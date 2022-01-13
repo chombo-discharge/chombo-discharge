@@ -20,6 +20,7 @@
 // Our includes
 #include <CD_CdrPlasmaJSON.H>
 #include <CD_DataParser.H>
+#include <CD_Random.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
@@ -298,7 +299,7 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
 
       kappaFunction = [value](const RealVect a_position) {return value;};
     }
-    else if (kappa == "bourdon"){
+    else if (kappa == "helmholtz"){
       // For the Bourdon model the translation between the Eddington and Bourdon model is
       //
       //    kappa = pX*lambda/sqrt(3).
@@ -326,14 +327,57 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
 	return m*P(a_position)*Units::atm2pascal*lambda/sqrt(3.0);
       };
     }
-    else if (kappa == "luque"){
-      MayDay::Error("luque not yet supported");
-    }    
-    else if (kappa == "discrete_zheleznyak"){
-      MayDay::Error("discrete_zheleznyak not yet supported");
+    else if (kappa == "stochastic_chanrion"){
+      // For the Chanrion stochastic model we compute the absorption length as
+      //
+      //    kappa = k1 * (k2/k1)^((f-f1)/(f2-f1))
+      //
+      // where k1 = chi_min * p(neutral) and p(neutral) is the partial pressure (in Pa) for some species.
+      //
+      // Note that the frequency f is sampled stochastically. 
+      //
+      // This requires that we are able to compute the partial pressure.
+      // Fortunately, we have m_gasPressure which computes the pressure, and m_neutralSpecies also stores the molar fraction for each species so this is comparatively
+      // easy to reconstruct.
+      
+      if(!(species.contains("f1"     ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'f1' is missing"     );
+      if(!(species.contains("f2"     ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'f2' is missing"     );
+      if(!(species.contains("chi_min"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'chi_max' is missing");
+      if(!(species.contains("chi_min"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'chi_min' is missing");
+      if(!(species.contains("neutral"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'neutral' is missing");
+
+      const auto f1      = species["f1"     ].get<Real       >();
+      const auto f2      = species["f1"     ].get<Real       >();
+      const auto chi_min = species["chi_min"].get<Real       >();
+      const auto chi_max = species["chi_max"].get<Real       >();
+      const auto neutral = species["neutral"].get<std::string>();
+
+      // Make sure that the neutral is in the list of species. 
+      if(m_neutralSpeciesMap.find(neutral) == m_neutralSpeciesMap.end()) {
+	this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'bourdon' but '" + neutral + "' is not in the list of neutral species");
+      }
+
+      // Get the molar fraction for the specified species. 
+      const Real molarFraction = m_neutralSpecies[m_neutralSpeciesMap.at(neutral)]->getMolarFraction();
+
+      // Create the absorption function. 
+      kappaFunction = [f1, f2, x1=chi_min, x2=chi_max, m=molarFraction, P=this->m_gasPressure](const RealVect a_position) -> Real {
+
+	// Create a uniform distribution on the range [f1,f2]	
+	std::uniform_real_distribution<Real> udist = std::uniform_real_distribution<Real>(f1, f2);	
+
+	const Real f = Random::get(udist);
+	const Real a = (f-f1)/(f2-f1);
+
+	const Real p  = m * P(a_position);
+	const Real K1 = x1*p;
+	const Real K2 = x2*p;
+
+	return K1*std::pow(K2/K1, a);
+      };
     }
     else{
-      this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'kappa ' is neither 'constant', 'bourdon', 'zheleznyak', or 'luque'");
+      this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'kappa ' is neither 'constant', 'helmholtz', 'stochastic_chanrion'");
     }
 
     // Initialize the species.

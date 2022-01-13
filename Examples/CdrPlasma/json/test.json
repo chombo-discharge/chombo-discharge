@@ -74,9 +74,14 @@
  [
      {
 	 "name": "bourdon1",
-	 "kappa": "bourdon",
+	 "kappa": "stochastic_chanrion",
+	 "value": 0.1,
 	 "lambda": 0.1,
-	 "neutral": "O2"
+	 "neutral": "O2",	 
+	 "f1":   2.925E15,
+	 "f2":   3.059E15,
+	 "chi_min": 2.625E-2,
+	 "chi_max": 1.5
      }
  ],
  "sigma": {
