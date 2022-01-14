@@ -758,10 +758,10 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
       m_plasmaReactionConstants.emplace(std::make_pair(reactionIndex, k                     ));
     }
     else if(lookup == "function E/N"){
-      std::cout << "using function" << std::endl;
+      MayDay::Error("CdrPlasmaJSON::parsePlasmaReaction -- 'function E/N' not supported yet");
     }
     else if (lookup == "table E/N"){
-      std::cout << "using table" << std::endl;
+      MayDay::Error("CdrPlasmaJSON::parsePlasmaReaction -- 'table E/N' not supported yet");      
     }
     else{
       this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");      
@@ -934,13 +934,104 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 					   const Real             a_kappa) const {
   //  MayDay::Warning("CdrPlasmaJSON::advanceReactionnetwork -- don't know how to do this yet");
 
-  for (int i = 0; i < a_cdrSources.size(); i++){
-    a_cdrSources[i] = 0.0;
+  // I really hate Chombo sometimes. 
+  std::vector<Real>& cdrSources = a_cdrSources.stdVector();
+  std::vector<Real>& rteSources = a_rteSources.stdVector();
+
+  const std::vector<Real    >& cdrDensities = ((Vector<Real    >&) a_cdrDensities).stdVector();
+  const std::vector<RealVect>& cdrGradients = ((Vector<RealVect>&) a_cdrGradients).stdVector();
+  const std::vector<Real    >& rteDensities = ((Vector<Real    >&) a_rteDensities).stdVector();
+
+
+  // Set all sources to zero. 
+  for (auto& S : cdrSources){
+    S = 0.0;
   }
 
-  for (int i = 0; i < a_rteSources.size(); i++){
-    a_rteSources[i] = 0.0;
+  for (auto& S : rteSources){
+    S = 0.0;
   }
+
+  // Here is the lambda for firing a plasma reaction that has a rate constant k. 
+  auto FirePlasmaReaction = [&position = a_pos,
+			     &CdrSrc   = cdrSources,
+			     &RteSrc   = rteSources,
+			     &CdrPhi   = cdrDensities,
+			     &Neutrals = this->m_neutralSpeciesDensities] (const Real a_rate,
+									   const CdrPlasmaReactionJSON& a_reaction) -> void {
+    Real volumetricRate = a_rate;
+
+    // These are the various species involved. 
+    const std::list<int>& plasmaReactants  = a_reaction.getPlasmaReactants ();    
+    const std::list<int>& neutralReactants = a_reaction.getNeutralReactants();
+    const std::list<int>& plasmaProducts   = a_reaction.getPlasmaProducts  ();    
+    const std::list<int>& photonProducts   = a_reaction.getPhotonProducts  ();
+
+    // Compute the total consumption. 
+    for (const auto& n : neutralReactants){
+      volumetricRate *= (Neutrals[n])(position);
+    }
+
+    for (const auto& r : plasmaReactants){
+      volumetricRate *= CdrPhi[r];
+    }
+
+    // Remove consumption on the left-hand side.
+    for (const auto& r : plasmaReactants){
+      CdrSrc[r] -= volumetricRate;
+    }
+
+    // Add mass on the right-hand side.
+    for (const auto& p : plasmaProducts){
+      CdrSrc[p] += volumetricRate;
+    }
+
+    for (const auto& p : plasmaProducts){
+      RteSrc[p] += volumetricRate;
+    }
+  };
+
+  // Here is the lambda that fires a photon reaction that has a rate constant k. 
+
+
+  // Iterate through plasma reactions
+  for (int i = 0; i < m_plasmaReactions.size(); i++){
+    
+    // Figure out the reaction rate for this reaction. 
+    Real k = 0.0;
+
+    const LookupMethod& method = m_plasmaReactionLookup.at(i);
+
+    switch(method){
+      case LookupMethod::Constant:
+	{
+	  k = m_plasmaReactionConstants.at(i);
+
+	  break;
+	}
+      case LookupMethod::FunctionLFA:
+	{
+	  MayDay::Error("CdrPlasmaJSON::advanceReactionNetwork -- FunctionLFA not supported yet");
+	  
+	  break;
+	}
+      case LookupMethod::TableLFA:
+	{
+	  MayDay::Error("CdrPlasmaJSON::advanceReactionNetwork -- Table not supported yet");
+	  
+	  break;
+	}
+    default:
+      {
+      MayDay::Error("CdrPlasmaJSON::advanceReactionNetwork -- logic bust");
+      break;
+      }
+    }
+
+    // Fire the reaction.
+    FirePlasmaReaction(k, m_plasmaReactions[i]);
+  }
+
 
   return;
 }
