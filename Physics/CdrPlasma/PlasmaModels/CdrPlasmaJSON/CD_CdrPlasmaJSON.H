@@ -368,6 +368,11 @@ namespace Physics {
       std::map<int, LookupTable<2> > m_diffusionTablesEN;
 
       /*!
+	@brief Map for finding a plasma reaction with a particular description
+      */
+      std::map<std::string, int> m_plasmaReactionsMap;
+
+      /*!
 	@brief Plasma reactions. 
       */
       std::vector<CdrPlasmaReaction> m_plasmaReactions;
@@ -446,6 +451,22 @@ namespace Physics {
       virtual void parsePlasmaReactions();
 
       /*!
+	@brief Parses a reaction string into reactangs and products
+	@param[out] a_reactants Left-hand side of reaction
+	@param[out] a_products  Right-hand side of reaction
+	@param[in]  _reaction   Reaction string. Must be in format "a + b + c -> e + f + g". 
+      */
+      virtual void parseReactionString(std::vector<std::string>& a_reactants,
+				       std::vector<std::string>& a_products,
+				       const std::string&        a_reaction) const;
+
+      /*!
+	@brief Do a species sanity check
+	@details This will make sure that species names are not duplicates. 
+      */
+      virtual void sanityCheckSpecies() const;
+
+      /*!
 	@brief Throw a parser error
 	@param[in] a_error Error code.
       */
@@ -455,7 +476,12 @@ namespace Physics {
 	@brief Throw a parser wearning
 	@param[in] a_error Warning
       */
-      void throwParserWarning(const std::string a_warning) const;      
+      void throwParserWarning(const std::string a_warning) const;
+
+      /*!
+	@brief Remove whitespace from string
+      */
+      std::string trim(const std::string& a_string) const;
     };
   }
 }

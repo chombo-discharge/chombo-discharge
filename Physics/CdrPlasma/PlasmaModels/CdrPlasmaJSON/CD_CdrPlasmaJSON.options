@@ -1,5 +1,5 @@
 # ====================================================================================================
 # CdrPlasmaJSON class options
 # ====================================================================================================
-CdrPlasmaJSON.verbose        = true
-CdrPlasmaJSON.chemistry_file = test.json
+CdrPlasmaJSON.verbose        = false
+CdrPlasmaJSON.chemistry_file = template.json

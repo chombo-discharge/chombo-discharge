@@ -12,6 +12,8 @@
 // Std includees
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <algorithm>
 
 // Chombo includes
 #include <ParmParse.H>
@@ -38,6 +40,9 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   this->initializePlasmaSpecies();
   this->initializePhotonSpecies();  
   this->initializeSigma();
+
+  // Do a sanity check. 
+  this->sanityCheckSpecies();
 
   // Parse CDR mobilities and diffusion coefficients. 
   this->parseMobilities();
@@ -89,10 +94,94 @@ void CdrPlasmaJSON::throwParserWarning(const std::string a_warning) const {
   MayDay::Warning(a_warning.c_str());
 }
 
-void CdrPlasmaJSON::initializeNeutralSpecies() {
-  CH_TIME("CdrNeutralJSON::initializeNeutralSpecies");
+void CdrPlasmaJSON::sanityCheckSpecies() const {
+  CH_TIME("CdrPlasmaJSON::sanityCheckSpecies");
   if(m_verbose){
-    pout() << "CdrNeutralJSON::initializeNeutralSpecies()" << endl;
+    pout() << "CdrPlasmaJSON::sanityCheckSpecies" << endl;
+  }
+
+  std::vector<std::string> allSpecies;
+
+  for (const auto& s : m_neutralSpeciesMap) {
+    allSpecies.emplace_back(s.first);
+  }
+
+  for (const auto& s : m_cdrSpeciesMap) {
+    allSpecies.emplace_back(s.first);
+  }
+
+  for (const auto& s : m_rteSpeciesMap) {
+    allSpecies.emplace_back(s.first);
+  }
+
+
+  const int numSpecies = allSpecies.size();
+
+  // Sort the container. 
+  std::sort(allSpecies.begin(), allSpecies.end());
+  for (int i = 0; i < allSpecies.size() - 1; i++){
+    if(allSpecies[i] == allSpecies[i+1]){
+      this->throwParserError("CdrPlasmaJSON::sanityCheckSpecies -- species '" + allSpecies[i] + "' was defined more than once. Check your neutral, plasma, and photon species");
+    }
+  }
+}
+
+std::string CdrPlasmaJSON::trim(const std::string& a_string) const {
+
+  auto ltrim = [](const std::string a_s) -> std::string {
+    std::string s = a_s;
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+				    std::not1(std::ptr_fun<int, int>(std::isspace))));
+    return s;
+  };
+
+
+  auto rtrim = [](std::string a_s) -> std::string {
+    std::string s = a_s;    
+    s.erase(std::find_if(s.rbegin(), s.rend(),
+			 std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    return s;
+  };
+
+  return ltrim(rtrim(a_string));
+}
+
+void CdrPlasmaJSON::parseReactionString(std::vector<std::string>& a_reactants,
+					std::vector<std::string>& a_products,
+					const std::string&        a_reaction) const {
+  CH_TIME("CdrPlasmaJSON::parseReactionString");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseReactionString()" << endl;
+  }
+
+  // Parse the string into segments. We split on white-space. 
+  std::stringstream ss(a_reaction);
+  std::string segment;
+  std::vector<std::string> segments;
+    
+  while(std::getline(ss, segment, ' ')){
+    segments.push_back(segment);
+  }
+
+  // Discard all whitespace and solitary + from input string
+  segments.erase(std::remove(segments.begin(), segments.end(), "" ), segments.end());
+  segments.erase(std::remove(segments.begin(), segments.end(), "+"), segments.end());
+
+  // Find the element containing "->"
+  const auto& it = std::find(segments.begin(), segments.end(), "->");  
+
+  // Make sure that -> is in the reaction string.
+  if(it == segments.end()) this->throwParserError("CdrPlasmaJSON::parseReactionString -- -" + a_reaction + "' does not contain '->");
+
+  // Left of "->" are reactants and right of "->" are products
+  a_reactants = std::vector<std::string>(segments.begin(), it);
+  a_products  = std::vector<std::string>(it + 1, segments.end());
+}
+
+void CdrPlasmaJSON::initializeNeutralSpecies() {
+  CH_TIME("CdrPlasmaJSON::initializeNeutralSpecies");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::initializeNeutralSpecies()" << endl;
   }
 
   // These fields are required
@@ -101,9 +190,9 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
   if(!(m_json["gas"].contains("law"            ))) this->throwParserError("In JSON field 'gas' - field 'law' is missing"            );
   if(!(m_json["gas"].contains("neutral_species"))) this->throwParserError("In JSON field 'gas' - field 'neutral_species' is missing");
 
-  const auto referenceTemperature = m_json["gas"]["temperature"].get<Real       >();
-  const auto referencePressure    = m_json["gas"]["pressure"   ].get<Real       >();
-  const auto gasLaw               = m_json["gas"]["law"        ].get<std::string>();
+  const auto referenceTemperature =      m_json["gas"]["temperature"].get<Real       >() ;
+  const auto referencePressure    =      m_json["gas"]["pressure"   ].get<Real       >() ;
+  const auto gasLaw               = trim(m_json["gas"]["law"        ].get<std::string>());
 
   // Instantiate the pressure, density, and temperature of the gas. Note: The density  is the NUMBER density. 
   if(gasLaw == "ideal"){
@@ -156,10 +245,15 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     molarSum += species["molar_fraction"].get<Real>();
   }
 
-  // Initialize the species
+  // Initialize the species. This will iterate through the neutral species in the JSON input file. 
   for (const auto& species : m_json["gas"]["neutral_species"]){
-    const std::string speciesName     = species["name"          ].get<std::string>();
-    const Real        speciesFraction = species["molar_fraction"].get<Real>() / molarSum;
+    const std::string speciesName     = trim(species["name"          ].get<std::string>());
+    const Real        speciesFraction =      species["molar_fraction"].get<Real>() / molarSum;
+
+    // It's an error if a species was defined twice. 
+    if(m_neutralSpeciesMap.find(speciesName) != m_neutralSpeciesMap.end()){
+      this->throwParserError("Neutral species '" + speciesName + "' was defined more than once");
+    }
 
     // Set the species density function. 
     const std::function<Real(const RealVect)> speciesDensity  = [f = speciesFraction, N = this->m_gasDensity] (const RealVect a_position) {
@@ -199,10 +293,16 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     if(!(species.contains("mobile"   ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma_species' must have field 'mobile'"   );
     if(!(species.contains("diffusive"))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma_species' must have field 'diffusive'");
 
-    const auto name        = species["name"].     get<std::string>();
-    const auto Z           = species["Z"].        get<int        >();
-    const auto mobile      = species["mobile"].   get<bool       >();
-    const auto diffusive   = species["diffusive"].get<bool       >();
+    const auto name        = trim(species["name"].     get<std::string>());
+    const auto Z           =      species["Z"].        get<int        >() ;
+    const auto mobile      =      species["mobile"].   get<bool       >() ;
+    const auto diffusive   =      species["diffusive"].get<bool       >() ;
+
+
+    // It's an error if a species was defined twice. 
+    if(m_cdrSpeciesMap.find(name) != m_cdrSpeciesMap.end()){
+      this->throwParserError("Plasma species '" + name + "' was defined more than once");
+    }    
     
     const bool hasInitData = species.contains("initial_data");
 
@@ -286,8 +386,8 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
     if(!(species.contains("name" ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'photon_species' must have field 'name'"     );
     if(!(species.contains("kappa"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'photon_species' must have field 'mobile'"   );
 
-    const auto name  = species["name" ].get<std::string>();
-    const auto kappa = species["kappa"].get<std::string>();
+    const auto name  = trim(species["name" ].get<std::string>());
+    const auto kappa = trim(species["kappa"].get<std::string>());
 
     // Set the kappa-function needed by RteSpeciesJSON.
     std::function<Real(const RealVect a_position)> kappaFunction = [](const RealVect a_position) -> Real {return 1.0;};
@@ -308,16 +408,16 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
       // which computes the pressure, and m_neutralSpecies also stores the molar fraction for each species so this is comparatively easy to reconstruct.     
 
       // Make sure that 'lambda' is found in the photon species and that O2 is found in the neutral species. 
-      if(!(species.contains("lambda" ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'bourdon' but field 'lambda' is missing" );
-      if(!(species.contains("neutral"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'bourdon' but field 'neutral' is missing");
+      if(!(species.contains("lambda" ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'helmholtz' but field 'lambda' is missing" );
+      if(!(species.contains("neutral"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'helmholtz' but field 'neutral' is missing");
 
       // Get lambda and the neutral species that we base the partial pressure upon. 
-      const auto lambda  = species["lambda" ].get<Real       >();
-      const auto neutral = species["neutral"].get<std::string>();
+      const auto neutral = trim(species["neutral"].get<std::string>());
+      const auto lambda  =      species["lambda" ].get<Real       >() ;      
 
       // Make sure that the neutral is in the list of species. 
       if(m_neutralSpeciesMap.find(neutral) == m_neutralSpeciesMap.end()) {
-	this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'bourdon' but '" + neutral + "' is not in the list of neutral species");
+	this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'helmholtz' but '" + neutral + "' is not in the list of neutral species");
       }
 
       // Get the molar fraction for this specific neutral
@@ -346,11 +446,11 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
       if(!(species.contains("chi_min"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'chi_min' is missing");
       if(!(species.contains("neutral"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'neutral' is missing");
 
-      const auto f1      = species["f1"     ].get<Real       >();
-      const auto f2      = species["f1"     ].get<Real       >();
-      const auto chi_min = species["chi_min"].get<Real       >();
-      const auto chi_max = species["chi_max"].get<Real       >();
-      const auto neutral = species["neutral"].get<std::string>();
+      const auto f1      =      species["f1"     ].get<Real       >() ;
+      const auto f2      =      species["f1"     ].get<Real       >() ;
+      const auto chi_min =      species["chi_min"].get<Real       >() ;
+      const auto chi_max =      species["chi_max"].get<Real       >() ;
+      const auto neutral = trim(species["neutral"].get<std::string>());
 
       // Make sure that the neutral is in the list of species. 
       if(m_neutralSpeciesMap.find(neutral) == m_neutralSpeciesMap.end()) {
@@ -422,7 +522,7 @@ void CdrPlasmaJSON::parseMobilities() {
 
   // Iterate through all tracked species.
   for (const auto& species : m_cdrSpeciesJSON){
-    const std::string name = species["name"].get<std::string>();
+    const std::string name = trim(species["name"].get<std::string>());
     const int         idx  = m_cdrSpeciesMap.at(name);
 
     if(m_CdrSpecies[idx]->isMobile()){
@@ -432,7 +532,7 @@ void CdrPlasmaJSON::parseMobilities() {
       const json& mobilityJSON = species["mobility"];
 
       // Get the mobility lookup method. This must either be a constant, a function, or a table. We parse these cases differently.
-      const std::string lookup = mobilityJSON["lookup"].get<std::string>();
+      const std::string lookup = trim(mobilityJSON["lookup"].get<std::string>());
 	
       if(lookup == "constant"){
 	// User specified a constant mobility. We look for a field 'value' in the JSON file and set the mobility from that. If the
@@ -453,8 +553,8 @@ void CdrPlasmaJSON::parseMobilities() {
 	if(!(mobilityJSON.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'max E/N' was not"   );
 	if(!(mobilityJSON.contains("num_points"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'num_points' was not");
 	
-	const std::string filename  = mobilityJSON["file"  ].get<std::string>();
-	const std::string startRead = mobilityJSON["header"].get<std::string>();
+	const std::string filename  = trim(mobilityJSON["file"  ].get<std::string>());
+	const std::string startRead = trim(mobilityJSON["header"].get<std::string>());
 	const std::string stopRead  = "";
 
 	const int xColumn   = mobilityJSON["E/N"       ].get<int>();
@@ -482,7 +582,7 @@ void CdrPlasmaJSON::parseMobilities() {
 
 	FunctionEN func;
 	
-	const std::string whichFunction = mobilityJSON["function"].get<std::string>();
+	const std::string whichFunction = trim(mobilityJSON["function"].get<std::string>());
 	if(whichFunction == "ABC"){
 	  if(!(mobilityJSON.contains("A"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function 'ABC'  did not find 'A'");
 	  if(!(mobilityJSON.contains("B"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function 'ABC'  did not find 'B'");
@@ -516,7 +616,7 @@ void CdrPlasmaJSON::parseDiffusion() {
 
   // Iterate through all tracked species.
   for (const auto& species : m_cdrSpeciesJSON){
-    const std::string name = species["name"].get<std::string>();
+    const std::string name = trim(species["name"].get<std::string>());
     const int         idx  = m_cdrSpeciesMap.at(name);
 
     if(m_CdrSpecies[idx]->isDiffusive()){
@@ -526,7 +626,7 @@ void CdrPlasmaJSON::parseDiffusion() {
       const json& diffusionJSON = species["diffusion"];
 
       // Get the mobility lookup method. This must either be a constant, a function, or a table. We parse these cases differently.
-      const std::string lookup = diffusionJSON["lookup"].get<std::string>();
+      const std::string lookup = trim(diffusionJSON["lookup"].get<std::string>());
 	
       if(lookup == "constant"){
 	// User specified a constant mobility. We look for a field 'value' in the JSON file and set the mobility from that. If the
@@ -547,8 +647,8 @@ void CdrPlasmaJSON::parseDiffusion() {
 	if(!(diffusionJSON.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'max E/N' was not."   );
 	if(!(diffusionJSON.contains("num_points"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'num_points' was not.");
 	
-	const std::string filename  = diffusionJSON["file"  ].get<std::string>();
-	const std::string startRead = diffusionJSON["header"].get<std::string>();
+	const std::string filename  = trim(diffusionJSON["file"  ].get<std::string>());
+	const std::string startRead = trim(diffusionJSON["header"].get<std::string>());
 	const std::string stopRead  = "";
 
 	const int xColumn   = diffusionJSON["E/N"       ].get<int>();
@@ -576,7 +676,7 @@ void CdrPlasmaJSON::parseDiffusion() {
 
 	FunctionEN func;
 	
-	const std::string whichFunction = diffusionJSON["function"].get<std::string>();
+	const std::string whichFunction = trim(diffusionJSON["function"].get<std::string>());
 	if(whichFunction == "ABC"){
 	  if(!(diffusionJSON.contains("A"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- using function 'ABC'  did not find 'A'");
 	  if(!(diffusionJSON.contains("B"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- using function 'ABC'  did not find 'B'");
@@ -606,6 +706,25 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
   CH_TIME("CdrPlasmaJSON::parsePlasmaReactions");
   if(m_verbose){
     pout() << "CdrPlasmaJSON::parsePlasmaReactions - file is = " << m_jsonFile << endl;
+  }
+
+  if(!(m_json.contains("plasma_reactions"))) this->throwParserWarning("CdrPlasmaJSON::parsePlasmaReactions -- did not find any reactions");  
+
+  for (const auto& r : m_json["plasma_reactions"]){
+    if(!(r.contains("reaction"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- field 'reaction' is missing");
+    if(!(r.contains("rate"    ))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- field 'rate' is missing");
+
+
+    const std::string reaction = trim(r["reaction"].get<std::string>());
+    const std::string rate     = trim(r["rate"    ].get<std::string>());
+
+    // Parse the reaction string to figure out the species involved in the reaction.
+    std::vector<std::string> reactants;
+    std::vector<std::string> products;
+
+    this->parseReactionString(reactants, products, reaction);
+    
+
   }
 }
 
