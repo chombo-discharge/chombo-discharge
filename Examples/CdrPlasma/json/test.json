@@ -89,6 +89,15 @@
  },
  "plasma_reactions": 
      [
-	 {"reaction": "e + O2 -> e -   e + O2+", "rate": "constant", "value": 0.1, "description": "O2 ionization"}
+	 {"reaction": "e + O2 -> e + e + O2+",
+	  "lookup": "constant",
+	  "rate": 0.1,
+	  "description": "O2 ionization",
+	  "file" : "transport_data.txt",
+	  "header": "# O2 ionization (E/N, rate/N)",
+	  "min E/N": 10,
+	  "max E/N": 100,
+	  "num_points": 1000
+	 }
      ]
 }

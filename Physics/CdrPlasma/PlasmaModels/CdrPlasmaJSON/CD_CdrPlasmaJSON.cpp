@@ -263,12 +263,14 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     // Add the species. Make sure the maps are consist.
     const int idx = m_neutralSpecies.size();
     
-    // Create the neutral species.
-    m_neutralSpecies.push_back(std::shared_ptr<NeutralSpeciesJSON>((new NeutralSpeciesJSON(speciesName, speciesFraction, speciesDensity))));
-
+    // Create the neutral species (and the mapped background density).
+    m_neutralSpecies.         push_back(std::shared_ptr<NeutralSpeciesJSON>((new NeutralSpeciesJSON(speciesName, speciesFraction, speciesDensity))));
+    m_neutralSpeciesDensities.push_back(speciesDensity);
+    
     // Create the string-int maps
     m_neutralSpeciesMap.       insert(std::make_pair(speciesName, idx        ));
     m_neutralSpeciesInverseMap.insert(std::make_pair(idx ,        speciesName));
+
   }
 
   // Figure out if we should plot the gas quantities
@@ -499,7 +501,7 @@ void CdrPlasmaJSON::initializeSigma() {
     pout() << "CdrPlasmaJSON::initializeSigma()" << endl;
   }
 
-  m_initialSigma = [](const Real a_time, const RealVect a_pos) -> Real {
+  m_initialSigma = [](const RealVect a_pos, const Real a_time) -> Real {
     return 0.0;
   };
 
@@ -507,7 +509,7 @@ void CdrPlasmaJSON::initializeSigma() {
     if(m_json["sigma"].contains("initial_density")){
       const Real sigma = m_json["sigma"]["initial_density"].get<Real>();
       
-      m_initialSigma = [sigma] (const Real a_time, const RealVect a_pos) -> Real {
+      m_initialSigma = [sigma] (const RealVect a_position, const Real a_time) -> Real {
 	return sigma;
       };
     }
@@ -710,21 +712,184 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
 
   if(!(m_json.contains("plasma_reactions"))) this->throwParserWarning("CdrPlasmaJSON::parsePlasmaReactions -- did not find any reactions");  
 
-  for (const auto& r : m_json["plasma_reactions"]){
-    if(!(r.contains("reaction"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- field 'reaction' is missing");
-    if(!(r.contains("rate"    ))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- field 'rate' is missing");
+  for (const auto& R : m_json["plasma_reactions"]){
+    if(!(R.contains("reaction"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- field 'reaction' is missing");
+    if(!(R.contains("rate"    ))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- field 'rate' is missing");
 
-
-    const std::string reaction = trim(r["reaction"].get<std::string>());
-    const std::string rate     = trim(r["rate"    ].get<std::string>());
+    const std::string reaction = trim(R["reaction"].get<std::string>());
+    const std::string lookup   = trim(R["lookup"  ].get<std::string>());
 
     // Parse the reaction string to figure out the species involved in the reaction.
     std::vector<std::string> reactants;
-    std::vector<std::string> products;
+    std::vector<std::string> products ;
 
-    this->parseReactionString(reactants, products, reaction);
-    
+    this->parseReactionString   (reactants, products, reaction);
+    this->sanctifyPlasmaReaction(reactants, products, reaction);
 
+    // Make the string-int encoding so we can encode the reaction properly.
+    std::list<int> plasmaReactants ;
+    std::list<int> neutralReactants;
+    std::list<int> plasmaProducts  ;
+    std::list<int> photonProducts  ;
+
+    this->getPlasmaReactionProducts(plasmaReactants,
+				    neutralReactants,
+				    plasmaProducts,
+				    photonProducts,
+				    reactants,
+				    products);
+
+
+    //
+    const int reactionIndex = m_plasmaReactions.size();
+
+
+    // Start monkeying with the rate.
+    //    LookupMethod 
+    if(lookup == "constant"){
+
+      // Constant reaction rates are easy, but we need to incorporate the neutral species in the rate so we don't have to multiply that in every time. So for 
+      // reactions of the type e + N2 -> e + e + N2+ the rate term is S = a * n[e] * n[N2] which we write as S = b * n[e] where b = a * n[N2]. The same goes
+      // for reactions of the type e + N2 + O2 -> ... in which case we modify the rate as S = b * n[e] where b = a * n[N2] * n[O2].
+      // 
+      // But, since the neutral species densities can be spatially varying, we have to construct a function f = f(x) for encapsulating the rate.
+
+      // auto modifiedRate = [] (const RealVect a_pos) -> Real {
+      // 	return rate * 
+      // };
+
+      if(!(R.contains("rate"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- got 'constant' but did not get 'rate'");
+
+      const Real k = R["rate"].get<Real>();
+
+      // Make the required function.
+      auto reactionRate = [k, neutrals = neutralReactants, Fs = this->m_neutralSpeciesDensities] (const RealVect a_pos) -> Real {
+	Real modifiedRate = k;
+
+	for (const auto& n : neutrals){
+	  modifiedRate *= Fs[n](a_pos);
+	}
+
+	return modifiedRate;
+      };
+
+      /// Add the rate and lookup method. 
+      m_plasmaReactionLookup.   emplace(std::make_pair(reactionIndex, LookupMethod::Constant));
+      m_plasmaReactionConstants.emplace(std::make_pair(reactionIndex, reactionRate          ));
+    }
+    else if(lookup == "function E/N"){
+      std::cout << "using function" << std::endl;
+    }
+    else if (lookup == "table E/N"){
+      std::cout << "using table" << std::endl;
+    }
+    else{
+      this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");      
+    }
+
+
+    // Add the reaction to the list of reactions.
+    m_plasmaReactions.emplace_back(plasmaReactants, plasmaProducts, photonProducts);    
+  }
+}
+
+void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
+					   const std::vector<std::string>& a_products,
+					   const std::string               a_reaction) const {
+  CH_TIME("CdrPlasmaJSON::sanctifyPlasmaReaction");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::sanctifyPlasmaReaction" << m_jsonFile << endl;
+  }
+
+    // All reactants must be in the list of neutral species or in the list of plasma species
+    for (const auto& r : a_reactants){
+      if(m_cdrSpeciesMap.    find(r) == m_cdrSpeciesMap.    end() &&
+	 m_neutralSpeciesMap.find(r) == m_neutralSpeciesMap.end()) {
+	this->throwParserError("CdrPlasmaJSON::sanctifyPlasmaReaction -- I do not know reacting species '" + r + "' for reaction '" + a_reaction + "'.");
+      }
+    }
+
+    // All products should be in the list of plasma or photon species. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
+    for (const auto& p : a_products){
+      if(m_cdrSpeciesMap.find(p) == m_cdrSpeciesMap.end() && m_rteSpeciesMap.find(p) == m_rteSpeciesMap.end()) {
+	if(m_neutralSpeciesMap.find(p) == m_neutralSpeciesMap.end()) {
+	  this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- I do not know product species '" + p + "' for reaction '" + a_reaction + "'.");
+	}
+	else{
+	  this->throwParserWarning("CdrPlasmaJSON::parsePlasmaReactions -- neutral species '" + p + "' was specified in reaction but will be ignored");
+	}
+      }
+    }
+
+    // Check for charge conservation
+    int sumCharge;
+    for (const auto& r : a_reactants){
+      if (m_cdrSpeciesMap.find(r) != m_cdrSpeciesMap.end()){
+	sumCharge -= m_CdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
+      }
+    }
+    for (const auto& p : a_products){
+      if (m_cdrSpeciesMap.find(p) != m_cdrSpeciesMap.end()){
+	sumCharge += m_CdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
+      }
+    }
+
+    if(sumCharge != 0) this->throwParserError("CdrPlasmaJSON::parsePlasmaReaction -- charge not conserved for reaction '" + a_reaction + "'.");  
+}
+
+void CdrPlasmaJSON::getPlasmaReactionProducts(std::list<int>&                 a_plasmaReactants,
+					      std::list<int>&                 a_neutralReactants,
+					      std::list<int>&                 a_plasmaProducts,
+					      std::list<int>&                 a_photonProducts,
+					      const std::vector<std::string>& a_reactants,
+					      const std::vector<std::string>& a_products) const {
+
+  CH_TIME("CdrPlasmaJSON::getPlasmaReactionProducts");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::getPlasmaReactionProducts" << endl;
+  }
+
+  a_plasmaReactants. clear();
+  a_neutralReactants.clear();
+  a_plasmaProducts.  clear();
+  a_photonProducts.  clear();  
+
+  // Figure out the reactants. 
+  for (const auto& r : a_reactants){
+
+    // Figure out if the reactants is a plasma species or a neutral species.
+    const bool isPlasmaSpecies  = m_cdrSpeciesMap.    find(r) != m_cdrSpeciesMap.    end();
+    const bool isNeutralSpecies = m_neutralSpeciesMap.find(r) != m_neutralSpeciesMap.end();
+
+    if(isPlasmaSpecies && !isNeutralSpecies){
+      a_plasmaReactants.emplace_back(m_cdrSpeciesMap.at(r));
+    }
+    else if (!isPlasmaSpecies && isNeutralSpecies){
+      a_neutralReactants.emplace_back(m_neutralSpeciesMap.at(r));      
+    }
+    else {
+      this->throwParserError("CdrPlasmaJSON::getPlasmaReactionProducts - logic bust 1");
+    }
+  }
+
+  // Figure out the products.
+  for (const auto& p : a_products){
+    const bool isPlasmaSpecies  = m_cdrSpeciesMap.    find(p) != m_cdrSpeciesMap.    end();
+    const bool isNeutralSpecies = m_neutralSpeciesMap.find(p) != m_neutralSpeciesMap.end();
+    const bool isPhotonSpecies  = m_rteSpeciesMap.    find(p) != m_rteSpeciesMap.    end();
+
+    if(isPlasmaSpecies && !isPhotonSpecies && !isNeutralSpecies){
+      a_plasmaProducts.emplace_back(m_cdrSpeciesMap.at(p));
+    }
+    else if(!isPlasmaSpecies && isPhotonSpecies && !isNeutralSpecies){
+      a_photonProducts.emplace_back(m_rteSpeciesMap.at(p));
+    }
+    else if(!isPlasmaSpecies && !isPhotonSpecies && isNeutralSpecies){
+      // do nothing
+    }
+    else{
+      this->throwParserError("CdrPlasmaJSON::getPlasmaReactionProducts - logic bust 2");
+    }
   }
 }
 
@@ -964,7 +1129,7 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
 }
 
 Real CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect a_pos) const {
-  return m_initialSigma(a_time, a_pos);
+  return m_initialSigma(a_pos, a_time);
 }
 
 

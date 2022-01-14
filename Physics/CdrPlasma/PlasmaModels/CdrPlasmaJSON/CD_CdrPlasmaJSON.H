@@ -51,6 +51,21 @@ namespace Physics {
       using FunctionEN = std::function<Real(const Real a_E, const Real a_N)>;
 
       /*!
+	@brief Function for encapsulating a function f = f(x) where x is the physical coordinates
+	@param[in] a_position Physical coordinates
+	@return Returns f(x)
+      */
+      using FunctionX = std::function<Real(const RealVect a_position)>;
+
+      /*!
+	@brief Function for encapsulating a function f = f(x,t) where x is the physical coordinates and t is time.
+	@param[in] a_position Physical coordinates
+	@param[in] a_time     Time
+	@return Returns f(x,t)
+      */
+      using FunctionXT = std::function<Real(const RealVect a_position, const Real a_time)>;      
+
+      /*!
 	@brief Default constructor.
       */
       CdrPlasmaJSON();
@@ -264,27 +279,32 @@ namespace Physics {
       /*!
 	@brief JSON entries for species in photon_species
       */
-      std::vector<json> m_rteSpeciesJSON;      
-
-      /*!
-	@brief Gas pressure (in atmospheres)
-      */
-      std::function<Real(const RealVect a_position)> m_gasPressure;
-
-      /*!
-	@brief Gas temperature (in Kelvin)
-      */
-      std::function<Real(const RealVect a_position)> m_gasTemperature;
-
-      /*!
-	@brief Gas number density (in m^(-3))
-      */
-      std::function<Real(const RealVect a_position)> m_gasDensity;
+      std::vector<json> m_rteSpeciesJSON;
 
       /*!
 	@brief Initial surface charge
       */
-      std::function<Real(const Real a_time, const RealVect a_pos) > m_initialSigma;
+      FunctionXT m_initialSigma;      
+
+      /*!
+	@brief Gas pressure (in atmospheres)
+      */
+      FunctionX m_gasPressure;
+
+      /*!
+	@brief Gas temperature (in Kelvin)
+      */
+      FunctionX m_gasTemperature;
+
+      /*!
+	@brief Gas number density (in m^(-3))
+      */
+      FunctionX m_gasDensity;
+
+      /*!
+	@brief Neutral species densities
+      */
+      std::vector<FunctionX> m_neutralSpeciesDensities;
 
       /*!
 	@brief These are the neutral species.
@@ -368,14 +388,19 @@ namespace Physics {
       std::map<int, LookupTable<2> > m_diffusionTablesEN;
 
       /*!
-	@brief Map for finding a plasma reaction with a particular description
+	@brief Map for figuring out how to look up the rate for a certain plasma reaction. 
       */
-      std::map<std::string, int> m_plasmaReactionsMap;
+      std::map<int, LookupMethod> m_plasmaReactionLookup;
+
+      /*!
+	@brief Constant plasma reaction rates (spatial dependence is allowed)
+      */
+      std::map<int, FunctionX> m_plasmaReactionConstants;
 
       /*!
 	@brief Plasma reactions. 
       */
-      std::vector<CdrPlasmaReaction> m_plasmaReactions;
+      std::vector<CdrPlasmaReaction> m_plasmaReactions;      
       
       /*!
 	@brief Get a species. This will return the species whether it is tracked or not. This yields an error if the species does not exist. 
@@ -454,7 +479,7 @@ namespace Physics {
 	@brief Parses a reaction string into reactangs and products
 	@param[out] a_reactants Left-hand side of reaction
 	@param[out] a_products  Right-hand side of reaction
-	@param[in]  _reaction   Reaction string. Must be in format "a + b + c -> e + f + g". 
+	@param[in]  a_reaction  Reaction string. Must be in format "a + b + c -> e + f + g". 
       */
       virtual void parseReactionString(std::vector<std::string>& a_reactants,
 				       std::vector<std::string>& a_products,
@@ -465,6 +490,33 @@ namespace Physics {
 	@details This will make sure that species names are not duplicates. 
       */
       virtual void sanityCheckSpecies() const;
+
+      /*!
+	@brief Check if a plasma-reaction makes sense in terms of the species that have been defined.
+	@details This will throw errors if the species do not exist or charge is not conserved.
+	@param[in] a_reactants Reactants
+	@param[in] a_products  Reaction products
+	@param[in] a_reaction  Reaction string
+      */
+      virtual void sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
+					  const std::vector<std::string>& a_products,
+					  const std::string               a_reaction) const;
+
+      /*!
+	@brief Get the int-encoding corresponding to species involved in a plasma reaction.
+	@param[out] a_plasmaReactants   Plasma reactants
+	@param[out] a_neutralReactants  Neutral reactants
+	@param[out] a_plasmaProducts    Plasma products
+	@param[out] a_photonProducts    Photon products
+	@param[in]  a_reactants         Reactants
+	@param[in]  a_products          Reaction products
+      */
+      virtual void getPlasmaReactionProducts(std::list<int>&                 a_plasmaReactants,
+					     std::list<int>&                 a_neutralReactants,
+					     std::list<int>&                 a_plasmaProducts,
+					     std::list<int>&                 a_photonProducts,
+					     const std::vector<std::string>& a_reactants,
+					     const std::vector<std::string>& a_products) const;
 
       /*!
 	@brief Throw a parser error
