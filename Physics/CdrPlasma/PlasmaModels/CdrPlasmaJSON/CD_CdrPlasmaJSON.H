@@ -25,7 +25,7 @@
 #include <CD_NeutralSpeciesJSON.H>
 #include <CD_CdrSpeciesJSON.H>
 #include <CD_RteSpeciesJSON.H>
-#include <CD_CdrPlasmaReaction.H>
+#include <CD_CdrPlasmaReactionJSON.H>
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
@@ -395,12 +395,12 @@ namespace Physics {
       /*!
 	@brief Constant plasma reaction rates (spatial dependence is allowed)
       */
-      std::map<int, FunctionX> m_plasmaReactionConstants;
+      std::map<int, Real> m_plasmaReactionConstants;
 
       /*!
 	@brief Plasma reactions. 
       */
-      std::vector<CdrPlasmaReaction> m_plasmaReactions;      
+      std::vector<CdrPlasmaReactionJSON> m_plasmaReactions;      
       
       /*!
 	@brief Get a species. This will return the species whether it is tracked or not. This yields an error if the species does not exist. 

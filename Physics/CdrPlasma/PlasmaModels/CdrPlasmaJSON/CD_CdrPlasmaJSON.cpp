@@ -748,34 +748,14 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
     //    LookupMethod 
     if(lookup == "constant"){
 
-      // Constant reaction rates are easy, but we need to incorporate the neutral species in the rate so we don't have to multiply that in every time. So for 
-      // reactions of the type e + N2 -> e + e + N2+ the rate term is S = a * n[e] * n[N2] which we write as S = b * n[e] where b = a * n[N2]. The same goes
-      // for reactions of the type e + N2 + O2 -> ... in which case we modify the rate as S = b * n[e] where b = a * n[N2] * n[O2].
-      // 
-      // But, since the neutral species densities can be spatially varying, we have to construct a function f = f(x) for encapsulating the rate.
-
-      // auto modifiedRate = [] (const RealVect a_pos) -> Real {
-      // 	return rate * 
-      // };
-
+      // Constant reaction rates are easy, just fetch it and put it where it belongs. 
       if(!(R.contains("rate"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- got 'constant' but did not get 'rate'");
 
       const Real k = R["rate"].get<Real>();
 
-      // Make the required function.
-      auto reactionRate = [k, neutrals = neutralReactants, Fs = this->m_neutralSpeciesDensities] (const RealVect a_pos) -> Real {
-	Real modifiedRate = k;
-
-	for (const auto& n : neutrals){
-	  modifiedRate *= Fs[n](a_pos);
-	}
-
-	return modifiedRate;
-      };
-
       /// Add the rate and lookup method. 
       m_plasmaReactionLookup.   emplace(std::make_pair(reactionIndex, LookupMethod::Constant));
-      m_plasmaReactionConstants.emplace(std::make_pair(reactionIndex, reactionRate          ));
+      m_plasmaReactionConstants.emplace(std::make_pair(reactionIndex, k                     ));
     }
     else if(lookup == "function E/N"){
       std::cout << "using function" << std::endl;
@@ -789,7 +769,7 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
 
 
     // Add the reaction to the list of reactions.
-    m_plasmaReactions.emplace_back(plasmaReactants, plasmaProducts, photonProducts);    
+    m_plasmaReactions.emplace_back(plasmaReactants, neutralReactants, plasmaProducts, photonProducts);    
   }
 }
 
