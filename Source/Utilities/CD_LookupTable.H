@@ -115,6 +115,13 @@ public:
   Real getEntry(const Real a_x) const;
 
   /*!
+    @brief Get size of the table.
+    @returns m_data.size()
+  */
+  inline
+  int getNumEntries() const;
+
+  /*!
     @brief Swap x and y vectors
   */
   inline

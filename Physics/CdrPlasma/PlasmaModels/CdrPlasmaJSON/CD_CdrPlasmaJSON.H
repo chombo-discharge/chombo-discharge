@@ -393,9 +393,14 @@ namespace Physics {
       std::map<int, LookupMethod> m_plasmaReactionLookup;
 
       /*!
-	@brief Constant plasma reaction rates (spatial dependence is allowed)
+	@brief Constant plasma reaction rates.
       */
       std::map<int, Real> m_plasmaReactionConstants;
+
+      /*!
+	@brief Map for table-based reaction coefficients (using reduced electric field)
+      */
+      std::map<int, LookupTable<2> > m_plasmaReactionTablesEN;      
 
       /*!
 	@brief Plasma reactions. 

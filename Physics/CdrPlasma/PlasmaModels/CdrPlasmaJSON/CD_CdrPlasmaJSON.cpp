@@ -571,6 +571,11 @@ void CdrPlasmaJSON::parseMobilities() {
 	// second column. 
 	LookupTable<2> mobilityTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
+      // If the table is empty then it's an error.
+	if(mobilityTable.getNumEntries() == 0){
+	  this->throwParserError("Mobility table '" + startRead + "' in file '" + filename + "'is empty. This is probably an error");
+	}	
+
 	// Format the table
 	mobilityTable.setRange(minEN, maxEN, 0);
 	mobilityTable.sort(0);
@@ -641,13 +646,13 @@ void CdrPlasmaJSON::parseDiffusion() {
 	m_diffusionConstants.emplace(std::make_pair(idx, value                 ));
       }
       else if(lookup == "table E/N"){
-	if(!(diffusionJSON.contains("file"      ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'file' was not."      );
-	if(!(diffusionJSON.contains("header"    ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'header' was not."    );
-	if(!(diffusionJSON.contains("E/N"       ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'E/N' was not."       );
-	if(!(diffusionJSON.contains("D*N"       ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'D*N' was not"        );
-	if(!(diffusionJSON.contains("min E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'min E/N' was not."   );
-	if(!(diffusionJSON.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'max E/N' was not."   );
-	if(!(diffusionJSON.contains("num_points"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'num_points' was not.");
+	if(!(diffusionJSON.contains("file"      ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'file' was not."      );
+	if(!(diffusionJSON.contains("header"    ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'header' was not."    );
+	if(!(diffusionJSON.contains("E/N"       ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'E/N' was not."       );
+	if(!(diffusionJSON.contains("D*N"       ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'D*N' was not"        );
+	if(!(diffusionJSON.contains("min E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'min E/N' was not."   );
+	if(!(diffusionJSON.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'max E/N' was not."   );
+	if(!(diffusionJSON.contains("num_points"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'num_points' was not.");
 	
 	const std::string filename  = trim(diffusionJSON["file"  ].get<std::string>());
 	const std::string startRead = trim(diffusionJSON["header"].get<std::string>());
@@ -664,6 +669,11 @@ void CdrPlasmaJSON::parseDiffusion() {
 	// the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
 	// second column. 
 	LookupTable<2> diffusionTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
+
+	// If the table is empty then it's an error.
+	if(diffusionTable.getNumEntries() == 0){
+	  this->throwParserError("Diffusion table '" + startRead + "' in file '" + filename + "'is empty. This is probably an error");	  
+	}		
 
 	// Format the table
 	diffusionTable.setRange(minEN, maxEN, 0);
@@ -740,12 +750,11 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
 				    products);
 
 
-    //
+    // This is the reaction index for the current index. The reaction we are currently
+    // dealing with is put in m_plasmaReactions[reactionIdex]. 
     const int reactionIndex = m_plasmaReactions.size();
 
-
-    // Start monkeying with the rate.
-    //    LookupMethod 
+    // Figure out how we compute the reaction rate for this reaction. 
     if(lookup == "constant"){
 
       // Constant reaction rates are easy, just fetch it and put it where it belongs. 
@@ -761,7 +770,42 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
       MayDay::Error("CdrPlasmaJSON::parsePlasmaReaction -- 'function E/N' not supported yet");
     }
     else if (lookup == "table E/N"){
-      MayDay::Error("CdrPlasmaJSON::parsePlasmaReaction -- 'table E/N' not supported yet");      
+      if(!(R.contains("file"      ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'file' was not"      );
+      if(!(R.contains("header"    ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'header' was not"    );
+      if(!(R.contains("E/N"       ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'E/N' was not"       );
+      if(!(R.contains("rate/N"    ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'rate/N' was not"    );
+      if(!(R.contains("min E/N"   ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'min E/N' was not"   );
+      if(!(R.contains("max E/N"   ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'max E/N' was not"   );
+      if(!(R.contains("num_points"))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'num_points' was not");
+
+      const std::string filename  = trim(R["file"  ].get<std::string>());
+      const std::string startRead = trim(R["header"].get<std::string>());
+      const std::string stopRead  = "";
+
+      const int xColumn   = R["E/N"       ].get<int>();
+      const int yColumn   = R["rate/N"    ].get<int>();
+      const int numPoints = R["num_points"].get<int>();
+
+      const Real minEN = R["min E/N"].get<Real>();
+      const Real maxEN = R["max E/N"].get<Real>();	
+
+      // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+      // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
+      // second column. 
+      LookupTable<2> reactionTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
+
+      // If the table is empty then it's an error.
+      if(reactionTable.getNumEntries() == 0){
+	this->throwParserError("Reaction table '" + startRead + "' in file '" + filename + "'is empty. This is probably an error");	  	
+      }
+
+      // Properly format the table. 
+      reactionTable.setRange(minEN, maxEN, 0);
+      reactionTable.sort(0);
+      reactionTable.makeUniform(numPoints);
+
+      m_plasmaReactionLookup.  emplace(std::make_pair(reactionIndex, LookupMethod::TableLFA));
+      m_plasmaReactionTablesEN.emplace(std::make_pair(reactionIndex, reactionTable         ));      
     }
     else{
       this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");      
@@ -932,8 +976,6 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 					   const Real             a_dt,
 					   const Real             a_time,
 					   const Real             a_kappa) const {
-  //  MayDay::Warning("CdrPlasmaJSON::advanceReactionnetwork -- don't know how to do this yet");
-
   // I really hate Chombo sometimes. 
   std::vector<Real>& cdrSources = a_cdrSources.stdVector();
   std::vector<Real>& rteSources = a_rteSources.stdVector();
@@ -991,7 +1033,13 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     }
   };
 
-  // Here is the lambda that fires a photon reaction that has a rate constant k. 
+  // Here is the lambda that fires a photon reaction that has a rate constant k.
+
+
+  // Electric field and reduce electric field. 
+  const Real E   = a_E.vectorLength();
+  const Real N   = m_gasDensity(a_pos);
+  const Real Etd = (E/(N * Units::Td));    
 
 
   // Iterate through plasma reactions
@@ -1011,13 +1059,19 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 	}
       case LookupMethod::FunctionLFA:
 	{
-	  MayDay::Error("CdrPlasmaJSON::advanceReactionNetwork -- FunctionLFA not supported yet");
+
+
+	  MayDay::Error("CdrPlasmaJSON::advanceReactionNetwork -- Function not supported yet");
 	  
 	  break;
 	}
       case LookupMethod::TableLFA:
 	{
-	  MayDay::Error("CdrPlasmaJSON::advanceReactionNetwork -- Table not supported yet");
+	  // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that. 
+	  const LookupTable<2>& reactionTable = m_plasmaReactionTablesEN.at(i);
+
+	  k  = reactionTable.getEntry<1>(Etd); // Get rate/N
+	  k *= N;                              // Get rate
 	  
 	  break;
 	}

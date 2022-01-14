@@ -247,6 +247,12 @@ void LookupTable<N>::makeUniform(const int a_numRows){
 
 }
 
+template <int N>
+inline
+int LookupTable<N>::getNumEntries() const {
+  return m_data.size();
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif
