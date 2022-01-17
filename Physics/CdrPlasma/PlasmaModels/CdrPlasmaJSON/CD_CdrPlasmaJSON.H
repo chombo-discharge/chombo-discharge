@@ -596,6 +596,12 @@ namespace Physics {
       void throwParserWarning(const std::string a_warning) const;
 
       /*!
+	@brief Protect the @ character in a string
+	@param[in] a_str String If it contains the at character we throw an error. 
+      */
+      bool containsAt(const std::string a_str) const;
+
+      /*!
 	@brief Remove whitespace from string
       */
       std::string trim(const std::string& a_string) const;
@@ -616,7 +622,7 @@ namespace Physics {
 	@brief Return true if species exists in map and false otherwise
 	@param[in] a_name Rte species name
       */
-      bool isPhotonSpecies(const std::string& a_name) const;      
+      bool isPhotonSpecies(const std::string& a_name) const;
     };
   }
 }

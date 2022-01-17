@@ -128,7 +128,7 @@
 	  "soloviev_species": "e"	  
 	 },
 	 {"reaction": "N2+ + N2 + N2 -> N4+ + N2",
-	  "description": "N2+ conversion to N4+",	  
+	  "description": "N2+ conversion to N4+",
 	  "lookup": "constant",
 	  "rate": 5E-41
 	 },

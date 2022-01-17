@@ -52,9 +52,6 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   // Parse plasma-reactions and photo-reactions
   this->parsePlasmaReactions();
 
-  // Parse boundary conditions and surface reactions
-
-
   m_numCdrSpecies = m_CdrSpecies.size();
   m_numRtSpecies  = m_RtSpecies. size();
 }
@@ -93,6 +90,10 @@ void CdrPlasmaJSON::throwParserWarning(const std::string a_warning) const {
   pout() << a_warning << endl;
 
   MayDay::Warning(a_warning.c_str());
+}
+
+bool CdrPlasmaJSON::containsAt(const std::string a_str) const {
+  return (a_str.find("@") != std::string::npos);
 }
 
 void CdrPlasmaJSON::sanityCheckSpecies() const {
@@ -200,9 +201,9 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
       
     const Real referenceDensity = (referencePressure * Units::atm2pascal * Units::Na)/ (referenceTemperature * Units::R);	
 
-    m_gasTemperature = [&T   = referenceTemperature] (const RealVect a_position) -> Real { return T;   };
-    m_gasPressure    = [&P   = referencePressure   ] (const RealVect a_position) -> Real { return P;   };
-    m_gasDensity     = [&Rho = referenceDensity    ] (const RealVect a_position) -> Real { return Rho; };
+    m_gasTemperature = [T   = referenceTemperature] (const RealVect a_position) -> Real { return T;   };
+    m_gasPressure    = [P   = referencePressure   ] (const RealVect a_position) -> Real { return P;   };
+    m_gasDensity     = [Rho = referenceDensity    ] (const RealVect a_position) -> Real { return Rho; };
   }
   else if(gasLaw == "troposphere"){
 
@@ -217,17 +218,17 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     const Real gMRL = (g * M) / (Units::R * L);
 
     // Temperature is T = T0 - L*(z-h0)
-    m_gasTemperature = [&T  = referenceTemperature, &L] (const RealVect a_position) -> Real {
+    m_gasTemperature = [T  = referenceTemperature, L] (const RealVect a_position) -> Real {
       return T - L * a_position[SpaceDim-1];
     };
 
     // Pressure is p = p0 * (1 - L*h/T0)^(g*M/(R*L)
-    m_gasPressure = [&T  = referenceTemperature, &P = referencePressure, &L, &gMRL ] (const RealVect a_position) -> Real {
+    m_gasPressure = [T  = referenceTemperature, P = referencePressure, L, gMRL ] (const RealVect a_position) -> Real {
       return P * std::pow(( 1 - L*a_position[SpaceDim-1]/T), gMRL);
     };
 
     // Density is rho = P*Na/(T*R)
-    m_gasDensity = [P = this->m_gasPressure, T = this->m_gasTemperature] (const RealVect a_position) -> Real {
+    m_gasDensity = [&P = this->m_gasPressure, &T = this->m_gasTemperature] (const RealVect a_position) -> Real {
       return (P(a_position) * Units::atm2pascal * Units::Na)/ (T(a_position) * Units::R);          
     };
   }
@@ -249,6 +250,9 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
   for (const auto& species : m_json["gas"]["neutral_species"]){
     const std::string speciesName     = trim(species["name"          ].get<std::string>());
     const Real        speciesFraction =      species["molar_fraction"].get<Real>() / molarSum;
+
+    // Names can not contain the at letter.
+    if(containsAt(speciesName)) this->throwParserError("CdrPlasmaJSON::initializeNeutralSpecies -- species name must not contain '@' letter");
 
     // It's an error if a species was defined twice.
     if(isNeutralSpecies(speciesName)) this->throwParserError("Neutral species '" + speciesName + "' was defined more than once");        
@@ -297,6 +301,9 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     const auto Z           =      species["Z"].        get<int        >() ;
     const auto mobile      =      species["mobile"].   get<bool       >() ;
     const auto diffusive   =      species["diffusive"].get<bool       >() ;
+
+    // Does not get to contain at letter
+    if(containsAt(name)) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- species name must not contain '@' letter");    
 
     // It's an error if the species was already defined. 
     if(isPlasmaSpecies(name)) this->throwParserError("Plasma species '" + name + "' was defined more than once");
@@ -385,6 +392,9 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
 
     const auto name  = trim(species["name" ].get<std::string>());
     const auto kappa = trim(species["kappa"].get<std::string>());
+
+    // Does not get to contain at letter.
+    if(containsAt(name)) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- species name cannot contain '@'");
 
     // It's an error if the species is already defined.
     if(isPhotonSpecies(name)) this->throwParserError("Photon species '" + name + "' was defined more than once");    
@@ -813,7 +823,7 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
     std::vector<std::string> reactants;
     std::vector<std::string> products ;
 
-    this->parseReactionString   (reactants, products, reaction);
+    this->parseReactionString(reactants, products, reaction);
     this->sanctifyPlasmaReaction(reactants, products, reaction);
 
     // Make the string-int encoding so we can encode the reaction properly.
