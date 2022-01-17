@@ -127,23 +127,20 @@
 	  "soloviev_correction": true,
 	  "soloviev_species": "e"	  
 	 },
-	 {"reaction": "N2+ + N2 + N2 -> N4+ + N2",
-	  "description": "N2+ conversion to N4+",
+	 {"reaction": "N2+ + N2 + @ -> N4+ + @",
+	  "@": ["N2", "O2"],
 	  "lookup": "constant",
 	  "rate": 5E-41
 	 },
 	 {"reaction": "N4+ + O2 -> O2+ + N2 + N2",
-	  "description": "N4+ conversion to O2+",	  
 	  "lookup": "constant",
 	  "rate": 2.5E-16
 	 },
-	 {"reaction": "N4+ + O2 -> O2+ + N2 + N2",
-	  "description": "N2+ conversion to O2+",	  
+	 {"reaction": "N2+ + O2 -> O2+ + N2",
 	  "lookup": "constant",
 	  "rate": 6E-17
 	 },
 	 {"reaction": "O2+ + N2 + N2 -> O2+N2 + N2",
-	  "description": "O2+ conversion to O2+N2",
 	  "lookup": "constant",
 	  "rate": 9E-43
 	 },
@@ -152,12 +149,45 @@
 	  "lookup": "constant",
 	  "rate": 4.3E-16
 	 },
+	 {"reaction": "O2+ + O2 + @ -> O4+ + @",
+	  "@": ["O2", "N2"],
+	  "lookup": "constant",
+	  "rate": 2.4E-42
+	 },
+	 {"reaction": "e + O2+ -> O2 + O2",
+	  "lookup": "function T1T2_A",
+	  "T1": "O2",
+	  "T2": "e",
+	  "c1" : 1.4E-12,
+	  "c2": 0.5
+	 },
+	 {"reaction": "e + O2+ -> O + O",
+	  "lookup": "function T1T2_A",
+	  "T1": "O2",
+	  "T2": "e",
+	  "c1" : 2E-13,
+	  "c2": 1.0
+	 },	 
 	 {"reaction": "e + O2 + O2 -> O2- + O2",
 	  "lookup": "function T1T2_A",
 	  "T1": "O2",
 	  "T2": "e",
-	  "c1" : 0.1,
-	  "c2": 0.2
+	  "c1" : 2E-41,
+	  "c2": 1
+	 },
+	 {"reaction": "O2- + O4+ -> O2 + O2 + O2",
+	  "lookup": "constant",
+	  "rate": 1E-13
+	 },
+	 {"reaction": "O2- + O4+ + @ -> O2 + O2 + O2 + @",
+	  "@": ["N2", "O2"],
+	  "lookup": "constant",
+	  "rate": 2E-37
+	 },
+	 {"reaction": "O2- + O2+ + @ -> O2 + O2 + @",
+	  "@": ["N2", "O2"],	  
+	  "lookup": "constant",
+	  "rate": 2E-37
 	 }
      ]
 }

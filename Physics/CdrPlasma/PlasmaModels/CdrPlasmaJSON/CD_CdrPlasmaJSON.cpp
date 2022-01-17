@@ -272,7 +272,6 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     // Create the string-int maps
     m_neutralSpeciesMap.       insert(std::make_pair(speciesName, idx        ));
     m_neutralSpeciesInverseMap.insert(std::make_pair(idx ,        speciesName));
-
   }
 
   // Figure out if we should plot the gas quantities
@@ -819,162 +818,212 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
     const std::string reaction = trim(R["reaction"].get<std::string>());
     const std::string lookup   = trim(R["lookup"  ].get<std::string>());
 
-    // Parse the reaction string to figure out the species involved in the reaction.
+    // Parse the reaction string to figure out the species involved in the reaction. Note that this CAN involve
+    // the species wildcard @, in which case we need need to build a superset of reaction strings that we parse. 
     std::vector<std::string> reactants;
     std::vector<std::string> products ;
-
+    
     this->parseReactionString(reactants, products, reaction);
-    this->sanctifyPlasmaReaction(reactants, products, reaction);
 
-    // Make the string-int encoding so we can encode the reaction properly.
-    std::list<int> plasmaReactants ;
-    std::list<int> neutralReactants;
-    std::list<int> plasmaProducts  ;
-    std::list<int> photonProducts  ;
+    // Check if reaction string had a wildcard '@'. If it did we replace the wildcard with the corresponding species. This means that we need to
+    // build another list of reactions. 
+    std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > reactantsAndProducts;
+    if(containsAt(reaction)){
+      if(!(R.contains("@"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReaction -- got reaction wildcard '@' but no '@:' field reaction '" + reaction + "'");
 
-    this->getPlasmaReactionProducts(plasmaReactants,
-				    neutralReactants,
-				    plasmaProducts,
-				    photonProducts,
-				    reactants,
-				    products);
+      // Get the wildcards. 
+      const std::vector<std::string> wildcards = R["@"].get<std::vector<std::string> >();
 
+      for (const auto& w : wildcards){
+	std::vector<std::string> curReactants;
+	std::vector<std::string> curProducts;
 
-    // This is the reaction index for the current index. The reaction we are currently
-    // dealing with is put in m_plasmaReactions[reactionIdex]. 
-    const int reactionIndex = m_plasmaReactions.size();
+	// Replace by wildcard in reactants.  	
+	for (const auto& r : reactants){
+	  if(containsAt(r)){
+	    curReactants.emplace_back(w);
+	  }
+	  else{
+	    curReactants.emplace_back(r);
+	  }
+	}
 
-    // Figure out how we compute the reaction rate for this reaction. 
-    if(lookup == "constant"){
+	// Replace by wildcard in reactants.  	
+	for (const auto& p : products){
+	  if(containsAt(p)){
+	    curProducts.emplace_back(w);
+	  }
+	  else{
+	    curProducts.emplace_back(p);
+	  }
+	}
 
-      // Constant reaction rates are easy, just fetch it and put it where it belongs. 
-      if(!(R.contains("rate"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- got 'constant' but did not get 'rate'");
-
-      const Real k = R["rate"].get<Real>();
-
-      /// Add the rate and lookup method. 
-      m_plasmaReactionLookup.   emplace(std::make_pair(reactionIndex, LookupMethod::Constant));
-      m_plasmaReactionConstants.emplace(std::make_pair(reactionIndex, k                     ));
+	reactantsAndProducts.emplace_back(curReactants, curProducts);
+      }
     }
-    else if(lookup == "function T1T2_A"){
-      if(!(R.contains("T1"))) this->throwParserError("Plasma reaction = '" + reaction + "' specied as 'function T1T2_A' but field 'T1' was not found");
-      if(!(R.contains("T2"))) this->throwParserError("Plasma reaction = '" + reaction + "' specied as 'function T1T2_A' but field 'T2' was not found");
-      if(!(R.contains("c1"))) this->throwParserError("Plasma reaction = '" + reaction + "' specied as 'function T1T2_A' but field 'c1' was not found");
-      if(!(R.contains("c2"))) this->throwParserError("Plasma reaction = '" + reaction + "' specied as 'function T1T2_A' but field 'c2' was not found");
-
-      const std::string speciesT1 = trim(R["T1"].get<std::string>());
-      const std::string speciesT2 = trim(R["T2"].get<std::string>());
-
-      const bool isPlasmaT1  = isPlasmaSpecies(speciesT1);
-      const bool isPlasmaT2  = isPlasmaSpecies(speciesT2);
-
-      const bool isNeutralT1 = isNeutralSpecies(speciesT1);
-      const bool isNeutralT2 = isNeutralSpecies(speciesT2);      
-
-      // Make sure that the specified species exist. 
-      if(!isPlasmaT1 && !isNeutralT1) this->throwParserError("Plasma reaction = '" + reaction + "' do not know species '" + speciesT1 + "'");
-      if(!isPlasmaT2 && !isNeutralT2) this->throwParserError("Plasma reaction = '" + reaction + "' do not know species '" + speciesT2 + "'");      
-
-      // This syntax may look weight, but we need to know precisely which temperatures are involved in the reaction. In general the reaction rate
-      // is just a function k = f(T1, T2) but T1 and T2 could be the temperatures for either a plasma or a neutral species. So, the plasmaReactionFunctionsT1T2 map
-      // is a very weird one because only the temperatures are passed into the functions and not the species themselves. This also happens to be the correct
-      // design because the temperatures themselves can be computed in many formats, and we just don't have a way of reconstructing them here. 
-      int firstIndex  = -1;
-      int secondIndex = -1;
-
-      if(isPlasmaT1) firstIndex  = m_cdrSpeciesMap.at(speciesT1);
-      if(isPlasmaT2) secondIndex = m_cdrSpeciesMap.at(speciesT2);
-
-      const Real c1 = R["c1"].get<Real>();
-      const Real c2 = R["c2"].get<Real>();
-
-      auto functionT1T2 = [&c1, &c2](const Real a_T1, const Real a_T2) -> Real {
-	return c1*std::pow(a_T1/a_T2, c2);
-      };
-
-      m_plasmaReactionFunctionsTT.emplace(reactionIndex, std::make_tuple(firstIndex, secondIndex, functionT1T2));
-      m_plasmaReactionLookup.     emplace(reactionIndex, LookupMethod::FunctionTT);
+    else{
+      reactantsAndProducts.emplace_back(reactants, products);
     }
-    else if (lookup == "table E/N"){
-      if(!(R.contains("file"      ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'file' was not"      );
-      if(!(R.contains("header"    ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'header' was not"    );
-      if(!(R.contains("E/N"       ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'E/N' was not"       );
-      if(!(R.contains("rate/N"    ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'rate/N' was not"    );
-      if(!(R.contains("min E/N"   ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'min E/N' was not"   );
-      if(!(R.contains("max E/N"   ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'max E/N' was not"   );
-      if(!(R.contains("num_points"))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'num_points' was not");
 
-      const std::string filename  = trim(R["file"  ].get<std::string>());
-      const std::string startRead = trim(R["header"].get<std::string>());
-      const std::string stopRead  = "";
+    // Now run through the superset of reactions encoded by the input string. Because of the @ character some of the rate functions
+    // need special handling. 
+    for (const auto& curReaction : reactantsAndProducts){
+      const std::vector<std::string> curReactants = curReaction.first ;
+      const std::vector<std::string> curProducts  = curReaction.second;
 
-      const int xColumn   = R["E/N"       ].get<int>();
-      const int yColumn   = R["rate/N"    ].get<int>();
-      const int numPoints = R["num_points"].get<int>();
+      // Make sure reaction string makes sense. 
+      this->sanctifyPlasmaReaction(curReactants, curProducts, reaction);      
 
-      const Real minEN = R["min E/N"].get<Real>();
-      const Real maxEN = R["max E/N"].get<Real>();	
+      // Make the string-int encoding so we can encode the reaction properly.      
+      std::list<int> plasmaReactants ;
+      std::list<int> neutralReactants;
+      std::list<int> plasmaProducts  ;
+      std::list<int> photonProducts  ;
 
-      // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
-      // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
-      // second column. 
-      LookupTable<2> reactionTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
+      this->getPlasmaReactionProducts(plasmaReactants,
+				      neutralReactants,
+				      plasmaProducts,
+				      photonProducts,
+				      curReactants,
+				      curProducts);
 
-      // If the table is empty then it's an error.
-      if(reactionTable.getNumEntries() == 0){
-	this->throwParserError("Reaction table '" + startRead + "' in file '" + filename + "'is empty. This is probably an error");	  	
+
+      // This is the reaction index for the current index. The reaction we are currently
+      // dealing with is put in m_plasmaReactions[reactionIdex]. 
+      const int reactionIndex = m_plasmaReactions.size();
+
+      // Figure out how we compute the reaction rate for this reaction. 
+      if(lookup == "constant"){
+
+	// Constant reaction rates are easy, just fetch it and put it where it belongs. 
+	if(!(R.contains("rate"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- got 'constant' but did not get 'rate'");
+
+	const Real k = R["rate"].get<Real>();
+
+	/// Add the rate and lookup method. 
+	m_plasmaReactionLookup.   emplace(std::make_pair(reactionIndex, LookupMethod::Constant));
+	m_plasmaReactionConstants.emplace(std::make_pair(reactionIndex, k                     ));
+      }
+      else if(lookup == "function T1T2_A"){
+	if(!(R.contains("T1"))) this->throwParserError("Plasma reaction = '" + reaction + "' specied as 'function T1T2_A' but field 'T1' was not found");
+	if(!(R.contains("T2"))) this->throwParserError("Plasma reaction = '" + reaction + "' specied as 'function T1T2_A' but field 'T2' was not found");
+	if(!(R.contains("c1"))) this->throwParserError("Plasma reaction = '" + reaction + "' specied as 'function T1T2_A' but field 'c1' was not found");
+	if(!(R.contains("c2"))) this->throwParserError("Plasma reaction = '" + reaction + "' specied as 'function T1T2_A' but field 'c2' was not found");
+
+	const std::string speciesT1 = trim(R["T1"].get<std::string>());
+	const std::string speciesT2 = trim(R["T2"].get<std::string>());
+
+	const bool isPlasmaT1  = isPlasmaSpecies(speciesT1);
+	const bool isPlasmaT2  = isPlasmaSpecies(speciesT2);
+
+	const bool isNeutralT1 = isNeutralSpecies(speciesT1);
+	const bool isNeutralT2 = isNeutralSpecies(speciesT2);      
+
+	// Make sure that the specified species exist. 
+	if(!isPlasmaT1 && !isNeutralT1) this->throwParserError("Plasma reaction = '" + reaction + "' do not know species '" + speciesT1 + "'");
+	if(!isPlasmaT2 && !isNeutralT2) this->throwParserError("Plasma reaction = '" + reaction + "' do not know species '" + speciesT2 + "'");      
+
+	// This syntax may look weight, but we need to know precisely which temperatures are involved in the reaction. In general the reaction rate
+	// is just a function k = f(T1, T2) but T1 and T2 could be the temperatures for either a plasma or a neutral species. So, the plasmaReactionFunctionsT1T2 map
+	// is a very weird one because only the temperatures are passed into the functions and not the species themselves. This also happens to be the correct
+	// design because the temperatures themselves can be computed in many formats, and we just don't have a way of reconstructing them here. 
+	int firstIndex  = -1;
+	int secondIndex = -1;
+
+	if(isPlasmaT1) firstIndex  = m_cdrSpeciesMap.at(speciesT1);
+	if(isPlasmaT2) secondIndex = m_cdrSpeciesMap.at(speciesT2);
+
+	const Real c1 = R["c1"].get<Real>();
+	const Real c2 = R["c2"].get<Real>();
+
+	auto functionT1T2 = [&c1, &c2](const Real a_T1, const Real a_T2) -> Real {
+	  return c1*std::pow(a_T1/a_T2, c2);
+	};
+
+	m_plasmaReactionFunctionsTT.emplace(reactionIndex, std::make_tuple(firstIndex, secondIndex, functionT1T2));
+	m_plasmaReactionLookup.     emplace(reactionIndex, LookupMethod::FunctionTT);
+      }
+      else if (lookup == "table E/N"){
+	if(!(R.contains("file"      ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'file' was not"      );
+	if(!(R.contains("header"    ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'header' was not"    );
+	if(!(R.contains("E/N"       ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'E/N' was not"       );
+	if(!(R.contains("rate/N"    ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'rate/N' was not"    );
+	if(!(R.contains("min E/N"   ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'min E/N' was not"   );
+	if(!(R.contains("max E/N"   ))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'max E/N' was not"   );
+	if(!(R.contains("num_points"))) this->throwParserError("Plasma reaction = '" + reaction + "' tabulated rate was specified but field 'num_points' was not");
+
+	const std::string filename  = trim(R["file"  ].get<std::string>());
+	const std::string startRead = trim(R["header"].get<std::string>());
+	const std::string stopRead  = "";
+
+	const int xColumn   = R["E/N"       ].get<int>();
+	const int yColumn   = R["rate/N"    ].get<int>();
+	const int numPoints = R["num_points"].get<int>();
+
+	const Real minEN = R["min E/N"].get<Real>();
+	const Real maxEN = R["max E/N"].get<Real>();	
+
+	// Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+	// the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
+	// second column. 
+	LookupTable<2> reactionTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
+
+	// If the table is empty then it's an error.
+	if(reactionTable.getNumEntries() == 0){
+	  this->throwParserError("Reaction table '" + startRead + "' in file '" + filename + "'is empty. This is probably an error");	  	
+	}
+
+	// Properly format the table. 
+	reactionTable.setRange(minEN, maxEN, 0);
+	reactionTable.sort(0);
+	reactionTable.makeUniform(numPoints);
+
+	m_plasmaReactionLookup.  emplace(std::make_pair(reactionIndex, LookupMethod::TableEN));
+	m_plasmaReactionTablesEN.emplace(std::make_pair(reactionIndex, reactionTable         ));      
+      }
+      else{
+	this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");      
       }
 
-      // Properly format the table. 
-      reactionTable.setRange(minEN, maxEN, 0);
-      reactionTable.sort(0);
-      reactionTable.makeUniform(numPoints);
+      // Determine if reaction needs Soloviev energy correction.
+      if(R.contains("soloviev_correction")){
+	if(!(R.contains("soloviev_species"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions - using energy correction but did not find field 'soloviev_species'");
 
-      m_plasmaReactionLookup.  emplace(std::make_pair(reactionIndex, LookupMethod::TableEN));
-      m_plasmaReactionTablesEN.emplace(std::make_pair(reactionIndex, reactionTable         ));      
-    }
-    else{
-      this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");      
-    }
+	// Get the species name on which we base the approximation. 
+	const std::string species = R["soloviev_species"].get<std::string>();
+	if(m_cdrSpeciesMap.find(species) == m_cdrSpeciesMap.end()) {
+	  this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions - using soloviev correction but did not find species '" + species + "'");
+	}
 
-    // Determine if reaction needs Soloviev energy correction.
-    if(R.contains("soloviev_correction")){
-      if(!(R.contains("soloviev_species"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions - using soloviev correction but did not find field 'soloviev_species'");
+	const bool solovievCorrection = R["soloviev_correction"].get<bool>();      
+	const int  solovievSpecies    = m_cdrSpeciesMap.at(species);
 
-      // Get the species name on which we base the approximation. 
-      const std::string species = R["soloviev_species"].get<std::string>();
-      if(m_cdrSpeciesMap.find(species) == m_cdrSpeciesMap.end()) {
-	this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions - using soloviev correction but did not find species '" + species + "'");
+	// Again, it's an error if the species isn't mobile and diffusive.
+	const bool isMobile    = m_CdrSpecies[solovievSpecies]->isMobile   ();
+	const bool isDiffusive = m_CdrSpecies[solovievSpecies]->isDiffusive();
+      
+	if(!isMobile   ) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- using Soloviev correction but species  + '" + species + "' isn't mobile."   );
+	if(!isDiffusive) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- using Soloviev correction but species  + '" + species + "' isn't diffusive.");
+      
+	m_plasmaReactionSolovievCorrection.emplace(reactionIndex, std::make_pair(solovievCorrection, solovievSpecies));      
+      }
+      else{
+	m_plasmaReactionSolovievCorrection.emplace(reactionIndex, std::make_pair(false, -1));
       }
 
-      const bool solovievCorrection = R["soloviev_correction"].get<bool>();      
-      const int  solovievSpecies    = m_cdrSpeciesMap.at(species);
+      // Determine if the reaction had a field "description". If it did, we will use that description in I/O files
+      if(R.contains("description")){
+	const std::string description = R["description"].get<std::string>();
 
-      // Again, it's an error if the species isn't mobile and diffusive.
-      const bool isMobile    = m_CdrSpecies[solovievSpecies]->isMobile   ();
-      const bool isDiffusive = m_CdrSpecies[solovievSpecies]->isDiffusive();
-      
-      if(!isMobile   ) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- using Soloviev correction but species  + '" + species + "' isn't mobile."   );
-      if(!isDiffusive) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- using Soloviev correction but species  + '" + species + "' isn't diffusive.");
-      
-      m_plasmaReactionSolovievCorrection.emplace(reactionIndex, std::make_pair(solovievCorrection, solovievSpecies));      
-    }
-    else{
-      m_plasmaReactionSolovievCorrection.emplace(reactionIndex, std::make_pair(false, -1));
-    }
+	m_plasmaReactionDescriptions.emplace(reactionIndex, description);      
+      }
+      else{
+	m_plasmaReactionDescriptions.emplace(reactionIndex, reaction);
+      }
 
-    // Determine if the reaction had a field "description". If it did, we will use that description in I/O files
-    if(R.contains("description")){
-      const std::string description = R["description"].get<std::string>();
-
-      m_plasmaReactionDescriptions.emplace(reactionIndex, description);      
+      // Add the reaction to the list of reactions.
+      m_plasmaReactions.emplace_back(plasmaReactants, neutralReactants, plasmaProducts, photonProducts);
     }
-    else{
-      m_plasmaReactionDescriptions.emplace(reactionIndex, reaction);
-    }
-
-    // Add the reaction to the list of reactions.
-    m_plasmaReactions.emplace_back(plasmaReactants, neutralReactants, plasmaProducts, photonProducts);    
   }
 }
 
@@ -989,7 +1038,7 @@ void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_rea
   // All reactants must be in the list of neutral species or in the list of plasma species
   for (const auto& r : a_reactants){
     if(!isPlasmaSpecies(r) && !isNeutralSpecies(r))
-      this->throwParserError("CdrPlasmaJSON::sanctifyPlasmaReaction -- I do not know reacting species '" + r + "' for reaction '" + a_reaction + "'.");
+      this->throwParserError("CdrPlasmaJSON::sanctifyPlasmaReaction -- I do not know reacting species '" + r + "' for reaction '" + a_reaction + "'");
   }
 
   // All products should be in the list of plasma or photon species. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
@@ -1000,7 +1049,7 @@ void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_rea
   }
 
   // Check for charge conservation
-  int sumCharge;
+  int sumCharge = 0;
   for (const auto& r : a_reactants){
     if (m_cdrSpeciesMap.find(r) != m_cdrSpeciesMap.end()){
       sumCharge -= m_CdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
