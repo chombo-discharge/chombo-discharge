@@ -58,6 +58,12 @@ namespace Physics {
       using FunctionX = std::function<Real(const RealVect a_position)>;
 
       /*!
+	@brief Function for encapsulating a function f = f(T) where T is the temperature of some species
+	@param[in] a_T Some temperature. 
+      */
+      using FunctionT = std::function<Real(const Real a_T)>;
+
+      /*!
 	@brief Function for encapsulating a function f = f(x,t) where x is the physical coordinates and t is time.
 	@param[in] a_position Physical coordinates
 	@param[in] a_time     Time
@@ -247,6 +253,7 @@ namespace Physics {
       */
       enum class LookupMethod {
 	Constant,
+	FunctionX,
 	FunctionLFA,
 	TableLFA
       };
@@ -345,7 +352,9 @@ namespace Physics {
 	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
 	@note This is the inverse of m_rteSpeciesMap
       */
-      std::map<int, std::string> m_rteSpeciesInverseMap;      
+      std::map<int, std::string> m_rteSpeciesInverseMap;
+
+      // MOBILITY QUANTITIES BEGIN HERE      
 
       /*!
 	@brief Mobility lookup method for each species. 
@@ -367,6 +376,8 @@ namespace Physics {
       */
       std::map<int, LookupTable<2> > m_mobilityTablesEN;
 
+      // DIFFUSION  QUANTITIES BEGIN HERE
+
       /*!
 	@brief Diffusion lookup method. 
       */
@@ -387,6 +398,25 @@ namespace Physics {
       */
       std::map<int, LookupTable<2> > m_diffusionTablesEN;
 
+      // TEMPERATURE DATA BEGINS HERE
+
+      /*!
+	@brief Temperature lookup method
+      */
+      std::map<int, LookupMethod> m_temperatureLookup;
+
+      /*!
+	@brief Constant temperatures.
+      */
+      std::map<int, FunctionX> m_temperatureConstants;
+
+      /*!
+	@brief Temperatures as functions of E/N. 
+      */
+      std::map<int, LookupTable<2> > m_temperatureTablesEN;
+
+      // REACTION DATA BEGINS HERE
+
       /*!
 	@brief Map for figuring out how to look up the rate for a certain plasma reaction. 
       */
@@ -398,15 +428,26 @@ namespace Physics {
       std::map<int, Real> m_plasmaReactionConstants;
 
       /*!
+	@brief Function-based plasma reaction rates. 
+      */
+      std::map<int, FunctionEN> m_plasmaReactionFunctionsEN;
+
+      /*!
 	@brief Map for table-based reaction coefficients (using reduced electric field)
       */
-      std::map<int, LookupTable<2> > m_plasmaReactionTablesEN;      
+      std::map<int, LookupTable<2> > m_plasmaReactionTablesEN;
+
+      /*!
+	@brief Flag for whether or not reaction includes Soloviev energy correction. 
+	@details If this is true, the rate for a reaction (in the local field approximation) will be modified as k * (1 + E.(D * grad(phi))/n * 
+      */
+      std::map<int, std::pair<bool, int> > m_plasmaReactionSolovievCorrection;
 
       /*!
 	@brief Plasma reactions. 
       */
-      std::vector<CdrPlasmaReactionJSON> m_plasmaReactions;      
-      
+      std::vector<CdrPlasmaReactionJSON> m_plasmaReactions;
+
       /*!
 	@brief Get a species. This will return the species whether it is tracked or not. This yields an error if the species does not exist. 
 	@param[in] a_name Species name. 
@@ -460,20 +501,25 @@ namespace Physics {
       virtual void initializePlasmaSpecies();
 
       /*!
-	@brief Initialize photon species
+	@brief Initialize photon species.
 	@details This will initialize the radiative transfer species absed on the "photon_species" field in the JSON file. 
       */
       virtual void initializePhotonSpecies();
 
       /*!
-	@brief Initialize species mobilities
+	@brief Initialize species mobilities.
       */
       virtual void parseMobilities();
 
       /*!
-	@brief Initialize species diffusion coefficients
+	@brief Initialize species diffusion coefficients.
       */
       virtual void parseDiffusion();
+
+      /*!
+	@brief Initialize species temperatures.
+      */
+      virtual void parseTemperatures();      
 
       /*!
 	@brief Parse plasma reactions
@@ -522,6 +568,27 @@ namespace Physics {
 					     std::list<int>&                 a_photonProducts,
 					     const std::vector<std::string>& a_reactants,
 					     const std::vector<std::string>& a_products) const;
+
+
+      /*!
+	@brief Compute the various plasma species temperatures.
+	@param[in] a_position     Physical coordinates
+	@param[in] a_E            Electric field (SI units)
+	@param[in] a_cdrDensities List of plasma species densities.
+      */
+      virtual std::vector<Real> computePlasmaSpeciesTemperatures(const RealVect&          a_position,
+								 const RealVect&          a_E,
+								 const std::vector<Real>& a_cdrDensities) const;
+
+      /*!
+	@brief Compute the various plasma species mobilities. 
+	@param[in] a_position     Physical coordinates
+	@param[in] a_E            Electric field (SI units)
+	@param[in] a_cdrDensities List of plasma species densities.
+      */
+      virtual std::vector<Real> computePlasmaSpeciesMobilities(const RealVect&          a_position,
+							       const RealVect&          a_E,
+							       const std::vector<Real>& a_cdrDensities) const;      
 
       /*!
 	@brief Throw a parser error

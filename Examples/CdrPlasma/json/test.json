@@ -64,6 +64,16 @@
 		 "amplitude": 1.2345,
 		 "position": [1, 2, 3]
 	     }
+	 },
+	 "temperature": {
+	     "lookup": "table E/N",
+	     "file": "transport_data.txt",
+	     "header": "# Electron mean energy (E/N, eV)",
+	     "E/N": 0,
+	     "eV": 1,
+	     "min E/N": 10,
+	     "max E/N": 1000,
+	     "num_points": 100
 	 }
      },
      {"name": "N2+", "Z":  1, "mobile": false, "diffusive": false},
@@ -99,7 +109,9 @@
 	  "rate/N": 1,	  
 	  "min E/N": 10,
 	  "max E/N": 1000,
-	  "num_points": 1000
+	  "num_points": 1000,
+	  "soloviev_correction": true,
+	  "soloviev_species": "e"
 	 }
      ]
 }
