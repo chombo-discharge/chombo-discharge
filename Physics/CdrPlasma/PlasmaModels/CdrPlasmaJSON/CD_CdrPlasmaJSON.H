@@ -64,12 +64,11 @@ namespace Physics {
       using FunctionT = std::function<Real(const Real a_T)>;
 
       /*!
-	@brief Function for encapsulating a function f = f(x,t) where x is the physical coordinates and t is time.
-	@param[in] a_position Physical coordinates
-	@param[in] a_time     Time
-	@return Returns f(x,t)
+	@brief Function for encapsulating a function f = f(T1, T2) where T1/T2 are temperatures of two species. 
+	@param[in] a_T1 Some species temperature. 
+	@param[in] a_T2 Some other species temperature. 
       */
-      using FunctionXT = std::function<Real(const RealVect a_position, const Real a_time)>;      
+      using FunctionTT = std::function<Real(const Real a_T1, const Real a_T2)>;      
 
       /*!
 	@brief Default constructor.
@@ -249,13 +248,15 @@ namespace Physics {
     protected:
 
       /*!
-	@brief Enum class for distinguishing types of mobility lookups. 
+	@brief Enum class for distinguishing types of computation methods when computing transport data stuff. 
       */
       enum class LookupMethod {
 	Constant,
 	FunctionX,
-	FunctionLFA,
-	TableLFA
+	FunctionT,
+	FunctionTT,
+	FunctionEN,
+	TableEN
       };
 
       /*!
@@ -291,7 +292,7 @@ namespace Physics {
       /*!
 	@brief Initial surface charge
       */
-      FunctionXT m_initialSigma;      
+      std::function<Real(const RealVect a_position, const Real a_time)> m_initialSigma;      
 
       /*!
 	@brief Gas pressure (in atmospheres)
@@ -418,6 +419,11 @@ namespace Physics {
       // REACTION DATA BEGINS HERE
 
       /*!
+	@brief Description of plasma reactions. Only used for I/O
+      */
+      std::map<int, std::string> m_plasmaReactionDescriptions;
+
+      /*!
 	@brief Map for figuring out how to look up the rate for a certain plasma reaction. 
       */
       std::map<int, LookupMethod> m_plasmaReactionLookup;
@@ -426,6 +432,17 @@ namespace Physics {
 	@brief Constant plasma reaction rates.
       */
       std::map<int, Real> m_plasmaReactionConstants;
+
+      /*!
+	@brief Maps for functions of the type k = f(T1,T2) where T1 and T2 are the temperatures of some species. 
+	@details This signature is absolute horrific -- what it means is that we have a reaction which should be evaluated
+	as f(T1, T2), but we need to know which species are involved. By design, this should be general so that T1 and T2 
+	can be the temperatures of any species, including neutral species. So, we make a tuple for indicating which species
+	we are talking about. The first index in the tuple is the first species, the second is the second species and the third
+	entry in the tuple is the actual function. A special rule occurs if one of the first two indices is < 0 in which case
+	the temperature is replaced by the background gas temperature. 
+      */
+      std::map<int, std::tuple<int, int, FunctionTT> > m_plasmaReactionFunctionsTT;;
 
       /*!
 	@brief Function-based plasma reaction rates. 
@@ -438,39 +455,15 @@ namespace Physics {
       std::map<int, LookupTable<2> > m_plasmaReactionTablesEN;
 
       /*!
-	@brief Flag for whether or not reaction includes Soloviev energy correction. 
-	@details If this is true, the rate for a reaction (in the local field approximation) will be modified as k * (1 + E.(D * grad(phi))/n * 
-      */
-      std::map<int, std::pair<bool, int> > m_plasmaReactionSolovievCorrection;
-
-      /*!
 	@brief Plasma reactions. 
       */
       std::vector<CdrPlasmaReactionJSON> m_plasmaReactions;
 
       /*!
-	@brief Get a species. This will return the species whether it is tracked or not. This yields an error if the species does not exist. 
-	@param[in] a_name Species name. 
+	@brief Flag for whether or not reaction includes Soloviev energy correction. 
+	@details If this is true, the rate for a reaction (in the local field approximation) will be modified as k * (1 + E.(D * grad(phi))/n * 
       */
-      const RefCountedPtr<CdrSpecies>& getCdrSpecies(const std::string a_name) const;
-
-      /*!
-	@brief Get a CdrSpecies density.
-	@details This will return the density for the species a_name. If the species is actively tracked, then it will return the entry
-	in a_cdrDensities that corresponds to the species name. If the species is NOT tracked, it will return the initial density of the species. 
-	@param[in] a_name         Species name. 
-	@param[in] a_cdrDensities List of CDR densities for tracked species. 
-	@param[in] a_pos          Physical coordinates
-	@param[in] a_time         Time
-      */
-      Real getCdrDensity(const std::string& a_name, const Vector<Real>& a_cdrDensities, const RealVect& a_pos, const Real& a_time) const;
-
-      /*!
-	@brief Get neutral species density
-	@param[in] a_name Species name
-	@param[in] a_pos  Physical coordinates
-      */      
-      virtual Real getNeutralSpeciesDensity(const std::string a_name, const RealVect& a_position) const;
+      std::map<int, std::pair<bool, int> > m_plasmaReactionSolovievCorrection;      
 
       /*!
 	@brief Parse class options
@@ -606,6 +599,24 @@ namespace Physics {
 	@brief Remove whitespace from string
       */
       std::string trim(const std::string& a_string) const;
+
+      /*!
+	@brief Return true if species exists in map and false otherwise
+	@param[in] a_name Neutral species name
+      */
+      bool isNeutralSpecies(const std::string& a_name) const;            
+
+      /*!
+	@brief Return true if species exists in map and false otherwise
+	@param[in] a_name Cdr species name
+      */
+      bool isPlasmaSpecies(const std::string& a_name) const;
+
+      /*!
+	@brief Return true if species exists in map and false otherwise
+	@param[in] a_name Rte species name
+      */
+      bool isPhotonSpecies(const std::string& a_name) const;      
     };
   }
 }

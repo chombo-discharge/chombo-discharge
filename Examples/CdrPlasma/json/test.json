@@ -1,6 +1,6 @@
 {"gas":
  {
-     "law": "ideal",
+     "law": "troposphere",
      "temperature": 300,
      "pressure": 1,
      "molar_mass": 0.0289652,
@@ -76,9 +76,12 @@
 	     "num_points": 100
 	 }
      },
-     {"name": "N2+", "Z":  1, "mobile": false, "diffusive": false},
-     {"name": "O2+", "Z":  1, "mobile": false, "diffusive": false},
-     {"name": "O2-", "Z": -1, "mobile": false, "diffusive": false}
+     {"name": "N2+",   "Z":  1, "mobile": false, "diffusive": false},
+     {"name": "O2+",   "Z":  1, "mobile": false, "diffusive": false},
+     {"name": "N4+",   "Z":  1, "mobile": false, "diffusive": false},     
+     {"name": "O4+",   "Z":  1, "mobile": false, "diffusive": false},
+     {"name": "O2+N2", "Z":  1, "mobile": false, "diffusive": false},          
+     {"name": "O2-",   "Z": -1, "mobile": false, "diffusive": false}
  ],
  "photon_species":
  [
@@ -105,13 +108,56 @@
 	  "description": "O2 ionization",
 	  "file" : "transport_data.txt",
 	  "header": "# O2 ionization (E/N, rate/N)",
-	  "E/N": 0,
-	  "rate/N": 1,	  
+	  "E/N": 0, "rate/N": 1,	  
 	  "min E/N": 10,
 	  "max E/N": 1000,
 	  "num_points": 1000,
 	  "soloviev_correction": true,
 	  "soloviev_species": "e"
+	 },
+	 {"reaction": "e + N2 -> e + e + N2+",
+	  "description": "N2 ionization",	  
+	  "lookup": "table E/N",
+	  "file" : "transport_data.txt",
+	  "header": "# N2 ionization (E/N, rate/N)",
+	  "E/N": 0, "rate/N": 1,	  
+	  "min E/N": 10,
+	  "max E/N": 1000,
+	  "num_points": 1000,
+	  "soloviev_correction": true,
+	  "soloviev_species": "e"	  
+	 },
+	 {"reaction": "N2+ + N2 + N2 -> N4+ + N2",
+	  "description": "N2+ conversion to N4+",	  
+	  "lookup": "constant",
+	  "rate": 5E-41
+	 },
+	 {"reaction": "N4+ + O2 -> O2+ + N2 + N2",
+	  "description": "N4+ conversion to O2+",	  
+	  "lookup": "constant",
+	  "rate": 2.5E-16
+	 },
+	 {"reaction": "N4+ + O2 -> O2+ + N2 + N2",
+	  "description": "N2+ conversion to O2+",	  
+	  "lookup": "constant",
+	  "rate": 6E-17
+	 },
+	 {"reaction": "O2+ + N2 + N2 -> O2+N2 + N2",
+	  "description": "O2+ conversion to O2+N2",
+	  "lookup": "constant",
+	  "rate": 9E-43
+	 },
+	 {"reaction": "O2+N2 + N2 -> O2+ + N2 + N2",
+	  "description": "Conversion of O2+N2 to O2+",
+	  "lookup": "constant",
+	  "rate": 4.3E-16
+	 },
+	 {"reaction": "e + O2 + O2 -> O2- + O2",
+	  "lookup": "function T1T2_A",
+	  "T1": "O2",
+	  "T2": "e",
+	  "c1" : 0.1,
+	  "c2": 0.2
 	 }
      ]
 }
