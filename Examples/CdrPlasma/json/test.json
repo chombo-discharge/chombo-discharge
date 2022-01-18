@@ -86,7 +86,7 @@
  "photon_species":
  [
      {
-	 "name": "UV1",
+	 "name": "Y",
 	 "kappa": "stochastic_chanrion",
 	 "value": 0.1,
 	 "lambda": 0.1,
@@ -101,93 +101,105 @@
      "initial_density": 0.0
  },
  "plasma_reactions": 
-     [
-	 {"reaction": "e + O2 -> e + e + O2+",
-	  "lookup": "table E/N",
-	  "rate": 0.1,
-	  "description": "O2 ionization",
-	  "file" : "transport_data.txt",
-	  "header": "# O2 ionization (E/N, rate/N)",
-	  "E/N": 0, "rate/N": 1,	  
-	  "min E/N": 10,
-	  "max E/N": 1000,
-	  "num_points": 1000,
-	  "soloviev_correction": true,
-	  "soloviev_species": "e"
-	 },
-	 {"reaction": "e + N2 -> e + e + N2+",
-	  "description": "N2 ionization",	  
-	  "lookup": "table E/N",
-	  "file" : "transport_data.txt",
-	  "header": "# N2 ionization (E/N, rate/N)",
-	  "E/N": 0, "rate/N": 1,	  
-	  "min E/N": 10,
-	  "max E/N": 1000,
-	  "num_points": 1000,
-	  "soloviev_correction": true,
-	  "soloviev_species": "e"	  
-	 },
-	 {"reaction": "N2+ + N2 + @ -> N4+ + @",
-	  "@": ["N2", "O2"],
-	  "lookup": "constant",
-	  "rate": 5E-41
-	 },
-	 {"reaction": "N4+ + O2 -> O2+ + N2 + N2",
-	  "lookup": "constant",
-	  "rate": 2.5E-16
-	 },
-	 {"reaction": "N2+ + O2 -> O2+ + N2",
-	  "lookup": "constant",
-	  "rate": 6E-17
-	 },
-	 {"reaction": "O2+ + N2 + N2 -> O2+N2 + N2",
-	  "lookup": "constant",
-	  "rate": 9E-43
-	 },
-	 {"reaction": "O2+N2 + N2 -> O2+ + N2 + N2",
-	  "description": "Conversion of O2+N2 to O2+",
-	  "lookup": "constant",
-	  "rate": 4.3E-16
-	 },
-	 {"reaction": "O2+ + O2 + @ -> O4+ + @",
-	  "@": ["O2", "N2"],
-	  "lookup": "constant",
-	  "rate": 2.4E-42
-	 },
-	 {"reaction": "e + O2+ -> O2 + O2",
-	  "lookup": "function T1T2_A",
-	  "T1": "O2",
-	  "T2": "e",
-	  "c1" : 1.4E-12,
-	  "c2": 0.5
-	 },
-	 {"reaction": "e + O2+ -> O + O",
-	  "lookup": "function T1T2_A",
-	  "T1": "O2",
-	  "T2": "e",
-	  "c1" : 2E-13,
-	  "c2": 1.0
-	 },	 
-	 {"reaction": "e + O2 + O2 -> O2- + O2",
-	  "lookup": "function T1T2_A",
-	  "T1": "O2",
-	  "T2": "e",
-	  "c1" : 2E-41,
-	  "c2": 1
-	 },
-	 {"reaction": "O2- + O4+ -> O2 + O2 + O2",
-	  "lookup": "constant",
-	  "rate": 1E-13
-	 },
-	 {"reaction": "O2- + O4+ + @ -> O2 + O2 + O2 + @",
-	  "@": ["N2", "O2"],
-	  "lookup": "constant",
-	  "rate": 2E-37
-	 },
-	 {"reaction": "O2- + O2+ + @ -> O2 + O2 + @",
-	  "@": ["N2", "O2"],	  
-	  "lookup": "constant",
-	  "rate": 2E-37
-	 }
-     ]
+ [
+     {
+	 "reaction": "e + O2 -> e + e + O2+",
+	 "lookup": "table E/N",
+	 "rate": 0.1,
+	 "description": "O2 ionization",
+	 "file" : "transport_data.txt",
+	 "header": "# O2 ionization (E/N, rate/N)",
+	 "E/N": 0, "rate/N": 1,	  
+	 "min E/N": 10,
+	 "max E/N": 1000,
+	 "num_points": 1000,
+	 "soloviev_correction": true,
+	 "soloviev_species": "e"
+     },
+     {
+	 "reaction": "e + N2 -> e + e + N2+",
+	 "description": "N2 ionization",	  
+	 "lookup": "table E/N",
+	 "file" : "transport_data.txt",
+	 "header": "# N2 ionization (E/N, rate/N)",
+	 "E/N": 0, "rate/N": 1,	  
+	 "min E/N": 10,
+	 "max E/N": 1000,
+	 "num_points": 1000,
+	 "soloviev_correction": true,
+	 "soloviev_species": "e"	  
+     },
+     {
+	 "reaction": "N2+ + N2 + @ -> N4+ + @",
+	 "@": ["N2", "O2"],
+	 "lookup": "constant",
+	 "rate": 5E-41
+     },
+     {
+	 "reaction": "N4+ + O2 -> O2+ + N2 + N2",
+	 "lookup": "constant",
+	 "rate": 2.5E-16
+     },
+     {
+	 "reaction": "N2+ + O2 -> O2+ + N2",
+	 "lookup": "constant",
+	 "rate": 6E-17
+     },
+     {
+	 "reaction": "O2+ + N2 + N2 -> O2+N2 + N2",
+	 "lookup": "constant",
+	 "rate": 9E-43
+     },
+     {
+	 "reaction": "O2+N2 + N2 -> O2+ + N2 + N2",
+	 "lookup": "constant",
+	 "rate": 4.3E-16
+     },
+     {
+	 "reaction": "O2+ + O2 + @ -> O4+ + @",
+	 "@": ["O2", "N2"],
+	 "lookup": "constant",
+	 "rate": 2.4E-42
+     },
+     {
+	 "reaction": "e + O2+ -> O2 + O2",
+	 "lookup": "function T1T2_A",
+	 "T1": "O2",
+	 "T2": "e",
+	 "c1" : 1.4E-12,
+	 "c2": 0.5
+     },
+     {
+	 "reaction": "e + O2+ -> ",
+	 "lookup": "function T1T2_A",
+	 "T1": "O2",
+	 "T2": "e",
+	 "c1" : 2E-13,
+	 "c2": 1.0
+     },
+     {
+	 "reaction": "e + O2 + O2 -> O2- + O2",
+	 "lookup": "function T1T2_A",
+	 "T1": "O2",
+	 "T2": "e",
+	 "c1" : 2E-41,
+	 "c2": 1
+     },
+     {
+	 "reaction": "O2- + O4+ -> O2 + O2 + O2",
+         "lookup": "constant",
+	 "rate": 1E-13
+     },
+     {
+	 "reaction": "O2- + O4+ + @ -> O2 + O2 + O2 + @",
+	 "@": ["N2", "O2"],
+	 "lookup": "constant",
+	 "rate": 2E-37},
+     {
+	 "reaction": "O2- + O2+ + @ -> O2 + O2 + @",
+	 "@": ["N2", "O2"],
+	 "lookup": "constant",
+	 "rate": 2E-37
+     }
+ ]
 }

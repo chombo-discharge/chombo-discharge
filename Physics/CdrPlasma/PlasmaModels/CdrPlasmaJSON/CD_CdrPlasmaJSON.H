@@ -442,7 +442,7 @@ namespace Physics {
 	entry in the tuple is the actual function. A special rule occurs if one of the first two indices is < 0 in which case
 	the temperature is replaced by the background gas temperature. 
       */
-      std::map<int, std::tuple<int, int, FunctionTT> > m_plasmaReactionFunctionsTT;;
+      std::map<int, std::tuple<int, int, FunctionTT> > m_plasmaReactionFunctionsTT;
 
       /*!
 	@brief Function-based plasma reaction rates. 

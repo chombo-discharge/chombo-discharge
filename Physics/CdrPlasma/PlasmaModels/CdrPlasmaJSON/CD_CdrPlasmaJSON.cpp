@@ -198,7 +198,6 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
   // Instantiate the pressure, density, and temperature of the gas. Note: The density  is the NUMBER density. 
   if(gasLaw == "ideal"){
     // Set the gas temperature, density, and pressure from the ideal gas law. No extra parameters needed and no variation in space either. 
-      
     const Real referenceDensity = (referencePressure * Units::atm2pascal * Units::Na)/ (referenceTemperature * Units::R);	
 
     m_gasTemperature = [T   = referenceTemperature] (const RealVect a_position) -> Real { return T;   };
@@ -208,9 +207,9 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
   else if(gasLaw == "troposphere"){
 
     // These fields are required.  
-    if(!(m_json["gas"].contains("molar_mass"      ))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'molar_mass'"      );
-    if(!(m_json["gas"].contains("gravity"         ))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'gravity'"         );
-    if(!(m_json["gas"].contains("lapse_rate"      ))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'lapse_rate'"      );
+    if(!(m_json["gas"].contains("molar_mass"))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'molar_mass'");
+    if(!(m_json["gas"].contains("gravity"   ))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'gravity'"   );
+    if(!(m_json["gas"].contains("lapse_rate"))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'lapse_rate'");
 
     const Real g    = m_json["gas"]["gravity"   ].get<Real>();
     const Real L    = m_json["gas"]["lapse_rate"].get<Real>();
@@ -258,7 +257,7 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     if(isNeutralSpecies(speciesName)) this->throwParserError("Neutral species '" + speciesName + "' was defined more than once");        
 
     // Set the species density function. 
-    const std::function<Real(const RealVect)> speciesDensity  = [f = speciesFraction, N = this->m_gasDensity] (const RealVect a_position) {
+    const std::function<Real(const RealVect)> speciesDensity  = [f = speciesFraction, &N = this->m_gasDensity] (const RealVect a_position) {
       return f * N(a_position);
     };
 
@@ -936,7 +935,7 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
 	const Real c1 = R["c1"].get<Real>();
 	const Real c2 = R["c2"].get<Real>();
 
-	auto functionT1T2 = [&c1, &c2](const Real a_T1, const Real a_T2) -> Real {
+	std::function<Real(const Real a_T1, const Real a_T2)> functionT1T2 = [=](const Real a_T1, const Real a_T2) -> Real {
 	  return c1*std::pow(a_T1/a_T2, c2);
 	};
 
@@ -1375,7 +1374,7 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
       CdrSrc[p] += volumetricRate;
     }
 
-    for (const auto& p : plasmaProducts){
+    for (const auto& p : photonProducts){
       RteSrc[p] += volumetricRate;
     }
   };
@@ -1387,7 +1386,7 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 
 
   // Iterate through plasma reactions
-  for (int i = 0; i < m_plasmaReactions.size(); i++){
+  for (int i = 0; i < m_plasmaReactions.size(); i++) {
     
     // Figure out the reaction rate for this reaction. 
     Real k = 0.0;
@@ -1414,13 +1413,10 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 	const int         idx1 = std::get<0>(tup);
 	const int         idx2 = std::get<1>(tup);
 	const FunctionTT& func = std::get<2>(tup);
-#if 0
+
 	const Real T1 = (idx1 < 0) ? m_gasTemperature(a_pos) : cdrTemperatures[idx1];
 	const Real T2 = (idx2 < 0) ? m_gasTemperature(a_pos) : cdrTemperatures[idx2];
-#endif
-	const Real T1 = 0.0;
-	const Real T2 = 1.0;
-
+	
 	k = func(T1, T2);
 
 	break;
@@ -1463,6 +1459,8 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     // Fire the reaction.
     FirePlasmaReaction(k, m_plasmaReactions[i]);
   }
+
+  // Iterate through the photon reactions. 
 
 
   // If using stochastic photons -- then we need to run Poisson sampling of the photons. 
@@ -1583,7 +1581,7 @@ Vector<Real> CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time
 						       const Vector<Real> a_extrapCdrFluxes) const {
   //  MayDay::Warning("CdrPlasmaJSON::computeCdrDielectricFluxes -- don't know how to do this yet");
 
-  return Vector<Real>(m_numCdrSpecies, 0.0);    
+  Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 }
 
 Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
