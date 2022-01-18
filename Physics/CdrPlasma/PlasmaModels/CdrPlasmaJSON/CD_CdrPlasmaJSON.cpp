@@ -1020,6 +1020,16 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
 	m_plasmaReactionDescriptions.emplace(reactionIndex, reaction);
       }
 
+      // Determine if we should plot the reaction
+      if(R.contains("plot")){
+	const bool plotReaction = R["plot"].get<bool>();
+	std::cout << "plotting reaction << " << reaction << std::endl;
+	m_plasmaReactionPlot.emplace(reactionIndex, plotReaction);
+      }
+      else{
+	m_plasmaReactionPlot.emplace(reactionIndex, false);
+      }
+
       // Add the reaction to the list of reactions.
       m_plasmaReactions.emplace_back(plasmaReactants, neutralReactants, plasmaProducts, photonProducts);
     }
@@ -1563,7 +1573,7 @@ Vector<Real> CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
 						      const Vector<Real> a_cdrDensities,
 						      const Vector<Real> a_cdrVelocities,
 						      const Vector<Real> a_cdrGradients,
-						      const Vector<Real> a_rteFluxeses,
+						      const Vector<Real> a_rteFluxes,
 						      const Vector<Real> a_extrapCdrFluxes) const {
   //  MayDay::Warning("CdrPlasmaJSON::computeCdrElectrodeFluxes -- don't know how to do this yet");
 
@@ -1577,7 +1587,7 @@ Vector<Real> CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time
 						       const Vector<Real> a_cdrDensities,
 						       const Vector<Real> a_cdrVelocities,
 						       const Vector<Real> a_cdrGradients,
-						       const Vector<Real> a_rteFluxeses,
+						       const Vector<Real> a_rteFluxes,
 						       const Vector<Real> a_extrapCdrFluxes) const {
   //  MayDay::Warning("CdrPlasmaJSON::computeCdrDielectricFluxes -- don't know how to do this yet");
 
@@ -1592,7 +1602,7 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
 						   const Vector<Real>   a_cdrDensities,
 						   const Vector<Real>   a_cdrVelocities,
 						   const Vector<Real>   a_cdrGradients,
-						   const Vector<Real>   a_rteFluxeses,
+						   const Vector<Real>   a_rteFluxes,
 						   const Vector<Real>   a_extrapCdrFluxes) const {
   //  MayDay::Warning("CdrPlasmaJSON::computeCdrDomainFluxes -- don't know how to do this yet");
   

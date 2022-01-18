@@ -177,7 +177,7 @@ namespace Physics {
 	@param[in] a_cdrVelocities   CDR velocities. Normal component only. 
 	@param[in] a_cdrDensities    CDR densities. 
 	@param[in] a_cdrGradients    Normal gradients of cdr densities
-	@param[in] a_rteFluxeses     RTE fluxes (normal component only)
+	@param[in] a_rteFluxes     RTE fluxes (normal component only)
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
 	@return Returns the flux on an electrode interface cell. The vector ordering must be the same as m_CdrSpecies. 
       */
@@ -188,7 +188,7 @@ namespace Physics {
 						     const Vector<Real> a_cdrDensities,
 						     const Vector<Real> a_cdrVelocities,
 						     const Vector<Real> a_cdrGradients,
-						     const Vector<Real> a_rteFluxeses,
+						     const Vector<Real> a_rteFluxes,
 						     const Vector<Real> a_extrapCdrFluxes) const override;
 
       /*!
@@ -200,7 +200,7 @@ namespace Physics {
 	@param[in] a_cdrDensities    CDR densities (on the EB)
 	@param[in] a_cdrVelocities   Normal component of CDR velocities (on the EB).
 	@param[in] a_cdrGradients    Normal gradients of cdr densities
-	@param[in] a_rteFluxeses     RTE fluxes (normal component only)
+	@param[in] a_rteFluxes     RTE fluxes (normal component only)
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
 	@return Returns the flux on a dielectric interface cell. The vector ordering must be the same as m_CdrSpecies. 
       */
@@ -211,7 +211,7 @@ namespace Physics {
 						      const Vector<Real> a_cdrDensities,
 						      const Vector<Real> a_cdrVelocities,
 						      const Vector<Real> a_cdrGradients,
-						      const Vector<Real> a_rteFluxeses,
+						      const Vector<Real> a_rteFluxes,
 						      const Vector<Real> a_extrapCdrFluxes) const override;
 
       /*!
@@ -224,7 +224,7 @@ namespace Physics {
 	@param[in] a_cdrDensities    CDR densities. 
 	@param[in] a_cdrVelocities   CDR velocities (normal component only). 
 	@param[in] a_cdrGradients    CDR gradients (normal component only)
-	@param[in] a_rteFluxeses     RTE fluxes (normal component only)
+	@param[in] a_rteFluxes     RTE fluxes (normal component only)
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
       */
       virtual Vector<Real> computeCdrDomainFluxes(const Real           a_time,
@@ -235,7 +235,7 @@ namespace Physics {
 						  const Vector<Real>   a_cdrDensities,
 						  const Vector<Real>   a_cdrVelocities,
 						  const Vector<Real>   a_cdrGradients,
-						  const Vector<Real>   a_rteFluxeses,
+						  const Vector<Real>   a_rteFluxes,
 						  const Vector<Real>   a_extrapCdrFluxes) const override;
 
       /*!
@@ -458,6 +458,11 @@ namespace Physics {
 	@brief Plasma reactions. 
       */
       std::vector<CdrPlasmaReactionJSON> m_plasmaReactions;
+
+      /*!
+	@brief Plot plasma reaction or not
+      */
+      std::map<int, bool> m_plasmaReactionPlot;
 
       /*!
 	@brief Flag for whether or not reaction includes Soloviev energy correction. 

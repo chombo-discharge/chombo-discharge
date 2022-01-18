@@ -114,7 +114,8 @@
 	 "max E/N": 1000,
 	 "num_points": 1000,
 	 "soloviev_correction": true,
-	 "soloviev_species": "e"
+	 "soloviev_species": "e",
+	 "plot": true
      },
      {
 	 "reaction": "e + N2 -> e + e + N2+",
