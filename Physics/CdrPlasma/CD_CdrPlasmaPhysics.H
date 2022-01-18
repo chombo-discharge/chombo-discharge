@@ -74,140 +74,143 @@ namespace Physics {
       }
 
       /*!
-	@brief Compute alpha. 
+	@brief Compute alpha. Should return Townsend ionization coefficient. 
 	@details This function is mostly used for the cell tagging classes
+	@param[in] a_E Electric field.
       */
-      virtual Real computeAlpha(const RealVect a_E) const = 0;
-
+      virtual Real computeAlpha(const RealVect a_E) const  = 0;
+      
       /*!
-	@brief Routine intended for advancing a full reaction network simultaneous. 
-	@details This is the routine that sometimes the reaction network in the FHD description. Things
-	that come in/out of this routine are DENSITIES, but you should translate this to number
-	of particles/Photons per cell. The particle densities are probably not integers, i.e. cells may
-	contain "half an electron". If you're doing nearest-grid point deposition of Photons, the
-	Photon densities x cell volume should be an integer, although stored as a floating point. 
-	@param[out] a_particle_sources   Number of particles produced per unit volume per unit time
-	@param[out] a_particle_sources   Number of Photons produced per unit volume per unit time
-	@param[in]  a_particle_densities Grid-based density for particle species
-	@param[in]  a_Photon_densities   Grid-based densities for Photons
-	@param[in]  a_time               Current time
-	@param[in]  a_dt                 Advanced time
-	@param[in]  a_pos                Position in space
-	@param[in]  a_E                  Electric field
+	@brief Routine intended for advancing a reaction network over a time a_dt. 
+	@details This routine assumes that the subsequent advance is in the form phi^(k+1) = phi^k + S*a_dt. Thus, this routine exists such that users can EITHER
+	fill a_cdrSources and a_rteSources directly with an explicit rule, OR they can perform a fully implicit advance within this routine and set S from that. 
+	@param[out] a_cdrSources    Source terms for CDR equations.
+	@param[out] a_rteSources    Source terms for RTE equations.
+	@param[in]  a_cdrDensities  Grid-based density for particle species.
+	@param[in]  a_cdrGradients  Grid-based gradients for particle species.
+	@param[in]  a_rteDensities  Grid-based densities for photons.
+	@param[in]  a_E             Electric field.
+	@param[in]  a_pos           Position in space.
+	@param[in]  a_dx            Grid resolution. 
+	@param[in]  a_dt            Advanced time.
+	@param[in]  a_time          Current time.
+	@param[in]  a_kappa         Grid cell unit volume. 
       */
-      virtual void advanceReactionNetwork(Vector<Real>&          a_particle_sources,
-					  Vector<Real>&          a_Photon_sources,
-					  const Vector<Real>     a_particle_densities,
-					  const Vector<RealVect> a_particle_gradients,
-					  const Vector<Real>     a_Photon_densities,
+      virtual void advanceReactionNetwork(Vector<Real>&          a_cdrSources,
+					  Vector<Real>&          a_rteSources,
+					  const Vector<Real>     a_cdrDensities,
+					  const Vector<RealVect> a_cdrGradients,
+					  const Vector<Real>     a_rteDensities,
 					  const RealVect         a_E,
 					  const RealVect         a_pos,
 					  const Real             a_dx,
 					  const Real             a_dt,
 					  const Real             a_time,
-					  const Real             a_kappa) const = 0;
+					  const Real             a_kappa) const  = 0;
 
       /*!
 	@brief Compute velocities for the CDR equations
-	@param[in] a_time Time
-	@param[in] a_pos Position
-	@param[in] a_E Electric field
-	@param[in] a_cdr_densities CDR densities
+	@param[in] a_time         Time
+	@param[in] a_pos          Position
+	@param[in] a_E            Electric field
+	@param[in] a_cdrDensities CDR densities
+	@return Returns the drift velocities for each CDR species. The vector ordering is the same as m_CdrSpecies. 
       */
       virtual Vector<RealVect> computeCdrDriftVelocities(const Real         a_time,
 							 const RealVect     a_pos,
 							 const RealVect     a_E,
-							 const Vector<Real> a_cdr_densities) const = 0;
+							 const Vector<Real> a_cdrDensities) const  = 0;
 
       /*!
-	@brief Compute the cdr diffusion coefficients
-	@param[in] a_time Time
-	@param[in] a_pos Position
-	@param[in] a_E Electric field
-	@param[in] a_cdr_densities CDR densities
+	@brief Compute diffusion coefficients for the CDR equations. 
+	@param[in] a_time         Time
+	@param[in] a_pos          Position
+	@param[in] a_E            Electric field
+	@param[in] a_cdrDensities CDR densities
+	@return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_CdrSpecies. 
       */
       virtual Vector<Real> computeCdrDiffusionCoefficients(const Real         a_time,
 							   const RealVect     a_pos,
 							   const RealVect     a_E,
-							   const Vector<Real> a_cdr_densities) const = 0;
+							   const Vector<Real> a_cdrDensities) const  = 0;
 
 
       /*!
-	@brief Compute cdr fluxes through electrode-gas interfaces
-	@param[in] a_time Time
-	@param[in] a_pos Position
-	@param[in] a_normal Normal vector, points into the gas phase. 
-	@param[in] a_E Electric field
-	@param[in] a_cdr_velocities CDR velocities. Normal component only. 
-	@param[in] a_cdr_densities CDR densities. 
-	@param[in] a_cdr_gradients Normal gradients of cdr densities
-	@param[in] a_rte_fluxes RTE fluxes (normal component only)
-	@param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
+	@brief Compute CDR fluxes on electrode-gas interfaces. This is used as a boundary condition in the CDR equations. 
+	@param[in] a_time            Time
+	@param[in] a_pos             Position
+	@param[in] a_normal          Boundary normal vector. This points into the gas phase. 
+	@param[in] a_E               Electric field
+	@param[in] a_cdrVelocities   CDR velocities. Normal component only. 
+	@param[in] a_cdrDensities    CDR densities. 
+	@param[in] a_cdrGradients    Normal gradients of cdr densities
+	@param[in] a_rteFluxeses     RTE fluxes (normal component only)
+	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
+	@return Returns the flux on an electrode interface cell. The vector ordering must be the same as m_CdrSpecies. 
       */
       virtual Vector<Real> computeCdrElectrodeFluxes(const Real         a_time,
 						     const RealVect     a_pos,
 						     const RealVect     a_normal,
 						     const RealVect     a_E,
-						     const Vector<Real> a_cdr_densities,
-						     const Vector<Real> a_cdr_velocities,
-						     const Vector<Real> a_cdr_gradients,
-						     const Vector<Real> a_rte_fluxes,
-						     const Vector<Real> a_extrap_cdr_fluxes) const = 0;
+						     const Vector<Real> a_cdrDensities,
+						     const Vector<Real> a_cdrVelocities,
+						     const Vector<Real> a_cdrGradients,
+						     const Vector<Real> a_rteFluxeses,
+						     const Vector<Real> a_extrapCdrFluxes) const  = 0;
 
       /*!
-	@brief Compute cdr fluxes through dielectric-gas interfaces
-	@param[in] a_time Time
-	@param[in] a_pos Position
-	@param[in] a_normal Normal vector, points into the gas phase. 
-	@param[in] a_E Electric field
-	@param[in] a_cdr_densities CDR densities. 
-	@param[in] a_cdr_velocities CDR velocities. Normal component only. 
-	@param[in] a_cdr_gradients Normal gradients of cdr densities
-	@param[in] a_rte_fluxes RTE fluxes (normal component only)
-	@param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
+	@brief Compute CDR fluxes on dielectric-gas interfaces. This is used as a boundary condition in the CDR equations. 
+	@param[in] a_time            Time
+	@param[in] a_pos             Position
+	@param[in] a_normal          Normal vector. This points into the gas phase. 
+	@param[in] a_E Electric      field
+	@param[in] a_cdrDensities    CDR densities (on the EB)
+	@param[in] a_cdrVelocities   Normal component of CDR velocities (on the EB).
+	@param[in] a_cdrGradients    Normal gradients of cdr densities
+	@param[in] a_rteFluxeses     RTE fluxes (normal component only)
+	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
+	@return Returns the flux on a dielectric interface cell. The vector ordering must be the same as m_CdrSpecies. 
       */
       virtual Vector<Real> computeCdrDielectricFluxes(const Real         a_time,
 						      const RealVect     a_pos,
 						      const RealVect     a_normal,
 						      const RealVect     a_E,
-						      const Vector<Real> a_cdr_densities,
-						      const Vector<Real> a_cdr_velocities,
-						      const Vector<Real> a_cdr_gradients,
-						      const Vector<Real> a_rte_fluxes,
-						      const Vector<Real> a_extrap_cdr_fluxes) const = 0;
+						      const Vector<Real> a_cdrDensities,
+						      const Vector<Real> a_cdrVelocities,
+						      const Vector<Real> a_cdrGradients,
+						      const Vector<Real> a_rteFluxeses,
+						      const Vector<Real> a_extrapCdrFluxes) const  = 0;
 
       /*!
-	@brief Compute cdr fluxes through domain sides
-	@param[in] a_time Time
-	@param[in] a_pos Position
-	@param[in] a_dir Direction (0 = x, 1=y etc)
-	@param[in] a_side Side (low or high side)
-	@param[in] a_E Electric field
-	@param[in] a_cdr_densities CDR densities. 
-	@param[in] a_cdr_velocities CDR velocities. Normal component only. 
-	@param[in] a_cdr_gradients Normal gradients of cdr densities
-	@param[in] a_rte_fluxes RTE fluxes (normal component only)
-	@param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
+	@brief Compute CDR fluxes through domain sides. This is used as a boundary condition in the CDR equations.
+	@param[in] a_time            Time
+	@param[in] a_pos             Position
+	@param[in] a_dir             Direction (0 = x, 1=y etc)
+	@param[in] a_side            Side (low or high side)
+	@param[in] a_E               Electric field
+	@param[in] a_cdrDensities    CDR densities. 
+	@param[in] a_cdrVelocities   CDR velocities (normal component only). 
+	@param[in] a_cdrGradients    CDR gradients (normal component only)
+	@param[in] a_rteFluxeses     RTE fluxes (normal component only)
+	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
       */
       virtual Vector<Real> computeCdrDomainFluxes(const Real           a_time,
 						  const RealVect       a_pos,
 						  const int            a_dir,
 						  const Side::LoHiSide a_side,
 						  const RealVect       a_E,
-						  const Vector<Real>   a_cdr_densities,
-						  const Vector<Real>   a_cdr_velocities,
-						  const Vector<Real>   a_cdr_gradients,
-						  const Vector<Real>   a_rte_fluxes,
-						  const Vector<Real>   a_extrap_cdr_fluxes) const = 0;
-
+						  const Vector<Real>   a_cdrDensities,
+						  const Vector<Real>   a_cdrVelocities,
+						  const Vector<Real>   a_cdrGradients,
+						  const Vector<Real>   a_rteFluxeses,
+						  const Vector<Real>   a_extrapCdrFluxes) const  = 0;
 
       /*!
 	@brief Set the initial surface charge
 	@param[in] a_time Time
 	@param[in] a_pos Position
       */
-      virtual Real initialSigma(const Real      a_time,
-				const RealVect a_pos) const = 0;
+      virtual Real initialSigma(const Real a_time, const RealVect a_pos) const  = 0;      
 
       /*!
 	@brief Initialize electron energy density
