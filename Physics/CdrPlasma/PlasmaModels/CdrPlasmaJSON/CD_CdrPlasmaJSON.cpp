@@ -590,32 +590,24 @@ void CdrPlasmaJSON::parseMobilities() {
 	m_mobilityLookup.  emplace(std::make_pair(idx, LookupMethod::TableEN));
 	m_mobilityTablesEN.emplace(std::make_pair(idx, mobilityTable         ));
       }		
-      else if (lookup == "function E/N"){
-	if(!(mobilityJSON.contains("function"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function E/N but did not find function specification");
-
+      else if (lookup == "functionEN_A"){
 	FunctionEN func;
 	
-	const std::string whichFunction = trim(mobilityJSON["function"].get<std::string>());
-	if(whichFunction == "ABC"){
-	  if(!(mobilityJSON.contains("A"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function 'ABC'  did not find 'A'");
-	  if(!(mobilityJSON.contains("B"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function 'ABC'  did not find 'B'");
-	  if(!(mobilityJSON.contains("C"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function 'ABC'  did not find 'C'");
+	if(!(mobilityJSON.contains("c1"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using 'functionEN_A' did not find 'c1'");
+	if(!(mobilityJSON.contains("c2"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using 'functionEN_A' did not find 'c2'");
+	if(!(mobilityJSON.contains("c3"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using 'functionEN_A' did not find 'c3'");
 
-	  const Real A = mobilityJSON["A"].get<Real>();
-	  const Real B = mobilityJSON["B"].get<Real>();
-	  const Real C = mobilityJSON["C"].get<Real>();
+	const Real A = mobilityJSON["c1"].get<Real>();
+	const Real B = mobilityJSON["c2"].get<Real>();
+	const Real C = mobilityJSON["c3"].get<Real>();
 
-	  func = [A, B, C](const Real a_E, const Real a_N) -> Real {return A * std::pow(a_E, B) / std::pow(a_N, C);};
-	}
-	else{
-	  this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function E/N but do not recognize specification '" + whichFunction + "'");
-	}
+	func = [A, B, C](const Real a_E, const Real a_N) -> Real {return A * std::pow(a_E, B) / std::pow(a_N, C);};
 
 	m_mobilityLookup.     emplace(std::make_pair(idx, LookupMethod::FunctionEN));
 	m_mobilityFunctionsEN.emplace(std::make_pair(idx, func                     ));	
       }
       else{
-	this->throwParserError("CdrPlasmaJSON::parseMobilities -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");
+	this->throwParserError("CdrPlasmaJSON::parseMobilities - logic bust");
       }
     }
   }
@@ -1023,7 +1015,6 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
       // Determine if we should plot the reaction
       if(R.contains("plot")){
 	const bool plotReaction = R["plot"].get<bool>();
-	std::cout << "plotting reaction << " << reaction << std::endl;
 	m_plasmaReactionPlot.emplace(reactionIndex, plotReaction);
       }
       else{

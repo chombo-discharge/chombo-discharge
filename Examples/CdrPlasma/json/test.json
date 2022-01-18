@@ -27,7 +27,7 @@
 	 "mobile": true,
 	 "diffusive": true,
 	 "mobility": {
-	     "lookup" : "function E/N",
+	     "lookup" : "functionEN_A",
 	     "value": 1,
 	     "file": "transport_data.txt",
 	     "header": "# Electron mobility (E/N, mu*N)",
@@ -36,10 +36,9 @@
 	     "min E/N": 10,
 	     "max E/N": 1000,
 	     "num_points": 100,
-	     "function": "ABC",
-	     "A": 1.45629E19,
-	     "B": -0.26,
-	     "C": 0.74
+	     "c1": 1.45629E19,
+	     "c2": -0.26,
+	     "c3": 0.74
 	 },
 	 "diffusion": {
 	     "lookup": "table E/N",
