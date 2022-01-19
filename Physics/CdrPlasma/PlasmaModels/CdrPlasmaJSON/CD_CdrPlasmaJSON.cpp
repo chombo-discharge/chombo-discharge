@@ -44,6 +44,10 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   // Do a sanity check. 
   this->sanityCheckSpecies();
 
+  // Parse the Townsend ionization and attachment coefficients.
+  this->parseAlpha();
+  this->parseEta();
+
   // Parse CDR mobilities and diffusion coefficients. 
   this->parseMobilities();
   this->parseDiffusion();
@@ -521,6 +525,24 @@ void CdrPlasmaJSON::initializeSigma() {
       };
     }
   }
+}
+
+void CdrPlasmaJSON::parseAlpha(){
+  CH_TIME("CdrPlasmaJSON::parseAlpha");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseAlpha" << endl;
+  }
+
+  MayDay::Abort("CdrPlasmaJSON::parseAlpha -- not implemented");
+}
+
+void CdrPlasmaJSON::parseEta(){
+  CH_TIME("CdrPlasmaJSON::parseEta");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseEta" << endl;
+  }
+
+  MayDay::Abort("CdrPlasmaJSON::parseEta -- not implemented");  
 }
 
 void CdrPlasmaJSON::parseMobilities() {
@@ -1036,6 +1058,26 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
     m_plasmaReactionLookup.   emplace(std::make_pair(a_reactionIndex, LookupMethod::Constant));
     m_plasmaReactionConstants.emplace(std::make_pair(a_reactionIndex, k                     ));
   }
+  else if(lookup == "alpha*v"){
+    if(!(a_R.contains("species"))) this->throwParserError(baseError + "and got 'alpha*v' but field 'species' was not found");
+
+    const std::string species = trim(a_R["species"].get<std::string>());
+
+    if(!(this->isPlasmaSpecies(species))) this->throwParserError(baseError + "and got 'alpha*v' but species '" + species + "' is not a plasma species");
+
+    m_plasmaReactionAlphaV.emplace(a_reactionIndex, m_cdrSpeciesMap.at(species));
+    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::AlphaV       );
+  }
+  else if(lookup == "eta*v"){
+    if(!(a_R.contains("species"))) this->throwParserError(baseError + "and got 'eta*v' but field 'species' was not found");
+
+    const std::string species = trim(a_R["species"].get<std::string>());
+
+    if(!(this->isPlasmaSpecies(species))) this->throwParserError(baseError + "and got 'eta*v' but species '" + species + "' is not a plasma species");
+
+    m_plasmaReactionEtaV.  emplace(a_reactionIndex, m_cdrSpeciesMap.at(species));
+    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::EtaV         );
+  }  
   else if(lookup == "function T1T2_A"){
     if(!(a_R.contains("T1"))) this->throwParserError(baseError + "and got 'function T1T2_A' but field 'T1' was not found");
     if(!(a_R.contains("T2"))) this->throwParserError(baseError + "and got 'function T1T2_A' but field 'T2' was not found");
@@ -1714,6 +1756,12 @@ Real CdrPlasmaJSON::computeAlpha(const RealVect a_E) const {
   return 0.0;
 }
 
+Real CdrPlasmaJSON::computeEta(const RealVect a_E) const {
+  MayDay::Warning("CdrPlasmaJSON::computeEta -- don't know how to do this yet");
+
+  return 0.0;
+} 
+
 void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 					   Vector<Real>&          a_rteSources,
 					   const Vector<Real>     a_cdrDensities,
@@ -1741,7 +1789,11 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
   // Electric field and reduce electric field. 
   const Real E   = a_E.vectorLength();
   const Real N   = m_gasDensity(a_pos);
-  const Real Etd = (E/(N * Units::Td));      
+  const Real Etd = (E/(N * Units::Td));
+
+  // Townsend ionization and attachment coefficients. May or may not be used.
+  const Real alpha = this->computeAlpha(a_E);
+  const Real eta   = this->computeEta  (a_E);
 
   // Set all sources to zero. 
   for (auto& S : cdrSources){
@@ -1792,8 +1844,28 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
   };
 
   // Here is the lambda that fires a photon reaction that has a rate constant k. Note that this is different
-  // if we use discrete photons!
+  // if we use discrete photons! Note that this currently limited to reactions of the type Y -> e + O2+. I.e. only a single
+  // photon species (we check it in the initializing code). 
+  auto FirePhotoReaction = [&CdrSrc = cdrSources,
+			    &RtePhi = rteDensities] (const Real a_rate, const CdrPlasmaPhotoReactionJSON& a_reaction) -> void {
+    
+    const std::list<int>& plasmaReactants  = a_reaction.getPlasmaReactants ();
+    const std::list<int>& neutralReactants = a_reaction.getNeutralReactants();
+    const std::list<int>& photonReactants  = a_reaction.getPhotonReactants ();
+    const std::list<int>& plasmaProducts   = a_reaction.getPlasmaProducts  ();
+    const std::list<int>& neutralProducts  = a_reaction.getNeutralProducts ();
 
+    Real volumetricRate = a_rate;
+
+    // Compute a_rate * Psi(x). Note that a_rate is different if we use Helmholtz reconstruction. 
+    for (const auto& y : photonReactants){
+      volumetricRate *= RtePhi[y];
+    }
+
+    for (const auto& p : plasmaProducts){
+      CdrSrc[p] += volumetricRate;
+    }
+  };
 
   // Iterate through plasma reactions
   for (int i = 0; i < m_plasmaReactions.size(); i++) {
@@ -1816,6 +1888,22 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 	  
 	break;
       }
+    case LookupMethod::AlphaV:
+      {
+	const int idx = m_plasmaReactionAlphaV.at(i);
+
+	k = alpha * E * cdrMobilities[idx];
+
+	break;
+      }
+    case LookupMethod::EtaV:
+      {
+	const int idx = m_plasmaReactionEtaV.at(i);
+
+	k = eta * E * cdrMobilities[idx];
+
+	break;
+      }      
     case LookupMethod::FunctionTT:
       {
 	const std::tuple<int, int, FunctionTT>& tup = m_plasmaReactionFunctionsTT.at(i);
@@ -1873,7 +1961,22 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     FirePlasmaReaction(k, m_plasmaReactions[i]);
   }
 
-  // Iterate through the photon reactions. 
+  // Iterate through the photon reactions.
+  for (int i = 0; i < m_photoReactions.size(); i++){
+    Real k = 0.0;
+
+    const bool useHelmholtz = m_photoReactionUseHelmholtz.at(i);
+
+    if(useHelmholtz){
+      k = m_photoReactionEfficiencies.at(i)(E, a_pos);
+    }
+    else{
+      k = m_photoReactionEfficiencies.at(i)(E, a_pos)/a_dt;
+    }
+
+    // Fire the reaction.
+    FirePhotoReaction(k, m_photoReactions[i]);
+  }
 
 
   // If using stochastic photons -- then we need to run Poisson sampling of the photons.
@@ -2018,6 +2121,5 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
 Real CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect a_pos) const {
   return m_initialSigma(a_pos, a_time);
 }
-
 
 #include <CD_NamespaceFooter.H>

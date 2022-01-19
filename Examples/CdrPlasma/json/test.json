@@ -99,6 +99,9 @@
  "sigma": {
      "initial density": 0.0
  },
+ "alpha":{
+
+ }, 
  "plasma reactions": 
  [
      {
@@ -131,6 +134,11 @@
 	     "correction": true,
 	     "species": "e"
 	 }	 
+     },
+     {
+	 "reaction": "e + N2 -> e + e + N2+",
+	 "lookup": "alpha*v",
+	 "species": "e"
      },
      {
 	 "reaction": "N2+ + N2 + @ -> N4+ + @",
@@ -223,7 +231,6 @@
  [
      {
 	 "reaction": "Y -> e + O2+",
-	 "scale": 0.0,
 	 "helmholtz": {
 	     "A": 1.12E-4,
 	     "lambda": 4.15E-2,

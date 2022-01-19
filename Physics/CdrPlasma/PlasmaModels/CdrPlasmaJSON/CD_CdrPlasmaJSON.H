@@ -117,10 +117,17 @@ namespace Physics {
 
       /*!
 	@brief Compute alpha. Should return Townsend ionization coefficient. 
-	@details This function is mostly used for the cell tagging classes
+	@details This function is mostly used for the cell tagging classes, but can be used for reactions as well. 
 	@param[in] a_E Electric field.
       */
       virtual Real computeAlpha(const RealVect a_E) const override;
+
+      /*!
+	@brief Compute eta. Should return Townsend attachment coefficient. 
+	@details This function is mostly used for the cell tagging classes, but can be used for reactions as well. 
+	@param[in] a_E Electric field.
+      */
+      virtual Real computeEta(const RealVect a_E) const;
       
       /*!
 	@brief Routine intended for advancing a reaction network over a time a_dt. 
@@ -265,7 +272,9 @@ namespace Physics {
 	FunctionT,
 	FunctionTT,
 	FunctionEN,
-	TableEN
+	TableEN,
+	AlphaV,
+	EtaV
       };
 
       /*!
@@ -454,6 +463,16 @@ namespace Physics {
       std::map<int, Real> m_plasmaReactionConstants;
 
       /*!
+	@brief Plasma reaction rates that are alpha*|v|
+      */
+      std::map<int, int> m_plasmaReactionAlphaV;
+
+      /*!
+	@brief Plasma reaction rates that are eta*|v|
+      */
+      std::map<int, int> m_plasmaReactionEtaV;            
+
+      /*!
 	@brief Maps for functions of the type k = f(T1,T2) where T1 and T2 are the temperatures of some species. 
 	@details This signature is absolute horrific -- what it means is that we have a reaction which should be evaluated
 	as f(T1, T2), but we need to know which species are involved. By design, this should be general so that T1 and T2 
@@ -561,7 +580,17 @@ namespace Physics {
       /*!
 	@brief Initialize species temperatures.
       */
-      virtual void parseTemperatures();      
+      virtual void parseTemperatures();
+
+      /*!
+	@brief Parse the Townsend ionization coefficient
+      */
+      virtual void parseAlpha();
+
+      /*!
+	@brief Parse the Townsend attachment coefficient
+      */
+      virtual void parseEta();      
 
       /*!
 	@brief Parse plasma reactions
@@ -668,7 +697,6 @@ namespace Physics {
       */
       virtual void sanityCheckSpecies() const;
 
-
       /*!
 	@brief Check if a photo-reaction makes sense in terms of the species that have been defined.
 	@details This will throw errors if the species do not exist or charge is not conserved.
@@ -716,8 +744,6 @@ namespace Physics {
       virtual std::vector<Real> computePlasmaSpeciesMobilities(const RealVect&          a_position,
 							       const RealVect&          a_E,
 							       const std::vector<Real>& a_cdrDensities) const;
-
-
 
       /*!
 	@brief Throw a parser error
