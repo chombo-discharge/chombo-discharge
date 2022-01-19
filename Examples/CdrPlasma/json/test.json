@@ -7,19 +7,19 @@
      "gravity": 9.81,
      "lapse rate": 0.0065,
      "plot": true,
-     "neutral_species":
+     "neutral species":
      [
 	 {
 	     "name": " O2 ",
-	     "molar_fraction": 0.2
+	     "molar fraction": 0.2
 	 },
 	 {
 	     "name": "N2",
-	     "molar_fraction": 0.8
+	     "molar fraction": 0.8
 	 }
      ]
  },
- "plasma_species":
+ "plasma species":
  [
      {
 	 "name": "e",
@@ -35,7 +35,7 @@
 	     "mu*N": 1,
 	     "min E/N": 10,
 	     "max E/N": 1000,
-	     "num_points": 100,
+	     "num points": 100,
 	     "c1": 1.45629E19,
 	     "c2": -0.26,
 	     "c3": 0.74
@@ -49,9 +49,9 @@
 	     "D*N": 1,
 	     "min E/N": 10,
 	     "max E/N": 1000,
-	     "num_points": 100
+	     "num points": 100
 	 },
-	 "initial_data": {
+	 "initial data": {
 	     "uniform": 1.0,
 	     "gauss2": {
 		 "radius": 1.0,
@@ -72,7 +72,7 @@
 	     "eV": 1,
 	     "min E/N": 10,
 	     "max E/N": 1000,
-	     "num_points": 100
+	     "num points": 100
 	 }
      },
      {"name": "N2+",   "Z":  1, "mobile": false, "diffusive": false},
@@ -82,7 +82,7 @@
      {"name": "O2+N2", "Z":  1, "mobile": false, "diffusive": false},          
      {"name": "O2-",   "Z": -1, "mobile": false, "diffusive": false}
  ],
- "photon_species":
+ "photon species":
  [
      {
 	 "name": "Y",
@@ -97,9 +97,9 @@
      }
  ],
  "sigma": {
-     "initial_density": 0.0
+     "initial density": 0.0
  },
- "plasma_reactions": 
+ "plasma reactions": 
  [
      {
 	 "reaction": "e + O2 -> e + e + O2+",
@@ -111,7 +111,7 @@
 	 "E/N": 0, "rate/N": 1,	  
 	 "min E/N": 10,
 	 "max E/N": 1000,
-	 "num_points": 1000,
+	 "num points": 1000,
 	 "soloviev" : {
 	     "correction": true,
 	     "species": "e"
@@ -126,7 +126,7 @@
 	 "E/N": 0, "rate/N": 1,	  
 	 "min E/N": 10,
 	 "max E/N": 1000,
-	 "num_points": 1000,
+	 "num points": 1000,
 	 "soloviev" : {
 	     "correction": true,
 	     "species": "e"
@@ -219,7 +219,7 @@
 	 }
      }
  ],
- "photo_reactions":
+ "photo reactions":
  [
      {
 	 "reaction": "Y -> e + O2+",

@@ -190,7 +190,7 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
   if(!(m_json["gas"].contains("temperature"    ))) this->throwParserError("In JSON field 'gas' - field 'temperature' is missing"    );
   if(!(m_json["gas"].contains("pressure"       ))) this->throwParserError("In JSON field 'gas' - field 'pressure' is missing"       );
   if(!(m_json["gas"].contains("law"            ))) this->throwParserError("In JSON field 'gas' - field 'law' is missing"            );
-  if(!(m_json["gas"].contains("neutral_species"))) this->throwParserError("In JSON field 'gas' - field 'neutral_species' is missing");
+  if(!(m_json["gas"].contains("neutral species"))) this->throwParserError("In JSON field 'gas' - field 'neutral species' is missing");
 
   const auto referenceTemperature =      m_json["gas"]["temperature"].get<Real       >() ;
   const auto referencePressure    =      m_json["gas"]["pressure"   ].get<Real       >() ;
@@ -239,17 +239,17 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
   // Instantiate the species densities. Note that we need to go through this twice because we need to normalize the molar fractions in case users
   // were a bit inconsiderate when setting them. 
   Real molarSum = 0.0;
-  for (const auto& species : m_json["gas"]["neutral_species"]){
-    if(!(species.contains("name")))           this->throwParserError("In JSON field 'neutral_species' - field 'name' is required"          );
-    if(!(species.contains("molar_fraction"))) this->throwParserError("In JSON field 'neutral_species' - field 'molar_fraction' is required");
+  for (const auto& species : m_json["gas"]["neutral species"]){
+    if(!(species.contains("name")))           this->throwParserError("In JSON field 'neutral species' - field 'name' is required"          );
+    if(!(species.contains("molar fraction"))) this->throwParserError("In JSON field 'neutral species' - field 'molar fraction' is required");
 
-    molarSum += species["molar_fraction"].get<Real>();
+    molarSum += species["molar fraction"].get<Real>();
   }
 
   // Initialize the species. This will iterate through the neutral species in the JSON input file. 
-  for (const auto& species : m_json["gas"]["neutral_species"]){
+  for (const auto& species : m_json["gas"]["neutral species"]){
     const std::string speciesName     = trim(species["name"          ].get<std::string>());
-    const Real        speciesFraction =      species["molar_fraction"].get<Real>() / molarSum;
+    const Real        speciesFraction =      species["molar fraction"].get<Real>() / molarSum;
 
     // Names can not contain the at letter.
     if(containsWildcard(speciesName)) this->throwParserError("CdrPlasmaJSON::initializeNeutralSpecies -- species name must not contain '@' letter");
@@ -287,14 +287,14 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     pout() << "CdrPlasmaJSON::initializePlasmaSpecies()" << endl;
   }
 
-  if(!(m_json.contains("plasma_species"))) this->throwParserWarning("CdrPlasmaJSON::initializePlasmaSpecies -- did not find any plasma species");
+  if(!(m_json.contains("plasma species"))) this->throwParserWarning("CdrPlasmaJSON::initializePlasmaSpecies -- did not find any plasma species");
 
   // Iterate through all species defined in the JSON file. 
-  for (const auto& species : m_json["plasma_species"]){
-    if(!(species.contains("name"     ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma_species' must have field 'name'"     );
-    if(!(species.contains("Z"        ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma_species' must have field 'Z'"        );
-    if(!(species.contains("mobile"   ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma_species' must have field 'mobile'"   );
-    if(!(species.contains("diffusive"))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma_species' must have field 'diffusive'");
+  for (const auto& species : m_json["plasma species"]){
+    if(!(species.contains("name"     ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma species' must have field 'name'"     );
+    if(!(species.contains("Z"        ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma species' must have field 'Z'"        );
+    if(!(species.contains("mobile"   ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma species' must have field 'mobile'"   );
+    if(!(species.contains("diffusive"))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma species' must have field 'diffusive'");
 
     const auto name        = trim(species["name"].     get<std::string>());
     const auto Z           =      species["Z"].        get<int        >() ;
@@ -307,13 +307,13 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     // It's an error if the species was already defined. 
     if(isPlasmaSpecies(name)) this->throwParserError("Plasma species '" + name + "' was defined more than once");
     
-    const bool hasInitData = species.contains("initial_data");
+    const bool hasInitData = species.contains("initial data");
 
     // Get the initial data. 
     std::function<Real(const RealVect, const Real)> initFunc;
 
     if(hasInitData){
-      initFunc = [data = species["initial_data"]] (const RealVect a_point, const Real a_time) -> Real {
+      initFunc = [data = species["initial data"]] (const RealVect a_point, const Real a_time) -> Real {
 	Real ret = 0.0;
 
 	// Add uniform density. 
@@ -383,11 +383,11 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
     pout() << "CdrPlasmaJSON::initializePhotonSpecies - file is = " << m_jsonFile << endl;
   }
 
-  if(!(m_json.contains("photon_species"))) this->throwParserWarning("CdrPlasmaJSON::initializePhotonSpecies -- did not find any photon species");
+  if(!(m_json.contains("photon species"))) this->throwParserWarning("CdrPlasmaJSON::initializePhotonSpecies -- did not find any photon species");
 
-  for (const auto& species : m_json["photon_species"]){
-    if(!(species.contains("name" ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'photon_species' must have field 'name'"     );
-    if(!(species.contains("kappa"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'photon_species' must have field 'mobile'"   );
+  for (const auto& species : m_json["photon species"]){
+    if(!(species.contains("name" ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'photon species' must have field 'name'"     );
+    if(!(species.contains("kappa"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'photon species' must have field 'mobile'"   );
 
     const auto name  = trim(species["name" ].get<std::string>());
     const auto kappa = trim(species["kappa"].get<std::string>());
@@ -513,8 +513,8 @@ void CdrPlasmaJSON::initializeSigma() {
   };
 
   if(m_json.contains("sigma")){
-    if(m_json["sigma"].contains("initial_density")){
-      const Real sigma = m_json["sigma"]["initial_density"].get<Real>();
+    if(m_json["sigma"].contains("initial density")){
+      const Real sigma = m_json["sigma"]["initial density"].get<Real>();
       
       m_initialSigma = [sigma] (const RealVect a_position, const Real a_time) -> Real {
 	return sigma;
@@ -560,7 +560,7 @@ void CdrPlasmaJSON::parseMobilities() {
 	if(!(mobilityJSON.contains("mu*N"      ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'mu*N' was not"      );
 	if(!(mobilityJSON.contains("min E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'min E/N' was not"   );
 	if(!(mobilityJSON.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'max E/N' was not"   );
-	if(!(mobilityJSON.contains("num_points"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'num_points' was not");
+	if(!(mobilityJSON.contains("num points"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'num points' was not");
 	
 	const std::string filename  = trim(mobilityJSON["file"  ].get<std::string>());
 	const std::string startRead = trim(mobilityJSON["header"].get<std::string>());
@@ -568,7 +568,7 @@ void CdrPlasmaJSON::parseMobilities() {
 
 	const int xColumn   = mobilityJSON["E/N"       ].get<int>();
 	const int yColumn   = mobilityJSON["mu*N"      ].get<int>();
-	const int numPoints = mobilityJSON["num_points"].get<int>();
+	const int numPoints = mobilityJSON["num points"].get<int>();
 
 	const Real minEN = mobilityJSON["min E/N"].get<Real>();
 	const Real maxEN = mobilityJSON["max E/N"].get<Real>();	
@@ -651,7 +651,7 @@ void CdrPlasmaJSON::parseDiffusion() {
 	if(!(diffusionJSON.contains("D*N"       ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'D*N' was not"        );
 	if(!(diffusionJSON.contains("min E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'min E/N' was not."   );
 	if(!(diffusionJSON.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'max E/N' was not."   );
-	if(!(diffusionJSON.contains("num_points"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'num_points' was not.");
+	if(!(diffusionJSON.contains("num points"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion - tabulated diffusion was specified but field 'num points' was not.");
 	
 	const std::string filename  = trim(diffusionJSON["file"  ].get<std::string>());
 	const std::string startRead = trim(diffusionJSON["header"].get<std::string>());
@@ -659,7 +659,7 @@ void CdrPlasmaJSON::parseDiffusion() {
 
 	const int xColumn   = diffusionJSON["E/N"       ].get<int>();
 	const int yColumn   = diffusionJSON["D*N"       ].get<int>();
-	const int numPoints = diffusionJSON["num_points"].get<int>();
+	const int numPoints = diffusionJSON["num points"].get<int>();
 
 	const Real minEN = diffusionJSON["min E/N"].get<Real>();
 	const Real maxEN = diffusionJSON["max E/N"].get<Real>();	
@@ -753,7 +753,7 @@ void CdrPlasmaJSON::parseTemperatures() {
 	if(!(S.contains("eV"        ))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'eV' was not"         );
 	if(!(S.contains("min E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'min E/N' was not."   );
 	if(!(S.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'max E/N' was not."   );
-	if(!(S.contains("num_points"))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'num_points' was not.");
+	if(!(S.contains("num points"))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'num points' was not.");
 
 	const std::string filename  = trim(S["file"  ].get<std::string>());
 	const std::string startRead = trim(S["header"].get<std::string>());
@@ -761,7 +761,7 @@ void CdrPlasmaJSON::parseTemperatures() {
 
 	const int xColumn   = S["E/N"       ].get<int>();
 	const int yColumn   = S["eV"        ].get<int>();
-	const int numPoints = S["num_points"].get<int>();
+	const int numPoints = S["num points"].get<int>();
 
 	const Real minEN = S["min E/N"].get<Real>();
 	const Real maxEN = S["max E/N"].get<Real>();	
@@ -800,7 +800,7 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
     pout() << "CdrPlasmaJSON::parsePlasmaReactions - file is = " << m_jsonFile << endl;
   }
 
-  for (const auto& R : m_json["plasma_reactions"]){
+  for (const auto& R : m_json["plasma reactions"]){
     if(!(R.contains("reaction"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- field 'reaction' is missing from one of the reactions");
     if(!(R.contains("lookup"  ))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- field 'lookup' is missing from one of the reactions");
 
@@ -986,7 +986,7 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
     if(!(a_R.contains("rate/N"    ))) this->throwParserError(baseError + "and got 'table E/N' but field 'rate/N' was not found"    );
     if(!(a_R.contains("min E/N"   ))) this->throwParserError(baseError + "and got 'table E/N' but field 'min E/N' was not found"   );
     if(!(a_R.contains("max E/N"   ))) this->throwParserError(baseError + "and got 'table E/N' but field 'max E/N' was not found"   );
-    if(!(a_R.contains("num_points"))) this->throwParserError(baseError + "and got 'table E/N' but field 'num_points' was not found");
+    if(!(a_R.contains("num points"))) this->throwParserError(baseError + "and got 'table E/N' but field 'num points' was not found");
 
     const std::string filename  = trim(a_R["file"  ].get<std::string>());
     const std::string startRead = trim(a_R["header"].get<std::string>());
@@ -994,7 +994,7 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
 
     const int xColumn   = a_R["E/N"       ].get<int>();
     const int yColumn   = a_R["rate/N"    ].get<int>();
-    const int numPoints = a_R["num_points"].get<int>();
+    const int numPoints = a_R["num points"].get<int>();
 
     const Real minEN = a_R["min E/N"].get<Real>();
     const Real maxEN = a_R["max E/N"].get<Real>();	
@@ -1206,8 +1206,8 @@ void CdrPlasmaJSON::parsePhotoReactions(){
     pout() << "CdrPlasmaJSON::parsePhotoReactions file is = " << m_jsonFile << endl;
   }
 
-  for (const auto& R : m_json["photo_reactions"]){
-    if(!(R.contains("reaction"))) this->throwParserError("CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing");
+  for (const auto& R : m_json["photo reactions"]){
+    if(!(R.contains("reaction"))) this->throwParserError("CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing from one of the reactions");
 
     const std::string reaction = trim(R["reaction"].get<std::string>());
 
