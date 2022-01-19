@@ -564,6 +564,17 @@ namespace Physics {
       virtual void parsePlasmaReactions();
 
       /*!
+	@brief Make a reaction set into a superset. This parses wildcards '@' in reaction string.
+	@param[in] a_reactants List of reactants. Can contain wildcard.
+	@param[in] a_products  List of products. Can contain wildcard.
+	@param[in] a_reaction  JSON reaction entry. 
+	@return Returns a list of reactants and products with wilcards replace. 
+      */
+      virtual std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > parsePlasmaReactionWildcards(const std::vector<std::string>& a_reactants,
+														      const std::vector<std::string>& a_products,
+														      const json& a_reaction);
+
+      /*!
 	@brief Parse scaling factors for reactions. 
 	@param[in] a_index    Reaction index. 
 	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
@@ -696,7 +707,7 @@ namespace Physics {
 	@brief Protect the @ character in a string
 	@param[in] a_str String If it contains the at character we throw an error. 
       */
-      bool containsAt(const std::string a_str) const;
+      bool containsWildcard(const std::string a_str) const;
 
       /*!
 	@brief Remove whitespace from string
