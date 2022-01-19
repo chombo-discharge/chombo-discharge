@@ -51,6 +51,7 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
 
   // Parse plasma-reactions and photo-reactions
   this->parsePlasmaReactions();
+  this->parsePhotoReactions();
 
   m_numCdrSpecies = m_CdrSpecies.size();
   m_numRtSpecies  = m_RtSpecies. size();
@@ -65,8 +66,9 @@ void CdrPlasmaJSON::parseOptions() {
   
   ParmParse pp("CdrPlasmaJSON");
 
-  pp.get("verbose",        m_verbose );
-  pp.get("chemistry_file", m_jsonFile);
+  pp.get("verbose",          m_verbose );
+  pp.get("chemistry_file",   m_jsonFile);
+  pp.get("discrete_photons", m_discretePhotons);
 }
 
 void CdrPlasmaJSON::parseJSON() {
@@ -76,8 +78,8 @@ void CdrPlasmaJSON::parseJSON() {
   }
 
   // Parse the JSON file
-  std::ifstream istream(m_jsonFile);
-  istream >> m_json;  
+  std::ifstream istream(m_jsonFile);      
+  istream >> m_json;
 }
 
 void CdrPlasmaJSON::throwParserError(const std::string a_error) const {
@@ -128,7 +130,6 @@ void CdrPlasmaJSON::sanityCheckSpecies() const {
 }
 
 std::string CdrPlasmaJSON::trim(const std::string& a_string) const {
-
   auto ltrim = [](const std::string a_s) -> std::string {
     std::string s = a_s;
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
@@ -207,13 +208,13 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
   else if(gasLaw == "troposphere"){
 
     // These fields are required.  
-    if(!(m_json["gas"].contains("molar_mass"))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'molar_mass'");
+    if(!(m_json["gas"].contains("molar mass"))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'molar mass'");
     if(!(m_json["gas"].contains("gravity"   ))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'gravity'"   );
-    if(!(m_json["gas"].contains("lapse_rate"))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'lapse_rate'");
+    if(!(m_json["gas"].contains("lapse rate"))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'lapse rate'");
 
     const Real g    = m_json["gas"]["gravity"   ].get<Real>();
-    const Real L    = m_json["gas"]["lapse_rate"].get<Real>();
-    const Real M    = m_json["gas"]["molar_mass"].get<Real>();
+    const Real L    = m_json["gas"]["lapse rate"].get<Real>();
+    const Real M    = m_json["gas"]["molar mass"].get<Real>();
     const Real gMRL = (g * M) / (Units::R * L);
 
     // Temperature is T = T0 - L*(z-h0)
@@ -712,7 +713,6 @@ void CdrPlasmaJSON::parseDiffusion() {
   }
 }
 
-  // Iterate through all tracked species.
 void CdrPlasmaJSON::parseTemperatures() {
   CH_TIME("CdrPlasmaJSON::parseTemperatures");
   if(m_verbose){
@@ -883,6 +883,8 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
       // dealing with is put in m_plasmaReactions[reactionIdex]. 
       const int reactionIndex = m_plasmaReactions.size();
 
+      // Parse the reaction reate. 
+
       // Figure out how we compute the reaction rate for this reaction. 
       if(lookup == "constant"){
 
@@ -976,55 +978,213 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
 	this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");      
       }
 
-      // Determine if reaction needs Soloviev energy correction.
-      if(R.contains("soloviev_correction")){
-	if(!(R.contains("soloviev_species"))) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions - using energy correction but did not find field 'soloviev_species'");
+      // Parse scaling factors, plots, and descriptions.
+      this->parsePlasmaReactionScaling    (reactionIndex, R);
+      this->parsePlasmaReactionPlot       (reactionIndex, R);
+      this->parsePlasmaReactionDescription(reactionIndex, R);
+      this->parsePlasmaReactionSoloviev   (reactionIndex, R);
 
-	// Get the species name on which we base the approximation. 
-	const std::string species = R["soloviev_species"].get<std::string>();
-	if(m_cdrSpeciesMap.find(species) == m_cdrSpeciesMap.end()) {
-	  this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions - using soloviev correction but did not find species '" + species + "'");
-	}
-
-	const bool solovievCorrection = R["soloviev_correction"].get<bool>();      
-	const int  solovievSpecies    = m_cdrSpeciesMap.at(species);
-
-	// Again, it's an error if the species isn't mobile and diffusive.
-	const bool isMobile    = m_CdrSpecies[solovievSpecies]->isMobile   ();
-	const bool isDiffusive = m_CdrSpecies[solovievSpecies]->isDiffusive();
-      
-	if(!isMobile   ) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- using Soloviev correction but species  + '" + species + "' isn't mobile."   );
-	if(!isDiffusive) this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- using Soloviev correction but species  + '" + species + "' isn't diffusive.");
-      
-	m_plasmaReactionSolovievCorrection.emplace(reactionIndex, std::make_pair(solovievCorrection, solovievSpecies));      
-      }
-      else{
-	m_plasmaReactionSolovievCorrection.emplace(reactionIndex, std::make_pair(false, -1));
-      }
-
-      // Determine if the reaction had a field "description". If it did, we will use that description in I/O files
-      if(R.contains("description")){
-	const std::string description = R["description"].get<std::string>();
-
-	m_plasmaReactionDescriptions.emplace(reactionIndex, description);      
-      }
-      else{
-	m_plasmaReactionDescriptions.emplace(reactionIndex, reaction);
-      }
-
-      // Determine if we should plot the reaction
-      if(R.contains("plot")){
-	const bool plotReaction = R["plot"].get<bool>();
-	m_plasmaReactionPlot.emplace(reactionIndex, plotReaction);
-      }
-      else{
-	m_plasmaReactionPlot.emplace(reactionIndex, false);
-      }
-
-      // Add the reaction to the list of reactions.
+      // Add the reaction to the pile. 
       m_plasmaReactions.emplace_back(plasmaReactants, neutralReactants, plasmaProducts, photonProducts);
     }
   }
+}
+
+void CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_R) {
+  CH_TIME("CdrPlasmaJSON::parsePlasmaReactionScaling");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parsePlasmaReactionScaling" << endl;
+  }
+
+  // TLDR: This will look through reactions and check if we should use the Soloviev energy correction for LFA-based models. 
+  if(a_R.contains("soloviev")){
+    
+    const std::string reaction  = a_R["reaction"].get<std::string>();
+    const std::string baseError = "Using Soloviev correction for '" + reaction + "' ";
+
+    const json& solo = a_R["soloviev"];
+
+    if(!solo.contains("correction")) this->throwParserError(baseError + "but did not find field 'correction'");
+    if(!solo.contains("species"   )) this->throwParserError(baseError + "but did not find field 'species'"   );
+
+    const auto correct = solo["correction"].get<bool       >();
+    const auto species = solo["species"   ].get<std::string>();
+
+    if(correct){
+      if(!isPlasmaSpecies(species)) this->throwParserError(baseError + "but '" + species + "' is not a plasma species");
+
+      const int plasmaSpecies = m_cdrSpeciesMap.at(species);
+
+      const bool isMobile    = m_CdrSpecies[plasmaSpecies]->isMobile   ();
+      const bool isDiffusive = m_CdrSpecies[plasmaSpecies]->isDiffusive();
+
+      if(!isMobile   ) this->throwParserError(baseError + "but species  + '" + species + "' isn't mobile."   );
+      if(!isDiffusive) this->throwParserError(baseError + "but species  + '" + species + "' isn't diffusive.");
+
+      m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(true, plasmaSpecies));
+    }
+  }
+  else{
+    m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(false, -1));
+  }
+}
+
+void CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R) {
+  CH_TIME("CdrPlasmaJSON::parsePlasmaReactionScaling");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parsePlasmaReactionScaling" << endl;
+  }
+
+  // TLDR: This routine tries to figure out how we should scale reactions. In general, reactions are scaled parametrically by a function f = f(E,x)
+  //       where E is the electric field magnitude and x is the physical position. This is completely general, but there are many, many ways that
+  //       such functions could be formed. Currently, we put these functions as one of the following:
+  //
+  //       f = s
+  //         s -> scaling
+  // 
+  //       f = s * pq/(p(x) + pq)
+  //         s  -> scaling
+  //         pq -> quenching pressure (in atm)
+  //      
+  //
+  //       f = s * kr/(kr + kp + kq(N)) * nu * mu
+  //          s  -> scaling
+  //          kr -> radiation rate
+  //          kp -> predissociation rate
+  //          kq -> quenching rate
+  //          nu -> photoionization efficiency
+  //          mu -> excitation efficiency efficiency  
+
+  // This is the reaction name. We need it for debugging.
+  const std::string reaction = a_R["reaction"].get<std::string>();
+
+  // Scaling factor for reaction. 
+  Real scale = 1.0;
+
+  // Quenching pressure in case that is specified. 
+  Real pq    = 0.0;
+
+  // Stuff for when "photoionization" is specified. 
+  Real kr        = 0.0;
+  Real kp        = 0.0;
+  Real kqN       = 0.0;
+  Real photoiEff = 0.0;
+  Real exciteEff = 0.0;      
+
+  // Flags for determining how to scale the reaction. 
+  bool doPressureQuenching = false;
+  bool doPhotoIonization   = false;
+
+  // Get the scaling factor.
+  if(a_R.contains("scale")) {
+    scale = a_R["scale"].get<Real>();
+  }      
+
+  if(a_R.contains("quenching pressure")){
+    doPressureQuenching = true;
+    
+    pq = a_R["quenching pressure"].get<Real>();
+  }
+
+  // Parse the photoionization field. 
+  if(a_R.contains("photoionization")){
+    const json& photoi = a_R["photoionization"];
+	
+    // These fields are required.
+    if(!(photoi.contains("kr"  )))       this->throwParserError("parsePlasmaReaction - got 'photoionization' for '" + reaction + "' but field 'kr' is missing"        );
+    if(!(photoi.contains("kp"  )))       this->throwParserError("parsePlasmaReaction - got 'photoionization' for '" + reaction + "' but field 'kp' is missing"        );
+    if(!(photoi.contains("kq/N")))       this->throwParserError("parsePlasmaReaction - got 'photoionization' for '" + reaction + "' but field 'kq/N' is missing"      );
+    if(!(photoi.contains("photoi eff"))) this->throwParserError("parsePlasmaReaction - got 'photoionization' for '" + reaction + "' but field 'photoi eff' is missing");
+    if(!(photoi.contains("excite eff"))) this->throwParserError("parsePlasmaReaction - got 'photoionization' for '" + reaction + "' but field 'excite eff' is missing");	
+	
+    kr        = photoi["kr"        ].get<Real>();
+    kp        = photoi["kp"        ].get<Real>();
+    kqN       = photoi["kq/N"      ].get<Real>();
+    photoiEff = photoi["photoi eff"].get<Real>();
+    exciteEff = photoi["excite eff"].get<Real>();	
+
+    doPhotoIonization = true;
+  }
+
+  // This is the scaling function. It will be stored in m_plasmaReactionEfficiencies. 
+  FunctionEX func;
+
+  // Now make ourselves a lambda that we can use for scaling the reactions. 
+  if(doPhotoIonization && doPressureQuenching) {
+    this->throwParserError("CdrPlasmaJSON::parsePlasmaReaction -- both 'photogeneration' and 'quenching pressure' specified for reaction '" + reaction + "'");
+  }
+  else if(doPressureQuenching && !doPhotoIonization){
+    func = [scale, pq, p = this->m_gasPressure](const Real E, const RealVect x){
+      return scale * pq/(pq + p(x));
+    };
+  }
+  else if(!doPressureQuenching && doPhotoIonization){
+    func = [scale, kr, kp, kqN, photoiEff, exciteEff, &N = this->m_gasDensity](const Real E, const RealVect x) -> Real {
+      const Real kq = kqN * N(x);
+
+      return scale * kr/(kr + kp + kq) * photoiEff * exciteEff;
+    };
+  }
+  else {
+    func = [scale](const Real E, const RealVect x) -> Real {
+      return scale;
+    };
+  }
+
+  // Add it to the pile. 
+  m_plasmaReactionEfficiencies.emplace(a_index, func);
+}
+
+void CdrPlasmaJSON::parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_R) {
+  CH_TIME("CdrPlasmaJSON::parsePlasmaReactionPlot");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parsePlasmaReactionPlot" << endl;
+  }
+
+  bool plot = false;
+
+  if(a_R.contains("plot")){
+    plot = a_R.get<bool>();
+  }
+
+  m_plasmaReactionPlot.emplace(a_reactionIndex, plot);  
+}
+
+void CdrPlasmaJSON::parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_R) {
+  CH_TIME("CdrPlasmaJSON::parsePlasmaReactionDescription");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parsePlasmaReactionDescription" << endl;
+  }
+
+  // Reaction name. 
+  std::string str = a_R["reaction"].get<std::string>();  
+
+  // Determine if the reaction had a field "description". If it did, we will use that description in I/O files
+  if(a_R.contains("description")){
+    str = a_R["description"].get<std::string>();
+  }
+
+  m_plasmaReactionDescriptions.emplace(a_reactionIndex, str);        
+}
+
+void CdrPlasmaJSON::parsePhotoReactions(){
+  CH_TIME("CdrPlasmaJSON::parsePhotoReactions");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parsePhotoReactions file is = " << m_jsonFile << endl;
+  }
+
+  for (const auto& R : m_json["photo_reactions"]){
+    if(!(R.contains("reaction"))) this->throwParserError("CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing");
+
+    const std::string reaction = trim(R["reaction"].get<std::string>());
+
+    std::vector<std::string> reactants;
+    std::vector<std::string> products;
+
+    this->parseReactionString  (reactants, products, reaction);
+    this->sanctifyPhotoReaction(reactants, products, reaction);
+  }
+  
 }
 
 void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
@@ -1063,6 +1223,74 @@ void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_rea
 
   if(sumCharge != 0) {
     this->throwParserError("CdrPlasmaJSON::sanctifyPlasmaReaction -- charge not conserved for reaction '" + a_reaction + "'.");
+  }
+}
+
+void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
+					  const std::vector<std::string>& a_products,
+					  const std::string               a_reaction) const {
+  CH_TIME("CdrPlasmaJSON::sanctifyPhotoReaction");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::sanctifyPhotoReaction" << m_jsonFile << endl;
+  }
+
+  // All reactants must be in the list of neutral species or in the list of photon species
+  int numPhotonSpecies = 0;  
+  for (const auto& r : a_reactants){
+    const bool isPlasma  = this->isPlasmaSpecies (r);
+    const bool isNeutral = this->isNeutralSpecies(r);
+    const bool isPhoton  = this->isPhotonSpecies (r);
+
+    if(isNeutral){
+      this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- neutral species (" + r + ") not allowed on left-hand side of photo-reaction '" + a_reaction + "'");
+    }
+    if(isPlasma){
+      this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- plasma species  (" + r + ") not allowed on left-hand side of photo-reaction '" + a_reaction + "'");
+    }
+    if(!isPhoton){
+      this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- I do not know species '" + r + "' on left-hand side of photo-reaction '" + a_reaction + "'");
+    }
+
+    if(isPhoton){
+      numPhotonSpecies++;
+    }
+  }
+
+  // There can only be one photon species on the left-hand side of the reaction. 
+  if(numPhotonSpecies != 1){
+    this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- only one photon species allowed on left-hand side of photo-reaction '" + a_reaction + "'");
+  }
+
+  // All products should be in the list of plasma, neutral, or photon species. 
+  for (const auto& p : a_products){
+    const bool isPlasma  = this->isPlasmaSpecies (p);
+    const bool isNeutral = this->isNeutralSpecies(p);
+    const bool isPhoton  = this->isPhotonSpecies (p);
+
+    if(isPhoton){
+      this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- photon species '" + p + "' not allowed on right-hand side of photo-reaction '" + a_reaction + "'");
+    }
+
+    if(!isPlasma && !isNeutral){
+      this->throwParserError("CdrPlasmaJSON::parsePhotoReactions -- I do not know species '" + p + "' for photo-reaction '" + a_reaction + "'.");
+    }
+  }
+
+  // Check for charge conservation
+  int sumCharge = 0;
+  for (const auto& r : a_reactants){
+    if (m_cdrSpeciesMap.find(r) != m_cdrSpeciesMap.end()){
+      sumCharge -= m_CdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
+    }
+  }
+  for (const auto& p : a_products){
+    if (m_cdrSpeciesMap.find(p) != m_cdrSpeciesMap.end()){
+      sumCharge += m_CdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
+    }
+  }
+
+  if(sumCharge != 0) {
+    this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- charge not conserved for reaction '" + a_reaction + "'.");
   }
 }
 
@@ -1380,10 +1608,8 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     }
   };
 
-  // Here is the lambda that fires a photon reaction that has a rate constant k.
-
-
-
+  // Here is the lambda that fires a photon reaction that has a rate constant k. Note that this is different
+  // if we use discrete photons!
 
 
   // Iterate through plasma reactions
@@ -1439,13 +1665,16 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
       }
     }
 
+    // Modify by other parameters.
+    k *= m_plasmaReactionEfficiencies.at(i)(E, a_pos);
+
     // This is a hook that uses the Soloviev correction. It modifies the reaction rate according to k = k * (1 + (E.D*grad(n))/(K * n * E^2) where
     // K is the electron mobility. 
     if( (m_plasmaReactionSolovievCorrection.at(i)).first){
       const int species = (m_plasmaReactionSolovievCorrection.at(i)).second;
 
       const Real&     N  = cdrDensities            [species];
-      const Real&     mu = cdrMobilities          [species];
+      const Real&     mu = cdrMobilities           [species];
       const Real&     D  = cdrDiffusionCoefficients[species];
       const RealVect& g  = cdrGradients            [species];
 
@@ -1464,7 +1693,10 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
   // Iterate through the photon reactions. 
 
 
-  // If using stochastic photons -- then we need to run Poisson sampling of the photons. 
+  // If using stochastic photons -- then we need to run Poisson sampling of the photons.
+  if(m_discretePhotons){
+    MayDay::Warning("CdrPlasmaJSON::advanceReactionNetwork -- discrete photons not yet done");
+  }
 
 
   return;

@@ -26,6 +26,7 @@
 #include <CD_CdrSpeciesJSON.H>
 #include <CD_RteSpeciesJSON.H>
 #include <CD_CdrPlasmaReactionJSON.H>
+#include <CD_CdrPlasmaPhotoReactionJSON.H>
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
@@ -56,6 +57,14 @@ namespace Physics {
 	@return Returns f(x)
       */
       using FunctionX = std::function<Real(const RealVect a_position)>;
+
+      /*!
+	@brief Function for encapsulating a function f = f(E, x) where E is the electric field at physical coordinates x.
+	@param[in] E Electric field magnitude in SI units. 
+	@param[in] x Physical coordinates
+      */
+      using FunctionEX = std::function<Real(const Real E, const RealVect x)>;
+
 
       /*!
 	@brief Function for encapsulating a function f = f(T) where T is the temperature of some species
@@ -270,6 +279,11 @@ namespace Physics {
       bool m_plotGas;
 
       /*!
+	@brief Using discrete photons or not.
+      */
+      bool m_discretePhotons;
+
+      /*!
 	@brief JSON definition. This is populated when calling parseJSON.
       */
       json m_json;
@@ -354,9 +368,11 @@ namespace Physics {
 	@note This is the inverse of m_rteSpeciesMap
       */
       std::map<int, std::string> m_rteSpeciesInverseMap;
-
+      
+      // ================================      
       // MOBILITY QUANTITIES BEGIN HERE      
-
+      // ================================
+      
       /*!
 	@brief Mobility lookup method for each species. 
       */
@@ -376,8 +392,10 @@ namespace Physics {
 	@brief Map for function-based mobilities. 
       */
       std::map<int, LookupTable<2> > m_mobilityTablesEN;
-
+      
+      // ================================      
       // DIFFUSION  QUANTITIES BEGIN HERE
+      // ================================
 
       /*!
 	@brief Diffusion lookup method. 
@@ -416,7 +434,9 @@ namespace Physics {
       */
       std::map<int, LookupTable<2> > m_temperatureTablesEN;
 
+      // ================================            
       // REACTION DATA BEGINS HERE
+      // ================================      
 
       /*!
 	@brief Description of plasma reactions. Only used for I/O
@@ -455,6 +475,11 @@ namespace Physics {
       std::map<int, LookupTable<2> > m_plasmaReactionTablesEN;
 
       /*!
+	@brief Scaled plasma reactions. These account for e.g. reaction efficiencies, collisional quenching, etc. 
+      */
+      std::map<int, FunctionEX> m_plasmaReactionEfficiencies;
+
+      /*!
 	@brief Plasma reactions. 
       */
       std::vector<CdrPlasmaReactionJSON> m_plasmaReactions;
@@ -468,7 +493,21 @@ namespace Physics {
 	@brief Flag for whether or not reaction includes Soloviev energy correction. 
 	@details If this is true, the rate for a reaction (in the local field approximation) will be modified as k * (1 + E.(D * grad(phi))/n * 
       */
-      std::map<int, std::pair<bool, int> > m_plasmaReactionSolovievCorrection;      
+      std::map<int, std::pair<bool, int> > m_plasmaReactionSolovievCorrection;
+
+      // ================================
+      // PHOTO-REACTIONS BEGIN HERE
+      // ================================            
+
+      /*!
+	@brief Flag for checking if the reaction was specified as being of the Helmholtz reconstruction type.
+      */
+      std::map<int, bool> m_photoReactionHelmholtz;
+
+      /*!
+	@brief Photo-reactions
+      */
+      std::vector<CdrPlasmaPhotoReactionJSON> m_photoReactions;
 
       /*!
 	@brief Parse class options
@@ -525,6 +564,46 @@ namespace Physics {
       virtual void parsePlasmaReactions();
 
       /*!
+	@brief Parse scaling factors for reactions. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
+      */
+      virtual void parsePlasmaReactionRate(const int a_reactionIndex, const json& a_reaction);
+      
+      /*!
+	@brief Parse scaling factors for reactions. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
+      */
+      virtual void parsePlasmaReactionScaling(const int a_reactionIndex, const json& a_reaction);
+
+      /*!
+	@brief Parse reaction plotting. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
+      */
+      virtual void parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_reaction);
+
+      /*!
+	@brief Parse plasma reaction descriptions. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
+      */
+      virtual void parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_reaction);
+
+      /*!
+	@brief Parse plasma reaction energy correction. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
+      */
+      virtual void parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reaction);      
+
+      /*!
+	@brief Parse photo-reactions
+      */
+      virtual void parsePhotoReactions();
+
+      /*!
 	@brief Parses a reaction string into reactangs and products
 	@param[out] a_reactants Left-hand side of reaction
 	@param[out] a_products  Right-hand side of reaction
@@ -550,6 +629,17 @@ namespace Physics {
       virtual void sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
 					  const std::vector<std::string>& a_products,
 					  const std::string               a_reaction) const;
+
+      /*!
+	@brief Check if a photo-reaction makes sense in terms of the species that have been defined.
+	@details This will throw errors if the species do not exist or charge is not conserved.
+	@param[in] a_reactants Reactants
+	@param[in] a_products  Reaction products
+	@param[in] a_reaction  Reaction string
+      */
+      virtual void sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
+					 const std::vector<std::string>& a_products,
+					 const std::string               a_reaction) const;
 
       /*!
 	@brief Get the int-encoding corresponding to species involved in a plasma reaction.
@@ -586,7 +676,9 @@ namespace Physics {
       */
       virtual std::vector<Real> computePlasmaSpeciesMobilities(const RealVect&          a_position,
 							       const RealVect&          a_E,
-							       const std::vector<Real>& a_cdrDensities) const;      
+							       const std::vector<Real>& a_cdrDensities) const;
+
+
 
       /*!
 	@brief Throw a parser error

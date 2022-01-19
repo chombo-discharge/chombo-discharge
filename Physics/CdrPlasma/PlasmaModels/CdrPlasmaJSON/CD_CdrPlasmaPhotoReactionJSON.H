@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_CdrPlasmaReactionJSON.H
+  @file   CD_CdrPlasmaPhotoReactionJSON.H
   @brief  Declaration of a class that encapsulates reactions for usage with CdrPlasmaJSON
   @author Robert Marskar
 */
 
-#ifndef CD_CdrPlasmaReactionJSON_H
-#define CD_CdrPlasmaReactionJSON_H
+#ifndef CD_CdrPlasmaPhotoReactionJSON_H
+#define CD_CdrPlasmaPhotoReactionJSON_H
 
 // Std includes
 #include <map>
@@ -25,32 +25,34 @@ namespace Physics {
   namespace CdrPlasma {
 
     /*!
-      @brief Class for encapsulating reactive process of type X1 + X2 -> X3 + Y for CdrPlasmaPhysics. This class just stores a list
+      @brief Class for encapsulating reactive process of type A + B + Y -> X3 +  for CdrPlasmaPhysics. This class just stores a list
       of target species, but it can also compute the result of stoichiometric reactions. The general format is reactions of the type [Xin] -> [Xout] + [Yout] where
       [Xin] are left hand side particle reactions, and [Xout] and [Yout] are right-hand side particle and photon products. 
 
       The reaction rate is computed as r = k * n[X1]n[X2]. Note that if X1 or X2 is a neutral species, they should be absorbed into the reaction rate prior to
       evaluating the reaction. 
     */
-    class CdrPlasmaReactionJSON {
+    class CdrPlasmaPhotoReactionJSON {
     public:
 
       /*!
 	@brief Default constructor. Don't use. 
       */
-      CdrPlasmaReactionJSON();
+      CdrPlasmaPhotoReactionJSON();
 
       /*!
 	@brief Full constructor. 
 	@param[in] a_plasmaReactants  Plasma species on the left-hand side of the reaction
 	@param[in] a_neutralReactants Neutral species on the left-hand side of the reaction
+	@param[in] a_photonReactants  Photon species on the left hand side of the reaction.
 	@param[in] a_plasmaProducts   Plasma species on the right-hand side of the reaction. 
 	@param[in] a_photonProducts   Photons on the right-hand side of the reaction.
       */
-      CdrPlasmaReactionJSON(const std::list<int> a_plasmaReactants,
-			    const std::list<int> a_neutralReactants,			    
-			    const std::list<int> a_plasmaProducts,
-			    const std::list<int> a_photonProducts);
+      CdrPlasmaPhotoReactionJSON(const std::list<int> a_plasmaReactants,
+				 const std::list<int> a_neutralReactants,
+				 const std::list<int> a_photonReactants,
+				 const std::list<int> a_plasmaProducts,
+				 const std::list<int> a_neutralProducts);
 
       /*!
 	@brief Get the plasma reactants
@@ -65,41 +67,29 @@ namespace Physics {
       const std::list<int>& getNeutralReactants() const;
 
       /*!
+	@brief Get the photo-reactants
+	@return Returns m_photonReactants
+      */
+      const std::list<int>& getPhotonReactants() const;      
+
+      /*!
 	@brief Get the plasma products
 	@return Returns m_plasmaProducts
       */
       const std::list<int>& getPlasmaProducts() const;
 
       /*!
-	@brief Get the photon products
-	@return Returns m_photonProducts
+	@brief Get the neutral products
+	@return Returns m_neutralProducts
       */
-      const std::list<int>& getPhotonProducts() const;            
-      
-      /*!
-	@brief Add the result of this reaction to the product vectors. This will ONLY iterate over the plasma species so if you had 
-	neutral species involved, their contribution should be incorporated in a_reactionRate. 
-	@param[inout] a_plasmaSources   On output, entries will be incremented by the number of consumed/produced particle products. 
-	@param[inout] a_photonSources   On output, entries will be incremented by the number of produced photon products. 
-	@param[inout] a_plasmaDensities Input particle densities. Note, these are evaluated per unit volume. 
-	@param[in]    a_reactionRate    Basic reaction rate for reaction X1 + X2 -> X3 + Y etc. 
-      */
-      void addProducts(std::vector<Real>&       a_plasmaProducts,
-		       std::vector<Real>&       a_photonProducts,
-		       const std::vector<Real>& a_plasmaDensities,
-		       const Real               a_reactionRate) const;
+      const std::list<int>& getNeutralProducts() const;            
       
       /*!
 	@brief Destructor
       */
-      virtual ~CdrPlasmaReactionJSON();
+      virtual ~CdrPlasmaPhotoReactionJSON();
 
     protected:
-
-      /*!
-	@brief Is defined or not
-      */
-      bool m_isDefined;
 
       /*!
 	@brief Plasma species on the left-hand side of the reaction
@@ -109,17 +99,22 @@ namespace Physics {
       /*!
 	@brief Neutral species on the left-hand side of the reaction
       */
-      std::list<int> m_neutralReactants;      
+      std::list<int> m_neutralReactants;
 
       /*!
-	@brief Particles on the right-hand side of the reaction
+	@brief Photon species on the left-hand side of the reaction
+      */
+      std::list<int> m_photonReactants;            
+
+      /*!
+	@brief Plasma species on the right-hand side of the reaction
       */      
       std::list<int> m_plasmaProducts;
 
       /*!
-	@brief Photons on the right-hand side of the reaction
+	@brief Neutral species on the right-hand side of the reaction
       */                  
-      std::list<int> m_photonProducts;
+      std::list<int> m_neutralProducts;
     };
   }
 }

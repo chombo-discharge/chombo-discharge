@@ -216,6 +216,7 @@ CdrPlasmaGodunovStepper.debug            = false     # Turn on debugging message
 # ====================================================================================================
 # CdrPlasmaJSON class options
 # ====================================================================================================
-CdrPlasmaJSON.verbose        = true
-CdrPlasmaJSON.chemistry_file = test.json
+CdrPlasmaJSON.verbose          = true
+CdrPlasmaJSON.chemistry_file   = test.json
+CdrPlasmaJSON.discrete_photons = false
 

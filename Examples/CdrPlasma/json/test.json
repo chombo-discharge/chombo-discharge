@@ -3,9 +3,9 @@
      "law": "troposphere",
      "temperature": 300,
      "pressure": 1,
-     "molar_mass": 0.0289652,
+     "molar mass": 0.0289652,
      "gravity": 9.81,
-     "lapse_rate": 0.0065,
+     "lapse rate": 0.0065,
      "plot": true,
      "neutral_species":
      [
@@ -112,9 +112,10 @@
 	 "min E/N": 10,
 	 "max E/N": 1000,
 	 "num_points": 1000,
-	 "soloviev_correction": true,
-	 "soloviev_species": "e",
-	 "plot": true
+	 "soloviev" : {
+	     "correction": true,
+	     "species": "e"
+	 }
      },
      {
 	 "reaction": "e + N2 -> e + e + N2+",
@@ -126,8 +127,10 @@
 	 "min E/N": 10,
 	 "max E/N": 1000,
 	 "num_points": 1000,
-	 "soloviev_correction": true,
-	 "soloviev_species": "e"	  
+	 "soloviev" : {
+	     "correction": true,
+	     "species": "e"
+	 }	 
      },
      {
 	 "reaction": "N2+ + N2 + @ -> N4+ + @",
@@ -194,12 +197,37 @@
 	 "reaction": "O2- + O4+ + @ -> O2 + O2 + O2 + @",
 	 "@": ["N2", "O2"],
 	 "lookup": "constant",
-	 "rate": 2E-37},
+	 "rate": 2E-37
+     },
      {
 	 "reaction": "O2- + O2+ + @ -> O2 + O2 + @",
 	 "@": ["N2", "O2"],
 	 "lookup": "constant",
 	 "rate": 2E-37
+     },
+     {
+	 "reaction": "e + N2 -> e + N2 + Y",
+	 "lookup": "constant",
+	 "rate": 2E-37,
+	 "scale": 1.0,
+	 "photoionization": {
+	     "kr": 0.1,
+	     "kp": 0.2,
+	     "kq/N": 0.5,
+	     "photoi eff": 0.9,
+	     "excite eff": 0.9
+	 }
+     }
+ ],
+ "photo_reactions":
+ [
+     {
+	 "reaction": "Y -> e + O2+",
+	 "helmholtz": {
+	     "A": 1.12E-4,
+	     "lambda": 4.15E-2,
+	     "neutral": "O2"
+	 }
      }
  ]
 }
