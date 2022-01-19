@@ -917,6 +917,102 @@ std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > CdrPl
   return reactionSets;
 }
 
+void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
+					   const std::vector<std::string>& a_products,
+					   const std::string               a_reaction) const {
+  CH_TIME("CdrPlasmaJSON::sanctifyPlasmaReaction");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::sanctifyPlasmaReaction" << m_jsonFile << endl;
+  }
+
+  // All reactants must be in the list of neutral species or in the list of plasma species
+  for (const auto& r : a_reactants){
+    if(!isPlasmaSpecies(r) && !isNeutralSpecies(r))
+      this->throwParserError("CdrPlasmaJSON::sanctifyPlasmaReaction -- I do not know reacting species '" + r + "' for reaction '" + a_reaction + "'");
+  }
+
+  // All products should be in the list of plasma or photon species. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
+  for (const auto& p : a_products){
+    if(!isPlasmaSpecies(p) && !isPhotonSpecies(p) && !isNeutralSpecies(p)){
+      this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- I do not know product species '" + p + "' for reaction '" + a_reaction + "'.");
+    }
+  }
+
+  // Check for charge conservation
+  int sumCharge = 0;
+  for (const auto& r : a_reactants){
+    if (m_cdrSpeciesMap.find(r) != m_cdrSpeciesMap.end()){
+      sumCharge -= m_CdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
+    }
+  }
+  for (const auto& p : a_products){
+    if (m_cdrSpeciesMap.find(p) != m_cdrSpeciesMap.end()){
+      sumCharge += m_CdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
+    }
+  }
+
+  if(sumCharge != 0) {
+    this->throwParserError("CdrPlasmaJSON::sanctifyPlasmaReaction -- charge not conserved for reaction '" + a_reaction + "'.");
+  }
+}
+
+
+
+void CdrPlasmaJSON::getPlasmaReactionProducts(std::list<int>&                 a_plasmaReactants,
+					      std::list<int>&                 a_neutralReactants,
+					      std::list<int>&                 a_plasmaProducts,
+					      std::list<int>&                 a_photonProducts,
+					      const std::vector<std::string>& a_reactants,
+					      const std::vector<std::string>& a_products) const {
+  CH_TIME("CdrPlasmaJSON::getPlasmaReactionProducts");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::getPlasmaReactionProducts" << endl;
+  }
+
+  a_plasmaReactants. clear();
+  a_neutralReactants.clear();
+  a_plasmaProducts.  clear();
+  a_photonProducts.  clear();  
+
+  // Figure out the reactants. 
+  for (const auto& r : a_reactants){
+
+    // Figure out if the reactants is a plasma species or a neutral species.
+    const bool isPlasmaSpecies  = m_cdrSpeciesMap.    find(r) != m_cdrSpeciesMap.    end();
+    const bool isNeutralSpecies = m_neutralSpeciesMap.find(r) != m_neutralSpeciesMap.end();
+
+    if(isPlasmaSpecies && !isNeutralSpecies){
+      a_plasmaReactants.emplace_back(m_cdrSpeciesMap.at(r));
+    }
+    else if (!isPlasmaSpecies && isNeutralSpecies){
+      a_neutralReactants.emplace_back(m_neutralSpeciesMap.at(r));      
+    }
+    else {
+      this->throwParserError("CdrPlasmaJSON::getPlasmaReactionProducts - logic bust 1");
+    }
+  }
+
+  // Figure out the products.
+  for (const auto& p : a_products){
+    const bool isPlasmaSpecies  = m_cdrSpeciesMap.    find(p) != m_cdrSpeciesMap.    end();
+    const bool isNeutralSpecies = m_neutralSpeciesMap.find(p) != m_neutralSpeciesMap.end();
+    const bool isPhotonSpecies  = m_rteSpeciesMap.    find(p) != m_rteSpeciesMap.    end();
+
+    if(isPlasmaSpecies && !isPhotonSpecies && !isNeutralSpecies){
+      a_plasmaProducts.emplace_back(m_cdrSpeciesMap.at(p));
+    }
+    else if(!isPlasmaSpecies && isPhotonSpecies && !isNeutralSpecies){
+      a_photonProducts.emplace_back(m_rteSpeciesMap.at(p));
+    }
+    else if(!isPlasmaSpecies && !isPhotonSpecies && isNeutralSpecies){
+      // do nothing
+    }
+    else{
+      this->throwParserError("CdrPlasmaJSON::getPlasmaReactionProducts - logic bust 2");
+    }
+  }
+}
+
 void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_R){
   CH_TIME("CdrPlasmaJSON::parsePlasmaReactionRate");
   if(m_verbose){
@@ -1050,7 +1146,8 @@ void CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_
   //          mu -> excitation efficiency efficiency  
 
   // This is the reaction name. We need it for debugging.
-  const std::string reaction = a_R["reaction"].get<std::string>();
+  const std::string reaction  = a_R["reaction"].get<std::string>();
+  const std::string baseError = "CdrPlasmaJSON::parsePlasmaReactionScaling for reaction '" + reaction + "' ";
 
   // Scaling factor for reaction. 
   Real scale = 1.0;
@@ -1085,11 +1182,11 @@ void CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_
     const json& photoi = a_R["photoionization"];
 	
     // These fields are required.
-    if(!(photoi.contains("kr"  )))       this->throwParserError("parsePlasmaReaction - got 'photoionization' for '" + reaction + "' but field 'kr' is missing"        );
-    if(!(photoi.contains("kp"  )))       this->throwParserError("parsePlasmaReaction - got 'photoionization' for '" + reaction + "' but field 'kp' is missing"        );
-    if(!(photoi.contains("kq/N")))       this->throwParserError("parsePlasmaReaction - got 'photoionization' for '" + reaction + "' but field 'kq/N' is missing"      );
-    if(!(photoi.contains("photoi eff"))) this->throwParserError("parsePlasmaReaction - got 'photoionization' for '" + reaction + "' but field 'photoi eff' is missing");
-    if(!(photoi.contains("excite eff"))) this->throwParserError("parsePlasmaReaction - got 'photoionization' for '" + reaction + "' but field 'excite eff' is missing");	
+    if(!(photoi.contains("kr"  )))       this->throwParserError(baseError + "got 'photoionization but field 'kr' is missing"        );
+    if(!(photoi.contains("kp"  )))       this->throwParserError(baseError + "got 'photoionization but field 'kp' is missing"        );
+    if(!(photoi.contains("kq/N")))       this->throwParserError(baseError + "got 'photoionization but field 'kq/N' is missing"      );
+    if(!(photoi.contains("photoi eff"))) this->throwParserError(baseError + "got 'photoionization but field 'photoi eff' is missing");
+    if(!(photoi.contains("excite eff"))) this->throwParserError(baseError + "got 'photoionization but field 'excite eff' is missing");
 	
     kr        = photoi["kr"        ].get<Real>();
     kp        = photoi["kp"        ].get<Real>();
@@ -1105,7 +1202,7 @@ void CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_
 
   // Now make ourselves a lambda that we can use for scaling the reactions. 
   if(doPhotoIonization && doPressureQuenching) {
-    this->throwParserError("CdrPlasmaJSON::parsePlasmaReaction -- both 'photogeneration' and 'quenching pressure' specified for reaction '" + reaction + "'");
+    this->throwParserError(baseError + "- cannot specify both 'photoionization' and 'quenching pressure'");
   }
   else if(doPressureQuenching && !doPhotoIonization){
     func = [scale, pq, p = this->m_gasPressure](const Real E, const RealVect x){
@@ -1171,7 +1268,7 @@ void CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const
   if(a_R.contains("soloviev")){
     
     const std::string reaction  = a_R["reaction"].get<std::string>();
-    const std::string baseError = "Using Soloviev correction for '" + reaction + "' ";
+    const std::string baseError = "CdrPlasmaJSON::parsePlasmaReactionSoloviev for '" + reaction + "' ";
 
     const json& solo = a_R["soloviev"];
 
@@ -1200,64 +1297,6 @@ void CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const
   }
 }
 
-void CdrPlasmaJSON::parsePhotoReactions(){
-  CH_TIME("CdrPlasmaJSON::parsePhotoReactions");
-  if(m_verbose){
-    pout() << "CdrPlasmaJSON::parsePhotoReactions file is = " << m_jsonFile << endl;
-  }
-
-  for (const auto& R : m_json["photo reactions"]){
-    if(!(R.contains("reaction"))) this->throwParserError("CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing from one of the reactions");
-
-    const std::string reaction = trim(R["reaction"].get<std::string>());
-
-    std::vector<std::string> reactants;
-    std::vector<std::string> products;
-
-    this->parseReactionString  (reactants, products, reaction);
-    this->sanctifyPhotoReaction(reactants, products, reaction);
-  }
-  
-}
-
-void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
-					   const std::vector<std::string>& a_products,
-					   const std::string               a_reaction) const {
-  CH_TIME("CdrPlasmaJSON::sanctifyPlasmaReaction");
-  if(m_verbose){
-    pout() << "CdrPlasmaJSON::sanctifyPlasmaReaction" << m_jsonFile << endl;
-  }
-
-  // All reactants must be in the list of neutral species or in the list of plasma species
-  for (const auto& r : a_reactants){
-    if(!isPlasmaSpecies(r) && !isNeutralSpecies(r))
-      this->throwParserError("CdrPlasmaJSON::sanctifyPlasmaReaction -- I do not know reacting species '" + r + "' for reaction '" + a_reaction + "'");
-  }
-
-  // All products should be in the list of plasma or photon species. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
-  for (const auto& p : a_products){
-    if(!isPlasmaSpecies(p) && !isPhotonSpecies(p) && !isNeutralSpecies(p)){
-      this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- I do not know product species '" + p + "' for reaction '" + a_reaction + "'.");
-    }
-  }
-
-  // Check for charge conservation
-  int sumCharge = 0;
-  for (const auto& r : a_reactants){
-    if (m_cdrSpeciesMap.find(r) != m_cdrSpeciesMap.end()){
-      sumCharge -= m_CdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
-    }
-  }
-  for (const auto& p : a_products){
-    if (m_cdrSpeciesMap.find(p) != m_cdrSpeciesMap.end()){
-      sumCharge += m_CdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
-    }
-  }
-
-  if(sumCharge != 0) {
-    this->throwParserError("CdrPlasmaJSON::sanctifyPlasmaReaction -- charge not conserved for reaction '" + a_reaction + "'.");
-  }
-}
 
 void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
 					  const std::vector<std::string>& a_products,
@@ -1279,10 +1318,7 @@ void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reac
     if( isNeutral) this->throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
     if( isPlasma ) this->throwParserError(baseError + "plasma species (" + r + ") not allowed on left-hand side");
     if(!isPhoton ) this->throwParserError(baseError + "I do not know species species '" + r + "' on left hand side");
-    
-    if(isPhoton){
-      numPhotonSpecies++;
-    }
+    if( isPhoton ) numPhotonSpecies++;
   }
 
   // There can only be one photon species on the left-hand side of the reaction. 
@@ -1314,58 +1350,185 @@ void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reac
   }
 }
 
-void CdrPlasmaJSON::getPlasmaReactionProducts(std::list<int>&                 a_plasmaReactants,
-					      std::list<int>&                 a_neutralReactants,
-					      std::list<int>&                 a_plasmaProducts,
-					      std::list<int>&                 a_photonProducts,
-					      const std::vector<std::string>& a_reactants,
-					      const std::vector<std::string>& a_products) const {
-
-  CH_TIME("CdrPlasmaJSON::getPlasmaReactionProducts");
+void CdrPlasmaJSON::parsePhotoReactions(){
+  CH_TIME("CdrPlasmaJSON::parsePhotoReactions");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::getPlasmaReactionProducts" << endl;
+    pout() << "CdrPlasmaJSON::parsePhotoReactions file is = " << m_jsonFile << endl;
+  }
+
+  for (const auto& R : m_json["photo reactions"]){
+    if(!(R.contains("reaction"))) this->throwParserError("CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing from one of the reactions");
+
+    const std::string reaction = trim(R["reaction"].get<std::string>());
+
+    std::vector<std::string> reactants;
+    std::vector<std::string> products;
+
+    // Index.
+    const int reactionIndex = m_photoReactions.size();
+
+    this->parseReactionString  (reactants, products, reaction);
+    this->sanctifyPhotoReaction(reactants, products, reaction);
+
+
+    // Parse if we use Helmholtz reconstruction for this photoionization method.
+    this->parsePhotoReactionScaling(reactionIndex, R);
+
+    // Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
+    std::list<int> plasmaReactants ;
+    std::list<int> neutralReactants;
+    std::list<int> photonReactants ;
+    std::list<int> plasmaProducts  ;
+    std::list<int> neutralProducts ;
+
+    this->getPhotoReactionProducts(plasmaReactants,
+				   neutralReactants,
+				   photonReactants,
+				   plasmaProducts,
+				   neutralProducts,
+				   reactants,
+				   products);
+
+    // Add it to the pile.
+    m_photoReactions.emplace_back(plasmaReactants, neutralReactants, photonReactants, plasmaProducts, neutralProducts);
+  }
+}
+
+void CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& a_R) {
+  CH_TIME("CdrPlasmaJSON::parsePhotoReactionScale");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parsePhotoReactionScale" << endl;
+  }
+
+  // TLDR: This routine tries to figure out how we should scale photo-reactions. In general, reactions are scaled parametrically by a function f = f(E,x)
+  //       where E is the electric field magnitude and x is the physical position. This is completely general, but there are many, many ways that
+  //       such functions could be formed. Currently, we put these functions as one of the following:
+  //
+  //       f = s
+  //         s -> scaling
+  // 
+  //       f = s * c * A * pX/(sqrt(3) * l)
+  //         s  -> scaling
+  //         c  -> Speed of light
+  //         A  -> Helmholtz constants
+  //         pX -> Partial pressure
+  //         pq -> quenching pressure (in atm)
+
+  // This is the reaction name. We need it for debugging.
+  const std::string reaction  = a_R["reaction"].get<std::string>();
+  const std::string baseError = "CdrPlasmaJSON::parsePhotoReactionScaling for reaction '" + reaction + "' ";
+
+  // Regular scale
+  Real scale = 1.0;
+
+  // Parameters for the Helmholtz reconstruction. 
+  Real helmholtzFactor = 0.0;
+  bool doHelmholtz = false;
+
+  if(a_R.contains("scale")){
+    scale = a_R["scale"].get<Real>();
+  }
+
+  if(a_R.contains("helmholtz")){
+    const json& helm = a_R["helmholtz"];
+
+    if(!(helm.contains("A")))       this->throwParserError(baseError + " and got Helmholtz but field 'A' is missing"      );
+    if(!(helm.contains("lambda")))  this->throwParserError(baseError + " and got Helmholtz but field 'lambda' is missing" );
+    if(!(helm.contains("species"))) this->throwParserError(baseError + " and got Helmholtz but field 'neutral' is missing");
+
+    const auto A       = helm["A"      ].get<Real       >();
+    const auto lambda  = helm["lambda" ].get<Real       >();
+    const auto neutral = helm["species"].get<std::string>();
+    
+    // Get the specified species and it's molar fraction. 
+    // Make sure that it's a neutral species.
+    if(!(this->isNeutralSpecies(neutral))) {
+      this->throwParserError(baseError + " and got Helmholtz but species '" + neutral + "' is not a neutral species");
+    }
+
+    // Make the Helmholtz factor
+    const Real molarFraction = m_neutralSpecies[m_neutralSpeciesMap.at(neutral)]->getMolarFraction();
+
+    helmholtzFactor = Units::c * A * molarFraction * Units::atm2pascal/(sqrt(3.0) * lambda);
+
+    doHelmholtz = true;
+  }
+
+
+  // Make the function object that we scale with. 
+  FunctionEX func;
+
+  if(doHelmholtz){
+    func = [scale, helmholtzFactor, &p = this->m_gasPressure](const Real E, const RealVect x){
+      return scale * helmholtzFactor * p(x);
+    };
+  }
+  else{
+    func = [scale] (const Real E, const RealVect x){
+      return scale;
+    };
+  }
+
+  m_photoReactionEfficiencies.emplace(a_reactionIndex, func       );
+  m_photoReactionUseHelmholtz.emplace(a_reactionIndex, doHelmholtz);
+}
+
+void CdrPlasmaJSON::getPhotoReactionProducts(std::list<int>&                 a_plasmaReactants,
+					     std::list<int>&                 a_neutralReactants,
+					     std::list<int>&                 a_photonReactants,					    
+					     std::list<int>&                 a_plasmaProducts,
+					     std::list<int>&                 a_neutralProducts,
+					     const std::vector<std::string>& a_reactants,
+					     const std::vector<std::string>& a_products) const {
+  CH_TIME("CdrPlasmaJSON::getPhotoReactionProducts");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::getPhotoReactionProducts" << endl;
   }
 
   a_plasmaReactants. clear();
   a_neutralReactants.clear();
+  a_photonReactants. clear();    
   a_plasmaProducts.  clear();
-  a_photonProducts.  clear();  
+  a_neutralProducts. clear();  
 
   // Figure out the reactants. 
   for (const auto& r : a_reactants){
 
     // Figure out if the reactants is a plasma species or a neutral species.
-    const bool isPlasmaSpecies  = m_cdrSpeciesMap.    find(r) != m_cdrSpeciesMap.    end();
-    const bool isNeutralSpecies = m_neutralSpeciesMap.find(r) != m_neutralSpeciesMap.end();
+    const bool isPlasma  = this->isPlasmaSpecies (r);
+    const bool isNeutral = this->isNeutralSpecies(r);
+    const bool isPhoton  = this->isPhotonSpecies (r);
 
-    if(isPlasmaSpecies && !isNeutralSpecies){
+    if(isPlasma && !isNeutral && !isPhoton){
       a_plasmaReactants.emplace_back(m_cdrSpeciesMap.at(r));
     }
-    else if (!isPlasmaSpecies && isNeutralSpecies){
+    else if(!isPlasma && isNeutral && !isPhoton){
       a_neutralReactants.emplace_back(m_neutralSpeciesMap.at(r));      
     }
+    else if(!isPlasma && !isNeutral && isPhoton){
+      a_photonReactants.emplace_back(m_rteSpeciesMap.at(r));      
+    }    
     else {
-      this->throwParserError("CdrPlasmaJSON::getPlasmaReactionProducts - logic bust 1");
+      this->throwParserError("CdrPlasmaJSON::getPhotoReactionProducts - logic bust 1");
     }
   }
 
-  // Figure out the products.
+  // Figure out the reactants. 
   for (const auto& p : a_products){
-    const bool isPlasmaSpecies  = m_cdrSpeciesMap.    find(p) != m_cdrSpeciesMap.    end();
-    const bool isNeutralSpecies = m_neutralSpeciesMap.find(p) != m_neutralSpeciesMap.end();
-    const bool isPhotonSpecies  = m_rteSpeciesMap.    find(p) != m_rteSpeciesMap.    end();
 
-    if(isPlasmaSpecies && !isPhotonSpecies && !isNeutralSpecies){
+    // Figure out if the reactants is a plasma species or a neutral species.
+    const bool isPlasma  = this->isPlasmaSpecies (p);
+    const bool isNeutral = this->isNeutralSpecies(p);
+    const bool isPhoton  = this->isPhotonSpecies (p);
+
+    if(isPlasma && !isNeutral && !isPhoton){
       a_plasmaProducts.emplace_back(m_cdrSpeciesMap.at(p));
     }
-    else if(!isPlasmaSpecies && isPhotonSpecies && !isNeutralSpecies){
-      a_photonProducts.emplace_back(m_rteSpeciesMap.at(p));
+    else if(!isPlasma && isNeutral && !isPhoton){
+      a_neutralProducts.emplace_back(m_neutralSpeciesMap.at(p));      
     }
-    else if(!isPlasmaSpecies && !isPhotonSpecies && isNeutralSpecies){
-      // do nothing
-    }
-    else{
-      this->throwParserError("CdrPlasmaJSON::getPlasmaReactionProducts - logic bust 2");
+    else {
+      this->throwParserError("CdrPlasmaJSON::getPhotoReactionProducts - logic bust 1");
     }
   }
 }

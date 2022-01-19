@@ -223,10 +223,11 @@
  [
      {
 	 "reaction": "Y -> e + O2+",
+	 "scale": 0.0,
 	 "helmholtz": {
 	     "A": 1.12E-4,
 	     "lambda": 4.15E-2,
-	     "neutral": "O2"
+	     "species": "O2"
 	 }
      }
  ]

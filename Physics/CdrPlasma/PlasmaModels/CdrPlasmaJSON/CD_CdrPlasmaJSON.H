@@ -500,9 +500,14 @@ namespace Physics {
       // ================================            
 
       /*!
-	@brief Flag for checking if the reaction was specified as being of the Helmholtz reconstruction type.
+	@brief Flag for photo-reaction efficiencies. Includes Helmholtz corrections, if present. 
       */
-      std::map<int, bool> m_photoReactionHelmholtz;
+      std::map<int, FunctionEX> m_photoReactionEfficiencies;
+
+      /*!
+	@brief Map over the Helmholtz reconstructions. 
+      */
+      std::map<int, bool> m_photoReactionUseHelmholtz;
 
       /*!
 	@brief Photo-reactions
@@ -573,47 +578,6 @@ namespace Physics {
       virtual std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > parsePlasmaReactionWildcards(const std::vector<std::string>& a_reactants,
 														      const std::vector<std::string>& a_products,
 														      const json& a_reaction);
-
-      /*!
-	@brief Parse scaling factors for reactions. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
-      */
-      virtual void parsePlasmaReactionRate(const int a_reactionIndex, const json& a_reaction);
-      
-      /*!
-	@brief Parse scaling factors for reactions. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
-      */
-      virtual void parsePlasmaReactionScaling(const int a_reactionIndex, const json& a_reaction);
-
-      /*!
-	@brief Parse reaction plotting. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
-      */
-      virtual void parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_reaction);
-
-      /*!
-	@brief Parse plasma reaction descriptions. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
-      */
-      virtual void parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_reaction);
-
-      /*!
-	@brief Parse plasma reaction energy correction. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma_reactions' array. 
-      */
-      virtual void parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reaction);      
-
-      /*!
-	@brief Parse photo-reactions
-      */
-      virtual void parsePhotoReactions();
-
       /*!
 	@brief Parses a reaction string into reactangs and products
 	@param[out] a_reactants Left-hand side of reaction
@@ -622,13 +586,7 @@ namespace Physics {
       */
       virtual void parseReactionString(std::vector<std::string>& a_reactants,
 				       std::vector<std::string>& a_products,
-				       const std::string&        a_reaction) const;
-
-      /*!
-	@brief Do a species sanity check
-	@details This will make sure that species names are not duplicates. 
-      */
-      virtual void sanityCheckSpecies() const;
+				       const std::string&        a_reaction) const;      
 
       /*!
 	@brief Check if a plasma-reaction makes sense in terms of the species that have been defined.
@@ -639,7 +597,77 @@ namespace Physics {
       */
       virtual void sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
 					  const std::vector<std::string>& a_products,
-					  const std::string               a_reaction) const;
+					  const std::string               a_reaction) const;      
+
+      /*!
+	@brief Parse scaling factors for reactions. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+      */
+      virtual void parsePlasmaReactionRate(const int a_reactionIndex, const json& a_reaction);
+      
+      /*!
+	@brief Parse scaling factors for reactions. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+      */
+      virtual void parsePlasmaReactionScaling(const int a_reactionIndex, const json& a_reaction);
+
+      /*!
+	@brief Parse reaction plotting. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+      */
+      virtual void parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_reaction);
+
+      /*!
+	@brief Parse plasma reaction descriptions. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+      */
+      virtual void parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_reaction);
+
+      /*!
+	@brief Parse plasma reaction energy correction. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+      */
+      virtual void parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reaction);      
+
+      /*!
+	@brief Parse photo-reactions
+      */
+      virtual void parsePhotoReactions();
+
+      /*!
+	@brief Parse scaling for photo-reactions. Includes Helmholtz corrections if doing Helmholtz reconstruction of photoionization profiles. 
+	@param[in] a_index    Reaction index. 
+	@param[in] a_reaction Input reaction. Must be one of the entries in the 'photo reactions' array. 
+      */
+      virtual void parsePhotoReactionScaling(const int a_reactionIndex, const json& a_reaction);      
+
+      /*!
+	@brief Get the int-encoding corresponding to species involved in a plasma reaction.
+	@param[out] a_plasmaReactants   Plasma reactants
+	@param[out] a_neutralReactants  Neutral reactants
+	@param[out] a_plasmaProducts    Plasma products
+	@param[out] a_photonProducts    Photon products
+	@param[in]  a_reactants         Reactants
+	@param[in]  a_products          Reaction products
+      */
+      virtual void getPlasmaReactionProducts(std::list<int>&                 a_plasmaReactants,
+					     std::list<int>&                 a_neutralReactants,
+					     std::list<int>&                 a_plasmaProducts,
+					     std::list<int>&                 a_photonProducts,
+					     const std::vector<std::string>& a_reactants,
+					     const std::vector<std::string>& a_products) const;      
+
+      /*!
+	@brief Do a species sanity check
+	@details This will make sure that species names are not duplicates. 
+      */
+      virtual void sanityCheckSpecies() const;
+
 
       /*!
 	@brief Check if a photo-reaction makes sense in terms of the species that have been defined.
@@ -661,13 +689,13 @@ namespace Physics {
 	@param[in]  a_reactants         Reactants
 	@param[in]  a_products          Reaction products
       */
-      virtual void getPlasmaReactionProducts(std::list<int>&                 a_plasmaReactants,
-					     std::list<int>&                 a_neutralReactants,
-					     std::list<int>&                 a_plasmaProducts,
-					     std::list<int>&                 a_photonProducts,
-					     const std::vector<std::string>& a_reactants,
-					     const std::vector<std::string>& a_products) const;
-
+      virtual void getPhotoReactionProducts(std::list<int>&                 a_plasmaReactants,
+					    std::list<int>&                 a_neutralReactants,
+					    std::list<int>&                 a_photonReactants,					    
+					    std::list<int>&                 a_plasmaProducts,
+					    std::list<int>&                 a_neutralProducts,
+					    const std::vector<std::string>& a_reactants,
+					    const std::vector<std::string>& a_products) const;      
 
       /*!
 	@brief Compute the various plasma species temperatures.
