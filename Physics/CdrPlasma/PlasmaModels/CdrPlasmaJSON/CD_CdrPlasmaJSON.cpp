@@ -1267,6 +1267,8 @@ void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reac
     pout() << "CdrPlasmaJSON::sanctifyPhotoReaction" << m_jsonFile << endl;
   }
 
+  const std::string baseError = "CdrPlasmaJSON::sanctifyPhotoReaction for reaction '" + a_reaction + "' ";
+
   // All reactants must be in the list of neutral species or in the list of photon species
   int numPhotonSpecies = 0;  
   for (const auto& r : a_reactants){
@@ -1274,16 +1276,10 @@ void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reac
     const bool isNeutral = this->isNeutralSpecies(r);
     const bool isPhoton  = this->isPhotonSpecies (r);
 
-    if(isNeutral){
-      this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- neutral species (" + r + ") not allowed on left-hand side of photo-reaction '" + a_reaction + "'");
-    }
-    if(isPlasma){
-      this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- plasma species  (" + r + ") not allowed on left-hand side of photo-reaction '" + a_reaction + "'");
-    }
-    if(!isPhoton){
-      this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- I do not know species '" + r + "' on left-hand side of photo-reaction '" + a_reaction + "'");
-    }
-
+    if( isNeutral) this->throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
+    if( isPlasma ) this->throwParserError(baseError + "plasma species (" + r + ") not allowed on left-hand side");
+    if(!isPhoton ) this->throwParserError(baseError + "I do not know species species '" + r + "' on left hand side");
+    
     if(isPhoton){
       numPhotonSpecies++;
     }
@@ -1300,30 +1296,21 @@ void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reac
     const bool isNeutral = this->isNeutralSpecies(p);
     const bool isPhoton  = this->isPhotonSpecies (p);
 
-    if(isPhoton){
-      this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- photon species '" + p + "' not allowed on right-hand side of photo-reaction '" + a_reaction + "'");
-    }
-
-    if(!isPlasma && !isNeutral){
-      this->throwParserError("CdrPlasmaJSON::parsePhotoReactions -- I do not know species '" + p + "' for photo-reaction '" + a_reaction + "'.");
-    }
+    if( isPhoton              ) this->throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side"); 
+    if(!isPlasma && !isNeutral) this->throwParserError(baseError + "I do not know species '" + p + "' on right hand side"     );
   }
 
   // Check for charge conservation
   int sumCharge = 0;
   for (const auto& r : a_reactants){
-    if (m_cdrSpeciesMap.find(r) != m_cdrSpeciesMap.end()){
-      sumCharge -= m_CdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
-    }
+    if(this->isPlasmaSpecies(r)) sumCharge -= m_CdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
   }
   for (const auto& p : a_products){
-    if (m_cdrSpeciesMap.find(p) != m_cdrSpeciesMap.end()){
-      sumCharge += m_CdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
-    }
+    if(this->isPlasmaSpecies(p)) sumCharge += m_CdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
   }
 
   if(sumCharge != 0) {
-    this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- charge not conserved for reaction '" + a_reaction + "'.");
+    this->throwParserError(baseError + "charge is not conserved!");
   }
 }
 
