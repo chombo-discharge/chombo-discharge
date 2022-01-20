@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-VesselAir.voltage   = 50E3
+VesselAir.voltage   = -50E3
 VesselAir.basename  = pout
 
 # ====================================================================================================
@@ -43,7 +43,7 @@ Driver.checkpoint_interval             = 10               # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 0                # Number of initial regrids
+Driver.initial_regrids                 = 1                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -52,15 +52,15 @@ Driver.geometry_only                   = false            # Special option that 
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
 Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = positive2d       # Simulation output names
+Driver.output_names                    = negative2d       # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
 Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
-Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
+Driver.allow_coarsening                = false            # Allows removal of grid levels according to CellTagger
+Driver.grow_geo_tags                   = 4                # How much to grow tags when using geometry-based refinement. 
+Driver.refine_angles                   = 5                # Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes               = 3                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
@@ -173,7 +173,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # along +y/+z in 2D/3D
 # ====================================================================================================
 Vessel.use_rod       = true           # Rod is on/off
-Vessel.use_shroom    = true           # Plate is on/off
+Vessel.use_shroom    = false          # Plate is on/off
 
 Vessel.rod_point     = 0. 7.5E-2      # Rod center point
 Vessel.rod_radius    = 500E-6         # Rod radius
@@ -220,11 +220,11 @@ CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 CdrPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 CdrPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
 CdrPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-CdrPlasmaStreamerTagger.buffer            = 0            # Grow tagged cells
+CdrPlasmaStreamerTagger.buffer            = 8            # Grow tagged cells
 
 CdrPlasmaStreamerTagger.refine_curvature  = 10.0         # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 10.0         # Curvature coarsening	
-CdrPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+CdrPlasmaStreamerTagger.refine_alpha      = 0.8          # Set alpha refinement. Lower  => More mesh
 CdrPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth
 
