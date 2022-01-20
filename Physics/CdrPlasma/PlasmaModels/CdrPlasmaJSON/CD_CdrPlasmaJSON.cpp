@@ -1863,12 +1863,11 @@ std::vector<Real> CdrPlasmaJSON::computePlasmaSpeciesTemperatures(const RealVect
   return T;
 }
 
-Real CdrPlasmaJSON::computeAlpha(const RealVect a_E) const {
+Real CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect a_position) const {
   Real alpha = 0.0;
 
-  const Real E   = a_E.vectorLength();
   const Real N   = m_gasDensity(RealVect::Zero); // This is an error.
-  const Real Etd = E/(Units::Td * N);
+  const Real Etd = a_E/(Units::Td * N);
 
   switch(m_alphaLookup) {
   case LookupMethod::TableEN:
@@ -1944,7 +1943,7 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
   const Real Etd = (E/(N * Units::Td));
 
   // Townsend ionization and attachment coefficients. May or may not be used.
-  const Real alpha = this->computeAlpha(a_E);
+  const Real alpha = this->computeAlpha(E, a_pos);
   const Real eta   = this->computeEta  (E, a_pos);
 
   // Set all sources to zero. 

@@ -76,9 +76,10 @@ namespace Physics {
       /*!
 	@brief Compute alpha. Should return Townsend ionization coefficient. 
 	@details This function is mostly used for the cell tagging classes
-	@param[in] a_E Electric field.
+	@param[in] a_E        Electric field.
+	@param[in] a_position Physical coordinates
       */
-      virtual Real computeAlpha(const RealVect a_E) const  = 0;
+      virtual Real computeAlpha(const Real a_E, const RealVect a_position) const  = 0;
       
       /*!
 	@brief Routine intended for advancing a reaction network over a time a_dt. 

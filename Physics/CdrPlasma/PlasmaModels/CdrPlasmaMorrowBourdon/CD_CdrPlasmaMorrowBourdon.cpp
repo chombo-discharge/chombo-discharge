@@ -144,7 +144,8 @@ void CdrPlasmaMorrowBourdon::advanceReactionNetwork(Vector<Real>&          a_par
 						    const Real             a_time,
 						    const Real             a_kappa) const {
 
-  const Real alpha  = computeAlpha(a_E); // Ionization coefficient
+  const Real E = a_E.vectorLength();
+  const Real alpha  = computeAlpha(E, a_pos); // Ionization coefficient
   const Real eta    = computeEta(a_E);   // Attachment coefficient
   const Real beta   = computeBeta(a_E);  // Recombination coefficient
 
@@ -249,12 +250,11 @@ RealVect CdrPlasmaMorrowBourdon::computeVn(const RealVect a_E) const{
   return vn;
 }
 
-Real CdrPlasmaMorrowBourdon::computeAlpha(const RealVect a_E) const{
+Real CdrPlasmaMorrowBourdon::computeAlpha(const Real a_E, const RealVect a_pos) const{
   Real alpha    = 0.;
   Real alphabyN = 0.;
 
-  const RealVect E = a_E*1.E-2;        // Morrow-Lowke wants E in V/cm
-  const Real Emag  = E.vectorLength(); // 
+  const Real Emag  = a_E*1.E-2;        // Morrow-Lowke wants E in V/cm
   const Real N     = m_N*1.E-6;        // Morrow-Lowke wants N in cm^3
   const Real EbyN  = Emag/N;           // This is now V/cm^2
 

@@ -119,7 +119,7 @@ namespace Physics {
 	@details This function is mostly used for the cell tagging classes, but can be used for reactions as well. 
 	@param[in] a_E Electric field.
       */
-      virtual Real computeAlpha(const RealVect a_E) const override;
+      virtual Real computeAlpha(const Real E, const RealVect a_position) const override;
 
       /*!
 	@brief Compute eta. Should return Townsend attachment coefficient. 

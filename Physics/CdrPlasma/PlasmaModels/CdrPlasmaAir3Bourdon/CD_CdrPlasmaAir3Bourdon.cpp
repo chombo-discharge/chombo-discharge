@@ -409,9 +409,8 @@ Real CdrPlasmaAir3Bourdon::initialSigma(const Real a_time, const RealVect a_pos)
   return 0.0;
 }
 
-Real CdrPlasmaAir3Bourdon::computeAlpha(const RealVect a_E) const{
-  const Real E     = a_E.vectorLength();
-  const Real alpha = m_e_alpha.getEntry<ALPHA>(E);
+Real CdrPlasmaAir3Bourdon::computeAlpha(const Real a_E, const RealVect a_pos) const{
+  const Real alpha = m_e_alpha.getEntry<ALPHA>(a_E);
 
   return alpha;
 }

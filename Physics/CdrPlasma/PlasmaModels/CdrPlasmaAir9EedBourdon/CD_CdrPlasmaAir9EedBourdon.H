@@ -53,7 +53,7 @@ namespace Physics {
 
       virtual ~CdrPlasmaAir9EedBourdon();
 
-      Real computeAlpha(const RealVect a_E) const;
+      Real computeAlpha(const Real a_E, const RealVect a_pos) const;
 
       void advanceReactionNetwork(Vector<Real>&          a_particle_sources,
 				  Vector<Real>&          a_Photon_sources,

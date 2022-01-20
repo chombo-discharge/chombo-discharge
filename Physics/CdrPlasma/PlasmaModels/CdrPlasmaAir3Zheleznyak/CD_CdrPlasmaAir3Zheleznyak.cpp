@@ -727,10 +727,8 @@ Real CdrPlasmaAir3Zheleznyak::initialSigma(const Real a_time, const RealVect a_p
   return 0.0;
 }
 
-Real CdrPlasmaAir3Zheleznyak::computeAlpha(const RealVect a_E) const{
-  const Real E     = a_E.vectorLength();
-  const Real alpha = m_e_alpha.getEntry<1>(E);
-  const Real eta   = m_e_eta.getEntry<1>(E);
+Real CdrPlasmaAir3Zheleznyak::computeAlpha(const Real a_E, const RealVect a_pos) const{
+  const Real alpha = m_e_alpha.getEntry<1>(a_E);
 
   return alpha;
 }

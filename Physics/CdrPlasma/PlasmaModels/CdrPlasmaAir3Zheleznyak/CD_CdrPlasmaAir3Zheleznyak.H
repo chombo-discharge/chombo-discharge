@@ -93,7 +93,7 @@ namespace Physics {
 
       Real initialSigma(const Real a_time, const RealVect a_pos) const;
 
-      Real computeAlpha(const RealVect a_E) const;
+      Real computeAlpha(const Real a_E, const RealVect a_pos) const;
 
     protected:
 

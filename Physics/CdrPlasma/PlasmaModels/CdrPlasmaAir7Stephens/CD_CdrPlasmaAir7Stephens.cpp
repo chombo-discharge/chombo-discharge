@@ -858,12 +858,8 @@ Real CdrPlasmaAir7Stephens::initialSigma(const Real a_time, const RealVect a_pos
   return 0.0;
 }
 
-Real CdrPlasmaAir7Stephens::computeAlpha(const RealVect a_E) const{
-  const Real E     = a_E.vectorLength();
-  const Real alpha = m_e_alpha.getEntry<1>(E);
-  const Real eta   = m_e_eta.getEntry<1>(E);
-
-  return alpha;
+Real CdrPlasmaAir7Stephens::computeAlpha(const Real a_E, const RealVect a_pos) const{
+  return m_e_alpha.getEntry<1>(a_E);
 }
 
 #include <CD_NamespaceFooter.H>

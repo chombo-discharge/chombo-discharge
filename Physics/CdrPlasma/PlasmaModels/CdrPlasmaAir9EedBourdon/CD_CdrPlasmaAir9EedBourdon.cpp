@@ -207,10 +207,10 @@ void CdrPlasmaAir9EedBourdon::read_initEed(){
   m_initEed.makeUniform(m_uniform_tables);
 }
 
-Real CdrPlasmaAir9EedBourdon::computeAlpha(const RealVect a_E) const{
-  const Real EbyN    = a_E.vectorLength()/(m_N*Units::Td);
+Real CdrPlasmaAir9EedBourdon::computeAlpha(const Real a_E, const RealVect a_pos) const{
+  const Real EbyN    = a_E/(m_N*Units::Td);
   const Real energy  = m_initEed.getEntry<1>(EbyN);
-  const Real alpha = m_alpha_townsend.getEntry<1>(energy);
+  const Real alpha   = m_alpha_townsend.getEntry<1>(energy);
   
   return alpha;
 }
