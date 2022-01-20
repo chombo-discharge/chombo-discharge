@@ -2235,9 +2235,21 @@ Vector<Real> CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
 						      const Vector<Real> a_cdrGradients,
 						      const Vector<Real> a_rteFluxes,
 						      const Vector<Real> a_extrapCdrFluxes) const {
-  //  MayDay::Warning("CdrPlasmaJSON::computeCdrElectrodeFluxes -- don't know how to do this yet");
+  Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
-  return Vector<Real>(m_numCdrSpecies, 0.0);  
+  const bool isCathode = a_E.dotProduct(a_normal) < 0;
+  const bool isAnode   = a_E.dotProduct(a_normal) > 0;
+
+  // Set outflow boundary conditions on charged species. 
+  for (int i = 0; i < m_numCdrSpecies; i++){
+    const int Z = m_CdrSpecies[i]->getChargeNumber();
+
+    // Outflow on of negative species on anodes. 
+    if(Z < 0 && isAnode  ) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+    if(Z > 0 && isCathode) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);      
+  }
+  
+  return fluxes;
 }
 
 Vector<Real> CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time,
@@ -2249,9 +2261,21 @@ Vector<Real> CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time
 						       const Vector<Real> a_cdrGradients,
 						       const Vector<Real> a_rteFluxes,
 						       const Vector<Real> a_extrapCdrFluxes) const {
-  //  MayDay::Warning("CdrPlasmaJSON::computeCdrDielectricFluxes -- don't know how to do this yet");
-
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
+  
+  const bool isCathode = a_E.dotProduct(a_normal) < 0;
+  const bool isAnode   = a_E.dotProduct(a_normal) > 0;
+
+  // Set outflow boundary conditions on charged species. 
+  for (int i = 0; i < m_numCdrSpecies; i++){
+    const int Z = m_CdrSpecies[i]->getChargeNumber();
+
+    // Outflow on of negative species on anodes. 
+    if(Z < 0 && isAnode  ) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+    if(Z > 0 && isCathode) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);      
+  }
+  
+  return fluxes;  
 }
 
 Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,

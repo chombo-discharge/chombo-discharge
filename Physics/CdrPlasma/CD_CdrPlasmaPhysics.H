@@ -148,6 +148,7 @@ namespace Physics {
 	@param[in] a_rteFluxes       RTE fluxes (normal component only)
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
 	@return Returns the flux on an electrode interface cell. The vector ordering must be the same as m_CdrSpecies. 
+	@note A positive flux is a flux INTO the domain. 
       */
       virtual Vector<Real> computeCdrElectrodeFluxes(const Real         a_time,
 						     const RealVect     a_pos,
@@ -171,6 +172,7 @@ namespace Physics {
 	@param[in] a_rteFluxes       RTE fluxes (normal component only)
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
 	@return Returns the flux on a dielectric interface cell. The vector ordering must be the same as m_CdrSpecies. 
+	@note A positive flux is a flux INTO the domain. 
       */
       virtual Vector<Real> computeCdrDielectricFluxes(const Real         a_time,
 						      const RealVect     a_pos,
@@ -194,6 +196,7 @@ namespace Physics {
 	@param[in] a_cdrGradients    CDR gradients (normal component only)
 	@param[in] a_rteFluxes       RTE fluxes (normal component only)
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
+	@note A positive flux is a flux INTO the domain. 
       */
       virtual Vector<Real> computeCdrDomainFluxes(const Real           a_time,
 						  const RealVect       a_pos,

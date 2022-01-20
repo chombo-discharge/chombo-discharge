@@ -135,8 +135,7 @@
 	 "soloviev" : {
 	     "correction": true,
 	     "species": "e"
-	 },
-	 "alpha": true
+	 }
      },
      {
 	 "reaction": "e + N2 -> e + e + N2+",
@@ -151,8 +150,7 @@
 	 "soloviev" : {
 	     "correction": true,
 	     "species": "e"
-	 },
-	 "alpha": true
+	 }
      },
      {
 	 "reaction": "e + N2 -> e + e + N2+",
