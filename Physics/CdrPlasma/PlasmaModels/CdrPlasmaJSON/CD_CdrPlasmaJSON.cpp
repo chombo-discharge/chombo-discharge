@@ -533,7 +533,63 @@ void CdrPlasmaJSON::parseAlpha(){
     pout() << "CdrPlasmaJSON::parseAlpha" << endl;
   }
 
-  MayDay::Abort("CdrPlasmaJSON::parseAlpha -- not implemented");
+  const std::string baseError = "CdrPlasmaJSON::parseAlpha";
+
+  // We must have a field 'alpha'
+  if(!(m_json.contains("alpha"))) {
+    this->throwParserError(baseError + " - input file does not contain field 'alpha'");
+  }
+
+  const json& alpha = m_json["alpha"];
+
+  if(!alpha.contains("lookup")) {
+    this->throwParserError(baseError + " field 'lookup' not specified");
+  }
+
+  const std::string lookup = alpha["lookup"].get<std::string>();
+  
+
+  // If we made it here we're good.
+  if(lookup == "table E/N"){
+    if(!(alpha.contains("file"      ))) this->throwParserError(baseError + " and got 'table E/N' but field 'file' is missing"      );
+    if(!(alpha.contains("header"    ))) this->throwParserError(baseError + " and got 'table E/N' but field 'header' is missing"    );
+    if(!(alpha.contains("E/N"       ))) this->throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing"       );
+    if(!(alpha.contains("alpha/N"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'alpha/N' is missing"   );
+    if(!(alpha.contains("min E/N"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing"   );
+    if(!(alpha.contains("max E/N"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing"   );
+    if(!(alpha.contains("num points"))) this->throwParserError(baseError + " and got 'table E/N' but field 'num_points' is missing");
+	
+    const std::string filename  = trim(alpha["file"  ].get<std::string>());
+    const std::string startRead = trim(alpha["header"].get<std::string>());
+    const std::string stopRead  = "";
+
+    const int xColumn   = alpha["E/N"       ].get<int>();
+    const int yColumn   = alpha["alpha/N"   ].get<int>();
+    const int numPoints = alpha["num points"].get<int>();
+
+    const Real minEN = alpha["min E/N"].get<Real>();
+    const Real maxEN = alpha["max E/N"].get<Real>();	
+
+    // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+    // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
+    // second column. 
+    m_alphaTableEN = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
+
+    // If the table is empty then it's an error.
+    if(m_alphaTableEN.getNumEntries() == 0){
+      this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
+    }	
+
+    // Format the table
+    m_alphaTableEN.setRange(minEN, maxEN, 0);
+    m_alphaTableEN.sort(0);
+    m_alphaTableEN.makeUniform(numPoints);
+
+    m_alphaLookup = LookupMethod::TableEN;
+  }
+  else{
+    this->throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
+  }
 }
 
 void CdrPlasmaJSON::parseEta(){
@@ -542,7 +598,64 @@ void CdrPlasmaJSON::parseEta(){
     pout() << "CdrPlasmaJSON::parseEta" << endl;
   }
 
-  MayDay::Abort("CdrPlasmaJSON::parseEta -- not implemented");  
+  const std::string baseError = "CdrPlasmaJSON::parseEta";
+
+  // We must have a field 'eta'
+  if(!(m_json.contains("eta"))) {
+    this->throwParserError(baseError + " - input file does not contain field 'eta'");
+  }
+
+  const json& eta = m_json["eta"];
+
+  if(!eta.contains("lookup")) {
+    this->throwParserError(baseError + " field 'lookup' not specified");
+  }
+
+  const std::string lookup = eta["lookup"].get<std::string>();
+  
+
+  // If we made it here we're good.
+  if(lookup == "table E/N"){
+    if(!(eta.contains("file"      ))) this->throwParserError(baseError + " and got 'table E/N' but field 'file' is missing"      );
+    if(!(eta.contains("header"    ))) this->throwParserError(baseError + " and got 'table E/N' but field 'header' is missing"    );
+    if(!(eta.contains("E/N"       ))) this->throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing"       );
+    if(!(eta.contains("eta/N"     ))) this->throwParserError(baseError + " and got 'table E/N' but field 'eta/N' is missing"     );
+    if(!(eta.contains("min E/N"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing"   );
+    if(!(eta.contains("max E/N"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing"   );
+    if(!(eta.contains("num points"))) this->throwParserError(baseError + " and got 'table E/N' but field 'num_points' is missing");
+	
+    const std::string filename  = trim(eta["file"  ].get<std::string>());
+    const std::string startRead = trim(eta["header"].get<std::string>());
+    const std::string stopRead  = "";
+
+    const int xColumn   = eta["E/N"       ].get<int>();
+    const int yColumn   = eta["eta/N"     ].get<int>();
+    const int numPoints = eta["num points"].get<int>();
+
+    const Real minEN = eta["min E/N"].get<Real>();
+    const Real maxEN = eta["max E/N"].get<Real>();	
+
+    // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+    // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
+    // second column. 
+    m_etaTableEN = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
+
+    // If the table is empty then it's an error.
+    if(m_etaTableEN.getNumEntries() == 0){
+      this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
+    }	
+
+    // Format the table
+    m_etaTableEN.setRange(minEN, maxEN, 0);
+    m_etaTableEN.sort(0);
+    m_etaTableEN.makeUniform(numPoints);
+
+    m_etaLookup = LookupMethod::TableEN;
+  }
+  else{
+    this->throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
+  }  
+
 }
 
 void CdrPlasmaJSON::parseMobilities() {
@@ -1751,15 +1864,54 @@ std::vector<Real> CdrPlasmaJSON::computePlasmaSpeciesTemperatures(const RealVect
 }
 
 Real CdrPlasmaJSON::computeAlpha(const RealVect a_E) const {
-  MayDay::Warning("CdrPlasmaJSON::computeAlpha -- don't know how to do this yet");
+  Real alpha = 0.0;
 
-  return 0.0;
+  const Real E   = a_E.vectorLength();
+  const Real N   = m_gasDensity(RealVect::Zero); // This is an error.
+  const Real Etd = E/(Units::Td * N);
+
+  switch(m_alphaLookup) {
+  case LookupMethod::TableEN:
+    {
+      alpha  = m_alphaTableEN.getEntry<1>(Etd); // Get alpha/N
+      alpha *= N;                               // Get alpha
+
+      break;
+    }
+  default:
+    {
+      MayDay::Error("CdrPlasmaJSON::computeAlpha -- logic bust");
+      
+      break;
+    }
+  }
+
+  return alpha;
 }
 
-Real CdrPlasmaJSON::computeEta(const RealVect a_E) const {
-  MayDay::Warning("CdrPlasmaJSON::computeEta -- don't know how to do this yet");
+Real CdrPlasmaJSON::computeEta(const Real a_E, const RealVect a_position) const {
+  Real eta = 0.0;
 
-  return 0.0;
+  const Real N   = m_gasDensity(a_position);
+  const Real Etd = a_E/(Units::Td * N);
+
+  switch(m_etaLookup) {
+  case LookupMethod::TableEN:
+    {
+      eta  = m_etaTableEN.getEntry<1>(Etd); // Get eta/N
+      eta *= N;                             // Get eta
+
+      break;
+    }
+  default:
+    {
+      MayDay::Error("CdrPlasmaJSON::computeEta -- logic bust");
+      
+      break;
+    }
+  }
+
+  return eta;  
 } 
 
 void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
@@ -1793,7 +1945,7 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 
   // Townsend ionization and attachment coefficients. May or may not be used.
   const Real alpha = this->computeAlpha(a_E);
-  const Real eta   = this->computeEta  (a_E);
+  const Real eta   = this->computeEta  (E, a_pos);
 
   // Set all sources to zero. 
   for (auto& S : cdrSources){

@@ -65,7 +65,6 @@ namespace Physics {
       */
       using FunctionEX = std::function<Real(const Real E, const RealVect x)>;
 
-
       /*!
 	@brief Function for encapsulating a function f = f(T) where T is the temperature of some species
 	@param[in] a_T Some temperature. 
@@ -125,9 +124,10 @@ namespace Physics {
       /*!
 	@brief Compute eta. Should return Townsend attachment coefficient. 
 	@details This function is mostly used for the cell tagging classes, but can be used for reactions as well. 
-	@param[in] a_E Electric field.
+	@param[in] a_E        Electric field.
+	@param[in] a_position Position
       */
-      virtual Real computeEta(const RealVect a_E) const;
+      virtual Real computeEta(const Real a_E, const RealVect a_position) const;
       
       /*!
 	@brief Routine intended for advancing a reaction network over a time a_dt. 
@@ -377,6 +377,40 @@ namespace Physics {
 	@note This is the inverse of m_rteSpeciesMap
       */
       std::map<int, std::string> m_rteSpeciesInverseMap;
+
+      // =====================================================
+      // TOWNSEND IONIZATION COEFFICIENT QUANTITIES BEGIN HERE      
+      // =====================================================
+
+      /*!
+	@brief Lookup method for Townsend ionization coefficient
+      */
+      LookupMethod m_alphaLookup;
+
+      /*!
+	@brief Lookup method for Townsend attachment coefficient
+      */
+      LookupMethod m_etaLookup;      
+
+      /*!
+	@brief For when we can put alpha = alpha(E,N) as an analytic function. 
+      */
+      FunctionEN m_alphaFunctionEN;
+
+      /*!
+	@brief For when we can put eta = eta(E,N) as an analytic function. 
+      */
+      FunctionEN m_etaFunctionEN;      
+
+      /*!
+	@brief For when we can put alpha = table(E,N)
+      */
+      LookupTable<2> m_alphaTableEN;
+
+      /*!
+	@brief For when we can put eta = table(E,N)
+      */
+      LookupTable<2> m_etaTableEN;      
       
       // ================================      
       // MOBILITY QUANTITIES BEGIN HERE      

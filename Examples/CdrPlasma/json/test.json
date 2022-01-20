@@ -99,8 +99,25 @@
  "sigma": {
      "initial density": 0.0
  },
- "alpha":{
-
+ "alpha": {
+     "lookup": "table E/N",
+     "file" : "transport_data.txt",
+     "header": "# Townsend ionization coeff (E/N, alpha/N)",
+     "E/N": 0,
+     "alpha/N": 1,	  
+     "min E/N": 10,
+     "max E/N": 1000,
+     "num points": 1000  
+ },
+ "eta": {
+     "lookup": "table E/N",
+     "file" : "transport_data.txt",
+     "header": "# Townsend attachment coeff (E/N, eta/N)",
+     "E/N": 0,
+     "eta/N": 1,	  
+     "min E/N": 10,
+     "max E/N": 1000,
+     "num points": 1000  
  }, 
  "plasma reactions": 
  [
@@ -118,7 +135,8 @@
 	 "soloviev" : {
 	     "correction": true,
 	     "species": "e"
-	 }
+	 },
+	 "alpha": true
      },
      {
 	 "reaction": "e + N2 -> e + e + N2+",
@@ -133,7 +151,8 @@
 	 "soloviev" : {
 	     "correction": true,
 	     "species": "e"
-	 }	 
+	 },
+	 "alpha": true
      },
      {
 	 "reaction": "e + N2 -> e + e + N2+",
