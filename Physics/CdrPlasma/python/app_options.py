@@ -11,7 +11,7 @@ def write_template(args):
     optf.write("# ====================================================================================================\n")
     optf.write('# Voltage curve\n')
     optf.write("# ====================================================================================================\n")
-    optf.write(args.app_name + ".potential = 1\n")
+    optf.write(args.app_name + ".voltage   = 1\n")
     optf.write(args.app_name + ".basename  = pout\n")
     optf.write('\n')
 

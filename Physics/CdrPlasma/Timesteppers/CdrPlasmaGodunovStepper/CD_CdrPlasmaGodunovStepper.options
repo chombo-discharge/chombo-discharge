@@ -1,5 +1,5 @@
 # ====================================================================================================
-# GODUNOV CLASS OPTIONS
+# CdrPlasmaGodunovStepper options
 # ====================================================================================================
 CdrPlasmaGodunovStepper.verbosity        = -1        # Class verbosity
 CdrPlasmaGodunovStepper.solver_verbosity = -1        # Individual solver verbosities

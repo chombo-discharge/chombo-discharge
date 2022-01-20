@@ -1,5 +1,5 @@
 # ====================================================================================================
-# STREAMER_TAGGER CLASS OPTIONS
+# CdrPlasmaStreamerTagger class options
 # ====================================================================================================
 CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 CdrPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
