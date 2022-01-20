@@ -1446,6 +1446,9 @@ void CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const
 
       m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(true, plasmaSpecies));
     }
+    else{
+      m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(false, -1));
+    }
   }
   else{
     m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(false, -1));
@@ -1955,7 +1958,10 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     S = 0.0;
   }
 
-  // Here is the lambda for firing a plasma reaction that has a rate constant k. 
+  // Here is the lambda for firing a plasma reaction that has a rate constant k. Note that this constant will include any neutral species
+  // on the left hand side. We have to do it this way because of the various ways of computing the reaction rates: some of them will have
+  // stored the rate as a field rate/N while others will have stored the rate itself. The rate that comes into this reaction should include
+  // k * neutralDensities. This lambda will multiply by the plasma densities so that the total consumption becomes k * neutralDensities * plasmaDensities
   auto FirePlasmaReaction = [&position = a_pos,
 			     &CdrSrc   = cdrSources,
 			     &RteSrc   = rteSources,
@@ -1972,7 +1978,7 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 
     // Compute the total consumption. 
     for (const auto& n : neutralReactants){
-      volumetricRate *= (Neutrals[n])(position);
+      //      volumetricRate *= (Neutrals[n])(position);
     }
 
     for (const auto& r : plasmaReactants){
@@ -2020,6 +2026,16 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 
   // Iterate through plasma reactions
   for (int i = 0; i < m_plasmaReactions.size(); i++) {
+
+    // Reaction and species involved in the reaction. The lambda above does *not* multiply by neutral species densities. Since rates
+    // can be parsed in so many different ways, the rules for the various rates are put in the switch statement below.
+    const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
+
+    const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
+    const std::list<int>& neutralReactants = reaction.getNeutralReactants();
+    const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
+    const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();    
+    
     
     // Figure out the reaction rate for this reaction. 
     Real k = 0.0;
@@ -2031,11 +2047,16 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
       {
 	k = m_plasmaReactionConstants.at(i);
 
+	for (const auto& n : neutralReactants){
+	  k *= (m_neutralSpeciesDensities[n])(a_pos);
+	}
+
 	break;
       }
     case LookupMethod::FunctionEN:
       {
-	k = m_plasmaReactionFunctionsEN.at(i)(E, N);
+	k  = m_plasmaReactionFunctionsEN.at(i)(E, N);
+	k *= N;
 	  
 	break;
       }
@@ -2067,6 +2088,10 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 	const Real T2 = (idx2 < 0) ? m_gasTemperature(a_pos) : cdrTemperatures[idx2];
 	
 	k = func(T1, T2);
+
+	for (const auto& n : neutralReactants){
+	  k *= (m_neutralSpeciesDensities[n])(a_pos);
+	}
 
 	break;
       }
@@ -2108,8 +2133,24 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
       k *= std::max(fcorr, 0.0);
     }
 
-    // Fire the reaction.
-    FirePlasmaReaction(k, m_plasmaReactions[i]);
+    // Compute total consumption. After this, k -> total consumption. 
+    for (const auto& r : plasmaReactants){
+      k *= cdrDensities[r];
+    }
+
+    // Remove consumption on the left-hand side.
+    for (const auto& r : plasmaReactants){
+      cdrSources[r] -= k;
+    }
+
+    // Add mass on the right-hand side.
+    for (const auto& p : plasmaProducts){
+      cdrSources[p] += k;
+    }
+
+    for (const auto& p : photonProducts){
+      rteSources[p] += k;
+    }    
   }
 
   // Iterate through the photon reactions.

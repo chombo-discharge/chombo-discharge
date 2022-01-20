@@ -55,8 +55,8 @@
 	     "uniform": 1.0E10,
 	     "gauss2": {
 		 "radius": 100E-6,
-		 "amplitude": 1E18,
-		 "position": [0, 0, 0]
+		 "amplitude": 1E16,
+		 "position": [0, 7.5E-2, 0]
 	     }
 	 },
 	 "temperature": {
@@ -79,8 +79,8 @@
 	     "uniform": 0.8E10,
 	     "gauss2": {
 		 "radius": 100E-6,
-		 "amplitude": 0.8E18,
-		 "position": [0, 0, 0]
+		 "amplitude": 0.8E16,
+		 "position": [0, 7.5E-2, 0]
 	     }
 	 }
      },
@@ -93,8 +93,8 @@
 	     "uniform": 0.2E10,
 	     "gauss2": {
 		 "radius": 100E-6,
-		 "amplitude": 0.2E18,
-		 "position": [0, 0, 0]
+		 "amplitude": 0.2E16,
+		 "position": [0, 7.5E-2, 0]
 	     }
 	 }
      },
@@ -106,16 +106,24 @@
  "photon species":
  [
      {
-	 "name": "Y",
-	 "kappa": "stochastic_chanrion",
-	 "value": 0.1,
-	 "lambda": 0.1,
-	 "neutral": "O2",	 
-	 "f1":   2.925E15,
-	 "f2":   3.059E15,
-	 "chi_min": 2.625E-2,
-	 "chi_max": 1.5
+	 "name": "Bourdon1",
+	 "kappa": "helmholtz",
+	 "neutral": "O2",
+	 "lambda": 0.0415
+     },
+     {
+	 "name": "Bourdon2",
+	 "kappa": "helmholtz",
+	 "neutral": "O2",
+	 "lambda": 0.1095
+     },
+     {
+	 "name": "Bourdon3",
+	 "kappa": "helmholtz",
+	 "neutral": "O2",
+	 "lambda": 0.6675
      }
+     
  ],
  "sigma": {
      "initial density": 0.0
@@ -263,29 +271,72 @@
 	 "rate": 2E-37
      },
      {
-	 "reaction": "e + N2 -> e + N2 + Y",
-	 "lookup": "constant",
-	 "rate": 2E-37,
-	 "scale": 1.0,
-	 "photoionization": {
-	     "kr": 0.1,
-	     "kp": 0.2,
-	     "kq/N": 0.5,
-	     "photoi eff": 0.9,
-	     "excite eff": 0.9
-	 }
-     }
+	 "reaction": "e + N2 -> e + N2 + Bourdon1",
+	 "lookup": "table E/N",
+	 "file" : "transport_data.txt",
+	 "header": "# N2 ionization (E/N, rate/N)",
+	 "E/N": 0,
+	 "rate/N": 1,	  
+	 "min E/N": 10,
+	 "max E/N": 1000,
+	 "num points": 1000,
+	 "quenching pressure": 0.03947,
+	 "scale": 0.06
+     },
+     {
+	 "reaction": "e + N2 -> e + N2 + Bourdon2",
+	 "lookup": "table E/N",
+	 "file" : "transport_data.txt",
+	 "header": "# N2 ionization (E/N, rate/N)",
+	 "E/N": 0,
+	 "rate/N": 1,	  
+	 "min E/N": 10,
+	 "max E/N": 1000,
+	 "num points": 1000,
+	 "quenching pressure": 0.03947,
+	 "scale": 0.06
+     },
+     {
+	 "reaction": "e + N2 -> e + N2 + Bourdon3",
+	 "lookup": "table E/N",
+	 "file" : "transport_data.txt",
+	 "header": "# N2 ionization (E/N, rate/N)",
+	 "E/N": 0,
+	 "rate/N": 1,	  
+	 "min E/N": 10,
+	 "max E/N": 1000,
+	 "num points": 1000,
+	 "quenching pressure": 0.03947,
+	 "scale": 0.06
+     }     
  ],
  "photo reactions":
  [
      {
-	 "reaction": "Y -> e + O2+",
+	 "reaction": "Bourdon1 -> e + O2+",
 	 "scale": 1.0,
 	 "helmholtz": {
 	     "A": 1.12E-4,
-	     "lambda": 4.15E-2,
+	     "lambda": 0.0415,
 	     "species": "O2"
 	 }
-     }
+     },
+     {
+	 "reaction": "Bourdon2 -> e + O2+",
+	 "helmholtz": {
+	     "A": 2.87E-3,
+	     "lambda": 0.1095,
+	     "species": "O2"
+	 }
+     },
+     {
+	 "reaction": "Bourdon3 -> e + O2+",
+	 "helmholtz": {
+	     "A": 0.275,
+	     "lambda": 0.6675,
+	     "species": "O2"
+	 }
+     }     
+     
  ]
 }
