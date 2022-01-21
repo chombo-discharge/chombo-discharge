@@ -2122,25 +2122,39 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
   for (int i = 0; i < m_photoReactions.size(); i++){
     Real k = 0.0;
 
-    const bool useHelmholtz = m_photoReactionUseHelmholtz.at(i);
+    const CdrPlasmaPhotoReactionJSON& reaction = m_photoReactions[i];
 
-    if(useHelmholtz){
+    // Get the photon and plasma products for the specified reaction. 
+    const std::list<int>& photonReactants = reaction.getPhotonReactants();
+    const std::list<int>& plasmaProducts  = reaction.getPlasmaProducts ();    
+
+
+    // Compute a rate. Note that if we use Helmholtz reconstruction this is a bit different. 
+    if(m_photoReactionUseHelmholtz.at(i)){
       k = m_photoReactionEfficiencies.at(i)(E, a_pos);
     }
     else{
+      // This is the "regular" code where Psi is the number of ionizing photons. In this case the Psi is what appears in the source terms,
+      // but the API says that we need to compute the rate, so we put rate = Psi/dt
+      
       k = m_photoReactionEfficiencies.at(i)(E, a_pos)/a_dt;
 
-      // Hook for ensuring correct scaling in 2D. When we run in Cartesian 2D the photons are not points but lines and we've computed
-      // Phi = #/m^2 but we want to the volumetric density. 
+      // Hook for ensuring correct scaling in 2D. When we run in Cartesian 2D the photons are not points, but lines. We've deposited the particles (lines)
+      // on the mesh but what we really want is the volumetric density. So we need to scale. 
       if(m_discretePhotons && SpaceDim == 2){
 	k *= 1./a_dx;
       }
     }
 
-    // Fire the reaction.
-    FirePhotoReaction(k, m_photoReactions[i]);
-  }
+    // Fire the reaction. 
+    for (const auto& y : photonReactants){
+      k *= rteDensities[y];
+    }
 
+    for (const auto& p : plasmaProducts){
+      cdrSources[p] += k;
+    }
+  }
 
   // If using stochastic photons -- then we need to run Poisson sampling of the photons.
   if(m_discretePhotons){
@@ -2150,7 +2164,6 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
       S = Real(poissonSample);
     }
   }
-
 
   return;
 }

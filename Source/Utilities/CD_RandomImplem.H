@@ -81,9 +81,7 @@ void Random::setRandomSeed() {
 template <typename T>
 inline
 T Random::getPoisson(const Real a_mean) {
-  if(!s_seeded){
-    Random::seed();
-  }
+  CH_assert(s_seeded);
 
   constexpr T zero = T(0);  
 
@@ -107,36 +105,28 @@ T Random::getPoisson(const Real a_mean) {
 
 inline
 Real Random::getUniformReal01() {
-  if(!s_seeded) {
-    Random::seed();
-  }
-  
+  CH_assert(s_seeded);  
+
   return s_uniform01(s_rng);
 }
 
 inline
 Real Random::getUniformReal11() {
-  if(!s_seeded) {
-    Random::seed();
-  }
+  CH_assert(s_seeded);    
   
   return s_uniform11(s_rng);
 }
 
 inline
 Real Random::getNormal01() {
-  if(!s_seeded) {
-    Random::seed();
-  }
+  CH_assert(s_seeded);      
   
   return s_normal01(s_rng);
 }
 
 inline
 RealVect Random::getDirection() {
-  if(!s_seeded) {
-    Random::seed();
-  }
+  CH_assert(s_seeded);        
   
   constexpr Real safety = 1.E-12;
 
@@ -172,9 +162,7 @@ RealVect Random::getDirection() {
 template<typename T>
 inline
 Real Random::get(T& a_distribution){
-  if(!s_seeded) {
-    Random::seed();
-  }
+  CH_assert(s_seeded);          
   
   return a_distribution(s_rng);
 }

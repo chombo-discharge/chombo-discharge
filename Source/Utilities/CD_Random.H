@@ -15,6 +15,7 @@
 // Std includes
 #include <random>
 #include <memory>
+#include <mutex>
 
 // Chombo includes
 #include <REAL.H>
@@ -101,6 +102,12 @@ public:
   inline  
   static Real get(T& a_distribution);
 
+  /*!
+    @brief Seed the RNG
+  */
+  inline
+  static void seed();  
+
 private:
 
   /*!
@@ -127,12 +134,6 @@ private:
     @brief Normal distribution centered at zero with standard deviation of one
   */
   static std::normal_distribution<Real> s_normal01;
-
-  /*!
-    @brief Seed the RNG
-  */
-  inline
-  static void seed();
 
   /*!
     @brief Set the RNG seed.
