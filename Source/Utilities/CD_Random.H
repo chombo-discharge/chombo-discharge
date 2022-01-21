@@ -59,7 +59,14 @@ public:
     @brief Disallowed move assignment. 
     @param[in] a_other Other RNG engine. 
   */
-  Random& operator=(const Random&& a_other) = delete;    
+  Random& operator=(const Random&& a_other) = delete;
+
+  /*!
+    @brief Get Poisson distributed number
+  */
+  template <typename T>
+  inline
+  static T getPoisson(const Real a_mean);
 
   /*!
     @brief Get a uniform real number on the interval [0,1]

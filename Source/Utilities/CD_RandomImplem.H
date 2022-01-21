@@ -78,6 +78,33 @@ void Random::setRandomSeed() {
   s_seeded = true;  
 }
 
+template <typename T>
+inline
+T Random::getPoisson(const Real a_mean) {
+  if(!s_seeded){
+    Random::seed();
+  }
+
+  constexpr T zero = T(0);  
+
+  T ret = 0;
+
+  if(a_mean < 250.0){
+    std::poisson_distribution<T> poisson(a_mean);
+
+    ret = poisson(s_rng);
+  }
+  else{
+    std::normal_distribution<Real> normal(a_mean, sqrt(a_mean));
+
+    ret = T(normal(s_rng));
+
+    ret = std::max(zero, ret);    
+  }
+
+  return ret;
+}
+
 inline
 Real Random::getUniformReal01() {
   if(!s_seeded) {

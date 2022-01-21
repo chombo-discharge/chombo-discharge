@@ -14,5 +14,5 @@ dependencies:
 	$(MAKE) --directory=$(DISCHARGE_HOME) cdrplasma
 
 # Make advection-diffusion headers and library visible. 
-XTRACPPFLAGS += $(CDRPLASMA_INCLUDE)
+XTRACPPFLAGS += $(CDRPLASMA_INCLUDE) -I$(DISCHARGE_HOME)/Submodules/json/include
 XTRALIBFLAGS += $(addprefix -l, $(CDRPLASMA_LIB))$(config)

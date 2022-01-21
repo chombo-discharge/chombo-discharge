@@ -778,7 +778,7 @@ namespace Physics {
       virtual std::vector<Real> computePlasmaSpeciesMobilities(const RealVect&          a_position,
 							       const RealVect&          a_E,
 							       const std::vector<Real>& a_cdrDensities) const;
-
+      
       /*!
 	@brief Throw a parser error
 	@param[in] a_error Error code.

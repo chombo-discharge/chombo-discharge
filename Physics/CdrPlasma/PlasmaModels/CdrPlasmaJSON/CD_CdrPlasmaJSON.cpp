@@ -440,7 +440,7 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
 	return m*P(a_position)*Units::atm2pascal*lambda/sqrt(3.0);
       };
     }
-    else if (kappa == "stochastic_chanrion"){
+    else if (kappa == "stochastic_A"){
       // For the Chanrion stochastic model we compute the absorption length as
       //
       //    kappa = k1 * (k2/k1)^((f-f1)/(f2-f1))
@@ -453,14 +453,14 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
       // Fortunately, we have m_gasPressure which computes the pressure, and m_neutralSpecies also stores the molar fraction for each species so this is comparatively
       // easy to reconstruct.
       
-      if(!(species.contains("f1"     ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'f1' is missing"     );
-      if(!(species.contains("f2"     ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'f2' is missing"     );
-      if(!(species.contains("chi_min"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'chi_max' is missing");
-      if(!(species.contains("chi_min"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'chi_min' is missing");
-      if(!(species.contains("neutral"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_chanrion' but field 'neutral' is missing");
+      if(!(species.contains("f1"     ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_A' but field 'f1' is missing"     );
+      if(!(species.contains("f2"     ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_A' but field 'f2' is missing"     );
+      if(!(species.contains("chi_min"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_A' but field 'chi_max' is missing");
+      if(!(species.contains("chi_min"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_A' but field 'chi_min' is missing");
+      if(!(species.contains("neutral"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_A' but field 'neutral' is missing");
 
       const auto f1      =      species["f1"     ].get<Real       >() ;
-      const auto f2      =      species["f1"     ].get<Real       >() ;
+      const auto f2      =      species["f2"     ].get<Real       >() ;
       const auto chi_min =      species["chi_min"].get<Real       >() ;
       const auto chi_max =      species["chi_max"].get<Real       >() ;
       const auto neutral = trim(species["neutral"].get<std::string>());
@@ -473,16 +473,16 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
       // Get the molar fraction for the specified species. 
       const Real molarFraction = m_neutralSpecies[m_neutralSpeciesMap.at(neutral)]->getMolarFraction();
 
+      std::uniform_real_distribution<Real> udist = std::uniform_real_distribution<Real>(f1, f2);	      
+
       // Create the absorption function. 
-      kappaFunction = [f1, f2, x1=chi_min, x2=chi_max, m=molarFraction, P=this->m_gasPressure](const RealVect a_position) -> Real {
+      kappaFunction = [f1, f2, udist, x1=chi_min, x2=chi_max, m=molarFraction, &P=this->m_gasPressure](const RealVect a_position) mutable -> Real {
 
 	// Create a uniform distribution on the range [f1,f2]	
-	std::uniform_real_distribution<Real> udist = std::uniform_real_distribution<Real>(f1, f2);	
-
 	const Real f = Random::get(udist);
 	const Real a = (f-f1)/(f2-f1);
 
-	const Real p  = m * P(a_position);
+	const Real p  = m * P(a_position) * Units::atm2pascal;
 	const Real K1 = x1*p;
 	const Real K2 = x2*p;
 
@@ -490,7 +490,7 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
       };
     }
     else{
-      this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'kappa ' is neither 'constant', 'helmholtz', 'stochastic_chanrion'");
+      this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'kappa ' is neither 'constant', 'helmholtz', 'stochastic_A'");
     }
 
     // Initialize the species.
@@ -1950,6 +1950,9 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
   const Real alpha = this->computeAlpha(E, a_pos);
   const Real eta   = this->computeEta  (E, a_pos);
 
+  // Grid cell volume
+  const Real vol = std::pow(a_dx, SpaceDim);
+
   // Set all sources to zero. 
   for (auto& S : cdrSources){
     S = 0.0;
@@ -2126,6 +2129,12 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     }
     else{
       k = m_photoReactionEfficiencies.at(i)(E, a_pos)/a_dt;
+
+      // Hook for ensuring correct scaling in 2D. When we run in Cartesian 2D the photons are not points but lines and we've computed
+      // Phi = #/m^2 but we want to the volumetric density. 
+      if(m_discretePhotons && SpaceDim == 2){
+	k *= 1./a_dx;
+      }
     }
 
     // Fire the reaction.
@@ -2135,14 +2144,16 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 
   // If using stochastic photons -- then we need to run Poisson sampling of the photons.
   if(m_discretePhotons){
-    MayDay::Warning("CdrPlasmaJSON::advanceReactionNetwork -- discrete photons not yet done");
+    for (auto& S : rteSources){
+      const auto poissonSample = Random::getPoisson<unsigned long long>(S * vol * a_dt);
+      
+      S = Real(poissonSample);
+    }
   }
 
 
   return;
 }
-
-
 
 Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_time,
 							  const RealVect     a_position,
