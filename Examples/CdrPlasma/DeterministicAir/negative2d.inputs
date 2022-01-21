@@ -222,9 +222,9 @@ CdrPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that 
 CdrPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
 CdrPlasmaStreamerTagger.buffer            = 4            # Grow tagged cells
 
-CdrPlasmaStreamerTagger.refine_curvature  = 5.0          # Curvature refinement
+CdrPlasmaStreamerTagger.refine_curvature  = 10.0         # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 100.0        # Curvature coarsening	
-CdrPlasmaStreamerTagger.refine_alpha      = 0.2          # Set alpha refinement. Lower  => More mesh
-CdrPlasmaStreamerTagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
+CdrPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+CdrPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth
 

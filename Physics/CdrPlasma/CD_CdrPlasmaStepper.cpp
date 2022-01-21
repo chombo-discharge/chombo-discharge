@@ -4511,72 +4511,155 @@ void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 
   if(numVars > 0){
 
+    const int numCdrSpecies = m_physics->getNumCdrSpecies();    
+    const int numRteSpecies = m_physics->getNumRtSpecies ();
+
     // Compute the electric field
     EBAMRCellData E;
     m_amr->allocate(E, m_realm, phase::gas, SpaceDim);
-    this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());    
+    this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
 
-    // Scratch storage
+    // Scratch data. 
     EBAMRCellData scratch;
-    m_amr->allocate(scratch, m_realm, phase::gas, numVars);
-    DataOps::setValue(scratch, 0.0);
-
-    // Lower-left corner -- physical coordinates.
-    const RealVect probLo = m_amr->getProbLo();
+    m_amr->allocate(scratch, m_realm, phase::gas, 1);
 
     // CDR and RTE densities
     const Vector<EBAMRCellData*> cdrDensities = m_cdr->getPhis();
     const Vector<EBAMRCellData*> rteDensities = m_rte->getPhis();
 
-    Vector<Real> localCdrDensities(cdrDensities.size());
-    Vector<Real> localRteDensities(rteDensities.size());
+    // Compute the gradient of each species. 
+    std::vector<std::shared_ptr<EBAMRCellData> > cdrGradients(numCdrSpecies);
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
 
-    // Write data to scratch data holder. 
+      // This storage must be deleted later. 
+      cdrGradients[idx] = std::make_shared<EBAMRCellData>();
+
+      // Allocate cell-centered data
+      m_amr->allocate(*cdrGradients[idx], m_realm, m_cdr->getPhase(), SpaceDim);
+
+      // Copy the densities to a scratch data holder so we can compute the gradient. Must do this because
+      // the gradient is a two-level AMR operator. 
+      DataOps::copy(scratch, *cdrDensities[idx]);
+      m_amr->interpGhostMG(scratch, m_realm, m_cdr->getPhase());
+
+      // Now compute the gradient and coarsen/interpolate the invalid regions. 
+      m_amr->computeGradient(*cdrGradients[idx], scratch, m_realm, m_cdr->getPhase());
+      m_amr->averageDown    (*cdrGradients[idx],          m_realm, m_cdr->getPhase());   
+      m_amr->interpGhost    (*cdrGradients[idx],          m_realm, m_cdr->getPhase());   
+    }
+
+    // This is stuff that is on a per-cell basis. We visit each cell and populate these fields and then pass them to our
+    // nifty plasma physics object. 
+    Vector<Real>     localCdrDensities(cdrDensities.size(), 0.0           );
+    Vector<RealVect> localCdrGradients(cdrDensities.size(), RealVect::Zero);    
+    Vector<Real>     localRteDensities(rteDensities.size(), 0.0           );
+
+    // E and the gradients can be put on the centroids immediately because their lifetimes are limited to
+    // this function.
+    m_amr->interpToCentroids(E, m_realm, phase::gas);
+    for (auto& grad : cdrGradients){
+      m_amr->interpToCentroids(*grad, m_realm, phase::gas);
+    }
+
+    // Level loop.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm            )[lvl];
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
       const Real               dx    = m_amr->getDx()[lvl];
 
+      // Patch loop.
       for (DataIterator dit(dbl); dit.ok(); ++dit){
-	const Box&     cellBox = dbl  [dit()];
+	const Box&     cellBox = dbl  [dit()]; // <--- regular region. 
 	const EBISBox& ebisBox = ebisl[dit()];
-      
 
-	BaseFab<Real>& regularData = (*scratch[lvl])[dit()].getSingleValuedFAB();
+	// Irregular region. 
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];					     
+
+	// Output data holder. 
+	EBCellFAB& output = (*a_output[lvl])[dit()];
+	BaseFab<Real>& regularData = (*a_output[lvl])[dit()].getSingleValuedFAB();
       
+	// Regular kernel. 
 	auto regularKernel = [&] (const IntVect& iv) -> void {
-	  const RealVect position = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
-
-	  const RealVect localE = RealVect(D_DECL((*E[lvl])[dit()].getSingleValuedFAB()(iv, 0),
-						  (*E[lvl])[dit()].getSingleValuedFAB()(iv, 1),
-						  (*E[lvl])[dit()].getSingleValuedFAB()(iv, 2)));
+	  const RealVect position = m_amr->getProbLo() + (0.5*RealVect::Unit + RealVect(iv))*dx;
+	  const RealVect localE   = RealVect(D_DECL((*E[lvl])[dit()].getSingleValuedFAB()(iv, 0),
+						    (*E[lvl])[dit()].getSingleValuedFAB()(iv, 1),
+						    (*E[lvl])[dit()].getSingleValuedFAB()(iv, 2)));
 
 	  for (int i = 0; i < cdrDensities.size(); i++){
 	    localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[dit()].getSingleValuedFAB()(iv, 0);
 	  }
 
+	  for (int i = 0; i < numCdrSpecies; i++){
+	    localCdrGradients[i] = RealVect(D_DECL((*(*cdrGradients[i])[lvl])[dit()].getSingleValuedFAB()(iv, 0),
+						   (*(*cdrGradients[i])[lvl])[dit()].getSingleValuedFAB()(iv, 1),
+						   (*(*cdrGradients[i])[lvl])[dit()].getSingleValuedFAB()(iv, 2)));
+	  }
+
 	  for (int i = 0; i < rteDensities.size(); i++){
 	    localRteDensities[i] = (*(*rteDensities[i])[lvl])[dit()].getSingleValuedFAB()(iv, 0);
-	  }	  
+	  }
 
-	  const Vector<Real> plotVars = m_physics->getPlotVariables(localCdrDensities, localRteDensities, localE, position, m_time);
+	  // Get plot variables from plasma physics. 
+	  const Vector<Real> plotVars = m_physics->getPlotVariables(localCdrDensities,
+								    localCdrGradients,
+								    localRteDensities,
+								    localE,
+								    position,
+								    dx,
+								    m_dt,
+								    m_time,
+								    1.0);
 
 	  for (int icomp = 0; icomp < numVars; icomp++){
-	    regularData(iv, icomp) = plotVars[icomp];
+	    regularData(iv, a_icomp + icomp) = plotVars[icomp];
 	  }
 	};
 
-	BoxLoops::loop(cellBox, regularKernel);
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
+	  const RealVect position = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisBox, dx);
+	  const RealVect localE   = RealVect(D_DECL((*E[lvl])[dit()](vof, 0),
+						    (*E[lvl])[dit()](vof, 1),
+						    (*E[lvl])[dit()](vof, 2)));
+
+	  for (int i = 0; i < cdrDensities.size(); i++){
+	    localCdrDensities[i] = 0.0;(*(*cdrDensities[i])[lvl])[dit()](vof, 0);
+	  }
+
+	  for (int i = 0; i < numCdrSpecies; i++){
+	    localCdrGradients[i] = RealVect(D_DECL((*(*cdrGradients[i])[lvl])[dit()](vof, 0),
+						   (*(*cdrGradients[i])[lvl])[dit()](vof, 1),
+						   (*(*cdrGradients[i])[lvl])[dit()](vof, 2)));
+	  }
+
+	  for (int i = 0; i < rteDensities.size(); i++){
+	    localRteDensities[i] = (*(*rteDensities[i])[lvl])[dit()](vof, 0);
+	  }
+
+	  // Get plot variables from plasma physics. 
+	  const Vector<Real> plotVars = m_physics->getPlotVariables(localCdrDensities,
+								    localCdrGradients,
+								    localRteDensities,
+								    localE,
+								    position,
+								    dx,
+								    m_dt,
+								    m_time,
+								    ebisBox.volFrac(vof));
+
+	  for (int icomp = 0; icomp < numVars; icomp++){
+	    output(vof, a_icomp + icomp) = plotVars[icomp];
+	  }	  
+	};
+
+	// Execute the kernels.
+	BoxLoops::loop(cellBox,   regularKernel);
+	BoxLoops::loop(vofit,   irregularKernel);
       }
     }
 
-    // Copy data to output data holder. 
-    const Interval srcInterv(0, numVars-1);
-    const Interval dstInterv(a_icomp, a_icomp + numVars -1);
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      scratch[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
-    }
-
+    // Need to let the outside world know that we've written to some of the variables. 
     a_icomp += numVars;
   }
 }

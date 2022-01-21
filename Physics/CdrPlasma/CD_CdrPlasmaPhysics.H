@@ -62,14 +62,25 @@ namespace Physics {
       /*!
 	@brief Provide plot variables. This is used by CdrPlasmaStepper when writing plot files. 
 	@details The plot variables should have length this->getNumberOfPlotVariables (as should getPlotVariableNames)
-	@param[in] a_position Physical coordinates
-	@param[in] a_time     Time. 
+	@param[in]  a_cdrDensities  Grid-based density for particle species.
+	@param[in]  a_cdrGradients  Grid-based gradients for particle species.
+	@param[in]  a_rteDensities  Grid-based densities for photons.
+	@param[in]  a_E             Electric field.
+	@param[in]  a_pos           Position in space.
+	@param[in]  a_dx            Grid resolution. 
+	@param[in]  a_dt            Advanced time.
+	@param[in]  a_time          Current time.
+	@param[in]  a_kappa         Grid cell unit volume. 
       */
-      virtual Vector<Real> getPlotVariables(const Vector<Real> a_cdrDensities,
-					    const Vector<Real> a_rteDensities,
-					    const RealVect     a_E,
-					    const RealVect     a_position,
-					    const Real         a_time) const {
+      virtual Vector<Real> getPlotVariables(const Vector<Real>     a_cdrDensities,
+					    const Vector<RealVect> a_cdrGradients,
+					    const Vector<Real>     a_rteDensities,
+					    const RealVect         a_E,
+					    const RealVect         a_position,
+					    const Real             a_dx,
+					    const Real             a_dt,
+					    const Real             a_time,
+					    const Real             a_kappa) const {
 	return Vector<Real> (this->getNumberOfPlotVariables(), 1.0);
       }
 

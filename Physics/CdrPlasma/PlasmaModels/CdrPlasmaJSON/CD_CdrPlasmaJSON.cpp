@@ -1713,11 +1713,15 @@ Vector<std::string> CdrPlasmaJSON::getPlotVariableNames() const {
   return ret;
 }
 
-Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real> a_cdrDensities,
-					     const Vector<Real> a_rteDensities,
-					     const RealVect     a_E,
-					     const RealVect     a_position,
-					     const Real         a_time) const {
+Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensities,
+					     const Vector<RealVect> a_cdrGradients,
+					     const Vector<Real>     a_rteDensities,
+					     const RealVect         a_E,
+					     const RealVect         a_position,
+					     const Real             a_dx,
+					     const Real             a_dt,
+					     const Real             a_time,
+					     const Real             a_kappa) const {
   Vector<Real> ret(0);
 
   if(m_plotGas){
