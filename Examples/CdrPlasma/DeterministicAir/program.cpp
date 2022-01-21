@@ -34,7 +34,7 @@ int main(int argc, char* argv[]){
   // Get voltage from input script 
   std::string basename; 
   {
-    ParmParse pp("VesselAir");
+    ParmParse pp("DeterministicAir");
     pp.get("voltage", g_voltage);
     pp.get("basename",  basename);
     setPoutBaseName(basename);

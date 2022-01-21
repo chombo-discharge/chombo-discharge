@@ -4575,7 +4575,9 @@ void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
     const Interval dstInterv(a_icomp, a_icomp + numVars -1);
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       scratch[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
-    }    
+    }
+
+    a_icomp += numVars;
   }
 }
 
