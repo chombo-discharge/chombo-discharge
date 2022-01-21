@@ -1390,7 +1390,7 @@ void CdrPlasmaJSON::parsePlasmaReactionPlot(const int a_reactionIndex, const jso
   bool plot = false;
 
   if(a_R.contains("plot")){
-    plot = a_R.get<bool>();
+    plot = a_R["plot"].get<bool>();
   }
 
   m_plasmaReactionPlot.emplace(a_reactionIndex, plot);  
@@ -1698,6 +1698,10 @@ int CdrPlasmaJSON::getNumberOfPlotVariables() const {
     ret = 3;
   }
 
+  for (const auto& m : m_plasmaReactionPlot){
+    if(m.second) ret++;
+  }
+
   return ret;
 }
 
@@ -1710,6 +1714,12 @@ Vector<std::string> CdrPlasmaJSON::getPlotVariableNames() const {
     ret.push_back("gas density"    );
   }
 
+  for (const auto& m : m_plasmaReactionPlot){
+    if(m.second){
+      ret.push_back(m_plasmaReactionDescriptions.at(m.first));
+    }
+  }
+
   return ret;
 }
 
@@ -1717,17 +1727,160 @@ Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensiti
 					     const Vector<RealVect> a_cdrGradients,
 					     const Vector<Real>     a_rteDensities,
 					     const RealVect         a_E,
-					     const RealVect         a_position,
+					     const RealVect         a_pos,
 					     const Real             a_dx,
 					     const Real             a_dt,
 					     const Real             a_time,
 					     const Real             a_kappa) const {
   Vector<Real> ret(0);
 
+  const std::vector<Real    >& cdrDensities = ((Vector<Real    >&) a_cdrDensities).stdVector();
+  const std::vector<RealVect>& cdrGradients = ((Vector<RealVect>&) a_cdrGradients).stdVector();
+  const std::vector<Real    >& rteDensities = ((Vector<Real    >&) a_rteDensities).stdVector();
+
+  // These may or may not be needed.
+  const std::vector<Real    > cdrMobilities            = this->computePlasmaSpeciesMobilities  (        a_pos, a_E,   cdrDensities)            ;  
+  const std::vector<Real    > cdrDiffusionCoefficients = this->computeCdrDiffusionCoefficients (a_time, a_pos, a_E, a_cdrDensities).stdVector();
+  const std::vector<Real    > cdrTemperatures          = this->computePlasmaSpeciesTemperatures(        a_pos, a_E,   cdrDensities)            ;
+
+  // Electric field and reduce electric field. 
+  const Real E   = a_E.vectorLength();
+  const Real N   = m_gasDensity(a_pos);
+  const Real Etd = (E/(N * Units::Td));
+
+  // Townsend ionization and attachment coefficients. May or may not be used.
+  const Real alpha = this->computeAlpha(E, a_pos);
+  const Real eta   = this->computeEta  (E, a_pos);
+
+  // Grid cell volume
+  const Real vol = std::pow(a_dx, SpaceDim);  
+
+  // Plot the gas data. 
   if(m_plotGas){
-    ret.push_back(m_gasPressure   (a_position));
-    ret.push_back(m_gasTemperature(a_position));
-    ret.push_back(m_gasDensity    (a_position));
+    ret.push_back(m_gasPressure   (a_pos));
+    ret.push_back(m_gasTemperature(a_pos));
+    ret.push_back(m_gasDensity    (a_pos));
+  }
+
+  for (const auto& m : m_plasmaReactionPlot){
+    if(m.second){
+      const int i = m.first;
+      
+      // Reaction and species involved in the reaction. The lambda above does *not* multiply by neutral species densities. Since rates
+      // can be parsed in so many different ways, the rules for the various rates are put in the switch statement below.
+      const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions.at(i);
+
+      const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
+      const std::list<int>& neutralReactants = reaction.getNeutralReactants();
+      const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
+      const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();    
+    
+    
+      // Figure out the reaction rate for this reaction. 
+      Real k = 0.0;
+
+      const LookupMethod& method = m_plasmaReactionLookup.at(i);
+
+      switch(method){
+      case LookupMethod::Constant:
+	{
+	  k = m_plasmaReactionConstants.at(i);
+
+	  for (const auto& n : neutralReactants){
+	    k *= (m_neutralSpeciesDensities[n])(a_pos);
+	  }
+
+	  break;
+	}
+      case LookupMethod::FunctionEN:
+	{
+	  k  = m_plasmaReactionFunctionsEN.at(i)(E, N);
+	  k *= N;
+	  
+	  break;
+	}
+      case LookupMethod::AlphaV:
+	{
+	  const int idx = m_plasmaReactionAlphaV.at(i);
+
+	  k = alpha * E * cdrMobilities[idx];
+
+	  break;
+	}
+      case LookupMethod::EtaV:
+	{
+	  const int idx = m_plasmaReactionEtaV.at(i);
+
+	  k = eta * E * cdrMobilities[idx];
+
+	  break;
+	}      
+      case LookupMethod::FunctionTT:
+	{
+	  const std::tuple<int, int, FunctionTT>& tup = m_plasmaReactionFunctionsTT.at(i);
+
+	  const int         idx1 = std::get<0>(tup);
+	  const int         idx2 = std::get<1>(tup);
+	  const FunctionTT& func = std::get<2>(tup);
+
+	  const Real T1 = (idx1 < 0) ? m_gasTemperature(a_pos) : cdrTemperatures[idx1];
+	  const Real T2 = (idx2 < 0) ? m_gasTemperature(a_pos) : cdrTemperatures[idx2];
+	
+	  k = func(T1, T2);
+
+	  for (const auto& n : neutralReactants){
+	    k *= (m_neutralSpeciesDensities[n])(a_pos);
+	  }
+
+	  break;
+	}
+      case LookupMethod::TableEN:
+	{
+	  // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that. 
+	  const LookupTable<2>& reactionTable = m_plasmaReactionTablesEN.at(i);
+
+	  k  = reactionTable.getEntry<1>(Etd); // Get rate/N
+	  k *= N;                              // Get rate
+	  
+	  break;
+	}
+      default:
+	{
+	  MayDay::Error("CdrPlasmaJSON::getPlotVariables -- logic bust");
+	  break;
+	}
+      }
+
+      // Modify by other parameters.
+      k *= m_plasmaReactionEfficiencies.at(i)(E, a_pos);
+
+      // This is a hook that uses the Soloviev correction. It modifies the reaction rate according to k = k * (1 + (E.D*grad(n))/(K * n * E^2) where
+      // K is the electron mobility. 
+      if( (m_plasmaReactionSolovievCorrection.at(i)).first){
+	const int species = (m_plasmaReactionSolovievCorrection.at(i)).second;
+
+	const Real&     n  = cdrDensities            [species];
+	const Real&     mu = cdrMobilities           [species];
+	const Real&     D  = cdrDiffusionCoefficients[species];
+	const RealVect& g  = cdrGradients            [species];
+
+	// Compute correction factor 1 + E.(D*grad(n))/(K * n * E^2). 
+	constexpr Real safety = 1.0;
+      
+	Real fcorr  = 1.0 + (a_E.dotProduct(D*g)) / ( safety + n * mu * E * E);
+
+	fcorr = std::max(fcorr, 0.0);
+      
+	k *= fcorr;
+      }
+
+      // Compute total consumption. After this, k -> total consumption. 
+      for (const auto& r : plasmaReactants){
+	k *= cdrDensities[r];
+      }
+
+      ret.push_back(k);
+    }
   }
 
   return ret;
@@ -2096,7 +2249,6 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
       
       Real fcorr  = 1.0 + (a_E.dotProduct(D*g)) / ( safety + n * mu * E * E);
 
-      //      fcorr = std::min(fcorr, 1.0);
       fcorr = std::max(fcorr, 0.0);
       
       k *= fcorr;

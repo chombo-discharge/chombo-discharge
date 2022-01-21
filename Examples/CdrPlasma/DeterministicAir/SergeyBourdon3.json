@@ -131,7 +131,7 @@
      "alpha/N": 1,	  
      "min E/N": 5,
      "max E/N": 2000,
-     "num points": 1000  
+     "num points": 1000
  },
  "eta": {
      "lookup": "table E/N",
@@ -165,7 +165,6 @@
      },
      {
 	 "reaction": "e + N2 -> e + e + N2+",
-	 "description": "N2 ionization",	  
 	 "lookup": "table E/N",
 	 "file" : "transport_data.txt",
 	 "header": "# N2 ionization (E/N, rate/N)",
@@ -178,7 +177,8 @@
 	 "soloviev" : {
 	     "correction": true,
 	     "species": "e"
-	 }
+	 },
+	 "plot": true
      },
      {
 	 "reaction": "N2+ + N2 + @ -> N4+ + @",
@@ -197,7 +197,8 @@
 	 "reaction": "N2+ + O2 -> O2+ + N2",
 	 "lookup": "constant",
 	 "scale": 1.0,
-	 "rate": 6E-17
+	 "rate": 6E-17,
+	 "plot": true
      },
      {
 	 "reaction": "O2+ + N2 + N2 -> O2+N2 + N2",
