@@ -112,7 +112,7 @@ public:
 #endif
 
   /*!
-    @brief Write plot data to file
+    @brief Write plot data to output holder. 
     @param[inout] a_output            Output data holder.
     @param[in]    a_plotVariableNames Plot variable names.
     @param[inout] a_icomp             Starting component in a_output to begin at. 
@@ -191,9 +191,6 @@ public:
   /*!
     @brief Perform post-regrid operations. 
     @details This includes all operations to be done AFTER interpolating data to new grids. 
-    @param[in] a_lmin           The coarsest level that changed. 
-    @param[in] a_oldFinestLevel The finest level before the regrid. 
-    @param[in] a_newFinestLevel The finest level after the regrid. 
   */
   virtual void postRegrid() = 0;  
 

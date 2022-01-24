@@ -385,7 +385,7 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
     CdrPlasmaStepper::computeCdrDiffusion();
 
     // If we're doing a stationary RTE solve, recompute source terms
-    if(this->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
+    if(this->stationaryRTE()){     // Solve RTE equations by using data that exists inside solvers
       const Real dummy_dt = 1.0;
 
       // Need new source terms for RTE equations
@@ -418,7 +418,7 @@ void CdrPlasmaGodunovStepper::postCheckpointSetup(){
     CdrPlasmaStepper::computeCdrDriftVelocities();
     CdrPlasmaStepper::computeCdrDiffusion();
 
-    if(this->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
+    if(this->stationaryRTE()){     // Solve RTE equations by using data that exists inside solvers
       const Real dummy_dt = 1.0;
 
       // Need new source terms for RTE equations
@@ -1345,13 +1345,13 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
     a_timeCode = TimeCode::RelaxationTime;
   }
 
-  if(a_dt < m_min_dt){
-    a_dt = m_min_dt;
+  if(a_dt < m_minDt){
+    a_dt = m_minDt;
     a_timeCode = TimeCode::Hardcap;
   }
 
-  if(a_dt > m_max_dt){
-    a_dt = m_max_dt;
+  if(a_dt > m_maxDt){
+    a_dt = m_maxDt;
     a_timeCode = TimeCode::Hardcap;
   }
 

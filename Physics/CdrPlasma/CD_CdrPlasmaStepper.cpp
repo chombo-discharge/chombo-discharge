@@ -31,17 +31,12 @@
 
 using namespace Physics::CdrPlasma;
 
-Real CdrPlasmaStepper::s_constant_one(const RealVect a_pos){
-  return 1.0;
-}
-
 CdrPlasmaStepper::CdrPlasmaStepper(){
   m_className = "CdrPlasmaStepper";
   m_verbosity  = -1;
-  m_solver_verbosity = -1;
+  m_solverVerbosity = -1;
   m_phase = phase::gas;
   m_realm = Realm::Primal;
-  m_subcycle = false;
 }
 
 CdrPlasmaStepper::CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : CdrPlasmaStepper() {
@@ -78,10 +73,10 @@ int CdrPlasmaStepper::queryGhost(){
   return 3;
 }
 
-bool CdrPlasmaStepper::stationary_rte(){
-  CH_TIME("CdrPlasmaStepper::stationary_rte");
+bool CdrPlasmaStepper::stationaryRTE(){
+  CH_TIME("CdrPlasmaStepper::stationaryRTE");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::stationary_rte" << endl;
+    pout() << "CdrPlasmaStepper::stationaryRTE" << endl;
   }
 
   return m_rte->isStationary();
@@ -162,13 +157,88 @@ void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivi
 #endif
 }
 
-void CdrPlasmaStepper::setupSemiImplicitPoisson(const Real a_dt){
-  CH_TIME("CdrPlasmaStepper::setupSemiImplicitPoisson");
+void CdrPlasmaStepper::computeSpaceChargeDensity(){
+  CH_TIME("CdrPlasmaStepper::computeSpaceChargeDensity()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::setupSemiImplicitPoisson" << endl;
+    pout() << "CdrPlasmaStepper::computeSpaceChargeDensity()" << endl;
   }
 
-  // Compute the required conductivities.
+  this->computeSpaceChargeDensity(m_fieldSolver->getRho(), m_cdr->getPhis());
+}
+
+void CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData&                 a_rho,
+						 const Vector<EBAMRCellData*>&  a_densities) {
+  CH_TIME("CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData, Vector(EBAMRCellData))");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData, Vector(EBAMRCellData))" << endl;
+  }
+
+  // Set space charge to zero everywhere. We will then compute the space charge on
+  // the gas phase (solid phase space charge is always zero in the CdrPlasma module). 
+  DataOps::setValue(a_rho, 0.0);
+
+  // Get the data holder for the gas phase (the MFAMRCellData holds data on both phases)
+  EBAMRCellData rhoGas = m_amr->alias(phase::gas, a_rho);
+
+
+  // Go through the CDR solvers and add their space charge density. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const EBAMRCellData&             density = *(a_densities[solverIt.index()]);
+    const RefCountedPtr<CdrSpecies>& spec    = solverIt.getSpecies();
+    const int                        Z       = spec->getChargeNumber();
+      
+    if(Z != 0){
+      DataOps::incr(rhoGas, density, Real(Z));
+    }
+  }
+
+  // Scale by electron charge. 
+  DataOps::scale(a_rho, Units::Qe);
+
+  // Above, we computed the cell-centered space charge. We must have centroid-centered. 
+  m_amr->averageDown      (a_rho,  m_realm            );
+  m_amr->interpGhostMG    (a_rho,  m_realm            );
+  m_amr->interpToCentroids(rhoGas, m_realm, phase::gas);
+}
+
+bool CdrPlasmaStepper::solvePoisson(){
+  CH_TIME("CdrPlasmaStepper::solvePoisson()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::solvePoisson()" << endl;
+  }
+
+  return this->solvePoisson(m_fieldSolver->getPotential(),
+			    m_fieldSolver->getRho      (),
+			    m_cdr        ->getPhis     (),
+			    m_sigma      ->getPhi      ());
+}
+
+bool CdrPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
+				    MFAMRCellData&                a_rho,
+				    const Vector<EBAMRCellData*>  a_densities,
+				    const EBAMRIVData&            a_sigma){
+  CH_TIME("CdrPlasmaStepper::solvePoisson(MFAMRCellData, MFAMRCellData, Vector<EBAMRCellData*>, EBAMRIVData)");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::solvePoisson(MFAMRCellData, MFAMRCellData, Vector<EBAMRCellData*>, EBAMRIVData)" << endl;
+  }
+
+  // Compute the space charge density onto the input data holder.
+  this->computeSpaceChargeDensity(a_rho, a_densities);
+
+  // Field solver solves for the potential.
+  const bool converged = m_fieldSolver->solve(a_potential, a_rho, a_sigma, false);
+
+  // Return whether or not the field solve converged. 
+  return converged;
+}
+
+void CdrPlasmaStepper::setupSemiImplicitPoisson(const Real a_dt){
+  CH_TIME("CdrPlasmaStepper::setupSemiImplicitPoisson(Real)");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::setupSemiImplicitPoisson(Real)" << endl;
+  }
+
+  // Storage that is needed. 
   EBAMRCellData conductivityCell;
   EBAMRFluxData conductivityFace;
   EBAMRIVData   conductivityEB;
@@ -177,20 +247,26 @@ void CdrPlasmaStepper::setupSemiImplicitPoisson(const Real a_dt){
   m_amr->allocate(conductivityFace, m_realm, phase::gas, 1);
   m_amr->allocate(conductivityEB,   m_realm, phase::gas, 1);
 
+  // Compute the cell-centered conductivity first. Then compute the face- and EB-centered conductivities by averaging the
+  // cell-centered conductivity. 
   this->computeCellConductivity(conductivityCell);
   this->computeFaceConductivity(conductivityFace, conductivityEB, conductivityCell);
 
-  // Ok, we must now set up the semi implicit Poisson equation.
+  // Set up the semi implicit Poisson equation. Note that the Poisson equation will have modified face-centered permittivities.
   this->setupSemiImplicitPoisson(conductivityFace, conductivityEB, a_dt/Units::eps0);
 }
 
 void CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFace,
 						const EBAMRIVData&   a_conductivityEB,
 						const Real           a_factor) {
-  CH_TIME("CdrPlasmaStepper::setupSemiImpliciPoisson");
+  CH_TIME("CdrPlasmaStepper::setupSemiImplicitPoisson(EBAMRFluxData, EBAMRIVData, Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::setupSemiImplicitPoisson" << endl;
+    pout() << "CdrPlasmaStepper::setupSemiImplicitPoisson(EBAMRFluxData, EBAMRIVData, Real)" << endl;
   }
+
+  // TLDR: This routine will set up the field solver from an equation
+  //
+  // div(B*grad(phi)) where B = epsr + a_factor*sigma and sigma = conductivity.
 
   // First, the field solver must set the permittivities as usual. The "permittivities" that we are after are
   // eps = epsr + dt*sigma/eps0 (but we only have plasma on the gas phase).
@@ -200,46 +276,17 @@ void CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductiv
   MFAMRFluxData& permFace = m_fieldSolver->getPermittivityFace();
   MFAMRIVData&   permEB   = m_fieldSolver->getPermittivityEB();
 
+  // Get handles to the gas-phase permittivities. 
   EBAMRFluxData permFaceGas = m_amr->alias(phase::gas, permFace);
   EBAMRIVData   permEBGas   = m_amr->alias(phase::gas, permEB  );
 
+  // Increment the field solver permittivities by a_factor*sigma. After this, the "permittivities" are
+  // given by epsr + a_factor*sigma
   DataOps::incr(permFaceGas, a_conductivityFace, a_factor);
   DataOps::incr(permEBGas,   a_conductivityEB,   a_factor);
 
-  // Now set up the solver with the new permittivities.
+  // Set up the solver with the new "permittivities".
   m_fieldSolver->setupSolver();
-}
-
-bool CdrPlasmaStepper::solvePoisson(){
-  CH_TIME("CdrPlasmaStepper::solvePoisson");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::solvePoisson" << endl;
-  }
-
-  this->computeSpaceChargeDensity();
-  const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(),
-					      m_fieldSolver->getRho(),
-					      m_sigma->getPhi(),
-					      false);
-
-  return converged;
-}
-
-bool CdrPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
-				    MFAMRCellData&                a_rhs,
-				    const Vector<EBAMRCellData*>  a_densities,
-				    const EBAMRIVData&            a_sigma,
-				    const Centering               a_centering){
-  CH_TIME("CdrPlasmaStepper::solvePoisson(full)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::solvePoisson(full)" << endl;
-  }
-
-  this->computeSpaceChargeDensity(a_rhs, a_densities, a_centering);
-
-  const bool converged = m_fieldSolver->solve(a_potential, a_rhs, a_sigma, false);
-
-  return converged;
 }
 
 void CdrPlasmaStepper::allocateInternals(){
@@ -3206,94 +3253,7 @@ void CdrPlasmaStepper::computeJ(LevelData<EBCellFAB>& a_J, const int a_lvl) cons
   DataOps::scale(a_J, Units::Qe);
 }
 
-void CdrPlasmaStepper::computeSpaceChargeDensity(){
-  CH_TIME("CdrPlasmaStepper::computeSpaceChargeDensity()");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeSpaceChargeDensity()" << endl;
-  }
 
-  Vector<EBAMRCellData*> densities;
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver> solver = solver_it();
-    densities.push_back(&(solver->getPhi()));
-  }
-
-  this->computeSpaceChargeDensity(m_fieldSolver->getRho(), densities, Centering::CellCenter);
-}
-
-void CdrPlasmaStepper::computeSpaceChargeDensity(EBAMRCellData& a_rho, const phase::which_phase a_phase){
-  CH_TIME("CdrPlasmaStepper::computeSpaceChargeDensity(ebamrcelldata, phase)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeSpaceChargeDensity(ebamrcelldata, phase)" << endl;
-  }
-
-  CH_assert(a_phase == m_cdr->getPhase());
-
-  DataOps::setValue(a_rho, 0.0);
-
-  Vector<EBAMRCellData*> densities = m_cdr->getPhis(); // Get densities from solver
-  
-  const int finest_level = m_amr->getFinestLevel();
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-
-    // Add volumetric charge 
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const EBAMRCellData& density       = *(densities[solver_it.index()]);
-      const RefCountedPtr<CdrSpecies>& spec = solver_it.getSpecies();
-
-      if(spec->getChargeNumber() != 0){
-	DataOps::incr(*a_rho[lvl], *density[lvl], spec->getChargeNumber());
-      }
-    }
-
-    // Scale by s_Qe/s_eps0
-    DataOps::scale(*a_rho[lvl], Units::Qe);
-  }
-
-  m_amr->averageDown(a_rho, m_realm, a_phase);
-  m_amr->interpGhostMG(a_rho, m_realm, a_phase);
-
-  DataOps::setCoveredValue(a_rho, 0, 0.0);
-}
-
-void CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData&                 a_rho,
-						 const Vector<EBAMRCellData*>&  a_densities,
-						 const Centering                a_centering){
-  CH_TIME("CdrPlasmaStepper::computeSpaceChargeDensity(mfamrcell, vec(ebamrcell))");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeSpaceChargeDensity(mfamrcell, vec(ebamrcell))" << endl;
-  }
-
-  DataOps::setValue(a_rho, 0.0);
-
-  EBAMRCellData rho_gas;
-  m_amr->allocatePointer(rho_gas); 
-  m_amr->alias(rho_gas, phase::gas, a_rho); 
-  const int finest_level = m_amr->getFinestLevel();
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-
-    // Add volumetric charge 
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const EBAMRCellData& density       = *(a_densities[solver_it.index()]);
-      const RefCountedPtr<CdrSpecies>& spec = solver_it.getSpecies();
-
-      if(spec->getChargeNumber() != 0){
-	DataOps::incr(*rho_gas[lvl], *density[lvl], spec->getChargeNumber());
-      }
-    }
-
-    // Scale by s_Qe
-    DataOps::scale(*a_rho[lvl], Units::Qe);
-  }
-
-  m_amr->averageDown(a_rho, m_realm);
-  m_amr->interpGhostMG(a_rho, m_realm);
-
-  // Transform to centroids
-  if(a_centering == Centering::CellCenter){
-    m_amr->interpToCentroids(rho_gas, m_realm, phase::gas);
-  }
-}
 
 void CdrPlasmaStepper::deallocateSolverInternals(){
   CH_TIME("CdrPlasmaStepper::deallocateSolverInternals");
@@ -3524,7 +3484,7 @@ void CdrPlasmaStepper::initialData(){
   this->computeCdrDiffusion();
 
   // Do stationary RTE solve if we must
-  if(this->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
+  if(this->stationaryRTE()){                  // Solve RTE equations by using initial data and electric field
     const Real dummy_dt = 1.0;
 
     this->solveRadiativeTransfer(dummy_dt);                 // Argument does not matter, it's a stationary solver.
@@ -3680,7 +3640,7 @@ void CdrPlasmaStepper::regrid(const int a_lmin, const int a_old_finest, const in
   this->computeCdrDiffusion();
 
   // If we're doing a stationary RTE solve, recompute source terms
-  if(this->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
+  if(this->stationaryRTE()){     // Solve RTE equations by using data that exists inside solvers
     const Real dummy_dt = 1.0;
 
     // Need new source terms for RTE equations
@@ -3776,7 +3736,7 @@ void CdrPlasmaStepper::parseSolverVerbosity(){
   }
   
   ParmParse pp(m_className.c_str());
-  pp.get("solver_verbosity", m_solver_verbosity);
+  pp.get("solver_verbosity", m_solverVerbosity);
 }
 
 void CdrPlasmaStepper::parseCFL(){
@@ -3796,34 +3756,18 @@ void CdrPlasmaStepper::parseRelaxationTime(){
   }
 }
 
-void CdrPlasmaStepper::parseSourceGrowth(){
-  ParmParse pp(m_className.c_str());
-  pp.query("source_growth", m_src_growth);
-  if(m_src_growth < 0.0){
-    MayDay::Abort("CdrPlasmaStepper::parseSourceGrowth - value cannot be negative");
-  }
-}
-
-void CdrPlasmaStepper::parseSourceTolerance(){
-  ParmParse pp(m_className.c_str());
-  pp.query("source_tolerance", m_src_tolerance);
-  if(m_src_tolerance < 0.0){
-    MayDay::Abort("CdrPlasmaStepper::parseSourceTolerance - value cannot be negative");
-  }
-}
-
 void CdrPlasmaStepper::parseMinDt(){
   ParmParse pp(m_className.c_str());
-  pp.get("min_dt", m_min_dt);
-  if(m_min_dt < 0.0){
+  pp.get("min_dt", m_minDt);
+  if(m_minDt < 0.0){
     MayDay::Abort("CdrPlasmaStepper::parseMinDt - value cannot be negative");
   }
 }
 
 void CdrPlasmaStepper::parseMaxDt(){
   ParmParse pp(m_className.c_str());
-  pp.get("max_dt", m_max_dt);
-  if(m_max_dt < 0.0){
+  pp.get("max_dt", m_maxDt);
+  if(m_maxDt < 0.0){
     MayDay::Abort("CdrPlasmaStepper::parseMaxDt - value cannot be negative");
   }
 }
@@ -3899,16 +3843,16 @@ void CdrPlasmaStepper::setSolverVerbosity(){
   }
 
   if(!m_cdr.isNull()){
-    m_cdr->setVerbosity(m_solver_verbosity);
+    m_cdr->setVerbosity(m_solverVerbosity);
   }
   if(!m_fieldSolver.isNull()){
-    m_fieldSolver->setVerbosity(m_solver_verbosity);
+    m_fieldSolver->setVerbosity(m_solverVerbosity);
   }
   if(!m_rte.isNull()){
-    m_rte->setVerbosity(m_solver_verbosity);
+    m_rte->setVerbosity(m_solverVerbosity);
   }
   if(!m_sigma.isNull()){
-    m_sigma->setVerbosity(m_solver_verbosity);
+    m_sigma->setVerbosity(m_solverVerbosity);
   }
 }
 
@@ -3934,23 +3878,23 @@ void CdrPlasmaStepper::setFastPoisson(const int a_fast_poisson){
 
 void CdrPlasmaStepper::setMinDt(const Real a_min_dt){
   const Real zero = 0.0;
-  m_min_dt = Max(a_min_dt, zero);
+  m_minDt = Max(a_min_dt, zero);
 
   ParmParse pp("CdrPlasmaStepper");
-  pp.query("min_dt", m_min_dt);
-  if(m_min_dt < 0.0){
-    m_min_dt = a_min_dt;
+  pp.query("min_dt", m_minDt);
+  if(m_minDt < 0.0){
+    m_minDt = a_min_dt;
   }
 }
 
 void CdrPlasmaStepper::setMaxDt(const Real a_max_dt){
   const Real zero = 0.0;
-  m_max_dt = Max(a_max_dt, zero);
+  m_maxDt = Max(a_max_dt, zero);
 
   ParmParse pp("CdrPlasmaStepper");
-  pp.query("max_dt", m_max_dt);
-  if(m_max_dt < 0.0){
-    m_max_dt = a_max_dt;
+  pp.query("max_dt", m_maxDt);
+  if(m_maxDt < 0.0){
+    m_maxDt = a_max_dt;
   }
 }
 
@@ -3974,33 +3918,13 @@ void CdrPlasmaStepper::setRelaxTime(const Real a_relax_time){
   }
 }
 
-void CdrPlasmaStepper::setSourceGrowth(const Real a_src_growth){
-  m_src_growth = a_src_growth;
-
-  ParmParse pp("CdrPlasmaStepper");
-  pp.query("source_growth", m_src_growth);
-  if(m_src_growth < 0.0){
-    m_src_growth = a_src_growth;
-  }
-}
-
-void CdrPlasmaStepper::setSourceGrowthTolerance(const Real a_src_tolerance){
-  m_src_tolerance = a_src_tolerance;
-
-  ParmParse pp("CdrPlasmaStepper");
-  pp.query("source_tolerance", m_src_tolerance);
-  if(m_src_tolerance < 0.0){
-    m_src_tolerance = a_src_tolerance;
-  }
-}
-
 void CdrPlasmaStepper::setupCdr(){
   CH_TIME("CdrPlasmaStepper::setupCdr");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::setupCdr" << endl;
   }
 
-  m_cdr->setVerbosity(m_solver_verbosity);
+  m_cdr->setVerbosity(m_solverVerbosity);
   m_cdr->parseOptions();
   m_cdr->setAmr(m_amr);
   m_cdr->setComputationalGeometry(m_computationalGeometry);
@@ -4021,7 +3945,7 @@ void CdrPlasmaStepper::setupPoisson(){
     pout() << "CdrPlasmaStepper::setupPoisson" << endl;
   }
 
-  m_fieldSolver->setVerbosity(m_solver_verbosity);
+  m_fieldSolver->setVerbosity(m_solverVerbosity);
   m_fieldSolver->parseOptions();
   m_fieldSolver->setAmr(m_amr);
   m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
@@ -4035,7 +3959,7 @@ void CdrPlasmaStepper::setupRadiativeTransfer(){
     pout() << "CdrPlasmaStepper::setupRadiativeTransfer" << endl;
   }
 
-  m_rte->setVerbosity(m_solver_verbosity);
+  m_rte->setVerbosity(m_solverVerbosity);
   m_rte->parseOptions();
   m_rte->setPhase(phase::gas);
   m_rte->setAmr(m_amr);
@@ -4053,7 +3977,7 @@ void CdrPlasmaStepper::setupSigma(){
 
   m_sigma = RefCountedPtr<SigmaSolver> (new SigmaSolver());
   m_sigma->setAmr(m_amr);
-  m_sigma->setVerbosity(m_solver_verbosity);
+  m_sigma->setVerbosity(m_solverVerbosity);
   m_sigma->setComputationalGeometry(m_computationalGeometry);
   m_sigma->setRealm(m_realm);
   //  m_sigma->allocateInternals();
@@ -4340,7 +4264,7 @@ Real CdrPlasmaStepper::computeRelaxationTime(){
   return minVal;
 }
 
-Real CdrPlasmaStepper::getTime(){
+Real CdrPlasmaStepper::getTime() const {
   return m_time;
 }
 
@@ -4366,6 +4290,16 @@ RefCountedPtr<RtLayout<RtSolver>>& CdrPlasmaStepper::getRadiativeTransferSolvers
 
 RefCountedPtr<SigmaSolver>& CdrPlasmaStepper::getSigmaSolver(){
   return m_sigma;
+}
+
+void CdrPlasmaStepper::deallocate() {
+  CH_TIME("CdrPlasmaStepper::deallocate");
+  if(m_verbosity > 3){
+    pout() << "CdrPlasmaStepper::deallocate" << endl;
+  }
+
+  this->deallocateInternals();
+  this->deallocateSolverInternals();  
 }
 
 #ifdef CH_USE_HDF5
@@ -4671,7 +4605,7 @@ void CdrPlasmaStepper::postCheckpointSetup(){
   }
 
   this->solvePoisson();       // Solve Poisson equation by 
-  if(this->stationary_rte()){  // Solve RTE equations if stationary solvers
+  if(this->stationaryRTE()){  // Solve RTE equations if stationary solvers
     const Real dummy_dt = 0.0;
     this->solveRadiativeTransfer(dummy_dt); // Argument does not matter, it's a stationary solver.
   }
