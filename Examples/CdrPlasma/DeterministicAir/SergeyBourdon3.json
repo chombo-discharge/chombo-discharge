@@ -68,8 +68,12 @@
      {
 	 "name": "N2+",
 	 "Z":  1,
-	 "mobile": false,
+	 "mobile": true,
 	 "diffusive": false,
+	 "mobility": {
+	     "lookup": "constant",
+	     "value": 2E-4
+	 },	 
 	 "initial data": {
 	     "uniform": 0.8E10,
 	     "gauss2": {
@@ -82,8 +86,12 @@
      {
 	 "name": "O2+",
 	 "Z":  1,
-	 "mobile": false,
+	 "mobile": true,
 	 "diffusive": false,
+	 "mobility": {
+	     "lookup": "constant",
+	     "value": 2E-4
+	 },
 	 "initial data": {
 	     "uniform": 0.2E10,
 	     "gauss2": {
@@ -93,7 +101,7 @@
 	     }
 	 }
      },
-     {"name": "N4+",   "Z":  1, "mobile": false, "diffusive": false},     
+     {"name": "N4+",   "Z":  1, "mobile": false, "diffusive": false},
      {"name": "O4+",   "Z":  1, "mobile": false, "diffusive": false},
      {"name": "O2+N2", "Z":  1, "mobile": false, "diffusive": false},          
      {"name": "O2-",   "Z": -1, "mobile": false, "diffusive": false}
@@ -159,7 +167,7 @@
 	 "num points": 1000,
 	 "scale": 1.0,	 
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }
      },
@@ -175,7 +183,7 @@
 	 "num points": 1000,
 	 "scale": 1.0,	 	 
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }
      },

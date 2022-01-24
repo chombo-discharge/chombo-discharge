@@ -429,31 +429,60 @@ namespace Physics {
 						      const Box&                a_cellBox);
 
       /*!
-	@brief Compute reaction network sources. Irregular patch version.
+	@brief Compute reaction network sources. This is the irregular version which only does the cut-cells. 
+	@param[out] a_cdrSources     Source terms for the CDR solvers. 
+	@param[out] a_rteSources     Source terms for the radiative transfer solvers. 
+	@param[in]  a_cdrDensities   Cell-centered densities for the plasma species (i.e., CDR solvers).
+	@param[in]  a_cdrGradients   Cell-centered gradients for the plasma species (i.e., CDR solvers).
+	@param[in]  a_cdrVelocities  Cell-centered velocities for the CDR solvers. 
+	@param[in]  a_rteDensities   Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
+	@param[in]  a_interpStencils Interpolation stencils for putting cell-centered data on the centroid. 
+	@param[in]  a_E              Cell-centered electric field. 
+	@param[in]  a_time           Time
+	@param[in]  a_dt             Time step.
+	@param[in]  a_dx             Grid resolution.
+	@param[in]  a_cellBox        Cell-centered computational region. 
+	@param[in]  a_lvl            Grid level
+	@param[in]  a_dit            Grid patch index
+	@note This will call one of the other versions. 
       */
       virtual void advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdrSources,
 					       Vector<EBCellFAB*>&          a_rteSources,
 					       const Vector<EBCellFAB*>&    a_cdrDensities,
 					       const Vector<EBCellFAB*>&    a_cdrGradients,
-					       const Vector<EBCellFAB*>&    a_particle_velocities,
+					       const Vector<EBCellFAB*>&    a_cdrVelocities,
 					       const Vector<EBCellFAB*>&    a_rteDensities,
 					       const BaseIVFAB<VoFStencil>& a_interpStencils,
 					       const EBCellFAB&             a_E,
 					       const Real&                  a_time,
 					       const Real&                  a_dt,
 					       const Real&                  a_dx,
-					       const Box&                   a_box,
+					       const Box&                   a_cellBox,
 					       const int                    a_lvl,
 					       const DataIndex&             a_dit);
 
       /*!
-	@brief Compute reaction network sources. Irregular patch version.
+	@brief Compute reaction network sources. This version interpolates everything to the centroid and runs with that data. 
+	@param[out] a_cdrSources     Source terms for the CDR solvers. 
+	@param[out] a_rteSources     Source terms for the radiative transfer solvers. 
+	@param[in]  a_cdrDensities   Cell-centered densities for the plasma species (i.e., CDR solvers).
+	@param[in]  a_cdrGradients   Cell-centered gradients for the plasma species (i.e., CDR solvers).
+	@param[in]  a_cdrVelocities  Cell-centered velocities for the CDR solvers. 
+	@param[in]  a_rteDensities   Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
+	@param[in]  a_interpStencils Interpolation stencils for putting cell-centered data on the centroid. 
+	@param[in]  a_E              Cell-centered electric field. 
+	@param[in]  a_time           Time
+	@param[in]  a_dt             Time step.
+	@param[in]  a_dx             Grid resolution.
+	@param[in]  a_cellBox        Cell-centered computational region. 
+	@param[in]  a_lvl            Grid level
+	@param[in]  a_dit            Grid patch index
       */
       virtual void advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&          a_cdrSources,
 						     Vector<EBCellFAB*>&          a_rteSources,
 						     const Vector<EBCellFAB*>&    a_cdrDensities,
 						     const Vector<EBCellFAB*>&    a_cdrGradients,
-						     const Vector<EBCellFAB*>&    a_particle_velocities,
+						     const Vector<EBCellFAB*>&    a_cdrVelocities,
 						     const Vector<EBCellFAB*>&    a_rteDensities,
 						     const BaseIVFAB<VoFStencil>& a_interpStencils,
 						     const EBCellFAB&             a_E,
@@ -463,7 +492,22 @@ namespace Physics {
 						     const Box&                   a_box,
 						     const int                    a_lvl,
 						     const DataIndex&             a_dit);
-
+      /*!
+	@brief Compute reaction network sources. This version assumes that some of the inputs are on the centroid. 
+	@param[out] a_cdrSources     Source terms for the CDR solvers. 
+	@param[out] a_rteSources     Source terms for the radiative transfer solvers. 
+	@param[in]  a_cdrDensities   Centroid-centered densities for the plasma species (i.e., CDR solvers).
+	@param[in]  a_cdrGradients   Cell-centered gradients for the plasma species (i.e., CDR solvers).
+	@param[in]  a_rteDensities   Centroid-centered densities for the radiative transfer equations (i.e., RTE solvers).
+	@param[in]  a_interpStencils Interpolation stencils for putting cell-centered data on the centroid. 
+	@param[in]  a_E              Cell-centered electric field. 
+	@param[in]  a_time           Time
+	@param[in]  a_dt             Time step.
+	@param[in]  a_dx             Grid resolution.
+	@param[in]  a_cellBox        Cell-centered computational region. 
+	@param[in]  a_lvl            Grid level
+	@param[in]  a_dit            Grid patch index      
+      */
       virtual void advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&          a_cdrSources,
 						    Vector<EBCellFAB*>&          a_rteSources,
 						    const Vector<EBCellFAB*>&    a_cdrDensities,
@@ -477,16 +521,31 @@ namespace Physics {
 						    const Box&                   a_box,
 						    const int                    a_lvl,
 						    const DataIndex&             a_dit);
-      
 
       /*!
-	@brief Compute reaction network sources. Uses upwinding of reaction terms. 
+	@brief Compute reaction network sources. 
+	@details This version is called with the Villa et. al upwind correction. It can also be used with regularly interpolated data, in which 
+	case it will turn off reactions in EB cells where the mass flows into the domain. This function assumes that all input is on the cell center. 
+	@param[out] a_cdrSources     Source terms for the CDR solvers. 
+	@param[out] a_rteSources     Source terms for the radiative transfer solvers. 
+	@param[in]  a_cdrDensities   Cell-centered densities for the plasma species (i.e., CDR solvers).
+	@param[in]  a_cdrGradients   Cell-centered gradients for the plasma species (i.e., CDR solvers).
+	@param[in]  a_cdrVelocities  Cell-centered velocities for the CDR solvers. 
+	@param[in]  a_rteDensities   Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
+	@param[in]  a_interpStencils Interpolation stencils for putting cell-centered data on the centroid. 
+	@param[in]  a_E              Cell-centered electric field. 
+	@param[in]  a_time           Time
+	@param[in]  a_dt             Time step.
+	@param[in]  a_dx             Grid resolution.
+	@param[in]  a_cellBox        Cell-centered computational region. 
+	@param[in]  a_lvl            Grid level
+	@param[in]  a_dit            Grid patch index
       */
       virtual void advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&          a_cdrSources,
 						     Vector<EBCellFAB*>&          a_rteSources,
 						     const Vector<EBCellFAB*>&    a_cdrDensities,
 						     const Vector<EBCellFAB*>&    a_cdrGradients,
-						     const Vector<EBCellFAB*>&    a_particle_velocities,
+						     const Vector<EBCellFAB*>&    a_cdrVelocities,
 						     const Vector<EBCellFAB*>&    a_rteDensities,
 						     const BaseIVFAB<VoFStencil>& a_interpStencils,
 						     const EBCellFAB&             a_E,
@@ -496,11 +555,6 @@ namespace Physics {
 						     const Box&                   a_box,
 						     const int                    a_lvl,
 						     const DataIndex&             a_dit);      
-
-
-
-
-
 
       /*!
 	@brief Compute the maximum of the electric field
@@ -518,78 +572,69 @@ namespace Physics {
       virtual void computeJ(LevelData<EBCellFAB>& a_J, const int a_lvl) const;
   
       /*!
-	@brief Compute diffusion things using whatever is available in the solvers
+	@brief Compute diffusion things using whatever is available in the solvers. 
+	@details This will compute the electric field on the cell center and EB, and then call the other version. 
       */
       virtual void computeCdrDiffusion();
 
       /*!
-	@brief Compute diffusion things using whatever is available in the solvers, except for the fields
+	@brief Compute diffusion things using whatever is available in the solvers. This version uses the input electric fields.
+	@param[in] a_electricFieldCell Electric field on cell centers. 
+	@param[in] a_electricFieldEB   Electric field on EB centroids
       */
-      virtual void computeCdrDiffusion(const EBAMRCellData& a_E_cell, const EBAMRIVData& a_E_eb);
+      virtual void computeCdrDiffusion(const EBAMRCellData& a_electricFieldCell, const EBAMRIVData& a_electricFieldEB);
 
       /*!
-	@brief Compute diffusion coefficients
-	@details The way we do this is that we compute the diffusion coefficients on cell centers, and then we average that
-	onto cell faces. 
+	@brief Compute CDR diffusion coefficients on cell centers. This will call the level version. 
+	@param[out] a_cdrDcoCell        CDR diffusion coefficients on cell centers. 
+	@param[in]  a_cdrDensities      Cell-centered CDR densities
+	@param[in]  a_electricFieldCell Cell-centered electric field
+	@param[in]  a_time              Time
       */
-      virtual void computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_diffusionCoefficient_face,
-					   const Vector<EBAMRCellData*>& a_cdr_densities,
-					   const EBAMRCellData&          a_E,
-					   const Real&                   a_time);
+      virtual void computeCdrDiffusionCell(Vector<EBAMRCellData>&        a_cdrDcoCell,
+					   const Vector<EBAMRCellData*>& a_cdrDensities,
+					   const EBAMRCellData&          a_electricFieldCell,
+					   const Real&                   a_time);            
+
+
 
       /*!
-	@brief Compute diffusion coefficients on cell centers. Calls the level version. 
+	@brief Compute diffusion coefficients. This is the level version and it will iterate through grid patches. 
+	@param[out] a_cdrDcoCell        CDR diffusion coefficients on cell centers. 
+	@param[in]  a_cdrDensities      Cell-centered CDR densities
+	@param[in]  a_electricFieldCell Cell-centered electric field
+	@param[in]  a_lvl               Grid level
+	@param[in]  a_time              Time
       */
-      virtual void computeCdrDiffusionCell(Vector<EBAMRCellData>&        a_diffusionCoefficient_cell,
-					   const Vector<EBAMRCellData*>& a_cdr_densities,
-					   const EBAMRCellData&          a_E,
-					   const Real&                   a_time);
+      virtual void computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>* >&       a_cdrDcoCell,
+					   const Vector<LevelData<EBCellFAB>* >& a_cdrDensities,
+					   const LevelData<EBCellFAB>&           a_electricFieldCell,
+					   const int                             a_lvl,
+					   const Real&                           a_time);      
+
+
 
       /*!
-	@brief Compute diffusion coefficients on cell centers. Regular cells. 
+	@brief Compute diffusion coefficients on cell centers. This does all the regular cells. 
+	@param[out] a_cdrDcoCell        CDR diffusion coefficients on cell centers. 
+	@param[in]  a_cdrDensities      Cell-centered CDR densities
+	@param[in]  a_electricFieldCell Cell-centered electric field
+	@param[in]  a_cellBox           Kernel region
+	@param[in]  a_dx                Grid resolution
+	@param[in]  a_time              Time
       */
-      virtual void computeCdrDiffusionCellRegular(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
-						  const Vector<EBCellFAB*>& a_cdr_densities,
-						  const EBCellFAB&          a_E,
-						  const Box                 a_box,
+      virtual void computeCdrDiffusionCellRegular(Vector<EBCellFAB*>&       a_cdrDcoCell,
+						  const Vector<EBCellFAB*>& a_cdrDensities,
+						  const EBCellFAB&          a_electricFieldCell,
+						  const Box                 a_cellBox,
 						  const Real                a_dx,
 						  const Real                a_time);
 
       /*!
-	@brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
-      */
-      virtual void computeCdrDiffusionCellRegularFast(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
-						      const Vector<EBCellFAB*>& a_cdr_densities,
-						      const EBCellFAB&          a_E,
-						      const Box                 a_box,
-						      const Real                a_dx,
-						      const Real                a_time);
-
-      /*!
-	@brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
-      */
-      virtual void computeCdrDiffusionCellRegularFast2D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
-							const Vector<EBCellFAB*>& a_cdr_densities,
-							const EBCellFAB&          a_E,
-							const Box                 a_box,
-							const Real                a_dx,
-							const Real                a_time);
-
-      /*!
-	@brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
-      */
-      virtual void computeCdrDiffusionCellRegularFast3D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
-							const Vector<EBCellFAB*>& a_cdr_densities,
-							const EBCellFAB&          a_E,
-							const Box                 a_box,
-							const Real                a_dx,
-							const Real                a_time);
-
-      /*!
 	@brief Compute diffusion coefficients on cell centers. Regular cells. 
       */
-      virtual void computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&           a_diffusionCoefficient_cell,
-						    const Vector<EBCellFAB*>&    a_cdr_densities,
+      virtual void computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&           a_cdrDcoCell,
+						    const Vector<EBCellFAB*>&    a_cdrDensities,
 						    const EBCellFAB&             a_E,
 						    const Box                    a_box,
 						    const Real                   a_dx,
@@ -599,19 +644,20 @@ namespace Physics {
 						    const DataIndex&             a_dit);
   
       /*!
-	@brief Compute diffusion coefficients. Level version. 
+	@brief Compute diffusion coefficients
+	@details The way we do this is that we compute the diffusion coefficients on cell centers, and then we average that
+	onto cell faces. 
       */
-      virtual void computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient_cell,
-					   const Vector<LevelData<EBCellFAB>* >& a_cdr_densities,
-					   const LevelData<EBCellFAB>&           a_E,
-					   const int                             a_lvl,
-					   const Real&                           a_time);
+      virtual void computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_diffusionCoefficient_face,
+					   const Vector<EBAMRCellData*>& a_cdrDensities,
+					   const EBAMRCellData&          a_E,
+					   const Real&                   a_time);
 
       /*!
 	@brief Compute diffusion coefficients on the EB. 
       */
       virtual void computeCdrDiffusionEb(Vector<EBAMRIVData*>&       a_diffusionCoefficient_face,
-					 const Vector<EBAMRIVData*>& a_cdr_densities,
+					 const Vector<EBAMRIVData*>& a_cdrDensities,
 					 const EBAMRIVData&          a_E,
 					 const Real&                 a_time);
 
@@ -619,7 +665,7 @@ namespace Physics {
 	@brief Compute diffusion coefficients on the EB. Level version. 
       */
       virtual void computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_ebDiffusionCoefficient,
-					 const Vector<LevelData<BaseIVFAB<Real> >* >& a_cdr_densities,
+					 const Vector<LevelData<BaseIVFAB<Real> >* >& a_cdrDensities,
 					 const LevelData<BaseIVFAB<Real> >&           a_E,
 					 const Real&                                  a_time,
 					 const int                                    a_lvl);
@@ -696,7 +742,7 @@ namespace Physics {
 	@brief Compute the cell-centered cdr velocities. Calls the level versions. 
       */
       virtual void computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_velocities,
-					     const Vector<EBAMRCellData*>& a_cdr_densities,
+					     const Vector<EBAMRCellData*>& a_cdrDensities,
 					     const EBAMRCellData&          a_E,
 					     const Real&                   a_time);
 
@@ -704,41 +750,41 @@ namespace Physics {
 	@brief Compute the cell-centered cdr velocities. Level version. 
       */
       virtual void computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *>&       a_velocities,
-					     const Vector<LevelData<EBCellFAB> *>& a_cdr_densities,
+					     const Vector<LevelData<EBCellFAB> *>& a_cdrDensities,
 					     const LevelData<EBCellFAB> &          a_E,
 					     const int                             a_lvl,
 					     const Real&                           a_time);
 
       virtual void computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&       a_velocities,
-						    const Vector<EBCellFAB*>& a_cdr_densities,
+						    const Vector<EBCellFAB*>& a_cdrDensities,
 						    const EBCellFAB&          a_E,
 						    const Box&                a_box,
 						    const Real&               a_time,
 						    const Real&               a_dx);
 
       virtual void computeCdrDriftVelocitiesRegularFast(Vector<EBCellFAB*>&       a_velocities,
-							const Vector<EBCellFAB*>& a_cdr_densities,
+							const Vector<EBCellFAB*>& a_cdrDensities,
 							const EBCellFAB&          a_E,
 							const Box&                a_box,
 							const Real&               a_time,
 							const Real&               a_dx);
 
       virtual void computeCdrDriftVelocitiesRegularFast2D(Vector<EBCellFAB*>&       a_velocities,
-							  const Vector<EBCellFAB*>& a_cdr_densities,
+							  const Vector<EBCellFAB*>& a_cdrDensities,
 							  const EBCellFAB&          a_E,
 							  const Box&                a_box,
 							  const Real&               a_time,
 							  const Real&               a_dx);
   
       virtual void computeCdrDriftVelocitiesRegularFast3D(Vector<EBCellFAB*>&       a_velocities,
-							  const Vector<EBCellFAB*>& a_cdr_densities,
+							  const Vector<EBCellFAB*>& a_cdrDensities,
 							  const EBCellFAB&          a_E,
 							  const Box&                a_box,
 							  const Real&               a_time,
 							  const Real&               a_dx);
 
       virtual void computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_velocities,
-						      const Vector<EBCellFAB*>& a_cdr_densities,
+						      const Vector<EBCellFAB*>& a_cdrDensities,
 						      const EBCellFAB&          a_E,
 						      const Box&                a_box,
 						      const Real&               a_time,
