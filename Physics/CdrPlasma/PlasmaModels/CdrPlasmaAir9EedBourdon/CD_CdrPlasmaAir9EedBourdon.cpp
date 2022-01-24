@@ -126,7 +126,7 @@ void CdrPlasmaAir9EedBourdon::parseTransport(){
 }
 
 void CdrPlasmaAir9EedBourdon::initSpecies(){
-  m_CdrSpecies.resize(m_numCdrSpecies);
+  m_cdrSpecies.resize(m_numCdrSpecies);
   m_eed_idx      = 0;
   m_Electron_idx = 1;
   m_N2plus_idx   = 2;
@@ -137,25 +137,25 @@ void CdrPlasmaAir9EedBourdon::initSpecies(){
   m_O2minus_idx  = 7;
   m_Ominus_idx   = 8;
   
-  m_CdrSpecies[m_eed_idx]      = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::eed());
-  m_CdrSpecies[m_Electron_idx] = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::Electron());
-  m_CdrSpecies[m_N2plus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::N2plus());
-  m_CdrSpecies[m_N4plus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::N4plus());
-  m_CdrSpecies[m_O2plus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::O2plus());
-  m_CdrSpecies[m_O4plus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::O4plus());
-  m_CdrSpecies[m_O2plusN2_idx] = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::O2plusN2());
-  m_CdrSpecies[m_O2minus_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::O2minus());
-  m_CdrSpecies[m_Ominus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::Ominus());
+  m_cdrSpecies[m_eed_idx]      = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::eed());
+  m_cdrSpecies[m_Electron_idx] = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::Electron());
+  m_cdrSpecies[m_N2plus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::N2plus());
+  m_cdrSpecies[m_N4plus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::N4plus());
+  m_cdrSpecies[m_O2plus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::O2plus());
+  m_cdrSpecies[m_O4plus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::O4plus());
+  m_cdrSpecies[m_O2plusN2_idx] = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::O2plusN2());
+  m_cdrSpecies[m_O2minus_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::O2minus());
+  m_cdrSpecies[m_Ominus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir9EedBourdon::Ominus());
 
   // Instantiate Photon solvers
-  m_RtSpecies.resize(m_numRtSpecies);
+  m_rtSpecies.resize(m_numRtSpecies);
   m_Photon1_idx = 0;
   m_Photon2_idx = 1;
   m_Photon3_idx = 2;
   
-  m_RtSpecies[m_Photon1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir9EedBourdon::PhotonOne());
-  m_RtSpecies[m_Photon2_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir9EedBourdon::PhotonTwo());
-  m_RtSpecies[m_Photon3_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir9EedBourdon::PhotonThree());
+  m_rtSpecies[m_Photon1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir9EedBourdon::PhotonOne());
+  m_rtSpecies[m_Photon2_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir9EedBourdon::PhotonTwo());
+  m_rtSpecies[m_Photon3_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir9EedBourdon::PhotonThree());
 }
 
 void CdrPlasmaAir9EedBourdon::read_e_N2_alpha(){
@@ -462,9 +462,9 @@ void CdrPlasmaAir9EedBourdon::advanceReactionNetwork(Vector<Real>&          a_cd
 #endif
 
   // Photoionization gamma + O2 -> e + O2+
-  const CdrPlasmaAir9EedBourdon::PhotonOne*   Photon1 = static_cast<CdrPlasmaAir9EedBourdon::PhotonOne*>   (&(*m_RtSpecies[m_Photon1_idx]));
-  const CdrPlasmaAir9EedBourdon::PhotonTwo*   Photon2 = static_cast<CdrPlasmaAir9EedBourdon::PhotonTwo*>   (&(*m_RtSpecies[m_Photon2_idx]));
-  const CdrPlasmaAir9EedBourdon::PhotonThree* Photon3 = static_cast<CdrPlasmaAir9EedBourdon::PhotonThree*> (&(*m_RtSpecies[m_Photon3_idx]));
+  const CdrPlasmaAir9EedBourdon::PhotonOne*   Photon1 = static_cast<CdrPlasmaAir9EedBourdon::PhotonOne*>   (&(*m_rtSpecies[m_Photon1_idx]));
+  const CdrPlasmaAir9EedBourdon::PhotonTwo*   Photon2 = static_cast<CdrPlasmaAir9EedBourdon::PhotonTwo*>   (&(*m_rtSpecies[m_Photon2_idx]));
+  const CdrPlasmaAir9EedBourdon::PhotonThree* Photon3 = static_cast<CdrPlasmaAir9EedBourdon::PhotonThree*> (&(*m_rtSpecies[m_Photon3_idx]));
   products = m_photoionization_efficiency*Units::c*m_O2frac*m_p*(Photon1->getA()*a_rte_densities[m_Photon1_idx]
 								 + Photon2->getA()*a_rte_densities[m_Photon2_idx]
 								 + Photon3->getA()*a_rte_densities[m_Photon3_idx]);
@@ -719,7 +719,7 @@ Real CdrPlasmaAir9EedBourdon::compute_e_N2_scattering_loss()              const 
 
 Real CdrPlasmaAir9EedBourdon::initEed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*Units::Td)).vectorLength();
-  return m_initEed.getEntry<1>(EbyN)*m_CdrSpecies[m_Electron_idx]->initialData(a_pos, a_time);
+  return m_initEed.getEntry<1>(EbyN)*m_cdrSpecies[m_Electron_idx]->initialData(a_pos, a_time);
 }
 
 Vector<Real> CdrPlasmaAir9EedBourdon::computeCdrFluxes(const Real         a_time,
@@ -755,7 +755,7 @@ Vector<Real> CdrPlasmaAir9EedBourdon::computeCdrFluxes(const Real         a_time
   // Switch for setting drift flux to zero for charge species
   Vector<Real> aj(m_numCdrSpecies, 0.0);
   for (int i = 0; i < m_numCdrSpecies; i++){
-    if(DataOps::sgn(m_CdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
+    if(DataOps::sgn(m_cdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {
@@ -828,14 +828,14 @@ Vector<Real> CdrPlasmaAir9EedBourdon::computeCathodeFluxes(const Real         a_
   
   // Drift outflow for positive species. No inflow for the others just yet. 
   for (int i = 0; i < m_numCdrSpecies; i++){
-    ret[i] = (m_CdrSpecies[i]->getChargeNumber() > 0) ? a_extrap_cdr_fluxes[i] : 0.0;
+    ret[i] = (m_cdrSpecies[i]->getChargeNumber() > 0) ? a_extrap_cdr_fluxes[i] : 0.0;
   }
 
   // Electron inflow due to ion impingement
   ret[m_Electron_idx] = 0.0;
   ret[m_eed_idx] = 0.0;
   for (int i = 0; i < m_numCdrSpecies; i++){
-    const int q = m_CdrSpecies[i]->getChargeNumber();
+    const int q = m_cdrSpecies[i]->getChargeNumber();
     if(q > 0){
       const Real flx = a_extrap_cdr_fluxes[i]*m_townsend2_electrode;
       ret[m_Electron_idx] -= flx;

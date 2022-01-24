@@ -138,15 +138,15 @@ void CdrPlasmaAir3Bourdon::initSpecies(){
   m_pho2_idx = 1;
   m_pho3_idx = 2;
 
-  m_CdrSpecies.resize(m_numCdrSpecies);
-  m_CdrSpecies[m_elec_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir3Bourdon::Electron());
-  m_CdrSpecies[m_plus_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir3Bourdon::MPlus());
-  m_CdrSpecies[m_minu_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir3Bourdon::MMinus());
+  m_cdrSpecies.resize(m_numCdrSpecies);
+  m_cdrSpecies[m_elec_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir3Bourdon::Electron());
+  m_cdrSpecies[m_plus_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir3Bourdon::MPlus());
+  m_cdrSpecies[m_minu_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir3Bourdon::MMinus());
 
-  m_RtSpecies.resize(m_numRtSpecies);
-  m_RtSpecies[m_pho1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Bourdon::PhotonOne());
-  m_RtSpecies[m_pho2_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Bourdon::PhotonTwo());
-  m_RtSpecies[m_pho3_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Bourdon::PhotonThree());
+  m_rtSpecies.resize(m_numRtSpecies);
+  m_rtSpecies[m_pho1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Bourdon::PhotonOne());
+  m_rtSpecies[m_pho2_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Bourdon::PhotonTwo());
+  m_rtSpecies[m_pho3_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Bourdon::PhotonThree());
 }
 
 void CdrPlasmaAir3Bourdon::parseDomainBc(){
@@ -256,9 +256,9 @@ void CdrPlasmaAir3Bourdon::advanceReactionNetwork(Vector<Real>&          a_parti
   Sp -= R3;
 
   // Photoionization, M + y => e + M+
-  const CdrPlasmaAir3Bourdon::PhotonOne*   Photon1 = static_cast<CdrPlasmaAir3Bourdon::PhotonOne*>   (&(*m_RtSpecies[m_pho1_idx]));
-  const CdrPlasmaAir3Bourdon::PhotonTwo*   Photon2 = static_cast<CdrPlasmaAir3Bourdon::PhotonTwo*>   (&(*m_RtSpecies[m_pho2_idx]));
-  const CdrPlasmaAir3Bourdon::PhotonThree* Photon3 = static_cast<CdrPlasmaAir3Bourdon::PhotonThree*> (&(*m_RtSpecies[m_pho3_idx]));
+  const CdrPlasmaAir3Bourdon::PhotonOne*   Photon1 = static_cast<CdrPlasmaAir3Bourdon::PhotonOne*>   (&(*m_rtSpecies[m_pho1_idx]));
+  const CdrPlasmaAir3Bourdon::PhotonTwo*   Photon2 = static_cast<CdrPlasmaAir3Bourdon::PhotonTwo*>   (&(*m_rtSpecies[m_pho2_idx]));
+  const CdrPlasmaAir3Bourdon::PhotonThree* Photon3 = static_cast<CdrPlasmaAir3Bourdon::PhotonThree*> (&(*m_rtSpecies[m_pho3_idx]));
 
   const Real Sph = m_photoi_eff*Units::c*m_O2frac*m_p*(Photon1->get_A()*a_Photon_densities[m_pho1_idx]
 						       + Photon2->get_A()*a_Photon_densities[m_pho2_idx]
@@ -389,7 +389,7 @@ Vector<Real> CdrPlasmaAir3Bourdon::computeCdrFluxes(const Real         a_time,
   // Switch for setting drift flux to zero for charge species
   Vector<Real> aj(m_numCdrSpecies, 0.0);
   for (int i = 0; i < m_numCdrSpecies; i++){
-    if(DataOps::sgn(m_CdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
+    if(DataOps::sgn(m_cdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {

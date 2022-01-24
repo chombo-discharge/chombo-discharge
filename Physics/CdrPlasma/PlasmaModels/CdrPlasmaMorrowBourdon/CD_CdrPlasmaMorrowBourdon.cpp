@@ -112,8 +112,8 @@ void CdrPlasmaMorrowBourdon::initSpecies(){
   m_numCdrSpecies = 3;
   m_numRtSpecies = 3;
 
-  m_CdrSpecies.resize(m_numCdrSpecies);
-  m_RtSpecies.resize(m_numRtSpecies);
+  m_cdrSpecies.resize(m_numCdrSpecies);
+  m_rtSpecies.resize(m_numRtSpecies);
 
   m_nelec_idx   = 0;
   m_nplus_idx   = 1;
@@ -123,13 +123,13 @@ void CdrPlasmaMorrowBourdon::initSpecies(){
   m_Photon2_idx = 1;
   m_Photon3_idx = 2;
   
-  m_CdrSpecies[m_nelec_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowBourdon::Electron());
-  m_CdrSpecies[m_nplus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowBourdon::PositiveSpecies());
-  m_CdrSpecies[m_nminu_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowBourdon::negative_species());
+  m_cdrSpecies[m_nelec_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowBourdon::Electron());
+  m_cdrSpecies[m_nplus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowBourdon::PositiveSpecies());
+  m_cdrSpecies[m_nminu_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowBourdon::negative_species());
   
-  m_RtSpecies[m_Photon1_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowBourdon::PhotonOne());
-  m_RtSpecies[m_Photon2_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowBourdon::PhotonTwo());
-  m_RtSpecies[m_Photon3_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowBourdon::PhotonThree());
+  m_rtSpecies[m_Photon1_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowBourdon::PhotonOne());
+  m_rtSpecies[m_Photon2_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowBourdon::PhotonTwo());
+  m_rtSpecies[m_Photon3_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowBourdon::PhotonThree());
 }
 
 void CdrPlasmaMorrowBourdon::advanceReactionNetwork(Vector<Real>&          a_particle_sources,
@@ -150,9 +150,9 @@ void CdrPlasmaMorrowBourdon::advanceReactionNetwork(Vector<Real>&          a_par
   const Real beta   = computeBeta(a_E);  // Recombination coefficient
 
   // Cast so we can get A-coefficients
-  const CdrPlasmaMorrowBourdon::PhotonOne*   Photon1 = static_cast<CdrPlasmaMorrowBourdon::PhotonOne*>   (&(*m_RtSpecies[m_Photon1_idx]));
-  const CdrPlasmaMorrowBourdon::PhotonTwo*   Photon2 = static_cast<CdrPlasmaMorrowBourdon::PhotonTwo*>   (&(*m_RtSpecies[m_Photon2_idx]));
-  const CdrPlasmaMorrowBourdon::PhotonThree* Photon3 = static_cast<CdrPlasmaMorrowBourdon::PhotonThree*> (&(*m_RtSpecies[m_Photon3_idx]));
+  const CdrPlasmaMorrowBourdon::PhotonOne*   Photon1 = static_cast<CdrPlasmaMorrowBourdon::PhotonOne*>   (&(*m_rtSpecies[m_Photon1_idx]));
+  const CdrPlasmaMorrowBourdon::PhotonTwo*   Photon2 = static_cast<CdrPlasmaMorrowBourdon::PhotonTwo*>   (&(*m_rtSpecies[m_Photon2_idx]));
+  const CdrPlasmaMorrowBourdon::PhotonThree* Photon3 = static_cast<CdrPlasmaMorrowBourdon::PhotonThree*> (&(*m_rtSpecies[m_Photon3_idx]));
   
   // Densities and velocities
   const Real Ne  = a_particle_densities[m_nelec_idx]; 

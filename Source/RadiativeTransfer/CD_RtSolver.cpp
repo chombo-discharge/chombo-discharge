@@ -96,8 +96,8 @@ void RtSolver::setRtSpecies(const RefCountedPtr<RtSpecies>& a_RtSpecies){
     pout() << m_name + "::setRtSpecies" << endl;
   }
 
-  m_RtSpecies = a_RtSpecies;
-  m_name      = m_RtSpecies->getName();
+  m_rtSpecies = a_RtSpecies;
+  m_name      = m_rtSpecies->getName();
 }
 
 void RtSolver::setPhase(const phase::which_phase a_phase){
@@ -117,7 +117,7 @@ void RtSolver::sanityCheck(){
 
   CH_assert(!m_computationalGeometry.isNull());
   CH_assert(!m_amr.                  isNull());
-  CH_assert(!m_RtSpecies.            isNull());
+  CH_assert(!m_rtSpecies.            isNull());
   CH_assert(!m_ebis.                 isNull());
 }
 
@@ -331,7 +331,7 @@ EBAMRIVData& RtSolver::getKappaEb(){
 }
 
 RefCountedPtr<RtSpecies>& RtSolver::getSpecies(){
-  return m_RtSpecies;
+  return m_rtSpecies;
 }
 
 #include <CD_NamespaceFooter.H>

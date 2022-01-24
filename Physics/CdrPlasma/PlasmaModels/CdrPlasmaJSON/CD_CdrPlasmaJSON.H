@@ -172,7 +172,7 @@ namespace Physics {
 	@param[in] a_pos          Position
 	@param[in] a_E            Electric field
 	@param[in] a_cdrDensities CDR densities
-	@return Returns the drift velocities for each CDR species. The vector ordering is the same as m_CdrSpecies. 
+	@return Returns the drift velocities for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
       virtual Vector<RealVect> computeCdrDriftVelocities(const Real         a_time,
 							 const RealVect     a_pos,
@@ -185,7 +185,7 @@ namespace Physics {
 	@param[in] a_pos          Position
 	@param[in] a_E            Electric field
 	@param[in] a_cdrDensities CDR densities
-	@return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_CdrSpecies. 
+	@return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
       virtual Vector<Real> computeCdrDiffusionCoefficients(const Real         a_time,
 							   const RealVect     a_pos,
@@ -204,7 +204,7 @@ namespace Physics {
 	@param[in] a_cdrGradients    Normal gradients of cdr densities
 	@param[in] a_rteFluxes     RTE fluxes (normal component only)
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
-	@return Returns the flux on an electrode interface cell. The vector ordering must be the same as m_CdrSpecies. 
+	@return Returns the flux on an electrode interface cell. The vector ordering must be the same as m_cdrSpecies. 
       */
       virtual Vector<Real> computeCdrElectrodeFluxes(const Real         a_time,
 						     const RealVect     a_pos,
@@ -227,7 +227,7 @@ namespace Physics {
 	@param[in] a_cdrGradients    Normal gradients of cdr densities
 	@param[in] a_rteFluxes     RTE fluxes (normal component only)
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
-	@return Returns the flux on a dielectric interface cell. The vector ordering must be the same as m_CdrSpecies. 
+	@return Returns the flux on a dielectric interface cell. The vector ordering must be the same as m_cdrSpecies. 
       */
       virtual Vector<Real> computeCdrDielectricFluxes(const Real         a_time,
 						      const RealVect     a_pos,

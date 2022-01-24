@@ -57,8 +57,8 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   this->parsePlasmaReactions();
   this->parsePhotoReactions();
 
-  m_numCdrSpecies = m_CdrSpecies.size();
-  m_numRtSpecies  = m_RtSpecies. size();
+  m_numCdrSpecies = m_cdrSpecies.size();
+  m_numRtSpecies  = m_rtSpecies. size();
 }
 
 CdrPlasmaJSON::~CdrPlasmaJSON(){
@@ -375,14 +375,14 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     }
 
     // Initialize the species.
-    const int num = m_CdrSpecies.size();
+    const int num = m_cdrSpecies.size();
 
     // Make the string-int map encodings. 
     m_cdrSpeciesMap.       emplace(std::make_pair(name, num ));
     m_cdrSpeciesInverseMap.emplace(std::make_pair(num , name));
 
     // Push the JSON entry and the new CdrSpecies to corresponding vectors. 
-    m_CdrSpecies.    push_back(RefCountedPtr<CdrSpecies> (new CdrSpeciesJSON(name, Z, diffusive, mobile, initFunc)));
+    m_cdrSpecies.    push_back(RefCountedPtr<CdrSpecies> (new CdrSpeciesJSON(name, Z, diffusive, mobile, initFunc)));
     m_cdrSpeciesJSON.push_back(species);
   }
 }
@@ -500,14 +500,14 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
     }
 
     // Initialize the species.
-    const int num = m_RtSpecies.size();
+    const int num = m_rtSpecies.size();
 
     // Make the string-int map encodings. 
     m_rteSpeciesMap.       emplace(std::make_pair(name, num ));
     m_rteSpeciesInverseMap.emplace(std::make_pair(num , name));
 
     // Push the JSON entry and the new CdrSpecies to corresponding vectors. 
-    m_RtSpecies.     push_back(RefCountedPtr<RtSpecies> (new RteSpeciesJSON(name, kappaFunction)));
+    m_rtSpecies.     push_back(RefCountedPtr<RtSpecies> (new RteSpeciesJSON(name, kappaFunction)));
     m_rteSpeciesJSON.push_back(species);    
   }
 }
@@ -675,7 +675,7 @@ void CdrPlasmaJSON::parseMobilities() {
     const std::string name = trim(species["name"].get<std::string>());
     const int         idx  = m_cdrSpeciesMap.at(name);
 
-    if(m_CdrSpecies[idx]->isMobile()){
+    if(m_cdrSpecies[idx]->isMobile()){
 
       // This is a required field. We use it for specifying the mobility. 
       if(!(species.contains("mobility"))) this->throwParserError("species " + name + " is mobile but file does not contain field 'mobility'");
@@ -766,7 +766,7 @@ void CdrPlasmaJSON::parseDiffusion() {
     const std::string name = trim(species["name"].get<std::string>());
     const int         idx  = m_cdrSpeciesMap.at(name);
 
-    if(m_CdrSpecies[idx]->isDiffusive()){
+    if(m_cdrSpecies[idx]->isDiffusive()){
 
       // This is a required field. We use it for specifying the mobility. 
       if(!(species.contains("diffusion"))) this->throwParserError("species " + name + " is diffusive but file does not contain field 'diffusion'");
@@ -1083,12 +1083,12 @@ void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_rea
   int sumCharge = 0;
   for (const auto& r : a_reactants){
     if (m_cdrSpeciesMap.find(r) != m_cdrSpeciesMap.end()){
-      sumCharge -= m_CdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
+      sumCharge -= m_cdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
     }
   }
   for (const auto& p : a_products){
     if (m_cdrSpeciesMap.find(p) != m_cdrSpeciesMap.end()){
-      sumCharge += m_CdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
+      sumCharge += m_cdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
     }
   }
 
@@ -1444,8 +1444,8 @@ void CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const
 
       const int plasmaSpecies = m_cdrSpeciesMap.at(species);
 
-      const bool isMobile    = m_CdrSpecies[plasmaSpecies]->isMobile   ();
-      const bool isDiffusive = m_CdrSpecies[plasmaSpecies]->isDiffusive();
+      const bool isMobile    = m_cdrSpecies[plasmaSpecies]->isMobile   ();
+      const bool isDiffusive = m_cdrSpecies[plasmaSpecies]->isDiffusive();
 
       if(!isMobile   ) this->throwParserError(baseError + "but species  + '" + species + "' isn't mobile."   );
       if(!isDiffusive) this->throwParserError(baseError + "but species  + '" + species + "' isn't diffusive.");
@@ -1503,10 +1503,10 @@ void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reac
   // Check for charge conservation
   int sumCharge = 0;
   for (const auto& r : a_reactants){
-    if(this->isPlasmaSpecies(r)) sumCharge -= m_CdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
+    if(this->isPlasmaSpecies(r)) sumCharge -= m_cdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
   }
   for (const auto& p : a_products){
-    if(this->isPlasmaSpecies(p)) sumCharge += m_CdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
+    if(this->isPlasmaSpecies(p)) sumCharge += m_cdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
   }
 
   if(sumCharge != 0) {
@@ -1849,8 +1849,8 @@ std::vector<Real> CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect& 
 
   // Go through each species. 
   for (int i = 0; i < a_cdrDensities.size(); i++){
-    const bool isMobile = m_CdrSpecies[i]->isMobile();
-    const int  Z        = m_CdrSpecies[i]->getChargeNumber();
+    const bool isMobile = m_cdrSpecies[i]->isMobile();
+    const int  Z        = m_cdrSpecies[i]->getChargeNumber();
 
     // Figure out how to compute the moiblity. 
     if(isMobile && Z != 0){
@@ -2270,7 +2270,7 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 
   // Make sure v = +/- mu*E depending on the sign charge. 
   for (int i = 0; i < a_cdrDensities.size(); i++){
-    const int Z = m_CdrSpecies[i]->getChargeNumber();
+    const int Z = m_cdrSpecies[i]->getChargeNumber();
 
     if(Z > 0){
       velocities[i] = + mu[i] * a_E;
@@ -2294,7 +2294,7 @@ Vector<Real> CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real         a
   const Real Etd = (E/(N * Units::Td));    
 
   for (int i = 0; i < a_cdrDensities.size(); i++){
-    if(m_CdrSpecies[i]->isDiffusive()){
+    if(m_cdrSpecies[i]->isDiffusive()){
       
       // Figure out how we compute the diffusion coefficient for this species. 
       const LookupMethod& method = m_diffusionLookup.at(i);
@@ -2356,7 +2356,7 @@ Vector<Real> CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
 
   // Set outflow boundary conditions on charged species. 
   for (int i = 0; i < m_numCdrSpecies; i++){
-    const int Z = m_CdrSpecies[i]->getChargeNumber();
+    const int Z = m_cdrSpecies[i]->getChargeNumber();
 
     // Outflow on of negative species on anodes. 
     if(Z < 0 && isAnode  ) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
@@ -2382,7 +2382,7 @@ Vector<Real> CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time
 
   // Set outflow boundary conditions on charged species. 
   for (int i = 0; i < m_numCdrSpecies; i++){
-    const int Z = m_CdrSpecies[i]->getChargeNumber();
+    const int Z = m_cdrSpecies[i]->getChargeNumber();
 
     // Outflow on of negative species on anodes. 
     if(Z < 0 && isAnode  ) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);

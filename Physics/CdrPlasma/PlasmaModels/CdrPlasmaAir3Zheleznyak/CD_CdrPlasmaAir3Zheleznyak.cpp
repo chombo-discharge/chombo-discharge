@@ -187,13 +187,13 @@ void CdrPlasmaAir3Zheleznyak::initSpecies(){
   m_phot_idx = 0;
 
 
-  m_CdrSpecies.resize(m_numCdrSpecies);
-  m_CdrSpecies[m_elec_idx]  = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir3Zheleznyak::Electron());
-  m_CdrSpecies[m_plus_idx]  = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir3Zheleznyak::MPlus());
-  m_CdrSpecies[m_minu_idx]  = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir3Zheleznyak::MMinus());
+  m_cdrSpecies.resize(m_numCdrSpecies);
+  m_cdrSpecies[m_elec_idx]  = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir3Zheleznyak::Electron());
+  m_cdrSpecies[m_plus_idx]  = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir3Zheleznyak::MPlus());
+  m_cdrSpecies[m_minu_idx]  = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir3Zheleznyak::MMinus());
 
-  m_RtSpecies.resize(m_numRtSpecies);
-  m_RtSpecies[m_phot_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Zheleznyak::uv_Photon());
+  m_rtSpecies.resize(m_numRtSpecies);
+  m_rtSpecies[m_phot_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Zheleznyak::uv_Photon());
 }
 
 void CdrPlasmaAir3Zheleznyak::parse_initial_particles(){
@@ -219,8 +219,8 @@ void CdrPlasmaAir3Zheleznyak::parse_initial_particles(){
   addGaussianParticles(Electron_ion_pairs, round(gaussian_pairs),   weight, rad_pairs,   center_pairs);
   
   // Set initial particles
-  auto& initialElectrons = m_CdrSpecies[m_elec_idx]->getInitialParticles();
-  auto& initialIons      = m_CdrSpecies[m_elec_idx]->getInitialParticles();
+  auto& initialElectrons = m_cdrSpecies[m_elec_idx]->getInitialParticles();
+  auto& initialIons      = m_cdrSpecies[m_elec_idx]->getInitialParticles();
 
   initialElectrons = Electron_ion_pairs;
   initialIons      = Electron_ion_pairs;  
@@ -707,7 +707,7 @@ Vector<Real> CdrPlasmaAir3Zheleznyak::computeCdrFluxes(const Real         a_time
   // Switch for setting drift flux to zero for charge species
   Vector<Real> aj(m_numCdrSpecies, 0.0);
   for (int i = 0; i < m_numCdrSpecies; i++){
-    if(DataOps::sgn(m_CdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
+    if(DataOps::sgn(m_cdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {

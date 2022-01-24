@@ -286,24 +286,24 @@ void CdrPlasmaAir7Stephens::initSpecies(){
   m_b1v1_X1v0_idx = 6;
   m_b1v1_X1v1_idx = 7;
 
-  m_CdrSpecies.resize(m_numCdrSpecies);
-  m_CdrSpecies[m_elec_idx]      = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::Electron());
-  m_CdrSpecies[m_N2plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::N2plus());
-  m_CdrSpecies[m_O2plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O2plus());
-  m_CdrSpecies[m_N4plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::N4plus());
-  m_CdrSpecies[m_O4plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O4plus());
-  m_CdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O2plusN2());
-  m_CdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O2minus());
+  m_cdrSpecies.resize(m_numCdrSpecies);
+  m_cdrSpecies[m_elec_idx]      = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::Electron());
+  m_cdrSpecies[m_N2plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::N2plus());
+  m_cdrSpecies[m_O2plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O2plus());
+  m_cdrSpecies[m_N4plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::N4plus());
+  m_cdrSpecies[m_O4plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O4plus());
+  m_cdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O2plusN2());
+  m_cdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O2minus());
 
-  m_RtSpecies.resize(m_numRtSpecies);
-  m_RtSpecies[m_c4v0_X1v0_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v0_X1v0());
-  m_RtSpecies[m_c4v0_X1v1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v0_X1v1());
-  m_RtSpecies[m_c4v1_X1v0_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v0());
-  m_RtSpecies[m_c4v1_X1v1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v1());
-  m_RtSpecies[m_c4v1_X1v2_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v2());
-  m_RtSpecies[m_c4v1_X1v3_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v3());
-  m_RtSpecies[m_b1v1_X1v0_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_b1v1_X1v0());
-  m_RtSpecies[m_b1v1_X1v1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_b1v1_X1v1());
+  m_rtSpecies.resize(m_numRtSpecies);
+  m_rtSpecies[m_c4v0_X1v0_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v0_X1v0());
+  m_rtSpecies[m_c4v0_X1v1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v0_X1v1());
+  m_rtSpecies[m_c4v1_X1v0_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v0());
+  m_rtSpecies[m_c4v1_X1v1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v1());
+  m_rtSpecies[m_c4v1_X1v2_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v2());
+  m_rtSpecies[m_c4v1_X1v3_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v3());
+  m_rtSpecies[m_b1v1_X1v0_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_b1v1_X1v0());
+  m_rtSpecies[m_b1v1_X1v1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_b1v1_X1v1());
 
 }
 
@@ -838,7 +838,7 @@ Vector<Real> CdrPlasmaAir7Stephens::computeCdrFluxes(const Real         a_time,
   // Switch for setting drift flux to zero for charge species
   Vector<Real> aj(m_numCdrSpecies, 0.0);
   for (int i = 0; i < m_numCdrSpecies; i++){
-    if(DataOps::sgn(m_CdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
+    if(DataOps::sgn(m_cdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {

@@ -88,7 +88,7 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA(){
 
   // Set up species
   m_ItoSpecies.resize(m_num_ItoSpecies);
-  m_RtSpecies.resize(m_numRtSpecies);
+  m_rtSpecies.resize(m_numRtSpecies);
 
   m_ElectronIdx = 0;
   m_PositiveIdx = 1;
@@ -98,7 +98,7 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA(){
   m_ItoSpecies[m_ElectronIdx] = RefCountedPtr<ItoSpecies> (new Electron());
   m_ItoSpecies[m_PositiveIdx] = RefCountedPtr<ItoSpecies> (new Positive());
   m_ItoSpecies[m_NegativeIdx] = RefCountedPtr<ItoSpecies> (new Negative());
-  m_RtSpecies[m_PhotonZ_idx]  = RefCountedPtr<RtSpecies> (new PhotonZ());
+  m_rtSpecies[m_PhotonZ_idx]  = RefCountedPtr<RtSpecies> (new PhotonZ());
 
   // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
   m_seed += procID();
