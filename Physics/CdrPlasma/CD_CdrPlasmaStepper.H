@@ -36,21 +36,10 @@ namespace Physics {
       implement the advance method. This class handles all I/O.
     */
     class CdrPlasmaStepper : public TimeStepper {
-    protected:
-
-      /*!
-	@brief Just a silly namespace for centering stuff... This is dead. 
-      */
-      enum class Centering {
-	CellCenter,
-	CellCentroid,
-	EbCentroid,
-      };
-      
     public:
 
       /*!
-	@brief Constructor
+	@brief Empty constructor.
       */
       CdrPlasmaStepper();
 
@@ -623,42 +612,54 @@ namespace Physics {
 	@param[in]  a_dx                Grid resolution
 	@param[in]  a_time              Time
       */
-      virtual void computeCdrDiffusionCellRegular(Vector<EBCellFAB*>&       a_cdrDcoCell,
-						  const Vector<EBCellFAB*>& a_cdrDensities,
-						  const EBCellFAB&          a_electricFieldCell,
+      virtual void computeCdrDiffusionCellRegular(Vector<FArrayBox*>&       a_cdrDcoCell,
+						  const Vector<FArrayBox*>& a_cdrDensities,
+						  const FArrayBox&          a_electricFieldCell,
 						  const Box                 a_cellBox,
 						  const Real                a_dx,
 						  const Real                a_time);
 
       /*!
-	@brief Compute diffusion coefficients on cell centers. Regular cells. 
+	@brief Compute diffusion coefficients on cell centers. This version does the irregular cells. 
+	@param[out] a_cdrDcoCell        CDR diffusion coefficients on cell centers. 
+	@param[in]  a_cdrDensities      Cell-centered CDR densities
+	@param[in]  a_electricFieldCell Cell-centered electric field
+	@param[in]  a_dx                Grid resolution
+	@param[in]  a_time              Time
+	@param[in]  a_lvl               Grid level
+	@param[in]  a_dit               Grid patch index
       */
-      virtual void computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&           a_cdrDcoCell,
+      virtual void computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&          a_cdrDcoCell,
 						    const Vector<EBCellFAB*>&    a_cdrDensities,
-						    const EBCellFAB&             a_E,
-						    const Box                    a_box,
+						    const EBCellFAB&             a_electricFieldCell,
 						    const Real                   a_dx,
-						    const BaseIVFAB<VoFStencil>& a_interpStencils,
 						    const Real&                  a_time,
 						    const int                    a_lvl,
 						    const DataIndex&             a_dit);
   
       /*!
-	@brief Compute diffusion coefficients
-	@details The way we do this is that we compute the diffusion coefficients on cell centers, and then we average that
-	onto cell faces. 
+	@brief Compute diffusion coefficients on face centers. 
+	@details This will first compute the diffusion coefficients on cell centers, and then interpolate the result to face centers.
+	@param[out] a_cdrDcoCell        CDR diffusion coefficients on cell centers. 
+	@param[in]  a_cdrDensities      Cell-centered CDR densities
+	@param[in]  a_electricFieldCell Cell-centered electric field
+	@param[in]  a_time              Time
       */
-      virtual void computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_diffusionCoefficient_face,
+      virtual void computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_cdrDcoFace,
 					   const Vector<EBAMRCellData*>& a_cdrDensities,
-					   const EBAMRCellData&          a_E,
+					   const EBAMRCellData&          a_electricFieldCell,
 					   const Real&                   a_time);
 
       /*!
-	@brief Compute diffusion coefficients on the EB. 
+	@brief Compute diffusion coefficients on the EB. This is the AMR version -- it will call the level version. 
+	@param[out] a_cdrDcoEB        EB-centered_CDR diffusion coefficients
+	@param[in]  a_cdrDensitiesEB  EB-centered CDR densities
+	@param[in]  a_electricFieldEB EB-centered electric field
+	@param[in]  a_time            Time
       */
-      virtual void computeCdrDiffusionEb(Vector<EBAMRIVData*>&       a_diffusionCoefficient_face,
-					 const Vector<EBAMRIVData*>& a_cdrDensities,
-					 const EBAMRIVData&          a_E,
+      virtual void computeCdrDiffusionEb(Vector<EBAMRIVData*>&       a_cdrDcoEB,
+					 const Vector<EBAMRIVData*>& a_cdrDensitiesEB,
+					 const EBAMRIVData&          a_electricFieldEB,
 					 const Real&                 a_time);
 
       /*!
@@ -1041,8 +1042,7 @@ namespace Physics {
 					  const Vector<EBAMRCellData*>& a_cdr_states,
 					  const EBAMRCellData&          a_E,
 					  const Real                    a_time,
-					  const Real                    a_dt,
-					  const Centering               a_centering = Centering::CellCenter);
+					  const Real                    a_dt);
 
       /*!
 	@brief Compute the ohmic current on electrodes
@@ -1121,16 +1121,15 @@ namespace Physics {
       };      
 
       /*!
-	@brief Realm
+	@brief Realm where the time stepper is registered. 
+	@details This will always be the primal realm because CdrPlasma has no dual-grid functionality.
       */
       std::string m_realm;
 
       /*!
-	@brief Which source term computation
+	@brief Time stepper class name
       */
-      SourceTermComputation m_whichSourceTermComputation;      
-
-
+      std::string m_className;      
 
       /*!
 	@brief Plasma phase
@@ -1138,9 +1137,9 @@ namespace Physics {
       phase::which_phase m_phase;
 
       /*!
-	@brief Time stepper class name
+	@brief Which source term computation
       */
-      std::string m_className;
+      SourceTermComputation m_whichSourceTermComputation;            
 
       /*!
 	@brief Index space

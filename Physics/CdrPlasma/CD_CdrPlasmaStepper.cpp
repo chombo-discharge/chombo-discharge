@@ -26,7 +26,6 @@
 
 // C-style VLA methods can have occasional memory issues. Use them at your own peril. 
 #define USE_FAST_VELOCITIES 0
-#define USE_FAST_DIFFUSION  0
 
 using namespace Physics::CdrPlasma;
 
@@ -59,6 +58,8 @@ void CdrPlasmaStepper::registerRealms(){
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::registerRealms" << endl;
   }
+
+  CH_assert(!m_amr.isNull());
   
   m_amr->registerRealm(m_realm);
 }
@@ -106,11 +107,13 @@ void CdrPlasmaStepper::computeSpaceChargeDensity(){
 }
 
 void CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData&                 a_rho,
-						 const Vector<EBAMRCellData*>&  a_densities) {
+						 const Vector<EBAMRCellData*>&  a_cdrDensities) {
   CH_TIME("CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData, Vector(EBAMRCellData))");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData, Vector(EBAMRCellData))" << endl;
   }
+
+  CH_assert(a_rho[0]->nComp() == 1);
 
   // Set space charge to zero everywhere. We will then compute the space charge on
   // the gas phase (solid phase space charge is always zero in the CdrPlasma module). 
@@ -122,9 +125,11 @@ void CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData&                 
 
   // Go through the CDR solvers and add their space charge density. 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const EBAMRCellData&             density = *(a_densities[solverIt.index()]);
+    const EBAMRCellData&             density = *(a_cdrDensities[solverIt.index()]);
     const RefCountedPtr<CdrSpecies>& spec    = solverIt.getSpecies();
     const int                        Z       = spec->getChargeNumber();
+
+    CH_assert(density[0]->nComp() == 1);
       
     if(Z != 0){
       DataOps::incr(rhoGas, density, Real(Z));
@@ -145,6 +150,8 @@ void CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::computeCellConductivity(EBAMRCellData)" << endl;
   }
+
+  CH_assert(a_cellConductivity[0]->nComp() == 1);
 
   // Get a handle to the 
   const EBAMRCellData cellCenteredElectricField = m_amr->alias(m_phase, m_fieldSolver->getElectricField());
@@ -197,6 +204,10 @@ void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivi
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData, EBAMRIVData, EBAMRCellData)" << endl;
   }
+  
+  CH_assert(a_conductivityFace[0]->nComp() == 1);
+  CH_assert(a_conductivityEB  [0]->nComp() == 1);
+  CH_assert(a_conductivityCell[0]->nComp() == 1);  
 
   // Init to something stupid in order to catch errors. 
   DataOps::setValue(a_conductivityFace, std::numeric_limits<Real>::max());
@@ -227,6 +238,8 @@ void CdrPlasmaStepper::setupSemiImplicitPoisson(const Real a_dt){
     pout() << "CdrPlasmaStepper::setupSemiImplicitPoisson(Real)" << endl;
   }
 
+  CH_assert(a_dt >= 0.0);
+
   // Storage that is needed. 
   EBAMRCellData conductivityCell;
   EBAMRFluxData conductivityFace;
@@ -255,7 +268,11 @@ void CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductiv
 
   // TLDR: This routine will set up the field solver from an equation
   //
-  // div(B*grad(phi)) where B = epsr + a_factor*sigma and sigma = conductivity.
+  // div(B*grad(phi)) where B = epsr + a_factor*sigma and sigma = conductivity.  
+
+  CH_assert(a_conductivityFace[0]->nComp() == 1  );
+  CH_assert(a_conductivityEB  [0]->nComp() == 1  );
+  CH_assert(a_factor                       >= 0.0);
 
   // First, the field solver must set the permittivities as usual. The "permittivities" that we are after are
   // eps = epsr + dt*sigma/eps0 (but we only have plasma on the gas phase).
@@ -299,6 +316,10 @@ bool CdrPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
     pout() << "CdrPlasmaStepper::solvePoisson(MFAMRCellData, MFAMRCellData, Vector<EBAMRCellData*>, EBAMRIVData)" << endl;
   }
 
+  CH_assert(a_potential[0]->nComp() == 1);
+  CH_assert(a_rho      [0]->nComp() == 1);
+  CH_assert(a_sigma    [0]->nComp() == 1);    
+
   // Compute the space charge density onto the input data holder.
   this->computeSpaceChargeDensity(a_rho, a_cdrDensities);
 
@@ -333,7 +354,9 @@ void CdrPlasmaStepper::advanceReactionNetwork(const Real a_time, const Real a_dt
     pout() << "CdrPlasmaStepper::advanceReactionNetwork(Real, Real)" << endl;
   }
 
-  // Compute the electric field.
+  CH_assert(a_dt >= 0.0);
+
+  // Compute the electric field on the compute phase. 
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, m_cdr->getPhase(), SpaceDim);
   this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
@@ -367,7 +390,10 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cd
   }
 
   // TLDR: This version of advanceReactionNetwork will compute the gradients of the plasma species densities and then
-  //       call the general version. The gradients are needed for various purposes.
+  //       call the general version. The gradients are needed for various purposes.  
+
+  CH_assert(a_E[0]->nComp() == SpaceDim);
+  CH_assert(a_dt            >= 0.0     );
 
   // Allocate scratch data which we will use to compute the gradient. 
   EBAMRCellData scratch;
@@ -408,9 +434,11 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cd
 			       a_dt);
 
   // Delete the extra storage since we didn't use smart pointers. 
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    
     m_amr->deallocate(*cdrGradients[idx]);
+    
     delete cdrGradients[idx];
   }
 }
@@ -428,11 +456,20 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cd
     pout() << "CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData>x5, EBAMRCellData, Real, Real)" << endl;
   }
 
-  // TLDR: This is the general version for computing the CDR and RTE source terms. This will call the level version. 
+  // TLDR: This is the general version for computing the CDR and RTE source terms. This will call the level version.   
 
+  CH_assert(a_E[0]->nComp() == SpaceDim);
+  CH_assert(a_dt            >= 0.0     );  
+
+  // Number of CDR and RTE solvers.
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
-  const int numRteSpecies = m_physics->getNumRtSpecies();
+  const int numRteSpecies = m_physics->getNumRtSpecies ();
 
+  CH_assert(a_cdrSources.  size() == numCdrSpecies);
+  CH_assert(a_rteSources.  size() == numRteSpecies);  
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);  
+  CH_assert(a_cdrGradients.size() == numCdrSpecies);
+  CH_assert(a_rteDensities.size() == numRteSpecies);      
 
   // This is a special option in case we use upwinding. In that case we need to allocate
   // storage for holding the upwind-weighted data for each cdr solver.
@@ -523,14 +560,23 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&   
     pout() << "CdrPlasmaStepper::advanceReactionNetwork(Vector<LD<EBCellFAB>x5, LD<EBCellFAB>, Real, Real, int)" << endl;
   }
 
-  constexpr int comp = 0;
-
   // TLDR: This is the level version of advanceReactionNetwork. It's purpose is to compute the source terms for the CDR and RTE equations. It will expose
-  //       all the input parameters on a per-patch basis and then call the patch version. 
+  //       all the input parameters on a per-patch basis and then call the patch version.   
+
+  CH_assert(a_E.nComp() == SpaceDim);
+  CH_assert(a_dt        >= 0.0     );
+
+  constexpr int comp = 0;
 
   // Number of species involved. 
   const int numRteSpecies  = m_physics->getNumRtSpecies();
   const int numCdrSpecies  = m_physics->getNumCdrSpecies();
+
+  CH_assert(a_cdrSources.  size() == numCdrSpecies);
+  CH_assert(a_rteSources.  size() == numRteSpecies);  
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);  
+  CH_assert(a_cdrGradients.size() == numCdrSpecies);
+  CH_assert(a_rteDensities.size() == numRteSpecies);          
 
   // Stencils for putting cell-centered data on cell centroids. 
   const IrregAmrStencil<CentroidInterpolationStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
@@ -655,6 +701,11 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>&   
     pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>x5, FArrayBox, Realx3, Box)" << endl;
   }
 
+  CH_assert(a_E.nComp() == SpaceDim );
+  CH_assert(a_dt        >= 0.0      );
+  CH_assert(a_dx        >= 0.0      );
+  CH_assert(a_cellBox.cellCentered());
+
   constexpr int  comp  = 0;
 
   constexpr Real zero  = 0.0;
@@ -663,6 +714,12 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>&   
   // Number of CDR and RTE solvers. 
   const int numCdrSpecies  = m_physics->getNumCdrSpecies();
   const int numRteSpecies  = m_physics->getNumRtSpecies();
+
+  CH_assert(a_cdrSources.  size() == numCdrSpecies);
+  CH_assert(a_rteSources.  size() == numRteSpecies);  
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);  
+  CH_assert(a_cdrGradients.size() == numCdrSpecies);
+  CH_assert(a_rteDensities.size() == numRteSpecies);        
 
   // Lower-left corner -- physical coordinates. 
   const RealVect probLo  = m_amr->getProbLo();
@@ -765,13 +822,19 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
 						   const Real&                  a_time,
 						   const Real&                  a_dt,
 						   const Real&                  a_dx,
-						   const Box&                   a_box,
+						   const Box&                   a_cellBox,
 						   const int                    a_lvl,
 						   const DataIndex&             a_dit){
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>x6, ...)");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>x6, ...)" << endl;
-  }  
+  }
+
+  CH_assert(a_E.nComp() == SpaceDim );
+  CH_assert(a_dt        >= 0.0      );
+  CH_assert(a_dx        >= 0.0      );
+  CH_assert(a_cellBox.cellCentered());
+  
   switch(m_whichSourceTermComputation){
   case SourceTermComputation::Interpolated:
     {
@@ -786,7 +849,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
 					      a_time,
 					      a_dt,
 					      a_dx,
-					      a_box,
+					      a_cellBox,
 					      a_lvl,
 					      a_dit);
       break;
@@ -804,7 +867,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
 					      a_time,
 					      a_dt,
 					      a_dx,
-					      a_box,
+					      a_cellBox,
 					      a_lvl,
 					      a_dit);      
       break;	
@@ -817,11 +880,12 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
 					     a_cdrGradients,
 					     a_rteDensities,
 					     a_interpStencils,
+
 					     a_E,
 					     a_time,
 					     a_dt,
 					     a_dx,
-					     a_box,
+					     a_cellBox,
 					     a_lvl,
 					     a_dit);
       break;
@@ -839,7 +903,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
 					      a_time,
 					      a_dt,
 					      a_dx,
-					      a_box,
+					      a_cellBox,
 					      a_lvl,
 					      a_dit);      
       break;	
@@ -864,7 +928,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&    
 							 const Real&                  a_time,
 							 const Real&                  a_dt,
 							 const Real&                  a_dx,
-							 const Box&                   a_box,
+							 const Box&                   a_cellBox,
 							 const int                    a_lvl,
 							 const DataIndex&             a_dit){
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>x6, ...)");
@@ -872,12 +936,23 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&    
     pout() << "CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>x6, ...)" << endl;
   }
 
+  CH_assert(a_E.nComp() == SpaceDim );
+  CH_assert(a_dt        >= 0.0      );
+  CH_assert(a_dx        >= 0.0      );
+  CH_assert(a_cellBox.cellCentered());  
+
   constexpr int  comp = 0  ;
   constexpr Real zero = 0.0;
 
   // Number of CDR and RTE solvers.
-  const int numRteSolvers  = m_physics->getNumRtSpecies ();
-  const int numCdrSolvers  = m_physics->getNumCdrSpecies();
+  const int numRteSpecies  = m_physics->getNumRtSpecies ();
+  const int numCdrSpecies  = m_physics->getNumCdrSpecies();
+
+  CH_assert(a_cdrSources.  size() == numCdrSpecies);
+  CH_assert(a_rteSources.  size() == numRteSpecies);  
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);  
+  CH_assert(a_cdrGradients.size() == numCdrSpecies);
+  CH_assert(a_rteDensities.size() == numRteSpecies);        
 
   // EB box. 
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl][a_dit];
@@ -886,11 +961,11 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&    
   const RealVect probLo = m_amr->getProbLo();
 
   // Things that are passed into CdrPlasmaPhysics
-  Vector<Real>     cdrSources  (numCdrSolvers, 0.            );
-  Vector<Real>     cdrDensities(numCdrSolvers, 0.            );
-  Vector<Real>     rteSources  (numRteSolvers, 0.            );  
-  Vector<Real>     rteDensities(numRteSolvers, 0.            );
-  Vector<RealVect> cdrGradients(numCdrSolvers, RealVect::Zero);  
+  Vector<Real>     cdrSources  (numCdrSpecies, 0.            );
+  Vector<Real>     cdrDensities(numCdrSpecies, 0.            );
+  Vector<Real>     rteSources  (numRteSpecies, 0.            );  
+  Vector<Real>     rteDensities(numRteSpecies, 0.            );
+  Vector<RealVect> cdrGradients(numCdrSpecies, RealVect::Zero);  
 
   // Irregular grid kernel. 
   auto irregularKernel = [&](const VolIndex& vof) -> void{
@@ -997,7 +1072,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&     
 							const Real&                  a_time,
 							const Real&                  a_dt,
 							const Real&                  a_dx,
-							const Box&                   a_box,
+							const Box&                   a_cellBox,
 							const int                    a_lvl,
 							const DataIndex&             a_dit){
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>x6, ...)");
@@ -1005,12 +1080,23 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&     
     pout() << "CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>x6, ...)" << endl;
   }
 
+  CH_assert(a_E.nComp() == SpaceDim );
+  CH_assert(a_dt        >= 0.0      );
+  CH_assert(a_dx        >= 0.0      );
+  CH_assert(a_cellBox.cellCentered());  
+
   constexpr int  comp = 0  ;
   constexpr Real zero = 0.0;
 
   // Number of CDR and RTE solvers.
-  const int numRteSolvers  = m_physics->getNumRtSpecies ();
-  const int numCdrSolvers  = m_physics->getNumCdrSpecies();
+  const int numRteSpecies  = m_physics->getNumRtSpecies ();
+  const int numCdrSpecies  = m_physics->getNumCdrSpecies();
+
+  CH_assert(a_cdrSources.  size() == numCdrSpecies);
+  CH_assert(a_rteSources.  size() == numRteSpecies);  
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);  
+  CH_assert(a_cdrGradients.size() == numCdrSpecies);
+  CH_assert(a_rteDensities.size() == numRteSpecies);    
 
   // EB box. 
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl][a_dit];    
@@ -1019,11 +1105,11 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&     
   const RealVect probLo  = m_amr->getProbLo();
 
   // Things that are passed into CdrPlasmaPhysics
-  Vector<Real>     cdrSources  (numCdrSolvers, 0.            );
-  Vector<Real>     cdrDensities(numCdrSolvers, 0.            );
-  Vector<Real>     rteSources  (numRteSolvers, 0.            );  
-  Vector<Real>     rteDensities(numRteSolvers, 0.            );
-  Vector<RealVect> cdrGradients(numCdrSolvers, RealVect::Zero);    
+  Vector<Real>     cdrSources  (numCdrSpecies, 0.            );
+  Vector<Real>     cdrDensities(numCdrSpecies, 0.            );
+  Vector<Real>     rteSources  (numRteSpecies, 0.            );  
+  Vector<Real>     rteDensities(numRteSpecies, 0.            );
+  Vector<RealVect> cdrGradients(numCdrSpecies, RealVect::Zero);    
 
   // Definition of the irregular kernel. 
   auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -1040,14 +1126,14 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&     
     }
 
     // On input the CDR densities are on the centroid so just make sure they are positive. 
-    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
 
       cdrDensities[idx] = std::max(zero, (*a_cdrDensities[idx])(vof, comp));      
     }
 
     // On input we assume that the CDR gradients are on the cell center so we interpolate to centroid. 
-    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
 
       cdrGradients[idx] = RealVect::Zero;
@@ -1110,7 +1196,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
 							 const Real&                  a_time,
 							 const Real&                  a_dt,
 							 const Real&                  a_dx,
-							 const Box&                   a_box,
+							 const Box&                   a_cellBox,
 							 const int                    a_lvl,
 							 const DataIndex&             a_dit){
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>x6, ...)");
@@ -1122,8 +1208,14 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
   constexpr Real zero = 0.0;
 
   // Number of CDR and RTE solvers.
-  const int numRteSolvers  = m_physics->getNumRtSpecies ();
-  const int numCdrSolvers  = m_physics->getNumCdrSpecies();
+  const int numRteSpecies  = m_physics->getNumRtSpecies ();
+  const int numCdrSpecies  = m_physics->getNumCdrSpecies();
+
+  CH_assert(a_cdrSources.  size() == numCdrSpecies);
+  CH_assert(a_rteSources.  size() == numRteSpecies);  
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);  
+  CH_assert(a_cdrGradients.size() == numCdrSpecies);
+  CH_assert(a_rteDensities.size() == numRteSpecies);        
 
   // EB box. 
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl][a_dit];    
@@ -1132,11 +1224,11 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
   const RealVect probLo  = m_amr->getProbLo();
 
   // Things that are passed into CdrPlasmaPhysics
-  Vector<Real>     cdrSources  (numCdrSolvers, 0.            );
-  Vector<Real>     cdrDensities(numCdrSolvers, 0.            );
-  Vector<Real>     rteSources  (numRteSolvers, 0.            );  
-  Vector<Real>     rteDensities(numRteSolvers, 0.            );
-  Vector<RealVect> cdrGradients(numCdrSolvers, RealVect::Zero);    
+  Vector<Real>     cdrSources  (numCdrSpecies, 0.            );
+  Vector<Real>     cdrDensities(numCdrSpecies, 0.            );
+  Vector<Real>     rteSources  (numRteSpecies, 0.            );  
+  Vector<Real>     rteDensities(numRteSpecies, 0.            );
+  Vector<RealVect> cdrGradients(numCdrSpecies, RealVect::Zero);    
 
   // This is the kernel that we run. 
   auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -1280,7 +1372,10 @@ void CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_electricFieldC
 
   // TLDR: We want to compute the CDR solver diffusion coefficients on the face centers (very important) and on the EB (less important). When we do the faces
   //       we actually compute the diffusion coefficient on the cell center, which we later average to faces. This is what computeCdrDiffusionFace does. On the EB,
-  //       we instead extrapolate the things that we need directly to it, and call the same physics coupling function as we did for the cells. 
+  //       we instead extrapolate the things that we need directly to it, and call the same physics coupling function as we did for the cells.
+
+  CH_assert(a_electricFieldCell[0]->nComp() == SpaceDim);
+  CH_assert(a_electricFieldEB  [0]->nComp() == SpaceDim);    
 
   constexpr int numComp       = 1;
 
@@ -1336,8 +1431,13 @@ void CdrPlasmaStepper::computeCdrDiffusionCell(Vector<EBAMRCellData>&        a_c
     pout() << "CdrPlasmaStepper::computeCdrDiffusionCell(Vector<EBAMRCellData*>, Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
   }
 
+  CH_assert(a_electricFieldCell[0]->nComp() == SpaceDim);  
+
   // Number of CDR solvers. 
-  const int numCdrSpecies  = m_physics->getNumCdrSpecies();
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+
+  CH_assert(a_cdrDcoCell.  size() == numCdrSpecies);
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);  
 
   // List of CDR diffusion coefficients and states. Will be populated on each grid level. 
   Vector<LevelData<EBCellFAB>* > cdrDcoCell  (numCdrSpecies, nullptr);
@@ -1361,7 +1461,7 @@ void CdrPlasmaStepper::computeCdrDiffusionCell(Vector<EBAMRCellData>&        a_c
 
 void CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>* >&       a_cdrDcoCell,
 					       const Vector<LevelData<EBCellFAB>* >& a_cdrDensities,
-					       const LevelData<EBCellFAB>&           a_electricField,
+					       const LevelData<EBCellFAB>&           a_electricFieldCell,
 					       const int                             a_lvl,
 					       const Real&                           a_time){
   CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LD<EBCellFAB>* >x2, LD<EBCellFAB, int, Real)");
@@ -1369,10 +1469,15 @@ void CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>* >&  
     pout() << "CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LD<EBCellFAB>* >x2, LD<EBCellFAB, int, Real)" << endl;
   }
 
+  CH_assert(a_electricFieldCell.nComp() == SpaceDim);
+
+  constexpr int comp = 0;
+
+  // Number of CDR solvers. 
   const int numCdrSpecies  = m_physics->getNumCdrSpecies();
 
-  // Interpolation stencil for interpolating from cell centers to cell centroids. Needed for the irregular kernel. 
-  const IrregAmrStencil<CentroidInterpolationStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
+  CH_assert(a_cdrDcoCell.  size() == numCdrSpecies);
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);    
 
   // Grids on this level. 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
@@ -1383,7 +1488,7 @@ void CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>* >&  
     const Box cellBox = dbl[dit()];
 
     // Handle to the electric field. 
-    const EBCellFAB& electricField    = a_electricField[dit()];
+    const EBCellFAB& electricField    = a_electricFieldCell[dit()];
     const FArrayBox& electricFieldFAB = electricField.getFArrayBox();
 
     // Get handle to the cell-centered diffusion coefficients and densities for the current patch. 
@@ -1404,9 +1509,9 @@ void CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>* >&  
     }
 
     // Do the regular cells. This will also do irregular cells but we re-do those below. 
-    this->computeCdrDiffusionCellRegular(cdrDcoCell,
-					 cdrDensities,
-					 electricField,
+    this->computeCdrDiffusionCellRegular(cdrDcoCellFAB,
+					 cdrDensitiesFAB,
+					 electricFieldFAB,
 					 cellBox,
 					 m_amr->getDx()[a_lvl],
 					 a_time);
@@ -1415,272 +1520,344 @@ void CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>* >&  
     this->computeCdrDiffusionCellIrregular(cdrDcoCell,
 					   cdrDensities,
 					   electricField,
-					   cellBox,
 					   m_amr->getDx()[a_lvl],
-					   interpStencils[a_lvl][dit()],
 					   a_time,
 					   a_lvl,
 					   dit());
+
+    // Covered data is bogus. 
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int  idx = solverIt.index();
+
+      cdrDcoCell[idx]->setCoveredCellVal(0.0, comp);
+    }
   }
 }
 
-void CdrPlasmaStepper::computeCdrDiffusionCellRegular(Vector<EBCellFAB*>&       a_cdrDcoCell,
-						      const Vector<EBCellFAB*>& a_cdrDensities,
-						      const EBCellFAB&          a_E,
-						      const Box                 a_box,
+void CdrPlasmaStepper::computeCdrDiffusionCellRegular(Vector<FArrayBox*>&       a_cdrDcoCell,
+						      const Vector<FArrayBox*>& a_cdrDensities,
+						      const FArrayBox&          a_electricFieldCell,
+						      const Box                 a_cellBox,
 						      const Real                a_dx,
 						      const Real                a_time){
-  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCellRegular");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCellRegular(Vector<FArrayBox*>x2, FArrayBox, Box, Real, Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDiffusionCellRegular" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionCellRegular(Vector<FArrayBox*>x2, FArrayBox, Box, Real, Real)" << endl;
   }
 
-  const int comp        = 0;
+  CH_assert(a_electricFieldCell.nComp() == SpaceDim);
+  CH_assert(a_cellBox.cellCentered());
+
+  constexpr Real zero = 0.0;
+  constexpr int  comp = 0;
+
+  // Number of CDR solvers. 
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
-  // EBISBox and graph
-  const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  CH_assert(a_cdrDcoCell.  size() == numCdrSpecies);
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);      
+
+  // Lower-left corner of physical domain. 
   const RealVect probLo  = m_amr->getProbLo();
 
-  // Things that are passed into CdrPlasmaPhysics
-  RealVect         pos, E;
-  Vector<Real>     cdr_densities(numCdrSpecies);
+  // This is populated by m_physics. 
+  Vector<Real> cdrDensities(numCdrSpecies, 0.0);
 
-  // Computed coefficients terms onto here
-  EBCellFAB tmp(ebisbox, a_E.getRegion(), numCdrSpecies);
+  // Computed coefficients terms go onto here -- then we extract the data later. 
+  FArrayBox diffusionCoefficients(a_cellBox, numCdrSpecies);
 
-  const BaseFab<Real>& EFab  = a_E.getSingleValuedFAB();
-  
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
-    const IntVect iv = bit();
-    
-    pos = probLo + iv*a_dx;
-    E   = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
+  // Regular kernel. We just fetch everything on the cell center and then call the physics framework. 
+  auto regularKernel = [&](const IntVect iv) -> void {
 
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
-      const Real phi = (*a_cdrDensities[idx]).getSingleValuedFAB()(iv, comp);
-      cdr_densities[idx] = Max(0.0, phi);
+    // Physical position and electric field. 
+    const RealVect pos = probLo + (0.5*RealVect::Unit + RealVect(iv)) * a_dx;
+    const RealVect E   = RealVect(D_DECL(a_electricFieldCell(iv, 0), a_electricFieldCell(iv, 1), a_electricFieldCell(iv, 2)));
+
+    // Get the CDR densities in the current cell. 
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int  idx = solverIt.index();
+      
+      const Real phi = (*a_cdrDensities[idx])(iv, comp);
+      
+      cdrDensities[idx] = std::max(zero, phi);
     }
 
-    const Vector<Real> coeffs = m_physics->computeCdrDiffusionCoefficients(a_time,
-									   pos,
-									   E,
-									   cdr_densities);
+    // Compute the diffusion coefficients. 
+    const Vector<Real> Dcos = m_physics->computeCdrDiffusionCoefficients(a_time, pos, E, cdrDensities);
 
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
-      if(solver_it()->isDiffusive()){
-	tmp.getSingleValuedFAB()(iv,idx) = coeffs[idx];
-      }
+    // Set the diffusion coefficients in the temporary data holder. 
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
+      
+      diffusionCoefficients(iv, idx) = Dcos[idx];
     }
-  }
+  };
 
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
-    if(solver_it()->isDiffusive()){
+  // Launch the kernel over the input box. 
+  BoxLoops::loop(a_cellBox, regularKernel);
+
+  // Linearize back -- we had all the diffusion coefficients stored in the temporary data holder -- now put them in the output data holders. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+
+    // The check here is important because the input FArrayBox points can be null if the species is not diffusive.     
+    if(solverIt()->isDiffusive()) {  
       (*a_cdrDcoCell[idx]).setVal(0.0);
-      (*a_cdrDcoCell[idx]).plus(tmp, idx, 0, 1);
-
-      // Covered cells are bogus. 
-      (*a_cdrDcoCell[idx]).setCoveredCellVal(0.0, 0);
+      (*a_cdrDcoCell[idx]).plus(diffusionCoefficients, idx, comp);
     }
   }
 }
 
 void CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&          a_cdrDcoCell,
 							const Vector<EBCellFAB*>&    a_cdrDensities,
-							const EBCellFAB&             a_E,
-							const Box                    a_box,
+							const EBCellFAB&             a_electricFieldCell,
 							const Real                   a_dx,
-							const BaseIVFAB<VoFStencil>& a_interpStencils,
 							const Real&                  a_time,
 							const int                    a_lvl,
-							const DataIndex&             a_dit){
-  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCellIrregular");
+							const DataIndex&             a_dit) {
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>x2, EBCellFAB, Real, Real, int DataIndex)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDiffusionCellIrregular" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>x2, EBCellFAB, Real, Real, int DataIndex)" << endl;
   }
 
-  const int comp = 0;
+  CH_assert(a_electricFieldCell.nComp() == SpaceDim);
+
+  constexpr int comp = 0;
+
+  // Number of CDR solvers
   const int numCdrSpecies  = m_physics->getNumCdrSpecies();
 
+  CH_assert(a_cdrDcoCell.  size() == numCdrSpecies);
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);  
+
   // EBISBox and graph
-  const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  const EBISBox& ebisbox = a_electricFieldCell.getEBISBox();
+
+  // Lower left corner (physical coordinates)
   const RealVect probLo  = m_amr->getProbLo();
 
   // Things that are passed into CdrPlasmaPhysics
-  RealVect         pos, E;
-  Vector<Real>     cdr_densities(numCdrSpecies);
+  Vector<Real> cdrDensities(numCdrSpecies, 0.0);
 
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-      
-    const RealVect pos = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, probLo);
-    const RealVect E   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
+  // Irreegular kernel. 
+  auto irregularKernel = [&](const VolIndex& vof) -> void {
 
-    Vector<Real> cdr_densities(numCdrSpecies);
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
-      cdr_densities[idx] = (*a_cdrDensities[idx])(vof, comp);
+    // Physical position and electric field. 
+    const RealVect pos = probLo + Location::position(Location::Cell::Center, vof, ebisbox, a_dx);						     
+    const RealVect E   = RealVect(D_DECL(a_electricFieldCell(vof, 0), a_electricFieldCell(vof, 1), a_electricFieldCell(vof, 2)));
+
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx  = solverIt.index();
+
+      const Real phi = (*a_cdrDensities[idx])(vof, comp);
+
+      cdrDensities[idx] = std::max(0.0, phi);
     }
-      
-    const Vector<Real> coeffs = m_physics->computeCdrDiffusionCoefficients(a_time,
-									   pos,
-									   E,
-									   cdr_densities);
-      
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
-      if(solver_it()->isDiffusive()){
-	(*a_cdrDcoCell[idx])(vof, comp) = coeffs[idx];
+
+    // Let our nifty plasma physics framework take care of the diffusion coefficients. 
+    const Vector<Real> Dcos = m_physics->computeCdrDiffusionCoefficients(a_time,
+									 pos,
+									 E,
+									 cdrDensities);
+
+    // Put the result in the correct diffusion coefficient data holder. 
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
+
+      // The check here is important because the input EBCellFAB* will be nullptr if the species is not diffusive. 
+      if(solverIt()->isDiffusive()){
+	(*a_cdrDcoCell[idx])(vof, comp) = Dcos[idx];
       }
     }
-  }
+  };
+
+  // Kernel region.
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];  
+
+  // Launch the kernel.
+  BoxLoops::loop(vofit, irregularKernel);
 }
 
-void CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_diffusionCoefficient_face,
+void CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_cdrDcoFace,
 					       const Vector<EBAMRCellData*>& a_cdrDensities,
-					       const EBAMRCellData&          a_E,
+					       const EBAMRCellData&          a_electricFieldCell,
 					       const Real&                   a_time){
-  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionFace(full)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>, Vector<EBAMRCellData*>, EBAMRCellData, Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDiffusionFace(full)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>, Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
   }
 
-  const int comp         = 0;
-  const int ncomp        = 1;
+  // TLDR: This is a routine for computing the CDR diffusion coefficients on face centers (not centroids!). It does so by first
+  //       computing the diffusion coefficient on cell centers and then averaging those to face centers. To do this, we need
+  //       to allocate some transient memory (which is automatically released).
+  //
+  //       The cell-to-face averaging will also fill one ghost face. This is important because the CDR solvers will interpolate
+  //       face-centered fluxes to face centroids and will thus reach into one ghost face.
+
+  CH_assert(a_electricFieldCell[0]->nComp() == SpaceDim);
+
+  const int nComp = 1;
+
+  // Number of CDR solvers
   const int numCdrSpecies  = m_physics->getNumCdrSpecies();
-  const int finest_level = m_amr->getFinestLevel();
 
-  // Allocate data for cell-centered diffusion coefficients
-  Vector<EBAMRCellData> diffco(numCdrSpecies);
-  Vector<Real> cdr_densities(numCdrSpecies);
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
+  CH_assert(a_cdrDcoFace.  size() == numCdrSpecies);
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);    
 
-    m_amr->allocate(diffco[idx], m_realm, m_cdr->getPhase(), ncomp);
+  // Allocate data for cell-centered diffusion coefficients. 
+  Vector<EBAMRCellData> cdrDcoCell(numCdrSpecies);
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    
+    m_amr->allocate(cdrDcoCell[idx], m_realm, m_cdr->getPhase(), nComp);
   }
 
-  // Call the cell version
-  computeCdrDiffusionCell(diffco, a_cdrDensities, a_E, a_time);
+  // Compute the diffusion coefficients on cell centers. 
+  this->computeCdrDiffusionCell(cdrDcoCell, a_cdrDensities, a_electricFieldCell, a_time);
 
-  // Now compute face-centered things by taking the average of cell-centered things
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const int idx = solver_it.index();
+  // Now compute face-centered things by taking the average of cell-centered things. Note that this will include
+  // one ghost face because the CDR solvers will interpolate the face-centered diffusion coefficients to face centroids. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    
+    // The check here is important because some EBAMRFluxData input pointers will be nullptr when the species is not diffusive. 
+    if(solver->isDiffusive()){ 
+      const int idx = solverIt.index();
 
-    if(solver->isDiffusive()){ // Only need to do this for diffusive things
-      DataOps::setValue(*a_diffusionCoefficient_face[idx], std::numeric_limits<Real>::max());
-      m_amr->averageDown  (diffco[idx], m_realm, m_cdr->getPhase());
-      m_amr->interpGhostMG(diffco[idx], m_realm, m_cdr->getPhase()); 
+      // Set to something stupendously large to spot errors. 
+      DataOps::setValue(*a_cdrDcoFace[idx], std::numeric_limits<Real>::max());
 
-#if 0 // Doesn't fill ghost faces
-      DataOps::averageCellToFace(*a_diffusionCoefficient_face[idx], diffco[idx], m_amr->getDomains());
-#else // Fills ghost faces
-      DataOps::averageCellScalarToFaceScalar(*a_diffusionCoefficient_face[idx], diffco[idx], m_amr->getDomains());
-#endif
+      // Coarsen the cell-centered diffusion coefficient before averaging to faces. 
+      m_amr->averageDown  (cdrDcoCell[idx], m_realm, m_cdr->getPhase());
+      m_amr->interpGhostMG(cdrDcoCell[idx], m_realm, m_cdr->getPhase()); 
+
+      // Average to cell faces. Note that this call also includes one ghost face. 
+      DataOps::averageCellScalarToFaceScalar(*a_cdrDcoFace[idx], cdrDcoCell[idx], m_amr->getDomains());
     }
   }
 }
 
 
-
-void CdrPlasmaStepper::computeCdrDiffusionEb(Vector<EBAMRIVData*>&       a_ebDiffusionCoefficient,
-					     const Vector<EBAMRIVData*>& a_cdrDensities,
-					     const EBAMRIVData&          a_E,
+void CdrPlasmaStepper::computeCdrDiffusionEb(Vector<EBAMRIVData*>&       a_cdrDcoEB,
+					     const Vector<EBAMRIVData*>& a_cdrDensitiesEB,
+					     const EBAMRIVData&          a_electricFieldEB,
 					     const Real&                 a_time){
-  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionEb(full)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionEb(Vector<EBAMRIVData*>x2, EBAMRIVData, Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDiffusionEb(full)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionEb(Vector<EBAMRIVData*>x2, EBAMRIVData, Real)" << endl;
   }
 
-  const int comp         = 0;
-  const int ncomp        = 1;
+  // TLDR: This is responsible for computing the CDR diffusion coefficients on EB faces. This is necessary because the finite-volume
+  //       method needs it. This routine will go through each level and call an equivalent routine.
+
+  CH_assert(a_electricFieldEB[0]->nComp() == SpaceDim);  
+
+  // Numer of CDR species. 
   const int numCdrSpecies  = m_physics->getNumCdrSpecies();
-  const int finest_level = m_amr->getFinestLevel();
-  const Real zero        = 0.0;
 
-  Vector<LevelData<BaseIVFAB<Real> >* > diffco(numCdrSpecies);
-  Vector<LevelData<BaseIVFAB<Real> >* > cdr_densities(numCdrSpecies);
-  
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  CH_assert(a_cdrDcoFace.  size() == numCdrSpecies);
+  CH_assert(a_cdrDensities.size() == numCdrSpecies);  
 
-    Vector<LevelData<BaseIVFAB<Real> >* > diffco(numCdrSpecies);
-    Vector<LevelData<BaseIVFAB<Real> >* > cdr_densities(numCdrSpecies);
+  // Level loop.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
-      diffco[idx]        = (*a_ebDiffusionCoefficient[idx])[lvl];
-      cdr_densities[idx] = (*a_cdrDensities[idx])[lvl];
+    // Populate the level-view of the diffusion coefficients and CDR densities. 
+    Vector<LevelData<BaseIVFAB<Real> >* > cdrDcoEB      (numCdrSpecies, nullptr);
+    Vector<LevelData<BaseIVFAB<Real> >* > cdrDensitiesEB(numCdrSpecies, nullptr);
+
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
+      
+      cdrDcoEB      [idx] = (*a_cdrDcoEB      [idx])[lvl];
+      cdrDensitiesEB[idx] = (*a_cdrDensitiesEB[idx])[lvl];
     }
 
-    // Call level versions
-    computeCdrDiffusionEb(diffco, cdr_densities, *a_E[lvl], a_time, lvl);
+    // Call the level version.
+    this->computeCdrDiffusionEb(cdrDcoEB, cdrDensitiesEB, *a_electricFieldEB[lvl], a_time, lvl);
   }
 }
 
 
-void CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_ebDiffusionCoefficient,
-					     const Vector<LevelData<BaseIVFAB<Real> >* >& a_cdrDensities,
-					     const LevelData<BaseIVFAB<Real> >&           a_E,
+void CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_cdrDcoEB,
+					     const Vector<LevelData<BaseIVFAB<Real> >* >& a_cdrDensitiesEB,
+					     const LevelData<BaseIVFAB<Real> >&           a_electricFieldEB,
 					     const Real&                                  a_time,
 					     const int                                    a_lvl){
-  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionEb(level)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LD<BaseIVFAB<Real> >* >x2, LD<BaseIVFAB<Real> >, Real, int)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDiffusionEb(level)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LD<BaseIVFAB<Real> >* >x2, LD<BaseIVFAB<Real> >, Real, int)" << endl;
   }
 
-  const int comp = 0;
+  // TLDR: This is the level version which computes the CDR diffusion coefficients on EB centroids. It will go through all patches and
+  //       call an irregular kernel. 
+
+  CH_assert(a_electricFieldEB[0]->nComp() == SpaceDim);    
+
+  constexpr int  comp = 0  ;
+  constexpr Real zero = 0.0;
+
+  // Number of CDR solvers
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
-  
-  const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
-  const Real dx                 = m_amr->getDx()[a_lvl];
-  const RealVect probLo         = m_amr->getProbLo();
+  CH_assert(a_cdrDcoFace.    size() == numCdrSpecies);
+  CH_assert(a_cdrDensitiesEB.size() == numCdrSpecies);
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box box            = dbl.get(dit());
+  // Physical coordinates of lower left corner 
+  const RealVect probLo = m_amr->getProbLo();
+
+  // This is passed into the plasma kinetics framework. 
+  Vector<Real> cdrDensitiesEB(numCdrSpecies, 0.0);  
+
+  // Grids on this level. 
+  const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
+  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
+  const Real               dx    = m_amr->getDx()[a_lvl];
+
+  // Grid patch loop.
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
     const EBISBox& ebisbox   = ebisl[dit()];
-    const EBGraph& ebgraph   = ebisbox.getEBGraph();
-    const IntVectSet ivs     = ebisbox.getIrregIVS(box);
-    const BaseIVFAB<Real>& E = a_E[dit()];
 
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      const RealVect cntr = ebisbox.bndryCentroid(vof);
-      const RealVect e    = RealVect(D_DECL(E(vof,0), E(vof,1), E(vof,2)));
-      const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, probLo) + cntr*dx;
-      
-      Vector<Real> cdr_densities(numCdrSpecies);
-      for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx  = solver_it.index();
-	const Real phi = (*a_cdrDensities[idx])[dit()](vof, 0);
-	cdr_densities[idx] = Max(0.0, phi);
+    // Electric field in this grid patch. 
+    const BaseIVFAB<Real>& electricFieldPatchEB = a_electricFieldEB[dit()];
+
+    // Irregular kernel.
+    auto irregularKernel = [&] (const VolIndex& vof) -> void {
+
+      // Physical coordinates and electric field. 
+      const RealVect pos  = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);							      
+      const RealVect E    = RealVect(D_DECL(electricFieldPatchEB(vof,0), electricFieldPatchEB(vof,1), electricFieldPatchEB(vof,2)));
+
+      // Construct the CDR densities on the EB -- it needs to be in a form understandable by CdrPlasmaPhysics
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	const int  idx  = solverIt.index();
+	const Real phi = (*a_cdrDensitiesEB[idx])[dit()](vof, comp);
+	
+	cdrDensitiesEB[idx] = std::max(zero, phi);
       }
 
-
-      const Vector<Real> diffco = m_physics->computeCdrDiffusionCoefficients(a_time,
+      // Call our nifty plasma kinetics framework for computing the diffusion coefficients. 
+      const Vector<Real> Dcos = m_physics->computeCdrDiffusionCoefficients(a_time,
 									     pos,
-									     e,
-									     cdr_densities);
-										  
-      for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.index();
-	if(solver_it()->isDiffusive()){
-#if 0 // ProbLoal code
-	  (*a_ebDiffusionCoefficient[idx])[dit()](vof, comp) = diffco[idx];
-#else // Debug code
-	  (*a_ebDiffusionCoefficient[idx])[dit()](vof, comp) = 0.0;//1.E-5;
-#endif
+									     E,
+									     cdrDensitiesEB);
+
+      // CdrPlasmaPhysics returns the diffusion coefficients in the definition order -- we need to put the coefficients
+      // in the solver data holders now. 
+      for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
+
+	// The check here is important because some of the input data will be nullptr if the species is not diffusive. 
+	if(solverIt()->isDiffusive()){
+	  (*a_cdrDcoEB[idx])[dit()](vof, comp) = Dcos[idx];
 	}
       }
-    }
+    };
+
+    // Kernel region.
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
+
+    // Launch the kernel.
+    BoxLoops::loop(vofit, irregularKernel);
   }
 }
 
@@ -1739,8 +1916,8 @@ void CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&   
       const RealVect pos       = EBArith::getVofLocation(vof, dx*RealVect::Unit, probLo) + centroid*dx;
 
       // Build ion densities and velocities
-      for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.index();
+      for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
 	extrap_cdr_fluxes[idx]     = (*a_extrap_cdr_fluxes[idx])[dit()](vof,comp);
 	extrap_cdr_densities[idx]  = (*a_extrap_cdr_densities[idx])[dit()](vof,comp);
 	extrap_cdr_velocities[idx] = (*a_extrap_cdr_velocities[idx])[dit()](vof,comp);
@@ -1748,8 +1925,8 @@ void CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&   
       }
 
       // Build Photon intensities
-      for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.index();
+      for (RtIterator<RtSolver> solverIt(*m_rte); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
 	extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](vof,comp);
       }
 
@@ -1764,8 +1941,8 @@ void CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&   
 								       extrap_cdr_fluxes);
 	
       // Put the fluxes in their respective place
-      for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.index();
+      for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
 	(*a_fluxes[idx])[dit()](vof, comp) = fluxes[idx];
       }
     }
@@ -1783,8 +1960,8 @@ void CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&   
       const Real     time      = 0.0;
 
       // Build ion densities and velocities
-      for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.index();
+      for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
 	extrap_cdr_fluxes[idx]     = (*a_extrap_cdr_fluxes[idx])[dit()](vof,comp);
 	extrap_cdr_densities[idx]  = (*a_extrap_cdr_densities[idx])[dit()](vof,comp);
 	extrap_cdr_velocities[idx] = (*a_extrap_cdr_velocities[idx])[dit()](vof,comp);
@@ -1792,8 +1969,8 @@ void CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&   
       }
 
       // Build Photon intensities
-      for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.index();
+      for (RtIterator<RtSolver> solverIt(*m_rte); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
 	extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](vof,comp);
       }
 
@@ -1808,8 +1985,8 @@ void CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&   
 									extrap_cdr_fluxes);
 	
       // Put the fluxes in their respective place
-      for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.index();
+      for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
 	(*a_fluxes[idx])[dit()](vof, comp) = fluxes[idx];
       }
     }
@@ -1843,8 +2020,8 @@ void CdrPlasmaStepper::computeCdrFluxes(Vector<EBAMRIVData*>&       a_fluxes,
     Vector<LevelData<BaseIVFAB<Real> >* > extrap_cdr_gradients(numCdrSpecies);
     Vector<LevelData<BaseIVFAB<Real> >* > extrap_rte_fluxes(numRteSpecies);
     
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
       fluxes[idx]                = (*a_fluxes[idx])[lvl];
       extrap_cdr_fluxes[idx]     = (*a_extrap_cdr_fluxes[idx])[lvl];
       extrap_cdr_densities[idx]  = (*a_extrap_cdr_densities[idx])[lvl];
@@ -1853,8 +2030,8 @@ void CdrPlasmaStepper::computeCdrFluxes(Vector<EBAMRIVData*>&       a_fluxes,
     }
 
 
-    for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
+    for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
       extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[lvl];
     }
 
@@ -1897,8 +2074,8 @@ void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_flux
     Vector<LevelData<DomainFluxIFFAB>* > extrap_cdr_gradients(numCdrSpecies);
     Vector<LevelData<DomainFluxIFFAB>* > extrap_rte_fluxes(numRteSpecies);
     
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
       fluxes[idx]                = (*a_fluxes[idx])[lvl];
       extrap_cdr_fluxes[idx]     = (*a_extrap_cdr_fluxes[idx])[lvl];
       extrap_cdr_densities[idx]  = (*a_extrap_cdr_densities[idx])[lvl];
@@ -1906,8 +2083,8 @@ void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_flux
       extrap_cdr_gradients[idx]  = (*a_extrap_cdr_gradients[idx])[lvl];
     }
 
-    for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
+    for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
       extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[lvl];
     }
 
@@ -1972,8 +2149,8 @@ void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*
 					     (a_E)[dit()](dir, sit())(face,2)));
 
 	  // Ion densities. 
-	  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	    const int idx = solver_it.index();
+	  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	    const int idx = solverIt.index();
 	    extrap_cdr_fluxes[idx]     = (*a_extrap_cdr_fluxes[idx])[dit()](dir, sit())(face,comp);
 	    extrap_cdr_densities[idx]  = (*a_extrap_cdr_densities[idx])[dit()](dir, sit())(face,comp);
 	    extrap_cdr_velocities[idx] = (*a_extrap_cdr_velocities[idx])[dit()](dir, sit())(face,comp);
@@ -1981,8 +2158,8 @@ void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*
 	  }
 
 	  // Photon fluxes
-	  for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
-	    const int idx = solver_it.index();
+	  for (RtIterator<RtSolver> solverIt(*m_rte); solverIt.ok(); ++solverIt){
+	    const int idx = solverIt.index();
 	    extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](dir, sit())(face,comp);
 	  }
 
@@ -1999,8 +2176,8 @@ void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*
 									extrap_cdr_fluxes);
 
 	  // Put fluxes where they belong
-	  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	    const int idx = solver_it.index();
+	  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	    const int idx = solverIt.index();
 	    (*a_fluxes[idx])[dit()](dir, sit())(face, comp) = fluxes[idx];
 	  }
 	}
@@ -2105,9 +2282,9 @@ void CdrPlasmaStepper::extrapolateToVectorDomainFaces(Vector<EBAMRIFData*>&     
     pout() << "CdrPlasmaStepper::extrapolateToVectorDomainFaces" << endl;
   }
 
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const int idx = solverIt.index();
     extrapolateToVectorDomainFaces(*a_extrap[idx], a_phase, *a_data[idx]);
   }
 }
@@ -2121,9 +2298,9 @@ void CdrPlasmaStepper::extrapolateVelocitiesVectorDomainFaces(Vector<EBAMRIFData
   }
 
   //  for(int i = 0; i < a_extrap.size(); i++){
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const int idx = solverIt.index();
     if(solver->isMobile()){
       extrapolateToVectorDomainFaces(*a_extrap[idx], a_phase, *a_velocities[idx]);
     }
@@ -2156,8 +2333,8 @@ void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a
     Vector<LevelData<EBCellFAB>* > velocities(numCdrSpecies);
     Vector<LevelData<EBCellFAB>* > cdr_densities(numCdrSpecies);
 
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
       velocities[idx]    = (*a_velocities[idx])[lvl];
       cdr_densities[idx] = (*a_cdrDensities[idx])[lvl];
     }
@@ -2166,9 +2343,9 @@ void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a
   }
 
   // Average down and interpolate ghost cells
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
-    if(solver_it()->isMobile()){
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    if(solverIt()->isMobile()){
       m_amr->averageDown(*a_velocities[idx], m_realm, m_cdr->getPhase()); 
       m_amr->interpGhostMG(*a_velocities[idx], m_realm, m_cdr->getPhase());
     }
@@ -2197,9 +2374,9 @@ void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *>&
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     Vector<EBCellFAB*> vel(numCdrSpecies);
     Vector<EBCellFAB*> phi(numCdrSpecies);;
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
-      if(solver_it()->isMobile()){
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
+      if(solverIt()->isMobile()){
 	vel[idx] = &(*a_velocities[idx])[dit()];
       }
       phi[idx] = &(*a_cdrDensities[idx])[dit()];
@@ -2243,8 +2420,8 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&     
 
       // Get densities
       Vector<Real> cdr_densities;
-      for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.index();
+      for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
 	cdr_densities.push_back((*a_cdrDensities[idx]).getSingleValuedFAB()(iv, comp));
       }
 
@@ -2253,9 +2430,9 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&     
     }
 
     // Put velocities in the appropriate place. 
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<CdrSolver>& solver = solver_it();
-      const int idx = solver_it.index();
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      RefCountedPtr<CdrSolver>& solver = solverIt();
+      const int idx = solverIt.index();
       if(solver->isMobile()){
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  (*a_velocities[idx]).getSingleValuedFAB()(iv, dir) = velocities[idx][dir];
@@ -2266,9 +2443,9 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&     
 
 
   // Covered is always bogus.
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    if(solver_it()->isMobile()){
-      const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    if(solverIt()->isMobile()){
+      const int idx = solverIt.index();
       for (int dir = 0; dir < SpaceDim; dir++){
 	a_velocities[idx]->setCoveredCellVal(0.0, dir);
       }
@@ -2355,9 +2532,9 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast2D(Vector<EBCellFAB*>
   }
 
   // Put the results back into solvers
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
-    const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+    const int idx = solverIt.index();
     if(solver->isMobile()){
       FArrayBox& v = a_velocities[idx]->getFArrayBox();
 
@@ -2445,9 +2622,9 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast3D(Vector<EBCellFAB*>
   }
   
   // Put the results back into solvers
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
-    const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+    const int idx = solverIt.index();
     if(solver->isMobile()){
       FArrayBox& v = a_velocities[idx]->getFArrayBox();
       
@@ -2490,8 +2667,8 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&   
 
     // Get densities
     Vector<Real> cdr_densities;
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
       cdr_densities.push_back((*a_cdrDensities[idx])(vof, comp));
     }
     
@@ -2499,9 +2676,9 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&   
     const Vector<RealVect> velocities = m_physics->computeCdrDriftVelocities(a_time, pos, e, cdr_densities);
 
     // Put velocities in the appropriate place. 
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      if(solver_it()->isMobile()){
-	const int idx = solver_it.index();
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      if(solverIt()->isMobile()){
+	const int idx = solverIt.index();
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  (*a_velocities[idx])(vof, dir) = velocities[idx][dir];
 	}
@@ -2666,10 +2843,10 @@ void CdrPlasmaStepper::computeChargeFlux(EBAMRIVData& a_flux, Vector<EBAMRIVData
 
   DataOps::setValue(a_flux, 0.0);
 
-  for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
-    const EBAMRIVData& solver_flux          = *a_cdr_fluxes[solver_it.index()];
+  for (CdrIterator<CdrSolver> solverIt(*m_cdr); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const RefCountedPtr<CdrSpecies>& spec      = solverIt.getSpecies();
+    const EBAMRIVData& solver_flux          = *a_cdr_fluxes[solverIt.index()];
 
     DataOps::incr(a_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
@@ -2717,9 +2894,9 @@ void CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_
   const IrregAmrStencil<EbCentroidInterpolationStencil>& interpStencils = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
 
   //  for (int i = 0; i < a_fluxes.size(); i++){
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
-    const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+    const int idx = solverIt.index();
     if(solver->isMobile()){
       interpStencils.apply(eb_vel, *a_velocities[idx]);
       interpStencils.apply(eb_phi, *a_densities[idx]);
@@ -2753,9 +2930,9 @@ void CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&      
   m_amr->allocate(scratch, m_realm, a_phase, SpaceDim);
 
   //  for (int i = 0; i < a_ebvelo.size(); i++){
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const int idx = solverIt.index();
     if(solver->isMobile()){
       this->extrapolateToEb(scratch, a_phase, *a_cell_vel[idx]);
       this->projectFlux(*a_ebvelo[idx], scratch);
@@ -2779,9 +2956,9 @@ void CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&    
   m_amr->allocate(domain_flux, m_realm, a_phase, SpaceDim);
 
   //  for (int i = 0; i < a_fluxes.size(); i++){
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const int idx = solverIt.index();
     if(solver->isMobile()){
       DataOps::copy(cell_flux, *a_velocities[idx]);
       DataOps::multiplyScalar(cell_flux, *a_densities[idx]); // cell_flux = n*v
@@ -2860,9 +3037,9 @@ void CdrPlasmaStepper::computeJ(LevelData<EBCellFAB>& a_J, const int a_lvl) cons
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+    RefCountedPtr<CdrSpecies>& spec      = solverIt.getSpecies();
 
     if(solver->isMobile()){
       const int q                       = spec->getChargeNumber();
@@ -3052,8 +3229,8 @@ void CdrPlasmaStepper::getCdrMax(Real& a_cdr_max, std::string& a_solver_name){
   
   a_cdr_max = -1.E99;
   a_solver_name = "invalid solver";
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver = solverIt();
     Real max, min;
     DataOps::getMaxMin(max, min, solver->getPhi(), comp);
 
@@ -3656,7 +3833,7 @@ void CdrPlasmaStepper::solveRadiativeTransfer(const Real a_dt){
   Vector<EBAMRCellData*> rhs        = m_rte->getSources();
   Vector<EBAMRCellData*> cdr_states = m_cdr->getPhis();
 
-  this->solveRadiativeTransfer(states, rhs, cdr_states, E, m_time, a_dt, Centering::CellCenter);
+  this->solveRadiativeTransfer(states, rhs, cdr_states, E, m_time, a_dt);
 }
 
 void CdrPlasmaStepper::solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_rte_states,
@@ -3664,8 +3841,7 @@ void CdrPlasmaStepper::solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_rt
 					      const Vector<EBAMRCellData*>& a_cdr_states,
 					      const EBAMRCellData&          a_E,
 					      const Real                    a_time,
-					      const Real                    a_dt,
-					      const Centering               a_centering){
+					      const Real                    a_dt) {
   CH_TIME("CdrPlasmaStepper::solveRadiativeTransfer(full)");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::solveRadiativeTransfer(full)" << endl;
@@ -3674,10 +3850,10 @@ void CdrPlasmaStepper::solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_rt
   //  this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
   //  advanceReactionNetwork(a_time, a_dt);
 
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
+  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
     
-    RefCountedPtr<RtSolver>& solver = solver_it();
+    RefCountedPtr<RtSolver>& solver = solverIt();
     EBAMRCellData& state              = *a_rte_states[idx];
     EBAMRCellData& rhs                = *a_rte_sources[idx];
     solver->advance(a_dt, state, rhs);
@@ -3711,9 +3887,9 @@ Real CdrPlasmaStepper::computeElectrodeCurrent(){
   m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
   DataOps::setValue(charge_flux, 0.0);
   
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const RefCountedPtr<CdrSpecies>& spec      = solverIt.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
     DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
@@ -3759,9 +3935,9 @@ Real CdrPlasmaStepper::computeDielectricCurrent(){
   m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
   DataOps::setValue(charge_flux, 0.0);
   
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const RefCountedPtr<CdrSpecies>& spec      = solverIt.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
     DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
@@ -3809,9 +3985,9 @@ Real CdrPlasmaStepper::computeDomainCurrent(){
   m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
   DataOps::setValue(charge_flux, 0.0);
   
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const RefCountedPtr<CdrSpecies>& spec      = solverIt.getSpecies();
     const EBAMRIFData& solver_flux          = solver->getDomainFlux();
 
     DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
@@ -3956,14 +4132,14 @@ void CdrPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl
   }
 
   // CDR solvers checkpoint their data
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
     solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
   // RTE solvers checkpoint their data
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<RtSolver>& solver = solver_it();
+  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<RtSolver>& solver = solverIt();
     solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
@@ -3979,13 +4155,13 @@ void CdrPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
     pout() << "CdrPlasmaStepper::readCheckpointData" << endl;
   }
 
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver = solverIt();
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<RtSolver>& solver = solver_it();
+  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<RtSolver>& solver = solverIt();
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
@@ -4001,13 +4177,13 @@ int CdrPlasmaStepper::getNumberOfPlotVariables() const{
   }
   int ncomp = 0;
   
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver = solverIt();
     ncomp += solver->getNumberOfPlotVariables();
   }
   
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<RtSolver>& solver = solver_it();
+  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<RtSolver>& solver = solverIt();
     ncomp += solver->getNumberOfPlotVariables();
   }
 
@@ -4036,15 +4212,15 @@ void CdrPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string
   m_sigma->writePlotData(a_output, a_icomp);
 
   // CDR solvers copy their output data
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver = solverIt();
     a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 
   // RTE solvers copy their output data
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<RtSolver>& solver = solver_it();
+  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<RtSolver>& solver = solverIt();
     a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
