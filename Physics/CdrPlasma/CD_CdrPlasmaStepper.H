@@ -663,13 +663,43 @@ namespace Physics {
 					 const Real&                 a_time);
 
       /*!
-	@brief Compute diffusion coefficients on the EB. Level version. 
+	@brief Compute diffusion coefficients on the EB. This is a level version but it will go through all patches. 
+	@param[out] a_cdrDcoEB        EB-centered_CDR diffusion coefficients
+	@param[in]  a_cdrDensitiesEB  EB-centered CDR densities
+	@param[in]  a_electricFieldEB EB-centered electric field
+	@param[in]  a_time            Time
+	@param[in]  a_lvl             Grid level. 
       */
-      virtual void computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_ebDiffusionCoefficient,
-					 const Vector<LevelData<BaseIVFAB<Real> >* >& a_cdrDensities,
-					 const LevelData<BaseIVFAB<Real> >&           a_E,
+      virtual void computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_cdrDcoEB,
+					 const Vector<LevelData<BaseIVFAB<Real> >* >& a_cdrDensitiesEB,
+					 const LevelData<BaseIVFAB<Real> >&           a_electricFieldEB,
 					 const Real&                                  a_time,
 					 const int                                    a_lvl);
+
+      /*!
+	@brief Compute the cell-centered cdr velocities. Level version. 
+      */
+      virtual void computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *>&       a_velocities,
+					     const Vector<LevelData<EBCellFAB> *>& a_cdrDensities,
+					     const LevelData<EBCellFAB> &          a_E,
+					     const int                             a_lvl,
+					     const Real&                           a_time);
+
+      virtual void computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&       a_velocities,
+						    const Vector<EBCellFAB*>& a_cdrDensities,
+						    const EBCellFAB&          a_E,
+						    const Box&                a_box,
+						    const Real&               a_time,
+						    const Real&               a_dx);
+
+      virtual void computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_velocities,
+						      const Vector<EBCellFAB*>& a_cdrDensities,
+						      const EBCellFAB&          a_E,
+						      const Box&                a_box,
+						      const Real&               a_time,
+						      const Real&               a_dx,
+						      const int                 a_lvl,
+						      const DataIndex&          a_dit);      
 
       /*!
 	@brief Compute cdr_fluxes
@@ -747,51 +777,7 @@ namespace Physics {
 					     const EBAMRCellData&          a_E,
 					     const Real&                   a_time);
 
-      /*!
-	@brief Compute the cell-centered cdr velocities. Level version. 
-      */
-      virtual void computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *>&       a_velocities,
-					     const Vector<LevelData<EBCellFAB> *>& a_cdrDensities,
-					     const LevelData<EBCellFAB> &          a_E,
-					     const int                             a_lvl,
-					     const Real&                           a_time);
 
-      virtual void computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&       a_velocities,
-						    const Vector<EBCellFAB*>& a_cdrDensities,
-						    const EBCellFAB&          a_E,
-						    const Box&                a_box,
-						    const Real&               a_time,
-						    const Real&               a_dx);
-
-      virtual void computeCdrDriftVelocitiesRegularFast(Vector<EBCellFAB*>&       a_velocities,
-							const Vector<EBCellFAB*>& a_cdrDensities,
-							const EBCellFAB&          a_E,
-							const Box&                a_box,
-							const Real&               a_time,
-							const Real&               a_dx);
-
-      virtual void computeCdrDriftVelocitiesRegularFast2D(Vector<EBCellFAB*>&       a_velocities,
-							  const Vector<EBCellFAB*>& a_cdrDensities,
-							  const EBCellFAB&          a_E,
-							  const Box&                a_box,
-							  const Real&               a_time,
-							  const Real&               a_dx);
-  
-      virtual void computeCdrDriftVelocitiesRegularFast3D(Vector<EBCellFAB*>&       a_velocities,
-							  const Vector<EBCellFAB*>& a_cdrDensities,
-							  const EBCellFAB&          a_E,
-							  const Box&                a_box,
-							  const Real&               a_time,
-							  const Real&               a_dx);
-
-      virtual void computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_velocities,
-						      const Vector<EBCellFAB*>& a_cdrDensities,
-						      const EBCellFAB&          a_E,
-						      const Box&                a_box,
-						      const Real&               a_time,
-						      const Real&               a_dx,
-						      const int                 a_lvl,
-						      const DataIndex&          a_dit);
 
       /*!
 	@brief Compute the cell-centered fluxes and extrapolate these to the EB centroid

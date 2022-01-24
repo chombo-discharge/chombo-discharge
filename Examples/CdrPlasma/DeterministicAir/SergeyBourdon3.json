@@ -283,7 +283,11 @@
 	 "max E/N": 2000,
 	 "num points": 1000,
 	 "quenching pressure": 0.03947,
-	 "scale": 0.06
+	 "scale": 0.06,
+	 "soloviev" : {
+	     "correction": true,
+	     "species": "e"
+	 }	 
      },
      {
 	 "reaction": "e + N2 -> e + N2 + Bourdon2",
@@ -296,7 +300,11 @@
 	 "max E/N": 2000,
 	 "num points": 1000,
 	 "quenching pressure": 0.03947,
-	 "scale": 0.06
+	 "scale": 0.06,
+	 "soloviev" : {
+	     "correction": true,
+	     "species": "e"
+	 }	 
      },
      {
 	 "reaction": "e + N2 -> e + N2 + Bourdon3",
@@ -309,7 +317,11 @@
 	 "max E/N": 2000,
 	 "num points": 1000,
 	 "quenching pressure": 0.03947,
-	 "scale": 0.06
+	 "scale": 0.06,
+	 "soloviev" : {
+	     "correction": true,
+	     "species": "e"
+	 }	 
      }
  ],
  "photo reactions":

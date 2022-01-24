@@ -24,9 +24,6 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-// C-style VLA methods can have occasional memory issues. Use them at your own peril. 
-#define USE_FAST_VELOCITIES 0
-
 using namespace Physics::CdrPlasma;
 
 CdrPlasmaStepper::CdrPlasmaStepper(){
@@ -1861,6 +1858,194 @@ void CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real> >*
   }
 }
 
+void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_velocities,
+						 const Vector<EBAMRCellData*>& a_cdrDensities,
+						 const EBAMRCellData&          a_E,
+						 const Real&                   a_time){
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocities(full)");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocities(full)" << endl;
+  }
+
+  MayDay::Error("CdrPlasmaStepper::computeCdrDriftVelocities -- this is the first function where I should resume code review");
+  
+  const int numCdrSpecies  = m_physics->getNumCdrSpecies();
+  const int finest_level = m_amr->getFinestLevel();
+
+  // Interpolate E to centroids
+  EBAMRCellData E;
+  m_amr->allocate(E, m_realm, phase::gas, SpaceDim);
+  DataOps::copy(E, a_E);
+  //  m_amr->interpToCentroids(E, m_realm, phase::gas);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+
+    Vector<LevelData<EBCellFAB>* > velocities(numCdrSpecies);
+    Vector<LevelData<EBCellFAB>* > cdr_densities(numCdrSpecies);
+
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
+      velocities[idx]    = (*a_velocities[idx])[lvl];
+      cdr_densities[idx] = (*a_cdrDensities[idx])[lvl];
+    }
+
+    computeCdrDriftVelocities(velocities, cdr_densities, *E[lvl], lvl, a_time);
+  }
+
+  // Average down and interpolate ghost cells
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    if(solverIt()->isMobile()){
+      m_amr->averageDown(*a_velocities[idx], m_realm, m_cdr->getPhase()); 
+      m_amr->interpGhostMG(*a_velocities[idx], m_realm, m_cdr->getPhase());
+    }
+  }
+}
+
+void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *>&       a_velocities,
+						 const Vector<LevelData<EBCellFAB> *>& a_cdrDensities,
+						 const LevelData<EBCellFAB> &          a_E,
+						 const int                             a_lvl,
+						 const Real&                           a_time){
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocities(level)");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocities(level)" << endl;
+  }
+
+  const phase::which_phase cdr_phase = m_cdr->getPhase();
+  const int finest_level             = m_amr->getFinestLevel();
+
+  const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
+  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, cdr_phase)[a_lvl];
+  const Real dx                 = m_amr->getDx()[a_lvl];
+
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+    
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    Vector<EBCellFAB*> vel(numCdrSpecies);
+    Vector<EBCellFAB*> phi(numCdrSpecies);;
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
+      if(solverIt()->isMobile()){
+	vel[idx] = &(*a_velocities[idx])[dit()];
+      }
+      phi[idx] = &(*a_cdrDensities[idx])[dit()];
+    }
+
+
+    computeCdrDriftVelocitiesRegular(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
+
+    computeCdrDriftVelocitiesIrregular(vel, phi, a_E[dit()], dbl.get(dit()), a_time, dx, a_lvl, dit());
+  }
+}
+
+void CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&       a_velocities,
+							const Vector<EBCellFAB*>& a_cdrDensities,
+							const EBCellFAB&          a_E,
+							const Box&                a_box,
+							const Real&               a_time,
+							const Real&               a_dx){
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocitiesRegular");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocitiesRegular" << endl;
+  }
+
+  const int comp         = 0;
+  const RealVect probLo  = m_amr->getProbLo();
+  const BaseFab<Real>& E = a_E.getSingleValuedFAB();
+  const EBISBox& ebisbox = a_E.getEBISBox();
+
+
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv    = bit();
+    const RealVect pos  = probLo + a_dx*iv;
+    const RealVect e    = RealVect(D_DECL(E(iv, 0), E(iv, 1), E(iv, 2)));
+
+    Vector<RealVect> velocities(a_cdrDensities.size(), RealVect::Zero);
+
+    if(ebisbox.isRegular(iv)){
+
+      // Get densities
+      Vector<Real> cdr_densities;
+      for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
+	cdr_densities.push_back((*a_cdrDensities[idx]).getSingleValuedFAB()(iv, comp));
+      }
+
+      // Compute velocities
+      velocities = m_physics->computeCdrDriftVelocities(a_time, pos, e, cdr_densities);
+    }
+
+    // Put velocities in the appropriate place. 
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      RefCountedPtr<CdrSolver>& solver = solverIt();
+      const int idx = solverIt.index();
+      if(solver->isMobile()){
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  (*a_velocities[idx]).getSingleValuedFAB()(iv, dir) = velocities[idx][dir];
+	}
+      }
+    }
+  }
+
+
+  // Covered is always bogus.
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    if(solverIt()->isMobile()){
+      const int idx = solverIt.index();
+      for (int dir = 0; dir < SpaceDim; dir++){
+	a_velocities[idx]->setCoveredCellVal(0.0, dir);
+      }
+    }
+  }
+}
+
+void CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_velocities,
+							  const Vector<EBCellFAB*>& a_cdrDensities,
+							  const EBCellFAB&          a_E,
+							  const Box&                a_box,
+							  const Real&               a_time,
+							  const Real&               a_dx,
+							  const int                 a_lvl,
+							  const DataIndex&          a_dit){
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular" << endl;
+  }
+
+  const int comp         = 0;
+  const EBISBox& ebisbox = a_E.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  const RealVect probLo  = m_amr->getProbLo();
+
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
+    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, probLo);
+
+    // Get densities
+    Vector<Real> cdr_densities;
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
+      cdr_densities.push_back((*a_cdrDensities[idx])(vof, comp));
+    }
+    
+    // Compute velocities
+    const Vector<RealVect> velocities = m_physics->computeCdrDriftVelocities(a_time, pos, e, cdr_densities);
+
+    // Put velocities in the appropriate place. 
+    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      if(solverIt()->isMobile()){
+	const int idx = solverIt.index();
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  (*a_velocities[idx])(vof, dir) = velocities[idx][dir];
+	}
+      }
+    }
+  }
+}
+
 void CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&       a_fluxes,
 					const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_fluxes,
 					const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_densities,
@@ -2310,382 +2495,7 @@ void CdrPlasmaStepper::extrapolateVelocitiesVectorDomainFaces(Vector<EBAMRIFData
   }
 }
 
-void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_velocities,
-						 const Vector<EBAMRCellData*>& a_cdrDensities,
-						 const EBAMRCellData&          a_E,
-						 const Real&                   a_time){
-  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocities(full)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDriftVelocities(full)" << endl;
-  }
-  
-  const int numCdrSpecies  = m_physics->getNumCdrSpecies();
-  const int finest_level = m_amr->getFinestLevel();
 
-  // Interpolate E to centroids
-  EBAMRCellData E;
-  m_amr->allocate(E, m_realm, phase::gas, SpaceDim);
-  DataOps::copy(E, a_E);
-  //  m_amr->interpToCentroids(E, m_realm, phase::gas);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-
-    Vector<LevelData<EBCellFAB>* > velocities(numCdrSpecies);
-    Vector<LevelData<EBCellFAB>* > cdr_densities(numCdrSpecies);
-
-    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      const int idx = solverIt.index();
-      velocities[idx]    = (*a_velocities[idx])[lvl];
-      cdr_densities[idx] = (*a_cdrDensities[idx])[lvl];
-    }
-
-    computeCdrDriftVelocities(velocities, cdr_densities, *E[lvl], lvl, a_time);
-  }
-
-  // Average down and interpolate ghost cells
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const int idx = solverIt.index();
-    if(solverIt()->isMobile()){
-      m_amr->averageDown(*a_velocities[idx], m_realm, m_cdr->getPhase()); 
-      m_amr->interpGhostMG(*a_velocities[idx], m_realm, m_cdr->getPhase());
-    }
-  }
-}
-
-void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *>&       a_velocities,
-						 const Vector<LevelData<EBCellFAB> *>& a_cdrDensities,
-						 const LevelData<EBCellFAB> &          a_E,
-						 const int                             a_lvl,
-						 const Real&                           a_time){
-  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocities(level)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDriftVelocities(level)" << endl;
-  }
-
-  const phase::which_phase cdr_phase = m_cdr->getPhase();
-  const int finest_level             = m_amr->getFinestLevel();
-
-  const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, cdr_phase)[a_lvl];
-  const Real dx                 = m_amr->getDx()[a_lvl];
-
-  const int numCdrSpecies = m_physics->getNumCdrSpecies();
-    
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    Vector<EBCellFAB*> vel(numCdrSpecies);
-    Vector<EBCellFAB*> phi(numCdrSpecies);;
-    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      const int idx = solverIt.index();
-      if(solverIt()->isMobile()){
-	vel[idx] = &(*a_velocities[idx])[dit()];
-      }
-      phi[idx] = &(*a_cdrDensities[idx])[dit()];
-    }
-
-    // Separate calls for regular and irregular
-#if USE_FAST_VELOCITIES
-    computeCdrDriftVelocitiesRegularFast(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
-#else
-    computeCdrDriftVelocitiesRegular(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
-#endif
-    computeCdrDriftVelocitiesIrregular(vel, phi, a_E[dit()], dbl.get(dit()), a_time, dx, a_lvl, dit());
-  }
-}
-
-void CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&       a_velocities,
-							const Vector<EBCellFAB*>& a_cdrDensities,
-							const EBCellFAB&          a_E,
-							const Box&                a_box,
-							const Real&               a_time,
-							const Real&               a_dx){
-  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocitiesRegular");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDriftVelocitiesRegular" << endl;
-  }
-
-  const int comp         = 0;
-  const RealVect probLo  = m_amr->getProbLo();
-  const BaseFab<Real>& E = a_E.getSingleValuedFAB();
-  const EBISBox& ebisbox = a_E.getEBISBox();
-
-
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
-    const IntVect iv    = bit();
-    const RealVect pos  = probLo + a_dx*iv;
-    const RealVect e    = RealVect(D_DECL(E(iv, 0), E(iv, 1), E(iv, 2)));
-
-    Vector<RealVect> velocities(a_cdrDensities.size(), RealVect::Zero);
-
-    if(ebisbox.isRegular(iv)){
-
-      // Get densities
-      Vector<Real> cdr_densities;
-      for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-	const int idx = solverIt.index();
-	cdr_densities.push_back((*a_cdrDensities[idx]).getSingleValuedFAB()(iv, comp));
-      }
-
-      // Compute velocities
-      velocities = m_physics->computeCdrDriftVelocities(a_time, pos, e, cdr_densities);
-    }
-
-    // Put velocities in the appropriate place. 
-    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      RefCountedPtr<CdrSolver>& solver = solverIt();
-      const int idx = solverIt.index();
-      if(solver->isMobile()){
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  (*a_velocities[idx]).getSingleValuedFAB()(iv, dir) = velocities[idx][dir];
-	}
-      }
-    }
-  }
-
-
-  // Covered is always bogus.
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    if(solverIt()->isMobile()){
-      const int idx = solverIt.index();
-      for (int dir = 0; dir < SpaceDim; dir++){
-	a_velocities[idx]->setCoveredCellVal(0.0, dir);
-      }
-    }
-  }
-}
-
-void CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast(Vector<EBCellFAB*>&       a_velocities,
-							    const Vector<EBCellFAB*>& a_cdrDensities,
-							    const EBCellFAB&          a_E,
-							    const Box&                a_box,
-							    const Real&               a_time,
-							    const Real&               a_dx){
-#if CH_SPACEDIM==2
-  computeCdrDriftVelocitiesRegularFast2D(a_velocities, a_cdrDensities, a_E, a_box, a_time, a_dx);
-#elif CH_SPACEDIM==3
-  computeCdrDriftVelocitiesRegularFast3D(a_velocities, a_cdrDensities, a_E, a_box, a_time, a_dx);
-#endif
-}
-
-void CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast2D(Vector<EBCellFAB*>&       a_velocities,
-							      const Vector<EBCellFAB*>& a_cdrDensities,
-							      const EBCellFAB&          a_E,
-							      const Box&                a_box,
-							      const Real&               a_time,
-							      const Real&               a_dx){
-  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast2D");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast2D" << endl;
-  }
-  
-#if CH_SPACEDIM==2
-  const int numCdrSpecies  = m_physics->getNumCdrSpecies();
-  const int comp         = 0;
-  const RealVect probLo  = m_amr->getProbLo();
-  const BaseFab<Real>& E = a_E.getSingleValuedFAB();
-
-  // I need contiguous memory for the nasty stuff that is about to happen, so begin by copying things onto smaller
-  // data holders
-  FArrayBox cdr_phi(a_box, numCdrSpecies);
-  FArrayBox cdr_vx(a_box,  numCdrSpecies);
-  FArrayBox cdr_vy(a_box,  numCdrSpecies);
-  for (int idx = 0; idx < numCdrSpecies; idx++){
-    cdr_phi.copy(a_cdrDensities[idx]->getFArrayBox(), a_box, 0, a_box, idx, 1);
-  }
-
-  FArrayBox Efab(a_box, SpaceDim);
-  Efab.copy(a_E.getFArrayBox(), a_box, 0, a_box, 0, SpaceDim);
-
-
-  // Pointer offsets
-  const IntVect dims   = a_box.size();
-  const IntVect lo     = a_box.smallEnd();
-  const IntVect hi     = a_box.bigEnd();
-  const int n0         = dims[0];
-  const int n1         = dims[1];
-  const int offset     = lo[0] + n0*lo[1];
-
-  // C style variable-length array conversion magic
-  auto vla_cdr_phi = (Real (*__restrict__)[n1][n0]) (cdr_phi.dataPtr() - offset);
-  auto vla_cdr_vx  = (Real (*__restrict__)[n1][n0]) (cdr_vx.dataPtr()  - offset);
-  auto vla_cdr_vy  = (Real (*__restrict__)[n1][n0]) (cdr_vy.dataPtr()  - offset);
-  auto vla_E       = (Real (*__restrict__)[n1][n0]) (Efab.dataPtr()    - offset);
-  
-  for (int j = lo[1]; j <= hi[1]; ++j){
-    for (int i = lo[0]; i <= hi[0]; ++i){
-
-      const RealVect pos = probLo + RealVect(D_DECL(i,j,k))*a_dx;
-      const RealVect E   = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
-
-      Vector<Real> cdr_densities(numCdrSpecies);
-      for (int idx = 0; idx < numCdrSpecies; idx++){
-	cdr_densities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
-      }
-
-      const Vector<RealVect> velocities = m_physics->computeCdrDriftVelocities(a_time, pos, E, cdr_densities);
-
-      // Put result in correct palce
-      for (int idx = 0; idx < numCdrSpecies; ++idx){
-	vla_cdr_vx[idx][j][i] = velocities[idx][0];
-	vla_cdr_vy[idx][j][i] = velocities[idx][1];
-      }
-    }
-  }
-
-  // Put the results back into solvers
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    RefCountedPtr<CdrSolver>& solver = solverIt();
-    const int idx = solverIt.index();
-    if(solver->isMobile()){
-      FArrayBox& v = a_velocities[idx]->getFArrayBox();
-
-      v.copy(cdr_vx, a_box, idx, a_box, 0, 1);
-      v.copy(cdr_vy, a_box, idx, a_box, 1, 1);
-
-      for (int dir = 0; dir < SpaceDim; dir++){
-	a_velocities[idx]->setCoveredCellVal(0.0, dir);
-      }
-    }
-  }
-#endif
-}
-
-
-
-void CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast3D(Vector<EBCellFAB*>&       a_velocities,
-							      const Vector<EBCellFAB*>& a_cdrDensities,
-							      const EBCellFAB&          a_E,
-							      const Box&                a_box,
-							      const Real&               a_time,
-							      const Real&               a_dx){
-  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast3D");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast3D" << endl;
-  }
-
-#if CH_SPACEDIM==3
-  const int numCdrSpecies  = m_physics->getNumCdrSpecies();
-  const int comp         = 0;
-  const RealVect probLo  = m_amr->getProbLo();
-  const BaseFab<Real>& E = a_E.getSingleValuedFAB();
-
-  // I need contiguous memory for the nasty stuff that is about to happen, so begin by copying things onto smaller
-  // data holders
-  FArrayBox cdr_phi(a_box, numCdrSpecies);
-  FArrayBox cdr_vx(a_box,  numCdrSpecies);
-  FArrayBox cdr_vy(a_box,  numCdrSpecies);
-  FArrayBox cdr_vz(a_box,  numCdrSpecies);
-  for (int idx = 0; idx < numCdrSpecies; idx++){
-    cdr_phi.copy(a_cdrDensities[idx]->getFArrayBox(), a_box, 0, a_box, idx, 1);
-  }
-
-  FArrayBox Efab(a_box, SpaceDim);
-  Efab.copy(a_E.getFArrayBox(), a_box, 0, a_box, 0, SpaceDim);
-
-
-  // Pointer offsets
-  const IntVect dims   = a_box.size();
-  const IntVect lo     = a_box.smallEnd();
-  const IntVect hi     = a_box.bigEnd();
-  const int n0         = dims[0];
-  const int n1         = dims[1];
-  const int n2         = dims[2];
-  const int offset     = lo[0] + n0*(lo[1] + n1*lo[2]);
-
-  auto vla_cdr_phi = (Real (*__restrict__)[n2][n1][n0]) (cdr_phi.dataPtr() - offset);
-  auto vla_cdr_vx  = (Real (*__restrict__)[n2][n1][n0]) (cdr_vx.dataPtr()  - offset);
-  auto vla_cdr_vy  = (Real (*__restrict__)[n2][n1][n0]) (cdr_vy.dataPtr()  - offset);
-  auto vla_cdr_vz  = (Real (*__restrict__)[n2][n1][n0]) (cdr_vz.dataPtr()  - offset);
-  auto vla_E       = (Real (*__restrict__)[n2][n1][n0]) (Efab.dataPtr()    - offset);
-  
-  for (int k = lo[2]; k <= hi[2]; k++){
-    for (int j = lo[1]; j <= hi[1]; ++j){
-      for (int i = lo[0]; i <= hi[0]; ++i){
-
-	const RealVect pos = probLo + RealVect(D_DECL(i,j,k))*a_dx;
-	const RealVect E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[2][k][j][i]);
-
-	Vector<Real> cdr_densities(numCdrSpecies);
-	for (int idx = 0; idx < numCdrSpecies; idx++){
-	  cdr_densities[idx] = Max(0.0, vla_cdr_phi[idx][k][j][i]);
-	}
-
-	const Vector<RealVect> velocities = m_physics->computeCdrDriftVelocities(a_time, pos, E, cdr_densities);
-
-	// Put result in correct palce
-	for (int idx = 0; idx < numCdrSpecies; ++idx){
-	  vla_cdr_vx[idx][k][j][i] = velocities[idx][0];
-	  vla_cdr_vy[idx][k][j][i] = velocities[idx][1];
-	  vla_cdr_vz[idx][k][j][i] = velocities[idx][2];
-	}
-      }
-    }
-  }
-  
-  // Put the results back into solvers
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    RefCountedPtr<CdrSolver>& solver = solverIt();
-    const int idx = solverIt.index();
-    if(solver->isMobile()){
-      FArrayBox& v = a_velocities[idx]->getFArrayBox();
-      
-      v.copy(cdr_vx, a_box, 0, a_box, 0, 1);
-      v.copy(cdr_vy, a_box, 0, a_box, 1, 1);
-      v.copy(cdr_vz, a_box, 0, a_box, 2, 1);
-
-      for (int dir = 0; dir < SpaceDim; dir++){
-	a_velocities[idx]->setCoveredCellVal(0.0, dir);
-      }      
-    }
-  }
-#endif
-}
-
-
-void CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_velocities,
-							  const Vector<EBCellFAB*>& a_cdrDensities,
-							  const EBCellFAB&          a_E,
-							  const Box&                a_box,
-							  const Real&               a_time,
-							  const Real&               a_dx,
-							  const int                 a_lvl,
-							  const DataIndex&          a_dit){
-  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular" << endl;
-  }
-
-  const int comp         = 0;
-  const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect probLo  = m_amr->getProbLo();
-
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-    const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
-    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, probLo);
-
-    // Get densities
-    Vector<Real> cdr_densities;
-    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      const int idx = solverIt.index();
-      cdr_densities.push_back((*a_cdrDensities[idx])(vof, comp));
-    }
-    
-    // Compute velocities
-    const Vector<RealVect> velocities = m_physics->computeCdrDriftVelocities(a_time, pos, e, cdr_densities);
-
-    // Put velocities in the appropriate place. 
-    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      if(solverIt()->isMobile()){
-	const int idx = solverIt.index();
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  (*a_velocities[idx])(vof, dir) = velocities[idx][dir];
-	}
-      }
-    }
-  }
-}
 
 void CdrPlasmaStepper::preRegrid(const int a_lmin, const int a_finestLevel){
   CH_TIME("CdrPlasmaStepper::preRegrid");
