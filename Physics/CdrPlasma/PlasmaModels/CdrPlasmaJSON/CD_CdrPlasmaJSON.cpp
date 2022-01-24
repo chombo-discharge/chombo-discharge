@@ -1764,120 +1764,24 @@ Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensiti
 
   for (const auto& m : m_plasmaReactionPlot){
     if(m.second){
-      const int i = m.first;
+      const int reactionIndex = m.first;
       
-      // Reaction and species involved in the reaction. The lambda above does *not* multiply by neutral species densities. Since rates
-      // can be parsed in so many different ways, the rules for the various rates are put in the switch statement below.
-      const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions.at(i);
+      // Compute the reaction rate for the current reaction.
+      const Real k = this->computePlasmaReactionRate(reactionIndex,
+						     cdrDensities,
+						     cdrMobilities,
+						     cdrDiffusionCoefficients,
+						     cdrTemperatures,
+						     cdrGradients,
+						     a_pos,
+						     a_E,
+						     E,
+						     Etd,
+						     N,
+						     alpha,
+						     eta,
+						     a_time);    
 
-      const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
-      const std::list<int>& neutralReactants = reaction.getNeutralReactants();
-      const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
-      const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();    
-    
-    
-      // Figure out the reaction rate for this reaction. 
-      Real k = 0.0;
-
-      const LookupMethod& method = m_plasmaReactionLookup.at(i);
-
-      switch(method){
-      case LookupMethod::Constant:
-	{
-	  k = m_plasmaReactionConstants.at(i);
-
-	  for (const auto& n : neutralReactants){
-	    k *= (m_neutralSpeciesDensities[n])(a_pos);
-	  }
-
-	  break;
-	}
-      case LookupMethod::FunctionEN:
-	{
-	  k  = m_plasmaReactionFunctionsEN.at(i)(E, N);
-	  k *= N;
-	  
-	  break;
-	}
-      case LookupMethod::AlphaV:
-	{
-	  const int idx = m_plasmaReactionAlphaV.at(i);
-
-	  k = alpha * E * cdrMobilities[idx];
-
-	  break;
-	}
-      case LookupMethod::EtaV:
-	{
-	  const int idx = m_plasmaReactionEtaV.at(i);
-
-	  k = eta * E * cdrMobilities[idx];
-
-	  break;
-	}      
-      case LookupMethod::FunctionTT:
-	{
-	  const std::tuple<int, int, FunctionTT>& tup = m_plasmaReactionFunctionsTT.at(i);
-
-	  const int         idx1 = std::get<0>(tup);
-	  const int         idx2 = std::get<1>(tup);
-	  const FunctionTT& func = std::get<2>(tup);
-
-	  const Real T1 = (idx1 < 0) ? m_gasTemperature(a_pos) : cdrTemperatures[idx1];
-	  const Real T2 = (idx2 < 0) ? m_gasTemperature(a_pos) : cdrTemperatures[idx2];
-	
-	  k = func(T1, T2);
-
-	  for (const auto& n : neutralReactants){
-	    k *= (m_neutralSpeciesDensities[n])(a_pos);
-	  }
-
-	  break;
-	}
-      case LookupMethod::TableEN:
-	{
-	  // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that. 
-	  const LookupTable<2>& reactionTable = m_plasmaReactionTablesEN.at(i);
-
-	  k  = reactionTable.getEntry<1>(Etd); // Get rate/N
-	  k *= N;                              // Get rate
-	  
-	  break;
-	}
-      default:
-	{
-	  MayDay::Error("CdrPlasmaJSON::getPlotVariables -- logic bust");
-	  break;
-	}
-      }
-
-      // Modify by other parameters.
-      k *= m_plasmaReactionEfficiencies.at(i)(E, a_pos);
-
-      // This is a hook that uses the Soloviev correction. It modifies the reaction rate according to k = k * (1 + (E.D*grad(n))/(K * n * E^2) where
-      // K is the electron mobility. 
-      if( (m_plasmaReactionSolovievCorrection.at(i)).first){
-	const int species = (m_plasmaReactionSolovievCorrection.at(i)).second;
-
-	const Real&     n  = cdrDensities            [species];
-	const Real&     mu = cdrMobilities           [species];
-	const Real&     D  = cdrDiffusionCoefficients[species];
-	const RealVect& g  = cdrGradients            [species];
-
-	// Compute correction factor 1 + E.(D*grad(n))/(K * n * E^2). 
-	constexpr Real safety = 1.0;
-      
-	Real fcorr  = 1.0 + (a_E.dotProduct(D*g)) / ( safety + n * mu * E * E);
-
-	fcorr = std::max(fcorr, 0.0);
-      
-	k *= fcorr;
-      }
-
-      // Compute total consumption. After this, k -> total consumption. 
-      for (const auto& r : plasmaReactants){
-	k *= cdrDensities[r];
-      }
 
       ret.push_back(k);
     }
@@ -2024,6 +1928,138 @@ std::vector<Real> CdrPlasmaJSON::computePlasmaSpeciesTemperatures(const RealVect
   return T;
 }
 
+Real CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reactionIndex,
+					      const std::vector<Real>&     a_cdrDensities,					      
+					      const std::vector<Real>&     a_cdrMobilities,
+					      const std::vector<Real>&     a_cdrDiffusionCoefficients,
+					      const std::vector<Real>&     a_cdrTemperatures,					     					      
+					      const std::vector<RealVect>& a_cdrGradients,					     
+					      const RealVect&              a_pos,					     					     
+					      const RealVect&              a_vectorE,
+					      const Real&                  a_E,
+					      const Real&                  a_Etd,					      
+					      const Real&                  a_N,
+					      const Real&                  a_alpha,
+					      const Real&                  a_eta,					     
+					      const Real&                  a_time) const {
+
+
+
+  const LookupMethod&          method   = m_plasmaReactionLookup.at(a_reactionIndex);
+  const CdrPlasmaReactionJSON& reaction = m_plasmaReactions        [a_reactionIndex];
+
+  // Get list of reactants and products.   
+  const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
+  const std::list<int>& neutralReactants = reaction.getNeutralReactants();
+  const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
+  const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();
+
+  // Figure out how to compute the reaction rate. 
+  Real k = 0.0;
+
+  // Various ways of computing the reaction rate. 
+  switch(method){
+  case LookupMethod::Constant:
+    {
+      k = m_plasmaReactionConstants.at(a_reactionIndex);
+
+      for (const auto& n : neutralReactants){
+	k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }
+
+      break;
+    }
+  case LookupMethod::FunctionEN:
+    {
+      k  = m_plasmaReactionFunctionsEN.at(a_reactionIndex)(a_E, a_N);
+      k *= a_N;
+	  
+      break;
+    }
+  case LookupMethod::AlphaV:
+    {
+      const int idx = m_plasmaReactionAlphaV.at(a_reactionIndex);
+
+      k = a_alpha * a_E * a_cdrMobilities[idx];
+
+      break;
+    }
+  case LookupMethod::EtaV:
+    {
+      const int idx = m_plasmaReactionEtaV.at(a_reactionIndex);
+
+      k = a_eta * a_E * a_cdrMobilities[idx];
+
+      break;
+    }      
+  case LookupMethod::FunctionTT:
+    {
+      const std::tuple<int, int, FunctionTT>& tup = m_plasmaReactionFunctionsTT.at(a_reactionIndex);
+
+      const int         idx1 = std::get<0>(tup);
+      const int         idx2 = std::get<1>(tup);
+      const FunctionTT& func = std::get<2>(tup);
+
+      const Real T1 = (idx1 < 0) ? m_gasTemperature(a_pos) : a_cdrTemperatures[idx1];
+      const Real T2 = (idx2 < 0) ? m_gasTemperature(a_pos) : a_cdrTemperatures[idx2];
+	
+      k = func(T1, T2);
+
+      for (const auto& n : neutralReactants){
+	k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }
+
+      break;
+    }
+  case LookupMethod::TableEN:
+    {
+      // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that. 
+      const LookupTable<2>& reactionTable = m_plasmaReactionTablesEN.at(a_reactionIndex);
+
+      k  = reactionTable.getEntry<1>(a_Etd); // Get rate/N
+      k *= a_N;                              // Get rate
+	  
+      break;
+    }
+  default:
+    {
+      MayDay::Error("CdrPlasmaJSON::computePlasmaReactionRate -- logic bust");
+      
+      break;
+    }
+  }
+
+  // Modify by other parameters.
+  k *= m_plasmaReactionEfficiencies.at(a_reactionIndex)(a_E, a_pos);
+
+  // This is a hook that uses the Soloviev correction. It modifies the reaction rate according to k = k * (1 + (E.D*grad(n))/(K * n * E^2) where
+  // K is the electron mobility. 
+  if( (m_plasmaReactionSolovievCorrection.at(a_reactionIndex)).first){
+    const int species = (m_plasmaReactionSolovievCorrection.at(a_reactionIndex)).second;
+
+    const Real&     n  = a_cdrDensities            [species];
+    const Real&     mu = a_cdrMobilities           [species];
+    const Real&     D  = a_cdrDiffusionCoefficients[species];
+    const RealVect& g  = a_cdrGradients            [species];
+
+    // Compute correction factor 1 + E.(D*grad(n))/(K * n * E^2). 
+    constexpr Real safety = 1.0;
+      
+    Real fcorr  = 1.0 + (a_vectorE.dotProduct(D*g)) / ( safety + n * mu * a_E * a_E);
+
+    fcorr = std::max(fcorr, 0.0);
+      
+    k *= fcorr;
+  }
+
+  // Compute total consumption. After this, k -> total consumption. 
+  for (const auto& r : plasmaReactants){
+    k *= a_cdrDensities[r];
+  }
+
+  return k;
+}
+
 Real CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect a_position) const {
   Real alpha = 0.0;
 
@@ -2090,8 +2126,8 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
   std::vector<Real>& rteSources = a_rteSources.stdVector();
 
   const std::vector<Real    >& cdrDensities = ((Vector<Real    >&) a_cdrDensities).stdVector();
-  const std::vector<RealVect>& cdrGradients = ((Vector<RealVect>&) a_cdrGradients).stdVector();
   const std::vector<Real    >& rteDensities = ((Vector<Real    >&) a_rteDensities).stdVector();
+  const std::vector<RealVect>& cdrGradients = ((Vector<RealVect>&) a_cdrGradients).stdVector();  
 
   // These may or may not be needed.
   const std::vector<Real    > cdrMobilities            = this->computePlasmaSpeciesMobilities  (        a_pos, a_E,   cdrDensities)            ;  
@@ -2119,31 +2155,7 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     S = 0.0;
   }
 
-  // Here is the lambda that fires a photon reaction that has a rate constant k. Note that this is different
-  // if we use discrete photons! Note that this currently limited to reactions of the type Y -> e + O2+. I.e. only a single
-  // photon species (we check it in the initializing code). 
-  auto FirePhotoReaction = [&CdrSrc = cdrSources,
-			    &RtePhi = rteDensities] (const Real a_rate, const CdrPlasmaPhotoReactionJSON& a_reaction) -> void {
-    
-    const std::list<int>& plasmaReactants  = a_reaction.getPlasmaReactants ();
-    const std::list<int>& neutralReactants = a_reaction.getNeutralReactants();
-    const std::list<int>& photonReactants  = a_reaction.getPhotonReactants ();
-    const std::list<int>& plasmaProducts   = a_reaction.getPlasmaProducts  ();
-    const std::list<int>& neutralProducts  = a_reaction.getNeutralProducts ();
-
-    Real volumetricRate = a_rate;
-
-    // Compute a_rate * Psi(x). Note that a_rate is different if we use Helmholtz reconstruction. 
-    for (const auto& y : photonReactants){
-      volumetricRate *= RtePhi[y];
-    }
-
-    for (const auto& p : plasmaProducts){
-      CdrSrc[p] += volumetricRate;
-    }
-  };
-
-  // Iterate through plasma reactions
+  // Plasma reactions loop
   for (int i = 0; i < m_plasmaReactions.size(); i++) {
 
     // Reaction and species involved in the reaction. The lambda above does *not* multiply by neutral species densities. Since rates
@@ -2153,111 +2165,23 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
     const std::list<int>& neutralReactants = reaction.getNeutralReactants();
     const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
-    const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();    
-    
-    
-    // Figure out the reaction rate for this reaction. 
-    Real k = 0.0;
+    const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();
 
-    const LookupMethod& method = m_plasmaReactionLookup.at(i);
-
-    switch(method){
-    case LookupMethod::Constant:
-      {
-	k = m_plasmaReactionConstants.at(i);
-
-	for (const auto& n : neutralReactants){
-	  k *= (m_neutralSpeciesDensities[n])(a_pos);
-	}
-
-	break;
-      }
-    case LookupMethod::FunctionEN:
-      {
-	k  = m_plasmaReactionFunctionsEN.at(i)(E, N);
-	k *= N;
-	  
-	break;
-      }
-    case LookupMethod::AlphaV:
-      {
-	const int idx = m_plasmaReactionAlphaV.at(i);
-
-	k = alpha * E * cdrMobilities[idx];
-
-	break;
-      }
-    case LookupMethod::EtaV:
-      {
-	const int idx = m_plasmaReactionEtaV.at(i);
-
-	k = eta * E * cdrMobilities[idx];
-
-	break;
-      }      
-    case LookupMethod::FunctionTT:
-      {
-	const std::tuple<int, int, FunctionTT>& tup = m_plasmaReactionFunctionsTT.at(i);
-
-	const int         idx1 = std::get<0>(tup);
-	const int         idx2 = std::get<1>(tup);
-	const FunctionTT& func = std::get<2>(tup);
-
-	const Real T1 = (idx1 < 0) ? m_gasTemperature(a_pos) : cdrTemperatures[idx1];
-	const Real T2 = (idx2 < 0) ? m_gasTemperature(a_pos) : cdrTemperatures[idx2];
-	
-	k = func(T1, T2);
-
-	for (const auto& n : neutralReactants){
-	  k *= (m_neutralSpeciesDensities[n])(a_pos);
-	}
-
-	break;
-      }
-    case LookupMethod::TableEN:
-      {
-	// Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that. 
-	const LookupTable<2>& reactionTable = m_plasmaReactionTablesEN.at(i);
-
-	k  = reactionTable.getEntry<1>(Etd); // Get rate/N
-	k *= N;                              // Get rate
-	  
-	break;
-      }
-    default:
-      {
-	MayDay::Error("CdrPlasmaJSON::advanceReactionNetwork -- logic bust");
-	break;
-      }
-    }
-
-    // Modify by other parameters.
-    k *= m_plasmaReactionEfficiencies.at(i)(E, a_pos);
-
-    // This is a hook that uses the Soloviev correction. It modifies the reaction rate according to k = k * (1 + (E.D*grad(n))/(K * n * E^2) where
-    // K is the electron mobility. 
-    if( (m_plasmaReactionSolovievCorrection.at(i)).first){
-      const int species = (m_plasmaReactionSolovievCorrection.at(i)).second;
-
-      const Real&     n  = cdrDensities            [species];
-      const Real&     mu = cdrMobilities           [species];
-      const Real&     D  = cdrDiffusionCoefficients[species];
-      const RealVect& g  = cdrGradients            [species];
-
-      // Compute correction factor 1 + E.(D*grad(n))/(K * n * E^2). 
-      constexpr Real safety = 1.0;
-      
-      Real fcorr  = 1.0 + (a_E.dotProduct(D*g)) / ( safety + n * mu * E * E);
-
-      fcorr = std::max(fcorr, 0.0);
-      
-      k *= fcorr;
-    }
-
-    // Compute total consumption. After this, k -> total consumption. 
-    for (const auto& r : plasmaReactants){
-      k *= cdrDensities[r];
-    }
+    // Compute the rate. This returns a volumetric rate in units of #/m^(-3) (or #/m^-2 for Cartesian 2D).
+    const Real k = this->computePlasmaReactionRate(i,
+						   cdrDensities,
+						   cdrMobilities,
+						   cdrDiffusionCoefficients,
+						   cdrTemperatures,
+						   cdrGradients,
+						   a_pos,
+						   a_E,
+						   E,
+						   Etd,
+						   N,
+						   alpha,
+						   eta,
+						   a_time);    
 
     // Remove consumption on the left-hand side.
     for (const auto& r : plasmaReactants){
@@ -2272,9 +2196,9 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     for (const auto& p : photonProducts){
       rteSources[p] += k;
     }    
-  }
+  } // End of plasma reactions. 
 
-  // Iterate through the photon reactions.
+  // Photo-reactions loop.
   for (int i = 0; i < m_photoReactions.size(); i++){
     Real k = 0.0;
 
@@ -2310,7 +2234,7 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     for (const auto& p : plasmaProducts){
       cdrSources[p] += k;
     }
-  }
+  } // End of photo-reactions. 
 
   // If using stochastic photons -- then we need to run Poisson sampling of the photons.
   if(m_discretePhotons){

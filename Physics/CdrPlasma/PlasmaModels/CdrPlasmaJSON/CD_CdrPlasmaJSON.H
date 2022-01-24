@@ -787,7 +787,43 @@ namespace Physics {
       virtual std::vector<Real> computePlasmaSpeciesMobilities(const RealVect&          a_position,
 							       const RealVect&          a_E,
 							       const std::vector<Real>& a_cdrDensities) const;
-      
+
+      /*!
+	@brief Compute the reaction rate for a plasma reaction.
+
+	This routine exists because we need to compute the rates both in advanceReactionNetwork and getPlotVariables. This function
+	reduces code duplication. 
+	@param[in] a_reactionIndex            Reaction index
+	@param[in] a_cdrDensities             Plasma species densities. 
+	@param[in] a_cdrMobilities            Plasma species mobilities. 
+	@param[in] a_cdrDiffusionCoefficients Plasma species diffusion coefficients. 
+	@param[in] a_cdrTemperatures          Plasma species temperatures. 
+	@param[in] a_cdrGradients             Plasma species gradients. 
+	@param[in] a_pos                      Position (physical coordinates)
+	@param[in] a_vectorE                  Electric field (vector)
+	@param[in] a_E                        Electric field magnitude (SI units)
+	@param[in] a_Etd                      Electric field magnitude (Townsend units)
+	@param[in] a_N                        Neutral density
+	@param[in] a_alpha                    Townsend ionization coefficient
+	@param[in] a_eta                      Townsend attachment coefficient
+	@param[in] a_time                     Time
+      */
+      virtual Real computePlasmaReactionRate(const int&                   a_reactionIndex,
+					     const std::vector<Real>&     a_cdrDensities,
+					     const std::vector<Real>&     a_cdrMobilities,
+					     const std::vector<Real>&     a_cdrDiffusionCoefficients,
+					     const std::vector<Real>&     a_cdrTemperatures,					     
+					     const std::vector<RealVect>& a_cdrGradients,					     
+					     const RealVect&              a_pos,					     					     
+					     const RealVect&              a_vectorE,
+					     const Real&                  a_E,
+					     const Real&                  a_Etd,					     
+					     const Real&                  a_N,
+					     const Real&                  a_alpha,
+					     const Real&                  a_eta,					     
+					     const Real&                  a_time) const;
+					     
+
       /*!
 	@brief Throw a parser error
 	@param[in] a_error Error code.
