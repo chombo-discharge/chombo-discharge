@@ -55,7 +55,8 @@ namespace Physics {
       CdrPlasmaStepper();
 
       /*!
-	@brief Constructor
+	@brief Full constructor. 
+	@param[in] a_physics CDR plasma physics. 
       */
       CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics);
 
@@ -276,27 +277,23 @@ namespace Physics {
 	@param[out] a_rho          Centroid centered space charge density.
 	@param[in]  a_cdrDensities Cell-centered plasma species densities. Must be in the same order as the densities in m_cdr.
       */
-      virtual void computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>& a_cdrDensities);      
+      virtual void computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>& a_cdrDensities);
 
       /*!
-	@brief Solve the electrostatic Poisson equation. 
-	@details This will first compute the centroid-centered space charge density (using the cell-centered data in the CDR solvers) and then
-	ask the field solver to solve.
+	@brief Compute the cell-centered conductivity.
+	@param[out] a_cellConductivity Cell-centered conductivity. 
       */
-      virtual bool solvePoisson();            
+      virtual void computeCellConductivity(EBAMRCellData& a_cellConductivity) const;
 
       /*!
-	@brief General electrostatic Poisson solver routine. 
-	@details This will compute the space charge density onto a_rho and then solve for the potential. 
-	@param[inout] a_potential    Electrostatic potential
-	@param[out]   a_rho          Centroid-centered space charge density. 
-	@param[in]    a_cdrDensities Plasma species densities. 
-	@param[in]    a_sigma        Surface charge density on dielectric EBs.
+	@brief Compute the face-centered conductivity from a cell-centered conductivity.
+	@param[out] a_conductivityFace Face-centered conductivity.
+	@param[out] a_conductivityEB   EB-centered conductivity. 
+	@param[in]  a_conductivityCell Cell-centered conductivity. 
       */
-      virtual bool solvePoisson(MFAMRCellData&                a_potential,
-				MFAMRCellData&                a_rho,
-				const Vector<EBAMRCellData*>  a_densities,
-				const EBAMRIVData&            a_sigma);
+      virtual void computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
+					   EBAMRIVData&         a_conductivityEB,
+					   const EBAMRCellData& a_conductivityCell) const;      
 
       /*!
 	@brief Set up a semi-implicit Poisson solver.
@@ -316,40 +313,91 @@ namespace Physics {
       */
       virtual void setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFace,
 					    const EBAMRIVData&   a_conductivityEB,
-					    const Real           a_factor);      
+					    const Real           a_factor);
+
       /*!
-	@brief Advance the reaction network. 
+	@brief Solve the electrostatic Poisson equation. 
+	@details This will first compute the centroid-centered space charge density (using the cell-centered data in the CDR solvers) and then
+	ask the field solver to solve.
+      */
+      virtual bool solvePoisson();            
+
+      /*!
+	@brief General electrostatic Poisson solver routine. 
+	@details This will compute the space charge density onto a_rho and then solve for the potential. 
+	@param[inout] a_potential    Electrostatic potential
+	@param[out]   a_rho          Centroid-centered space charge density. 
+	@param[in]    a_cdrDensities Plasma species densities. 
+	@param[in]    a_sigma        Surface charge density on dielectric EBs.
+      */
+      virtual bool solvePoisson(MFAMRCellData&                a_potential,
+				MFAMRCellData&                a_rho,
+				const Vector<EBAMRCellData*>  a_cdrDensities,
+				const EBAMRIVData&            a_sigma);      
+
+
+      
+      /*!
+	@brief Advance the reaction network. This will compute the electric field (on the appropriate phase) and call the other version.
+	@param[in] a_time Time
+	@param[in] a_dt   Time step
       */
       virtual void advanceReactionNetwork(const Real a_time, const Real a_dt);
   
       /*!
-	@brief Compute reaction network sources. First computes the CDR gradients and then calls the other version
+	@brief Compute reaction network source terms. 
+	@details This will call the other version but will first compute the gradients of the plasma densities. 
+	@param[out] a_cdrSources   Source terms for the CDR solvers. 
+	@param[out] a_rteSources   Source terms for the radiative transfer solvers. 
+	@param[in]  a_cdrDensities Cell-centered densities for the plasma species (i.e., CDR solvers).
+	@param[in]  a_rteDensities Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
+	@param[in]  a_E            Cell-centered electric field. 
+	@param[in]  a_time         Time
+	@param[in]  a_dt           Time step.
       */
-      virtual void advanceReactionNetwork(Vector<EBAMRCellData*>&       a_particle_sources,
-					  Vector<EBAMRCellData*>&       a_Photon_sources,
-					  const Vector<EBAMRCellData*>& a_particle_densities,
-					  const Vector<EBAMRCellData*>& a_Photon_densities,
+      virtual void advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSources,
+					  Vector<EBAMRCellData*>&       a_rteSources,
+					  const Vector<EBAMRCellData*>& a_cdrDensities,
+					  const Vector<EBAMRCellData*>& a_rteDensities,
 					  const EBAMRCellData&          a_E,
 					  const Real&                   a_time,
 					  const Real&                   a_dt);
 
       /*!
-	@brief Compute reaction network sources. Used for time-dependent FHD models
+	@brief Compute reaction network source terms. This is the AMR version that does all levels. 
+	@param[out] a_cdrSources   Source terms for the CDR solvers. 
+	@param[out] a_rteSources   Source terms for the radiative transfer solvers. 
+	@param[in]  a_cdrDensities Cell-centered densities for the plasma species (i.e., CDR solvers).
+	@param[in]  a_cdrGradients Cell-centered gradients for the plasma species (i.e., CDR solvers).
+	@param[in]  a_rteDensities Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
+	@param[in]  a_E            Cell-centered electric field. 
+	@param[in]  a_time         Time
+	@param[in]  a_dt           Time step.
       */
-      virtual void advanceReactionNetwork(Vector<EBAMRCellData*>&       a_particle_sources,
-					  Vector<EBAMRCellData*>&       a_Photon_sources,
-					  const Vector<EBAMRCellData*>& a_particle_densities,
-					  const Vector<EBAMRCellData*>& a_particle_gradients,
-					  const Vector<EBAMRCellData*>& a_Photon_densities,
+      virtual void advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSources,
+					  Vector<EBAMRCellData*>&       a_rteSources,
+					  const Vector<EBAMRCellData*>& a_cdrDensities,
+					  const Vector<EBAMRCellData*>& a_cdrGradients,
+					  const Vector<EBAMRCellData*>& a_rteDensities,
 					  const EBAMRCellData&          a_E,
 					  const Real&                   a_time,
 					  const Real&                   a_dt);
 
-
-      virtual void advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&       a_particle_sources,
-					  Vector<LevelData<EBCellFAB>* >&       a_Photon_sources,
-					  const Vector<LevelData<EBCellFAB>* >& a_particle_densities,
-					  const Vector<LevelData<EBCellFAB>* >& a_particle_gradients,
+      /*!
+	@brief Compute reaction network source terms. This is the level version. 
+	@param[out] a_cdrSources   Source terms for the CDR solvers. 
+	@param[out] a_rteSources   Source terms for the radiative transfer solvers. 
+	@param[in]  a_cdrDensities Cell-centered densities for the plasma species (i.e., CDR solvers).
+	@param[in]  a_cdrGradients Cell-centered gradients for the plasma species (i.e., CDR solvers).
+	@param[in]  a_rteDensities Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
+	@param[in]  a_E            Cell-centered electric field. 
+	@param[in]  a_time         Time
+	@param[in]  a_dt           Time step.
+      */
+      virtual void advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&       a_cdrSources,
+					  Vector<LevelData<EBCellFAB>* >&       a_rteSources,
+					  const Vector<LevelData<EBCellFAB>* >& a_cdrDensities,
+					  const Vector<LevelData<EBCellFAB>* >& a_cdrGradients,
 					  const Vector<LevelData<EBCellFAB>* >& a_Photon_densities,
 					  const LevelData<EBCellFAB>&           a_E,
 					  const Real&                           a_time,
@@ -358,10 +406,10 @@ namespace Physics {
       /*!
 	@brief Compute reaction network sources. Patch version.
       */
-      virtual void advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&       a_particle_sources,
-						      Vector<EBCellFAB*>&       a_Photon_sources,
-						      const Vector<EBCellFAB*>& a_particle_densities,
-						      const Vector<EBCellFAB*>& a_particle_gradients,
+      virtual void advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&       a_cdrSources,
+						      Vector<EBCellFAB*>&       a_rteSources,
+						      const Vector<EBCellFAB*>& a_cdrDensities,
+						      const Vector<EBCellFAB*>& a_cdrGradients,
 						      const Vector<EBCellFAB*>& a_Photon_densities,
 						      const EBCellFAB&          a_E,
 						      const Real&               a_time,
@@ -372,10 +420,10 @@ namespace Physics {
       /*!
 	@brief Compute reaction network sources. Fast patch version. 
       */
-      virtual void advanceReactionNetworkRegularCellsFast(Vector<EBCellFAB*>&       a_particle_sources,
-							  Vector<EBCellFAB*>&       a_Photon_sources,
-							  const Vector<EBCellFAB*>& a_particle_densities,
-							  const Vector<EBCellFAB*>& a_particle_gradients,
+      virtual void advanceReactionNetworkRegularCellsFast(Vector<EBCellFAB*>&       a_cdrSources,
+							  Vector<EBCellFAB*>&       a_rteSources,
+							  const Vector<EBCellFAB*>& a_cdrDensities,
+							  const Vector<EBCellFAB*>& a_cdrGradients,
 							  const Vector<EBCellFAB*>& a_Photon_densities,
 							  const EBCellFAB&          a_E,
 							  const Real&               a_time,
@@ -383,10 +431,10 @@ namespace Physics {
 							  const Real&               a_dx,
 							  const Box&                a_box);
 
-      virtual void advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB*>&       a_particle_sources,
-							    Vector<EBCellFAB*>&       a_Photon_sources,
-							    const Vector<EBCellFAB*>& a_particle_densities,
-							    const Vector<EBCellFAB*>& a_particle_gradients,
+      virtual void advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB*>&       a_cdrSources,
+							    Vector<EBCellFAB*>&       a_rteSources,
+							    const Vector<EBCellFAB*>& a_cdrDensities,
+							    const Vector<EBCellFAB*>& a_cdrGradients,
 							    const Vector<EBCellFAB*>& a_Photon_densities,
 							    const EBCellFAB&          a_E,
 							    const Real&               a_time,
@@ -394,10 +442,10 @@ namespace Physics {
 							    const Real&               a_dx,
 							    const Box&                a_box);
 
-      virtual void advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB*>&       a_particle_sources,
-							    Vector<EBCellFAB*>&       a_Photon_sources,
-							    const Vector<EBCellFAB*>& a_particle_densities,
-							    const Vector<EBCellFAB*>& a_particle_gradients,
+      virtual void advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB*>&       a_cdrSources,
+							    Vector<EBCellFAB*>&       a_rteSources,
+							    const Vector<EBCellFAB*>& a_cdrDensities,
+							    const Vector<EBCellFAB*>& a_cdrGradients,
 							    const Vector<EBCellFAB*>& a_Photon_densities,
 							    const EBCellFAB&          a_E,
 							    const Real&               a_time,
@@ -408,10 +456,10 @@ namespace Physics {
       /*!
 	@brief Compute reaction network sources. Irregular patch version.
       */
-      virtual void advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_particle_sources,
-					       Vector<EBCellFAB*>&          a_Photon_sources,
-					       const Vector<EBCellFAB*>&    a_particle_densities,
-					       const Vector<EBCellFAB*>&    a_particle_gradients,
+      virtual void advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdrSources,
+					       Vector<EBCellFAB*>&          a_rteSources,
+					       const Vector<EBCellFAB*>&    a_cdrDensities,
+					       const Vector<EBCellFAB*>&    a_cdrGradients,
 					       const Vector<EBCellFAB*>&    a_particle_velocities,
 					       const Vector<EBCellFAB*>&    a_Photon_densities,
 					       const BaseIVFAB<VoFStencil>& a_interp_stencils,
@@ -426,10 +474,10 @@ namespace Physics {
       /*!
 	@brief Compute reaction network sources. Irregular patch version.
       */
-      virtual void advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&          a_particle_sources,
-						     Vector<EBCellFAB*>&          a_Photon_sources,
-						     const Vector<EBCellFAB*>&    a_particle_densities,
-						     const Vector<EBCellFAB*>&    a_particle_gradients,
+      virtual void advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&          a_cdrSources,
+						     Vector<EBCellFAB*>&          a_rteSources,
+						     const Vector<EBCellFAB*>&    a_cdrDensities,
+						     const Vector<EBCellFAB*>&    a_cdrGradients,
 						     const Vector<EBCellFAB*>&    a_particle_velocities,
 						     const Vector<EBCellFAB*>&    a_Photon_densities,
 						     const BaseIVFAB<VoFStencil>& a_interp_stencils,
@@ -441,10 +489,10 @@ namespace Physics {
 						     const int                    a_lvl,
 						     const DataIndex&             a_dit);
 
-      virtual void advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&          a_particle_sources,
-						    Vector<EBCellFAB*>&          a_Photon_sources,
-						    const Vector<EBCellFAB*>&    a_particle_densities,
-						    const Vector<EBCellFAB*>&    a_particle_gradients,
+      virtual void advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&          a_cdrSources,
+						    Vector<EBCellFAB*>&          a_rteSources,
+						    const Vector<EBCellFAB*>&    a_cdrDensities,
+						    const Vector<EBCellFAB*>&    a_cdrGradients,
 						    const Vector<EBCellFAB*>&    a_Photon_densities,
 						    const BaseIVFAB<VoFStencil>& a_interp_stencils,
 						    const EBCellFAB&             a_E,
@@ -459,10 +507,10 @@ namespace Physics {
       /*!
 	@brief Compute reaction network sources. Uses upwinding of reaction terms. 
       */
-      virtual void advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&          a_particle_sources,
-						     Vector<EBCellFAB*>&          a_Photon_sources,
-						     const Vector<EBCellFAB*>&    a_particle_densities,
-						     const Vector<EBCellFAB*>&    a_particle_gradients,
+      virtual void advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&          a_cdrSources,
+						     Vector<EBCellFAB*>&          a_rteSources,
+						     const Vector<EBCellFAB*>&    a_cdrDensities,
+						     const Vector<EBCellFAB*>&    a_cdrGradients,
 						     const Vector<EBCellFAB*>&    a_particle_velocities,
 						     const Vector<EBCellFAB*>&    a_Photon_densities,
 						     const BaseIVFAB<VoFStencil>& a_interp_stencils,
@@ -975,13 +1023,6 @@ namespace Physics {
 					  const Real                    a_dt,
 					  const Centering               a_centering = Centering::CellCenter);
 
-
-
-      /*!
-	@brief Query about necessary number of ghost cells. This collects that from the individual solvers. 
-      */
-      virtual int queryGhost();
-
       /*!
 	@brief Compute the ohmic current on electrodes
       */
@@ -1196,21 +1237,7 @@ namespace Physics {
       virtual void parseFastRadiativeTransfer();
       virtual void parseSourceComputation();      
 
-      /*!
-	@brief Compute the cell-centered conductivity.
-	@param[out] a_cellConductivity Cell-centered conductivity. 
-      */
-      virtual void computeCellConductivity(EBAMRCellData& a_cellConductivity) const;
 
-      /*!
-	@brief Compute the face-centered conductivity from a cell-centered conductivity.
-	@param[out] a_conductivityFace Face-centered conductivity.
-	@param[out] a_conductivityEB   EB-centered conductivity. 
-	@param[in]  a_conductivityCell Cell-centered conductivity. 
-      */
-      virtual void computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
-					   EBAMRIVData&         a_conductivityEB,
-					   const EBAMRCellData& a_conductivityCell) const;
 
 
 

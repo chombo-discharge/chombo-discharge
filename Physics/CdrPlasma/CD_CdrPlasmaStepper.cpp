@@ -32,21 +32,35 @@
 using namespace Physics::CdrPlasma;
 
 CdrPlasmaStepper::CdrPlasmaStepper(){
-  m_className = "CdrPlasmaStepper";
-  m_verbosity  = -1;
+  CH_TIME("CdrPlasmaStepper::CdrPlasmaStepper()");
+  
+  // Default settings
+  m_className       = "CdrPlasmaStepper";
+  m_verbosity       = -1;
   m_solverVerbosity = -1;
-  m_phase = phase::gas;
-  m_realm = Realm::Primal;
+  m_phase           = phase::gas;
+  m_realm           = Realm::Primal;
 }
 
 CdrPlasmaStepper::CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : CdrPlasmaStepper() {
+  CH_TIME("CdrPlasmaStepper::CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>)");
+  
   m_physics = a_physics;
 }
 
 void CdrPlasmaStepper::postInitialize() {
+  CH_TIME("CdrPlasmaStepper::postInitialize");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::postInitialize" << endl;
+  }
 }
 
 void CdrPlasmaStepper::registerRealms(){
+  CH_TIME("CdrPlasmaStepper::registerRealms");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::registerRealms" << endl;
+  }
+  
   m_amr->registerRealm(m_realm);
 }
 
@@ -55,106 +69,32 @@ void CdrPlasmaStepper::postRegrid(){
 }
 
 void CdrPlasmaStepper::registerOperators(){
-  CH_TIME("CdrPlasmaStepper::registerOperators");
+  CH_TIME("CdrPlasmaStepper::registerOperators()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::registerOperators" << endl;
+    pout() << "CdrPlasmaStepper::registerOperators()" << endl;
   }
-  
-  m_cdr->registerOperators();
+
+  // Solvers know what they need so they can just register the operators themselves. 
+  m_cdr        ->registerOperators();
   m_fieldSolver->registerOperators();
-  m_rte->registerOperators();
-  m_sigma->registerOperators();
+  m_rte        ->registerOperators();
+  m_sigma      ->registerOperators();
 }
 
 CdrPlasmaStepper::~CdrPlasmaStepper(){
-}
-
-int CdrPlasmaStepper::queryGhost(){
-  return 3;
+  CH_TIME("CdrPlasmaStepper::~CdrPlasmaStepper()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::~CdrPlasmaStepper()" << endl;
+  }  
 }
 
 bool CdrPlasmaStepper::stationaryRTE(){
-  CH_TIME("CdrPlasmaStepper::stationaryRTE");
+  CH_TIME("CdrPlasmaStepper::stationaryRTE()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::stationaryRTE" << endl;
+    pout() << "CdrPlasmaStepper::stationaryRTE()" << endl;
   }
 
   return m_rte->isStationary();
-}
-
-
-void CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) const {
-  CH_TIME("CdrPlasmaStepper::computeCellConductivity");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCellConductivity" << endl;
-  }
-
-  const EBAMRCellData cellCenteredElectricField = m_amr->alias(phase::gas, m_fieldSolver->getElectricField());
-
-  // Allocate some storage
-  EBAMRCellData fieldMagnitude;      // Holds electric field magnitude
-  EBAMRCellData speciesConductivity; // Holds bulk conductivity for one species
-
-  m_amr->allocate(fieldMagnitude,      m_realm, phase::gas, 1);
-  m_amr->allocate(speciesConductivity, m_realm, phase::gas, 1);
-
-  // Compute the electric field magnitude
-  DataOps::vectorLength(fieldMagnitude, cellCenteredElectricField);
-
-  // Compute the cell-centered conductivity.
-  DataOps::setValue(a_cellConductivity, 0.0);
-
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
-    const RefCountedPtr<CdrSpecies>& species = solverIt.getSpecies();
-
-    // Compute the conductivity for this species. This is just Z*mu*n.
-    if(solver->isMobile()){
-      const EBAMRCellData& cellVel = solver->getCellCenteredVelocity();
-      const EBAMRCellData& phi     = solver->getPhi();
-
-      const int Z = species->getChargeNumber();
-
-      // In the below comments, f = speciesConductivity
-      if(Z != 0){
-	DataOps::vectorLength  (speciesConductivity, cellVel       ); // Compute f = |v|
-	DataOps::divideByScalar(speciesConductivity, fieldMagnitude); // Compute f = |v|/|E| = |mu|
-	DataOps::multiply      (speciesConductivity, phi           ); // Compute f = mu*n
-
-	// Add to total conductivity. 
-	DataOps::incr(a_cellConductivity, speciesConductivity, 1.0*std::abs(Z));
-      }
-    }
-  }
-
-  DataOps::scale(a_cellConductivity, Units::Qe); // Scale by electron charge.
-}
-
-void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
-					       EBAMRIVData&         a_conductivityEB,
-					       const EBAMRCellData& a_conductivityCell) const {
-  CH_TIME("CdrPlasmaStepper::computeFaceConductivity");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeFaceConductivity" << endl;
-  }
-
-  DataOps::setValue(a_conductivityFace, std::numeric_limits<Real>::max());
-  DataOps::setValue(a_conductivityEB,   std::numeric_limits<Real>::max());
-
-#if 1
-  DataOps::averageCellScalarToFaceScalar(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
-#else
-  DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
-#endif
-
-  // Now compute the conductivity onthe EB.
-#if 1
-  const auto& interpStencil = m_amr->getCentroidInterpolationStencils(m_realm, phase::gas);
-  interpStencil.apply(a_conductivityEB, a_conductivityCell);
-#else
-  DataOps::setValue(a_conductivityEB, 0.0);
-  DataOps::incr(a_conductivityEB, a_conductivityCell, 1.0);
-#endif
 }
 
 void CdrPlasmaStepper::computeSpaceChargeDensity(){
@@ -201,35 +141,85 @@ void CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData&                 
   m_amr->interpToCentroids(rhoGas, m_realm, phase::gas);
 }
 
-bool CdrPlasmaStepper::solvePoisson(){
-  CH_TIME("CdrPlasmaStepper::solvePoisson()");
+void CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) const {
+  CH_TIME("CdrPlasmaStepper::computeCellConductivity(EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::solvePoisson()" << endl;
+    pout() << "CdrPlasmaStepper::computeCellConductivity(EBAMRCellData)" << endl;
   }
 
-  return this->solvePoisson(m_fieldSolver->getPotential(),
-			    m_fieldSolver->getRho      (),
-			    m_cdr        ->getPhis     (),
-			    m_sigma      ->getPhi      ());
+  // Get a handle to the 
+  const EBAMRCellData cellCenteredElectricField = m_amr->alias(m_phase, m_fieldSolver->getElectricField());
+
+  // Allocate some storage for holding the electric field magnitude and one species conductivity.
+  EBAMRCellData fieldMagnitude;      
+  EBAMRCellData speciesConductivity; 
+
+  m_amr->allocate(fieldMagnitude,      m_realm, m_phase, 1);
+  m_amr->allocate(speciesConductivity, m_realm, m_phase, 1);
+
+  // Compute the electric field magnitude
+  DataOps::vectorLength(fieldMagnitude, cellCenteredElectricField);
+
+  // Reset the conductivity.
+  DataOps::setValue(a_cellConductivity, 0.0);
+
+  // Increment the conductivity by the drift contribution from each CDR species. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver> & solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solverIt.getSpecies();
+
+    // Compute the conductivity for this species. This is just Z*mu*n.
+    if(solver->isMobile()){
+      const EBAMRCellData& cellVel = solver->getCellCenteredVelocity();
+      const EBAMRCellData& phi     = solver->getPhi();
+
+      const int Z = species->getChargeNumber();
+
+      // In the below comments, f = speciesConductivity. The loop just adds to the total conductivity. 
+      if(Z != 0){
+	DataOps::vectorLength  (speciesConductivity, cellVel       ); // Compute f = |v|
+	DataOps::divideByScalar(speciesConductivity, fieldMagnitude); // Compute f = |v|/|E| = |mu|
+	DataOps::multiply      (speciesConductivity, phi           ); // Compute f = mu*n
+
+	// Add to total conductivity. 
+	DataOps::incr(a_cellConductivity, speciesConductivity, 1.0*std::abs(Z));
+      }
+    }
+  }
+
+  // Need to scale by electron charge.
+  DataOps::scale(a_cellConductivity, Units::Qe); 
 }
 
-bool CdrPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
-				    MFAMRCellData&                a_rho,
-				    const Vector<EBAMRCellData*>  a_densities,
-				    const EBAMRIVData&            a_sigma){
-  CH_TIME("CdrPlasmaStepper::solvePoisson(MFAMRCellData, MFAMRCellData, Vector<EBAMRCellData*>, EBAMRIVData)");
+void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
+					       EBAMRIVData&         a_conductivityEB,
+					       const EBAMRCellData& a_conductivityCell) const {
+  CH_TIME("CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData, EBAMRIVData, EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::solvePoisson(MFAMRCellData, MFAMRCellData, Vector<EBAMRCellData*>, EBAMRIVData)" << endl;
+    pout() << "CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData, EBAMRIVData, EBAMRCellData)" << endl;
   }
 
-  // Compute the space charge density onto the input data holder.
-  this->computeSpaceChargeDensity(a_rho, a_densities);
+  // Init to something stupid in order to catch errors. 
+  DataOps::setValue(a_conductivityFace, std::numeric_limits<Real>::max());
+  DataOps::setValue(a_conductivityEB,   std::numeric_limits<Real>::max());
 
-  // Field solver solves for the potential.
-  const bool converged = m_fieldSolver->solve(a_potential, a_rho, a_sigma, false);
+#if 1
+  // Average the cell-centered conductivity to faces. Note that this includes one "ghost face", which we need
+  // because the multigrid solver will interpolate face-centered conductivities to face centroids. 
+  DataOps::averageCellScalarToFaceScalar(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
+#else
+  DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
+#endif
 
-  // Return whether or not the field solve converged. 
-  return converged;
+
+#if 1
+  // Now compute the conductivity on the EB. 
+  const auto& interpStencil = m_amr->getCentroidInterpolationStencils(m_realm, m_phase);
+  interpStencil.apply(a_conductivityEB, a_conductivityCell);
+#else
+  DataOps::setValue(a_conductivityEB, 0.0);
+  DataOps::incr(a_conductivityEB, a_conductivityCell, 1.0);
+#endif
 }
 
 void CdrPlasmaStepper::setupSemiImplicitPoisson(const Real a_dt){
@@ -289,6 +279,37 @@ void CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductiv
   m_fieldSolver->setupSolver();
 }
 
+bool CdrPlasmaStepper::solvePoisson(){
+  CH_TIME("CdrPlasmaStepper::solvePoisson()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::solvePoisson()" << endl;
+  }
+
+  return this->solvePoisson(m_fieldSolver->getPotential(),
+			    m_fieldSolver->getRho      (),
+			    m_cdr        ->getPhis     (),
+			    m_sigma      ->getPhi      ());
+}
+
+bool CdrPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
+				    MFAMRCellData&                a_rho,
+				    const Vector<EBAMRCellData*>  a_cdrDensities,
+				    const EBAMRIVData&            a_sigma){
+  CH_TIME("CdrPlasmaStepper::solvePoisson(MFAMRCellData, MFAMRCellData, Vector<EBAMRCellData*>, EBAMRIVData)");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::solvePoisson(MFAMRCellData, MFAMRCellData, Vector<EBAMRCellData*>, EBAMRIVData)" << endl;
+  }
+
+  // Compute the space charge density onto the input data holder.
+  this->computeSpaceChargeDensity(a_rho, a_cdrDensities);
+
+  // Field solver solves for the potential.
+  const bool converged = m_fieldSolver->solve(a_potential, a_rho, a_sigma, false);
+
+  // Return whether or not the field solve converged. 
+  return converged;
+}
+
 void CdrPlasmaStepper::allocateInternals(){
   CH_TIME("CdrPlasmaStepper::allocateInternals"); 
   if(m_verbosity > 5){
@@ -313,181 +334,193 @@ void CdrPlasmaStepper::advanceReactionNetwork(const Real a_time, const Real a_dt
     pout() << "CdrPlasmaStepper::advanceReactionNetwork(solvers)" << endl;
   }
 
-  // Compute the electric field
+  // Compute the electric field.
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, m_cdr->getPhase(), SpaceDim);
   this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
 
+  // Get the source terms and densities from the solvers. 
+  Vector<EBAMRCellData*> cdrSources   = m_cdr->getSources();
+  Vector<EBAMRCellData*> rteSources   = m_rte->getSources();
+  Vector<EBAMRCellData*> cdrDensities = m_cdr->getPhis();
+  Vector<EBAMRCellData*> rteDensities = m_rte->getPhis();
 
-  Vector<EBAMRCellData*> particle_sources = m_cdr->getSources();
-  Vector<EBAMRCellData*> Photon_sources   = m_rte->getSources();
-  Vector<EBAMRCellData*> particle_states  = m_cdr->getPhis();
-  Vector<EBAMRCellData*> Photon_states    = m_rte->getPhis();
-
-  // Call the AMR version (without the gradient)
-  advanceReactionNetwork(particle_sources,
-			 Photon_sources, 
-			 particle_states,
-			 Photon_states,
-			 E,
-			 a_time,
-			 a_dt);
+  // Call the other version (without the gradient)
+  this->advanceReactionNetwork(cdrSources,
+			       rteSources,
+			       cdrDensities,
+			       rteDensities,
+			       E,
+			       a_time,
+			       a_dt);
 }
 
-void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_particle_sources,
-					      Vector<EBAMRCellData*>&       a_Photon_sources,
-					      const Vector<EBAMRCellData*>& a_particle_densities,
-					      const Vector<EBAMRCellData*>& a_Photon_densities,
+void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSources,
+					      Vector<EBAMRCellData*>&       a_rteSources,
+					      const Vector<EBAMRCellData*>& a_cdrDensities,
+					      const Vector<EBAMRCellData*>& a_rteDensities,
 					      const EBAMRCellData&          a_E,
 					      const Real&                   a_time,
 					      const Real&                   a_dt){
-  CH_TIME("CdrPlasmaStepper::advanceReactionNetwork(nograd)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData>x4, EBAMRCellData, Real, Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::advanceReactionNetwork(nograd)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData>x4, EBAMRCellData, Real, Real)" << endl;
   }
 
+  // TLDR: This version of advanceReactionNetwork will compute the gradients of the plasma species densities and then
+  //       call the general version. The gradients are needed for various purposes.
+
+  // Allocate scratch data which we will use to compute the gradient. 
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_cdr->getPhase(), 1);
 
-  const int num_species = m_physics->getNumCdrSpecies();
+  // Number of CDR solvers. 
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
-  Vector<EBAMRCellData*> grad_cdr(num_species); // Holders for grad(cdr)
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
-    grad_cdr[idx] = new EBAMRCellData();                            // This storage must be deleted
-    m_amr->allocate(*grad_cdr[idx], m_realm, m_cdr->getPhase(), SpaceDim);  // Allocate
+  // Compute the cell-centered gradient for each plasma species. 
+  Vector<EBAMRCellData*> cdrGradients(numCdrSpecies); 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
 
-    DataOps::copy(scratch, *a_particle_densities[idx]);
+    // Create some storage where we store the gradient. Note that we use the new operator so this
+    // storage must be deleted later. 
+    cdrGradients[idx] = new EBAMRCellData();
+    m_amr->allocate(*cdrGradients[idx], m_realm, m_cdr->getPhase(), SpaceDim);  
+
+    // Copy the cell-centered density to the scratch data holder. Need to do this because the CDR solvers may not
+    // have updated their ghost cells. 
+    DataOps::copy(scratch, *a_cdrDensities[idx]);
     m_amr->interpGhostMG(scratch, m_realm, m_cdr->getPhase());
 
-    m_amr->computeGradient(*grad_cdr[idx], scratch, m_realm, phase::gas); // Compute grad()
-    m_amr->averageDown(*grad_cdr[idx], m_realm, m_cdr->getPhase());        // Average down
-    m_amr->interpGhost(*grad_cdr[idx], m_realm, m_cdr->getPhase());        // Interpolate ghost cells
+    // Compute the gradient and coarsen the result. 
+    m_amr->computeGradient(*cdrGradients[idx], scratch, m_realm, m_cdr->getPhase());
+    m_amr->averageDown    (*cdrGradients[idx],          m_realm, m_cdr->getPhase());
+    m_amr->interpGhost    (*cdrGradients[idx],          m_realm, m_cdr->getPhase());
   }
 
-  this->advanceReactionNetwork(a_particle_sources,
-			       a_Photon_sources,
-			       a_particle_densities,
-			       grad_cdr,
-			       a_Photon_densities,
+  // Call the other version.
+  this->advanceReactionNetwork(a_cdrSources,
+			       a_rteSources,
+			       a_cdrDensities,
+			       cdrGradients,
+			       a_rteDensities,
 			       a_E,
 			       a_time,
 			       a_dt);
 
-  // Delete extra storage - didn't use smart pointers for this...
+  // Delete the extra storage since we didn't use smart pointers. 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_amr->deallocate(*grad_cdr[idx]);
-    delete grad_cdr[idx];
+    m_amr->deallocate(*cdrGradients[idx]);
+    delete cdrGradients[idx];
   }
 }
 
-void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_particle_sources,
-					      Vector<EBAMRCellData*>&       a_Photon_sources,
-					      const Vector<EBAMRCellData*>& a_particle_densities,
-					      const Vector<EBAMRCellData*>& a_particle_gradients,
-					      const Vector<EBAMRCellData*>& a_Photon_densities,
+void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cdrSources,
+					      Vector<EBAMRCellData*>&       a_rteSources,
+					      const Vector<EBAMRCellData*>& a_cdrDensities,
+					      const Vector<EBAMRCellData*>& a_cdrGradients,
+					      const Vector<EBAMRCellData*>& a_rteDensities,
 					      const EBAMRCellData&          a_E,
 					      const Real&                   a_time,
 					      const Real&                   a_dt){
-  CH_TIME("CdrPlasmaStepper::advanceReactionNetwork(amr)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData>x5, EBAMRCellData, Real, Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::advanceReactionNetwork(amr)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData>x5, EBAMRCellData, Real, Real)" << endl;
   }
 
-  const int num_species = m_physics->getNumCdrSpecies();
-  const int num_Photons = m_physics->getNumRtSpecies();
+  // TLDR: This is the general version for computing the CDR and RTE source terms. This will call the level version. 
 
-  Vector<EBAMRCellData*> states(num_species);
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+  const int numRteSpecies = m_physics->getNumRtSpecies();
+
 
   // This is a special option in case we use upwinding. In that case we need to allocate
-  // storage for holding the upwind-weighted data for each cdr solver. 
+  // storage for holding the upwind-weighted data for each cdr solver.
+  Vector<EBAMRCellData*> cdrStates(numCdrSpecies);
+  
   if(m_whichSourceTermComputation == SourceTermComputation::Upwind){
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
 
-      states[idx] = new EBAMRCellData;
-      m_amr->allocate(*states[idx], m_realm, m_cdr->getPhase(), 1);
+      // Allocate some storage and compute an upwind approximation to the cell-centered density. This is the Villa et. al magic for stabilizing
+      // the drift-reaction mechanism. Only use if you absolute know what you're doing. 
+      cdrStates[idx] = new EBAMRCellData();
+      m_amr->allocate(*cdrStates[idx], m_realm, m_cdr->getPhase(), 1);
 
-      solverIt()->weightedUpwind(*states[idx], m_upwindFactor);
+      // Compute the upwind approximation. 
+      solverIt()->weightedUpwind(*cdrStates[idx], m_upwindFactor);
     }
   }
   else{
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
       
-      states[idx] = a_particle_densities[idx];
+      cdrStates[idx] = a_cdrDensities[idx];
     }
   }
 
+
+  // Level loop. We expose the entire reaction network method as a level version. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    Vector<LevelData<EBCellFAB>* > particle_sources(num_species);
-    Vector<LevelData<EBCellFAB>* > particle_densities(num_species);
-    Vector<LevelData<EBCellFAB>* > particle_gradients(num_species);
-    Vector<LevelData<EBCellFAB>* > Photon_sources(num_Photons);
-    Vector<LevelData<EBCellFAB>* > Photon_densities(num_Photons);
 
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
-      particle_sources[idx]   = (*a_particle_sources[idx])[lvl];
-      particle_densities[idx] = (*states[idx])[lvl];
-      particle_gradients[idx] = (*a_particle_gradients[idx])[lvl];
+    // Things to be exposed by level. 
+    Vector<LevelData<EBCellFAB>* > cdrSources  (numCdrSpecies);
+    Vector<LevelData<EBCellFAB>* > rteSources  (numRteSpecies);    
+    Vector<LevelData<EBCellFAB>* > cdrDensities(numCdrSpecies);
+    Vector<LevelData<EBCellFAB>* > cdrGradients(numCdrSpecies);
+    Vector<LevelData<EBCellFAB>* > rteDensities(numRteSpecies);
+
+    // Get the CDR stuff on this level. 
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx     = solverIt.index();
+      
+      cdrSources  [idx] = (*a_cdrSources  [idx])[lvl];
+      cdrDensities[idx] = (*cdrStates  [idx])[lvl];
+      cdrGradients[idx] = (*a_cdrGradients[idx])[lvl];
     }
 
-    for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
-      Photon_sources[idx]   = (*a_Photon_sources[idx])[lvl];
-      Photon_densities[idx] = (*a_Photon_densities[idx])[lvl];
+    // Get the RTE stuff on this level.     
+    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+      const int idx     = solverIt.index();
+      
+      rteSources  [idx] = (*a_rteSources  [idx])[lvl];
+      rteDensities[idx] = (*a_rteDensities[idx])[lvl];
     }
 
-    // Call the level versions
-    advanceReactionNetwork(particle_sources,
-			   Photon_sources,
-			   particle_densities,
-			   particle_gradients,
-			   Photon_densities,
-			   *a_E[lvl],
-			   a_time,
-			   a_dt,
-			   lvl);
+    // Now call the level version. 
+    this->advanceReactionNetwork(cdrSources,
+				 rteSources,
+				 cdrDensities,
+				 cdrGradients,
+				 rteDensities,
+				 *a_E[lvl],
+				 a_time,
+				 a_dt,
+				 lvl);
   }
 
-  // Release the extra allocated memory
+  // When we did the upwind approximation we explicitly allocate memory. Now release it. 
   if(m_whichSourceTermComputation == SourceTermComputation::Upwind){
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
-      delete states[idx];
+      delete cdrStates[idx];
     }
   }  
-
-#if 0 // R.M. May/2020: This is not a good place to do this kind of averaging and interpolating. If need it, do it elsewhere.
-  // Average down species
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
-    m_amr->averageDown(*a_particle_sources[idx], m_realm, m_cdr->getPhase());
-    m_amr->interpGhost(*a_particle_sources[idx], m_realm, m_cdr->getPhase()); // This MAY be when if we extrapolate advection
-  }
-
-  // Average down Photon solvers
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
-    m_amr->averageDown(*a_Photon_sources[idx], m_realm, m_cdr->getPhase());
-  }
-#endif
 }
 
-void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&       a_particle_sources,
-					      Vector<LevelData<EBCellFAB>* >&       a_Photon_sources,
-					      const Vector<LevelData<EBCellFAB>* >& a_particle_densities,
-					      const Vector<LevelData<EBCellFAB>* >& a_particle_gradients,
-					      const Vector<LevelData<EBCellFAB> *>& a_Photon_densities,
+void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&       a_cdrSources,
+					      Vector<LevelData<EBCellFAB>* >&       a_rteSources,
+					      const Vector<LevelData<EBCellFAB>* >& a_cdrDensities,
+					      const Vector<LevelData<EBCellFAB>* >& a_cdrGradients,
+					      const Vector<LevelData<EBCellFAB> *>& a_rteDensities,
 					      const LevelData<EBCellFAB>&           a_E,
 					      const Real&                           a_time,
 					      const Real&                           a_dt,
 					      const int                             a_lvl){
-  CH_TIME("CdrPlasmaStepper::advanceReactionNetwork(level)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetwork(Vector<LD<EBCellFAB>x5, LD<EBCellFAB>, Real, Real, int)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::advanceReactionNetwork(level)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetwork(Vector<LD<EBCellFAB>x5, LD<EBCellFAB>, Real, Real, int)" << endl;
   }
 
   const Real zero = 0.0;
@@ -506,19 +539,19 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&   
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     Vector<EBCellFAB*> particle_sources(num_species);
-    Vector<EBCellFAB*> particle_densities(num_species);
-    Vector<EBCellFAB*> particle_gradients(num_species);
+    Vector<EBCellFAB*> cdrDensities(num_species);
+    Vector<EBCellFAB*> cdrGradients(num_species);
     Vector<EBCellFAB*> particle_velocities(num_species, NULL);
-    Vector<EBCellFAB*> Photon_sources(num_Photons);
-    Vector<EBCellFAB*> Photon_densities(num_Photons);
+    Vector<EBCellFAB*> rteSources(num_Photons);
+    Vector<EBCellFAB*> rteDensities(num_Photons);
 
     
     for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const RefCountedPtr<CdrSolver>& solver = solver_it();
       const int idx = solver_it.index();
-      particle_sources[idx]   = &(*a_particle_sources[idx])[dit()];
-      particle_densities[idx] = &(*a_particle_densities[idx])[dit()];
-      particle_gradients[idx] = &(*a_particle_gradients[idx])[dit()];
+      particle_sources[idx]   = &(*a_cdrSources[idx])[dit()];
+      cdrDensities[idx] = &(*a_cdrDensities[idx])[dit()];
+      cdrGradients[idx] = &(*a_cdrGradients[idx])[dit()];
 
       if(solver->isMobile()){
 	const EBAMRCellData& velo = solver->getCellCenteredVelocity();
@@ -529,17 +562,17 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&   
     
     for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      Photon_sources[idx]   = &(*a_Photon_sources[idx])[dit()];
-      Photon_densities[idx] = &(*a_Photon_densities[idx])[dit()];
+      rteSources[idx]   = &(*a_rteSources[idx])[dit()];
+      rteDensities[idx] = &(*a_rteDensities[idx])[dit()];
     }
     
     // This does all cells
 #if USE_FAST_REACTIONS
     advanceReactionNetworkRegularCellsFast(particle_sources,
-					   Photon_sources,
-					   particle_densities,
-					   particle_gradients,
-					   Photon_densities,
+					   rteSources,
+					   cdrDensities,
+					   cdrGradients,
+					   rteDensities,
 					   a_E[dit()],
 					   a_time,
 					   a_dt,
@@ -548,10 +581,10 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&   
 
 #else
     advanceReactionNetworkRegularCells(particle_sources,
-				       Photon_sources,
-				       particle_densities,
-				       particle_gradients,
-				       Photon_densities,
+				       rteSources,
+				       cdrDensities,
+				       cdrGradients,
+				       rteDensities,
 				       a_E[dit()],
 				       a_time,
 				       a_dt,
@@ -561,11 +594,11 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&   
 
     // This overwrites irregular celles
     advanceReactionNetworkIrreg(particle_sources,
-				Photon_sources,
-				particle_densities,
-				particle_gradients,
+				rteSources,
+				cdrDensities,
+				cdrGradients,
 				particle_velocities,
-				Photon_densities,
+				rteDensities,
 				interp_stencils[a_lvl][dit()],
 				a_E[dit()],
 				a_time,
@@ -577,11 +610,11 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&   
   }
 }
 
-void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&       a_particle_sources,
-							  Vector<EBCellFAB*>&       a_Photon_sources,
-							  const Vector<EBCellFAB*>& a_particle_densities,
-							  const Vector<EBCellFAB*>& a_particle_gradients,
-							  const Vector<EBCellFAB*>& a_Photon_densities,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&       a_cdrSources,
+							  Vector<EBCellFAB*>&       a_rteSources,
+							  const Vector<EBCellFAB*>& a_cdrDensities,
+							  const Vector<EBCellFAB*>& a_cdrGradients,
+							  const Vector<EBCellFAB*>& a_rteDensities,
 							  const EBCellFAB&          a_E,
 							  const Real&               a_time,
 							  const Real&               a_dt,
@@ -606,10 +639,10 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&   
   // Things that are passed into CdrPlasmaPhysics
   RealVect         pos, E;
   Vector<Real>     particle_sources(num_species);
-  Vector<Real>     particle_densities(num_species);
-  Vector<RealVect> particle_gradients(num_species);
-  Vector<Real>     Photon_sources(num_Photons);
-  Vector<Real>     Photon_densities(num_Photons);
+  Vector<Real>     cdrDensities(num_species);
+  Vector<RealVect> cdrGradients(num_species);
+  Vector<Real>     rteSources(num_Photons);
+  Vector<Real>     rteDensities(num_Photons);
 
   // Computed source terms onto here
   EBCellFAB part_src(ebisbox, a_E.getRegion(), num_species);
@@ -633,25 +666,25 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&   
       // Fill vectors with densities
       for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	const int idx  = solver_it.index();
-	const Real phi = (*a_particle_densities[idx]).getSingleValuedFAB()(iv, 0);
-	particle_densities[idx] = Max(zero, phi);
-	particle_gradients[idx] = RealVect(D_DECL((*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 0),
-						  (*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 1),
-						  (*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 2)));
+	const Real phi = (*a_cdrDensities[idx]).getSingleValuedFAB()(iv, 0);
+	cdrDensities[idx] = Max(zero, phi);
+	cdrGradients[idx] = RealVect(D_DECL((*a_cdrGradients[idx]).getSingleValuedFAB()(iv, 0),
+						  (*a_cdrGradients[idx]).getSingleValuedFAB()(iv, 1),
+						  (*a_cdrGradients[idx]).getSingleValuedFAB()(iv, 2)));
       }
       for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	const int idx  = solver_it.index();
-	const Real phi = (*a_Photon_densities[idx]).getSingleValuedFAB()(iv, 0);
-	Photon_densities[idx] = Max(zero, phi);
+	const Real phi = (*a_rteDensities[idx]).getSingleValuedFAB()(iv, 0);
+	rteDensities[idx] = Max(zero, phi);
       }
 
       // Compute source terms
       const Real kappa = 1.0; // Kappa for regular cells
       m_physics->advanceReactionNetwork(particle_sources,
-					Photon_sources,
-					particle_densities,
-					particle_gradients,
-					Photon_densities,
+					rteSources,
+					cdrDensities,
+					cdrGradients,
+					rteDensities,
 					E,
 					pos,
 					a_dx,
@@ -668,7 +701,7 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&   
       // Put vector into temporary holders
       for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.index();
-	phot_src.getSingleValuedFAB()(iv,idx) = Photon_sources[idx];
+	phot_src.getSingleValuedFAB()(iv,idx) = rteSources[idx];
       }
     }
   }
@@ -676,29 +709,29 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&   
   // Copy temporary storage back to solvers
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    (*a_particle_sources[idx]).setVal(0.0);
-    (*a_particle_sources[idx]).plus(part_src, idx, 0, 1);
+    (*a_cdrSources[idx]).setVal(0.0);
+    (*a_cdrSources[idx]).plus(part_src, idx, 0, 1);
 
     // Covered cells are bogus. 
-    (*a_particle_sources[idx]).setCoveredCellVal(0.0, 0);
+    (*a_cdrSources[idx]).setCoveredCellVal(0.0, 0);
   }
 
   // Copy temporary storage back to solvers
   for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    (*a_Photon_sources[idx]).setVal(0.0);
-    (*a_Photon_sources[idx]).plus(phot_src, idx, 0, 1);
+    (*a_rteSources[idx]).setVal(0.0);
+    (*a_rteSources[idx]).plus(phot_src, idx, 0, 1);
 
     // Covered cells are bogus. 
-    (*a_Photon_sources[idx]).setCoveredCellVal(0.0, 0);
+    (*a_rteSources[idx]).setCoveredCellVal(0.0, 0);
   }
 }
 
-void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast(Vector<EBCellFAB*>&       a_particle_sources,
-							      Vector<EBCellFAB*>&       a_Photon_sources,
-							      const Vector<EBCellFAB*>& a_particle_densities,
-							      const Vector<EBCellFAB*>& a_particle_gradients,
-							      const Vector<EBCellFAB*>& a_Photon_densities,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast(Vector<EBCellFAB*>&       a_cdrSources,
+							      Vector<EBCellFAB*>&       a_rteSources,
+							      const Vector<EBCellFAB*>& a_cdrDensities,
+							      const Vector<EBCellFAB*>& a_cdrGradients,
+							      const Vector<EBCellFAB*>& a_rteDensities,
 							      const EBCellFAB&          a_E,
 							      const Real&               a_time,
 							      const Real&               a_dt,
@@ -710,20 +743,20 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast(Vector<EBCellFAB*>
   }
 
 #if CH_SPACEDIM==2
-  advanceReactionNetworkRegularCellsFast2D(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients,
-					   a_Photon_densities, a_E, a_time, a_dt, a_dx, a_box);
+  advanceReactionNetworkRegularCellsFast2D(a_cdrSources, a_rteSources, a_cdrDensities, a_cdrGradients,
+					   a_rteDensities, a_E, a_time, a_dt, a_dx, a_box);
 #elif CH_SPACEDIM==3
-  advanceReactionNetworkRegularCellsFast3D(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients,
-					   a_Photon_densities, a_E, a_time, a_dt, a_dx, a_box);
+  advanceReactionNetworkRegularCellsFast3D(a_cdrSources, a_rteSources, a_cdrDensities, a_cdrGradients,
+					   a_rteDensities, a_E, a_time, a_dt, a_dx, a_box);
 #endif
   
 }
 
-void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB*>&       a_particle_sources,
-								Vector<EBCellFAB*>&       a_Photon_sources,
-								const Vector<EBCellFAB*>& a_particle_densities,
-								const Vector<EBCellFAB*>& a_particle_gradients,
-								const Vector<EBCellFAB*>& a_Photon_densities,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB*>&       a_cdrSources,
+								Vector<EBCellFAB*>&       a_rteSources,
+								const Vector<EBCellFAB*>& a_cdrDensities,
+								const Vector<EBCellFAB*>& a_cdrGradients,
+								const Vector<EBCellFAB*>& a_rteDensities,
 								const EBCellFAB&          a_E,
 								const Real&               a_time,
 								const Real&               a_dt,
@@ -750,10 +783,10 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB
   RealVect         pos = RealVect::Zero;
   RealVect         E   = RealVect::Zero;
   Vector<Real>     particle_sources(num_species);
-  Vector<Real>     particle_densities(num_species);
-  Vector<RealVect> particle_gradients(num_species);
-  Vector<Real>     Photon_sources(num_Photons);
-  Vector<Real>     Photon_densities(num_Photons);
+  Vector<Real>     cdrDensities(num_species);
+  Vector<RealVect> cdrGradients(num_species);
+  Vector<Real>     rteSources(num_Photons);
+  Vector<Real>     rteDensities(num_Photons);
 
   // I need contiguous memory for what is about to happen, so begin by copying stuff onto smaller data holders
   
@@ -765,9 +798,9 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB
   cdr_phi.setVal(0.0);
   cdr_src.setVal(0.0);
   for (int i = 0; i < num_species; i++){
-    cdr_phi.copy(a_particle_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
-    cdr_gx.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 0, a_box, i, 1);
-    cdr_gy.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 1, a_box, i, 1);
+    cdr_phi.copy(a_cdrDensities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+    cdr_gx.copy(a_cdrGradients[i]->getFArrayBox(),  a_box, 0, a_box, i, 1);
+    cdr_gy.copy(a_cdrGradients[i]->getFArrayBox(),  a_box, 1, a_box, i, 1);
   }
 
   // Temps for Photon source terms and densities
@@ -776,7 +809,7 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB
   rte_phi.setVal(0.0);
   rte_src.setVal(0.0);
   for (int i = 0; i < num_Photons; i++){
-    rte_phi.copy(a_Photon_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+    rte_phi.copy(a_rteDensities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
   }
 
   // Temp for electric field
@@ -805,24 +838,24 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB
       
       // Particle densities
       for (int idx = 0; idx < num_species; ++idx){
-	particle_densities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
-	particle_gradients[idx][0] = vla_cdr_gx[idx][j][i];
-	particle_gradients[idx][1] = vla_cdr_gy[idx][j][i];
+	cdrDensities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
+	cdrGradients[idx][0] = vla_cdr_gx[idx][j][i];
+	cdrGradients[idx][1] = vla_cdr_gy[idx][j][i];
       }
 
       // Photon densities
       for (int idx = 0; idx < num_Photons; ++idx){
-	Photon_densities[idx] = Max(0.0, vla_rte_phi[idx][j][i]);
+	rteDensities[idx] = Max(0.0, vla_rte_phi[idx][j][i]);
       }
 
       E   = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
       pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
       m_physics->advanceReactionNetwork(particle_sources,
-					Photon_sources,
-					particle_densities,
-					particle_gradients,
-					Photon_densities,
+					rteSources,
+					cdrDensities,
+					cdrGradients,
+					rteDensities,
 					E,
 					pos,
 					a_dx,
@@ -837,22 +870,22 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB
 
       // Put result in correct palce
       for (int idx = 0; idx < num_Photons; ++idx){
-	vla_rte_src[idx][j][i] = Photon_sources[idx];
+	vla_rte_src[idx][j][i] = rteSources[idx];
       }
     }
   }
 
   // Copy result back to solvers
   for (int i = 0; i < num_species; i++){
-    FArrayBox& src = a_particle_sources[i]->getFArrayBox();
+    FArrayBox& src = a_cdrSources[i]->getFArrayBox();
     src.setVal(0.0);
     src.copy(cdr_src, a_box, i, a_box, 0, 1);
-    a_particle_sources[i]->setCoveredCellVal(0.0, 0);
+    a_cdrSources[i]->setCoveredCellVal(0.0, 0);
   }
 
   // Copy result back to solvers
   for (int i = 0; i < num_Photons; i++){
-    FArrayBox& src = a_Photon_sources[i]->getFArrayBox();
+    FArrayBox& src = a_rteSources[i]->getFArrayBox();
     src.setVal(0.0);
     src.copy(rte_src, a_box, i, a_box, 0, 1);
   }
@@ -860,11 +893,11 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB
 }
 
 
-void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB*>&       a_particle_sources,
-								Vector<EBCellFAB*>&       a_Photon_sources,
-								const Vector<EBCellFAB*>& a_particle_densities,
-								const Vector<EBCellFAB*>& a_particle_gradients,
-								const Vector<EBCellFAB*>& a_Photon_densities,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB*>&       a_cdrSources,
+								Vector<EBCellFAB*>&       a_rteSources,
+								const Vector<EBCellFAB*>& a_cdrDensities,
+								const Vector<EBCellFAB*>& a_cdrGradients,
+								const Vector<EBCellFAB*>& a_rteDensities,
 								const EBCellFAB&          a_E,
 								const Real&               a_time,
 								const Real&               a_dt,
@@ -890,10 +923,10 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB
   RealVect         pos = RealVect::Zero;
   RealVect         E   = RealVect::Zero;
   Vector<Real>     particle_sources(num_species);
-  Vector<Real>     particle_densities(num_species);
-  Vector<RealVect> particle_gradients(num_species);
-  Vector<Real>     Photon_sources(num_Photons);
-  Vector<Real>     Photon_densities(num_Photons);
+  Vector<Real>     cdrDensities(num_species);
+  Vector<RealVect> cdrGradients(num_species);
+  Vector<Real>     rteSources(num_Photons);
+  Vector<Real>     rteDensities(num_Photons);
 
   // I need contiguous memory for what is about to happen, so begin by copying stuff onto smaller data holders
   
@@ -906,10 +939,10 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB
   cdr_phi.setVal(0.0);
   cdr_src.setVal(0.0);
   for (int i = 0; i < num_species; i++){
-    cdr_phi.copy(a_particle_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
-    cdr_gx.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 0, a_box, i, 1);
-    cdr_gy.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 1, a_box, i, 1);
-    cdr_gz.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 2, a_box, i, 1);
+    cdr_phi.copy(a_cdrDensities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+    cdr_gx.copy(a_cdrGradients[i]->getFArrayBox(),  a_box, 0, a_box, i, 1);
+    cdr_gy.copy(a_cdrGradients[i]->getFArrayBox(),  a_box, 1, a_box, i, 1);
+    cdr_gz.copy(a_cdrGradients[i]->getFArrayBox(),  a_box, 2, a_box, i, 1);
   }
 
   // Temps for Photon source terms and densities
@@ -918,7 +951,7 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB
   rte_phi.setVal(0.0);
   rte_src.setVal(0.0);
   for (int i = 0; i < num_Photons; i++){
-    rte_phi.copy(a_Photon_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+    rte_phi.copy(a_rteDensities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
   }
 
   // Temp for electric field
@@ -950,25 +983,25 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB
       
 	// Particle densities
 	for (int idx = 0; idx < num_species; ++idx){
-	  particle_densities[idx]    = Max(0.0, vla_cdr_phi[idx][k][j][i]);
-	  particle_gradients[idx][0] = vla_cdr_gx[idx][k][j][i];
-	  particle_gradients[idx][1] = vla_cdr_gy[idx][k][j][i];
-	  particle_gradients[idx][2] = vla_cdr_gz[idx][k][j][i];
+	  cdrDensities[idx]    = Max(0.0, vla_cdr_phi[idx][k][j][i]);
+	  cdrGradients[idx][0] = vla_cdr_gx[idx][k][j][i];
+	  cdrGradients[idx][1] = vla_cdr_gy[idx][k][j][i];
+	  cdrGradients[idx][2] = vla_cdr_gz[idx][k][j][i];
 	}
 
 	// Photon densities
 	for (int idx = 0; idx < num_Photons; ++idx){
-	  Photon_densities[idx] = Max(0.0, vla_rte_phi[idx][k][j][i]);
+	  rteDensities[idx] = Max(0.0, vla_rte_phi[idx][k][j][i]);
 	}
 
 	E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[2][k][j][i]);
 	pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
 	m_physics->advanceReactionNetwork(particle_sources,
-					  Photon_sources,
-					  particle_densities,
-					  particle_gradients,
-					  Photon_densities,
+					  rteSources,
+					  cdrDensities,
+					  cdrGradients,
+					  rteDensities,
 					  E,
 					  pos,
 					  a_dx,
@@ -983,7 +1016,7 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB
 
 	// Put result in correct palce
 	for (int idx = 0; idx < num_Photons; ++idx){
-	  vla_rte_src[idx][k][j][i] = Photon_sources[idx];
+	  vla_rte_src[idx][k][j][i] = rteSources[idx];
 	}
       }
     }
@@ -991,15 +1024,15 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB
 
   // Copy result back to solvers
   for (int i = 0; i < num_species; i++){
-    FArrayBox& src = a_particle_sources[i]->getFArrayBox();
+    FArrayBox& src = a_cdrSources[i]->getFArrayBox();
     src.setVal(0.0);
     src.copy(cdr_src, a_box, i, a_box, 0, 1);
-    a_particle_sources[i]->setCoveredCellVal(0.0, 0);
+    a_cdrSources[i]->setCoveredCellVal(0.0, 0);
   }
 
   // Copy result back to solvers
   for (int i = 0; i < num_Photons; i++){
-    FArrayBox& src = a_Photon_sources[i]->getFArrayBox();
+    FArrayBox& src = a_rteSources[i]->getFArrayBox();
     src.setVal(0.0);
     src.copy(rte_src, a_box, i, a_box, 0, 1);
   }
@@ -1009,12 +1042,12 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB
 
 
 
-void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_particle_sources,
-						   Vector<EBCellFAB*>&          a_Photon_sources,
-						   const Vector<EBCellFAB*>&    a_particle_densities,
-						   const Vector<EBCellFAB*>&    a_particle_gradients,
+void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdrSources,
+						   Vector<EBCellFAB*>&          a_rteSources,
+						   const Vector<EBCellFAB*>&    a_cdrDensities,
+						   const Vector<EBCellFAB*>&    a_cdrGradients,
 						   const Vector<EBCellFAB*>&    a_particle_velocities,
-						   const Vector<EBCellFAB*>&    a_Photon_densities,
+						   const Vector<EBCellFAB*>&    a_rteDensities,
 						   const BaseIVFAB<VoFStencil>& a_interp_stencils,
 						   const EBCellFAB&             a_E,
 						   const Real&                  a_time,
@@ -1026,12 +1059,12 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
   switch(m_whichSourceTermComputation){
   case SourceTermComputation::Interpolated:
     {
-      this->advanceReactionNetworkIrregInterp(a_particle_sources,
-					      a_Photon_sources,
-					      a_particle_densities,
-					      a_particle_gradients,
+      this->advanceReactionNetworkIrregInterp(a_cdrSources,
+					      a_rteSources,
+					      a_cdrDensities,
+					      a_cdrGradients,
 					      a_particle_velocities,
-					      a_Photon_densities,
+					      a_rteDensities,
 					      a_interp_stencils,
 					      a_E,
 					      a_time,
@@ -1044,12 +1077,12 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
     }
   case SourceTermComputation::InterpolatedStable:
     {
-      this->advanceReactionNetworkIrregUpwind(a_particle_sources,
-					      a_Photon_sources,
-					      a_particle_densities,
-					      a_particle_gradients,
+      this->advanceReactionNetworkIrregUpwind(a_cdrSources,
+					      a_rteSources,
+					      a_cdrDensities,
+					      a_cdrGradients,
 					      a_particle_velocities,					      
-					      a_Photon_densities,
+					      a_rteDensities,
 					      a_interp_stencils,
 					      a_E,
 					      a_time,
@@ -1062,11 +1095,11 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
     }
   case SourceTermComputation::CellAverage:
     {
-      this->advanceReactionNetworkIrregKappa(a_particle_sources,
-					     a_Photon_sources,
-					     a_particle_densities,
-					     a_particle_gradients,
-					     a_Photon_densities,
+      this->advanceReactionNetworkIrregKappa(a_cdrSources,
+					     a_rteSources,
+					     a_cdrDensities,
+					     a_cdrGradients,
+					     a_rteDensities,
 					     a_interp_stencils,
 					     a_E,
 					     a_time,
@@ -1079,12 +1112,12 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
     }
   case SourceTermComputation::Upwind:
     {
-      this->advanceReactionNetworkIrregUpwind(a_particle_sources,
-					      a_Photon_sources,
-					      a_particle_densities,
-					      a_particle_gradients,
+      this->advanceReactionNetworkIrregUpwind(a_cdrSources,
+					      a_rteSources,
+					      a_cdrDensities,
+					      a_cdrGradients,
 					      a_particle_velocities,					      
-					      a_Photon_densities,
+					      a_rteDensities,
 					      a_interp_stencils,
 					      a_E,
 					      a_time,
@@ -1211,11 +1244,11 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&    
   }
 }
 
-void CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&          a_particle_sources,
-							Vector<EBCellFAB*>&          a_Photon_sources,
-							const Vector<EBCellFAB*>&    a_particle_densities,
-							const Vector<EBCellFAB*>&    a_particle_gradients,
-							const Vector<EBCellFAB*>&    a_Photon_densities,
+void CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&          a_cdrSources,
+							Vector<EBCellFAB*>&          a_rteSources,
+							const Vector<EBCellFAB*>&    a_cdrDensities,
+							const Vector<EBCellFAB*>&    a_cdrGradients,
+							const Vector<EBCellFAB*>&    a_rteDensities,
 							const BaseIVFAB<VoFStencil>& a_interp_stencils,
 							const EBCellFAB&             a_E,
 							const Real&                  a_time,
@@ -1242,10 +1275,10 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&     
   // Things that are passed into CdrPlasmaPhysics
   RealVect         pos, E;
   Vector<Real>     particle_sources(num_species);
-  Vector<Real>     Photon_sources(num_Photons);
-  Vector<Real>     particle_densities(num_species);
-  Vector<RealVect> particle_gradients(num_species);
-  Vector<Real>     Photon_densities(num_Photons);
+  Vector<Real>     rteSources(num_Photons);
+  Vector<Real>     cdrDensities(num_species);
+  Vector<RealVect> cdrGradients(num_species);
+  Vector<Real>     rteDensities(num_Photons);
 
   VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
@@ -1275,25 +1308,25 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&     
 	const VolIndex& ivof = stencil.vof(i);
 	const Real& iweight  = stencil.weight(i);
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  grad[dir] += (*a_particle_gradients[idx])(ivof, dir)*iweight;
+	  grad[dir] += (*a_cdrGradients[idx])(ivof, dir)*iweight;
 	}
       }
       
-      particle_densities[idx] = Max(zero, (*a_particle_densities[idx])(vof,0));
-      particle_gradients[idx] = grad;
+      cdrDensities[idx] = Max(zero, (*a_cdrDensities[idx])(vof,0));
+      cdrGradients[idx] = grad;
     }
 
     for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      Photon_densities[idx] = Max(zero, (*a_Photon_densities[idx])(vof, 0));
+      rteDensities[idx] = Max(zero, (*a_rteDensities[idx])(vof, 0));
     }
 
     // Compute source terms
     m_physics->advanceReactionNetwork(particle_sources,
-				      Photon_sources,
-				      particle_densities,
-				      particle_gradients,
-				      Photon_densities,
+				      rteSources,
+				      cdrDensities,
+				      cdrGradients,
+				      rteDensities,
 				      E,
 				      pos,
 				      a_dx,
@@ -1303,12 +1336,12 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&     
 
     for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      (*a_particle_sources[idx])(vof, 0) = particle_sources[idx];
+      (*a_cdrSources[idx])(vof, 0) = particle_sources[idx];
     }
     
     for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      (*a_Photon_sources[idx])(vof, 0) = Photon_sources[idx];
+      (*a_rteSources[idx])(vof, 0) = rteSources[idx];
     }
   }
 }
