@@ -32,28 +32,31 @@ namespace Physics {
     public:
 
       /*!
-	@brief Constructor
+	@brief Default constructor. Does nothing. 
       */
       CdrPlasmaPhysics(){
-	m_eed_solve     = false;
-	m_eed_index = 0;
       }
 
       /*!
-	@brief Destructor
+	@brief Base destructor. Does nothing.
       */
       virtual ~CdrPlasmaPhysics(){}
 
       /*!
 	@brief Get number of plot variables for this physics class. 
-	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. 
+	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. When overriding
+	this method then this routine should return the number of plot variables that will be plotted. The returned number
+	should thus be the same as the vectors that are returned from getPlotVariableNames and getPlotVariables.
       */
       virtual int getNumberOfPlotVariables() const {
 	return 0;
       }
 
       /*!
-	@brief Get plot variable names. The names and positions between this routine and getPlotVariables must be consistent!
+	@brief Get plot variable names. The
+	@details This function will return the plot variable names that CdrPlasmaPhysics will plot. The length of the returned
+	vector must be the same as the returned value from getNumberOfPlotVariables. Note that the names/positions between this 
+	routine and getPlotVariables should be consistent.
       */
       virtual Vector<std::string> getPlotVariableNames() const {
 	return Vector<std::string>(this->getNumberOfPlotVariables(), std::string("empty data"));
@@ -61,7 +64,8 @@ namespace Physics {
 
       /*!
 	@brief Provide plot variables. This is used by CdrPlasmaStepper when writing plot files. 
-	@details The plot variables should have length this->getNumberOfPlotVariables (as should getPlotVariableNames)
+	@details The length of the returned vector should be the same as the returned value from getNumberOfPlotVariables. The names
+	for the returned variables are given by the returned vector in getPlotVariableNames().
 	@param[in]  a_cdrDensities  Grid-based density for particle species.
 	@param[in]  a_cdrGradients  Grid-based gradients for particle species.
 	@param[in]  a_rteDensities  Grid-based densities for photons.
@@ -228,70 +232,34 @@ namespace Physics {
       virtual Real initialSigma(const Real a_time, const RealVect a_pos) const  = 0;      
 
       /*!
-	@brief Initialize electron energy density
-      */
-      virtual Real initEed(const RealVect a_pos, const Real a_time, const RealVect a_E){
-	return 0.0;
-      }
-
-      /*!
-	@brief Get all ions
+	@brief Get all CDR species. 
       */
       const Vector<RefCountedPtr<CdrSpecies> >& getCdrSpecies() const { 
 	return m_CdrSpecies; 
       }
 
       /*!
-	@brief Get all Photons
+	@brief Get all RTE species. 
       */
       const Vector<RefCountedPtr<RtSpecies> >& getRtSpecies() const {
 	return m_RtSpecies;
       }
 
       /*!
-	@brief Return number of ion equations
+	@brief Return number of CDR species that we solve for. 
       */
       int getNumCdrSpecies() const{
 	return m_CdrSpecies.size();
       }
 
       /*!
-	@brief Return number of RTE equations
+	@brief Return number of RTE equations that we solve for. 
       */
       int getNumRtSpecies() const {
 	return m_RtSpecies.size();
       }
-
-      /*!
-	@brief Check if solver solves for eed
-      */
-      bool solveEed(){
-	return m_eed_solve;
-      }
-
-      /*!
-	@brief Get eed solver index
-      */
-      int getEedIndex(){
-	return m_eed_index;
-      }
-
-      void setDt(const Real a_dt){
-	m_dt = a_dt;
-      }
-
-      void setFinestDx(const Real a_finest_dx){
-	m_finest_dx = a_finest_dx;
-      }
-
   
     protected:
-      bool m_eed_solve;     // Doing EED solve or not?
-  
-      int m_eed_index;      // EED solver index
-  
-      Real m_dt;            // FHD kinetics need access to time steps
-      Real m_finest_dx;     // Finest dx
 
       /*!
 	@brief List of species

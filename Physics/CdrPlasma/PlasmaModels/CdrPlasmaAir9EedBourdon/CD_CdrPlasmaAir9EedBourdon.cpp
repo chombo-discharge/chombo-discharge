@@ -39,8 +39,8 @@ std::string CdrPlasmaAir9EedBourdon::s_bolsig_townsend = "Energy (eV)	Townsend i
 CdrPlasmaAir9EedBourdon::CdrPlasmaAir9EedBourdon(){
   m_numCdrSpecies = 9;    // 8 reactive ones plus the eed
   m_numRtSpecies = 3;    // Bourdon model for Photons
-  m_eed_solve   = true; // Yes, we're doing an EED solve so we must have a Poisson solution first
-  m_eed_index   = 0;    // Index for the EED equation
+  //  m_eed_solve   = true; // Yes, we're doing an EED solve so we must have a Poisson solution first
+  //  m_eed_index   = 0;    // Index for the EED equation
 
   parseTransportFile();
   parseGas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac); // Get gas parameters

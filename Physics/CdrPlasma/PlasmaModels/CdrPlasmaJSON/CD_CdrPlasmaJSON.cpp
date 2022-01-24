@@ -82,8 +82,14 @@ void CdrPlasmaJSON::parseJSON() {
   }
 
   // Parse the JSON file
-  std::ifstream istream(m_jsonFile);      
-  istream >> m_json;
+  std::ifstream istream(m_jsonFile);
+
+  if(istream.good()){
+    istream >> m_json;
+  }
+  else{
+    this->throwParserError("CdrPlasmaJSON::parseJSON -- I did not find file '" + m_jsonFile + "' not found");
+  }
 }
 
 void CdrPlasmaJSON::throwParserError(const std::string a_error) const {
