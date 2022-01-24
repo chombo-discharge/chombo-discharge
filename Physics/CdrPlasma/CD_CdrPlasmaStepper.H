@@ -417,12 +417,12 @@ namespace Physics {
 	@param[in]  a_dx           Grid resolution.
 	@param[in]  a_cellBox      Cell-centered computational region. 
       */
-      virtual void advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&       a_cdrSources,
-						      Vector<EBCellFAB*>&       a_rteSources,
-						      const Vector<EBCellFAB*>& a_cdrDensities,
-						      const Vector<EBCellFAB*>& a_cdrGradients,
-						      const Vector<EBCellFAB*>& a_rteDensities,
-						      const EBCellFAB&          a_E,
+      virtual void advanceReactionNetworkRegularCells(Vector<FArrayBox*>&       a_cdrSources,
+						      Vector<FArrayBox*>&       a_rteSources,
+						      const Vector<FArrayBox*>& a_cdrDensities,
+						      const Vector<FArrayBox*>& a_cdrGradients,
+						      const Vector<FArrayBox*>& a_rteDensities,
+						      const FArrayBox&          a_E,
 						      const Real&               a_time,
 						      const Real&               a_dt,
 						      const Real&               a_dx,
