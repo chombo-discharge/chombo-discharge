@@ -393,65 +393,40 @@ namespace Physics {
 	@param[in]  a_E            Cell-centered electric field. 
 	@param[in]  a_time         Time
 	@param[in]  a_dt           Time step.
+	@param[in]  a_level        Grid level. 
       */
       virtual void advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&       a_cdrSources,
 					  Vector<LevelData<EBCellFAB>* >&       a_rteSources,
 					  const Vector<LevelData<EBCellFAB>* >& a_cdrDensities,
 					  const Vector<LevelData<EBCellFAB>* >& a_cdrGradients,
-					  const Vector<LevelData<EBCellFAB>* >& a_Photon_densities,
+					  const Vector<LevelData<EBCellFAB>* >& a_rteDensities,
 					  const LevelData<EBCellFAB>&           a_E,
 					  const Real&                           a_time,
 					  const Real&                           a_dt,
 					  const int                             a_level);
       /*!
-	@brief Compute reaction network sources. Patch version.
+	@brief Compute reaction network sources. This is the regular version which does not do the cut-cells.
+	@param[out] a_cdrSources   Source terms for the CDR solvers. 
+	@param[out] a_rteSources   Source terms for the radiative transfer solvers. 
+	@param[in]  a_cdrDensities Cell-centered densities for the plasma species (i.e., CDR solvers).
+	@param[in]  a_cdrGradients Cell-centered gradients for the plasma species (i.e., CDR solvers).
+	@param[in]  a_rteDensities Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
+	@param[in]  a_E            Cell-centered electric field. 
+	@param[in]  a_time         Time
+	@param[in]  a_dt           Time step.
+	@param[in]  a_dx           Grid resolution.
+	@param[in]  a_cellBox      Cell-centered computational region. 
       */
       virtual void advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&       a_cdrSources,
 						      Vector<EBCellFAB*>&       a_rteSources,
 						      const Vector<EBCellFAB*>& a_cdrDensities,
 						      const Vector<EBCellFAB*>& a_cdrGradients,
-						      const Vector<EBCellFAB*>& a_Photon_densities,
+						      const Vector<EBCellFAB*>& a_rteDensities,
 						      const EBCellFAB&          a_E,
 						      const Real&               a_time,
 						      const Real&               a_dt,
 						      const Real&               a_dx,
-						      const Box&                a_box);
-
-      /*!
-	@brief Compute reaction network sources. Fast patch version. 
-      */
-      virtual void advanceReactionNetworkRegularCellsFast(Vector<EBCellFAB*>&       a_cdrSources,
-							  Vector<EBCellFAB*>&       a_rteSources,
-							  const Vector<EBCellFAB*>& a_cdrDensities,
-							  const Vector<EBCellFAB*>& a_cdrGradients,
-							  const Vector<EBCellFAB*>& a_Photon_densities,
-							  const EBCellFAB&          a_E,
-							  const Real&               a_time,
-							  const Real&               a_dt,
-							  const Real&               a_dx,
-							  const Box&                a_box);
-
-      virtual void advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB*>&       a_cdrSources,
-							    Vector<EBCellFAB*>&       a_rteSources,
-							    const Vector<EBCellFAB*>& a_cdrDensities,
-							    const Vector<EBCellFAB*>& a_cdrGradients,
-							    const Vector<EBCellFAB*>& a_Photon_densities,
-							    const EBCellFAB&          a_E,
-							    const Real&               a_time,
-							    const Real&               a_dt,
-							    const Real&               a_dx,
-							    const Box&                a_box);
-
-      virtual void advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB*>&       a_cdrSources,
-							    Vector<EBCellFAB*>&       a_rteSources,
-							    const Vector<EBCellFAB*>& a_cdrDensities,
-							    const Vector<EBCellFAB*>& a_cdrGradients,
-							    const Vector<EBCellFAB*>& a_Photon_densities,
-							    const EBCellFAB&          a_E,
-							    const Real&               a_time,
-							    const Real&               a_dt,
-							    const Real&               a_dx,
-							    const Box&                a_box);
+						      const Box&                a_cellBox);
 
       /*!
 	@brief Compute reaction network sources. Irregular patch version.
@@ -461,7 +436,7 @@ namespace Physics {
 					       const Vector<EBCellFAB*>&    a_cdrDensities,
 					       const Vector<EBCellFAB*>&    a_cdrGradients,
 					       const Vector<EBCellFAB*>&    a_particle_velocities,
-					       const Vector<EBCellFAB*>&    a_Photon_densities,
+					       const Vector<EBCellFAB*>&    a_rteDensities,
 					       const BaseIVFAB<VoFStencil>& a_interpStencils,
 					       const EBCellFAB&             a_E,
 					       const Real&                  a_time,
@@ -479,7 +454,7 @@ namespace Physics {
 						     const Vector<EBCellFAB*>&    a_cdrDensities,
 						     const Vector<EBCellFAB*>&    a_cdrGradients,
 						     const Vector<EBCellFAB*>&    a_particle_velocities,
-						     const Vector<EBCellFAB*>&    a_Photon_densities,
+						     const Vector<EBCellFAB*>&    a_rteDensities,
 						     const BaseIVFAB<VoFStencil>& a_interpStencils,
 						     const EBCellFAB&             a_E,
 						     const Real&                  a_time,
@@ -493,7 +468,7 @@ namespace Physics {
 						    Vector<EBCellFAB*>&          a_rteSources,
 						    const Vector<EBCellFAB*>&    a_cdrDensities,
 						    const Vector<EBCellFAB*>&    a_cdrGradients,
-						    const Vector<EBCellFAB*>&    a_Photon_densities,
+						    const Vector<EBCellFAB*>&    a_rteDensities,
 						    const BaseIVFAB<VoFStencil>& a_interpStencils,
 						    const EBCellFAB&             a_E,
 						    const Real&                  a_time,
@@ -512,7 +487,7 @@ namespace Physics {
 						     const Vector<EBCellFAB*>&    a_cdrDensities,
 						     const Vector<EBCellFAB*>&    a_cdrGradients,
 						     const Vector<EBCellFAB*>&    a_particle_velocities,
-						     const Vector<EBCellFAB*>&    a_Photon_densities,
+						     const Vector<EBCellFAB*>&    a_rteDensities,
 						     const BaseIVFAB<VoFStencil>& a_interpStencils,
 						     const EBCellFAB&             a_E,
 						     const Real&                  a_time,

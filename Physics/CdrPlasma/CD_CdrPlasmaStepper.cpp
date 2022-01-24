@@ -25,7 +25,6 @@
 #include <CD_NamespaceHeader.H>
 
 // C-style VLA methods can have occasional memory issues. Use them at your own peril. 
-#define USE_FAST_REACTIONS  0
 #define USE_FAST_VELOCITIES 0
 #define USE_FAST_DIFFUSION  0
 
@@ -543,52 +542,58 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&   
   // Grid loop
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox = dbl[dit()];
-    
-    Vector<EBCellFAB*> cdrSources   (numCdrSpecies, nullptr);
-    Vector<EBCellFAB*> cdrDensities (numCdrSpecies, nullptr);
-    Vector<EBCellFAB*> cdrGradients (numCdrSpecies, nullptr);
-    Vector<EBCellFAB*> cdrVelocities(numCdrSpecies, nullptr);
-    Vector<EBCellFAB*> rteSources   (numRteSpecies, nullptr);
-    Vector<EBCellFAB*> rteDensities (numRteSpecies, nullptr);
+
+    // Things that are passed into the kernels. The stuff with EBCellFAB* signatures is for the irregular kernel. The vectors with FArrayBox* signatures
+    // are for the regular kernels. 
+    Vector<EBCellFAB*> cdrSources      (numCdrSpecies, nullptr);
+    Vector<EBCellFAB*> cdrDensities    (numCdrSpecies, nullptr);
+    Vector<EBCellFAB*> cdrGradients    (numCdrSpecies, nullptr);
+    Vector<EBCellFAB*> cdrVelocities   (numCdrSpecies, nullptr);
+    Vector<EBCellFAB*> rteSources      (numRteSpecies, nullptr);
+    Vector<EBCellFAB*> rteDensities    (numRteSpecies, nullptr);
+
+    Vector<FArrayBox*> cdrSourcesFAB   (numCdrSpecies, nullptr);
+    Vector<FArrayBox*> cdrDensitiesFAB (numCdrSpecies, nullptr);
+    Vector<FArrayBox*> cdrGradientsFAB (numCdrSpecies, nullptr);
+    Vector<FArrayBox*> cdrVelocitiesFAB(numCdrSpecies, nullptr);
+    Vector<FArrayBox*> rteSourcesFAB   (numRteSpecies, nullptr);
+    Vector<FArrayBox*> rteDensitiesFAB (numRteSpecies, nullptr);    
 
     // Fetch things for the CDR solvres. 
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const RefCountedPtr<CdrSolver>& solver = solverIt();
-      const int idx = solverIt.index();
       
-      cdrSources  [idx] = &(*a_cdrSources  [idx])[dit()];
-      cdrDensities[idx] = &(*a_cdrDensities[idx])[dit()];
-      cdrGradients[idx] = &(*a_cdrGradients[idx])[dit()];
+      const int    idx  = solverIt.index();
+      
+      cdrSources     [idx] = &(*a_cdrSources  [idx])[dit()];
+      cdrDensities   [idx] = &(*a_cdrDensities[idx])[dit()];
+      cdrGradients   [idx] = &(*a_cdrGradients[idx])[dit()];
+
+      cdrSourcesFAB  [idx] = &(cdrSources  [idx]->getFArrayBox());
+      cdrDensitiesFAB[idx] = &(cdrDensities[idx]->getFArrayBox());      
+      cdrGradientsFAB[idx] = &(cdrGradients[idx]->getFArrayBox());
 
       // If the solver is mobile, fetch it's (cell-centered) velocity. 
       if(solver->isMobile()){
 	const EBAMRCellData& velo = solver->getCellCenteredVelocity();
-	cdrVelocities[idx] = &((*velo[a_lvl])[dit()]);
+	
+	cdrVelocities   [idx] = &((*velo[a_lvl])[dit()]);
+	
+	cdrVelocitiesFAB[idx] = &(cdrVelocities[idx]->getFArrayBox());
       }
     }
 
     // Fetch things from the RTE solvers. 
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
-      const int idx = solverIt.index();
+      const int    idx  = solverIt.index();
       
       rteSources  [idx] = &(*a_rteSources  [idx])[dit()];
       rteDensities[idx] = &(*a_rteDensities[idx])[dit()];
+
+      rteSourcesFAB  [idx] = &(rteSources  [idx]->getFArrayBox());
+      rteDensitiesFAB[idx] = &(rteDensities[idx]->getFArrayBox());
     }
     
-    // Call the patch versions. 
-#if USE_FAST_REACTIONS
-    this->advanceReactionNetworkRegularCellsFast(cdrSources,
-						 rteSources,
-						 cdrDensities,
-						 cdrGradients,
-						 rteDensities,
-						 a_E[dit()],
-						 a_time,
-						 a_dt,
-						 dx,
-						 cellBox);
-
-#else
     // Do regular cells (actually also does irregular cells but those are redone using correct arithmetic in the call below). 
     this->advanceReactionNetworkRegularCells(cdrSources,
 					     rteSources,
@@ -600,7 +605,6 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&   
 					     a_dt,
 					     dx,
 					     cellBox);
-#endif
 
     // The regular cell loop will also do the irregular cells, so we redo the irregular cells here. 
     this->advanceReactionNetworkIrreg(cdrSources,
@@ -629,21 +633,21 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&   
 							  const Real&               a_time,
 							  const Real&               a_dt,
 							  const Real&               a_dx,
-							  const Box&                a_box){
+							  const Box&                a_cellBox){
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCells(patch)");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCells(patch)" << endl;
   }
 
-  const Real zero = 0.0;
+  constexpr Real zero  = 0.0;
+  constexpr Real kappa = 1.0;
     
-
+  // Number of CDR and RTE solvers. 
   const int numCdrSpecies  = m_physics->getNumCdrSpecies();
   const int numRteSpecies  = m_physics->getNumRtSpecies();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
   const RealVect probLo  = m_amr->getProbLo();
 
   // Things that are passed into CdrPlasmaPhysics
@@ -665,7 +669,7 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&   
 
   
   // Grid loop
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+  for (BoxIterator bit(a_cellBox); bit.ok(); ++bit){
     const IntVect iv = bit();
     if(ebisbox.isRegular(iv)){
     
@@ -674,22 +678,21 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&   
       E      = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
 
       // Fill vectors with densities
-      for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx  = solver_it.index();
+      for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	const int idx  = solverIt.index();
 	const Real phi = (*a_cdrDensities[idx]).getSingleValuedFAB()(iv, 0);
 	cdrDensities[idx] = Max(zero, phi);
 	cdrGradients[idx] = RealVect(D_DECL((*a_cdrGradients[idx]).getSingleValuedFAB()(iv, 0),
 						  (*a_cdrGradients[idx]).getSingleValuedFAB()(iv, 1),
 						  (*a_cdrGradients[idx]).getSingleValuedFAB()(iv, 2)));
       }
-      for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-	const int idx  = solver_it.index();
+      for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+	const int idx  = solverIt.index();
 	const Real phi = (*a_rteDensities[idx]).getSingleValuedFAB()(iv, 0);
 	rteDensities[idx] = Max(zero, phi);
       }
 
-      // Compute source terms
-      const Real kappa = 1.0; // Kappa for regular cells
+      // Physics solves for the source terms. 
       m_physics->advanceReactionNetwork(cdrSources,
 					rteSources,
 					cdrDensities,
@@ -702,23 +705,23 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&   
 					a_time,
 					kappa);
 
-      // Put vector into temporary holders
-      for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.index();
+      // Put CDR source terms into temporary data holders. 
+      for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
 	part_src.getSingleValuedFAB()(iv,idx) = cdrSources[idx];
       }
     
-      // Put vector into temporary holders
-      for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.index();
+      // Put RTE source terms into temporary dataholders. 
+      for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+	const int idx = solverIt.index();
 	phot_src.getSingleValuedFAB()(iv,idx) = rteSources[idx];
       }
     }
   }
 
   // Copy temporary storage back to solvers
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
     (*a_cdrSources[idx]).setVal(0.0);
     (*a_cdrSources[idx]).plus(part_src, idx, 0, 1);
 
@@ -727,8 +730,8 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&   
   }
 
   // Copy temporary storage back to solvers
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
+  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
     (*a_rteSources[idx]).setVal(0.0);
     (*a_rteSources[idx]).plus(phot_src, idx, 0, 1);
 
@@ -736,321 +739,6 @@ void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&   
     (*a_rteSources[idx]).setCoveredCellVal(0.0, 0);
   }
 }
-
-void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast(Vector<EBCellFAB*>&       a_cdrSources,
-							      Vector<EBCellFAB*>&       a_rteSources,
-							      const Vector<EBCellFAB*>& a_cdrDensities,
-							      const Vector<EBCellFAB*>& a_cdrGradients,
-							      const Vector<EBCellFAB*>& a_rteDensities,
-							      const EBCellFAB&          a_E,
-							      const Real&               a_time,
-							      const Real&               a_dt,
-							      const Real&               a_dx,
-							      const Box&                a_box){
-  CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast(patch)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast(patch)" << endl;
-  }
-
-#if CH_SPACEDIM==2
-  advanceReactionNetworkRegularCellsFast2D(a_cdrSources, a_rteSources, a_cdrDensities, a_cdrGradients,
-					   a_rteDensities, a_E, a_time, a_dt, a_dx, a_box);
-#elif CH_SPACEDIM==3
-  advanceReactionNetworkRegularCellsFast3D(a_cdrSources, a_rteSources, a_cdrDensities, a_cdrGradients,
-					   a_rteDensities, a_E, a_time, a_dt, a_dx, a_box);
-#endif
-  
-}
-
-void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB*>&       a_cdrSources,
-								Vector<EBCellFAB*>&       a_rteSources,
-								const Vector<EBCellFAB*>& a_cdrDensities,
-								const Vector<EBCellFAB*>& a_cdrGradients,
-								const Vector<EBCellFAB*>& a_rteDensities,
-								const EBCellFAB&          a_E,
-								const Real&               a_time,
-								const Real&               a_dt,
-								const Real&               a_dx,
-								const Box&                a_box){
-#if CH_SPACEDIM==2
-  CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(patch)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(patch)" << endl;
-  }
-
-  const Real zero = 0.0;
-    
-
-  const int numCdrSpecies  = m_physics->getNumCdrSpecies();
-  const int numRteSpecies  = m_physics->getNumRtSpecies();
-
-  // EBISBox and graph
-  const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect probLo  = m_amr->getProbLo();
-
-  // Things that are passed into CdrPlasmaPhysics. 
-  RealVect         pos = RealVect::Zero;
-  RealVect         E   = RealVect::Zero;
-  Vector<Real>     cdrSources(numCdrSpecies);
-  Vector<Real>     cdrDensities(numCdrSpecies);
-  Vector<RealVect> cdrGradients(numCdrSpecies);
-  Vector<Real>     rteSources(numRteSpecies);
-  Vector<Real>     rteDensities(numRteSpecies);
-
-  // I need contiguous memory for what is about to happen, so begin by copying stuff onto smaller data holders
-  
-  // Temps for source terms and particle densities
-  FArrayBox cdr_src(a_box, numCdrSpecies);
-  FArrayBox cdr_phi(a_box, numCdrSpecies);
-  FArrayBox cdr_gx(a_box, numCdrSpecies);  // Gradient in x-direction
-  FArrayBox cdr_gy(a_box, numCdrSpecies);  // Gradient in y-direction
-  cdr_phi.setVal(0.0);
-  cdr_src.setVal(0.0);
-  for (int i = 0; i < numCdrSpecies; i++){
-    cdr_phi.copy(a_cdrDensities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
-    cdr_gx.copy(a_cdrGradients[i]->getFArrayBox(),  a_box, 0, a_box, i, 1);
-    cdr_gy.copy(a_cdrGradients[i]->getFArrayBox(),  a_box, 1, a_box, i, 1);
-  }
-
-  // Temps for Photon source terms and densities
-  FArrayBox rte_phi(a_box, numRteSpecies);
-  FArrayBox rte_src(a_box, numRteSpecies);
-  rte_phi.setVal(0.0);
-  rte_src.setVal(0.0);
-  for (int i = 0; i < numRteSpecies; i++){
-    rte_phi.copy(a_rteDensities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
-  }
-
-  // Temp for electric field
-  FArrayBox Efab(a_box, SpaceDim);
-  Efab.copy(a_E.getFArrayBox(), a_box, 0, a_box, 0, SpaceDim);
-
-  // Pointer offsets
-  const IntVect dims   = a_box.size();
-  const IntVect lo     = a_box.smallEnd();
-  const IntVect hi     = a_box.bigEnd();
-  const int n0         = dims[0];
-  const int n1         = dims[1];
-  const int offset     = lo[0] + n0*lo[1];
-
-  // C style variable-length array conversion magic
-  auto vla_cdr_src = (Real (*__restrict__)[n1][n0]) (cdr_src.dataPtr() - offset);
-  auto vla_rte_src = (Real (*__restrict__)[n1][n0]) (rte_src.dataPtr() - offset);
-  auto vla_cdr_phi = (Real (*__restrict__)[n1][n0]) (cdr_phi.dataPtr() - offset);
-  auto vla_rte_phi = (Real (*__restrict__)[n1][n0]) (rte_phi.dataPtr() - offset);
-  auto vla_E       = (Real (*__restrict__)[n1][n0]) (Efab.dataPtr()    - offset);
-  auto vla_cdr_gx  = (Real (*__restrict__)[n1][n0]) (cdr_gx.dataPtr()  - offset);
-  auto vla_cdr_gy  = (Real (*__restrict__)[n1][n0]) (cdr_gy.dataPtr()  - offset);
-
-  for (int j = lo[1]; j <= hi[1]; ++j){
-    for (int i = lo[0]; i <= hi[0]; ++i){
-      
-      // Particle densities
-      for (int idx = 0; idx < numCdrSpecies; ++idx){
-	cdrDensities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
-	cdrGradients[idx][0] = vla_cdr_gx[idx][j][i];
-	cdrGradients[idx][1] = vla_cdr_gy[idx][j][i];
-      }
-
-      // Photon densities
-      for (int idx = 0; idx < numRteSpecies; ++idx){
-	rteDensities[idx] = Max(0.0, vla_rte_phi[idx][j][i]);
-      }
-
-      E   = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
-      pos = probLo + RealVect(D_DECL(i,j,k))*a_dx;
-
-      m_physics->advanceReactionNetwork(cdrSources,
-					rteSources,
-					cdrDensities,
-					cdrGradients,
-					rteDensities,
-					E,
-					pos,
-					a_dx,
-					a_dt,
-					a_time,
-					1.0);
-
-      // Put result in correct palce
-      for (int idx = 0; idx < numCdrSpecies; ++idx){
-	vla_cdr_src[idx][j][i] = cdrSources[idx];
-      }
-
-      // Put result in correct palce
-      for (int idx = 0; idx < numRteSpecies; ++idx){
-	vla_rte_src[idx][j][i] = rteSources[idx];
-      }
-    }
-  }
-
-  // Copy result back to solvers
-  for (int i = 0; i < numCdrSpecies; i++){
-    FArrayBox& src = a_cdrSources[i]->getFArrayBox();
-    src.setVal(0.0);
-    src.copy(cdr_src, a_box, i, a_box, 0, 1);
-    a_cdrSources[i]->setCoveredCellVal(0.0, 0);
-  }
-
-  // Copy result back to solvers
-  for (int i = 0; i < numRteSpecies; i++){
-    FArrayBox& src = a_rteSources[i]->getFArrayBox();
-    src.setVal(0.0);
-    src.copy(rte_src, a_box, i, a_box, 0, 1);
-  }
-#endif
-}
-
-
-void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB*>&       a_cdrSources,
-								Vector<EBCellFAB*>&       a_rteSources,
-								const Vector<EBCellFAB*>& a_cdrDensities,
-								const Vector<EBCellFAB*>& a_cdrGradients,
-								const Vector<EBCellFAB*>& a_rteDensities,
-								const EBCellFAB&          a_E,
-								const Real&               a_time,
-								const Real&               a_dt,
-								const Real&               a_dx,
-								const Box&                a_box){
-#if CH_SPACEDIM==3
-  CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(patch)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(patch)" << endl;
-  }
-
-  const Real zero = 0.0;
-
-  const int numCdrSpecies  = m_physics->getNumCdrSpecies();
-  const int numRteSpecies  = m_physics->getNumRtSpecies();
-
-  // EBISBox and graph
-  const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect probLo  = m_amr->getProbLo();
-
-  // Things that are passed into CdrPlasmaPhysics. 
-  RealVect         pos = RealVect::Zero;
-  RealVect         E   = RealVect::Zero;
-  Vector<Real>     cdrSources(numCdrSpecies);
-  Vector<Real>     cdrDensities(numCdrSpecies);
-  Vector<RealVect> cdrGradients(numCdrSpecies);
-  Vector<Real>     rteSources(numRteSpecies);
-  Vector<Real>     rteDensities(numRteSpecies);
-
-  // I need contiguous memory for what is about to happen, so begin by copying stuff onto smaller data holders
-  
-  // Temps for source terms and particle densities
-  FArrayBox cdr_src(a_box, numCdrSpecies);
-  FArrayBox cdr_phi(a_box, numCdrSpecies);
-  FArrayBox cdr_gx(a_box, numCdrSpecies);  // Gradient in x-direction
-  FArrayBox cdr_gy(a_box, numCdrSpecies);  // Gradient in y-direction
-  FArrayBox cdr_gz(a_box, numCdrSpecies);  // Gradient in z-direction
-  cdr_phi.setVal(0.0);
-  cdr_src.setVal(0.0);
-  for (int i = 0; i < numCdrSpecies; i++){
-    cdr_phi.copy(a_cdrDensities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
-    cdr_gx.copy(a_cdrGradients[i]->getFArrayBox(),  a_box, 0, a_box, i, 1);
-    cdr_gy.copy(a_cdrGradients[i]->getFArrayBox(),  a_box, 1, a_box, i, 1);
-    cdr_gz.copy(a_cdrGradients[i]->getFArrayBox(),  a_box, 2, a_box, i, 1);
-  }
-
-  // Temps for Photon source terms and densities
-  FArrayBox rte_phi(a_box, numRteSpecies);
-  FArrayBox rte_src(a_box, numRteSpecies);
-  rte_phi.setVal(0.0);
-  rte_src.setVal(0.0);
-  for (int i = 0; i < numRteSpecies; i++){
-    rte_phi.copy(a_rteDensities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
-  }
-
-  // Temp for electric field
-  FArrayBox Efab(a_box, SpaceDim);
-  Efab.copy(a_E.getFArrayBox(), a_box, 0, a_box, 0, SpaceDim);
-
-  // Pointer offsets
-  const IntVect dims   = a_box.size();
-  const IntVect lo     = a_box.smallEnd();
-  const IntVect hi     = a_box.bigEnd();
-  const int n0         = dims[0];
-  const int n1         = dims[1];
-  const int n2         = dims[2];
-  const int offset     = lo[0] + n0*(lo[1] + n1*lo[2]);
-
-  // C style variable-length array conversion magic
-  auto vla_cdr_src = (Real (*__restrict__)[n2][n1][n0]) (cdr_src.dataPtr() - offset);
-  auto vla_rte_src = (Real (*__restrict__)[n2][n1][n0]) (rte_src.dataPtr() - offset);
-  auto vla_cdr_phi = (Real (*__restrict__)[n2][n1][n0]) (cdr_phi.dataPtr() - offset);
-  auto vla_rte_phi = (Real (*__restrict__)[n2][n1][n0]) (rte_phi.dataPtr() - offset);
-  auto vla_E       = (Real (*__restrict__)[n2][n1][n0]) (Efab.dataPtr()    - offset);
-  auto vla_cdr_gx  = (Real (*__restrict__)[n2][n1][n0]) (cdr_gx.dataPtr()  - offset);
-  auto vla_cdr_gy  = (Real (*__restrict__)[n2][n1][n0]) (cdr_gy.dataPtr()  - offset);
-  auto vla_cdr_gz  = (Real (*__restrict__)[n2][n1][n0]) (cdr_gz.dataPtr()  - offset);
-
-  for (int k = lo[2]; k <= hi[2]; k++){
-    for (int j = lo[1]; j <= hi[1]; ++j){
-      for (int i = lo[0]; i <= hi[0]; ++i){
-      
-	// Particle densities
-	for (int idx = 0; idx < numCdrSpecies; ++idx){
-	  cdrDensities[idx]    = Max(0.0, vla_cdr_phi[idx][k][j][i]);
-	  cdrGradients[idx][0] = vla_cdr_gx[idx][k][j][i];
-	  cdrGradients[idx][1] = vla_cdr_gy[idx][k][j][i];
-	  cdrGradients[idx][2] = vla_cdr_gz[idx][k][j][i];
-	}
-
-	// Photon densities
-	for (int idx = 0; idx < numRteSpecies; ++idx){
-	  rteDensities[idx] = Max(0.0, vla_rte_phi[idx][k][j][i]);
-	}
-
-	E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[2][k][j][i]);
-	pos = probLo + RealVect(D_DECL(i,j,k))*a_dx;
-
-	m_physics->advanceReactionNetwork(cdrSources,
-					  rteSources,
-					  cdrDensities,
-					  cdrGradients,
-					  rteDensities,
-					  E,
-					  pos,
-					  a_dx,
-					  a_dt,
-					  a_time,
-					  1.0);
-
-	// Put result in correct palce
-	for (int idx = 0; idx < numCdrSpecies; ++idx){
-	  vla_cdr_src[idx][k][j][i] = cdrSources[idx];
-	}
-
-	// Put result in correct palce
-	for (int idx = 0; idx < numRteSpecies; ++idx){
-	  vla_rte_src[idx][k][j][i] = rteSources[idx];
-	}
-      }
-    }
-  }
-
-  // Copy result back to solvers
-  for (int i = 0; i < numCdrSpecies; i++){
-    FArrayBox& src = a_cdrSources[i]->getFArrayBox();
-    src.setVal(0.0);
-    src.copy(cdr_src, a_box, i, a_box, 0, 1);
-    a_cdrSources[i]->setCoveredCellVal(0.0, 0);
-  }
-
-  // Copy result back to solvers
-  for (int i = 0; i < numRteSpecies; i++){
-    FArrayBox& src = a_rteSources[i]->getFArrayBox();
-    src.setVal(0.0);
-    src.copy(rte_src, a_box, i, a_box, 0, 1);
-  }
-
-#endif
-}
-
-
 
 void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdrSources,
 						   Vector<EBCellFAB*>&          a_rteSources,
