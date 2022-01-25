@@ -297,6 +297,16 @@ namespace Physics {
       bool m_plotGas;
 
       /*!
+	@brief Plot Townsend ionization coefficient
+      */
+      bool m_plotAlpha;
+
+      /*!
+	@brief Plot Townsend attachment coefficient
+      */
+      bool m_plotEta;
+
+      /*!
 	@brief Using discrete photons or not.
       */
       bool m_discretePhotons;

@@ -217,11 +217,12 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     
     // Set the gas temperature, density, and pressure from the ideal gas law. No extra parameters needed and no variation in space either.
     const Real T0   = gasJSON["temperature"].get<Real>() ;
-    const Real P0   = gasJSON["pressure"   ].get<Real>() ;    
-    const Real Rho0 = (P0 * Units::atm2pascal * Units::Na)/ (T0 * Units::R);	
+    const Real P0   = gasJSON["pressure"   ].get<Real>() ;
+    const Real P    = P0 * Units::atm2pascal;
+    const Real Rho0 = (P * Units::Na) / (T0 * Units::R);
 
     m_gasTemperature = [T0  ] (const RealVect a_position) -> Real { return T0;   };
-    m_gasPressure    = [P0  ] (const RealVect a_position) -> Real { return P0;   };
+    m_gasPressure    = [P   ] (const RealVect a_position) -> Real { return P;    };
     m_gasDensity     = [Rho0] (const RealVect a_position) -> Real { return Rho0; };
   }
   else if(gasLaw == "troposphere"){
@@ -233,12 +234,13 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     if(!(gasJSON.contains("gravity"    ))) this->throwParserError(baseError + " and got troposphere gas law but field 'gravity' is missing");    
     if(!(gasJSON.contains("lapse rate" ))) this->throwParserError(baseError + " and got troposphere gas law but field 'lapse rate' is missing");    
 
-    const Real T0   = gasJSON["temperature"].get<Real>() ;
-    const Real P0   = gasJSON["pressure"   ].get<Real>() ;
+    const Real T0   = gasJSON["temperature"].get<Real>();
+    const Real P0   = gasJSON["pressure"   ].get<Real>();
     const Real g    = gasJSON["gravity"    ].get<Real>();
     const Real L    = gasJSON["lapse rate" ].get<Real>();
     const Real M    = gasJSON["molar mass" ].get<Real>();
     const Real gMRL = (g * M) / (Units::R * L);
+    const Real P    = P0 * Units::atm2pascal;
 
     // Temperature is T = T0 - L*(z-h0)
     m_gasTemperature = [T0, L] (const RealVect a_position) -> Real {
@@ -246,13 +248,13 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     };
 
     // Pressure is p = p0 * (1 - L*h/T0)^(g*M/(R*L)
-    m_gasPressure = [T0, P0, L, gMRL ] (const RealVect a_position) -> Real {
-      return P0 * std::pow(( 1 - L*a_position[SpaceDim-1]/T0), gMRL);
+    m_gasPressure = [T0, P, L, gMRL ] (const RealVect a_position) -> Real {
+      return P * std::pow(( 1 - L*a_position[SpaceDim-1]/T0), gMRL);
     };
 
     // Density is rho = P*Na/(T*R)
-    m_gasDensity = [&P = this->m_gasPressure, &T = this->m_gasTemperature] (const RealVect a_position) -> Real {
-      return (P(a_position) * Units::atm2pascal * Units::Na)/ (T(a_position) * Units::R);          
+    m_gasDensity = [&p = this->m_gasPressure, &T = this->m_gasTemperature] (const RealVect a_position) -> Real {
+      return (p(a_position) * Units::atm2pascal * Units::Na)/ (T(a_position) * Units::R);          
     };
   }
   else if(gasLaw == "table"){
@@ -290,7 +292,7 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     LookupTable<2> densityTable     = DataParser::simpleFileReadASCII(filename, height, Rho);
 
     // The input density was in kg/m^3 but we want the number density.
-    densityTable.scale<2>(M * Units::Na);
+    densityTable. scale<1>(Units::Na/M);
 
     // Make the tables uniform
     temperatureTable.setRange(minHeight, maxHeight, 0);
@@ -305,8 +307,6 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     pressureTable.   makeUniform(numPoints);
     densityTable.    makeUniform(numPoints);
 
-    temperatureTable.dumpTable();
-
     // Now create the temperature, pressure, and density functions. 
     m_gasTemperature = [table = temperatureTable] (const RealVect a_position) -> Real {
       return table.getEntry<1>(a_position[SpaceDim-1]);
@@ -318,7 +318,7 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
 
     m_gasDensity = [table = densityTable] (const RealVect a_position) -> Real {
       return table.getEntry<1>(a_position[SpaceDim-1]);
-    };        
+    };
   }
   else{
     this->throwParserError("CdrPlasmaJSON::initializeNeutralSpecies gas law '" + gasLaw + "' not recognized.");
@@ -521,7 +521,7 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
       const Real molarFraction = m_neutralSpecies[m_neutralSpeciesMap.at(neutral)]->getMolarFraction();
 
       kappaFunction = [lambda, P = this->m_gasPressure, m = molarFraction](const RealVect a_position) -> Real {
-	return m*P(a_position)*Units::atm2pascal*lambda/sqrt(3.0);
+	return m*P(a_position)*lambda/sqrt(3.0);
       };
     }
     else if (kappa == "stochastic_A"){
@@ -566,7 +566,7 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
 	const Real f = Random::get(udist);
 	const Real a = (f-f1)/(f2-f1);
 
-	const Real p  = m * P(a_position) * Units::atm2pascal;
+	const Real p  = m * P(a_position);
 	const Real K1 = x1*p;
 	const Real K2 = x2*p;
 
@@ -674,6 +674,12 @@ void CdrPlasmaJSON::parseAlpha(){
   else{
     this->throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
   }
+
+  // Check if we should plot alpha.
+  m_plotAlpha = false;
+  if(alpha.contains("plot")){
+    m_plotAlpha = alpha["plot"].get<bool>();
+  }
 }
 
 void CdrPlasmaJSON::parseEta(){
@@ -738,8 +744,14 @@ void CdrPlasmaJSON::parseEta(){
   }
   else{
     this->throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
-  }  
+  }
 
+
+  // Check if we should plot alpha.
+  m_plotEta = false;
+  if(eta.contains("plot")){
+    m_plotEta = eta["plot"].get<bool>();
+  }  
 }
 
 void CdrPlasmaJSON::parseMobilities() {
@@ -797,7 +809,7 @@ void CdrPlasmaJSON::parseMobilities() {
 	// second column. 
 	LookupTable<2> mobilityTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
-      // If the table is empty then it's an error.
+	// If the table is empty then it's an error.
 	if(mobilityTable.getNumEntries() == 0){
 	  this->throwParserError("Mobility table '" + startRead + "' in file '" + filename + "'is empty. This is probably an error");
 	}	
@@ -1691,7 +1703,7 @@ void CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const j
     // Make the Helmholtz factor
     const Real molarFraction = m_neutralSpecies[m_neutralSpeciesMap.at(neutral)]->getMolarFraction();
 
-    helmholtzFactor = Units::c * A * molarFraction * Units::atm2pascal/(sqrt(3.0) * lambda);
+    helmholtzFactor = (Units::c * A * molarFraction) / (sqrt(3.0) * lambda);
 
     doHelmholtz = true;
   }
@@ -1786,6 +1798,14 @@ int CdrPlasmaJSON::getNumberOfPlotVariables() const {
     if(m.second) ret++;
   }
 
+  if(m_plotAlpha){
+    ret++;
+  }
+
+  if(m_plotEta){
+    ret++;
+  }  
+
   return ret;
 }
 
@@ -1803,6 +1823,14 @@ Vector<std::string> CdrPlasmaJSON::getPlotVariableNames() const {
       ret.push_back(m_plasmaReactionDescriptions.at(m.first));
     }
   }
+
+  if(m_plotAlpha){
+    ret.push_back("Townsend ionization coefficient");
+  }
+
+  if(m_plotEta){
+    ret.push_back("Townsend attachment coefficient");
+  }  
 
   return ret;
 }
@@ -1870,6 +1898,18 @@ Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensiti
       ret.push_back(k);
     }
   }
+
+  if(m_plotAlpha){
+    const Real alpha = this->computeAlpha(E, a_pos);
+    
+    ret.push_back(alpha);
+  }
+
+  if(m_plotEta){
+    const Real alpha = this->computeEta(E, a_pos);
+    
+    ret.push_back(eta);
+  }  
 
   return ret;
 }
