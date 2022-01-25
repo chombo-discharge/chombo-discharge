@@ -559,13 +559,6 @@ namespace Physics {
 	@param[out] a_J Current density
       */
       virtual void computeJ(EBAMRCellData& a_J) const;
-
-      /*!
-	@brief Compute the current density. Level version. 
-	@param[out] a_J   Current density
-	@param[in]  a_lvl Grid level
-      */
-      virtual void computeJ(LevelData<EBCellFAB>& a_J, const int a_lvl) const;
   
       /*!
 	@brief Compute diffusion things using whatever is available in the solvers. 
