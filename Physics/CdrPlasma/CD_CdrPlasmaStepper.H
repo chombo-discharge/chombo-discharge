@@ -177,42 +177,49 @@ namespace Physics {
 
       /*!
 	@brief Compute the cell-centered electric field on both phases
-	@param[out] a_E         Cell-centered electric field
-	@param[in]  a_potential Electrostatic potential
+	@param[out] a_electricFieldCell Cell-centered electric field
+	@param[in]  a_potential         Cell-centered electrostatic potential
       */
-      virtual void computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) const;
+      virtual void computeElectricField(MFAMRCellData& a_electricFieldCell, const MFAMRCellData& a_potential) const;
 
       /*!
 	@brief Compute the cell-centered electric field on a specific phase using whatever is available in m_fieldSolver
 	@details This will use the potential from m_fieldSolver.
-	@param[out] a_E     Cell-centered electric field
-	@param[in]  a_phase Phase
+	@param[out] a_electricFieldCell Cell-centered electric field
+	@param[in]  a_phase             Phase
       */
-      virtual void computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase) const;
+      virtual void computeElectricField(EBAMRCellData& a_electricFieldCell, const phase::which_phase a_phase) const;
 
       /*!
 	@brief Compute the cell-centered electric field on a specific phase
-	@param[out] a_E         Cell-centered electric field
-	@param[in]  a_phase     Phase
-	@param[in]  a_potential Electrostatic potential
+	@param[out] a_electricFieldCell Cell-centered electric field
+	@param[in]  a_phase             Phase
+	@param[in]  a_potential         Electrostatic potential (cell-centered)
       */
       virtual void computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential) const;
 
       /*!
 	@brief Compute the face-centered electric field. This will only do the normal component. 
-	@param[out] a_Eface  Face-centered electric field
-	@param[in]  a_phase  Phase
-	@param[in]  a_Ecell  Cell-centered electric field (all components). 
+	@param[out] a_electricFieldFace  Face-centered electric field
+	@param[in]  a_phase              Phase
+	@param[in]  a_electricFieldCell  Cell-centered electric field (all components). 
       */
-      virtual void computeElectricField(EBAMRFluxData& a_Eface, const phase::which_phase a_phase, const EBAMRCellData& a_Ecell) const;
+      virtual void computeElectricField(EBAMRFluxData& a_electricFieldFace, const phase::which_phase a_phase, const EBAMRCellData& a_electricFieldCell) const;
   
       /*!
 	@brief Compute the EB-centered electric field. 
-	@param[out] a_Eeb    EB-centered electric field. 
-	@param[in]  a_phase  Phase
-	@param[in]  a_Ecell  Cell-centered electric field (all components). 
+	@param[out] a_electricFieldEB    EB-centered electric field. 
+	@param[in]  a_phase              Phase
+	@param[in]  a_electricFieldCell  Cell-centered electric field (all components). 
       */
-      virtual void computeElectricField(EBAMRIVData& a_Eeb, const phase::which_phase a_phase, const EBAMRCellData& a_Ecell) const;
+      virtual void computeElectricField(EBAMRIVData& a_electricFieldEB, const phase::which_phase a_phase, const EBAMRCellData& a_electricFieldCell) const;
+
+      /*!
+	@brief Compute the maximum of the electric field
+	@param[out] a_maxElectricField Maximum electric field magnitude evaluated over the input phase
+	@param[in]  a_phase            Input phase
+      */
+      virtual void computeMaxElectricField(Real& a_maxElectricField, const phase::which_phase a_phase);      
 
       /*!
 	@brief Return time
@@ -545,18 +552,18 @@ namespace Physics {
 						     const int                    a_lvl,
 						     const DataIndex&             a_dit);      
 
-      /*!
-	@brief Compute the maximum of the electric field
-      */
-      virtual void computeMaxElectricField(Real& a_Emax, const phase::which_phase a_phase);
+
 
       /*!
 	@brief Compute the current density
+	@param[out] a_J Current density
       */
       virtual void computeJ(EBAMRCellData& a_J) const;
 
       /*!
 	@brief Compute the current density. Level version. 
+	@param[out] a_J   Current density
+	@param[in]  a_lvl Grid level
       */
       virtual void computeJ(LevelData<EBCellFAB>& a_J, const int a_lvl) const;
   
@@ -677,29 +684,75 @@ namespace Physics {
 					 const int                                    a_lvl);
 
       /*!
-	@brief Compute the cell-centered cdr velocities. Level version. 
+	@brief Compute the CDR drift velocities.
+	@details This will compute the cell-centered electric field and then call the other version.
       */
-      virtual void computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *>&       a_velocities,
+      virtual void computeCdrDriftVelocities();
+
+      /*!
+	@brief Compute the cell-centered CDR velocities. This will call the level version.
+	@param[out] a_cdrVelocities Cell-centered CDR drift velocities
+	@param[out] a_cdrDensities  Cell-centered CDR densities
+	@param[in]  a_electricField The cell-centered electric field
+	@param[in]  a_time          Time
+      */
+      virtual void computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_velocities,
+					     const Vector<EBAMRCellData*>& a_cdrDensities,
+					     const EBAMRCellData&          a_E,
+					     const Real&                   a_time);      
+
+      /*!
+	@brief Compute the cell-centered CDR velocities. 
+	@details This is the level version -- it will call the patch version for each patch in the grid. 
+	@param[out] a_cdrVelocities Cell-centered CDR drift velocities
+	@param[out] a_cdrDensities  Cell-centered CDR densities
+	@param[in]  a_electricField The cell-centered electric field
+	@param[in]  a_lvl           Grid level
+	@param[in]  a_time          Time
+      */      
+      virtual void computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *>&       a_cdrVelocities,
 					     const Vector<LevelData<EBCellFAB> *>& a_cdrDensities,
-					     const LevelData<EBCellFAB> &          a_E,
+					     const LevelData<EBCellFAB> &          a_electricField,
 					     const int                             a_lvl,
 					     const Real&                           a_time);
 
-      virtual void computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&       a_velocities,
-						    const Vector<EBCellFAB*>& a_cdrDensities,
-						    const EBCellFAB&          a_E,
-						    const Box&                a_box,
+      /*!
+	@brief Compute the cell-centered CDR velocities. 
+	@details This is patch version for regular grid cells. 
+	@param[out] a_cdrVelocities Cell-centered CDR drift velocities
+	@param[out] a_cdrDensities  Cell-centered CDR densities
+	@param[in]  a_electricField The cell-centered electric field
+	@param[in]  a_cellBox       Computational region. 
+	@param[in]  a_time          Time
+	@param[in]  a_dx            Grid resolution
+      */            
+      virtual void computeCdrDriftVelocitiesRegular(Vector<FArrayBox*>&       a_cdrVelocities,
+						    const Vector<FArrayBox*>& a_cdrDensities,
+						    const FArrayBox&          a_electricField,
+						    const Box&                a_cellBox,
 						    const Real&               a_time,
 						    const Real&               a_dx);
 
+      /*!
+	@brief Compute the cell-centered CDR velocities. 
+	@details This is patch version for irregular grid cells. 
+	@param[out] a_cdrVelocities Cell-centered CDR drift velocities
+	@param[out] a_cdrDensities  Cell-centered CDR densities
+	@param[in]  a_electricField The cell-centered electric field
+	@param[in]  a_time          Time
+	@param[in]  a_dx            Grid resolution
+	@param[in]  a_lvl           Grid level
+	@param[in]  a_dit           Grid index
+      */                  
       virtual void computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_velocities,
 						      const Vector<EBCellFAB*>& a_cdrDensities,
-						      const EBCellFAB&          a_E,
-						      const Box&                a_box,
+						      const EBCellFAB&          a_electricField,
 						      const Real&               a_time,
 						      const Real&               a_dx,
 						      const int                 a_lvl,
-						      const DataIndex&          a_dit);      
+						      const DataIndex&          a_dit);
+
+      //////// CODE-WALK FROM HERE HERE AND DOWNWARDS /////
 
       /*!
 	@brief Compute cdr_fluxes
@@ -764,18 +817,7 @@ namespace Physics {
 						 const phase::which_phase&     a_phase,
 						 const Vector<EBAMRCellData*>& a_phi);
 
-      /*!
-	@brief Compute cdr velocities
-      */
-      virtual void computeCdrDriftVelocities();
 
-      /*!
-	@brief Compute the cell-centered cdr velocities. Calls the level versions. 
-      */
-      virtual void computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_velocities,
-					     const Vector<EBAMRCellData*>& a_cdrDensities,
-					     const EBAMRCellData&          a_E,
-					     const Real&                   a_time);
 
 
 
@@ -1242,12 +1284,6 @@ namespace Physics {
       virtual void parseFastPoisson();
       virtual void parseFastRadiativeTransfer();
       virtual void parseSourceComputation();      
-
-
-
-
-
-
 
       /*!
 	@brief Compute and put the current density in output data holder
