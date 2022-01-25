@@ -196,51 +196,129 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     pout() << "CdrPlasmaJSON::initializeNeutralSpecies()" << endl;
   }
 
-  // These fields are required
-  if(!(m_json["gas"].contains("temperature"    ))) this->throwParserError("In JSON field 'gas' - field 'temperature' is missing"    );
-  if(!(m_json["gas"].contains("pressure"       ))) this->throwParserError("In JSON field 'gas' - field 'pressure' is missing"       );
-  if(!(m_json["gas"].contains("law"            ))) this->throwParserError("In JSON field 'gas' - field 'law' is missing"            );
-  if(!(m_json["gas"].contains("neutral species"))) this->throwParserError("In JSON field 'gas' - field 'neutral species' is missing");
+  const std::string baseError = "CdrPlasmaJSON::initializeNeutralSpecies";
 
-  const auto referenceTemperature =      m_json["gas"]["temperature"].get<Real       >() ;
-  const auto referencePressure    =      m_json["gas"]["pressure"   ].get<Real       >() ;
-  const auto gasLaw               = trim(m_json["gas"]["law"        ].get<std::string>());
+  // These fields are ALWAYS required
+  if(!(m_json["gas"].contains("law"            ))) this->throwParserError(baseError + " but field 'law' is missing"            );
+  if(!(m_json["gas"].contains("neutral species"))) this->throwParserError(baseError + " but field 'neutral species' is missing");
+
+  // JSON entry
+  const auto gasJSON = m_json["gas"];  
+
+  // Get the gas law
+  const auto gasLaw = trim(gasJSON["law"].get<std::string>());
 
   // Instantiate the pressure, density, and temperature of the gas. Note: The density  is the NUMBER density. 
   if(gasLaw == "ideal"){
-    // Set the gas temperature, density, and pressure from the ideal gas law. No extra parameters needed and no variation in space either. 
-    const Real referenceDensity = (referencePressure * Units::atm2pascal * Units::Na)/ (referenceTemperature * Units::R);	
 
-    m_gasTemperature = [T   = referenceTemperature] (const RealVect a_position) -> Real { return T;   };
-    m_gasPressure    = [P   = referencePressure   ] (const RealVect a_position) -> Real { return P;   };
-    m_gasDensity     = [Rho = referenceDensity    ] (const RealVect a_position) -> Real { return Rho; };
+    // These fields are required
+    if(!(gasJSON.contains("temperature"))) this->throwParserError(baseError + " and got ideal gas law but field 'temperature' is missing");
+    if(!(gasJSON.contains("pressure"   ))) this->throwParserError(baseError + " and got ideal gas law but field 'pressure' is missing");
+    
+    // Set the gas temperature, density, and pressure from the ideal gas law. No extra parameters needed and no variation in space either.
+    const Real T0   = gasJSON["temperature"].get<Real>() ;
+    const Real P0   = gasJSON["pressure"   ].get<Real>() ;    
+    const Real Rho0 = (P0 * Units::atm2pascal * Units::Na)/ (T0 * Units::R);	
+
+    m_gasTemperature = [T0  ] (const RealVect a_position) -> Real { return T0;   };
+    m_gasPressure    = [P0  ] (const RealVect a_position) -> Real { return P0;   };
+    m_gasDensity     = [Rho0] (const RealVect a_position) -> Real { return Rho0; };
   }
   else if(gasLaw == "troposphere"){
 
-    // These fields are required.  
-    if(!(m_json["gas"].contains("molar mass"))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'molar mass'");
-    if(!(m_json["gas"].contains("gravity"   ))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'gravity'"   );
-    if(!(m_json["gas"].contains("lapse rate"))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'lapse rate'");
+    // These fields are required.
+    if(!(gasJSON.contains("temperature"))) this->throwParserError(baseError + " and got troposphere gas law but field 'temperature' is missing");
+    if(!(gasJSON.contains("pressure"   ))) this->throwParserError(baseError + " and got troposphere gas law but field 'pressure' is missing");    
+    if(!(gasJSON.contains("molar mass" ))) this->throwParserError(baseError + " and got troposphere gas law but field 'molar mass' is missing");    
+    if(!(gasJSON.contains("gravity"    ))) this->throwParserError(baseError + " and got troposphere gas law but field 'gravity' is missing");    
+    if(!(gasJSON.contains("lapse rate" ))) this->throwParserError(baseError + " and got troposphere gas law but field 'lapse rate' is missing");    
 
-    const Real g    = m_json["gas"]["gravity"   ].get<Real>();
-    const Real L    = m_json["gas"]["lapse rate"].get<Real>();
-    const Real M    = m_json["gas"]["molar mass"].get<Real>();
+    const Real T0   = gasJSON["temperature"].get<Real>() ;
+    const Real P0   = gasJSON["pressure"   ].get<Real>() ;
+    const Real g    = gasJSON["gravity"    ].get<Real>();
+    const Real L    = gasJSON["lapse rate" ].get<Real>();
+    const Real M    = gasJSON["molar mass" ].get<Real>();
     const Real gMRL = (g * M) / (Units::R * L);
 
     // Temperature is T = T0 - L*(z-h0)
-    m_gasTemperature = [T  = referenceTemperature, L] (const RealVect a_position) -> Real {
-      return T - L * a_position[SpaceDim-1];
+    m_gasTemperature = [T0, L] (const RealVect a_position) -> Real {
+      return T0 - L * a_position[SpaceDim-1];
     };
 
     // Pressure is p = p0 * (1 - L*h/T0)^(g*M/(R*L)
-    m_gasPressure = [T  = referenceTemperature, P = referencePressure, L, gMRL ] (const RealVect a_position) -> Real {
-      return P * std::pow(( 1 - L*a_position[SpaceDim-1]/T), gMRL);
+    m_gasPressure = [T0, P0, L, gMRL ] (const RealVect a_position) -> Real {
+      return P0 * std::pow(( 1 - L*a_position[SpaceDim-1]/T0), gMRL);
     };
 
     // Density is rho = P*Na/(T*R)
     m_gasDensity = [&P = this->m_gasPressure, &T = this->m_gasTemperature] (const RealVect a_position) -> Real {
       return (P(a_position) * Units::atm2pascal * Units::Na)/ (T(a_position) * Units::R);          
     };
+  }
+  else if(gasLaw == "table"){
+    // These fields are required
+
+    if(!gasJSON.contains("file"))        this->throwParserError(baseError + " and got 'table' gas law but field 'file' is not specified"       );
+    if(!gasJSON.contains("height"))      this->throwParserError(baseError + " and got 'table' gas law but field 'height' is not specified"     );
+    if(!gasJSON.contains("temperature")) this->throwParserError(baseError + " and got 'table' gas law but field 'temperature' is not specified");
+    if(!gasJSON.contains("pressure"))    this->throwParserError(baseError + " and got 'table' gas law but field 'pressure' is not specified"   );
+    if(!gasJSON.contains("density"))     this->throwParserError(baseError + " and got 'table' gas law but field 'density' is not specified"    );
+    if(!gasJSON.contains("molar mass"))  this->throwParserError(baseError + " and got 'table' gas law but field 'molar mass' is not specified" );
+    if(!gasJSON.contains("min height"))  this->throwParserError(baseError + " and got 'table' gas law but field 'min height' is not specified" );
+    if(!gasJSON.contains("max height"))  this->throwParserError(baseError + " and got 'table' gas law but field 'max height' is not specified" );
+    if(!gasJSON.contains("num points"))  this->throwParserError(baseError + " and got 'table' gas law but field 'num points' is not specified" );
+
+    // Get the file name
+    const auto filename  = trim(gasJSON["file"].get<std::string>());
+
+    // Get columns where height, temperature, pressure, and density are specified. 
+    const auto height    = gasJSON["height"].     get<int>();
+    const auto T         = gasJSON["temperature"].get<int>();
+    const auto P         = gasJSON["pressure"].   get<int>();
+    const auto Rho       = gasJSON["density"].    get<int>();
+
+    // Get molar mass
+    const auto M         = gasJSON["molar mass"].get<Real>();
+
+    // Get table format specifications.
+    const auto minHeight = gasJSON["min height"].get<Real>();
+    const auto maxHeight = gasJSON["max height"].get<Real>();
+    const auto numPoints = gasJSON["num points"].get<int >();
+
+    LookupTable<2> temperatureTable = DataParser::simpleFileReadASCII(filename, height, T  );
+    LookupTable<2> pressureTable    = DataParser::simpleFileReadASCII(filename, height, P  );
+    LookupTable<2> densityTable     = DataParser::simpleFileReadASCII(filename, height, Rho);
+
+    // The input density was in kg/m^3 but we want the number density.
+    densityTable.scale<2>(M * Units::Na);
+
+    // Make the tables uniform
+    temperatureTable.setRange(minHeight, maxHeight, 0);
+    pressureTable.   setRange(minHeight, maxHeight, 0);
+    densityTable.    setRange(minHeight, maxHeight, 0);
+    
+    temperatureTable.sort(0);
+    pressureTable.   sort(0);
+    densityTable.    sort(0);
+
+    temperatureTable.makeUniform(numPoints);
+    pressureTable.   makeUniform(numPoints);
+    densityTable.    makeUniform(numPoints);
+
+    temperatureTable.dumpTable();
+
+    // Now create the temperature, pressure, and density functions. 
+    m_gasTemperature = [table = temperatureTable] (const RealVect a_position) -> Real {
+      return table.getEntry<1>(a_position[SpaceDim-1]);
+    };
+
+    m_gasPressure = [table = pressureTable] (const RealVect a_position) -> Real {
+      return table.getEntry<1>(a_position[SpaceDim-1]);
+    };
+
+    m_gasDensity = [table = densityTable] (const RealVect a_position) -> Real {
+      return table.getEntry<1>(a_position[SpaceDim-1]);
+    };        
   }
   else{
     this->throwParserError("CdrPlasmaJSON::initializeNeutralSpecies gas law '" + gasLaw + "' not recognized.");
@@ -249,7 +327,7 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
   // Instantiate the species densities. Note that we need to go through this twice because we need to normalize the molar fractions in case users
   // were a bit inconsiderate when setting them. 
   Real molarSum = 0.0;
-  for (const auto& species : m_json["gas"]["neutral species"]){
+  for (const auto& species : gasJSON["neutral species"]){
     if(!(species.contains("name")))           this->throwParserError("In JSON field 'neutral species' - field 'name' is required"          );
     if(!(species.contains("molar fraction"))) this->throwParserError("In JSON field 'neutral species' - field 'molar fraction' is required");
 
@@ -257,7 +335,7 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
   }
 
   // Initialize the species. This will iterate through the neutral species in the JSON input file. 
-  for (const auto& species : m_json["gas"]["neutral species"]){
+  for (const auto& species : gasJSON["neutral species"]){
     const std::string speciesName     = trim(species["name"          ].get<std::string>());
     const Real        speciesFraction =      species["molar fraction"].get<Real>() / molarSum;
 
@@ -286,8 +364,8 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
 
   // Figure out if we should plot the gas quantities
   m_plotGas = false;
-  if(m_json["gas"].contains("plot")){
-    m_plotGas = m_json["gas"]["plot"].get<bool>();
+  if(gasJSON.contains("plot")){
+    m_plotGas = gasJSON["plot"].get<bool>();
   }
 }
 
