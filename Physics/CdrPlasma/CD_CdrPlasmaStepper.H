@@ -176,6 +176,12 @@ namespace Physics {
       virtual void postRegrid() override;
 
       /*!
+	@brief Compute the current density
+	@param[out] a_J Current density
+      */
+      virtual void computeJ(EBAMRCellData& a_J) const;      
+
+      /*!
 	@brief Compute the cell-centered electric field on both phases
 	@param[out] a_electricFieldCell Cell-centered electric field
 	@param[in]  a_potential         Cell-centered electrostatic potential
@@ -330,8 +336,6 @@ namespace Physics {
 				MFAMRCellData&                a_rho,
 				const Vector<EBAMRCellData*>  a_cdrDensities,
 				const EBAMRIVData&            a_sigma);      
-
-
       
       /*!
 	@brief Advance the reaction network. This will compute the electric field (on the appropriate phase) and call the other version.
@@ -552,13 +556,6 @@ namespace Physics {
 						     const int                    a_lvl,
 						     const DataIndex&             a_dit);      
 
-
-
-      /*!
-	@brief Compute the current density
-	@param[out] a_J Current density
-      */
-      virtual void computeJ(EBAMRCellData& a_J) const;
   
       /*!
 	@brief Compute diffusion things using whatever is available in the solvers. 

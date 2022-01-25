@@ -2617,6 +2617,79 @@ void CdrPlasmaStepper::preRegridInternals(const int a_lbase, const int a_finestL
   }
 }
 
+
+void CdrPlasmaStepper::computeJ(EBAMRCellData& a_J) const{
+  CH_TIME("CdrPlasmaStepper::computeJ(amr)");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::computeJ(amr)" << endl;
+  }
+
+  CH_assert(a_J[0]->nComp() == SpaceDim);
+
+  DataOps::setValue(a_J, 0.0);
+
+  // Allocate scratch storage for holding the cell-centered diffusion coefficient and
+  // D * grad(phi)
+  EBAMRCellData scratchONE;
+  EBAMRCellData scratchDIM;
+
+  m_amr->allocate(scratchONE, m_realm, m_phase, 1       );
+  m_amr->allocate(scratchDIM, m_realm, m_phase, SpaceDim);  
+  
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solverIt.getSpecies();
+    
+    const int  Z           = species->getChargeNumber();
+    const bool isMobile    = solver->isMobile();
+    const bool isDiffusive = solver->isDiffusive();
+
+    // Cell-centered density
+    const EBAMRCellData& phi = solver->getPhi();
+
+    // Add the drift contribution to the current. We compute v*n*Z and add it to J
+    if(Z != 0 && isMobile){
+
+      // Cell-centered velocity
+      const EBAMRCellData& vel = solver->getCellCenteredVelocity();
+
+      // Now compute vel*phi and add the contribution to the current density. 
+      DataOps::copy(scratchDIM, vel);
+      DataOps::multiplyScalar(scratchDIM, phi);
+      DataOps::incr(a_J, scratchDIM, Real(Z));
+    }
+
+    // Add the diffusive contribution to the current.
+    if(Z != 0 && isDiffusive){
+
+      // We need updated ghost cells when computing the gradient so we use scratchONE as a scratch data holder when we compute grad(phi)
+      DataOps::copy(scratchONE, phi);
+
+      m_amr->averageDown    (scratchONE,             m_realm, m_phase);
+      m_amr->interpGhostMG  (scratchONE,             m_realm, m_phase);
+      m_amr->computeGradient(scratchDIM, scratchONE, m_realm, m_phase);
+
+      // scratchONE now holds grad(phi). We need to put the diffusion coefficient on the cell center now.
+      const EBAMRFluxData& diffusionCoefficientFace = solver->getFaceCenteredDiffusionCoefficient();
+
+      DataOps::averageFaceToCell(scratchONE, diffusionCoefficientFace, m_amr->getDomains());
+
+      // Now make DgradPhi = D * grad(Phi)
+      DataOps::multiplyScalar(scratchDIM, scratchONE);
+
+      // Add contribution -Z * D * grad(Phi) to the current
+      DataOps::incr(a_J, scratchDIM, -Real(Z));
+    }
+  }
+
+  // Now scale by electron charge.
+  DataOps::scale(a_J, Units::Qe);
+
+  // Coarsen and update ghost cells
+  m_amr->averageDown(a_J, m_realm, m_phase);
+  m_amr->interpGhost(a_J, m_realm, m_phase);  
+}
+
 void CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) const {
   CH_TIME("CdrPlasmaStepper::computeElectricField(MFAMRCellData, MFAMRCellData)");
   if(m_verbosity > 5){
@@ -2922,77 +2995,6 @@ void CdrPlasmaStepper::computeFlux(LevelData<EBCellFAB>&       a_flux,
   DataOps::multiplyScalar(a_flux, a_density);
 }
 
-void CdrPlasmaStepper::computeJ(EBAMRCellData& a_J) const{
-  CH_TIME("CdrPlasmaStepper::computeJ(amr)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeJ(amr)" << endl;
-  }
-
-  CH_assert(a_J[0]->nComp() == SpaceDim);
-
-  DataOps::setValue(a_J, 0.0);
-
-  // Allocate scratch storage for holding the cell-centered diffusion coefficient and
-  // D * grad(phi)
-  EBAMRCellData scratchONE;
-  EBAMRCellData scratchDIM;
-
-  m_amr->allocate(scratchONE, m_realm, m_phase, 1       );
-  m_amr->allocate(scratchDIM, m_realm, m_phase, SpaceDim);  
-  
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
-    const RefCountedPtr<CdrSpecies>& species = solverIt.getSpecies();
-    
-    const int  Z           = species->getChargeNumber();
-    const bool isMobile    = solver->isMobile();
-    const bool isDiffusive = solver->isDiffusive();
-
-    // Cell-centered density
-    const EBAMRCellData& phi = solver->getPhi();
-
-    // Add the drift contribution to the current. We compute v*n*Z and add it to J
-    if(Z != 0 && isMobile){
-
-      // Cell-centered velocity
-      const EBAMRCellData& vel = solver->getCellCenteredVelocity();
-
-      // Now compute vel*phi and add the contribution to the current density. 
-      DataOps::copy(scratchDIM, vel);
-      DataOps::multiplyScalar(scratchDIM, phi);
-      DataOps::incr(a_J, scratchDIM, Real(Z));
-    }
-
-    // Add the diffusive contribution to the current.
-    if(Z != 0 && isDiffusive){
-
-      // We need updated ghost cells when computing the gradient so we use scratchONE as a scratch data holder when we compute grad(phi)
-      DataOps::copy(scratchONE, phi);
-
-      m_amr->averageDown    (scratchONE,             m_realm, m_phase);
-      m_amr->interpGhostMG  (scratchONE,             m_realm, m_phase);
-      m_amr->computeGradient(scratchDIM, scratchONE, m_realm, m_phase);
-
-      // scratchONE now holds grad(phi). We need to put the diffusion coefficient on the cell center now.
-      const EBAMRFluxData& diffusionCoefficientFace = solver->getFaceCenteredDiffusionCoefficient();
-
-      DataOps::averageFaceToCell(scratchONE, diffusionCoefficientFace, m_amr->getDomains());
-
-      // Now make DgradPhi = D * grad(Phi)
-      DataOps::multiplyScalar(scratchDIM, scratchONE);
-
-      // Add contribution -Z * D * grad(Phi) to the current
-      DataOps::incr(a_J, scratchDIM, -Real(Z));
-    }
-  }
-
-  // Now scale by electron charge.
-  DataOps::scale(a_J, Units::Qe);
-
-  // Coarsen and update ghost cells
-  m_amr->averageDown(a_J, m_realm, m_phase);
-  m_amr->interpGhost(a_J, m_realm, m_phase);  
-}
 
 void CdrPlasmaStepper::deallocateSolverInternals(){
   CH_TIME("CdrPlasmaStepper::deallocateSolverInternals");
