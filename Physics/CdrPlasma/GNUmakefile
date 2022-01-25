@@ -11,6 +11,8 @@ SrcLib = $(DISCHARGE_HOME)/Lib/lib$(CDRPLASMA_LIB)$(config).a
 
 .DEFAULT_GOAL=CdrPlasmaPhysics
 
+XTRACPPFLAGS += -I$(DISCHARGE_HOME)/Submodules/json/include
+
 # For making the library.
 CdrPlasmaPhysics: $(objects)
 	if test -f $(SrcLib); then $(RM) $(SrcLib); fi

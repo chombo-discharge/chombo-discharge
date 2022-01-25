@@ -20,4 +20,6 @@ std::normal_distribution      <Real> Random::s_normal01  = std::normal_distribut
 
 bool Random::s_seeded = false;
 
+//std::once_flag once = std::once_flag();
+
 #include <CD_NamespaceFooter.H>

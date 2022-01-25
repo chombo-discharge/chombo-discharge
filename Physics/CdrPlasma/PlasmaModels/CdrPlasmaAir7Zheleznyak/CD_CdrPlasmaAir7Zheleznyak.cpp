@@ -240,17 +240,17 @@ void CdrPlasmaAir7Zheleznyak::initSpecies(){
   
   m_phot_idx         = 0;
 
-  m_CdrSpecies.resize(m_numCdrSpecies);
-  m_CdrSpecies[m_elec_idx]      = RefCountedPtr<CdrSpecies>  (new CdrPlasmaAir7Zheleznyak::Electron());
-  m_CdrSpecies[m_N2plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::N2plus());
-  m_CdrSpecies[m_O2plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O2plus());
-  m_CdrSpecies[m_N4plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::N4plus());
-  m_CdrSpecies[m_O4plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O4plus());
-  m_CdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O2plusN2());
-  m_CdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O2minus());
+  m_cdrSpecies.resize(m_numCdrSpecies);
+  m_cdrSpecies[m_elec_idx]      = RefCountedPtr<CdrSpecies>  (new CdrPlasmaAir7Zheleznyak::Electron());
+  m_cdrSpecies[m_N2plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::N2plus());
+  m_cdrSpecies[m_O2plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O2plus());
+  m_cdrSpecies[m_N4plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::N4plus());
+  m_cdrSpecies[m_O4plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O4plus());
+  m_cdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O2plusN2());
+  m_cdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O2minus());
 
-  m_RtSpecies.resize(m_numRtSpecies);
-  m_RtSpecies[m_phot_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Zheleznyak::uv_Photon());
+  m_rtSpecies.resize(m_numRtSpecies);
+  m_rtSpecies[m_phot_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Zheleznyak::uv_Photon());
 
 }
 
@@ -722,12 +722,8 @@ Real CdrPlasmaAir7Zheleznyak::initialSigma(const Real a_time, const RealVect a_p
   return 0.0;
 }
 
-Real CdrPlasmaAir7Zheleznyak::computeAlpha(const RealVect a_E) const{
-  const Real E     = a_E.vectorLength();
-  const Real alpha = m_e_alpha.getEntry<1>(E);
-  const Real eta   = m_e_eta.getEntry<1>(E);
-
-  return alpha;
+Real CdrPlasmaAir7Zheleznyak::computeAlpha(const Real a_E, const RealVect a_pos) const{
+  return m_e_alpha.getEntry<1>(a_E);
 }
 
 Real CdrPlasmaAir7Zheleznyak::excitationRates(const Real a_E) const{

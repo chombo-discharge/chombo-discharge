@@ -36,7 +36,6 @@ typedef CdrPlasmaImExSdcStepper::SigmaStorage   SigmaStorage;
 
 CdrPlasmaImExSdcStepper::CdrPlasmaImExSdcStepper(){
   m_className = "CdrPlasmaImExSdcStepper";
-  m_subcycle   = false;
 }
 
 CdrPlasmaImExSdcStepper::CdrPlasmaImExSdcStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : CdrPlasmaImExSdcStepper() {
@@ -1135,7 +1134,7 @@ void CdrPlasmaImExSdcStepper::computeNewDt(bool& a_accept_step, const Real a_dt,
 
   // Try time step
   const Real rel_err    = (m_safety*m_err_thresh)/m_max_error;
-  const Real dt_adapt   = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
+  const Real dt_adapt   = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_maxDt;
   const Real min_dt_cfl = dt_cfl*m_minCFL;
   const Real max_dt_cfl = dt_cfl*m_maxCFL;
 
@@ -1149,8 +1148,8 @@ void CdrPlasmaImExSdcStepper::computeNewDt(bool& a_accept_step, const Real a_dt,
     else{ // rel_err > 1 => dt_adapt < a_dt. This shrinks the error down to the safety factor. 
       m_new_dt = dt_adapt;
     }
-    m_new_dt = Max(m_new_dt, m_min_dt);                   // Don't go below hardcap
-    m_new_dt = Min(m_new_dt, m_max_dt);                   // Don't go above other hardcap
+    m_new_dt = Max(m_new_dt, m_minDt);                   // Don't go below hardcap
+    m_new_dt = Min(m_new_dt, m_maxDt);                   // Don't go above other hardcap
 
     m_new_dt = Max(m_new_dt, dt_cfl*m_minCFL);            // Don't drop below minimum CFL
     m_new_dt = Min(m_new_dt, dt_cfl*m_maxCFL);            // Don't go above maximum CFL
@@ -1160,15 +1159,15 @@ void CdrPlasmaImExSdcStepper::computeNewDt(bool& a_accept_step, const Real a_dt,
     a_accept_step = false;
 
     m_new_dt = m_decrease_safe*dt_adapt; // Decrease time step a little bit extra to avoid another rejection
-    if(a_dt <= min_dt_cfl || a_dt < m_min_dt){ // Step already at minimum. Accept it anyways.
+    if(a_dt <= min_dt_cfl || a_dt < m_minDt){ // Step already at minimum. Accept it anyways.
       a_accept_step = true;
     }
     
     m_new_dt = Max(m_new_dt, dt_cfl*m_minCFL);            // Don't drop below minimum CFL
     m_new_dt = Min(m_new_dt, dt_cfl*m_maxCFL);            // Don't go above maximum CFL
 
-    m_new_dt = Max(m_new_dt, m_min_dt);                   // Don't go below hardcap
-    m_new_dt = Min(m_new_dt, m_max_dt);                   // Don't go above other hardcap
+    m_new_dt = Max(m_new_dt, m_minDt);                   // Don't go below hardcap
+    m_new_dt = Min(m_new_dt, m_maxDt);                   // Don't go above other hardcap
   }
 
 #if 0 // Debug
@@ -1259,13 +1258,13 @@ void CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
     a_timeCode = TimeCode::Restricted;
   }
 
-  if(dt < m_min_dt){
-    dt = m_min_dt;
+  if(dt < m_minDt){
+    dt = m_minDt;
     a_timeCode = TimeCode::Hardcap;
   }
 
-  if(dt > m_max_dt){
-    dt = m_max_dt;
+  if(dt > m_maxDt){
+    dt = m_maxDt;
     a_timeCode = TimeCode::Hardcap;
   }
 

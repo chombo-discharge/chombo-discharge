@@ -17,7 +17,7 @@ jobs:
     
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
-      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib      
+      CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib      
 
     steps:
       - name: Checkout chombo-discharge
@@ -106,7 +106,7 @@ jobs:
     
     env:
       DISCHARGE_HOME: ${{github.workspace}}
-      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
+      CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
 
     steps:
       - name: Checkout chombo-discharge

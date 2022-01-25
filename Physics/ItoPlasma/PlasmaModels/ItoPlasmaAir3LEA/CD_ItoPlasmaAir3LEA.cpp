@@ -81,7 +81,7 @@ ItoPlasmaAir3LEA::ItoPlasmaAir3LEA(){
 
   // Set up species
   m_ItoSpecies.resize(m_num_ItoSpecies);
-  m_RtSpecies.resize(m_numRtSpecies);
+  m_rtSpecies.resize(m_numRtSpecies);
 
   m_electronIdx = 0;
   m_positiveIdx = 1;
@@ -95,7 +95,7 @@ ItoPlasmaAir3LEA::ItoPlasmaAir3LEA(){
   m_ItoSpecies[m_electronIdx] = RefCountedPtr<ItoSpecies> (new Electron(m_tables.at("mobility"), m_tables.at("diffco")));
   m_ItoSpecies[m_positiveIdx] = RefCountedPtr<ItoSpecies> (new Positive());
   m_ItoSpecies[m_negativeIdx] = RefCountedPtr<ItoSpecies> (new Negative());
-  m_RtSpecies[m_PhotonZ_idx]  = RefCountedPtr<RtSpecies> (new PhotonZ());
+  m_rtSpecies[m_PhotonZ_idx]  = RefCountedPtr<RtSpecies> (new PhotonZ());
 
   // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
   m_seed += procID();

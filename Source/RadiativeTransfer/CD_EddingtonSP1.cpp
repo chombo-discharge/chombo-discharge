@@ -680,7 +680,7 @@ void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   BaseFab<Real>& helmAcoReg = a_helmAco.getSingleValuedFAB();
   auto regularAcoKernel = [&] (const IntVect& iv) -> void {
     const RealVect pos   = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
-    const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
+    const Real     kappa = m_rtSpecies->getAbsorptionCoefficient(pos);
       
     helmAcoReg(iv, m_comp) = kappa;
   };
@@ -715,7 +715,7 @@ void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     BaseFab<Real>& helmBcoReg = helmBcoFace.getSingleValuedFAB();
     auto regularBcoKernel = [&] (const IntVect& iv) -> void {
       const RealVect pos   = probLo + dx * ((RealVect(iv) + 0.5*RealVect::Unit) - 0.5*BASISREALV(dir));
-      const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
+      const Real     kappa = m_rtSpecies->getAbsorptionCoefficient(pos);
       
       helmBcoReg(iv, m_comp) = 1./(3.0*kappa);
     };
@@ -723,7 +723,7 @@ void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     // Irregular Bco-kernel. Does exactly the same. 
     auto irregularBcoKernel = [&] (const FaceIndex& face) -> void {
       const RealVect pos   = probLo + Location::position(Location::Face::Center, face, ebisbox, dx);
-      const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
+      const Real     kappa = m_rtSpecies->getAbsorptionCoefficient(pos);
 
       helmBcoFace(face, m_comp) = 1./(3.0*kappa);
     };
@@ -740,7 +740,7 @@ void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
   auto irregularKernel = [&] (const VolIndex& vof) -> void {
     const RealVect pos   = probLo + Location::position(m_dataLocation, vof, ebisbox, dx);
-    const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
+    const Real     kappa = m_rtSpecies->getAbsorptionCoefficient(pos);
 
     a_helmAco     (vof, m_comp) = kappa;
     a_helmBcoIrreg(vof, m_comp) = 1./(3.0*kappa);
@@ -777,7 +777,7 @@ void EddingtonSP1::setupHelmholtzFactory(){
   RefCountedPtr<EBHelmholtzEBBCFactory> ebbcFactory;
   
   // Domain bcs use a wrapper for fetching the bc function on a specified edge
-  domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzEddingtonSP1DomainBCFactory(m_domainBc, m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo));
+  domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzEddingtonSP1DomainBCFactory(m_domainBc, m_rtSpecies, m_reflectCoefOne, m_reflectCoefTwo));
 
   // For EBs we run with only one type of BC (for now). This code sets up the embedded boundary conditions. In parseEBBC we happened to
   // read a line from the input script in the format = <type> <value> which was put into a function. Associate that function here. 
@@ -791,7 +791,7 @@ void EddingtonSP1::setupHelmholtzFactory(){
   case EBBCType::Larsen:{
     constexpr int order  = 1; // Need to become input parameters
     constexpr int weight = 0;
-    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzLarsenEBBCFactory (order, weight, m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, m_ebbc.second));
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzLarsenEBBCFactory (order, weight, m_rtSpecies, m_reflectCoefOne, m_reflectCoefTwo, m_ebbc.second));
     break;
   }
   default:

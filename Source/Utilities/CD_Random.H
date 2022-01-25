@@ -15,6 +15,7 @@
 // Std includes
 #include <random>
 #include <memory>
+#include <mutex>
 
 // Chombo includes
 #include <REAL.H>
@@ -59,7 +60,14 @@ public:
     @brief Disallowed move assignment. 
     @param[in] a_other Other RNG engine. 
   */
-  Random& operator=(const Random&& a_other) = delete;    
+  Random& operator=(const Random&& a_other) = delete;
+
+  /*!
+    @brief Get Poisson distributed number
+  */
+  template <typename T>
+  inline
+  static T getPoisson(const Real a_mean);
 
   /*!
     @brief Get a uniform real number on the interval [0,1]
@@ -94,6 +102,12 @@ public:
   inline  
   static Real get(T& a_distribution);
 
+  /*!
+    @brief Seed the RNG
+  */
+  inline
+  static void seed();  
+
 private:
 
   /*!
@@ -120,12 +134,6 @@ private:
     @brief Normal distribution centered at zero with standard deviation of one
   */
   static std::normal_distribution<Real> s_normal01;
-
-  /*!
-    @brief Seed the RNG
-  */
-  inline
-  static void seed();
 
   /*!
     @brief Set the RNG seed.

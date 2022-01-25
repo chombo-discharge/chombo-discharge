@@ -1,17 +1,17 @@
-discharge-lib: source geometries 
-
-physics: source advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer
+all: discharge-source discharge-geometries discharge-physics
 
 chombo:
 	$(MAKE) --directory=$(CHOMBO_HOME) USE_EB=TRUE USE_MF=TRUE lib
 
-all: discharge-lib physics
+discharge-lib: discharge-source discharge-geometries discharge-physics
 
-source: chombo
-	$(MAKE) --directory=$(DISCHARGE_HOME)/Source 
+discharge-source: chombo
+	$(MAKE) --directory=$(DISCHARGE_HOME)/Source
 
-geometries: source
+discharge-geometries: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Geometries
+
+discharge-physics: discharge-source advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer
 
 advectiondiffusion: source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/AdvectionDiffusion

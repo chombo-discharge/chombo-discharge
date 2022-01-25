@@ -457,7 +457,7 @@ void ItoPlasmaPhysics::reconcilePhotons(Vector<List<Photon>* >&  a_newPhotons,
 
   for (int i = 0; i < a_newPhotons.size(); i++){
     if(a_numNewPhotons[i] > 0){
-      this->reconcilePhotons(*a_newPhotons[i], *m_RtSpecies[i], a_numNewPhotons[i], a_cellPos, a_centroidPos, a_lo, a_hi,
+      this->reconcilePhotons(*a_newPhotons[i], *m_rtSpecies[i], a_numNewPhotons[i], a_cellPos, a_centroidPos, a_lo, a_hi,
 			     a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     }
   }

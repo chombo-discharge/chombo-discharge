@@ -218,7 +218,7 @@ namespace Physics {
   
       int poissonReaction(const Real a_propensity, const Real a_dt) const;
   
-      Real computeAlpha(const RealVect a_E) const;
+      Real computeAlpha(const Real a_E, const RealVect a_pos) const;
       Real computeEta(const RealVect a_E)   const;
       Real computeEta2(const RealVect a_E)  const;
       Real computeEta3(const RealVect a_E)  const;

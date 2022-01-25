@@ -28,8 +28,8 @@ CdrPlasmaMorrowZheleznyak::CdrPlasmaMorrowZheleznyak(){
   m_numCdrSpecies = 3;
   m_numRtSpecies = 1;
 
-  m_CdrSpecies.resize(m_numCdrSpecies);
-  m_RtSpecies.resize(m_numRtSpecies);
+  m_cdrSpecies.resize(m_numCdrSpecies);
+  m_rtSpecies.resize(m_numRtSpecies);
 
   m_nelec_idx   = 0;
   m_nplus_idx   = 1;
@@ -37,10 +37,10 @@ CdrPlasmaMorrowZheleznyak::CdrPlasmaMorrowZheleznyak(){
   m_Photon1_idx = 0;
 
   // Instantiate species
-  m_CdrSpecies[m_nelec_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowZheleznyak::Electron());
-  m_CdrSpecies[m_nplus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowZheleznyak::PositiveSpecies());
-  m_CdrSpecies[m_nminu_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowZheleznyak::negative_species());
-  m_RtSpecies[m_Photon1_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowZheleznyak::UvPhoton());
+  m_cdrSpecies[m_nelec_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowZheleznyak::Electron());
+  m_cdrSpecies[m_nplus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowZheleznyak::PositiveSpecies());
+  m_cdrSpecies[m_nminu_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowZheleznyak::negative_species());
+  m_rtSpecies[m_Photon1_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowZheleznyak::UvPhoton());
 
   // Parse some basic settings
   parseGasParameters();
@@ -151,7 +151,7 @@ void CdrPlasmaMorrowZheleznyak::networkRRE(Vector<Real>&          a_particle_sou
   const RealVect Ve = computeVe(a_E);
   const Real ve     = Ve.vectorLength();
   const Real E      = a_E.vectorLength();
-  const Real alpha  = computeAlpha(a_E);
+  const Real alpha  = computeAlpha(E, a_pos);
   const Real eta    = computeEta(a_E);
   const Real beta   = computeBeta(a_E);
 
@@ -253,7 +253,7 @@ void CdrPlasmaMorrowZheleznyak::networkTau(Vector<Real>&          a_particle_sou
   const RealVect Ve = computeVe(a_E);
   const Real ve     = Ve.vectorLength();
   const Real E      = a_E.vectorLength();
-  const Real alpha  = computeAlpha(a_E);
+  const Real alpha  = computeAlpha(E, a_pos);
   const Real eta    = computeEta(a_E);
   const Real beta   = computeBeta(a_E);
 
@@ -345,7 +345,7 @@ void CdrPlasmaMorrowZheleznyak::networkSSA(Vector<Real>&          a_particle_sou
   const RealVect Ve = computeVe(a_E);
   const Real ve     = Ve.vectorLength();
   const Real E      = a_E.vectorLength();
-  const Real alpha  = computeAlpha(a_E);
+  const Real alpha  = computeAlpha(E, a_pos);
   const Real eta    = computeEta(a_E);
   const Real beta   = computeBeta(a_E);
   const Real eff    = sergeyFactor(m_fracO2)*excitationRates(E)*m_pq/(m_p+m_pq);
@@ -554,12 +554,11 @@ RealVect CdrPlasmaMorrowZheleznyak::computeVn(const RealVect a_E) const{
   return vn;
 }
 
-Real CdrPlasmaMorrowZheleznyak::computeAlpha(const RealVect a_E) const{
+Real CdrPlasmaMorrowZheleznyak::computeAlpha(const Real a_E, const RealVect a_pos) const{
   Real alpha    = 0.;
   Real alphabyN = 0.;
 
-  const RealVect E = a_E*1.E-2;        // Morrow-Lowke wants E in V/cm
-  const Real Emag  = E.vectorLength(); // 
+  const Real Emag  = a_E*1.E-2;        // Morrow-Lowke wants E in V/cm
   const Real N     = m_N*1.E-6;        // Morrow-Lowke wants N in cm^3
   const Real EbyN  = Emag/N;           // This is now V/cm^2
 
@@ -681,7 +680,7 @@ Vector<Real> CdrPlasmaMorrowZheleznyak::computeCdrFluxes(const Real         a_ti
   // Switch for setting drift flux to zero for charge species
   Vector<Real> aj(m_numCdrSpecies, 0.0);
   for (int i = 0; i < m_numCdrSpecies; i++){
-    if(DataOps::sgn(m_CdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
+    if(DataOps::sgn(m_cdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {
@@ -1032,8 +1031,8 @@ void CdrPlasmaMorrowZheleznyak::parseInitialParticles(){
   addGaussianParticles(p);
   
   // Copy initial particles to various species
-  m_CdrSpecies[m_nelec_idx]->getInitialParticles() = p;
-  m_CdrSpecies[m_nplus_idx]->getInitialParticles() = p;
+  m_cdrSpecies[m_nelec_idx]->getInitialParticles() = p;
+  m_cdrSpecies[m_nplus_idx]->getInitialParticles() = p;
 
   // Get the initial deposition scheme
 }

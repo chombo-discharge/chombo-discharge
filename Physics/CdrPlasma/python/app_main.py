@@ -4,20 +4,20 @@ import sys
 def write_template(args):
     # Make sure that every class can be found where they should
     geofile = args.discharge_home + "/Geometries" + "/" + args.geometry + "/CD_" + args.geometry + ".H"
-    tsfile  = args.discharge_home + "/Physics/CdrPlasma/Timesteppers" + "/" + args.TimeStepper + "/CD_" + args.TimeStepper + ".H"
+    tsfile  = args.discharge_home + "/Physics/CdrPlasma/Timesteppers" + "/" + args.time_stepper + "/CD_" + args.time_stepper + ".H"
     kinfile = args.discharge_home + "/Physics/CdrPlasma/PlasmaModels" + "/" + args.physics + "/CD_" + args.physics + ".H"
-    tagfile = args.discharge_home + "/Physics/CdrPlasma/CellTaggers" +  "/" + args.CellTagger + "/CD_" + args.CellTagger + ".H"
+    tagfile = args.discharge_home + "/Physics/CdrPlasma/CellTaggers" +  "/" + args.cell_tagger + "/CD_" + args.cell_tagger + ".H"
     if not os.path.exists(geofile):
         print 'Could not find ' + geofile
     if not os.path.exists(tsfile):
         print 'Could not find ' + tsfile
     if not os.path.exists(kinfile):
         print 'Could not find ' + kinfile
-    if not os.path.exists(tagfile) and args.CellTagger != "none":
+    if not os.path.exists(tagfile) and args.cell_tagger != "none":
         print 'Could not find ' + tagfile
                     
     # Create app directory if it does not exist
-    app_dir = args.discharge_home + "/" + args.base_dir + "/" + args.app_name
+    app_dir = args.base_dir + "/" + args.app_name
     if not os.path.exists(app_dir):
         os.makedirs(app_dir)
                         
@@ -29,21 +29,21 @@ def write_template(args):
     mainf.write('#include <CD_FieldSolverFactory.H>\n')
     mainf.write('#include <CD_' + args.field_solver + '.H>\n')
     mainf.write('#include <CD_CdrLayoutImplem.H>\n')
-    mainf.write('#include <CD_' + args.CdrSolver + '.H>\n')
+    mainf.write('#include <CD_' + args.cdr_solver + '.H>\n')
     mainf.write('#include <CD_RtLayoutImplem.H>\n')
-    mainf.write('#include <CD_' + args.RtSolver + '.H>\n')
+    mainf.write('#include <CD_' + args.rte_solver + '.H>\n')
     mainf.write('#include <CD_' + args.physics + '.H>\n')
     mainf.write('#include <CD_' + args.geometry + '.H>\n')
-    mainf.write('#include <CD_' + args.TimeStepper + '.H>\n')
-    if not args.CellTagger == "none":
-        mainf.write('#include <CD_' + args.CellTagger + '.H>\n')
-    mainf.write('#include "ParmParse.H"\n')
+    mainf.write('#include <CD_' + args.time_stepper + '.H>\n')
+    if not args.cell_tagger == "none":
+        mainf.write('#include <CD_' + args.cell_tagger + '.H>\n')
+    mainf.write('#include <ParmParse.H>\n')
     mainf.write("\n")
     
-    mainf.write("// This is the potential curve (constant in this case). Modify it if you want to.\n")
-    mainf.write("Real g_potential;\n");
-    mainf.write("Real potential_curve(const Real a_time){\n")
-    mainf.write("  return g_potential;\n")
+    mainf.write("// This is the voltage curve (constant in this case). Modify it if you want to.\n")
+    mainf.write("Real g_voltage;\n");
+    mainf.write("Real voltageCurve(const Real a_time){\n")
+    mainf.write("  return g_voltage;\n")
     mainf.write("}\n")
 
     mainf.write("\n")
@@ -52,10 +52,9 @@ def write_template(args):
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
-    if args.use_mpi:
-        mainf.write("#ifdef CH_MPI\n")
-        mainf.write("  MPI_Init(&argc, &argv);\n")
-        mainf.write("#endif\n")
+    mainf.write("#ifdef CH_MPI\n")
+    mainf.write("  MPI_Init(&argc, &argv);\n")
+    mainf.write("#endif\n")
     
     mainf.write("\n")
     mainf.write("  // Build class options from input script and command line options\n")
@@ -64,13 +63,13 @@ def write_template(args):
     mainf.write("\n")
 
     mainf.write("\n")
-    mainf.write("  // Get potential from input script \n")
+    mainf.write("  // Get voltage from input script \n")
     mainf.write("  std::string basename; \n");
     mainf.write("  {\n")
-    mainf.write('     ParmParse pp("' + args.app_name + '");\n')
-    mainf.write('     pp.get("potential", g_potential);\n')
-    mainf.write('     pp.get("basename",  basename);\n')
-    mainf.write('     setPoutBaseName(basename);\n')
+    mainf.write('    ParmParse pp("' + args.app_name + '");\n')
+    mainf.write('    pp.get("voltage", g_voltage);\n')
+    mainf.write('    pp.get("basename",  basename);\n')
+    mainf.write('    setPoutBaseName(basename);\n')
     mainf.write("  }\n")
 
     mainf.write("\n")
@@ -82,18 +81,18 @@ def write_template(args):
     mainf.write("\n")
     mainf.write("  // Set up physics \n")
     mainf.write("  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new " + args.physics + "());\n")
-    mainf.write("  RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new " + args.TimeStepper + "(physics));\n")
-    if args.CellTagger != "none":
-        mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new " + args.CellTagger + "(physics, timestepper, amr, compgeom));\n")
+    mainf.write("  RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new " + args.time_stepper + "(physics));\n")
+    if args.cell_tagger != "none":
+        mainf.write("  RefCountedPtr<CellTagger> tagger             = RefCountedPtr<CellTagger> (new " + args.cell_tagger + "(physics, timestepper, amr, compgeom));\n")
     else:
-        mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);\n")
+        mainf.write("  RefCountedPtr<CellTagger> tagger             = RefCountedPtr<CellTagger> (nullptr);\n")
 
     mainf.write("\n")
 
     mainf.write("  // Create solver factories\n")
     mainf.write("  auto poi_fact = new FieldSolverFactory<" + args.field_solver + ">();\n")
-    mainf.write("  auto cdr_fact = new CdrFactory<CdrSolver, " + args.CdrSolver + ">();\n")
-    mainf.write("  auto rte_fact = new RtFactory<RtSolver, " + args.RtSolver + ">();\n")
+    mainf.write("  auto cdr_fact = new CdrFactory<CdrSolver, " + args.cdr_solver + ">();\n")
+    mainf.write("  auto rte_fact = new RtFactory<RtSolver, " + args.rte_solver + ">();\n")
     mainf.write("\n")
     
     mainf.write("  // Instantiate solvers\n")
@@ -108,8 +107,8 @@ def write_template(args):
     mainf.write("  timestepper->setRadiativeTransferSolvers(rte);\n");
     mainf.write("\n")
 
-    mainf.write("  // Set potential \n")
-    mainf.write("timestepper->setVoltage(potential_curve);\n")
+    mainf.write("  // Set voltage \n")
+    mainf.write("  timestepper->setVoltage(voltageCurve);\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")
@@ -123,11 +122,10 @@ def write_template(args):
     mainf.write("  delete rte_fact;\n")
     mainf.write("\n")    
 
-    if args.use_mpi:
-        mainf.write("#ifdef CH_MPI\n")
-        mainf.write("  CH_TIMER_REPORT();\n")
-        mainf.write("  MPI_Finalize();\n")
-        mainf.write("#endif\n")
-        mainf.write("}\n")
+    mainf.write("#ifdef CH_MPI\n")
+    mainf.write("  CH_TIMER_REPORT();\n")
+    mainf.write("  MPI_Finalize();\n")
+    mainf.write("#endif\n")
+    mainf.write("}\n")
         
     mainf.close()

@@ -66,9 +66,11 @@ Vector<Real> CdrPlasmaStreamerTagger::tracer(const RealVect         a_pos,
 
   
   Vector<Real> tracers(m_num_tracers);
-  tracers[0] = a_E.vectorLength()/a_max_E;
-  tracers[1] = m_physics->computeAlpha(a_E);
 
+  const Real E = a_E.vectorLength();
+  
+  tracers[0] = E/a_max_E;
+  tracers[1] = m_physics->computeAlpha(E, a_pos);
 
   return tracers;
 }

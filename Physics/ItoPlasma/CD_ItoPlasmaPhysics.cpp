@@ -57,7 +57,7 @@ const Vector<RefCountedPtr<ItoSpecies> >& ItoPlasmaPhysics::getItoSpecies() cons
 }
 
 const Vector<RefCountedPtr<RtSpecies> >& ItoPlasmaPhysics::getRtSpecies() const {
-  return m_RtSpecies;
+  return m_rtSpecies;
 }
 
 int ItoPlasmaPhysics::getNumItoSpecies() const{
@@ -65,7 +65,7 @@ int ItoPlasmaPhysics::getNumItoSpecies() const{
 }
 
 int ItoPlasmaPhysics::getNumRtSpecies() const {
-  return m_RtSpecies.size();
+  return m_rtSpecies.size();
 }
 
 ItoPlasmaPhysics::coupling ItoPlasmaPhysics::getCoupling() const {

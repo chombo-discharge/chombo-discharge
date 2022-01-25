@@ -243,7 +243,7 @@ namespace Physics {
       mutable std::uniform_real_distribution<Real> m_udist11;
 
       Vector<RefCountedPtr<ItoSpecies> > m_ItoSpecies;
-      Vector<RefCountedPtr<RtSpecies> > m_RtSpecies;
+      Vector<RefCountedPtr<RtSpecies> > m_rtSpecies;
 
       int m_num_ItoSpecies;
       int m_numRtSpecies;

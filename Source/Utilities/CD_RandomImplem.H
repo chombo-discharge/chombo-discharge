@@ -78,38 +78,55 @@ void Random::setRandomSeed() {
   s_seeded = true;  
 }
 
+template <typename T>
+inline
+T Random::getPoisson(const Real a_mean) {
+  CH_assert(s_seeded);
+
+  constexpr T zero = T(0);  
+
+  T ret = 0;
+
+  if(a_mean < 250.0){
+    std::poisson_distribution<T> poisson(a_mean);
+
+    ret = poisson(s_rng);
+  }
+  else{
+    std::normal_distribution<Real> normal(a_mean, sqrt(a_mean));
+
+    ret = T(normal(s_rng));
+
+    ret = std::max(zero, ret);    
+  }
+
+  return ret;
+}
+
 inline
 Real Random::getUniformReal01() {
-  if(!s_seeded) {
-    Random::seed();
-  }
-  
+  CH_assert(s_seeded);  
+
   return s_uniform01(s_rng);
 }
 
 inline
 Real Random::getUniformReal11() {
-  if(!s_seeded) {
-    Random::seed();
-  }
+  CH_assert(s_seeded);    
   
   return s_uniform11(s_rng);
 }
 
 inline
 Real Random::getNormal01() {
-  if(!s_seeded) {
-    Random::seed();
-  }
+  CH_assert(s_seeded);      
   
   return s_normal01(s_rng);
 }
 
 inline
 RealVect Random::getDirection() {
-  if(!s_seeded) {
-    Random::seed();
-  }
+  CH_assert(s_seeded);        
   
   constexpr Real safety = 1.E-12;
 
@@ -145,9 +162,7 @@ RealVect Random::getDirection() {
 template<typename T>
 inline
 Real Random::get(T& a_distribution){
-  if(!s_seeded) {
-    Random::seed();
-  }
+  CH_assert(s_seeded);          
   
   return a_distribution(s_rng);
 }

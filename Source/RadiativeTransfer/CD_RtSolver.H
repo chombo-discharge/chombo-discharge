@@ -352,7 +352,7 @@ protected:
   /*!
     @brief Radiative transfer species (contains meta-information like initial conditions)
   */
-  RefCountedPtr<RtSpecies> m_RtSpecies;
+  RefCountedPtr<RtSpecies> m_rtSpecies;
 
   /*!
     @brief Computational geometry. 
