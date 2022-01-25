@@ -148,15 +148,14 @@ Real LookupTable<N>::getEntry(const Real a_x) const {
     const int whichColumn = std::get<Column>(m_state);
 
     const int idx = std::floor( (a_x - m_data.front()[whichColumn])/m_delta);
-    if (idx < 0){
+    if (idx <= 0){
       ret = m_data.front()[K];
     }
-    else if (idx >= m_data.size() ){
+    else if (idx >= m_data.size()-1){
       ret = m_data.back()[K];
     }
     else{
       const Real t = (a_x - m_data[idx][whichColumn])/m_delta;
-
       ret = m_data[idx][K] + t*(m_data[idx+1][K] - m_data[idx][K]);
     }
   }
@@ -181,8 +180,8 @@ std::array<Real, N> LookupTable<N>::directLookup(const Real a_x) const {
     else if(a_x >= m_data.back()[column]){
       ret = m_data.back();
     }
-    else{ // Do liner interpolation. We look through the rows and find two entries that bracket a_x. We then linearly interpolate between those entries. 
-      for (int irow = 0; irow < m_data.size()-2; irow++){
+    else{ // Do linear interpolation. We look through the rows and find two entries that bracket a_x. We then linearly interpolate between those entries. 
+      for (int irow = 0; irow < m_data.size()-1; irow++){
 	const std::array<Real, N>& row1 = m_data[irow  ];
 	const std::array<Real, N>& row2 = m_data[irow+1];
 
@@ -214,8 +213,8 @@ void LookupTable<N>::makeUniform(const int a_numRows){
     if(a_numRows > 1){
 
       // Find maximum value and spacing. 
-      Real maxVal = std::numeric_limits<Real>::min();
-      Real minVal = std::numeric_limits<Real>::max();
+      Real maxVal = -std::numeric_limits<Real>::max();
+      Real minVal =  std::numeric_limits<Real>::max();
 
       for (const auto& r : m_data){
 	maxVal = std::max(maxVal, r[whichColumn]);
