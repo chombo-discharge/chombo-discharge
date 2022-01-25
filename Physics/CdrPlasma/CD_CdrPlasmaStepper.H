@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrPlasmaStepper.H
-  @brief  Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time across an amr mesh
+  @brief  Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time.
   @author Robert Marskar
 */
 
@@ -742,52 +742,70 @@ namespace Physics {
 						      const int                 a_lvl,
 						      const DataIndex&          a_dit);
 
-      //////// CODE-WALK FROM HERE HERE AND DOWNWARDS /////
+      /*!
+	@brief Compute CDR fluxes on the EB. This is the AMR version -- it will call the level version. 
+	@param[out] a_cdrFluxesEB         CDR fluxes to be put in CDR solvers as a BC on the EBs.
+	@param[in]  a_extrapCdrFluxes     CDR fluxes extrapolated from the inside. Can be used to construct inflow/outflow BCs.
+	@param[in]  a_extrapCdrDensities  CDR densities extrapolated from the inside. 
+	@param[in]  a_extrapCdrVelocities CDR velocities on the EB, extrapolated from the inside. 
+	@param[in]  a_extrapCdrGradients  CDR gradients on the EB, extrapolated from the inside. 
+	@param[in]  a_electricField       Electric field on the EB. 
+	@param[in]  a_time                Time. 
+      */      
+      virtual void computeCdrFluxes(Vector<EBAMRIVData*>&       a_cdrFluxesEB,
+				    const Vector<EBAMRIVData*>& a_extrapCdrFluxes,
+				    const Vector<EBAMRIVData*>& a_extrapCdrDensities,
+				    const Vector<EBAMRIVData*>& a_extrapCdrVelocities,
+				    const Vector<EBAMRIVData*>& a_extrapCdrGradients,
+				    const Vector<EBAMRIVData*>& a_extrapRteFluxes,
+				    const EBAMRIVData&          a_electricField,
+				    const Real&                 a_time);      
 
       /*!
-	@brief Compute cdr_fluxes
+	@brief Compute CDR fluxes on the EB. This is the level version which will fill EB fluxes on both electrode and dielectric cells. 
+	@param[out] a_cdrFluxesEB         CDR fluxes to be put in CDR solvers as a BC on the EBs.
+	@param[in]  a_extrapCdrFluxes     CDR fluxes extrapolated from the inside. Can be used to construct inflow/outflow BCs.
+	@param[in]  a_extrapCdrDensities  CDR densities extrapolated from the inside. 
+	@param[in]  a_extrapCdrVelocities CDR velocities on the EB, extrapolated from the inside. 
+	@param[in]  a_extrapCdrGradients  CDR gradients on the EB, extrapolated from the inside. 
+	@param[in]  a_electricField       Electric field on the EB. 
+	@param[in]  a_time                Time. 
+	@param[in]  a_lvl                 Grid level. 
       */
-      virtual void computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&       a_fluxes,
-				    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_fluxes,
-				    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_densities,
-				    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_velocities,
-				    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_gradients,
-				    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_rte_fluxes,
-				    const LevelData<BaseIVFAB<Real> >&          a_field,
+      virtual void computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&       a_cdrFluxesEB,
+				    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrapCdrFluxes,
+				    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrapCdrDensities,
+				    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrapCdrVelocities,
+				    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrapCdrGradients,
+				    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrapRteFluxes,
+				    const LevelData<BaseIVFAB<Real> >&          a_electricField,
 				    const Real&                                 a_time,
 				    const int                                   a_lvl);
 
-      virtual void computeCdrFluxes(Vector<EBAMRIVData*>&       a_fluxes,
-				    const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
-				    const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
-				    const Vector<EBAMRIVData*>& a_extrap_cdr_velocities,
-				    const Vector<EBAMRIVData*>& a_extrap_cdr_gradients,
-				    const Vector<EBAMRIVData*>& a_extrap_rte_fluxes,
-				    const EBAMRIVData&          a_field,
-				    const Real&                 a_time);
+      //////// CODE-WALK FROM HERE HERE AND DOWNWARDS /////
 
       /*!
 	@brief Compute cdr fluxes on domain faces
 	@note Everything that comes in here should have been computed on the domain faces
       */
-      virtual void computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_fluxes,
-					  const Vector<EBAMRIFData*>& a_extrap_cdr_fluxes,
-					  const Vector<EBAMRIFData*>& a_extrap_cdr_densities,
-					  const Vector<EBAMRIFData*>& a_extrap_cdr_velocities,
-					  const Vector<EBAMRIFData*>& a_extrap_cdr_gradients,
-					  const Vector<EBAMRIFData*>& a_extrap_rte_fluxes,
+      virtual void computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_cdrFluxes,
+					  const Vector<EBAMRIFData*>& a_extrapCdrFluxes,
+					  const Vector<EBAMRIFData*>& a_extrapCdrDensities,
+					  const Vector<EBAMRIFData*>& a_extrapCdrVelocities,
+					  const Vector<EBAMRIFData*>& a_extrapCdrGradients,
+					  const Vector<EBAMRIFData*>& a_extrapRteFluxes,
 					  const EBAMRIFData&          a_field,
 					  const Real&                 a_time);
 
       /*!
 	@brief Compute cdr fluxes on domain faces. Level version
       */
-      virtual void computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_fluxes,
-					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_fluxes,
-					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_densities,
-					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_velocities,
-					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_gradients,
-					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_rte_fluxes,
+      virtual void computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_cdrFluxes,
+					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrFluxes,
+					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrDensities,
+					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrVelocities,
+					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrGradients,
+					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapRteFluxes,
 					  const LevelData<DomainFluxIFFAB>&          a_E,
 					  const Real&                                a_time,
 					  const int                                  a_lvl);
