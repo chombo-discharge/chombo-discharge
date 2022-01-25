@@ -335,7 +335,7 @@ namespace Physics {
       virtual bool solvePoisson(MFAMRCellData&                a_potential,
 				MFAMRCellData&                a_rho,
 				const Vector<EBAMRCellData*>  a_cdrDensities,
-				const EBAMRIVData&            a_sigma);      
+				const EBAMRIVData&            a_sigma);
       
       /*!
 	@brief Advance the reaction network. This will compute the electric field (on the appropriate phase) and call the other version.
