@@ -1319,11 +1319,11 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
     m_plasmaReactionEtaV.  emplace(a_reactionIndex, m_cdrSpeciesMap.at(species));
     m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::EtaV         );
   }  
-  else if(lookup == "function T1T2 A"){
-    if(!(a_R.contains("T1"))) this->throwParserError(baseError + "and got 'function T1T2 A' but field 'T1' was not found");
-    if(!(a_R.contains("T2"))) this->throwParserError(baseError + "and got 'function T1T2 A' but field 'T2' was not found");
-    if(!(a_R.contains("c1"))) this->throwParserError(baseError + "and got 'function T1T2 A' but field 'c1' was not found");
-    if(!(a_R.contains("c2"))) this->throwParserError(baseError + "and got 'function T1T2 A' but field 'c2' was not found");    
+  else if(lookup == "functionT1T2 A"){
+    if(!(a_R.contains("T1"))) this->throwParserError(baseError + "and got 'functionT1T2 A' but field 'T1' was not found");
+    if(!(a_R.contains("T2"))) this->throwParserError(baseError + "and got 'functionT1T2 A' but field 'T2' was not found");
+    if(!(a_R.contains("c1"))) this->throwParserError(baseError + "and got 'functionT1T2 A' but field 'c1' was not found");
+    if(!(a_R.contains("c2"))) this->throwParserError(baseError + "and got 'functionT1T2 A' but field 'c2' was not found");    
 
     const std::string speciesT1 = trim(a_R["T1"].get<std::string>());
     const std::string speciesT2 = trim(a_R["T2"].get<std::string>());
@@ -1335,8 +1335,8 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
     const bool isNeutralT2 = this->isNeutralSpecies(speciesT2);      
 
     // Make sure that the specified species exist. 
-    if(!isPlasmaT1 && !isNeutralT1) this->throwParserError(baseError + "and got function 'function T1T2 A' but do not know species '" + speciesT1 + "'");
-    if(!isPlasmaT2 && !isNeutralT2) this->throwParserError(baseError + "and got function 'function T1T2 A' but do not know species '" + speciesT2 + "'");    
+    if(!isPlasmaT1 && !isNeutralT1) this->throwParserError(baseError + "and got function 'functionT1T2 A' but do not know species '" + speciesT1 + "'");
+    if(!isPlasmaT2 && !isNeutralT2) this->throwParserError(baseError + "and got function 'functionT1T2 A' but do not know species '" + speciesT2 + "'");    
 
     // This syntax may look weird, but we need to know precisely which temperatures are involved in the reaction. In general the reaction rate
     // is just a function k = f(T1, T2) but T1 and T2 could be the temperatures for either a plasma or a neutral species. So, the plasmaReactionFunctionsT1T2 map

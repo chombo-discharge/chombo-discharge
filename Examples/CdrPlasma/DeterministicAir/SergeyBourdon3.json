@@ -227,7 +227,7 @@
      },
      {
 	 "reaction": "e + O2+ -> O2 + O2",
-	 "lookup": "function T1T2 A",
+	 "lookup": "functionT1T2 A",
 	 "scale": 1.0,	 
 	 "T1": "O2",
 	 "T2": "e",
@@ -236,7 +236,7 @@
      },
      {
 	 "reaction": "e + O2+ -> ",
-	 "lookup": "function T1T2 A",
+	 "lookup": "functionT1T2 A",
 	 "scale": 1.0,	 
 	 "T1": "O2",
 	 "T2": "e",
@@ -245,7 +245,7 @@
      },
      {
 	 "reaction": "e + O2 + O2 -> O2- + O2",
-	 "lookup": "function T1T2 A",
+	 "lookup": "functionT1T2 A",
 	 "scale": 1.0,	 
 	 "T1": "O2",
 	 "T2": "e",
