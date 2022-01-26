@@ -376,14 +376,16 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     pout() << "CdrPlasmaJSON::initializePlasmaSpecies()" << endl;
   }
 
-  if(!(m_json.contains("plasma species"))) this->throwParserWarning("CdrPlasmaJSON::initializePlasmaSpecies -- did not find any plasma species");
+  const std::string baseError = "CdrPlasmaJSON::initializePlasmaSpecies ";
+
+  if(!(m_json.contains("plasma species"))) this->throwParserWarning(baseError + " -- did not find any plasma species");
 
   // Iterate through all species defined in the JSON file. 
   for (const auto& species : m_json["plasma species"]){
-    if(!(species.contains("name"     ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma species' must have field 'name'"     );
-    if(!(species.contains("Z"        ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma species' must have field 'Z'"        );
-    if(!(species.contains("mobile"   ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma species' must have field 'mobile'"   );
-    if(!(species.contains("diffusive"))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma species' must have field 'diffusive'");
+    if(!(species.contains("name"     ))) this->throwParserError(baseError + "-- all entries in the  'plasma species' array must have field 'name'"     );
+    if(!(species.contains("Z"        ))) this->throwParserError(baseError + "-- all entries in the  'plasma species' array must have field 'Z'"        );
+    if(!(species.contains("mobile"   ))) this->throwParserError(baseError + "-- all entries in the  'plasma species' array must have field 'mobile'"   );
+    if(!(species.contains("diffusive"))) this->throwParserError(baseError + "-- all entries in the  'plasma species' array must have field 'diffusive'");
 
     const auto name        = trim(species["name"].     get<std::string>());
     const auto Z           =      species["Z"].        get<int        >() ;
@@ -391,10 +393,10 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     const auto diffusive   =      species["diffusive"].get<bool       >() ;
 
     // Does not get to contain at letter
-    if(containsWildcard(name)) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- species name must not contain '@' letter");    
+    if(containsWildcard(name)) this->throwParserError(baseError + "but species '" + name + "' can not contain the '@' letter");
 
     // It's an error if the species was already defined. 
-    if(isPlasmaSpecies(name)) this->throwParserError("Plasma species '" + name + "' was defined more than once");
+    if(isPlasmaSpecies(name)) this->throwParserError(baseError + "but plasma species '" + name + "' was defined more than once");
     
     const bool hasInitData = species.contains("initial data");
 
@@ -402,7 +404,7 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     std::function<Real(const RealVect, const Real)> initFunc;
 
     if(hasInitData){
-      initFunc = [data = species["initial data"]] (const RealVect a_point, const Real a_time) -> Real {
+      initFunc = [this, baseError, data = species["initial data"]] (const RealVect a_point, const Real a_time) -> Real {
 	Real ret = 0.0;
 
 	// Add uniform density. 
@@ -412,11 +414,19 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
 
 	// Add gaussian seed.
 	if(data.contains("gauss2")){
-	  const Real     amplitude = data["gauss2"]["amplitude"].get<Real>();	  
-	  const Real     radius    = data["gauss2"]["radius"   ].get<Real>();
-	  const RealVect center    = RealVect(D_DECL(data["gauss2"]["position"][0].get<Real>(),
-						     data["gauss2"]["position"][1].get<Real>(),
-						     data["gauss2"]["position"][2].get<Real>()));
+	  const auto& gauss2 = data["gauss2"];
+
+	  // These fields must exist
+	  if(!(gauss2.contains("amplitude"))) this->throwParserError(baseError + "and got gauss2 for initial data but field 'amplitude' is not specified");
+	  if(!(gauss2.contains("radius"   ))) this->throwParserError(baseError + "and got gauss2 for initial data but field 'radius' is not specified"   );
+	  if(!(gauss2.contains("position" ))) this->throwParserError(baseError + "and got gauss2 for initial data but field 'position' is not specified" );	  
+
+	  // Fetch fields and make the friggin functionl
+	  const Real     amplitude = gauss2["amplitude"].get<Real>();	  
+	  const Real     radius    = gauss2["radius"   ].get<Real>();
+	  const RealVect center    = RealVect(D_DECL(gauss2["position"][0].get<Real>(),
+						     gauss2["position"][1].get<Real>(),
+						     gauss2["position"][2].get<Real>()));
 	  const RealVect delta      = center - a_point;
 
 	  ret += amplitude * exp(-delta.dotProduct(delta)/(2*std::pow(radius,2)));
@@ -424,12 +434,20 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
 
 	// Add super-Gaussian seed.
 	if(data.contains("gauss4")){
-	  const Real     amplitude = data["gauss4"]["amplitude"].get<Real>();	  
-	  const Real     radius    = data["gauss4"]["radius"   ].get<Real>();
-	  const RealVect center    = RealVect(D_DECL(data["gauss4"]["position"][0].get<Real>(),
-						     data["gauss4"]["position"][1].get<Real>(),
-						     data["gauss4"]["position"][2].get<Real>()));
-	  const RealVect delta      = center - a_point;
+	  const auto& gauss4 = data["gauss4"];
+
+	  // These fields must exist
+	  if(!(gauss4.contains("amplitude"))) this->throwParserError(baseError + "and got gauss4 for initial data but field 'amplitude' is not specified");
+	  if(!(gauss4.contains("radius"   ))) this->throwParserError(baseError + "and got gauss4 for initial data but field 'radius' is not specified"   );
+	  if(!(gauss4.contains("position" ))) this->throwParserError(baseError + "and got gauss4 for initial data but field 'position' is not specified" );	  
+
+	  // Fetch fields and make the friggin functionl
+	  const Real     amplitude = gauss4["amplitude"].get<Real>();	  
+	  const Real     radius    = gauss4["radius"   ].get<Real>();
+	  const RealVect center    = RealVect(D_DECL(gauss4["position"][0].get<Real>(),
+						     gauss4["position"][1].get<Real>(),
+						     gauss4["position"][2].get<Real>()));
+	  const RealVect delta      = center - a_point;	  
 
 	  ret += amplitude * exp(-std::pow(delta.dotProduct(delta),2)/(2*std::pow(radius, 4)));
 	}
@@ -467,31 +485,33 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
 }
 
 void CdrPlasmaJSON::initializePhotonSpecies() {
-  CH_TIME("CdrPlasmaJSON::initializePhotonSpecies");
+  CH_TIME("CdrPlasmaJSON::initializePhotonSpecies()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::initializePhotonSpecies - file is = " << m_jsonFile << endl;
+    pout() << "CdrPlasmaJSON::initializePhotonSpecies()" << endl;
   }
 
-  if(!(m_json.contains("photon species"))) this->throwParserWarning("CdrPlasmaJSON::initializePhotonSpecies -- did not find any photon species");
+  const std::string baseError = "CdrPlasmaJSON::initializePhotonSpecies ";
+
+  if(!(m_json.contains("photon species"))) this->throwParserWarning(baseError + " -- did not find any photon species");
 
   for (const auto& species : m_json["photon species"]){
-    if(!(species.contains("name" ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'photon species' must have field 'name'"     );
-    if(!(species.contains("kappa"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'photon species' must have field 'mobile'"   );
+    if(!(species.contains("name" ))) this->throwParserError(baseError + "-- every entry in 'photon species' must have field 'name'" );
+    if(!(species.contains("kappa"))) this->throwParserError(baseError + "-- every entry in 'photon species' must have field 'kappa'");
 
     const auto name  = trim(species["name" ].get<std::string>());
     const auto kappa = trim(species["kappa"].get<std::string>());
 
     // Does not get to contain at letter.
-    if(containsWildcard(name)) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- species name cannot contain '@'");
+    if(containsWildcard(name)) this->throwParserError(baseError + " -- photon species name cannot contain '@'");
 
     // It's an error if the species is already defined.
-    if(isPhotonSpecies(name)) this->throwParserError("Photon species '" + name + "' was defined more than once");    
+    if(isPhotonSpecies(name)) this->throwParserError(baseError + "photon species '" + name + "' was defined more than once");    
 
     // Set the kappa-function needed by RteSpeciesJSON.
     std::function<Real(const RealVect a_position)> kappaFunction = [](const RealVect a_position) -> Real {return 1.0;};
     
     if(kappa == "constant"){
-      if(!(species.contains("value"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'constant' but field 'value' is missing");
+      if(!(species.contains("value"))) this->throwParserError(baseError + " -- got 'constant' kappa but field 'value' is missing");
 
       const Real value = species["value"].get<Real>();
 
@@ -506,8 +526,8 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
       // which computes the pressure, and m_neutralSpecies also stores the molar fraction for each species so this is comparatively easy to reconstruct.     
 
       // Make sure that 'lambda' is found in the photon species and that O2 is found in the neutral species. 
-      if(!(species.contains("lambda" ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'helmholtz' but field 'lambda' is missing" );
-      if(!(species.contains("neutral"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'helmholtz' but field 'neutral' is missing");
+      if(!(species.contains("lambda" ))) this->throwParserError(baseError + " -- got 'helmholtz' kappa but field 'lambda' is missing" );
+      if(!(species.contains("neutral"))) this->throwParserError(baseError + " -- got 'helmholtz' kappa but field 'neutral' is missing");
 
       // Get lambda and the neutral species that we base the partial pressure upon. 
       const auto neutral = trim(species["neutral"].get<std::string>());
@@ -515,7 +535,7 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
 
       // Make sure that the neutral is in the list of species. 
       if(m_neutralSpeciesMap.find(neutral) == m_neutralSpeciesMap.end()) {
-	this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'helmholtz' but '" + neutral + "' is not in the list of neutral species");
+	this->throwParserError(baseError + " -- got 'helmholtz' kappa but '" + neutral + "' is not in the list of neutral species");
       }
 
       // Get the molar fraction for this specific neutral
@@ -525,12 +545,12 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
 	return m*P(a_position)*lambda/sqrt(3.0);
       };
     }
-    else if (kappa == "stochastic_A"){
+    else if (kappa == "stochastic A"){
       // For the Chanrion stochastic model we compute the absorption length as
       //
       //    kappa = k1 * (k2/k1)^((f-f1)/(f2-f1))
       //
-      // where k1 = chi_min * p(neutral) and p(neutral) is the partial pressure (in Pa) for some species.
+      // where k1 = chi min * p(neutral) and p(neutral) is the partial pressure (in Pa) for some species.
       //
       // Note that the frequency f is sampled stochastically. 
       //
@@ -538,21 +558,21 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
       // Fortunately, we have m_gasPressure which computes the pressure, and m_neutralSpecies also stores the molar fraction for each species so this is comparatively
       // easy to reconstruct.
       
-      if(!(species.contains("f1"     ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_A' but field 'f1' is missing"     );
-      if(!(species.contains("f2"     ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_A' but field 'f2' is missing"     );
-      if(!(species.contains("chi_min"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_A' but field 'chi_max' is missing");
-      if(!(species.contains("chi_min"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_A' but field 'chi_min' is missing");
-      if(!(species.contains("neutral"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'stochastic_A' but field 'neutral' is missing");
+      if(!(species.contains("f1"     ))) this->throwParserError(baseError + " -- got 'stochastic A' but field 'f1' is missing"     );
+      if(!(species.contains("f2"     ))) this->throwParserError(baseError + " -- got 'stochastic A' but field 'f2' is missing"     );
+      if(!(species.contains("chi min"))) this->throwParserError(baseError + " -- got 'stochastic A' but field 'chi max' is missing");
+      if(!(species.contains("chi min"))) this->throwParserError(baseError + " -- got 'stochastic A' but field 'chi min' is missing");
+      if(!(species.contains("neutral"))) this->throwParserError(baseError + " -- got 'stochastic A' but field 'neutral' is missing");
 
       const auto f1      =      species["f1"     ].get<Real       >() ;
       const auto f2      =      species["f2"     ].get<Real       >() ;
-      const auto chi_min =      species["chi_min"].get<Real       >() ;
-      const auto chi_max =      species["chi_max"].get<Real       >() ;
+      const auto chi_min =      species["chi min"].get<Real       >() ;
+      const auto chi_max =      species["chi max"].get<Real       >() ;
       const auto neutral = trim(species["neutral"].get<std::string>());
 
       // Make sure that the neutral is in the list of species. 
       if(m_neutralSpeciesMap.find(neutral) == m_neutralSpeciesMap.end()) {
-	this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'bourdon' but '" + neutral + "' is not in the list of neutral species");
+	this->throwParserError(baseError + " -- got 'bourdon' but '" + neutral + "' is not in the list of neutral species");
       }
 
       // Get the molar fraction for the specified species. 
@@ -575,7 +595,7 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
       };
     }
     else{
-      this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'kappa ' is neither 'constant', 'helmholtz', 'stochastic_A'");
+      this->throwParserError(baseError + " -- logic bust");
     }
 
     // Initialize the species.
@@ -592,7 +612,7 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
 }
 
 void CdrPlasmaJSON::initializeSigma() {
-  CH_TIME("CdrPlasmaJSON::initializeSigma");
+  CH_TIME("CdrPlasmaJSON::initializeSigma()");
   if(m_verbose){
     pout() << "CdrPlasmaJSON::initializeSigma()" << endl;
   }
@@ -632,7 +652,6 @@ void CdrPlasmaJSON::parseAlpha(){
   }
 
   const std::string lookup = alpha["lookup"].get<std::string>();
-  
 
   // If we made it here we're good.
   if(lookup == "table E/N"){
@@ -653,7 +672,9 @@ void CdrPlasmaJSON::parseAlpha(){
     const int numPoints = alpha["num points"].get<int>();
 
     const Real minEN = alpha["min E/N"].get<Real>();
-    const Real maxEN = alpha["max E/N"].get<Real>();	
+    const Real maxEN = alpha["max E/N"].get<Real>();
+
+    if(!(this->doesFileExist(filename))) this->throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");
 
     // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
@@ -684,9 +705,9 @@ void CdrPlasmaJSON::parseAlpha(){
 }
 
 void CdrPlasmaJSON::parseEta(){
-  CH_TIME("CdrPlasmaJSON::parseEta");
+  CH_TIME("CdrPlasmaJSON::parseEta()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::parseEta" << endl;
+    pout() << "CdrPlasmaJSON::parseEta()" << endl;
   }
 
   const std::string baseError = "CdrPlasmaJSON::parseEta";
@@ -724,7 +745,9 @@ void CdrPlasmaJSON::parseEta(){
     const int numPoints = eta["num points"].get<int>();
 
     const Real minEN = eta["min E/N"].get<Real>();
-    const Real maxEN = eta["max E/N"].get<Real>();	
+    const Real maxEN = eta["max E/N"].get<Real>();
+
+    if(!(this->doesFileExist(filename))) this->throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");    
 
     // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
@@ -747,12 +770,11 @@ void CdrPlasmaJSON::parseEta(){
     this->throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
   }
 
-
-  // Check if we should plot alpha.
+  // Check if we should plot eta.
   m_plotEta = false;
   if(eta.contains("plot")){
     m_plotEta = eta["plot"].get<bool>();
-  }  
+  }
 }
 
 void CdrPlasmaJSON::parseMobilities() {
@@ -953,6 +975,7 @@ void CdrPlasmaJSON::parseTemperatures() {
     pout() << "CdrPlasmaJSON::parseTemperatures" << endl;
   }
 
+  // Go through each species and check if the temperature was specified. 
   for (const auto& species : m_cdrSpeciesJSON){
     const std::string name = trim(species["name"].get<std::string>());
     const int         idx  = m_cdrSpeciesMap.at(name);
@@ -965,14 +988,15 @@ void CdrPlasmaJSON::parseTemperatures() {
     else{
       const json& S = species["temperature"];
 
-      // We MUST have a lookup field in order to determine how we compute the temperature for a species. 
-      if(!(S.contains("lookup"))) this->throwParserError("CdrPlasmaJSON::parseTemperatures -- temperature specified but field 'lookup' is missing");
+      const std::string baseError = "CdrPlasmaJSON::parseTemperatures -- temperature for species '" + name + "' ";      
 
+      // We MUST have a lookup field in order to determine how we compute the temperature for a species. 
+      if(!(S.contains("lookup"))) this->throwParserError(baseError + "was specified but field 'lookup' is missing");
 
       // Figure out the lookup method. 
       const std::string lookup = trim(S["lookup"].get<std::string>());
       if(lookup == "constant"){
-	if(!(S.contains("value"))) this->throwParserError("CdrPlasmaJSON::parseTemperatures -- 'constant' specified but field 'value' is missing");
+	if(!(S.contains("value"))) this->throwParserError(baseError + "was specified as 'constant' but field 'value' is missing");
 
 	const Real value = S["value"].get<Real>();
 
@@ -981,13 +1005,13 @@ void CdrPlasmaJSON::parseTemperatures() {
 	m_temperatureConstants.emplace(idx, [value] (const RealVect a_psition) -> Real {return value;});
       }
       else if (lookup == "table E/N"){
-	if(!(S.contains("file"      ))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'file' was not."      );
-	if(!(S.contains("header"    ))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'header' was not."    );
-	if(!(S.contains("E/N"       ))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'E/N' was not."       );
-	if(!(S.contains("eV"        ))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'eV' was not"         );
-	if(!(S.contains("min E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'min E/N' was not."   );
-	if(!(S.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'max E/N' was not."   );
-	if(!(S.contains("num points"))) this->throwParserError("CdrPlasmaJSON::parseTemperatures - tabulated diffusion was specified but field 'num points' was not.");
+	if(!(S.contains("file"      ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'file' is missing"      );
+	if(!(S.contains("header"    ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'header' is missing"    );
+	if(!(S.contains("E/N"       ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'E/N' is missing"       );
+	if(!(S.contains("eV"        ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'eV' is missing"        );
+	if(!(S.contains("min E/N"   ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'min E/N' is missing"   );
+	if(!(S.contains("max E/N"   ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'max E/N' is missing"   );
+	if(!(S.contains("num points"))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'num points' is missing");
 
 	const std::string filename  = trim(S["file"  ].get<std::string>());
 	const std::string startRead = trim(S["header"].get<std::string>());
@@ -998,7 +1022,10 @@ void CdrPlasmaJSON::parseTemperatures() {
 	const int numPoints = S["num points"].get<int>();
 
 	const Real minEN = S["min E/N"].get<Real>();
-	const Real maxEN = S["max E/N"].get<Real>();	
+	const Real maxEN = S["max E/N"].get<Real>();
+
+	// Issue an error if the file does not exist at all!
+	if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "was specified as 'table E/N' but got file = '" + filename + "' was not found");
 
 	// Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
 	// the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
@@ -1007,7 +1034,7 @@ void CdrPlasmaJSON::parseTemperatures() {
 
 	// If the table is empty then it's an error.
 	if(temperatureTable.getNumEntries() == 0){
-	  this->throwParserError("Temperature table '" + startRead + "' in file '" + filename + "'is empty. This is probably an error");	  
+	  this->throwParserError(baseError + " but temperature table '" + startRead + "' in file '" + filename + "'is empty. This is probably an error");	  
 	}		
 
 	// Format the table
@@ -1022,7 +1049,7 @@ void CdrPlasmaJSON::parseTemperatures() {
 	m_temperatureTablesEN.emplace(std::make_pair(idx, temperatureTable      ));	
       }
       else{
-	this->throwParserError("CdrPlasmaJSON::parseTemperatures -- I do not know the field '" + lookup + "'. Supported are 'constant' and 'table E/N'");
+	this->throwParserError(baseError + " -- logic bust");
       }
     }
   }
@@ -1031,7 +1058,7 @@ void CdrPlasmaJSON::parseTemperatures() {
 void CdrPlasmaJSON::parsePlasmaReactions() {
   CH_TIME("CdrPlasmaJSON::parsePlasmaReactions");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::parsePlasmaReactions - file is = " << m_jsonFile << endl;
+    pout() << "CdrPlasmaJSON::parsePlasmaReactions" << endl;
   }
 
   for (const auto& R : m_json["plasma reactions"]){
@@ -1092,9 +1119,9 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
 std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > CdrPlasmaJSON::parsePlasmaReactionWildcards(const std::vector<std::string>& a_reactants,
 														       const std::vector<std::string>& a_products,
 														       const json& a_R){
-  CH_TIME("CdrPlasmaJSON::parsePlasmaReactionWildcards");
+  CH_TIME("CdrPlasmaJSON::parsePlasmaReactionWildcards()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::parsePlasmaReactionWildcards" << endl;
+    pout() << "CdrPlasmaJSON::parsePlasmaReactionWildcards()" << endl;
   }
 
   // This is what we return. A horrific creature.
@@ -1154,21 +1181,23 @@ std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > CdrPl
 void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
 					   const std::vector<std::string>& a_products,
 					   const std::string               a_reaction) const {
-  CH_TIME("CdrPlasmaJSON::sanctifyPlasmaReaction");
+  CH_TIME("CdrPlasmaJSON::sanctifyPlasmaReaction()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::sanctifyPlasmaReaction" << m_jsonFile << endl;
+    pout() << "CdrPlasmaJSON::sanctifyPlasmaReaction()" << m_jsonFile << endl;
   }
+
+  const std::string baseError = "CdrPlasmaJSON::sanctifyPlasmaReaction "; 
 
   // All reactants must be in the list of neutral species or in the list of plasma species
   for (const auto& r : a_reactants){
     if(!isPlasmaSpecies(r) && !isNeutralSpecies(r))
-      this->throwParserError("CdrPlasmaJSON::sanctifyPlasmaReaction -- I do not know reacting species '" + r + "' for reaction '" + a_reaction + "'");
+      this->throwParserError(baseError + "but I do not know reacting species '" + r + "' for reaction '" + a_reaction + "'");
   }
 
   // All products should be in the list of plasma or photon species. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
   for (const auto& p : a_products){
     if(!isPlasmaSpecies(p) && !isPhotonSpecies(p) && !isNeutralSpecies(p)){
-      this->throwParserError("CdrPlasmaJSON::parsePlasmaReactions -- I do not know product species '" + p + "' for reaction '" + a_reaction + "'.");
+      this->throwParserError(baseError + "but I do not know product species '" + p + "' for reaction '" + a_reaction + "'.");
     }
   }
 
@@ -1190,18 +1219,18 @@ void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_rea
   }
 }
 
-
-
 void CdrPlasmaJSON::getPlasmaReactionProducts(std::list<int>&                 a_plasmaReactants,
 					      std::list<int>&                 a_neutralReactants,
 					      std::list<int>&                 a_plasmaProducts,
 					      std::list<int>&                 a_photonProducts,
 					      const std::vector<std::string>& a_reactants,
 					      const std::vector<std::string>& a_products) const {
-  CH_TIME("CdrPlasmaJSON::getPlasmaReactionProducts");
+  CH_TIME("CdrPlasmaJSON::getPlasmaReactionProducts()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::getPlasmaReactionProducts" << endl;
+    pout() << "CdrPlasmaJSON::getPlasmaReactionProducts()" << endl;
   }
+
+  const std::string baseError = "CdrPlasmaJSON::getPlasmaReactionProducts ";
 
   a_plasmaReactants. clear();
   a_neutralReactants.clear();
@@ -1222,7 +1251,7 @@ void CdrPlasmaJSON::getPlasmaReactionProducts(std::list<int>&                 a_
       a_neutralReactants.emplace_back(m_neutralSpeciesMap.at(r));      
     }
     else {
-      this->throwParserError("CdrPlasmaJSON::getPlasmaReactionProducts - logic bust 1");
+      this->throwParserError(baseError + "-- logic bust 1");
     }
   }
 
@@ -1242,7 +1271,7 @@ void CdrPlasmaJSON::getPlasmaReactionProducts(std::list<int>&                 a_
       // do nothing
     }
     else{
-      this->throwParserError("CdrPlasmaJSON::getPlasmaReactionProducts - logic bust 2");
+      this->throwParserError(baseError + "-- logic bust 2");      
     }
   }
 }
@@ -1290,11 +1319,11 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
     m_plasmaReactionEtaV.  emplace(a_reactionIndex, m_cdrSpeciesMap.at(species));
     m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::EtaV         );
   }  
-  else if(lookup == "function T1T2_A"){
-    if(!(a_R.contains("T1"))) this->throwParserError(baseError + "and got 'function T1T2_A' but field 'T1' was not found");
-    if(!(a_R.contains("T2"))) this->throwParserError(baseError + "and got 'function T1T2_A' but field 'T2' was not found");
-    if(!(a_R.contains("c1"))) this->throwParserError(baseError + "and got 'function T1T2_A' but field 'c1' was not found");
-    if(!(a_R.contains("c2"))) this->throwParserError(baseError + "and got 'function T1T2_A' but field 'c2' was not found");    
+  else if(lookup == "function T1T2 A"){
+    if(!(a_R.contains("T1"))) this->throwParserError(baseError + "and got 'function T1T2 A' but field 'T1' was not found");
+    if(!(a_R.contains("T2"))) this->throwParserError(baseError + "and got 'function T1T2 A' but field 'T2' was not found");
+    if(!(a_R.contains("c1"))) this->throwParserError(baseError + "and got 'function T1T2 A' but field 'c1' was not found");
+    if(!(a_R.contains("c2"))) this->throwParserError(baseError + "and got 'function T1T2 A' but field 'c2' was not found");    
 
     const std::string speciesT1 = trim(a_R["T1"].get<std::string>());
     const std::string speciesT2 = trim(a_R["T2"].get<std::string>());
@@ -1306,8 +1335,8 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
     const bool isNeutralT2 = this->isNeutralSpecies(speciesT2);      
 
     // Make sure that the specified species exist. 
-    if(!isPlasmaT1 && !isNeutralT1) this->throwParserError(baseError + "and got function 'function T1T2_A' but do not know species '" + speciesT1 + "'");
-    if(!isPlasmaT2 && !isNeutralT2) this->throwParserError(baseError + "and got function 'function T1T2_A' but do not know species '" + speciesT2 + "'");    
+    if(!isPlasmaT1 && !isNeutralT1) this->throwParserError(baseError + "and got function 'function T1T2 A' but do not know species '" + speciesT1 + "'");
+    if(!isPlasmaT2 && !isNeutralT2) this->throwParserError(baseError + "and got function 'function T1T2 A' but do not know species '" + speciesT2 + "'");    
 
     // This syntax may look weird, but we need to know precisely which temperatures are involved in the reaction. In general the reaction rate
     // is just a function k = f(T1, T2) but T1 and T2 could be the temperatures for either a plasma or a neutral species. So, the plasmaReactionFunctionsT1T2 map
@@ -1347,7 +1376,9 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
     const int numPoints = a_R["num points"].get<int>();
 
     const Real minEN = a_R["min E/N"].get<Real>();
-    const Real maxEN = a_R["max E/N"].get<Real>();	
+    const Real maxEN = a_R["max E/N"].get<Real>();
+
+    if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "and got 'table E/N' but file '" + filename + "' does not exist");
 
     // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
@@ -1374,9 +1405,9 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
 }
 
 void CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R) {
-  CH_TIME("CdrPlasmaJSON::parsePlasmaReactionScaling");
+  CH_TIME("CdrPlasmaJSON::parsePlasmaReactionScaling()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::parsePlasmaReactionScaling" << endl;
+    pout() << "CdrPlasmaJSON::parsePlasmaReactionScaling()" << endl;
   }
 
   // TLDR: This routine tries to figure out how we should scale reactions. In general, reactions are scaled parametrically by a function f = f(E,x)
@@ -1436,11 +1467,11 @@ void CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_
     const json& photoi = a_R["photoionization"];
 	
     // These fields are required.
-    if(!(photoi.contains("kr"  )))       this->throwParserError(baseError + "got 'photoionization but field 'kr' is missing"        );
-    if(!(photoi.contains("kp"  )))       this->throwParserError(baseError + "got 'photoionization but field 'kp' is missing"        );
-    if(!(photoi.contains("kq/N")))       this->throwParserError(baseError + "got 'photoionization but field 'kq/N' is missing"      );
-    if(!(photoi.contains("photoi eff"))) this->throwParserError(baseError + "got 'photoionization but field 'photoi eff' is missing");
-    if(!(photoi.contains("excite eff"))) this->throwParserError(baseError + "got 'photoionization but field 'excite eff' is missing");
+    if(!(photoi.contains("kr"  )))       this->throwParserError(baseError + "got 'photoionization' but field 'kr' is missing"        );
+    if(!(photoi.contains("kp"  )))       this->throwParserError(baseError + "got 'photoionization' but field 'kp' is missing"        );
+    if(!(photoi.contains("kq/N")))       this->throwParserError(baseError + "got 'photoionization' but field 'kq/N' is missing"      );
+    if(!(photoi.contains("photoi eff"))) this->throwParserError(baseError + "got 'photoionization' but field 'photoi eff' is missing");
+    if(!(photoi.contains("excite eff"))) this->throwParserError(baseError + "got 'photoionization' but field 'excite eff' is missing");
 	
     kr        = photoi["kr"        ].get<Real>();
     kp        = photoi["kp"        ].get<Real>();
@@ -1608,9 +1639,9 @@ void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reac
 }
 
 void CdrPlasmaJSON::parsePhotoReactions(){
-  CH_TIME("CdrPlasmaJSON::parsePhotoReactions");
+  CH_TIME("CdrPlasmaJSON::parsePhotoReactions()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::parsePhotoReactions file is = " << m_jsonFile << endl;
+    pout() << "CdrPlasmaJSON::parsePhotoReactions()" << endl;
   }
 
   for (const auto& R : m_json["photo reactions"]){
@@ -1689,9 +1720,9 @@ void CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const j
   if(a_R.contains("helmholtz")){
     const json& helm = a_R["helmholtz"];
 
-    if(!(helm.contains("A")))       this->throwParserError(baseError + " and got Helmholtz but field 'A' is missing"      );
-    if(!(helm.contains("lambda")))  this->throwParserError(baseError + " and got Helmholtz but field 'lambda' is missing" );
-    if(!(helm.contains("species"))) this->throwParserError(baseError + " and got Helmholtz but field 'neutral' is missing");
+    if(!(helm.contains("A")))       this->throwParserError(baseError + " and got 'helmholtz' kappa but field 'A' is missing"      );
+    if(!(helm.contains("lambda")))  this->throwParserError(baseError + " and got 'helmholtz' kappa but field 'lambda' is missing" );
+    if(!(helm.contains("species"))) this->throwParserError(baseError + " and got 'helmholtz' kappa but field 'neutral' is missing");
 
     const auto A       = helm["A"      ].get<Real       >();
     const auto lambda  = helm["lambda" ].get<Real       >();
@@ -1700,7 +1731,7 @@ void CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const j
     // Get the specified species and it's molar fraction. 
     // Make sure that it's a neutral species.
     if(!(this->isNeutralSpecies(neutral))) {
-      this->throwParserError(baseError + " and got Helmholtz but species '" + neutral + "' is not a neutral species");
+      this->throwParserError(baseError + " and got 'helmholtz' kappa but species '" + neutral + "' is not a neutral species");
     }
 
     // Make the Helmholtz factor
@@ -1737,10 +1768,12 @@ void CdrPlasmaJSON::getPhotoReactionProducts(std::list<int>&                 a_p
 					     std::list<int>&                 a_neutralProducts,
 					     const std::vector<std::string>& a_reactants,
 					     const std::vector<std::string>& a_products) const {
-  CH_TIME("CdrPlasmaJSON::getPhotoReactionProducts");
+  CH_TIME("CdrPlasmaJSON::getPhotoReactionProducts()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::getPhotoReactionProducts" << endl;
+    pout() << "CdrPlasmaJSON::getPhotoReactionProducts()" << endl;
   }
+
+  const std::string baseError = "CdrPlasmaJSON::getPhotoReactionProducts ";
 
   a_plasmaReactants. clear();
   a_neutralReactants.clear();
@@ -1766,7 +1799,7 @@ void CdrPlasmaJSON::getPhotoReactionProducts(std::list<int>&                 a_p
       a_photonReactants.emplace_back(m_rteSpeciesMap.at(r));      
     }    
     else {
-      this->throwParserError("CdrPlasmaJSON::getPhotoReactionProducts - logic bust 1");
+      this->throwParserError(baseError + "- logic bust 1");
     }
   }
 
@@ -1785,7 +1818,7 @@ void CdrPlasmaJSON::getPhotoReactionProducts(std::list<int>&                 a_p
       a_neutralProducts.emplace_back(m_neutralSpeciesMap.at(p));      
     }
     else {
-      this->throwParserError("CdrPlasmaJSON::getPhotoReactionProducts - logic bust 1");
+      this->throwParserError(baseError + "- logic bust 1");      
     }
   }
 }
