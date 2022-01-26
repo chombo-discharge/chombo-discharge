@@ -874,6 +874,13 @@ namespace Physics {
 	@param[in] a_name Rte species name
       */
       bool isPhotonSpecies(const std::string& a_name) const;
+
+      /*!
+	@brief Check if file exists
+	@param[in] a_filename File name
+      */
+      bool doesFileExist(const std::string a_filename) const;
+
     };
   }
 }
