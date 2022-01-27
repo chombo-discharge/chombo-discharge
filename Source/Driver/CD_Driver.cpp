@@ -2136,6 +2136,11 @@ void Driver::writePlotFile(const std::string a_filename){
     }
   }
 
+  // Update ghost cells
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    output_ptr[lvl]->exchange();
+  }
+
   // Write internal data
   plotVariableNames.append(this->getPlotVariableNames());
   this->writePlotData(output, icomp);

@@ -1237,6 +1237,26 @@ void AmrMesh::averageDown(EBAMRCellData& a_data, const std::string a_realm, cons
   a_data[a_lvl]->exchange();
 }
 
+void AmrMesh::averageDown(LevelData<EBCellFAB>&       a_coarData,
+			  const LevelData<EBCellFAB>& a_fineData,
+			  const int                   a_lvl,
+			  const std::string           a_realm,
+			  const phase::which_phase    a_phase) const {
+  CH_TIME("AmrMesh::averageDown(LD<EBCellFAB>, LD<EBCellFAB>, int, string, phase)");
+  if(m_verbosity > 3){
+    pout() << "AmrMesh::averageDown(LD<EBCellFAB>, LD<EBCellFAB>, int, string, phase)" << endl;
+  }
+
+  if(!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::averageDown(LD<EBCellFAB>, LD<EBCellFAB>, int, string, phase) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[a_lvl];
+
+  aveOp.average(a_coarData, a_fineData, a_coarData.interval());  
+}
+
 void AmrMesh::averageDown(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const {
   CH_TIME("AmrMesh::averageDown(EBAMRFluxData, string, phase::which_phase");
   if(m_verbosity > 3){
