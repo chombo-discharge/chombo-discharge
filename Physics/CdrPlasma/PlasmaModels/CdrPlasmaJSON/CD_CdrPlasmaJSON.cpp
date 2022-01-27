@@ -73,6 +73,7 @@ void CdrPlasmaJSON::parseOptions() {
   pp.get("verbose",          m_verbose );
   pp.get("chemistry_file",   m_jsonFile);
   pp.get("discrete_photons", m_discretePhotons);
+  pp.get("skip_reactions",   m_skipReactions);
 }
 
 void CdrPlasmaJSON::parseJSON() {
@@ -461,6 +462,8 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
       };
     }
 
+    initFunc = this->parsePlasmaSpeciesInitialData(species);
+
     // Print out a message if we're verbose.
     if(m_verbose){
       pout() << "CdrPlasmaJSON::initializePlasmaSpecies: instantiating species" << "\n"
@@ -482,6 +485,183 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     m_cdrSpecies.    push_back(RefCountedPtr<CdrSpecies> (new CdrSpeciesJSON(name, Z, diffusive, mobile, initFunc)));
     m_cdrSpeciesJSON.push_back(species);
   }
+}
+
+CdrPlasmaJSON::InitialDataFunction CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const {
+  CH_TIME("CdrPlasmaJSON::parsePlasmaSpeciesInitialData()");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parsePlasmaSpeciesInitialData()" << endl;
+  }
+
+  const std::string species   = a_json["name"].get<std::string>();
+  const std::string baseError = "CdrPlasmaJSON::parsePlasmaSpeciesInitialData for species '" + species + "' ";
+
+  // This is the returned data function. 
+  InitialDataFunction initFunc = [](const RealVect a_position, const Real a_time) {
+    return 0.0;
+  };
+
+  // JSON object for the initial data field.
+  json initData;
+  if(a_json.contains("initial data")){
+    initData = a_json["initial data"];
+
+    bool addUniformData   = false;
+    bool addGauss2        = false;
+    bool addGauss4        = false;
+    bool addHeightProfile = false;
+
+    // Uniform density
+    Real uniformDensity = 0.0;
+  
+    // Gaussian seeds
+    std::vector<FunctionX> gauss2Functions;
+    std::vector<FunctionX> gauss4Functions;
+
+    // Pointer to height profile table
+    LookupTable<2> heightProfile;
+
+    // Set the uniform density
+    if(initData.contains("uniform")){
+      uniformDensity = initData["uniform"].get<Real>();
+    }
+
+    // Add Gaussian seeds
+    if(initData.contains("gauss2")) {
+      const json& gauss2Array = initData["gauss2"];
+
+      for (const auto& gauss2 : gauss2Array){
+	
+	// These fields are required
+	if(!(gauss2.contains("radius"   ))) this->throwParserError(baseError + "and found 'gauss2' array in initial data but 'radius' was not specified"   );
+	if(!(gauss2.contains("amplitude"))) this->throwParserError(baseError + "and found 'gauss2' array in initial data but 'amplitude' was not specified");
+	if(!(gauss2.contains("position" ))) this->throwParserError(baseError + "and found 'gauss2' array in initial data but 'position' was not specified" );
+
+	// Get the parameters
+	const Real     radius    = gauss2["radius"   ].get<Real>();
+	const Real     amplitude = gauss2["amplitude"].get<Real>();	  	
+	const RealVect center    = RealVect(D_DECL(gauss2["position"][0].get<Real>(),
+						   gauss2["position"][1].get<Real>(),
+						   gauss2["position"][2].get<Real>()));
+
+
+	// Add a Gaussian seed function
+	const Real radius2 = 2*radius*radius;
+	auto gaussianFunction = [radius2, amplitude, center](const RealVect a_position) -> Real {
+	  const RealVect delta = center - a_position;	  
+
+	  return amplitude * exp(-delta.dotProduct(delta)/radius2);
+	};
+      
+	gauss2Functions.emplace_back(gaussianFunction);
+      }
+    }
+
+    // Add super-Gaussian seeds
+    if(initData.contains("gauss4")) {
+      const json& gauss4Array = initData["gauss4"];
+
+      for (const auto& gauss4 : gauss4Array){
+	
+	// These fields are required
+	if(!(gauss4.contains("radius"   ))) this->throwParserError(baseError + "and found 'gauss4' array in initial data but 'radius' was not specified"   );
+	if(!(gauss4.contains("amplitude"))) this->throwParserError(baseError + "and found 'gauss4' array in initial data but 'amplitude' was not specified");
+	if(!(gauss4.contains("position" ))) this->throwParserError(baseError + "and found 'gauss4' array in initial data but 'position' was not specified" );
+
+	// Get the parameters
+	const Real     radius    = gauss4["radius"   ].get<Real>();
+	const Real     amplitude = gauss4["amplitude"].get<Real>();	  	
+	const RealVect center    = RealVect(D_DECL(gauss4["position"][0].get<Real>(),
+						   gauss4["position"][1].get<Real>(),
+						   gauss4["position"][2].get<Real>()));
+
+
+	// Add a Gaussian seed function
+	const Real radius4 = 2*std::pow(radius, 4);
+	auto gaussianFunction = [radius4, amplitude, center](const RealVect a_position) -> Real {
+	  const RealVect delta  = center - a_position;
+	  const Real     delta2 = delta.dotProduct(delta);
+
+	  return amplitude * exp(-delta2*delta2/(radius4));
+	};
+      
+	gauss4Functions.emplace_back(gaussianFunction);
+      }
+    }
+
+    if(initData.contains("height profile")){
+      const json& heightProfileJSON = initData["height profile"];
+
+      // These fields are required
+      if(!(heightProfileJSON.contains("file"      ))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'file' was not specified"      );
+      if(!(heightProfileJSON.contains("height"    ))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'height' was not specified"    );
+      if(!(heightProfileJSON.contains("density"   ))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'density' was not specified"   );
+      if(!(heightProfileJSON.contains("height min"))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'height min' was not specified");
+      if(!(heightProfileJSON.contains("height max"))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'height max' was not specified");
+      if(!(heightProfileJSON.contains("num points"))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'num points' was not specified");
+
+      // Get the file name
+      const auto filename  = trim(heightProfileJSON["file"].get<std::string>());
+
+      const auto heightColumn  = heightProfileJSON["height"    ].get<int>();
+      const auto densityColumn = heightProfileJSON["density"   ].get<int>();
+      const auto minHeight     = heightProfileJSON["height min"].get<int>();
+      const auto maxHeight     = heightProfileJSON["height max"].get<int>();
+      const auto numPoints     = heightProfileJSON["num points"].get<int>();
+
+      // Fetch a scaling factor if it exists.
+      Real scaleX = 1.0;
+      Real scaleY = 1.0;
+      
+      if(heightProfileJSON.contains("scale x")){
+	scaleX = heightProfileJSON["scale x"].get<Real>();
+      }
+      if(heightProfileJSON.contains("scale y")){
+	scaleY = heightProfileJSON["scale y"].get<Real>();
+      }      
+
+      // Throw a warning if the input file does not exist. 
+      if(!(this->doesFileExist(filename))) this->throwParserError(baseError + " and found 'height profile' in initial data but file = '" + filename + "' was not found");
+
+      // Parse input file into our nifty little LookupTable. 
+      heightProfile = DataParser::simpleFileReadASCII(filename, heightColumn, densityColumn);
+
+      // Sort the table along the first column. This is the height above ground.
+      heightProfile.setRange(minHeight, maxHeight, 0);      
+
+      // Scale the table by the desired factors. 
+      heightProfile.scale<0>(scaleX);
+      heightProfile.scale<1>(scaleY);
+
+      // Set range and make the table uniform so we can use fast lookup.
+      heightProfile.sort(0);      
+      heightProfile.makeUniform(numPoints);
+    }
+
+    // Set the friggin function.
+    initFunc = [uniformDensity, gauss2Functions, gauss4Functions, heightProfile] (const RealVect a_position, const Real a_time) {
+      Real retVal = uniformDensity;
+
+      // Add contribution from Gaussian seeds
+      for (const auto& f : gauss2Functions) {
+	retVal += f(a_position);
+      }
+
+      // Add contribution from super-Gaussian seeds
+      for (const auto& f : gauss4Functions) {
+	retVal += f(a_position);
+      }
+
+      // Add contribution from height profile.
+      if(heightProfile.getNumEntries() > 0){
+	retVal += heightProfile.getEntry<1>(a_position[SpaceDim-1]);
+      }
+      
+      return retVal;
+    };
+  }
+
+  return initFunc;
 }
 
 void CdrPlasmaJSON::initializePhotonSpecies() {
@@ -850,12 +1030,12 @@ void CdrPlasmaJSON::parseMobilities() {
 	m_mobilityLookup.  emplace(std::make_pair(idx, LookupMethod::TableEN));
 	m_mobilityTablesEN.emplace(std::make_pair(idx, mobilityTable         ));
       }		
-      else if (lookup == "functionEN_A"){
+      else if (lookup == "functionEN A"){
 	FunctionEN func;
 	
-	if(!(mobilityJSON.contains("c1"))) this->throwParserError(baseError + " and got 'functionEN_A' for the mobility but field 'c1' was not specified");
-	if(!(mobilityJSON.contains("c2"))) this->throwParserError(baseError + " and got 'functionEN_A' for the mobility but field 'c2' was not specified");
-	if(!(mobilityJSON.contains("c3"))) this->throwParserError(baseError + " and got 'functionEN_A' for the mobility but field 'c3' was not specified");
+	if(!(mobilityJSON.contains("c1"))) this->throwParserError(baseError + " and got 'functionEN A' for the mobility but field 'c1' was not specified");
+	if(!(mobilityJSON.contains("c2"))) this->throwParserError(baseError + " and got 'functionEN A' for the mobility but field 'c2' was not specified");
+	if(!(mobilityJSON.contains("c3"))) this->throwParserError(baseError + " and got 'functionEN A' for the mobility but field 'c3' was not specified");
 
 	const Real A = mobilityJSON["c1"].get<Real>();
 	const Real B = mobilityJSON["c2"].get<Real>();
@@ -946,12 +1126,12 @@ void CdrPlasmaJSON::parseDiffusion() {
 	m_diffusionLookup.  emplace(std::make_pair(idx, LookupMethod::TableEN));
 	m_diffusionTablesEN.emplace(std::make_pair(idx, diffusionTable         ));
       }
-      else if (lookup == "functionEN_A"){
+      else if (lookup == "functionEN A"){
 	FunctionEN func;
 	
-	if(!(diffusionJSON.contains("c1"))) this->throwParserError(baseError + " and got 'functionEN_A' for the diffusion but field 'c1' was not specified");
-	if(!(diffusionJSON.contains("c2"))) this->throwParserError(baseError + " and got 'functionEN_A' for the diffusion but field 'c2' was not specified");
-	if(!(diffusionJSON.contains("c3"))) this->throwParserError(baseError + " and got 'functionEN_A' for the diffusion but field 'c3' was not specified");
+	if(!(diffusionJSON.contains("c1"))) this->throwParserError(baseError + " and got 'functionEN A' for the diffusion but field 'c1' was not specified");
+	if(!(diffusionJSON.contains("c2"))) this->throwParserError(baseError + " and got 'functionEN A' for the diffusion but field 'c2' was not specified");
+	if(!(diffusionJSON.contains("c3"))) this->throwParserError(baseError + " and got 'functionEN A' for the diffusion but field 'c3' was not specified");
 
 	const Real A = diffusionJSON["c1"].get<Real>();
 	const Real B = diffusionJSON["c2"].get<Real>();
@@ -1905,7 +2085,8 @@ Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensiti
 
   // Plot the gas data. 
   if(m_plotGas){
-    ret.push_back(m_gasPressure   (a_pos));
+    //    ret.push_back(m_gasPressure   (a_pos));
+    ret.push_back(cdrMobilities[0]);
     ret.push_back(m_gasTemperature(a_pos));
     ret.push_back(m_gasDensity    (a_pos));
   }
@@ -2326,93 +2507,97 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     S = 0.0;
   }
 
-  // Plasma reactions loop
-  for (int i = 0; i < m_plasmaReactions.size(); i++) {
+  // Hook for turning off all reactions. 
+  if(!m_skipReactions){
 
-    // Reaction and species involved in the reaction. The lambda above does *not* multiply by neutral species densities. Since rates
-    // can be parsed in so many different ways, the rules for the various rates are put in the switch statement below.
-    const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
+    // Plasma reactions loop
+    for (int i = 0; i < m_plasmaReactions.size(); i++) {
 
-    const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
-    const std::list<int>& neutralReactants = reaction.getNeutralReactants();
-    const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
-    const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();
+      // Reaction and species involved in the reaction. The lambda above does *not* multiply by neutral species densities. Since rates
+      // can be parsed in so many different ways, the rules for the various rates are put in the switch statement below.
+      const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
 
-    // Compute the rate. This returns a volumetric rate in units of #/m^(-3) (or #/m^-2 for Cartesian 2D).
-    const Real k = this->computePlasmaReactionRate(i,
-						   cdrDensities,
-						   cdrMobilities,
-						   cdrDiffusionCoefficients,
-						   cdrTemperatures,
-						   cdrGradients,
-						   a_pos,
-						   a_E,
-						   E,
-						   Etd,
-						   N,
-						   alpha,
-						   eta,
-						   a_time);    
+      const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
+      const std::list<int>& neutralReactants = reaction.getNeutralReactants();
+      const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
+      const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();
 
-    // Remove consumption on the left-hand side.
-    for (const auto& r : plasmaReactants){
-      cdrSources[r] -= k;
-    }
+      // Compute the rate. This returns a volumetric rate in units of #/m^(-3) (or #/m^-2 for Cartesian 2D).
+      const Real k = this->computePlasmaReactionRate(i,
+						     cdrDensities,
+						     cdrMobilities,
+						     cdrDiffusionCoefficients,
+						     cdrTemperatures,
+						     cdrGradients,
+						     a_pos,
+						     a_E,
+						     E,
+						     Etd,
+						     N,
+						     alpha,
+						     eta,
+						     a_time);    
 
-    // Add mass on the right-hand side.
-    for (const auto& p : plasmaProducts){
-      cdrSources[p] += k;
-    }
-
-    for (const auto& p : photonProducts){
-      rteSources[p] += k;
-    }    
-  } // End of plasma reactions. 
-
-  // Photo-reactions loop.
-  for (int i = 0; i < m_photoReactions.size(); i++){
-    Real k = 0.0;
-
-    const CdrPlasmaPhotoReactionJSON& reaction = m_photoReactions[i];
-
-    // Get the photon and plasma products for the specified reaction. 
-    const std::list<int>& photonReactants = reaction.getPhotonReactants();
-    const std::list<int>& plasmaProducts  = reaction.getPlasmaProducts ();    
-
-
-    // Compute a rate. Note that if we use Helmholtz reconstruction this is a bit different. 
-    if(m_photoReactionUseHelmholtz.at(i)){
-      k = m_photoReactionEfficiencies.at(i)(E, a_pos);
-    }
-    else{
-      // This is the "regular" code where Psi is the number of ionizing photons. In this case the Psi is what appears in the source terms,
-      // but the API says that we need to compute the rate, so we put rate = Psi/dt
-      
-      k = m_photoReactionEfficiencies.at(i)(E, a_pos)/a_dt;
-
-      // Hook for ensuring correct scaling in 2D. When we run in Cartesian 2D the photons are not points, but lines. We've deposited the particles (lines)
-      // on the mesh but what we really want is the volumetric density. So we need to scale. 
-      if(m_discretePhotons && SpaceDim == 2){
-	k *= 1./a_dx;
+      // Remove consumption on the left-hand side.
+      for (const auto& r : plasmaReactants){
+	cdrSources[r] -= k;
       }
-    }
 
-    // Fire the reaction. 
-    for (const auto& y : photonReactants){
-      k *= rteDensities[y];
-    }
+      // Add mass on the right-hand side.
+      for (const auto& p : plasmaProducts){
+	cdrSources[p] += k;
+      }
 
-    for (const auto& p : plasmaProducts){
-      cdrSources[p] += k;
-    }
-  } // End of photo-reactions. 
+      for (const auto& p : photonProducts){
+	rteSources[p] += k;
+      }    
+    } // End of plasma reactions. 
 
-  // If using stochastic photons -- then we need to run Poisson sampling of the photons.
-  if(m_discretePhotons){
-    for (auto& S : rteSources){
-      const auto poissonSample = Random::getPoisson<unsigned long long>(S * vol * a_dt);
+    // Photo-reactions loop.
+    for (int i = 0; i < m_photoReactions.size(); i++){
+      Real k = 0.0;
+
+      const CdrPlasmaPhotoReactionJSON& reaction = m_photoReactions[i];
+
+      // Get the photon and plasma products for the specified reaction. 
+      const std::list<int>& photonReactants = reaction.getPhotonReactants();
+      const std::list<int>& plasmaProducts  = reaction.getPlasmaProducts ();    
+
+
+      // Compute a rate. Note that if we use Helmholtz reconstruction this is a bit different. 
+      if(m_photoReactionUseHelmholtz.at(i)){
+	k = m_photoReactionEfficiencies.at(i)(E, a_pos);
+      }
+      else{
+	// This is the "regular" code where Psi is the number of ionizing photons. In this case the Psi is what appears in the source terms,
+	// but the API says that we need to compute the rate, so we put rate = Psi/dt
       
-      S = Real(poissonSample);
+	k = m_photoReactionEfficiencies.at(i)(E, a_pos)/a_dt;
+
+	// Hook for ensuring correct scaling in 2D. When we run in Cartesian 2D the photons are not points, but lines. We've deposited the particles (lines)
+	// on the mesh but what we really want is the volumetric density. So we need to scale. 
+	if(m_discretePhotons && SpaceDim == 2){
+	  k *= 1./a_dx;
+	}
+      }
+
+      // Fire the reaction. 
+      for (const auto& y : photonReactants){
+	k *= rteDensities[y];
+      }
+
+      for (const auto& p : plasmaProducts){
+	cdrSources[p] += k;
+      }
+    } // End of photo-reactions. 
+
+    // If using stochastic photons -- then we need to run Poisson sampling of the photons.
+    if(m_discretePhotons){
+      for (auto& S : rteSources){
+	const auto poissonSample = Random::getPoisson<unsigned long long>(S * vol * a_dt);
+      
+	S = Real(poissonSample);
+      }
     }
   }
 

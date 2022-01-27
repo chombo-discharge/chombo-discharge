@@ -42,6 +42,13 @@ namespace Physics {
     public:
 
       /*!
+	@brief Function alias for initial data function. 
+	@param[in] a_position Physical coordinates
+	@param[in] a_time     Time
+      */
+      using InitialDataFunction = std::function<Real(const RealVect a_position, const Real a_time)>;
+
+      /*!
 	@brief Function for encapsulating operations f = f(E,N). 
 	field in Townsend units
 	@param[in] a_E Electric field in SI units.
@@ -310,6 +317,11 @@ namespace Physics {
 	@brief Using discrete photons or not.
       */
       bool m_discretePhotons;
+
+      /*!
+	@brief A flag for skipping reactions completely. 
+      */
+      bool m_skipReactions;
 
       /*!
 	@brief JSON definition. This is populated when calling parseJSON.
@@ -649,6 +661,12 @@ namespace Physics {
 	@brief Parse plasma reactions
       */
       virtual void parsePlasmaReactions();
+
+      /*!
+	@brief Generate an initial data function for a given plasma species
+	@param[in] a_json JSON field, usually (always?) describing one of the objects in the 'plasma species' field.
+      */
+      virtual InitialDataFunction parsePlasmaSpeciesInitialData(const json& a_json) const;
 
       /*!
 	@brief Make a reaction set into a superset. This parses wildcards '@' in reaction string.
