@@ -2567,9 +2567,24 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
 						   const Vector<Real>   a_cdrGradients,
 						   const Vector<Real>   a_rteFluxes,
 						   const Vector<Real>   a_extrapCdrFluxes) const {
-  //  MayDay::Warning("CdrPlasmaJSON::computeCdrDomainFluxes -- don't know how to do this yet");
+  Vector<Real> fluxes(m_numCdrSpecies, 0.0);  
+
+  const int sign        = (a_side == Side::Lo) ? 1 : -1;
+  const RealVect normal = sign * BASISREALV(a_dir);
+    
+  const bool isCathode = a_E.dotProduct(normal) < 0;
+  const bool isAnode   = a_E.dotProduct(normal) > 0;
+
+  // Set outflow boundary conditions on charged species. 
+  for (int i = 0; i < m_numCdrSpecies; i++){
+    const int Z = m_cdrSpecies[i]->getChargeNumber();
+
+    // Outflow on of negative species on anodes. 
+    if(Z < 0 && isAnode  ) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+    if(Z > 0 && isCathode) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);      
+  }
   
-  return Vector<Real>(m_numCdrSpecies, 0.0);      
+  return fluxes;    
 }
 
 Real CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect a_pos) const {
