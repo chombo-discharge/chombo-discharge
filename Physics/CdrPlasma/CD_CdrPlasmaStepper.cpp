@@ -4382,6 +4382,28 @@ void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
       }
     }
 
+    // I want to coarsen and interpolate this data because it might otherwise contain bogus values.
+    for (int comp = 0; comp < numVars; comp++){
+      
+      const Interval interv(a_icomp + comp, a_icomp + comp);
+
+      // Coarsen loop
+      for (int lvl = m_amr->getFinestLevel(); lvl > 0; lvl--){
+
+	LevelData<EBCellFAB> fineAlias;
+	LevelData<EBCellFAB> coarAlias;
+
+	aliasLevelData(fineAlias, &(*a_output[lvl  ]), interv);
+	aliasLevelData(coarAlias, &(*a_output[lvl-1]), interv);
+
+	fineAlias.exchange();	
+
+	m_amr->averageDown(coarAlias, fineAlias, lvl, m_realm, phase::gas);
+
+	coarAlias.exchange();
+      }
+    }
+
     // Need to let the outside world know that we've written to some of the variables. 
     a_icomp += numVars;
   }
