@@ -24,7 +24,12 @@
 template <int N>
 inline
 LookupTable<N>::LookupTable(){
+
+  // Default settings
   m_state     = std::make_tuple(-1, false, false);
+
+  m_strategyLo = OutOfRangeStrategy::Constant;
+  m_strategyHi = OutOfRangeStrategy::Constant;  
 }
 
 template <int N>
@@ -36,9 +41,12 @@ LookupTable<N>::~LookupTable(){
 template <int N>
 inline
 LookupTable<N>::LookupTable(const LookupTable& a_table){
-  m_data      = a_table.m_data;
-  m_state     = a_table.m_state;
-  m_delta     = a_table.m_delta;  
+  m_data       = a_table.m_data;
+  m_state      = a_table.m_state;
+  m_delta      = a_table.m_delta;
+
+  m_strategyLo = a_table.m_strategyLo;
+  m_strategyHi = a_table.m_strategyHi;
 }
 
 template <int N>
@@ -126,6 +134,18 @@ void LookupTable<N>::setRange(const Real a_min, const Real a_max, const int a_co
 
 template <int N>
 inline
+void LookupTable<N>::setOutOfRangeStrategyLow(const OutOfRangeStrategy a_strategy) {
+  m_strategyLo = a_strategy;
+}
+
+template <int N>
+inline
+void LookupTable<N>::setOutOfRangeStrategyHigh(const OutOfRangeStrategy a_strategy) {
+  m_strategyHi = a_strategy;
+}
+
+template <int N>
+inline
 void LookupTable<N>::dumpTable(std::ostream& a_outputStream) const{
   for (const auto& r : m_data){
     for (const auto& c : r){
@@ -139,7 +159,11 @@ template <int N>
 template <int K>
 inline
 Real LookupTable<N>::getEntry(const Real a_x) const {
-  Real ret;
+  
+  // TLDR: This is the main routine for fetching a column of data. This will switch between constant/linear interpolation outside of
+  //       the stored data range. 
+  
+  Real ret = 0.0;
   
   if(m_data.size() == 1){
     ret = m_data.front()[K];
@@ -147,12 +171,64 @@ Real LookupTable<N>::getEntry(const Real a_x) const {
   else{
     const int whichColumn = std::get<Column>(m_state);
 
+    // This is the LOWER index among the two indices we will interpolate between. 
     const int idx = std::floor( (a_x - m_data.front()[whichColumn])/m_delta);
-    if (idx <= 0){
-      ret = m_data.front()[K];
+
+    // See how we should enforce fetching the data when retrieving data outside the stored data range. 
+    if (idx < 0){ // On the low side.
+
+      // Figure out how we should interpolate on the low side. 
+      switch (m_strategyLo){
+      case OutOfRangeStrategy::Constant:
+	{
+	  ret = m_data.front()[K];
+
+	  break;
+	}
+      case OutOfRangeStrategy::Linear:
+	{
+	  const int size = m_data.size();
+	  
+	  const Real slope = (m_data[1][K] - m_data[0][K])/m_delta;
+	  const Real dist  = m_data.front()[whichColumn] - a_x;
+
+	  ret = m_data.front()[K] - dist * slope;
+
+	  break;
+	}
+      default:
+	MayDay::Error("LookupTable<N>::getEntry -- logic bust when fetching out-of-range endpoint on the low side");
+
+	break;
+      }
     }
     else if (idx >= m_data.size()-1){
-      ret = m_data.back()[K];
+
+      // Figure out how to get the data outside the range. 
+      switch (m_strategyHi){
+      case OutOfRangeStrategy::Constant:
+	{
+	  ret = m_data.back()[K];
+
+	  break;
+	}
+      case OutOfRangeStrategy::Linear:
+	{
+	  const int size = m_data.size();
+	  
+	  const Real slope = (m_data[size-1][K] - m_data[size-2][K])/m_delta;
+	  const Real dist  = a_x - m_data.back()[whichColumn];
+
+	  ret = m_data.back()[K] + dist * slope;
+
+	  break;	  
+	}
+      default:
+	MayDay::Error("LookupTable<N>::getEntry -- logic bust when fetching out-of-range endpoint on the high side");
+
+	break;
+      }
+
     }
     else{
       const Real t = (a_x - m_data[idx][whichColumn])/m_delta;

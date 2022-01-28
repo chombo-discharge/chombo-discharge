@@ -23,6 +23,17 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
+  @brief Strategy for obtaining data when requesting data that is out of range. 
+  We can use either constant (i.e. virtually padding the data with the first/last entry) or 
+  with linear interpolation (i.e. virtually padding the data with a slope connecting the first
+  two or last two entries in the table). 
+*/
+enum class OutOfRangeStrategy {
+  Constant,
+  Linear
+};
+
+/*!
   @brief Class for looking up and interpolation (x,y) data. 
 */
 template<int N>
@@ -42,7 +53,7 @@ public:
   /*!
     @brief Destructor (does nothing). 
   */
-  ~LookupTable();
+  virtual ~LookupTable();
 
   /*!
     @brief Clear all data
@@ -86,6 +97,22 @@ public:
   void setRange(const Real a_min, const Real a_max, const int a_whichColumn = 0);
 
   /*!
+    @brief Set the strategy when retrieving data that is out of range on the low side
+    @details Set the input parameter a_strategy to Constant if you want to virtually pad the data with the last endpoint or Linear if you want linear interpolation.
+    @param[in] a_strategy Range strategy. 
+  */
+  inline
+  void setOutOfRangeStrategyLow(const OutOfRangeStrategy a_strategy);
+
+  /*!
+    @brief Set the strategy when retrieving data that is out of range on the high side
+    @details Set the input parameter a_strategy to Constant if you want to virtually pad the data with the last endpoint or Linear if you want linear interpolation.
+    @param[in] a_strategy Range strategy. 
+  */
+  inline
+  void setOutOfRangeStrategyHigh(const OutOfRangeStrategy a_strategy);  
+
+  /*!
     @brief Sort the table. Useful if the input data was not already sorted. 
     @param[in] a_whichColumn Sort along this column. 
     @details On output, the data in the table is sorted -- smallest x goes first. 
@@ -94,7 +121,8 @@ public:
   void sort(const int a_whichColumn = 0);
 
   /*!
-    @brief Add entry
+    @brief Add entry. 
+    @param[in] x Entry to add. You can add an entire array through the variadic template. 
   */
   template<typename... Ts>  
   inline
@@ -109,10 +137,19 @@ public:
   /*!
     @brief Get entry
     @note When calling this, make sure the data is sorted AND uniform. For performance reasons this is not checked when calling this routine. 
+    @param[in] a_x Interpolation point
   */
   template <int K>
   inline
   Real getEntry(const Real a_x) const;
+
+  /*!
+    @brief Get data.
+    @note When calling this, make sure the data is sorted AND uniform. For performance reasons this is not checked when calling this routine. 
+    @param[in] a_x Interpolation point
+  */
+  inline
+  std::array<Real, N> getData(const Real a_x) const;  
 
   /*!
     @brief Get size of the table.
@@ -139,6 +176,16 @@ protected:
     Sorted  = 1,
     Uniform = 2,
   };
+
+  /*!
+    @brief End point stategy on the low end of the data 
+  */
+  OutOfRangeStrategy m_strategyLo;
+  
+  /*!
+    @brief End point stategy on the high end of the data 
+  */
+  OutOfRangeStrategy m_strategyHi;
   
   /*!
     @brief Table state. First entry is the column along which we sort and make the table uniform. The second entry is 
