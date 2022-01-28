@@ -2085,8 +2085,7 @@ Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensiti
 
   // Plot the gas data. 
   if(m_plotGas){
-    //    ret.push_back(m_gasPressure   (a_pos));
-    ret.push_back(cdrMobilities[0]);
+    ret.push_back(m_gasPressure   (a_pos));
     ret.push_back(m_gasTemperature(a_pos));
     ret.push_back(m_gasDensity    (a_pos));
   }
@@ -2368,8 +2367,13 @@ Real CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_rea
       // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that. 
       const LookupTable<2>& reactionTable = m_plasmaReactionTablesEN.at(a_reactionIndex);
 
-      k  = reactionTable.getEntry<1>(a_Etd); // Get rate/N
-      k *= a_N;                              // Get rate
+      // Get the reaction rate. 
+      k  = reactionTable.getEntry<1>(a_Etd);
+
+      // Multiply by neutral species densities. 
+      for (const auto& n : neutralReactants){
+	k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }
 	  
       break;
     }
@@ -2404,7 +2408,7 @@ Real CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_rea
     k *= fcorr;
   }
 
-  // Compute total consumption. After this, k -> total consumption. 
+  // Finally compute the total consumption. After this, k -> total consumption. 
   for (const auto& r : plasmaReactants){
     k *= a_cdrDensities[r];
   }
