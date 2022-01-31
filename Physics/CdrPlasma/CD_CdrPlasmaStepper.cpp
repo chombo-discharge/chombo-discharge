@@ -188,7 +188,7 @@ void CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity
 	DataOps::multiply      (speciesConductivity, phi           ); // Compute f = mu*n
 
 	// Add to total conductivity. 
-	DataOps::incr(a_cellConductivity, speciesConductivity, 1.0*std::abs(Z));
+	DataOps::incr(a_cellConductivity, speciesConductivity, 1.0);
       }
     }
   }
