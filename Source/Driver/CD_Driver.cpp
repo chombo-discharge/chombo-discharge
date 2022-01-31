@@ -779,7 +779,11 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	  // Regrid all levels, but restrict the addition to one at a time. As always, new grids on level l are generated through tags
 	  // on levels (l-1);
 	  const int lmin = 0;                           // Coarsest grid level that can change. Base level can also change (due to run-time parameters or load balancing). 
-	  const int lmax = m_amr->getFinestLevel() + 1; // This means that if we refine, we can only add one level at a time. 
+	  const int lmax = m_amr->getFinestLevel() + 1; // This means that if we refine, we can only add one level at a time.
+
+	  if(m_writeRegridFiles){
+	    this->writePreRegridFile();
+	  }	  
 
 	  this->regrid(lmin, lmax, false);
 
@@ -789,7 +793,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	    this->gridReport();
 	  }
 	  if(m_writeRegridFiles){
-	    this->writeRegridFile();
+	    this->writePostRegridFile();
 	  }
 	}
       }
@@ -2008,16 +2012,31 @@ void Driver::writePlotFile(){
   this->writePlotFile(fname);
 }
 
-void Driver::writeRegridFile(){
-  CH_TIME("Driver::writeRegridFile()");
+void Driver::writePreRegridFile(){
+  CH_TIME("Driver::writePreRegridFile()");
   if(m_verbosity > 3){
-    pout() << "Driver::writeRegridFile()" << endl;
+    pout() << "Driver::writePreRegridFile()" << endl;
   }
 
   // Filename
   char file_char[1000];
   const std::string prefix = m_outputDirectory + "/regrid/" + m_outputFileNames;
-  sprintf(file_char, "%s.regrid%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
+  sprintf(file_char, "%s.preRegrid%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
+  string fname(file_char);
+
+  this->writePlotFile(fname);
+}
+
+void Driver::writePostRegridFile(){
+  CH_TIME("Driver::writePostRegridFile()");
+  if(m_verbosity > 3){
+    pout() << "Driver::writePostRegridFile()" << endl;
+  }
+
+  // Filename
+  char file_char[1000];
+  const std::string prefix = m_outputDirectory + "/regrid/" + m_outputFileNames;
+  sprintf(file_char, "%s.postRegrid%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
   string fname(file_char);
 
   this->writePlotFile(fname);
