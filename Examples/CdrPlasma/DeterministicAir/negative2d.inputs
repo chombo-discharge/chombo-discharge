@@ -212,6 +212,7 @@ CdrPlasmaGodunovStepper.debug            = false     # Turn on debugging message
 CdrPlasmaJSON.verbose          = false
 CdrPlasmaJSON.chemistry_file   = SergeyBourdon3.json
 CdrPlasmaJSON.discrete_photons = false
+CdrPlasmaJSON.skip_reactions   = false
 
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options

@@ -265,7 +265,7 @@
 	 "min E/N": 5,
 	 "max E/N": 2000,
 	 "num points": 1000,
-	 "quenching pressure": 0.03947,
+	 "quenching pressure": 4000,
 	 "scale": 0.06
      }
  ],

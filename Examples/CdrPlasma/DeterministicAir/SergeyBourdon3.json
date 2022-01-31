@@ -145,7 +145,8 @@
      "alpha/N": 1,	  
      "min E/N": 10,
      "max E/N": 2000,
-     "res E/N": 10
+     "res E/N": 10,
+     "plot": true
  },
  "eta": {
      "lookup": "table E/N",
@@ -162,7 +163,6 @@
      {
 	 "reaction": "e + O2 -> e + e + O2+",
 	 "lookup": "table E/N",
-	 "rate": 0.1,
 	 "description": "O2 ionization",
 	 "file" : "transport_data.txt",
 	 "header": "# O2 ionization (E/N, rate/N)",
@@ -173,7 +173,7 @@
 	 "res E/N": 10,
 	 "scale": 1.0,	 
 	 "soloviev" : {
-	     "correction": true,
+	     "correction": false,
 	     "species": "e"
 	 }
      },
@@ -189,7 +189,7 @@
 	 "res E/N": 10,
 	 "scale": 1.0,	 	 
 	 "soloviev" : {
-	     "correction": true,
+	     "correction": false,
 	     "species": "e"
 	 }
      },
@@ -288,10 +288,10 @@
 	 "min E/N": 10,
 	 "max E/N": 2000,
 	 "res E/N": 1000,
-	 "quenching pressure": 0.03947,
+	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": true,
+	     "correction": false,
 	     "species": "e"
 	 }	 
      },
@@ -305,10 +305,10 @@
 	 "min E/N": 10,
 	 "max E/N": 2000,
 	 "res E/N": 10,
-	 "quenching pressure": 0.03947,
+	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": true,
+	     "correction": false,
 	     "species": "e"
 	 }	 
      },
@@ -322,10 +322,10 @@
 	 "min E/N": 10,
 	 "max E/N": 2000,
 	 "res E/N": 10,
-	 "quenching pressure": 0.03947,
+	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": true,
+	     "correction": false,
 	     "species": "e"
 	 }	 
      }
