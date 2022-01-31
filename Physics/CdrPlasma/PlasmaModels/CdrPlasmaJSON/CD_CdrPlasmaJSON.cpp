@@ -2084,9 +2084,9 @@ Vector<std::string> CdrPlasmaJSON::getPlotVariableNames() const {
   Vector<std::string> ret(0);
 
   if(m_plotGas){
-    ret.push_back("gas pressure"   );
-    ret.push_back("gas temperature");
-    ret.push_back("gas density"    );
+    ret.push_back("gas pressure"      );
+    ret.push_back("gas temperature"   );
+    ret.push_back("gas number density");
   }
 
   for (const auto& m : m_plasmaReactionPlot){
@@ -2350,9 +2350,6 @@ Real CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_rea
 					      const Real&                  a_alpha,
 					      const Real&                  a_eta,					     
 					      const Real&                  a_time) const {
-
-
-
   const LookupMethod&          method   = m_plasmaReactionLookup.at(a_reactionIndex);
   const CdrPlasmaReactionJSON& reaction = m_plasmaReactions        [a_reactionIndex];
 
