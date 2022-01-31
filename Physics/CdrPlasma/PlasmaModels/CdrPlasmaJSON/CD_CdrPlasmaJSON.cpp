@@ -1442,7 +1442,7 @@ void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_rea
   }
 
   if(sumCharge != 0) {
-    this->throwParserError("CdrPlasmaJSON::sanctifyPlasmaReaction -- charge not conserved for reaction '" + a_reaction + "'.");
+    this->throwParserWarning("CdrPlasmaJSON::sanctifyPlasmaReaction -- charge not conserved for reaction '" + a_reaction + "'.");
   }
 }
 
