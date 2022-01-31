@@ -268,7 +268,7 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     if(!gasJSON.contains("molar mass" )) this->throwParserError(baseError + " and got 'table' gas law but field 'molar mass' is not specified" );
     if(!gasJSON.contains("min height" )) this->throwParserError(baseError + " and got 'table' gas law but field 'min height' is not specified" );
     if(!gasJSON.contains("max height" )) this->throwParserError(baseError + " and got 'table' gas law but field 'max height' is not specified" );
-    if(!gasJSON.contains("num points" )) this->throwParserError(baseError + " and got 'table' gas law but field 'num points' is not specified" );
+    if(!gasJSON.contains("res height" )) this->throwParserError(baseError + " and got 'table' gas law but field 'res height' is not specified" );
 
     // Get the file name
     const auto filename  = trim(gasJSON["file"].get<std::string>());
@@ -285,16 +285,24 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     // Get table format specifications.
     const auto minHeight = gasJSON["min height"].get<Real>();
     const auto maxHeight = gasJSON["max height"].get<Real>();
-    const auto numPoints = gasJSON["num points"].get<int >();
+    const auto resHeight = gasJSON["res height"].get<Real>();
 
+    // It's an error if max height < min height
+    if(maxHeight < minHeight) this->throwParserError(baseError + " and got tabulated gas law but can't have 'max height' < 'min height'");
+
+    // Throw an error if the file does not exist. 
     if(!(this->doesFileExist(filename))) this->throwParserError(baseError + " and got tabulated gas law but file = '" + filename + "' was not found");
 
+    // Let the data parser read the input. 
     LookupTable<2> temperatureTable = DataParser::simpleFileReadASCII(filename, height, T  );
     LookupTable<2> pressureTable    = DataParser::simpleFileReadASCII(filename, height, P  );
     LookupTable<2> densityTable     = DataParser::simpleFileReadASCII(filename, height, Rho);
 
+    // Compute the number of points in the table
+    const int numPoints = std::ceil((maxHeight - minHeight)/resHeight);
+
     // The input density was in kg/m^3 but we want the number density.
-    densityTable. scale<1>(Units::Na/M);
+    densityTable.scale<1>(Units::Na/M);
 
     // Make the tables uniform
     temperatureTable.setRange(minHeight, maxHeight, 0);
@@ -596,18 +604,19 @@ CdrPlasmaJSON::InitialDataFunction CdrPlasmaJSON::parsePlasmaSpeciesInitialData(
       if(!(heightProfileJSON.contains("file"      ))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'file' was not specified"      );
       if(!(heightProfileJSON.contains("height"    ))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'height' was not specified"    );
       if(!(heightProfileJSON.contains("density"   ))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'density' was not specified"   );
-      if(!(heightProfileJSON.contains("height min"))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'height min' was not specified");
-      if(!(heightProfileJSON.contains("height max"))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'height max' was not specified");
-      if(!(heightProfileJSON.contains("num points"))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'num points' was not specified");
+      if(!(heightProfileJSON.contains("min height"))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'min height' was not specified");
+      if(!(heightProfileJSON.contains("max height"))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'max height' was not specified");
+      if(!(heightProfileJSON.contains("res height"))) this->throwParserError(baseError + "and found 'height profile' in initial data but 'res height' was not specified");
 
       // Get the file name
       const auto filename  = trim(heightProfileJSON["file"].get<std::string>());
 
       const auto heightColumn  = heightProfileJSON["height"    ].get<int>();
       const auto densityColumn = heightProfileJSON["density"   ].get<int>();
-      const auto minHeight     = heightProfileJSON["height min"].get<int>();
-      const auto maxHeight     = heightProfileJSON["height max"].get<int>();
-      const auto numPoints     = heightProfileJSON["num points"].get<int>();
+      
+      const auto minHeight     = heightProfileJSON["min height"].get<Real>();
+      const auto maxHeight     = heightProfileJSON["max height"].get<Real>();
+      const auto resHeight     = heightProfileJSON["res height"].get<Real>();
 
       // Fetch a scaling factor if it exists.
       Real scaleX = 1.0;
@@ -618,10 +627,16 @@ CdrPlasmaJSON::InitialDataFunction CdrPlasmaJSON::parsePlasmaSpeciesInitialData(
       }
       if(heightProfileJSON.contains("scale y")){
 	scaleY = heightProfileJSON["scale y"].get<Real>();
-      }      
+      }
+
+      // Can't have max height < min height.
+      if(maxHeight < minHeight) this->throwParserError(baseError + " and found 'height profile' in initial data but can't have 'max height' < 'min height'");
 
       // Throw a warning if the input file does not exist. 
       if(!(this->doesFileExist(filename))) this->throwParserError(baseError + " and found 'height profile' in initial data but file = '" + filename + "' was not found");
+
+      // Compute the number of points for the table
+      const int numPoints = std::ceil((maxHeight-minHeight)/resHeight);
 
       // Parse input file into our nifty little LookupTable. 
       heightProfile = DataParser::simpleFileReadASCII(filename, heightColumn, densityColumn);
@@ -835,13 +850,13 @@ void CdrPlasmaJSON::parseAlpha(){
 
   // If we made it here we're good.
   if(lookup == "table E/N"){
-    if(!(alpha.contains("file"      ))) this->throwParserError(baseError + " and got 'table E/N' but field 'file' is missing"      );
-    if(!(alpha.contains("header"    ))) this->throwParserError(baseError + " and got 'table E/N' but field 'header' is missing"    );
-    if(!(alpha.contains("E/N"       ))) this->throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing"       );
-    if(!(alpha.contains("alpha/N"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'alpha/N' is missing"   );
-    if(!(alpha.contains("min E/N"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing"   );
-    if(!(alpha.contains("max E/N"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing"   );
-    if(!(alpha.contains("num points"))) this->throwParserError(baseError + " and got 'table E/N' but field 'num_points' is missing");
+    if(!(alpha.contains("file"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'file' is missing"   );
+    if(!(alpha.contains("header" ))) this->throwParserError(baseError + " and got 'table E/N' but field 'header' is missing" );
+    if(!(alpha.contains("E/N"    ))) this->throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing"    );
+    if(!(alpha.contains("alpha/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'alpha/N' is missing");
+    if(!(alpha.contains("min E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing");
+    if(!(alpha.contains("max E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing");
+    if(!(alpha.contains("res E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'res E/N' is missing");
 	
     const std::string filename  = trim(alpha["file"  ].get<std::string>());
     const std::string startRead = trim(alpha["header"].get<std::string>());
@@ -849,11 +864,15 @@ void CdrPlasmaJSON::parseAlpha(){
 
     const int xColumn   = alpha["E/N"       ].get<int>();
     const int yColumn   = alpha["alpha/N"   ].get<int>();
-    const int numPoints = alpha["num points"].get<int>();
 
     const Real minEN = alpha["min E/N"].get<Real>();
     const Real maxEN = alpha["max E/N"].get<Real>();
+    const Real resEN = alpha["res E/N"].get<Real>();
 
+    // I can't have maxEN < minEN. Throw an error.
+    if(maxEN < minEN) this->throwParserError(baseError + " and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+
+    // Throw an error if the file does not exist. 
     if(!(this->doesFileExist(filename))) this->throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");
 
     // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
@@ -864,7 +883,10 @@ void CdrPlasmaJSON::parseAlpha(){
     // If the table is empty then it's an error.
     if(m_alphaTableEN.getNumEntries() == 0){
       this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
-    }	
+    }
+
+    // Compute the number of points in the table. 
+    const int numPoints = std::ceil((maxEN-minEN)/resEN);
 
     // Format the table
     m_alphaTableEN.setRange(minEN, maxEN, 0);
@@ -908,13 +930,13 @@ void CdrPlasmaJSON::parseEta(){
 
   // If we made it here we're good.
   if(lookup == "table E/N"){
-    if(!(eta.contains("file"      ))) this->throwParserError(baseError + " and got 'table E/N' but field 'file' is missing"      );
-    if(!(eta.contains("header"    ))) this->throwParserError(baseError + " and got 'table E/N' but field 'header' is missing"    );
-    if(!(eta.contains("E/N"       ))) this->throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing"       );
-    if(!(eta.contains("eta/N"     ))) this->throwParserError(baseError + " and got 'table E/N' but field 'eta/N' is missing"     );
-    if(!(eta.contains("min E/N"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing"   );
-    if(!(eta.contains("max E/N"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing"   );
-    if(!(eta.contains("num points"))) this->throwParserError(baseError + " and got 'table E/N' but field 'num_points' is missing");
+    if(!(eta.contains("file"   ))) this->throwParserError(baseError + " and got 'table E/N' but field 'file' is missing"   );
+    if(!(eta.contains("header" ))) this->throwParserError(baseError + " and got 'table E/N' but field 'header' is missing" );
+    if(!(eta.contains("E/N"    ))) this->throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing"    );
+    if(!(eta.contains("eta/N"  ))) this->throwParserError(baseError + " and got 'table E/N' but field 'eta/N' is missing"  );
+    if(!(eta.contains("min E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing");
+    if(!(eta.contains("max E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing");
+    if(!(eta.contains("res E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'res E/N' is missing");
 	
     const std::string filename  = trim(eta["file"  ].get<std::string>());
     const std::string startRead = trim(eta["header"].get<std::string>());
@@ -922,11 +944,15 @@ void CdrPlasmaJSON::parseEta(){
 
     const int xColumn   = eta["E/N"       ].get<int>();
     const int yColumn   = eta["eta/N"     ].get<int>();
-    const int numPoints = eta["num points"].get<int>();
 
     const Real minEN = eta["min E/N"].get<Real>();
     const Real maxEN = eta["max E/N"].get<Real>();
+    const Real resEN = eta["res E/N"].get<Real>();
 
+    // Can't have maxEN < min EN
+    if(maxEN < minEN) this->throwParserError(baseError + " and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+
+    // Throw an error if the file does not exist. 
     if(!(this->doesFileExist(filename))) this->throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");    
 
     // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
@@ -937,7 +963,10 @@ void CdrPlasmaJSON::parseEta(){
     // If the table is empty then it's an error.
     if(m_etaTableEN.getNumEntries() == 0){
       this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
-    }	
+    }
+
+    // Compute the number of points in the table.
+    const int numPoints = std::ceil((maxEN-minEN)/resEN);
 
     // Format the table
     m_etaTableEN.setRange(minEN, maxEN, 0);
@@ -990,13 +1019,13 @@ void CdrPlasmaJSON::parseMobilities() {
 	m_mobilityConstants.emplace(std::make_pair(idx, value                 ));
       }
       else if(lookup == "table E/N"){
-	if(!(mobilityJSON.contains("file"      ))) this->throwParserError(baseError + "and got tabulated mobility but field 'file' was not specified"      );
-	if(!(mobilityJSON.contains("header"    ))) this->throwParserError(baseError + "and got tabulated mobility but field 'header' was not specified"    );
-	if(!(mobilityJSON.contains("E/N"       ))) this->throwParserError(baseError + "and got tabulated mobility but field 'E/N' was not specified"       );
-	if(!(mobilityJSON.contains("mu*N"      ))) this->throwParserError(baseError + "and got tabulated mobility but field 'mu*N' was not specified"      );
-	if(!(mobilityJSON.contains("min E/N"   ))) this->throwParserError(baseError + "and got tabulated mobility but field 'min E/N' was not specified"   );
-	if(!(mobilityJSON.contains("max E/N"   ))) this->throwParserError(baseError + "and got tabulated mobility but field 'max E/N' was not specified"   );
-	if(!(mobilityJSON.contains("num points"))) this->throwParserError(baseError + "and got tabulated mobility but field 'num points' was not specified");
+	if(!(mobilityJSON.contains("file"   ))) this->throwParserError(baseError + "and got tabulated mobility but field 'file' was not specified"   );
+	if(!(mobilityJSON.contains("header" ))) this->throwParserError(baseError + "and got tabulated mobility but field 'header' was not specified" );
+	if(!(mobilityJSON.contains("E/N"    ))) this->throwParserError(baseError + "and got tabulated mobility but field 'E/N' was not specified"    );
+	if(!(mobilityJSON.contains("mu*N"   ))) this->throwParserError(baseError + "and got tabulated mobility but field 'mu*N' was not specified"   );
+	if(!(mobilityJSON.contains("min E/N"))) this->throwParserError(baseError + "and got tabulated mobility but field 'min E/N' was not specified");
+	if(!(mobilityJSON.contains("max E/N"))) this->throwParserError(baseError + "and got tabulated mobility but field 'max E/N' was not specified");
+	if(!(mobilityJSON.contains("res E/N"))) this->throwParserError(baseError + "and got tabulated mobility but field 'res E/N' was not specified");
 	
 	const std::string filename  = trim(mobilityJSON["file"  ].get<std::string>());
 	const std::string startRead = trim(mobilityJSON["header"].get<std::string>());
@@ -1004,13 +1033,16 @@ void CdrPlasmaJSON::parseMobilities() {
 
 	const int xColumn   = mobilityJSON["E/N"       ].get<int>();
 	const int yColumn   = mobilityJSON["mu*N"      ].get<int>();
-	const int numPoints = mobilityJSON["num points"].get<int>();
 
 	const Real minEN = mobilityJSON["min E/N"].get<Real>();
 	const Real maxEN = mobilityJSON["max E/N"].get<Real>();
+	const Real resEN = mobilityJSON["res E/N"].get<Real>();	
+
+	// Can't have maxEN < minEN
+	if(maxEN < minEN) this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
 
 	// Issue an error if the file does not exist at all!
-	if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "and got file = '" + filename + "' but file was not found");	
+	if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "and got 'table E/N' with file = '" + filename + "' but file was not found");	
 
 	// Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
 	// the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
@@ -1020,7 +1052,10 @@ void CdrPlasmaJSON::parseMobilities() {
 	// If the table is empty then it's an error.
 	if(mobilityTable.getNumEntries() == 0){
 	  this->throwParserError(baseError + " and got tabulated mobility but mobility table '" + startRead + "' in file '" + filename + "'is empty");
-	}	
+	}
+
+	// COmpute the numer of points in the table
+	const int numPoints = std::ceil((maxEN - minEN)/resEN);
 
 	// Format the table
 	mobilityTable.setRange(minEN, maxEN, 0);
@@ -1086,13 +1121,13 @@ void CdrPlasmaJSON::parseDiffusion() {
 	m_diffusionConstants.emplace(std::make_pair(idx, value                 ));
       }
       else if(lookup == "table E/N"){
-	if(!(diffusionJSON.contains("file"      ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'file' was not specified"      );
-	if(!(diffusionJSON.contains("header"    ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'header' was not specified"    );
-	if(!(diffusionJSON.contains("E/N"       ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'E/N' was not specified"       );
-	if(!(diffusionJSON.contains("D*N"       ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'D*N' was not specified"      );
-	if(!(diffusionJSON.contains("min E/N"   ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'min E/N' was not specified"   );
-	if(!(diffusionJSON.contains("max E/N"   ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'max E/N' was not specified"   );
-	if(!(diffusionJSON.contains("num points"))) this->throwParserError(baseError + "and got tabulated diffusion but field 'num points' was not specified");	
+	if(!(diffusionJSON.contains("file"   ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'file' was not specified"      );
+	if(!(diffusionJSON.contains("header" ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'header' was not specified"    );
+	if(!(diffusionJSON.contains("E/N"    ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'E/N' was not specified"       );
+	if(!(diffusionJSON.contains("D*N"    ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'D*N' was not specified"      );
+	if(!(diffusionJSON.contains("min E/N"))) this->throwParserError(baseError + "and got tabulated diffusion but field 'min E/N' was not specified"   );
+	if(!(diffusionJSON.contains("max E/N"))) this->throwParserError(baseError + "and got tabulated diffusion but field 'max E/N' was not specified"   );
+	if(!(diffusionJSON.contains("res E/N"))) this->throwParserError(baseError + "and got tabulated diffusion but field 'res E/N' was not specified");	
 	
 	const std::string filename  = trim(diffusionJSON["file"  ].get<std::string>());
 	const std::string startRead = trim(diffusionJSON["header"].get<std::string>());
@@ -1100,13 +1135,16 @@ void CdrPlasmaJSON::parseDiffusion() {
 
 	const int  xColumn   = diffusionJSON["E/N"       ].get<int >();
 	const int  yColumn   = diffusionJSON["D*N"       ].get<int >();
-	const int  numPoints = diffusionJSON["num points"].get<int >();
 	
 	const Real minEN     = diffusionJSON["min E/N"   ].get<Real>();
 	const Real maxEN     = diffusionJSON["max E/N"   ].get<Real>();
+	const Real resEN     = diffusionJSON["res E/N"   ].get<Real>();
+
+	// Can't have maxEN < minEN
+	if(maxEN < minEN) this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
 
 	// Issue an error if the file does not exist at all!
-	if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "and got file = '" + filename + "' but file was not found");		
+	if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "and got 'table E/N' with file = '" + filename + "' but file was not found");		
 
 	// Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
 	// the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
@@ -1118,13 +1156,16 @@ void CdrPlasmaJSON::parseDiffusion() {
 	  this->throwParserError(baseError + " and got tabulated diffusion but diffusion table '" + startRead + "' in file '" + filename + "'is empty");	  
 	}
 
+	// Compute thne number of points in the table
+	const int numPoints = std::ceil((maxEN - minEN)/resEN);
+
 	// Format the table
 	diffusionTable.setRange(minEN, maxEN, 0);
 	diffusionTable.sort(0);
 	diffusionTable.makeUniform(numPoints);
 
 	m_diffusionLookup.  emplace(std::make_pair(idx, LookupMethod::TableEN));
-	m_diffusionTablesEN.emplace(std::make_pair(idx, diffusionTable         ));
+	m_diffusionTablesEN.emplace(std::make_pair(idx, diffusionTable       ));
       }
       else if (lookup == "functionEN A"){
 	FunctionEN func;
@@ -1185,13 +1226,13 @@ void CdrPlasmaJSON::parseTemperatures() {
 	m_temperatureConstants.emplace(idx, [value] (const RealVect a_psition) -> Real {return value;});
       }
       else if (lookup == "table E/N"){
-	if(!(S.contains("file"      ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'file' is missing"      );
-	if(!(S.contains("header"    ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'header' is missing"    );
-	if(!(S.contains("E/N"       ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'E/N' is missing"       );
-	if(!(S.contains("eV"        ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'eV' is missing"        );
-	if(!(S.contains("min E/N"   ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'min E/N' is missing"   );
-	if(!(S.contains("max E/N"   ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'max E/N' is missing"   );
-	if(!(S.contains("num points"))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'num points' is missing");
+	if(!(S.contains("file"   ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'file' is missing"   );
+	if(!(S.contains("header" ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'header' is missing" );
+	if(!(S.contains("E/N"    ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'E/N' is missing"    );
+	if(!(S.contains("eV"     ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'eV' is missing"     );
+	if(!(S.contains("min E/N"))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'min E/N' is missing");
+	if(!(S.contains("max E/N"))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'max E/N' is missing");
+	if(!(S.contains("res E/N"))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'res E/N' is missing");
 
 	const std::string filename  = trim(S["file"  ].get<std::string>());
 	const std::string startRead = trim(S["header"].get<std::string>());
@@ -1199,10 +1240,13 @@ void CdrPlasmaJSON::parseTemperatures() {
 
 	const int xColumn   = S["E/N"       ].get<int>();
 	const int yColumn   = S["eV"        ].get<int>();
-	const int numPoints = S["num points"].get<int>();
 
 	const Real minEN = S["min E/N"].get<Real>();
 	const Real maxEN = S["max E/N"].get<Real>();
+	const Real resEN = S["res E/N"].get<Real>();
+
+	// Can't have maxEN < minEN
+	if(maxEN < minEN) this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
 
 	// Issue an error if the file does not exist at all!
 	if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "was specified as 'table E/N' but got file = '" + filename + "' was not found");
@@ -1215,7 +1259,10 @@ void CdrPlasmaJSON::parseTemperatures() {
 	// If the table is empty then it's an error.
 	if(temperatureTable.getNumEntries() == 0){
 	  this->throwParserError(baseError + " but temperature table '" + startRead + "' in file '" + filename + "'is empty. This is probably an error");	  
-	}		
+	}
+
+	// Compute the number of points we'll need
+	const int numPoints = std::ceil((maxEN - minEN)/resEN);
 
 	// Format the table
 	temperatureTable.setRange(minEN, maxEN, 0);
@@ -1539,25 +1586,29 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
     m_plasmaReactionLookup.     emplace(a_reactionIndex, LookupMethod::FunctionTT);
   }
   else if (lookup == "table E/N"){
-    if(!(a_R.contains("file"      ))) this->throwParserError(baseError + "and got 'table E/N' but field 'file' was not found"      );
-    if(!(a_R.contains("header"    ))) this->throwParserError(baseError + "and got 'table E/N' but field 'header' was not found"    );
-    if(!(a_R.contains("E/N"       ))) this->throwParserError(baseError + "and got 'table E/N' but field 'E/N' was not found"       );
-    if(!(a_R.contains("rate/N"    ))) this->throwParserError(baseError + "and got 'table E/N' but field 'rate/N' was not found"    );
-    if(!(a_R.contains("min E/N"   ))) this->throwParserError(baseError + "and got 'table E/N' but field 'min E/N' was not found"   );
-    if(!(a_R.contains("max E/N"   ))) this->throwParserError(baseError + "and got 'table E/N' but field 'max E/N' was not found"   );
-    if(!(a_R.contains("num points"))) this->throwParserError(baseError + "and got 'table E/N' but field 'num points' was not found");
+    if(!(a_R.contains("file"   ))) this->throwParserError(baseError + "and got 'table E/N' but field 'file' was not found"   );
+    if(!(a_R.contains("header" ))) this->throwParserError(baseError + "and got 'table E/N' but field 'header' was not found" );
+    if(!(a_R.contains("E/N"    ))) this->throwParserError(baseError + "and got 'table E/N' but field 'E/N' was not found"    );
+    if(!(a_R.contains("rate"   ))) this->throwParserError(baseError + "and got 'table E/N' but field 'rate' was not found"   );
+    if(!(a_R.contains("min E/N"))) this->throwParserError(baseError + "and got 'table E/N' but field 'min E/N' was not found");
+    if(!(a_R.contains("max E/N"))) this->throwParserError(baseError + "and got 'table E/N' but field 'max E/N' was not found");
+    if(!(a_R.contains("res E/N"))) this->throwParserError(baseError + "and got 'table E/N' but field 'res E/N' was not found");
 
     const std::string filename  = trim(a_R["file"  ].get<std::string>());
     const std::string startRead = trim(a_R["header"].get<std::string>());
     const std::string stopRead  = "";
 
-    const int xColumn   = a_R["E/N"       ].get<int>();
-    const int yColumn   = a_R["rate/N"    ].get<int>();
-    const int numPoints = a_R["num points"].get<int>();
+    const int xColumn   = a_R["E/N" ].get<int>();
+    const int yColumn   = a_R["rate"].get<int>();
 
     const Real minEN = a_R["min E/N"].get<Real>();
     const Real maxEN = a_R["max E/N"].get<Real>();
+    const Real resEN = a_R["res E/N"].get<Real>();
 
+    // It's an error if max E/N < min E/N
+    if(maxEN < minEN) this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+
+    // Throw an error if the input file does not exist.
     if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "and got 'table E/N' but file '" + filename + "' does not exist");
 
     // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
@@ -1570,10 +1621,14 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
       this->throwParserError(baseError + "and got 'table E/N' but table is empty. This is probably an error");
     }
 
+    // Compute the number of grid points in the table
+    const int numPoints = std::ceil((maxEN - minEN)/resEN);
+
     // Format the table. 
     reactionTable.setRange(minEN, maxEN, 0);
     reactionTable.sort(0);
     reactionTable.makeUniform(numPoints);
+
 
     // Add the tabulated rate and identifier. 
     m_plasmaReactionLookup.  emplace(std::make_pair(a_reactionIndex, LookupMethod::TableEN));
@@ -2089,6 +2144,8 @@ Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensiti
     ret.push_back(m_gasTemperature(a_pos));
     ret.push_back(m_gasDensity    (a_pos));
   }
+
+  //  MayDay::Error("CdrPlasmaJSON::getPlotVariables -- need to start from here -- something fishy about the reactions");
 
   for (const auto& m : m_plasmaReactionPlot){
     if(m.second){
