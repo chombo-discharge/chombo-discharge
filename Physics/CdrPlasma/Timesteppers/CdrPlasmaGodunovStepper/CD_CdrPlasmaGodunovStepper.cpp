@@ -1012,6 +1012,7 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
       
       DataOps::incr(m_semiImplicitRho, phi, Z*Units::Qe);
 
+#if 0 // This code was unstable when doing the red-sprite case. I'm not sure why...
       // If the solver is diffusive we must increment by the diffusion term as well. 
       if(solver->isDiffusive()){
 	RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
@@ -1020,8 +1021,9 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
 
 	solver->computeDivD(divDgradPhi, phi, false, false);
 
-	//	DataOps::incr(m_semiImplicitRho, divDgradPhi, Z*a_dt*Units::Qe);
+	DataOps::incr(m_semiImplicitRho, divDgradPhi, Z*a_dt*Units::Qe);
       }
+#endif
     }
   }
   
