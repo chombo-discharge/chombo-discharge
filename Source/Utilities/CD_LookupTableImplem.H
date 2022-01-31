@@ -241,6 +241,109 @@ Real LookupTable<N>::getEntry(const Real a_x) const {
 
 template <int N>
 inline
+std::array<Real, N> LookupTable<N>::getData(const Real a_x) const {
+  
+  std::array<Real, N> ret;
+
+  if(m_data.size() == 1){
+    ret = m_data.front();
+  }
+  else{
+    const int whichColumn = std::get<Column>(m_state);
+
+    // This is the LOWER index among the two indices we will interpolate between. 
+    const int idx = std::floor( (a_x - m_data.front()[whichColumn])/m_delta);
+
+    // See how we should enforce fetching the data when retrieving data outside the stored data range. 
+    if (idx < 0){ // On the low side.
+
+      // Figure out how we should interpolate on the low side. 
+      switch (m_strategyLo){
+      case OutOfRangeStrategy::Constant:
+	{
+	  ret = m_data.front();
+
+	  break;
+	}
+      case OutOfRangeStrategy::Linear:
+	{
+	  ret = m_data.front();
+
+	  // Distance from first point in the table to the interpolation point. This
+	  // will be a positive number.  
+	  const Real dist  = m_data.front()[whichColumn] - a_x;	  
+
+	  // Interpolate each dependent and independent variable. 
+	  for (int i = 0; i < N; i++){
+
+	    // This is the slope for variable i.
+	    const Real slope = (m_data[1][i] - m_data[0][i])/m_delta;
+
+	    // Extrapolate beyond endpoint
+	    ret[i] -= dist * slope;
+	  }
+
+	  break;
+	}
+      default:
+	MayDay::Error("LookupTable<N>::getData -- logic bust when fetching out-of-range endpoint on the low side");
+
+	break;
+      }
+    }
+    else if (idx >= m_data.size()-1){
+
+      // Figure out how to get the data outside the range. 
+      switch (m_strategyHi){
+      case OutOfRangeStrategy::Constant:
+	{
+	  ret = m_data.back();
+
+	  break;
+	}
+      case OutOfRangeStrategy::Linear:
+	{
+	  const int size = m_data.size();
+
+	  ret = m_data.back();
+
+	  // This is the distance from the interpolation to the endpoint in the table. This will be a positive number. 
+	  const Real dist  = a_x - m_data.back()[whichColumn];
+
+	  // Interpolate each dependent and independent variable.
+	  for (int i = 0; i < N; i++){
+
+	    // This is the slope for variable i
+	    const Real slope = (m_data[size-1][i] - m_data[size-2][i])/m_delta;
+
+
+	    ret[i] +=dist * slope;
+	  }
+
+	  break;	  
+	}
+      default:
+	MayDay::Error("LookupTable<N>::getEntry -- logic bust when fetching out-of-range endpoint on the high side");
+
+	break;
+      }
+
+    }
+    else{
+      const Real t = (a_x - m_data[idx][whichColumn])/m_delta;
+
+      // Interpolate all variables.
+      for (int i = 0; i < N; i++){
+	ret[i] = m_data[idx][i] + t*(m_data[idx+1][i] - m_data[idx][i]);
+      }
+    }
+  }
+
+  return ret;
+}
+
+template <int N>
+inline
 std::array<Real, N> LookupTable<N>::directLookup(const Real a_x) const {
 
   std::array<Real, N> ret;

@@ -137,7 +137,7 @@ public:
   /*!
     @brief Get entry
     @note When calling this, make sure the data is sorted AND uniform. For performance reasons this is not checked when calling this routine. 
-    @param[in] a_x Interpolation point
+    @param[in] a_x Interpolation point (independent variable)
   */
   template <int K>
   inline
@@ -146,7 +146,7 @@ public:
   /*!
     @brief Get data.
     @note When calling this, make sure the data is sorted AND uniform. For performance reasons this is not checked when calling this routine. 
-    @param[in] a_x Interpolation point
+    @param[in] a_x Interpolation point (independent variable)
   */
   inline
   std::array<Real, N> getData(const Real a_x) const;  
