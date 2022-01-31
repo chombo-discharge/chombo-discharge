@@ -1020,7 +1020,7 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
 
 	solver->computeDivD(divDgradPhi, phi, false, false);
 
-	DataOps::incr(m_semiImplicitRho, divDgradPhi, Z*a_dt*Units::Qe);
+	//	DataOps::incr(m_semiImplicitRho, divDgradPhi, Z*a_dt*Units::Qe);
       }
     }
   }
