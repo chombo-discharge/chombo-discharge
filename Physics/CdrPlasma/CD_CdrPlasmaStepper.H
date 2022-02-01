@@ -785,8 +785,15 @@ namespace Physics {
       //////// CODE-WALK FROM HERE HERE AND DOWNWARDS /////
 
       /*!
-	@brief Compute cdr fluxes on domain faces
-	@note Everything that comes in here should have been computed on the domain faces
+	@brief Compute CDR fluxes on domain faces for usage in boundary conditions. This is the AMR version. 
+	@param[out] a_cdrFluxes           CDR domain bounadry fluxes for solvers.
+	@param[in]  a_extrapCdrFluxes     CDR fluxes extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrDensities  CDR densities extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrVelocities CDR velocities extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrGradients  CDR gradients extrapolated to the domain faces. 
+	@param[in]  a_extrapRteFluxes     RTE fluxes on the domain faces. 
+	@param[in]  a_electricField       Electric field on the domain faces. 
+	@param[in]  a_time                Time.
       */
       virtual void computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_cdrFluxes,
 					  const Vector<EBAMRIFData*>& a_extrapCdrFluxes,
@@ -798,7 +805,17 @@ namespace Physics {
 					  const Real&                 a_time);
 
       /*!
-	@brief Compute cdr fluxes on domain faces. Level version
+	@brief Compute CDR fluxes on domain faces for usage in boundary conditions. This is the level version. 
+	@details This will iterate over the patches on each level and compute the domain fluxes. 
+	@param[out] a_cdrFluxes           CDR domain bounadry fluxes for solvers.
+	@param[in]  a_extrapCdrFluxes     CDR fluxes extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrDensities  CDR densities extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrVelocities CDR velocities extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrGradients  CDR gradients extrapolated to the domain faces. 
+	@param[in]  a_extrapRteFluxes     RTE fluxes on the domain faces. 
+	@param[in]  a_electricField       Electric field on the domain faces. 
+	@param[in]  a_time                Time.
+	@param[in]  a_lvl                 Grid level
       */
       virtual void computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_cdrFluxes,
 					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrFluxes,
@@ -806,12 +823,12 @@ namespace Physics {
 					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrVelocities,
 					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrGradients,
 					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapRteFluxes,
-					  const LevelData<DomainFluxIFFAB>&          a_E,
+					  const LevelData<DomainFluxIFFAB>&          a_electricField,
 					  const Real&                                a_time,
 					  const int                                  a_lvl);
 
       /*!
-	@brief Compute the gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
+	@brief Compute gradients of various cell-centered quantities at the EB.  gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
 	@note This version computes the gradients from phi
       */
       virtual void computeGradientsAtEb(Vector<EBAMRIVData*>&         a_grad,

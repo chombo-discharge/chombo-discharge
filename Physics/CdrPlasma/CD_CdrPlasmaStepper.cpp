@@ -2373,131 +2373,164 @@ void CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&   
   }
 }
 
-
-
-void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_fluxes,
+void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_cdrFluxes,
 					      const Vector<EBAMRIFData*>& a_extrapCdrFluxes,
 					      const Vector<EBAMRIFData*>& a_extrapCdrDensities,
 					      const Vector<EBAMRIFData*>& a_extrapCdrVelocities,
 					      const Vector<EBAMRIFData*>& a_extrapCdrGradients,
 					      const Vector<EBAMRIFData*>& a_extrapRteFluxes,
-					      const EBAMRIFData&          a_E,
+					      const EBAMRIFData&          a_electricField,
 					      const Real&                 a_time){
-  CH_TIME("CdrPlasmaStepper::computeCdrDomainFluxes(level)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDomainFluxes(Vector<EBAMRIFData*>x6, EBAMRIFData, Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDomainFluxes(level)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDomainFluxes(Vector<EBAMRIFData*>x6, EBAMRIFData, Real)" << endl;
   }
 
+  // Number of CDR and RTE solvers that we have. 
   const int numCdrSpecies  = m_physics->getNumCdrSpecies();
   const int numRteSpecies  = m_physics->getNumRtSpecies();
-  const int finest_level = m_amr->getFinestLevel();
 
-  // Things that will be passed into physics
-  Vector<Real> extrapCdrFluxes(numCdrSpecies);
-  Vector<Real> extrapCdrDensities(numCdrSpecies);
-  Vector<Real> extrapCdrVelocities(numCdrSpecies);
-  Vector<Real> extrapCdrGradients(numCdrSpecies);
-  Vector<Real> extrapRteFluxes(numRteSpecies);
+  CH_assert(a_cdrFluxes.          size() == numCdrSpecies);
+  CH_assert(a_extrapCdrFluxes.    size() == numCdrSpecies);
+  CH_assert(a_extrapCdrVelocities.size() == numCdrSpecies);      
+  CH_assert(a_extrapCdrVelocities.size() == numCdrSpecies);
+  CH_assert(a_extrapCdrGradients. size() == numCdrSpecies);
+  CH_assert(a_extrapRteFluxes.    size() == numRteSpecies);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  // Level loop.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 
-    Vector<LevelData<DomainFluxIFFAB>* > fluxes(numCdrSpecies);
-    Vector<LevelData<DomainFluxIFFAB>* > extrapCdrFluxes(numCdrSpecies);
-    Vector<LevelData<DomainFluxIFFAB>* > extrapCdrDensities(numCdrSpecies);
-    Vector<LevelData<DomainFluxIFFAB>* > extrapCdrVelocities(numCdrSpecies);
-    Vector<LevelData<DomainFluxIFFAB>* > extrapCdrGradients(numCdrSpecies);
-    Vector<LevelData<DomainFluxIFFAB>* > extrapRteFluxes(numRteSpecies);
-    
-    for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    // Holders where we populate pointers to level-data.
+    Vector<LevelData<DomainFluxIFFAB>* > cdrFluxes          (numCdrSpecies, nullptr);
+    Vector<LevelData<DomainFluxIFFAB>* > extrapCdrFluxes    (numCdrSpecies, nullptr);
+    Vector<LevelData<DomainFluxIFFAB>* > extrapCdrDensities (numCdrSpecies, nullptr);
+    Vector<LevelData<DomainFluxIFFAB>* > extrapCdrVelocities(numCdrSpecies, nullptr);
+    Vector<LevelData<DomainFluxIFFAB>* > extrapCdrGradients (numCdrSpecies, nullptr);
+    Vector<LevelData<DomainFluxIFFAB>* > extrapRteFluxes    (numRteSpecies, nullptr);
+
+    // Populate the CDR species stuff. Note that if species are immobile, we can have
+    // that the velocity pointers exist but don't point to valid memory blocks (because the memory is not allocated). This
+    // is by design because we don't allocate memory for drift velocities if they are not used. 
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
-      fluxes[idx]                = (*a_fluxes[idx])[lvl];
-      extrapCdrFluxes[idx]     = (*a_extrapCdrFluxes[idx])[lvl];
-      extrapCdrDensities[idx]  = (*a_extrapCdrDensities[idx])[lvl];
+      
+      cdrFluxes          [idx] = (*a_cdrFluxes          [idx])[lvl];
+      extrapCdrFluxes    [idx] = (*a_extrapCdrFluxes    [idx])[lvl];
+      extrapCdrDensities [idx] = (*a_extrapCdrDensities [idx])[lvl];
       extrapCdrVelocities[idx] = (*a_extrapCdrVelocities[idx])[lvl];
-      extrapCdrGradients[idx]  = (*a_extrapCdrGradients[idx])[lvl];
+      extrapCdrGradients [idx] = (*a_extrapCdrGradients [idx])[lvl];
     }
 
-    for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    // Populated the RTE things. This means the fluxes on the domain faces. 
+    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
+      
       extrapRteFluxes[idx] = (*a_extrapRteFluxes[idx])[lvl];
     }
 
     // Call the level version
-    computeCdrDomainFluxes(fluxes, extrapCdrFluxes, extrapCdrDensities, extrapCdrVelocities,
-			   extrapCdrGradients, extrapRteFluxes, *a_E[lvl], a_time, lvl);
+    this->computeCdrDomainFluxes(cdrFluxes,
+				 extrapCdrFluxes,
+				 extrapCdrDensities,
+				 extrapCdrVelocities,
+				 extrapCdrGradients,
+				 extrapRteFluxes,
+				 *a_electricField[lvl],
+				 a_time,
+				 lvl);
     
   }
 }
 
-void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_fluxes,
+void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_cdrFluxes,
 					      const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrFluxes,
 					      const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrDensities,
 					      const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrVelocities,
 					      const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrGradients,
 					      const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapRteFluxes,
-					      const LevelData<DomainFluxIFFAB>&          a_E,
+					      const LevelData<DomainFluxIFFAB>&          a_electricField,
 					      const Real&                                a_time,
 					      const int                                  a_lvl){
-  CH_TIME("CdrPlasmaStepper::computeCdrDomainFluxes(level)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LD<DomainFluxIFFAB>*>x6, DomainFluxIFFAB, Real, int)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeCdrDomainFluxes(level)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LD<DomainFluxIFFAB>*>x6, DomainFluxIFFAB, Real, int)" << endl;
   }
 
+  constexpr int comp = 0;  
+
+  // Number of CDR and RTE solvers that we have. 
   const int numCdrSpecies  = m_physics->getNumCdrSpecies();
   const int numRteSpecies  = m_physics->getNumRtSpecies();
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->getFinestLevel();
 
-  // Things that will be passed into physics
-  Vector<Real> extrapCdrFluxes(numCdrSpecies);
-  Vector<Real> extrapCdrDensities(numCdrSpecies);
-  Vector<Real> extrapCdrVelocities(numCdrSpecies);
-  Vector<Real> extrapCdrGradients(numCdrSpecies);
-  Vector<Real> extrapRteFluxes(numRteSpecies);
+  CH_assert(a_cdrFluxes.          size() == numCdrSpecies);
+  CH_assert(a_extrapCdrFluxes.    size() == numCdrSpecies);
+  CH_assert(a_extrapCdrVelocities.size() == numCdrSpecies);      
+  CH_assert(a_extrapCdrVelocities.size() == numCdrSpecies);
+  CH_assert(a_extrapCdrGradients. size() == numCdrSpecies);
+  CH_assert(a_extrapRteFluxes.    size() == numRteSpecies);  
 
-  const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
-  const ProblemDomain& domain   = m_amr->getDomains()[a_lvl];
-  const Real dx                 = m_amr->getDx()[a_lvl];
-  const RealVect probLo         = m_amr->getProbLo();
+  // These are data holders that we will pass into CdrPlasmaPhysics
+  Vector<Real> extrapCdrFluxes    (numCdrSpecies, 0.0);
+  Vector<Real> extrapCdrDensities (numCdrSpecies, 0.0);
+  Vector<Real> extrapCdrVelocities(numCdrSpecies, 0.0);
+  Vector<Real> extrapCdrGradients (numCdrSpecies, 0.0);
+  Vector<Real> extrapRteFluxes    (numRteSpecies, 0.0);
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box& box         = dbl.get(dit());
-    const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
+  // Fetch various grid information on this level. I.e, the box distribution, the EB description, resolution, and physical corner.
+  const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_lvl];
+  const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
+  const Real               dx     = m_amr->getDx()[a_lvl];
+  const RealVect           probLo = m_amr->getProbLo();
+
+  // Stopping criterion for face iteration. We will only visit domain boundary faces. 
+  const FaceStop::WhichFaces stopCrit = FaceStop::AllBoundaryOnly;  
+
+  // Iterate through patches on this level. 
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box&     box     = dbl.get(dit());
+    const EBISBox& ebisBox = ebisl[dit()];
+    const EBGraph& ebgraph = ebisBox.getEBGraph();
     
-    const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
-    
+    // Go through each coordinate direction
     for (int dir = 0; dir < SpaceDim; dir++){
+
+      // and then go through high/low side. On the inside of this loop we are visiting exactly one of the domain edges/faces. 
       for (SideIterator sit; sit.ok(); ++sit){
-	const IntVectSet& ivs  = (*a_fluxes[0])[dit()](dir, sit()).getIVS();
 
-	for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
+	// Get the IntVectSet where we have valid domain faces. 
+	const IntVectSet& ivs  = (*a_cdrFluxes[0])[dit()](dir, sit()).getIVS();
+
+	// Iterate through those faces. 
+	for (FaceIterator faceit(ivs, ebgraph, dir, stopCrit); faceit.ok(); ++faceit){
+
+	  // Note that we fill the fluxes on the face centers because CdrSolver will
+	  // interpolate those fluxes to the face centroids when it computes the divergences. 	  
 	  const FaceIndex& face = faceit();
-	  const RealVect pos    = EBArith::getFaceLocation(face, dx*RealVect::Unit, probLo);
+	  const RealVect   pos  = probLo + Location::position(Location::Face::Center, face, ebisBox, dx);
 	    
-	  // Define the electric field
-	  const RealVect E = RealVect(D_DECL((a_E)[dit()](dir, sit())(face,0),
-					     (a_E)[dit()](dir, sit())(face,1),
-					     (a_E)[dit()](dir, sit())(face,2)));
+	  // Get the electric field on the current face. 
+	  const RealVect E = RealVect(D_DECL((a_electricField)[dit()](dir, sit())(face,0),
+					     (a_electricField)[dit()](dir, sit())(face,1),
+					     (a_electricField)[dit()](dir, sit())(face,2)));
 
-	  // Ion densities. 
-	  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	  // Get the CDR densities on the current face. 
+	  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
 	    const int idx = solverIt.index();
-	    extrapCdrFluxes[idx]     = (*a_extrapCdrFluxes[idx])[dit()](dir, sit())(face,comp);
-	    extrapCdrDensities[idx]  = (*a_extrapCdrDensities[idx])[dit()](dir, sit())(face,comp);
+	    
+	    extrapCdrFluxes    [idx] = (*a_extrapCdrFluxes    [idx])[dit()](dir, sit())(face,comp);
+	    extrapCdrDensities [idx] = (*a_extrapCdrDensities [idx])[dit()](dir, sit())(face,comp);
 	    extrapCdrVelocities[idx] = (*a_extrapCdrVelocities[idx])[dit()](dir, sit())(face,comp);
-	    extrapCdrGradients[idx]  = (*a_extrapCdrGradients[idx])[dit()](dir, sit())(face,comp);
+	    extrapCdrGradients [idx] = (*a_extrapCdrGradients [idx])[dit()](dir, sit())(face,comp);
 	  }
 
-	  // Photon fluxes
-	  for (RtIterator<RtSolver> solverIt(*m_rte); solverIt.ok(); ++solverIt){
+	  // Get the RTE fluxes on the current face. 
+	  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
 	    const int idx = solverIt.index();
+	    
 	    extrapRteFluxes[idx] = (*a_extrapRteFluxes[idx])[dit()](dir, sit())(face,comp);
 	  }
 
-	  // Call CdrPlasmaPhysics
+	  // Call CdrPlasmaPhysics -- it will compute the domain fluxes for us. 
 	  const Vector<Real> fluxes = m_physics->computeCdrDomainFluxes(a_time,
 									pos,
 									dir,
@@ -2509,10 +2542,11 @@ void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*
 									extrapRteFluxes,
 									extrapCdrFluxes);
 
-	  // Put fluxes where they belong
-	  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+	  // Put fluxes back into the CDR solvers. 
+	  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
 	    const int idx = solverIt.index();
-	    (*a_fluxes[idx])[dit()](dir, sit())(face, comp) = fluxes[idx];
+	    
+	    (*a_cdrFluxes[idx])[dit()](dir, sit())(face, comp) = fluxes[idx];
 	  }
 	}
       }
