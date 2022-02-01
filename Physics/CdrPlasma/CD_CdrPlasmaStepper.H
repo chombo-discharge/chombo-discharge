@@ -828,25 +828,6 @@ namespace Physics {
 					  const int                                  a_lvl);
 
       /*!
-	@brief Compute gradients of various cell-centered quantities at the EB.  gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
-	@note This version computes the gradients from phi
-      */
-      virtual void computeGradientsAtEb(Vector<EBAMRIVData*>&         a_grad,
-					const phase::which_phase&     a_phase,
-					const Vector<EBAMRCellData*>& a_phi);
-
-      /*!
-	@brief Compute gradients at domain faces
-      */
-      virtual void computeGradientsAtDomainFaces(Vector<EBAMRIFData*>&         a_grad,
-						 const phase::which_phase&     a_phase,
-						 const Vector<EBAMRCellData*>& a_phi);
-
-
-
-
-
-      /*!
 	@brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
       */
       virtual void computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_fluxes,
