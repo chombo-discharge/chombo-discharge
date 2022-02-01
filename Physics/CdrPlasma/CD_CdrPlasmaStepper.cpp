@@ -22,6 +22,7 @@
 #include <CD_Units.H>
 #include <CD_Timer.H>
 #include <CD_BoxLoops.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::CdrPlasma;
@@ -3190,36 +3191,38 @@ void CdrPlasmaStepper::getCdrMax(Real& a_cdrMax, std::string& a_solverName) cons
 }
 
 void CdrPlasmaStepper::setCdrSolvers(RefCountedPtr<CdrLayout<CdrSolver>>& a_cdr){
-  CH_TIME("CdrPlasmaStepper::setCdrSolvers");
+  CH_TIME("CdrPlasmaStepper::setCdrSolvers(RefCountedPtr<CdrLayout<CdrSolver> >)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::setCdrSolvers" << endl;
+    pout() << "CdrPlasmaStepper::setCdrSolvers(RefCountedPtr<CdrLayout<CdrSolver> >)" << endl;
   }
   m_cdr = a_cdr;
 }
 
-void CdrPlasmaStepper::setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson){
-  CH_TIME("CdrPlasmaStepper::setFieldSolver");
+void CdrPlasmaStepper::setFieldSolver(RefCountedPtr<FieldSolver>& a_fieldSolver){
+  CH_TIME("CdrPlasmaStepper::setFieldSolver(RefCountedPtr<FieldSolver>)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::setFieldSolver" << endl;
+    pout() << "CdrPlasmaStepper::setFieldSolver(RefCountedPtr<FieldSolver>)" << endl;
   }
-  m_fieldSolver = a_poisson;
+  
+  m_fieldSolver = a_fieldSolver;
 }
 
 void CdrPlasmaStepper::setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver>>& a_rte){
-  CH_TIME("CdrPlasmaStepper::setRadiativeTransferSolvers");
+  CH_TIME("CdrPlasmaStepper::setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver> >)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::setRadiativeTransferSolvers" << endl;
+    pout() << "CdrPlasmaStepper::setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver> >)" << endl;
   }
+  
   m_rte = a_rte;
 }
 
 void CdrPlasmaStepper::setupSolvers() {
-  CH_TIME("CdrPlasmaStepper::setupSolvers");
+  CH_TIME("CdrPlasmaStepper::setupSolvers()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::setupSolvers" << endl;
+    pout() << "CdrPlasmaStepper::setupSolvers()" << endl;
   }
   
-  parseOptions();
+  this->parseOptions();
 
   // Make solvers
   this->setupCdr();
@@ -3746,160 +3749,189 @@ void CdrPlasmaStepper::solveRadiativeTransfer(const Real a_dt) {
     pout() << "CdrPlasmaStepper::solveRadiativeTransfer(Real)" << endl;
   }
 
-  // for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
-  //   const int idx = solverIt.index();
-    
-  //   RefCountedPtr<RtSolver>& solver = solverIt();
-  //   EBAMRCellData&       phi              = *a_rte_states[idx];
-  //   const EBAMRCellData& source           = *a_rte_sources[idx];
-  //   solver->advance(a_dt, state, rhs);
-  // }
-  // Compute the electric field at the cell center. 
-  EBAMRCellData E;
-  m_amr->allocate(E, m_realm, m_phase, SpaceDim);
-  this->computeElectricField(E, m_phase, m_fieldSolver->getPotential());
-
-  Vector<EBAMRCellData*> states     = m_rte->getPhis();
-  Vector<EBAMRCellData*> rhs        = m_rte->getSources();
-  Vector<EBAMRCellData*> cdr_states = m_cdr->getPhis();
-
-  this->solveRadiativeTransfer(states, rhs, cdr_states, E, m_time, a_dt);
-}
-
-void CdrPlasmaStepper::solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_rte_states,
-					      Vector<EBAMRCellData*>&       a_rte_sources,
-					      const Vector<EBAMRCellData*>& a_cdr_states,
-					      const EBAMRCellData&          a_E,
-					      const Real                    a_time,
-					      const Real                    a_dt) {
-  CH_TIME("CdrPlasmaStepper::solveRadiativeTransfer(full)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::solveRadiativeTransfer(full)" << endl;
-  }
-
-  //  this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
-  //  advanceReactionNetwork(a_time, a_dt);
-
-  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
-    const int idx = solverIt.index();
-    
+  // Iterate through all RTE solvers and call their advance method.
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
     RefCountedPtr<RtSolver>& solver = solverIt();
-    EBAMRCellData& state              = *a_rte_states[idx];
-    EBAMRCellData& rhs                = *a_rte_sources[idx];
-    solver->advance(a_dt, state, rhs);
+    
+    EBAMRCellData&       phi    = solver->getPhi   ();
+    const EBAMRCellData& source = solver->getSource();
+    
+    solver->advance(a_dt, phi, source);
   }
 }
 
 void CdrPlasmaStepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
-  CH_TIME("CdrPlasmaStepper::synchronizeSolverTimes");
+  CH_TIME("CdrPlasmaStepper::synchronizeSolverTimes(int, Real, Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::synchronizeSolverTimes" << endl;
+    pout() << "CdrPlasmaStepper::synchronizeSolverTimes(int, Real, Real)" << endl;
   }
 
   m_timeStep = a_step;
-  m_time = a_time;
-  m_dt   = a_dt;
+  m_time     = a_time;
+  m_dt       = a_dt;
 
-  m_cdr->setTime(a_step,     a_time, a_dt);
+  m_cdr        ->setTime(a_step, a_time, a_dt);
   m_fieldSolver->setTime(a_step, a_time, a_dt);
-  m_rte->setTime(a_step,     a_time, a_dt);
-  m_sigma->setTime(a_step,   a_time, a_dt);
+  m_rte        ->setTime(a_step, a_time, a_dt);
+  m_sigma      ->setTime(a_step, a_time, a_dt);
 }
 
 Real CdrPlasmaStepper::computeElectrodeCurrent() {
-  CH_TIME("CdrPlasmaStepper::computeElectrodeCurrent");
+  CH_TIME("CdrPlasmaStepper::computeElectrodeCurrent()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeElectrodeCurrent" << endl;
+    pout() << "CdrPlasmaStepper::computeElectrodeCurrent()" << endl;
   }
 
-  // Need to copy onto temporary storage because 
-  EBAMRIVData charge_flux;
-  m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
-  DataOps::setValue(charge_flux, 0.0);
-  
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const RefCountedPtr<CdrSolver>& solver = solverIt();
-    const RefCountedPtr<CdrSpecies>& spec      = solverIt.getSpecies();
-    const EBAMRIVData& solver_flux          = solver->getEbFlux();
+  constexpr int comp = 0;
 
-    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
-  }
+  // TLDR: We first compute the total charge flux on the EB and then reset the flux (i.e., set it to zero) on dielectric interface cells. After
+  //       that we simply integrate the contribution. 
 
-  this->resetDielectricCells(charge_flux);
-  m_amr->conservativeAverage(charge_flux, m_realm, m_cdr->getPhase());
+  // Allocate a data holder for storing the total charge flux, i.e. J.
+  EBAMRIVData currentDensity;
+  m_amr->allocate(currentDensity, m_realm, m_cdr->getPhase(), 1);
+  DataOps::setValue(currentDensity, 0.0);
 
-  const int compute_lvl = 0;
-  Real sum = 0.0;
-  const Real dx = m_amr->getDx()[compute_lvl];
-  for (DataIterator dit = m_amr->getGrids(m_realm)[compute_lvl].dataIterator(); dit.ok(); ++dit){
-    const BaseIVFAB<Real>& flx = (*charge_flux[compute_lvl])[dit()];
+  // Iterate through all CDR solvers and add their EB BC flux to the current density data holder. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solverIt.getSpecies();
+    const EBAMRIVData& solverFlux            = solver->getEbFlux();
 
-    const IntVectSet ivs = flx.getIVS() & m_amr->getGrids(m_realm)[compute_lvl].get(dit());
-    for (VoFIterator vofit(ivs, flx.getEBGraph()); vofit.ok(); ++vofit){
-      const VolIndex& vof   = vofit();
-      const Real& bndryFrac = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[compute_lvl][dit()].bndryArea(vof);
-      const Real& flux = flx(vof, 0);
-      sum += flux*bndryFrac;
+    const int Z = species->getChargeNumber();
+
+    // Add the flux to the total charge flux.
+    if(Z != 0){
+      DataOps::incr(currentDensity, solverFlux, species->getChargeNumber()*Units::Qe);
     }
   }
 
-  sum *= pow(dx, SpaceDim-1);
+  // Reset the current density only dielectric interface cells so we get the electrode cells. We also
+  // coarsen the currentDensity so that we can perform the integration on the coarsest grid level. 
+  this->resetDielectricCells(currentDensity);
+  m_amr->conservativeAverage(currentDensity, m_realm, m_cdr->getPhase());
 
 
-#ifdef CH_MPI
-  const Real sum1 = sum;
-  sum = EBLevelDataOps::parallelSum(sum1);  
-#endif
+  // Next, we integrate the current over the EB surface on the coarsest level only. 
+  const int integrationLevel = 0;
 
-  return sum;
+  // Handles to grid information on the coarsest level. 
+  const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm         )[integrationLevel];
+  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[integrationLevel];
+
+  // Local value of the current -- need to sum this over all ranks later. 
+  Real current = 0.0;
+
+  // Iterate over grid patches. 
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box&             cellBox      = dbl  [dit()];
+    const EBISBox&         ebisBox      = ebisl[dit()];    
+    const BaseIVFAB<Real>& patchCurrent = (*currentDensity[integrationLevel])[dit()];
+
+    // Grid kernel. 
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      const Real& bndryFrac = ebisBox.bndryArea(vof);
+      const Real& flux      = patchCurrent(vof, comp); // Recall -- this holds the normal component of the current density on the EB surface. 
+      
+      current += flux*bndryFrac;
+    };
+
+    // Kernel region.
+    const IntVectSet ivs = patchCurrent.getIVS() & cellBox; // Integration restricted to cellBox because I don't want to include ghost cells. 
+    VoFIterator vofit(ivs, patchCurrent.getEBGraph());
+
+    // Launch kernel.
+    BoxLoops::loop(vofit, irregularKernel);
+  }
+
+
+  // Normalize by surface area. 
+  const Real dx = m_amr->getDx()[integrationLevel];  
+  current *= pow(dx, SpaceDim-1);
+
+  // Sum over ranks
+  current = ParallelOps::sum(current);
+
+  return current;
 }
 
 Real CdrPlasmaStepper::computeDielectricCurrent() {
-  CH_TIME("CdrPlasmaStepper::computeDielectricCurrent");
+  CH_TIME("CdrPlasmaStepper::computeDielectricCurrent()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeDielectricCurrent" << endl;
+    pout() << "CdrPlasmaStepper::computeDielectricCurrent()" << endl;
   }
 
-  // Need to copy onto temporary storage because 
-  EBAMRIVData charge_flux;
-  m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
-  DataOps::setValue(charge_flux, 0.0);
-  
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const RefCountedPtr<CdrSolver>& solver = solverIt();
-    const RefCountedPtr<CdrSpecies>& spec      = solverIt.getSpecies();
-    const EBAMRIVData& solver_flux          = solver->getEbFlux();
+  constexpr int comp = 0;
 
-    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
-  }
+  // TLDR: We first compute the total charge flux on the EB and then reset the flux (i.e., set it to zero) on electrode interface cells. After
+  //       that we simply integrate the contribution. 
 
-  m_sigma->resetCells(charge_flux);
-  m_amr->conservativeAverage(charge_flux, m_realm, m_cdr->getPhase());
+  // Allocate a data holder for storing the total charge flux, i.e. J.
+  EBAMRIVData currentDensity;
+  m_amr->allocate(currentDensity, m_realm, m_cdr->getPhase(), 1);
+  DataOps::setValue(currentDensity, 0.0);
 
-  const int compute_lvl = 0;
-  Real sum = 0.0;
-  const Real dx = m_amr->getDx()[compute_lvl];
-  for (DataIterator dit = m_amr->getGrids(m_realm)[compute_lvl].dataIterator(); dit.ok(); ++dit){
-    const BaseIVFAB<Real>& flx = (*charge_flux[compute_lvl])[dit()];
+  // Iterate through all CDR solvers and add their EB BC flux to the current density data holder. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solverIt.getSpecies();
+    const EBAMRIVData& solverFlux            = solver->getEbFlux();
 
-    const IntVectSet ivs = flx.getIVS() & m_amr->getGrids(m_realm)[compute_lvl].get(dit());
-    for (VoFIterator vofit(ivs, flx.getEBGraph()); vofit.ok(); ++vofit){
-      const VolIndex& vof   = vofit();
-      const Real& bndryFrac = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[compute_lvl][dit()].bndryArea(vof);
-      const Real& flux = flx(vof, 0);
-      sum += flux*bndryFrac;
+    const int Z = species->getChargeNumber();
+
+    // Add the flux to the total charge flux.
+    if(Z != 0){
+      DataOps::incr(currentDensity, solverFlux, species->getChargeNumber()*Units::Qe);
     }
   }
 
-  sum *= pow(dx, SpaceDim-1);
+  // Reset the current density only electrode interface cells so we get the electrode cells. We also
+  // coarsen the currentDensity so that we can perform the integration on the coarsest grid level. 
+  m_sigma->resetCells(currentDensity);
+  m_amr->conservativeAverage(currentDensity, m_realm, m_cdr->getPhase());
 
 
-#ifdef CH_MPI
-  const Real sum1 = sum;
-  sum = EBLevelDataOps::parallelSum(sum1);  
-#endif
+  // Next, we integrate the current over the EB surface on the coarsest level only. 
+  const int integrationLevel = 0;
 
-  return sum;
+  // Handles to grid information on the coarsest level. 
+  const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm         )[integrationLevel];
+  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[integrationLevel];
+
+  // Local value of the current -- need to sum this over all ranks later. 
+  Real current = 0.0;
+
+  // Iterate over grid patches. 
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box&             cellBox      = dbl  [dit()];
+    const EBISBox&         ebisBox      = ebisl[dit()];    
+    const BaseIVFAB<Real>& patchCurrent = (*currentDensity[integrationLevel])[dit()];
+
+    // Grid kernel. 
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      const Real& bndryFrac = ebisBox.bndryArea(vof);
+      const Real& flux      = patchCurrent(vof, comp); // Recall -- this holds the normal component of the current density on the EB surface. 
+      
+      current += flux*bndryFrac;
+    };
+
+    // Kernel region.
+    const IntVectSet ivs = patchCurrent.getIVS() & cellBox; // Integration restricted to cellBox because I don't want to include ghost cells. 
+    VoFIterator vofit(ivs, patchCurrent.getEBGraph());
+
+    // Launch kernel.
+    BoxLoops::loop(vofit, irregularKernel);
+  }
+
+
+  // Normalize by surface area. 
+  const Real dx = m_amr->getDx()[integrationLevel];  
+  current *= pow(dx, SpaceDim-1);
+
+  // Sum over ranks
+  current = ParallelOps::sum(current);
+
+  return current;  
 }
 
 Real CdrPlasmaStepper::computeDomainCurrent() {
@@ -3911,23 +3943,23 @@ Real CdrPlasmaStepper::computeDomainCurrent() {
   const int comp = 0;
 
   // Need to copy onto temporary storage because 
-  EBAMRIFData charge_flux;
-  m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
-  DataOps::setValue(charge_flux, 0.0);
+  EBAMRIFData chargeFlux;
+  m_amr->allocate(chargeFlux, m_realm, m_cdr->getPhase(), 1);
+  DataOps::setValue(chargeFlux, 0.0);
   
   for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     const RefCountedPtr<CdrSolver>& solver = solverIt();
     const RefCountedPtr<CdrSpecies>& spec      = solverIt.getSpecies();
     const EBAMRIFData& solver_flux          = solver->getDomainFlux();
 
-    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
+    DataOps::incr(chargeFlux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
-  const int compute_lvl = 0;
+  const int integrationLevel = 0;
   Real sum = 0.0;
-  const Real dx = m_amr->getDx()[compute_lvl];
-  for (DataIterator dit = m_amr->getGrids(m_realm)[compute_lvl].dataIterator(); dit.ok(); ++dit){
-    const DomainFluxIFFAB& flux = (*charge_flux[compute_lvl])[dit()];
+  const Real dx = m_amr->getDx()[integrationLevel];
+  for (DataIterator dit = m_amr->getGrids(m_realm)[integrationLevel].dataIterator(); dit.ok(); ++dit){
+    const DomainFluxIFFAB& flux = (*chargeFlux[integrationLevel])[dit()];
 
     for (int dir = 0; dir < SpaceDim; dir++){
       for (SideIterator sit; sit.ok(); ++sit){

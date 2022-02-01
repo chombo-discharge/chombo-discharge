@@ -49,6 +49,12 @@ namespace ParallelOps {
   int Max(const int& a_input);
 
   /*!
+    @brief Compute the sum across all MPI ranks
+  */
+  inline
+  Real sum(const Real& a_value);
+
+  /*!
     @brief Perform a summation of all the MPI ranks's input data. 
     @details This performs a rank-wise summation. If rank 1 has data (1,2,3) and rank 2 has data (3,4,5), the output data
     on both ranks is (4,6,8).

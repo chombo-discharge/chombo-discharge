@@ -77,6 +77,22 @@ int ParallelOps::Max(const int& a_input) {
 }
 
 inline
+Real ParallelOps::sum(const Real& a_value) {
+#ifdef CH_MPI
+  Real ret = 0.0;
+  
+  const int result = MPI_Allreduce(&a_value, &ret, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("In file ParallelOps::sum -- MPI communication error");
+  }  
+  
+  return ret;
+#else
+  return a_value;
+#endif
+}
+
+inline
 void ParallelOps::VectorSum(Vector<long int>& a_data) {
 #ifdef CH_MPI
   const Vector<long int> tmp = a_data;

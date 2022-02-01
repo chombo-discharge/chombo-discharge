@@ -1066,8 +1066,6 @@ namespace Physics {
       */
       virtual void setVoltage(std::function<Real(const Real a_time)> a_voltage);
 
-      // CODE WALK BEGINS HERE                                    
-
       /*!
 	@brief Solve the radiative transfer problem. 
 	@details This will call the other version with states taken from the solvers. 
@@ -1076,42 +1074,37 @@ namespace Physics {
       virtual void solveRadiativeTransfer(const Real a_dt);
 
       /*!
-	@brief General RTE advance routine
-	@details This computes the source terms at the specified time and then advances the solution
-      */
-      virtual void solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_phis,
-					  Vector<EBAMRCellData*>&       a_rhs,
-					  const Vector<EBAMRCellData*>& a_cdr_states,
-					  const EBAMRCellData&          a_E,
-					  const Real                    a_time,
-					  const Real                    a_dt);      
-
-      /*!
-	@brief Set the cdr layout
+	@brief Set the CDR layout. 
+	@param[in] a_cdr CDR solvers.
       */
       virtual void setCdrSolvers(RefCountedPtr<CdrLayout<CdrSolver> >& a_cdr);
 
       /*!
-	@brief Set the Poisson solver
+	@brief Set the field solver
+	@param[in] a_fieldSolver Field solver
       */
-      virtual void setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson);
+      virtual void setFieldSolver(RefCountedPtr<FieldSolver>& a_fieldSolver);
 
       /*!
-	@brief Set the RTE layout
-      */
+	@brief Set the RTE solvers
+	@param[in] a_rte RTE solvers
+      */      
       virtual void setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver> >& a_rte);
 
-
-
       /*!
-	@brief Compute the ohmic current on electrodes
+	@brief Compute the ohmic current on electrodes.
+	@details This will compute the total charge flux through electrode surfaces and return it. 
+	@note In 2D this will yield the current per unit length into the domain. 
       */
       virtual Real computeElectrodeCurrent();
 
       /*!
 	@brief Compute the ohmic current on dielectrics
+	@details This will compute the total charge flux through dielectric surfaces and return it. 
       */
       virtual Real computeDielectricCurrent();
+
+      // CODE WALK BEGINS HERE                                                      
 
       /*!
 	@brief Compute the ohmic current through the domain faces
@@ -1132,8 +1125,6 @@ namespace Physics {
 	@brief Restrict dt
       */
       virtual Real restrictDt() = 0;
-
-
 
       /*!
 	@brief Get dt
