@@ -1132,28 +1132,6 @@ namespace Physics {
 	@brief Get dt
       */
       virtual Real getDt();
-
-      // CODE WALK BEGINS HERE      
-
-      /*!
-	@brief Get cdr solvers
-      */
-      virtual RefCountedPtr<CdrLayout<CdrSolver> >& getCdrSolvers();
-
-      /*!
-	@brief Get cdr solvers
-      */
-      virtual RefCountedPtr<FieldSolver>& getFieldSolver();
-  
-      /*!
-	@brief Get cdr solvers
-      */
-      virtual RefCountedPtr<RtLayout<RtSolver>>& getRadiativeTransferSolvers();
-
-      /*!
-	@brief Get sigma solver
-      */
-      virtual RefCountedPtr<SigmaSolver>& getSigmaSolver();
   
     protected:
 
@@ -1236,14 +1214,14 @@ namespace Physics {
       Real m_maxDt;
 
       /*!
-	@brief CFL
+	@brief CFL number.
       */
       Real m_cfl;
 
       /*!
 	@brief Fudge factor for relaxation time
       */
-      Real m_relax_time;
+      Real m_relaxTime;
 
       /*!
 	@brief TIme
@@ -1268,12 +1246,12 @@ namespace Physics {
       /*!
 	@brief Fast RTE solver
       */
-      int m_fast_rte;
+      int m_fastRTE;
 
       /*!
 	@brief Fast RTE solver
       */
-      int m_fast_poisson;
+      int m_fastPoisson;
 
       /*!
 	@brief Upwind factor
@@ -1300,16 +1278,36 @@ namespace Physics {
       */                  
       virtual void parseRelaxationTime();
 
+      /*!
+	@brief Parse the minimum allowed time step
+      */
       virtual void parseMinDt();
+
+      /*!
+	@brief Parse the maximum allowed time step
+      */      
       virtual void parseMaxDt();
+
+      /*!
+	@brief Parse the "fast poisson" method, i.e. how often we solve the Poisson equation. 
+      */            
       virtual void parseFastPoisson();
+
+      /*!
+	@brief Parse the "fast rte" method, i.e. how often we solve the Poisson equation. 
+      */                  
       virtual void parseFastRadiativeTransfer();
+
+      /*!
+	@brief Parse how we compute the source terms. 
+	@details This is for modifications near the EB.
+      */
       virtual void parseSourceComputation();      
 
       /*!
 	@brief Compute and put the current density in output data holder
-	@param[inout] a_output            Output data holder.
-	@param[inout] a_icomp             Starting component in a_output to begin at. On output this is incremented by SpaceDim.
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component in a_output to begin at. On output this is incremented by SpaceDim.
       */
       virtual void writeJ(EBAMRCellData& a_output, int& a_comp) const;
 

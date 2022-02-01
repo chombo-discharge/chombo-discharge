@@ -3259,9 +3259,9 @@ void CdrPlasmaStepper::initialData() {
 
   // Do stationary RTE solve if we must
   if(this->stationaryRTE()){                  // Solve RTE equations by using initial data and electric field
-    const Real dummy_dt = 1.0;
+    const Real dummyDt = 1.0;
 
-    this->solveRadiativeTransfer(dummy_dt);                 // Argument does not matter, it's a stationary solver.
+    this->solveRadiativeTransfer(dummyDt);                 // Argument does not matter, it's a stationary solver.
   }
 }
 
@@ -3454,11 +3454,11 @@ void CdrPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, cons
 
   // If we're doing a stationary RTE solve, recompute source terms
   if(this->stationaryRTE()){     // Solve RTE equations by using data that exists inside solvers
-    const Real dummy_dt = 1.0;
+    const Real dummyDt = 1.0;
 
     // Need new source terms for RTE equations
-    this->advanceReactionNetwork(m_time, dummy_dt);
-    this->solveRadiativeTransfer(dummy_dt);    // Argument does not matter, it's a stationary solver.
+    this->advanceReactionNetwork(m_time, dummyDt);
+    this->solveRadiativeTransfer(dummyDt);    // Argument does not matter, it's a stationary solver.
   }
 }
 
@@ -3535,9 +3535,9 @@ void CdrPlasmaStepper::setVoltage(std::function<Real(const Real a_time)> a_volta
 }
 
 void CdrPlasmaStepper::parseVerbosity() {
-  CH_TIME("CdrPlasmaStepper::parseVerbosity");
+  CH_TIME("CdrPlasmaStepper::parseVerbosity()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::parseVerbosity" << endl;
+    pout() << "CdrPlasmaStepper::parseVerbosity()" << endl;
   }
   
   ParmParse pp(m_className.c_str());
@@ -3545,9 +3545,9 @@ void CdrPlasmaStepper::parseVerbosity() {
 }
 
 void CdrPlasmaStepper::parseSolverVerbosity() {
-  CH_TIME("CdrPlasmaStepper::parseSolverVerbosity");
+  CH_TIME("CdrPlasmaStepper::parseSolverVerbosity()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::parseSolverVerbosity" << endl;
+    pout() << "CdrPlasmaStepper::parseSolverVerbosity()" << endl;
   }
   
   ParmParse pp(m_className.c_str());
@@ -3555,58 +3555,93 @@ void CdrPlasmaStepper::parseSolverVerbosity() {
 }
 
 void CdrPlasmaStepper::parseCFL() {
+  CH_TIME("CdrPlasmaStepper::parseCFL()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::parseCFL()" << endl;
+  }  
 
   ParmParse pp(m_className.c_str());
   pp.get("cfl", m_cfl);
+  
   if(m_cfl < 0.0){
-    MayDay::Abort("CdrPlasmaStepper::parseCFL - CFL cannot be negative!");
+    MayDay::Error("CdrPlasmaStepper::parseCFL - CFL cannot be negative!");
   }
 }
 
 void CdrPlasmaStepper::parseRelaxationTime() {
+  CH_TIME("CdrPlasmaStepper::parseRelaxationTime()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::parseRelaxationTime()" << endl;
+  }
+  
   ParmParse pp(m_className.c_str());
-  pp.get("relax_time", m_relax_time);
-  if(m_relax_time < 0.0){
-    MayDay::Abort("CdrPlasmaStepper::parseRelaxationTime - relaxation time cannot be negative");
+  pp.get("relax_time", m_relaxTime);
+  
+  if(m_relaxTime < 0.0){
+    MayDay::Error("CdrPlasmaStepper::parseRelaxationTime - relaxation time cannot be negative");
   }
 }
 
 void CdrPlasmaStepper::parseMinDt() {
+  CH_TIME("CdrPlasmaStepper::parseMinDt()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::parseMinDt()" << endl;
+  }
+  
   ParmParse pp(m_className.c_str());
   pp.get("min_dt", m_minDt);
+  
   if(m_minDt < 0.0){
-    MayDay::Abort("CdrPlasmaStepper::parseMinDt - value cannot be negative");
+    MayDay::Error("CdrPlasmaStepper::parseMinDt - value cannot be negative");
   }
 }
 
 void CdrPlasmaStepper::parseMaxDt() {
+  CH_TIME("CdrPlasmaStepper::parseMaxDt()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::parseMaxDt()" << endl;
+  }
+  
   ParmParse pp(m_className.c_str());
   pp.get("max_dt", m_maxDt);
+  
   if(m_maxDt < 0.0){
-    MayDay::Abort("CdrPlasmaStepper::parseMaxDt - value cannot be negative");
+    MayDay::Error("CdrPlasmaStepper::parseMaxDt - value cannot be negative");
   }
 }
 
 void CdrPlasmaStepper::parseFastRadiativeTransfer() {
+  CH_TIME("CdrPlasmaStepper::parseFastRadiativeTransfer()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::parseFastRadiativeTransfer()" << endl;
+  }
+  
   ParmParse pp(m_className.c_str());
-  pp.get("fast_rte", m_fast_rte);
-  if(m_fast_rte <= 0){
-    MayDay::Abort("CdrPlasmaStepper::parseFastRadiativeTransfer - value cannot be negative");
+  pp.get("fast_rte", m_fastRTE);
+  
+  if(m_fastRTE <= 0){
+    MayDay::Error("CdrPlasmaStepper::parseFastRadiativeTransfer - value must be non-negative");
   }
 }
 
 void CdrPlasmaStepper::parseFastPoisson() {
+  CH_TIME("CdrPlasmaStepper::parseFastPoisson()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::parseFastPoisson()" << endl;
+  }
+  
   ParmParse pp(m_className.c_str());
-  pp.get("fast_poisson", m_fast_poisson);
-  if(m_fast_poisson <= 0){
-    MayDay::Abort("CdrPlasmaStepper::parseFastPoisson - value cannot be negative");
+  pp.get("fast_poisson", m_fastPoisson);
+  
+  if(m_fastPoisson <= 0){
+    MayDay::Abort("CdrPlasmaStepper::parseFastPoisson - value must be non-negative");
   }
 }
 
 void CdrPlasmaStepper::parseSourceComputation() {
-  CH_TIME("CdrPlasmaStepper::parseSourceComputation");
+  CH_TIME("CdrPlasmaStepper::parseSourceComputation()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::parseSourceComputation" << endl;
+    pout() << "CdrPlasmaStepper::parseSourceComputation()" << endl;
   }
 
   // Parse the source term computation. We support:
@@ -3729,7 +3764,6 @@ void CdrPlasmaStepper::setupSigma() {
   m_sigma->setVerbosity(m_solverVerbosity);
   m_sigma->setComputationalGeometry(m_computationalGeometry);
   m_sigma->setRealm(m_realm);
-  //  m_sigma->allocateInternals();
 }
 
 void CdrPlasmaStepper::solverDump() {
@@ -4095,26 +4129,10 @@ Real CdrPlasmaStepper::getDt() {
   return m_dt;
 }
 
-RefCountedPtr<CdrLayout<CdrSolver>>& CdrPlasmaStepper::getCdrSolvers() {
-  return m_cdr;
-}
-
-RefCountedPtr<FieldSolver>& CdrPlasmaStepper::getFieldSolver() {
-  return m_fieldSolver;
-}
-
-RefCountedPtr<RtLayout<RtSolver>>& CdrPlasmaStepper::getRadiativeTransferSolvers() {
-  return m_rte;
-}
-
-RefCountedPtr<SigmaSolver>& CdrPlasmaStepper::getSigmaSolver() {
-  return m_sigma;
-}
-
 void CdrPlasmaStepper::deallocate() {
-  CH_TIME("CdrPlasmaStepper::deallocate");
+  CH_TIME("CdrPlasmaStepper::deallocate()");
   if(m_verbosity > 3){
-    pout() << "CdrPlasmaStepper::deallocate" << endl;
+    pout() << "CdrPlasmaStepper::deallocate()" << endl;
   }
 
   this->deallocateInternals();
@@ -4123,81 +4141,89 @@ void CdrPlasmaStepper::deallocate() {
 
 #ifdef CH_USE_HDF5
 void CdrPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const{
-  CH_TIME("CdrPlasmaStepper::writeCheckpointData");
+  CH_TIME("CdrPlasmaStepper::writeCheckpointData(HDF5Handle, int)");
   if(m_verbosity > 3){
-    pout() << "CdrPlasmaStepper::writeCheckpointData" << endl;
+    pout() << "CdrPlasmaStepper::writeCheckpointData(HDF5Handle, int)" << endl;
   }
 
   // CDR solvers checkpoint their data
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     const RefCountedPtr<CdrSolver>& solver = solverIt();
     solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
   // RTE solvers checkpoint their data
-  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
     const RefCountedPtr<RtSolver>& solver = solverIt();
     solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
   m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
-  m_sigma->writeCheckpointLevel(a_handle, a_lvl);
+  m_sigma      ->writeCheckpointLevel(a_handle, a_lvl);
 }
 #endif
 
 #ifdef CH_USE_HDF5
 void CdrPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
-  CH_TIME("CdrPlasmaStepper::readCheckpointData");
+  CH_TIME("CdrPlasmaStepper::readCheckpointData(HDF5Handle, int)");
   if(m_verbosity > 3){
-    pout() << "CdrPlasmaStepper::readCheckpointData" << endl;
+    pout() << "CdrPlasmaStepper::readCheckpointData(HDF5Handle, int)" << endl;
   }
 
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+  // CDR solvers read checkpoint data. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     RefCountedPtr<CdrSolver>& solver = solverIt();
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
-  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+  // RTE solvers read checkpoint data.   
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
     RefCountedPtr<RtSolver>& solver = solverIt();
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
   m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
-  m_sigma->readCheckpointLevel(a_handle, a_lvl);
+  m_sigma      ->readCheckpointLevel(a_handle, a_lvl);
 }
 #endif
 
 int CdrPlasmaStepper::getNumberOfPlotVariables() const{
-  CH_TIME("CdrPlasmaStepper::getNumberOfPlotVariables");
+  CH_TIME("CdrPlasmaStepper::getNumberOfPlotVariables()");
   if(m_verbosity > 3){
-    pout() << "CdrPlasmaStepper::getNumberOfPlotVariables" << endl;
+    pout() << "CdrPlasmaStepper::getNumberOfPlotVariables()" << endl;
   }
-  int ncomp = 0;
   
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+  int numVars = 0;
+
+  // Number of output variables from CDR equations. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     RefCountedPtr<CdrSolver>& solver = solverIt();
-    ncomp += solver->getNumberOfPlotVariables();
+    numVars += solver->getNumberOfPlotVariables();
   }
-  
-  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+
+  // Number of output variables from RTE equations.   
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
     RefCountedPtr<RtSolver>& solver = solverIt();
-    ncomp += solver->getNumberOfPlotVariables();
+    numVars += solver->getNumberOfPlotVariables();
   }
 
-  ncomp += m_fieldSolver->getNumberOfPlotVariables();
-  ncomp += m_sigma->getNumberOfPlotVariables();
-  ncomp += SpaceDim; // For plotting the current density
+  // Number of output variables from field solver and surface charge solver. 
+  numVars += m_fieldSolver->getNumberOfPlotVariables();
+  numVars += m_sigma       ->getNumberOfPlotVariables();
 
-  // CdrPlasmaPhysics plotting
-  ncomp += m_physics->getNumberOfPlotVariables();
+  // Add variables from CdrPlasmaStepper when plotting the current density. 
+  numVars += SpaceDim;
 
-  return ncomp;
+  // Add variables from CdrPlasmaPhysics
+  numVars += m_physics->getNumberOfPlotVariables();
+
+  return numVars;
 }
 
 void CdrPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
-  CH_TIME("CdrPlasmaStepper::writePlotData");
+  CH_TIME("CdrPlasmaStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)");
   if(m_verbosity > 3){
-    pout() << "CdrPlasmaStepper::writePlotData" << endl;
+    pout() << "CdrPlasmaStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;
   }
 
   // Poisson solver copies over its output data
@@ -4208,21 +4234,21 @@ void CdrPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string
   a_plotVariableNames.append(m_sigma->getPlotVariableNames());
   m_sigma->writePlotData(a_output, a_icomp);
 
-  // CDR solvers copy their output data
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+  // CDR solvers output their data
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     RefCountedPtr<CdrSolver>& solver = solverIt();
     a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 
-  // RTE solvers copy their output data
-  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+  // RTE solvers output their data
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
     RefCountedPtr<RtSolver>& solver = solverIt();
     a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 
-  // Write the current to the output
+  // CdrPlasmaStepper adds the current to the output file. 
   this->writeJ(a_output, a_icomp);
   a_plotVariableNames.push_back("x-J");
   a_plotVariableNames.push_back("y-J");
@@ -4230,36 +4256,42 @@ void CdrPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string
     a_plotVariableNames.push_back("z-J");
   }
 
-  // Physics writes to output as well.
+  // CdrPlasmaPhysics outputs its variable. 
   a_plotVariableNames.append(m_physics->getPlotVariableNames());
   this->writePhysics(a_output, a_icomp);
 }
 
 void CdrPlasmaStepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const{
-  CH_TIME("CdrPlasmaStepper::writeJ");
+  CH_TIME("CdrPlasmaStepper::writeJ(EBAMRCellData, int)");
   if(m_verbosity > 3){
-    pout() << "CdrPlasmaStepper::writeJ" << endl;
+    pout() << "CdrPlasmaStepper::writeJ(EBAMRCellData, int)" << endl;
   }
 
-  // Allocates storage and computes J
+  // Allocates storage for computing J. 
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, phase::gas, SpaceDim);
+
+  // Compute the current density. 
   this->computeJ(scratch);
 
-  const Interval src_interv(0, SpaceDim-1);
-  const Interval dst_interv(a_icomp, a_icomp + SpaceDim -1);
+  // Add the current density to the a_output data holder, starting on component a_icomp. 
+  const Interval srcInterv(0, SpaceDim-1);
+  const Interval dstInterv(a_icomp, a_icomp + SpaceDim -1);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+    scratch[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
   }
+
+  // Need to inform the outside world about the change in starting component. 
   a_icomp += SpaceDim;
 }
 
 void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const {
-  CH_TIME("CdrPlasmaStepper::writePhysics");
+  CH_TIME("CdrPlasmaStepper::writePhysics(EBAMRCellData, int)");
   if(m_verbosity > 3){
-    pout() << "CdrPlasmaStepper::writePhysics" << endl;
+    pout() << "CdrPlasmaStepper::writePhysics(EBAMRCellData, int)" << endl;
   }
 
+  // Number of output variables from CdrPlasmaPhysics
   const int numVars = m_physics->getNumberOfPlotVariables();
 
   if(numVars > 0){
@@ -4440,17 +4472,24 @@ void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 }
 
 void CdrPlasmaStepper::postCheckpointSetup() {
-  CH_TIME("CdrPlasmaStepper::postCheckpointSetup");
+  CH_TIME("CdrPlasmaStepper::postCheckpointSetup()");
   if(m_verbosity > 3){
-    pout() << "CdrPlasmaStepper::postCheckpointSetup" << endl;
+    pout() << "CdrPlasmaStepper::postCheckpointSetup()" << endl;
   }
 
-  this->solvePoisson();       // Solve Poisson equation by 
-  if(this->stationaryRTE()){  // Solve RTE equations if stationary solvers
-    const Real dummy_dt = 0.0;
-    this->solveRadiativeTransfer(dummy_dt); // Argument does not matter, it's a stationary solver.
+  // TLDR: This does all the post-operations after reading data from the checkpoint file. 
+
+  // Solve Poisson equation again. 
+  this->solvePoisson();
+
+  // Update RTE solvers if the solver was stationary. 
+  if(this->stationaryRTE()){  
+    const Real dummyDt = 0.0;
+    this->solveRadiativeTransfer(dummyDt);
   }
-  this->allocateInternals();  // Prepare internal storage for time stepper
+
+  // Prepare internal storage for time stepper  
+  this->allocateInternals();  
 
   // Fill solvers with important stuff
   this->computeCdrDriftVelocities();
@@ -4458,21 +4497,22 @@ void CdrPlasmaStepper::postCheckpointSetup() {
 }
 
 void CdrPlasmaStepper::printStepReport() {
-  CH_TIME("CdrPlasmaStepper::printStepReport");
+  CH_TIME("CdrPlasmaStepper::printStepReport()");
   if(m_verbosity > 4){
-    pout() << "CdrPlasmaStepper::printStepReport" << endl;
+    pout() << "CdrPlasmaStepper::printStepReport()" << endl;
   }
 
   // Compute the maximum electric field
-  Real Emax;
+  Real Emax = -std::numeric_limits<Real>::max();
   this->computeMaxElectricField(Emax, phase::gas);
 
   //
-  Real nmax;
-  std::string solver_max;
-  this->getCdrMax(nmax, solver_max);
+  Real cdrMax           = -std::numeric_limits<Real>::max();
+  std::string solverMax = "invalid solver";
+  
+  this->getCdrMax(cdrMax, solverMax);
 
-  const Real cfl_dt = m_dtCFL;
+  const Real dtCFL = m_dtCFL;
 
   std::string str;
   if(m_timeCode == TimeCode::Advection){
@@ -4501,9 +4541,9 @@ void CdrPlasmaStepper::printStepReport() {
     str = " (Restricted by a hardcap)";
   }
   pout() << "                                   mode  = " << str << endl
-	 << "                                   cfl   = " << m_dt/cfl_dt << endl
+	 << "                                   cfl   = " << m_dt/dtCFL << endl
 	 << "                                   Emax  = " << Emax << endl
-	 << "                                   n_max = " << nmax << "(" + solver_max + ")" << endl;
+	 << "                                   n_max = " << cdrMax << "(" + solverMax + ")" << endl;
 }
 
 #include <CD_NamespaceFooter.H>

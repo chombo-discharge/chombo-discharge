@@ -266,7 +266,7 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
   // Compute electric field.
   if(m_transportAlgorithm != TransportAlgorithm::SemiImplicit){  
     timer.startEvent("Poisson");
-    if((m_timeStep +1) % m_fast_poisson == 0){
+    if((m_timeStep +1) % m_fastPoisson == 0){
       CdrPlasmaStepper::solvePoisson();
     }
     CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();
@@ -281,7 +281,7 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
 
   // Radiative transfer. 
   timer.startEvent("Photons");
-  if((m_timeStep +1) % m_fast_rte == 0){
+  if((m_timeStep +1) % m_fastRTE == 0){
     CdrPlasmaGodunovStepper::advanceRadiativeTransfer(a_dt);              // Update RTE equations
   }
   timer.stopEvent("Photons");  
@@ -1180,7 +1180,7 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
   }
 
   // 2. Compute the electric field and update boundary conditions and kinetic coefficients
-  if((m_timeStep +1) % m_fast_poisson == 0){
+  if((m_timeStep +1) % m_fastPoisson == 0){
     CdrPlasmaStepper::solvePoisson();         // Update the Poisson equation
     CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();       // Update electric fields too
   }
@@ -1341,7 +1341,7 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
   }
 
   // Below here we restrict by relaxation time and hardcaps. 
-  const Real dt_relax = m_relax_time*this->computeRelaxationTime();
+  const Real dt_relax = m_relaxTime*this->computeRelaxationTime();
   if(dt_relax < a_dt){
     a_dt = dt_relax;
     a_timeCode = TimeCode::RelaxationTime;

@@ -1246,7 +1246,7 @@ void CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
 
   // EVERYTHING BELOW HERE IS "STANDARD"
   // -----------------------------------
-  const Real dt_relax = m_relax_time*this->computeRelaxationTime();
+  const Real dt_relax = m_relaxTime*this->computeRelaxationTime();
   if(dt_relax < dt){
     dt = dt_relax;
     a_timeCode = TimeCode::RelaxationTime;
@@ -1752,7 +1752,7 @@ void CdrPlasmaImExSdcStepper::updateField(){
   }
   
   if(m_do_poisson){ // Solve Poisson equation
-    if((m_timeStep +1) % m_fast_poisson == 0){
+    if((m_timeStep +1) % m_fastPoisson == 0){
       CdrPlasmaStepper::solvePoisson();
       this->computeElectricFieldIntoScratch();
     }
@@ -1766,7 +1766,7 @@ void CdrPlasmaImExSdcStepper::updateField(const Vector<EBAMRCellData*>& a_densit
   }
   
   if(m_do_poisson){ // Solve Poisson equation
-    if((m_timeStep +1) % m_fast_poisson == 0){
+    if((m_timeStep +1) % m_fastPoisson == 0){
       CdrPlasmaStepper::solvePoisson(m_fieldSolver->getPotential(),
 				     m_fieldSolver->getRho(),
 				     a_densities,
@@ -1783,7 +1783,7 @@ void CdrPlasmaImExSdcStepper::integrateRtTransient(const Real a_dt){
   }
 
   if(m_do_rte){
-    if((m_timeStep + 1) % m_fast_rte == 0){
+    if((m_timeStep + 1) % m_fastRTE == 0){
       if(!(m_rte->isStationary())){
 	for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	  RefCountedPtr<RtSolver>& solver = solver_it();
@@ -1801,7 +1801,7 @@ void CdrPlasmaImExSdcStepper::integrateRtStationary(){
   }
 
   if(m_do_rte){
-    if((m_timeStep + 1) % m_fast_rte == 0){
+    if((m_timeStep + 1) % m_fastRTE == 0){
       if((m_rte->isStationary())){
 	for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	  RefCountedPtr<RtSolver>& solver = solver_it();
