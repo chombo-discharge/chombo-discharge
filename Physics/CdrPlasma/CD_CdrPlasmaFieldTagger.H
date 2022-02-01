@@ -104,7 +104,6 @@ namespace Physics {
 				  const Real     a_minGradElectricField,
 				  const Real     a_maxGradElectricField) const = 0;
 
-
       /*!
 	@brief Coarsen a cell based on a tracer field
 	@param[in] a_pos         Physical position

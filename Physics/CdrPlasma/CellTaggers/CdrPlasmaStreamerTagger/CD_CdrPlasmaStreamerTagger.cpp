@@ -18,73 +18,93 @@
 
 using namespace Physics::CdrPlasma;
 
-CdrPlasmaStreamerTagger::CdrPlasmaStreamerTagger(){
-  m_name = "CdrPlasmaStreamerTagger";
-
-  m_numTracers = 2;
-}
 
 CdrPlasmaStreamerTagger::~CdrPlasmaStreamerTagger(){
-
+  CH_TIME("CdrPlasmaStreamerTagger::~CdrPlasmaStreamerTagger()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStreamerTagger::~CdrPlasmaStreamerTagger()" << endl;
+  }
 }
 
 CdrPlasmaStreamerTagger::CdrPlasmaStreamerTagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
 						 const RefCountedPtr<CdrPlasmaStepper>&     a_timeStepper,
 						 const RefCountedPtr<AmrMesh>&               a_amr,
-						 const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : CdrPlasmaStreamerTagger() {
+						 const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) {
+  CH_TIME("CdrPlasmaStreamerTagger::CdrPlasmaStreamerTagger(RefCountedPtr<...>x4)");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStreamerTagger::CdrPlasmaStreamerTagger(RefCountedPtr<...>x4)" << endl;
+  }
+
+  // Call parent define function for setting the input parameters. 
   this->define(a_physics, a_timeStepper, a_amr, a_computationalGeometry);
+
+  m_name       = "CdrPlasmaStreamerTagger";  
+  m_numTracers = 2; // 2 tracer fields -- the electric field and the Townsend ionization coefficient. 
 }
 
 void CdrPlasmaStreamerTagger::parseOptions(){
-  parseVerbosity();
-  parseBoxes();
-  parseBuffer();
+  CH_TIME("CdrPlasmaStreamerTagger::parseOptions()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStreamerTagger::parseOptions()" << endl;
+  }
+  
+  this->parseVerbosity();
+  this->parseBoxes();
+  this->parseBuffer();
 
+  // Parse class options. 
   ParmParse pp(m_name.c_str());
-  pp.get("coarsen_curvature", m_coar_curv);
-  pp.get("refine_curvature",  m_refi_curv);
-  pp.get("refine_alpha",      m_refi_alpha);
-  pp.get("coarsen_alpha",     m_coar_alpha);
-  pp.get("max_coarsen_lvl",   m_max_coarsen_level);
+  pp.get("coarsen_curvature", m_coarCurv);
+  pp.get("refine_curvature",  m_refiCurv);
+  pp.get("refine_alpha",      m_refiAlpha     );
+  pp.get("coarsen_alpha",     m_coarAlpha     );
+  pp.get("max_coarsen_lvl",   m_maxCoarsenLevel);
 }
 
 void CdrPlasmaStreamerTagger::parseRuntimeOptions(){
+  CH_TIME("CdrPlasmaStreamerTagger::parseRuntimeOptions()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStreamerTagger::parseRuntimeOptions()" << endl;
+    
+  }  
   this->parseOptions();
 }
 
 
-Vector<Real> CdrPlasmaStreamerTagger::tracer(const RealVect         a_pos,
-					     const Real             a_time,
-					     const Real             a_dx,
-					     const RealVect         a_E,
-					     const Real             a_min_E,
-					     const Real             a_max_E,
-					     const RealVect         a_grad_E,
-					     const Real             a_min_grad_E,
-					     const Real             a_max_grad_E) const {
+Vector<Real> CdrPlasmaStreamerTagger::tracer(const RealVect a_pos,
+					     const Real     a_time,
+					     const Real     a_dx,
+					     const RealVect a_electricField,
+					     const Real     a_minElectricField,
+					     const Real     a_maxElectricField,
+					     const RealVect a_gradElectricField,
+					     const Real     a_minGradElectricField,
+					     const Real     a_maxGradElectricField) const {
+  Vector<Real> tracers(m_numTracers, 0.0);
 
+  // We define the two tracer fields as the electric strength |E| and as the alpha-coefficient. 
 
-  
-  Vector<Real> tracers(m_numTracers);
+  const Real E = a_electricField.vectorLength();
 
-  const Real E = a_E.vectorLength();
-  
-  tracers[0] = E/a_max_E;
+  // Set tracer fields
+  tracers[0] = E/a_maxElectricField;
   tracers[1] = m_physics->computeAlpha(E, a_pos);
 
   return tracers;
 }
+
 bool CdrPlasmaStreamerTagger::coarsenCell(const RealVect         a_pos,
 					  const Real             a_time,
 					  const Real             a_dx,
 					  const int              a_lvl,
-					  const Vector<Real>     a_tracer,
-					  const Vector<RealVect> a_grad_tracer) const {
-
+					  const Vector<Real>     a_tracers,
+					  const Vector<RealVect> a_gradTracers) const {
   bool coarsen = false;
 
-  if(a_lvl >= m_max_coarsen_level){
-    coarsen = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] < m_coar_curv && a_tracer[1]*a_dx < m_coar_alpha;
+  // TLDR: Coarsen if both criteria are met. 
+
+  if(a_lvl >= m_maxCoarsenLevel){
+    coarsen = a_gradTracers[0].vectorLength()*a_dx/a_tracers[0] < m_coarCurv && a_tracers[1]*a_dx < m_coarAlpha;
   }
   else{
     coarsen = false;
@@ -99,12 +119,18 @@ bool CdrPlasmaStreamerTagger::refineCell(const RealVect         a_pos,
 					 const Real             a_time,
 					 const Real             a_dx,
 					 const int              a_lvl,
-					 const Vector<Real>     a_tracer,
-					 const Vector<RealVect> a_grad_tracer) const {
-  const bool refine1  = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv;
-  const bool refine2 = a_tracer[1]*a_dx > m_refi_alpha;
+					 const Vector<Real>     a_tracers,
+					 const Vector<RealVect> a_gradTracers) const {
+  bool refine = false;
 
-  return refine1 || refine2;
+  // TLDR: Refine if either criterion are met.   
+  
+  const bool refine1 = a_gradTracers[0].vectorLength()*a_dx/a_tracers[0] > m_refiCurv;
+  const bool refine2 = a_tracers[1]*a_dx > m_refiAlpha;
+
+  refine = refine1 || refine2;
+
+  return refine:
 }
 
 #include <CD_NamespaceFooter.H>
