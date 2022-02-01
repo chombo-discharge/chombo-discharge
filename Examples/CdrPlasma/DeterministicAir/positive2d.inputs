@@ -47,7 +47,7 @@ Driver.initial_regrids                 = 0                # Number of initial re
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 100              # Maximum number of steps
+Driver.max_steps                       = 1000              # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -194,7 +194,7 @@ CdrPlasmaGodunovStepper.verbosity        = -1        # Class verbosity
 CdrPlasmaGodunovStepper.solver_verbosity = -1        # Individual solver verbosities
 CdrPlasmaGodunovStepper.min_dt           = 0.        # Minimum permitted time step
 CdrPlasmaGodunovStepper.max_dt           = 1.E99     # Maximum permitted time step
-CdrPlasmaGodunovStepper.cfl              = 0.5       # CFL number
+CdrPlasmaGodunovStepper.cfl              = 0.9       # CFL number
 CdrPlasmaGodunovStepper.diffusion        = explicit  # Diffusion. 'explicit', 'implicit', or 'auto'. Semi-implicit transport uses explicit diffusion. 
 CdrPlasmaGodunovStepper.transport        = semi_implicit     # Transport algorithm. 'euler', 'rk2', or 'semi-implicit'
 CdrPlasmaGodunovStepper.relax_time       = 1.E99     # Relaxation time constant
@@ -223,8 +223,8 @@ CdrPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that 
 CdrPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
 CdrPlasmaStreamerTagger.buffer            = 0            # Grow tagged cells
 
-CdrPlasmaStreamerTagger.refine_curvature  = 10.0         # Curvature refinement
-CdrPlasmaStreamerTagger.coarsen_curvature = 10.0         # Curvature coarsening	
+CdrPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
+CdrPlasmaStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 CdrPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
 CdrPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth

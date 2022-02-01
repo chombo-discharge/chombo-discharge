@@ -62,7 +62,7 @@
 	     "eV": 1,
 	     "min E/N": 10,
 	     "max E/N": 2000,
-	     "res E/N": 1000
+	     "res E/N": 10
 	 }
      },
      {
@@ -107,10 +107,42 @@
 	     ]
 	 }
      },
-     {"name": "N4+",   "Z":  1, "mobile": false, "diffusive": false},
-     {"name": "O4+",   "Z":  1, "mobile": false, "diffusive": false},
-     {"name": "O2+N2", "Z":  1, "mobile": false, "diffusive": false},          
-     {"name": "O2-",   "Z": -1, "mobile": false, "diffusive": false}
+     {"name":"N4+",
+      "Z":  1,
+      "mobile": true,
+      "diffusive": false,
+      "mobility": {
+	  "lookup": "constant",
+	  "value": 2E-4
+      }
+     },
+     {"name":"O4+",
+      "Z":  1,
+      "mobile": true,
+      "diffusive": false,
+      "mobility": {
+	  "lookup": "constant",
+	  "value": 2E-4
+      }
+     },
+     {"name":"O2+N2",
+      "Z":  1,
+      "mobile": true,
+      "diffusive": false,
+      "mobility": {
+	  "lookup": "constant",
+	  "value": 2E-4
+      }
+     },
+     {"name":"O2-",
+      "Z":  -1,
+      "mobile": true,
+      "diffusive": false,
+      "mobility": {
+	  "lookup": "constant",
+	  "value": 2E-4
+      }
+     }
  ],
  "photon species":
  [
@@ -173,7 +205,7 @@
 	 "res E/N": 10,
 	 "scale": 1.0,	 
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }
      },
@@ -189,7 +221,7 @@
 	 "res E/N": 10,
 	 "scale": 1.0,	 	 
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }
      },
@@ -287,11 +319,11 @@
 	 "rate": 1,	  
 	 "min E/N": 10,
 	 "max E/N": 2000,
-	 "res E/N": 1000,
+	 "res E/N": 10,
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }	 
      },
@@ -308,7 +340,7 @@
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }	 
      },
@@ -325,7 +357,7 @@
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }	 
      }

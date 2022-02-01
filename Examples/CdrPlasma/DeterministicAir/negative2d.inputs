@@ -12,7 +12,7 @@ AmrMesh.hi_corner        =  0.2    0.1 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 32      # Number of cells on coarsest domain
 AmrMesh.max_amr_depth    = 11          # Maximum amr depth
-AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
+AmrMesh.max_sim_depth    = 10          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm   = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
@@ -173,7 +173,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # along +y/+z in 2D/3D
 # ====================================================================================================
 Vessel.use_rod       = true           # Rod is on/off
-Vessel.use_shroom    = false          # Plate is on/off
+Vessel.use_shroom    = false           # Plate is on/off
 
 Vessel.rod_point     = 0. 7.5E-2      # Rod center point
 Vessel.rod_radius    = 500E-6         # Rod radius
