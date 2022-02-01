@@ -2743,23 +2743,28 @@ void CdrPlasmaStepper::extrapolateVectorToDomainFaces(EBAMRIFData&             a
   this->projectDomain(a_domainData, domainVector);
 }
 
-void CdrPlasmaStepper::extrapolateVelocitiesVectorDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
+void CdrPlasmaStepper::extrapolateVelocitiesToDomainFaces(Vector<EBAMRIFData*>&         a_domainVelocities,
 							      const phase::which_phase      a_phase,
-							      const Vector<EBAMRCellData*>& a_velocities){
-  CH_TIME("CdrPlasmaStepper::extrapolateVelocitiesVectorDomainFaces");
+							      const Vector<EBAMRCellData*>& a_cellVelocities){
+  CH_TIME("CdrPlasmaStepper::extrapolateVelocitiesToDomainFaces(Vector<EBAMRIFData*>, phase, Vector<EBAMRCellData*>)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::extrapolateVelocitiesVectorDomainFaces)" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateVelocitiesToDomainFaces(Vector<EBAMRIFData*>, phase, Vector<EBAMRCellData*>)" << endl;
   }
 
-  //  for(int i = 0; i < a_extrap.size(); i++){
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+  CH_assert(a_domainVelocities.size() == a_cellVelocities.size());
+
+  // Go through CDR solvers and call the general extrapolation function. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     const RefCountedPtr<CdrSolver>& solver = solverIt();
-    const int idx = solverIt.index();
+
+    const int idx = solverIt.index();    
+
+    // If the solver is mobile, extrapolate. Otherwise, set the domain data to zero. 
     if(solver->isMobile()){
-      extrapolateVectorToDomainFaces(*a_extrap[idx], a_phase, *a_velocities[idx]);
+      this->extrapolateVectorToDomainFaces(*a_domainVelocities[idx], a_phase, *a_cellVelocities[idx]);
     }
     else{
-      DataOps::setValue(*a_extrap[idx], 0.0);
+      DataOps::setValue(*a_domainVelocities[idx], 0.0);
     }
   }
 }

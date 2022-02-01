@@ -1682,7 +1682,7 @@ void CdrPlasmaImExSdcStepper::computeCdrDomainFluxes(const Vector<EBAMRCellData*
 
   // Compute extrapolated velocities and fluxes at the domain faces
   this->extrapolateToDomainFaces(extrap_cdr_densities,         m_cdr->getPhase(), a_phis);
-  this->extrapolateVelocitiesVectorDomainFaces(extrap_cdr_velocities, m_cdr->getPhase(), cdr_velocities);
+  this->extrapolateVelocitiesToDomainFaces(extrap_cdr_velocities, m_cdr->getPhase(), cdr_velocities);
   this->computeExtrapolatedDomainFluxes(extrap_cdr_fluxes,     a_phis,           cdr_velocities, m_cdr->getPhase());
   this->extrapolateVectorToDomainFaces(extrap_cdr_gradients,  m_cdr->getPhase(), cdr_gradients);
 

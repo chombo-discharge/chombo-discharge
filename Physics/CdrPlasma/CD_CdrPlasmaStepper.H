@@ -956,18 +956,22 @@ namespace Physics {
 						  const EBAMRCellData&     a_cellData);
 
 
-      // CODE WALK BEGINS HERE            
-      virtual void extrapolateVelocitiesVectorDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
+      /*!
+	@brief Extrapolate velocities data to domain faces. This is the AMR version that does all species. 
+	@details This will extrapolate the velocities data to domain faces.
+	@param[out] a_domainVelocities Domain-centered velocities. Must have SpaceDim components. 
+	@param[in]  a_phase            Phase
+	@param[in]  a_cellData         Cell-centered velocities. Must have SpaceDim components. 
+      */      
+      virtual void extrapolateVelocitiesToDomainFaces(Vector<EBAMRIFData*>&             a_domainVelocities,
 							  const phase::which_phase      a_phase,
-							  const Vector<EBAMRCellData*>& a_data);
+							  const Vector<EBAMRCellData*>& a_cellVelocities);
 
+      // CODE WALK BEGINS HERE                  
       /*!
 	@brief Get maximum value of the cdr solver stuff
       */
       virtual void getCdrMax(Real& a_cdr_max, std::string& a_solver_name);
-
-
-
 
 
       /*!
@@ -989,8 +993,6 @@ namespace Physics {
 	@brief Project flux on the boundary normal
       */
       virtual void projectDomain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux);
-
-
 
       /*!
 	@brief Regrid internal storage. This MUST be overwritten.

@@ -758,7 +758,7 @@ void CdrPlasmaGodunovStepper::computeCdrDomainFluxes(){
 
   // Compute extrapolated velocities and fluxes at the domain faces
   this->extrapolateToDomainFaces(extrap_cdr_densities,         m_cdr->getPhase(), states);
-  this->extrapolateVelocitiesVectorDomainFaces(extrap_cdr_velocities,   m_cdr->getPhase(), cdr_velocities);
+  this->extrapolateVelocitiesToDomainFaces(extrap_cdr_velocities,   m_cdr->getPhase(), cdr_velocities);
   this->computeExtrapolatedDomainFluxes(extrap_cdr_fluxes,     states,             cdr_velocities, m_cdr->getPhase());
   this->extrapolateVectorToDomainFaces(extrap_cdr_gradients,  m_cdr->getPhase(), cdr_gradients);
 
