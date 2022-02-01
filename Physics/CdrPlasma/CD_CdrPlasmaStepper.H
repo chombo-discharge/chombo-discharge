@@ -967,127 +967,124 @@ namespace Physics {
 							  const phase::which_phase      a_phase,
 							  const Vector<EBAMRCellData*>& a_cellVelocities);
 
-      // CODE WALK BEGINS HERE                  
       /*!
-	@brief Get maximum value of the cdr solver stuff
+	@brief Get maximum density in the CDR species. This will fetch both the value and the solver name. 
+	@param[out] a_cdrMax     Maximum density found in one of the CDR solvers
+	@param[out] a_solverName The solver name
       */
-      virtual void getCdrMax(Real& a_cdr_max, std::string& a_solver_name);
-
+      virtual void getCdrMax(Real& a_cdrMax, std::string& a_solverName) const;
 
       /*!
-	@brief Initialize sigma
+	@brief Initialize the surface charge. 
       */
       virtual void initialSigma();
 
       /*!
-	@brief Project flux
+	@brief Project a flux onto the EB normal. This is the AMR version. 
+	@param[out] a_projectedFlux Projected flux -- must have one component. 
+	@param[in]  a_flux          Vector flux -- must have SpaceDim components.
       */
-      virtual void projectFlux(LevelData<BaseIVFAB<Real> >& a_proj_flux, const LevelData<BaseIVFAB<Real> >& a_flux, const int a_lvl);
+      virtual void projectFlux(EBAMRIVData& a_projectedFlux, const EBAMRIVData& a_flux);
 
       /*!
-	@brief Extrapolated flux to EB and project it onto the normal
+	@brief Project a flux onto the EB normal. This is the level version. 
+	@param[out] a_projectedFlux Projected flux -- must have one component. 
+	@param[in]  a_flux          Vector flux -- must have SpaceDim components.
       */
-      virtual void projectFlux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux);
+      virtual void projectFlux(LevelData<BaseIVFAB<Real> >& a_projectedFlux, const LevelData<BaseIVFAB<Real> >& a_flux, const int a_lvl);
 
       /*!
-	@brief Project flux on the boundary normal
+	@brief Project flux onto domain edges/faces.
+	@param[out] a_projectedFlux Projected flux -- must have one component. 
+	@param[in]  a_flux          Vector flux -- must have SpaceDim components.
       */
-      virtual void projectDomain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux);
+      virtual void projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData& a_flux);
 
       /*!
-	@brief Regrid internal storage. This MUST be overwritten.
+	@brief Regrid internal storage. This MUST be overwritten by implementations. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
       */
       virtual void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
 
       /*!
-	@brief Regrid individual solvers
+	@brief Regrid all of our solvers. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
       */
       virtual void regridSolvers(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
       /*!
-	@brief Set data defined over dielectric cells to zero
+	@brief Set data defined over dielectric cells to zero.
+	@param[in] a_data EB-centered data. 
       */
-      virtual void resetDielectricCells(EBAMRIVData& a_data);
+      virtual void resetDielectricCells(EBAMRIVData& a_data) const;
 
       /*!
-	@brief Do a sanity check
+	@brief Do a sanity check. Only works when DEBUG=TRUE.
       */
-      virtual void sanityCheck();
+      virtual void sanityCheck() const;
+
+
 
       /*!
-	@brief Set fast rte
-      */
-      virtual void setFastRadiativeTransfer(const int a_fast_rte);
-
-      /*!
-	@brief Set fast rte
-      */
-      virtual void setFastPoisson(const int a_fast_poisson);
-
-      /*!
-	@brief Set hardcap on the time step
-      */
-      virtual void setMinDt(const Real a_min_dt);
-
-      /*!
-	@brief Set hardcap on the time step
-      */
-      virtual void setMaxDt(const Real a_min_dt);
-
-      /*!
-	@brief Set CFL condition
-      */
-      virtual void setCFL(const Real a_cfl);
-
-      /*!
-	@brief Set fudge factor for relaxation time
-      */
-      virtual void setRelaxTime(const Real a_relax_time);
-
-      /*!
-	@brief Set plasma kinetics
-      */
-      virtual void setCdrPlasmaPhysics(const RefCountedPtr<CdrPlasmaPhysics>& a_physics);
-
-      /*!
-	@brief Set solver verbosity
-      */
-      virtual void setSolverVerbosity();
-
-      /*!
-	@brief Setup the cdr solvers
+	@brief Setup the CDR solvers. 
       */
       virtual void setupCdr();
 
       /*!
-	@brief Setup the poisson solver
+	@brief Setup the field solver
       */
       virtual void setupPoisson();
 
       /*!
-	@brief Setup the rte solvers
+	@brief Setup the RTE solvers
       */
       virtual void setupRadiativeTransfer();
 
       /*!
-	@brief Instantiate the sigma solver
+	@brief Set up the surface charge solver. 
       */
       virtual void setupSigma();
 
       /*!
-	@brief Solver dumps data files
+	@brief Set solver verbosity.
+	@details This will set the solver verbosity to m_solverVerbosity. 
+      */
+      virtual void setSolverVerbosity();            
+
+      /*!
+	@brief All solvers writes plot files. These are *not* the same as the plot files written by Driver. 
       */
       virtual void solverDump();
 
       /*!
-	@brief Set potential
+	@brief Set voltage curve.
+	@param[in] a_voltage Voltage curve
       */
-      virtual void setVoltage(std::function<Real(const Real a_time)> a_potential);
+      virtual void setVoltage(std::function<Real(const Real a_time)> a_voltage);
+
+      // CODE WALK BEGINS HERE                                    
 
       /*!
-	@brief RTE advance using data existing in other solvers
+	@brief Solve the radiative transfer problem. 
+	@details This will call the other version with states taken from the solvers. 
+	@param[in] a_dt Time step.
       */
       virtual void solveRadiativeTransfer(const Real a_dt);
+
+      /*!
+	@brief General RTE advance routine
+	@details This computes the source terms at the specified time and then advances the solution
+      */
+      virtual void solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_phis,
+					  Vector<EBAMRCellData*>&       a_rhs,
+					  const Vector<EBAMRCellData*>& a_cdr_states,
+					  const EBAMRCellData&          a_E,
+					  const Real                    a_time,
+					  const Real                    a_dt);      
 
       /*!
 	@brief Set the cdr layout
@@ -1104,16 +1101,7 @@ namespace Physics {
       */
       virtual void setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver> >& a_rte);
 
-      /*!
-	@brief General RTE advance routine
-	@details This computes the source terms at the specified time and then advances the solution
-      */
-      virtual void solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_phis,
-					  Vector<EBAMRCellData*>&       a_rhs,
-					  const Vector<EBAMRCellData*>& a_cdr_states,
-					  const EBAMRCellData&          a_E,
-					  const Real                    a_time,
-					  const Real                    a_dt);
+
 
       /*!
 	@brief Compute the ohmic current on electrodes
@@ -1245,7 +1233,7 @@ namespace Physics {
       /*!
 	@brief Set the potential
       */
-      std::function<Real(const Real a_time) > m_potential;
+      std::function<Real(const Real a_time) > m_voltage;
   
       /*!
 	@brief Minimum allowed time step
