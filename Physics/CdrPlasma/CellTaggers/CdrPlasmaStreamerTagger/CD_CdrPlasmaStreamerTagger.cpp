@@ -121,16 +121,12 @@ bool CdrPlasmaStreamerTagger::refineCell(const RealVect         a_pos,
 					 const int              a_lvl,
 					 const Vector<Real>     a_tracers,
 					 const Vector<RealVect> a_gradTracers) const {
-  bool refine = false;
-
   // TLDR: Refine if either criterion are met.   
   
   const bool refine1 = a_gradTracers[0].vectorLength()*a_dx/a_tracers[0] > m_refiCurv;
   const bool refine2 = a_tracers[1]*a_dx > m_refiAlpha;
 
-  refine = refine1 || refine2;
-
-  return refine:
+  return refine1 || refine2;
 }
 
 #include <CD_NamespaceFooter.H>
