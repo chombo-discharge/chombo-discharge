@@ -1104,25 +1104,27 @@ namespace Physics {
       */
       virtual Real computeDielectricCurrent();
 
-      // CODE WALK BEGINS HERE                                                      
-
       /*!
 	@brief Compute the ohmic current through the domain faces
+	@details This will compute the total current through domain faces and return it. 
       */
       virtual Real computeDomainCurrent();
 
       /*!
-	@brief Compute induced current in external circuit due to ohmic conduction
+	@brief Compute induced current in external circuit due to ohmic conduction.
+	@details This will return int(E*J dV) over the entire domain. 
       */
       virtual Real computeOhmicInductionCurrent();
-			     
+
+
       /*!
-	@brief Compute the relaxation time
+	@brief Compute the relaxation time as dt = eps0/conductivity. 
       */
       virtual Real computeRelaxationTime();
 
       /*!
 	@brief Restrict dt
+	@details This is used for restricting the time step. 
       */
       virtual Real restrictDt() = 0;
 
@@ -1131,10 +1133,7 @@ namespace Physics {
       */
       virtual Real getDt();
 
-      /*!
-	@brief Get the CFL time step
-      */
-      virtual Real getCflDt();
+      // CODE WALK BEGINS HERE      
 
       /*!
 	@brief Get cdr solvers
@@ -1259,7 +1258,7 @@ namespace Physics {
       /*!
 	@brief Computed CFL time step
       */
-      Real m_dt_cfl;
+      Real m_dtCFL;
 
       /*!
 	@brief Verbosity for solvers

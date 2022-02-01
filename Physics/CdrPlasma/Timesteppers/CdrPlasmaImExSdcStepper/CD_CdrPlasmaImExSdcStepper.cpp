@@ -1130,7 +1130,7 @@ void CdrPlasmaImExSdcStepper::computeNewDt(bool& a_accept_step, const Real a_dt,
 
   // If a_dt was the smallest possible CFL or hardcap time step, we just have to accept it
   const Real max_gl_dist = CdrPlasmaImExSdcStepper::getMaxNodeDistance();
-  Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist; // This is the smallest time step ON THE FINEST LEVEL
+  Real dt_cfl = 2.0*m_dtCFL/max_gl_dist; // This is the smallest time step ON THE FINEST LEVEL
 
   // Try time step
   const Real rel_err    = (m_safety*m_err_thresh)/m_max_error;
@@ -1213,9 +1213,9 @@ void CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
     Nref = Nref*m_amr->getRefinementRatios()[lvl];
   }
   const Real max_gl_dist = CdrPlasmaImExSdcStepper::getMaxNodeDistance();
-  m_dt_cfl = m_cdr->computeAdvectionDt();
+  m_dtCFL = m_cdr->computeAdvectionDt();
 
-  Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
+  Real dt_cfl = 2.0*m_dtCFL/max_gl_dist;
   
   // Time step selection for non-adaptive stepping
   if(!m_adaptive_dt){
@@ -1902,7 +1902,7 @@ void CdrPlasmaImExSdcStepper::writeStepProfile(const Real a_dt,
       << std::left << std::setw(width) << a_corrections << "\t"
       << std::left << std::setw(width) << a_rejections << "\t"
       << std::left << std::setw(width) << m_max_error << "\t"
-      << std::left << std::setw(width) << m_dt_cfl << "\t"
+      << std::left << std::setw(width) << m_dtCFL << "\t"
       << endl;
   }
 }

@@ -3935,113 +3935,152 @@ Real CdrPlasmaStepper::computeDielectricCurrent() {
 }
 
 Real CdrPlasmaStepper::computeDomainCurrent() {
-  CH_TIME("CdrPlasmaStepper::computeDomainCurrent");
+  CH_TIME("CdrPlasmaStepper::computeDomainCurrent()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeDomainCurrent" << endl;
+    pout() << "CdrPlasmaStepper::computeDomainCurrent()" << endl;
   }
 
-  const int comp = 0;
+  // TLDR: We fetch the domain boundary condition flux from the CDR solvers and compute the current from that. 
 
-  // Need to copy onto temporary storage because 
-  EBAMRIFData chargeFlux;
-  m_amr->allocate(chargeFlux, m_realm, m_cdr->getPhase(), 1);
-  DataOps::setValue(chargeFlux, 0.0);
-  
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const RefCountedPtr<CdrSolver>& solver = solverIt();
-    const RefCountedPtr<CdrSpecies>& spec      = solverIt.getSpecies();
-    const EBAMRIFData& solver_flux          = solver->getDomainFlux();
+  constexpr int comp = 0;
 
-    DataOps::incr(chargeFlux, solver_flux, spec->getChargeNumber()*Units::Qe);
+  // Create a data holder that allows us to hold the current density on the surface. I.e., this is
+  // the projection of the current density J along the domain normal n. 
+  EBAMRIFData currentDensity;
+  m_amr->allocate(currentDensity, m_realm, m_cdr->getPhase(), 1);
+  DataOps::setValue(currentDensity, 0.0);
+
+  // Iterate through the CDR solvers and add contributions to the current density. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solverIt.getSpecies();
+    
+    const int Z = species->getChargeNumber();
+
+    if(Z != 0){
+      const EBAMRIFData& solverFlux = solver->getDomainFlux();
+      
+      DataOps::incr(currentDensity, solverFlux, Z*Units::Qe);
+    }
   }
 
+  // Integrate the current on the coarsest grid level. 
   const int integrationLevel = 0;
-  Real sum = 0.0;
-  const Real dx = m_amr->getDx()[integrationLevel];
-  for (DataIterator dit = m_amr->getGrids(m_realm)[integrationLevel].dataIterator(); dit.ok(); ++dit){
-    const DomainFluxIFFAB& flux = (*chargeFlux[integrationLevel])[dit()];
+  Real current = 0.0;
+
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[integrationLevel];
+
+  // Iterate through patches on the integration level.
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box cellBox           = dbl[dit()];
+    const DomainFluxIFFAB& flux = (*currentDensity[integrationLevel])[dit()];
 
     for (int dir = 0; dir < SpaceDim; dir++){
       for (SideIterator sit; sit.ok(); ++sit){
 	const BaseIFFAB<Real>& fluxdir = flux(dir, sit());
 
-	FaceStop::WhichFaces stopcrit = FaceStop::AllBoundaryOnly;
-	const IntVectSet& ivs  = fluxdir.getIVS();
-	const EBGraph& ebgraph = fluxdir.getEBGraph();
+	// -1 on the low side and +1 on the high side. 
+	const int s = sign(sit());
 
-	for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	  sum += sign(sit())*fluxdir(faceit(), comp);
-	}
+	// This is our kernel. 
+	auto kernel = [&](const FaceIndex& face) -> void {
+	  current += s * fluxdir(face, comp);
+	};
+
+	// Kernel region. We only do boundary faces and no ghost faces. 
+	FaceStop::WhichFaces stopcrit = FaceStop::AllBoundaryOnly;
+	const IntVectSet ivs   = fluxdir.getIVS() & cellBox;;
+	const EBGraph& ebgraph = fluxdir.getEBGraph();
+	
+	FaceIterator faceit(ivs, ebgraph, dir, stopcrit);
+
+	// Launch the kernel
+	BoxLoops::loop(faceit, kernel);
+	  
       }
     }
   }
 
-  sum *= pow(dx, SpaceDim-1);
+  // Normalize by surface area. 
+  const Real dx = m_amr->getDx()[integrationLevel];  
+  current *= pow(dx, SpaceDim-1);
 
+  // Sum over MPI ranks. 
+  current = ParallelOps::sum(current);
 
-#ifdef CH_MPI
-  const Real sum1 = sum;
-  sum = EBLevelDataOps::parallelSum(sum1);  
-#endif
-
-  return sum;
+  return current;
 }
 
 Real CdrPlasmaStepper::computeOhmicInductionCurrent() {
-  CH_TIME("CdrPlasmaStepper::computeRelaxationTime");
+  CH_TIME("CdrPlasmaStepper::computeOhmicInductionCurrent");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeRelaxationTime" << endl;
+    pout() << "CdrPlasmaStepper::computeOhmicInductionCurrent" << endl;
   }
 
   Real current = 0.0;
 
-  EBAMRCellData J, E, JdotE;
-  m_amr->allocate(J,     m_realm, m_cdr->getPhase(), SpaceDim);
-  m_amr->allocate(E,     m_realm, m_cdr->getPhase(), SpaceDim);
-  m_amr->allocate(JdotE, m_realm, m_cdr->getPhase(), SpaceDim);
+  // Allocate data that can holder the various parts. 
+  EBAMRCellData J;
+  EBAMRCellData E;
+  EBAMRCellData JdotE;
+  
+  m_amr->allocate(J,     m_realm, m_phase, SpaceDim);
+  m_amr->allocate(E,     m_realm, m_phase, SpaceDim);
+  m_amr->allocate(JdotE, m_realm, m_phase, 1       );
 
+  // Compute the electric field and the current density. 
   this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
   this->computeJ(J);
 
-  // Compute J.dot.E 
-  DataOps::dotProduct(JdotE, J,E);
+  // Compute the dot product between E and J and coarsen it. 
+  DataOps::dotProduct(JdotE, J, E);
+
+  // Coarsen so we can integrate on the coarsest level. 
   m_amr->averageDown(JdotE, m_realm, m_cdr->getPhase());
 
-  // Only compue on coarsest level
-  const int coar = 0;
-  const Real dx  = m_amr->getDx()[coar];
-  DataOps::kappaSum(current, *JdotE[coar]);
+  // Integrate on the coarsest level. 
+  const int integrationLevel = 0;
+
+  DataOps::kappaSum(current, *JdotE[integrationLevel]);
+
+  // kappaSum only does the sum, we need int(dV) so multiply by dx^SpaceDim. 
+  const Real dx  = m_amr->getDx()[integrationLevel];  
   current *= pow(dx, SpaceDim);
 
   return current;
 }
 
 Real CdrPlasmaStepper::computeRelaxationTime() {
-  CH_TIME("CdrPlasmaStepper::computeRelaxationTime");
+  CH_TIME("CdrPlasmaStepper::computeRelaxationTime()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeRelaxationTime" << endl;
+    pout() << "CdrPlasmaStepper::computeRelaxationTime()" << endl;
   }
 
   // TLDR: This computes the relaxation time as t = eps0/conductivity. Simple as that. 
 
+  // Allocate some data that can hold the conductivity and eps0/conductivity. 
   EBAMRCellData relaxTime;
   EBAMRCellData conductivity;
 
   m_amr->allocate(relaxTime,    m_realm, phase::gas, 1);
   m_amr->allocate(conductivity, m_realm, phase::gas, 1);
 
+  // Compute the conductivity. 
   this->computeCellConductivity(conductivity);
 
+  // Coarsen it and put it on centroids. 
   m_amr->averageDown  (conductivity, m_realm, phase::gas);
   m_amr->interpGhostMG(conductivity, m_realm, phase::gas);
   
   m_amr->interpToCentroids(conductivity, m_realm, phase::gas);  
 
+  // Compute relaxTime = eps0/conductivity
   DataOps::setValue(relaxTime, Units::eps0);
   DataOps::divideByScalar(relaxTime, conductivity);
 
-  Real maxVal;
-  Real minVal;
+  // Get the largest/smallest value in the data holder and return the smallest. This will be our relaxation time. 
+  Real maxVal = -std::numeric_limits<Real>::max();
+  Real minVal =  std::numeric_limits<Real>::max();
 
   DataOps::getMaxMinNorm(maxVal, minVal, relaxTime);
   
@@ -4054,10 +4093,6 @@ Real CdrPlasmaStepper::getTime() const {
 
 Real CdrPlasmaStepper::getDt() {
   return m_dt;
-}
-
-Real CdrPlasmaStepper::getCflDt() {
-  return m_dt_cfl;
 }
 
 RefCountedPtr<CdrLayout<CdrSolver>>& CdrPlasmaStepper::getCdrSolvers() {
@@ -4437,7 +4472,7 @@ void CdrPlasmaStepper::printStepReport() {
   std::string solver_max;
   this->getCdrMax(nmax, solver_max);
 
-  const Real cfl_dt = this->getCflDt();
+  const Real cfl_dt = m_dtCFL;
 
   std::string str;
   if(m_timeCode == TimeCode::Advection){

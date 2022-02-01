@@ -1307,16 +1307,16 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
 
   // Restrict by advection or advection-diffusion. 
   if(m_WhichDiffusionAlgorithm == WhichDiffusionAlgorithm::Explicit){
-    m_dt_cfl   = m_cdr->computeAdvectionDiffusionDt();
+    m_dtCFL   = m_cdr->computeAdvectionDiffusionDt();
     
     a_timeCode = TimeCode::AdvectionDiffusion;
-    a_dt       = m_cfl*m_dt_cfl;
+    a_dt       = m_cfl*m_dtCFL;
   }
   else if(m_WhichDiffusionAlgorithm == WhichDiffusionAlgorithm::Implicit){
-    m_dt_cfl   = m_cdr->computeAdvectionDt();
+    m_dtCFL   = m_cdr->computeAdvectionDt();
     a_timeCode = TimeCode::Advection;
 
-    a_dt = m_cfl*m_dt_cfl;
+    a_dt = m_cfl*m_dtCFL;
   }
   else if (m_WhichDiffusionAlgorithm == WhichDiffusionAlgorithm::Automatic){
     const Real advection_dt = m_cdr->computeAdvectionDt();
@@ -1325,19 +1325,19 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
     if(diffusion_dt < advection_dt){
       m_implicit_diffusion = true;
 
-      m_dt_cfl   = advection_dt;
-      a_dt       = m_cfl*m_dt_cfl;
+      m_dtCFL   = advection_dt;
+      a_dt       = m_cfl*m_dtCFL;
       a_timeCode = TimeCode::Advection;
     }
     else {
       m_implicit_diffusion = false;
 
-      m_dt_cfl   = m_cdr->computeAdvectionDiffusionDt();
-      a_dt       = m_cfl*m_dt_cfl;
+      m_dtCFL   = m_cdr->computeAdvectionDiffusionDt();
+      a_dt       = m_cfl*m_dtCFL;
       a_timeCode = TimeCode::AdvectionDiffusion;
     }
 
-    m_dt_cfl = a_dt/m_cfl;
+    m_dtCFL = a_dt/m_cfl;
   }
 
   // Below here we restrict by relaxation time and hardcaps. 
