@@ -27,68 +27,71 @@ typedef CdrPlasmaGodunovStepper::FieldStorage   FieldStorage;
 typedef CdrPlasmaGodunovStepper::RtStorage      RtStorage;
 typedef CdrPlasmaGodunovStepper::SigmaStorage   SigmaStorage;
 
-CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper(){
-  m_className = "CdrPlasmaGodunovStepper";
-  m_extrap_advect = true;
-}
-
 CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics){
+  CH_TIME("CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper()");
+
+  // Default settings
   m_className    = "CdrPlasmaGodunovStepper";
   m_physics       = a_physics;
-  m_extrap_advect = true;
+  m_extrapAdvect = true;
 }
 
 CdrPlasmaGodunovStepper::~CdrPlasmaGodunovStepper(){
-
+  CH_TIME("CdrPlasmaGodunovStepper::~CdrPlasmaGodunovStepper()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaGodunovStepper::~CdrPlasmaGodunovStepper" << endl;
+  }
 }
 
 void CdrPlasmaGodunovStepper::parseOptions(){
-  CH_TIME("CdrPlasmaGodunovStepper::parseOptions");
+  CH_TIME("CdrPlasmaGodunovStepper::parseOptions()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::parseOptions" << endl;
+    pout() << "CdrPlasmaGodunovStepper::parseOptions()" << endl;
   }
 
-  parseVerbosity();
-  parseSolverVerbosity();
-  parseFastPoisson();
-  parseFastRadiativeTransfer();
-  parseCFL();
-  parseRelaxationTime();
-  parseMinDt();
-  parseMaxDt();
-  parseSourceComputation();
-  parseDiffusion();
-  parseTransport();
-  parseAdvection();
-  parseFloor();
-  parseDebug();
-  parseFHD();
+  // Parse various options. 
+  this->parseVerbosity();
+  this->parseSolverVerbosity();
+  this->parseFastPoisson();
+  this->parseFastRadiativeTransfer();
+  this->parseCFL();
+  this->parseRelaxationTime();
+  this->parseMinDt();
+  this->parseMaxDt();
+  this->parseSourceComputation();
+  this->parseDiffusion();
+  this->parseTransport();
+  this->parseAdvection();
+  this->parseFloor();
+  this->parseDebug();
+  this->parseFHD();
 }
 
 void CdrPlasmaGodunovStepper::parseRuntimeOptions(){
-  CH_TIME("CdrPlasmaGodunovStepper::parseRuntimeOptions");
+  CH_TIME("CdrPlasmaGodunovStepper::parseRuntimeOptions()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::parseRuntimeOptions" << endl;
+    pout() << "CdrPlasmaGodunovStepper::parseRuntimeOptions()" << endl;
   }
 
-  parseVerbosity();
-  parseSolverVerbosity();
-  parseFastPoisson();
-  parseFastRadiativeTransfer();
-  parseCFL();
-  parseRelaxationTime();
-  parseMinDt();
-  parseMaxDt();
-  parseSourceComputation();
-  parseDiffusion();
-  parseTransport();
-  parseAdvection();
-  parseFloor();
-  parseDebug();
-  parseFHD();
+  this->parseVerbosity();
+  this->parseSolverVerbosity();
+  this->parseFastPoisson();
+  this->parseFastRadiativeTransfer();
+  this->parseCFL();
+  this->parseRelaxationTime();
+  this->parseMinDt();
+  this->parseMaxDt();
+  this->parseSourceComputation();
+  this->parseDiffusion();
+  this->parseTransport();
+  this->parseAdvection();
+  this->parseFloor();
+  this->parseDebug();
+  this->parseFHD();
 
-  m_cdr->parseRuntimeOptions();
-  m_rte->parseRuntimeOptions();
+  // Solvers also parse their runtime options. 
+  m_cdr        ->parseRuntimeOptions();
+  m_rte        ->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
 }
 
@@ -103,15 +106,15 @@ void CdrPlasmaGodunovStepper::parseDiffusion(){
   std::string str;
   pp.get("diffusion", str);
   if(str == "explicit"){
-    m_implicit_diffusion = false;
+    m_implicitDiffusion = false;
     m_WhichDiffusionAlgorithm = WhichDiffusionAlgorithm::Explicit;
   }
   else if(str == "implicit"){
-    m_implicit_diffusion = true;
+    m_implicitDiffusion = true;
     m_WhichDiffusionAlgorithm = WhichDiffusionAlgorithm::Implicit;
   }
   else if(str == "auto"){
-    m_implicit_diffusion = true;
+    m_implicitDiffusion = true;
     m_WhichDiffusionAlgorithm = WhichDiffusionAlgorithm::Automatic;
   }
   else{
@@ -154,10 +157,10 @@ void CdrPlasmaGodunovStepper::parseAdvection(){
   std::string str;
   pp.get("extrap_advect", str);
   if(str == "true"){
-    m_extrap_advect = true;
+    m_extrapAdvect = true;
   }
   else if(str == "false"){
-    m_extrap_advect = false;
+    m_extrapAdvect = false;
   }
   else{
     MayDay::Abort("CdrPlasmaGodunovStepper::parseAdvection - unknown argument");
@@ -186,30 +189,20 @@ void CdrPlasmaGodunovStepper::parseFloor(){
 }
 
 void CdrPlasmaGodunovStepper::parseDebug(){
-  CH_TIME("CdrPlasmaGodunovStepper::parseDebug");
+  CH_TIME("CdrPlasmaGodunovStepper::parseDebug()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::parseDebug" << endl;
+    pout() << "CdrPlasmaGodunovStepper::parseDebug()" << endl;
   }
 
   ParmParse pp(m_className.c_str());
 
-  std::string str;
-  pp.get("debug", str);
-  if(str == "true"){
-    m_debug = true;
-  }
-  else if(str == "false"){
-    m_debug = false;
-  }
-  else{
-    MayDay::Abort("CdrPlasmaGodunovStepper::parseDebug - unknown argument requested.");
-  }
+  pp.get("debug", m_debug);
 }
 
 void CdrPlasmaGodunovStepper::parseFHD(){
-  CH_TIME("CdrPlasmaGodunovStepper::parseFHD");
+  CH_TIME("CdrPlasmaGodunovStepper::parseFHD()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::parseFHD" << endl;
+    pout() << "CdrPlasmaGodunovStepper::parseFHD()" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -217,21 +210,12 @@ void CdrPlasmaGodunovStepper::parseFHD(){
   pp.get("fhd", m_fhd);
 }
 
-bool CdrPlasmaGodunovStepper::needToRegrid(){
-  CH_TIME("CdrPlasmaGodunovStepper::deallocateInternals");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::needToRegrid" << endl;
-  }
-
-  return false;
-}
-
 RefCountedPtr<CdrStorage>& CdrPlasmaGodunovStepper::getCdrStorage(const CdrIterator<CdrSolver>& a_solverit){
-  return m_cdr_scratch[a_solverit.index()];
+  return m_cdrScratch[a_solverit.index()];
 }
 
 RefCountedPtr<RtStorage>& CdrPlasmaGodunovStepper::getRtStorage(const RtIterator<RtSolver>& a_solverit){
-  return m_rte_scratch[a_solverit.index()];
+  return m_rteScratch[a_solverit.index()];
 }
 
 Real CdrPlasmaGodunovStepper::restrictDt(){
@@ -244,26 +228,29 @@ Real CdrPlasmaGodunovStepper::restrictDt(){
 }
 
 Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
-  CH_TIME("CdrPlasmaGodunovStepper::advance");
+  CH_TIME("CdrPlasmaGodunovStepper::advance(Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::advance" << endl;
+    pout() << "CdrPlasmaGodunovStepper::advance(Real)" << endl;
   }
 
-  // INFO: When we enter here, the CdrSolver have updated ghost cells (either linear or quadratic) and should have been
-  // filled with velocities and diffusion coefficients. The steps are:
+  // INFO: When we enter here, the CdrSolvers should have been filled with velocities and diffusion coefficients.
   //
-  // 1. Advance transport
-  // 2. Solve the Poisson equation (special option for semi-implicit transport)
-  // 3. 
+  // The next steps are:
+  //
+  //    1. Advance transport
+  //    2. Solve the Poisson equation (special option for semi-implicit transport)
+  //    3. Solve the reactive problem.
+  //    4. Solve the radiative transfer problem
+  //    5. Put data back into solvers to prepare for the next time step. 
 
   Timer timer("GodunovStepper::advance");
 
-  // Transport
+  // 1. Solve the transport problem. Note that we call advanceTransport which holds the implementation. This differs for explicit and semi-implicit formulations.
   timer.startEvent("Transport");
   CdrPlasmaGodunovStepper::advanceTransport(a_dt);
   timer.stopEvent("Transport");  
 
-  // Compute electric field.
+  // 2. Solve the Poisson equation and compute the electric field. If we did a semi-implicit solve then the field has already been computed.
   if(m_transportAlgorithm != TransportAlgorithm::SemiImplicit){  
     timer.startEvent("Poisson");
     if((m_timeStep +1) % m_fastPoisson == 0){
@@ -273,25 +260,25 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
     timer.stopEvent("Poisson");
   }
 
-  // Advance the reaction network
+  // 3. Solve the reactive problem. 
   timer.startEvent("Reactions");
   CdrPlasmaGodunovStepper::computeCdrGradients();        
   CdrPlasmaGodunovStepper::computeReactionNetwork(a_dt); 
   timer.stopEvent("Reactions");  
 
-  // Radiative transfer. 
+  // 4. Solve the radiative transfer problem. 
   timer.startEvent("Photons");
   if((m_timeStep +1) % m_fastRTE == 0){
-    CdrPlasmaGodunovStepper::advanceRadiativeTransfer(a_dt);              // Update RTE equations
+    CdrPlasmaGodunovStepper::advanceRadiativeTransfer(a_dt);
   }
   timer.stopEvent("Photons");  
 
-  // Post step
+  // Do post step operations. 
   timer.startEvent("Post-step");
   CdrPlasmaGodunovStepper::postStep();
   timer.stopEvent("Post-step");  
   
-  // Update velocities and diffusion coefficients. We don't do sources here.
+  // 5. Update velocities and diffusion coefficients in order to prepare for the next time step. 
   timer.startEvent("Velocities");
   CdrPlasmaGodunovStepper::computeCdrDriftVelocities(m_time + a_dt);
   timer.stopEvent("Velocities");
@@ -308,69 +295,79 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
 }
 
 void CdrPlasmaGodunovStepper::preRegrid(const int a_lbase, const int a_finestLevel) {
-  CH_TIME("CdrPlasmaGodunovStepper::preRegrid");
+  CH_TIME("CdrPlasmaGodunovStepper::preRegrid(int, int)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::preRegrid" << endl;
+    pout() << "CdrPlasmaGodunovStepper::preRegrid(int, int)" << endl;
   }
 
+  // Call the parent method -- this will put all solvers in pre-regrid mode. 
   CdrPlasmaStepper::preRegrid(a_lbase, a_finestLevel);
 
-  // Allocate and compute the cell-centered conductivity. We need to regrid it.
+  // When we regrid we must compute the field on the new grid using the semi-implicit update. However, we only have
+  // the conductivities and space charge on the old grids, so we must store them and interpolate them to the new grids.
   if(m_transportAlgorithm == TransportAlgorithm::SemiImplicit){
     m_amr->allocate(m_scratchConductivity,    m_realm, phase::gas, 1);
     m_amr->allocate(m_scratchSemiImplicitRho, m_realm, phase::gas, 1);
 
-    DataOps::copy(m_scratchConductivity,    m_conductivityFactor);
-    DataOps::copy(m_scratchSemiImplicitRho, m_semiImplicitRho   );    
+    DataOps::copy(m_scratchConductivity,    m_conductivityFactorCell);
+    DataOps::copy(m_scratchSemiImplicitRho, m_semiImplicitRho       );    
   }
 }
 
 void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
-  CH_TIME("CdrPlasmaGodunovStepper::regrid");
+  CH_TIME("CdrPlasmaGodunovStepper::regrid(int, int, int)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::regrid" << endl;
+    pout() << "CdrPlasmaGodunovStepper::regrid(int, int, int)" << endl;
   }
+
+  // TLDR: If we are not using a semi-implicit scheme then we can just call the parent method. Modifications are needed for the
+  //       semi-implicit scheme because we solve for the field using div((eps + dt*sigma^k/eps0)E^(k+1)) = -rho^(k+1)/eps0 but
+  //       this means we need the conductivity and space charge at the previous time step for restoring the field on the new mesh.
 
   if(m_transportAlgorithm != TransportAlgorithm::SemiImplicit || m_timeStep == 0){ // Just use regular regrid when we start the simulation. 
     CdrPlasmaStepper::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   }
   else{
-    const Interval interv(0,0);
-    
+    const Interval interv(0, 0);
+
+    // Call parent method for setting up storage and regridding solvers. 
     this->allocateInternals();
     this->regridSolvers  (a_lmin, a_oldFinestLevel, a_newFinestLevel);
     this->regridInternals(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-    // Now regrid the conductivity and space charge. 
+    // When computing the electric field on the new mesh, we need the conductivity and space charge from the
+    // previous step. CdrPlasmaGodunvoStepper::preRegrid will have been called before this routine, so we
+    // have the conductivities (stored as sigma*dt/eps0) and space charge stored in scratch data holders. 
     for (int lvl = 0; lvl <= std::max(0, a_lmin-1); lvl++){
-      m_scratchConductivity   [lvl]->copyTo(*m_conductivityFactor[lvl]);
-      m_scratchSemiImplicitRho[lvl]->copyTo(*m_semiImplicitRho   [lvl]);      
+      m_scratchConductivity   [lvl]->copyTo(*m_conductivityFactorCell[lvl]);
+      m_scratchSemiImplicitRho[lvl]->copyTo(*m_semiImplicitRho       [lvl]);      
     }
 
+    // Regrid AMR levels. 
     for (int lvl = std::max(1, a_lmin); lvl <= a_newFinestLevel; lvl++){
       RefCountedPtr<EBPWLFineInterp>& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase)[lvl];
 
       // Linearly interpolate (with limiters):
-      interpolator->interpolate(*m_conductivityFactor[lvl], *m_conductivityFactor[lvl-1], interv);
-      interpolator->interpolate(*m_semiImplicitRho   [lvl], *m_semiImplicitRho   [lvl-1], interv);
+      interpolator->interpolate(*m_conductivityFactorCell[lvl], *m_conductivityFactorCell[lvl-1], interv);
+      interpolator->interpolate(*m_semiImplicitRho       [lvl], *m_semiImplicitRho       [lvl-1], interv);
 
       // For parts of the new grid that overlap with the old grid, replace data with a copy.
       if(lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)){
-	m_scratchConductivity   [lvl]->copyTo(*m_conductivityFactor[lvl]);
-	m_scratchSemiImplicitRho[lvl]->copyTo(*m_semiImplicitRho   [lvl]);      	
+	m_scratchConductivity   [lvl]->copyTo(*m_conductivityFactorCell[lvl]);
+	m_scratchSemiImplicitRho[lvl]->copyTo(*m_semiImplicitRho       [lvl]);      	
       }
     }
 
-    m_amr->averageDown  (m_conductivityFactor, m_realm, m_phase);
-    m_amr->interpGhostMG(m_conductivityFactor, m_realm, m_phase);
+    // Coarsen the conductivity and space charge from the last step and update ghost cells. 
+    m_amr->averageDown  (m_conductivityFactorCell, m_realm, m_phase);
+    m_amr->interpGhostMG(m_conductivityFactorCell, m_realm, m_phase);
 
     m_amr->averageDown  (m_semiImplicitRho, m_realm, m_phase);
     m_amr->interpGhostMG(m_semiImplicitRho, m_realm, m_phase);
 
-    // preRegrid will have been called before this routine, so use the conductivities from that. Note that we store m_conductivityFactor as sigma^k*dt/eps0
-    // but the semi-implicit routine will take dt as an argument and 
-    this->computeFaceConductivity (m_conductivityFace, m_conductivityEB, m_conductivityFactor);
-    this->setupSemiImplicitPoisson(m_conductivityFace, m_conductivityEB, 1.0);
+    // Set up the semi-implicit Poisson equation and solve it. 
+    this->computeFaceConductivity (m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);
+    this->setupSemiImplicitPoisson(m_conductivityFactorFace, m_conductivityFactorEB, 1.0                     );
 
     // Now solve for the field on the new grids.
     const bool converged = this->solveSemiImplicitPoisson();
@@ -380,50 +377,70 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
       pout() << "CdrPlasmaGodunovStepper::regrid - Poisson solver failed to converge during semi-implicit regrid." << endl;
     }
 
-    // Compute stuff that is important for the CDR solvers. 
+    // Now compute drift velocities and diffusion -- using the electric field from last time step on the new mesh. 
     CdrPlasmaStepper::computeCdrDriftVelocities();
     CdrPlasmaStepper::computeCdrDiffusion();
 
-    // If we're doing a stationary RTE solve, recompute source terms
+    // If we're doing a stationary RTE solve, we also have to recompute source terms
     if(this->stationaryRTE()){     // Solve RTE equations by using data that exists inside solvers
-      const Real dummy_dt = 1.0;
+      const Real dummyDt = 0.0;
 
       // Need new source terms for RTE equations
-      this->advanceReactionNetwork(m_time, dummy_dt);
-      this->solveRadiativeTransfer(dummy_dt);    // Argument does not matter, it's a stationary solver.
+      this->advanceReactionNetwork(m_time, dummyDt);
+      this->solveRadiativeTransfer(dummyDt);    // Argument does not matter, it's a stationary solver.
     }
   }
 }
 
-void CdrPlasmaGodunovStepper::postCheckpointSetup(){
-  CH_TIME("CdrPlasmaGodunovStepper::postCheckpointSetup");
+void CdrPlasmaGodunovStepper::postRegrid() {
+  CH_TIME("CdrPlasmaGodunovStepper::postRegrid()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::postCheckpointSetup" << endl;
+    pout() << "CdrPlasmaGodunovStepper::postRegrid()" << endl;
   }
+
+  CdrPlasmaStepper::postRegrid();
+
+  // Release memory. 
+  if(m_transportAlgorithm == TransportAlgorithm::SemiImplicit){
+    m_amr->deallocate(m_scratchConductivity   );
+    m_amr->deallocate(m_scratchSemiImplicitRho);
+  }
+}
+
+void CdrPlasmaGodunovStepper::postCheckpointSetup(){
+  CH_TIME("CdrPlasmaGodunovStepper::postCheckpointSetup()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaGodunovStepper::postCheckpointSetup()" << endl;
+  }
+
+  // TLDR: Only the semi-implicit part overrides the parent method, and it is done because the field needs to be computed from
+  //       a different equation. 
 
   if(m_transportAlgorithm == TransportAlgorithm::SemiImplicit){
     
     // When we enter this routine we will already have called read the checkpoint data into the conductivityFactor and semiimplicit space charge. We need
     // to set up the field solver with those quantities rather than the regular space charge. 
-    this->computeFaceConductivity (m_conductivityFace, m_conductivityEB, m_conductivityFactor);
-    this->setupSemiImplicitPoisson(m_conductivityFace, m_conductivityEB, 1.0);
+    this->computeFaceConductivity (m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);
+    this->setupSemiImplicitPoisson(m_conductivityFactorFace, m_conductivityFactorEB, 1.0                     );
   
     // Now solve for the field on the new grids.
     const bool converged = this->solveSemiImplicitPoisson();
     if(!converged){
-      pout() << "CdrPlasmaGodunovStepper::regrid - Poisson solver failed to converge during restart." << endl;
+      pout() << "CdrPlasmaGodunovStepper::postCheckpointSetup - Poisson solver failed to converge during restart." << endl;
     }
   
-    // Now compute the drift and diffusion velocities and update the source terms. 
+    // Now compute the drift and diffusion velocities and update the source terms. This will be OK because the
+    // CdrPlasmaStepper functions fetch the electric field from the solver, but it already has the correct potential. 
     CdrPlasmaStepper::computeCdrDriftVelocities();
     CdrPlasmaStepper::computeCdrDiffusion();
 
-    if(this->stationaryRTE()){     // Solve RTE equations by using data that exists inside solvers
-      const Real dummy_dt = 1.0;
+    // If we are doing a stationary RTE then we probably have to update the elliptic equations.
+    if(this->stationaryRTE()){
+      const Real dummyDt = 0.0;
 
-      // Need new source terms for RTE equations
-      this->advanceReactionNetwork(m_time, dummy_dt);
-      this->solveRadiativeTransfer(dummy_dt);    // Argument does not matter, it's a stationary solver.
+      // We also need new source terms for RTE equations.
+      this->advanceReactionNetwork(m_time, dummyDt);
+      this->solveRadiativeTransfer(dummyDt);    
     }
   }
   else{
@@ -432,12 +449,10 @@ void CdrPlasmaGodunovStepper::postCheckpointSetup(){
 }
 
 void CdrPlasmaGodunovStepper::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
-  CH_TIME("CdrPlasmaGodunovStepper::regridInternals");
+  CH_TIME("CdrPlasmaGodunovStepper::regridInternals(int, int, int)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::regridInternals" << endl;
+    pout() << "CdrPlasmaGodunovStepper::regridInternals(int, int, int)" << endl;
   }
-
-  // Nothing to see here
 }
 
 bool CdrPlasmaGodunovStepper::solveSemiImplicitPoisson(){
@@ -467,77 +482,97 @@ bool CdrPlasmaGodunovStepper::solveSemiImplicitPoisson(){
 }
 
 void CdrPlasmaGodunovStepper::allocateInternals(){
-  CH_TIME("CdrPlasmaGodunovStepper::allocateInternals");
+  CH_TIME("CdrPlasmaGodunovStepper::allocateInternals()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::allocateInternals" << endl;
+    pout() << "CdrPlasmaGodunovStepper::allocateInternals()" << endl;
   }
 
-  const int ncomp       = 1;
-  const int num_species = m_physics->getNumCdrSpecies();
-  const int num_Photons = m_physics->getNumRtSpecies();
+  constexpr int nComp = 1;
 
-  // Allocate cdr storage
-  m_cdr_scratch.resize(num_species);
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
-    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage> (new CdrStorage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
-    m_cdr_scratch[idx]->allocateStorage();
+  // TLDR: Since the advancement method requires some temporary variables (for holding various things at BCs, for example),
+  //       we have organized the transient memory into classes. Here, we allocate those classes. 
+
+  // Number of CDR solvers and RTE solvers that we have. 
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+  const int numRteSpecies = m_physics->getNumRtSpecies();
+
+  // Allocate storage for the CDR solvers. 
+  m_cdrScratch.resize(numCdrSpecies);
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage> (new CdrStorage(m_amr, m_realm, m_cdr->getPhase(), nComp));
+    m_cdrScratch[idx]->allocateStorage();
   }
 
-  // Allocate RTE storage
-  m_rte_scratch.resize(num_Photons);
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
-    m_rte_scratch[idx] = RefCountedPtr<RtStorage> (new RtStorage(m_amr, m_realm, m_rte->getPhase(), ncomp));
-    m_rte_scratch[idx]->allocateStorage();
+  // Allocate RTE storage.
+  m_rteScratch.resize(numRteSpecies);
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    
+    m_rteScratch[idx] = RefCountedPtr<RtStorage> (new RtStorage(m_amr, m_realm, m_rte->getPhase(), nComp));
+    m_rteScratch[idx]->allocateStorage();
   }
 
-  // Allocate Poisson storage
-  m_fieldSolver_scratch = RefCountedPtr<FieldStorage> (new FieldStorage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
-  m_fieldSolver_scratch->allocateStorage();
+  // Allocate storage for field solver. 
+  m_fieldScratch = RefCountedPtr<FieldStorage> (new FieldStorage(m_amr, m_realm, m_cdr->getPhase(), nComp));
+  m_fieldScratch->allocateStorage();
   
-  // Allocate sigma storage
-  m_sigma_scratch = RefCountedPtr<SigmaStorage> (new SigmaStorage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
-  m_sigma_scratch->allocateStorage();
+  // Allocate storage for surface charge solver. 
+  m_sigmaScratch = RefCountedPtr<SigmaStorage> (new SigmaStorage(m_amr, m_realm, m_cdr->getPhase(), nComp));
+  m_sigmaScratch->allocateStorage();
 
-  // Set up storage for semi-implicit Poisson
-  m_amr->allocate(m_semiImplicitRho,  m_realm, m_phase, ncomp);
-  m_amr->allocate(m_conductivityFactor, m_realm, m_phase, ncomp);
-  m_amr->allocate(m_conductivityFace, m_realm, m_phase, ncomp);
-  m_amr->allocate(m_conductivityEB,   m_realm, m_phase, ncomp);
+  // Set up storage for semi-implicit field solves. 
+  m_amr->allocate(m_semiImplicitRho,        m_realm, m_phase, nComp);
+  m_amr->allocate(m_conductivityFactorCell, m_realm, m_phase, nComp);
+  m_amr->allocate(m_conductivityFactorFace, m_realm, m_phase, nComp);
+  m_amr->allocate(m_conductivityFactorEB,   m_realm, m_phase, nComp);
 
-  DataOps::setValue(m_semiImplicitRho,  0.0);
-  DataOps::setValue(m_conductivityFactor, 0.0);
-  DataOps::setValue(m_conductivityFace, 0.0);
-  DataOps::setValue(m_conductivityEB,   0.0);  
+  // Initialize values. 
+  DataOps::setValue(m_semiImplicitRho,        0.0);
+  DataOps::setValue(m_conductivityFactorCell, 0.0);
+  DataOps::setValue(m_conductivityFactorFace, 0.0);
+  DataOps::setValue(m_conductivityFactorEB,   0.0);  
 }
 
 void CdrPlasmaGodunovStepper::deallocateInternals(){
-  CH_TIME("CdrPlasmaGodunovStepper::deallocateInternals");
+  CH_TIME("CdrPlasmaGodunovStepper::deallocateInternals()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::deallocateInternals" << endl;
+    pout() << "CdrPlasmaGodunovStepper::deallocateInternals()" << endl;
   }
 
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
-    m_cdr_scratch[idx]->deallocateStorage();
-    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage>(0);
+  // TLDR: This routine simply deallocates the transient memory used by CdrPlasmaGodunovStepper.
+
+  // Run through CDR solvers and deallocate the transient memory assocaited with them. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    
+    m_cdrScratch[idx]->deallocateStorage();
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(0);
   }
 
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
-    m_rte_scratch[idx]->deallocateStorage();
-    m_rte_scratch[idx] = RefCountedPtr<RtStorage>(0);
+  // Run through RTE solvers and deallocate the transient memory assocaited with them.   
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    
+    m_rteScratch[idx]->deallocateStorage();
+    m_rteScratch[idx] = RefCountedPtr<RtStorage>(0);
   }
 
-  m_cdr_scratch.resize(0);
-  m_rte_scratch.resize(0);
+  m_cdrScratch.resize(0);
+  m_rteScratch.resize(0);
 
-  m_fieldSolver_scratch->deallocateStorage();
-  m_fieldSolver_scratch = RefCountedPtr<FieldStorage>(0);
+  m_fieldScratch->deallocateStorage();
+  m_fieldScratch = RefCountedPtr<FieldStorage>(0);
   
-  m_sigma_scratch->deallocateStorage();
-  m_sigma_scratch = RefCountedPtr<SigmaStorage>(0);
+  m_sigmaScratch->deallocateStorage();
+  m_sigmaScratch = RefCountedPtr<SigmaStorage>(0);
+
+  // Deallocate storage for the semi-implicit solve. 
+  m_amr->deallocate(m_semiImplicitRho       );
+  m_amr->deallocate(m_conductivityFactorCell);
+  m_amr->deallocate(m_conductivityFactorFace);
+  m_amr->deallocate(m_conductivityFactorEB  );
 }
 
 void CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch(){
@@ -546,9 +581,9 @@ void CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch(){
     pout() << "CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch" << endl;
   }
   
-  EBAMRCellData& E_cell = m_fieldSolver_scratch->getElectricFieldCell();
-  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->getElectricFieldEb();
-  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->getElectricFieldDomain();
+  EBAMRCellData& E_cell = m_fieldScratch->getElectricFieldCell();
+  EBAMRIVData&   E_eb   = m_fieldScratch->getElectricFieldEb();
+  EBAMRIFData&   E_dom  = m_fieldScratch->getElectricFieldDomain();
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
 
@@ -563,10 +598,10 @@ void CdrPlasmaGodunovStepper::computeCdrGradients(){
     pout() << "CdrPlasmaGodunovStepper::computeCdrGradients" << endl;
   }
 
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
-    RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solver_it);
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     EBAMRCellData& scratch = storage->getScratch();
     EBAMRCellData& grad    = storage->getGradient();
@@ -594,9 +629,9 @@ void CdrPlasmaGodunovStepper::computeCdrEbStates(){
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solver_it);
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     cdr_states.push_back(&(storage->getExtrap()));
     eb_states.push_back(&(storage->getEbState()));
@@ -607,8 +642,8 @@ void CdrPlasmaGodunovStepper::computeCdrEbStates(){
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
   CdrPlasmaStepper::extrapolateToEb(eb_states, m_cdr->getPhase(), cdr_states);
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
     DataOps::floor(*eb_states[idx], 0.0);
   }
 
@@ -637,8 +672,8 @@ void CdrPlasmaGodunovStepper::computeCdrEbFluxes(){
 
   cdr_fluxes = m_cdr->getEbFlux();
 
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrStorage>& storage = this->getCdrStorage(solver_it);
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrStorage>& storage = this->getCdrStorage(solverIt);
 
     EBAMRIVData& dens_eb = storage->getEbState();
     EBAMRIVData& velo_eb = storage->getEbVelo();
@@ -659,16 +694,16 @@ void CdrPlasmaGodunovStepper::computeCdrEbFluxes(){
   CdrPlasmaStepper::computeExtrapolatedVelocities(extrap_cdr_velocities, cdr_velocities, m_cdr->getPhase());
 
   // Compute RTE flux on the boundary
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<RtStorage>& storage = this->getRtStorage(solver_it);
+  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<RtSolver>& solver   = solverIt();
+    RefCountedPtr<RtStorage>& storage = this->getRtStorage(solverIt);
 
     EBAMRIVData& flux_eb = storage->getEbFlux();
     solver->computeBoundaryFlux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_fieldSolver_scratch->getElectricFieldEb();
+  const EBAMRIVData& E = m_fieldScratch->getElectricFieldEb();
   CdrPlasmaStepper::computeCdrFluxes(cdr_fluxes,
 				     extrap_cdr_fluxes,
 				     extrap_cdr_densities,
@@ -690,9 +725,9 @@ void CdrPlasmaGodunovStepper::computeCdrDomainStates(){
   Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
-  for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solver_it);
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     cdr_states.push_back(&(storage->getExtrap()));
     domain_states.push_back(&(storage->getDomainState()));
@@ -706,9 +741,9 @@ void CdrPlasmaGodunovStepper::computeCdrDomainStates(){
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
   m_amr->allocate(grad, m_realm, m_cdr->getPhase(), SpaceDim);
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const int idx = solver_it.index();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const int idx = solverIt.index();
     if(solver->isMobile()){
       CdrPlasmaStepper::extrapolateToDomainFaces(grad, m_cdr->getPhase(), *cdr_gradients[idx]);
       CdrPlasmaStepper::projectDomain(*domain_gradients[idx], grad);
@@ -738,8 +773,8 @@ void CdrPlasmaGodunovStepper::computeCdrDomainFluxes(){
 
   cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->getVelocities();
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrStorage>& storage = this->getCdrStorage(solver_it);
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrStorage>& storage = this->getCdrStorage(solverIt);
 
     EBAMRIFData& dens_domain = storage->getDomainState();
     EBAMRIFData& velo_domain = storage->getDomainVelo();
@@ -763,16 +798,16 @@ void CdrPlasmaGodunovStepper::computeCdrDomainFluxes(){
   this->extrapolateVectorToDomainFaces(extrap_cdr_gradients,  m_cdr->getPhase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<RtStorage>& storage = this->getRtStorage(solver_it);
+  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<RtSolver>& solver   = solverIt();
+    RefCountedPtr<RtStorage>& storage = this->getRtStorage(solverIt);
 
     EBAMRIFData& domain_flux = storage->getDomainFlux();
     solver->computeDomainFlux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
-  const EBAMRIFData& E = m_fieldSolver_scratch->getElectricFieldDomain();
+  const EBAMRIFData& E = m_fieldScratch->getElectricFieldDomain();
 
   // This fills the solvers' domain fluxes
   CdrPlasmaStepper::computeCdrDomainFluxes(cdr_fluxes,
@@ -794,9 +829,9 @@ void CdrPlasmaGodunovStepper::computeSigmaFlux(){
   EBAMRIVData& flux = m_sigma->getFlux();
   DataOps::setValue(flux, 0.0);
 
-  for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<CdrSolver>& solver = solver_it();
-    const RefCountedPtr<CdrSpecies>& spec  = solver_it.getSpecies();
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const RefCountedPtr<CdrSpecies>& spec  = solverIt.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
     DataOps::incr(flux, solver_flux, spec->getChargeNumber()*Units::Qe);
@@ -818,11 +853,11 @@ void CdrPlasmaGodunovStepper::computeReactionNetwork(const Real a_dt){
   Vector<EBAMRCellData*> cdr_phi = m_cdr->getPhis();
   Vector<EBAMRCellData*> rte_src = m_rte->getSources();
   Vector<EBAMRCellData*> rte_phi = m_rte->getPhis();
-  const EBAMRCellData& E = m_fieldSolver_scratch->getElectricFieldCell();
+  const EBAMRCellData& E = m_fieldScratch->getElectricFieldCell();
 
   Vector<EBAMRCellData*> cdr_grad;
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrStorage>& storage = getCdrStorage(solver_it);
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrStorage>& storage = getCdrStorage(solverIt);
 
     EBAMRCellData& gradient = storage->getGradient();
     cdr_grad.push_back(&gradient);
@@ -832,8 +867,8 @@ void CdrPlasmaGodunovStepper::computeReactionNetwork(const Real a_dt){
   CdrPlasmaStepper::advanceReactionNetwork(cdr_src, rte_src, cdr_phi, cdr_grad, rte_phi, E, m_time, a_dt);
 
   // Make phi = phi + S*dt
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver = solverIt();
 
     EBAMRCellData& phi = solver->getPhi();
     const EBAMRCellData& src = solver->getSource();
@@ -898,11 +933,11 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
   CdrPlasmaGodunovStepper::computeCdrDomainFluxes();            // Extrapolate cell-centered fluxes to domain edges
   CdrPlasmaGodunovStepper::computeSigmaFlux();                  // Update charge flux for sigma solver    
 
-  for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver   = solver_it();
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver   = solverIt();
 
     if(solver->isMobile() || solver->isDiffusive()){
-      RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
       EBAMRCellData& phi = solver->getPhi();
       EBAMRCellData& src = solver->getSource();
@@ -911,8 +946,8 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
       EBAMRCellData& scratch2 = storage->getScratch2();
 
       // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-      const Real extrap_dt = (m_extrap_advect) ? a_dt : 0.0;
-      if(!m_implicit_diffusion){
+      const Real extrap_dt = (m_extrapAdvect) ? a_dt : 0.0;
+      if(!m_implicitDiffusion){
 	solver->computeDivJ(scratch, phi, extrap_dt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
       }
       else{
@@ -943,7 +978,7 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
     
 
       // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F) + dt*R
-      if(m_implicit_diffusion){
+      if(m_implicitDiffusion){
 	// Solve implicit diffusion equation. This looks weird but we're solving
 	//
 	// phi^(k+1) = phi^k - dt*div(F) + dt*R + dt*div(D*div(phi^k+1))
@@ -989,15 +1024,15 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
   }
 
   // Compute the conductivity first. We store it as sigma^k*a_dt/eps0
-  this->computeCellConductivity(m_conductivityFactor);
-  DataOps::scale(m_conductivityFactor, a_dt/Units::eps0);
+  this->computeCellConductivity(m_conductivityFactorCell);
+  DataOps::scale(m_conductivityFactorCell, a_dt/Units::eps0);
 
-  m_amr->averageDown  (m_conductivityFactor, m_realm, m_phase);
-  m_amr->interpGhostMG(m_conductivityFactor, m_realm, m_phase);  
+  m_amr->averageDown  (m_conductivityFactorCell, m_realm, m_phase);
+  m_amr->interpGhostMG(m_conductivityFactorCell, m_realm, m_phase);  
 
   // Average conductivity to faces and set up the semi-implicit poisson equation. 
-  this->computeFaceConductivity (m_conductivityFace, m_conductivityEB, m_conductivityFactor);
-  this->setupSemiImplicitPoisson(m_conductivityFace, m_conductivityEB, 1.0);
+  this->computeFaceConductivity (m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);
+  this->setupSemiImplicitPoisson(m_conductivityFactorFace, m_conductivityFactorEB, 1.0);
 
   // Compute the modified right-hand side. We store this as rho^k - dt*e * sum(Z * div(D*grad(phi))).
   DataOps::setValue(m_semiImplicitRho, 0.0);
@@ -1012,7 +1047,6 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
       
       DataOps::incr(m_semiImplicitRho, phi, Z*Units::Qe);
 
-#if 0 // This code was unstable when doing the red-sprite case. I'm not sure why...
       // If the solver is diffusive we must increment by the diffusion term as well. 
       if(solver->isDiffusive()){
 	RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
@@ -1023,7 +1057,6 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
 
 	DataOps::incr(m_semiImplicitRho, divDgradPhi, Z*a_dt*Units::Qe);
       }
-#endif
     }
   }
   
@@ -1046,11 +1079,11 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
   CdrPlasmaGodunovStepper::computeCdrDomainFluxes();            // Extrapolate cell-centered fluxes to domain edges
   CdrPlasmaGodunovStepper::computeSigmaFlux();                  // Update charge flux for sigma solver    
 
-  for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver   = solver_it();
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver   = solverIt();
 
     if(solver->isMobile() || solver->isDiffusive()){
-      RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
       EBAMRCellData& phi = solver->getPhi();
     
@@ -1058,7 +1091,7 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
       EBAMRCellData& scratch2 = storage->getScratch2();
 
       // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-      const Real extrap_dt = (m_extrap_advect) ? a_dt : 0.0;
+      const Real extrap_dt = (m_extrapAdvect) ? a_dt : 0.0;
       solver->computeDivF(scratch, phi, extrap_dt, true, true); // For implicit diffusion, sratch is computed as div(v*phi)
 
       DataOps::scale(scratch, -1.0);     // scratch = -[div(F/J)]
@@ -1113,9 +1146,9 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
 
   // 1. Compute the "k1" coefficient. This is equivalent to using a semi-implicit
   //    euler method as the predictor for Heun's method
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solver_it);
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver   = solverIt();
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     EBAMRCellData& phi     = solver->getPhi();
     EBAMRCellData& scratch = storage->getScratch();
@@ -1124,8 +1157,8 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
     DataOps::copy(k1, phi);
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-    const Real extrap_dt = (m_extrap_advect) ? a_dt : 0.0;
-    if(!m_implicit_diffusion){
+    const Real extrap_dt = (m_extrapAdvect) ? a_dt : 0.0;
+    if(!m_implicitDiffusion){
       solver->computeDivJ(scratch, phi, extrap_dt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
     }
     else{
@@ -1136,7 +1169,7 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
     DataOps::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J)
 
     // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F) + dt*R
-    if(m_implicit_diffusion){
+    if(m_implicitDiffusion){
       DataOps::floor(phi, 0.0);
       
       // Solve implicit diffusion equation. This looks weird but we're solving
@@ -1167,7 +1200,7 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
   // Update the sigma equation
   {
     EBAMRIVData& sigma = m_sigma->getPhi();
-    EBAMRIVData& k1    = m_sigma_scratch->getScratch();
+    EBAMRIVData& k1    = m_sigmaScratch->getScratch();
     DataOps::copy(k1, sigma);
 
     // Advance
@@ -1197,17 +1230,17 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
   CdrPlasmaGodunovStepper::computeSigmaFlux();           // Update charge flux for sigma solver
 
   // 3. Perform final advance, which will be the solution to 
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solver_it);
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver   = solverIt();
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     EBAMRCellData& phi      = solver->getPhi();
     EBAMRCellData& scratch  = storage->getScratch();
     const EBAMRCellData& k1 = storage->getScratch3();
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-    const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
-    if(!m_implicit_diffusion){
+    const Real extrap_dt = m_extrapAdvect ? a_dt : 0.0;
+    if(!m_implicitDiffusion){
       solver->computeDivJ(scratch, phi, extrap_dt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
       DataOps::scale(scratch, -1.0);
       DataOps::scale(scratch, a_dt);
@@ -1261,7 +1294,7 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
   { // Do the final sigma advance
     EBAMRIVData& sigma     = m_sigma->getPhi();
     const EBAMRIVData& rhs = m_sigma->getFlux();
-    const EBAMRIVData& k1  = m_sigma_scratch->getScratch();
+    const EBAMRIVData& k1  = m_sigmaScratch->getScratch();
     DataOps::incr(sigma, k1, -0.5);
     DataOps::incr(sigma, rhs, 0.5*a_dt);
   }
@@ -1274,8 +1307,8 @@ void CdrPlasmaGodunovStepper::advanceRadiativeTransfer(const Real a_dt){
   }
 
   // Source terms should already be in place so we can solve directly.
-  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<RtSolver>& solver = solver_it();
+  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<RtSolver>& solver = solverIt();
     solver->advance(a_dt);
   }
 }
@@ -1287,7 +1320,7 @@ void CdrPlasmaGodunovStepper::computeCdrDriftVelocities(const Real a_time){
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
-  CdrPlasmaStepper::computeCdrDriftVelocities(velocities, m_cdr->getPhis(), m_fieldSolver_scratch->getElectricFieldCell(), a_time);
+  CdrPlasmaStepper::computeCdrDriftVelocities(velocities, m_cdr->getPhis(), m_fieldScratch->getElectricFieldCell(), a_time);
 }
 
 void CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(const Real a_time){
@@ -1296,16 +1329,25 @@ void CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(const Real a_time)
     pout() << "CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients" << endl;
   }
 
-  CdrPlasmaStepper::computeCdrDiffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
+  CdrPlasmaStepper::computeCdrDiffusion(m_fieldScratch->getElectricFieldCell(), m_fieldScratch->getElectricFieldEb());
 }
 
 void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
-  CH_TIME("CdrPlasmaGodunovStepper::computeDt");
+  CH_TIME("CdrPlasmaGodunovStepper::computeDt(Real, TimeCode)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::computeDt" << endl;
+    pout() << "CdrPlasmaGodunovStepper::computeDt(Real, TimeCode)" << endl;
   }
 
-  // Restrict by advection or advection-diffusion. 
+  // TLDR: This routine really depends on what algorithms we use:
+  //
+  //       Explicit or semi-implicit -> restrict by advection, diffusion, and relaxation time
+  //       Partially implicit        -> restrict by advection and relaxation time
+  //
+  // Note that the semi-implicit scheme does not require restriction by the relaxation time, but users will take
+  // care of that through the input script. 
+  
+
+  // First, figure out what the transport time step must be for explicit and explicit-implicit methods. 
   if(m_WhichDiffusionAlgorithm == WhichDiffusionAlgorithm::Explicit){
     m_dtCFL   = m_cdr->computeAdvectionDiffusionDt();
     
@@ -1319,18 +1361,22 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
     a_dt = m_cfl*m_dtCFL;
   }
   else if (m_WhichDiffusionAlgorithm == WhichDiffusionAlgorithm::Automatic){
-    const Real advection_dt = m_cdr->computeAdvectionDt();
-    const Real diffusion_dt = m_cdr->computeDiffusionDt();
+    // If we are running with "automatic" diffusion, then we switch to implicit diffusion if the diffusive time step
+    // is shorter than the advective time step. 
+    const Real advectionDt = m_cdr->computeAdvectionDt();
+    const Real diffusionDt = m_cdr->computeDiffusionDt();
 
-    if(diffusion_dt < advection_dt){
-      m_implicit_diffusion = true;
+    // These are the two cases we need: Either diffusion dt < advection dt and we switch to implicit diffusion and
+    // only limit by advection. Or we run fully explicit and use both advection and diffusion as a limiting step. 
+    if(diffusionDt < advectionDt){
+      m_implicitDiffusion = true;
 
-      m_dtCFL   = advection_dt;
+      m_dtCFL   = advectionDt;
       a_dt       = m_cfl*m_dtCFL;
       a_timeCode = TimeCode::Advection;
     }
     else {
-      m_implicit_diffusion = false;
+      m_implicitDiffusion = false;
 
       m_dtCFL   = m_cdr->computeAdvectionDiffusionDt();
       a_dt       = m_cfl*m_dtCFL;
@@ -1340,23 +1386,26 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
     m_dtCFL = a_dt/m_cfl;
   }
 
-  // Below here we restrict by relaxation time and hardcaps. 
-  const Real dt_relax = m_relaxTime*this->computeRelaxationTime();
-  if(dt_relax < a_dt){
-    a_dt = dt_relax;
+  // Next, limit by the relaxation time. 
+  const Real dtRelax = m_relaxTime*this->computeRelaxationTime();
+  if(dtRelax < a_dt){
+    a_dt       = dtRelax;
     a_timeCode = TimeCode::RelaxationTime;
   }
 
+  // Limit by lower hardcap.
   if(a_dt < m_minDt){
-    a_dt = m_minDt;
+    a_dt       = m_minDt;
     a_timeCode = TimeCode::Hardcap;
   }
 
+  // Limit by upper hardcap.  
   if(a_dt > m_maxDt){
-    a_dt = m_maxDt;
+    a_dt       = m_maxDt;
     a_timeCode = TimeCode::Hardcap;
   }
 
+  // Set time code also for the TimeStepper. 
   m_timeCode = a_timeCode;
 }
 
@@ -1366,8 +1415,8 @@ void CdrPlasmaGodunovStepper::postStep(){
     pout() << "CdrPlasmaGodunovStepper::postStep" << endl;
   }
 
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver> solver = solver_it();
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver> solver = solverIt();
 
     m_amr->averageDown(solver->getPhi(), m_realm, m_cdr->getPhase());
     m_amr->interpGhost(solver->getPhi(), m_realm, m_cdr->getPhase());
@@ -1383,9 +1432,9 @@ void CdrPlasmaGodunovStepper::extrapolateSourceTerm(const Real a_dt){
   // TLDR: If we extrapolate the advective derivative and include the source term in the extrapolation,
   //       the boundary conditions should be computed from phi + 0.5*source*dt rather than just phi.
 
-  for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solver_it);
+  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>& solver = solverIt();
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     const EBAMRCellData& state  = solver->getPhi();
     const EBAMRCellData& source = solver->getSource();
@@ -1393,7 +1442,7 @@ void CdrPlasmaGodunovStepper::extrapolateSourceTerm(const Real a_dt){
     EBAMRCellData& extrap = storage->getExtrap();
 
     DataOps::copy(extrap, state);
-    if(m_extrap_advect) {
+    if(m_extrapAdvect) {
       DataOps::incr(extrap, source, 0.5*a_dt);
     }
   }
@@ -1408,8 +1457,8 @@ void CdrPlasmaGodunovStepper::writeCheckpointData(HDF5Handle& a_handle, const in
 
   CdrPlasmaStepper::writeCheckpointData(a_handle, a_lvl);
 
-  write(a_handle, *m_semiImplicitRho   [a_lvl], "semiImplicitRho"   );
-  write(a_handle, *m_conductivityFactor[a_lvl], "conductivityFactor");  
+  write(a_handle, *m_semiImplicitRho       [a_lvl], "semiImplicitRho"   );
+  write(a_handle, *m_conductivityFactorCell[a_lvl], "conductivityFactor");  
 }
 
 void CdrPlasmaGodunovStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl) {
@@ -1422,8 +1471,8 @@ void CdrPlasmaGodunovStepper::readCheckpointData(HDF5Handle& a_handle, const int
 
   CdrPlasmaStepper::readCheckpointData(a_handle, a_lvl);
 
-  read(a_handle, *m_semiImplicitRho   [a_lvl], "semiImplicitRho",    m_amr->getGrids(m_realm)[a_lvl], interv, false);
-  read(a_handle, *m_conductivityFactor[a_lvl], "conductivityFactor", m_amr->getGrids(m_realm)[a_lvl], interv, false);  
+  read(a_handle, *m_semiImplicitRho       [a_lvl], "semiImplicitRho",    m_amr->getGrids(m_realm)[a_lvl], interv, false);
+  read(a_handle, *m_conductivityFactorCell[a_lvl], "conductivityFactor", m_amr->getGrids(m_realm)[a_lvl], interv, false);  
 }
 #endif      
 

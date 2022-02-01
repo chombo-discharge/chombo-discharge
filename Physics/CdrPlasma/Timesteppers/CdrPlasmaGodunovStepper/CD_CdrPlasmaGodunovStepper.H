@@ -24,67 +24,186 @@ namespace Physics {
   
     /*!
       @brief Class for evolving plasma equations using a split step Godunov method. 
+      @details This class can use semi-implicit formulations for the transport. 
     */
     class CdrPlasmaGodunovStepper : public CdrPlasmaStepper {
     public:
   
-      // Forward declare nested classes. I don't want to clutter this file.
+      // Forward declared utility classes for handling the extra memory when advancing the solvers. 
       class CdrStorage;
       class FieldStorage;
       class RtStorage;
       class SigmaStorage;
 
-      CdrPlasmaGodunovStepper();
-      CdrPlasmaGodunovStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics);
-      ~CdrPlasmaGodunovStepper();
+      /*!
+	@brief Disallowed constructor -- use strong construction
+      */
+      CdrPlasmaGodunovStepper() = delete;
 
-      // Pure functions that must be overwritten
-      Real advance(const Real a_dt) override;
+      /*!
+	@brief Full constructor
+	@param[in] a_physics Reference to the plasma physics implementation.
+      */
+      CdrPlasmaGodunovStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics);
+
+      /*!
+	@brief Destructor
+      */
+      virtual ~CdrPlasmaGodunovStepper();
+
+      /*!
+	@brief Parse startup options
+      */
       void parseOptions() override;
-      void parseRuntimeOptions() override;
+
+      /*!
+	@brief Parse run-time adjustable parameters
+      */
+      void parseRuntimeOptions() override;      
+
+      /*!
+	@brief Implementation of the advance method
+	@details This will switch between the various available implementations. 
+	@param[in] a_dt Time step to try
+	@return Returns a_dt (no adjustable time step for this class)
+      */
+      Real advance(const Real a_dt) override;
+
+      /*!
+	@brief Pre-regrid method. Used for storing important variables for the solvers
+	@details This is overriden because the semi-implicit scheme requires us to store some extra variables on the old grids. 
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+      */
+      void preRegrid(const int a_lbase, const int a_oldFinestLevel) override;      
+
+      /*!
+	@brief Regrid method. 
+	@details This overrides the parent class regrid method when using a semi-implicit scheme.
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
-      void preRegrid(const int a_lbase, const int a_finestLevel) override;
+
+      /*!
+	@brief Perform post-regrid operations. 
+	@details This releases transient memory needed during the regrid. 
+      */
+      void postRegrid() override;
+
+      /*!
+	@brief For regridding internal storage. Does nothing. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */
       void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+
+      /*!
+	@brief Allocate internal storage.
+	@details This will set up the memory for handling all the various advances. 
+      */
       void allocateInternals() override;
+
+      /*!
+	@brief Deallocate transient memory
+      */
       void deallocateInternals() override;
+
+      /*!
+	@brief Compute the time step -- this will be different for the different supported algorithms. 
+	@param[out] a_dt       Time step to be used.
+	@param[out] a_timeCode Identifier for how the time step was restricted.
+      */
       void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+
+      /*!
+	@brief Run post-checkpoint setup operations. 
+	@details The override is only relevant for the semi-implicit scheme because the field needs to be computed from a different equation. Fortunately,
+	we've stored the necessary quantities (conductivity and space charge) to HDF5 so we can just set up a standard semi-implicit Poisson solve here. 
+      */
       void postCheckpointSetup() override;
-      bool needToRegrid() override;
 
     protected:
 
+      /*!
+	@brief Enum for distinguishing various transport algorithms
+      */
       enum class TransportAlgorithm {
 	SemiImplicit,
 	Euler,
 	RK2,
       };
 
+      /*!
+	@brief Enum for distinguishing various ways we handle diffusion. 
+      */      
       enum class WhichDiffusionAlgorithm{
 	Explicit,
 	Implicit,
 	Automatic,
       };
 
-      // Scratch storage
-      Vector<RefCountedPtr<CdrStorage> > m_cdr_scratch;
-      Vector<RefCountedPtr<RtStorage> >  m_rte_scratch;
-      RefCountedPtr<FieldStorage>        m_fieldSolver_scratch;
-      RefCountedPtr<SigmaStorage>        m_sigma_scratch;
+      /*!
+	@brief Scratch storage for the CDR solvers
+      */
+      Vector<RefCountedPtr<CdrStorage> > m_cdrScratch;
 
-      // Extra scratch storage when using semi-implicti scheme.
-      EBAMRCellData m_semiImplicitRho;     // Used for holding the "space charge" for semi-implicit formulations
-      EBAMRCellData m_conductivityFactor;    // Used for holding the cell-centered conductivity.
-      EBAMRFluxData m_conductivityFace;    // Used for holding the face-centered conductivity.
-      EBAMRIVData   m_conductivityEB;      // Used for holding the EB-centered conductivity.
+      /*!
+	@brief Scratch storage for the RTE solvers
+      */      
+      Vector<RefCountedPtr<RtStorage> > m_rteScratch;
 
-      EBAMRCellData m_scratchSemiImplicitRho;  // Scratch storage for holding the conductivity during regrids. 
-      EBAMRCellData m_scratchConductivity;     // Scratch storage for holding the conductivity during regrids.
+      /*!
+	@brief Scratch storage for the field solver
+      */            
+      RefCountedPtr<FieldStorage> m_fieldScratch;
 
-      bool m_extrap_advect;
+      /*!
+	@brief Scratch storage for the surface charge solver
+      */                  
+      RefCountedPtr<SigmaStorage> m_sigmaScratch;
+
+      /*!
+	@brief Use for holding the "space charge" when doing semi-implicit solves. 
+	@details This is different from the actual space charge because it also includes a diffusive contribution
+      */
+      EBAMRCellData m_semiImplicitRho;
+
+      /*!
+	@brief Used for storing conductivity*dt/eps0 on the cell center.
+      */
+      EBAMRCellData m_conductivityFactorCell;
+      
+      /*!
+	@brief Used for storing conductivity*dt/eps0 on the face centers.
+      */
+      EBAMRFluxData m_conductivityFactorFace;
+
+      /*!
+	@brief Used for storing conductivity*dt/eps0 on the EB centers.
+      */      
+      EBAMRIVData m_conductivityFactorEB;   
+
+      /*!
+	@brief Scratch storage for storing m_semiImplicitRho on the old grids during regrid operations.
+      */
+      EBAMRCellData m_scratchSemiImplicitRho;
+
+      /*!
+	@brief Scratch storage for storing m_conductivityFactorCell on the old grids during regrid operations.
+      */      
+      EBAMRCellData m_scratchConductivity;
+
+
+      // CODE-WALK BEGINS HERE      
+
+      bool m_extrapAdvect;
       bool m_debug;
       bool m_floor;
       bool m_fhd;
-      bool m_implicit_diffusion;
+      bool m_implicitDiffusion;
 
       WhichDiffusionAlgorithm m_WhichDiffusionAlgorithm;
       TransportAlgorithm m_transportAlgorithm;
