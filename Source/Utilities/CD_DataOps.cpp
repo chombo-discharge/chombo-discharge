@@ -1056,8 +1056,8 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_da
   }
 
   // If running with MPI then we need to reduce the result.
-  a_max = ParallelOps::Max(a_max);
-  a_min = ParallelOps::Min(a_min);  
+  a_max = ParallelOps::max(a_max);
+  a_min = ParallelOps::min(a_min);  
 }
 
 void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& a_data){
@@ -1106,8 +1106,8 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> 
   }
 
   // If running with MPI then we need to reduce the result.
-  a_max = ParallelOps::Max(a_max);
-  a_min = ParallelOps::Min(a_min);    
+  a_max = ParallelOps::max(a_max);
+  a_min = ParallelOps::min(a_min);    
 }
 
 void DataOps::invert(EBAMRFluxData& a_data){

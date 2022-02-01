@@ -474,7 +474,7 @@ Real EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order) {
     BoxLoops::loop(m_vofIterIrreg[dit()], irregularKernel);
   }
 
-  maxNorm = ParallelOps::Max(maxNorm);
+  maxNorm = ParallelOps::max(maxNorm);
   
   return maxNorm;
 }

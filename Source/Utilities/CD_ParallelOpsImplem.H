@@ -19,12 +19,12 @@
 #include <CD_NamespaceHeader.H>
 
 inline  
-Real ParallelOps::Min(const Real& a_input) {
+Real ParallelOps::min(const Real& a_input) {
 #ifdef CH_MPI
   Real ret = 1.0;
   const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("In file ParallelOps::Min -- MPI communication error");
+    MayDay::Error("In file ParallelOps::min -- MPI communication error");
   }
   return ret;
 #else
@@ -33,13 +33,13 @@ Real ParallelOps::Min(const Real& a_input) {
 }
 
 inline
-Real ParallelOps::Max(const Real& a_input) {
+Real ParallelOps::max(const Real& a_input) {
 
 #ifdef CH_MPI
   Real ret = 1.0;
   const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("In file ParallelOps::Max -- MPI communication error");
+    MayDay::Error("In file ParallelOps::max -- MPI communication error");
   }
   return ret;
 #else
@@ -48,12 +48,12 @@ Real ParallelOps::Max(const Real& a_input) {
 }
 
 inline  
-int ParallelOps::Min(const int& a_input) {
+int ParallelOps::min(const int& a_input) {
 #ifdef CH_MPI
   int ret = 1.0;
   const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("In file ParallelOps::Min -- MPI communication error");
+    MayDay::Error("In file ParallelOps::min -- MPI communication error");
   }
   return ret;
 #else
@@ -62,13 +62,13 @@ int ParallelOps::Min(const int& a_input) {
 }
 
 inline
-int ParallelOps::Max(const int& a_input) {
+int ParallelOps::max(const int& a_input) {
 
 #ifdef CH_MPI
   int ret = 1.0;
   const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("In file ParallelOps::Max -- MPI communication error");
+    MayDay::Error("In file ParallelOps::max -- MPI communication error");
   }
   return ret;
 #else
@@ -93,12 +93,12 @@ Real ParallelOps::sum(const Real& a_value) {
 }
 
 inline
-void ParallelOps::VectorSum(Vector<long int>& a_data) {
+void ParallelOps::vectorSum(Vector<long int>& a_data) {
 #ifdef CH_MPI
   const Vector<long int> tmp = a_data;
   const int result = MPI_Allreduce(&(tmp[0]),&(a_data[0]), a_data.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("In file ParallelOps::VectorSum -- MPI communication error");
+    MayDay::Error("In file ParallelOps::vectorSum -- MPI communication error");
   }
 #endif
 }

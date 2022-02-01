@@ -301,7 +301,7 @@ void Driver::getGeometryTags(){
     if(!m_geomTags[lvl].isEmpty()) deepestTagLevel = lvl;
   }
   
-  m_geometricTagsDepth = ParallelOps::Max(deepestTagLevel);
+  m_geometricTagsDepth = ParallelOps::max(deepestTagLevel);
 }
 
 void Driver::getCellsAndBoxes(long long&         a_numLocalCells,

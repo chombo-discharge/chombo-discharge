@@ -1941,7 +1941,7 @@ Real CdrSolver::computeAdvectionDt(){
     }
 
     // If we are using MPI then ranks need to know of each other's time steps.
-    minDt = ParallelOps::Min(minDt);
+    minDt = ParallelOps::min(minDt);
   }
 
   return minDt;
@@ -2024,7 +2024,7 @@ Real CdrSolver::computeDiffusionDt(){
       }
     }
 
-    minDt = ParallelOps::Min(minDt);
+    minDt = ParallelOps::min(minDt);
   }
 
   return minDt;
@@ -2137,7 +2137,7 @@ Real CdrSolver::computeAdvectionDiffusionDt(){
       }
     }
 
-    minDt = ParallelOps::Min(minDt);
+    minDt = ParallelOps::min(minDt);
   }
 
   return minDt;
@@ -2194,7 +2194,7 @@ Real CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance){
       }
     }
 
-    minDt = ParallelOps::Min(minDt);
+    minDt = ParallelOps::min(minDt);
   }
   
   return minDt;
