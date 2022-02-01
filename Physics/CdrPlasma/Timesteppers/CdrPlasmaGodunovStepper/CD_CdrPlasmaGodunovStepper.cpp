@@ -760,7 +760,7 @@ void CdrPlasmaGodunovStepper::computeCdrDomainFluxes(){
   this->extrapolateToDomainFaces(extrap_cdr_densities,         m_cdr->getPhase(), states);
   this->extrapolateVelocitiesVectorDomainFaces(extrap_cdr_velocities,   m_cdr->getPhase(), cdr_velocities);
   this->computeExtrapolatedDomainFluxes(extrap_cdr_fluxes,     states,             cdr_velocities, m_cdr->getPhase());
-  this->extrapolateToVectorDomainFaces(extrap_cdr_gradients,  m_cdr->getPhase(), cdr_gradients);
+  this->extrapolateVectorToDomainFaces(extrap_cdr_gradients,  m_cdr->getPhase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
   for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){

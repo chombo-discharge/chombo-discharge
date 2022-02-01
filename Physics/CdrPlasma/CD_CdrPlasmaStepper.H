@@ -155,11 +155,18 @@ namespace Physics {
       virtual void printStepReport() override;
 
       /*!
-	@brief Pre-regrid function. 
+	@brief Pre-regrid function -- this is the one called by Driver. 
 	@param[in] a_lmin           The coarsest level that changes
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
       */
       virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
+
+      /*!
+	@brief Do a preRegrid operation for internal storage (if needed). 
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+      */
+      virtual void preRegridInternals(const int a_lmin, const int a_oldFinestLevel);      
 
       /*!
 	@brief Regrid method.
@@ -254,12 +261,6 @@ namespace Physics {
       */
       virtual void parseOptions() = 0;
 
-      /*!
-	@brief Do a preRegrid operation for internal storage (if needed). 
-	@param[in] a_lmin           The coarsest level that changes
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
-      */
-      virtual void preRegridInternals(const int a_lmin, const int a_oldFinestLevel);
 
       /*!
 	@brief Deallocation function. This will deallocate internal storage in the subclasses as well as the solvers. 
@@ -782,8 +783,6 @@ namespace Physics {
 				    const Real&                                 a_time,
 				    const int                                   a_lvl);
 
-      //////// CODE-WALK FROM HERE HERE AND DOWNWARDS /////
-
       /*!
 	@brief Compute CDR fluxes on domain faces for usage in boundary conditions. This is the AMR version. 
 	@param[out] a_cdrFluxes           CDR domain bounadry fluxes for solvers.
@@ -828,100 +827,136 @@ namespace Physics {
 					  const int                                  a_lvl);
 
       /*!
-	@brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
+	@brief Extrapolate cell-centered fluxes to the EB centroid.
+	@param[out] a_extrapCdrFluxesEB CDR fluxes extrapolated to the EB.
+	@param[in]  a_cdrDensities      CDR densities on the cell center
+	@param[in]  a_cdrVelocities     CDR velocities on the cell center
+	@param[in]  a_phase             Phase
       */
-      virtual void computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_fluxes,
-					     const Vector<EBAMRCellData*> a_densities,
-					     const Vector<EBAMRCellData*> a_velocities,
+      virtual void computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extrapCdrFluxesEB,
+					     const Vector<EBAMRCellData*> a_cdrDensities,
+					     const Vector<EBAMRCellData*> a_cdrVelocities,
 					     const phase::which_phase     a_phase);
 
+
       /*!
-	@brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
+	@brief Extrapolate drift fluxes to domain faces. 
+	@details Note that this projects the flux on the domain face vectors. 
+	@param[out] a_cdrDomainFluxes CDR fluxes extrapolated and projected onto the domain face. 
+	@param[in]  a_cdrDensities    Cell-centered CDR solver densities. 
+	@param[in]  a_cdrVelocities   Cell-centered CDR solver velocities. 
+	@param[in]  a_phase           Phase
       */
-      virtual void computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_ebvel,
-						 const Vector<EBAMRCellData*> a_velocities,
+      virtual void computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a_cdrDomainFluxes,
+						   const Vector<EBAMRCellData*> a_cdrDensities,
+						   const Vector<EBAMRCellData*> a_cdrVelocities,
+						   const phase::which_phase     a_phase);      
+
+      /*!
+	@brief Extrapolated cell-centered velocities to the EB. 
+	@details This only computes the normal velocity on the EB, i.e. the output is the extrapolated velocity projected along the EB normal. 
+	@param[out] a_cdrVelocitiesEB   EB-centered velocities
+	@param[in]  a_cdrVelocitiesCell Cell-centered velocities
+	@param[in]  a_phase             Phase
+      */
+      virtual void computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_cdrVelocitiesEB,
+						 const Vector<EBAMRCellData*> a_cdrVelocitiesCell,
 						 const phase::which_phase     a_phase);
-
-      /*!
-	@brief Compute the cell-centered fluxes and extrapolate these to the domain faces
-      */
-      virtual void computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a_fluxes,
-						   const Vector<EBAMRCellData*> a_densities,
-						   const Vector<EBAMRCellData*> a_velocities,
-						   const phase::which_phase     a_phase);
-
-
-      /*!
-	@brief Compute flux
-      */
-      virtual void computeFlux(EBAMRCellData&       a_flux,
-			       const EBAMRCellData& a_density,
-			       const EBAMRCellData& a_velocity);
-
-      virtual void computeFlux(LevelData<EBCellFAB>&       a_flux,
-			       const LevelData<EBCellFAB>& a_density,
-			       const LevelData<EBCellFAB>& a_velocity,
-			       const int                   a_lvl);
-
-      /*!
-	@brief Compute charge flux. 
-      */
-      virtual void computeChargeFlux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_flxues);
-
-
-
   
       /*!
 	@brief Deallocate internal solver storages
       */
       virtual void deallocateSolverInternals();
 
-      virtual void extrapolateToEb(LevelData<BaseIVFAB<Real> >& a_extrap,
+      /*!
+	@brief Extrapolated cell-centered data to the EB. This is the AMR version for all species. 
+	@param[out] a_ebData   EB-centered data
+	@param[in]  a_phase    Phase 
+	@param[in]  a_cellData Cell-centered data
+      */
+      virtual void extrapolateToEb(Vector<EBAMRIVData*>&         a_ebData,
+				   const phase::which_phase      a_phase,
+				   const Vector<EBAMRCellData*>& a_cellData);
+
+      /*!
+	@brief Extrapolated cell-centered data to the EB. This is the AMR version.
+	@param[out] a_ebData   EB-centered data
+	@param[in]  a_phase    Phase 
+	@param[in]  a_cellData Cell-centered data
+      */
+      virtual void extrapolateToEb(EBAMRIVData& a_ebData, const phase::which_phase a_phase, const EBAMRCellData& a_cellData);      
+
+      /*!
+	@brief Extrapolated cell-centered data to the EB. This is the level version. 
+	@param[out] a_ebData   EB-centered data
+	@param[in]  a_phase    Phase 
+	@param[in]  a_cellData Cell-centered data
+	@param[in]  a_lvl      Grid level
+      */
+      virtual void extrapolateToEb(LevelData<BaseIVFAB<Real> >& a_ebData,
 				   const phase::which_phase     a_phase,
-				   const LevelData<EBCellFAB>&  a_data,
+				   const LevelData<EBCellFAB>&  a_cellData,
 				   const int                    a_lvl);
 
-      /*!
-	@brief Extrapolate data to EB centroid
-      */
-      virtual void extrapolateToEb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
 
       /*!
-	@brief Extrapolate data to EB centroid
+	@brief Extrapolate cell-centered data to domain faces. This is the AMR version that does all species. 
+	@param[out] a_domainData Domain-centered data
+	@param[in]  a_phase      Phase
+	@param[in]  a_cellData   Cell-centered data. 
       */
-      virtual void extrapolateToEb(Vector<EBAMRIVData*>&         a_extrap,
-				   const phase::which_phase      a_phase,
-				   const Vector<EBAMRCellData*>& a_data);
+      virtual void extrapolateToDomainFaces(Vector<EBAMRIFData*>&         a_domainData,
+					    const phase::which_phase      a_phase,
+					    const Vector<EBAMRCellData*>& a_cellData);
 
       /*!
-	@brief Extrapolate to domain faces. Calls level version. 
+	@brief Extrapolate cell-centered data to domain faces. This is the AMR version.
+	@param[out] a_domainData Domain-centered data
+	@param[in]  a_phase      Phase
+	@param[in]  a_cellData   Cell-centered data. 
       */
-      virtual void extrapolateToDomainFaces(EBAMRIFData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
+      virtual void extrapolateToDomainFaces(EBAMRIFData&             a_domainData,
+					    const phase::which_phase a_phase,
+					    const EBAMRCellData&     a_cellData);
 
       /*!
-	@brief Extrapolate to domain faces
+	@brief Extrapolate cell-centered data to domain faces. This is the AMR version.
+	@param[out] a_domainData Domain-centered data
+	@param[in]  a_phase      Phase
+	@param[in]  a_cellData   Cell-centered data. 
+	@param[in]  a_lvl        Grid level
       */
-      virtual void extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_extrap,
+      virtual void extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_domainData,
 					    const phase::which_phase    a_phase,
-					    const LevelData<EBCellFAB>& a_data,
+					    const LevelData<EBCellFAB>& a_cellData,
 					    const int                   a_lvl);
 
+
       /*!
-	@brief Extrapolate to domain faces
+	@brief Extrapolate vector data to domain faces. This is the AMR version that does all species. 
+	@details This will extrapolate the vector data to domain faces and project it along the domain normal. 
+	@param[out] a_domainData Domain-centered data. Must have one component. 
+	@param[in]  a_phase      Phase
+	@param[in]  a_cellData   Cell-centered data. Must have SpaceDim components. 
       */
-      virtual void extrapolateToDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
-					    const phase::which_phase      a_phase,
-					    const Vector<EBAMRCellData*>& a_data);
-  
-
-      virtual void extrapolateToVectorDomainFaces(EBAMRIFData&             a_extrap,
-						  const phase::which_phase a_phase,
-						  const EBAMRCellData&     a_data);
-
-      virtual void extrapolateToVectorDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
+      virtual void extrapolateVectorToDomainFaces(Vector<EBAMRIFData*>&         a_domainData,
 						  const phase::which_phase      a_phase,
-						  const Vector<EBAMRCellData*>& a_data);
+						  const Vector<EBAMRCellData*>& a_cellData);
 
+
+      /*!
+	@brief Extrapolate vector data to domain faces. This is the AMR version.
+	@details This will extrapolate the vector data to domain faces and project it along the domain normal. 
+	@param[out] a_domainData Domain-centered data. Must have one component. 
+	@param[in]  a_phase      Phase
+	@param[in]  a_cellData   Cell-centered data. Must have SpaceDim components. 
+      */      
+      virtual void extrapolateVectorToDomainFaces(EBAMRIFData&             a_domainData,
+						  const phase::which_phase a_phase,
+						  const EBAMRCellData&     a_cellData);
+
+
+      // CODE WALK BEGINS HERE            
       virtual void extrapolateVelocitiesVectorDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
 							  const phase::which_phase      a_phase,
 							  const Vector<EBAMRCellData*>& a_data);
