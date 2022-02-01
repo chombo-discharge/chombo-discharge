@@ -64,7 +64,7 @@ namespace Physics {
 				  const Real             a_max_E,
 				  const RealVect         a_grad_E,
 				  const Real             a_min_grad_E,
-				  const Real             a_max_grad_E);
+				  const Real             a_max_grad_E) const;
 
       /*!
 	@brief Return coarsening criterion. 
@@ -74,7 +74,7 @@ namespace Physics {
 			       const Real             a_dx,
 			       const int              a_lvl,
 			       const Vector<Real>     a_tracer,
-			       const Vector<RealVect> a_grad_tracer);
+			       const Vector<RealVect> a_grad_tracer) const;
 
       /*!
 	@brief Return refinement criterion. 
@@ -84,7 +84,7 @@ namespace Physics {
 			      const Real             a_dx,
 			      const int              a_lvl,
 			      const Vector<Real>     a_tracer,
-			      const Vector<RealVect> a_grad_tracer);
+			      const Vector<RealVect> a_grad_tracer) const;
     protected:
 
       /*!

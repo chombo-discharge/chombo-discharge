@@ -21,7 +21,7 @@ using namespace Physics::CdrPlasma;
 CdrPlasmaStreamerTagger::CdrPlasmaStreamerTagger(){
   m_name = "CdrPlasmaStreamerTagger";
 
-  m_num_tracers = 2;
+  m_numTracers = 2;
 }
 
 CdrPlasmaStreamerTagger::~CdrPlasmaStreamerTagger(){
@@ -61,11 +61,11 @@ Vector<Real> CdrPlasmaStreamerTagger::tracer(const RealVect         a_pos,
 					     const Real             a_max_E,
 					     const RealVect         a_grad_E,
 					     const Real             a_min_grad_E,
-					     const Real             a_max_grad_E){
+					     const Real             a_max_grad_E) const {
 
 
   
-  Vector<Real> tracers(m_num_tracers);
+  Vector<Real> tracers(m_numTracers);
 
   const Real E = a_E.vectorLength();
   
@@ -79,7 +79,7 @@ bool CdrPlasmaStreamerTagger::coarsenCell(const RealVect         a_pos,
 					  const Real             a_dx,
 					  const int              a_lvl,
 					  const Vector<Real>     a_tracer,
-					  const Vector<RealVect> a_grad_tracer){
+					  const Vector<RealVect> a_grad_tracer) const {
 
   bool coarsen = false;
 
@@ -100,7 +100,7 @@ bool CdrPlasmaStreamerTagger::refineCell(const RealVect         a_pos,
 					 const Real             a_dx,
 					 const int              a_lvl,
 					 const Vector<Real>     a_tracer,
-					 const Vector<RealVect> a_grad_tracer){
+					 const Vector<RealVect> a_grad_tracer) const {
   const bool refine1  = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv;
   const bool refine2 = a_tracer[1]*a_dx > m_refi_alpha;
 

@@ -15,351 +15,393 @@
 // Our includes
 #include <CD_CdrPlasmaTagger.H>
 #include <CD_DataOps.H>
+#include <CD_ParallelOps.H>
+#include <CD_BoxLoops.H>
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::CdrPlasma;
 
 CdrPlasmaTagger::CdrPlasmaTagger(){
   CH_TIME("CdrPlasmaTagger::CdrPlasmaTagger");
-  m_verbosity = 10;
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaTagger::CdrPlasmaTagger" << endl;
-  }
+    pout() << m_name + "::define" << endl;
+  }  
 
+  // Default settings
   m_name  = "CdrPlasmaTagger";
   m_phase = phase::gas;
 }
 
-CdrPlasmaTagger::CdrPlasmaTagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
-				 const RefCountedPtr<CdrPlasmaStepper>&     a_timeStepper,
+CdrPlasmaTagger::CdrPlasmaTagger(const RefCountedPtr<CdrPlasmaPhysics>&      a_physics,
+				 const RefCountedPtr<CdrPlasmaStepper>&      a_timeStepper,
 				 const RefCountedPtr<AmrMesh>&               a_amr,
 				 const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : CdrPlasmaTagger() {
+  CH_TIME("CdrPlasmaTagger::CdrPlasmaTagger(RefCountedPtr<...> x 4)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::define(RefCountedPtr<...>x4)" << endl;
+  }
+
+  // Call the define function
   this->define(a_physics, a_timeStepper, a_amr, a_computationalGeometry);
 }
 
 CdrPlasmaTagger::~CdrPlasmaTagger(){
-
+  CH_TIME("CdrPlasmaTagger::~CdrPlasmaTagger");
+  if(m_verbosity > 5){
+    pout() << m_name + "::~CdrPlasmaTagger" << endl;
+  }    
 }
 
 void CdrPlasmaTagger::define(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
 			     const RefCountedPtr<CdrPlasmaStepper>&     a_timeStepper,
 			     const RefCountedPtr<AmrMesh>&               a_amr,
 			     const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
-  CH_TIME("CdrPlasmaTagger::define");
+  CH_TIME("CdrPlasmaTagger::define(RefCountedPtr<...>x4)");
   if(m_verbosity > 5){
-    pout() << m_name + "::define" << endl;
+    pout() << m_name + "::define(RefCountedPtr<...>x4)" << endl;
   }
 
-  m_physics     = a_physics;
-  m_timeStepper = a_timeStepper;
-  m_amr         = a_amr;
-  m_computationalGeometry    = a_computationalGeometry;
-  m_realm       = Realm::Primal;
+  m_physics               = a_physics;
+  m_timeStepper           = a_timeStepper;
+  m_amr                   = a_amr;
+  m_realm                 = Realm::Primal;
+  m_computationalGeometry = a_computationalGeometry;
+  m_phase                 = phase::gas;
 }
 
 void CdrPlasmaTagger::regrid(){
-  CH_TIME("CdrPlasmaTagger::regrid");
+  CH_TIME("CdrPlasmaTagger::regrid()");
   if(m_verbosity > 5){
-    pout() << m_name + "::regrid" << endl;
+    pout() << m_name + "::regrid()" << endl;
   }
+
+  // TLDR: This reallocates storage for the tracer fields. 
   
-  if(m_num_tracers > 0){
-    m_tracer.resize(m_num_tracers);
-    m_grad_tracer.resize(m_num_tracers);
-    for (int i = 0; i < m_num_tracers; i++){
-      m_amr->allocate(m_tracer[i],      m_realm, m_phase, 1);
-      m_amr->allocate(m_grad_tracer[i], m_realm, m_phase, SpaceDim);
+  if(m_numTracers > 0){
+    m_tracers.    resize(m_numTracers);
+    m_gradTracers.resize(m_numTracers);
+
+    // Allocate storage for scalar tracer and it's gradient. 
+    for (int i = 0; i < m_numTracers; i++){
+      m_amr->allocate(m_tracers    [i], m_realm, m_phase, 1       );
+      m_amr->allocate(m_gradTracers[i], m_realm, m_phase, SpaceDim);
     }
   }
 }
 
-void CdrPlasmaTagger::setPhase(const phase::which_phase a_phase){
-  CH_TIME("CdrPlasmaTagger::setPhase");
+int CdrPlasmaTagger::getNumberOfPlotVariables() const {
+  CH_TIME("CdrPlasmaTagger::getNumberOfPlotVariables()");
   if(m_verbosity > 5){
-    pout() << m_name + "::setPhase" << endl;
-  }
-  
-  m_phase = a_phase;
-}
-
-int CdrPlasmaTagger::getNumberOfPlotVariables(){
-  CH_TIME("CdrPlasmaTagger::getNumberOfPlotVariables_cells");
-  if(m_verbosity > 5){
-    pout() << m_name + "::getNumberOfPlotVariables" << endl;
-  }
-  
-  return m_num_tracers;
-}
-
-Vector<EBAMRCellData>& CdrPlasmaTagger::getTracerFields() {
-  return m_tracer;
-}
-
-void CdrPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) {
-  CH_TIME("CdrPlasmaTagger::writePlotData");
-  if(m_verbosity > 5){
-    pout() << m_name + "::writePlotData" << endl;
+    pout() << m_name + "::getNumberOfPlotVariables()" << endl;
   }
 
+  return m_numTracers;
+}
+
+void CdrPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
+  CH_TIME("CdrPlasmaTagger::writePlotData(EBAMRCellData, Vector<std::string>, int)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;
+  }
+
+  // Update the tracer fields. 
   this->computeTracers();
-  for (int i = 0; i < m_num_tracers; i++){
+
+  // Go through the fields and add them to file. 
+  for (int i = 0; i < m_numTracers; i++){
+
+    // Make the variable name into 'Tracer field-0', 'Tracer field-1', etc. 
     std::string one = "Tracer field-";
     long int j = i;
     char s[2]; 
     sprintf(s,"%ld", j);
     std::string two(s);
-      
-    const EBAMRCellData& tracer = m_tracer[i];
+
+    // Handle to tracer filed. 
+    const EBAMRCellData& tracer = m_tracers[i];
     
-    const Interval src_interv(0, 0);
-    const Interval dst_interv(a_icomp, a_icomp);
-    
+    const Interval srcInterv(0,       0      );
+    const Interval dstInterv(a_icomp, a_icomp);
+
+    // Copy data to the ouput data holder. Covered data is bogus. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      tracer[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+      tracer[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
+      
       DataOps::setCoveredValue(*a_output[lvl], a_icomp, 0.0);
     }
 
-    // Add component and name
+    // Add variable name and update the starting component. 
     a_plotVariableNames.push_back(one+two);
+    
     a_icomp++;
   }
 }
 
 bool CdrPlasmaTagger::tagCells(EBAMRTags& a_tags){
-  CH_TIME("CdrPlasmaTagger::tagCells");
+  CH_TIME("CdrPlasmaTagger::tagCells(EBAMRTags)");
   if(m_verbosity > 5){
-    pout() << m_name + "::tagCells" << endl;
+    pout() << m_name + "::tagCells(EBAMRTags)" << endl;
   }
 
-  bool got_new_tags = false;
+  bool gotNewTags = false;
 
-  const RealVect origin      = m_amr->getProbLo();
-  const Real time            = m_timeStepper->getTime();
-  const int finest_level     = m_amr->getFinestLevel();
-  const int max_depth        = m_amr->getMaxAmrDepth();
-  const int finest_tag_level = (finest_level == max_depth) ? max_depth - 1 : finest_level; // Never tag on max_amr_depth
+  // Lower left corner and current time. 
+  const RealVect probLo = m_amr->getProbLo();
+  const Real     time   = m_timeStepper->getTime();
 
-  if(m_num_tracers > 0){
 
-    // Compute tracer fields. This is an overriden pure function
-    computeTracers();
-    
-    for (int lvl = 0; lvl <= finest_tag_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm,m_phase)[lvl];
-      const Real dx                = m_amr->getDx()[lvl];
+  // Determine how deep we should flag cells for refinement. We will never flag cells on AmrMesh's maximum AMR depth, so we restrict to that. 
+  const int finestLevel    = m_amr->getFinestLevel();
+  const int maxDepth       = m_amr->getMaxAmrDepth();
+  const int finestTagLevel = (finestLevel == maxDepth) ? maxDepth - 1 : finestLevel; 
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const Box box          = dbl.get(dit());
+  if(m_numTracers > 0){
+
+    // Compute tracer fields -- note that this is implemented by subclasses. 
+    this->computeTracers();
+
+    // Go through the AMR levels, being careful not to add cell tags on the maximum possible AMR depth (because grid level l+1 is generated from tags on level l).
+    for (int lvl = 0; lvl <= finestTagLevel; lvl++){
+      const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm         )[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
+
+      // Go through the grid patches. 
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box      box     = dbl  [dit()];
 	const EBISBox& ebisbox = ebisl[dit()];
 	const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-	const IntVectSet irreg_ivs = ebisbox.getIrregIVS(box);
-	const IntVectSet prev_tags = IntVectSet((*a_tags[lvl])[dit()]);
-
+	// Create data holders that hold which cells were coarsened and which cells were refined
 	DenseIntVectSet coarsenTags(box, false); // Cells that will be coarsened
-	DenseIntVectSet refine_tags(box, false);  // Cells that will be refined
+	DenseIntVectSet refineTags (box, false); // Cells that will be refined
 
+	// Handle to tracer fields and their gradients on this grid patch. 
 	Vector<EBCellFAB*> tracers;
 	Vector<EBCellFAB*> gtracers;
 
-	for (int i = 0; i < m_num_tracers; i++){
-	  tracers.push_back(&((*m_tracer[i][lvl])[dit()]));
-	  gtracers.push_back(&((*m_grad_tracer[i][lvl])[dit()]));
+	for (int i = 0; i < m_numTracers; i++){
+	  tracers. push_back(&((*m_tracers    [i][lvl])[dit()]));
+	  gtracers.push_back(&((*m_gradTracers[i][lvl])[dit()]));
 	}
 
+	// Current cell flags. If we add a tag, the cell will be refined. Remove one, and it will be coarsened. 
 	DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
 	
-	// Refinement and coarsening
-	refineCellsBox(refine_tags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
-	coarsenCellsBox(coarsenTags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
+	// Calls the patch versions which figure out which tags will be refined in each grid patch. 
+	this->refineCellsBox (refineTags,  tracers, gtracers, lvl, dit(), box, ebisbox, time, dx, probLo);
+	this->coarsenCellsBox(coarsenTags, tracers, gtracers, lvl, dit(), box, ebisbox, time, dx, probLo);
 
-	// Check if we got any new tags, or we are just recycling old tags.
-	// Basically we will check if (current_tags + refined_tags - coarsenTags) == current_tags
+	// Check if we got any new tags, or we are just recycling old tags. If we did not get new tags then
+	// we will ask the Driver to skip the regrid completely. Basically we will check if (current_tags + refined_tags - coarsenTags) == current_tags
 	DenseIntVectSet cpy1 = tags;
 	tags -= coarsenTags;
-	tags |= refine_tags;
+	tags |= refineTags;
 	DenseIntVectSet cpy2 = tags;
 
 	cpy2 -= cpy1; // = new tags minus old tags. If nonzero, we got some new tags. 
 	cpy1 -= tags; // = old_tags minus new tags. If nonzero, we got some new tags
 	if(cpy1.numPts() != 0 || cpy2.numPts() != 0){
-	  got_new_tags = true;
+	  gotNewTags = true;
 	}
 
+	// No tags allowed outside the current grid patch. 
 	tags &= box;
       }
     }
   }
 
   // Some ranks may have gotten new tags while others have not. This little code snippet
-  // sets got_new_tags = true for all ranks if any rank originally had got_new_tags = true
-#ifdef CH_MPI
-  int glo = 1;
-  int loc = got_new_tags ? 1 : 0;
+  // sets gotNewTags = true for all ranks if any rank probLoally had gotNewTags = true
+  int hasTags = gotNewTags ? 1 : 0;
+  hasTags = ParallelOps::max(hasTags);
 
-  const int result = MPI_Allreduce(&loc, &glo, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  if(hasTags > 0){
+    gotNewTags = true;
+  }
 
-  got_new_tags = (glo == 1) ? true : false;
-#endif
-
-  return got_new_tags;
+  return gotNewTags;
 }
 
-void CdrPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refined_tags,
+void CdrPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refinedCells,
 				     const Vector<EBCellFAB*>& a_tracers,
-				     const Vector<EBCellFAB*>& a_grad_tracers,
+				     const Vector<EBCellFAB*>& a_gradTracers,
 				     const int                 a_lvl,
+				     const DataIndex           a_dit,
 				     const Box                 a_box,
 				     const EBISBox&            a_ebisbox,
 				     const Real                a_time,
 				     const Real                a_dx,
-				     const RealVect            a_origin){
-
-
-  
-  Vector<BaseFab<Real>* > reg_tracers;
-  Vector<BaseFab<Real>* > reg_gtracer;
-
-  for (int i = 0; i < m_num_tracers; i++){
-    reg_tracers.push_back(&(a_tracers[i]->getSingleValuedFAB()));
-    reg_gtracer.push_back(&(a_grad_tracers[i]->getSingleValuedFAB()));
+				     const RealVect            a_probLo){
+  CH_TIME("CdrPlasmaTagger::refineCellsBox(...)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::refineCellsBox(...)" << endl;
   }
 
-  // Regular box loop
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
-    const IntVect iv   = bit();
-    const RealVect pos = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect::Unit;
+  constexpr int comp = 0;
+
+  // Get a handle to the single-valued data. 
+  Vector<FArrayBox* > tracersReg  ;
+  Vector<FArrayBox* > gradientsReg;
+
+  for (int i = 0; i < m_numTracers; i++){
+    tracersReg.  push_back(&(a_tracers    [i]->getFArrayBox()));
+    gradientsReg.push_back(&(a_gradTracers[i]->getFArrayBox()));
+  }
+
+  // Cell-wise tracer fields. Used in the kernels. 
+  Vector<Real>     tr(m_numTracers); 
+  Vector<RealVect> gt(m_numTracers);  
+
+  // Regular kernel.
+  auto regularKernel = [&] (const IntVect& iv) -> void {
+    const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv)) * a_dx;
     
     // If position is inside any of the tagging boxes, we can refine
-    if(insideTagBox(pos) && a_ebisbox.isRegular(iv)){
+    if(this->insideTagBox(pos) && a_ebisbox.isRegular(iv)){
       
-      // Build point-wise tracer fields
-      Vector<Real>     tr(m_num_tracers); 
-      Vector<RealVect> gt(m_num_tracers);
-      for (int i = 0; i < m_num_tracers; i++){
-	tr[i] = (*reg_tracers[i])(iv, 0);
-	gt[i] = RealVect(D_DECL((*reg_gtracer[i])(iv, 0),(*reg_gtracer[i])(iv, 1),(*reg_gtracer[i])(iv, 2)));
+      // Get the tracer fields and the gradients of them. 
+      for (int i = 0; i < m_numTracers; i++){
+	tr[i] = (*tracersReg[i])(iv, 0);
+	gt[i] = RealVect(D_DECL((*gradientsReg[i])(iv, 0),
+				(*gradientsReg[i])(iv, 1),
+				(*gradientsReg[i])(iv, 2)));
       }
 
-      // Check if this cell should be refined
-      const bool refine = refineCell(pos, a_time, a_dx, a_lvl, tr, gt);
+      // Call the per-cell-refinement method. 
+      const bool refine = this->refineCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
-      // If we refine, grow with buffer and increment to a_refined_tags
+      // If we refine, grow with buffer and increment to a_refinedCells
       if(refine){
-	a_refined_tags |= iv;
+	a_refinedCells |= iv;
       }
     }
-  }
+  };
 
-  // Irregular box loop
-  const IntVectSet& irreg = a_ebisbox.getIrregIVS(a_box);
-  const EBGraph& ebgraph  = a_ebisbox.getEBGraph();
-  for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
+  // Irregular kernel
+  auto irregularKernel = [&] (const VolIndex& vof) -> void {
+    const RealVect pos  = a_probLo + Location::position(Location::Cell::Center, vof, a_ebisbox, a_dx);
 
     // If position is inside any of the tagging boxes, we can refine
-    if(insideTagBox(pos)){
-      
-      // Build point-wise tracer fields
-      Vector<Real>     tr(m_num_tracers); 
-      Vector<RealVect> gt(m_num_tracers);
-      for (int i = 0; i < m_num_tracers; i++){
+    if(this->insideTagBox(pos)){
+
+      // Get the tracer fields and the gradients of them.       
+      for (int i = 0; i < m_numTracers; i++){
 	tr[i] = (*a_tracers[i])(vof, 0);
-	gt[i] = RealVect(D_DECL((*a_grad_tracers[i])(vof, 0),(*a_grad_tracers[i])(vof, 1),(*a_grad_tracers[i])(vof, 2)));
+	gt[i] = RealVect(D_DECL((*a_gradTracers[i])(vof, 0),
+				(*a_gradTracers[i])(vof, 1),
+				(*a_gradTracers[i])(vof, 2)));
       }
 
-      // Check if this cell should be refined
-      const bool refine = refineCell(pos, a_time, a_dx, a_lvl, tr, gt);
+      // Call the per-cell-refinement method.
+      const bool refine = this->refineCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
       if(refine){
-	a_refined_tags |= vof.gridIndex();
+	a_refinedCells |= vof.gridIndex();
       }
     }
-  }
+  };
+
+    // Irregular kernel region. Should probably be stored in its own VoFIterator but I'm lazy so let's define it right here.
+  VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
+
+  // Execute the kernels.
+  BoxLoops::loop(a_box,   regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);      
 }
 
-void CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&         a_coarsened_tags,
+void CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
 				      const Vector<EBCellFAB*>& a_tracers,
-				      const Vector<EBCellFAB*>& a_grad_tracers,
+				      const Vector<EBCellFAB*>& a_gradTracers,
 				      const int                 a_lvl,
+				      const DataIndex           a_dit,
 				      const Box                 a_box,
 				      const EBISBox&            a_ebisbox,
 				      const Real                a_time,
 				      const Real                a_dx,
-				      const RealVect            a_origin){
-
-
-  
-  Vector<BaseFab<Real>* > reg_tracers;
-  Vector<BaseFab<Real>* > reg_gtracer;
-
-  for (int i = 0; i < m_num_tracers; i++){
-    reg_tracers.push_back(&(a_tracers[i]->getSingleValuedFAB()));
-    reg_gtracer.push_back(&(a_grad_tracers[i]->getSingleValuedFAB()));
+				      const RealVect            a_probLo){
+  CH_TIME("CdrPlasmaTagger::coarsenCellsBox(...)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::coarsenCellsBox(...)" << endl;
   }
+
+  constexpr int comp = 0;
+
+  // Get a handle to the single-valued data.   
+  Vector<FArrayBox* > tracersReg;
+  Vector<FArrayBox* > gradientsReg;
+
+  for (int i = 0; i < m_numTracers; i++){
+    tracersReg.  push_back(&(a_tracers    [i]->getFArrayBox()));
+    gradientsReg.push_back(&(a_gradTracers[i]->getFArrayBox()));
+  }
+
+  // Tracer field and gradient of tracer fields. Used in the kernels. 
+  Vector<Real>     tr(m_numTracers); 
+  Vector<RealVect> gt(m_numTracers);  
 
   // Regular box loop
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
-    const IntVect iv   = bit();
-    const RealVect pos = a_origin + a_dx*RealVect(iv);
+  auto regularKernel = [&] (const IntVect& iv) -> void {
+    const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv)) * a_dx;
     
     // If position is inside any of the tagging boxes, we can refine
-    const bool inside = insideTagBox(pos);
-    if(!inside){
-      a_coarsened_tags |= iv;
+    const bool isPointInside = this->insideTagBox(pos);
+    if(!isPointInside){ 
+      a_coarsenedCells |= iv; // Always coarsen outside the refinement boxes. 
     }
-    else if(inside && a_ebisbox.isRegular(iv)){
+    else if(isPointInside && a_ebisbox.isRegular(iv)){
       
-      // Build point-wise tracer fields
-      Vector<Real>     tr(m_num_tracers); 
-      Vector<RealVect> gt(m_num_tracers);
-      for (int i = 0; i < m_num_tracers; i++){
-	tr[i] = (*reg_tracers[i])(iv, 0);
-	gt[i] = RealVect(D_DECL((*reg_gtracer[i])(iv, 0),(*reg_gtracer[i])(iv, 1),(*reg_gtracer[i])(iv, 2)));
+      // Reconstruct the tracer fields and tracer field gradients
+      for (int i = 0; i < m_numTracers; i++){
+	tr[i] = (*tracersReg[i])(iv, 0);
+	gt[i] = RealVect(D_DECL((*gradientsReg[i])(iv, 0),
+				(*gradientsReg[i])(iv, 1),
+				(*gradientsReg[i])(iv, 2)));
       }
 
-      // Check if this cell should be refined
-      const bool coarsen = coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);
+      // Call the per-cell-coarsening method and see if we should coarsen this cell. 
+      const bool coarsen = this->coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
-      // If we refine, grow with buffer and increment to a_refined_tags
+      // If we refine, grow with buffer and increment to a_refinedCells
       if(coarsen){
-	a_coarsened_tags |= iv;
+	a_coarsenedCells |= iv;
       }
     }
-  }
+  };
 
   // Irregular box loop
-  const IntVectSet& irreg = a_ebisbox.getIrregIVS(a_box);
-  const EBGraph& ebgraph  = a_ebisbox.getEBGraph();
-  for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
+  auto irregularKernel = [&] (const VolIndex& vof) -> void {
+    const RealVect pos  = a_probLo + Location::position(Location::Cell::Center, vof, a_ebisbox, a_dx);
 
     // If position is inside any of the tagging boxes, we can refine
-    const bool inside = insideTagBox(pos);
-    if(!inside){
-      a_coarsened_tags |= vof.gridIndex();
+    const bool isPointInside = this->insideTagBox(pos);
+    if(!isPointInside){
+      a_coarsenedCells |= vof.gridIndex();
     }
-    else if(inside){
-      
-      // Build point-wise tracer fields
-      Vector<Real>     tr(m_num_tracers); 
-      Vector<RealVect> gt(m_num_tracers);
-      for (int i = 0; i < m_num_tracers; i++){
+    else
+      // Reconstruct the tracer fields and gradients again. 
+      for (int i = 0; i < m_numTracers; i++){
 	tr[i] = (*a_tracers[i])(vof, 0);
-	gt[i] = RealVect(D_DECL((*a_grad_tracers[i])(vof, 0),(*a_grad_tracers[i])(vof, 1),(*a_grad_tracers[i])(vof, 2)));
+	gt[i] = RealVect(D_DECL((*a_gradTracers[i])(vof, 0),
+				(*a_gradTracers[i])(vof, 1),
+				(*a_gradTracers[i])(vof, 2)));
       }
 
-      // Check if this cell should be refined
-      const bool coarsen = coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);
+    // Call the per-cell refinement method. 
+    const bool coarsen = this->coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
-      if(coarsen){
-	a_coarsened_tags |= vof.gridIndex();
-      }
+    if(coarsen){
+      a_coarsenedCells |= vof.gridIndex();
     }
-  }
+  };
+
+  // Kernel region for the irregular kernel. 
+  VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];  
+
+  // Execute the kernels
+  BoxLoops::loop(a_box,   regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);  
 }
 
 #include <CD_NamespaceFooter.H>

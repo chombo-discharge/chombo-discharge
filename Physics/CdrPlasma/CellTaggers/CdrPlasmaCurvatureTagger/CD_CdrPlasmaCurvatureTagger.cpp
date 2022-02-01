@@ -20,7 +20,7 @@ using namespace Physics::CdrPlasma;
 
 CdrPlasmaCurvatureTagger::CdrPlasmaCurvatureTagger(){
   m_name = "CdrPlasmaCurvatureTagger";
-  m_num_tracers = 1;
+  m_numTracers = 1;
 }
 
 CdrPlasmaCurvatureTagger::CdrPlasmaCurvatureTagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_plaskin,
@@ -57,7 +57,7 @@ Vector<Real> CdrPlasmaCurvatureTagger::tracer(const RealVect          a_pos,
 					      const Real              a_min_grad_E,
 					      const Real              a_max_grad_E){
 
-  Vector<Real> tracers(m_num_tracers);
+  Vector<Real> tracers(m_numTracers);
   tracers[0] = a_E.vectorLength()/a_max_E;
 
   return tracers;

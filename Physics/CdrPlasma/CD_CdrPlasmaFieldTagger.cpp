@@ -32,7 +32,7 @@ CdrPlasmaFieldTagger::~CdrPlasmaFieldTagger(){
 
 }
 
-void CdrPlasmaFieldTagger::allocateStorage(){
+void CdrPlasmaFieldTagger::allocateStorage() const {
   CH_TIME("CdrPlasmaFieldTagger::allocateStorage");
   if(m_verbosity > 5){
     pout() << m_name + "::allocateStorage" << endl;
@@ -43,7 +43,7 @@ void CdrPlasmaFieldTagger::allocateStorage(){
   m_amr->allocate(m_grad_E,   m_realm, m_phase, SpaceDim);
 }
 
-void CdrPlasmaFieldTagger::deallocateStorage(){
+void CdrPlasmaFieldTagger::deallocateStorage() const {
   CH_TIME("CdrPlasmaFieldTagger::deallocateStorage");
   if(m_verbosity > 5){
     pout() << m_name + "::deallocateStorage" << endl;
@@ -54,7 +54,7 @@ void CdrPlasmaFieldTagger::deallocateStorage(){
   m_amr->deallocate(m_grad_E);
 }
 
-void CdrPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
+void CdrPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E) const {
   CH_TIME("CdrPlasmaFieldTagger::computeElectricField");
   if(m_verbosity > 5){
     pout() << m_name + "::computeElectricField" << endl;
@@ -72,7 +72,7 @@ void CdrPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellDat
   m_amr->interpToCentroids(a_grad_E, m_realm, m_phase);
 }
 
-void CdrPlasmaFieldTagger::computeTracers(){
+void CdrPlasmaFieldTagger::computeTracers() const {
   CH_TIME("CdrPlasmaFieldTagger::computeTracers");
   if(m_verbosity > 5){
     pout() << m_name + "::computeTracers" << endl;
@@ -113,8 +113,8 @@ void CdrPlasmaFieldTagger::computeTracers(){
       // Avoid the extra point lookups by getting these before the point loops
       Vector<EBCellFAB*> tr;
       Vector<BaseFab<Real>* > tr_fab;
-      for (int i = 0; i < m_num_tracers; i++){
-	tr.push_back(&((*m_tracer[i][lvl])[dit()]));
+      for (int i = 0; i < m_numTracers; i++){
+	tr.push_back(&((*m_tracers[i][lvl])[dit()]));
 	tr_fab.push_back(&(tr[i]->getSingleValuedFAB()));
       }
 
@@ -136,7 +136,7 @@ void CdrPlasmaFieldTagger::computeTracers(){
 					    grad_E_min,
 					    grad_E_max);
 	
-	for(int i = 0; i < m_num_tracers; i++){
+	for(int i = 0; i < m_numTracers; i++){
 	  (*tr_fab[i])(iv, 0) = tracers[i];
 	}
       }
@@ -161,7 +161,7 @@ void CdrPlasmaFieldTagger::computeTracers(){
 					    grad_E_min,
 					    grad_E_max);
 	
-	for(int i = 0; i < m_num_tracers; i++){
+	for(int i = 0; i < m_numTracers; i++){
 	  (*tr[i])(vof, 0);
 	}
       }
@@ -169,15 +169,15 @@ void CdrPlasmaFieldTagger::computeTracers(){
   }
 
 
-  for (int i = 0; i < m_num_tracers; i++){
-    m_amr->averageDown(m_tracer[i], m_realm, m_phase);
-    m_amr->interpGhost(m_tracer[i], m_realm, m_phase);
+  for (int i = 0; i < m_numTracers; i++){
+    m_amr->averageDown(m_tracers[i], m_realm, m_phase);
+    m_amr->interpGhost(m_tracers[i], m_realm, m_phase);
   }
 
   // Compute gradient of tracers
-  for (int i = 0; i < m_num_tracers; i++){
-    m_amr->computeGradient(m_grad_tracer[i], m_tracer[i], m_realm, phase::gas);
-    m_amr->averageDown(m_grad_tracer[i], m_realm, m_phase);
+  for (int i = 0; i < m_numTracers; i++){
+    m_amr->computeGradient(m_gradTracers[i], m_tracers[i], m_realm, phase::gas);
+    m_amr->averageDown(m_gradTracers[i], m_realm, m_phase);
   }
 
   this->deallocateStorage(); // No reason to keep the extra storage lying around...

@@ -40,7 +40,7 @@ namespace Physics {
       /*!
 	@brief Compute tracer fields
       */
-      void computeTracers();
+      void computeTracers() const override final;
 
       /*!
 	@brief Parse options
@@ -52,32 +52,32 @@ namespace Physics {
       /*!
 	@brief Scratch storage
       */
-      EBAMRCellData m_scratch;
+      mutable EBAMRCellData m_scratch;
   
       /*!
 	@brief Storage for electric field
       */
-      EBAMRCellData m_E;
+      mutable EBAMRCellData m_E;
 
       /*!
 	@brief Storage for electric field
       */
-      EBAMRCellData m_grad_E;
+      mutable EBAMRCellData m_grad_E;
 
       /*!
 	@brief Allocate memory
       */
-      void allocateStorage();
+      void allocateStorage() const;
 
       /*!
 	@brief Deallocate memory
       */
-      void deallocateStorage();
+      void deallocateStorage() const;
 
       /*!
 	@brief Compute electric field
       */
-      void computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E);
+      void computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E) const;
     
       /*!
 	@brief Compute tracer field
@@ -90,7 +90,7 @@ namespace Physics {
 				  const Real              a_max_E,
 				  const RealVect          a_grad_E,
 				  const Real              a_min_grad_E,
-				  const Real              a_max_grad_E) = 0;
+				  const Real              a_max_grad_E) const = 0;
 
 
       /*!
@@ -101,7 +101,7 @@ namespace Physics {
 			       const Real             a_dx,
 			       const int              a_lvl,
 			       const Vector<Real>     a_tracer,
-			       const Vector<RealVect> a_grad_tracer) = 0;
+			       const Vector<RealVect> a_grad_tracer) const = 0;
 
       /*!
 	@brief Refine a cell based on a tracer field
@@ -111,7 +111,7 @@ namespace Physics {
 			      const Real             a_dx,
 			      const int              a_lvl,
 			      const Vector<Real>     a_tracer,
-			      const Vector<RealVect> a_grad_tracer) = 0;
+			      const Vector<RealVect> a_grad_tracer) const = 0;
     };
   }
 }

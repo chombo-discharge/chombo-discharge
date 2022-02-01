@@ -138,7 +138,7 @@ void CellTagger::parseVerbosity(){
   }
 }
 
-void CellTagger::writePlotData(EBAMRCellData& a_output, const Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
+void CellTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
   CH_TIME("CellTagger::writePlotData(EBAMRCellData, Vector<std::string>, int)");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;

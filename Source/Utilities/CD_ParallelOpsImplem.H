@@ -50,8 +50,8 @@ Real ParallelOps::max(const Real& a_input) {
 inline  
 int ParallelOps::min(const int& a_input) {
 #ifdef CH_MPI
-  int ret = 1.0;
-  const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  int ret = 1;
+  const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
     MayDay::Error("In file ParallelOps::min -- MPI communication error");
   }
@@ -65,8 +65,8 @@ inline
 int ParallelOps::max(const int& a_input) {
 
 #ifdef CH_MPI
-  int ret = 1.0;
-  const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+  int ret = 1;
+  const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
     MayDay::Error("In file ParallelOps::max -- MPI communication error");
   }
