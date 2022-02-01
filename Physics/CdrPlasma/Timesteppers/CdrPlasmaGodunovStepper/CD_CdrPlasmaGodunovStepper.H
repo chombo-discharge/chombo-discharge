@@ -146,6 +146,16 @@ namespace Physics {
       };
 
       /*!
+	@brief For figuring out which transport algorithm we use. 
+      */      
+      TransportAlgorithm m_transportAlgorithm;            
+
+      /*!
+	@brief For figuring out how we handle diffusion.
+      */
+      WhichDiffusionAlgorithm m_whichDiffusionAlgorithm;
+
+      /*!
 	@brief Scratch storage for the CDR solvers
       */
       Vector<RefCountedPtr<CdrStorage> > m_cdrScratch;
@@ -196,23 +206,52 @@ namespace Physics {
       */      
       EBAMRCellData m_scratchConductivity;
 
-
-      // CODE-WALK BEGINS HERE      
-
+      /*!
+	@brief A special flag for letting the CDR solvers know that we want to compute advective derivatives at half time steps
+      */
       bool m_extrapAdvect;
+
+      /*!
+	@brief Enable for debugging this class. 
+      */      
       bool m_debug;
+
+      /*!
+	@brief True if we floor the CDR densities. Due to reactions/EBs, they are not generally non-negative
+      */
       bool m_floor;
+
+      /*!
+	@brief If true, add a stochastic diffusion flux. 
+      */
       bool m_fhd;
+
+      /*!
+	@brief If true, we are using implicit diffusion. Otherwise it's explicit diffusion
+      */
       bool m_implicitDiffusion;
 
-      WhichDiffusionAlgorithm m_WhichDiffusionAlgorithm;
-      TransportAlgorithm m_transportAlgorithm;
+      /*!
+	@brief Function for getting the transient storage assocaited with a particular CDR solver
+	@param[in] a_solverIt Solver iterator
+	@return This returns the entry in m_cdrScratch corresponding to the solver. 
+      */
+      RefCountedPtr<CdrStorage>& getCdrStorage(const CdrIterator<CdrSolver>& a_solverIt);
 
-      // Get functions for storage
-      RefCountedPtr<CdrStorage>& getCdrStorage(const CdrIterator<CdrSolver>& a_solverit);
-      RefCountedPtr<RtStorage>& getRtStorage(const RtIterator<RtSolver>& a_solverit);
+      /*!
+	@brief Function for getting the transient storage assocaited with a particular RTE solver
+	@param[in] a_solverIt Solver iterator
+	@return This returns the entry in m_rteScratch corresponding to the solver. 
+      */      
+      RefCountedPtr<RtStorage>& getRtStorage(const RtIterator<RtSolver>& a_solverIt);
 
-      Real restrictDt();
+      /*!
+	@brief Use for restricting the time step
+      */
+      Real restrictDt() override;
+
+      
+      // CODE-WALK BEGINS HERE                  
 
       // Aux functions
       void computeElectricFieldIntoScratch();
@@ -246,11 +285,25 @@ namespace Physics {
       // Routine for semi-implicit Poisson solve.
       bool solveSemiImplicitPoisson();
 
-      // Need to override these because the semi-implicit scheme dump the conductivity to disk. 
+      // AND ENDS HERE
+
 #ifdef CH_USE_HDF5
+      /*!  
+	@brief Write checkpoint data to file.
+	@details Overriden because semi-implicit scheme requires additioanl stuff in HDF5 files. 
+	@param[inout] a_handle HDF5 fil
+	@param[in]    a_lvl    Grid level
+      */            
       virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
-#ifdef CH_USE_HDF5      
+      
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read checkpoint data from file. Used for restarts. 
+	@details Overriden because semi-implicit scheme requires additioanl stuff in HDF5 files. 
+	@param[inout] a_handle HDF5 file
+	@param[in]    a_lvl    Grid level
+      */            
       virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
 #endif      
     };

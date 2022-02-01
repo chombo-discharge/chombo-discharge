@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <limits>
+
 // Chombo includes
 #include <ParmParse.H>
 
@@ -107,15 +110,15 @@ void CdrPlasmaGodunovStepper::parseDiffusion(){
   pp.get("diffusion", str);
   if(str == "explicit"){
     m_implicitDiffusion = false;
-    m_WhichDiffusionAlgorithm = WhichDiffusionAlgorithm::Explicit;
+    m_whichDiffusionAlgorithm = WhichDiffusionAlgorithm::Explicit;
   }
   else if(str == "implicit"){
     m_implicitDiffusion = true;
-    m_WhichDiffusionAlgorithm = WhichDiffusionAlgorithm::Implicit;
+    m_whichDiffusionAlgorithm = WhichDiffusionAlgorithm::Implicit;
   }
   else if(str == "auto"){
     m_implicitDiffusion = true;
-    m_WhichDiffusionAlgorithm = WhichDiffusionAlgorithm::Automatic;
+    m_whichDiffusionAlgorithm = WhichDiffusionAlgorithm::Automatic;
   }
   else{
     MayDay::Abort("CdrPlasmaGodunovStepper_maruyama::parseDiffusion - unknown diffusion type requested");
@@ -210,21 +213,21 @@ void CdrPlasmaGodunovStepper::parseFHD(){
   pp.get("fhd", m_fhd);
 }
 
-RefCountedPtr<CdrStorage>& CdrPlasmaGodunovStepper::getCdrStorage(const CdrIterator<CdrSolver>& a_solverit){
-  return m_cdrScratch[a_solverit.index()];
+RefCountedPtr<CdrStorage>& CdrPlasmaGodunovStepper::getCdrStorage(const CdrIterator<CdrSolver>& a_solverIt){
+  return m_cdrScratch[a_solverIt.index()];
 }
 
-RefCountedPtr<RtStorage>& CdrPlasmaGodunovStepper::getRtStorage(const RtIterator<RtSolver>& a_solverit){
-  return m_rteScratch[a_solverit.index()];
+RefCountedPtr<RtStorage>& CdrPlasmaGodunovStepper::getRtStorage(const RtIterator<RtSolver>& a_solverIt){
+  return m_rteScratch[a_solverIt.index()];
 }
 
 Real CdrPlasmaGodunovStepper::restrictDt(){
-  CH_TIME("CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper");
+  CH_TIME("CdrPlasmaGodunovStepper::restrictDt()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper" << endl;
+    pout() << "CdrPlasmaGodunovStepper::restrictDt()" << endl;
   }
 
-  return 1.E99;
+  return std::numeric_limits<Real>::max();
 }
 
 Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
@@ -1348,19 +1351,19 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
   
 
   // First, figure out what the transport time step must be for explicit and explicit-implicit methods. 
-  if(m_WhichDiffusionAlgorithm == WhichDiffusionAlgorithm::Explicit){
+  if(m_whichDiffusionAlgorithm == WhichDiffusionAlgorithm::Explicit){
     m_dtCFL   = m_cdr->computeAdvectionDiffusionDt();
     
     a_timeCode = TimeCode::AdvectionDiffusion;
     a_dt       = m_cfl*m_dtCFL;
   }
-  else if(m_WhichDiffusionAlgorithm == WhichDiffusionAlgorithm::Implicit){
+  else if(m_whichDiffusionAlgorithm == WhichDiffusionAlgorithm::Implicit){
     m_dtCFL   = m_cdr->computeAdvectionDt();
     a_timeCode = TimeCode::Advection;
 
     a_dt = m_cfl*m_dtCFL;
   }
-  else if (m_WhichDiffusionAlgorithm == WhichDiffusionAlgorithm::Automatic){
+  else if (m_whichDiffusionAlgorithm == WhichDiffusionAlgorithm::Automatic){
     // If we are running with "automatic" diffusion, then we switch to implicit diffusion if the diffusive time step
     // is shorter than the advective time step. 
     const Real advectionDt = m_cdr->computeAdvectionDt();
@@ -1450,22 +1453,30 @@ void CdrPlasmaGodunovStepper::extrapolateSourceTerm(const Real a_dt){
 
 #ifdef CH_USE_HDF5
 void CdrPlasmaGodunovStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
-  CH_TIME("CdrPlasmaGodunovStepper::writeCheckpointData");
+  CH_TIME("CdrPlasmaGodunovStepper::writeCheckpointData(HDF5Handle, int)");
   if(m_verbosity > 3){
-    pout() << "CdrPlasmaGodunovStepper::writeCheckpointData" << endl;
+    pout() << "CdrPlasmaGodunovStepper::writeCheckpointData(HDF5Handle, int)" << endl;
   }
+
+  // In addition to the checkpointed stuff from the parent class, the semi-implicit scheme also requires us to checkpoint
+  // the factors used in the semi-implicit field solve. We write them here. 
 
   CdrPlasmaStepper::writeCheckpointData(a_handle, a_lvl);
 
   write(a_handle, *m_semiImplicitRho       [a_lvl], "semiImplicitRho"   );
   write(a_handle, *m_conductivityFactorCell[a_lvl], "conductivityFactor");  
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void CdrPlasmaGodunovStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl) {
-  CH_TIME("CdrPlasmaGodunovStepper::readCheckpointData");
+  CH_TIME("CdrPlasmaGodunovStepper::readCheckpointData(HDF5Handle, int)");
   if(m_verbosity > 3){
-    pout() << "CdrPlasmaGodunovStepper::readCheckpointData" << endl;
+    pout() << "CdrPlasmaGodunovStepper::readCheckpointData(HDF5Handle, int)" << endl;
   }
+
+  // In addition to the checkpointed stuff from the parent class, the semi-implicit scheme also requires us to checkpoint
+  // the factors used in the semi-implicit field solve. We read them here.   
 
   const Interval interv(0,0);
 
