@@ -18,7 +18,6 @@
 
 using namespace Physics::CdrPlasma;
 
-
 CdrPlasmaStreamerTagger::~CdrPlasmaStreamerTagger(){
   CH_TIME("CdrPlasmaStreamerTagger::~CdrPlasmaStreamerTagger()");
   if(m_verbosity > 5){
@@ -54,10 +53,10 @@ void CdrPlasmaStreamerTagger::parseOptions(){
 
   // Parse class options. 
   ParmParse pp(m_name.c_str());
-  pp.get("coarsen_curvature", m_coarCurv);
-  pp.get("refine_curvature",  m_refiCurv);
-  pp.get("refine_alpha",      m_refiAlpha     );
-  pp.get("coarsen_alpha",     m_coarAlpha     );
+  pp.get("coarsen_curvature", m_coarCurv       );
+  pp.get("refine_curvature",  m_refiCurv       );
+  pp.get("refine_alpha",      m_refiAlpha      );
+  pp.get("coarsen_alpha",     m_coarAlpha      );
   pp.get("max_coarsen_lvl",   m_maxCoarsenLevel);
 }
 
