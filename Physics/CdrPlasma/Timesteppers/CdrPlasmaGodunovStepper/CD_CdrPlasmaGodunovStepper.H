@@ -269,22 +269,74 @@ namespace Physics {
       void extrapolateCdrToEB();
 
       /*!
-	@brief Compute the boundary conditions on the EBs.
+	@brief Compute the CDR boundary condition fluxes on the EBs.
 	@details Prior to calling this routine, one must extrapolated the CDR states to the EB (calling extrapolateCdrToEB)
       */
       void computeCdrFluxesEB();
       
-      // CODE-WALK BEGINS HERE                        
-      void computeCdrDomainStates();
-      void computeCdrDomainFluxes();
-      void computeSigmaFlux();
-      void computeReactionNetwork(const Real a_dt);
+      /*!
+	@brief Extrapolate the CDR cell-centered densities to domain edges/face
+      */
+      void extrapolateCdrToDomain();
 
+      /*!
+	@brief Compute the CDR boundary condition fluxes on the domain faces. 
+	@details Prior to calling this routine, one must extrapolated the CDR states to the domain faces (calling extrapolateCdrToDomain)
+      */
+      void computeCdrDomainFluxes();
+
+      /*!
+	@brief Compute the surface flux for the surface charge solver. 
+      */
+      void computeSigmaFlux();
+
+      /*!
+	@brief Advance the transport problem.
+	@param[in] a_dt Time step.
+	@note This will switch between transport algorithms and call the other methods. 
+      */
       void advanceTransport(const Real a_dt);
+
+      /*!
+	@brief Advance the transport problem using the explicit or explicit-implicit Euler rule
+	@param[in] a_dt Time step.
+      */
       void advanceTransportEuler(const Real a_dt);
+
+      /*!
+	@brief Advance the transport problem using a semi-implicit formulation for the electric field. This is still an Euler solve.
+	@param[in] a_dt Time step. 
+      */
+      void advanceTransportSemiImplicit(const Real a_dt);      
+
+      // CODE-walk begins here.             
       void advanceTransportRK2(const Real a_dt);
-      void advanceTransportSemiImplicit(const Real a_dt);
+
+
+      /*!
+	@brief Advance the reactive problem over a time step dt.
+	@details This will update the source terms and advance the CDR equations with the source terms. 
+	@param[in] a_dt Time step
+	@note The RTE source terms are filled in this routine, but are advanced in the separate routine advanceRadiativeTransfer
+      */
+      void advanceReactions(const Real a_dt);
+
+      /*!
+	@brief Advance the radiative transfer problem. 
+	@param[in] a_dt Time step
+	@note This should be called after advanceReactions because that routine sets up the source terms
+      */
       void advanceRadiativeTransfer(const Real a_dt);
+
+      /*!
+	@brief Print how much mass was injected into the system. 
+	@details Occasionally, mass injection can be necessary due to negative densities arising the reactive problem, or due to redistribution near the
+	embedded boundaries (which does not preserve non-negativeness). 
+	@param[in] a_message Base message
+	@param[in] a_solver  Which CDR solver to compute the mass for. 
+      */
+      void floorMass(EBAMRCellData& a_data, const std::string a_message, const RefCountedPtr<CdrSolver>& a_solver) const;
+
       void postStep();
 
     
