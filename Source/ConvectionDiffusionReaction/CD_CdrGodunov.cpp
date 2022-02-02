@@ -17,6 +17,7 @@
 // Our includes
 #include <CD_CdrGodunov.H>
 #include <CD_DataOps.H>
+#include <CD_ParallelOps.H>
 #include "CD_NamespaceHeader.H"
 
 CdrGodunov::CdrGodunov() : CdrTGA() {
@@ -61,6 +62,174 @@ void CdrGodunov::parseRuntimeOptions(){
   this->parseDivergenceComputation(); // Parses non-conservative divergence blending. 
 }
 
+Real CdrGodunov::computeAdvectionDt(){
+  CH_TIME("CdrGodunov::computeAdvectionDt()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::computeAdvectionDt()" << endl;
+  }
+
+  // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these two papers for details:
+  //
+  //       Bell, Colella, Glaz, J. Comp. Phys 85 (257), 1989
+  //       Minion, J. Comp. Phys 123 (435), 1996
+
+  Real minDt = std::numeric_limits<Real>::max();
+
+  if(m_isMobile){
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)              [lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()                        [lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box        cellBox = dbl  [dit()];	
+	const EBCellFAB& velo    = (*m_cellVelocity[lvl])[dit()];
+	const EBISBox&   ebisBox = ebisl[dit()];
+
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+	// Regular grid data.
+	const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();	
+
+	// Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far. 
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  Real velMax = 0.0;	  
+	  if(!ebisBox.isCovered(iv)){
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      velMax = std::max(velMax, std::abs(veloReg(iv,dir)));
+	    }
+	  }
+
+	  if(velMax > 0.0){
+	    minDt = std::min(dx/velMax, minDt);
+	  }	  
+	};
+
+	// Same kernel, but for cut-cells.
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
+	  Real velMax = 0.0;
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    velMax = std::max(velMax, std::abs(velo(vof, dir)));
+	  }
+
+	  if(velMax > 0.0){
+	    minDt = std::min(dx/velMax, minDt);
+	  }
+	};
+
+
+	// Execute the kernels.
+	BoxLoops::loop(cellBox, regularKernel  );
+	BoxLoops::loop(vofit,   irregularKernel);
+      }
+    }
+
+    // If we are using MPI then ranks need to know of each other's time steps.
+    minDt = ParallelOps::min(minDt);
+  }
+
+  return minDt;
+}
+
+Real CdrGodunov::computeAdvectionDiffusionDt(){
+  CH_TIME("CdrGodunov::computeAdvectionDiffusionDt()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::computeAdvectionDiffusionDt()" << endl;
+  }
+
+  Real minDt = std::numeric_limits<Real>::max();
+
+  // Default to advection or diffusion time steps if the solver is only advective/diffusive. 
+  if(m_isMobile && !m_isDiffusive){
+    minDt = this->computeAdvectionDt();
+  }
+  else if(!m_isMobile && m_isDiffusive){
+    minDt = this->computeDiffusionDt();
+  }
+  else if(m_isMobile && m_isDiffusive){
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm         )[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
+      const Real               dx2   = dx*dx;
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const EBCellFAB& velo       = (*m_cellVelocity                    [lvl])[dit()];
+	const EBFluxFAB& diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()];
+	const EBISBox&   ebisbox    = ebisl[dit()];	
+	const Box        cellBox    = dbl  [dit()];
+	
+	VoFIterator&     vofit      = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];		
+
+	// Single-valued data. 
+	const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
+
+	// Regular kernel.
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  if(ebisbox.isRegular(iv)){
+	    Real maxVel = 0.0;
+	    Real maxD   = 0.0;
+
+	    // Compute |v|
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      maxVel = std::max(maxVel, std::abs(veloReg(iv, dir)));
+	    }
+
+	    // Get biggest diffusion coefficient in this cell.
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      maxD = std::max(maxD, diffCoFace[dir].getSingleValuedFAB()(iv              , m_comp));
+	      maxD = std::max(maxD, diffCoFace[dir].getSingleValuedFAB()(iv + BASISV(dir), m_comp));			   
+	    }
+
+	    if(maxVel > 0.0 || maxD > 0.0){
+	      const Real curDt = 1./(maxVel/dx + 2*maxD*SpaceDim/dx2);
+
+	      minDt = std::min(minDt, curDt);
+	    }
+	  }
+	};
+
+	// Irregular kernel.
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
+	  Real maxVel = 0.0;
+	  Real maxD   = 0.0;
+
+	  // Compute |v|
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    maxVel = std::max(maxVel, std::abs(velo(vof, dir)));
+	  }
+
+	  // Compute largest D
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    const EBFaceFAB& Dface = diffCoFace[dir];
+
+	    for (SideIterator sit; sit.ok(); ++sit){
+	      const std::vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit()).stdVector();
+
+	      for (const auto& face : faces){
+		maxD = std::max(maxD, Dface(face, m_comp));
+	      }
+	    }
+	  }
+
+	  if(maxVel > 0.0 || maxD > 0.0){
+	    const Real curDt = 1./(maxVel/dx + 2*maxD*SpaceDim/dx2);
+
+	    minDt = std::min(minDt, curDt);
+	  }
+	};
+
+	// Execute the kernels.
+	BoxLoops::loop(dbl[dit()],   regularKernel);
+	BoxLoops::loop(vofit,      irregularKernel);	
+      }
+    }
+
+    minDt = ParallelOps::min(minDt);
+  }
+
+  return minDt;
+}
 
 void CdrGodunov::parseExtrapolateSourceTerm(){
   CH_TIME("CdrGodunov::parseExtrapolateSourceTerm()");
