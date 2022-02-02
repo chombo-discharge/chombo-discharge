@@ -310,7 +310,7 @@ namespace Physics {
       */
       void advanceTransportSemiImplicit(const Real a_dt);      
 
-      // CODE-walk begins here.             
+      // CODE-WALK BEGINS HERE.             
       void advanceTransportRK2(const Real a_dt);
 
       /*!
