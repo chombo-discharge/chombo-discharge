@@ -304,14 +304,14 @@ namespace Physics {
       void advanceTransportEuler(const Real a_dt);
 
       /*!
-	@brief Advance the transport problem using a semi-implicit formulation for the electric field. This is still an Euler solve.
+	@brief Advance the transport problem using a semi-implicit formulation for the electric field. 
+	@details Under the hood, this is still an Euler solve.
 	@param[in] a_dt Time step. 
       */
       void advanceTransportSemiImplicit(const Real a_dt);      
 
       // CODE-walk begins here.             
       void advanceTransportRK2(const Real a_dt);
-
 
       /*!
 	@brief Advance the reactive problem over a time step dt.
@@ -337,6 +337,9 @@ namespace Physics {
       */
       void floorMass(EBAMRCellData& a_data, const std::string a_message, const RefCountedPtr<CdrSolver>& a_solver) const;
 
+      /*!
+	@brief Perform post-step operations
+      */
       void postStep();
 
     
