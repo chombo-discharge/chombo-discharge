@@ -244,20 +244,37 @@ namespace Physics {
 	@return This returns the entry in m_rteScratch corresponding to the solver. 
       */      
       RefCountedPtr<RtStorage>& getRtStorage(const RtIterator<RtSolver>& a_solverIt);
+      
+      /*!
+	@brief Compute electric field into scratch storage.
+	@details This computes the electric field into the scratch storages in m_fieldScratch
+      */
+      void computeElectricFieldIntoScratch();
 
       /*!
-	@brief Use for restricting the time step
+	@brief Compute gradients of the CDR densities into scratch storage
       */
-      Real restrictDt() override;
-
-      
-      // CODE-WALK BEGINS HERE                  
-
-      // Aux functions
-      void computeElectricFieldIntoScratch();
       void computeCdrGradients();
-      void computeCdrEbStates();
-      void computeCdrEbFluxes();
+
+      /*!
+	@brief Extrapolate cell-centered states with the source term
+	@details This will compute cell-centered states (in the scratch storage) as n = n(t) + 0.5*a_dt * S(t)
+	@param[in] a_dt Time step size. 
+      */
+      void extrapolateWithSourceTerm(const Real a_dt);      
+
+      /*!
+	@brief Extrapolate the cell-centered states to the EB. 
+      */
+      void extrapolateCdrToEB();
+
+      /*!
+	@brief Compute the boundary conditions on the EBs.
+	@details Prior to calling this routine, one must extrapolated the CDR states to the EB (calling extrapolateCdrToEB)
+      */
+      void computeCdrFluxesEB();
+      
+      // CODE-WALK BEGINS HERE                        
       void computeCdrDomainStates();
       void computeCdrDomainFluxes();
       void computeSigmaFlux();
@@ -269,7 +286,7 @@ namespace Physics {
       void advanceTransportSemiImplicit(const Real a_dt);
       void advanceRadiativeTransfer(const Real a_dt);
       void postStep();
-      void extrapolateSourceTerm(const Real a_dt);
+
     
       void computeCdrDriftVelocities(const Real a_time);
       void computeCdrDiffusionCoefficients(const Real a_time);

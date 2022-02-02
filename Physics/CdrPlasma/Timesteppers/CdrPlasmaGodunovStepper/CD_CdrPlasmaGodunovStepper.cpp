@@ -221,15 +221,6 @@ RefCountedPtr<RtStorage>& CdrPlasmaGodunovStepper::getRtStorage(const RtIterator
   return m_rteScratch[a_solverIt.index()];
 }
 
-Real CdrPlasmaGodunovStepper::restrictDt(){
-  CH_TIME("CdrPlasmaGodunovStepper::restrictDt()");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::restrictDt()" << endl;
-  }
-
-  return std::numeric_limits<Real>::max();
-}
-
 Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
   CH_TIME("CdrPlasmaGodunovStepper::advance(Real)");
   if(m_verbosity > 5){
@@ -579,41 +570,47 @@ void CdrPlasmaGodunovStepper::deallocateInternals(){
 }
 
 void CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch(){
-  CH_TIME("CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch");
+  CH_TIME("CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch" << endl;
+    pout() << "CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch()" << endl;
   }
+
+  // TLDR: This computes the electric field on the cell center, EB, and domain faces. 
   
-  EBAMRCellData& E_cell = m_fieldScratch->getElectricFieldCell();
-  EBAMRIVData&   E_eb   = m_fieldScratch->getElectricFieldEb();
-  EBAMRIFData&   E_dom  = m_fieldScratch->getElectricFieldDomain();
+  EBAMRCellData& electricFieldCell   = m_fieldScratch->getElectricFieldCell();
+  EBAMRIVData&   electricFieldEB     = m_fieldScratch->getElectricFieldEb();
+  EBAMRIFData&   electricFieldDomain = m_fieldScratch->getElectricFieldDomain();
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
 
-  CdrPlasmaStepper::computeElectricField(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
-  CdrPlasmaStepper::computeElectricField(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
-  CdrPlasmaStepper::extrapolateToDomainFaces(E_dom, m_cdr->getPhase(), E_cell); // Domain centered field
+  CdrPlasmaStepper::computeElectricField    (electricFieldCell,   m_cdr->getPhase(), phi              ); // Compute cell-centered field
+  CdrPlasmaStepper::computeElectricField    (electricFieldEB,     m_cdr->getPhase(), electricFieldCell); // EB-centered field
+  CdrPlasmaStepper::extrapolateToDomainFaces(electricFieldDomain, m_cdr->getPhase(), electricFieldCell); // Domain centered field
 }
 
 void CdrPlasmaGodunovStepper::computeCdrGradients(){
-  CH_TIME("CdrPlasmaGodunovStepper::computeCdrGradients");
+  CH_TIME("CdrPlasmaGodunovStepper::computeCdrGradients()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::computeCdrGradients" << endl;
+    pout() << "CdrPlasmaGodunovStepper::computeCdrGradients()" << endl;
   }
 
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     const int idx = solverIt.index();
-    RefCountedPtr<CdrSolver>& solver = solverIt();
+
+    // Fetch solver and associated storage. 
+    RefCountedPtr<CdrSolver>&  solver  = solverIt();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
     EBAMRCellData& scratch = storage->getScratch();
     EBAMRCellData& grad    = storage->getGradient();
 
+    // Update the ghost cells so we can compute the gradient. 
     scratch.copy(solver->getPhi());
 
     m_amr->averageDown  (scratch, m_realm, m_phase);
     m_amr->interpGhostMG(scratch, m_realm, m_phase);
-    
+
+    // Compute the gradient, coarsen it, and update the ghost cells. 
     m_amr->computeGradient(grad, scratch, m_realm, phase::gas);
     
     m_amr->averageDown  (grad, m_realm, m_cdr->getPhase());
@@ -621,98 +618,161 @@ void CdrPlasmaGodunovStepper::computeCdrGradients(){
   }
 }
 
-void CdrPlasmaGodunovStepper::computeCdrEbStates(){
-  CH_TIME("CdrPlasmaGodunovStepper::computeCdrEbStates");
+void CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(const Real a_dt){
+  CH_TIME("CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::computeCdrEbStates" << endl;
+    pout() << "CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(Real)" << endl;
   }
 
-  Vector<EBAMRCellData*> cdr_states;
-  Vector<EBAMRIVData*>   eb_gradients;
-  Vector<EBAMRIVData*>   eb_states;
-  Vector<EBAMRCellData*> cdr_gradients;
-  
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const RefCountedPtr<CdrSolver>& solver = solverIt();
+  // TLDR: If we extrapolate the advective derivative and include the source term in the extrapolation,
+  //       the boundary conditions should be computed from phi + 0.5*source*dt rather than just phi. This probably
+  //       does not matter, but for consistency we do it anyways. 
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrSolver>&  solver  = solverIt();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
-    cdr_states.push_back(&(storage->getExtrap()));
-    eb_states.push_back(&(storage->getEbState()));
-    eb_gradients.push_back(&(storage->getEbGrad()));
-    cdr_gradients.push_back(&(storage->getGradient())); // Should already have been computed
-  }
+    const EBAMRCellData& state  = solver->getPhi();
+    const EBAMRCellData& source = solver->getSource();
 
-  // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
-  // won't hurt mass conservation because the mass hasn't been injected yet
-  CdrPlasmaStepper::extrapolateToEb(eb_states, m_cdr->getPhase(), cdr_states);
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const int idx = solverIt.index();
-    DataOps::floor(*eb_states[idx], 0.0);
-  }
+    EBAMRCellData& extrap = storage->getExtrap();
 
-  // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
-  EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_realm, m_cdr->getPhase(), SpaceDim);
-  for (int i = 0; i < cdr_states.size(); i++){
-    CdrPlasmaStepper::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
-    CdrPlasmaStepper::projectFlux(*eb_gradients[i], eb_gradient);
+    // Let n = n(t) + 0.5*a_dt * S(t) if we use the source term for extrapolation. 
+    DataOps::copy(extrap, state);
+    if(m_extrapAdvect) {
+      DataOps::incr(extrap, source, 0.5*a_dt);
+    }
   }
 }
 
-void CdrPlasmaGodunovStepper::computeCdrEbFluxes(){
-  CH_TIME("CdrPlasmaGodunovStepper::computeCdrEbFluxes()");
+void CdrPlasmaGodunovStepper::extrapolateCdrToEB(){
+  CH_TIME("CdrPlasmaGodunovStepper::extrapolateCdrToEB()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::computeCdrEbFluxes()";
+    pout() << "CdrPlasmaGodunovStepper::extrapolateCdrToEB()" << endl;
   }
 
-  Vector<EBAMRCellData*> states;
-  Vector<EBAMRIVData*> cdr_fluxes;
-  Vector<EBAMRIVData*> extrap_cdr_fluxes;
-  Vector<EBAMRIVData*> extrap_cdr_densities;
-  Vector<EBAMRIVData*> extrap_cdr_velocities;
-  Vector<EBAMRIVData*> extrap_cdr_gradients;
-  Vector<EBAMRIVData*> extrap_rte_fluxes;
+  // TLDR: This routine is reponsible for computing the cell-centered states and gradients at the EB. This is necessary because
+  //       the boundary condition routines require these things to be known at the EB. This is the routine that computes them. We 
+  //       will later fetch these quantities and pass them into our boundary condition routines. 
 
-  cdr_fluxes = m_cdr->getEbFlux();
+  Vector<EBAMRCellData*> cdrDensities  ; // Cell-centered densities used when extrapolating to EBs and domains when parsing boundary conditions. 
+  Vector<EBAMRCellData*> cdrGradients  ; // Gradient of cell-centered densities
+  Vector<EBAMRIVData*>   cdrDensitiesEB; // Extrapolation of cdrDensities to the EB
+  Vector<EBAMRIVData*>   cdrGradientsEB; // Extrapolation of cdrGradients to the EB
 
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+  // Scratch storage for holding a gradient at the EB
+  EBAMRIVData gradientEB;
+  m_amr->allocate(gradientEB, m_realm, m_cdr->getPhase(), SpaceDim);  
+
+  // Run through the solvers and fetch the various data used for the extrapolation. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
+
+    // Note: For the CDR densities we use the extrap data holder in the scratch storage. The routine extrapolateWithSourceTerm will have
+    //       been called prior to this routine. If we center advective discretizations at the half time step, we need to increment the
+    //       edge centered states by 0.5*S*dt. 
+
+    // Populate the data. 
+    cdrDensities.  push_back(&(storage->getExtrap()  ));
+    cdrGradients.  push_back(&(storage->getGradient())); 
+    cdrDensitiesEB.push_back(&(storage->getEbState() ));
+    cdrGradientsEB.push_back(&(storage->getEbGrad()  ));
+  }
+
+  // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
+  // won't hurt mass conservation because no mass has been injected. That comes later. 
+  CdrPlasmaStepper::extrapolateToEb(cdrDensitiesEB, m_cdr->getPhase(), cdrDensities);
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    
+    DataOps::floor(*cdrDensitiesEB[idx], 0.0);
+  }
+
+  // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
+  for (int i = 0; i < cdrDensities.size(); i++){
+
+    // Extrapolate the EB to the gradient
+    CdrPlasmaStepper::extrapolateToEb(gradientEB, m_cdr->getPhase(), *cdrGradients[i]);
+
+    // And project it along the EB normal.
+    CdrPlasmaStepper::projectFlux(*cdrGradientsEB[i], gradientEB);
+  }
+}
+
+void CdrPlasmaGodunovStepper::computeCdrFluxesEB(){
+  CH_TIME("CdrPlasmaGodunovStepper::computeCdrFluxesEB()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaGodunovStepper::computeCdrFluxesEB()";
+  }
+
+  // TLDR: This is the main routine for computing the CDR fluxes on the EB, i.e. the boundary conditions. When we enter this routine
+  //       we will have populated the states we use for extrapolation, and the gradients. The velocities on the EB and the extrapoalted
+  //       fluxes on the EB will not have been computed, so we do those here. 
+
+  // Holds the CDR densities. 
+  Vector<EBAMRCellData*> cdrDensities;
+
+  // These are things that must be populated and passed into our
+  // nifty boundary condition framework. 
+  Vector<EBAMRIVData*>   extrapCdrFluxesEB;
+  Vector<EBAMRIVData*>   extrapCdrDensities;
+  Vector<EBAMRIVData*>   extrapCdrVelocities;
+  Vector<EBAMRIVData*>   extrapCdrGradients;
+  Vector<EBAMRIVData*>   extrapRteFluxes;
+
+  // Run through CDR solvers and populate Vectors. 
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     RefCountedPtr<CdrStorage>& storage = this->getCdrStorage(solverIt);
 
-    EBAMRIVData& dens_eb = storage->getEbState();
-    EBAMRIVData& velo_eb = storage->getEbVelo();
-    EBAMRIVData& flux_eb = storage->getEbFlux();
-    EBAMRIVData& grad_eb = storage->getEbGrad();
-    EBAMRCellData& state = storage->getExtrap();
+    EBAMRCellData& densityCell = storage->getExtrap ();    
+    EBAMRIVData&   densityEB   = storage->getEbState();
+    EBAMRIVData&   velocityEB  = storage->getEbVelo ();
+    EBAMRIVData&   fluxEB      = storage->getEbFlux ();
+    EBAMRIVData&   gradientEB  = storage->getEbGrad ();
 
-    states.push_back(&state);
-    extrap_cdr_densities.push_back(&dens_eb);  // Computed in computeCdrEbStates
-    extrap_cdr_velocities.push_back(&velo_eb); // Not yet computed
-    extrap_cdr_fluxes.push_back(&flux_eb);     // Not yet computed
-    extrap_cdr_gradients.push_back(&grad_eb);  // Computed in computeCdrEbStates
+
+    cdrDensities.       push_back(&densityCell); // Will not touch this, but use it for extrapolating the fluxes. 
+    extrapCdrDensities. push_back(&densityEB);   // Computed in extrapolateCdrToEB
+    extrapCdrVelocities.push_back(&velocityEB);  // Not yet computed
+    extrapCdrFluxesEB.  push_back(&fluxEB);      // Not yet computed
+    extrapCdrGradients. push_back(&gradientEB);  // Computed in extrapolateCdrToEB
   }
 
-  // Compute extrapolated fluxes and velocities at the EB
-  Vector<EBAMRCellData*> cdr_velocities = m_cdr->getVelocities();
-  CdrPlasmaStepper::computeExtrapolatedFluxes(extrap_cdr_fluxes, states, cdr_velocities, m_cdr->getPhase());
-  CdrPlasmaStepper::computeExtrapolatedVelocities(extrap_cdr_velocities, cdr_velocities, m_cdr->getPhase());
+  // Extrapolate the CDR fluxes and velocities to the EB. After this, we have all
+  // the pertinent CDR quantities we need in our BC framework. 
+  Vector<EBAMRCellData*> cdrVelocities = m_cdr->getVelocities();
+  CdrPlasmaStepper::computeExtrapolatedFluxes    (extrapCdrFluxesEB,   cdrDensities,  cdrVelocities, m_cdr->getPhase());
+  CdrPlasmaStepper::computeExtrapolatedVelocities(extrapCdrVelocities, cdrVelocities,                m_cdr->getPhase());
 
   // Compute RTE flux on the boundary
-  for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
-    RefCountedPtr<RtSolver>& solver   = solverIt();
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<RtSolver> & solver  = solverIt();
     RefCountedPtr<RtStorage>& storage = this->getRtStorage(solverIt);
 
-    EBAMRIVData& flux_eb = storage->getEbFlux();
-    solver->computeBoundaryFlux(flux_eb, solver->getPhi());
-    extrap_rte_fluxes.push_back(&flux_eb);
+    EBAMRIVData& fluxEB = storage->getEbFlux();
+
+    // Let the solver compute the boundary flux. 
+    solver->computeBoundaryFlux(fluxEB, solver->getPhi());
+
+    // Add the extrapolated EB flux to the data holder. 
+    extrapRteFluxes.push_back(&fluxEB);
   }
 
+  // This is where we put the result -- directly in the solvers.
+  Vector<EBAMRIVData*> cdrFluxesEB = m_cdr->getEbFlux();  
+
+  // Electric field which has been extrapolated to the EB (in computeElectricFieldIntoScratch).
   const EBAMRIVData& E = m_fieldScratch->getElectricFieldEb();
-  CdrPlasmaStepper::computeCdrFluxes(cdr_fluxes,
-				     extrap_cdr_fluxes,
-				     extrap_cdr_densities,
-				     extrap_cdr_velocities,
-				     extrap_cdr_gradients,
-				     extrap_rte_fluxes,
+
+  // Now call the parent method which does all the BC computations. 
+  CdrPlasmaStepper::computeCdrFluxes(cdrFluxesEB,
+				     extrapCdrFluxesEB,
+				     extrapCdrDensities,
+				     extrapCdrVelocities,
+				     extrapCdrGradients,
+				     extrapRteFluxes,
 				     E,
 				     m_time);
 }
@@ -725,21 +785,21 @@ void CdrPlasmaGodunovStepper::computeCdrDomainStates(){
 
   Vector<EBAMRIFData*>   domain_gradients;
   Vector<EBAMRIFData*>   domain_states;
-  Vector<EBAMRCellData*> cdr_states;
-  Vector<EBAMRCellData*> cdr_gradients;
+  Vector<EBAMRCellData*> cdrDensities;
+  Vector<EBAMRCellData*> cdrGradients;
   
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     const RefCountedPtr<CdrSolver>& solver = solverIt();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
-    cdr_states.push_back(&(storage->getExtrap()));
+    cdrDensities.push_back(&(storage->getExtrap()));
     domain_states.push_back(&(storage->getDomainState()));
     domain_gradients.push_back(&(storage->getDomainGrad()));
-    cdr_gradients.push_back(&(storage->getGradient())); // Should already be computed
+    cdrGradients.push_back(&(storage->getGradient())); // Should already be computed
   }
 
   // Extrapolate states to the domain faces
-  CdrPlasmaStepper::extrapolateToDomainFaces(domain_states, m_cdr->getPhase(), cdr_states);
+  CdrPlasmaStepper::extrapolateToDomainFaces(domain_states, m_cdr->getPhase(), cdrDensities);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
@@ -748,7 +808,7 @@ void CdrPlasmaGodunovStepper::computeCdrDomainStates(){
     const RefCountedPtr<CdrSolver>& solver = solverIt();
     const int idx = solverIt.index();
     if(solver->isMobile()){
-      CdrPlasmaStepper::extrapolateToDomainFaces(grad, m_cdr->getPhase(), *cdr_gradients[idx]);
+      CdrPlasmaStepper::extrapolateToDomainFaces(grad, m_cdr->getPhase(), *cdrGradients[idx]);
       CdrPlasmaStepper::projectDomain(*domain_gradients[idx], grad);
     }
     else{
@@ -764,18 +824,18 @@ void CdrPlasmaGodunovStepper::computeCdrDomainFluxes(){
   }
 
   Vector<EBAMRCellData*> states;
-  Vector<EBAMRIFData*>   cdr_fluxes;
-  Vector<EBAMRIFData*>   extrap_cdr_fluxes;
-  Vector<EBAMRIFData*>   extrap_cdr_densities;
-  Vector<EBAMRIFData*>   extrap_cdr_velocities;
-  Vector<EBAMRIFData*>   extrap_cdr_gradients;
-  Vector<EBAMRIFData*>   extrap_rte_fluxes;
+  Vector<EBAMRIFData*>   cdrFluxesEB;
+  Vector<EBAMRIFData*>   extrapCdrFluxesEB;
+  Vector<EBAMRIFData*>   extrapCdrDensities;
+  Vector<EBAMRIFData*>   extrapCdrVelocities;
+  Vector<EBAMRIFData*>   extrapCdrGradients;
+  Vector<EBAMRIFData*>   extrapRteFluxes;
 
-  Vector<EBAMRCellData*> cdr_velocities;
-  Vector<EBAMRCellData*> cdr_gradients;
+  Vector<EBAMRCellData*> cdrVelocities;
+  Vector<EBAMRCellData*> cdrGradients;
 
-  cdr_fluxes = m_cdr->getDomainFlux();
-  cdr_velocities = m_cdr->getVelocities();
+  cdrFluxesEB = m_cdr->getDomainFlux();
+  cdrVelocities = m_cdr->getVelocities();
   for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     RefCountedPtr<CdrStorage>& storage = this->getCdrStorage(solverIt);
 
@@ -787,18 +847,18 @@ void CdrPlasmaGodunovStepper::computeCdrDomainFluxes(){
     EBAMRCellData& state     = storage->getExtrap();
 
     states.push_back(&state);
-    extrap_cdr_densities.push_back(&dens_domain);  // Has not been computed
-    extrap_cdr_velocities.push_back(&velo_domain); // Has not been computed
-    extrap_cdr_fluxes.push_back(&flux_domain);     // Has not been computed
-    extrap_cdr_gradients.push_back(&grad_domain);  // Has not been computed
-    cdr_gradients.push_back(&gradient);
+    extrapCdrDensities.push_back(&dens_domain);  // Has not been computed
+    extrapCdrVelocities.push_back(&velo_domain); // Has not been computed
+    extrapCdrFluxesEB.push_back(&flux_domain);     // Has not been computed
+    extrapCdrGradients.push_back(&grad_domain);  // Has not been computed
+    cdrGradients.push_back(&gradient);
   }
 
   // Compute extrapolated velocities and fluxes at the domain faces
-  this->extrapolateToDomainFaces(extrap_cdr_densities,         m_cdr->getPhase(), states);
-  this->extrapolateVelocitiesToDomainFaces(extrap_cdr_velocities,   m_cdr->getPhase(), cdr_velocities);
-  this->computeExtrapolatedDomainFluxes(extrap_cdr_fluxes,     states,             cdr_velocities, m_cdr->getPhase());
-  this->extrapolateVectorToDomainFaces(extrap_cdr_gradients,  m_cdr->getPhase(), cdr_gradients);
+  this->extrapolateToDomainFaces(extrapCdrDensities,         m_cdr->getPhase(), states);
+  this->extrapolateVelocitiesToDomainFaces(extrapCdrVelocities,   m_cdr->getPhase(), cdrVelocities);
+  this->computeExtrapolatedDomainFluxes(extrapCdrFluxesEB,     states,             cdrVelocities, m_cdr->getPhase());
+  this->extrapolateVectorToDomainFaces(extrapCdrGradients,  m_cdr->getPhase(), cdrGradients);
 
   // Compute RTE flux on domain faces
   for (RtIterator<RtSolver> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
@@ -807,18 +867,18 @@ void CdrPlasmaGodunovStepper::computeCdrDomainFluxes(){
 
     EBAMRIFData& domain_flux = storage->getDomainFlux();
     solver->computeDomainFlux(domain_flux, solver->getPhi());
-    extrap_rte_fluxes.push_back(&domain_flux);
+    extrapRteFluxes.push_back(&domain_flux);
   }
 
   const EBAMRIFData& E = m_fieldScratch->getElectricFieldDomain();
 
   // This fills the solvers' domain fluxes
-  CdrPlasmaStepper::computeCdrDomainFluxes(cdr_fluxes,
-					   extrap_cdr_fluxes,
-					   extrap_cdr_densities,
-					   extrap_cdr_velocities,
-					   extrap_cdr_gradients,
-					   extrap_rte_fluxes,
+  CdrPlasmaStepper::computeCdrDomainFluxes(cdrFluxesEB,
+					   extrapCdrFluxesEB,
+					   extrapCdrDensities,
+					   extrapCdrVelocities,
+					   extrapCdrGradients,
+					   extrapRteFluxes,
 					   E,
 					   m_time);
 }
@@ -929,9 +989,9 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
 
   CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();   // Compute the electric field
   CdrPlasmaGodunovStepper::computeCdrGradients();               // Compute cdr gradients
-  CdrPlasmaGodunovStepper::extrapolateSourceTerm(a_dt);         // If we used advective extrapolation, BCs are more work. 
-  CdrPlasmaGodunovStepper::computeCdrEbStates();                // Extrapolate cell-centered stuff to EB centroids
-  CdrPlasmaGodunovStepper::computeCdrEbFluxes();                // Extrapolate cell-centered fluxes to EB centroids
+  CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(a_dt);         // If we used advective extrapolation, BCs are more work. 
+  CdrPlasmaGodunovStepper::extrapolateCdrToEB();                // Extrapolate cell-centered stuff to EB centroids
+  CdrPlasmaGodunovStepper::computeCdrFluxesEB();                // Extrapolate cell-centered fluxes to EB centroids
   CdrPlasmaGodunovStepper::computeCdrDomainStates();            // Extrapolate cell-centered states to domain edges
   CdrPlasmaGodunovStepper::computeCdrDomainFluxes();            // Extrapolate cell-centered fluxes to domain edges
   CdrPlasmaGodunovStepper::computeSigmaFlux();                  // Update charge flux for sigma solver    
@@ -1075,9 +1135,9 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
   CdrPlasmaGodunovStepper::computeCdrDriftVelocities(m_time + a_dt);
   
   // Compute boundary conditions
-  CdrPlasmaGodunovStepper::extrapolateSourceTerm(a_dt);         // If we used advective extrapolation, BCs are more work. 
-  CdrPlasmaGodunovStepper::computeCdrEbStates();                // Extrapolate cell-centered stuff to EB centroids
-  CdrPlasmaGodunovStepper::computeCdrEbFluxes();                // Extrapolate cell-centered fluxes to EB centroids
+  CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(a_dt);         // If we used advective extrapolation, BCs are more work. 
+  CdrPlasmaGodunovStepper::extrapolateCdrToEB();                // Extrapolate cell-centered stuff to EB centroids
+  CdrPlasmaGodunovStepper::computeCdrFluxesEB();                // Extrapolate cell-centered fluxes to EB centroids
   CdrPlasmaGodunovStepper::computeCdrDomainStates();            // Extrapolate cell-centered states to domain edges
   CdrPlasmaGodunovStepper::computeCdrDomainFluxes();            // Extrapolate cell-centered fluxes to domain edges
   CdrPlasmaGodunovStepper::computeSigmaFlux();                  // Update charge flux for sigma solver    
@@ -1140,9 +1200,9 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
 
   CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();   // Compute the electric field
   CdrPlasmaGodunovStepper::computeCdrGradients();               // Compute cdr gradients
-  CdrPlasmaGodunovStepper::extrapolateSourceTerm(a_dt);         // If we used advective extrapolation, BCs are more work. 
-  CdrPlasmaGodunovStepper::computeCdrEbStates();                // Extrapolate cell-centered stuff to EB centroids
-  CdrPlasmaGodunovStepper::computeCdrEbFluxes();                // Extrapolate cell-centered fluxes to EB centroids
+  CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(a_dt);         // If we used advective extrapolation, BCs are more work. 
+  CdrPlasmaGodunovStepper::extrapolateCdrToEB();                // Extrapolate cell-centered stuff to EB centroids
+  CdrPlasmaGodunovStepper::computeCdrFluxesEB();                // Extrapolate cell-centered fluxes to EB centroids
   CdrPlasmaGodunovStepper::computeCdrDomainStates();            // Extrapolate cell-centered states to domain edges
   CdrPlasmaGodunovStepper::computeCdrDomainFluxes();            // Extrapolate cell-centered fluxes to domain edges
   CdrPlasmaGodunovStepper::computeSigmaFlux();                  // Update charge flux for sigma solver    
@@ -1225,9 +1285,9 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
   CdrPlasmaGodunovStepper::postStep();
   
   CdrPlasmaGodunovStepper::computeCdrGradients();        // Recompute cdr gradients after reaction advance (these might have changed)
-  CdrPlasmaGodunovStepper::extrapolateSourceTerm(a_dt);            // BCs are more work with advective extrapolation
-  CdrPlasmaGodunovStepper::computeCdrEbStates();        // Extrapolate cell-centered stuff to EB centroids
-  CdrPlasmaGodunovStepper::computeCdrEbFluxes();        // Extrapolate cell-centered fluxes to EB centroids
+  CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(a_dt);            // BCs are more work with advective extrapolation
+  CdrPlasmaGodunovStepper::extrapolateCdrToEB();        // Extrapolate cell-centered stuff to EB centroids
+  CdrPlasmaGodunovStepper::computeCdrFluxesEB();        // Extrapolate cell-centered fluxes to EB centroids
   CdrPlasmaGodunovStepper::computeCdrDomainStates();    // Extrapolate cell-centered states to domain edges
   CdrPlasmaGodunovStepper::computeCdrDomainFluxes();    // Extrapolate cell-centered fluxes to domain edges
   CdrPlasmaGodunovStepper::computeSigmaFlux();           // Update charge flux for sigma solver
@@ -1426,30 +1486,7 @@ void CdrPlasmaGodunovStepper::postStep(){
   }
 }
 
-void CdrPlasmaGodunovStepper::extrapolateSourceTerm(const Real a_dt){
-  CH_TIME("CdrPlasmaGodunovStepper::extrapolateSourceTerm");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::extrapolateSourceTerm" << endl;
-  }
 
-  // TLDR: If we extrapolate the advective derivative and include the source term in the extrapolation,
-  //       the boundary conditions should be computed from phi + 0.5*source*dt rather than just phi.
-
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    RefCountedPtr<CdrSolver>& solver = solverIt();
-    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
-
-    const EBAMRCellData& state  = solver->getPhi();
-    const EBAMRCellData& source = solver->getSource();
-
-    EBAMRCellData& extrap = storage->getExtrap();
-
-    DataOps::copy(extrap, state);
-    if(m_extrapAdvect) {
-      DataOps::incr(extrap, source, 0.5*a_dt);
-    }
-  }
-}
 
 #ifdef CH_USE_HDF5
 void CdrPlasmaGodunovStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {

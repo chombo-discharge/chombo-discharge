@@ -202,7 +202,6 @@ namespace Physics {
 
       //
       Real getMaxError();
-      Real restrictDt() ;
       Real getMaxNodeDistance();
 
       // Profiling

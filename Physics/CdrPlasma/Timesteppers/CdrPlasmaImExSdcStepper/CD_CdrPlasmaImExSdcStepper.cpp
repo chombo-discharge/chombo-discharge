@@ -235,10 +235,6 @@ bool CdrPlasmaImExSdcStepper::needToRegrid(){
   return false;
 }
 
-Real CdrPlasmaImExSdcStepper::restrictDt(){
-  return 1.E99;
-}
-
 Real CdrPlasmaImExSdcStepper::getMaxNodeDistance(){
   CH_TIME("CdrPlasmaImExSdcStepper::getMaxNodeDistance");
   if(m_verbosity > 5){
@@ -1250,12 +1246,6 @@ void CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
   if(dt_relax < dt){
     dt = dt_relax;
     a_timeCode = TimeCode::RelaxationTime;
-  }
-
-  const Real dt_restrict = this->restrictDt();
-  if(dt_restrict < dt){
-    dt = dt_restrict;
-    a_timeCode = TimeCode::Restricted;
   }
 
   if(dt < m_minDt){

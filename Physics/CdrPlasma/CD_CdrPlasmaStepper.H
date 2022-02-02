@@ -1123,12 +1123,6 @@ namespace Physics {
       virtual Real computeRelaxationTime();
 
       /*!
-	@brief Restrict dt
-	@details This is used for restricting the time step. 
-      */
-      virtual Real restrictDt() = 0;
-
-      /*!
 	@brief Get dt
       */
       virtual Real getDt();
