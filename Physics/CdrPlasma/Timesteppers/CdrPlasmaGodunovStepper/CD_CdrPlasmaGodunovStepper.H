@@ -217,6 +217,11 @@ namespace Physics {
       bool m_debug;
 
       /*!
+	@brief Enable performance profiling
+      */
+      bool m_profile;
+
+      /*!
 	@brief True if we floor the CDR densities. Due to reactions/EBs, they are not generally non-negative
       */
       bool m_floor;
@@ -346,12 +351,39 @@ namespace Physics {
       void computeCdrDriftVelocities(const Real a_time);
       void computeCdrDiffusionCoefficients(const Real a_time);
 
-      // Various option parsing
+      /*!
+	@brief Parse how we handle diffusion.
+      */
       void parseDiffusion();
+
+      /*!
+	@brief Parse centering for the advective integrator.
+      */
       void parseAdvection();
+
+      /*!
+	@brief Parse the transport algorithm
+      */
       void parseTransport();
+
+      /*!
+	@brief Parse whether or not we should floor the mass
+      */
       void parseFloor();
+
+      /*!
+	@brief Parse debug mode
+      */
       void parseDebug();
+
+      /*!
+	@brief Parse debug mode
+      */
+      void parseProfile();      
+
+      /*!
+	@brief Parse inclusion of random diffusion flux.
+      */
       void parseFHD();
 
       // Routine for semi-implicit Poisson solve.

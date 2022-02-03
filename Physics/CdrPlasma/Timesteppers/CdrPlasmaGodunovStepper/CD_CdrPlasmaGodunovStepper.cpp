@@ -99,12 +99,12 @@ void CdrPlasmaGodunovStepper::parseRuntimeOptions(){
 }
 
 void CdrPlasmaGodunovStepper::parseDiffusion(){
-  CH_TIME("CdrPlasmaGodunovStepper::parseDiffusion");
+  CH_TIME("CdrPlasmaGodunovStepper::parseDiffusion()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::parseDiffusion" << endl;
+    pout() << "CdrPlasmaGodunovStepper::parseDiffusion()" << endl;
   }
 
-  ParmParse pp("CdrPlasmaGodunovStepper");
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("diffusion", str);
@@ -121,17 +121,17 @@ void CdrPlasmaGodunovStepper::parseDiffusion(){
     m_whichDiffusionAlgorithm = WhichDiffusionAlgorithm::Automatic;
   }
   else{
-    MayDay::Abort("CdrPlasmaGodunovStepper_maruyama::parseDiffusion - unknown diffusion type requested");
+    MayDay::Error("CdrPlasmaGodunovStepper_maruyama::parseDiffusion - unknown diffusion type requested");
   }
 }
 
 void CdrPlasmaGodunovStepper::parseTransport(){
-  CH_TIME("CdrPlasmaGodunovStepper::parseTransport");
+  CH_TIME("CdrPlasmaGodunovStepper::parseTransport()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::parseTransport" << endl;
+    pout() << "CdrPlasmaGodunovStepper::parseTransport()" << endl;
   }
 
-  ParmParse pp("CdrPlasmaGodunovStepper");
+  ParmParse pp(m_className.c_str());
 
   std::string str;
   pp.get("transport", str);
@@ -145,14 +145,14 @@ void CdrPlasmaGodunovStepper::parseTransport(){
     m_transportAlgorithm = TransportAlgorithm::SemiImplicit;
   }
   else{
-    MayDay::Abort("CdrPlasmaGodunovStepper::parseTransport - unknown transport algorithm requested");
+    MayDay::Error("CdrPlasmaGodunovStepper::parseTransport - unknown transport algorithm requested");
   }
 }
 
 void CdrPlasmaGodunovStepper::parseAdvection(){
-  CH_TIME("CdrPlasmaGodunovStepper::parseAdvection");
+  CH_TIME("CdrPlasmaGodunovStepper::parseAdvection()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::parseAdvection" << endl;
+    pout() << "CdrPlasmaGodunovStepper::parseAdvection()" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -166,14 +166,14 @@ void CdrPlasmaGodunovStepper::parseAdvection(){
     m_extrapAdvect = false;
   }
   else{
-    MayDay::Abort("CdrPlasmaGodunovStepper::parseAdvection - unknown argument");
+    MayDay::Error("CdrPlasmaGodunovStepper::parseAdvection - unknown argument");
   }
 }
 
 void CdrPlasmaGodunovStepper::parseFloor(){
-  CH_TIME("CdrPlasmaGodunovStepper::parseFloor");
+  CH_TIME("CdrPlasmaGodunovStepper::parseFloor()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::parseFloor" << endl;
+    pout() << "CdrPlasmaGodunovStepper::parseFloor()" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -187,7 +187,7 @@ void CdrPlasmaGodunovStepper::parseFloor(){
     m_floor = false;
   }
   else{
-    MayDay::Abort("CdrPlasmaGodunovStepper::parseFloor - unknown argument requested.");
+    MayDay::Error("CdrPlasmaGodunovStepper::parseFloor - unknown argument requested.");
   }
 }
 
@@ -200,6 +200,17 @@ void CdrPlasmaGodunovStepper::parseDebug(){
   ParmParse pp(m_className.c_str());
 
   pp.get("debug", m_debug);
+}
+
+void CdrPlasmaGodunovStepper::parseProfile(){
+  CH_TIME("CdrPlasmaGodunovStepper::parseProfile()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaGodunovStepper::parseProfile()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("profile", m_profile);
 }
 
 void CdrPlasmaGodunovStepper::parseFHD(){
