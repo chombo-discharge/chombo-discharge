@@ -213,6 +213,7 @@ CdrPlasmaGodunovStepper.min_dt           = 0.        # Minimum permitted time st
 CdrPlasmaGodunovStepper.max_dt           = 1.E99     # Maximum permitted time step
 CdrPlasmaGodunovStepper.cfl              = 0.9       # CFL number
 CdrPlasmaGodunovStepper.diffusion        = implicit  # Diffusion. 'explicit', 'implicit', or 'auto'
+CdrPlasmaGodunovStepper.diffusion_thresh = 2.0           # Diffusion threshold. If dtD/dtA > this then we use implicit diffusion.
 CdrPlasmaGodunovStepper.transport        = euler     # Transport algorithm. 'euler' or 'rk2'
 CdrPlasmaGodunovStepper.relax_time       = 1.0       # Relaxation time constant
 CdrPlasmaGodunovStepper.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
