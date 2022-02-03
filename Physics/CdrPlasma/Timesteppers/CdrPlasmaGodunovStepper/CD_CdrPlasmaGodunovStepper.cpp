@@ -277,10 +277,15 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
     timer.stopEvent("Poisson");
   }
 
+  // Need to update diffusion and mobility coefficients now.
+  CdrPlasmaGodunovStepper::computeCdrDriftVelocities(m_time + a_dt);
+  CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(m_time + a_dt);  
+
   // 3. Solve the reactive problem. 
   timer.startEvent("Reactions");
-  CdrPlasmaGodunovStepper::computeCdrGradients();        
-  CdrPlasmaGodunovStepper::advanceReactions(a_dt); 
+  CdrPlasmaGodunovStepper::computeCdrGradients();
+  CdrPlasmaGodunovStepper::computeSourceTerms(a_dt);
+  CdrPlasmaGodunovStepper::advanceCdrReactions(a_dt); 
   timer.stopEvent("Reactions");  
 
   // 4. Solve the radiative transfer problem. 
@@ -1140,34 +1145,11 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
   this->advanceTransportEuler(a_dt);
 }
 
-void CdrPlasmaGodunovStepper::advanceReactions(const Real a_dt){
-  CH_TIME("CdrPlasmaGodunovStepper::advanceReactions(Real)");
+void CdrPlasmaGodunovStepper::advanceCdrReactions(const Real a_dt){
+  CH_TIME("CdrPlasmaGodunovStepper::advanceCdrReactions(Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::advanceReactions(Real)" << endl;
+    pout() << "CdrPlasmaGodunovStepper::advanceCdrReactions(Real)" << endl;
   }
-
-  // We have already computed E and the gradients of the CDR equations. The API says we also need the gradients of the CDR equations, but we've already
-  // computed those in computeCdrGradients. So we just collect everything and then call the parent method which fills the source terms. 
-
-  Vector<EBAMRCellData*> cdrSources   = m_cdr->getSources();
-  Vector<EBAMRCellData*> rteSources   = m_rte->getSources();  
-  Vector<EBAMRCellData*> cdrDensities = m_cdr->getPhis();
-  Vector<EBAMRCellData*> rteDensities = m_rte->getPhis();
-
-  // Fill the gradient data holders. These have already been computed. 
-  Vector<EBAMRCellData*> cdrGradients;
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    RefCountedPtr<CdrStorage>& storage = getCdrStorage(solverIt);
-
-    EBAMRCellData& gradient = storage->getGradient();
-    cdrGradients.push_back(&gradient);
-  }
-
-  // Get the electric field -- we use the one in the scratch storage. 
-  const EBAMRCellData& electricField = m_fieldScratch->getElectricFieldCell();  
-
-  // Compute all source terms for both CDR and RTE equations. 
-  CdrPlasmaStepper::advanceReactionNetwork(cdrSources, rteSources, cdrDensities, cdrGradients, rteDensities, electricField, m_time, a_dt);
 
   // After calling advanceReactionNetwork the CDR solvers have been filled with appropriate source terms. We now advance the
   // states over the time step a_dt using those source terms. 
@@ -1190,7 +1172,7 @@ void CdrPlasmaGodunovStepper::advanceReactions(const Real a_dt){
 	const Real massAfter   = solver->computeMass();
 	const Real relMassDiff = (massAfter-massBefore)/massBefore;
 	
-	pout() << "CdrPlasmaGodunovStepper::advanceReactions - injecting relative "  << solver->getName() << " mass = " << relMassDiff << endl;
+	pout() << "CdrPlasmaGodunovStepper::advanceCdrReactions - injecting relative "  << solver->getName() << " mass = " << relMassDiff << endl;
       }
     }
     else{
@@ -1232,6 +1214,36 @@ void CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(const Real a_time)
   // TLDR: We call the parent method, but using the scratch storage that holds the electric field.   
 
   CdrPlasmaStepper::computeCdrDiffusion(m_fieldScratch->getElectricFieldCell(), m_fieldScratch->getElectricFieldEb());
+}
+
+void CdrPlasmaGodunovStepper::computeSourceTerms(const Real a_dt){
+  CH_TIME("CdrPlasmaGodunovStepper::computeSourceTerms(Real)");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaGodunovStepper::computeSourceTerms(Real)" << endl;
+  }
+
+  // We have already computed E and the gradients of the CDR equations. The API says we also need the gradients of the CDR equations, but we've already
+  // computed those in computeCdrGradients. So we just collect everything and then call the parent method which fills the source terms. 
+
+  Vector<EBAMRCellData*> cdrSources   = m_cdr->getSources();
+  Vector<EBAMRCellData*> rteSources   = m_rte->getSources();  
+  Vector<EBAMRCellData*> cdrDensities = m_cdr->getPhis();
+  Vector<EBAMRCellData*> rteDensities = m_rte->getPhis();
+
+  // Fill the gradient data holders. These have already been computed. 
+  Vector<EBAMRCellData*> cdrGradients;
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    RefCountedPtr<CdrStorage>& storage = getCdrStorage(solverIt);
+
+    EBAMRCellData& gradient = storage->getGradient();
+    cdrGradients.push_back(&gradient);
+  }
+
+  // Get the electric field -- we use the one in the scratch storage. 
+  const EBAMRCellData& electricField = m_fieldScratch->getElectricFieldCell();  
+
+  // Compute all source terms for both CDR and RTE equations. 
+  CdrPlasmaStepper::advanceReactionNetwork(cdrSources, rteSources, cdrDensities, cdrGradients, rteDensities, electricField, m_time, a_dt);
 }
 
 void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){

@@ -322,11 +322,10 @@ namespace Physics {
 
       /*!
 	@brief Advance the reactive problem over a time step dt.
-	@details This will update the source terms and advance the CDR equations with the source terms. 
 	@param[in] a_dt Time step
-	@note The RTE source terms are filled in this routine, but are advanced in the separate routine advanceRadiativeTransfer
+	@note Only does the CDR solvers.
       */
-      void advanceReactions(const Real a_dt);
+      void advanceCdrReactions(const Real a_dt);
 
       /*!
 	@brief Advance the radiative transfer problem. 
@@ -352,16 +351,22 @@ namespace Physics {
       /*!
 	@brief Compute CDR drift velocities
 	@details This is just like the parent method, except that we use the electric field stored in the scratch storage. 
-	@param[in] a_time
+	@param[in] a_time Time step
       */
       void computeCdrDriftVelocities(const Real a_time);
 
       /*!
 	@brief Compute CDR diffusion coefficients
 	@details This is just like the parent method, except that we use the electric field stored in the scratch storage. 
-	@param[in] a_time
+	@param[in] a_time Time step
       */      
       void computeCdrDiffusionCoefficients(const Real a_time);
+
+      /*!
+	@brief Compute source terms for the CDR and RTE equations
+	@param[in] a_dt Time step
+      */
+      void computeSourceTerms(const Real a_dt);
 
       /*!
 	@brief Parse how we handle diffusion.
