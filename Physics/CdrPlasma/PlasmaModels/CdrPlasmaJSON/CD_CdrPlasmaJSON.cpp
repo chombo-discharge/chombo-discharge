@@ -1031,12 +1031,18 @@ void CdrPlasmaJSON::parseMobilities() {
 	const std::string startRead = trim(mobilityJSON["header"].get<std::string>());
 	const std::string stopRead  = "";
 
-	const int xColumn   = mobilityJSON["E/N"       ].get<int>();
-	const int yColumn   = mobilityJSON["mu*N"      ].get<int>();
+	const int xColumn = mobilityJSON["E/N"    ].get<int >();
+	const int yColumn = mobilityJSON["mu*N"   ].get<int >();
 
-	const Real minEN = mobilityJSON["min E/N"].get<Real>();
-	const Real maxEN = mobilityJSON["max E/N"].get<Real>();
-	const Real resEN = mobilityJSON["res E/N"].get<Real>();	
+	const Real minEN  = mobilityJSON["min E/N"].get<Real>();
+	const Real maxEN  = mobilityJSON["max E/N"].get<Real>();
+	const Real resEN  = mobilityJSON["res E/N"].get<Real>();
+
+	// Check if we should scale the table.
+	Real scale = 1.0;
+	if(mobilityJSON.contains("scale")){
+	  scale = mobilityJSON["scale"].get<Real>();
+	}
 
 	// Can't have maxEN < minEN
 	if(maxEN < minEN) this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
@@ -1054,10 +1060,11 @@ void CdrPlasmaJSON::parseMobilities() {
 	  this->throwParserError(baseError + " and got tabulated mobility but mobility table '" + startRead + "' in file '" + filename + "'is empty");
 	}
 
-	// COmpute the numer of points in the table
+	// Compute the required number of points in the table
 	const int numPoints = std::ceil((maxEN - minEN)/resEN);
 
 	// Format the table
+	mobilityTable.scale<1>(scale);		
 	mobilityTable.setRange(minEN, maxEN, 0);
 	mobilityTable.sort(0);
 	mobilityTable.makeUniform(numPoints);
@@ -1144,7 +1151,7 @@ void CdrPlasmaJSON::parseDiffusion() {
 	if(maxEN < minEN) this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
 
 	// Issue an error if the file does not exist at all!
-	if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "and got 'table E/N' with file = '" + filename + "' but file was not found");		
+	if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "and got 'table E/N' with file = '" + filename + "' but file was not found");
 
 	// Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
 	// the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
@@ -1156,10 +1163,17 @@ void CdrPlasmaJSON::parseDiffusion() {
 	  this->throwParserError(baseError + " and got tabulated diffusion but diffusion table '" + startRead + "' in file '" + filename + "'is empty");	  
 	}
 
+	// Check if we should scale the table.
+	Real scale = 1.0;
+	if(diffusionJSON.contains("scale")){
+	  scale = diffusionJSON["scale"].get<Real>();
+	}	
+
 	// Compute thne number of points in the table
 	const int numPoints = std::ceil((maxEN - minEN)/resEN);
 
 	// Format the table
+	diffusionTable.scale<1>(scale);
 	diffusionTable.setRange(minEN, maxEN, 0);
 	diffusionTable.sort(0);
 	diffusionTable.makeUniform(numPoints);
@@ -1251,6 +1265,12 @@ void CdrPlasmaJSON::parseTemperatures() {
 	// Issue an error if the file does not exist at all!
 	if(!(this->doesFileExist(filename))) this->throwParserError(baseError + "was specified as 'table E/N' but got file = '" + filename + "' was not found");
 
+	// Check if we should scale the table.
+	Real scale = 1.0;
+	if(S.contains("scale")){
+	  scale = S["scale"].get<Real>();
+	}
+
 	// Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
 	// the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
 	// second column. 
@@ -1265,6 +1285,7 @@ void CdrPlasmaJSON::parseTemperatures() {
 	const int numPoints = std::ceil((maxEN - minEN)/resEN);
 
 	// Format the table
+	temperatureTable.scale<1>(scale);		
 	temperatureTable.setRange(minEN, maxEN, 0);
 	temperatureTable.sort(0);
 	temperatureTable.makeUniform(numPoints);
