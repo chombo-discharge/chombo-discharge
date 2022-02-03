@@ -260,7 +260,7 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
   //    4. Solve the radiative transfer problem
   //    5. Put data back into solvers to prepare for the next time step. 
 
-  Timer timer("GodunovStepper::advance");
+  Timer timer("CdrPlasmaGodunovStepper::advance");
 
   // 1. Solve the transport problem. Note that we call advanceTransport which holds the implementation. This differs for explicit and semi-implicit formulations.
   timer.startEvent("Transport");
@@ -277,23 +277,23 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
     timer.stopEvent("Poisson");
   }
 
-  // Need to update diffusion and mobility coefficients now.
-  CdrPlasmaGodunovStepper::computeCdrDriftVelocities(m_time + a_dt);
-  CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(m_time + a_dt);  
-
   // 3. Solve the reactive problem. 
   timer.startEvent("Reactions");
   CdrPlasmaGodunovStepper::computeCdrGradients();
   CdrPlasmaGodunovStepper::computeSourceTerms(a_dt);
-  CdrPlasmaGodunovStepper::advanceCdrReactions(a_dt); 
-  timer.stopEvent("Reactions");  
+  timer.stopEvent("Reactions");
+
+  // 3. Advance CDR equations with reactive terms. 
+  timer.startEvent("CDR reactions");
+  CdrPlasmaGodunovStepper::advanceCdrReactions(a_dt);
+  timer.stopEvent("CDR reactions");  
 
   // 4. Solve the radiative transfer problem. 
-  timer.startEvent("Photons");
+  timer.startEvent("Radiation");
   if((m_timeStep +1) % m_fastRTE == 0){
     CdrPlasmaGodunovStepper::advanceRadiativeTransfer(a_dt);
   }
-  timer.stopEvent("Photons");  
+  timer.stopEvent("Radiation");  
 
   // Do post step operations. 
   timer.startEvent("Post-step");
@@ -523,7 +523,7 @@ void CdrPlasmaGodunovStepper::allocateInternals(){
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     const int idx = solverIt.index();
     
-    m_cdrScratch[idx] = RefCountedPtr<CdrStorage> (new CdrStorage(m_amr, m_realm, m_cdr->getPhase(), nComp));
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage> (new CdrStorage(m_amr, m_realm, m_cdr->getPhase()));
     m_cdrScratch[idx]->allocateStorage();
   }
 
@@ -532,16 +532,16 @@ void CdrPlasmaGodunovStepper::allocateInternals(){
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){
     const int idx = solverIt.index();
     
-    m_rteScratch[idx] = RefCountedPtr<RtStorage> (new RtStorage(m_amr, m_realm, m_rte->getPhase(), nComp));
+    m_rteScratch[idx] = RefCountedPtr<RtStorage> (new RtStorage(m_amr, m_realm, m_rte->getPhase()));
     m_rteScratch[idx]->allocateStorage();
   }
 
   // Allocate storage for field solver. 
-  m_fieldScratch = RefCountedPtr<FieldStorage> (new FieldStorage(m_amr, m_realm, m_cdr->getPhase(), nComp));
+  m_fieldScratch = RefCountedPtr<FieldStorage> (new FieldStorage(m_amr, m_realm, m_cdr->getPhase()));
   m_fieldScratch->allocateStorage();
   
   // Allocate storage for surface charge solver. 
-  m_sigmaScratch = RefCountedPtr<SigmaStorage> (new SigmaStorage(m_amr, m_realm, m_cdr->getPhase(), nComp));
+  m_sigmaScratch = RefCountedPtr<SigmaStorage> (new SigmaStorage(m_amr, m_realm, m_cdr->getPhase()));
   m_sigmaScratch->allocateStorage();
 
   // Set up storage for semi-implicit field solves. 
@@ -606,7 +606,7 @@ void CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch(){
   // TLDR: This computes the electric field on the cell center, EB, and domain faces. 
   
   EBAMRCellData& electricFieldCell   = m_fieldScratch->getElectricFieldCell();
-  EBAMRIVData&   electricFieldEB     = m_fieldScratch->getElectricFieldEb();
+  EBAMRIVData&   electricFieldEB     = m_fieldScratch->getElectricFieldEB();
   EBAMRIFData&   electricFieldDomain = m_fieldScratch->getElectricFieldDomain();
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
@@ -791,7 +791,7 @@ void CdrPlasmaGodunovStepper::computeCdrFluxesEB(){
   Vector<EBAMRIVData*> cdrFluxesEB = m_cdr->getEbFlux();  
 
   // Electric field which has been extrapolated to the EB (in computeElectricFieldIntoScratch).
-  const EBAMRIVData& electricFieldEB = m_fieldScratch->getElectricFieldEb();
+  const EBAMRIVData& electricFieldEB = m_fieldScratch->getElectricFieldEB();
 
   // Now call the parent method which does all the BC computations. 
   CdrPlasmaStepper::computeCdrFluxes(cdrFluxesEB,
@@ -1213,7 +1213,7 @@ void CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(const Real a_time)
 
   // TLDR: We call the parent method, but using the scratch storage that holds the electric field.   
 
-  CdrPlasmaStepper::computeCdrDiffusion(m_fieldScratch->getElectricFieldCell(), m_fieldScratch->getElectricFieldEb());
+  CdrPlasmaStepper::computeCdrDiffusion(m_fieldScratch->getElectricFieldCell(), m_fieldScratch->getElectricFieldEB());
 }
 
 void CdrPlasmaGodunovStepper::computeSourceTerms(const Real a_dt){
