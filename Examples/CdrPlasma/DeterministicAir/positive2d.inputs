@@ -188,25 +188,25 @@ Vessel.live_rod      = true           # Rod is live or not
 Vessel.live_shroom   = false          # Mushroom is live or not
 
 # ====================================================================================================
-# CdrPlasmaGodunovStepper class options
+# CdrPlasmaGodunovStepper options
 # ====================================================================================================
-CdrPlasmaGodunovStepper.verbosity        = -1        # Class verbosity
-CdrPlasmaGodunovStepper.solver_verbosity = -1        # Individual solver verbosities
-CdrPlasmaGodunovStepper.min_dt           = 0.        # Minimum permitted time step
-CdrPlasmaGodunovStepper.max_dt           = 1.E99     # Maximum permitted time step
-CdrPlasmaGodunovStepper.cfl              = 0.9       # CFL number
-CdrPlasmaGodunovStepper.diffusion        = auto      # Diffusion. 'explicit', 'implicit', or 'auto'. Semi-implicit transport uses explicit diffusion. 
+CdrPlasmaGodunovStepper.verbosity        = -1            # Class verbosity
+CdrPlasmaGodunovStepper.solver_verbosity = -1            # Individual solver verbosities
+CdrPlasmaGodunovStepper.min_dt           = 0.            # Minimum permitted time step
+CdrPlasmaGodunovStepper.max_dt           = 1.E99         # Maximum permitted time step
+CdrPlasmaGodunovStepper.cfl              = 0.9           # CFL number
+CdrPlasmaGodunovStepper.diffusion        = auto          # Diffusion. 'explicit', 'implicit', or 'auto'. 
 CdrPlasmaGodunovStepper.diffusion_thresh = 2.0           # Diffusion threshold. If dtD/dtA > this then we use implicit diffusion.
-CdrPlasmaGodunovStepper.transport        = semi_implicit     # Transport algorithm. 'euler', 'rk2', or 'semi-implicit'
-CdrPlasmaGodunovStepper.relax_time       = 1.E99     # Relaxation time constant
-CdrPlasmaGodunovStepper.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
-CdrPlasmaGodunovStepper.fast_rte         = 10        # Solve RTE every this time steps. Mostly for debugging.
-CdrPlasmaGodunovStepper.fhd              = false     # Set to true if you want to add a stochastic diffusion flux
-CdrPlasmaGodunovStepper.source_comp      = interp2   # Interpolated 'interp' or cell-average 'cell_ave' for source computations
-CdrPlasmaGodunovStepper.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the CdrSolver
-CdrPlasmaGodunovStepper.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
-CdrPlasmaGodunovStepper.debug            = false     # Turn on debugging messages. Also monitors mass if it was injected into the system. 
-CdrPlasmaGodunovStepper.profile          = true         # Turn on/off performance profiling.
+CdrPlasmaGodunovStepper.transport        = semi_implicit # Transport algorithm. 'semi_implicit' or 'euler'
+CdrPlasmaGodunovStepper.relax_time       = 1.E99         # Relaxation time constant. Not necessary for semi-implicit scheme. 
+CdrPlasmaGodunovStepper.fast_poisson     = 1             # Solve Poisson every this time steps. Mostly for debugging.
+CdrPlasmaGodunovStepper.fast_rte         = 1             # Solve RTE every this time steps. Mostly for debugging.
+CdrPlasmaGodunovStepper.fhd              = false         # Set to true if you want to add a stochastic diffusion flux
+CdrPlasmaGodunovStepper.source_comp      = interp2       # Interpolated 'interp', 'interp2', or 'upwind X' (X = integer, for ultimate stability)
+CdrPlasmaGodunovStepper.extrap_advect    = true          # Use time-extrapolation capabilities (if they exist) in the CdrSolver
+CdrPlasmaGodunovStepper.floor_cdr        = true          # Floor CDR solvers to avoid negative densities
+CdrPlasmaGodunovStepper.debug            = false         # Turn on debugging messages. Also monitors mass if it was injected into the system. 
+CdrPlasmaGodunovStepper.profile          = false         # Turn on/off performance profiling.
 
 # ====================================================================================================
 # CdrPlasmaJSON class options

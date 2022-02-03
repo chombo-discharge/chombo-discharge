@@ -8,12 +8,12 @@ CdrPlasmaGodunovStepper.max_dt           = 1.E99         # Maximum permitted tim
 CdrPlasmaGodunovStepper.cfl              = 0.9           # CFL number
 CdrPlasmaGodunovStepper.diffusion        = auto          # Diffusion. 'explicit', 'implicit', or 'auto'. 
 CdrPlasmaGodunovStepper.diffusion_thresh = 2.0           # Diffusion threshold. If dtD/dtA > this then we use implicit diffusion.
-CdrPlasmaGodunovStepper.transport        = semi_implicit # Transport algorithm. 'semi_implicit', 'euler', or 'rk2'
+CdrPlasmaGodunovStepper.transport        = semi_implicit # Transport algorithm. 'semi_implicit' or 'euler'
 CdrPlasmaGodunovStepper.relax_time       = 1.E99         # Relaxation time constant. Not necessary for semi-implicit scheme. 
 CdrPlasmaGodunovStepper.fast_poisson     = 1             # Solve Poisson every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fast_rte         = 1             # Solve RTE every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fhd              = false         # Set to true if you want to add a stochastic diffusion flux
-CdrPlasmaGodunovStepper.source_comp      = interp2       # Interpolated 'interp' or cell-average 'cell_ave' for source computations
+CdrPlasmaGodunovStepper.source_comp      = interp2       # Interpolated 'interp', 'interp2', or 'upwind X' (X = integer, for ultimate stability)
 CdrPlasmaGodunovStepper.extrap_advect    = true          # Use time-extrapolation capabilities (if they exist) in the CdrSolver
 CdrPlasmaGodunovStepper.floor_cdr        = true          # Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug            = false         # Turn on debugging messages. Also monitors mass if it was injected into the system. 

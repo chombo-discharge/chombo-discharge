@@ -153,9 +153,6 @@ void CdrPlasmaGodunovStepper::parseTransport(){
   if(str == "euler"){
     m_transportAlgorithm = TransportAlgorithm::Euler;
   }
-  else if(str == "rk2"){
-    m_transportAlgorithm = TransportAlgorithm::RK2;
-  }
   else if(str == "semi_implicit"){
     m_transportAlgorithm = TransportAlgorithm::SemiImplicit;
   }
@@ -969,12 +966,6 @@ void CdrPlasmaGodunovStepper::advanceTransport(const Real a_dt){
       
       break;
     }
-  case TransportAlgorithm::RK2:
-    {
-      this->advanceTransportRK2(a_dt);
-      
-      break;
-    }
   case TransportAlgorithm::SemiImplicit:
     {
       this->advanceTransportSemiImplicit(a_dt);
@@ -1148,182 +1139,6 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
   // Now call the Euler transport method -- it will know what to do. 
   this->advanceTransportEuler(a_dt);
 }
-
-void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
-  CH_TIME("CdrPlasmaGodunovStepper::advanceTransportRK2");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::advanceTransportRK2" << endl;
-  }
-
-  CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();   // Compute the electric field
-  CdrPlasmaGodunovStepper::computeCdrGradients();               // Compute cdr gradients
-  CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(a_dt);         // If we used advective extrapolation, BCs are more work. 
-  CdrPlasmaGodunovStepper::extrapolateCdrToEB();                // Extrapolate cell-centered stuff to EB centroids
-  CdrPlasmaGodunovStepper::computeCdrFluxesEB();                // Extrapolate cell-centered fluxes to EB centroids
-  CdrPlasmaGodunovStepper::extrapolateCdrToDomain();            // Extrapolate cell-centered states to domain edges
-  CdrPlasmaGodunovStepper::computeCdrDomainFluxes();            // Extrapolate cell-centered fluxes to domain edges
-  CdrPlasmaGodunovStepper::computeSigmaFlux();                  // Update charge flux for sigma solver    
-
-  // 1. Compute the "k1" coefficient. This is equivalent to using a semi-implicit
-  //    euler method as the predictor for Heun's method
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    RefCountedPtr<CdrSolver>& solver   = solverIt();
-    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
-
-    const int idx = solverIt.index();
-
-    EBAMRCellData& phi     = solver->getPhi();
-    EBAMRCellData& scratch = storage->getScratch();
-    EBAMRCellData& k1      = storage->getScratch3();
-
-    DataOps::copy(k1, phi);
-
-    // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-    const Real extrapDt = (m_extrapAdvect) ? a_dt : 0.0;
-    if(!m_useImplicitDiffusion[idx]){
-      solver->computeDivJ(scratch, phi, extrapDt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
-    }
-    else{
-      solver->computeDivF(scratch, phi, extrapDt, true, true); // For implicit diffusion, sratch is computed as div(v*phi)
-    }
-    DataOps::scale(scratch, -1.0);     // scratch = -[div(F/J)]
-    DataOps::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
-    DataOps::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J)
-
-    // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F) + dt*R
-    if(m_useImplicitDiffusion[idx]){
-      DataOps::floor(phi, 0.0);
-      
-      // Solve implicit diffusion equation. This looks weird but we're solving
-      //
-      // phi^(k+1) = phi^k - dt*div(F) + dt*R + dt*div(D*div(phi^k+1))
-      //
-      // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
-      // so we just use that for simplicity
-      if(solver->isDiffusive()){
-	EBAMRCellData& scratch2 = storage->getScratch2();
-	
-	DataOps::copy(scratch, phi);       // Make scratch = phiOld - dt*div(F/J)
-	DataOps::setValue(scratch2, 0.0); // No source, those are a part of the initial solution
-	solver->advanceEuler(phi, scratch, scratch2, a_dt);
-      }
-    }
-
-    DataOps::floor(phi, 0.0);
-
-    m_amr->averageDown(phi, m_realm, m_cdr->getPhase());
-    m_amr->interpGhost(phi, m_realm, m_cdr->getPhase());
-
-    // Compute k1 from phi^(k+1) = phi^k + k1
-    DataOps::incr(k1, phi, -1.0);
-    DataOps::scale(k1, -1.0);
-  }
-
-  // Update the sigma equation
-  {
-    EBAMRIVData& sigma = m_sigma->getPhi();
-    EBAMRIVData& k1    = m_sigmaScratch->getScratch();
-    DataOps::copy(k1, sigma);
-
-    // Advance
-    const EBAMRIVData& rhs = m_sigma->getFlux();
-    DataOps::incr(sigma, rhs, a_dt);
-
-    // Compute k1 from sigma^(k+1) = sigma^k + k1*dt
-    DataOps::incr(k1, sigma, -1.0);
-    DataOps::scale(k1, -1.0);
-  }
-
-  // 2. Compute the electric field and update boundary conditions and kinetic coefficients
-  if((m_timeStep +1) % m_fastPoisson == 0){
-    CdrPlasmaStepper::solvePoisson();         // Update the Poisson equation
-    CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();       // Update electric fields too
-  }
-  CdrPlasmaGodunovStepper::computeCdrDriftVelocities(m_time + a_dt);
-  CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(m_time + a_dt);
-  CdrPlasmaGodunovStepper::postStep();
-  
-  CdrPlasmaGodunovStepper::computeCdrGradients();        // Recompute cdr gradients after reaction advance (these might have changed)
-  CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(a_dt);            // BCs are more work with advective extrapolation
-  CdrPlasmaGodunovStepper::extrapolateCdrToEB();        // Extrapolate cell-centered stuff to EB centroids
-  CdrPlasmaGodunovStepper::computeCdrFluxesEB();        // Extrapolate cell-centered fluxes to EB centroids
-  CdrPlasmaGodunovStepper::extrapolateCdrToDomain();    // Extrapolate cell-centered states to domain edges
-  CdrPlasmaGodunovStepper::computeCdrDomainFluxes();    // Extrapolate cell-centered fluxes to domain edges
-  CdrPlasmaGodunovStepper::computeSigmaFlux();           // Update charge flux for sigma solver
-
-  // 3. Perform final advance, which will be the solution to 
-  for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const int idx = solverIt.index();
-    
-    RefCountedPtr<CdrSolver>& solver   = solverIt();
-    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
-
-    EBAMRCellData& phi      = solver->getPhi();
-    EBAMRCellData& scratch  = storage->getScratch();
-    const EBAMRCellData& k1 = storage->getScratch3();
-
-    // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-    const Real extrapDt = m_extrapAdvect ? a_dt : 0.0;
-    if(!m_useImplicitDiffusion[idx]){
-      solver->computeDivJ(scratch, phi, extrapDt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
-      DataOps::scale(scratch, -1.0);
-      DataOps::scale(scratch, a_dt);
-      // Now make phiNew = phiOld + 0.5*(k1+k2)*dt but since phi = phiOld + k1, just do
-      // phiNew = phi - 0.5*k1 + 0.5*scratch
-
-      DataOps::incr(phi, k1,     -0.5);
-      DataOps::incr(phi, scratch, 0.5);
-    }
-    else{ // Implicit diffusion is a bit more tricky
-      solver->computeDivF(scratch, phi, extrapDt, true, true); // For implicit diffusion, sratch is computed as div(v*phi)
-      DataOps::scale(scratch, -a_dt);     // scratch = [-div(F)]*dt
-
-      // Solve the stinking diffusion equation. This is weird but we want to solve phiNew = phiOld + 0.5*dt*(k1+f(phiNew)),
-      // and phi holds phiOld + dt*k1 and f(phiNew) is semi-implicit. So we solve in the form
-      //
-      // phiNew = phiOld + 0.5*dt*(k1 - divF(phi) + div(D*grad(phiNew)))
-      //
-      DataOps::incr(phi, k1, -0.5);     // phi = phiOld + 0.5*k1
-      DataOps::incr(phi, scratch, 0.5); // phi = phiOld + 0.5*(k1 - div(F))
-      
-      if(solver->isDiffusive()){
-	EBAMRCellData& scratch2 = storage->getScratch2();
-	
-	DataOps::copy(scratch, phi);       // Weird-ass initial solution, as explained above
-	DataOps::setValue(scratch2, 0.0); // No source, those are a part of the initial solution
-	
-	solver->advanceEuler(phi, scratch, scratch2, a_dt);
-      }
-    }
-
-    DataOps::floor(phi, 0.0);
-
-    m_amr->averageDown(phi, m_realm, m_cdr->getPhase());
-    m_amr->interpGhost(phi, m_realm, m_cdr->getPhase());
-
-    if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
-      if(m_debug){
-	const Real massBefore = solver->computeMass();
-	DataOps::floor(phi, 0.0);
-	const Real massAfter = solver->computeMass();
-	const Real relMassDiff = (massAfter-massBefore)/massBefore;
-	pout() << "CdrPlasmaGodunovStepper::advanceTransportRK2 - injecting relative " << solver->getName() << " mass = " << relMassDiff << endl;
-      }
-      else{
-	DataOps::floor(phi, 0.0);
-      }
-    }
-  }
-
-  { // Do the final sigma advance
-    EBAMRIVData& sigma     = m_sigma->getPhi();
-    const EBAMRIVData& rhs = m_sigma->getFlux();
-    const EBAMRIVData& k1  = m_sigmaScratch->getScratch();
-    DataOps::incr(sigma, k1, -0.5);
-    DataOps::incr(sigma, rhs, 0.5*a_dt);
-  }
-}
-
 
 void CdrPlasmaGodunovStepper::advanceReactions(const Real a_dt){
   CH_TIME("CdrPlasmaGodunovStepper::advanceReactions(Real)");

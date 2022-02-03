@@ -320,10 +320,6 @@ namespace Physics {
       */
       void advanceTransportSemiImplicit(const Real a_dt);      
 
-      // CODE-WALK BEGINS HERE.             
-      void advanceTransportRK2(const Real a_dt);
-      // AND ENDS HERE            
-
       /*!
 	@brief Advance the reactive problem over a time step dt.
 	@details This will update the source terms and advance the CDR equations with the source terms. 
