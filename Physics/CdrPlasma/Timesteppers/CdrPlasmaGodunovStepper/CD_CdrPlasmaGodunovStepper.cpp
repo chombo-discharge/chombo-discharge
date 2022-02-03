@@ -67,6 +67,7 @@ void CdrPlasmaGodunovStepper::parseOptions(){
   this->parseAdvection();
   this->parseFloor();
   this->parseDebug();
+  this->parseProfile();  
   this->parseFHD();
 }
 
@@ -90,6 +91,7 @@ void CdrPlasmaGodunovStepper::parseRuntimeOptions(){
   this->parseAdvection();
   this->parseFloor();
   this->parseDebug();
+  this->parseProfile();  
   this->parseFHD();
 
   // Solvers also parse their runtime options. 
@@ -106,23 +108,36 @@ void CdrPlasmaGodunovStepper::parseDiffusion(){
 
   ParmParse pp(m_className.c_str());
 
+  const int numCdrSpecies = m_physics->getNumCdrSpecies();
+
+  m_useImplicitDiffusion.resize(numCdrSpecies, false);
+
   std::string str;
   pp.get("diffusion", str);
   if(str == "explicit"){
-    m_implicitDiffusion = false;
     m_whichDiffusionAlgorithm = WhichDiffusionAlgorithm::Explicit;
+
+    // Set explicit diffusion for all species
+    m_useImplicitDiffusion.resize(numCdrSpecies, false);    
   }
   else if(str == "implicit"){
-    m_implicitDiffusion = true;
     m_whichDiffusionAlgorithm = WhichDiffusionAlgorithm::Implicit;
+
+    // Set implicit diffusion for all species
+    m_useImplicitDiffusion.resize(numCdrSpecies, true);        
   }
   else if(str == "auto"){
-    m_implicitDiffusion = true;
     m_whichDiffusionAlgorithm = WhichDiffusionAlgorithm::Automatic;
+
+    // Diffusion will be determined during time step computation, but for now we initialize it to explicit.
+    m_useImplicitDiffusion.resize(numCdrSpecies, false);            
   }
   else{
-    MayDay::Error("CdrPlasmaGodunovStepper_maruyama::parseDiffusion - unknown diffusion type requested");
+    MayDay::Error("CdrPlasmaGodunovStepper::parseDiffusion - unknown diffusion type requested");
   }
+
+  // Fetch the diffusion threshold factor
+  pp.get("diffusion_thresh", m_implicitDiffusionThreshold);
 }
 
 void CdrPlasmaGodunovStepper::parseTransport(){
@@ -292,7 +307,7 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
   CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(m_time + a_dt);
   timer.stopEvent("Diffu-coeffs");
 
-  if(m_debug){
+  if(m_profile){
     timer.eventReport(pout(), false);
   }
   
@@ -1006,7 +1021,10 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     RefCountedPtr<CdrSolver>& solver   = solverIt();
 
+    const int idx = solverIt.index();    
+
     if(solver->isMobile() || solver->isDiffusive()){
+
       RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
       EBAMRCellData& phi = solver->getPhi();
@@ -1018,7 +1036,7 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
       // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion. The
       // 'extrapDt' variable is for centering the advective discretization at the half time step (if user asks for it). 
       const Real extrapDt = (m_extrapAdvect) ? a_dt : 0.0;
-      if(!m_implicitDiffusion){
+      if(!m_useImplicitDiffusion[idx]){
 	solver->computeDivJ(scratch, phi, extrapDt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
       }
       else{
@@ -1040,7 +1058,7 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
       }
 
       // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F)
-      if(m_implicitDiffusion){
+      if(m_useImplicitDiffusion[idx]){
 	// Solve implicit diffusion equation. This looks weird but we're solving
 	//
 	// phi^(k+1) = phi^k - dt*div(F) + dt*div(D*div(phi^k+1))
@@ -1152,6 +1170,8 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
     RefCountedPtr<CdrSolver>& solver   = solverIt();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
+    const int idx = solverIt.index();
+
     EBAMRCellData& phi     = solver->getPhi();
     EBAMRCellData& scratch = storage->getScratch();
     EBAMRCellData& k1      = storage->getScratch3();
@@ -1160,7 +1180,7 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
     const Real extrapDt = (m_extrapAdvect) ? a_dt : 0.0;
-    if(!m_implicitDiffusion){
+    if(!m_useImplicitDiffusion[idx]){
       solver->computeDivJ(scratch, phi, extrapDt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
     }
     else{
@@ -1171,7 +1191,7 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
     DataOps::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J)
 
     // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F) + dt*R
-    if(m_implicitDiffusion){
+    if(m_useImplicitDiffusion[idx]){
       DataOps::floor(phi, 0.0);
       
       // Solve implicit diffusion equation. This looks weird but we're solving
@@ -1233,6 +1253,8 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
 
   // 3. Perform final advance, which will be the solution to 
   for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    
     RefCountedPtr<CdrSolver>& solver   = solverIt();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
@@ -1242,7 +1264,7 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
     const Real extrapDt = m_extrapAdvect ? a_dt : 0.0;
-    if(!m_implicitDiffusion){
+    if(!m_useImplicitDiffusion[idx]){
       solver->computeDivJ(scratch, phi, extrapDt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
       DataOps::scale(scratch, -1.0);
       DataOps::scale(scratch, a_dt);
@@ -1375,20 +1397,24 @@ void CdrPlasmaGodunovStepper::advanceRadiativeTransfer(const Real a_dt){
 }
 
 void CdrPlasmaGodunovStepper::computeCdrDriftVelocities(const Real a_time){
-  CH_TIME("CdrPlasmaGodunovStepper::computeCdrDriftVelocities");
+  CH_TIME("CdrPlasmaGodunovStepper::computeCdrDriftVelocities(Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::computeCdrDriftVelocities" << endl;
+    pout() << "CdrPlasmaGodunovStepper::computeCdrDriftVelocities(Real)" << endl;
   }
+
+  // TLDR: We call the parent method, but using the scratch storage that holds the electric field. 
 
   Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
   CdrPlasmaStepper::computeCdrDriftVelocities(velocities, m_cdr->getPhis(), m_fieldScratch->getElectricFieldCell(), a_time);
 }
 
 void CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(const Real a_time){
-  CH_TIME("CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients");
+  CH_TIME("CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients" << endl;
+    pout() << "CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(Real)" << endl;
   }
+
+  // TLDR: We call the parent method, but using the scratch storage that holds the electric field.   
 
   CdrPlasmaStepper::computeCdrDiffusion(m_fieldScratch->getElectricFieldCell(), m_fieldScratch->getElectricFieldEb());
 }
@@ -1414,34 +1440,95 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
     
     a_timeCode = TimeCode::AdvectionDiffusion;
     a_dt       = m_cfl*m_dtCFL;
+
+    // Turn off implicit diffusion for all species.
+    for (int i = 0; i < m_useImplicitDiffusion.size(); i++){
+      m_useImplicitDiffusion[i] = false;
+    }        
   }
   else if(m_whichDiffusionAlgorithm == WhichDiffusionAlgorithm::Implicit){
     m_dtCFL   = m_cdr->computeAdvectionDt();
     a_timeCode = TimeCode::Advection;
 
     a_dt = m_cfl*m_dtCFL;
+
+    // Turn on implicit diffusion for all species.
+    for (int i = 0; i < m_useImplicitDiffusion.size(); i++){
+      m_useImplicitDiffusion[i] = true;
+    }    
   }
   else if (m_whichDiffusionAlgorithm == WhichDiffusionAlgorithm::Automatic){
-    // If we are running with "automatic" diffusion, then we switch to implicit diffusion if the diffusive time step
-    // is shorter than the advective time step. 
-    const Real advectionDt = m_cdr->computeAdvectionDt();
-    const Real diffusionDt = m_cdr->computeDiffusionDt();
 
-    // These are the two cases we need: Either diffusion dt < advection dt and we switch to implicit diffusion and
-    // only limit by advection. Or we run fully explicit and use both advection and diffusion as a limiting step. 
-    if(diffusionDt < advectionDt){
-      m_implicitDiffusion = true;
+    // When we run with auto-diffusion, we check which species can be done using explicit diffusion and which ones
+    // that should use implicit diffusion (based on a user threshold).
 
-      m_dtCFL   = advectionDt;
-      a_dt       = m_cfl*m_dtCFL;
-      a_timeCode = TimeCode::Advection;
+    // First. Store the various time step restrictions for the CDR solvers
+    std::vector<Real> solverDt; 
+    std::vector<Real> advectionDt;
+    std::vector<Real> diffusionDt;
+    std::vector<Real> advectionDiffusionDt;
+
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      solverDt.emplace_back(std::numeric_limits<Real>::max());
+      
+      advectionDt.         emplace_back(solverIt()->computeAdvectionDt()         );
+      diffusionDt.         emplace_back(solverIt()->computeDiffusionDt()         );
+      advectionDiffusionDt.emplace_back(solverIt()->computeAdvectionDiffusionDt());
     }
-    else {
-      m_implicitDiffusion = false;
 
-      m_dtCFL   = m_cdr->computeAdvectionDiffusionDt();
-      a_dt       = m_cfl*m_dtCFL;
-      a_timeCode = TimeCode::AdvectionDiffusion;
+    const Real thresh = 1.0;
+
+    // Next, run through the CDR solvers and switch to implicit diffusion for the solvers that satisfy the threshold.
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
+
+      const Real dtA  = advectionDt         [idx];
+      const Real dtD  = diffusionDt         [idx];
+      const Real dtAD = advectionDiffusionDt[idx];
+
+      // Check if this solver should use implicit or explicit diffusion. 
+      if(dtD/dtA < m_implicitDiffusionThreshold) {
+	solverDt[idx] = dtA;
+
+	m_useImplicitDiffusion[idx] = true;
+      }
+      else{
+	solverDt[idx] = dtAD;
+
+	m_useImplicitDiffusion[idx] = false;
+      }
+    }
+
+    // Figure out the smallest time step among the solvers
+    Real minDt = std::numeric_limits<Real>::max();
+    for (const auto& dt : solverDt){
+      minDt = std::min(dt, minDt);
+    }
+
+    // In this sweep, go through the solvers again and switch back to explicit diffusion if there's no point in using
+    // implicit diffusion.
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
+
+      const Real dtA  = advectionDt         [idx];
+      const Real dtD  = diffusionDt         [idx];
+      const Real dtAD = advectionDiffusionDt[idx];      
+
+      // Switch to explicit diffusion if we can. 
+      if(dtAD > minDt){
+	solverDt              [idx] = dtAD ;
+	m_useImplicitDiffusion[idx] = false;
+      }
+    }
+
+    // Finally, we will have found the smallest time step and also figured out which species that implicit/explicit diffusion.
+    a_dt = minDt;
+    a_timeCode = TimeCode::AdvectionDiffusion;
+
+    for (const auto& implicit : m_useImplicitDiffusion){
+      if(implicit) {
+	a_timeCode = TimeCode::Advection;
+      }
     }
 
     m_dtCFL = a_dt/m_cfl;

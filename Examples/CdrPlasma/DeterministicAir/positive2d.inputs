@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-DeterministicAir.voltage   = 50E3
+DeterministicAir.voltage   = 100E3
 DeterministicAir.basename  = pout
 
 # ====================================================================================================
@@ -195,7 +195,7 @@ CdrPlasmaGodunovStepper.solver_verbosity = -1        # Individual solver verbosi
 CdrPlasmaGodunovStepper.min_dt           = 0.        # Minimum permitted time step
 CdrPlasmaGodunovStepper.max_dt           = 1.E99     # Maximum permitted time step
 CdrPlasmaGodunovStepper.cfl              = 0.9       # CFL number
-CdrPlasmaGodunovStepper.diffusion        = explicit  # Diffusion. 'explicit', 'implicit', or 'auto'. Semi-implicit transport uses explicit diffusion. 
+CdrPlasmaGodunovStepper.diffusion        = auto      # Diffusion. 'explicit', 'implicit', or 'auto'. Semi-implicit transport uses explicit diffusion. 
 CdrPlasmaGodunovStepper.transport        = semi_implicit     # Transport algorithm. 'euler', 'rk2', or 'semi-implicit'
 CdrPlasmaGodunovStepper.relax_time       = 1.E99     # Relaxation time constant
 CdrPlasmaGodunovStepper.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
@@ -205,7 +205,7 @@ CdrPlasmaGodunovStepper.source_comp      = interp2   # Interpolated 'interp' or 
 CdrPlasmaGodunovStepper.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the CdrSolver
 CdrPlasmaGodunovStepper.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug            = false     # Turn on debugging messages. Also monitors mass if it was injected into the system. 
-CdrPlasmaGodunovStepper.profile          = false         # Turn on/off performance profiling.
+CdrPlasmaGodunovStepper.profile          = true         # Turn on/off performance profiling.
 
 # ====================================================================================================
 # CdrPlasmaJSON class options

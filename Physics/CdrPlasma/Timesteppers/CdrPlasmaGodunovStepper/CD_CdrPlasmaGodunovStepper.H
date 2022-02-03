@@ -232,9 +232,14 @@ namespace Physics {
       bool m_fhd;
 
       /*!
+	@brief Diffusion threshold factor
+      */
+      Real m_implicitDiffusionThreshold;
+
+      /*!
 	@brief If true, we are using implicit diffusion. Otherwise it's explicit diffusion
       */
-      bool m_implicitDiffusion;
+      std::vector<bool> m_useImplicitDiffusion;
 
       /*!
 	@brief Function for getting the transient storage assocaited with a particular CDR solver
@@ -317,6 +322,7 @@ namespace Physics {
 
       // CODE-WALK BEGINS HERE.             
       void advanceTransportRK2(const Real a_dt);
+      // AND ENDS HERE            
 
       /*!
 	@brief Advance the reactive problem over a time step dt.
@@ -347,8 +353,18 @@ namespace Physics {
       */
       void postStep();
 
-    
+      /*!
+	@brief Compute CDR drift velocities
+	@details This is just like the parent method, except that we use the electric field stored in the scratch storage. 
+	@param[in] a_time
+      */
       void computeCdrDriftVelocities(const Real a_time);
+
+      /*!
+	@brief Compute CDR diffusion coefficients
+	@details This is just like the parent method, except that we use the electric field stored in the scratch storage. 
+	@param[in] a_time
+      */      
       void computeCdrDiffusionCoefficients(const Real a_time);
 
       /*!
@@ -377,7 +393,7 @@ namespace Physics {
       void parseDebug();
 
       /*!
-	@brief Parse debug mode
+	@brief Parse profiling mode
       */
       void parseProfile();      
 
@@ -386,10 +402,12 @@ namespace Physics {
       */
       void parseFHD();
 
-      // Routine for semi-implicit Poisson solve.
+      /*!
+	@brief Solve the semi-implicit Poisson equation
+	@note This is just like the parent method for solving it, except that we use m_semiImplicitRho for the space charge density. Note that
+	the user should first have set up the semi-implicit Poisson equation by computing the conductivities and calling CdrPlasmasetupSemiImplicitPoisson.
+      */
       bool solveSemiImplicitPoisson();
-
-      // AND ENDS HERE
 
 #ifdef CH_USE_HDF5
       /*!  
