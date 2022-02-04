@@ -2104,7 +2104,7 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
 				 neutralProducts,			       
 				 photonProducts,
 				 curReactants,
-				 curProducts);      	
+				 curProducts);
 
 	// Now create the reaction -- note that surface reactions support both plasma species and photon species on
 	// the left hand side of the reaction. 
@@ -2185,8 +2185,8 @@ void CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const 
     const Real rate = a_reactionJSON["value"].get<Real>();
 
     // Add the constant reaction rate to the appropriate data holder. 
-    m_electrodeReactionLookup.  emplace(a_reactionIndex, LookupMethod::Constant);
-    m_electrodeReactionConstant.emplace(a_reactionIndex, rate                  );
+    m_electrodeReactionLookup.   emplace(a_reactionIndex, LookupMethod::Constant);
+    m_electrodeReactionConstants.emplace(a_reactionIndex, rate                  );
   }
   else{
     this->throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
@@ -2913,18 +2913,95 @@ Vector<Real> CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
 						      const Vector<Real> a_cdrGradients,
 						      const Vector<Real> a_rteFluxes,
 						      const Vector<Real> a_extrapCdrFluxes) const {
-  Vector<Real> fluxes(m_numCdrSpecies, 0.0);
+  
+  // TLDR: This routine computes the finite volume fluxes on the EB. The input argument a_extrapCdrFluxes are the fluxes
+  //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
+  //       use these fluxes to specify an inflow due to secondary emission. 
 
+  // Storage for "natural" outflow fluxes, and inflow fluxes due to secondary emission. 
+  std::vector<Real> outflowFluxes(m_numCdrSpecies, 0.0);
+  std::vector<Real> inflowFluxes (m_numCdrSpecies, 0.0);
+
+  // Check if this is an anode or a cathode. 
   const bool isCathode = a_E.dotProduct(a_normal) < 0;
   const bool isAnode   = a_E.dotProduct(a_normal) > 0;
 
-  // Set outflow boundary conditions on charged species. 
+  // Compute the magnitude of the electric field both in SI units and Townsend units
+  const Real N   = m_gasDensity(a_pos);
+  const Real E   = a_E.vectorLength();
+  const Real Etd = E/(Units::Td * N);
+
+  // Compute the outflow fluxes. 
   for (int i = 0; i < m_numCdrSpecies; i++){
     const int Z = m_cdrSpecies[i]->getChargeNumber();
 
     // Outflow on of negative species on anodes. 
-    if(Z < 0 && isAnode  ) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
-    if(Z > 0 && isCathode) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);      
+    if(Z < 0 && isAnode  ) outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+    if(Z > 0 && isCathode) outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+  }
+
+  // Go through our list of electrode reactions and compute the inflow fluxes from secondary emission from plasma species
+  // and photon species. 
+  for (int i = 0; i < m_electrodeReactions.size(); i++){
+
+    // Get the reaction and lookup method. 
+    const LookupMethod&                 method   = m_electrodeReactionLookup.at(i);
+    const CdrPlasmaSurfaceReactionJSON& reaction = m_electrodeReactions        [i];
+
+    // Get the outgoing species that are involved in the reaction.
+    const std::list<int>& plasmaReactants = reaction.getPlasmaReactants();
+    const std::list<int>& photonReactants = reaction.getPhotonReactants();
+    const std::list<int>& plasmaProducts  = reaction.getPlasmaProducts ();    
+
+    // Get the emission rate constant. 
+    Real emissionRate = 0.0;
+    switch(method){
+    case LookupMethod::Constant:
+      {
+	emissionRate = m_electrodeReactionConstants.at(i);
+
+	break;
+      }
+    default:
+      {
+	MayDay::Error("CdrPlasmaJSON::computeCdrElectrodeFluxes -- logic bust");
+      }
+    }
+
+    // Scale the emission rate constant by whatever the user has put in the "scaling factor" field.
+    const FunctionEX& scalingFunction = m_electrodeReactionEfficiencies.at(i);
+    const Real        scalingFactor   = scalingFunction(E, a_pos);
+
+    emissionRate *= scalingFactor;
+
+    // Next, compute the total influx due to outflow of the specified surface reaction species. 
+    Real inflow = 0.0;
+
+    // Inflow due to outflow of specified plasma species
+    for (const auto& r : plasmaReactants){
+      inflow += outflowFluxes[r];
+    }
+
+    // Inflow due to outflow of specified photon flux
+    for (const auto& r : photonReactants){
+      inflow += a_rteFluxes[r];
+    }
+
+    // Scale by emission rate in order to get total influx. 
+    inflow *= emissionRate;
+
+    // Add the inflow flux to all species on the right-hand side of the reaction.
+    for (const auto& p : plasmaProducts){
+      inflowFluxes[p] += inflow;
+    }
+  }
+
+  // Now set the finite volume fluxes on the EB accordingly. The negative sign is because 'inflowFluxes' is the magnitude, but in our
+  // finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
+  Vector<Real> fluxes(m_numCdrSpecies, 0.0);
+  
+  for (int i = 0; i < m_numCdrSpecies; i++){
+    fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
   }
   
   return fluxes;

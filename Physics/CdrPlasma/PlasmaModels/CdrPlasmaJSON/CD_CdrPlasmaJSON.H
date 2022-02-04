@@ -613,7 +613,7 @@ namespace Physics {
       /*!
 	@brief Constant electrode reaction rate. 
       */
-      std::map<int, Real> m_electrodeReactionConstant;      
+      std::map<int, Real> m_electrodeReactionConstants;
 
       /*!
 	@brief Electrode reaction effiencies. Used for scaling reactions on electrodes in a "generic" way. 
