@@ -900,9 +900,9 @@ void CdrPlasmaJSON::initializeSigma() {
 }
 
 void CdrPlasmaJSON::parseAlpha(){
-  CH_TIME("CdrPlasmaJSON::parseAlpha");
+  CH_TIME("CdrPlasmaJSON::parseAlpha()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::parseAlpha" << endl;
+    pout() << "CdrPlasmaJSON::parseAlpha()" << endl;
   }
 
   const std::string baseError = "CdrPlasmaJSON::parseAlpha";
@@ -928,18 +928,19 @@ void CdrPlasmaJSON::parseAlpha(){
     if(!(alpha.contains("alpha/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'alpha/N' is missing");
     if(!(alpha.contains("min E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing");
     if(!(alpha.contains("max E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing");
-    if(!(alpha.contains("res E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'res E/N' is missing");
+    if(!(alpha.contains("points" ))) this->throwParserError(baseError + " and got 'table E/N' but field 'points' is missing" );
+    if(!(alpha.contains("spacing"))) this->throwParserError(baseError + " and got 'table E/N' but field 'spacing' is missing");    
 	
-    const std::string filename  = trim(alpha["file"  ].get<std::string>());
-    const std::string startRead = trim(alpha["header"].get<std::string>());
+    const std::string filename  = this->trim(alpha["file"   ].get<std::string>());
+    const std::string spacing   = this->trim(alpha["spacing"].get<std::string>());
+    const std::string startRead = this->trim(alpha["header" ].get<std::string>());    
     const std::string stopRead  = "";
 
-    const int xColumn   = alpha["E/N"       ].get<int>();
-    const int yColumn   = alpha["alpha/N"   ].get<int>();
-
-    const Real minEN = alpha["min E/N"].get<Real>();
-    const Real maxEN = alpha["max E/N"].get<Real>();
-    const Real resEN = alpha["res E/N"].get<Real>();
+    const int  xColumn   = alpha["E/N"    ].get<int >();
+    const int  yColumn   = alpha["alpha/N"].get<int >();
+    const int  numPoints = alpha["points" ].get<int >();
+    const Real minEN     = alpha["min E/N"].get<Real>();
+    const Real maxEN     = alpha["max E/N"].get<Real>();
 
     // I can't have maxEN < minEN. Throw an error.
     if(maxEN < minEN) this->throwParserError(baseError + " and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
@@ -957,13 +958,29 @@ void CdrPlasmaJSON::parseAlpha(){
       this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
     }
 
-    // Compute the number of points in the table. 
-    const int numPoints = std::ceil((maxEN-minEN)/resEN);
+    // Figure out the table spacing
+    TableSpacing tableSpacing;
+    if(spacing == "uniform"){
+      tableSpacing = TableSpacing::Uniform;
+    }
+    else if(spacing == "exponential"){
+      tableSpacing = TableSpacing::Exponential;
+    }
+    else{
+      this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing + "' which is not supported");
+    }    
 
     // Format the table
     m_alphaTableEN.setRange(minEN, maxEN, 0);
     m_alphaTableEN.sort(0);
+    m_alphaTableEN.setTableSpacing(tableSpacing);
     m_alphaTableEN.makeUniform(numPoints);
+
+    // Check if we should dump the table to file so that users can debug.
+    if(alpha.contains("dump")){
+      const std::string dumpFile = alpha["dump"].get<std::string>();
+      m_alphaTableEN.dumpTable(dumpFile);
+    }    
 
     m_alphaLookup = LookupMethod::TableEN;
   }
@@ -997,8 +1014,8 @@ void CdrPlasmaJSON::parseEta(){
     this->throwParserError(baseError + " field 'lookup' not specified");
   }
 
+  // Get the lookup method. 
   const std::string lookup = eta["lookup"].get<std::string>();
-  
 
   // If we made it here we're good.
   if(lookup == "table E/N"){
@@ -1008,18 +1025,19 @@ void CdrPlasmaJSON::parseEta(){
     if(!(eta.contains("eta/N"  ))) this->throwParserError(baseError + " and got 'table E/N' but field 'eta/N' is missing"  );
     if(!(eta.contains("min E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing");
     if(!(eta.contains("max E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing");
-    if(!(eta.contains("res E/N"))) this->throwParserError(baseError + " and got 'table E/N' but field 'res E/N' is missing");
+    if(!(eta.contains("points" ))) this->throwParserError(baseError + " and got 'table E/N' but field 'points' is missing" );
+    if(!(eta.contains("spacing"))) this->throwParserError(baseError + " and got 'table E/N' but field 'spacing' is missing");
+    
+    const std::string filename  = this->trim(eta["file"   ].get<std::string>());
+    const std::string spacing   = this->trim(eta["spacing"].get<std::string>());
+    const std::string startRead = this->trim(eta["header" ].get<std::string>());    
+    const std::string stopRead  = "";    
 	
-    const std::string filename  = trim(eta["file"  ].get<std::string>());
-    const std::string startRead = trim(eta["header"].get<std::string>());
-    const std::string stopRead  = "";
-
-    const int xColumn   = eta["E/N"       ].get<int>();
-    const int yColumn   = eta["eta/N"     ].get<int>();
-
-    const Real minEN = eta["min E/N"].get<Real>();
-    const Real maxEN = eta["max E/N"].get<Real>();
-    const Real resEN = eta["res E/N"].get<Real>();
+    const int  xColumn   = eta["E/N"    ].get<int >();
+    const int  yColumn   = eta["eta/N"  ].get<int >();
+    const int  numPoints = eta["points" ].get<int >();
+    const Real minEN     = eta["min E/N"].get<Real>();
+    const Real maxEN     = eta["max E/N"].get<Real>();
 
     // Can't have maxEN < min EN
     if(maxEN < minEN) this->throwParserError(baseError + " and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
@@ -1037,13 +1055,29 @@ void CdrPlasmaJSON::parseEta(){
       this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
     }
 
-    // Compute the number of points in the table.
-    const int numPoints = std::ceil((maxEN-minEN)/resEN);
+    // Figure out the table spacing
+    TableSpacing tableSpacing;
+    if(spacing == "uniform"){
+      tableSpacing = TableSpacing::Uniform;
+    }
+    else if(spacing == "exponential"){
+      tableSpacing = TableSpacing::Exponential;
+    }
+    else{
+      this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing + "' which is not supported");
+    }        
 
     // Format the table
     m_etaTableEN.setRange(minEN, maxEN, 0);
     m_etaTableEN.sort(0);
+    m_alphaTableEN.setTableSpacing(tableSpacing);    
     m_etaTableEN.makeUniform(numPoints);
+
+    // Check if we should dump the table to file so that users can debug.
+    if(eta.contains("dump")){
+      const std::string dumpFile = eta["dump"].get<std::string>();
+      m_etaTableEN.dumpTable(dumpFile);
+    }        
 
     m_etaLookup = LookupMethod::TableEN;
   }
