@@ -59,6 +59,7 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
 
   // Parse secondary emission on electrodes and dielectrics
   this->parseElectrodeReactions();
+  this->parseDielectricReactions();  
 
   m_numCdrSpecies = m_cdrSpecies.size();
   m_numRtSpecies  = m_rtSpecies. size();
