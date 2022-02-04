@@ -31,7 +31,9 @@
 	     "mu*N": 1,
 	     "min E/N": 10,
 	     "max E/N": 2000,
-	     "res E/N": 10
+	     "points" : 100,
+	     "spacing": "exponential",
+	     "dump" : "electron_mobility.dat"
 	 },
 	 "diffusion": {
 	     "lookup": "table E/N",
@@ -41,7 +43,9 @@
 	     "D*N": 1,
 	     "min E/N": 10,
 	     "max E/N": 2000,
-	     "res E/N": 10
+	     "points": 100,
+	     "spacing": "exponential",
+	     "dump": "electron_diffusion.dat"
 	 },
 	 "initial data": {
 	     "uniform": 1.0,
@@ -58,11 +62,14 @@
 	     "lookup": "table E/N",
 	     "file": "transport_data.txt",
 	     "header": "# Electron mean energy (E/N, eV)",
+	     
 	     "E/N": 0,
 	     "eV": 1,
 	     "min E/N": 10,
 	     "max E/N": 2000,
-	     "res E/N": 10
+	     "points": 100,
+	     "spacing": "exponential",
+	     "dump": "electron_temperature.dat"
 	 }
      },
      {
@@ -177,7 +184,9 @@
      "alpha/N": 1,	  
      "min E/N": 10,
      "max E/N": 2000,
-     "res E/N": 10,
+     "points": 200,
+     "spacing": "exponential",
+     "dump": "alpha.dat",
      "plot": true
  },
  "eta": {
@@ -188,7 +197,10 @@
      "eta/N": 1,	  
      "min E/N": 10,
      "max E/N": 2000,
-     "res E/N": 10  
+     "points": 200,
+     "spacing": "exponential",
+     "dump": "eta.dat",
+     "plot": true     
  }, 
  "plasma reactions": 
  [
@@ -202,8 +214,10 @@
 	 "rate": 1,
 	 "min E/N": 10,
 	 "max E/N": 2000,
-	 "res E/N": 10,
-	 "scale": 1.0,	 
+	 "points": 200,
+	 "spacing": "uniform",	 	 
+	 "scale": 1.0,
+	 "dump": "O2_ionization.dat",
 	 "soloviev" : {
 	     "correction": true,
 	     "species": "e"
@@ -218,7 +232,8 @@
 	 "rate": 1,	  
 	 "min E/N": 10,
 	 "max E/N": 2000,
-	 "res E/N": 10,
+	 "points": 200,
+	 "spacing": "exponential",	 
 	 "scale": 1.0,	 	 
 	 "soloviev" : {
 	     "correction": true,
@@ -319,7 +334,8 @@
 	 "rate": 1,	  
 	 "min E/N": 10,
 	 "max E/N": 2000,
-	 "res E/N": 10,
+	 "points": 100,
+	 "spacing": "exponential",	 
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
@@ -336,7 +352,8 @@
 	 "rate": 1,	  
 	 "min E/N": 10,
 	 "max E/N": 2000,
-	 "res E/N": 10,
+	 "points": 100,
+	 "spacing": "exponential",
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
@@ -353,13 +370,14 @@
 	 "rate": 1,	  
 	 "min E/N": 10,
 	 "max E/N": 2000,
-	 "res E/N": 10,
+	 "points": 100,
+	 "spacing": "exponential",
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
 	     "correction": false,
 	     "species": "e"
-	 }	 
+	 }
      }
  ],
  "photo reactions":
@@ -395,10 +413,17 @@
  "electrode reactions":
  [
      { "reaction": "@ -> e",
-       "@": ["N2+", "O2+"],       
+       "@": ["N2+", "O2+", "N4+", "O4+", "O2+N2", "Bourdon1", "Bourdon2", "Bourdon3"],
        "lookup": "constant",
-       "value": 0.1,
-       "scale": 0.0
+       "value": 1E-3
      }
- ]
+ ],
+ "dielectric reactions":
+ [
+     { "reaction": "@ -> e",
+       "@": ["N2+", "O2+", "N4+", "O4+", "O2+N2", "Bourdon1", "Bourdon2", "Bourdon3"],
+       "lookup": "constant",
+       "value": 1E-3
+     }
+ ] 
 }

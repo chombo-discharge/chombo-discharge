@@ -1070,7 +1070,7 @@ void CdrPlasmaJSON::parseEta(){
     // Format the table
     m_etaTableEN.setRange(minEN, maxEN, 0);
     m_etaTableEN.sort(0);
-    m_alphaTableEN.setTableSpacing(tableSpacing);    
+    m_etaTableEN.setTableSpacing(tableSpacing);    
     m_etaTableEN.makeUniform(numPoints);
 
     // Check if we should dump the table to file so that users can debug.
@@ -1815,18 +1815,19 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
     if(!(a_R.contains("rate"   ))) this->throwParserError(baseError + "and got 'table E/N' but field 'rate' was not found"   );
     if(!(a_R.contains("min E/N"))) this->throwParserError(baseError + "and got 'table E/N' but field 'min E/N' was not found");
     if(!(a_R.contains("max E/N"))) this->throwParserError(baseError + "and got 'table E/N' but field 'max E/N' was not found");
-    if(!(a_R.contains("res E/N"))) this->throwParserError(baseError + "and got 'table E/N' but field 'res E/N' was not found");
+    if(!(a_R.contains("points" ))) this->throwParserError(baseError + "and got 'table E/N' but field 'points' was not found" );
+    if(!(a_R.contains("spacing"))) this->throwParserError(baseError + "and got 'table E/N' but field 'spacing' was not found");    
 
-    const std::string filename  = trim(a_R["file"  ].get<std::string>());
-    const std::string startRead = trim(a_R["header"].get<std::string>());
+    const std::string filename  = this->trim(a_R["file"   ].get<std::string>());
+    const std::string spacing   = this->trim(a_R["spacing"].get<std::string>());    
+    const std::string startRead = this->trim(a_R["header" ].get<std::string>());
     const std::string stopRead  = "";
 
-    const int xColumn   = a_R["E/N" ].get<int>();
-    const int yColumn   = a_R["rate"].get<int>();
-
-    const Real minEN = a_R["min E/N"].get<Real>();
-    const Real maxEN = a_R["max E/N"].get<Real>();
-    const Real resEN = a_R["res E/N"].get<Real>();
+    const int  xColumn   = a_R["E/N"    ].get<int >();
+    const int  yColumn   = a_R["rate"   ].get<int >();
+    const int  numPoints = a_R["points" ].get<int >();    
+    const Real minEN     = a_R["min E/N"].get<Real>();
+    const Real maxEN     = a_R["max E/N"].get<Real>();
 
     // It's an error if max E/N < min E/N
     if(maxEN < minEN) this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
@@ -1844,14 +1845,29 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
       this->throwParserError(baseError + "and got 'table E/N' but table is empty. This is probably an error");
     }
 
-    // Compute the number of grid points in the table
-    const int numPoints = std::ceil((maxEN - minEN)/resEN);
+    // Figure out the table spacing
+    TableSpacing tableSpacing;
+    if(spacing == "uniform"){
+      tableSpacing = TableSpacing::Uniform;
+    }
+    else if(spacing == "exponential"){
+      tableSpacing = TableSpacing::Exponential;
+    }
+    else{
+      this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing + "' which is not supported");
+    }        
 
     // Format the table. 
     reactionTable.setRange(minEN, maxEN, 0);
     reactionTable.sort(0);
+    reactionTable.setTableSpacing(tableSpacing);
     reactionTable.makeUniform(numPoints);
 
+    // Check if we should dump the table to file so that users can debug.
+    if(a_R.contains("dump")){
+      const std::string dumpFile = a_R["dump"].get<std::string>();
+      reactionTable.dumpTable(dumpFile);
+    }        
 
     // Add the tabulated rate and identifier. 
     m_plasmaReactionLookup.  emplace(std::make_pair(a_reactionIndex, LookupMethod::TableEN));

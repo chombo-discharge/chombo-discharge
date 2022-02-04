@@ -15,9 +15,9 @@ AmrMesh.max_amr_depth    = 10          # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
-AmrMesh.grid_algorithm   = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.grid_algorithm   = br       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting      = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor  = 16          # Blocking factor. 
+AmrMesh.blocking_factor  = 8           # Blocking factor. 
 AmrMesh.max_box_size     = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS generation. 
 AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
@@ -196,7 +196,7 @@ CdrPlasmaGodunovStepper.min_dt           = 0.            # Minimum permitted tim
 CdrPlasmaGodunovStepper.max_dt           = 1.E99         # Maximum permitted time step
 CdrPlasmaGodunovStepper.cfl              = 0.9           # CFL number
 CdrPlasmaGodunovStepper.diffusion        = auto      # Diffusion. 'explicit', 'implicit', or 'auto'. 
-CdrPlasmaGodunovStepper.diffusion_thresh = 5.0           # Diffusion threshold. If dtD/dtA > this then we use implicit diffusion.
+CdrPlasmaGodunovStepper.diffusion_thresh = 1.2           # Diffusion threshold. If dtAD/dtA > this then we use implicit diffusion.
 CdrPlasmaGodunovStepper.transport        = semi_implicit # Transport algorithm. 'semi_implicit' or 'euler'
 CdrPlasmaGodunovStepper.relax_time       = 1.E99         # Relaxation time constant. Not necessary for semi-implicit scheme. 
 CdrPlasmaGodunovStepper.fast_poisson     = 1             # Solve Poisson every this time steps. Mostly for debugging.
@@ -211,7 +211,7 @@ CdrPlasmaGodunovStepper.profile          = true          # Turn on/off performan
 # ====================================================================================================
 # CdrPlasmaJSON class options
 # ====================================================================================================
-CdrPlasmaJSON.verbose          = false
+CdrPlasmaJSON.verbose          = true
 CdrPlasmaJSON.chemistry_file   = SergeyBourdon3.json
 CdrPlasmaJSON.discrete_photons = false
 CdrPlasmaJSON.skip_reactions   = false
@@ -228,6 +228,6 @@ CdrPlasmaStreamerTagger.buffer            = 8            # Grow tagged cells
 CdrPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 CdrPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-CdrPlasmaStreamerTagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
+CdrPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth
 
