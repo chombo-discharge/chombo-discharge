@@ -627,7 +627,27 @@ namespace Physics {
 
       // ===========================================
       // DIELECTRIC SURFACE REACTIONS BEGIN HERE
-      // ===========================================      
+      // ===========================================
+
+      /*!
+	@brief Lookup method for the dielectric surface reaction rates
+      */
+      std::map<int, LookupMethod> m_dielectricReactionLookup;
+
+      /*!
+	@brief Constant dielectric reaction rate. 
+      */
+      std::map<int, Real> m_dielectricReactionConstants;
+
+      /*!
+	@brief Dielectric reaction effiencies. Used for scaling reactions on dielectrics in a "generic" way. 
+      */
+      std::map<int, FunctionEX> m_dielectricReactionEfficiencies;
+
+      /*!
+	@brief List of dielectric reactions
+      */
+      std::vector<CdrPlasmaSurfaceReactionJSON> m_dielectricReactions;      
       
       /*!
 	@brief Parse class options
@@ -823,7 +843,7 @@ namespace Physics {
       /*!
 	@brief Parse reaction rate for electrode surface reactions. 
 	@param[in] a_reactionIndex  Reaction index. 
-	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'electrode reactions' array. 
       */
       virtual void parseElectrodeReactionRate(const int a_reactionIndex, const json& a_reactionJSON);      
 
@@ -835,6 +855,27 @@ namespace Physics {
 	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
       */
       virtual void parseElectrodeReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+
+      /*!
+	@brief Parse secondary emission on dielectrics
+      */
+      virtual void parseDielectricReactions();
+
+      /*!
+	@brief Parse reaction rate for dielectric surface reactions. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'electrode reactions' array. 
+      */
+      virtual void parseDielectricReactionRate(const int a_reactionIndex, const json& a_reactionJSON);      
+
+      /*!
+	@brief Parse dielectric electrode reaction scaling for a specific reaction.
+	@details This currently exists without much functionality -- it just returns one for all reactions. As we
+	expand the functionality, this can be used to adjust for e.g. positional or field dependence.
+	@param[in] a_reactionIndex Reaction index (this is the array index in the dielectric reaction array supplied in the JSON file)
+	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
+      */
+      virtual void parseDielectricReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);      
 
       /*!
 	@brief Check if a surface-reaction makes sense in terms of the species that have been defined.

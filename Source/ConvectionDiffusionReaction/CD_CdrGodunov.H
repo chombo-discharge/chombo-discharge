@@ -62,12 +62,6 @@ public:
   */
   virtual Real computeAdvectionDt() override;
 
-  /*!
-    @brief Compute the largest possible advection-diffusion time step.
-    @details This computes dt = 1/(max(|vx|,|vy|,|vz|)/dx + (2*D*d)/dx^2), minimized over all grid levels and patches. 
-  */
-  virtual Real computeAdvectionDiffusionDt() override;  
-
 protected:
 
   /*!

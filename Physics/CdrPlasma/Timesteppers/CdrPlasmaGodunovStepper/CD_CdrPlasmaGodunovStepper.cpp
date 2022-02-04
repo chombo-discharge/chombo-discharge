@@ -1303,8 +1303,6 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
       advectionDiffusionDt.emplace_back(solverIt()->computeAdvectionDiffusionDt());
     }
 
-    const Real thresh = 1.0;
-
     // Next, run through the CDR solvers and switch to implicit diffusion for the solvers that satisfy the threshold.
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
@@ -1314,7 +1312,7 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
       const Real dtAD = advectionDiffusionDt[idx];
 
       // Check if this solver should use implicit or explicit diffusion. 
-      if(dtD/dtA < m_implicitDiffusionThreshold) {
+      if(dtA/dtAD > m_implicitDiffusionThreshold) {
 	solverDt[idx] = dtA;
 
 	m_useImplicitDiffusion[idx] = true;

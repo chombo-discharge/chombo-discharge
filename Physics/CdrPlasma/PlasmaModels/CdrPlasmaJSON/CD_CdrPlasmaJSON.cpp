@@ -1544,6 +1544,101 @@ void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_rea
   }
 }
 
+void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
+					  const std::vector<std::string>& a_products,
+					  const std::string               a_reaction) const {
+  CH_TIME("CdrPlasmaJSON::sanctifyPhotoReaction");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::sanctifyPhotoReaction" << m_jsonFile << endl;
+  }
+
+  const std::string baseError = "CdrPlasmaJSON::sanctifyPhotoReaction for reaction '" + a_reaction + "' ";
+
+  // All reactants must be in the list of neutral species or in the list of photon species
+  int numPhotonSpecies = 0;  
+  for (const auto& r : a_reactants){
+    const bool isPlasma  = this->isPlasmaSpecies (r);
+    const bool isNeutral = this->isNeutralSpecies(r);
+    const bool isPhoton  = this->isPhotonSpecies (r);
+
+    if( isNeutral) this->throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
+    if( isPlasma ) this->throwParserError(baseError + "plasma species (" + r + ") not allowed on left-hand side");
+    if(!isPhoton ) this->throwParserError(baseError + "I do not know species species '" + r + "' on left hand side");
+    if( isPhoton ) numPhotonSpecies++;
+  }
+
+  // There can only be one photon species on the left-hand side of the reaction. 
+  if(numPhotonSpecies != 1){
+    this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- only one photon species allowed on left-hand side of photo-reaction '" + a_reaction + "'");
+  }
+
+  // All products should be in the list of plasma, neutral, or photon species. 
+  for (const auto& p : a_products){
+    const bool isPlasma  = this->isPlasmaSpecies (p);
+    const bool isNeutral = this->isNeutralSpecies(p);
+    const bool isPhoton  = this->isPhotonSpecies (p);
+
+    if( isPhoton              ) this->throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side"); 
+    if(!isPlasma && !isNeutral) this->throwParserError(baseError + "I do not know species '" + p + "' on right hand side"     );
+  }
+
+  // Check for charge conservation
+  int sumCharge = 0;
+  for (const auto& r : a_reactants){
+    if(this->isPlasmaSpecies(r)) sumCharge -= m_cdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
+  }
+  for (const auto& p : a_products){
+    if(this->isPlasmaSpecies(p)) sumCharge += m_cdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
+  }
+
+  if(sumCharge != 0) {
+    this->throwParserError(baseError + "charge is not conserved!");
+  }
+}
+
+void CdrPlasmaJSON::sanctifySurfaceReaction(const std::vector<std::string>& a_reactants,
+					    const std::vector<std::string>& a_products,
+					    const std::string               a_reaction) const {
+  CH_TIME("CdrPlasmaJSON::sanctifySurfaceReaction");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::sanctifySurfaceReaction" << m_jsonFile << endl;
+  }
+
+  const std::string baseError = "CdrPlasmaJSON::sanctifySurfaceReaction for reaction '" + a_reaction + "' ";
+
+  // Only plasma and RTE species allowed on the left hand side of the reaction. 
+  for (const auto& r : a_reactants){
+    const bool isPlasma  = this->isPlasmaSpecies (r);
+    const bool isNeutral = this->isNeutralSpecies(r);
+    const bool isPhoton  = this->isPhotonSpecies (r);
+
+    // No neutrals allowed.
+    if(isNeutral){
+      this->throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
+    }
+
+    // Unknown species not allowed either. 
+    if(!isPlasma && !isNeutral && !isPhoton){
+      this->throwParserError(baseError + "but I do not know species '" + r + "' on left hand side");
+    }
+  }
+
+  // All products should be in the list of plasma, neutral, or photon species. 
+  for (const auto& p : a_products){
+    const bool isPlasma  = this->isPlasmaSpecies (p);
+    const bool isNeutral = this->isNeutralSpecies(p);
+    const bool isPhoton  = this->isPhotonSpecies (p);
+
+    if(isPhoton ) this->throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side");
+    if(isNeutral) this->throwParserError(baseError + "neutral species '" + p + "' not allowed on right hand side");
+
+    // Unknown species not allowed either. 
+    if(!isPlasma && !isNeutral && !isPhoton){
+      this->throwParserError(baseError + "but I do not know species '" + p + "' on right hand side");
+    }
+  }
+}
+
 void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_R){
   CH_TIME("CdrPlasmaJSON::parsePlasmaReactionRate");
   if(m_verbose){
@@ -1861,57 +1956,7 @@ void CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const
   }
 }
 
-void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
-					  const std::vector<std::string>& a_products,
-					  const std::string               a_reaction) const {
-  CH_TIME("CdrPlasmaJSON::sanctifyPhotoReaction");
-  if(m_verbose){
-    pout() << "CdrPlasmaJSON::sanctifyPhotoReaction" << m_jsonFile << endl;
-  }
 
-  const std::string baseError = "CdrPlasmaJSON::sanctifyPhotoReaction for reaction '" + a_reaction + "' ";
-
-  // All reactants must be in the list of neutral species or in the list of photon species
-  int numPhotonSpecies = 0;  
-  for (const auto& r : a_reactants){
-    const bool isPlasma  = this->isPlasmaSpecies (r);
-    const bool isNeutral = this->isNeutralSpecies(r);
-    const bool isPhoton  = this->isPhotonSpecies (r);
-
-    if( isNeutral) this->throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
-    if( isPlasma ) this->throwParserError(baseError + "plasma species (" + r + ") not allowed on left-hand side");
-    if(!isPhoton ) this->throwParserError(baseError + "I do not know species species '" + r + "' on left hand side");
-    if( isPhoton ) numPhotonSpecies++;
-  }
-
-  // There can only be one photon species on the left-hand side of the reaction. 
-  if(numPhotonSpecies != 1){
-    this->throwParserError("CdrPlasmaJSON::sanctifyPhotoReaction -- only one photon species allowed on left-hand side of photo-reaction '" + a_reaction + "'");
-  }
-
-  // All products should be in the list of plasma, neutral, or photon species. 
-  for (const auto& p : a_products){
-    const bool isPlasma  = this->isPlasmaSpecies (p);
-    const bool isNeutral = this->isNeutralSpecies(p);
-    const bool isPhoton  = this->isPhotonSpecies (p);
-
-    if( isPhoton              ) this->throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side"); 
-    if(!isPlasma && !isNeutral) this->throwParserError(baseError + "I do not know species '" + p + "' on right hand side"     );
-  }
-
-  // Check for charge conservation
-  int sumCharge = 0;
-  for (const auto& r : a_reactants){
-    if(this->isPlasmaSpecies(r)) sumCharge -= m_cdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
-  }
-  for (const auto& p : a_products){
-    if(this->isPlasmaSpecies(p)) sumCharge += m_cdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
-  }
-
-  if(sumCharge != 0) {
-    this->throwParserError(baseError + "charge is not conserved!");
-  }
-}
 
 void CdrPlasmaJSON::parsePhotoReactions(){
   CH_TIME("CdrPlasmaJSON::parsePhotoReactions()");
@@ -2114,49 +2159,6 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
   }
 }
 
-void CdrPlasmaJSON::sanctifySurfaceReaction(const std::vector<std::string>& a_reactants,
-					    const std::vector<std::string>& a_products,
-					    const std::string               a_reaction) const {
-  CH_TIME("CdrPlasmaJSON::sanctifySurfaceReaction");
-  if(m_verbose){
-    pout() << "CdrPlasmaJSON::sanctifySurfaceReaction" << m_jsonFile << endl;
-  }
-
-  const std::string baseError = "CdrPlasmaJSON::sanctifySurfaceReaction for reaction '" + a_reaction + "' ";
-
-  // Only plasma and RTE species allowed on the left hand side of the reaction. 
-  for (const auto& r : a_reactants){
-    const bool isPlasma  = this->isPlasmaSpecies (r);
-    const bool isNeutral = this->isNeutralSpecies(r);
-    const bool isPhoton  = this->isPhotonSpecies (r);
-
-    // No neutrals allowed.
-    if(isNeutral){
-      this->throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
-    }
-
-    // Unknown species not allowed either. 
-    if(!isPlasma && !isNeutral && !isPhoton){
-      this->throwParserError(baseError + "but I do not know species '" + r + "' on left hand side");
-    }
-  }
-
-  // All products should be in the list of plasma, neutral, or photon species. 
-  for (const auto& p : a_products){
-    const bool isPlasma  = this->isPlasmaSpecies (p);
-    const bool isNeutral = this->isNeutralSpecies(p);
-    const bool isPhoton  = this->isPhotonSpecies (p);
-
-    if(isPhoton ) this->throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side");
-    if(isNeutral) this->throwParserError(baseError + "neutral species '" + p + "' not allowed on right hand side");
-
-    // Unknown species not allowed either. 
-    if(!isPlasma && !isNeutral && !isPhoton){
-      this->throwParserError(baseError + "but I do not know species '" + p + "' on right hand side");
-    }
-  }
-}
-
 void CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const json& a_reactionJSON) {
   CH_TIME("CdrPlasmaJSON::parseElectrodeReactionRate()");
   if(m_verbose){
@@ -2212,6 +2214,139 @@ void CdrPlasmaJSON::parseElectrodeReactionScaling(const int a_reactionIndex, con
 
   // Add it to the pile. 
   m_electrodeReactionEfficiencies.emplace(a_reactionIndex, func);
+}
+
+void CdrPlasmaJSON::parseDielectricReactions() {
+  CH_TIME("CdrPlasmaJSON::parseDielectricReactions()");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseDielectricReactions()" << endl;
+  }
+
+  // Check if our JSON f
+  if(m_json.contains("dielectric reactions")){
+    const json& dielectricReactions = m_json["dielectric reactions"];
+
+    // Base error used when parsing the reactions
+    const std::string baseError = "CdrPlasmaJSON::parseDielectricReactions ";    
+
+    // Iterate through the reactions. 
+    for (const auto& dielectricReaction : dielectricReactions){
+
+      // These fields are required
+      if(!(dielectricReaction.contains("reaction"))) this->throwParserError(baseError + "- found 'dielectric reactions' but field 'reaction' was not specified");
+      if(!(dielectricReaction.contains("lookup"  ))) this->throwParserError(baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");      
+
+      // Get the reaction and lookup strings. 
+      const std::string reaction = this->trim(dielectricReaction["reaction"].get<std::string>());
+      const std::string lookup   = this->trim(dielectricReaction["lookup"  ].get<std::string>());
+
+      // Parse the reaction string so we get a list of reactants and products
+      std::vector<std::string> reactants;
+      std::vector<std::string> products ;
+
+      this->parseReactionString(reactants, products, reaction);
+
+      // Dielectric reactions can contain wildcards -- if the current reaction contains a wildcard
+      // we create a list of more reactions.
+      const auto reactionSets = this->parseReactionWildcards(reactants, products, dielectricReaction);
+
+      // Go through all the reactions now. 
+      for (const auto& curReaction : reactionSets){
+
+	const std::vector<std::string> curReactants = curReaction.first ;
+	const std::vector<std::string> curProducts  = curReaction.second;
+
+	// Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense.
+	this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+
+	// This is the reaction index for the current index. The reaction we are currently
+	// dealing with is put in m_plasmaReactions[reactionIdex]. 
+	const int reactionIndex = m_dielectricReactions.size();
+
+	// Parse the scaling factor for the dielectric surface reaction
+	this->parseDielectricReactionRate   (reactionIndex, dielectricReaction);	
+	this->parseDielectricReactionScaling(reactionIndex, dielectricReaction);
+
+	// Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
+	std::list<int> plasmaReactants ;
+	std::list<int> neutralReactants;
+	std::list<int> photonReactants ;      
+	std::list<int> plasmaProducts  ;
+	std::list<int> neutralProducts ;
+	std::list<int> photonProducts  ;            
+
+	this->getReactionSpecies(plasmaReactants,
+				 neutralReactants,
+				 photonReactants,			       
+				 plasmaProducts,
+				 neutralProducts,			       
+				 photonProducts,
+				 curReactants,
+				 curProducts);
+
+	// Now create the reaction -- note that surface reactions support both plasma species and photon species on
+	// the left hand side of the reaction. 
+	m_dielectricReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+      }
+    }
+  }
+}
+
+void CdrPlasmaJSON::parseDielectricReactionRate(const int a_reactionIndex, const json& a_reactionJSON) {
+  CH_TIME("CdrPlasmaJSON::parseDielectricReactionRate()");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseDielectricReactionRate()" << endl;
+  }
+
+  // This is the reaction string -- we happen to know that, if we make it to this code, it exists.
+  const std::string reaction  = trim(a_reactionJSON["reaction"].get<std::string>());
+
+  // Create a basic error message for error handling. 
+  const std::string baseError = "CdrPlasmaJSON::parseDielectricReactionRate for reaction '" + reaction + "' ";
+
+  // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions.
+  if(!(a_reactionJSON.contains("lookup"))) this->throwParserError(baseError + "but field 'lookup' was not specified");
+
+  // Get the lookup method
+  const std::string lookup = this->trim(a_reactionJSON["lookup"].get<std::string>());
+
+  // Now go through the various rate-computation methods and populated the
+  // relevant data holders. 
+  if(lookup == "constant"){
+    // If using a constant emission rate, we must get the field 'value'.
+
+    if(!(a_reactionJSON.contains("value"))) this->throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
+
+    const Real rate = a_reactionJSON["value"].get<Real>();
+
+    // Add the constant reaction rate to the appropriate data holder. 
+    m_dielectricReactionLookup.   emplace(a_reactionIndex, LookupMethod::Constant);
+    m_dielectricReactionConstants.emplace(a_reactionIndex, rate                  );
+  }
+  else{
+    this->throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
+  }
+}
+
+void CdrPlasmaJSON::parseDielectricReactionScaling(const int a_reactionIndex, const json& a_reactionJSON) {
+  CH_TIME("CdrPlasmaJSON::parseDielectricReactionScaling()");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseDielectricReactionScaling()" << endl;
+  }
+
+  Real scale = 1.0;
+  if(a_reactionJSON.contains("scale")){
+    scale = a_reactionJSON["scale"].get<Real>();
+  }
+
+  // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
+  // reactions can be done by expanding this routine. 
+  auto func = [scale](const Real E, const RealVect x) -> Real {
+    return scale;
+  };
+
+  // Add it to the pile. 
+  m_dielectricReactionEfficiencies.emplace(a_reactionIndex, func);
 }
 
 int CdrPlasmaJSON::getNumberOfPlotVariables() const {
@@ -3016,18 +3151,95 @@ Vector<Real> CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time
 						       const Vector<Real> a_cdrGradients,
 						       const Vector<Real> a_rteFluxes,
 						       const Vector<Real> a_extrapCdrFluxes) const {
-  Vector<Real> fluxes(m_numCdrSpecies, 0.0);
-  
+
+  // TLDR: This routine computes the finite volume fluxes on the EB. The input argument a_extrapCdrFluxes are the fluxes
+  //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
+  //       use these fluxes to specify an inflow due to secondary emission. 
+
+  // Storage for "natural" outflow fluxes, and inflow fluxes due to secondary emission. 
+  std::vector<Real> outflowFluxes(m_numCdrSpecies, 0.0);
+  std::vector<Real> inflowFluxes (m_numCdrSpecies, 0.0);
+
+  // Check if this is an anode or a cathode. 
   const bool isCathode = a_E.dotProduct(a_normal) < 0;
   const bool isAnode   = a_E.dotProduct(a_normal) > 0;
 
-  // Set outflow boundary conditions on charged species. 
+  // Compute the magnitude of the electric field both in SI units and Townsend units
+  const Real N   = m_gasDensity(a_pos);
+  const Real E   = a_E.vectorLength();
+  const Real Etd = E/(Units::Td * N);
+
+  // Compute the outflow fluxes. 
   for (int i = 0; i < m_numCdrSpecies; i++){
     const int Z = m_cdrSpecies[i]->getChargeNumber();
 
     // Outflow on of negative species on anodes. 
-    if(Z < 0 && isAnode  ) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
-    if(Z > 0 && isCathode) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);      
+    if(Z < 0 && isAnode  ) outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+    if(Z > 0 && isCathode) outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+  }
+
+  // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma species
+  // and photon species. 
+  for (int i = 0; i < m_dielectricReactions.size(); i++){
+
+    // Get the reaction and lookup method. 
+    const LookupMethod&                 method   = m_dielectricReactionLookup.at(i);
+    const CdrPlasmaSurfaceReactionJSON& reaction = m_dielectricReactions        [i];
+
+    // Get the outgoing species that are involved in the reaction.
+    const std::list<int>& plasmaReactants = reaction.getPlasmaReactants();
+    const std::list<int>& photonReactants = reaction.getPhotonReactants();
+    const std::list<int>& plasmaProducts  = reaction.getPlasmaProducts ();    
+
+    // Get the emission rate constant. 
+    Real emissionRate = 0.0;
+    switch(method){
+    case LookupMethod::Constant:
+      {
+	emissionRate = m_dielectricReactionConstants.at(i);
+
+	break;
+      }
+    default:
+      {
+	MayDay::Error("CdrPlasmaJSON::computeCdrDielectricFluxes -- logic bust");
+      }
+    }
+
+    // Scale the emission rate constant by whatever the user has put in the "scaling factor" field.
+    const FunctionEX& scalingFunction = m_dielectricReactionEfficiencies.at(i);
+    const Real        scalingFactor   = scalingFunction(E, a_pos);
+
+    emissionRate *= scalingFactor;
+
+    // Next, compute the total influx due to outflow of the specified surface reaction species. 
+    Real inflow = 0.0;
+
+    // Inflow due to outflow of specified plasma species
+    for (const auto& r : plasmaReactants){
+      inflow += outflowFluxes[r];
+    }
+
+    // Inflow due to outflow of specified photon flux
+    for (const auto& r : photonReactants){
+      inflow += a_rteFluxes[r];
+    }
+
+    // Scale by emission rate in order to get total influx. 
+    inflow *= emissionRate;
+
+    // Add the inflow flux to all species on the right-hand side of the reaction.
+    for (const auto& p : plasmaProducts){
+      inflowFluxes[p] += inflow;
+    }
+  }
+
+  // Now set the finite volume fluxes on the EB accordingly. The negative sign is because 'inflowFluxes' is the magnitude, but in our
+  // finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
+  Vector<Real> fluxes(m_numCdrSpecies, 0.0);
+  
+  for (int i = 0; i < m_numCdrSpecies; i++){
+    fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
   }
   
   return fluxes;  
