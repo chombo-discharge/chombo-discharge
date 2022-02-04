@@ -1097,18 +1097,19 @@ void CdrPlasmaJSON::parseMobilities() {
 	if(!(mobilityJSON.contains("mu*N"   ))) this->throwParserError(baseError + "and got tabulated mobility but field 'mu*N' was not specified"   );
 	if(!(mobilityJSON.contains("min E/N"))) this->throwParserError(baseError + "and got tabulated mobility but field 'min E/N' was not specified");
 	if(!(mobilityJSON.contains("max E/N"))) this->throwParserError(baseError + "and got tabulated mobility but field 'max E/N' was not specified");
-	if(!(mobilityJSON.contains("res E/N"))) this->throwParserError(baseError + "and got tabulated mobility but field 'res E/N' was not specified");
+	if(!(mobilityJSON.contains("points" ))) this->throwParserError(baseError + "and got tabulated mobility but field 'points' was not specified" );
+	if(!(mobilityJSON.contains("spacing"))) this->throwParserError(baseError + "and got tabulated mobility but field 'spacing' was not specified");	
 	
-	const std::string filename  = trim(mobilityJSON["file"  ].get<std::string>());
-	const std::string startRead = trim(mobilityJSON["header"].get<std::string>());
+	const std::string filename  = this->trim(mobilityJSON["file"   ].get<std::string>());
+	const std::string startRead = this->trim(mobilityJSON["header" ].get<std::string>());
+	const std::string spacing   = this->trim(mobilityJSON["spacing"].get<std::string>());
 	const std::string stopRead  = "";
 
-	const int xColumn = mobilityJSON["E/N"    ].get<int >();
-	const int yColumn = mobilityJSON["mu*N"   ].get<int >();
-
-	const Real minEN  = mobilityJSON["min E/N"].get<Real>();
-	const Real maxEN  = mobilityJSON["max E/N"].get<Real>();
-	const Real resEN  = mobilityJSON["res E/N"].get<Real>();
+	const int  xColumn   = mobilityJSON["E/N"    ].get<int >();
+	const int  yColumn   = mobilityJSON["mu*N"   ].get<int >();
+	const int  numPoints = mobilityJSON["points" ].get<int >();
+	const Real minEN     = mobilityJSON["min E/N"].get<Real>();
+	const Real maxEN     = mobilityJSON["max E/N"].get<Real>();
 
 	// Check if we should scale the table.
 	Real scale = 1.0;
@@ -1132,15 +1133,32 @@ void CdrPlasmaJSON::parseMobilities() {
 	  this->throwParserError(baseError + " and got tabulated mobility but mobility table '" + startRead + "' in file '" + filename + "'is empty");
 	}
 
-	// Compute the required number of points in the table
-	const int numPoints = std::ceil((maxEN - minEN)/resEN);
+	// Figure out the table spacing
+	TableSpacing tableSpacing;
+	if(spacing == "uniform"){
+	  tableSpacing = TableSpacing::Uniform;
+	}
+	else if(spacing == "exponential"){
+	  tableSpacing = TableSpacing::Exponential;
+	}
+	else{
+	  this->throwParserError(baseError + "and got tabulated mobility but 'spacing' field = '" + spacing + "' which is not supported");
+	}
 
-	// Format the table
+	// Format the table appropriately. 
 	mobilityTable.scale<1>(scale);		
 	mobilityTable.setRange(minEN, maxEN, 0);
 	mobilityTable.sort(0);
+	mobilityTable.setTableSpacing(tableSpacing);
 	mobilityTable.makeUniform(numPoints);
 
+	// Check if we should dump the table to file so that users can debug.
+	if(mobilityJSON.contains("dump")){
+	  const std::string dumpFile = mobilityJSON["dump"].get<std::string>();
+	  mobilityTable.dumpTable(dumpFile);
+	}
+
+	// Ok, put the table where it belongs. 
 	m_mobilityLookup.  emplace(std::make_pair(idx, LookupMethod::TableEN));
 	m_mobilityTablesEN.emplace(std::make_pair(idx, mobilityTable         ));
       }		
@@ -1200,24 +1218,25 @@ void CdrPlasmaJSON::parseDiffusion() {
 	m_diffusionConstants.emplace(std::make_pair(idx, value                 ));
       }
       else if(lookup == "table E/N"){
-	if(!(diffusionJSON.contains("file"   ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'file' was not specified"      );
-	if(!(diffusionJSON.contains("header" ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'header' was not specified"    );
-	if(!(diffusionJSON.contains("E/N"    ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'E/N' was not specified"       );
-	if(!(diffusionJSON.contains("D*N"    ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'D*N' was not specified"      );
-	if(!(diffusionJSON.contains("min E/N"))) this->throwParserError(baseError + "and got tabulated diffusion but field 'min E/N' was not specified"   );
-	if(!(diffusionJSON.contains("max E/N"))) this->throwParserError(baseError + "and got tabulated diffusion but field 'max E/N' was not specified"   );
-	if(!(diffusionJSON.contains("res E/N"))) this->throwParserError(baseError + "and got tabulated diffusion but field 'res E/N' was not specified");	
+	if(!(diffusionJSON.contains("file"   ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'file' was not specified"   );
+	if(!(diffusionJSON.contains("header" ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'header' was not specified" );
+	if(!(diffusionJSON.contains("E/N"    ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'E/N' was not specified"    );
+	if(!(diffusionJSON.contains("D*N"    ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'D*N' was not specified"    );
+	if(!(diffusionJSON.contains("min E/N"))) this->throwParserError(baseError + "and got tabulated diffusion but field 'min E/N' was not specified");
+	if(!(diffusionJSON.contains("max E/N"))) this->throwParserError(baseError + "and got tabulated diffusion but field 'max E/N' was not specified");
+	if(!(diffusionJSON.contains("points" ))) this->throwParserError(baseError + "and got tabulated diffusion but field 'points' was not specified" );
+	if(!(diffusionJSON.contains("spacing"))) this->throwParserError(baseError + "and got tabulated diffusion but field 'spacing' was not specified");		
 	
-	const std::string filename  = trim(diffusionJSON["file"  ].get<std::string>());
-	const std::string startRead = trim(diffusionJSON["header"].get<std::string>());
+	const std::string filename  = this->trim(diffusionJSON["file"  ].get<std::string>());
+	const std::string startRead = this->trim(diffusionJSON["header"].get<std::string>());
+	const std::string spacing   = this->trim(diffusionJSON["spacing"].get<std::string>());	
 	const std::string stopRead  = "";
 
-	const int  xColumn   = diffusionJSON["E/N"       ].get<int >();
-	const int  yColumn   = diffusionJSON["D*N"       ].get<int >();
-	
-	const Real minEN     = diffusionJSON["min E/N"   ].get<Real>();
-	const Real maxEN     = diffusionJSON["max E/N"   ].get<Real>();
-	const Real resEN     = diffusionJSON["res E/N"   ].get<Real>();
+	const int  xColumn   = diffusionJSON["E/N"    ].get<int >();
+	const int  yColumn   = diffusionJSON["D*N"    ].get<int >();
+	const int  numPoints = diffusionJSON["points" ].get<int >();		
+	const Real minEN     = diffusionJSON["min E/N"].get<Real>();
+	const Real maxEN     = diffusionJSON["max E/N"].get<Real>();
 
 	// Can't have maxEN < minEN
 	if(maxEN < minEN) this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
@@ -1239,16 +1258,32 @@ void CdrPlasmaJSON::parseDiffusion() {
 	Real scale = 1.0;
 	if(diffusionJSON.contains("scale")){
 	  scale = diffusionJSON["scale"].get<Real>();
-	}	
+	}
 
-	// Compute thne number of points in the table
-	const int numPoints = std::ceil((maxEN - minEN)/resEN);
+	// Figure out the table spacing
+	TableSpacing tableSpacing;
+	if(spacing == "uniform"){
+	  tableSpacing = TableSpacing::Uniform;
+	}
+	else if(spacing == "exponential"){
+	  tableSpacing = TableSpacing::Exponential;
+	}
+	else{
+	  this->throwParserError(baseError + " and got tabulated diffusion but 'spacing' field = '" + spacing + "' which is not supported");
+	}	
 
 	// Format the table
 	diffusionTable.scale<1>(scale);
 	diffusionTable.setRange(minEN, maxEN, 0);
 	diffusionTable.sort(0);
+	diffusionTable.setTableSpacing(tableSpacing);	
 	diffusionTable.makeUniform(numPoints);
+
+	// Check if we should dump the table to file so that users can debug.
+	if(diffusionJSON.contains("dump")){
+	  const std::string dumpFile = diffusionJSON["dump"].get<std::string>();
+	  diffusionTable.dumpTable(dumpFile);
+	}	
 
 	m_diffusionLookup.  emplace(std::make_pair(idx, LookupMethod::TableEN));
 	m_diffusionTablesEN.emplace(std::make_pair(idx, diffusionTable       ));
@@ -1318,18 +1353,19 @@ void CdrPlasmaJSON::parseTemperatures() {
 	if(!(S.contains("eV"     ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'eV' is missing"     );
 	if(!(S.contains("min E/N"))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'min E/N' is missing");
 	if(!(S.contains("max E/N"))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'max E/N' is missing");
-	if(!(S.contains("res E/N"))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'res E/N' is missing");
+	if(!(S.contains("points" ))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'points' is missing" );
+	if(!(S.contains("spacing"))) this->throwParserError(baseError + "was specified as 'table E/N' but field 'spacing' is missing");
 
-	const std::string filename  = trim(S["file"  ].get<std::string>());
-	const std::string startRead = trim(S["header"].get<std::string>());
+	const std::string filename  = this->trim(S["file"   ].get<std::string>());
+	const std::string startRead = this->trim(S["header" ].get<std::string>());
+	const std::string spacing   = this->trim(S["spacing"].get<std::string>());	
 	const std::string stopRead  = "";
 
-	const int xColumn   = S["E/N"       ].get<int>();
-	const int yColumn   = S["eV"        ].get<int>();
-
-	const Real minEN = S["min E/N"].get<Real>();
-	const Real maxEN = S["max E/N"].get<Real>();
-	const Real resEN = S["res E/N"].get<Real>();
+	const int  xColumn   = S["E/N"    ].get<int >();
+	const int  yColumn   = S["eV"     ].get<int >();
+	const int  numPoints = S["points" ].get<Real>();
+	const Real minEN     = S["min E/N"].get<Real>();
+	const Real maxEN     = S["max E/N"].get<Real>();
 
 	// Can't have maxEN < minEN
 	if(maxEN < minEN) this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
@@ -1353,17 +1389,33 @@ void CdrPlasmaJSON::parseTemperatures() {
 	  this->throwParserError(baseError + " but temperature table '" + startRead + "' in file '" + filename + "'is empty. This is probably an error");	  
 	}
 
-	// Compute the number of points we'll need
-	const int numPoints = std::ceil((maxEN - minEN)/resEN);
+	// Figure out the table spacing
+	TableSpacing tableSpacing;
+	if(spacing == "uniform"){
+	  tableSpacing = TableSpacing::Uniform;
+	}
+	else if(spacing == "exponential"){
+	  tableSpacing = TableSpacing::Exponential;
+	}
+	else{
+	  this->throwParserError(baseError +"and got tabulated mobility but 'spacing' field = '" + spacing + "' which is not supported");
+	}	
 
 	// Format the table
 	temperatureTable.scale<1>(scale);		
 	temperatureTable.setRange(minEN, maxEN, 0);
 	temperatureTable.sort(0);
+	temperatureTable.setTableSpacing(tableSpacing);	
 	temperatureTable.makeUniform(numPoints);
 
 	// Conversion factor is eV to Kelvin.
 	temperatureTable.scale<1>( (2.0*Units::Qe) / (3.0*Units::kb) );
+
+	// Check if we should dump the table to file so that users can debug.
+	if(S.contains("dump")){
+	  const std::string dumpFile = S["dump"].get<std::string>();
+	  temperatureTable.dumpTable(dumpFile);
+	}		
 
 	m_temperatureLookup.  emplace(std::make_pair(idx, LookupMethod::TableEN));
 	m_temperatureTablesEN.emplace(std::make_pair(idx, temperatureTable      ));	
