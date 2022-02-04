@@ -34,6 +34,23 @@ enum class OutOfRangeStrategy {
 };
 
 /*!
+  @brief For identifying columns in the LookupTable.
+*/
+enum StateStatus {
+  Column  = 0,
+  Sorted  = 1,
+  Uniform = 2,
+};
+
+/*!
+  @brief Enum for classifying how table is spaced. 
+*/
+enum class TableSpacing {
+  Uniform,
+  Exponential
+};
+
+/*!
   @brief Class for looking up and interpolation (x,y) data. 
 */
 template<int N>
@@ -110,7 +127,14 @@ public:
     @param[in] a_strategy Range strategy. 
   */
   inline
-  void setOutOfRangeStrategyHigh(const OutOfRangeStrategy a_strategy);  
+  void setOutOfRangeStrategyHigh(const OutOfRangeStrategy a_strategy);
+
+  /*!
+    @brief Set the table spacing mode
+    @param[in] a_spacing Spacing mode.
+  */
+  inline
+  void setTableSpacing(const TableSpacing a_spacing);  
 
   /*!
     @brief Sort the table. Useful if the input data was not already sorted. 
@@ -132,7 +156,14 @@ public:
     @brief Dump table to pout()
   */
   inline
-  void dumpTable(std::ostream& a_outputStream = std::cout) const ;
+  void dumpTable(std::ostream& a_outputStream = std::cout) const;
+
+  /*!
+    @brief Dump table to a file. 
+    @param[in] a_fileName File name
+  */
+  inline
+  void dumpTable(const std::string a_fileName) const;  
 
   /*!
     @brief Get entry
@@ -158,24 +189,9 @@ public:
   inline
   int getNumEntries() const;
 
-  /*!
-    @brief Swap x and y vectors
-  */
-  inline
-  void swapXY(){
-    return this->swap(0,1);
-  }
 
 protected:
 
-  /*!
-    @brief For fetching/setting tuple stuff
-  */
-  enum StateStatus {
-    Column  = 0,
-    Sorted  = 1,
-    Uniform = 2,
-  };
 
   /*!
     @brief End point stategy on the low end of the data 
@@ -186,6 +202,11 @@ protected:
     @brief End point stategy on the high end of the data 
   */
   OutOfRangeStrategy m_strategyHi;
+
+  /*!
+    @brief For setting the table spacing
+  */
+  TableSpacing m_spacing;
   
   /*!
     @brief Table state. First entry is the column along which we sort and make the table uniform. The second entry is 
@@ -209,7 +230,14 @@ protected:
     @note The data MUST be sorted along the input column for this to work. 
   */
   inline
-  std::array<Real, N> directLookup(const Real a_x) const;  
+  std::array<Real, N> directLookup(const Real a_x) const;
+
+  /*!
+    @brief Get the lower index during a lookup
+    @param[in] a_x Interpolation point. 
+  */
+  inline
+  int getIndexLo(const Real a_x) const;
 };
 
 #include <CD_NamespaceFooter.H>
