@@ -57,6 +57,9 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   this->parsePlasmaReactions();
   this->parsePhotoReactions();
 
+  // Parse secondary emission on electrodes and dielectrics
+  this->parseElectrodeReactions();
+
   m_numCdrSpecies = m_cdrSpecies.size();
   m_numRtSpecies  = m_rtSpecies. size();
 }
@@ -188,6 +191,74 @@ void CdrPlasmaJSON::parseReactionString(std::vector<std::string>& a_reactants,
   // Left of "->" are reactants and right of "->" are products
   a_reactants = std::vector<std::string>(segments.begin(), it);
   a_products  = std::vector<std::string>(it + 1, segments.end());
+}
+
+void CdrPlasmaJSON::getReactionSpecies(std::list<int>&                 a_plasmaReactants,
+				       std::list<int>&                 a_neutralReactants,
+				       std::list<int>&                 a_photonReactants,					    
+				       std::list<int>&                 a_plasmaProducts,
+				       std::list<int>&                 a_neutralProducts,
+				       std::list<int>&                 a_photonProducts,				       
+				       const std::vector<std::string>& a_reactants,
+				       const std::vector<std::string>& a_products) const {
+  CH_TIME("CdrPlasmaJSON::getReactionSpecies()");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::getReactionSpecies()" << endl;
+  }
+
+  const std::string baseError = "CdrPlasmaJSON::getReactionSpecies ";
+
+  a_plasmaReactants. clear();
+  a_neutralReactants.clear();
+  a_photonReactants. clear();
+  
+  a_plasmaProducts.  clear();
+  a_neutralProducts. clear();
+  a_photonProducts.  clear();
+
+  // Figure out the reactants. 
+  for (const auto& r : a_reactants){
+
+    // Figure out if the reactants is a plasma species or a neutral species.
+    const bool isPlasma  = this->isPlasmaSpecies (r);
+    const bool isNeutral = this->isNeutralSpecies(r);
+    const bool isPhoton  = this->isPhotonSpecies (r);
+
+    if(isPlasma && !(isNeutral || isPhoton)){
+      a_plasmaReactants.emplace_back(m_cdrSpeciesMap.at(r));
+    }
+    else if(isNeutral && !(isPlasma || isPhoton)){
+      a_neutralReactants.emplace_back(m_neutralSpeciesMap.at(r));
+    }
+    else if(isPhoton && !(isPlasma || isNeutral)){
+      a_photonReactants.emplace_back(m_rteSpeciesMap.at(r));
+    }
+    else{
+      this->throwParserError(baseError + "-- logic bust 1");
+    }
+  }
+
+  // Figure out the reactants. 
+  for (const auto& p : a_products){
+
+    // Figure out if the reactants is a plasma species or a neutral species.
+    const bool isPlasma  = this->isPlasmaSpecies (p);
+    const bool isNeutral = this->isNeutralSpecies(p);
+    const bool isPhoton  = this->isPhotonSpecies (p);
+
+    if(isPlasma && !(isNeutral || isPhoton)){
+      a_plasmaProducts.emplace_back(m_cdrSpeciesMap.at(p));
+    }
+    else if(isNeutral && !(isPlasma || isPhoton)){
+      a_neutralProducts.emplace_back(m_neutralSpeciesMap.at(p));
+    }
+    else if(isPhoton && !(isPlasma || isNeutral)){
+      a_photonProducts.emplace_back(m_rteSpeciesMap.at(p));
+    }
+    else{
+      this->throwParserError(baseError + "-- logic bust 2");
+    }
+  }  
 }
 
 void CdrPlasmaJSON::initializeNeutralSpecies() {
@@ -1304,9 +1375,9 @@ void CdrPlasmaJSON::parseTemperatures() {
 }
 
 void CdrPlasmaJSON::parsePlasmaReactions() {
-  CH_TIME("CdrPlasmaJSON::parsePlasmaReactions");
+  CH_TIME("CdrPlasmaJSON::parsePlasmaReactions()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::parsePlasmaReactions" << endl;
+    pout() << "CdrPlasmaJSON::parsePlasmaReactions()" << endl;
   }
 
   for (const auto& R : m_json["plasma reactions"]){
@@ -1324,7 +1395,7 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
     this->parseReactionString(reactants, products, reaction);
 
     // Parse wildcards and make the reaction sets. std::list<std::pair<std::vector<std::string>, std::vector<std::string> > >
-    const auto reactionSets = this->parsePlasmaReactionWildcards(reactants, products, R);
+    const auto reactionSets = this->parseReactionWildcards(reactants, products, R);
 
     // Now run through the superset of reactions encoded by the input string. Because of the @ character some of the rate functions
     // need special handling. 
@@ -1349,27 +1420,33 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
       // Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
       std::list<int> plasmaReactants ;
       std::list<int> neutralReactants;
+      std::list<int> photonReactants ;      
       std::list<int> plasmaProducts  ;
-      std::list<int> photonProducts  ;
+      std::list<int> neutralProducts ;
+      std::list<int> photonProducts  ;            
 
-      this->getPlasmaReactionProducts(plasmaReactants,
-				      neutralReactants,
-				      plasmaProducts,
-				      photonProducts,
-				      curReactants,
-				      curProducts);      
+      this->getReactionSpecies(plasmaReactants,
+			       neutralReactants,
+			       photonReactants,			       
+			       plasmaProducts,
+			       neutralProducts,			       
+			       photonProducts,
+			       curReactants,
+			       curProducts);      
 
+      // Now create the reaction -- note that plasma reactions don't use photon species on the left hand side of the
+      // reaction, and it ignores neutral species on the right-hand side of the reaction.
       m_plasmaReactions.emplace_back(plasmaReactants, neutralReactants, plasmaProducts, photonProducts);
     }
   }
 }
 
-std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > CdrPlasmaJSON::parsePlasmaReactionWildcards(const std::vector<std::string>& a_reactants,
-														       const std::vector<std::string>& a_products,
-														       const json& a_R){
-  CH_TIME("CdrPlasmaJSON::parsePlasmaReactionWildcards()");
+std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > CdrPlasmaJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
+														 const std::vector<std::string>& a_products,
+														 const json& a_R){
+  CH_TIME("CdrPlasmaJSON::parseReactionWildcards()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::parsePlasmaReactionWildcards()" << endl;
+    pout() << "CdrPlasmaJSON::parseReactionWildcards()" << endl;
   }
 
   // This is what we return. A horrific creature.
@@ -1377,7 +1454,7 @@ std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > CdrPl
 
   // This is the reaction name. 
   const std::string reaction  = a_R["reaction"].get<std::string>();
-  const std::string baseError = "CdrPlasmaJSON::parsePlasmaReactionWildcards for reaction '" + reaction + "'";
+  const std::string baseError = "CdrPlasmaJSON::parseReactionWildcards for reaction '" + reaction + "'";
 
   // Check if reaction string had a wildcard '@'. If it did we replace the wildcard with the corresponding species. This means that we need to
   // build additional reactions. 
@@ -1464,63 +1541,6 @@ void CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_rea
 
   if(sumCharge != 0) {
     this->throwParserWarning("CdrPlasmaJSON::sanctifyPlasmaReaction -- charge not conserved for reaction '" + a_reaction + "'.");
-  }
-}
-
-void CdrPlasmaJSON::getPlasmaReactionProducts(std::list<int>&                 a_plasmaReactants,
-					      std::list<int>&                 a_neutralReactants,
-					      std::list<int>&                 a_plasmaProducts,
-					      std::list<int>&                 a_photonProducts,
-					      const std::vector<std::string>& a_reactants,
-					      const std::vector<std::string>& a_products) const {
-  CH_TIME("CdrPlasmaJSON::getPlasmaReactionProducts()");
-  if(m_verbose){
-    pout() << "CdrPlasmaJSON::getPlasmaReactionProducts()" << endl;
-  }
-
-  const std::string baseError = "CdrPlasmaJSON::getPlasmaReactionProducts ";
-
-  a_plasmaReactants. clear();
-  a_neutralReactants.clear();
-  a_plasmaProducts.  clear();
-  a_photonProducts.  clear();  
-
-  // Figure out the reactants. 
-  for (const auto& r : a_reactants){
-
-    // Figure out if the reactants is a plasma species or a neutral species.
-    const bool isPlasmaSpecies  = m_cdrSpeciesMap.    find(r) != m_cdrSpeciesMap.    end();
-    const bool isNeutralSpecies = m_neutralSpeciesMap.find(r) != m_neutralSpeciesMap.end();
-
-    if(isPlasmaSpecies && !isNeutralSpecies){
-      a_plasmaReactants.emplace_back(m_cdrSpeciesMap.at(r));
-    }
-    else if (!isPlasmaSpecies && isNeutralSpecies){
-      a_neutralReactants.emplace_back(m_neutralSpeciesMap.at(r));      
-    }
-    else {
-      this->throwParserError(baseError + "-- logic bust 1");
-    }
-  }
-
-  // Figure out the products.
-  for (const auto& p : a_products){
-    const bool isPlasmaSpecies  = m_cdrSpeciesMap.    find(p) != m_cdrSpeciesMap.    end();
-    const bool isNeutralSpecies = m_neutralSpeciesMap.find(p) != m_neutralSpeciesMap.end();
-    const bool isPhotonSpecies  = m_rteSpeciesMap.    find(p) != m_rteSpeciesMap.    end();
-
-    if(isPlasmaSpecies && !isPhotonSpecies && !isNeutralSpecies){
-      a_plasmaProducts.emplace_back(m_cdrSpeciesMap.at(p));
-    }
-    else if(!isPlasmaSpecies && isPhotonSpecies && !isNeutralSpecies){
-      a_photonProducts.emplace_back(m_rteSpeciesMap.at(p));
-    }
-    else if(!isPlasmaSpecies && !isPhotonSpecies && isNeutralSpecies){
-      // do nothing
-    }
-    else{
-      this->throwParserError(baseError + "-- logic bust 2");      
-    }
   }
 }
 
@@ -1924,16 +1944,18 @@ void CdrPlasmaJSON::parsePhotoReactions(){
     std::list<int> photonReactants ;
     std::list<int> plasmaProducts  ;
     std::list<int> neutralProducts ;
+    std::list<int> photonProducts  ;    
 
-    this->getPhotoReactionProducts(plasmaReactants,
-				   neutralReactants,
-				   photonReactants,
-				   plasmaProducts,
-				   neutralProducts,
-				   reactants,
-				   products);
+    this->getReactionSpecies(plasmaReactants,
+			     neutralReactants,
+			     photonReactants,
+			     plasmaProducts,
+			     neutralProducts,
+			     photonProducts,			     
+			     reactants,
+			     products);
 
-    // Add it to the pile.
+    // Add the reaction to the pile. 
     m_photoReactions.emplace_back(plasmaReactants, neutralReactants, photonReactants, plasmaProducts, neutralProducts);
   }
 }
@@ -2017,64 +2039,55 @@ void CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const j
   m_photoReactionUseHelmholtz.emplace(a_reactionIndex, doHelmholtz);
 }
 
-void CdrPlasmaJSON::getPhotoReactionProducts(std::list<int>&                 a_plasmaReactants,
-					     std::list<int>&                 a_neutralReactants,
-					     std::list<int>&                 a_photonReactants,					    
-					     std::list<int>&                 a_plasmaProducts,
-					     std::list<int>&                 a_neutralProducts,
-					     const std::vector<std::string>& a_reactants,
-					     const std::vector<std::string>& a_products) const {
-  CH_TIME("CdrPlasmaJSON::getPhotoReactionProducts()");
+void CdrPlasmaJSON::parseElectrodeReactions() {
+  CH_TIME("CdrPlasmaJSON::parseElectrodeReactions()");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::getPhotoReactionProducts()" << endl;
+    pout() << "CdrPlasmaJSON::parseElectrodeReactions()" << endl;
   }
 
-  const std::string baseError = "CdrPlasmaJSON::getPhotoReactionProducts ";
+  // Check if our JSON f
+  if(m_json.contains("electrode reactions")){
+    const json& electrodeReactions = m_json["electrode reactions"];
 
-  a_plasmaReactants. clear();
-  a_neutralReactants.clear();
-  a_photonReactants. clear();    
-  a_plasmaProducts.  clear();
-  a_neutralProducts. clear();  
+    // Base error used when parsing the reactions
+    const std::string baseError = "CdrPlasmaJSON::parseElectrodeReactions ";    
 
-  // Figure out the reactants. 
-  for (const auto& r : a_reactants){
+    // Iterate through the reactions. 
+    for (const auto& electrodeReaction : electrodeReactions){
 
-    // Figure out if the reactants is a plasma species or a neutral species.
-    const bool isPlasma  = this->isPlasmaSpecies (r);
-    const bool isNeutral = this->isNeutralSpecies(r);
-    const bool isPhoton  = this->isPhotonSpecies (r);
+      // These fields are required
+      if(!(electrodeReaction.contains("reaction"))) this->throwParserError(baseError + "- found 'electrode reactions' but field 'reaction' was not specified");
+      if(!(electrodeReaction.contains("lookup"  ))) this->throwParserError(baseError + "- found 'electrode reactions' but field 'lookup' was not specified");      
 
-    if(isPlasma && !isNeutral && !isPhoton){
-      a_plasmaReactants.emplace_back(m_cdrSpeciesMap.at(r));
-    }
-    else if(!isPlasma && isNeutral && !isPhoton){
-      a_neutralReactants.emplace_back(m_neutralSpeciesMap.at(r));      
-    }
-    else if(!isPlasma && !isNeutral && isPhoton){
-      a_photonReactants.emplace_back(m_rteSpeciesMap.at(r));      
-    }    
-    else {
-      this->throwParserError(baseError + "- logic bust 1");
-    }
-  }
+      // Get the reaction and lookup strings. 
+      const std::string reaction = this->trim(electrodeReaction["reaction"].get<std::string>());
+      const std::string lookup   = this->trim(electrodeReaction["lookup"  ].get<std::string>());
 
-  // Figure out the reactants. 
-  for (const auto& p : a_products){
+      // Parse the reaction string so we get a list of reactants and products
+      std::vector<std::string> reactants;
+      std::vector<std::string> products ;
 
-    // Figure out if the reactants is a plasma species or a neutral species.
-    const bool isPlasma  = this->isPlasmaSpecies (p);
-    const bool isNeutral = this->isNeutralSpecies(p);
-    const bool isPhoton  = this->isPhotonSpecies (p);
+      this->parseReactionString(reactants, products, reaction);
 
-    if(isPlasma && !isNeutral && !isPhoton){
-      a_plasmaProducts.emplace_back(m_cdrSpeciesMap.at(p));
-    }
-    else if(!isPlasma && isNeutral && !isPhoton){
-      a_neutralProducts.emplace_back(m_neutralSpeciesMap.at(p));      
-    }
-    else {
-      this->throwParserError(baseError + "- logic bust 1");      
+      // Electrode reactions can contain wildcards -- if the current reaction contains a wildcard
+      // we create a list of more reactions.
+      const auto reactionSets = this->parseReactionWildcards(reactants, products, electrodeReaction);
+
+      // Go through all the reactions now. 
+      for (const auto& curReaction : reactionSets){
+
+	const std::vector<std::string> curReactants = curReaction.first ;
+	const std::vector<std::string> curProducts  = curReaction.second;
+
+	// This is the reaction index for the current index. The reaction we are currently
+	// dealing with is put in m_plasmaReactions[reactionIdex]. 
+	const int reactionIndex = m_electrodeReactions.size();
+
+      	if(procID() == 0){
+	   
+      	  std::cout << curReactants[0] << std::endl;
+      	}	
+      }
     }
   }
 }

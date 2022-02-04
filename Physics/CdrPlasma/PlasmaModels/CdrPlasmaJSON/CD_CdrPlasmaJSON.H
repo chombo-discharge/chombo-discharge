@@ -27,6 +27,7 @@
 #include <CD_RteSpeciesJSON.H>
 #include <CD_CdrPlasmaReactionJSON.H>
 #include <CD_CdrPlasmaPhotoReactionJSON.H>
+#include <CD_CdrPlasmaSurfaceReactionJSON.H>
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
@@ -491,7 +492,9 @@ namespace Physics {
       */
       std::map<int, LookupTable<2> > m_diffusionTablesEN;
 
-      // TEMPERATURE DATA BEGINS HERE
+      // ===========================================
+      // PLASMA SPECIES TEMPERATURE DATA BEGINS HERE
+      // ===========================================      
 
       /*!
 	@brief Temperature lookup method
@@ -598,6 +601,30 @@ namespace Physics {
       */
       std::vector<CdrPlasmaPhotoReactionJSON> m_photoReactions;
 
+      // ===========================================
+      // ELECTRODE SURFACE REACTIONS BEGIN HERE
+      // ===========================================
+      
+      /*!
+	@brief Lookup method for the electrode surface reaction rates
+      */
+      std::map<int, LookupMethod> m_electrodeReactionLookup;
+
+      /*!
+	@brief Electrode reaction effiencies. Used for scaling reactions on electrodes in a "generic" way. 
+      */
+      std::map<int, FunctionEX> m_electrodeReactionEfficiencies;
+
+      /*!
+	@brief List of electrode reactions
+      */
+      std::map<int, CdrPlasmaSurfaceReactionJSON> m_electrodeReactions;
+
+      // ===========================================
+      // DIELECTRIC SURFACE REACTIONS BEGIN HERE
+      // ===========================================      
+      
+
       /*!
 	@brief Parse class options
       */
@@ -675,9 +702,9 @@ namespace Physics {
 	@param[in] a_reaction  JSON reaction entry. 
 	@return Returns a list of reactants and products with wilcards replace. 
       */
-      virtual std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > parsePlasmaReactionWildcards(const std::vector<std::string>& a_reactants,
-														      const std::vector<std::string>& a_products,
-														      const json& a_reaction);
+      virtual std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > parseReactionWildcards(const std::vector<std::string>& a_reactants,
+														const std::vector<std::string>& a_products,
+														const json& a_reaction);
       /*!
 	@brief Parses a reaction string into reactangs and products
 	@param[out] a_reactants Left-hand side of reaction
@@ -697,7 +724,28 @@ namespace Physics {
       */
       virtual void sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
 					  const std::vector<std::string>& a_products,
-					  const std::string               a_reaction) const;      
+					  const std::string               a_reaction) const;
+
+
+      /*!
+	@brief Get the int-encoding corresponding to species involved in some reaction. 
+	@param[out] a_plasmaReactants   Plasma reactants
+	@param[out] a_neutralReactants  Neutral reactants
+	@param[out] a_photonReactants   Photon reactants
+	@param[out] a_plasmaProducts    Plasma products
+	@param[out] a_neutralProducts   Neutral products
+	@param[out] a_photonProducts    Photon products
+	@param[in]  a_reactants         Reactant names
+	@param[in]  a_products          Reaction names
+      */
+      virtual void getReactionSpecies(std::list<int>&                 a_plasmaReactants,
+				      std::list<int>&                 a_neutralReactants,
+				      std::list<int>&                 a_photonReactants,					    
+				      std::list<int>&                 a_plasmaProducts,
+				      std::list<int>&                 a_neutralProducts,
+				      std::list<int>&                 a_photonProducts,				       
+				      const std::vector<std::string>& a_reactants,
+				      const std::vector<std::string>& a_products) const;
 
       /*!
 	@brief Parse scaling factors for reactions. 
@@ -747,22 +795,6 @@ namespace Physics {
       virtual void parsePhotoReactionScaling(const int a_reactionIndex, const json& a_reaction);      
 
       /*!
-	@brief Get the int-encoding corresponding to species involved in a plasma reaction.
-	@param[out] a_plasmaReactants   Plasma reactants
-	@param[out] a_neutralReactants  Neutral reactants
-	@param[out] a_plasmaProducts    Plasma products
-	@param[out] a_photonProducts    Photon products
-	@param[in]  a_reactants         Reactants
-	@param[in]  a_products          Reaction products
-      */
-      virtual void getPlasmaReactionProducts(std::list<int>&                 a_plasmaReactants,
-					     std::list<int>&                 a_neutralReactants,
-					     std::list<int>&                 a_plasmaProducts,
-					     std::list<int>&                 a_photonProducts,
-					     const std::vector<std::string>& a_reactants,
-					     const std::vector<std::string>& a_products) const;      
-
-      /*!
 	@brief Do a species sanity check
 	@details This will make sure that species names are not duplicates. 
       */
@@ -780,21 +812,9 @@ namespace Physics {
 					 const std::string               a_reaction) const;
 
       /*!
-	@brief Get the int-encoding corresponding to species involved in a plasma reaction.
-	@param[out] a_plasmaReactants   Plasma reactants
-	@param[out] a_neutralReactants  Neutral reactants
-	@param[out] a_plasmaProducts    Plasma products
-	@param[out] a_photonProducts    Photon products
-	@param[in]  a_reactants         Reactants
-	@param[in]  a_products          Reaction products
+	@brief Parse secondary emission on electrodes
       */
-      virtual void getPhotoReactionProducts(std::list<int>&                 a_plasmaReactants,
-					    std::list<int>&                 a_neutralReactants,
-					    std::list<int>&                 a_photonReactants,					    
-					    std::list<int>&                 a_plasmaProducts,
-					    std::list<int>&                 a_neutralProducts,
-					    const std::vector<std::string>& a_reactants,
-					    const std::vector<std::string>& a_products) const;      
+      virtual void parseElectrodeReactions();
 
       /*!
 	@brief Compute the various plasma species temperatures.
@@ -818,8 +838,7 @@ namespace Physics {
 
       /*!
 	@brief Compute the reaction rate for a plasma reaction.
-
-	This routine exists because we need to compute the rates both in advanceReactionNetwork and getPlotVariables. This function
+	@details This routine exists because we need to compute the rates both in advanceReactionNetwork and getPlotVariables. This function
 	reduces code duplication. 
 	@param[in] a_reactionIndex            Reaction index
 	@param[in] a_cdrDensities             Plasma species densities. 

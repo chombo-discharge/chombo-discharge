@@ -44,7 +44,7 @@
 	     "res E/N": 10
 	 },
 	 "initial data": {
-	     "uniform": 1.0E10,
+	     "uniform": 1.0,
 	     "gauss2":
 	     [
 		 {
@@ -68,14 +68,14 @@
      {
 	 "name": "N2+",
 	 "Z":  1,
-	 "mobile": false,
+	 "mobile": true,
 	 "diffusive": false,
 	 "mobility": {
 	     "lookup": "constant",
 	     "value": 2E-4
 	 },	 
 	 "initial data": {
-	     "uniform": 0.8E10,
+	     "uniform": 0.8,
 	     "gauss2":
 	     [
 		 {
@@ -89,14 +89,14 @@
      {
 	 "name": "O2+",
 	 "Z":  1,
-	 "mobile": false,
+	 "mobile": true,
 	 "diffusive": false,
 	 "mobility": {
 	     "lookup": "constant",
 	     "value": 2E-4
 	 },
 	 "initial data": {
-	     "uniform": 0.2E10,
+	     "uniform": 0.2,
 	     "gauss2":
 	     [
 		 {
@@ -109,7 +109,7 @@
      },
      {"name":"N4+",
       "Z":  1,
-      "mobile": false,
+      "mobile": true,
       "diffusive": false,
       "mobility": {
 	  "lookup": "constant",
@@ -118,7 +118,7 @@
      },
      {"name":"O4+",
       "Z":  1,
-      "mobile": false,
+      "mobile": true,
       "diffusive": false,
       "mobility": {
 	  "lookup": "constant",
@@ -127,7 +127,7 @@
      },
      {"name":"O2+N2",
       "Z":  1,
-      "mobile": false,
+      "mobile": true,
       "diffusive": false,
       "mobility": {
 	  "lookup": "constant",
@@ -136,7 +136,7 @@
      },
      {"name":"O2-",
       "Z":  -1,
-      "mobile": false,
+      "mobile": true,
       "diffusive": false,
       "mobility": {
 	  "lookup": "constant",
@@ -323,7 +323,7 @@
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": true,
+	     "correction": false,
 	     "species": "e"
 	 }	 
      },
@@ -340,7 +340,7 @@
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": true,
+	     "correction": false,
 	     "species": "e"
 	 }	 
      },
@@ -357,7 +357,7 @@
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": true,
+	     "correction": false,
 	     "species": "e"
 	 }	 
      }
@@ -366,6 +366,7 @@
  [
      {
 	 "reaction": "Bourdon1 -> e + O2+",
+	 "scale": 1.0,	 
 	 "helmholtz": {
 	     "A": 1.12E-4,
 	     "lambda": 0.0415,
@@ -374,6 +375,7 @@
      },
      {
 	 "reaction": "Bourdon2 -> e + O2+",
+	 "scale": 1.0,	 
 	 "helmholtz": {
 	     "A": 2.87E-3,
 	     "lambda": 0.1095,
@@ -382,11 +384,21 @@
      },
      {
 	 "reaction": "Bourdon3 -> e + O2+",
+	 "scale": 1.0,
 	 "helmholtz": {
 	     "A": 0.275,
 	     "lambda": 0.6675,
 	     "species": "O2"
 	 }
+     }
+ ],
+ "electrode reactions":
+ [
+     { "reaction": "@ -> e",
+       "@": ["N2+", "O2+"],       
+       "lookup": "constant",
+       "value": 0.1,
+       "scale": 0.0
      }
  ]
 }

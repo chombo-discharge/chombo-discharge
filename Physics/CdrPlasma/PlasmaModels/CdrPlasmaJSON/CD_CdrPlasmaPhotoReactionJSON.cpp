@@ -15,10 +15,6 @@
 
 using namespace Physics::CdrPlasma;
 
-CdrPlasmaPhotoReactionJSON::CdrPlasmaPhotoReactionJSON() {
-
-}
-
 CdrPlasmaPhotoReactionJSON::CdrPlasmaPhotoReactionJSON(const std::list<int> a_plasmaReactants,
 						       const std::list<int> a_neutralReactants,
 						       const std::list<int> a_photonReactants,

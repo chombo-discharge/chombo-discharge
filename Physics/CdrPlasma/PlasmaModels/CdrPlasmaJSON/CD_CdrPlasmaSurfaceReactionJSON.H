@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_CdrPlasmaReactionJSON.H
+  @file   CD_CdrPlasmaSurfaceReactionJSON.H
   @brief  Declaration of a class that encapsulates reactions for usage with CdrPlasmaJSON
   @author Robert Marskar
 */
 
-#ifndef CD_CdrPlasmaReactionJSON_H
-#define CD_CdrPlasmaReactionJSON_H
+#ifndef CD_CdrPlasmaSurfaceReactionJSON_H
+#define CD_CdrPlasmaSurfaceReactionJSON_H
 
 // Std includes
 #include <map>
@@ -25,33 +25,35 @@ namespace Physics {
   namespace CdrPlasma {
 
     /*!
-      @brief Class for encapsulating reactive process of type X1 + X2 -> X3 + Y for CdrPlasmaPhysics. This class just stores a list
-      of product and target species.
+      @brief Class for encapsulating reactive process of type A + B + Y -> X3 +  for CdrPlasmaPhysics. This class just stores a list
+      of product target species.
     */
-    class CdrPlasmaReactionJSON {
+    class CdrPlasmaSurfaceReactionJSON {
     public:
 
       /*!
 	@brief Disallowed weak construction.
       */
-      CdrPlasmaReactionJSON() = delete;
+      CdrPlasmaSurfaceReactionJSON();
 
       /*!
 	@brief Full constructor. 
 	@param[in] a_plasmaReactants  Plasma species on the left-hand side of the reaction
 	@param[in] a_neutralReactants Neutral species on the left-hand side of the reaction
+	@param[in] a_photonReactants  Photon species on the left hand side of the reaction.
 	@param[in] a_plasmaProducts   Plasma species on the right-hand side of the reaction. 
-	@param[in] a_photonProducts   Photons on the right-hand side of the reaction.
+	@param[in] a_neutralProducts  Neutral species on the right-hand side of the reaction.
       */
-      CdrPlasmaReactionJSON(const std::list<int> a_plasmaReactants,
-			    const std::list<int> a_neutralReactants,			    
-			    const std::list<int> a_plasmaProducts,
-			    const std::list<int> a_photonProducts);
+      CdrPlasmaSurfaceReactionJSON(const std::list<int> a_plasmaReactants,
+				   const std::list<int> a_photonReactants,
+				   const std::list<int> a_neutralReactants,
+				   const std::list<int> a_plasmaProducts,
+				   const std::list<int> a_neutralProducts);
 
       /*!
 	@brief Destructor
       */
-      virtual ~CdrPlasmaReactionJSON();      
+      virtual ~CdrPlasmaSurfaceReactionJSON();      
 
       /*!
 	@brief Get the plasma reactants
@@ -66,16 +68,22 @@ namespace Physics {
       const std::list<int>& getNeutralReactants() const;
 
       /*!
+	@brief Get the photo-reactants
+	@return Returns m_photonReactants
+      */
+      const std::list<int>& getPhotonReactants() const;      
+
+      /*!
 	@brief Get the plasma products
 	@return Returns m_plasmaProducts
       */
       const std::list<int>& getPlasmaProducts() const;
 
       /*!
-	@brief Get the photon products
-	@return Returns m_photonProducts
+	@brief Get the neutral products
+	@return Returns m_neutralProducts
       */
-      const std::list<int>& getPhotonProducts() const;            
+      const std::list<int>& getNeutralProducts() const;            
 
     protected:
 
@@ -87,17 +95,22 @@ namespace Physics {
       /*!
 	@brief Neutral species on the left-hand side of the reaction
       */
-      std::list<int> m_neutralReactants;      
+      std::list<int> m_neutralReactants;
 
       /*!
-	@brief Particles on the right-hand side of the reaction
+	@brief Photon species on the left-hand side of the reaction
+      */
+      std::list<int> m_photonReactants;            
+
+      /*!
+	@brief Plasma species on the right-hand side of the reaction
       */      
       std::list<int> m_plasmaProducts;
 
       /*!
-	@brief Photons on the right-hand side of the reaction
+	@brief Neutral species on the right-hand side of the reaction
       */                  
-      std::list<int> m_photonProducts;
+      std::list<int> m_neutralProducts;
     };
   }
 }
