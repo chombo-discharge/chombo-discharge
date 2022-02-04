@@ -26,7 +26,9 @@ namespace Physics {
 
     /*!
       @brief Class for encapsulating reactive process of type A + B + Y -> X3 +  for CdrPlasmaPhysics. This class just stores a list
-      of product target species.
+      of product target species. 
+      @details This class is specifically for surface reactions. When including more species on the left hand side, e.g. A + B -> C, it is the same
+      as specifying A -> C, B -> C with equal reaction rates. 
     */
     class CdrPlasmaSurfaceReactionJSON {
     public:
@@ -39,16 +41,12 @@ namespace Physics {
       /*!
 	@brief Full constructor. 
 	@param[in] a_plasmaReactants  Plasma species on the left-hand side of the reaction
-	@param[in] a_neutralReactants Neutral species on the left-hand side of the reaction
 	@param[in] a_photonReactants  Photon species on the left hand side of the reaction.
 	@param[in] a_plasmaProducts   Plasma species on the right-hand side of the reaction. 
-	@param[in] a_neutralProducts  Neutral species on the right-hand side of the reaction.
       */
       CdrPlasmaSurfaceReactionJSON(const std::list<int> a_plasmaReactants,
 				   const std::list<int> a_photonReactants,
-				   const std::list<int> a_neutralReactants,
-				   const std::list<int> a_plasmaProducts,
-				   const std::list<int> a_neutralProducts);
+				   const std::list<int> a_plasmaProducts);
 
       /*!
 	@brief Destructor
@@ -62,12 +60,6 @@ namespace Physics {
       const std::list<int>& getPlasmaReactants() const;
 
       /*!
-	@brief Get the neutral reactants
-	@return Returns m_neutralReactants
-      */
-      const std::list<int>& getNeutralReactants() const;
-
-      /*!
 	@brief Get the photo-reactants
 	@return Returns m_photonReactants
       */
@@ -79,23 +71,12 @@ namespace Physics {
       */
       const std::list<int>& getPlasmaProducts() const;
 
-      /*!
-	@brief Get the neutral products
-	@return Returns m_neutralProducts
-      */
-      const std::list<int>& getNeutralProducts() const;            
-
     protected:
 
       /*!
 	@brief Plasma species on the left-hand side of the reaction
       */
       std::list<int> m_plasmaReactants;
-
-      /*!
-	@brief Neutral species on the left-hand side of the reaction
-      */
-      std::list<int> m_neutralReactants;
 
       /*!
 	@brief Photon species on the left-hand side of the reaction
@@ -106,11 +87,6 @@ namespace Physics {
 	@brief Plasma species on the right-hand side of the reaction
       */      
       std::list<int> m_plasmaProducts;
-
-      /*!
-	@brief Neutral species on the right-hand side of the reaction
-      */                  
-      std::list<int> m_neutralProducts;
     };
   }
 }

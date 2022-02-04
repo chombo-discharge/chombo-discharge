@@ -1861,7 +1861,6 @@ void CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const
   }
 }
 
-
 void CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
 					  const std::vector<std::string>& a_products,
 					  const std::string               a_reaction) const {
@@ -2079,17 +2078,140 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
 	const std::vector<std::string> curReactants = curReaction.first ;
 	const std::vector<std::string> curProducts  = curReaction.second;
 
+	// Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense.
+	this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+
 	// This is the reaction index for the current index. The reaction we are currently
 	// dealing with is put in m_plasmaReactions[reactionIdex]. 
 	const int reactionIndex = m_electrodeReactions.size();
 
-      	if(procID() == 0){
-	   
-      	  std::cout << curReactants[0] << std::endl;
-      	}	
+	// Parse the scaling factor for the electrode surface reaction
+	this->parseElectrodeReactionRate   (reactionIndex, electrodeReaction);	
+	this->parseElectrodeReactionScaling(reactionIndex, electrodeReaction);
+
+	// Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
+	std::list<int> plasmaReactants ;
+	std::list<int> neutralReactants;
+	std::list<int> photonReactants ;      
+	std::list<int> plasmaProducts  ;
+	std::list<int> neutralProducts ;
+	std::list<int> photonProducts  ;            
+
+	this->getReactionSpecies(plasmaReactants,
+				 neutralReactants,
+				 photonReactants,			       
+				 plasmaProducts,
+				 neutralProducts,			       
+				 photonProducts,
+				 curReactants,
+				 curProducts);      	
+
+	// Now create the reaction -- note that surface reactions support both plasma species and photon species on
+	// the left hand side of the reaction. 
+	m_electrodeReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
       }
     }
   }
+}
+
+void CdrPlasmaJSON::sanctifySurfaceReaction(const std::vector<std::string>& a_reactants,
+					    const std::vector<std::string>& a_products,
+					    const std::string               a_reaction) const {
+  CH_TIME("CdrPlasmaJSON::sanctifySurfaceReaction");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::sanctifySurfaceReaction" << m_jsonFile << endl;
+  }
+
+  const std::string baseError = "CdrPlasmaJSON::sanctifySurfaceReaction for reaction '" + a_reaction + "' ";
+
+  // Only plasma and RTE species allowed on the left hand side of the reaction. 
+  for (const auto& r : a_reactants){
+    const bool isPlasma  = this->isPlasmaSpecies (r);
+    const bool isNeutral = this->isNeutralSpecies(r);
+    const bool isPhoton  = this->isPhotonSpecies (r);
+
+    // No neutrals allowed.
+    if(isNeutral){
+      this->throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
+    }
+
+    // Unknown species not allowed either. 
+    if(!isPlasma && !isNeutral && !isPhoton){
+      this->throwParserError(baseError + "but I do not know species '" + r + "' on left hand side");
+    }
+  }
+
+  // All products should be in the list of plasma, neutral, or photon species. 
+  for (const auto& p : a_products){
+    const bool isPlasma  = this->isPlasmaSpecies (p);
+    const bool isNeutral = this->isNeutralSpecies(p);
+    const bool isPhoton  = this->isPhotonSpecies (p);
+
+    if(isPhoton ) this->throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side");
+    if(isNeutral) this->throwParserError(baseError + "neutral species '" + p + "' not allowed on right hand side");
+
+    // Unknown species not allowed either. 
+    if(!isPlasma && !isNeutral && !isPhoton){
+      this->throwParserError(baseError + "but I do not know species '" + p + "' on right hand side");
+    }
+  }
+}
+
+void CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const json& a_reactionJSON) {
+  CH_TIME("CdrPlasmaJSON::parseElectrodeReactionRate()");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseElectrodeReactionRate()" << endl;
+  }
+
+  // This is the reaction string -- we happen to know that, if we make it to this code, it exists.
+  const std::string reaction  = trim(a_reactionJSON["reaction"].get<std::string>());
+
+  // Create a basic error message for error handling. 
+  const std::string baseError = "CdrPlasmaJSON::parseElectrodeReactionRate for reaction '" + reaction + "' ";
+
+  // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions.
+  if(!(a_reactionJSON.contains("lookup"))) this->throwParserError(baseError + "but field 'lookup' was not specified");
+
+  // Get the lookup method
+  const std::string lookup = this->trim(a_reactionJSON["lookup"].get<std::string>());
+
+  // Now go through the various rate-computation methods and populated the
+  // relevant data holders. 
+  if(lookup == "constant"){
+    // If using a constant emission rate, we must get the field 'value'.
+
+    if(!(a_reactionJSON.contains("value"))) this->throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
+
+    const Real rate = a_reactionJSON["value"].get<Real>();
+
+    // Add the constant reaction rate to the appropriate data holder. 
+    m_electrodeReactionLookup.  emplace(a_reactionIndex, LookupMethod::Constant);
+    m_electrodeReactionConstant.emplace(a_reactionIndex, rate                  );
+  }
+  else{
+    this->throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
+  }
+}
+
+void CdrPlasmaJSON::parseElectrodeReactionScaling(const int a_reactionIndex, const json& a_reactionJSON) {
+  CH_TIME("CdrPlasmaJSON::parseElectrodeReactionScaling()");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseElectrodeReactionScaling()" << endl;
+  }
+
+  Real scale = 1.0;
+  if(a_reactionJSON.contains("scale")){
+    scale = a_reactionJSON["scale"].get<Real>();
+  }
+
+  // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
+  // reactions can be done by expanding this routine. 
+  auto func = [scale](const Real E, const RealVect x) -> Real {
+    return scale;
+  };
+
+  // Add it to the pile. 
+  m_electrodeReactionEfficiencies.emplace(a_reactionIndex, func);
 }
 
 int CdrPlasmaJSON::getNumberOfPlotVariables() const {

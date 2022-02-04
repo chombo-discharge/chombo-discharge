@@ -611,6 +611,11 @@ namespace Physics {
       std::map<int, LookupMethod> m_electrodeReactionLookup;
 
       /*!
+	@brief Constant electrode reaction rate. 
+      */
+      std::map<int, Real> m_electrodeReactionConstant;      
+
+      /*!
 	@brief Electrode reaction effiencies. Used for scaling reactions on electrodes in a "generic" way. 
       */
       std::map<int, FunctionEX> m_electrodeReactionEfficiencies;
@@ -618,13 +623,12 @@ namespace Physics {
       /*!
 	@brief List of electrode reactions
       */
-      std::map<int, CdrPlasmaSurfaceReactionJSON> m_electrodeReactions;
+      std::vector<CdrPlasmaSurfaceReactionJSON> m_electrodeReactions;
 
       // ===========================================
       // DIELECTRIC SURFACE REACTIONS BEGIN HERE
       // ===========================================      
       
-
       /*!
 	@brief Parse class options
       */
@@ -748,39 +752,39 @@ namespace Physics {
 				      const std::vector<std::string>& a_products) const;
 
       /*!
-	@brief Parse scaling factors for reactions. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@brief Parse reaction rate for plasma reaction.
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionRate(const int a_reactionIndex, const json& a_reaction);
+      virtual void parsePlasmaReactionRate(const int a_reactionIndex, const json& a_reactionJSON);
       
       /*!
 	@brief Parse scaling factors for reactions. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionScaling(const int a_reactionIndex, const json& a_reaction);
+      virtual void parsePlasmaReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse reaction plotting. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_reaction);
+      virtual void parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse plasma reaction descriptions. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_reaction);
+      virtual void parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse plasma reaction energy correction. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reaction);      
+      virtual void parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reactionJSON);      
 
       /*!
 	@brief Parse photo-reactions
@@ -789,10 +793,10 @@ namespace Physics {
 
       /*!
 	@brief Parse scaling for photo-reactions. Includes Helmholtz corrections if doing Helmholtz reconstruction of photoionization profiles. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'photo reactions' array. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'photo reactions' array. 
       */
-      virtual void parsePhotoReactionScaling(const int a_reactionIndex, const json& a_reaction);      
+      virtual void parsePhotoReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);      
 
       /*!
 	@brief Do a species sanity check
@@ -815,6 +819,32 @@ namespace Physics {
 	@brief Parse secondary emission on electrodes
       */
       virtual void parseElectrodeReactions();
+
+      /*!
+	@brief Parse reaction rate for electrode surface reactions. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+      */
+      virtual void parseElectrodeReactionRate(const int a_reactionIndex, const json& a_reactionJSON);      
+
+      /*!
+	@brief Parse electrode reaction scaling for a specific reaction.
+	@details This currently exists without much functionality -- it just returns one for all reactions. As we
+	expand the functionality, this can be used to adjust for e.g. positional or field dependence.
+	@param[in] a_reactionIndex Reaction index (this is the array index in the reaction array supplied in the JSON file)
+	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
+      */
+      virtual void parseElectrodeReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+
+      /*!
+	@brief Check if a surface-reaction makes sense in terms of the species that have been defined.
+	@param[in] a_reactants Reactants
+	@param[in] a_products  Reaction products
+	@param[in] a_reaction  Reaction string
+      */
+      virtual void sanctifySurfaceReaction(const std::vector<std::string>& a_reactants,
+					   const std::vector<std::string>& a_products,
+					   const std::string               a_reaction) const;
 
       /*!
 	@brief Compute the various plasma species temperatures.
