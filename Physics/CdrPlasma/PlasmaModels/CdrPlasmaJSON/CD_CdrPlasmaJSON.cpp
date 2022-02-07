@@ -280,6 +280,9 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
   // Get the gas law
   const auto gasLaw = trim(gasJSON["law"].get<std::string>());
 
+  // For converting grams to kilograms
+  constexpr Real g2kg = 1.E-3;  
+
   // Instantiate the pressure, density, and temperature of the gas. Note: The density  is the NUMBER density. 
   if(gasLaw == "ideal"){
 
@@ -304,14 +307,14 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     if(!(gasJSON.contains("pressure"   ))) this->throwParserError(baseError + " and got troposphere gas law but field 'pressure' is missing");    
     if(!(gasJSON.contains("molar mass" ))) this->throwParserError(baseError + " and got troposphere gas law but field 'molar mass' is missing");    
     if(!(gasJSON.contains("gravity"    ))) this->throwParserError(baseError + " and got troposphere gas law but field 'gravity' is missing");    
-    if(!(gasJSON.contains("lapse rate" ))) this->throwParserError(baseError + " and got troposphere gas law but field 'lapse rate' is missing");    
+    if(!(gasJSON.contains("lapse rate" ))) this->throwParserError(baseError + " and got troposphere gas law but field 'lapse rate' is missing");
 
     const Real T0   = gasJSON["temperature"].get<Real>();
     const Real P0   = gasJSON["pressure"   ].get<Real>();
     const Real g    = gasJSON["gravity"    ].get<Real>();
     const Real L    = gasJSON["lapse rate" ].get<Real>();
     const Real M    = gasJSON["molar mass" ].get<Real>();
-    const Real gMRL = (g * M) / (Units::R * L);
+    const Real gMRL = (g * g2kg * M) / (Units::R * L);
     const Real P    = P0 * Units::atm2pascal;
 
     // Temperature is T = T0 - L*(z-h0)
@@ -374,7 +377,7 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     const int numPoints = std::ceil((maxHeight - minHeight)/resHeight);
 
     // The input density was in kg/m^3 but we want the number density.
-    densityTable.scale<1>(Units::Na/M);
+    densityTable.scale<1>(Units::Na/(M * g2kg));
 
     // Make the tables uniform
     temperatureTable.setRange(minHeight, maxHeight, 0);
@@ -694,11 +697,11 @@ CdrPlasmaJSON::InitialDataFunction CdrPlasmaJSON::parsePlasmaSpeciesInitialData(
       Real scaleX = 1.0;
       Real scaleY = 1.0;
       
-      if(heightProfileJSON.contains("scale x")){
-	scaleX = heightProfileJSON["scale x"].get<Real>();
+      if(heightProfileJSON.contains("scale height")){
+	scaleX = heightProfileJSON["scale height"].get<Real>();
       }
-      if(heightProfileJSON.contains("scale y")){
-	scaleY = heightProfileJSON["scale y"].get<Real>();
+      if(heightProfileJSON.contains("scale density")){
+	scaleY = heightProfileJSON["scale density"].get<Real>();
       }
 
       // Can't have max height < min height.
