@@ -602,7 +602,7 @@ void BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int> >&          
     }
 
     // If running with MPI, loads must be gathered on all ranks. 
-    ParallelOps::VectorSum(loads);
+    ParallelOps::vectorSum(loads);
 
     // Sort the boxes and loads using a Morton code. Then load balance the application.
     LoadBalancing::sort       (boxes, loads, BoxSorting::Morton);
@@ -668,7 +668,7 @@ void BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int> >&     
     }
 
     // If running with MPI, loads must be gathered on all ranks. 
-    ParallelOps::VectorSum(loads);    
+    ParallelOps::vectorSum(loads);    
 
     // Sort the boxes and loads using a Morton code. Then load balance the application. 
     LoadBalancing::sort       (boxes, loads, BoxSorting::Morton);
@@ -704,7 +704,7 @@ Vector<long int> BrownianWalkerStepper::getCheckpointLoads(const std::string a_r
   }
 
   // If running with MPI, loads must be gathered on all ranks.
-  ParallelOps::VectorSum(loads);      
+  ParallelOps::vectorSum(loads);      
 
   return loads;
 }

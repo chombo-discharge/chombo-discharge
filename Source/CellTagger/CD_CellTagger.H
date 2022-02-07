@@ -80,7 +80,7 @@ public:
     @param[inout] a_plotVariableNames Plot variable names
     @param[inout] a_icomp             Starting variable in a_output where we begin appending data.
   */
-  virtual void writePlotData(EBAMRCellData& a_output, const Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
+  virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
 
   /*!
     @brief Get tag buffer. 

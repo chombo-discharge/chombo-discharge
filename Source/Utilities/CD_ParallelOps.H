@@ -25,28 +25,34 @@ namespace ParallelOps {
     @param[in] a_input Data input. Returns the smallest. 
   */
   inline
-  Real Min(const Real& a_input);
+  Real min(const Real& a_input);
 
   /*!
     @brief Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)
     @param[in] a_input Data input. 
   */
   inline
-  Real Max(const Real& a_input);
+  Real max(const Real& a_input);
 
   /*!
     @brief Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)
     @param[in] a_input Data input. Returns the smallest. 
   */
   inline
-  int Min(const int& a_input);
+  int min(const int& a_input);
 
   /*!
     @brief Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)
     @param[in] a_input Data input. 
   */
   inline
-  int Max(const int& a_input);
+  int max(const int& a_input);
+
+  /*!
+    @brief Compute the sum across all MPI ranks
+  */
+  inline
+  Real sum(const Real& a_value);
 
   /*!
     @brief Perform a summation of all the MPI ranks's input data. 
@@ -55,7 +61,7 @@ namespace ParallelOps {
     @param[inout] a_data On 
   */
   inline
-  void VectorSum(Vector<long int>& a_data);
+  void vectorSum(Vector<long int>& a_data);
 }
 
 #include <CD_NamespaceFooter.H>

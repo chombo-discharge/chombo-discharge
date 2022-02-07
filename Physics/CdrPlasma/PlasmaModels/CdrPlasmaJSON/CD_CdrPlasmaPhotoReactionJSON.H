@@ -26,17 +26,13 @@ namespace Physics {
 
     /*!
       @brief Class for encapsulating reactive process of type A + B + Y -> X3 +  for CdrPlasmaPhysics. This class just stores a list
-      of target species, but it can also compute the result of stoichiometric reactions. The general format is reactions of the type [Xin] -> [Xout] + [Yout] where
-      [Xin] are left hand side particle reactions, and [Xout] and [Yout] are right-hand side particle and photon products. 
-
-      The reaction rate is computed as r = k * n[X1]n[X2]. Note that if X1 or X2 is a neutral species, they should be absorbed into the reaction rate prior to
-      evaluating the reaction. 
+      of product target species.
     */
     class CdrPlasmaPhotoReactionJSON {
     public:
 
       /*!
-	@brief Default constructor. Don't use. 
+	@brief Disallowed weak construction.
       */
       CdrPlasmaPhotoReactionJSON();
 
@@ -53,6 +49,11 @@ namespace Physics {
 				 const std::list<int> a_photonReactants,
 				 const std::list<int> a_plasmaProducts,
 				 const std::list<int> a_neutralProducts);
+
+      /*!
+	@brief Destructor
+      */
+      virtual ~CdrPlasmaPhotoReactionJSON();      
 
       /*!
 	@brief Get the plasma reactants
@@ -83,11 +84,6 @@ namespace Physics {
 	@return Returns m_neutralProducts
       */
       const std::list<int>& getNeutralProducts() const;            
-      
-      /*!
-	@brief Destructor
-      */
-      virtual ~CdrPlasmaPhotoReactionJSON();
 
     protected:
 

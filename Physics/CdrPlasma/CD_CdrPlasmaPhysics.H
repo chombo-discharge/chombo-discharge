@@ -26,7 +26,7 @@ namespace Physics {
   namespace CdrPlasma {
   
     /*!
-      @brief Abstract base class for specifying plasma kinetics
+      @brief Abstract base class for specifying plasma kinetics. This is the base class used by CdrPlasmaStepper when advancing the minimal plasma model. 
     */
     class CdrPlasmaPhysics {
     public:

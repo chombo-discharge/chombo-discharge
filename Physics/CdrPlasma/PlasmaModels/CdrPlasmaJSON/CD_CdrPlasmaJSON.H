@@ -27,6 +27,7 @@
 #include <CD_RteSpeciesJSON.H>
 #include <CD_CdrPlasmaReactionJSON.H>
 #include <CD_CdrPlasmaPhotoReactionJSON.H>
+#include <CD_CdrPlasmaSurfaceReactionJSON.H>
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
@@ -40,6 +41,13 @@ namespace Physics {
     */
     class CdrPlasmaJSON : public CdrPlasmaPhysics {
     public:
+
+      /*!
+	@brief Function alias for initial data function. 
+	@param[in] a_position Physical coordinates
+	@param[in] a_time     Time
+      */
+      using InitialDataFunction = std::function<Real(const RealVect a_position, const Real a_time)>;
 
       /*!
 	@brief Function for encapsulating operations f = f(E,N). 
@@ -297,9 +305,24 @@ namespace Physics {
       bool m_plotGas;
 
       /*!
+	@brief Plot Townsend ionization coefficient
+      */
+      bool m_plotAlpha;
+
+      /*!
+	@brief Plot Townsend attachment coefficient
+      */
+      bool m_plotEta;
+
+      /*!
 	@brief Using discrete photons or not.
       */
       bool m_discretePhotons;
+
+      /*!
+	@brief A flag for skipping reactions completely. 
+      */
+      bool m_skipReactions;
 
       /*!
 	@brief JSON definition. This is populated when calling parseJSON.
@@ -469,7 +492,9 @@ namespace Physics {
       */
       std::map<int, LookupTable<2> > m_diffusionTablesEN;
 
-      // TEMPERATURE DATA BEGINS HERE
+      // ===========================================
+      // PLASMA SPECIES TEMPERATURE DATA BEGINS HERE
+      // ===========================================      
 
       /*!
 	@brief Temperature lookup method
@@ -576,6 +601,54 @@ namespace Physics {
       */
       std::vector<CdrPlasmaPhotoReactionJSON> m_photoReactions;
 
+      // ===========================================
+      // ELECTRODE SURFACE REACTIONS BEGIN HERE
+      // ===========================================
+      
+      /*!
+	@brief Lookup method for the electrode surface reaction rates
+      */
+      std::map<int, LookupMethod> m_electrodeReactionLookup;
+
+      /*!
+	@brief Constant electrode reaction rate. 
+      */
+      std::map<int, Real> m_electrodeReactionConstants;
+
+      /*!
+	@brief Electrode reaction effiencies. Used for scaling reactions on electrodes in a "generic" way. 
+      */
+      std::map<int, FunctionEX> m_electrodeReactionEfficiencies;
+
+      /*!
+	@brief List of electrode reactions
+      */
+      std::vector<CdrPlasmaSurfaceReactionJSON> m_electrodeReactions;
+
+      // ===========================================
+      // DIELECTRIC SURFACE REACTIONS BEGIN HERE
+      // ===========================================
+
+      /*!
+	@brief Lookup method for the dielectric surface reaction rates
+      */
+      std::map<int, LookupMethod> m_dielectricReactionLookup;
+
+      /*!
+	@brief Constant dielectric reaction rate. 
+      */
+      std::map<int, Real> m_dielectricReactionConstants;
+
+      /*!
+	@brief Dielectric reaction effiencies. Used for scaling reactions on dielectrics in a "generic" way. 
+      */
+      std::map<int, FunctionEX> m_dielectricReactionEfficiencies;
+
+      /*!
+	@brief List of dielectric reactions
+      */
+      std::vector<CdrPlasmaSurfaceReactionJSON> m_dielectricReactions;      
+      
       /*!
 	@brief Parse class options
       */
@@ -641,15 +714,21 @@ namespace Physics {
       virtual void parsePlasmaReactions();
 
       /*!
+	@brief Generate an initial data function for a given plasma species
+	@param[in] a_json JSON field, usually (always?) describing one of the objects in the 'plasma species' field.
+      */
+      virtual InitialDataFunction parsePlasmaSpeciesInitialData(const json& a_json) const;
+
+      /*!
 	@brief Make a reaction set into a superset. This parses wildcards '@' in reaction string.
 	@param[in] a_reactants List of reactants. Can contain wildcard.
 	@param[in] a_products  List of products. Can contain wildcard.
 	@param[in] a_reaction  JSON reaction entry. 
 	@return Returns a list of reactants and products with wilcards replace. 
       */
-      virtual std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > parsePlasmaReactionWildcards(const std::vector<std::string>& a_reactants,
-														      const std::vector<std::string>& a_products,
-														      const json& a_reaction);
+      virtual std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > parseReactionWildcards(const std::vector<std::string>& a_reactants,
+														const std::vector<std::string>& a_products,
+														const json& a_reaction);
       /*!
 	@brief Parses a reaction string into reactangs and products
 	@param[out] a_reactants Left-hand side of reaction
@@ -669,42 +748,63 @@ namespace Physics {
       */
       virtual void sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
 					  const std::vector<std::string>& a_products,
-					  const std::string               a_reaction) const;      
+					  const std::string               a_reaction) const;
+
 
       /*!
-	@brief Parse scaling factors for reactions. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@brief Get the int-encoding corresponding to species involved in some reaction. 
+	@param[out] a_plasmaReactants   Plasma reactants
+	@param[out] a_neutralReactants  Neutral reactants
+	@param[out] a_photonReactants   Photon reactants
+	@param[out] a_plasmaProducts    Plasma products
+	@param[out] a_neutralProducts   Neutral products
+	@param[out] a_photonProducts    Photon products
+	@param[in]  a_reactants         Reactant names
+	@param[in]  a_products          Reaction names
       */
-      virtual void parsePlasmaReactionRate(const int a_reactionIndex, const json& a_reaction);
+      virtual void getReactionSpecies(std::list<int>&                 a_plasmaReactants,
+				      std::list<int>&                 a_neutralReactants,
+				      std::list<int>&                 a_photonReactants,					    
+				      std::list<int>&                 a_plasmaProducts,
+				      std::list<int>&                 a_neutralProducts,
+				      std::list<int>&                 a_photonProducts,				       
+				      const std::vector<std::string>& a_reactants,
+				      const std::vector<std::string>& a_products) const;
+
+      /*!
+	@brief Parse reaction rate for plasma reaction.
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+      */
+      virtual void parsePlasmaReactionRate(const int a_reactionIndex, const json& a_reactionJSON);
       
       /*!
 	@brief Parse scaling factors for reactions. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionScaling(const int a_reactionIndex, const json& a_reaction);
+      virtual void parsePlasmaReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse reaction plotting. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_reaction);
+      virtual void parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse plasma reaction descriptions. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_reaction);
+      virtual void parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse plasma reaction energy correction. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reaction);      
+      virtual void parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reactionJSON);      
 
       /*!
 	@brief Parse photo-reactions
@@ -713,26 +813,10 @@ namespace Physics {
 
       /*!
 	@brief Parse scaling for photo-reactions. Includes Helmholtz corrections if doing Helmholtz reconstruction of photoionization profiles. 
-	@param[in] a_index    Reaction index. 
-	@param[in] a_reaction Input reaction. Must be one of the entries in the 'photo reactions' array. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'photo reactions' array. 
       */
-      virtual void parsePhotoReactionScaling(const int a_reactionIndex, const json& a_reaction);      
-
-      /*!
-	@brief Get the int-encoding corresponding to species involved in a plasma reaction.
-	@param[out] a_plasmaReactants   Plasma reactants
-	@param[out] a_neutralReactants  Neutral reactants
-	@param[out] a_plasmaProducts    Plasma products
-	@param[out] a_photonProducts    Photon products
-	@param[in]  a_reactants         Reactants
-	@param[in]  a_products          Reaction products
-      */
-      virtual void getPlasmaReactionProducts(std::list<int>&                 a_plasmaReactants,
-					     std::list<int>&                 a_neutralReactants,
-					     std::list<int>&                 a_plasmaProducts,
-					     std::list<int>&                 a_photonProducts,
-					     const std::vector<std::string>& a_reactants,
-					     const std::vector<std::string>& a_products) const;      
+      virtual void parsePhotoReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);      
 
       /*!
 	@brief Do a species sanity check
@@ -752,21 +836,56 @@ namespace Physics {
 					 const std::string               a_reaction) const;
 
       /*!
-	@brief Get the int-encoding corresponding to species involved in a plasma reaction.
-	@param[out] a_plasmaReactants   Plasma reactants
-	@param[out] a_neutralReactants  Neutral reactants
-	@param[out] a_plasmaProducts    Plasma products
-	@param[out] a_photonProducts    Photon products
-	@param[in]  a_reactants         Reactants
-	@param[in]  a_products          Reaction products
+	@brief Parse secondary emission on electrodes
       */
-      virtual void getPhotoReactionProducts(std::list<int>&                 a_plasmaReactants,
-					    std::list<int>&                 a_neutralReactants,
-					    std::list<int>&                 a_photonReactants,					    
-					    std::list<int>&                 a_plasmaProducts,
-					    std::list<int>&                 a_neutralProducts,
-					    const std::vector<std::string>& a_reactants,
-					    const std::vector<std::string>& a_products) const;      
+      virtual void parseElectrodeReactions();
+
+      /*!
+	@brief Parse reaction rate for electrode surface reactions. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'electrode reactions' array. 
+      */
+      virtual void parseElectrodeReactionRate(const int a_reactionIndex, const json& a_reactionJSON);      
+
+      /*!
+	@brief Parse electrode reaction scaling for a specific reaction.
+	@details This currently exists without much functionality -- it just returns one for all reactions. As we
+	expand the functionality, this can be used to adjust for e.g. positional or field dependence.
+	@param[in] a_reactionIndex Reaction index (this is the array index in the reaction array supplied in the JSON file)
+	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
+      */
+      virtual void parseElectrodeReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+
+      /*!
+	@brief Parse secondary emission on dielectrics
+      */
+      virtual void parseDielectricReactions();
+
+      /*!
+	@brief Parse reaction rate for dielectric surface reactions. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'electrode reactions' array. 
+      */
+      virtual void parseDielectricReactionRate(const int a_reactionIndex, const json& a_reactionJSON);      
+
+      /*!
+	@brief Parse dielectric electrode reaction scaling for a specific reaction.
+	@details This currently exists without much functionality -- it just returns one for all reactions. As we
+	expand the functionality, this can be used to adjust for e.g. positional or field dependence.
+	@param[in] a_reactionIndex Reaction index (this is the array index in the dielectric reaction array supplied in the JSON file)
+	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
+      */
+      virtual void parseDielectricReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);      
+
+      /*!
+	@brief Check if a surface-reaction makes sense in terms of the species that have been defined.
+	@param[in] a_reactants Reactants
+	@param[in] a_products  Reaction products
+	@param[in] a_reaction  Reaction string
+      */
+      virtual void sanctifySurfaceReaction(const std::vector<std::string>& a_reactants,
+					   const std::vector<std::string>& a_products,
+					   const std::string               a_reaction) const;
 
       /*!
 	@brief Compute the various plasma species temperatures.
@@ -790,8 +909,7 @@ namespace Physics {
 
       /*!
 	@brief Compute the reaction rate for a plasma reaction.
-
-	This routine exists because we need to compute the rates both in advanceReactionNetwork and getPlotVariables. This function
+	@details This routine exists because we need to compute the rates both in advanceReactionNetwork and getPlotVariables. This function
 	reduces code duplication. 
 	@param[in] a_reactionIndex            Reaction index
 	@param[in] a_cdrDensities             Plasma species densities. 
@@ -864,6 +982,13 @@ namespace Physics {
 	@param[in] a_name Rte species name
       */
       bool isPhotonSpecies(const std::string& a_name) const;
+
+      /*!
+	@brief Check if file exists
+	@param[in] a_filename File name
+      */
+      bool doesFileExist(const std::string a_filename) const;
+
     };
   }
 }

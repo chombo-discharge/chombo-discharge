@@ -523,7 +523,6 @@ public:
     @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
   void reallocate(MFAMRIVData& a_data, const int a_lmin) const;
-
   /*!
     @brief Average down multifluid data over a realm. 
     @param[inout] a_data  Data to be coarsened.
@@ -563,6 +562,21 @@ public:
     @details This coarsens data from level a_lvl+1 to level a_lvl
   */
   void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl) const;
+
+
+  /*!
+    @brief Coarsen cells over a realm. This does a specific level. 
+    @param[inout] a_coarData Coarse grid data
+    @param[inout] a_fineData Fine grid data
+    @param[in]    a_level    The grid level corresponding to a_fineData
+    @param[in]    a_realm    Realm name
+    @param[in]    a_phase    Phase (gas or solid)
+  */
+  void averageDown(LevelData<EBCellFAB>&       a_coarData,
+		   const LevelData<EBCellFAB>& a_fineData,
+		   const int                   a_level,
+		   const std::string           a_realm,
+		   const phase::which_phase    a_phase) const;  
 
   /*!
     @brief Average down on specific realm and phase. 

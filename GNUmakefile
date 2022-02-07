@@ -13,22 +13,22 @@ discharge-geometries: discharge-source
 
 discharge-physics: discharge-source advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer
 
-advectiondiffusion: source
+advectiondiffusion: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/AdvectionDiffusion
 
-brownianwalker: source
+brownianwalker: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/BrownianWalker
 
-cdrplasma: source
+cdrplasma: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/CdrPlasma
 
-electrostatics: source
+electrostatics: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Electrostatics
 
-geometry: source
+geometry: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Geometry
 
-radiativetransfer: source
+radiativetransfer: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/RadiativeTransfer
 
 libclean:
@@ -47,5 +47,7 @@ allclean: libclean
 pristine: allclean
 	$(MAKE) --directory=$(CHOMBO_HOME) realclean
 	find . -type f -name "*.ex" -delete
+	find . -type f -name "*.d" -delete
+	find . -type f -name "*.o" -delete
 
-.PHONY: discharge-lib physics all source geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer libclean allclean pristine
+.PHONY: all chombo discharge-lib discharge-physics discharge-source discharge-geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer libclean allclean pristine

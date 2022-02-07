@@ -21,6 +21,7 @@
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
+#include <CD_NewIntersectionIF.H>
 #include <CD_ScanShop.H>
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
@@ -176,7 +177,7 @@ void ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
     parts.push_back(&(*(m_electrodes[i].getImplicitFunction())));
   }
 
-  m_implicitFunctionGas = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
+  m_implicitFunctionGas = RefCountedPtr<BaseIF> (new NewIntersectionIF(parts));
 
   // Build the EBIS geometry. Use either ScanShop or Chombo here. 
   if(m_useScanShop){
@@ -225,9 +226,9 @@ void ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
   else {
     Vector<BaseIF*> parts;
 
-    RefCountedPtr<BaseIF> dielBaseIF = RefCountedPtr<BaseIF> (new IntersectionIF(dielectricParts)); // This gives the region outside the dielectrics. 
-    RefCountedPtr<BaseIF> elecBaseIF = RefCountedPtr<BaseIF> (new IntersectionIF(electrodeParts )); // This is the region outside the the electrodes. 
-    RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF> (new ComplementIF  (*dielBaseIF   ));  // This is the region inside the dielectrics. 
+    RefCountedPtr<BaseIF> dielBaseIF = RefCountedPtr<BaseIF> (new NewIntersectionIF(dielectricParts)); // This gives the region outside the dielectrics. 
+    RefCountedPtr<BaseIF> elecBaseIF = RefCountedPtr<BaseIF> (new NewIntersectionIF(electrodeParts )); // This is the region outside the the electrodes. 
+    RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF> (new ComplementIF     (*dielBaseIF    )); // This is the region inside the dielectrics. 
 
     // We want the function which is the region inside the dielectrics and outside the electrodes, i.e. the intersection of the region "inside"
     // dielectrics and outside the electrods. 

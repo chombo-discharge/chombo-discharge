@@ -17,6 +17,7 @@
 // Our includes
 #include <CD_CdrGodunov.H>
 #include <CD_DataOps.H>
+#include <CD_ParallelOps.H>
 #include "CD_NamespaceHeader.H"
 
 CdrGodunov::CdrGodunov() : CdrTGA() {
@@ -61,6 +62,74 @@ void CdrGodunov::parseRuntimeOptions(){
   this->parseDivergenceComputation(); // Parses non-conservative divergence blending. 
 }
 
+Real CdrGodunov::computeAdvectionDt(){
+  CH_TIME("CdrGodunov::computeAdvectionDt()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::computeAdvectionDt()" << endl;
+  }
+
+  // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these two papers for details:
+  //
+  //       Bell, Colella, Glaz, J. Comp. Phys 85 (257), 1989
+  //       Minion, J. Comp. Phys 123 (435), 1996
+
+  Real minDt = std::numeric_limits<Real>::max();
+
+  if(m_isMobile){
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)              [lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()                        [lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box        cellBox = dbl  [dit()];	
+	const EBCellFAB& velo    = (*m_cellVelocity[lvl])[dit()];
+	const EBISBox&   ebisBox = ebisl[dit()];
+
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+	// Regular grid data.
+	const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();	
+
+	// Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far. 
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  Real velMax = 0.0;	  
+	  if(!ebisBox.isCovered(iv)){
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      velMax = std::max(velMax, std::abs(veloReg(iv,dir)));
+	    }
+	  }
+
+	  if(velMax > 0.0){
+	    minDt = std::min(dx/velMax, minDt);
+	  }	  
+	};
+
+	// Same kernel, but for cut-cells.
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
+	  Real velMax = 0.0;
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    velMax = std::max(velMax, std::abs(velo(vof, dir)));
+	  }
+
+	  if(velMax > 0.0){
+	    minDt = std::min(dx/velMax, minDt);
+	  }
+	};
+
+
+	// Execute the kernels.
+	BoxLoops::loop(cellBox, regularKernel  );
+	BoxLoops::loop(vofit,   irregularKernel);
+      }
+    }
+
+    // If we are using MPI then ranks need to know of each other's time steps.
+    minDt = ParallelOps::min(minDt);
+  }
+
+  return minDt;
+}
 
 void CdrGodunov::parseExtrapolateSourceTerm(){
   CH_TIME("CdrGodunov::parseExtrapolateSourceTerm()");

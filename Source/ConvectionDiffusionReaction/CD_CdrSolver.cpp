@@ -1941,7 +1941,7 @@ Real CdrSolver::computeAdvectionDt(){
     }
 
     // If we are using MPI then ranks need to know of each other's time steps.
-    minDt = ParallelOps::Min(minDt);
+    minDt = ParallelOps::min(minDt);
   }
 
   return minDt;
@@ -2024,7 +2024,7 @@ Real CdrSolver::computeDiffusionDt(){
       }
     }
 
-    minDt = ParallelOps::Min(minDt);
+    minDt = ParallelOps::min(minDt);
   }
 
   return minDt;
@@ -2137,7 +2137,7 @@ Real CdrSolver::computeAdvectionDiffusionDt(){
       }
     }
 
-    minDt = ParallelOps::Min(minDt);
+    minDt = ParallelOps::min(minDt);
   }
 
   return minDt;
@@ -2194,7 +2194,7 @@ Real CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance){
       }
     }
 
-    minDt = ParallelOps::Min(minDt);
+    minDt = ParallelOps::min(minDt);
   }
   
   return minDt;
@@ -2365,14 +2365,23 @@ Real CdrSolver::computeMass(){
     pout() << m_name + "::computeMass()" << endl;
   }
 
+  return this->computeMass(m_phi);
+}
+
+Real CdrSolver::computeMass(EBAMRCellData& a_phi){
+  CH_TIME("CdrSolver::computeMass(EBAMRCellData)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::computeMass(EBAMRCellData)" << endl;
+  }
+
   // TLDR: We have conservative coarsening so we just coarsen the solution and compute the mass on the coarsest level only.
   
-  m_amr->averageDown(m_phi, m_realm, m_phase);
+  m_amr->averageDown(a_phi, m_realm, m_phase);
 
   const Real dx  = m_amr->getDx()[0];
 
   Real mass = 0.;
-  DataOps::kappaSum(mass, *m_phi[0]);
+  DataOps::kappaSum(mass, *a_phi[0]);
 
   mass *= pow(dx, SpaceDim);
   

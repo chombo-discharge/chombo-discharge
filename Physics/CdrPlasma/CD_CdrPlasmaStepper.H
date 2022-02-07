@@ -155,11 +155,18 @@ namespace Physics {
       virtual void printStepReport() override;
 
       /*!
-	@brief Pre-regrid function. 
+	@brief Pre-regrid function -- this is the one called by Driver. 
 	@param[in] a_lmin           The coarsest level that changes
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
       */
       virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
+
+      /*!
+	@brief Do a preRegrid operation for internal storage (if needed). 
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+      */
+      virtual void preRegridInternals(const int a_lmin, const int a_oldFinestLevel);      
 
       /*!
 	@brief Regrid method.
@@ -254,12 +261,6 @@ namespace Physics {
       */
       virtual void parseOptions() = 0;
 
-      /*!
-	@brief Do a preRegrid operation for internal storage (if needed). 
-	@param[in] a_lmin           The coarsest level that changes
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
-      */
-      virtual void preRegridInternals(const int a_lmin, const int a_oldFinestLevel);
 
       /*!
 	@brief Deallocation function. This will deallocate internal storage in the subclasses as well as the solvers. 
@@ -782,11 +783,16 @@ namespace Physics {
 				    const Real&                                 a_time,
 				    const int                                   a_lvl);
 
-      //////// CODE-WALK FROM HERE HERE AND DOWNWARDS /////
-
       /*!
-	@brief Compute cdr fluxes on domain faces
-	@note Everything that comes in here should have been computed on the domain faces
+	@brief Compute CDR fluxes on domain faces for usage in boundary conditions. This is the AMR version. 
+	@param[out] a_cdrFluxes           CDR domain bounadry fluxes for solvers.
+	@param[in]  a_extrapCdrFluxes     CDR fluxes extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrDensities  CDR densities extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrVelocities CDR velocities extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrGradients  CDR gradients extrapolated to the domain faces. 
+	@param[in]  a_extrapRteFluxes     RTE fluxes on the domain faces. 
+	@param[in]  a_electricField       Electric field on the domain faces. 
+	@param[in]  a_time                Time.
       */
       virtual void computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_cdrFluxes,
 					  const Vector<EBAMRIFData*>& a_extrapCdrFluxes,
@@ -798,7 +804,17 @@ namespace Physics {
 					  const Real&                 a_time);
 
       /*!
-	@brief Compute cdr fluxes on domain faces. Level version
+	@brief Compute CDR fluxes on domain faces for usage in boundary conditions. This is the level version. 
+	@details This will iterate over the patches on each level and compute the domain fluxes. 
+	@param[out] a_cdrFluxes           CDR domain bounadry fluxes for solvers.
+	@param[in]  a_extrapCdrFluxes     CDR fluxes extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrDensities  CDR densities extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrVelocities CDR velocities extrapolated to the domain faces. 
+	@param[in]  a_extrapCdrGradients  CDR gradients extrapolated to the domain faces. 
+	@param[in]  a_extrapRteFluxes     RTE fluxes on the domain faces. 
+	@param[in]  a_electricField       Electric field on the domain faces. 
+	@param[in]  a_time                Time.
+	@param[in]  a_lvl                 Grid level
       */
       virtual void computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_cdrFluxes,
 					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrFluxes,
@@ -806,341 +822,310 @@ namespace Physics {
 					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrVelocities,
 					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapCdrGradients,
 					  const Vector<LevelData<DomainFluxIFFAB>*>& a_extrapRteFluxes,
-					  const LevelData<DomainFluxIFFAB>&          a_E,
+					  const LevelData<DomainFluxIFFAB>&          a_electricField,
 					  const Real&                                a_time,
 					  const int                                  a_lvl);
 
       /*!
-	@brief Compute the gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
-	@note This version computes the gradients from phi
+	@brief Extrapolate cell-centered fluxes to the EB centroid.
+	@param[out] a_extrapCdrFluxesEB CDR fluxes extrapolated to the EB.
+	@param[in]  a_cdrDensities      CDR densities on the cell center
+	@param[in]  a_cdrVelocities     CDR velocities on the cell center
+	@param[in]  a_phase             Phase
       */
-      virtual void computeGradientsAtEb(Vector<EBAMRIVData*>&         a_grad,
-					const phase::which_phase&     a_phase,
-					const Vector<EBAMRCellData*>& a_phi);
-
-      /*!
-	@brief Compute gradients at domain faces
-      */
-      virtual void computeGradientsAtDomainFaces(Vector<EBAMRIFData*>&         a_grad,
-						 const phase::which_phase&     a_phase,
-						 const Vector<EBAMRCellData*>& a_phi);
-
-
-
-
-
-      /*!
-	@brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
-      */
-      virtual void computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_fluxes,
-					     const Vector<EBAMRCellData*> a_densities,
-					     const Vector<EBAMRCellData*> a_velocities,
+      virtual void computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extrapCdrFluxesEB,
+					     const Vector<EBAMRCellData*> a_cdrDensities,
+					     const Vector<EBAMRCellData*> a_cdrVelocities,
 					     const phase::which_phase     a_phase);
 
+
       /*!
-	@brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
+	@brief Extrapolate drift fluxes to domain faces. 
+	@details Note that this projects the flux on the domain face vectors. 
+	@param[out] a_cdrDomainFluxes CDR fluxes extrapolated and projected onto the domain face. 
+	@param[in]  a_cdrDensities    Cell-centered CDR solver densities. 
+	@param[in]  a_cdrVelocities   Cell-centered CDR solver velocities. 
+	@param[in]  a_phase           Phase
       */
-      virtual void computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_ebvel,
-						 const Vector<EBAMRCellData*> a_velocities,
+      virtual void computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a_cdrDomainFluxes,
+						   const Vector<EBAMRCellData*> a_cdrDensities,
+						   const Vector<EBAMRCellData*> a_cdrVelocities,
+						   const phase::which_phase     a_phase);      
+
+      /*!
+	@brief Extrapolated cell-centered velocities to the EB. 
+	@details This only computes the normal velocity on the EB, i.e. the output is the extrapolated velocity projected along the EB normal. 
+	@param[out] a_cdrVelocitiesEB   EB-centered velocities
+	@param[in]  a_cdrVelocitiesCell Cell-centered velocities
+	@param[in]  a_phase             Phase
+      */
+      virtual void computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_cdrVelocitiesEB,
+						 const Vector<EBAMRCellData*> a_cdrVelocitiesCell,
 						 const phase::which_phase     a_phase);
-
-      /*!
-	@brief Compute the cell-centered fluxes and extrapolate these to the domain faces
-      */
-      virtual void computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a_fluxes,
-						   const Vector<EBAMRCellData*> a_densities,
-						   const Vector<EBAMRCellData*> a_velocities,
-						   const phase::which_phase     a_phase);
-
-
-      /*!
-	@brief Compute flux
-      */
-      virtual void computeFlux(EBAMRCellData&       a_flux,
-			       const EBAMRCellData& a_density,
-			       const EBAMRCellData& a_velocity);
-
-      virtual void computeFlux(LevelData<EBCellFAB>&       a_flux,
-			       const LevelData<EBCellFAB>& a_density,
-			       const LevelData<EBCellFAB>& a_velocity,
-			       const int                   a_lvl);
-
-      /*!
-	@brief Compute charge flux. 
-      */
-      virtual void computeChargeFlux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_flxues);
-
-
-
   
       /*!
 	@brief Deallocate internal solver storages
       */
       virtual void deallocateSolverInternals();
 
-      virtual void extrapolateToEb(LevelData<BaseIVFAB<Real> >& a_extrap,
+      /*!
+	@brief Extrapolated cell-centered data to the EB. This is the AMR version for all species. 
+	@param[out] a_ebData   EB-centered data
+	@param[in]  a_phase    Phase 
+	@param[in]  a_cellData Cell-centered data
+      */
+      virtual void extrapolateToEb(Vector<EBAMRIVData*>&         a_ebData,
+				   const phase::which_phase      a_phase,
+				   const Vector<EBAMRCellData*>& a_cellData);
+
+      /*!
+	@brief Extrapolated cell-centered data to the EB. This is the AMR version.
+	@param[out] a_ebData   EB-centered data
+	@param[in]  a_phase    Phase 
+	@param[in]  a_cellData Cell-centered data
+      */
+      virtual void extrapolateToEb(EBAMRIVData& a_ebData, const phase::which_phase a_phase, const EBAMRCellData& a_cellData);      
+
+      /*!
+	@brief Extrapolated cell-centered data to the EB. This is the level version. 
+	@param[out] a_ebData   EB-centered data
+	@param[in]  a_phase    Phase 
+	@param[in]  a_cellData Cell-centered data
+	@param[in]  a_lvl      Grid level
+      */
+      virtual void extrapolateToEb(LevelData<BaseIVFAB<Real> >& a_ebData,
 				   const phase::which_phase     a_phase,
-				   const LevelData<EBCellFAB>&  a_data,
+				   const LevelData<EBCellFAB>&  a_cellData,
 				   const int                    a_lvl);
 
-      /*!
-	@brief Extrapolate data to EB centroid
-      */
-      virtual void extrapolateToEb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
 
       /*!
-	@brief Extrapolate data to EB centroid
+	@brief Extrapolate cell-centered data to domain faces. This is the AMR version that does all species. 
+	@param[out] a_domainData Domain-centered data
+	@param[in]  a_phase      Phase
+	@param[in]  a_cellData   Cell-centered data. 
       */
-      virtual void extrapolateToEb(Vector<EBAMRIVData*>&         a_extrap,
-				   const phase::which_phase      a_phase,
-				   const Vector<EBAMRCellData*>& a_data);
+      virtual void extrapolateToDomainFaces(Vector<EBAMRIFData*>&         a_domainData,
+					    const phase::which_phase      a_phase,
+					    const Vector<EBAMRCellData*>& a_cellData);
 
       /*!
-	@brief Extrapolate to domain faces. Calls level version. 
+	@brief Extrapolate cell-centered data to domain faces. This is the AMR version.
+	@param[out] a_domainData Domain-centered data
+	@param[in]  a_phase      Phase
+	@param[in]  a_cellData   Cell-centered data. 
       */
-      virtual void extrapolateToDomainFaces(EBAMRIFData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
+      virtual void extrapolateToDomainFaces(EBAMRIFData&             a_domainData,
+					    const phase::which_phase a_phase,
+					    const EBAMRCellData&     a_cellData);
 
       /*!
-	@brief Extrapolate to domain faces
+	@brief Extrapolate cell-centered data to domain faces. This is the AMR version.
+	@param[out] a_domainData Domain-centered data
+	@param[in]  a_phase      Phase
+	@param[in]  a_cellData   Cell-centered data. 
+	@param[in]  a_lvl        Grid level
       */
-      virtual void extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_extrap,
+      virtual void extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_domainData,
 					    const phase::which_phase    a_phase,
-					    const LevelData<EBCellFAB>& a_data,
+					    const LevelData<EBCellFAB>& a_cellData,
 					    const int                   a_lvl);
 
+
       /*!
-	@brief Extrapolate to domain faces
+	@brief Extrapolate vector data to domain faces. This is the AMR version that does all species. 
+	@details This will extrapolate the vector data to domain faces and project it along the domain normal. 
+	@param[out] a_domainData Domain-centered data. Must have one component. 
+	@param[in]  a_phase      Phase
+	@param[in]  a_cellData   Cell-centered data. Must have SpaceDim components. 
       */
-      virtual void extrapolateToDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
-					    const phase::which_phase      a_phase,
-					    const Vector<EBAMRCellData*>& a_data);
-  
-
-      virtual void extrapolateToVectorDomainFaces(EBAMRIFData&             a_extrap,
-						  const phase::which_phase a_phase,
-						  const EBAMRCellData&     a_data);
-
-      virtual void extrapolateToVectorDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
+      virtual void extrapolateVectorToDomainFaces(Vector<EBAMRIFData*>&         a_domainData,
 						  const phase::which_phase      a_phase,
-						  const Vector<EBAMRCellData*>& a_data);
+						  const Vector<EBAMRCellData*>& a_cellData);
 
-      virtual void extrapolateVelocitiesVectorDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
+
+      /*!
+	@brief Extrapolate vector data to domain faces. This is the AMR version.
+	@details This will extrapolate the vector data to domain faces and project it along the domain normal. 
+	@param[out] a_domainData Domain-centered data. Must have one component. 
+	@param[in]  a_phase      Phase
+	@param[in]  a_cellData   Cell-centered data. Must have SpaceDim components. 
+      */      
+      virtual void extrapolateVectorToDomainFaces(EBAMRIFData&             a_domainData,
+						  const phase::which_phase a_phase,
+						  const EBAMRCellData&     a_cellData);
+
+
+      /*!
+	@brief Extrapolate velocities data to domain faces. This is the AMR version that does all species. 
+	@details This will extrapolate the velocities data to domain faces.
+	@param[out] a_domainVelocities Domain-centered velocities. Must have SpaceDim components. 
+	@param[in]  a_phase            Phase
+	@param[in]  a_cellData         Cell-centered velocities. Must have SpaceDim components. 
+      */      
+      virtual void extrapolateVelocitiesToDomainFaces(Vector<EBAMRIFData*>&             a_domainVelocities,
 							  const phase::which_phase      a_phase,
-							  const Vector<EBAMRCellData*>& a_data);
+							  const Vector<EBAMRCellData*>& a_cellVelocities);
 
       /*!
-	@brief Get maximum value of the cdr solver stuff
+	@brief Get maximum density in the CDR species. This will fetch both the value and the solver name. 
+	@param[out] a_cdrMax     Maximum density found in one of the CDR solvers
+	@param[out] a_solverName The solver name
       */
-      virtual void getCdrMax(Real& a_cdr_max, std::string& a_solver_name);
-
-
-
-
+      virtual void getCdrMax(Real& a_cdrMax, std::string& a_solverName) const;
 
       /*!
-	@brief Initialize sigma
+	@brief Initialize the surface charge. 
       */
       virtual void initialSigma();
 
       /*!
-	@brief Project flux
+	@brief Project a flux onto the EB normal. This is the AMR version. 
+	@param[out] a_projectedFlux Projected flux -- must have one component. 
+	@param[in]  a_flux          Vector flux -- must have SpaceDim components.
       */
-      virtual void projectFlux(LevelData<BaseIVFAB<Real> >& a_proj_flux, const LevelData<BaseIVFAB<Real> >& a_flux, const int a_lvl);
+      virtual void projectFlux(EBAMRIVData& a_projectedFlux, const EBAMRIVData& a_flux);
 
       /*!
-	@brief Extrapolated flux to EB and project it onto the normal
+	@brief Project a flux onto the EB normal. This is the level version. 
+	@param[out] a_projectedFlux Projected flux -- must have one component. 
+	@param[in]  a_flux          Vector flux -- must have SpaceDim components.
       */
-      virtual void projectFlux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux);
+      virtual void projectFlux(LevelData<BaseIVFAB<Real> >& a_projectedFlux, const LevelData<BaseIVFAB<Real> >& a_flux, const int a_lvl);
 
       /*!
-	@brief Project flux on the boundary normal
+	@brief Project flux onto domain edges/faces.
+	@param[out] a_projectedFlux Projected flux -- must have one component. 
+	@param[in]  a_flux          Vector flux -- must have SpaceDim components.
       */
-      virtual void projectDomain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux);
-
-
+      virtual void projectDomain(EBAMRIFData& a_projectedFlux, const EBAMRIFData& a_flux);
 
       /*!
-	@brief Regrid internal storage. This MUST be overwritten.
+	@brief Regrid internal storage. This MUST be overwritten by implementations. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
       */
       virtual void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
 
       /*!
-	@brief Regrid individual solvers
+	@brief Regrid all of our solvers. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
       */
       virtual void regridSolvers(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
       /*!
-	@brief Set data defined over dielectric cells to zero
+	@brief Set data defined over dielectric cells to zero.
+	@param[in] a_data EB-centered data. 
       */
-      virtual void resetDielectricCells(EBAMRIVData& a_data);
+      virtual void resetDielectricCells(EBAMRIVData& a_data) const;
 
       /*!
-	@brief Do a sanity check
+	@brief Do a sanity check. Only works when DEBUG=TRUE.
       */
-      virtual void sanityCheck();
+      virtual void sanityCheck() const;
+
+
 
       /*!
-	@brief Set fast rte
-      */
-      virtual void setFastRadiativeTransfer(const int a_fast_rte);
-
-      /*!
-	@brief Set fast rte
-      */
-      virtual void setFastPoisson(const int a_fast_poisson);
-
-      /*!
-	@brief Set hardcap on the time step
-      */
-      virtual void setMinDt(const Real a_min_dt);
-
-      /*!
-	@brief Set hardcap on the time step
-      */
-      virtual void setMaxDt(const Real a_min_dt);
-
-      /*!
-	@brief Set CFL condition
-      */
-      virtual void setCFL(const Real a_cfl);
-
-      /*!
-	@brief Set fudge factor for relaxation time
-      */
-      virtual void setRelaxTime(const Real a_relax_time);
-
-      /*!
-	@brief Set plasma kinetics
-      */
-      virtual void setCdrPlasmaPhysics(const RefCountedPtr<CdrPlasmaPhysics>& a_physics);
-
-      /*!
-	@brief Set solver verbosity
-      */
-      virtual void setSolverVerbosity();
-
-      /*!
-	@brief Setup the cdr solvers
+	@brief Setup the CDR solvers. 
       */
       virtual void setupCdr();
 
       /*!
-	@brief Setup the poisson solver
+	@brief Setup the field solver
       */
       virtual void setupPoisson();
 
       /*!
-	@brief Setup the rte solvers
+	@brief Setup the RTE solvers
       */
       virtual void setupRadiativeTransfer();
 
       /*!
-	@brief Instantiate the sigma solver
+	@brief Set up the surface charge solver. 
       */
       virtual void setupSigma();
 
       /*!
-	@brief Solver dumps data files
+	@brief Set solver verbosity.
+	@details This will set the solver verbosity to m_solverVerbosity. 
+      */
+      virtual void setSolverVerbosity();            
+
+      /*!
+	@brief All solvers writes plot files. These are *not* the same as the plot files written by Driver. 
       */
       virtual void solverDump();
 
       /*!
-	@brief Set potential
+	@brief Set voltage curve.
+	@param[in] a_voltage Voltage curve
       */
-      virtual void setVoltage(std::function<Real(const Real a_time)> a_potential);
+      virtual void setVoltage(std::function<Real(const Real a_time)> a_voltage);
 
       /*!
-	@brief RTE advance using data existing in other solvers
+	@brief Solve the radiative transfer problem. 
+	@details This will call the other version with states taken from the solvers. 
+	@param[in] a_dt Time step.
       */
       virtual void solveRadiativeTransfer(const Real a_dt);
 
       /*!
-	@brief Set the cdr layout
+	@brief Set the CDR layout. 
+	@param[in] a_cdr CDR solvers.
       */
       virtual void setCdrSolvers(RefCountedPtr<CdrLayout<CdrSolver> >& a_cdr);
 
       /*!
-	@brief Set the Poisson solver
+	@brief Set the field solver
+	@param[in] a_fieldSolver Field solver
       */
-      virtual void setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson);
+      virtual void setFieldSolver(RefCountedPtr<FieldSolver>& a_fieldSolver);
 
       /*!
-	@brief Set the RTE layout
-      */
+	@brief Set the RTE solvers
+	@param[in] a_rte RTE solvers
+      */      
       virtual void setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver> >& a_rte);
 
       /*!
-	@brief General RTE advance routine
-	@details This computes the source terms at the specified time and then advances the solution
-      */
-      virtual void solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_phis,
-					  Vector<EBAMRCellData*>&       a_rhs,
-					  const Vector<EBAMRCellData*>& a_cdr_states,
-					  const EBAMRCellData&          a_E,
-					  const Real                    a_time,
-					  const Real                    a_dt);
-
-      /*!
-	@brief Compute the ohmic current on electrodes
+	@brief Compute the ohmic current on electrodes.
+	@details This will compute the total charge flux through electrode surfaces and return it. 
+	@note In 2D this will yield the current per unit length into the domain. 
       */
       virtual Real computeElectrodeCurrent();
 
       /*!
 	@brief Compute the ohmic current on dielectrics
+	@details This will compute the total charge flux through dielectric surfaces and return it. 
       */
       virtual Real computeDielectricCurrent();
 
       /*!
 	@brief Compute the ohmic current through the domain faces
+	@details This will compute the total current through domain faces and return it. 
       */
       virtual Real computeDomainCurrent();
 
       /*!
-	@brief Compute induced current in external circuit due to ohmic conduction
+	@brief Compute induced current in external circuit due to ohmic conduction.
+	@details This will return int(E*J dV) over the entire domain. 
       */
       virtual Real computeOhmicInductionCurrent();
-			     
+
+
       /*!
-	@brief Compute the relaxation time
+	@brief Compute the relaxation time as dt = eps0/conductivity. 
       */
       virtual Real computeRelaxationTime();
-
-      /*!
-	@brief Restrict dt
-      */
-      virtual Real restrictDt() = 0;
-
-
 
       /*!
 	@brief Get dt
       */
       virtual Real getDt();
-
-      /*!
-	@brief Get the CFL time step
-      */
-      virtual Real getCflDt();
-
-      /*!
-	@brief Get cdr solvers
-      */
-      virtual RefCountedPtr<CdrLayout<CdrSolver> >& getCdrSolvers();
-
-      /*!
-	@brief Get cdr solvers
-      */
-      virtual RefCountedPtr<FieldSolver>& getFieldSolver();
-  
-      /*!
-	@brief Get cdr solvers
-      */
-      virtual RefCountedPtr<RtLayout<RtSolver>>& getRadiativeTransferSolvers();
-
-      /*!
-	@brief Get sigma solver
-      */
-      virtual RefCountedPtr<SigmaSolver>& getSigmaSolver();
   
     protected:
 
@@ -1210,7 +1195,7 @@ namespace Physics {
       /*!
 	@brief Set the potential
       */
-      std::function<Real(const Real a_time) > m_potential;
+      std::function<Real(const Real a_time) > m_voltage;
   
       /*!
 	@brief Minimum allowed time step
@@ -1223,14 +1208,14 @@ namespace Physics {
       Real m_maxDt;
 
       /*!
-	@brief CFL
+	@brief CFL number.
       */
       Real m_cfl;
 
       /*!
 	@brief Fudge factor for relaxation time
       */
-      Real m_relax_time;
+      Real m_relaxTime;
 
       /*!
 	@brief TIme
@@ -1245,7 +1230,7 @@ namespace Physics {
       /*!
 	@brief Computed CFL time step
       */
-      Real m_dt_cfl;
+      Real m_dtCFL;
 
       /*!
 	@brief Verbosity for solvers
@@ -1255,12 +1240,12 @@ namespace Physics {
       /*!
 	@brief Fast RTE solver
       */
-      int m_fast_rte;
+      int m_fastRTE;
 
       /*!
 	@brief Fast RTE solver
       */
-      int m_fast_poisson;
+      int m_fastPoisson;
 
       /*!
 	@brief Upwind factor
@@ -1287,16 +1272,36 @@ namespace Physics {
       */                  
       virtual void parseRelaxationTime();
 
+      /*!
+	@brief Parse the minimum allowed time step
+      */
       virtual void parseMinDt();
+
+      /*!
+	@brief Parse the maximum allowed time step
+      */      
       virtual void parseMaxDt();
+
+      /*!
+	@brief Parse the "fast poisson" method, i.e. how often we solve the Poisson equation. 
+      */            
       virtual void parseFastPoisson();
+
+      /*!
+	@brief Parse the "fast rte" method, i.e. how often we solve the Poisson equation. 
+      */                  
       virtual void parseFastRadiativeTransfer();
+
+      /*!
+	@brief Parse how we compute the source terms. 
+	@details This is for modifications near the EB.
+      */
       virtual void parseSourceComputation();      
 
       /*!
 	@brief Compute and put the current density in output data holder
-	@param[inout] a_output            Output data holder.
-	@param[inout] a_icomp             Starting component in a_output to begin at. On output this is incremented by SpaceDim.
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component in a_output to begin at. On output this is incremented by SpaceDim.
       */
       virtual void writeJ(EBAMRCellData& a_output, int& a_comp) const;
 

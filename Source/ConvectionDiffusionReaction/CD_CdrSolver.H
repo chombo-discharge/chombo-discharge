@@ -487,6 +487,13 @@ public:
   virtual Real computeMass();
 
   /*!
+    @brief Compute the "physical mass" in the input argument. 
+    @details This conservatively coarsens the solution and computes on the coarsest level only
+    @param[in] a_phi Cell-centered data. 
+  */
+  virtual Real computeMass(EBAMRCellData& a_phi);  
+
+  /*!
     @brief Compute the total charge in m_phi
     @details Calls computeMass and multiplies by charge
   */

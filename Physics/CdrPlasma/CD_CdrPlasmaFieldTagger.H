@@ -20,7 +20,7 @@ namespace Physics {
   namespace CdrPlasma {
   
     /*!
-      @brief Lightweight tagging class. Only tags cells based on electric field. 
+      @brief Lightweight tagging class which flags cells for refinement/coarsening using the electric field only. 
       @details This class fetches the point-wise electric field. The class is pure, so users must implement 
       the actual tagging criterion themselves. 
     */
@@ -35,15 +35,16 @@ namespace Physics {
       /*!
 	@brief Destructor
       */
-      ~CdrPlasmaFieldTagger();
+      virtual ~CdrPlasmaFieldTagger();
 
       /*!
-	@brief Compute tracer fields
+	@brief Compute tracer fields. 
+	@details Implements parent class method but introduces a cell-wise method CdrPlasmaFieldTagger::tracer which is used on per-cell basis. 
       */
-      void computeTracers();
+      void computeTracers() const override final;
 
       /*!
-	@brief Parse options
+	@brief Parse options. Must be implemented by users. 
       */
       virtual void parseOptions() = 0;
 
@@ -52,66 +53,90 @@ namespace Physics {
       /*!
 	@brief Scratch storage
       */
-      EBAMRCellData m_scratch;
+      mutable EBAMRCellData m_scratch;
   
       /*!
 	@brief Storage for electric field
       */
-      EBAMRCellData m_E;
+      mutable EBAMRCellData m_electricField;
 
       /*!
 	@brief Storage for electric field
       */
-      EBAMRCellData m_grad_E;
+      mutable EBAMRCellData m_gradElectricField;
 
       /*!
-	@brief Allocate memory
+	@brief Allocate memory for electric field and scratch. 
       */
-      void allocateStorage();
+      virtual void allocateStorage() const;
 
       /*!
-	@brief Deallocate memory
+	@brief Deallocate memory for electric field and scratch. 
       */
-      void deallocateStorage();
+      virtual void deallocateStorage() const;
 
       /*!
-	@brief Compute electric field
+	@brief Compute electric field onto the input data holders. 
+	@param[out] a_electricField         Cell-centered electric field
+	@param[out] a_gradientElectricField Gradient of |E| where E is the electric field. 
       */
-      void computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E);
+      virtual void computeElectricField(EBAMRCellData& a_electricField, EBAMRCellData& a_gradientElectricField) const;
     
       /*!
-	@brief Compute tracer field
+	@brief Compute tracer field. 
+	@param[in] a_pos                  Physical coordinates
+	@param[in] a_time                 Time
+	@param[in] a_electricField        Electric field (in SI units)
+	@param[in] a_minElectricField     Minimum value of electric field
+	@param[in] a_maxElectricField     Maximum value of electric field
+	@param[in] a_gradElectricField    Gradient of |E|, i.e. grad(|E|)
+	@param[in] a_minGradElectricField Maximum value of |grad(|E|)|
+	@param[in] a_maxGradElectricField Maximum value of |grad(|E|)|
+	@return This should return a Vector of values whose length is equal to the number of tracer fields the subclasses uses. 
       */
-      virtual Vector<Real> tracer(const RealVect          a_pos,
-				  const Real              a_time,
-				  const Real              a_dx,
-				  const RealVect          a_E,
-				  const Real              a_min_E,
-				  const Real              a_max_E,
-				  const RealVect          a_grad_E,
-				  const Real              a_min_grad_E,
-				  const Real              a_max_grad_E) = 0;
-
+      virtual Vector<Real> tracer(const RealVect a_pos,
+				  const Real     a_time,
+				  const Real     a_dx,
+				  const RealVect a_electricField,
+				  const Real     a_minElectricField,
+				  const Real     a_maxElectricField,
+				  const RealVect a_gradElectricField,
+				  const Real     a_minGradElectricField,
+				  const Real     a_maxGradElectricField) const = 0;
 
       /*!
 	@brief Coarsen a cell based on a tracer field
+	@param[in] a_pos         Physical position
+	@param[in] a_time        Current time
+	@param[in] a_dx          Grid resolution
+	@param[in] a_lvl         Grid level
+	@param[in] a_tracers     Tracer fields
+	@param[in] a_gradTracers Gradient of tracer fields
+	@return Return true if the cell should be coarsened and false otherwise. 
       */
       virtual bool coarsenCell(const RealVect         a_pos,
 			       const Real             a_time,
 			       const Real             a_dx,
 			       const int              a_lvl,
-			       const Vector<Real>     a_tracer,
-			       const Vector<RealVect> a_grad_tracer) = 0;
+			       const Vector<Real>     a_tracers,
+			       const Vector<RealVect> a_gradTracers) const = 0;
 
       /*!
 	@brief Refine a cell based on a tracer field
+	@param[in] a_pos         Physical position
+	@param[in] a_time        Current time
+	@param[in] a_dx          Grid resolution
+	@param[in] a_lvl         Grid level
+	@param[in] a_tracers     Tracer fields
+	@param[in] a_gradTracers Gradient of tracer fields
+	@return True if the cell should be refined and false otherwise. 
       */
       virtual bool refineCell(const RealVect         a_pos,
 			      const Real             a_time,
 			      const Real             a_dx,
 			      const int              a_lvl,
-			      const Vector<Real>     a_tracer,
-			      const Vector<RealVect> a_grad_tracer) = 0;
+			      const Vector<Real>     a_tracers,
+			      const Vector<RealVect> a_gradTracers) const = 0;
     };
   }
 }

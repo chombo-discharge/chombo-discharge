@@ -561,9 +561,15 @@ protected:
 
   /*!
     @brief Write a regrid file.
-    @details This writes a regular plot file /regrid
+    @details This writes a regular plot file to /regrid
   */
-  void writeRegridFile();
+  void writePreRegridFile();
+
+  /*!
+    @brief Write a regrid file.
+    @details This writes a regular plot file to /regrid
+  */
+  void writePostRegridFile();  
 
   /*!
     @brief Write a restart file

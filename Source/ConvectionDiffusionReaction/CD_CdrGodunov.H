@@ -55,6 +55,13 @@ public:
   */
   virtual void allocateInternals() override;
 
+  /*!
+    @brief Compute the largest possible advective time step (for explicit methods)
+    @details This computes dt = dx/max(|vx|,|vy|,|vz|), minimized over all grid levels and patches. 
+    @note This is the appropriate time step routine for the BCG reconstruction. 
+  */
+  virtual Real computeAdvectionDt() override;
+
 protected:
 
   /*!

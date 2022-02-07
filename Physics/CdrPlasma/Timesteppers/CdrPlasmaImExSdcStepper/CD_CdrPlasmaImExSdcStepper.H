@@ -23,12 +23,12 @@ namespace Physics {
   namespace CdrPlasma {
 
     /*!
-      @brief Class for evolving plasma equations with a multirate method using semi-implicit spectral deferred corrections
+      @brief Class for evolving plasma equations using implicit-explicit spectral deferred corrections.
     */
     class CdrPlasmaImExSdcStepper : public CdrPlasmaStepper {
     public:
   
-      // Forward declare nested classes. I don't want to clutter this file.
+      // Forward declare utility classes for handlnig the extra memory when advancing the solvers.
       class CdrStorage;
       class FieldStorage;
       class RtStorage;
@@ -37,77 +37,148 @@ namespace Physics {
   
     public:
 
-      CdrPlasmaImExSdcStepper();
+      /*!
+	@brief Disallowed constructor -- use the full constructor
+      */
+      CdrPlasmaImExSdcStepper() = delete;
+
+      /*!
+	@brief Full constructor.
+	@param[in] a_physics Reference to plasma physics object
+      */
       CdrPlasmaImExSdcStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics);
-      ~CdrPlasmaImExSdcStepper();
-  
-      Real advance(const Real a_dt);
 
-      void init();
+      /*!
+	@brief Destructor
+      */
+      virtual ~CdrPlasmaImExSdcStepper();
+
+      /*!
+	@brief Advance method. Implements the ImEx SDC algorithm
+	@param[in] a_dt Tried time step
+	@return Time step used (can be different from a_dt if using adaptive stepping).
+      */
+      Real advance(const Real a_dt) override;
+
+      /*!
+	@brief Allocation method for setting up internal storage.
+	@details This will set up the various storages for the SDC terms.
+      */
       void allocateInternals() override;
-      void deallocateInternals() override;
-      void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
-      void parseOptions() override;
-      void parseRuntimeOptions() override;
-      bool needToRegrid() override;
 
-      Vector<EBAMRCellData*> getCdrErrors();
+      /*!
+	@brief De-allocation method for deleting run-time storage. 
+      */      
+      void deallocateInternals() override;
+
+      /*!
+	@brief For regridding internal storage. Does nothing. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */      
+      void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+
+      /*!
+	@brief Parse startup options
+      */
+      void parseOptions() override;
+
+      /*!
+	@brief Parse run-time options.
+      */      
+      void parseRuntimeOptions() override;
   
     protected:
 
-      Vector<RefCountedPtr<CdrStorage> > m_cdr_scratch;
-      Vector<RefCountedPtr<RtStorage> > m_rte_scratch;
-      RefCountedPtr<FieldStorage>      m_fieldSolver_scratch;
-      RefCountedPtr<SigmaStorage>        m_sigma_scratch;
+      /*!
+	@brief Scratch storage for the CDR solvers.
+      */
+      Vector<RefCountedPtr<CdrStorage> > m_cdrScratch;
 
-      // Extra storage outside of solver storage
-      EBAMRCellData scratch1;
-      EBAMRCellData scratchD;
+      /*!
+	@brief Scratch storage for the radiative transfer solvers.
+      */      
+      Vector<RefCountedPtr<RtStorage> > m_rteScratch;
 
-      int m_max_retries;
+      /*!
+	@brief Scratch storage for the field solver.
+      */            
+      RefCountedPtr<FieldStorage> m_fieldScratch;
+      
+      /*!
+	@brief Scratch storage for the surface charge solver.
+      */                  
+      RefCountedPtr<SigmaStorage> m_sigmaScratch;
+
+      /*!
+	@brief Maximum number of retries when using adaptive time steps.
+      */
+      int m_maxRetries;
+
+      /*!
+	@brief Number of subintervals in the SDC discretization.
+      */      
       int m_p;
-      int m_k;
-      int m_error_norm;
-      int m_min_corr;
-      int m_error_idx;
 
-      Real m_accum_cfl;
-      Real m_regrid_cfl;
-      Real m_max_growth;
+      /*!
+	@brief Number of correction for the SDC discretization.
+      */            
+      int m_k;
+
+      /*!
+	@brief Error norm to use when using adaptive time steps
+      */
+      int m_errorNorm;
+
+      /*!
+	@brief Minimum number of SDC corrections.
+      */
+      int m_minCorr;
+
+      /*!
+	@brief The species error index -- allows us to restrict error evaluation and adaptive times stepping to a specified species.
+	@details If m_errorIdx < 0 we do all species.
+      */
+      int m_errorIdx;
+
+      /*!
+	@brief Maximum growth factor for the time step when using adaptive stepping
+      */
+      Real m_maxDtGrowth;
       Real m_minCFL;
       Real m_maxCFL;
-      Real m_cycleCFL;
-      Real m_err_thresh;
+      Real m_errThresh;
       Real m_safety;
-      Real m_decrease_safe;
-      Real m_new_dt; // dt for next time step
-      Real m_extrap_dt;
+      Real m_decreaseSafety;
+      Real m_newDt; // dt for next time step
+      Real m_extrapDt;
 
-      bool m_extrap_advect;
-      bool m_adaptive_dt;
-      bool m_print_report;
-      bool m_have_err; 
+      bool m_extrapAdvect;
+      bool m_adaptiveDt;
+      bool m_printReport;
+      bool m_haveError; 
       bool m_useTGA; // Second order diffusion
   
 
       // Basically only debugging stuff
-      bool m_do_advec_src;  
-      bool m_do_diffusion;  
-      bool m_do_poisson;
-      bool m_do_rte;
-      bool m_compute_D;
-      bool m_compute_v;
-      bool m_compute_S;
-      bool m_consistent_E;
-      bool m_consistent_rte;
-      bool m_have_dt_err;
-      bool m_profile_steps;
+      bool m_doAdvectionSource;  
+      bool m_doDiffusion;  
+      bool m_doPoisson;
+      bool m_doRTE;
+      bool m_computeD;
+      bool m_computeV;
+      bool m_computeS;
+      bool m_consistentE;
+      bool m_consistentRTE;
+      bool m_haveDtErr;
+      bool m_profileSteps;
 
       // Error things
-      Vector<Real> m_cdr_error;
-      Real m_sigma_error;
-      Real m_max_error;
-      Real m_pre_error;
+      Vector<Real> m_cdrError;
+      Real m_sigmaError;
+      Real m_maxError;
+      Real m_preError;
 
       // Stuff for Lobatto intervals, Vandermonde matrix, integration
       // weights, Lobatto nodes etc. 
@@ -117,7 +188,7 @@ namespace Physics {
       Vector<Real> m_tm;
       Vector<Real> m_dtm;
 
-      std::string m_which_nodes;
+      std::string m_whichNodes;
 
       // Get functions for storage
       RefCountedPtr<CdrStorage>& getCdrStorage(const CdrIterator<CdrSolver>& a_solverit);
@@ -158,6 +229,11 @@ namespace Physics {
       void integrateAdvectionReaction(const Real a_dt, const int a_m, const bool a_lagged_terms);
       void integrateAdvection(const Real a_dt, const int a_m, const bool a_lagged_terms);
       void integrateDiffusion(const Real a_dt, const int a_m, const bool a_lagged_terms);
+
+      /*!
+	@brief Get errors for CDR equations
+      */
+      Vector<EBAMRCellData*> getCdrErrors();      
 
       // Make integrands quadrature-ready
       void reconcileIntegrands();
@@ -202,7 +278,6 @@ namespace Physics {
 
       //
       Real getMaxError();
-      Real restrictDt() ;
       Real getMaxNodeDistance();
 
       // Profiling
