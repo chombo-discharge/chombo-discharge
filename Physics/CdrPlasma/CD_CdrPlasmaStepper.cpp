@@ -196,9 +196,6 @@ void CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity
 
   // Need to scale by electron charge.
   DataOps::scale(a_cellConductivity, Units::Qe);
-
-  m_amr->averageDown(a_cellConductivity, m_realm, m_phase);
-  m_amr->interpGhost(a_cellConductivity, m_realm, m_phase);  
 }
 
 void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
@@ -221,8 +218,6 @@ void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivi
   // Average the cell-centered conductivity to faces. Note that this includes one "ghost face", which we need
   // because the multigrid solver will interpolate face-centered conductivities to face centroids. 
   DataOps::averageCellScalarToFaceScalar(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
-
-  m_amr->averageDown(a_conductivityFace, m_realm, m_phase);
 #else
   DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
 #endif
@@ -1734,8 +1729,8 @@ void CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_c
       DataOps::setValue(*a_cdrDcoFace[idx], std::numeric_limits<Real>::max());
 
       // Coarsen the cell-centered diffusion coefficient before averaging to faces. 
-      m_amr->averageDown(cdrDcoCell[idx], m_realm, m_cdr->getPhase());
-      m_amr->interpGhost(cdrDcoCell[idx], m_realm, m_cdr->getPhase()); 
+      m_amr->averageDown  (cdrDcoCell[idx], m_realm, m_cdr->getPhase());
+      m_amr->interpGhostMG(cdrDcoCell[idx], m_realm, m_cdr->getPhase()); 
 
       // Average to cell faces. Note that this call also includes one ghost face. 
       DataOps::averageCellScalarToFaceScalar(*a_cdrDcoFace[idx], cdrDcoCell[idx], m_amr->getDomains());
@@ -1926,8 +1921,8 @@ void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a
     const int idx = solverIt.index();
     
     if(solverIt()->isMobile()){
-      m_amr->averageDown(*a_cdrVelocities[idx], m_realm, m_cdr->getPhase()); 
-      m_amr->interpGhost(*a_cdrVelocities[idx], m_realm, m_cdr->getPhase());
+      m_amr->averageDown  (*a_cdrVelocities[idx], m_realm, m_cdr->getPhase()); 
+      m_amr->interpGhostMG(*a_cdrVelocities[idx], m_realm, m_cdr->getPhase());
     }
   }
 }
@@ -2863,8 +2858,8 @@ void CdrPlasmaStepper::computeJ(EBAMRCellData& a_J) const{
   DataOps::scale(a_J, Units::Qe);
 
   // Coarsen and update ghost cells
-  m_amr->averageDown(a_J, m_realm, m_phase);
-  m_amr->interpGhost(a_J, m_realm, m_phase);  
+  m_amr->averageDown  (a_J, m_realm, m_phase);
+  m_amr->interpGhostMG(a_J, m_realm, m_phase);  
 }
 
 void CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) const {
@@ -2881,8 +2876,8 @@ void CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellD
   m_fieldSolver->computeElectricField(a_E, a_potential);
 
   // Update ghost cells. 
-  m_amr->averageDown(a_E, m_realm);
-  m_amr->interpGhost(a_E, m_realm);
+  m_amr->averageDown  (a_E, m_realm);
+  m_amr->interpGhostMG(a_E, m_realm);
 }
 
 void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase) const {
@@ -2907,8 +2902,8 @@ void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::whi
 
   m_fieldSolver->computeElectricField(a_E, a_phase, a_potential);
 
-  m_amr->averageDown(a_E, m_realm, a_phase);
-  m_amr->interpGhost(a_E, m_realm, a_phase);
+  m_amr->averageDown  (a_E, m_realm, a_phase);
+  m_amr->interpGhostMG(a_E, m_realm, a_phase);
 }
 
 void CdrPlasmaStepper::computeElectricField(EBAMRFluxData& a_electricFieldFace, const phase::which_phase a_phase, const EBAMRCellData& a_electricFieldCell) const {
@@ -4108,8 +4103,8 @@ Real CdrPlasmaStepper::computeRelaxationTime() {
   this->computeCellConductivity(conductivity);
 
   // Coarsen it and put it on centroids. 
-  m_amr->averageDown(conductivity, m_realm, phase::gas);
-  m_amr->interpGhost(conductivity, m_realm, phase::gas);
+  m_amr->averageDown  (conductivity, m_realm, phase::gas);
+  m_amr->interpGhostMG(conductivity, m_realm, phase::gas);
   
   m_amr->interpToCentroids(conductivity, m_realm, phase::gas);  
 

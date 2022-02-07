@@ -381,11 +381,11 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
     }
 
     // Coarsen the conductivity and space charge from the last step and update ghost cells. 
-    m_amr->averageDown(m_conductivityFactorCell, m_realm, m_phase);
-    m_amr->interpGhost(m_conductivityFactorCell, m_realm, m_phase);
+    m_amr->averageDown  (m_conductivityFactorCell, m_realm, m_phase);
+    m_amr->interpGhostMG(m_conductivityFactorCell, m_realm, m_phase);
 
-    m_amr->averageDown(m_semiImplicitRho, m_realm, m_phase);
-    m_amr->interpGhost(m_semiImplicitRho, m_realm, m_phase);
+    m_amr->averageDown  (m_semiImplicitRho, m_realm, m_phase);
+    m_amr->interpGhostMG(m_semiImplicitRho, m_realm, m_phase);
 
     // Set up the semi-implicit Poisson equation and solve it. 
     this->computeFaceConductivity (m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);
@@ -442,11 +442,11 @@ void CdrPlasmaGodunovStepper::postCheckpointSetup(){
     
     // When we enter this routine we will already have called read the checkpoint data into the conductivityFactor and semiimplicit space charge. We need
     // to set up the field solver with those quantities rather than the regular space charge.
-    m_amr->averageDown(m_conductivityFactorCell, m_realm, m_phase);
-    m_amr->interpGhost(m_conductivityFactorCell, m_realm, m_phase);
+    m_amr->averageDown  (m_conductivityFactorCell, m_realm, m_phase);
+    m_amr->interpGhostMG(m_conductivityFactorCell, m_realm, m_phase);
 
-    m_amr->averageDown(m_semiImplicitRho, m_realm, m_phase);
-    m_amr->interpGhost(m_semiImplicitRho, m_realm, m_phase);    
+    m_amr->averageDown  (m_semiImplicitRho, m_realm, m_phase);
+    m_amr->interpGhostMG(m_semiImplicitRho, m_realm, m_phase);    
     
     this->computeFaceConductivity (m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);
     this->setupSemiImplicitPoisson(m_conductivityFactorFace, m_conductivityFactorEB, 1.0                     );
@@ -496,8 +496,8 @@ bool CdrPlasmaGodunovStepper::solveSemiImplicitPoisson(){
   DataOps::setValue(rho, 0.0);
   DataOps::copy(rhoPhase, m_semiImplicitRho);
 
-  m_amr->averageDown(rho, m_realm);
-  m_amr->interpGhost(rho, m_realm);
+  m_amr->averageDown  (rho, m_realm);
+  m_amr->interpGhostMG(rho, m_realm);
   
   m_amr->interpToCentroids(rhoPhase, m_realm, m_phase);
   
@@ -641,8 +641,8 @@ void CdrPlasmaGodunovStepper::computeCdrGradients(){
     // Update the ghost cells so we can compute the gradient. 
     scratch.copy(solver->getPhi());
 
-    m_amr->averageDown(scratch, m_realm, m_phase);
-    m_amr->interpGhost(scratch, m_realm, m_phase);
+    m_amr->averageDown  (scratch, m_realm, m_phase);
+    m_amr->interpGhostMG(scratch, m_realm, m_phase);
 
     // Compute the gradient, coarsen it, and update the ghost cells. 
     m_amr->computeGradient(grad, scratch, m_realm, phase::gas);
@@ -1101,8 +1101,8 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
   this->computeCellConductivity(m_conductivityFactorCell);
   DataOps::scale(m_conductivityFactorCell, a_dt/Units::eps0);
 
-  m_amr->averageDown(m_conductivityFactorCell, m_realm, m_phase);
-  m_amr->interpGhost(m_conductivityFactorCell, m_realm, m_phase);  
+  m_amr->averageDown  (m_conductivityFactorCell, m_realm, m_phase);
+  m_amr->interpGhostMG(m_conductivityFactorCell, m_realm, m_phase);  
 
   // Average conductivity to faces and set up the semi-implicit poisson equation. 
   this->computeFaceConductivity (m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);

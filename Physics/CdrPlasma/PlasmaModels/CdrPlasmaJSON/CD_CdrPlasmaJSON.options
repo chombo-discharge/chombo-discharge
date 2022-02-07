@@ -4,3 +4,4 @@
 CdrPlasmaJSON.verbose          = false
 CdrPlasmaJSON.chemistry_file   = template.json
 CdrPlasmaJSON.discrete_photons = false
+CdrPlasmaJSON.skip_reactions   = false
