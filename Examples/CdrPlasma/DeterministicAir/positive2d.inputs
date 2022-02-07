@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-DeterministicAir.voltage   = 100E3
+DeterministicAir.voltage   = 50E3
 DeterministicAir.basename  = pout
 
 # ====================================================================================================
@@ -11,8 +11,8 @@ AmrMesh.lo_corner        = -0.2    0   # Low corner of problem domain
 AmrMesh.hi_corner        =  0.2    0.1 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 32      # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 8           # Maximum amr depth
-AmrMesh.max_sim_depth    = 7          # Maximum simulation depth
+AmrMesh.max_amr_depth    = 7           # Maximum amr depth
+AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm   = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
@@ -43,11 +43,11 @@ Driver.checkpoint_interval             = 10               # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 0                # Number of initial regrids
+Driver.initial_regrids                 = 4                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 1000              # Maximum number of steps
+Driver.max_steps                       = 1000             # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -227,6 +227,6 @@ CdrPlasmaStreamerTagger.buffer            = 4            # Grow tagged cells
 
 CdrPlasmaStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
-CdrPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-CdrPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
+CdrPlasmaStreamerTagger.refine_alpha      = 1.5          # Set alpha refinement. Lower  => More mesh
+CdrPlasmaStreamerTagger.coarsen_alpha     = 0.3          # Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth

@@ -32,8 +32,7 @@
 	     "min E/N": 10,
 	     "max E/N": 2000,
 	     "points" : 100,
-	     "spacing": "exponential",
-	     "dump" : "electron_mobility.dat"
+	     "spacing": "exponential"
 	 },
 	 "diffusion": {
 	     "lookup": "table E/N",
@@ -44,8 +43,7 @@
 	     "min E/N": 10,
 	     "max E/N": 2000,
 	     "points": 100,
-	     "spacing": "exponential",
-	     "dump": "electron_diffusion.dat"
+	     "spacing": "exponential"
 	 },
 	 "initial data": {
 	     "uniform": 1.0,
@@ -68,8 +66,7 @@
 	     "min E/N": 10,
 	     "max E/N": 2000,
 	     "points": 100,
-	     "spacing": "exponential",
-	     "dump": "electron_temperature.dat"
+	     "spacing": "exponential"
 	 }
      },
      {
@@ -186,7 +183,6 @@
      "max E/N": 2000,
      "points": 200,
      "spacing": "exponential",
-     "dump": "alpha.dat",
      "plot": true
  },
  "eta": {
@@ -199,7 +195,6 @@
      "max E/N": 2000,
      "points": 200,
      "spacing": "exponential",
-     "dump": "eta.dat",
      "plot": true     
  }, 
  "plasma reactions": 
@@ -217,7 +212,6 @@
 	 "points": 200,
 	 "spacing": "uniform",	 	 
 	 "scale": 1.0,
-	 "dump": "O2_ionization.dat",
 	 "soloviev" : {
 	     "correction": true,
 	     "species": "e"
