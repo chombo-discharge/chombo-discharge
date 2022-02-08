@@ -53,9 +53,9 @@ namespace Physics {
 	@brief Function for encapsulating operations f = f(E,N). 
 	field in Townsend units
 	@param[in] a_E Electric field in SI units.
-	@param[in] a_N Neutral density
+	@param[in] a_N Neutral density.
 	@return Returns f = f(E,N). 
-	@note a_E is in physical units. 
+	@note a_E is in SI units and the neutral density is in m^-3.
       */
       using FunctionEN = std::function<Real(const Real a_E, const Real a_N)>;
 
@@ -956,9 +956,22 @@ namespace Physics {
 
       /*!
 	@brief Protect the @ character in a string
-	@param[in] a_str String If it contains the at character we throw an error. 
+	@param[in] a_str Input string. If it contains the at character we throw an error. 
       */
       bool containsWildcard(const std::string a_str) const;
+
+      /*!
+	@brief Protect all kinds of brackets in a string.
+	@param[in] a_str Input string. If it contains any bracket we throw an error.
+      */
+      bool containsBracket(const std::string a_str) const;
+
+      /*!
+	@brief Return true if string starts and ends with a paranthesis.
+	@param[in] a_str Input string. 
+	@return True if the first character in the string is ( and the last character is )
+      */      
+      bool isBracketed(const std::string a_str) const;
 
       /*!
 	@brief Remove whitespace from string

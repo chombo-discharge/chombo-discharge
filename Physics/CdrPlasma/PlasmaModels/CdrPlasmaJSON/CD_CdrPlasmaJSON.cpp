@@ -109,6 +109,26 @@ bool CdrPlasmaJSON::containsWildcard(const std::string a_str) const {
   return (a_str.find("@") != std::string::npos);
 }
 
+bool CdrPlasmaJSON::containsBracket(const std::string a_str) const {
+  const std::list<char> bracketList{'(', ')', '[', ']', '{', '}'};
+
+  bool containsBracket = false;
+
+  for (const auto& b : bracketList){
+    if (a_str.find(b) != std::string::npos){
+      containsBracket = true;
+
+      break;
+    }
+  }
+
+  return containsBracket;
+}
+
+bool CdrPlasmaJSON::isBracketed(const std::string a_str) const {
+  return (a_str.front() == '(' && a_str.back() == ')');
+}
+
 void CdrPlasmaJSON::sanityCheckSpecies() const {
   CH_TIME("CdrPlasmaJSON::sanityCheckSpecies()");
   if(m_verbose){
@@ -425,7 +445,10 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     const Real        speciesFraction =      species["molar fraction"].get<Real>() / molarSum;
 
     // Names can not contain the at letter.
-    if(containsWildcard(speciesName)) this->throwParserError(baseError + " -- species name must not contain '@' letter");
+    if(this->containsWildcard(speciesName)) this->throwParserError(baseError + " -- species name must not contain '@' letter");
+
+    // Names can not contain paranthesis either
+    if(this->containsBracket(speciesName)) this->throwParserError(baseError + "but species '" + speciesName + "' can not contain brackets");    
 
     // It's an error if a species was defined twice.
     if(isNeutralSpecies(speciesName)) this->throwParserError(baseError + " -- Neutral species '" + speciesName + "' was defined more than once");        
@@ -477,10 +500,13 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     const auto diffusive   =      species["diffusive"].get<bool       >() ;
 
     // Does not get to contain at letter
-    if(containsWildcard(name)) this->throwParserError(baseError + "but species '" + name + "' can not contain the '@' letter");
+    if(this->containsWildcard(name)) this->throwParserError(baseError + "but species '" + name + "' can not contain the '@' letter");
+
+    // Names can not contain paranthesis either
+    if(this->containsBracket(name)) this->throwParserError(baseError + "but species '" + name + "' can not contain brackets");
 
     // It's an error if the species was already defined. 
-    if(isPlasmaSpecies(name)) this->throwParserError(baseError + "but plasma species '" + name + "' was defined more than once");
+    if(this->isPlasmaSpecies(name)) this->throwParserError(baseError + "but plasma species '" + name + "' was defined more than once");
     
     const bool hasInitData = species.contains("initial data");
 
@@ -772,10 +798,13 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
     const auto kappa = trim(species["kappa"].get<std::string>());
 
     // Does not get to contain at letter.
-    if(containsWildcard(name)) this->throwParserError(baseError + " -- photon species name cannot contain '@'");
+    if(this->containsWildcard(name)) this->throwParserError(baseError + "but photon species '" + name + "' cannot contain '@'");
+
+    // Names can not contain paranthesis either
+    if(this->containsBracket(name)) this->throwParserError(baseError + "but photon species '" + name + "' can not contain brackets");    
 
     // It's an error if the species is already defined.
-    if(isPhotonSpecies(name)) this->throwParserError(baseError + "photon species '" + name + "' was defined more than once");    
+    if(this->isPhotonSpecies(name)) this->throwParserError(baseError + "photon species '" + name + "' was defined more than once");    
 
     // Set the kappa-function needed by RteSpeciesJSON.
     std::function<Real(const RealVect a_position)> kappaFunction = [](const RealVect a_position) -> Real {return 1.0;};
@@ -1495,10 +1524,18 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
 
       // This is the reaction index for the current index. The reaction we are currently
       // dealing with is put in m_plasmaReactions[reactionIdex]. 
-      const int reactionIndex = m_plasmaReactions.size();      
+      const int reactionIndex = m_plasmaReactions.size();
+
+      // Go through the right-hand side of the reaction and ignore any species that are bracketed.
+      std::vector<std::string> trimmedProducts;
+      for (const auto& p : curProducts){
+	if(!(this->isBracketed(p))){
+	  trimmedProducts.emplace_back(p);
+	}
+      }
 
       // Make sure reaction string makes sense. 
-      this->sanctifyPlasmaReaction(curReactants, curProducts, reaction);      
+      this->sanctifyPlasmaReaction(curReactants, trimmedProducts, reaction);      
 
       // Parse the reaction parameters. 
       this->parsePlasmaReactionRate       (reactionIndex, R);
@@ -1522,7 +1559,7 @@ void CdrPlasmaJSON::parsePlasmaReactions() {
 			       neutralProducts,			       
 			       photonProducts,
 			       curReactants,
-			       curProducts);      
+			       trimmedProducts);      
 
       // Now create the reaction -- note that plasma reactions don't use photon species on the left hand side of the
       // reaction, and it ignores neutral species on the right-hand side of the reaction.
@@ -1552,7 +1589,7 @@ std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > CdrPl
   
   if(containsWildcard){
     if(!(a_R.contains("@"))) {
-      this->throwParserError(baseError + "got reaction wildcard '@' but array '@:' was specified");
+      this->throwParserError(baseError + "got reaction wildcard '@' but array '@:' was not specified");
     }
 
     // Get the wildcards array. 
@@ -1876,6 +1913,28 @@ void CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const jso
     m_plasmaReactionLookup.  emplace(std::make_pair(a_reactionIndex, LookupMethod::TableEN));
     m_plasmaReactionTablesEN.emplace(std::make_pair(a_reactionIndex, reactionTable         ));      
   }
+  else if (lookup == "functionEN expA"){
+    if(!(a_R.contains("c1"))) this->throwParserError(baseError + "and got 'functionEN expA' but field 'c1' is required but not specified");
+    if(!(a_R.contains("c2"))) this->throwParserError(baseError + "and got 'functionEN expA' but field 'c2' is required but not specified");
+    if(!(a_R.contains("c3"))) this->throwParserError(baseError + "and got 'functionEN expA' but field 'c3' is required but not specified");
+    if(!(a_R.contains("c4"))) this->throwParserError(baseError + "and got 'functionEN expA' but field 'c4' is required but not specified");
+    if(!(a_R.contains("c5"))) this->throwParserError(baseError + "and got 'functionEN expA' but field 'c5' is required but not specified");
+
+    // Get the constants
+    const Real c1 = a_R["c1"].get<Real>();
+    const Real c2 = a_R["c2"].get<Real>();
+    const Real c3 = a_R["c3"].get<Real>();
+    const Real c4 = a_R["c4"].get<Real>();
+    const Real c5 = a_R["c5"].get<Real>();
+
+    auto func = [c1,c2,c3,c4,c5](const Real a_E, const Real a_N) -> Real {
+      return c1*exp(-std::pow(c2/(c3 + c4*(a_E/ (Units::Td * a_N))), c5));
+    };
+
+    // Add the function and identifier. 
+    m_plasmaReactionLookup.     emplace(std::make_pair(a_reactionIndex, LookupMethod::FunctionEN));
+    m_plasmaReactionFunctionsEN.emplace(std::make_pair(a_reactionIndex, func                    ));
+  }
   else{
     this->throwParserError(baseError + "but lookup = '" + lookup + "' is not recognized");
   }  
@@ -2062,8 +2121,6 @@ void CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const
   }
 }
 
-
-
 void CdrPlasmaJSON::parsePhotoReactions(){
   CH_TIME("CdrPlasmaJSON::parsePhotoReactions()");
   if(m_verbose){
@@ -2081,8 +2138,19 @@ void CdrPlasmaJSON::parsePhotoReactions(){
     // Index.
     const int reactionIndex = m_photoReactions.size();
 
-    this->parseReactionString  (reactants, products, reaction);
-    this->sanctifyPhotoReaction(reactants, products, reaction);
+    // Parse the reaction string. 
+    this->parseReactionString(reactants, products, reaction);
+
+    // Ignore products on the right-hand side that are bracketed.
+    std::vector<std::string> trimmedProducts;
+    for (const auto& p : products){
+      if(!(this->isBracketed(p))){
+	trimmedProducts.emplace_back(p);
+      }
+    }
+
+    // Ensure that the reaction string makes sense. 
+    this->sanctifyPhotoReaction(reactants, trimmedProducts, reaction);
 
 
     // Parse if we use Helmholtz reconstruction for this photoionization method.
@@ -2103,7 +2171,7 @@ void CdrPlasmaJSON::parsePhotoReactions(){
 			     neutralProducts,
 			     photonProducts,			     
 			     reactants,
-			     products);
+			     trimmedProducts);
 
     // Add the reaction to the pile. 
     m_photoReactions.emplace_back(plasmaReactants, neutralReactants, photonReactants, plasmaProducts, neutralProducts);
@@ -2774,10 +2842,28 @@ Real CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_rea
   case LookupMethod::FunctionEN:
     {
       k  = m_plasmaReactionFunctionsEN.at(a_reactionIndex)(a_E, a_N);
-      k *= a_N;
+
+      for (const auto& n : neutralReactants){
+	k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }      
 	  
       break;
     }
+  case LookupMethod::TableEN:
+    {
+      // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that. 
+      const LookupTable<2>& reactionTable = m_plasmaReactionTablesEN.at(a_reactionIndex);
+
+      // Get the reaction rate. 
+      k  = reactionTable.getEntry<1>(a_Etd);
+
+      // Multiply by neutral species densities. 
+      for (const auto& n : neutralReactants){
+	k *= (m_neutralSpeciesDensities[n])(a_pos);
+      }
+	  
+      break;
+    }    
   case LookupMethod::AlphaV:
     {
       const int idx = m_plasmaReactionAlphaV.at(a_reactionIndex);
@@ -2813,21 +2899,6 @@ Real CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_rea
 
       break;
     }
-  case LookupMethod::TableEN:
-    {
-      // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that. 
-      const LookupTable<2>& reactionTable = m_plasmaReactionTablesEN.at(a_reactionIndex);
-
-      // Get the reaction rate. 
-      k  = reactionTable.getEntry<1>(a_Etd);
-
-      // Multiply by neutral species densities. 
-      for (const auto& n : neutralReactants){
-	k *= (m_neutralSpeciesDensities[n])(a_pos);
-      }
-	  
-      break;
-    }
   default:
     {
       MayDay::Error("CdrPlasmaJSON::computePlasmaReactionRate -- logic bust");
@@ -2836,7 +2907,13 @@ Real CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_rea
     }
   }
 
-  // Modify by other parameters.
+  // Now multiply by the rest of the left-hand side -- all neutrals should be done above so we are only missing the plasma
+  // reactants. After this, the reaction is essentially k -> k * n[A] * n[B] * ...
+  for (const auto& r : plasmaReactants){
+    k *= a_cdrDensities[r];
+  }  
+
+  // Modify by user-provided reaction efficiencies and scales. 
   k *= m_plasmaReactionEfficiencies.at(a_reactionIndex)(a_E, a_pos);
 
   // This is a hook that uses the Soloviev correction. It modifies the reaction rate according to k = k * (1 + (E.D*grad(n))/(K * n * E^2) where
@@ -2857,11 +2934,6 @@ Real CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_rea
     fcorr = std::max(fcorr, 0.0);
       
     k *= fcorr;
-  }
-
-  // Finally compute the total consumption. After this, k -> total consumption. 
-  for (const auto& r : plasmaReactants){
-    k *= a_cdrDensities[r];
   }
 
   return k;
