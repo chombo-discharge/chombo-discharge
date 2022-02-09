@@ -26,38 +26,38 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Namespace which encapsulates some changes to standard Chombo HDF5 IO.
+  @brief Namespace which encapsulates chombo-discharge IO functionality. 
 */
 namespace DischargeIO {
 
   /*!
     @brief A shameless copy of Chombo's writeEBHDF5 but including the lower-left corner of the physical domain as well.
     @param[in] a_filename         File name
+    @param[in] a_variableNames    Grid variable names
     @param[in] a_grids            Grids on each AMR level
     @param[in] a_data             Data on the AMR levels
-    @param[in] a_variableNames    Grid variable names
-    @param[in] a_coarsestDomain   Coarsest grid domain
-    @param[in] a_coarsestDx       Coarsest grid resolution
+    @param[in] a_domains          Grid domains
+    @param[in] a_dx               Grid resolutions
+    @param[in] a_refinementRatios Refinement ratios
     @param[in] a_dt               Time step
     @param[in] a_time             Time
     @param[in] a_probLo           Lower-left physical corner
-    @param[in] a_refinementRatios Refinement ratios
     @param[in] a_numLevels        Number of AMR levels
-    @param[in] a_ghostVect        Number of ghost cells to include in the plot files.
+    @param[in] a_numGhost         Number of ghost cells included in the output. 
     @todo The current implementation doubles the memory in the output data. We should look into more general aliasing functions. 
    */
   void writeEBHDF5(const std::string&                     a_filename,
+		   const Vector<std::string>&             a_variableNames,		   
 		   const Vector<DisjointBoxLayout>&       a_grids,
 		   const Vector<LevelData<EBCellFAB>* > & a_data,
-		   const Vector<std::string>&             a_variableNames,
-		   const ProblemDomain&                   a_coarsestDomain,
-		   const Real&                            a_coarsestDx,
-		   const Real&                            a_dt,
-		   const Real&                            a_time,
-		   const RealVect&                        a_probLo,
-		   const Vector<int>&                     a_refinementRatios,
-		   const int&                             a_numLevels,
-		   const IntVect                          a_ghostVect= IntVect::Zero);  
+		   const Vector<ProblemDomain>&           a_domains,
+		   const Vector<Real>                     a_dx,
+		   const Vector<int>                      a_refinementRatios,		   
+		   const Real                             a_dt,
+		   const Real                             a_time,
+		   const RealVect                         a_probLo,
+		   const int                              a_numLevels,
+		   const int                              a_numGhost);
 
 }
 

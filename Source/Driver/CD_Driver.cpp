@@ -1979,18 +1979,18 @@ void Driver::writeGeometry(){
   string fname(file_char);
 
 #ifdef CH_USE_HDF5
-  DischargeIO::writeEBHDF5(fname, 
+  DischargeIO::writeEBHDF5(fname,
+			   names, 			   
 			   m_amr->getGrids(m_realm),
 			   outputPtr,
-			   names, 
-			   m_amr->getDomains()[0],
-			   m_amr->getDx()[0], 
+			   m_amr->getDomains(),
+			   m_amr->getDx(),
+			   m_amr->getRefinementRatios(),
 			   m_dt,
 			   m_time,
 			   m_amr->getProbLo(),
-			   m_amr->getRefinementRatios(),
 			   1 + m_amr->getFinestLevel(),
-			   m_numPlotGhost*IntVect::Unit);
+			   m_numPlotGhost);
 #endif
 }
 
@@ -2173,18 +2173,18 @@ void Driver::writePlotFile(const std::string a_filename){
   }
   
   timer.startEvent("Write data");
-  DischargeIO::writeEBHDF5(a_filename, 
+  DischargeIO::writeEBHDF5(a_filename,
+			   plotVariableNames, 			   
 			   m_amr->getGrids(m_realm),
 			   output_ptr,
-			   plotVariableNames, 
-			   m_amr->getDomains()[0],
-			   m_amr->getDx()[0], 
+			   m_amr->getDomains(),
+			   m_amr->getDx(),
+			   m_amr->getRefinementRatios(),			   
 			   m_dt,
 			   m_time,
 			   m_amr->getProbLo(),	      
-			   m_amr->getRefinementRatios(),
 			   plot_depth + 1,
-			   m_numPlotGhost*IntVect::Unit);
+			   m_numPlotGhost);
   timer.stopEvent("Write data");
 #endif
   

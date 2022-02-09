@@ -10,8 +10,6 @@
 */
 
 // Chombo includes
-#include <EBAMRIO.H>
-#include <AMRIO.H>
 #include <CH_HDF5.H>
 #include <PolyGeom.H>
 
@@ -20,23 +18,24 @@
 #include <CD_NamespaceHeader.H>
 
 void DischargeIO::writeEBHDF5(const std::string&                     a_filename,
+			      const Vector<std::string>&             a_variableNames,			      
 			      const Vector<DisjointBoxLayout>&       a_grids,
 			      const Vector<LevelData<EBCellFAB>* > & a_data,
-			      const Vector<std::string>&             a_variableNames,
-			      const ProblemDomain&                   a_coarsestDomain,
-			      const Real&                            a_coarsestDx,
-			      const Real&                            a_dt,
-			      const Real&                            a_time,
-			      const RealVect&                        a_probLo,			      
-			      const Vector<int>&                     a_refinementRatios,
-			      const int&                             a_numLevels,
-			      const IntVect                          a_ghostVect) {
+			      const Vector<ProblemDomain>&           a_domains,
+			      const Vector<Real>                     a_dx,
+			      const Vector<int>                      a_refinementRatios,
+			      const Real                             a_dt,
+			      const Real                             a_time,
+			      const RealVect                         a_probLo,
+			      const int                              a_numLevels,
+			      const int                              a_numGhost) {
   CH_TIME("DischargeIO::writeEBHDF5");
 
   const int numInputVars  = a_data[0]->nComp();  
 
   // Basic assertions to make sure the input makes sense. 
   CH_assert(a_numLevels               >  0              );
+  CH_assert(a_numGhost                >= 0              );
   CH_assert(a_grids.           size() >= a_numLevels    );
   CH_assert(a_data.            size() >= a_numLevels    );
   CH_assert(a_refinementRatios.size() >= a_numLevels - 1);
@@ -100,14 +99,12 @@ void DischargeIO::writeEBHDF5(const std::string&                     a_filename,
   for (int lvl = 0; lvl < a_numLevels; lvl++){
     const DisjointBoxLayout& dbl  =  a_grids[lvl];
 
-    // This is the grid resolution on this level.
-    Real dx = a_coarsestDx;
-    for (int i = 0; i < lvl; i++){
-      dx *= a_refinementRatios[lvl];
-    }
+    // This is the domain and grid resolution on this level.
+    const Real          dx     = a_dx     [lvl];
+    const ProblemDomain domain = a_domains[lvl];
 
     // Allocate the Chombo FArrayBox data. 
-    chomboData[lvl] = new LevelData<FArrayBox> (dbl, numCompTotal, a_ghostVect);
+    chomboData[lvl] = new LevelData<FArrayBox> (dbl, numCompTotal, a_numGhost*IntVect::Unit);
       
     LevelData<FArrayBox>& fabData = *chomboData[lvl];
 
@@ -119,7 +116,7 @@ void DischargeIO::writeEBHDF5(const std::string&                     a_filename,
       // Grid information and user input variables.
       const EBCellFAB& data    = (*a_data[lvl])[dit()];
       const EBISBox&   ebisbox = data.getEBISBox();
-      const Box        box     = currentFab.box() & ebisbox.getDomain();
+      const Box        box     = currentFab.box() & domain;
 
       // Copy the regular data. This will also do single-valued cut-cells. 
       constexpr int srcStartComp = 0;
@@ -165,7 +162,6 @@ void DischargeIO::writeEBHDF5(const std::string&                     a_filename,
       }
 
       // Run through the grid box and set the grid information. 
-
       for (BoxIterator bit(box); bit.ok(); ++bit){
 	const IntVect& iv = bit();
 
@@ -230,29 +226,92 @@ void DischargeIO::writeEBHDF5(const std::string&                     a_filename,
 	    currentFab(iv, indexNormal + dir) = normal[dir];
 	  }
 
-	  // set distance unless the length of the normal is zero
-	  Real length = PolyGeom::dot(normal,normal);
-
-	  if (length > 0){
-	    Real dist = PolyGeom::computeAlpha(volFrac,normal) * dx;
-	    currentFab(iv,indexDist) = -dist;
+	  // Set distance unless the length of the normal is zero.
+	  if (normal.vectorLength() > 0.0){
+	    currentFab(iv, indexDist) = -PolyGeom::computeAlpha(volFrac,normal) * dx;
 	  }
 	}
       }
-    }
-  } 
 
-  // Call the Chombo writer. 
-  WriteAMRHierarchyHDF5(a_filename,
-                        a_grids,
-                        chomboData,
-                        variableNamesHDF5,
-                        a_coarsestDomain.domainBox(),
-                        a_coarsestDx,
-                        a_dt,
-                        a_time,
-                        a_refinementRatios,
-                        a_numLevels);
+      // At this point we want to fill one layer of ghost cells OUTSIDE the domain.
+      if(a_numGhost > 0){
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  for (SideIterator sit; sit.ok(); ++sit){
+	    const IntVect shift = sign(flip(sit())) * BASISV(dir); // => +1 for Lo side and -1 for high side. 
+
+	    // Get the layer of cells immediately outside this box.
+	    const Box domainBox   = a_domains[lvl].domainBox();	    
+	    const Box validBox    = box & domainBox;
+	    const Box boundaryBox = adjCellBox(validBox, dir, sit(), 1);
+	    
+	    if(!(domainBox.contains(boundaryBox))){
+	      for (BoxIterator bit(boundaryBox); bit.ok(); ++bit){
+		const IntVect iv = bit();
+
+		for (int comp = 0; comp < numCompTotal; comp++){
+		  currentFab(iv, comp) = currentFab(iv + shift, comp);
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    } // End grid patch loop.
+  } // End of level loop.
+
+  // Now write the data to HDF5.
+#ifdef CH_MPI
+  MPI_Barrier(Chombo_MPI::comm);
+#endif
+  HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
+
+  // Write the header to file. 
+  HDF5HeaderData header;
+
+  header.m_string  ["filetype"]       = "VanillaAMRFileType";
+  header.m_int     ["num_levels"]     = a_numLevels;
+  header.m_int     ["num_components"] = numCompTotal;
+  header.m_realvect["prob_lo"]        = a_probLo;
+
+  for (int comp = 0; comp < numCompTotal; comp++){
+    char labelString[100];
+    sprintf(labelString, "component_%d", comp);
+
+    std::string label(labelString);
+
+    header.m_string[label] = variableNamesHDF5[comp];
+  }
+
+  header.writeToFile(handle);
+
+  // Go through each grid level and write it to file. 
+  for (int lvl = 0; lvl < a_numLevels; lvl++){
+    int refRatio = 1;
+
+    if(lvl != a_numLevels -1){
+      refRatio = a_refinementRatios[lvl];
+    }
+
+    const int success = writeLevel(handle,
+				   lvl,
+				   *chomboData[lvl],
+				   a_dx[lvl],
+				   a_dt,
+				   a_time,
+				   a_domains[lvl].domainBox(),
+				   refRatio,
+				   a_numGhost*IntVect::Unit,
+				   Interval(0, numCompTotal-1));
+
+    if(success != 0){
+      MayDay::Error("DischargeIO::writeEBHDF5 -- error in writeLevel");
+    }
+  }
+
+#ifdef CH_MPI
+  MPI_Barrier(Chombo_MPI::comm);
+#endif  
+  handle.close();
 
   // Clean up memory.
   for (int lvl = 0; lvl < a_numLevels; lvl++) {
