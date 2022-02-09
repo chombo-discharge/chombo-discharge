@@ -46,15 +46,15 @@ jobs:
 
       - name: Build chombo-discharge/source (2D)
         run: |
-          make -s -j2 DIM=2 source
+          make -s -j2 DIM=2 discharge-source
 
       - name: Build chombo-discharge/geometries (2D)
         run: |
-          make -s -j2 DIM=2 geometries
+          make -s -j2 DIM=2 discharge-geometries
 
       - name: Build chombo-discharge/physics (2D)
         run: |
-          make -s -j2 DIM=2 physics
+          make -s -j2 DIM=2 discharge-physics
 
       - name: Build Chombo (3D)
         run: |
@@ -62,15 +62,15 @@ jobs:
 
       - name: Build chombo-discharge/source (3D)
         run: |
-          make -s -j2 DIM=3 source
+          make -s -j2 DIM=3 discharge-source
 
       - name: Build chombo-discharge/geometries (3D)
         run: |
-          make -s -j2 DIM=3 geometries
+          make -s -j2 DIM=3 discharge-geometries
 
       - name: Build chombo-discharge/physics (3D)
         run: |
-          make -s -j2 DIM=3 physics
+          make -s -j2 DIM=3 discharge-physics
 
       - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
@@ -119,15 +119,15 @@ jobs:
 
       - name: Build chombo-discharge/source (2D)
         run: |
-          make -s -j2 DIM=2 source
+          make -s -j2 DIM=2 discharge-source
 
       - name: Build chombo-discharge/geometries (2D)
         run: |
-          make -s -j2 DIM=2 geometries
+          make -s -j2 DIM=2 discharge-geometries
 
       - name: Build chombo-discharge/physics (2D)
         run: |
-          make -s -j2 DIM=2 physics
+          make -s -j2 DIM=2 discharge-physics
 
       - name: Build Chombo (3D)
         run: |
@@ -135,15 +135,15 @@ jobs:
 
       - name: Build chombo-discharge/source (3D)
         run: |
-          make -s -j2 DIM=3 source
+          make -s -j2 DIM=3 discharge-source
 
       - name: Build chombo-discharge/geometries (3D)
         run: |
-          make -s -j2 DIM=3 geometries
+          make -s -j2 DIM=3 discharge-geometries
 
       - name: Build chombo-discharge/physics (3D)
         run: |
-          make -s -j2 DIM=3 physics
+          make -s -j2 DIM=3 discharge-physics
 
       - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
@@ -192,15 +192,15 @@ jobs:
 
       - name: Build chombo-discharge/source (2D)
         run: |
-          make -s -j2 DIM=2 source
+          make -s -j2 DIM=2 discharge-source
 
       - name: Build chombo-discharge/geometries (2D)
         run: |
-          make -s -j2 DIM=2 geometries
+          make -s -j2 DIM=2 discharge-geometries
 
       - name: Build chombo-discharge/physics (2D)
         run: |
-          make -s -j2 DIM=2 physics
+          make -s -j2 DIM=2 discharge-physics
 
       - name: Build Chombo (3D)
         run: |
@@ -208,15 +208,15 @@ jobs:
 
       - name: Build chombo-discharge/source (3D)
         run: |
-          make -s -j2 DIM=3 source
+          make -s -j2 DIM=3 discharge-source
 
       - name: Build chombo-discharge/geometries (3D)
         run: |
-          make -s -j2 DIM=3 geometries
+          make -s -j2 DIM=3 discharge-geometries
 
       - name: Build chombo-discharge/physics (3D)
         run: |
-          make -s -j2 DIM=3 physics
+          make -s -j2 DIM=3 discharge-physics
 
       - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
@@ -265,15 +265,15 @@ jobs:
 
       - name: Build chombo-discharge/source (2D)
         run: |
-          make -s -j2 DIM=2 source
+          make -s -j2 DIM=2 discharge-source
 
       - name: Build chombo-discharge/geometries (2D)
         run: |
-          make -s -j2 DIM=2 geometries
+          make -s -j2 DIM=2 discharge-geometries
 
       - name: Build chombo-discharge/physics (2D)
         run: |
-          make -s -j2 DIM=2 physics
+          make -s -j2 DIM=2 discharge-physics
 
       - name: Build Chombo (3D)
         run: |
@@ -281,15 +281,15 @@ jobs:
 
       - name: Build chombo-discharge/source (3D)
         run: |
-          make -s -j2 DIM=3 source
+          make -s -j2 DIM=3 discharge-source
 
       - name: Build chombo-discharge/geometries (3D)
         run: |
-          make -s -j2 DIM=3 geometries
+          make -s -j2 DIM=3 discharge-geometries
 
       - name: Build chombo-discharge/physics (3D)
         run: |
-          make -s -j2 DIM=3 physics
+          make -s -j2 DIM=3 discharge-physics
 
       - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
