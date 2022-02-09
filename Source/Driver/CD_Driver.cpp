@@ -35,6 +35,7 @@
 #include <CD_MemoryReport.H>
 #include <CD_Timer.H>
 #include <CD_ParallelOps.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
@@ -1978,19 +1979,18 @@ void Driver::writeGeometry(){
   string fname(file_char);
 
 #ifdef CH_USE_HDF5
-  writeEBHDF5(fname, 
-	      m_amr->getGrids(m_realm),
-	      outputPtr,
-	      names, 
-	      m_amr->getDomains()[0],
-	      m_amr->getDx()[0], 
-	      m_dt,
-	      m_time,
-	      m_amr->getRefinementRatios(),
-	      1 + m_amr->getFinestLevel(),
-	      false,
-	      Vector<Real>(),
-	      m_numPlotGhost*IntVect::Unit);
+  DischargeIO::writeEBHDF5(fname, 
+			   m_amr->getGrids(m_realm),
+			   outputPtr,
+			   names, 
+			   m_amr->getDomains()[0],
+			   m_amr->getDx()[0], 
+			   m_dt,
+			   m_time,
+			   m_amr->getProbLo(),
+			   m_amr->getRefinementRatios(),
+			   1 + m_amr->getFinestLevel(),
+			   m_numPlotGhost*IntVect::Unit);
 #endif
 }
 
@@ -2173,19 +2173,18 @@ void Driver::writePlotFile(const std::string a_filename){
   }
   
   timer.startEvent("Write data");
-  writeEBHDF5(a_filename, 
-	      m_amr->getGrids(m_realm),
-	      output_ptr,
-	      plotVariableNames, 
-	      m_amr->getDomains()[0],
-	      m_amr->getDx()[0], 
-	      m_dt,
-	      m_time,
-	      m_amr->getRefinementRatios(),
-	      plot_depth + 1,
-	      false,
-	      Vector<Real>(),
-	      m_numPlotGhost*IntVect::Unit);
+  DischargeIO::writeEBHDF5(a_filename, 
+			   m_amr->getGrids(m_realm),
+			   output_ptr,
+			   plotVariableNames, 
+			   m_amr->getDomains()[0],
+			   m_amr->getDx()[0], 
+			   m_dt,
+			   m_time,
+			   m_amr->getProbLo(),	      
+			   m_amr->getRefinementRatios(),
+			   plot_depth + 1,
+			   m_numPlotGhost*IntVect::Unit);
   timer.stopEvent("Write data");
 #endif
   
