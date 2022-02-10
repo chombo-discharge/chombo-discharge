@@ -191,16 +191,7 @@ void CdrPlasmaGodunovStepper::parseFloor(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
-  pp.get("floor_cdr", str);
-  if(str == "true"){
-    m_floor = true;
-  }
-  else if(str == "false"){
-    m_floor = false;
-  }
-  else{
-    MayDay::Error("CdrPlasmaGodunovStepper::parseFloor - unknown argument requested.");
-  }
+  pp.get("floor_cdr", m_floor);
 }
 
 void CdrPlasmaGodunovStepper::parseDebug(){
@@ -1180,9 +1171,9 @@ void CdrPlasmaGodunovStepper::advanceCdrReactions(const Real a_dt){
 	
 	pout() << "CdrPlasmaGodunovStepper::advanceCdrReactions - injecting relative "  << solver->getName() << " mass = " << relMassDiff << endl;
       }
-    }
-    else{
-      DataOps::floor(phi, 0.0);
+      else{
+	DataOps::floor(phi, 0.0);
+      }      
     }
   }
 }
