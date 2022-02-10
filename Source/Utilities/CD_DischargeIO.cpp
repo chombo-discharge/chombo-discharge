@@ -17,6 +17,7 @@
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
+#ifdef CH_USE_HDF5
 void DischargeIO::writeEBHDF5(const std::string&                     a_filename,
 			      const Vector<std::string>&             a_variableNames,			      
 			      const Vector<DisjointBoxLayout>&       a_grids,
@@ -308,6 +309,7 @@ void DischargeIO::writeEBHDF5(const std::string&                     a_filename,
     }
   }
 
+
 #ifdef CH_MPI
   MPI_Barrier(Chombo_MPI::comm);
 #endif  
@@ -318,5 +320,6 @@ void DischargeIO::writeEBHDF5(const std::string&                     a_filename,
     delete chomboData[lvl];
   }  
 }
+#endif
 
 #include <CD_NamespaceFooter.H>

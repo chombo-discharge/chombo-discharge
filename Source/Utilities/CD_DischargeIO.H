@@ -46,6 +46,7 @@ namespace DischargeIO {
     @param[in] a_numGhost         Number of ghost cells included in the output. 
     @todo The current implementation doubles the memory in the output data. We should look into more general aliasing functions. 
    */
+#ifdef CH_USE_HDF5
   void writeEBHDF5(const std::string&                     a_filename,
 		   const Vector<std::string>&             a_variableNames,		   
 		   const Vector<DisjointBoxLayout>&       a_grids,
@@ -58,6 +59,7 @@ namespace DischargeIO {
 		   const RealVect                         a_probLo,
 		   const int                              a_numLevels,
 		   const int                              a_numGhost);
+#endif
 
 }
 
