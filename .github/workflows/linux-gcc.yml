@@ -13,7 +13,7 @@ jobs:
     if: github.event.pull_request.draft == false  
     name: GNU@10.0 C++14 serial without HDF5
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300
     
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
@@ -86,7 +86,7 @@ jobs:
     if: github.event.pull_request.draft == false    
     name: GNU@10.0 C++14 serial with HDF5    
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300
     
     env:
       DISCHARGE_HOME: ${{github.workspace}}
@@ -159,7 +159,7 @@ jobs:
     if: github.event.pull_request.draft == false        
     name: GNU@10.0 C++14 OpenMPI without HDF5    
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300
     
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
@@ -232,7 +232,7 @@ jobs:
     if: github.event.pull_request.draft == false        
     name: GNU@10.0 C++14 OpenMPI with HDF5        
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300
     
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
