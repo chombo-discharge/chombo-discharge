@@ -668,7 +668,7 @@ namespace Physics {
       */
       std::map<int, FunctionEX> m_domainReactionEfficiencies;
 
-      /*!
+      /*! 
 	@brief List of domain reactions
       */
       std::vector<CdrPlasmaSurfaceReactionJSON> m_domainReactions;

@@ -2515,6 +2515,7 @@ void CdrPlasmaJSON::parseDomainReactions(){
 	std::list<int> plasmaProducts;
 	std::list<int> neutralProducts;
 	std::list<int> photonProducts;
+	
 
 	this->getReactionSpecies(plasmaReactants,
 				 neutralReactants,
