@@ -1,12 +1,12 @@
 /* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
+ * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
 /*!
   @file   CD_CdrPlasmaJSON.cpp
   @brief  Implementation of CD_CdrPlasmaJSON.H
-  @author Robert Marskar
+  @author Robert Marskar, Fanny Skirbekk
 */
 
 // Std includees
@@ -2455,6 +2455,137 @@ void CdrPlasmaJSON::parseDielectricReactionScaling(const int a_reactionIndex, co
   m_dielectricReactionEfficiencies.emplace(a_reactionIndex, func);
 }
 
+void CdrPlasmaJSON::parseDomainReactions(){
+  CH_TIME("CdrPlasmaJSON::parseDomainReactions()");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseDomainReactions()" << endl;
+  }
+  
+  // Check if JSON file contains domain reactions
+  if(m_json.contains("domain reactions")){
+    const json& domainReactions = m_json["domain reactions"];
+
+    // Base error when parsing the reactions
+    const std::string baseError = "CdrPlasmaJSON::parseDomainReactions ";
+
+    // Iterate through the reactions
+    for (const auto& domainReaction : domainReactions){
+
+      // These fields are required
+      if(!(domainReaction.contains("reaction"))) this->throwParserError(baseError + " - found 'domain reactions' but field 'reaction' was not specified");
+      if(!(domainReaction.contains("lookup"))) this->throwParserError(baseError + " - found 'domain reactions' but field 'lookup' was not specified");
+      if(!(domainReaction.contains("side"))) this->throwParserError(baseError + " - found 'domain reactions' but field 'side' was not specified");
+
+      // Get the reaction lookup strings
+      const std::string reaction = this->trim(domainReaction["reaction"].get<std::string>());
+      const std::string lookup = this->trim(domainReaction["lookup"].get<std::string>());
+
+      // Parse the reaction string so we get a list of reactants and products
+      std::vector<std::string> reactants;
+      std::vector<std::string> products;
+      this->parseReactionString(reactants, products, reaction);
+
+      // Domain reactions can contain wildcards -- if the current reaction contains a wildcard
+      // we create a list of more reactions.
+      const auto reactionSets = this->parseReactionWildcards(reactants, products, domainReaction);
+
+      // Get sides array
+      const std::vector<std::string> sides = m_json["side"];
+
+      // Go through all reactions
+      for (const auto& curReaction : reactionSets){
+	const std::vector<std::string> curReactants = curReaction.first;
+	const std::vector<std::string> curProducts = curReaction.second;
+
+	// Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense
+	this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+
+	// This is the reaction index for the current index. The reaction we are currently
+	// dealing with is put in m_domainReactions[reactionIndex]
+	const int reactionIndex = m_domainReactions.size();
+
+	// Parse the scaling factor for the electrode surface reaction
+	this->parseDomainReactionRate(reactionIndex, domainReaction);
+	this->parseDomainReactionRate(reactionIndex, domainReaction);
+
+	// Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile.
+	std::list<int> plasmaReactants;
+	std::list<int> neutralReactants;
+	std::list<int> photonReactants;
+	std::list<int> plasmaProducts;
+	std::list<int> neutralProducts;
+	std::list<int> photonProducts;
+
+	this->getReactionSpecies(plasmaReactants,
+				 neutralReactants,
+				 photonReactants,
+				 plasmaProducts,
+				 neutralProducts,
+				 photonProducts,
+				 curReactants,
+				 curProducts);
+
+	// Now create the reaction -- note that the surface reactions support both plasma species and photon species on the
+	// left hand side of the reaction
+	m_domainReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+      }
+    }
+  }
+}
+
+void CdrPlasmaJSON::parseDomainReactionRate(const int a_reactionIndex, const json& a_reactionJSON){
+  CH_TIME("CdrPlasmaJSON::parseDomainReactionRate()");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseDomainReactionRate()" << endl;
+  }
+
+  // This is the reaction string -- it exists if we make it to this code (we know this based on tests earlier in the code)
+  const std::string reaction = trim(a_reactionJSON["reaction"].get<std::string>());
+
+  // Create a basic error message for error handling
+  const std::string baseError = "CdrPlasmaJSON::parseDomainReactionRate for reaction '" + reaction + "' ";
+
+  // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions
+  if(!(a_reactionJSON.contains("lookup"))) this->throwParserError(baseError + "but field 'lookup' was not specified");
+
+  // Get the lookup method
+  const std::string lookup = this->trim(a_reactionJSON["lookup"].get<std::string>());
+
+  // Now go through the various rate-computation methods and fill the relevant containers
+  if(lookup == "constant"){
+    // If using a constant emission rate, we must get the field 'value'
+
+    if(!(a_reactionJSON.contains("value"))) this->throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
+
+    const Real rate = a_reactionJSON["value"].get<Real>();
+
+    // Add the constant reaction rate to the appropriate container
+    m_domainReactionLookup.emplace(a_reactionIndex, LookupMethod::Constant);
+    m_domainReactionConstants.emplace(a_reactionIndex, rate);
+  }
+  else {
+    this->throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
+  }
+}
+
+void CdrPlasmaJSON::parseDomainReactionScaling(const int a_reactionIndex, const json& a_reactionJSON){
+  CH_TIME("CdrPlasmaJSON::parseDomainReactionScaling()");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseDomainReactionScaling()" << endl;
+  }
+
+  Real scale = 1.0;
+  if(a_reactionJSON.contains("scale")){
+     scale = a_reactionJSON["scale"].get<Real>();
+  }
+
+  // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
+  // reactions can be done by expanding this routine.
+  auto func = [scale](const Real E, const RealVect x) -> Real{
+     return scale;
+  };
+}
+
 int CdrPlasmaJSON::getNumberOfPlotVariables() const {
   int ret = 0;
 
@@ -3377,6 +3508,8 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
     if(Z < 0 && isAnode  ) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
     if(Z > 0 && isCathode) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);      
   }
+
+  // for (int i = 0; i < m_
   
   return fluxes;    
 }

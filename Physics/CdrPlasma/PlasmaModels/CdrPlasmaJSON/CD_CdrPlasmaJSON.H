@@ -1,12 +1,12 @@
 /* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
+ * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
 /*!
   @file   CD_CdrPlasmaJSON.H
   @brief  Declaration of a generic CdrPlasma model.
-  @author Robert Marskar
+  @author Robert Marskar, Fanny Skirbekk
 */
 
 #ifndef CD_CdrPlasmaJSON_H
@@ -647,7 +647,31 @@ namespace Physics {
       /*!
 	@brief List of dielectric reactions
       */
-      std::vector<CdrPlasmaSurfaceReactionJSON> m_dielectricReactions;      
+      std::vector<CdrPlasmaSurfaceReactionJSON> m_dielectricReactions;
+
+       // ===========================================
+      // DOMAIN SURFACE REACTIONS BEGIN HERE
+      // ===========================================
+
+      /*!
+	@brief Lookup method for the domain reaction rates
+      */
+      std::map<int, LookupMethod> m_domainReactionLookup;
+
+      /*!
+	@brief Constant domain reaction rate. 
+      */
+      std::map<int, Real> m_domainReactionConstants;
+
+      /*!
+	@brief Domain reaction effiencies. Used for scaling reactions on domains in a "generic" way. 
+      */
+      std::map<int, FunctionEX> m_domainReactionEfficiencies;
+
+      /*!
+	@brief List of domain reactions
+      */
+      std::vector<CdrPlasmaSurfaceReactionJSON> m_domainReactions;
       
       /*!
 	@brief Parse class options
@@ -875,7 +899,28 @@ namespace Physics {
 	@param[in] a_reactionIndex Reaction index (this is the array index in the dielectric reaction array supplied in the JSON file)
 	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
       */
-      virtual void parseDielectricReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);      
+      virtual void parseDielectricReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+
+      /*!
+	@brief Parse secondary emission on domain
+      */
+      virtual void parseDomainReactions();
+
+      /*!
+	@brief Parse reaction rate for domain reactions. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'electrode reactions' array. 
+      */
+      virtual void parseDomainReactionRate(const int a_reactionIndex, const json& a_reactionJSON);      
+
+      /*!
+	@brief Parse domain reaction scaling for a specific reaction.
+	@details This currently exists without much functionality -- it just returns one for all reactions. As we
+	expand the functionality, this can be used to adjust for e.g. positional or field dependence.
+	@param[in] a_reactionIndex Reaction index (this is the array index in the dielectric reaction array supplied in the JSON file)
+	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
+      */
+      virtual void parseDomainReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Check if a surface-reaction makes sense in terms of the species that have been defined.
