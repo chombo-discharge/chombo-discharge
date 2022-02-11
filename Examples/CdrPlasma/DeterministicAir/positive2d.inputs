@@ -206,7 +206,7 @@ CdrPlasmaGodunovStepper.source_comp      = interp2       # Interpolated 'interp'
 CdrPlasmaGodunovStepper.extrap_advect    = true          # Use time-extrapolation capabilities (if they exist) in the CdrSolver
 CdrPlasmaGodunovStepper.floor_cdr        = true          # Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug            = false         # Turn on debugging messages. Also monitors mass if it was injected into the system. 
-CdrPlasmaGodunovStepper.profile          = false         # Turn on/off performance profiling.
+CdrPlasmaGodunovStepper.profile          = true         # Turn on/off performance profiling.
 
 # ====================================================================================================
 # CdrPlasmaJSON class options
@@ -215,8 +215,8 @@ CdrPlasmaJSON.verbose          = false
 CdrPlasmaJSON.chemistry_file   = air_chemistry.json
 CdrPlasmaJSON.discrete_photons = false
 CdrPlasmaJSON.skip_reactions   = false
-CdrPlasmaJSON.integrator       = explicit_euler    # Reaction network integrator
-CdrPlasmaJSON.substeps         = 1                 # Substeps in the reaction integrator
+CdrPlasmaJSON.integrator       = explicit_midpoint    # Reaction network integrator
+CdrPlasmaJSON.substeps         = 2                 # Substeps in the reaction integrator
 
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options

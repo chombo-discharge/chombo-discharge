@@ -24,6 +24,7 @@
 #include <CD_DataParser.H>
 #include <CD_Random.H>
 #include <CD_Units.H>
+#include <CD_Decorations.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::CdrPlasma;
@@ -3711,12 +3712,13 @@ void CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&          a_
   std::vector<Real> cdrY1(m_numCdrSpecies, 0.0);
   std::vector<Real> rteY1(m_numRtSpecies,  0.0);  
 
-  // Compute k1. 
-  for (int i = 0; i < m_plasmaReactions.size(); i++) {
+  // Compute k1.
+  std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities  (a_pos, a_E, cdrY0);
+  std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion   (a_pos, a_E, cdrY0);
+  std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, cdrY0);
 
-    const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities  (a_pos, a_E, cdrY0);
-    const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion   (a_pos, a_E, cdrY0);
-    const std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, cdrY0);    
+  CD_PRAGMA_SIMD  
+  for (int i = 0; i < m_plasmaReactions.size(); i++) {
 
     // Reaction and species involved in the reaction. 
     const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
@@ -3743,36 +3745,46 @@ void CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&          a_
 						   a_time);
     
     // Remove consumption on the left-hand side.
-    for (const auto& r : plasmaReactants){
-      cdrK1[r] -= k;
-    }
+    CD_PRAGMA_SIMD    
+      for (const auto& r : plasmaReactants){
+	cdrK1[r] -= k;
+      }
 
     // Add mass on the right-hand side.
-    for (const auto& p : plasmaProducts){
-      cdrK1[p] += k;      
-    }
+    CD_PRAGMA_SIMD    
+      for (const auto& p : plasmaProducts){
+	cdrK1[p] += k;      
+      }
 
-    // Add photons on the right-hand side. 
-    for (const auto& p : photonProducts){
-      rteK1[p] += k;
-    }
+    // Add photons on the right-hand side.
+    CD_PRAGMA_SIMD    
+      for (const auto& p : photonProducts){
+	rteK1[p] += k;
+      }
   }
 
   // Compute intermediate states.
+  const Real g0 = a_tableuAlpha * a_dt;
+
+  CD_PRAGMA_SIMD  
   for (int i = 0; i < m_numCdrSpecies; i++){
-    cdrY1[i] = cdrY0[i] + a_tableuAlpha * a_dt * cdrK1[i];
+    cdrY1[i] = cdrY0[i] + g0 * cdrK1[i];
   }
 
+  CD_PRAGMA_SIMD  
   for (int i = 0; i < m_numRtSpecies; i++){
-    rteY1[i] = rteY0[i] + a_tableuAlpha * a_dt * rteK1[i];
+    rteY1[i] = g0 * rteK1[i];
   }
 
-  // Compute k2. 
+  // Compute k2.
+  cdrMobilities            = this->computePlasmaSpeciesMobilities  (a_pos, a_E, cdrY1);
+  cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion   (a_pos, a_E, cdrY1);
+  cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, cdrY1);
+
+  CD_PRAGMA_SIMD
   for (int i = 0; i < m_plasmaReactions.size(); i++) {
 
-    const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities  (a_pos, a_E, cdrY1);
-    const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion   (a_pos, a_E, cdrY1);
-    const std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, cdrY1);    
+
 
     // Reaction and species involved in the reaction. 
     const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
@@ -3814,16 +3826,18 @@ void CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&          a_
     }
   }
 
-  const Real g2 = 1.0 / (2.0*a_tableuAlpha);
-  const Real g1 = 1.0 - g2;
+  const Real g2 = a_dt *  1.0 / (2.0*a_tableuAlpha);
+  const Real g1 = a_dt * (1.0 - g2);
 
   // Set the final states
+  CD_PRAGMA_SIMD  
   for (int i = 0; i < m_numCdrSpecies; i++){
-    a_cdrDensities[i] = cdrY0[i] + a_dt * ( g1*cdrK1[i] + g2*cdrK2[i] );
+    a_cdrDensities[i] = cdrY0[i] + (g1*cdrK1[i] + g2*cdrK2[i]);
   }
 
+  CD_PRAGMA_SIMD
   for (int i = 0; i < m_numRtSpecies; i++){
-    a_photonProduction[i] = rteY1[i] + a_dt * ( g1*rteK1[i] + g2*rteK2[i] );    
+    a_photonProduction[i] = (g1*rteK1[i] + g2*rteK2[i]);    
   }
 }
 
