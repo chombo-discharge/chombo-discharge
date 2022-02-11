@@ -1,5 +1,5 @@
 /* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
+ * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -933,12 +933,12 @@ namespace Physics {
 
       /*!
 	@brief Compute the various plasma species diffusion coefficients. 
-	@param[in] a_pos          Position
-	@param[in] a_E            Electric field
-	@param[in] a_cdrDensities CDR densities
+	@param[in] a_position     Physical coordinates
+	@param[in] a_E            Electric field (SI units)
+	@param[in] a_cdrDensities List of plasma species densities
 	@return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
-      virtual std::vector<Real> computePlasmaSpeciesDiffusion(const RealVect          a_pos,
+      virtual std::vector<Real> computePlasmaSpeciesDiffusion(const RealVect          a_position,
 							      const RealVect          a_E,
 							      const std::vector<Real> a_cdrDensities) const;
 
@@ -1038,10 +1038,34 @@ namespace Physics {
       bool doesFileExist(const std::string a_filename) const;
 
       /*!
+	@brief Add photoionization products to transport equations source terms.
+	@param[inout] a_cdrSources   Source terms for CDR densities.
+	@param[in]    a_rteDensities RTE mesh densities.
+	@param[in]    a_position     Physical coordinates
+	@param[in]    a_E            Electric field (SI units)
+	@param[in]    a_dt           Time step
+	@param[in]    a_dx           Grid resolution. 
+      */
+      virtual void addPhotoIonization(std::vector<Real>&       a_cdrSources,
+				      const std::vector<Real>& a_rteDensities,
+				      const RealVect           a_position,
+				      const Real               a_E,
+				      const Real               a_dt,
+				      const Real               a_dx) const;      
+
+      /*!
 	@brief Routine for integrating the reactive-only problem using various algorithms. 
+	@param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+	@param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
+	@param[in]    a_cdrGradients     CDR gradients at time a_time
+	@param[in]    a_E                Electric field
+	@param[in]    a_pos              Physical coordinates
+	@param[in]    a_dx               Grid resolution
+	@param[in]    a_dt               Time step
+	@param[in]    a_kappa            Volume fraction 
       */
       virtual void integrateReactions(std::vector<Real>&          a_cdrDensities,
-				      std::vector<Real>&          a_rteDensities,
+				      std::vector<Real>&          a_photonProduction,
 				      const std::vector<RealVect> a_cdrGradients,
 				      const RealVect              a_E,
 				      const RealVect              a_pos,
@@ -1052,10 +1076,18 @@ namespace Physics {
 
 
       /*!
-	@brief Routine for integrating the reactive-only problem using the explicit Euler rule. 
+	@brief Routine for integrating the reactive-only problem using various algorithms. 
+	@param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+	@param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
+	@param[in]    a_cdrGradients     CDR gradients at time a_time
+	@param[in]    a_E                Electric field
+	@param[in]    a_pos              Physical coordinates
+	@param[in]    a_dx               Grid resolution
+	@param[in]    a_dt               Time step
+	@param[in]    a_kappa            Volume fraction 
       */
       void integrateReactionsExplicitEuler(std::vector<Real>&          a_cdrDensities,
-					   std::vector<Real>&          a_rteDensities,
+					   std::vector<Real>&          a_photonProduction,
 					   const std::vector<RealVect> a_cdrGradients,
 					   const RealVect              a_E,
 					   const RealVect              a_pos,
@@ -1063,7 +1095,6 @@ namespace Physics {
 					   const Real                  a_dt,
 					   const Real                  a_time,
 					   const Real                  a_kappa) const;
-
     };
   }
 }

@@ -1,5 +1,5 @@
 /* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
+ * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -3100,27 +3100,6 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
   std::vector<Real>& cdrSources = a_cdrSources.stdVector();
   std::vector<Real>& rteSources = a_rteSources.stdVector();
 
-  const std::vector<Real    >& cdrDensities = ((Vector<Real    >&) a_cdrDensities).stdVector();
-  const std::vector<Real    >& rteDensities = ((Vector<Real    >&) a_rteDensities).stdVector();
-  const std::vector<RealVect>& cdrGradients = ((Vector<RealVect>&) a_cdrGradients).stdVector();  
-
-  // These may or may not be needed.
-  const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities  (a_pos, a_E, cdrDensities);  
-  const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion   (a_pos, a_E, cdrDensities);  
-  const std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, cdrDensities);
-
-  // Electric field and reduce electric field. 
-  const Real E   = a_E.vectorLength();
-  const Real N   = m_gasDensity(a_pos);
-  const Real Etd = (E/(N * Units::Td));
-
-  // Townsend ionization and attachment coefficients. May or may not be used.
-  const Real alpha = this->computeAlpha(E, a_pos);
-  const Real eta   = this->computeEta  (E, a_pos);
-
-  // Grid cell volume
-  const Real vol = std::pow(a_dx, SpaceDim);
-
   // Set all sources to zero. 
   for (auto& S : cdrSources){
     S = 0.0;
@@ -3128,10 +3107,30 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 
   for (auto& S : rteSources){
     S = 0.0;
-  }
+  }  
+
+  const std::vector<Real    >& cdrDensities = ((Vector<Real    >&) a_cdrDensities).stdVector();
+  const std::vector<Real    >& rteDensities = ((Vector<Real    >&) a_rteDensities).stdVector();
+  const std::vector<RealVect>& cdrGradients = ((Vector<RealVect>&) a_cdrGradients).stdVector();
+
+  const Real E   = a_E.vectorLength();  
 
   // Hook for turning off all reactions. 
   if(!m_skipReactions){
+
+    // These may or may not be needed.
+    const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities  (a_pos, a_E, cdrDensities);  
+    const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion   (a_pos, a_E, cdrDensities);  
+    const std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, cdrDensities);
+
+    // Electric field and reduce electric field. 
+
+    const Real N   = m_gasDensity(a_pos);
+    const Real Etd = (E/(N * Units::Td));
+
+    // Townsend ionization and attachment coefficients. May or may not be used.
+    const Real alpha = this->computeAlpha(E, a_pos);
+    const Real eta   = this->computeEta  (E, a_pos);    
 
     // Plasma reactions loop
     for (int i = 0; i < m_plasmaReactions.size(); i++) {
@@ -3175,53 +3174,50 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
       }    
     } // End of plasma reactions. 
 
-    // Photo-reactions loop.
-    for (int i = 0; i < m_photoReactions.size(); i++){
-      Real k = 0.0;
-
-      const CdrPlasmaPhotoReactionJSON& reaction = m_photoReactions[i];
-
-      // Get the photon and plasma products for the specified reaction. 
-      const std::list<int>& photonReactants = reaction.getPhotonReactants();
-      const std::list<int>& plasmaProducts  = reaction.getPlasmaProducts ();    
-
-
-      // Compute a rate. Note that if we use Helmholtz reconstruction this is a bit different. 
-      if(m_photoReactionUseHelmholtz.at(i)){
-	k = m_photoReactionEfficiencies.at(i)(E, a_pos);
-      }
-      else{
-	// This is the "regular" code where Psi is the number of ionizing photons. In this case the Psi is what appears in the source terms,
-	// but the API says that we need to compute the rate, so we put rate = Psi/dt
-      
-	k = m_photoReactionEfficiencies.at(i)(E, a_pos)/a_dt;
-
-	// Hook for ensuring correct scaling in 2D. When we run in Cartesian 2D the photons are not points, but lines. We've deposited the particles (lines)
-	// on the mesh but what we really want is the volumetric density. So we need to scale. 
-	if(m_discretePhotons && SpaceDim == 2){
-	  k *= 1./a_dx;
-	}
-      }
-
-      // Fire the reaction. 
-      for (const auto& y : photonReactants){
-	k *= rteDensities[y];
-      }
-
-      for (const auto& p : plasmaProducts){
-	cdrSources[p] += k;
-      }
-    } // End of photo-reactions. 
-
-    // If using stochastic photons -- then we need to run Poisson sampling of the photons.
-    if(m_discretePhotons){
-      for (auto& S : rteSources){
-	const auto poissonSample = Random::getPoisson<unsigned long long>(S * vol * a_dt);
-      
-	S = Real(poissonSample);
-      }
-    }
+    // Add the photoionization products
+    this->addPhotoIonization(cdrSources, rteDensities, a_pos, E, a_dt, a_dx);
   }
+  else{
+    // Solve the reactive problem.
+    std::vector<Real> finalCdrDensities = cdrDensities;
+    std::vector<Real> photonProduction (m_numRtSpecies,  0.0);
+
+    this->integrateReactions(finalCdrDensities,
+			     photonProduction,
+			     cdrGradients,
+			     a_E,
+			     a_pos,
+			     a_dx,
+			     a_dt,
+			     a_time,
+			     a_kappa);
+
+
+    // Linearize the source terms.
+    for (int i = 0; i < m_numCdrSpecies; i++){
+      cdrSources[i] = (finalCdrDensities[i] - cdrDensities[i])/a_dt;
+    }
+
+    for (int i = 0; i < m_numRtSpecies; i++){
+      rteSources[i] = photonProduction[i]/a_dt;
+    }
+
+    // Add the photoionization products
+    this->addPhotoIonization(cdrSources, rteDensities, a_pos, E, a_dt, a_dx);
+  }
+
+
+  // If using stochastic photons -- then we need to run Poisson sampling of the photons.
+  if(m_discretePhotons){
+    // Grid cell volume
+    const Real vol = std::pow(a_dx, SpaceDim);
+    
+    for (auto& S : rteSources){
+      const auto poissonSample = Random::getPoisson<unsigned long long>(S * vol * a_dt);
+      
+      S = Real(poissonSample);
+    }
+  }      
 
   return;
 }
@@ -3507,8 +3503,53 @@ Real CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect a_pos) const 
   return m_initialSigma(a_pos, a_time);
 }
 
+
+void CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
+				       const std::vector<Real>& a_rteDensities,
+				       const RealVect           a_position,
+				       const Real               a_E,
+				       const Real               a_dt,
+				       const Real               a_dx) const {
+  // Add photo-ionization.
+  for (int i = 0; i < m_photoReactions.size(); i++){
+    Real k = 0.0;
+
+    const CdrPlasmaPhotoReactionJSON& reaction = m_photoReactions[i];
+    
+    // Get the photon and plasma products for the specified reaction. 
+    const std::list<int>& photonReactants = reaction.getPhotonReactants();
+    const std::list<int>& plasmaProducts  = reaction.getPlasmaProducts ();    
+
+    // Compute a rate. Note that if we use Helmholtz reconstruction this is a bit different. 
+    if(m_photoReactionUseHelmholtz.at(i)){
+      k = m_photoReactionEfficiencies.at(i)(a_E, a_position);
+    }
+    else{
+      // This is the "regular" code where Psi is the number of ionizing photons. In this case the Psi is what appears in the source terms,
+      // but the API says that we need to compute the rate, so we put rate = Psi/dt
+      
+      k = m_photoReactionEfficiencies.at(i)(a_E, a_position)/a_dt;
+
+      // Hook for ensuring correct scaling in 2D. When we run in Cartesian 2D the photons are not points, but lines. We've deposited the particles (lines)
+      // on the mesh but what we really want is the volumetric density. So we need to scale. 
+      if(m_discretePhotons && SpaceDim == 2){
+	k *= 1./a_dx;
+      }
+    }
+
+    // Fire the reaction. 
+    for (const auto& y : photonReactants){
+      k *= a_rteDensities[y];
+    }
+
+    for (const auto& p : plasmaProducts){
+      a_cdrSources[p] += k;
+    }
+  }
+}
+
 void CdrPlasmaJSON::integrateReactions(std::vector<Real>&          a_cdrDensities,
-				       std::vector<Real>&          a_rteDensities,
+				       std::vector<Real>&          a_photonProduction,
 				       const std::vector<RealVect> a_cdrGradients,
 				       const RealVect              a_E,
 				       const RealVect              a_pos,
@@ -3516,7 +3557,7 @@ void CdrPlasmaJSON::integrateReactions(std::vector<Real>&          a_cdrDensitie
 				       const Real                  a_dt,
 				       const Real                  a_time,
 				       const Real                  a_kappa) const {
-  // Do substeps. We happen to know that we have m_reactionIntegrator.second substeps for the whole integration interval. 
+  // Do substeps. We happen to know that we have m_reactionIntegrator.second substeps for the whole integration interval.
   for (int step = 0; step < m_reactionIntegrator.second; step++){
     const Real dt   = a_dt/m_reactionIntegrator.second;    
     const Real time = a_time + dt*(step-1);
@@ -3524,7 +3565,7 @@ void CdrPlasmaJSON::integrateReactions(std::vector<Real>&          a_cdrDensitie
     switch(m_reactionIntegrator.first){
     case ReactionIntegrator::ExplicitEuler:
       {
-	this->integrateReactionsExplicitEuler(a_cdrDensities, a_rteDensities, a_cdrGradients, a_E, a_pos, a_dx, dt, time, a_kappa);
+	this->integrateReactionsExplicitEuler(a_cdrDensities, a_photonProduction, a_cdrGradients, a_E, a_pos, a_dx, dt, time, a_kappa);
 
 	break;
       }
@@ -3537,7 +3578,7 @@ void CdrPlasmaJSON::integrateReactions(std::vector<Real>&          a_cdrDensitie
 }
 
 void CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          a_cdrDensities,
-						    std::vector<Real>&          a_rteDensities,
+						    std::vector<Real>&          a_photonProduction,
 						    const std::vector<RealVect> a_cdrGradients,
 						    const RealVect              a_E,
 						    const RealVect              a_pos,
@@ -3562,8 +3603,8 @@ void CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          
   const Real alpha = this->computeAlpha(E, a_pos);
   const Real eta   = this->computeEta  (E, a_pos);
 
-  // Grid cell volume
-  const Real vol = std::pow(a_dx, SpaceDim);
+  // For simplicity, create a copy of the CDR densities. 
+  const std::vector<Real> initCdrDensities = a_cdrDensities;
 
   // Plasma reactions loop
   for (int i = 0; i < m_plasmaReactions.size(); i++) {
@@ -3576,9 +3617,9 @@ void CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          
     const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
     const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();
 
-    // Compute the rate. This returns a volumetric rate in units of #/m^(-3) (or #/m^-2 for Cartesian 2D).
+    // Compute the rate. This returns a volumetric rate in units of #/(m^3 * s) (or #/(m^2 * s) for Cartesian 2D).
     const Real k = this->computePlasmaReactionRate(i,
-						   a_cdrDensities,
+						   initCdrDensities,
 						   cdrMobilities,
 						   cdrDiffusionCoefficients,
 						   cdrTemperatures,
@@ -3592,6 +3633,7 @@ void CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          
 						   eta,
 						   a_time);
 
+    // This is the total number of products 
     const Real Sdt = k * a_dt;
 
     // Remove consumption on the left-hand side.
@@ -3606,9 +3648,10 @@ void CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          
 
     // Add photons on the right-hand side. 
     for (const auto& p : photonProducts){
-      a_rteDensities[p] += Sdt;
+      a_photonProduction[p] += Sdt;
     }
   }
 }
+
 
 #include <CD_NamespaceFooter.H>
