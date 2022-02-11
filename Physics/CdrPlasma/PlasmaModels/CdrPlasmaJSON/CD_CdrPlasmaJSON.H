@@ -932,6 +932,17 @@ namespace Physics {
 							       const std::vector<Real>& a_cdrDensities) const;
 
       /*!
+	@brief Compute the various plasma species diffusion coefficients. 
+	@param[in] a_pos          Position
+	@param[in] a_E            Electric field
+	@param[in] a_cdrDensities CDR densities
+	@return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. 
+      */
+      virtual std::vector<Real> computePlasmaSpeciesDiffusion(const RealVect          a_pos,
+							      const RealVect          a_E,
+							      const std::vector<Real> a_cdrDensities) const;
+
+      /*!
 	@brief Compute the reaction rate for a plasma reaction.
 	@details This routine exists because we need to compute the rates both in advanceReactionNetwork and getPlotVariables. This function
 	reduces code duplication. 
@@ -1026,20 +1037,32 @@ namespace Physics {
       */
       bool doesFileExist(const std::string a_filename) const;
 
-
       /*!
 	@brief Routine for integrating the reactive-only problem using various algorithms. 
       */
-      void integrateReactions(std::vector<Real>&          a_cdrDensities,
-				      std::vector<Real>&          a_rteSources,
+      virtual void integrateReactions(std::vector<Real>&          a_cdrDensities,
+				      std::vector<Real>&          a_rteDensities,
 				      const std::vector<RealVect> a_cdrGradients,
-				      const std::vector<Real>     a_rteDensities,
 				      const RealVect              a_E,
 				      const RealVect              a_pos,
 				      const Real                  a_dx,
 				      const Real                  a_dt,
 				      const Real                  a_time,
 				      const Real                  a_kappa) const;
+
+
+      /*!
+	@brief Routine for integrating the reactive-only problem using the explicit Euler rule. 
+      */
+      void integrateReactionsExplicitEuler(std::vector<Real>&          a_cdrDensities,
+					   std::vector<Real>&          a_rteDensities,
+					   const std::vector<RealVect> a_cdrGradients,
+					   const RealVect              a_E,
+					   const RealVect              a_pos,
+					   const Real                  a_dx,
+					   const Real                  a_dt,
+					   const Real                  a_time,
+					   const Real                  a_kappa) const;
 
     };
   }
