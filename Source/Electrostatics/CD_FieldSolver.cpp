@@ -22,6 +22,7 @@
 #include <CD_FieldSolver.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_DataOps.H>
+#include <CD_DischargeIO.H>
 #include <CD_Units.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
@@ -925,19 +926,20 @@ void FieldSolver::writePlotFile(){
   string fname(file_char);
 
 #ifdef CH_USE_HDF5
-  writeEBHDF5(fname,
-	      m_amr->getGrids(m_realm),
-	      outputPtr,
-	      plotVarNames,
-	      m_amr->getDomains()[0].domainBox(),
-	      m_amr->getDx()[0],
-	      m_dt,
-	      m_time,
-	      m_amr->getRefinementRatios(),
-	      m_amr->getFinestLevel() + 1,
-	      false,
-	      covered_values,
-	      IntVect::Unit);
+  constexpr int numPlotGhost = 0;
+  
+  DischargeIO::writeEBHDF5(fname,
+			   plotVarNames,
+			   m_amr->getGrids(m_realm),
+			   outputPtr,
+			   m_amr->getDomains(),
+			   m_amr->getDx(),
+			   m_amr->getRefinementRatios(),
+			   m_dt,
+			   m_time,
+			   m_amr->getProbLo(),
+			   m_amr->getFinestLevel() + 1,
+			   numPlotGhost);
 #endif
 }
 

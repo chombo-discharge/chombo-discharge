@@ -22,6 +22,7 @@
 #include <CD_EddingtonSP1.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
+#include <CD_DischargeIO.H>
 #include <CD_EBHelmholtzDirichletEBBCFactory.H>      
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_EBHelmholtzLarsenEBBCFactory.H>
@@ -1102,18 +1103,20 @@ void EddingtonSP1::writePlotFile(){
   string fname(file_char);
 
 #ifdef CH_USE_HDF5
-  writeEBHDF5(fname,
-	      m_amr->getGrids(m_realm),
-	      output_ptr,
-	      names,
-	      m_amr->getDomains()[0].domainBox(),
-	      m_amr->getDx()[0],
-	      m_dt,
-	      m_time,
-	      m_amr->getRefinementRatios(),
-	      m_amr->getFinestLevel() + 1,
-	      true,
-	      covered_values);
+  constexpr int numPlotGhost = 0;
+  
+  DischargeIO::writeEBHDF5(fname,
+			   names,			   
+			   m_amr->getGrids(m_realm),
+			   output_ptr,
+			   m_amr->getDomains(),
+			   m_amr->getDx(),
+			   m_amr->getRefinementRatios(),
+			   m_dt,
+			   m_time,
+			   m_amr->getProbLo(),
+			   m_amr->getFinestLevel() + 1,
+			   numPlotGhost);
 #endif
 }
 
