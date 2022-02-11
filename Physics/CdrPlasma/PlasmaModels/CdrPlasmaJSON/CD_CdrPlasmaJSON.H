@@ -97,6 +97,11 @@ namespace Physics {
       virtual ~CdrPlasmaJSON();
 
       /*!
+	@brief Parse run-time class options.
+      */
+      virtual void parseRuntimeOptions();      
+
+      /*!
 	@brief Get number of plot variables for this physics class. 
 	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. The current implementation 
 	plots the gas pressure, temperature, and density
@@ -295,6 +300,15 @@ namespace Physics {
       };
 
       /*!
+	@brief Enum for distinguishing integration methods
+      */
+      enum class ReactionIntegrator {
+	ExplicitEuler,
+	RK2,
+	RK4
+      };
+
+      /*!
 	@brief Verbose or not
       */
       bool m_verbose;
@@ -328,6 +342,11 @@ namespace Physics {
 	@brief JSON definition. This is populated when calling parseJSON.
       */
       json m_json;
+
+      /*!
+	@brief Reaction integrator
+      */
+      std::pair<ReactionIntegrator, int> m_reactionIntegrator;
 
       /*!
 	@brief Input JSON file name
@@ -653,6 +672,11 @@ namespace Physics {
 	@brief Parse class options
       */
       virtual void parseOptions();
+
+      /*!
+	@brief Parse the reactive integrator
+      */
+      virtual void parseIntegrator();
 
       /*!
 	@brief Parse the JSON file

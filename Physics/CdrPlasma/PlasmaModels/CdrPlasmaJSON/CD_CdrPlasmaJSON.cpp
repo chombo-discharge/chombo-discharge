@@ -59,7 +59,7 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
 
   // Parse secondary emission on electrodes and dielectrics
   this->parseElectrodeReactions();
-  this->parseDielectricReactions();  
+  this->parseDielectricReactions();
 
   m_numCdrSpecies = m_cdrSpecies.size();
   m_numRtSpecies  = m_rtSpecies. size();
@@ -78,6 +78,47 @@ void CdrPlasmaJSON::parseOptions() {
   pp.get("chemistry_file",   m_jsonFile);
   pp.get("discrete_photons", m_discretePhotons);
   pp.get("skip_reactions",   m_skipReactions);
+
+  this->parseIntegrator();
+}
+
+void CdrPlasmaJSON::parseRuntimeOptions() {
+  CH_TIME("CdrPlasmaJSON::parseRuntimeOptions");
+
+  this->parseIntegrator();
+}
+
+void CdrPlasmaJSON::parseIntegrator() {
+  CH_TIME("CdrPlasmaJSON::parseIntegrator");
+
+  ParmParse pp("CdrPlasmaJSON");  
+
+  std::string str;
+  int substeps;
+  ReactionIntegrator integrator;    
+  
+  pp.get("integrator", str     );
+  pp.get("substeps",   substeps);
+
+  if(substeps <= 0){
+    this->throwParserError("CdrPlasmaJSON::parseIntegrator -- substeps must be >= 1");
+  }
+
+  if(str == "explicit_euler") {
+    integrator = ReactionIntegrator::ExplicitEuler;
+  }
+  else if(str == "rk2") {
+    integrator = ReactionIntegrator::RK2;
+  }
+  else if(str == "rk4") {
+    integrator = ReactionIntegrator::RK4;
+  }
+  else {
+    this->throwParserError("CdrPlasmaJSON::parseIntegrator -- I do not know the integrator '" + str + "'");
+  }
+
+  // Set up the integrator. 
+  m_reactionIntegrator = std::make_pair(integrator, substeps);
 }
 
 void CdrPlasmaJSON::parseJSON() {
