@@ -1,8 +1,8 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-AmrMesh.lo_corner       =    0.0   0.
-AmrMesh.hi_corner       =    0.04  0.02
+AmrMesh.lo_corner       =   -0.04   0.
+AmrMesh.hi_corner       =    0.04  0.04
 AmrMesh.verbosity       = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain = 128 64      # Number of cells on coarsest domain
 AmrMesh.max_amr_depth   = 3           # Maximum amr depth
@@ -64,7 +64,7 @@ Driver.refine_dielectrics              = 0             # Refine dielectric surfa
 # ====================================================================================================
 FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
-FieldSolverMultigrid.bc.x.lo      = neumann   0.0     # Bc type.
+FieldSolverMultigrid.bc.x.lo      = dirichlet 0.0     # Bc type.
 FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0     # Bc type.
 FieldSolverMultigrid.bc.y.lo      = dirichlet 0.0     # Bc type.
 FieldSolverMultigrid.bc.y.hi      = neumann   0.0     # Bc type.

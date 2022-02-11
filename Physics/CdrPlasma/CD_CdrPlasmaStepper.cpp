@@ -3099,8 +3099,8 @@ void CdrPlasmaStepper::extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_do
 
   const int nComp = a_cellData.nComp();
 
-  CH_assert(a_domainData.nComp() == nComp());
-  CH_assert(a_cellData.  nComp() == nComp());  
+  CH_assert(a_domainData.nComp() == nComp);
+  CH_assert(a_cellData.  nComp() == nComp);  
 
   // Fetch patch distribution and EB information on this grid. 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
