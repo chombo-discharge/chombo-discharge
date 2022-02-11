@@ -669,9 +669,10 @@ namespace Physics {
       std::map<int, FunctionEX> m_domainReactionEfficiencies;
 
       /*! 
-	@brief List of domain reactions
+	@brief List of domain reactions. The pair is made up of an int representing direction (0=x, 1=y, 2=z) and a std::string
+	representing side ("lo", "hi")
       */
-      std::vector<CdrPlasmaSurfaceReactionJSON> m_domainReactions;
+      std::map<std::pair<int, std::string>, std::vector<CdrPlasmaSurfaceReactionJSON>> m_domainReactions;
       
       /*!
 	@brief Parse class options

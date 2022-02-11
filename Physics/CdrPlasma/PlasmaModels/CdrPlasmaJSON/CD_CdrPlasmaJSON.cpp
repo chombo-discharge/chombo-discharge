@@ -59,7 +59,8 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
 
   // Parse secondary emission on electrodes and dielectrics
   this->parseElectrodeReactions();
-  this->parseDielectricReactions();  
+  this->parseDielectricReactions();
+  this->parseDomainReactions();
 
   m_numCdrSpecies = m_cdrSpecies.size();
   m_numRtSpecies  = m_rtSpecies. size();
@@ -2468,6 +2469,9 @@ void CdrPlasmaJSON::parseDomainReactions(){
     // Base error when parsing the reactions
     const std::string baseError = "CdrPlasmaJSON::parseDomainReactions ";
 
+    const std::map<char, int> dirMap{{'x', 0}, {'y', 1}, {'z', 2}};
+    const std::map<char, std::string> sideMap{{'l', "lo"}, {'h', "hi"}};
+
     // Iterate through the reactions
     for (const auto& domainReaction : domainReactions){
 
@@ -2490,8 +2494,11 @@ void CdrPlasmaJSON::parseDomainReactions(){
       const auto reactionSets = this->parseReactionWildcards(reactants, products, domainReaction);
 
       // Get sides array
-      const std::vector<std::string> sides = m_json["side"];
+      const std::vector<std::string> sides = domainReaction["side"].get<std::vector<std::string>>();
 
+      // Create vector for temporary storage of reactions
+      std::vector<CdrPlasmaSurfaceReactionJSON> domainReactionsVec;
+      
       // Go through all reactions
       for (const auto& curReaction : reactionSets){
 	const std::vector<std::string> curReactants = curReaction.first;
@@ -2501,8 +2508,8 @@ void CdrPlasmaJSON::parseDomainReactions(){
 	this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
 
 	// This is the reaction index for the current index. The reaction we are currently
-	// dealing with is put in m_domainReactions[reactionIndex]
-	const int reactionIndex = m_domainReactions.size();
+	// dealing with is put in domainReactionsVec[reactionIndex]
+	const int reactionIndex = domainReactionsVec.size();
 
 	// Parse the scaling factor for the electrode surface reaction
 	this->parseDomainReactionRate(reactionIndex, domainReaction);
@@ -2528,7 +2535,27 @@ void CdrPlasmaJSON::parseDomainReactions(){
 
 	// Now create the reaction -- note that the surface reactions support both plasma species and photon species on the
 	// left hand side of the reaction
-	m_domainReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+	domainReactionsVec.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+      }
+      for (std::string curSide : sides){
+	// Create an int, string pair of dir, side for the m_domainReactions-map
+	curSide = this->trim(curSide);
+	std::pair<int, std::string> curPair = std::make_pair(dirMap.at(curSide.at(0)), sideMap.at(curSide.at(2)));
+
+	// Make sure that the dir+side combination has only been included once
+	if(m_domainReactions.find(curPair) != m_domainReactions.end()){
+	  this->throwParserError(baseError + " - dir+side-pair '" + curSide + "' was listed multiple times");
+	}
+
+	m_domainReactions.emplace(curPair, domainReactionsVec);
+      }
+    }
+    for(const auto& curDir : dirMap){
+      for (const auto& curSide : sideMap){
+	// Make sure that all dir+side combinations are included
+	if(m_domainReactions.find(std::make_pair(curDir.second, curSide.second)) == m_domainReactions.end()){
+	  this->throwParserError(baseError + " - dir+side-pair '" + curDir.first + "_" + curSide.second + "' is missing.");
+	}
       }
     }
   }
