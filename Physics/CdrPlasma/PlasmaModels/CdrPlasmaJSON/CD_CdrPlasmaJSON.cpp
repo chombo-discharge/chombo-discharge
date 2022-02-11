@@ -107,11 +107,14 @@ void CdrPlasmaJSON::parseIntegrator() {
   if(str == "explicit_euler") {
     integrator = ReactionIntegrator::ExplicitEuler;
   }
-  else if(str == "rk2") {
-    integrator = ReactionIntegrator::RK2;
+  else if(str == "explicit_trapezoidal") {
+    integrator = ReactionIntegrator::ExplicitTrapezoidal;
   }
+  else if(str == "explicit_midpoint") {
+    integrator = ReactionIntegrator::ExplicitMidpoint;
+  }  
   else if(str == "rk4") {
-    integrator = ReactionIntegrator::RK4;
+    integrator = ReactionIntegrator::ExplicitRK4;
   }
   else {
     this->throwParserError("CdrPlasmaJSON::parseIntegrator -- I do not know the integrator '" + str + "'");
@@ -3569,6 +3572,18 @@ void CdrPlasmaJSON::integrateReactions(std::vector<Real>&          a_cdrDensitie
 
 	break;
       }
+    case ReactionIntegrator::ExplicitTrapezoidal:
+      {
+	this->integrateReactionsExplicitRK2(a_cdrDensities, a_photonProduction, a_cdrGradients, a_E, a_pos, a_dx, dt, time, a_kappa, 1.0);
+
+	break;
+      }
+    case ReactionIntegrator::ExplicitMidpoint:
+      {
+	this->integrateReactionsExplicitRK2(a_cdrDensities, a_photonProduction, a_cdrGradients, a_E, a_pos, a_dx, dt, time, a_kappa, 0.5);
+
+	break;
+      }      
     default:
       {
 	MayDay::Error("CdrPlasmaJSON::integrateReactions - logic bust");
@@ -3650,6 +3665,165 @@ void CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          
     for (const auto& p : photonProducts){
       a_photonProduction[p] += Sdt;
     }
+  }
+}
+
+void CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDensities,
+						  std::vector<Real>&          a_photonProduction,
+						  const std::vector<RealVect> a_cdrGradients,
+						  const RealVect              a_E,
+						  const RealVect              a_pos,
+						  const Real                  a_dx,
+						  const Real                  a_dt,
+						  const Real                  a_time,
+						  const Real                  a_kappa,
+						  const Real                  a_tableuAlpha) const {
+
+  // TLDR: We are integrating over an interval (a_time, a_time + a_dt). The integration rule for dy/dt = f(y,t) is
+  //
+  //          y(t+dt) = y0 + 0.5*dt * [f(y,t) + f(y+k1*dt, t+dt)] where k1 = f(y,t)
+  //
+  //       which we for compactness write
+  //
+  //          y(t+dt) = y0 + k1*dt.
+
+  // Electric field and reduce electric field. 
+  const Real E   = a_E.vectorLength();
+  const Real N   = m_gasDensity(a_pos);
+  const Real Etd = (E/(N * Units::Td));
+
+  // Townsend ionization and attachment coefficients. May or may not be used.
+  const Real alpha = this->computeAlpha(E, a_pos);
+  const Real eta   = this->computeEta  (E, a_pos);
+
+  // Initial states for reactive problem. 
+  const std::vector<Real> cdrY0 = a_cdrDensities;
+  const std::vector<Real> rteY0 = std::vector<Real>(m_numRtSpecies, 0.0);
+
+  // Storage for k1- and k2- coefficients.
+  std::vector<Real> cdrK1(m_numCdrSpecies, 0.0);
+  std::vector<Real> rteK1(m_numRtSpecies,  0.0);
+
+  std::vector<Real> cdrK2(m_numCdrSpecies, 0.0);
+  std::vector<Real> rteK2(m_numRtSpecies,  0.0);
+
+  // Used for holding intermediate states = y(t) + dt*f(y(t),t)
+  std::vector<Real> cdrY1(m_numCdrSpecies, 0.0);
+  std::vector<Real> rteY1(m_numRtSpecies,  0.0);  
+
+  // Compute k1. 
+  for (int i = 0; i < m_plasmaReactions.size(); i++) {
+
+    const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities  (a_pos, a_E, cdrY0);
+    const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion   (a_pos, a_E, cdrY0);
+    const std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, cdrY0);    
+
+    // Reaction and species involved in the reaction. 
+    const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
+
+    const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
+    const std::list<int>& neutralReactants = reaction.getNeutralReactants();
+    const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
+    const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();
+
+    // Compute the rate. This returns a volumetric rate in units of #/(m^3 * s) (or #/(m^2 * s) for Cartesian 2D).
+    const Real k = this->computePlasmaReactionRate(i,
+						   cdrY0,
+						   cdrMobilities,
+						   cdrDiffusionCoefficients,
+						   cdrTemperatures,
+						   a_cdrGradients,
+						   a_pos,
+						   a_E,
+						   E,
+						   Etd,
+						   N,
+						   alpha,
+						   eta,
+						   a_time);
+    
+    // Remove consumption on the left-hand side.
+    for (const auto& r : plasmaReactants){
+      cdrK1[r] -= k;
+    }
+
+    // Add mass on the right-hand side.
+    for (const auto& p : plasmaProducts){
+      cdrK1[p] += k;      
+    }
+
+    // Add photons on the right-hand side. 
+    for (const auto& p : photonProducts){
+      rteK1[p] += k;
+    }
+  }
+
+  // Compute intermediate states.
+  for (int i = 0; i < m_numCdrSpecies; i++){
+    cdrY1[i] = cdrY0[i] + a_tableuAlpha * a_dt * cdrK1[i];
+  }
+
+  for (int i = 0; i < m_numRtSpecies; i++){
+    rteY1[i] = rteY0[i] + a_tableuAlpha * a_dt * rteK1[i];
+  }
+
+  // Compute k2. 
+  for (int i = 0; i < m_plasmaReactions.size(); i++) {
+
+    const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities  (a_pos, a_E, cdrY1);
+    const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion   (a_pos, a_E, cdrY1);
+    const std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, cdrY1);    
+
+    // Reaction and species involved in the reaction. 
+    const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
+
+    const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
+    const std::list<int>& neutralReactants = reaction.getNeutralReactants();
+    const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
+    const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();
+
+    // Compute the rate. This returns a volumetric rate in units of #/(m^3 * s) (or #/(m^2 * s) for Cartesian 2D).
+    const Real k = this->computePlasmaReactionRate(i,
+						   cdrY1,
+						   cdrMobilities,
+						   cdrDiffusionCoefficients,
+						   cdrTemperatures,
+						   a_cdrGradients,
+						   a_pos,
+						   a_E,
+						   E,
+						   Etd,
+						   N,
+						   alpha,
+						   eta,
+						   a_time);
+    
+    // Remove consumption on the left-hand side.
+    for (const auto& r : plasmaReactants){
+      cdrK2[r] -= k;
+    }
+
+    // Add mass on the right-hand side.
+    for (const auto& p : plasmaProducts){
+      cdrK2[p] += k;      
+    }
+
+    // Add photons on the right-hand side. 
+    for (const auto& p : photonProducts){
+      rteK2[p] += k;
+    }
+  }
+
+  const Real g2 = 1.0 / (2.0*a_tableuAlpha);
+  const Real g1 = 1.0 - g2;
+
+  // Set the final states
+  for (int i = 0; i < m_numCdrSpecies; i++){
+    a_cdrDensities[i] = cdrY0[i] + a_dt * ( g1*cdrK1[i] + g2*cdrK2[i] );
+  }
+
+  for (int i = 0; i < m_numRtSpecies; i++){
+    a_photonProduction[i] = rteY1[i] + a_dt * ( g1*rteK1[i] + g2*rteK2[i] );    
   }
 }
 
