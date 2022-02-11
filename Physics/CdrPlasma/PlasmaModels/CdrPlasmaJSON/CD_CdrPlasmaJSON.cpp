@@ -3136,8 +3136,7 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     // Plasma reactions loop
     for (int i = 0; i < m_plasmaReactions.size(); i++) {
 
-      // Reaction and species involved in the reaction. The lambda above does *not* multiply by neutral species densities. Since rates
-      // can be parsed in so many different ways, the rules for the various rates are put in the switch statement below.
+      // Reaction and species involved in the reaction. 
       const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
 
       const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
@@ -3564,7 +3563,52 @@ void CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          
   const Real eta   = this->computeEta  (E, a_pos);
 
   // Grid cell volume
-  const Real vol = std::pow(a_dx, SpaceDim);  
+  const Real vol = std::pow(a_dx, SpaceDim);
+
+  // Plasma reactions loop
+  for (int i = 0; i < m_plasmaReactions.size(); i++) {
+
+    // Reaction and species involved in the reaction. 
+    const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
+
+    const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
+    const std::list<int>& neutralReactants = reaction.getNeutralReactants();
+    const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
+    const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();
+
+    // Compute the rate. This returns a volumetric rate in units of #/m^(-3) (or #/m^-2 for Cartesian 2D).
+    const Real k = this->computePlasmaReactionRate(i,
+						   a_cdrDensities,
+						   cdrMobilities,
+						   cdrDiffusionCoefficients,
+						   cdrTemperatures,
+						   a_cdrGradients,
+						   a_pos,
+						   a_E,
+						   E,
+						   Etd,
+						   N,
+						   alpha,
+						   eta,
+						   a_time);
+
+    const Real Sdt = k * a_dt;
+
+    // Remove consumption on the left-hand side.
+    for (const auto& r : plasmaReactants){
+      a_cdrDensities[r] -= Sdt;
+    }
+
+    // Add mass on the right-hand side.
+    for (const auto& p : plasmaProducts){
+      a_cdrDensities[p] += Sdt;
+    }
+
+    // Add photons on the right-hand side. 
+    for (const auto& p : photonProducts){
+      a_rteDensities[p] += Sdt;
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>
