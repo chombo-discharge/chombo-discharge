@@ -964,8 +964,7 @@ namespace Physics {
 					     const Real&                  a_alpha,
 					     const Real&                  a_eta,					     
 					     const Real&                  a_time) const;
-					     
-
+      
       /*!
 	@brief Throw a parser error
 	@param[in] a_error Error code.

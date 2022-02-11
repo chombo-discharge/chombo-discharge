@@ -5,3 +5,5 @@ CdrPlasmaJSON.verbose          = false             # Turn on/off verbosity
 CdrPlasmaJSON.chemistry_file   = template.json     # Chemistry file containing JSON definitions
 CdrPlasmaJSON.discrete_photons = false             # Use discrete photons or not
 CdrPlasmaJSON.skip_reactions   = false             # If true, turn off all reactions
+CdrPlasmaJSON.integrator       = explicit_euler    # Reaction network integrator
+CdrPlasmaJSON.substeps         = 1                 # Substeps in the reaction integrator
