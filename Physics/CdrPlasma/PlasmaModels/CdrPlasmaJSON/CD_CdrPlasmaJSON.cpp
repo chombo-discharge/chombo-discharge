@@ -2471,8 +2471,8 @@ void CdrPlasmaJSON::parseDomainReactions(){
     // Base error when parsing the reactions
     const std::string baseError = "CdrPlasmaJSON::parseDomainReactions ";
 
-    const std::map<char, int> dirMap{{'x', 0}, {'y', 1}, {'z', 2}};
-    const std::map<std::string, Side::LoHiSide> sideMap{{"lo", Side::Lo}, {"hi", Side::Hi}};
+    //const std::map<char, int> dirMap{{'x', 0}, {'y', 1}, {'z', 2}};
+    //const std::map<std::string, Side::LoHiSide> sideMap{{"lo", Side::Lo}, {"hi", Side::Hi}};
 
     // Iterate through the reactions
     for (const auto& domainReaction : domainReactions){
@@ -2514,8 +2514,8 @@ void CdrPlasmaJSON::parseDomainReactions(){
 	const int reactionIndex = domainReactionsVec.size();
 
 	// Parse the scaling factor for the electrode surface reaction
-	this->parseDomainReactionRate(reactionIndex, domainReaction);
-	this->parseDomainReactionRate(reactionIndex, domainReaction);
+	this->parseDomainReactionRate(reactionIndex, domainReaction, sides);
+	this->parseDomainReactionScaling(reactionIndex, domainReaction, sides);
 
 	// Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile.
 	std::list<int> plasmaReactants;
@@ -2540,9 +2540,9 @@ void CdrPlasmaJSON::parseDomainReactions(){
 	domainReactionsVec.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
       }
       for (std::string curSide : sides){
-	// Create an int, string pair of dir, side for the m_domainReactions-map
+	// Create an int, Side::LoHiSide pair of dir, side for the m_domainReactions-map
 	curSide = this->trim(curSide);
-	std::pair<int, Side::LoHiSide> curPair = std::make_pair(dirMap.at(curSide.at(0)), sideMap.at(curSide.substr(2,2)));
+	std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2,2)));
 
 	// Make sure that the dir+side combination has only been included once
 	if(m_domainReactions.find(curPair) != m_domainReactions.end()){
@@ -2552,8 +2552,8 @@ void CdrPlasmaJSON::parseDomainReactions(){
 	m_domainReactions.emplace(curPair, domainReactionsVec);
       }
     }
-    for(const auto& curDir : dirMap){
-      for (const auto& curSide : sideMap){
+    for(const auto& curDir : m_dirCharToInt){
+      for (const auto& curSide : m_sideStringToSide){
 	// Make sure that all dir+side combinations are included
 	if(m_domainReactions.find(std::make_pair(curDir.second, curSide.second)) == m_domainReactions.end()){
 	  this->throwParserError(baseError + " - dir+side-pair '" + curDir.first + "_" + curSide.first + "' is missing.");
@@ -2563,7 +2563,7 @@ void CdrPlasmaJSON::parseDomainReactions(){
   }
 }
 
-void CdrPlasmaJSON::parseDomainReactionRate(const int a_reactionIndex, const json& a_reactionJSON){
+void CdrPlasmaJSON::parseDomainReactionRate(const int a_reactionIndex, const json& a_reactionJSON, const std::vector<std::string>& a_sides){
   CH_TIME("CdrPlasmaJSON::parseDomainReactionRate()");
   if(m_verbose){
     pout() << "CdrPlasmaJSON::parseDomainReactionRate()" << endl;
@@ -2589,16 +2589,23 @@ void CdrPlasmaJSON::parseDomainReactionRate(const int a_reactionIndex, const jso
 
     const Real rate = a_reactionJSON["value"].get<Real>();
 
-    // Add the constant reaction rate to the appropriate container
-    m_domainReactionLookup.emplace(a_reactionIndex, LookupMethod::Constant);
-    m_domainReactionConstants.emplace(a_reactionIndex, rate);
+    for (std::string curSide : a_sides){
+      // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactionLookup- and m_domainReactionConstants-map
+      curSide = this->trim(curSide);
+      std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2,2)));
+
+      // Duplicated inputs are not handled here (they are handled in CdrPlasmaJSON::parseDomainReactions() )
+      // Add the constant reaction rate to the appropriate container
+      m_domainReactionLookup[curPair].emplace(a_reactionIndex, LookupMethod::Constant);
+      m_domainReactionConstants[curPair].emplace(a_reactionIndex, rate);
+    }
   }
   else {
     this->throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
   }
 }
 
-void CdrPlasmaJSON::parseDomainReactionScaling(const int a_reactionIndex, const json& a_reactionJSON){
+void CdrPlasmaJSON::parseDomainReactionScaling(const int a_reactionIndex, const json& a_reactionJSON, const std::vector<std::string>& a_sides){
   CH_TIME("CdrPlasmaJSON::parseDomainReactionScaling()");
   if(m_verbose){
     pout() << "CdrPlasmaJSON::parseDomainReactionScaling()" << endl;
@@ -2614,6 +2621,17 @@ void CdrPlasmaJSON::parseDomainReactionScaling(const int a_reactionIndex, const 
   auto func = [scale](const Real E, const RealVect x) -> Real{
      return scale;
   };
+
+  
+  for (std::string curSide : a_sides){
+    // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactionLookup- and m_domainReactionConstants-map
+    curSide = this->trim(curSide);
+    std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2,2)));
+
+    // Duplicated inputs are not handled here (they are handled in CdrPlasmaJSON::parseDomainReactions() )
+    // Add to the pile
+    m_domainReactionEfficiencies[curPair].emplace(a_reactionIndex, func);
+  }  
 }
 
 int CdrPlasmaJSON::getNumberOfPlotVariables() const {
