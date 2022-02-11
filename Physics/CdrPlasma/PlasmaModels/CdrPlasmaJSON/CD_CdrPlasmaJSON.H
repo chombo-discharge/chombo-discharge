@@ -1,5 +1,7 @@
 /* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
+ * Copyright © 2022 NTNU.
+ * Copyrigth © 2022 Fanny Skirbekk. 
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 

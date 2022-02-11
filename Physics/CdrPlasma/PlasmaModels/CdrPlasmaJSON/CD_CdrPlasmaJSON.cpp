@@ -1,5 +1,7 @@
 /* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
+ * Copyright © 2022 NTNU.
+ * Copyrigth © 2022 Fanny Skirbekk. 
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -2544,7 +2546,7 @@ void CdrPlasmaJSON::parseDomainReactions(){
 
 	// Make sure that the dir+side combination has only been included once
 	if(m_domainReactions.find(curPair) != m_domainReactions.end()){
-	  this->throwParserError(baseError + " - dir+side-pair '" + curSide + "' was listed multiple times");
+	  this->throwParserError(baseError + " - dir+side-pair '" + curSide.substr(2,2) + "' was listed multiple times");
 	}
 
 	m_domainReactions.emplace(curPair, domainReactionsVec);
@@ -3520,6 +3522,8 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
 						   const Vector<Real>   a_cdrGradients,
 						   const Vector<Real>   a_rteFluxes,
 						   const Vector<Real>   a_extrapCdrFluxes) const {
+  
+  // The finite volume fluxes. In our finite-volume implementation, a mass inflow will have a negative sign.
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);  
 
   const int sign        = (a_side == Side::Lo) ? 1 : -1;
@@ -3537,7 +3541,15 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
     if(Z > 0 && isCathode) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);      
   }
 
-  // for (int i = 0; i < m_
+  /*
+  // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma species
+  // and photon species
+  for (int i = 0; i < m_domainReactions.at(std::make_pair(a_dir, a_side)).size(); ++i){
+
+    // Get the reaction an lookup method.
+    const LookupMethod& method = m_domainReactionLookup.at(i)
+  }
+  */
   
   return fluxes;    
 }
