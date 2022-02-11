@@ -2470,7 +2470,7 @@ void CdrPlasmaJSON::parseDomainReactions(){
     const std::string baseError = "CdrPlasmaJSON::parseDomainReactions ";
 
     const std::map<char, int> dirMap{{'x', 0}, {'y', 1}, {'z', 2}};
-    const std::map<char, std::string> sideMap{{'l', "lo"}, {'h', "hi"}};
+    const std::map<std::string, Side::LoHiSide> sideMap{{"lo", Side::Lo}, {"hi", Side::Hi}};
 
     // Iterate through the reactions
     for (const auto& domainReaction : domainReactions){
@@ -2540,7 +2540,7 @@ void CdrPlasmaJSON::parseDomainReactions(){
       for (std::string curSide : sides){
 	// Create an int, string pair of dir, side for the m_domainReactions-map
 	curSide = this->trim(curSide);
-	std::pair<int, std::string> curPair = std::make_pair(dirMap.at(curSide.at(0)), sideMap.at(curSide.at(2)));
+	std::pair<int, Side::LoHiSide> curPair = std::make_pair(dirMap.at(curSide.at(0)), sideMap.at(curSide.substr(2,2)));
 
 	// Make sure that the dir+side combination has only been included once
 	if(m_domainReactions.find(curPair) != m_domainReactions.end()){
@@ -2554,7 +2554,7 @@ void CdrPlasmaJSON::parseDomainReactions(){
       for (const auto& curSide : sideMap){
 	// Make sure that all dir+side combinations are included
 	if(m_domainReactions.find(std::make_pair(curDir.second, curSide.second)) == m_domainReactions.end()){
-	  this->throwParserError(baseError + " - dir+side-pair '" + curDir.first + "_" + curSide.second + "' is missing.");
+	  this->throwParserError(baseError + " - dir+side-pair '" + curDir.first + "_" + curSide.first + "' is missing.");
 	}
       }
     }
