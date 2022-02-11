@@ -3541,14 +3541,23 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
 						   const Vector<Real>   a_rteFluxes,
 						   const Vector<Real>   a_extrapCdrFluxes) const {
   
+  // TLDR: This routine computes the finite volume fluxes on the domain. The input argument a_extrapCdrFluxes are the fluxes
+  //       that were extrapolated from the inside of the domain. Likewise, a_rteFluxes are the photon fluxes onto the surfaces. We
+  //       use these fluxes to specify an inflow due to secondary emission. 
+  
   // The finite volume fluxes. In our finite-volume implementation, a mass inflow will have a negative sign.
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);  
 
   const int sign        = (a_side == Side::Lo) ? 1 : -1;
   const RealVect normal = sign * BASISREALV(a_dir);
-    
+  const std::pair<int, Side::LoHiSide> dirSide = std::make_pair(a_dir, a_side);
+
+  // Check if this is an anode or a cathode
   const bool isCathode = a_E.dotProduct(normal) < 0;
   const bool isAnode   = a_E.dotProduct(normal) > 0;
+
+  // Compute the magnitude of the electric field in SI units
+  const Real E = a_E.vectorLength();
 
   // Set outflow boundary conditions on charged species. 
   for (int i = 0; i < m_numCdrSpecies; i++){
@@ -3559,15 +3568,62 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
     if(Z > 0 && isCathode) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);      
   }
 
-  /*
   // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma species
   // and photon species
-  for (int i = 0; i < m_domainReactions.at(std::make_pair(a_dir, a_side)).size(); ++i){
+  for (int i = 0; i < m_domainReactions.at(dirSide).size(); ++i){
 
-    // Get the reaction an lookup method.
-    const LookupMethod& method = m_domainReactionLookup.at(i)
+    // Get the reaction and lookup method.
+    const LookupMethod& method = m_domainReactionLookup.at(dirSide).at(i);
+    const CdrPlasmaSurfaceReactionJSON& reaction = m_domainReactions.at(dirSide)[i];
+
+    // Get the outgoing species that are involved in the reaction
+    const std::list<int>& plasmaReactants = reaction.getPlasmaReactants();
+    const std::list<int>& photonReactants = reaction.getPhotonReactants();
+    const std::list<int>& plasmaProducts = reaction.getPlasmaProducts();
+
+    // Get the emission rate constant
+    Real emissionRate = 0.0;
+    switch(method){
+    case LookupMethod::Constant:
+      {
+	emissionRate = m_domainReactionConstants.at(dirSide).at(i);
+	break;
+      }
+    default:
+      {
+	MayDay::Error("CdrPlasmaJSON::computeCdrDomainFluxes -- logic bust");
+      }
+    }
+
+    // Scale the emission rate constant by whatever the user has put in the "scaling factor" field.
+    const FunctionEX& scalingFunction = m_domainReactionEfficiencies.at(dirSide).at(i);
+    const Real scalingFactor = scalingFunction(E, a_pos);
+
+    emissionRate *= scalingFactor;
+
+    // Next, compute the total influx due to outflow of the specified surface reaction species.
+    Real inflow = 0.0;
+
+    // Inflow due to outflow of specified plasma species
+    for (const auto& r : plasmaReactants){
+      inflow += fluxes[r];
+    }
+
+    // Inflow due to outflow of specified photon flux
+    for (const auto& r : photonReactants){
+      inflow += a_extrapCdrFluxes[r];
+    }
+
+    // Scale by emission rate in order to get total influx
+    inflow *= emissionRate;
+
+    // Add the inflow flux to all species on the right-hand-side of the reaction, i.e. subtract it.
+    // It is subtracted because 'inflowFluxes' is the magnitude, but in our
+    // finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
+    for (const auto& p : plasmaProducts){
+      fluxes[p] -= inflow;
+    }
   }
-  */
   
   return fluxes;    
 }
