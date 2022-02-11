@@ -475,10 +475,12 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cd
   // This is a special option in case we use upwinding. In that case we need to allocate
   // storage for holding the upwind-weighted data for each cdr solver.
   Vector<EBAMRCellData*> cdrStates(numCdrSpecies);
-  
-  if(m_whichSourceTermComputation == SourceTermComputation::Upwind){
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      const int idx = solverIt.index();
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+      
+    // Do the upwind magic, but only for the first species (which we assume are electrons)
+    if(m_whichSourceTermComputation == SourceTermComputation::Upwind && idx == 0){
 
       // Allocate some storage and compute an upwind approximation to the cell-centered density. This is the Villa et. al magic for stabilizing
       // the drift-reaction mechanism. Only use if you absolute know what you're doing. 
@@ -488,11 +490,7 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cd
       // Compute the upwind approximation. 
       solverIt()->weightedUpwind(*cdrStates[idx], m_upwindFactor);
     }
-  }
-  else{
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      const int idx = solverIt.index();
-      
+    else{
       cdrStates[idx] = a_cdrDensities[idx];
     }
   }
@@ -538,9 +536,9 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cd
   }
 
   // When we did the upwind approximation we explicitly allocate memory. Now release it. 
-  if(m_whichSourceTermComputation == SourceTermComputation::Upwind){
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      const int idx = solverIt.index();
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    if(m_whichSourceTermComputation == SourceTermComputation::Upwind && idx == 0){            
       
       delete cdrStates[idx];
     }

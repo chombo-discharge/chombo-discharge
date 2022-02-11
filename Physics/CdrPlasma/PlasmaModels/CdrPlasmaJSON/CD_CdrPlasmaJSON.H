@@ -964,6 +964,7 @@ namespace Physics {
 					     const Real&                  a_alpha,
 					     const Real&                  a_eta,					     
 					     const Real&                  a_time) const;
+
       
       /*!
 	@brief Throw a parser error
@@ -1024,6 +1025,21 @@ namespace Physics {
 	@param[in] a_filename File name
       */
       bool doesFileExist(const std::string a_filename) const;
+
+
+      /*!
+	@brief Routine for integrating the reactive-only problem using various algorithms. 
+      */
+      void integrateReactions(std::vector<Real>&          a_cdrDensities,
+				      std::vector<Real>&          a_rteSources,
+				      const std::vector<RealVect> a_cdrGradients,
+				      const std::vector<Real>     a_rteDensities,
+				      const RealVect              a_E,
+				      const RealVect              a_pos,
+				      const Real                  a_dx,
+				      const Real                  a_dt,
+				      const Real                  a_time,
+				      const Real                  a_kappa) const;
 
     };
   }
