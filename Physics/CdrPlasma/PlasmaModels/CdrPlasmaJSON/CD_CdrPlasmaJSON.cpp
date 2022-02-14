@@ -3121,67 +3121,6 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 
   // Hook for turning off all reactions. 
   if(!m_skipReactions){
-
-    // These may or may not be needed.
-    const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities  (a_pos, a_E, cdrDensities);  
-    const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion   (a_pos, a_E, cdrDensities);  
-    const std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, cdrDensities);
-
-    // Electric field and reduce electric field. 
-
-    const Real N   = m_gasDensity(a_pos);
-    const Real Etd = (E/(N * Units::Td));
-
-    // Townsend ionization and attachment coefficients. May or may not be used.
-    const Real alpha = this->computeAlpha(E, a_pos);
-    const Real eta   = this->computeEta  (E, a_pos);    
-
-    // Plasma reactions loop
-    for (int i = 0; i < m_plasmaReactions.size(); i++) {
-
-      // Reaction and species involved in the reaction. 
-      const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
-
-      const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
-      const std::list<int>& neutralReactants = reaction.getNeutralReactants();
-      const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
-      const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();
-
-      // Compute the rate. This returns a volumetric rate in units of #/m^(-3) (or #/m^-2 for Cartesian 2D).
-      const Real k = this->computePlasmaReactionRate(i,
-						     cdrDensities,
-						     cdrMobilities,
-						     cdrDiffusionCoefficients,
-						     cdrTemperatures,
-						     cdrGradients,
-						     a_pos,
-						     a_E,
-						     E,
-						     Etd,
-						     N,
-						     alpha,
-						     eta,
-						     a_time);    
-
-      // Remove consumption on the left-hand side.
-      for (const auto& r : plasmaReactants){
-	cdrSources[r] -= k;
-      }
-
-      // Add mass on the right-hand side.
-      for (const auto& p : plasmaProducts){
-	cdrSources[p] += k;
-      }
-
-      for (const auto& p : photonProducts){
-	rteSources[p] += k;
-      }
-    } // End of plasma reactions. 
-
-    // Add the photoionization products
-    this->addPhotoIonization(cdrSources, rteDensities, a_pos, E, a_dt, a_dx);
-  }
-  else{
     // Solve the reactive problem.
     std::vector<Real> finalCdrDensities = cdrDensities;
     std::vector<Real> photonProduction (m_numRtSpecies,  0.0);
@@ -3208,7 +3147,6 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     // Add the photoionization products
     this->addPhotoIonization(cdrSources, rteDensities, a_pos, E, a_dt, a_dx);
   }
-
 
   // If using stochastic photons -- then we need to run Poisson sampling of the photons.
   if(m_discretePhotons){
@@ -3902,6 +3840,5 @@ void CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&          a_
     a_photonProduction[i] = rteY0[i] + a_dt * (rteK1[i] + 2.0*rteK2[i] + 2.0*rteK3[i] + rteK4[i]) / 6.0;
   }
 }
-
 
 #include <CD_NamespaceFooter.H>
