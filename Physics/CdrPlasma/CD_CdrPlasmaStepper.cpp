@@ -3254,13 +3254,6 @@ void CdrPlasmaStepper::initialData() {
   // Fill solvers with velocity and diffusion
   this->computeCdrDriftVelocities();
   this->computeCdrDiffusion();
-
-  // Do stationary RTE solve if we must
-  if(this->stationaryRTE()){                  // Solve RTE equations by using initial data and electric field
-    const Real dummyDt = 1.0;
-
-    this->solveRadiativeTransfer(dummyDt);                 // Argument does not matter, it's a stationary solver.
-  }
 }
 
 void CdrPlasmaStepper::initialSigma() {
@@ -3450,13 +3443,12 @@ void CdrPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, cons
   this->computeCdrDriftVelocities();
   this->computeCdrDiffusion();
 
-  // If we're doing a stationary RTE solve, recompute source terms
-  if(this->stationaryRTE()){     // Solve RTE equations by using data that exists inside solvers
-    const Real dummyDt = 1.0;
-
-    // Need new source terms for RTE equations
-    this->advanceReactionNetwork(m_time, dummyDt);
-    this->solveRadiativeTransfer(dummyDt);    // Argument does not matter, it's a stationary solver.
+  // If we're doing a stationary RTE, we should update the elliptic equations. The RTE solvers should
+  // have regridded the source term in that case. 
+  if(this->stationaryRTE()){
+    constexpr Real dummyDt = 0.0;
+    
+    this->solveRadiativeTransfer(dummyDt);
   }
 }
 
@@ -4482,7 +4474,8 @@ void CdrPlasmaStepper::postCheckpointSetup() {
 
   // Update RTE solvers if the solver was stationary. 
   if(this->stationaryRTE()){  
-    const Real dummyDt = 0.0;
+    constexpr Real dummyDt = 0.0;
+    
     this->solveRadiativeTransfer(dummyDt);
   }
 
