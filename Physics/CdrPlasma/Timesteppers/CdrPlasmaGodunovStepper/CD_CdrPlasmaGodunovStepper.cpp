@@ -668,7 +668,7 @@ void CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(const Real a_dt){
     // Let n = n(t) + 0.5*a_dt * S(t) if we use the source term for extrapolation. 
     DataOps::copy(extrap, state);
     if(m_extrapAdvect) {
-      DataOps::incr(extrap, source, 0.5*a_dt);
+      //      DataOps::incr(extrap, source, 0.5*a_dt);
     }
   }
 }
