@@ -431,7 +431,7 @@
        "@": ["Bourdon1", "Bourdon2", "Bourdon3"],
        "lookup": "constant",
        "value": 1E-3,
-       "scale": 1.0
+       "scale": 0.0
      }
  ],
  "dielectric reactions":
@@ -440,7 +440,7 @@
        "@": ["Bourdon1", "Bourdon2", "Bourdon3"],
        "lookup": "constant",
        "value": 1E-3,
-       "scale": 1.0       
+       "scale": 0.0       
      }
  ] 
 }
