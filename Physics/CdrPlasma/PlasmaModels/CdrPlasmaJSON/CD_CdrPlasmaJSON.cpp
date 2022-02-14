@@ -3175,7 +3175,7 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 
       for (const auto& p : photonProducts){
 	rteSources[p] += k;
-      }    
+      }
     } // End of plasma reactions. 
 
     // Add the photoionization products
@@ -3532,12 +3532,6 @@ void CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
       // but the API says that we need to compute the rate, so we put rate = Psi/dt
       
       k = m_photoReactionEfficiencies.at(i)(a_E, a_position)/a_dt;
-
-      // Hook for ensuring correct scaling in 2D. When we run in Cartesian 2D the photons are not points, but lines. We've deposited the particles (lines)
-      // on the mesh but what we really want is the volumetric density. So we need to scale. 
-      if(m_discretePhotons && SpaceDim == 2){
-	k *= 1./a_dx;
-      }
     }
 
     // Fire the reaction. 

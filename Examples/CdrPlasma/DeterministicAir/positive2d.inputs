@@ -59,7 +59,7 @@ Driver.num_plot_ghost                  = 1                # Number of ghost cell
 Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
+Driver.grow_geo_tags                   = 4                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes               = 3                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -200,7 +200,7 @@ CdrPlasmaGodunovStepper.diffusion_thresh = 1.2           # Diffusion threshold. 
 CdrPlasmaGodunovStepper.transport        = semi_implicit # Transport algorithm. 'semi_implicit' or 'euler'
 CdrPlasmaGodunovStepper.relax_time       = 1.E99         # Relaxation time constant. Not necessary for semi-implicit scheme. 
 CdrPlasmaGodunovStepper.fast_poisson     = 1             # Solve Poisson every this time steps. Mostly for debugging.
-CdrPlasmaGodunovStepper.fast_rte         = 10		             # Solve RTE every this time steps. Mostly for debugging.
+CdrPlasmaGodunovStepper.fast_rte         = 1	         # Solve RTE every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fhd              = false         # Set to true if you want to add a stochastic diffusion flux
 CdrPlasmaGodunovStepper.source_comp      = interp2       # Interpolated 'interp', 'interp2', or 'upwind X' (X = integer, for ultimate stability)
 CdrPlasmaGodunovStepper.extrap_advect    = true          # Use time-extrapolation capabilities (if they exist) in the CdrSolver
