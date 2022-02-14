@@ -1445,7 +1445,7 @@ void CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
   }
 
   // These levels have changed
-  for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
+  for (int lvl = std::max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
     RefCountedPtr<EBPWLFineInterp>& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase)[lvl]; // The interpolator for interpolator from lvl-1 to lvl lives on lvl
 
     // Linearly interpolate (with limiters) from level lvl-1 to lvl
@@ -1465,6 +1465,10 @@ void CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
 
   m_amr->averageDown(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
+
+  // Deallocate the scratch storage.
+  m_amr->deallocate(m_cachePhi   );
+  m_amr->deallocate(m_cacheSource);    
 }
 
 void CdrSolver::reflux(EBAMRCellData& a_phi){
