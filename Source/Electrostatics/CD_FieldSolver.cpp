@@ -405,6 +405,9 @@ void FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int
 
   // Set permittivities
   this->setPermittivities();
+
+  // Deallocate the scratch storage.
+  m_amr->deallocate(m_cache);
 }
 
 void FieldSolver::setRho(const Real a_rho){
