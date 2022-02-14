@@ -2236,7 +2236,7 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
 	this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
 
 	// This is the reaction index for the current index. The reaction we are currently
-	// dealing with is put in m_plasmaReactions[reactionIdex]. 
+	// dealing with is put in m_electrodeReactions[reactionIndex]. 
 	const int reactionIndex = m_electrodeReactions.size();
 
 	// Parse the scaling factor for the electrode surface reaction
