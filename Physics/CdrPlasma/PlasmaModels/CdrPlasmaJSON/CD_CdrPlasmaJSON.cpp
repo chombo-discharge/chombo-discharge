@@ -1,7 +1,7 @@
 /* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
  * Copyright © 2022 NTNU.
- * Copyrigth © 2022 Fanny Skirbekk. 
+ * Copyright © 2022 Fanny Skirbekk. 
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -2525,7 +2525,6 @@ void CdrPlasmaJSON::parseDomainReactions(){
 	std::list<int> neutralProducts;
 	std::list<int> photonProducts;
 	
-
 	this->getReactionSpecies(plasmaReactants,
 				 neutralReactants,
 				 photonReactants,
@@ -2584,7 +2583,6 @@ void CdrPlasmaJSON::parseDomainReactionRate(const int a_reactionIndex, const jso
   // Now go through the various rate-computation methods and fill the relevant containers
   if(lookup == "constant"){
     // If using a constant emission rate, we must get the field 'value'
-
     if(!(a_reactionJSON.contains("value"))) this->throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
 
     const Real rate = a_reactionJSON["value"].get<Real>();
