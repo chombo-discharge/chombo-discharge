@@ -471,11 +471,6 @@ protected:
   int m_seed;
 
   /*!
-    @brief Threshold for swapping Poisson and exponential distributions
-  */
-  int m_poissonExponentialSwapLimit;
-
-  /*!
     @brief PVR buffer
   */
   int m_pvrBuffer;
@@ -570,12 +565,6 @@ protected:
     @param[in] a_side Coordinate side
   */
   int domainBcMap(const int a_dir, const Side::LoHiSide a_side);
-
-  /*!
-    @brief Random Poisson trial
-    @param[in] a_mean Mean value in Poisson distribution
-  */
-  int randomPoisson(const Real a_mean);
 
   /*!
     @brief Random exponential trial

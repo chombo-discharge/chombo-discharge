@@ -93,7 +93,6 @@ void McPhoto::parseOptions(){
     pout() << m_name + "::parseOptions" << endl;
   }
   
-  this->parseRNG();
   this->parsePseudoPhotons();
   this->parsePhotoGeneration();
   this->parseSourceType();
@@ -131,18 +130,6 @@ void McPhoto::parseDivergenceComputation(){
   ParmParse pp(m_className.c_str());
 
   pp.get("blend_conservation", m_blendConservation);
-}
-
-void McPhoto::parseRNG(){
-  CH_TIME("McPhoto::parseRNG");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parseRNG" << endl;
-  }
-
-  // Seed the RNG
-  ParmParse pp(m_className.c_str());
-  
-  pp.get("poiss_exp_swap", m_poissonExponentialSwapLimit);
 }
 
 void McPhoto::parseInstantaneous(){
@@ -669,17 +656,6 @@ int McPhoto::getNumberOfPlotVariables() const{
   return numPlotVars;
 }
 
-int McPhoto::randomPoisson(const Real a_mean){
-  if(a_mean < m_poissonExponentialSwapLimit){
-    std::poisson_distribution<int> pdist(a_mean);
-    return Random::get(pdist);
-  }
-  else {
-    std::normal_distribution<Real> ndist(a_mean, sqrt(a_mean));
-    return (int) round(Random::get(ndist));
-  }
-}
-
 int McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side) {
   const int iside = (a_side == Side::Lo) ? 0 : 1;
 
@@ -864,7 +840,7 @@ int McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_
   // Draw a number of Photons with the desired algorithm
   if(m_photoGenerationMethod == PhotonGeneration::Stochastic){
     const Real mean = a_source*factor;
-    numPhysicalPhotons = this->randomPoisson(mean);
+    numPhysicalPhotons = Random::getPoisson<int>(mean);
   }
   else if(m_photoGenerationMethod == PhotonGeneration::Deterministic){
     numPhysicalPhotons = round(a_source*factor);

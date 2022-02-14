@@ -1099,6 +1099,7 @@ namespace Physics {
 
       /*!
 	@brief Routine for integrating the reactive-only problem using a second order Runge-Kutta method. 
+	@details This includes the tableu through the a_tableuAlpha parameter. 
 	@param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
 	@param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
 	@param[in]    a_cdrGradients     CDR gradients at time a_time
@@ -1107,7 +1108,7 @@ namespace Physics {
 	@param[in]    a_dx               Grid resolution
 	@param[in]    a_dt               Time step
 	@param[in]    a_kappa            Volume fraction 
-	@param[in]    a_tableuAlpha      RK2 tableu alpha
+	@param[in]    a_tableuAlpha      RK2 tableu alpha. Use 0.5 for midpoint and 1.0 for trapezoidal (Heun's method)
       */
       void integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDensities,
 					 std::vector<Real>&          a_photonProduction,
@@ -1118,7 +1119,28 @@ namespace Physics {
 					 const Real                  a_dt,
 					 const Real                  a_time,
 					 const Real                  a_kappa,
-					 const Real                  a_tableuAlpha) const;      
+					 const Real                  a_tableuAlpha) const;
+
+      /*!
+	@brief Routine for integrating the reactive-only problem using the foruth order Runge-Kutta method. 
+	@param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+	@param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
+	@param[in]    a_cdrGradients     CDR gradients at time a_time
+	@param[in]    a_E                Electric field
+	@param[in]    a_pos              Physical coordinates
+	@param[in]    a_dx               Grid resolution
+	@param[in]    a_dt               Time step
+	@param[in]    a_kappa            Volume fraction 
+      */
+      void integrateReactionsExplicitRK4(std::vector<Real>&          a_cdrDensities,
+					 std::vector<Real>&          a_photonProduction,
+					 const std::vector<RealVect> a_cdrGradients,
+					 const RealVect              a_E,
+					 const RealVect              a_pos,
+					 const Real                  a_dx,
+					 const Real                  a_dt,
+					 const Real                  a_time,
+					 const Real                  a_kappa) const;
     };
   }
 }

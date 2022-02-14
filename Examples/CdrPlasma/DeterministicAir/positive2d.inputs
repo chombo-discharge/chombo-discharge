@@ -43,7 +43,7 @@ Driver.checkpoint_interval             = 10               # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 4                # Number of initial regrids
+Driver.initial_regrids                 = 3                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -200,13 +200,13 @@ CdrPlasmaGodunovStepper.diffusion_thresh = 1.2           # Diffusion threshold. 
 CdrPlasmaGodunovStepper.transport        = semi_implicit # Transport algorithm. 'semi_implicit' or 'euler'
 CdrPlasmaGodunovStepper.relax_time       = 1.E99         # Relaxation time constant. Not necessary for semi-implicit scheme. 
 CdrPlasmaGodunovStepper.fast_poisson     = 1             # Solve Poisson every this time steps. Mostly for debugging.
-CdrPlasmaGodunovStepper.fast_rte         = 1             # Solve RTE every this time steps. Mostly for debugging.
+CdrPlasmaGodunovStepper.fast_rte         = 10		             # Solve RTE every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fhd              = false         # Set to true if you want to add a stochastic diffusion flux
 CdrPlasmaGodunovStepper.source_comp      = interp2       # Interpolated 'interp', 'interp2', or 'upwind X' (X = integer, for ultimate stability)
 CdrPlasmaGodunovStepper.extrap_advect    = true          # Use time-extrapolation capabilities (if they exist) in the CdrSolver
 CdrPlasmaGodunovStepper.floor_cdr        = true          # Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug            = false         # Turn on debugging messages. Also monitors mass if it was injected into the system. 
-CdrPlasmaGodunovStepper.profile          = true         # Turn on/off performance profiling.
+CdrPlasmaGodunovStepper.profile          = true          # Turn on/off performance profiling.
 
 # ====================================================================================================
 # CdrPlasmaJSON class options
@@ -214,9 +214,9 @@ CdrPlasmaGodunovStepper.profile          = true         # Turn on/off performanc
 CdrPlasmaJSON.verbose          = false
 CdrPlasmaJSON.chemistry_file   = air_chemistry.json
 CdrPlasmaJSON.discrete_photons = false
-CdrPlasmaJSON.skip_reactions   = false
-CdrPlasmaJSON.integrator       = explicit_midpoint    # Reaction network integrator
-CdrPlasmaJSON.substeps         = 2                 # Substeps in the reaction integrator
+CdrPlasmaJSON.skip_reactions   = true
+CdrPlasmaJSON.integrator       = explicit_midpoint # Reaction network integrator
+CdrPlasmaJSON.substeps         = 1                 # Substeps in the reaction integrator
 
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options
