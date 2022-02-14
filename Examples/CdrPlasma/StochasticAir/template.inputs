@@ -148,7 +148,6 @@ McPhoto.bc_y_low           = outflow       # Boundary condition
 McPhoto.bc_y_high          = outflow       # Boundary condition
 McPhoto.bc_z_low           = outflow       # Boundary condition
 McPhoto.bc_z_high          = outflow       # Boundary condition
-McPhoto.poiss_exp_swap     = 100           # Swap out Poisson with exponential distribution above this mean
 McPhoto.photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
 McPhoto.source_type        = number        # 'number'      = Source term contains the number of photons produced
                                            # 'volume'      = Source terms contains the number of photons produced per unit volume
