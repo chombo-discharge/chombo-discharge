@@ -220,6 +220,10 @@ void Realm::defineHaloMasks(const int a_lmin){
 			     buffer,
 			     m_refinementRatios[lvl]);
       }
+
+      // Must explicitly set this because we want to the finest level mask to be nullptr, but we could be removing a grid level and in that case
+      // the old mask will remain in the vector after resizing. This fixes that. 
+      mask[m_finestLevel] = RefCountedPtr<LevelData<BaseFab<bool> > >(nullptr);
     }
   }
 }

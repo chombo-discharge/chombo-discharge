@@ -139,7 +139,7 @@ public:
     @brief Copy particles to non-masked data holder. 
     @details This is the "inverse" of copyMaskParticles. 
     @param[in] a_mask Mask
-    @note If the mask is nullptr on any of the levels, those levels will be ignored. 
+    @note If the mask is nullptr on any of the levels, all particles on that level will be copied. 
   */
   void copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_mask) const;
 
