@@ -1060,6 +1060,34 @@ void CdrPlasmaJSON::parseAlpha(){
 
     m_alphaLookup = LookupMethod::TableEN;
   }
+  else if (lookup == "morrow-lowke"){
+
+    // This is the Morrow-Lowke Townsend ionization coefficient. 
+    m_alphaFunctionEN = [] (const Real E, const Real N) -> Real {
+      
+      // Because Morrow and Lowke want E/N given as V cm^2.      
+      const Real EN = E/N * 1E4; 
+
+      // Compute alpha/N. 
+      Real alpha = 0.0;
+      if(EN <= 1.5E-15){
+	alpha = 6.619E-17 * exp(-5.593E-15/EN); 
+      }
+      else{
+	alpha = 2.0E-16 * exp(-7.248E-15/EN);
+      }
+
+      // Morrow-Lowke expression for alpha/N, which is in units of cm^2. Convert to m^2.       
+      alpha *= 1E-4;
+
+      // Actual alpha in sane units.
+      alpha *= N;
+
+      return alpha;
+    };
+
+    m_alphaLookup     = LookupMethod::FunctionEN;
+  }
   else{
     this->throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
   }
@@ -1156,6 +1184,43 @@ void CdrPlasmaJSON::parseEta(){
     }        
 
     m_etaLookup = LookupMethod::TableEN;
+  }
+  if(lookup == "morrow-lowke"){
+    
+    // This is the Morrow-Lowke Townsend attachment coefficient. 
+    m_etaFunctionEN = [] (const Real E, const Real N) -> Real {
+      
+      // Because Morrow and Lowke want E/N given as V cm^2.      
+      const Real EN = E/N * 1E4; 
+
+      // Compute the two-body attachment coefficient. 
+      Real eta2 = 0.0;
+      if(EN <= 1.05E-15){
+	eta2 = 6.089E-4*EN - 2.893E-19;
+      }
+      else{
+	eta2 = 8.889E-5*EN + 2.567E-19;
+      }
+
+      // Morrow-Lowke expression for eta/N, which is in units of cm^2. Convert to m^2.       
+      eta2 *= 1E-4;
+
+      // Actual alpha in sane units.
+      eta2 *= N;
+
+      // Three-body attachment coefficient.
+      Real eta3 = 4.7778E-59 * std::pow(EN, -1.2749); // In cm^5. Convert to m^5.
+
+      // Convert to m^5
+      eta3 *= 1.E-10;
+
+      //
+      eta3 *= N * N;
+
+      return eta2 + eta3;
+    };
+
+    m_etaLookup     = LookupMethod::FunctionEN;
   }
   else{
     this->throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
@@ -1288,6 +1353,81 @@ void CdrPlasmaJSON::parseMobilities() {
 	m_mobilityLookup.     emplace(std::make_pair(idx, LookupMethod::FunctionEN));
 	m_mobilityFunctionsEN.emplace(std::make_pair(idx, func                     ));	
       }
+      else if (lookup == "morrow-lowke e"){
+	// This is a hook for fetching the electron mobility from the Morrow-Lowke model. The expression
+	// is found in 'Streamer propagation in air', J. Phys. D: Appl. Phys. 30 614
+
+	auto func = [](const Real E, const Real N) -> Real {
+	  const Real EN = E/N * 1E4;
+
+	  const Real Einv = 1./E;
+
+	  constexpr Real lim0 = 2.6E-17;
+	  constexpr Real lim1 = 1.E-16;
+	  constexpr Real lim2 = 2.0E-15;
+
+	  Real mu = 0.0;
+	  
+	  if(EN <= lim0){
+	    mu = Einv *(6.87E22 * EN + 3.38E4);
+	  }
+	  else if(EN > lim0 && EN <= lim1){
+	    mu = Einv * (7.293E21*EN + 1.63E6);
+	  }
+	  else if(EN > lim1 && EN <= lim2){
+	    mu = Einv * (1.03E22*EN + 1.3E6);
+	  }
+	  else if(EN > lim2){
+	    mu = Einv * (7.4E21*EN + 7.1E6);
+	  }
+
+	  mu *= 1E-2;
+	  
+	  return mu;
+	};
+
+	m_mobilityLookup.     emplace(std::make_pair(idx, LookupMethod::FunctionEN));
+	m_mobilityFunctionsEN.emplace(std::make_pair(idx, func                     ));	
+      }
+      else if(lookup == "morrow-lowke +") {
+	// This is a hook for fetching the positive ion from the Morrow-Lowke model. The expression
+	// is found in 'Streamer propagation in air', J. Phys. D: Appl. Phys. 30 614	
+
+	auto func = [&P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
+	  constexpr Real P0 = Units::atm2pascal; // One atmosphere in Pascal.
+
+	  return 2.34E-4 * P0/P(x);
+	};
+
+	m_mobilityLookup.     emplace(std::make_pair(idx, LookupMethod::FunctionEX));
+	m_mobilityFunctionsEX.emplace(std::make_pair(idx, func                     ));		
+      }
+      else if(lookup == "morrow-lowke -") {
+	// This is a hook for fetching the negative ion from the Morrow-Lowke model. The expression
+	// is found in 'Streamer propagation in air', J. Phys. D: Appl. Phys. 30 614	
+
+	auto func = [&N = this->m_gasDensity, &P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
+
+	  const Real EN = E/N(x) * 1E4;
+
+	  constexpr Real P0 = Units::atm2pascal; // One atmosphere in Pascal.	  
+
+	  Real mu = 0.0;
+	  if(EN < 5.0E-16){
+	    mu = 1.86 * P0/P(x);
+	  }
+	  else{
+	    mu = 2.87 * P0/P(x);
+	  }
+
+	  mu *= 1.E-4; 
+
+	  return mu;
+	};
+
+	m_mobilityLookup.     emplace(std::make_pair(idx, LookupMethod::FunctionEX));
+	m_mobilityFunctionsEX.emplace(std::make_pair(idx, func                    ));
+      }      
       else{
 	this->throwParserError(baseError + " -- logic bust");
       }
@@ -1413,6 +1553,50 @@ void CdrPlasmaJSON::parseDiffusion() {
 
 	m_diffusionLookup.     emplace(std::make_pair(idx, LookupMethod::FunctionEN));
 	m_diffusionFunctionsEN.emplace(std::make_pair(idx, func                     ));	
+      }
+      else if (lookup == "morrow-lowke e"){
+	// This is a hook for fetching the electron diffusion from the Morrow-Lowke model. The expression
+	// is found in 'Streamer propagation in air', J. Phys. D: Appl. Phys. 30 614
+
+	auto electronMobility = [](const Real E, const Real N) -> Real {
+	  const Real EN = E/N * 1E4;
+
+	  const Real Einv = 1./E;
+
+	  constexpr Real lim0 = 2.6E-17;
+	  constexpr Real lim1 = 1.E-16;
+	  constexpr Real lim2 = 2.0E-15;
+
+	  Real mu = 0.0;
+	  
+	  if(EN <= lim0){
+	    mu = Einv *(6.87E22 * EN + 3.38E4);
+	  }
+	  else if(EN > lim0 && EN <= lim1){
+	    mu = Einv * (7.293E21*EN + 1.63E6);
+	  }
+	  else if(EN > lim1 && EN <= lim2){
+	    mu = Einv * (1.03E22*EN + 1.3E6);
+	  }
+	  else if(EN > lim2){
+	    mu = Einv * (7.4E21*EN + 7.1E6);
+	  }
+
+	  mu *= 1E-2;
+	  
+	  return mu;
+	};
+
+	auto electronDiffusion = [electronMobility] (const Real E, const Real N) -> Real {
+
+	  const Real EN = E/N * 1E4;
+	  const Real mu = electronMobility(E, N);
+
+	  return 0.3341E9*std::pow(EN, 0.54069) * mu * 1E-2;
+	};
+
+	m_diffusionLookup.     emplace(std::make_pair(idx, LookupMethod::FunctionEN));
+	m_diffusionFunctionsEN.emplace(std::make_pair(idx, electronDiffusion       ));	
       }      
       else{
 	this->throwParserError(baseError + " -- logic bust");	
@@ -2778,6 +2962,12 @@ std::vector<Real> CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect& 
       case LookupMethod::FunctionEN:
 	{
 	  mu[i] = m_mobilityFunctionsEN.at(i)(E, N);
+	  
+	  break;
+	}
+      case LookupMethod::FunctionEX:
+	{
+	  mu[i] = m_mobilityFunctionsEX.at(i)(E, a_position);
 	  
 	  break;
 	}

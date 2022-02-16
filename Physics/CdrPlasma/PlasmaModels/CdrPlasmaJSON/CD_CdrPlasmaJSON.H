@@ -294,6 +294,7 @@ namespace Physics {
 	FunctionT,
 	FunctionTT,
 	FunctionEN,
+	FunctionEX,
 	TableEN,
 	AlphaV,
 	EtaV
@@ -370,7 +371,7 @@ namespace Physics {
       std::function<Real(const RealVect a_position, const Real a_time)> m_initialSigma;      
 
       /*!
-	@brief Gas pressure (in atmospheres)
+	@brief Gas pressure (in Pascal).
       */
       FunctionX m_gasPressure;
 
@@ -479,9 +480,14 @@ namespace Physics {
       std::map<int, Real> m_mobilityConstants;
 
       /*!
-	@brief Map for table-based mobilities.
+	@brief Map for function-based mobilities mu = mu(E,N)
       */
       std::map<int, FunctionEN> m_mobilityFunctionsEN;
+
+      /*!
+	@brief Map for function-based mobilities mu = mu(E,x)
+      */
+      std::map<int, FunctionEX> m_mobilityFunctionsEX;
 
       /*!
 	@brief Map for function-based mobilities. 
