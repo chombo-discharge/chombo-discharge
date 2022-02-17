@@ -104,7 +104,10 @@ void CdrPlasmaJSON::parseIntegrator() {
     this->throwParserError("CdrPlasmaJSON::parseIntegrator -- substeps must be >= 1");
   }
 
-  if(str == "explicit_euler") {
+  if(str == "none"){
+    integrator = ReactionIntegrator::None;
+  }
+  else if(str == "explicit_euler") {
     integrator = ReactionIntegrator::ExplicitEuler;
   }
   else if(str == "explicit_trapezoidal") {
@@ -1185,7 +1188,7 @@ void CdrPlasmaJSON::parseEta(){
 
     m_etaLookup = LookupMethod::TableEN;
   }
-  if(lookup == "morrow-lowke"){
+  else if(lookup == "morrow-lowke"){
     
     // This is the Morrow-Lowke Townsend attachment coefficient. 
     m_etaFunctionEN = [] (const Real E, const Real N) -> Real {
@@ -3319,34 +3322,49 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
   const std::vector<Real    >& rteDensities = ((Vector<Real    >&) a_rteDensities).stdVector();
   const std::vector<RealVect>& cdrGradients = ((Vector<RealVect>&) a_cdrGradients).stdVector();
 
-  const Real E   = a_E.vectorLength();  
-
   // Hook for turning off all reactions. 
   if(!m_skipReactions){
-    // Solve the reactive problem.
-    std::vector<Real> finalCdrDensities = cdrDensities;
-    std::vector<Real> photonProduction (m_numRtSpecies,  0.0);
+    
+    // Solve the reactive problem. The first hook will INTEGRATE the reactive problem (and then linearize the source terms). The other hook
+    // will just fill the source terms. 
+    if(m_reactionIntegrator.first != ReactionIntegrator::None) {
+      std::vector<Real> finalCdrDensities = cdrDensities;
+      std::vector<Real> photonProduction (m_numRtSpecies,  0.0);
 
-    this->integrateReactions(finalCdrDensities,
-			     photonProduction,
-			     cdrGradients,
-			     a_E,
-			     a_pos,
-			     a_dx,
-			     a_dt,
-			     a_time,
-			     a_kappa);
+      this->integrateReactions(finalCdrDensities,
+			       photonProduction,
+			       cdrGradients,
+			       a_E,
+			       a_pos,
+			       a_dx,
+			       a_dt,
+			       a_time,
+			       a_kappa);
 
-    // Linearize the source terms.
-    for (int i = 0; i < m_numCdrSpecies; i++){
-      cdrSources[i] = (finalCdrDensities[i] - cdrDensities[i])/a_dt;
+      // Linearize the source terms.
+      for (int i = 0; i < m_numCdrSpecies; i++){
+	cdrSources[i] = (finalCdrDensities[i] - cdrDensities[i])/a_dt;
+      }
+
+      for (int i = 0; i < m_numRtSpecies; i++){
+	rteSources[i] = photonProduction[i]/a_dt;
+      }
     }
-
-    for (int i = 0; i < m_numRtSpecies; i++){
-      rteSources[i] = photonProduction[i]/a_dt;
+    else {
+      this->fillSourceTerms(cdrSources,
+			    rteSources,
+			    cdrDensities,
+			    cdrGradients,
+			    a_E,
+			    a_pos,
+			    a_dx,
+			    a_dt,
+			    a_kappa);
     }
 
     // Add the photoionization products
+    const Real E   = a_E.vectorLength();
+      
     this->addPhotoIonization(cdrSources, rteDensities, a_pos, E, a_dt, a_dx);
   }
 
@@ -3646,7 +3664,6 @@ Real CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect a_pos) const 
   return m_initialSigma(a_pos, a_time);
 }
 
-
 void CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
 				       const std::vector<Real>& a_rteDensities,
 				       const RealVect           a_position,
@@ -3728,6 +3745,87 @@ void CdrPlasmaJSON::integrateReactions(std::vector<Real>&          a_cdrDensitie
       {
 	MayDay::Error("CdrPlasmaJSON::integrateReactions - logic bust");
       }
+    }
+  }
+}
+
+void CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&          a_cdrSources,
+				    std::vector<Real>&          a_rteSources,
+				    const std::vector<Real>     a_cdrDensities,
+				    const std::vector<RealVect> a_cdrGradients,
+				    const RealVect              a_E,
+				    const RealVect              a_pos,
+				    const Real                  a_dx,
+				    const Real                  a_time,
+				    const Real                  a_kappa) const {
+
+  // TLDR: We are integrating over an interval (a_time, a_time + a_dt).
+
+  // These may or may not be needed.
+  const std::vector<Real> cdrMobilities            = this->computePlasmaSpeciesMobilities  (a_pos, a_E, a_cdrDensities);
+  const std::vector<Real> cdrDiffusionCoefficients = this->computePlasmaSpeciesDiffusion   (a_pos, a_E, a_cdrDensities);
+  const std::vector<Real> cdrTemperatures          = this->computePlasmaSpeciesTemperatures(a_pos, a_E, a_cdrDensities);
+
+  // Electric field and reduce electric field. 
+  const Real E   = a_E.vectorLength();
+  const Real N   = m_gasDensity(a_pos);
+  const Real Etd = (E/(N * Units::Td));
+
+  // Townsend ionization and attachment coefficients. May or may not be used.
+  const Real alpha = this->computeAlpha(E, a_pos);
+  const Real eta   = this->computeEta  (E, a_pos);
+
+  // Set source terms to zero. 
+  for (auto& S : a_cdrSources) {
+    S = 0.0;
+  }
+
+  // Set source terms to zero. 
+  for (auto& S : a_rteSources) {
+    S = 0.0;
+  }
+  
+  // Plasma reactions loop
+  for (int i = 0; i < m_plasmaReactions.size(); i++) {
+
+    // Reaction and species involved in the reaction. 
+    const CdrPlasmaReactionJSON& reaction  = m_plasmaReactions[i];
+
+    const std::list<int>& plasmaReactants  = reaction.getPlasmaReactants ();    
+    const std::list<int>& neutralReactants = reaction.getNeutralReactants();
+    const std::list<int>& plasmaProducts   = reaction.getPlasmaProducts  ();    
+    const std::list<int>& photonProducts   = reaction.getPhotonProducts  ();
+
+    // Compute the rate. This returns a volumetric rate in units of #/(m^3 * s) (or #/(m^2 * s) for Cartesian 2D).
+    const Real k = this->computePlasmaReactionRate(i,
+						   a_cdrDensities,
+						   cdrMobilities,
+						   cdrDiffusionCoefficients,
+						   cdrTemperatures,
+						   a_cdrGradients,
+						   a_pos,
+						   a_E,
+						   E,
+						   Etd,
+						   N,
+						   alpha,
+						   eta,
+						   a_time);
+
+
+    // Remove consumption on the left-hand side.
+    for (const auto& r : plasmaReactants){
+      a_cdrSources[r] -= k;
+    }
+
+    // Add mass on the right-hand side.
+    for (const auto& p : plasmaProducts){
+      a_cdrSources[p] += k;
+    }
+
+    // Add photons on the right-hand side. 
+    for (const auto& p : photonProducts){
+      a_rteSources[p] += k;
     }
   }
 }

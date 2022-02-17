@@ -301,9 +301,10 @@ namespace Physics {
       };
 
       /*!
-	@brief Enum for distinguishing integration methods
+	@brief Enum for distinguishing integration methods. Note that 'None' just fills directly with source terms. 
       */
       enum class ReactionIntegrator {
+	None,
 	ExplicitEuler,
 	ExplicitTrapezoidal,
 	ExplicitMidpoint,	
@@ -1081,6 +1082,27 @@ namespace Physics {
 				      const Real                  a_time,
 				      const Real                  a_kappa) const;
 
+      /*!
+	@brief Routine for filling the source terms in the reactive problem.
+	@param[out]   a_cdrSources       Contains source term for CDR equations. 
+	@param[out]   a_rteSources       Contains source terms for RTE equations. 
+	@param[in]    a_cdrDensities     CDR densities
+	@param[in]    a_cdrGradients     CDR gradients at time a_time
+	@param[in]    a_E                Electric field
+	@param[in]    a_pos              Physical coordinates
+	@param[in]    a_dx               Grid resolution
+	@param[in]    a_time             Time
+	@param[in]    a_kappa            Volume fraction 
+      */
+      void fillSourceTerms(std::vector<Real>&          a_cdrSources,
+			   std::vector<Real>&          a_rteSources,
+			   const std::vector<Real>     a_cdrDensities,
+			   const std::vector<RealVect> a_cdrGradients,
+			   const RealVect              a_E,
+			   const RealVect              a_pos,
+			   const Real                  a_dx,
+			   const Real                  a_time,
+			   const Real                  a_kappa) const;
 
       /*!
 	@brief Routine for integrating the reactive-only problem using the explicit Euler rule. 
@@ -1091,6 +1113,7 @@ namespace Physics {
 	@param[in]    a_pos              Physical coordinates
 	@param[in]    a_dx               Grid resolution
 	@param[in]    a_dt               Time step
+	@param[in]    a_time             Time
 	@param[in]    a_kappa            Volume fraction 
       */
       void integrateReactionsExplicitEuler(std::vector<Real>&          a_cdrDensities,
@@ -1113,6 +1136,7 @@ namespace Physics {
 	@param[in]    a_pos              Physical coordinates
 	@param[in]    a_dx               Grid resolution
 	@param[in]    a_dt               Time step
+	@param[in]    a_time             Time
 	@param[in]    a_kappa            Volume fraction 
 	@param[in]    a_tableuAlpha      RK2 tableu alpha. Use 0.5 for midpoint and 1.0 for trapezoidal (Heun's method)
       */
@@ -1136,6 +1160,7 @@ namespace Physics {
 	@param[in]    a_pos              Physical coordinates
 	@param[in]    a_dx               Grid resolution
 	@param[in]    a_dt               Time step
+	@param[in]    a_time             Time
 	@param[in]    a_kappa            Volume fraction 
       */
       void integrateReactionsExplicitRK4(std::vector<Real>&          a_cdrDensities,
