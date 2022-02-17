@@ -1209,7 +1209,7 @@ void CdrPlasmaJSON::parseEta(){
       eta2 *= N;
 
       // Three-body attachment coefficient.
-      Real eta3 = 4.7778E-59 * std::pow(EN, -1.2749); // In cm^5. Convert to m^5.
+      Real eta3 = 4.7778E-59 * std::pow(EN, 1.2749); // In cm^5. Convert to m^5.
 
       // Convert to m^5
       eta3 *= 1.E-10;
@@ -1592,7 +1592,7 @@ void CdrPlasmaJSON::parseDiffusion() {
 	  const Real EN = E/N * 1E4;
 	  const Real mu = electronMobility(E, N);
 
-	  return 0.3341E9*std::pow(EN, 0.54069) * mu * 1E-2;
+	  return 0.3341E9*std::pow(EN, 0.54069) * mu;
 	};
 
 	m_diffusionLookup.     emplace(std::make_pair(idx, LookupMethod::FunctionEN));
@@ -3243,6 +3243,12 @@ Real CdrPlasmaJSON::computeAlpha(const Real a_E, const RealVect a_position) cons
 
       break;
     }
+  case LookupMethod::FunctionEN:
+    {
+      alpha = m_alphaFunctionEN(a_E, N);
+
+      break;
+    }
   default:
     {
       MayDay::Error("CdrPlasmaJSON::computeAlpha -- logic bust");
@@ -3265,6 +3271,12 @@ Real CdrPlasmaJSON::computeEta(const Real a_E, const RealVect a_position) const 
     {
       eta  = m_etaTableEN.getEntry<1>(Etd); // Get eta/N
       eta *= N;                             // Get eta
+
+      break;
+    }
+  case LookupMethod::FunctionEN:
+    {
+      eta = m_etaFunctionEN(a_E, N);
 
       break;
     }
