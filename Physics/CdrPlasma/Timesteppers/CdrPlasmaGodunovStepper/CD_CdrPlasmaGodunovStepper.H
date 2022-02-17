@@ -12,11 +12,15 @@
 #ifndef CD_CdrPlasmaGodunovStepper_H
 #define CD_CdrPlasmaGodunovStepper_H
 
+// Std includes
+#include <memory>
+
 // Our includes
 #include <CD_AmrMesh.H>
 #include <CD_CdrPlasmaStepper.H>
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
+#include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -154,6 +158,11 @@ namespace Physics {
 	@brief For figuring out how we handle diffusion.
       */
       WhichDiffusionAlgorithm m_whichDiffusionAlgorithm;
+
+      /*!
+	@brief Timer for run-time profiling
+      */
+      std::unique_ptr<Timer> m_timer;
 
       /*!
 	@brief Scratch storage for the CDR solvers
