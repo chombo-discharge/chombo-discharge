@@ -246,17 +246,17 @@ namespace Dcel {
     /*!
       @brief Mesh vertices
     */
-    std::vector<VertexPtr >  m_vertices;
+    std::vector<VertexPtr> m_vertices;
 
     /*!
       @brief Mesh half-edges
     */    
-    std::vector<EdgePtr >    m_edges;
+    std::vector<EdgePtr> m_edges;
 
     /*!
       @brief Mesh faces
     */        
-    std::vector<FacePtr >    m_faces;
+    std::vector<FacePtr> m_faces;
 
     /*!
       @brief Return all vertex coordinates in the mesh.

@@ -63,31 +63,31 @@ public:
     @brief Return av vector with x = y = 0
   */
   inline
-  static Vec2T<T> zero() noexcept;
+  static constexpr Vec2T<T> zero() noexcept;
 
   /*!
     @brief Return av vector with x = y = 1
   */  
   inline
-  static Vec2T<T> one() noexcept;
+  static constexpr Vec2T<T> one() noexcept;
 
   /*!
     @brief Return a vector with components x = y= -std::numeric_limits<T>::max()
   */    
   inline
-  static Vec2T<T> min() noexcept;
+  static constexpr Vec2T<T> min() noexcept;
 
   /*!
     @brief Return a vector with components x = y= std::numeric_limits<T>::max()
   */    
   inline
-  static Vec2T<T> max() noexcept;
+  static constexpr Vec2T<T> max() noexcept;
   
   /*!
     @brief Return a vector with components x = y= std::numeric_limits<T>::infinity()
   */    
   inline
-  static Vec2T<T> infinity() noexcept;
+  static constexpr Vec2T<T> infinity() noexcept;
 
   /*!
     @brief Assignment operator. Sets this.x = a_other.x and this.y = a_other.y
@@ -250,31 +250,31 @@ public:
     @brief Return av vector with x = y = z = 0
   */
   inline
-  static Vec3T<T> zero() noexcept;
+  static constexpr Vec3T<T> zero() noexcept;
 
   /*!
     @brief Return av vector with x = y = z = 1
   */
   inline
-  static Vec3T<T> one() noexcept;
+  static constexpr Vec3T<T> one() noexcept;
 
   /*!
     @brief Return a vector with components x = y = z = -std::numeric_limits<T>::max()
   */    
   inline
-  static Vec3T<T> min() noexcept;
+  static constexpr Vec3T<T> min() noexcept;
 
   /*!
     @brief Return a vector with components x = y = z = std::numeric_limits<T>::max()
   */    
   inline
-  static Vec3T<T> max() noexcept;
+  static constexpr Vec3T<T> max() noexcept;
 
   /*!
     @brief Return a vector with components x = y = z = std::numeric_limits<T>::infinity()
   */    
   inline
-  static Vec3T<T> infinity() noexcept;
+  static constexpr Vec3T<T> infinity() noexcept;
 
   /*!
     @brief Return component in vector. (i=0 => x and so on)

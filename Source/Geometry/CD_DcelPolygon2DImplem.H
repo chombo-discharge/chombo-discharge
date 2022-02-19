@@ -30,21 +30,29 @@ namespace Dcel {
   template <class T>
   inline
   bool Polygon2D<T>::isPointInside(const Vec3& a_point, const InsideOutsideAlgorithm a_algorithm) const noexcept {
-    bool ret;
+    bool ret =false;
     
     switch(a_algorithm){
     case InsideOutsideAlgorithm::SubtendedAngle:
-      ret = this->isPointInsidePolygonSubtend(a_point);
-      break;
+      {
+	ret = this->isPointInsidePolygonSubtend(a_point);
+	
+	break;
+      }
     case InsideOutsideAlgorithm::CrossingNumber:
-      ret = this->isPointInsidePolygonCrossingNumber(a_point);
-      break;
+      {
+	ret = this->isPointInsidePolygonCrossingNumber(a_point);
+	
+	break;
+      }
     case InsideOutsideAlgorithm::WindingNumber:
-      ret = this->isPointInsidePolygonWindingNumber(a_point);
-      break;
+      {
+	ret = this->isPointInsidePolygonWindingNumber(a_point);
+	
+	break;
+      }
     default:
-      ret = false;
-      std::cerr << "In file 'CD_DcelPolygon2DImplem.H' function Dcel::Polygon2D<T>::isPointInside - unsupported algorithm requested.\n";
+      std::cerr << "In file 'CD_DcelPolygon2DImplem.H' function Dcel::Polygon2D<T>::isPointInside - logic bust.\n";
     }
 
     return ret;
@@ -61,13 +69,13 @@ namespace Dcel {
   void Polygon2D<T>::define(const Vec3& a_normal, const std::vector<Vec3>& a_points) {
     m_ignoreDir = 0;
   
-    for (int dir = 0; dir < 3; dir++){
+    for (int dir = 1; dir < 3; dir++){
       if(std::abs(a_normal[dir]) > std::abs(a_normal[m_ignoreDir])) {
 	m_ignoreDir = dir;
       }
     }
 
-    m_xDir = 3;
+    m_xDir =  3;
     m_yDir = -1;
   
     for (int dir = 0; dir < 3; dir++){
