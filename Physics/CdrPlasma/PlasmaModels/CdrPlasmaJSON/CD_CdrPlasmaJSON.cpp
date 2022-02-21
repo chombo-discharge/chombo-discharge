@@ -1372,7 +1372,7 @@ void CdrPlasmaJSON::parseMobilities() {
 	  Real mu = 0.0;
 	  
 	  if(EN <= lim0){
-	    mu = Einv *(6.87E22 * EN + 3.38E4);
+	    mu = Einv *(6.87E22 * EN + 0.0*3.38E4); // I'm turning off the constant term because otherwise mu -> infty as E -> 0!
 	  }
 	  else if(EN > lim0 && EN <= lim1){
 	    mu = Einv * (7.293E21*EN + 1.63E6);
@@ -1573,7 +1573,7 @@ void CdrPlasmaJSON::parseDiffusion() {
 	  Real mu = 0.0;
 	  
 	  if(EN <= lim0){
-	    mu = Einv *(6.87E22 * EN + 3.38E4);
+	    mu = Einv *(6.87E22 * EN + 0.0*3.38E4); // I'm turning off the constant term because otherwise mu -> infty as E -> 0!	    
 	  }
 	  else if(EN > lim0 && EN <= lim1){
 	    mu = Einv * (7.293E21*EN + 1.63E6);
