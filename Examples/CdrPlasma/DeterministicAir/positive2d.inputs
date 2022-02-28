@@ -11,7 +11,7 @@ AmrMesh.lo_corner        = -0.2    0   # Low corner of problem domain
 AmrMesh.hi_corner        =  0.2    0.1 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 32      # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 7           # Maximum amr depth
+AmrMesh.max_amr_depth    = 9           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -215,8 +215,8 @@ CdrPlasmaJSON.verbose          = false
 CdrPlasmaJSON.chemistry_file   = air_chemistry.json
 CdrPlasmaJSON.discrete_photons = false
 CdrPlasmaJSON.skip_reactions   = false
-CdrPlasmaJSON.integrator       = explicit_euler # Reaction network integrator
-CdrPlasmaJSON.substeps         = 1                 # Substeps in the reaction integrator
+CdrPlasmaJSON.integrator       = explicit_midpoint # Reaction network integrator
+CdrPlasmaJSON.chemistry_dt     = 1.E99             # Maximum allowed chemistry time step. 
 
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options

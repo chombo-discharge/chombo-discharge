@@ -151,7 +151,7 @@ void CdrPlasmaGodunovStepper::parseTransport(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
-  pp.get("transport_alg", str);
+  pp.get("transport", str);
   if(str == "euler"){
     m_transportAlgorithm = TransportAlgorithm::Euler;
   }
@@ -160,12 +160,6 @@ void CdrPlasmaGodunovStepper::parseTransport(){
   }
   else{
     MayDay::Error("CdrPlasmaGodunovStepper::parseTransport - unknown transport algorithm requested");
-  }
-
-  pp.get("transport_steps", m_transportSteps);
-
-  if(m_transportSteps <= 0) {
-    MayDay::Error("CdrPlasmaGodunovStepper::parseTransport must have > 0 transport Steps");
   }
 }
 

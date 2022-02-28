@@ -4399,7 +4399,7 @@ void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 						    (*E[lvl])[dit()](vof, 2)));
 
 	  for (int i = 0; i < cdrDensities.size(); i++){
-	    localCdrDensities[i] = 0.0;(*(*cdrDensities[i])[lvl])[dit()](vof, 0);
+	    localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[dit()](vof, 0);
 	  }
 
 	  for (int i = 0; i < numCdrSpecies; i++){

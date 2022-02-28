@@ -214,7 +214,7 @@ CdrPlasmaJSON.chemistry_file   = air_chemistry.json # Chemistry file containing 
 CdrPlasmaJSON.discrete_photons = true               # Use discrete photons or not
 CdrPlasmaJSON.skip_reactions   = false              # If true, turn off all reactions
 CdrPlasmaJSON.integrator       = explicit_midpoint  # Reaction network integrator
-CdrPlasmaJSON.substeps         = 1                  # Substeps in the reaction integrator
+CdrPlasmaJSON.chemistry_dt     = 1.E99              # Maximum allowed chemistry time step. 
 
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options

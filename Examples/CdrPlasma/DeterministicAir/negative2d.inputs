@@ -216,7 +216,7 @@ CdrPlasmaJSON.chemistry_file   = air_chemistry.json
 CdrPlasmaJSON.discrete_photons = false
 CdrPlasmaJSON.skip_reactions   = false    
 CdrPlasmaJSON.integrator       = explicit_trapezoidal # Reaction network integrator
-CdrPlasmaJSON.substeps         = 1                    # Substeps in the reaction integrator
+CdrPlasmaJSON.chemistry_dt     = 1.E99             # Maximum allowed chemistry time step. 
 
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options

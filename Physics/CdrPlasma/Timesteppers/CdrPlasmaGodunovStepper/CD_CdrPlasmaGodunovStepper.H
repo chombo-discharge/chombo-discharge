@@ -241,11 +241,6 @@ namespace Physics {
       bool m_fhd;
 
       /*!
-	@brief Number of transport steps
-      */
-      int m_transportSteps;
-
-      /*!
 	@brief Diffusion threshold factor
       */
       Real m_implicitDiffusionThreshold;

@@ -6,4 +6,4 @@ CdrPlasmaJSON.chemistry_file   = template.json     # Chemistry file containing J
 CdrPlasmaJSON.discrete_photons = false             # Use discrete photons or not
 CdrPlasmaJSON.skip_reactions   = false             # If true, turn off all reactions
 CdrPlasmaJSON.integrator       = explicit_midpoint # Reaction network integrator
-CdrPlasmaJSON.substeps         = 1                 # Substeps in the reaction integrator
+CdrPlasmaJSON.chemistry_dt     = 1.E99             # Maximum allowed chemistry time step. 
