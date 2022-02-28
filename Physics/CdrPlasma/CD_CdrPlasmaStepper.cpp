@@ -1638,12 +1638,14 @@ void CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&     
   // Things that are passed into CdrPlasmaPhysics
   Vector<Real> cdrDensities(numCdrSpecies, 0.0);
 
+  // Interpolation stencils
+  const BaseIVFAB<VoFStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase())[a_lvl][a_dit];    
+
   // Irreegular kernel. 
   auto irregularKernel = [&](const VolIndex& vof) -> void {
 
     // Physical position and electric field. 
     const RealVect pos = probLo + Location::position(Location::Cell::Center, vof, ebisbox, a_dx);						     
-    const RealVect E   = RealVect(D_DECL(a_electricFieldCell(vof, 0), a_electricFieldCell(vof, 1), a_electricFieldCell(vof, 2)));
 
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx  = solverIt.index();
@@ -1652,6 +1654,21 @@ void CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&     
 
       cdrDensities[idx] = std::max(0.0, phi);
     }
+
+#if 1    
+    const VoFStencil& sten = interpStencils(vof, 0);
+    RealVect E = RealVect::Zero;
+    for (int i = 0; i < sten.size(); i++){
+      const VolIndex& ivof    = sten.vof   (i);
+      const Real&     iweight = sten.weight(i);
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	E[dir] += a_electricFieldCell(ivof, dir) * iweight;
+      }
+    }
+#else
+    const RealVect E    = RealVect(D_DECL(a_electricFieldCell(vof, 0), a_electricFieldCell(vof, 1), a_electricFieldCell(vof, 2)));
+#endif    
 
     // Let our nifty plasma physics framework take care of the diffusion coefficients. 
     const Vector<Real> Dcos = m_physics->computeCdrDiffusionCoefficients(a_time,
@@ -2107,12 +2124,28 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&   
   // CDR densities -- will be populated in each grid cell
   Vector<Real> cdrDensities(numCdrSpecies, 0.0);
 
+  // Interpolation stencils
+  const BaseIVFAB<VoFStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase())[a_lvl][a_dit];  
+
   // Irregular kernel. 
   auto irregularKernel = [&](const VolIndex& vof) -> void {
 
     // Position and electric field
-    const RealVect pos  = probLo + Location::position(Location::Cell::Center, vof, ebisBox, a_dx);        
+    const RealVect pos  = probLo + Location::position(Location::Cell::Center, vof, ebisBox, a_dx);
+#if 1    
+    const VoFStencil& sten = interpStencils(vof, 0);
+    RealVect E = RealVect::Zero;
+    for (int i = 0; i < sten.size(); i++){
+      const VolIndex& ivof    = sten.vof   (i);
+      const Real&     iweight = sten.weight(i);
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	E[dir] += a_electricField(ivof, dir) * iweight;
+      }
+    }
+#else
     const RealVect E    = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
+#endif
 
     // Get CDR densities
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
