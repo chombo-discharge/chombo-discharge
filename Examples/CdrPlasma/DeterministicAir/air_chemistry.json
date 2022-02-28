@@ -45,8 +45,6 @@
 	     "points": 500,
 	     "spacing": "exponential"
 	 },
-	 "energy transport": true,
-	 "initial energy": 1.2345,
 	 "initial data": {
 	     "uniform": 1.0E10,
 	     "gauss2":
