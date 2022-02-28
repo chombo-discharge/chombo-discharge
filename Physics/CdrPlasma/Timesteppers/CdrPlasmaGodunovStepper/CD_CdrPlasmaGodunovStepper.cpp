@@ -141,7 +141,7 @@ void CdrPlasmaGodunovStepper::parseDiffusion(){
   // Fetch the diffusion threshold factor
   pp.get("diffusion_thresh", m_implicitDiffusionThreshold);
 
-  m_diffusionSolver = DiffusionSolver::Euler;
+  m_diffusionSolver = DiffusionSolver::TGA;
 }
 
 void CdrPlasmaGodunovStepper::parseTransport(){
@@ -1133,6 +1133,7 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
 
       // If the solver is diffusive we must compute the diffusion term as well, and then increment by it. 
       if(solver->isDiffusive()){
+#if 0
 	RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 												 
 	EBAMRCellData& divDgradPhi = storage->getScratch();
@@ -1140,6 +1141,7 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
 	solver->computeDivD(divDgradPhi, phi, false, false);
 
 	DataOps::incr(m_semiImplicitRho, divDgradPhi, Z*a_dt*Units::Qe);
+#endif
       }
     }
   }
