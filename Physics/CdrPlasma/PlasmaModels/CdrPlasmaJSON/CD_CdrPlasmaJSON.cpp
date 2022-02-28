@@ -109,9 +109,6 @@ void CdrPlasmaJSON::parseIntegrator() {
   else if(str == "explicit_euler") {
     m_reactionIntegrator = ReactionIntegrator::ExplicitEuler;
   }
-  else if(str == "implicit_euler") {
-    m_reactionIntegrator = ReactionIntegrator::ImplicitEuler;
-  }
   else if(str == "explicit_trapezoidal") {
     m_reactionIntegrator = ReactionIntegrator::ExplicitTrapezoidal;
   }
@@ -4446,12 +4443,6 @@ void CdrPlasmaJSON::integrateReactions(std::vector<Real>&          a_cdrDensitie
 
 	break;
       }
-    case ReactionIntegrator::ImplicitEuler:
-      {
-	this->integrateReactionsImplicitEuler(a_cdrDensities, a_photonProduction, a_cdrGradients, a_E, a_pos, a_dx, dt, time, a_kappa);
-
-	break;
-      }      
     case ReactionIntegrator::ExplicitTrapezoidal:
       {
 	this->integrateReactionsExplicitRK2(a_cdrDensities, a_photonProduction, a_cdrGradients, a_E, a_pos, a_dx, dt, time, a_kappa, 1.0);
@@ -4670,48 +4661,6 @@ void CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          
   }
 }
 
-
-void CdrPlasmaJSON::integrateReactionsImplicitEuler(std::vector<Real>&          a_cdrDensities,
-						    std::vector<Real>&          a_photonProduction,
-						    const std::vector<RealVect> a_cdrGradients,
-						    const RealVect              a_E,
-						    const RealVect              a_pos,
-						    const Real                  a_dx,
-						    const Real                  a_dt,
-						    const Real                  a_time,
-						    const Real                  a_kappa) const {
-  std::vector<Real> cdrSources(m_numCdrSpecies, 0.0);
-  std::vector<Real> rteSources(m_numRtSpecies,  0.0);
-
-  // Initial guess
-  std::vector<Real> cdrY = a_cdrDensities;
-
-  for (int i = 0; i < 5; i++){
-    this->fillSourceTerms(cdrSources,
-			  rteSources,
-			  cdrY,
-			  a_cdrGradients,
-			  a_E,
-			  a_pos,
-			  a_dx,
-			  a_time,
-			  a_kappa);
-
-    for (int j = 0; j < m_numCdrSpecies; j++){
-      cdrY[j] = a_cdrDensities[j] + a_dt * cdrSources[j];
-    }
-  }
-
-  // Advance states.
-  for (int i = 0; i < m_numCdrSpecies; i++) {
-    a_cdrDensities[i] += cdrSources[i] * a_dt;
-  }
-
-  for (int i = 0; i < m_numRtSpecies; i++) {
-    a_photonProduction[i] = rteSources[i] * a_dt;
-  }
-}
-
 void CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDensities,
 						  std::vector<Real>&          a_photonProduction,
 						  const std::vector<RealVect> a_cdrGradients,
@@ -4726,8 +4675,9 @@ void CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&          a_
     pout() << "CdrPlasmaJSON::integrateReactionsRK2" << endl;
   }
 
-  const Real c2 = 1./(2.0*a_tableuAlpha);
-  const Real c1 = 1.0 - c1;  
+  const Real c1 = 1.0 - 1.0/(2.0*a_tableuAlpha);
+  const Real c2 =       1.0/(2.0*a_tableuAlpha);
+
 
   // Storage for k1- and k2- coefficients, and intermediate states.
   std::vector<Real> cdrK1(m_numCdrSpecies, 0.0);

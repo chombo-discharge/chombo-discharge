@@ -307,7 +307,6 @@ namespace Physics {
       enum class ReactionIntegrator {
 	None,
 	ExplicitEuler,
-	ImplicitEuler,
 	ExplicitTrapezoidal,
 	ExplicitMidpoint,	
 	ExplicitRK4

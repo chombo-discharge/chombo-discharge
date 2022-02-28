@@ -150,6 +150,14 @@ namespace Physics {
       };
 
       /*!
+	@brief Enum for switching between implicit Euler or implicit RK2 (using the TGA). 
+      */
+      enum class DiffusionSolver {
+	Euler,
+	TGA
+      };
+
+      /*!
 	@brief For figuring out which transport algorithm we use. 
       */      
       TransportAlgorithm m_transportAlgorithm;            
@@ -158,6 +166,11 @@ namespace Physics {
 	@brief For figuring out how we handle diffusion.
       */
       WhichDiffusionAlgorithm m_whichDiffusionAlgorithm;
+
+      /*!
+	@brief Diffusion solver
+      */
+      DiffusionSolver m_diffusionSolver;
 
       /*!
 	@brief Timer for run-time profiling

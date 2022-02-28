@@ -33,9 +33,9 @@ CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper(RefCountedPtr<CdrPlasmaPhysics>
   CH_TIME("CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper()");
 
   // Default settings
-  m_className    = "CdrPlasmaGodunovStepper";
-  m_physics       = a_physics;
-  m_extrapAdvect = true;
+  m_className       = "CdrPlasmaGodunovStepper";
+  m_physics         = a_physics;
+  m_extrapAdvect    = true;
 }
 
 CdrPlasmaGodunovStepper::~CdrPlasmaGodunovStepper(){
@@ -140,6 +140,8 @@ void CdrPlasmaGodunovStepper::parseDiffusion(){
 
   // Fetch the diffusion threshold factor
   pp.get("diffusion_thresh", m_implicitDiffusionThreshold);
+
+  m_diffusionSolver = DiffusionSolver::Euler;
 }
 
 void CdrPlasmaGodunovStepper::parseTransport(){
@@ -1035,44 +1037,48 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
       // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion. The
       // 'extrapDt' variable is for centering the advective discretization at the half time step (if user asks for it). 
       const Real extrapDt = (m_extrapAdvect) ? a_dt : 0.0;
-      if(!m_useImplicitDiffusion[idx]){
+      if(!m_useImplicitDiffusion[idx] || !(solver->isDiffusive())){
 	solver->computeDivJ(scratch, phi, extrapDt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
+
+	DataOps::incr(phi, scratch, -a_dt);
       }
       else{
-	solver->computeDivF(scratch, phi, extrapDt, true, true); // For implicit diffusion, sratch is computed as div(v*phi)
-      }
-      DataOps::scale(scratch, -1.0);     // scratch = -[div(F/J)]
-      DataOps::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
-      DataOps::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J)
+	// TLDR: Implicit diffusion AND a diffusive solver. We are solving d(phi)/dt + L(phi) = S where S is the finite volume
+	//       approximation of [-div(v*phi)]^(k+1/2). We have stored this term in "scratch", and we just copy the initial solution
+	//       to another scratch data holder.
 
-      // Add random flux
-      if(m_fhd && solver->isDiffusive()){
-	solver->gwnDiffusionSource(scratch2, phi);
-	DataOps::incr(phi, scratch2, a_dt);
+	// Compute the finite volume approximation to [div(v*phi)^{k+1/2}. If using extrapDt = 0.0, this becomes centered on
+	// k rather than k+1/2, but hopefully the user is running with MUSCL reconstruction anyways.
+	
+	solver->computeDivF(scratch, phi, extrapDt, true, true); 
+	DataOps::scale(scratch, -1.0); 
+
+	// Let scratc2 = initial solution, i.e. phi^k. 
+	DataOps::copy(scratch2, phi);
+
+	switch(m_diffusionSolver){
+	case DiffusionSolver::Euler:
+	  {
+	    solver->advanceEuler(phi, scratch2, scratch, a_dt);
+
+	    break;
+	  }
+	case DiffusionSolver::TGA:
+	  {
+	    solver->advanceTGA(phi, scratch2, scratch, a_dt);
+
+	    break;
+	  }
+	default:
+	  {
+	    MayDay::Error("CdrPlasmaGodunovStepper::advanceTransportEuler -- logic bust");
+	  }
+	}
       }
 
       // Floor mass or not?
       if(m_floor){
 	this->floorMass(phi, "CdrPlasmaGodunovStepper::advanceTransportEuler", solver);
-      }
-
-      // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F)
-      if(m_useImplicitDiffusion[idx]){
-	// Solve implicit diffusion equation. This looks weird but we're solving
-	//
-	// phi^(k+1) = phi^k - dt*div(F) + dt*div(D*div(phi^k+1))
-	//
-	// This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) as initial solution
-	// so we just use that as a source term in an Euler solve. 
-	if(solver->isDiffusive()){
-	  DataOps::copy(scratch, phi);      // Weird-ass initial solution, as explained above
-	  DataOps::setValue(scratch2, 0.0); // No source, we've made those are a part of the initial solution
-	  solver->advanceEuler(phi, scratch, scratch2, a_dt);
-
-	  if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
-	    this->floorMass(phi, "CdrPlasmaGodunovStepper::advanceTransportEuler (implicit diffusion)", solver);
-	  }
-	}
       }
 
       // Coarsen the solution and update ghost cells. 
