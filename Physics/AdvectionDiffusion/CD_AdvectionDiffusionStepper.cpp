@@ -309,10 +309,9 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
 	  const bool conservativeOnly = false;
 	  
 	  m_solver->computeDivF(m_k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
-	  
-	  DataOps::kappaScale(m_k1);
 	}
 
+	DataOps::kappaScale(m_k1);	
 	DataOps::scale(m_k1, -1.0);	
 	
 	// Use m_k1 as the old solution. 
