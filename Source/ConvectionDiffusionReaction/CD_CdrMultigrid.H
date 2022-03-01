@@ -87,45 +87,51 @@ public:
 
   /*!
     @brief Compute div(J) explicitly, where J = nV - D*grad(n)
-    @param[out] a_divJ      Divergence term, i.e. finite volume approximation to 
-    @param[in]  a_phi       Cell-centered state
-    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
-    @param[in]  a_ebFlux    If true, the embedded boundary flux will injected and included in div(J)
+    @param[out] a_divJ             Divergence term, i.e. finite volume approximation to 
+    @param[in]  a_phi              Cell-centered state
+    @param[in]  a_conservativeOnly If true, we compute the finite volume approximation to kappa*div(J)
+    @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_ebFlux           If true, the embedded boundary flux will injected and included in div(J)
     @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivJ(EBAMRCellData& a_divJ,
 			   EBAMRCellData& a_phi,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true,
-			   const bool     a_domainFlux = true) override final;
+			   const bool     a_conservativeOnly,			   
+			   const bool     a_ebFlux,
+			   const bool     a_domainFlux) override final;
 
   /*!
     @brief Compute div(v*phi) explicitly
-    @param[out] a_divF      Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. 
-    @param[in]  a_phi       Cell-centered state
-    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
-    @param[in]  a_domainBc  How to set domain fluxes
-    @param[in]  a_ebFlux    If true, the embedded boundary flux will injected be included in div(F)
+    @param[out] a_divF             Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. 
+    @param[in]  a_phi              Cell-centered state
+    @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_conservativeOnly If true, we compute the finite volume approximation to kappa*div(J)
+    @param[in]  a_domainBc         How to set domain fluxes
+    @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivF(EBAMRCellData& a_divF,
 			   EBAMRCellData& a_phi,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true,
-			   const bool     a_domainFlux = true) override final;
+			   const bool     a_conservativeOnly,
+			   const bool     a_ebFlux,
+			   const bool     a_domainFlux) override final;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
-    @param[out] a_divF      Divergence term, including redistribution magic. 
-    @param[in]  a_phi       Cell-centered state
-    @param[in]  a_domainBc  How to set domain fluxes
-    @param[in]  a_useEbFlux If true, the embedded boundary flux will be included in div(D)
+    @param[out] a_divF             Divergence term, including redistribution magic. 
+    @param[in]  a_phi              Cell-centered state
+    @param[in]  a_conservativeOnly If true, we compute the finite volume approximation to kappa*div(J)
+    @param[in]  a_domainBc         How to set domain fluxes
+    @param[in]  a_useEbFlux        If true, the embedded boundary flux will be included in div(D)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
 			   EBAMRCellData& a_phi,
-			   const bool     a_ebFlux = false,
-			   const bool     a_domainFlux = false) override final;
+			   const bool     a_conservativeOnly,			   
+			   const bool     a_ebFlux,
+			   const bool     a_domainFlux) override final;
 
   /*!
     @brief Implicit diffusion TGA advance with source term.

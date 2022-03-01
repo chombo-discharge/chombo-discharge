@@ -1038,7 +1038,7 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
       // 'extrapDt' variable is for centering the advective discretization at the half time step (if user asks for it). 
       const Real extrapDt = (m_extrapAdvect) ? a_dt : 0.0;
       if(!m_useImplicitDiffusion[idx] || !(solver->isDiffusive())){
-	solver->computeDivJ(scratch, phi, extrapDt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
+	solver->computeDivJ(scratch, phi, extrapDt, false, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
 
 	DataOps::incr(phi, scratch, -a_dt);
       }
@@ -1050,7 +1050,7 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
 	// Compute the finite volume approximation to [div(v*phi)^{k+1/2}. If using extrapDt = 0.0, this becomes centered on
 	// k rather than k+1/2, but hopefully the user is running with MUSCL reconstruction anyways.
 	
-	solver->computeDivF(scratch, phi, extrapDt, true, true); 
+	solver->computeDivF(scratch, phi, extrapDt, false, true, true); 
 	DataOps::scale(scratch, -1.0); 
 
 	// Let scratc2 = initial solution, i.e. phi^k. 
@@ -1138,7 +1138,7 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
 												 
 	EBAMRCellData& divDgradPhi = storage->getScratch();
 
-	solver->computeDivD(divDgradPhi, phi, false, false);
+	solver->computeDivD(divDgradPhi, phi, false, false, false);
 
 	DataOps::incr(m_semiImplicitRho, divDgradPhi, Z*a_dt*Units::Qe);
 #endif

@@ -57,9 +57,9 @@ void CdrMultigrid::allocateInternals() {
 }
 
 void CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
-			  const EBAMRCellData& a_oldPhi,
-			  const EBAMRCellData& a_source,
-			  const Real           a_dt){
+				const EBAMRCellData& a_oldPhi,
+				const EBAMRCellData& a_source,
+				const Real           a_dt){
   CH_TIME("CdrMultigrid::advanceEuler(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceEuler(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
@@ -119,9 +119,9 @@ void CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
 }
 
 void CdrMultigrid::advanceTGA(EBAMRCellData&       a_newPhi,
-			const EBAMRCellData& a_oldPhi,
-			const EBAMRCellData& a_source,
-			const Real           a_dt){
+			      const EBAMRCellData& a_oldPhi,
+			      const EBAMRCellData& a_source,
+			      const Real           a_dt){
   CH_TIME("CdrMultigrid::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
@@ -344,10 +344,10 @@ void CdrMultigrid::setupEuler(){
     (new EBBackwardEuler (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refinementRatios, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
-void CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrMultigrid::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool)");
+void CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux){
+  CH_TIME("CdrMultigrid::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool)" << endl;
+    pout() << m_name + "::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool, bool)" << endl;
   }
 
   // Fill ghost cells
@@ -392,7 +392,7 @@ void CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, cons
     else{
       ebflux = &m_ebZero;
     }
-    this->computeDivG(a_divJ, m_scratchFluxOne, *ebflux);
+    this->computeDivG(a_divJ, m_scratchFluxOne, *ebflux, a_conservativeOnly);
   }
   else{ 
     DataOps::setValue(a_divJ, 0.0);
@@ -401,10 +401,10 @@ void CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, cons
   return;
 }
 
-void CdrMultigrid::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrMultigrid::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool)");
+void CdrMultigrid::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux){
+  CH_TIME("CdrMultigrid::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool)" << endl;
+    pout() << m_name + "::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool, bool)" << endl;
   }
 
   if(m_isMobile){
@@ -427,14 +427,14 @@ void CdrMultigrid::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, cons
     else{
       ebflux = &m_ebZero;
     }
-    this->computeDivG(a_divF, m_scratchFluxOne, *ebflux); 
+    this->computeDivG(a_divF, m_scratchFluxOne, *ebflux, a_conservativeOnly); 
   }
   else{
     DataOps::setValue(a_divF, 0.0);
   }
 }
 
-void CdrMultigrid::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_ebFlux, const bool a_domainFlux){
+void CdrMultigrid::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux){
   CH_TIME("CdrMultigrid::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)" << endl;
@@ -458,7 +458,7 @@ void CdrMultigrid::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, cons
     else{
       ebflux = &m_ebZero;
     }
-    this->computeDivG(a_divD, m_scratchFluxOne, *ebflux); // General face-centered flux to divergence magic.
+    this->computeDivG(a_divD, m_scratchFluxOne, *ebflux, a_conservativeOnly); // General face-centered flux to divergence magic.
 
     m_amr->averageDown(a_divD, m_realm, m_phase);
     m_amr->interpGhost(a_divD, m_realm, m_phase);

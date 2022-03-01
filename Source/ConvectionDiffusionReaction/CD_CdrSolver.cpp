@@ -426,10 +426,10 @@ void CdrSolver::coarseFineRedistribution(EBAMRCellData& a_phi){
   }
 }
 
-void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux){
-  CH_TIME("CdrSolver::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData)");
+void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux, const bool a_conservativeOnly){
+  CH_TIME("CdrSolver::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData)" << endl;
+    pout() << m_name + "::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData, bool)" << endl;
   }
 
   CH_assert(a_divG  [0]->nComp() == 1);
@@ -447,17 +447,21 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
   m_amr->averageDown(a_G, m_realm, m_phase);
   
   this->conservativeDivergenceNoKappaDivision(a_divG, a_G, a_ebFlux);      // Make the conservative divergence without kappa-division.
-  this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);          // Compute the non-conservative divergence
-  this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG); // a_divG becomes hybrid divergence. Mass diff computed. 
 
-  if(m_whichRedistribution != Redistribution::None){
-    // Increment redistribution registers with the mass difference.
-    this->incrementRedist    (m_massDifference);
-    this->coarseFineIncrement(m_massDifference);
+  // Compute hybrid divergence.
+  if(!a_conservativeOnly){
+    this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);          // Compute the non-conservative divergence
+    this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG); // a_divG becomes hybrid divergence. Mass diff computed. 
 
-    // Redistribute mass on the level and across the coarse-fine boundaries.
-    this->hyperbolicRedistribution(a_divG);      // Level redistribution. 
-    this->coarseFineRedistribution(a_divG);      // Coarse-fine redistribution
+    if(m_whichRedistribution != Redistribution::None){
+      // Increment redistribution registers with the mass difference.
+      this->incrementRedist    (m_massDifference);
+      this->coarseFineIncrement(m_massDifference);
+
+      // Redistribute mass on the level and across the coarse-fine boundaries.
+      this->hyperbolicRedistribution(a_divG);      // Level redistribution. 
+      this->coarseFineRedistribution(a_divG);      // Coarse-fine redistribution
+    }
   }
 }
 
@@ -2677,9 +2681,9 @@ void CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCell
     }
 #endif
 
-    this->fillGwn(m_scratchFluxTwo, 1.0);                         // Gaussian White Noise = W/sqrt(dV)
-    DataOps::multiply(m_scratchFluxOne, m_scratchFluxTwo);        // Now m_scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi). 
-    this->computeDivG(a_noiseSource, m_scratchFluxOne, m_ebZero); // Compute the finite volume approximation and make it into a source term. 
+    this->fillGwn(m_scratchFluxTwo, 1.0);                                // Gaussian White Noise = W/sqrt(dV)
+    DataOps::multiply(m_scratchFluxOne, m_scratchFluxTwo);               // Now m_scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi). 
+    this->computeDivG(a_noiseSource, m_scratchFluxOne, m_ebZero, false); // Compute the finite volume approximation and make it into a source term. 
   
 #if 0 // Debug, check if we have NaNs/Infs
     m_amr->averageDown(a_noiseSource, m_realm, m_phase);

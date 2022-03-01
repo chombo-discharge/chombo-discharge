@@ -267,17 +267,21 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
   // State to be advanced. 
   EBAMRCellData& state = m_solver->getPhi();
 
+  const bool conservativeOnly = false;
+  const bool addEbFlux        = true ;
+  const bool addDomainFlux    = true ;  
+
   switch(m_integrator){
   case Integrator::Heun:
     {
 
       // Compute k1 coefficient
-      m_solver->computeDivJ(m_k1, state, 0.0);
+      m_solver->computeDivJ(m_k1, state, 0.0, conservativeOnly, addEbFlux, addDomainFlux);
       DataOps::copy(m_tmp, state);
       DataOps::incr(m_tmp, m_k1, -a_dt);
 
       // Compute k2 coefficient and final state
-      m_solver->computeDivJ(m_k2, m_tmp, 0.0);
+      m_solver->computeDivJ(m_k2, m_tmp, 0.0, conservativeOnly, addEbFlux, addDomainFlux);
       DataOps::incr(state, m_k1, -0.5*a_dt);
       DataOps::incr(state, m_k2, -0.5*a_dt); 
 
@@ -294,10 +298,7 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
     }
   case Integrator::EulerIMEX:
     {
-      const bool addEbFlux     = true;
-      const bool addDomainFlux = true;
-    
-      m_solver->computeDivF(m_k1, state, a_dt, addEbFlux, addDomainFlux);
+      m_solver->computeDivF(m_k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
       DataOps::incr(state, m_k1, -a_dt);
 
       if(m_solver->isDiffusive()){
