@@ -300,7 +300,7 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
 
 	// Compute the finite volume approximation to kappa*div(F). The second "hook" is a debugging hook that includes redistribution when computing kappa*div(F). It
 	// exists only for debugging/assurance reasons. 
-	if(false){
+	if(true){
 	  const bool conservativeOnly = true;
 	  
 	  m_solver->computeDivF(m_k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
