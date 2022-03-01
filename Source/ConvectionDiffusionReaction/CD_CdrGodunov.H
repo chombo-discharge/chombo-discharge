@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrGodunov.H
-  @brief  Declaration of a class which implements CdrTGA using Godunov-type advection. 
+  @brief  Declaration of a class which implements CdrMultigrid using Godunov-type advection. 
   @author Robert Marskar
 */
 
@@ -16,18 +16,18 @@
 #include <EBAdvectLevelIntegrator.H>
 
 // Our includes
-#include <CD_CdrTGA.H>
+#include <CD_CdrMultigrid.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Godunov implementation for advection. 
-  @details The CdrGodunov class perform Godunov-type advection with time-extrapolated slope-limiting to faces. Note that this class implements CdrTGA which
+  @details The CdrGodunov class perform Godunov-type advection with time-extrapolated slope-limiting to faces. Note that this class implements CdrMultigrid which
   is the base class that implements second order diffusion (either explicit or implicit). The rationale for doing time-extrapolation ala Godunov is that one can use
   centered differencing phi^(k+1) = phi^k - dt*div[v^(k+1/2) * phi^(k+1/2)] for a second order accurate discretization in time. This class uses Chombo functionality
   from EBAdvectLevelIntegrator which uses the Graves/Trebotich discretization in "An adaptive finite volume method for the incompressible Navier–Stokes equations 
   in complex geometries" (DOI: 10.2140/camcos.2015.10.43). Note that if source terms are involved the extrapolation is more involved. 
 */
-class CdrGodunov : public CdrTGA {
+class CdrGodunov : public CdrMultigrid {
 public:
 
   /*!

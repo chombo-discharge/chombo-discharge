@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CD_CdrTGA.cpp
-  @brief  Implementation of CD_CdrTGA.H
+  @file   CD_CdrMultigrid.cpp
+  @brief  Implementation of CD_CdrMultigrid.H
   @author Robert Marskar
 */
 
@@ -14,27 +14,27 @@
 #include <EBAMRIO.H>
 
 // Our includes
-#include <CD_CdrTGA.H>
+#include <CD_CdrMultigrid.H>
 #include <CD_DataOps.H>
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
 #include <CD_EBHelmholtzDirichletDomainBCFactory.H>
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-CdrTGA::CdrTGA() : CdrSolver() {
-  CH_TIME("CdrTGA::CdrTGA()");
+CdrMultigrid::CdrMultigrid() : CdrSolver() {
+  CH_TIME("CdrMultigrid::CdrMultigrid()");
   
   // Default settings
-  m_name         = "CdrTGA";
-  m_className    = "CdrTGA";
+  m_name         = "CdrMultigrid";
+  m_className    = "CdrMultigrid";
 }
 
-CdrTGA::~CdrTGA(){
+CdrMultigrid::~CdrMultigrid(){
 
 }
 
-void CdrTGA::registerOperators() {
-  CH_TIME("CdrTGA::registerOperators()");
+void CdrMultigrid::registerOperators() {
+  CH_TIME("CdrMultigrid::registerOperators()");
   if(m_verbosity > 5){
     pout() << m_name + "::registerOperators()" << endl;
   }
@@ -45,8 +45,8 @@ void CdrTGA::registerOperators() {
   m_amr->registerOperator(s_eb_multigrid, m_realm, m_phase);
 }
 
-void CdrTGA::allocateInternals() {
-  CH_TIME("CdrTGA::allocateInternals()");
+void CdrMultigrid::allocateInternals() {
+  CH_TIME("CdrMultigrid::allocateInternals()");
   if(m_verbosity > 5){
     pout() << m_name + "::allocateInternals()" << endl;
   }
@@ -56,11 +56,11 @@ void CdrTGA::allocateInternals() {
 
 }
 
-void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
+void CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
 			  const EBAMRCellData& a_oldPhi,
 			  const EBAMRCellData& a_source,
 			  const Real           a_dt){
-  CH_TIME("CdrTGA::advanceEuler(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
+  CH_TIME("CdrMultigrid::advanceEuler(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceEuler(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
   }
@@ -118,11 +118,11 @@ void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
   }
 }
 
-void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
+void CdrMultigrid::advanceTGA(EBAMRCellData&       a_newPhi,
 			const EBAMRCellData& a_oldPhi,
 			const EBAMRCellData& a_source,
 			const Real           a_dt){
-  CH_TIME("CdrTGA::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
+  CH_TIME("CdrMultigrid::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
   }
@@ -156,8 +156,8 @@ void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
   }
 }
 
-void CdrTGA::setupDiffusionSolver(){
-  CH_TIME("CdrTGA::setupDiffusionSolver()");
+void CdrMultigrid::setupDiffusionSolver(){
+  CH_TIME("CdrMultigrid::setupDiffusionSolver()");
   if(m_verbosity > 5){
     pout() << m_name + "::setupDiffusionSolver()" << endl;
   }
@@ -179,8 +179,8 @@ void CdrTGA::setupDiffusionSolver(){
   }  
 }
 
-void CdrTGA::setupHelmholtzFactory(){
-  CH_TIME("CdrTGA::setupHelmholtzFactory()");
+void CdrMultigrid::setupHelmholtzFactory(){
+  CH_TIME("CdrMultigrid::setupHelmholtzFactory()");
   if(m_verbosity > 5){
     pout() << m_name + "::setupHelmholtzFactory()" << endl;
   }
@@ -241,8 +241,8 @@ void CdrTGA::setupHelmholtzFactory(){
 										       m_amr->getMaxBoxSize()));
 }
 
-void CdrTGA::setupMultigrid(){
-  CH_TIME("CdrTGA::setupMultigrid()");
+void CdrMultigrid::setupMultigrid(){
+  CH_TIME("CdrMultigrid::setupMultigrid()");
   if(m_verbosity > 5){
     pout() << m_name + "::setupMultigrid()" << endl;
   }
@@ -260,7 +260,7 @@ void CdrTGA::setupMultigrid(){
     botsolver = &m_gmres;
     m_gmres.m_verbosity = 0; // Shut up. 
   default:
-    MayDay::Error("CdrTGA::setupMultigrid() - logic bust in bottom solver setup");
+    MayDay::Error("CdrMultigrid::setupMultigrid() - logic bust in bottom solver setup");
     break;
   }
 
@@ -274,7 +274,7 @@ void CdrTGA::setupMultigrid(){
     gmgType = 2;
     break;
   default:
-    MayDay::Error("CdrTGA::setupMultigrid() -- logic bust in multigrid type selection");
+    MayDay::Error("CdrMultigrid::setupMultigrid() -- logic bust in multigrid type selection");
   }
 
   const int finestLevel              = m_amr->getFinestLevel();
@@ -316,8 +316,8 @@ void CdrTGA::setupMultigrid(){
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
 }
 
-void CdrTGA::setupTGA(){
-  CH_TIME("CdrTGA::setupTGA()");
+void CdrMultigrid::setupTGA(){
+  CH_TIME("CdrMultigrid::setupTGA()");
   if(m_verbosity > 5){
     pout() << m_name + "::setupTGA()" << endl;
   }
@@ -330,8 +330,8 @@ void CdrTGA::setupTGA(){
     (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refinementRatios, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
-void CdrTGA::setupEuler(){
-  CH_TIME("CdrTGA::setupEuler");
+void CdrMultigrid::setupEuler(){
+  CH_TIME("CdrMultigrid::setupEuler");
   if(m_verbosity > 5){
     pout() << m_name + "::setupEuler" << endl;
   }
@@ -344,8 +344,8 @@ void CdrTGA::setupEuler(){
     (new EBBackwardEuler (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refinementRatios, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
-void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrTGA::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool)");
+void CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
+  CH_TIME("CdrMultigrid::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool)" << endl;
   }
@@ -401,8 +401,8 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
   return;
 }
 
-void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrTGA::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool)");
+void CdrMultigrid::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
+  CH_TIME("CdrMultigrid::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool)" << endl;
   }
@@ -434,8 +434,8 @@ void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real
   }
 }
 
-void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrTGA::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)");
+void CdrMultigrid::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_ebFlux, const bool a_domainFlux){
+  CH_TIME("CdrMultigrid::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)" << endl;
   }
@@ -468,8 +468,8 @@ void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool
   }
 }
 
-void CdrTGA::parseMultigridSettings(){
-  CH_TIME("CdrTGA::parseMultigridSettings()");
+void CdrMultigrid::parseMultigridSettings(){
+  CH_TIME("CdrMultigrid::parseMultigridSettings()");
   if(m_verbosity > 5){
     pout() << m_name + "::parseMultigridSettings()" << endl;
   }
@@ -488,7 +488,7 @@ void CdrTGA::parseMultigridSettings(){
   pp.get("gmg_exit_hang",    m_multigridExitHang);
   pp.get("gmg_min_cells",    m_minCellsBottom);
 
-  // Fetch the desired bottom solver from the input script. We look for things like CdrTGA.gmg_bottom_solver = bicgstab or '= simple <number>'
+  // Fetch the desired bottom solver from the input script. We look for things like CdrMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver. 
   const int num = pp.countval("gmg_bottom_solver");
   if(num == 1){
@@ -500,7 +500,7 @@ void CdrTGA::parseMultigridSettings(){
       m_bottomSolverType = BottomSolverType::GMRES;
     }
     else{
-      MayDay::Error("CdrTGA::parseMultigridSettings - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
+      MayDay::Error("CdrMultigrid::parseMultigridSettings - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
     }
   }
   else if(num == 2){
@@ -512,11 +512,11 @@ void CdrTGA::parseMultigridSettings(){
       m_simpleSolver.setNumSmooths(numSmooth);
     }
     else{
-      MayDay::Error("CdrTGA::parseMultigridSettings - logic bust, you've specified two parameters and I expected 'simple <number>'");
+      MayDay::Error("CdrMultigrid::parseMultigridSettings - logic bust, you've specified two parameters and I expected 'simple <number>'");
     }
   }
   else{
-    MayDay::Error("CdrTGA::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
+    MayDay::Error("CdrMultigrid::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
   // Relaxation type
@@ -531,7 +531,7 @@ void CdrTGA::parseMultigridSettings(){
     m_smoother = EBHelmholtzOp::Smoother::GauSaiMultiColor;
   }
   else{
-    MayDay::Error("CdrTGA::parseMultigridSettings - unknown relaxation method requested");
+    MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown relaxation method requested");
   }
 
   // Cycle type
@@ -540,7 +540,7 @@ void CdrTGA::parseMultigridSettings(){
     m_multigridType = MultigridType::VCycle;
   }
   else{
-    MayDay::Error("CdrTGA::parseMultigridSettings - unknown cycle type requested");
+    MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown cycle type requested");
   }
 
   // No lower than 2. 
@@ -549,8 +549,8 @@ void CdrTGA::parseMultigridSettings(){
   }
 }
 
-void CdrTGA::writePlotData(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("CdrTGA::writePlotData(EBAMRCellData, int)");
+void CdrMultigrid::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("CdrMultigrid::writePlotData(EBAMRCellData, int)");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotData(EBAMRCellData, int)" << endl;
   }

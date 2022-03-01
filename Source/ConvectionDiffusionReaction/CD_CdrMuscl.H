@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrMuscl.H
-  @brief  Declaration of a class which implements CdrTGA using MUSCL for advection. 
+  @brief  Declaration of a class which implements CdrMultigrid using MUSCL for advection. 
   @author Robert Marskar
 */
 
@@ -13,7 +13,7 @@
 #define CD_CdrMuscl_H
 
 // Our includes
-#include <CD_CdrTGA.H>
+#include <CD_CdrMultigrid.H>
 #include <CD_CdrGodunov.H>
 #include <CD_NamespaceHeader.H>
 
@@ -21,7 +21,7 @@
   @brief Class that uses MUSCL discretization advection.
   @details This class performs MUSCL-type advection using a van Leer limiter for obtaining the face-centered states. 
 */
-class CdrMuscl : public CdrTGA {
+class CdrMuscl : public CdrMultigrid {
 public:
 
   /*!

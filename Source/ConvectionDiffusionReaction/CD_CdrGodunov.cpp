@@ -20,7 +20,7 @@
 #include <CD_ParallelOps.H>
 #include "CD_NamespaceHeader.H"
 
-CdrGodunov::CdrGodunov() : CdrTGA() {
+CdrGodunov::CdrGodunov() : CdrMultigrid() {
   CH_TIME("CdrGodunov::CdrGodunov()");
 
   // Class name and instantiation name. 
@@ -159,8 +159,8 @@ void CdrGodunov::allocateInternals(){
     pout() << m_name + "::allocateInternals()" << endl;
   }
 
-  // CdrTGA allocates everything except storage needed for the advection object. 
-  CdrTGA::allocateInternals();
+  // CdrMultigrid allocates everything except storage needed for the advection object. 
+  CdrMultigrid::allocateInternals();
 
 
   // Allocate levelAdvect only if the solver is mobile. See Chombo design docs for how the EBAdvectLevelIntegrator operates. 

@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_CdrTGA.H
+  @file   CD_CdrMultigrid.H
   @brief  Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves
   @author Robert Marskar
 */
 
-#ifndef CD_CdrTGA_H
-#define CD_CdrTGA_H
+#ifndef CD_CdrMultigrid_H
+#define CD_CdrMultigrid_H
 
 // Std includes
 #include <random>
@@ -33,7 +33,7 @@
 /*!
   @brief Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic diffusion.
 */
-class CdrTGA : public CdrSolver {
+class CdrMultigrid : public CdrSolver {
 protected:
 
   /*!
@@ -58,12 +58,12 @@ public:
   /*!
     @brief Constructor
   */
-  CdrTGA();
+  CdrMultigrid();
 
   /*!
     @brief Destructor
   */
-  virtual ~CdrTGA();
+  virtual ~CdrMultigrid();
 
   /*!
     @brief Parse class options
