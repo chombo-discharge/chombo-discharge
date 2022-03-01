@@ -147,13 +147,13 @@ public:
 			  const Real           a_dt) override final;
   
   /*!
-    @brief Implicit diffusion Euler advance with source term.
+    @brief Implicit diffusion Euler advance with source term. 
+    @details This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and
+    that the incoming source term a_source HAS been weighted by the volume fraction. 
     @param[inout] a_newPhi Solution at time t + dt
-    @param[in]    a_oldPhi Solution at time t
-    @param[in]    a_source Source term. 
-    @param[in]    a_dt     Time step
-    @note For purely implicit Euler the source term should be centered at t+dt (otherwise it's an implicit-explicit method)
-    @details This solves the implicit diffusion equation equation a_newPhi - a_oldPhi = dt*Laplacian(a_newPhi) + dt*a_source. 
+    @param[in]    a_oldPhi Solution at time t. Should be unweighted by the volume fraction. 
+    @param[in]    a_source Source term. Should be weighted by the volume fraction. 
+    @param[in]    a_dt     Time step.
   */
   virtual void advanceEuler(EBAMRCellData&       a_newPhi,
 			    const EBAMRCellData& a_oldPhi,
@@ -185,11 +185,6 @@ protected:
   RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > > m_tgaSolver;
 
   /*!
-    @brief Euler solver
-  */
-  RefCountedPtr<EBBackwardEuler> m_eulerSolver;
-
-  /*!
     @brief Operator factory
   */
   RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzOpFactory;
@@ -217,7 +212,12 @@ protected:
   /*!
     @brief Storage for Helmholtz a-coefficient. Always 1. 
   */
-  EBAMRCellData m_helmAcoef;  
+  EBAMRCellData m_helmAcoef;
+
+  /*!
+    @brief Storage for multigrid residual
+  */
+  EBAMRCellData m_residual;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -300,9 +300,11 @@ protected:
   virtual void setupTGA();
 
   /*!
-    @brief Setup the Euler solver
+    @brief Reset alpha and beta-coefficients in the multigrid solvers
+    @param[in] a_alpha Alpha-coefficient for EBHelmholtzOp
+    @param[in] a_beta  Beta-coefficient for EBHelmholtzOp
   */
-  virtual void setupEuler();
+  virtual void resetAlphaAndBeta(const Real a_alpha, const Real a_beta);
 
   /*!
     @brief Parse solver settings for geometric multigrid

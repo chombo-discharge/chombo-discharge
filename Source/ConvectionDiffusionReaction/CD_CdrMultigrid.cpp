@@ -52,8 +52,23 @@ void CdrMultigrid::allocateInternals() {
   }
 
   CdrSolver::allocateInternals();
+}
 
+void CdrMultigrid::resetAlphaAndBeta(const Real a_alpha, const Real a_beta) {
+  CH_TIME("CdrMultigrid::resetAlphaAndBeta(Real, Real");
+  if(m_verbosity > 5){
+    pout() << m_name + "::resetAlphaAndBeta(Real, Real)" << endl;
+  }
 
+  if(m_isDiffusive){
+    Vector<MGLevelOp<LevelData<EBCellFAB> >* > multigridOperators = m_multigridSolver->getAllOperators();
+
+    for (int i = 0; i < multigridOperators.size(); i++){
+      TGAHelmOp<LevelData<EBCellFAB> >* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB> >*) multigridOperators[i];
+
+      helmholtzOperator->setAlphaAndBeta(a_alpha, a_beta);
+    }
+  }
 }
 
 void CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
@@ -66,52 +81,55 @@ void CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
   }
   
   if(m_isDiffusive){
-    this->setupDiffusionSolver(); // Set up gmg again since diffusion coefficients might between time steps. 
-    
-    bool converged = false;
 
-    const int finestLevel = m_amr->getFinestLevel();
+    // TLDR: Recall that the elliptic operator solves
+    // 
+    //          kappa*L(phi) = kappa*rho
+    //
+    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass this into multigrid. We assume that the user
+    //       has provided a source-term that comes in is already weighted, but that the old solution comes in unweighted.     
 
-    // We first compute a convergence metric where we stop iterating further. We are solving
-    //
-    //    dphi/dt = L(phi) + rho
-    //
-    // where L(phi) = Div(D*grad(phi))
-    //
-    // This is discretized as phi^(k+1) - dt*L(phi^(k+1)) = phi^k + dt*rho. We set the "source term" to m_scratch = phi^k + dt*rho
-    // which yields phi^(k+1) - dt*L(phi^(k+1)) = m_scratch. We reset the alpha and beta coefficients to 1 and -dt in the TGA operator
-    // lets and compute the residual using phi^(k+1)=0. Then we set the convergence metric. 
+    // Set up multigrid again because the diffusion coefficients might have changed underneath us.
+    this->setupDiffusionSolver(); 
 
+    // Make the right-hand side for the Euler equation. Since we are solving
+    //
+    //     kappa * phi^(k+1) - kappa*dt*L(phi^(k+1)) = kappa * phi^k + kappa*dt*S
+    //
+    // we need to put the right-hand side somewhere. We use m_scratch for holding kappa*phi^k + kappa*dt*S. Note that we assume that S comes in unweighted. 
     DataOps::copy(m_scratch, a_oldPhi);
-    DataOps::incr(m_scratch, a_source, a_dt);
+    DataOps::kappaScale(m_scratch);
+    DataOps::incr(m_scratch, a_source, -a_dt);
 
-    Vector<LevelData<EBCellFAB>* > zero;
-    Vector<LevelData<EBCellFAB>* > rhs;
-    
-    m_amr->alias(zero, m_zero);
-    m_amr->alias(rhs,  m_scratch);
+    // As above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -a_dt. The kappas on the left-hand side
+    // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those. 
+    this->resetAlphaAndBeta(1.0, -a_dt);
 
-    m_eulerSolver->resetAlphaAndBeta(1.0, -a_dt);
+    // Aliasing because Chombo did not always use smart pointers. 
+    Vector<LevelData<EBCellFAB>* > newPhi;
+    Vector<LevelData<EBCellFAB>* > eulerRHS;
+    Vector<LevelData<EBCellFAB>* > resid;
+    Vector<LevelData<EBCellFAB>* > zero;        
     
-    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, rhs, finestLevel, 0);
-    
+    m_amr->alias(newPhi,   a_newPhi  );
+    m_amr->alias(eulerRHS, m_scratch );
+    m_amr->alias(resid,    m_residual);
+    m_amr->alias(zero,     m_zero    );    
+
+    const int coarsestLevel = 0;
+    const int finestLevel   = m_amr->getFinestLevel();
+
+    // Figure out how far away we are form a "converged" solution.
+    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, eulerRHS, finestLevel, coarsestLevel);
+
+    // Set the convergence metric.
     m_multigridSolver->m_convergenceMetric = zeroResid;
 
-    // Now do the backward Euler solve. 
-    Vector<LevelData<EBCellFAB>* > newPhi;
-    Vector<LevelData<EBCellFAB>* > oldPhi;
-    Vector<LevelData<EBCellFAB>* > source;
-    
-    m_amr->alias(newPhi, a_newPhi);
-    m_amr->alias(oldPhi, a_oldPhi);
-    m_amr->alias(source, a_source);
+    // Always from previous solution.
+    DataOps::copy(a_newPhi, a_oldPhi);    
 
-    m_eulerSolver->oneStep(newPhi, oldPhi, source, a_dt, 0, finestLevel, false);
-    
-    const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){       // 8 => Norm sufficiently small
-      converged = true;
-    }
+    // Do the multigrid solve. 
+    m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
   }
   else{
     DataOps::copy(a_newPhi, a_oldPhi);
@@ -167,15 +185,16 @@ void CdrMultigrid::setupDiffusionSolver(){
   if(m_isDiffusive){
     m_amr->allocate(m_zero,      m_realm, m_phase, m_nComp);
     m_amr->allocate(m_helmAcoef, m_realm, m_phase, m_nComp);
+    m_amr->allocate(m_residual,  m_realm, m_phase, m_nComp);
     
     DataOps::setValue(m_zero,      0.0);
     DataOps::setValue(m_helmAcoef, 1.0);
+    DataOps::setValue(m_residual,  0.0);    
 
     // This sets up the multigrid Helmholtz solver and the TGA/Euler solvers. The TGA/Euler stuff is Chombo code.
     this->setupHelmholtzFactory();
     this->setupMultigrid();
     this->setupTGA();
-    this->setupEuler();
   }  
 }
 
@@ -328,20 +347,6 @@ void CdrMultigrid::setupTGA(){
 
   m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
     (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refinementRatios, 1 + finestLevel, m_multigridSolver->m_verbosity));
-}
-
-void CdrMultigrid::setupEuler(){
-  CH_TIME("CdrMultigrid::setupEuler");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setupEuler" << endl;
-  }
-
-  const int finestLevel              = m_amr->getFinestLevel();
-  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
-  const Vector<int> refinementRatios = m_amr->getRefinementRatios();
-
-  m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
-    (new EBBackwardEuler (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refinementRatios, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux){

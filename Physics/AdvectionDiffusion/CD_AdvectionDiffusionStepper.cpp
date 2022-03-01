@@ -267,13 +267,14 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
   // State to be advanced. 
   EBAMRCellData& state = m_solver->getPhi();
 
-  const bool conservativeOnly = false;
-  const bool addEbFlux        = true ;
-  const bool addDomainFlux    = true ;  
+
 
   switch(m_integrator){
   case Integrator::Heun:
     {
+      const bool conservativeOnly = false;
+      const bool addEbFlux        = true ;
+      const bool addDomainFlux    = true ;        
 
       // Compute k1 coefficient
       m_solver->computeDivJ(m_k1, state, 0.0, conservativeOnly, addEbFlux, addDomainFlux);
@@ -290,29 +291,37 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
 	m_solver->gwnDiffusionSource(m_k1, state); // k1 holds random diffusion
 	DataOps::incr(state, m_k1, a_dt);
       }
-  
-      m_amr->averageDown(state, m_realm, m_phase);
-      m_amr->interpGhost(state, m_realm, m_phase);
       
       break;
     }
   case Integrator::EulerIMEX:
     {
-      m_solver->computeDivF(m_k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
-      DataOps::incr(state, m_k1, -a_dt);
+      const bool addEbFlux        = true ;
+      const bool addDomainFlux    = true ;
 
       if(m_solver->isDiffusive()){
-	DataOps::copy(m_k2, state); // Now holds phiOld - dt*div(F)
-	if(m_fhd){
-	  m_solver->gwnDiffusionSource(m_k1, state); // k1 holds random diffusion
-	  DataOps::incr(m_k2, m_k1, a_dt);
+
+	// Compute the finite volume approximation to kappa*div(F). The second "hook" is a debugging hook that includes redistribution when computing kappa*div(F). It
+	// exists only for debugging/assurance reasons. 
+	if(true){ 
+	  m_solver->computeDivF(m_k1, state, a_dt, true, addEbFlux, addDomainFlux);
 	}
-	DataOps::setValue(m_k1, 0.0);
+	else{
+	  m_solver->computeDivF(m_k1, state, a_dt, false, addEbFlux, addDomainFlux);
+	  DataOps::kappaScale(m_k1);
+	}
+	
+	// Use m_k1 as the old solution. 
+	DataOps::copy(m_k2, state);
+
+	// Do the Euler solve. 
 	m_solver->advanceEuler(state, m_k2, m_k1, a_dt);
       }
+      else{ // Purely inviscid advance. 
+	m_solver->computeDivF(m_k1, state, a_dt, true, addEbFlux, addDomainFlux);
 
-      m_amr->averageDown(state, m_realm, m_phase);
-      m_amr->averageDown(state, m_realm, m_phase);
+	DataOps::incr(state, m_k1, -a_dt);
+      }
       
       break;
     }
@@ -320,6 +329,9 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
     MayDay::Error("AdvectionDiffusionStepper - unknown integrator requested");
     break;
   }
+
+  m_amr->averageDown(state, m_realm, m_phase);
+  m_amr->interpGhost(state, m_realm, m_phase);  
   
   return a_dt;
 }
