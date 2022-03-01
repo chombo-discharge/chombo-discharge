@@ -177,6 +177,29 @@ void CdrSolver::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_old
   }
 }
 
+void CdrSolver::advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
+  CH_TIME("CdrSolver::advanceCrankNicholson(EBAMRCellData, EBAMRCellData, Real)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advanceCrankNicholson(EBAMRCellData, EBAMRCellData, Real)" << endl;
+  }
+
+  CH_assert(a_newPhi[0]->nComp() == 1);
+  CH_assert(a_oldPhi[0]->nComp() == 1);
+
+  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the implementation
+  //       version.
+  if(m_isDiffusive){
+    EBAMRCellData src;
+    m_amr->allocate(src, m_realm, m_phase, m_nComp);
+    DataOps::setValue(src, 0.0);
+
+    this->advanceCrankNicholson(a_newPhi, a_oldPhi, src, a_dt);
+  }
+  else{
+    DataOps::copy(a_newPhi, a_oldPhi);
+  }
+}
+
 void CdrSolver::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
   CH_TIME("CdrSolver::advanceTGA(EBAMRCellData, EBAMRCellData, Real)");
   if(m_verbosity > 5){

@@ -263,11 +263,8 @@ void AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
 Real AdvectionDiffusionStepper::advance(const Real a_dt){
   CH_TIME("AdvectionDiffusionStepper::advance");
 
-
   // State to be advanced. 
   EBAMRCellData& state = m_solver->getPhi();
-
-
 
   switch(m_integrator){
   case Integrator::Heun:
@@ -303,19 +300,26 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
 
 	// Compute the finite volume approximation to kappa*div(F). The second "hook" is a debugging hook that includes redistribution when computing kappa*div(F). It
 	// exists only for debugging/assurance reasons. 
-	if(true){ 
-	  m_solver->computeDivF(m_k1, state, a_dt, true, addEbFlux, addDomainFlux);
+	if(false){
+	  const bool conservativeOnly = true;
+	  
+	  m_solver->computeDivF(m_k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
 	}
 	else{
-	  m_solver->computeDivF(m_k1, state, a_dt, false, addEbFlux, addDomainFlux);
+	  const bool conservativeOnly = false;
+	  
+	  m_solver->computeDivF(m_k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
+	  
 	  DataOps::kappaScale(m_k1);
 	}
+
+	DataOps::scale(m_k1, -1.0);	
 	
 	// Use m_k1 as the old solution. 
 	DataOps::copy(m_k2, state);
 
 	// Do the Euler solve. 
-	m_solver->advanceEuler(state, m_k2, m_k1, a_dt);
+	m_solver->advanceCrankNicholson(state, m_k2, m_k1, a_dt);
       }
       else{ // Purely inviscid advance. 
 	m_solver->computeDivF(m_k1, state, a_dt, true, addEbFlux, addDomainFlux);

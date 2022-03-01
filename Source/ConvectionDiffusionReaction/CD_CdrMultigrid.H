@@ -160,6 +160,19 @@ public:
 			    const EBAMRCellData& a_source,
 			    const Real           a_dt) override final;
 
+  /*!
+    @brief Implicit diffusion Crank-Nicholson advance with source term.
+    @details This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and
+    that the incoming source term a_source HAS been weighted by the volume fraction. 
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_source Source term. 
+    @param[in]    a_dt     Time step
+  */
+  virtual void advanceCrankNicholson(EBAMRCellData&       a_newPhi,
+				     const EBAMRCellData& a_oldPhi,
+				     const EBAMRCellData& a_source,
+				     const Real           a_dt) override final;
 
 
 protected:
@@ -305,6 +318,14 @@ protected:
     @param[in] a_beta  Beta-coefficient for EBHelmholtzOp
   */
   virtual void resetAlphaAndBeta(const Real a_alpha, const Real a_beta);
+
+  /*!
+    @brief Compute kappa * L(phi) using the multigrid operator. This is different from computeDivD.
+    @param[in] a_kappaLphi kappa*L(phi)
+    @param[in] a_phi        Cell-centered state
+    @note This will reset the alpha and beta coefficients. 
+  */
+  virtual void computeKappaLphi(EBAMRCellData& a_kappaLphi, const EBAMRCellData& a_phi);
 
   /*!
     @brief Parse solver settings for geometric multigrid

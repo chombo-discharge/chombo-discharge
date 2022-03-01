@@ -71,6 +71,27 @@ void CdrMultigrid::resetAlphaAndBeta(const Real a_alpha, const Real a_beta) {
   }
 }
 
+void CdrMultigrid::computeKappaLphi(EBAMRCellData& a_kappaLphi, const EBAMRCellData& a_phi) {
+  CH_TIME("CdrMultigrid::computeKappaLphi(EBAMRCellData, EBAMRCellData)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::computeKappaLphi(EBAMRCellData, EBAMRCellData)" << endl;
+  }
+
+  const int coarsestLevel = 0;
+  const int finestLevel   = m_amr->getFinestLevel();  
+
+  Vector<LevelData<EBCellFAB>* > LphiPtr;
+  Vector<LevelData<EBCellFAB>* > phiPtr ;
+
+  m_amr->alias(LphiPtr, a_kappaLphi);
+  m_amr->alias(phiPtr,  a_phi      );
+
+  // Need to reset to make sure we are computing kappa*div(D*grad(phi)) and not something like kappa*(phi - div(D*grad(phi))). 
+  this->resetAlphaAndBeta(0.0, 1.0);
+
+  m_multigridSolver->computeAMROperator(LphiPtr, phiPtr, finestLevel, coarsestLevel, false);
+}
+
 void CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
 				const EBAMRCellData& a_oldPhi,
 				const EBAMRCellData& a_source,
@@ -96,10 +117,10 @@ void CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
     //
     //     kappa * phi^(k+1) - kappa*dt*L(phi^(k+1)) = kappa * phi^k + kappa*dt*S
     //
-    // we need to put the right-hand side somewhere. We use m_scratch for holding kappa*phi^k + kappa*dt*S. Note that we assume that S comes in unweighted. 
+    // we need to put the right-hand side somewhere. We use m_scratch for holding kappa*phi^k + kappa*dt*S. Note that we assume that S comes in weighted. 
     DataOps::copy(m_scratch, a_oldPhi);
     DataOps::kappaScale(m_scratch);
-    DataOps::incr(m_scratch, a_source, -a_dt);
+    DataOps::incr(m_scratch, a_source, a_dt);
 
     // As above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -a_dt. The kappas on the left-hand side
     // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those. 
@@ -118,6 +139,90 @@ void CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
 
     const int coarsestLevel = 0;
     const int finestLevel   = m_amr->getFinestLevel();
+
+    // Figure out how far away we are form a "converged" solution.
+    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, eulerRHS, finestLevel, coarsestLevel);
+
+    // Set the convergence metric.
+    m_multigridSolver->m_convergenceMetric = zeroResid;
+
+    // Always from previous solution.
+    DataOps::copy(a_newPhi, a_oldPhi);    
+
+    // Do the multigrid solve. 
+    m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
+  }
+  else{
+    DataOps::copy(a_newPhi, a_oldPhi);
+  }
+}
+
+void CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
+					 const EBAMRCellData& a_oldPhi,
+					 const EBAMRCellData& a_source,
+					 const Real           a_dt){
+  CH_TIME("CdrMultigrid::advanceCrankNicholson(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advanceCrankNicholson(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
+  }
+  
+  if(m_isDiffusive){
+
+    const int coarsestLevel = 0;
+    const int finestLevel   = m_amr->getFinestLevel();    
+
+    // TLDR: Recall that the elliptic operator solves
+    // 
+    //          kappa*L(phi) = kappa*rho
+    //
+    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass this into multigrid. We assume that the user
+    //       has provided a source-term that comes in is already weighted, but that the old solution comes in unweighted.     
+
+    // Set up multigrid again because the diffusion coefficients might have changed underneath us.
+    this->setupDiffusionSolver(); 
+
+    // Make the right-hand side for the Euler equation. Since we are solving
+    //
+    //     kappa * phi^(k+1) - 0.5 * kappa*dt*L(phi^(k+1)) = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
+    //
+    // we need to put the right-hand side somewhere. We use m_scratch for holding the right-hand side. Note that S^(k+1/2) should come in weighted and the old solution
+    // come in unweighted.
+
+    // First, put kappa*phi^k in scratch. 
+    DataOps::copy(m_scratch, a_oldPhi);
+    DataOps::kappaScale(m_scratch);
+
+    // Add the source term, which by assumption comes in weighted by the volume fraction. 
+    DataOps::incr(m_scratch, a_source, a_dt);
+
+    // Compute kappa*L(phi^k) and add it to the scratch data holder. 
+    EBAMRCellData kappaLphi;
+    EBAMRCellData phiScratch;
+
+    m_amr->allocate(kappaLphi,  m_realm, m_phase, 1);
+    m_amr->allocate(phiScratch, m_realm, m_phase, 1);
+
+    DataOps::copy(phiScratch, a_oldPhi);
+
+    this->computeKappaLphi(kappaLphi, phiScratch);
+
+    // After this we have m_scratch = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
+    DataOps::incr(m_scratch, kappaLphi, 0.5*a_dt);
+
+    // From the equation above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -0.5*a_dt. The kappas on the left-hand side
+    // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those. 
+    this->resetAlphaAndBeta(1.0, -0.5*a_dt);
+
+    // Aliasing because Chombo did not always use smart pointers. 
+    Vector<LevelData<EBCellFAB>* > newPhi;
+    Vector<LevelData<EBCellFAB>* > eulerRHS;
+    Vector<LevelData<EBCellFAB>* > resid;
+    Vector<LevelData<EBCellFAB>* > zero;        
+    
+    m_amr->alias(newPhi,   a_newPhi  );
+    m_amr->alias(eulerRHS, m_scratch );
+    m_amr->alias(resid,    m_residual);
+    m_amr->alias(zero,     m_zero    );    
 
     // Figure out how far away we are form a "converged" solution.
     const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, eulerRHS, finestLevel, coarsestLevel);

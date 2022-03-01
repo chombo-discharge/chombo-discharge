@@ -146,6 +146,27 @@ public:
 			    const EBAMRCellData& a_source,
 			    const Real           a_dt) = 0;
 
+    /*!
+    @brief Implicit diffusion Crank-Nicholson advance without source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_dt     Time step
+    @note This calls the other version with a zero source term. 
+  */
+  virtual void advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt);
+
+  /*!
+    @brief Implicit diffusion Crank-Nicholson advance with source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_source Source term. 
+    @param[in]    a_dt     Time step
+  */
+  virtual void advanceCrankNicholson(EBAMRCellData&       a_newPhi,
+				     const EBAMRCellData& a_oldPhi,
+				     const EBAMRCellData& a_source,
+				     const Real           a_dt) = 0;
+
   /*!
     @brief Compute div(J) explicitly, where J = nV - D*grad(n)
     @param[out] a_divJ             Divergence term, i.e. finite volume approximation to 
