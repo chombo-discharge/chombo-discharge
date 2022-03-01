@@ -74,7 +74,7 @@ void AdvectionDiffusionStepper::parseIntegrator(){
     m_integrator = Integrator::Heun;
   }
   else if(str == "imex"){
-    m_integrator = Integrator::EulerIMEX;
+    m_integrator = Integrator::IMEX;
   }
   else{
     MayDay::Error("AdvectionDiffusionStepper::parseIntegrator -- logic bust");
