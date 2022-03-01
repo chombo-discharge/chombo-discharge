@@ -180,7 +180,7 @@ namespace Physics {
       */
       enum Integrator {
 	Heun,
-	EulerIMEX
+	IMEX
       };
 
       /*!

@@ -291,7 +291,7 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
       
       break;
     }
-  case Integrator::EulerIMEX:
+  case Integrator::IMEX:
     {
       const bool addEbFlux        = true ;
       const bool addDomainFlux    = true ;
