@@ -241,44 +241,6 @@ void CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
   }
 }
 
-void CdrMultigrid::advanceTGA(EBAMRCellData&       a_newPhi,
-			      const EBAMRCellData& a_oldPhi,
-			      const EBAMRCellData& a_source,
-			      const Real           a_dt){
-  CH_TIME("CdrMultigrid::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
-  }
-  
-  if(m_isDiffusive){
-    this->setupDiffusionSolver(); // Set up gmg again since diffusion coefficients might change between time steps. 
-    
-    bool converged = false;
-
-    const int finestLevel = m_amr->getFinestLevel();
-
-    // Do the aliasing stuff
-    Vector<LevelData<EBCellFAB>* > newPhi;
-    Vector<LevelData<EBCellFAB>* > oldPhi;
-    Vector<LevelData<EBCellFAB>* > source;
-
-    m_amr->alias(newPhi, a_newPhi);
-    m_amr->alias(oldPhi, a_oldPhi);
-    m_amr->alias(source,    a_source);
-
-    // Do the TGA solve. 
-    m_tgaSolver->oneStep(newPhi, oldPhi, source, a_dt, 0, finestLevel, false);
-
-    const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){       // 8 => Norm sufficiently small
-      converged = true;
-    }
-  }
-  else{
-    DataOps::copy(a_newPhi, a_oldPhi);
-  }
-}
-
 void CdrMultigrid::setupDiffusionSolver(){
   CH_TIME("CdrMultigrid::setupDiffusionSolver()");
   if(m_verbosity > 5){
@@ -296,10 +258,9 @@ void CdrMultigrid::setupDiffusionSolver(){
     DataOps::setValue(m_helmAcoef, 1.0);
     DataOps::setValue(m_residual,  0.0);    
 
-    // This sets up the multigrid Helmholtz solver and the TGA/Euler solvers. The TGA/Euler stuff is Chombo code.
+    // This sets up the multigrid Helmholtz solver.
     this->setupHelmholtzFactory();
     this->setupMultigrid();
-    this->setupTGA();
   }  
 }
 
@@ -437,20 +398,6 @@ void CdrMultigrid::setupMultigrid(){
 
   // Init solver. This instantiates all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
-}
-
-void CdrMultigrid::setupTGA(){
-  CH_TIME("CdrMultigrid::setupTGA()");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setupTGA()" << endl;
-  }
-  
-  const int finestLevel              = m_amr->getFinestLevel();
-  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
-  const Vector<int> refinementRatios = m_amr->getRefinementRatios();
-
-  m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
-    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refinementRatios, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux){

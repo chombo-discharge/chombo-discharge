@@ -19,9 +19,7 @@
 
 // Chombo includes
 #include <AMRMultiGrid.H>
-#include <AMRTGA.H>
 #include <BiCGStabSolver.H>
-#include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
 #include <GMRESSolver.H>
 
@@ -132,19 +130,6 @@ public:
 			   const bool     a_conservativeOnly,			   
 			   const bool     a_ebFlux,
 			   const bool     a_domainFlux) override final;
-
-  /*!
-    @brief Implicit diffusion TGA advance with source term.
-    @param[inout] a_newPhi Solution at time t + dt
-    @param[in]    a_oldPhi Solution at time t
-    @param[in]    a_source Source (at t+dt/2)
-    @param[in]    a_dt     Time step
-    @note Source term should be centered at t+dt/2 for second order convergence. 
-  */
-  virtual void advanceTGA(EBAMRCellData&       a_newPhi,
-			  const EBAMRCellData& a_oldPhi,
-			  const EBAMRCellData& a_source,
-			  const Real           a_dt) override final;
   
   /*!
     @brief Implicit diffusion Euler advance with source term. 
@@ -191,11 +176,6 @@ protected:
     @brief Geometric multigrid solver
   */
   RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_multigridSolver;
-
-  /*!
-    @brief TGA solver
-  */
-  RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > > m_tgaSolver;
 
   /*!
     @brief Operator factory
@@ -306,11 +286,6 @@ protected:
     @brief Setup multigrid
   */
   virtual void setupMultigrid();
-
-  /*!
-    @brief Setup the TGA solver
-  */
-  virtual void setupTGA();
 
   /*!
     @brief Reset alpha and beta-coefficients in the multigrid solvers

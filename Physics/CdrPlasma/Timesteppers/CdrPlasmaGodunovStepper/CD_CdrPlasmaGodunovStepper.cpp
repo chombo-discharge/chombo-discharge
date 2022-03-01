@@ -1063,12 +1063,6 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
 
 	    break;
 	  }
-	case DiffusionSolver::TGA:
-	  {
-	    solver->advanceTGA(phi, scratch2, scratch, a_dt);
-
-	    break;
-	  }
 	default:
 	  {
 	    MayDay::Error("CdrPlasmaGodunovStepper::advanceTransportEuler -- logic bust");

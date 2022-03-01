@@ -154,7 +154,6 @@ namespace Physics {
       */
       enum class DiffusionSolver {
 	Euler,
-	TGA
       };
 
       /*!

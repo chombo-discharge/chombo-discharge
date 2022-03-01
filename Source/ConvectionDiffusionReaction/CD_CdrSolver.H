@@ -102,28 +102,6 @@ public:
   void setDomainBcFunction(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::FluxFunction a_fluxFunction);
 
   /*!
-    @brief Implicit diffusion TGA advance without source term.
-    @param[inout] a_newPhi Solution at time t + dt
-    @param[in]    a_oldPhi Solution at time t
-    @param[in]    a_dt     Time step
-    @note This calls the other version with a zero source term. 
-  */
-  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt);
-
-  /*!
-    @brief Implicit diffusion TGA advance with source term.
-    @param[inout] a_newPhi Solution at time t + dt
-    @param[in]    a_oldPhi Solution at time t
-    @param[in]    a_source Source (at t+dt/2)
-    @param[in]    a_dt     Time step
-    @note Source term should be centered at t+dt/2 for true second order convergence. 
-  */
-  virtual void advanceTGA(EBAMRCellData&       a_newPhi,
-			  const EBAMRCellData& a_oldPhi,
-			  const EBAMRCellData& a_source,
-			  const Real           a_dt) = 0;
-
-  /*!
     @brief Implicit diffusion Euler advance without source term.
     @param[inout] a_newPhi Solution at time t + dt
     @param[in]    a_oldPhi Solution at time t

@@ -931,7 +931,7 @@ void CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m,
 
       // Solve
       if(m_useTGA){
-	solver->advanceTGA(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
+	MayDay::Error("CdrPlasmaImExSdcStepper::integrateDiffusion - logic bust");
       }
       else{
 	solver->advanceEuler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
