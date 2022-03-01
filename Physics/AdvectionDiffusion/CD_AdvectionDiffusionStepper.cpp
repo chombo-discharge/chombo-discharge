@@ -246,7 +246,7 @@ void AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
       a_timeCode = TimeCode::AdvectionDiffusion;
       break;
     }
-  case Integrator::EulerIMEX:
+  case Integrator::IMEX:
     {
       const Real dt = m_solver->computeAdvectionDt();
 
