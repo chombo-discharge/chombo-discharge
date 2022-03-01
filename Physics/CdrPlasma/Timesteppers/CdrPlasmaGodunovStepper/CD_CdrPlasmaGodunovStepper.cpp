@@ -141,7 +141,7 @@ void CdrPlasmaGodunovStepper::parseDiffusion(){
   // Fetch the diffusion threshold factor
   pp.get("diffusion_thresh", m_implicitDiffusionThreshold);
 
-  m_diffusionSolver = DiffusionSolver::TGA;
+  m_diffusionSolver = DiffusionSolver::Euler;
 }
 
 void CdrPlasmaGodunovStepper::parseTransport(){
