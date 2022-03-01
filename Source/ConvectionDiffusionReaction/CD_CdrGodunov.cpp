@@ -215,17 +215,8 @@ void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
 #if 0
   if(m_isDiffusive && a_extrapDt > 0.0) {
     this->setupDiffusionSolver();
-    
-    m_tgaSolver  ->resetAlphaAndBeta(0.0, 1.0);
-    m_eulerSolver->resetAlphaAndBeta(0.0, -1.0);
 
-    Vector<LevelData<EBCellFAB>* > scratch;
-    Vector<LevelData<EBCellFAB>* > phi;
-    
-    m_amr->alias(scratch, m_scratch);
-    m_amr->alias(phi,     a_cellPhi);      
-
-    m_multigridSolver->computeAMROperator(scratch, phi, m_amr->getFinestLevel(), 0, false);
+    this->computeKappaLphi(m_scratch, a_cellPhi);
   }
 #endif
 

@@ -338,8 +338,7 @@ void CdrMultigrid::setupHelmholtzFactory(){
   //    phi^(k+1) - dt*Div(D*Grad(phi^(k+1)) = phi^k + dt*rho
   //
   // and in that case we have alpha * A = 1 and beta = -dt. EBHelmholtzOpFactory shouldn't be doing anything
-  // with this data but TGA/Euler solvers might change the alpha and beta under us. A-coefficient should be one
-  // anyways. 
+  // with this data but diffusion solvers might change the alpha and beta under us. We set the A-coefficient to one. 
   DataOps::setValue(m_helmAcoef, 1.0);
 
   // Set up the operator
