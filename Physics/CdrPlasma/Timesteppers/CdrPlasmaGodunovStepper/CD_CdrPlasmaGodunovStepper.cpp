@@ -1050,7 +1050,7 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
 	// Compute the finite volume approximation to [div(v*phi)^{k+1/2}. If using extrapDt = 0.0, this becomes centered on
 	// k rather than k+1/2, but hopefully the user is running with MUSCL reconstruction anyways.
 	
-	solver->computeDivF(scratch, phi, extrapDt, true, true, true);
+	solver->computeDivF(scratch, phi, extrapDt, false, true, true);
 	DataOps::scale(scratch, -1.0);
 	DataOps::kappaScale(scratch); // Our multigrid operators will want us to kappa-weight the problem. 
 
