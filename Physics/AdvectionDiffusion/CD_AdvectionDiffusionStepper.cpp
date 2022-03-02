@@ -35,6 +35,10 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper(){
   pp.get("omega",      m_omega);
   pp.get("cfl",        m_cfl);
 
+  // For debugging.
+  m_debug = false;
+  pp.query("debug", m_debug);
+
   this->parseIntegrator();  
 }
 
@@ -209,7 +213,7 @@ void AdvectionDiffusionStepper::postCheckpointSetup(){
     return 0.0;
   };
 
-  //m_solver->setDomainFlux(fluxFunc);  
+  //  m_solver->setDomainFlux(fluxFunc);  
 }
 
 int AdvectionDiffusionStepper::getNumberOfPlotVariables() const{
@@ -266,6 +270,9 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
   // State to be advanced. 
   EBAMRCellData& state = m_solver->getPhi();
 
+  // Compute mass before advance. 
+  const Real initialMass = m_solver->computeMass();  
+
   switch(m_integrator){
   case Integrator::Heun:
     {
@@ -300,7 +307,7 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
 
 	// Compute the finite volume approximation to kappa*div(F). The second "hook" is a debugging hook that includes redistribution when computing kappa*div(F). It
 	// exists only for debugging/assurance reasons. 
-	if(true){
+	if(false){
 	  const bool conservativeOnly = true;
 	  
 	  m_solver->computeDivF(m_k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
@@ -334,8 +341,16 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
   }
 
   m_amr->averageDown(state, m_realm, m_phase);
-  m_amr->interpGhost(state, m_realm, m_phase);  
-  
+  m_amr->interpGhost(state, m_realm, m_phase);
+
+  // Compute final mass.
+  const Real finalMass = m_solver->computeMass();
+
+  if(procID() == 0 && m_debug){
+    std::cout << "step = " << m_timeStep+1 << "\t\t\t" << "mass conservation % = " << 100.*(finalMass-initialMass)/initialMass << std::endl;
+  }
+
+    
   return a_dt;
 }
 

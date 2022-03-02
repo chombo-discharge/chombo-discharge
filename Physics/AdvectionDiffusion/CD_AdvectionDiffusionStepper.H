@@ -224,6 +224,11 @@ namespace Physics {
       bool m_fhd;
 
       /*!
+	@brief For activating debugging. This is an option.
+      */
+      bool m_debug;
+
+      /*!
 	@brief Integrator
       */
       Integrator m_integrator;
