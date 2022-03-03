@@ -4,44 +4,44 @@
  */
 
 /*!
-  @file   CD_DcelSdf.H
+  @file   CD_SignedDistanceDCEL.H
   @brief  Declaration of an implicit-function class that gets its value function from a DCEL surface Tesselation
   @author Robert Marskar
   @date   March 2021
 */
 
-#ifndef CD_DcelSdf_H
-#define CD_DcelSdf_H
+#ifndef CD_SignedDistanceDCEL_H
+#define CD_SignedDistanceDCEL_H
 
 // Std includes
 #include <memory>
+
+// EBGeometry includes
+#include <EBGeometry.hpp>
 
 // Chombo includes
 #include <BaseIF.H>
 
 // Our includes
-#include <CD_DcelMesh.H>
 #include <CD_NamespaceHeader.H>
-
-using namespace Dcel;
 
 /*!
   @brief Signed distance function from a DCEL mesh. 
   @details This does not use a bounding volume hierarchy for performance. The template parameter is the floating point precision. 
 */
 template <class T>
-class DcelSdf : public BaseIF {
+class SignedDistanceDCEL : public BaseIF {
 public:
 
   /*!
-    @brief Alias for DCEl mesh with precision T
+    @brief Alias for EBGeometry DCEl mesh with precision T
   */
-  using Mesh = MeshT<T>;
+  using Mesh = EBGeometry::Dcel::MeshT<T>;
 
   /*!
     @brief Disallowed, use the full constructor
   */
-  DcelSdf() = delete;
+  SignedDistanceDCEL() = delete;
 
   /*!
     @brief Full constructor
@@ -49,18 +49,18 @@ public:
     @param[in] a_flipInside Hook for turning inside to outside
     @param[in] a_zCoord 2D only. This is the z-coordinate through which we slice the 3D object. 
   */
-  DcelSdf(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside, const Real a_zCoord = 0.0);
+  SignedDistanceDCEL(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside, const Real a_zCoord = 0.0);
 
   /*!
     @brief Copy constructor
     @param[in] a_object Other distance function
   */
-  DcelSdf(const DcelSdf& a_object);
+  SignedDistanceDCEL(const SignedDistanceDCEL& a_object);
 
   /*!
     @brief Destructor (does nothing)
   */
-  ~DcelSdf();
+  ~SignedDistanceDCEL();
 
   /*!
     @brief Value function
@@ -93,6 +93,6 @@ protected:
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_DcelSdfImplem.H>
+#include <CD_SignedDistanceDCELImplem.H>
 
 #endif
