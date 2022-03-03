@@ -21,8 +21,6 @@
 #include <CD_SignedDistanceDCEL.H>
 #include <CD_NamespaceHeader.H>
 
-using namespace Dcel;
-
 using precision = float;
 
 using Face   = EBGeometry::Dcel::FaceT<precision>;

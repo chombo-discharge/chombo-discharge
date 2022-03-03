@@ -16,7 +16,6 @@
 #include <chrono>
 
 // Our includes
-#include <CD_Vec.H>
 #include <CD_SignedDistanceBVH.H>
 #include <CD_NamespaceHeader.H>
 

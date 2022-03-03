@@ -23,7 +23,6 @@
 #include <BaseIF.H>
 
 // Our includes
-#include <CD_DcelMesh.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
