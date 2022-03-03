@@ -4,28 +4,26 @@
  */
 
 /*!
-  @file   CD_BvhSdfImplem.H
-  @brief  Implementation of CD_BvhSdf.H
+  @file   CD_SignedDistanceBVHImplem.H
+  @brief  Implementation of CD_SignedDistanceBVH.H
   @author Robert Marskar
 */
 
-#ifndef CD_BvhSdfImplem_H
-#define CD_BvhSdfImplem_H
+#ifndef CD_SignedDistanceBVHImplem_H
+#define CD_SignedDistanceBVHImplem_H
 
 // Std includes
 #include <chrono>
 
 // Our includes
 #include <CD_Vec.H>
-#include <CD_BvhSdf.H>
+#include <CD_SignedDistanceBVH.H>
 #include <CD_NamespaceHeader.H>
 
-using namespace Dcel;
-using namespace BVH;
 using namespace std::chrono;
 
 template <class T, class BV, int K>
-BvhSdf<T, BV, K>::BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipInside, const Real a_zCoord) {
+SignedDistanceBVH<T, BV, K>::SignedDistanceBVH(const std::shared_ptr<Node>& a_root, const bool a_flipInside, const Real a_zCoord) {
   m_root       = a_root;
   m_zCoord     = a_zCoord;
   m_flipInside = a_flipInside;
@@ -35,7 +33,7 @@ BvhSdf<T, BV, K>::BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipI
 }
 
 template <class T, class BV, int K>
-BvhSdf<T, BV, K>::BvhSdf(const BvhSdf& a_primitive) {
+SignedDistanceBVH<T, BV, K>::SignedDistanceBVH(const SignedDistanceBVH& a_primitive) {
   m_root       = a_primitive.m_root;
   m_zCoord     = a_primitive.m_zCoord;  
   m_flipInside = a_primitive.m_flipInside;
@@ -45,14 +43,15 @@ BvhSdf<T, BV, K>::BvhSdf(const BvhSdf& a_primitive) {
 }
 
 template <class T, class BV, int K>
-BvhSdf<T, BV, K>::~BvhSdf(){
+SignedDistanceBVH<T, BV, K>::~SignedDistanceBVH(){
   if(m_numCalled > 0L){
-    pout() << "In file CD_BvhSdfImplem: BvhSdf::~BvhSdf() On destructor: Calls: " << m_numCalled << "\t Tot: " << m_timespan.count() << "\t Avg./Call = " << m_timespan.count()/(1.0*m_numCalled) << endl;
+    pout() << "In file CD_SignedDistanceBVHImplem: SignedDistanceBVH::~SignedDistanceBVH() On destructor: Calls: " << m_numCalled
+	   << "\t Tot: " << m_timespan.count() << "\t Avg./Call = " << m_timespan.count()/(1.0*m_numCalled) << endl;
   }
 }
 
 template <class T, class BV, int K>
-Real BvhSdf<T, BV, K>::value(const RealVect& a_point) const {
+Real SignedDistanceBVH<T, BV, K>::value(const RealVect& a_point) const {
 
   // TLDR: In 2D we ignore z-variations, freezing that coordinate to some value. We then use the bounding volume hierarchy methodology for computing the signed distance. 
 #if CH_SPACEDIM==2
@@ -77,8 +76,8 @@ Real BvhSdf<T, BV, K>::value(const RealVect& a_point) const {
 }
 
 template <class T, class BV, int K>
-BaseIF* BvhSdf<T, BV, K>::newImplicitFunction() const {
-  return static_cast<BaseIF*> (new BvhSdf(*this));
+BaseIF* SignedDistanceBVH<T, BV, K>::newImplicitFunction() const {
+  return static_cast<BaseIF*> (new SignedDistanceBVH(*this));
 }
 
 #include <CD_NamespaceFooter.H>

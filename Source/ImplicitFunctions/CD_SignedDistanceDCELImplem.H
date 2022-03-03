@@ -4,42 +4,42 @@
  */
 
 /*!
-  @file   CD_DcelSdfImplem.H
-  @brief  Implementation of CD_DcelSdf.H
+  @file   CD_SignedDistanceDCELImplem.H
+  @brief  Implementation of CD_SignedDistanceDCEL.H
   @author Robert Marskar
 */
 
-#ifndef CD_DcelSdfImplem_H
-#define CD_DcelSdfImplem_H
+#ifndef CD_SignedDistanceDCELImplem_H
+#define CD_SignedDistanceDCELImplem_H
 
 // Our includes
 #include <CD_Vec.H>
-#include <CD_DcelSdf.H>
+#include <CD_SignedDistanceDCEL.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Dcel;
 
 template <class T>
-DcelSdf<T>::DcelSdf(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside, const Real a_zCoord){
+SignedDistanceDCEL<T>::SignedDistanceDCEL(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside, const Real a_zCoord){
   m_mesh       = a_mesh;
   m_zCoord     = a_zCoord;
   m_flipInside = a_flipInside;
 }
 
 template <class T>
-DcelSdf<T>::DcelSdf(const DcelSdf& a_object){
+SignedDistanceDCEL<T>::SignedDistanceDCEL(const SignedDistanceDCEL& a_object){
   m_mesh       = a_object.m_mesh;
   m_zCoord     = a_object.m_zCoord;
   m_flipInside = a_object.m_flipInside;
 }
 
 template <class T>
-DcelSdf<T>::~DcelSdf(){
+SignedDistanceDCEL<T>::~SignedDistanceDCEL(){
 
 }
 
 template <class T>
-Real DcelSdf<T>::value(const RealVect& a_point) const {
+Real SignedDistanceDCEL<T>::value(const RealVect& a_point) const {
 
 #if CH_SPACEDIM==2
   Vec3T<T> p(a_point[0], a_point[1], m_zCoord);
@@ -57,8 +57,8 @@ Real DcelSdf<T>::value(const RealVect& a_point) const {
 }
 
 template <class T>
-BaseIF* DcelSdf<T>::newImplicitFunction() const {
-  return static_cast<BaseIF*> (new DcelSdf(*this));
+BaseIF* SignedDistanceDCEL<T>::newImplicitFunction() const {
+  return static_cast<BaseIF*> (new SignedDistanceDCEL(*this));
 }
 
 #include <CD_NamespaceFooter.H>
