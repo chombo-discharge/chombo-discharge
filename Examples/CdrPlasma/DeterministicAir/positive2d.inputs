@@ -69,10 +69,10 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # ====================================================================================================
 FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
-FieldSolverMultigrid.bc.x.lo           = neumann   0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.x.hi           = neumann   0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.lo           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.y.hi           = neumann   1.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.y.hi           = neumann   0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma'
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
 
@@ -172,8 +172,8 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # Vessel. It (currently) consists of a rod electrode and a "mushroom" flat plate electrode, set up
 # along +y/+z in 2D/3D
 # ====================================================================================================
-Vessel.use_rod       = false           # Rod is on/off
-Vessel.use_shroom    = false           # Plate is on/off
+Vessel.use_rod       = true           # Rod is on/off
+Vessel.use_shroom    = true           # Plate is on/off
 
 Vessel.rod_point     = 0. 7.5E-2      # Rod center point
 Vessel.rod_radius    = 500E-6         # Rod radius
@@ -214,7 +214,7 @@ CdrPlasmaGodunovStepper.profile          = false         # Turn on/off performan
 CdrPlasmaJSON.verbose          = false
 CdrPlasmaJSON.chemistry_file   = SergeyBourdon3.json
 CdrPlasmaJSON.discrete_photons = false
-CdrPlasmaJSON.skip_reactions   = true
+CdrPlasmaJSON.skip_reactions   = false
 
 # ====================================================================================================
 # CdrPlasmaStreamerTagger class options
