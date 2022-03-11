@@ -637,6 +637,89 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
   }
 }
 
+void CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
+					      const EBAMRCellData& a_cellStates,
+					      const EBAMRFluxData& a_faceStates,
+					      const EBAMRFluxData& a_faceVelocities,
+					      const EBAMRFluxData& a_faceDiffCo,
+					      const bool           a_addDomainFlux) {
+  CH_TIME("CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData, EBAMRCellData, EBAMRFluxDatax3, bool)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::computeAdvectionDiffusionFlux(EBAMRFluxData, EBAMRCellData, EBAMRFluxDatax3, bool)" << endl;
+  }
+
+  DataOps::setValue(a_flux, 0.0);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)              [lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()                   [lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
+    const Real idx               = 1./dx;
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box&       cellBox = dbl  [dit()];    
+      const EBISBox&   ebisbox = ebisl[dit()];
+      const EBGraph&   ebgraph = ebisbox.getEBGraph();
+
+      const EBCellFAB&     phiCell    = (*a_cellStates[lvl])[dit()];
+      const BaseFab<Real>& regPhiCell = phiCell.getSingleValuedFAB();	      
+	
+      for (int dir = 0; dir < SpaceDim; dir++){
+	EBFaceFAB&       fluxFace = (*a_flux          [lvl])[dit()][dir];
+	const EBFaceFAB& phiFace  = (*a_faceStates    [lvl])[dit()][dir];	  
+	const EBFaceFAB& velFace  = (*a_faceVelocities[lvl])[dit()][dir];
+	const EBFaceFAB& dcoFace  = (*a_faceDiffCo    [lvl])[dit()][dir];	  
+
+	// Regular grid data. 
+	BaseFab<Real>&       regFluxFace = fluxFace.getSingleValuedFAB();
+	const BaseFab<Real>& regPhiFace  = phiFace. getSingleValuedFAB();
+	const BaseFab<Real>& regVelFace  = velFace. getSingleValuedFAB();	  	  
+	const BaseFab<Real>& regDcoFace  = dcoFace. getSingleValuedFAB();
+      
+	// Only want interior faces -- the domain flux will be set to zero (what else would it be...?). Anyways, recall that
+	// the cut-cell face centroid fluxes are interpolated between face centers. So, if a face at the edge of a patch is cut
+	// by the EB, the interpolant will reach out of the patch. Thus, we must fill the flux for the tangential ghost faces
+	// outside the grid patch. 
+	Box grownCellBox = cellBox;
+	grownCellBox.grow(1);
+	grownCellBox &= domain;
+	grownCellBox.grow(dir, -1);
+
+	// These are the "regions" for the regular and cut-cell kernels. 
+	const Box grownFaceBox = surroundingNodes(grownCellBox, dir);
+	FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
+
+	// Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
+	// iv, and the cell at the low side is at iv - BASISV(dir).
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  regFluxFace(iv, m_comp) = regPhiFace(iv, m_comp) * regVelFace(iv, m_comp)
+	  - idx * regDcoFace(iv, m_comp) * ( regPhiCell(iv, m_comp) - regPhiCell(iv - BASISV(dir), m_comp) );
+	};
+
+	// Cut-cell kernel. Basically the same as the above but we need to explicity get vofs on the low/high side (because
+	// we may have multi-cells but the above kernel only does single-valued cells). 
+	auto irregularKernel = [&](const FaceIndex& face) -> void {
+	  if(!face.isBoundary()){
+	    const VolIndex hiVoF = face.getVoF(Side::Hi);
+	    const VolIndex loVoF = face.getVoF(Side::Lo);
+
+	    fluxFace(face, m_comp) = phiFace(face, m_comp) * velFace(face, m_comp) - idx * dcoFace(face,m_comp) * (phiCell(hiVoF,m_comp) - phiCell(loVoF, m_comp));
+	  }
+	};
+
+	// Execute kernels.
+	BoxLoops::loop(grownFaceBox,   regularKernel);
+	BoxLoops::loop(faceit,       irregularKernel);
+      }
+    }
+  }
+
+  if(a_addDomainFlux){
+    this->fillDomainFlux(a_flux);
+  }
+}
+
 void CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux){
   CH_TIME("CdrSolver::resetDomainFlux(EBAMRFluxData)");
   if(m_verbosity > 5){

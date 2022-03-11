@@ -406,10 +406,10 @@ void CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, cons
     pout() << m_name + "::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool, bool)" << endl;
   }
 
-  // Fill ghost cells
-  m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
-
   if(m_isMobile || m_isDiffusive){
+
+    // Fill ghost cells
+    m_amr->interpGhostPwl(a_phi, m_realm, m_phase);    
 
     if(m_whichRedistribution == Redistribution::MassWeighted){
       this->setRedistWeights(a_phi);
@@ -418,26 +418,24 @@ void CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, cons
     // We will let m_scratchFluxOne hold the total flux = advection + diffusion fluxes
     DataOps::setValue(m_scratchFluxOne, 0.0);
 
-    // Compute advection flux. This is mostly the same as computeDivF. If we can, add domain fluxes here. 
-    if(m_isMobile){
+    if(m_isMobile && !m_isDiffusive){
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
-      
-      this->averageVelocityToFaces(); // Update m_faceVelocity from m_cellVelocity
-      this->advectToFaces(m_faceStates, a_phi, a_extrapDt); // Advect to faces
-      this->computeAdvectionFlux(m_scratchFluxTwo, m_faceVelocity, m_faceStates, a_domainFlux);
 
-      DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, 1.0);
+      // Update face velocity and advect to faces. 
+      this->averageVelocityToFaces(); 
+      this->advectToFaces(m_faceStates, a_phi, a_extrapDt); 
+      this->computeAdvectionFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, a_domainFlux);
     }
+    else if(!m_isMobile && m_isDiffusive) {
+      this->computeDiffusionFlux(m_scratchFluxOne, a_phi, a_domainFlux); // Domain flux needs to come in through here. 
+      DataOps::scale(m_scratchFluxOne, -1.0);
+    }
+    else if(m_isMobile && m_isDiffusive) { // 
+      m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
+      this->averageVelocityToFaces();
+      this->advectToFaces(m_faceStates, a_phi, a_extrapDt);
 
-    // Compute diffusion flux. If we don't have advection, add the domain flux here. 
-    if(m_isDiffusive){
-      if(m_isMobile){
-	this->computeDiffusionFlux(m_scratchFluxTwo, a_phi, false); // Domain flux already in advective flux
-      }
-      else{
-	this->computeDiffusionFlux(m_scratchFluxTwo, a_phi, a_domainFlux); // No advective deriv. Put flux here. 
-      }
-      DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, -1.0);
+      this->computeAdvectionDiffusionFlux(m_scratchFluxOne, a_phi, m_faceStates, m_faceVelocity, m_faceCenteredDiffusionCoefficient, a_domainFlux);
     }
 
     // General divergence computation. Also inject charge. Domain fluxes came in above but eb fluxes come in here. 

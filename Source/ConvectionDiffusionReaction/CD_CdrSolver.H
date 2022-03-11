@@ -879,6 +879,22 @@ protected:
   virtual void computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const int a_lvl);
 
   /*!
+    @brief Compute the full advection-diffusion flux. This assumes that the solver is mobile and diffusive.
+    @param[out] a_flux           Face-centered flux. 
+    @param[in]  a_cellStates     Cell-centered states. 
+    @param[in]  a_faceVelocities Face-centered velocities.
+    @param[in]  a_faceStates     Face-centered (advected) states. 
+    @param[in]  a_faceDiffCo     Face-centered diffusion coefficients. 
+    @param[in]  a_addDomainFlux  Add domain flux or not. 
+  */
+  virtual void computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
+					     const EBAMRCellData& a_cellStates,
+					     const EBAMRFluxData& a_faceStates,
+					     const EBAMRFluxData& a_faceVelocities,
+					     const EBAMRFluxData& a_faceDiffCo,
+					     const bool           a_addDomainFlux);
+
+  /*!
     @brief Set flux to zero on domain boundaries
     @param[in] a_flux Flux data holder -- on domain edges this is modified so the flux is zero. 
   */
