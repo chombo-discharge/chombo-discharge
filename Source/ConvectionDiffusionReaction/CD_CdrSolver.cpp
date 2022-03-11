@@ -836,22 +836,31 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 	FaceIterator faceit(ivs, ebgraph, dir, FaceStop::AllBoundaryOnly);
 	
 	auto kernel = [&] (const FaceIndex& face) -> void {
+	  
 	  // Set the flux on the BC. This can be data-based, wall, function-based, outflow (extrapolated). 
 	  switch(bcType){
-	  case CdrDomainBC::BcType::DataBased:{
-	    flux(face, m_comp) = dataBasedFlux(face, m_comp);
+	  case CdrDomainBC::BcType::DataBased:
+	  {
+	    flux(face, m_comp) = sign(sit()) * dataBasedFlux(face, m_comp);
+	    
 	    break;
 	  }
-	  case CdrDomainBC::BcType::Wall:{	    
+	  case CdrDomainBC::BcType::Wall:
+	  {	    
 	    flux(face, m_comp) = 0.0;
+	    
 	    break;
 	  }
-	  case CdrDomainBC::BcType::Function:{	    	    
+	  case CdrDomainBC::BcType::Function:
+	  {	    	    
 	    const RealVect pos = EBArith::getFaceLocation(face, m_amr->getDx()[a_level],m_amr->getProbLo());
+	    
 	    flux(face, m_comp)   = -sign(sit()) * bcFunction(pos, m_time);
+	    
 	    break;
 	  }
-	  case CdrDomainBC::BcType::Outflow:{
+	  case CdrDomainBC::BcType::Outflow:
+	  {
 	    flux(face, m_comp) = 0.0;
 	    
 	    // Get the next interior face(s) and extrapolate from these. 
@@ -874,15 +883,16 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 	    
 	    break;
 	  }
-	  case CdrDomainBC::BcType::Solver:{ // Don't do anything.
+	  case CdrDomainBC::BcType::Solver:{ // Don't do anything beacuse the solver will have filled the flux already. 
 	    break; 
 	  }
 	  default:
-	  MayDay::Error("CdrSolver::fillDomainFlux(LD<EBFluxFAB>, int) - trying to fill unsupported domain bc flux type");
-	  break;
-	  }
+	  {
+	    MayDay::Error("CdrSolver::fillDomainFlux(LD<EBFluxFAB>, int) - trying to fill unsupported domain bc flux type");
+	    
+	    break;
+	  }}
 	};
-
 	// Run the kernel
 	BoxLoops::loop(faceit, kernel);
       }
