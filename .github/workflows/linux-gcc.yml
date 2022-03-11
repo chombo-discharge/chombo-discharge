@@ -13,7 +13,7 @@ jobs:
     if: github.event.pull_request.draft == false  
     name: GNU@10.0 C++14 serial without HDF5
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 300
     
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
@@ -46,15 +46,15 @@ jobs:
 
       - name: Build chombo-discharge/source (2D)
         run: |
-          make -s -j2 DIM=2 source
+          make -s -j2 DIM=2 discharge-source
 
       - name: Build chombo-discharge/geometries (2D)
         run: |
-          make -s -j2 DIM=2 geometries
+          make -s -j2 DIM=2 discharge-geometries
 
       - name: Build chombo-discharge/physics (2D)
         run: |
-          make -s -j2 DIM=2 physics
+          make -s -j2 DIM=2 discharge-physics
 
       - name: Build Chombo (3D)
         run: |
@@ -62,31 +62,31 @@ jobs:
 
       - name: Build chombo-discharge/source (3D)
         run: |
-          make -s -j2 DIM=3 source
+          make -s -j2 DIM=3 discharge-source
 
       - name: Build chombo-discharge/geometries (3D)
         run: |
-          make -s -j2 DIM=3 geometries
+          make -s -j2 DIM=3 discharge-geometries
 
       - name: Build chombo-discharge/physics (3D)
         run: |
-          make -s -j2 DIM=3 physics
+          make -s -j2 DIM=3 discharge-physics
 
-      - name: Compile tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --compile --benchmark --no_exec -cores 2
+      # - name: Compile tests
+      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+      #   run: |
+      #     python3 tests.py --compile --benchmark --no_exec -cores 2
 
-      - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --no_compare -cores 2
+      # - name: Run tests
+      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+      #   run: |
+      #     python3 tests.py --no_compare -cores 2
 
   serial-hdf:
     if: github.event.pull_request.draft == false    
     name: GNU@10.0 C++14 serial with HDF5    
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 300
     
     env:
       DISCHARGE_HOME: ${{github.workspace}}
@@ -119,15 +119,15 @@ jobs:
 
       - name: Build chombo-discharge/source (2D)
         run: |
-          make -s -j2 DIM=2 source
+          make -s -j2 DIM=2 discharge-source
 
       - name: Build chombo-discharge/geometries (2D)
         run: |
-          make -s -j2 DIM=2 geometries
+          make -s -j2 DIM=2 discharge-geometries
 
       - name: Build chombo-discharge/physics (2D)
         run: |
-          make -s -j2 DIM=2 physics
+          make -s -j2 DIM=2 discharge-physics
 
       - name: Build Chombo (3D)
         run: |
@@ -135,31 +135,31 @@ jobs:
 
       - name: Build chombo-discharge/source (3D)
         run: |
-          make -s -j2 DIM=3 source
+          make -s -j2 DIM=3 discharge-source
 
       - name: Build chombo-discharge/geometries (3D)
         run: |
-          make -s -j2 DIM=3 geometries
+          make -s -j2 DIM=3 discharge-geometries
 
       - name: Build chombo-discharge/physics (3D)
         run: |
-          make -s -j2 DIM=3 physics
+          make -s -j2 DIM=3 discharge-physics
 
-      - name: Compile tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --compile --benchmark --no_exec -cores 2
+      # - name: Compile tests
+      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+      #   run: |
+      #     python3 tests.py --compile --benchmark --no_exec -cores 2
 
-      - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --no_compare -cores 2          
+      # - name: Run tests
+      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+      #   run: |
+      #     python3 tests.py --no_compare -cores 2          
         
   mpi-no-hdf5:
     if: github.event.pull_request.draft == false        
     name: GNU@10.0 C++14 OpenMPI without HDF5    
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 300
     
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
@@ -192,15 +192,15 @@ jobs:
 
       - name: Build chombo-discharge/source (2D)
         run: |
-          make -s -j2 DIM=2 source
+          make -s -j2 DIM=2 discharge-source
 
       - name: Build chombo-discharge/geometries (2D)
         run: |
-          make -s -j2 DIM=2 geometries
+          make -s -j2 DIM=2 discharge-geometries
 
       - name: Build chombo-discharge/physics (2D)
         run: |
-          make -s -j2 DIM=2 physics
+          make -s -j2 DIM=2 discharge-physics
 
       - name: Build Chombo (3D)
         run: |
@@ -208,31 +208,31 @@ jobs:
 
       - name: Build chombo-discharge/source (3D)
         run: |
-          make -s -j2 DIM=3 source
+          make -s -j2 DIM=3 discharge-source
 
       - name: Build chombo-discharge/geometries (3D)
         run: |
-          make -s -j2 DIM=3 geometries
+          make -s -j2 DIM=3 discharge-geometries
 
       - name: Build chombo-discharge/physics (3D)
         run: |
-          make -s -j2 DIM=3 physics
+          make -s -j2 DIM=3 discharge-physics
 
-      - name: Compile tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --compile --benchmark --no_exec -cores 2
+      # - name: Compile tests
+      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+      #   run: |
+      #     python3 tests.py --compile --benchmark --no_exec -cores 2
 
-      - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --no_compare -cores 2 --parallel          
+      # - name: Run tests
+      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+      #   run: |
+      #     python3 tests.py --no_compare -cores 2 --parallel          
 
   mpi-hdf5:
     if: github.event.pull_request.draft == false        
     name: GNU@10.0 C++14 OpenMPI with HDF5        
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 300
     
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
@@ -265,15 +265,15 @@ jobs:
 
       - name: Build chombo-discharge/source (2D)
         run: |
-          make -s -j2 DIM=2 source
+          make -s -j2 DIM=2 discharge-source
 
       - name: Build chombo-discharge/geometries (2D)
         run: |
-          make -s -j2 DIM=2 geometries
+          make -s -j2 DIM=2 discharge-geometries
 
       - name: Build chombo-discharge/physics (2D)
         run: |
-          make -s -j2 DIM=2 physics
+          make -s -j2 DIM=2 discharge-physics
 
       - name: Build Chombo (3D)
         run: |
@@ -281,22 +281,22 @@ jobs:
 
       - name: Build chombo-discharge/source (3D)
         run: |
-          make -s -j2 DIM=3 source
+          make -s -j2 DIM=3 discharge-source
 
       - name: Build chombo-discharge/geometries (3D)
         run: |
-          make -s -j2 DIM=3 geometries
+          make -s -j2 DIM=3 discharge-geometries
 
       - name: Build chombo-discharge/physics (3D)
         run: |
-          make -s -j2 DIM=3 physics
+          make -s -j2 DIM=3 discharge-physics
 
-      - name: Compile tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --compile --benchmark --no_exec -cores 2
+      # - name: Compile tests
+      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+      #   run: |
+      #     python3 tests.py --compile --benchmark --no_exec -cores 2
 
-      - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --no_compare --parallel -cores 2 --parallel
+      # - name: Run tests
+      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+      #   run: |
+      #     python3 tests.py --no_compare --parallel -cores 2 --parallel
