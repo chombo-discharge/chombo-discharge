@@ -43,6 +43,9 @@ RADTRANSFER_INCLUDE     := $(foreach dir, $(RADTRANSFER_DIRS),     $(addprefix -
 XTRACPPFLAGS += $(SOURCE_INCLUDE) 
 XTRACPPFLAGS += $(GEOMETRIES_INCLUDE)
 
+# EBGeometry submodule needs to be visible.
+XTRACPPFLAGS += -I$(DISCHARGE_HOME)/Submodules/EBGeometry
+
 # Source and Geometries libraries should always be visible. 
 XTRALIBFLAGS += $(addprefix -l, $(SOURCE_LIB))$(config)
 XTRALIBFLAGS += $(addprefix -l, $(GEOMETRIES_LIB))$(config)
