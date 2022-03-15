@@ -1,12 +1,14 @@
 /* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
+ * Copyright © 2022 SINTEF Energy Research.
+ * Copyright © 2022 NTNU.
+ * Copyright © 2022 Fanny Skirbekk. 
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
 /*!
   @file   CD_CdrPlasmaJSON.H
   @brief  Declaration of a generic CdrPlasma model.
-  @author Robert Marskar
+  @author Robert Marskar, Fanny Skirbekk
 */
 
 #ifndef CD_CdrPlasmaJSON_H
@@ -647,7 +649,46 @@ namespace Physics {
       /*!
 	@brief List of dielectric reactions
       */
-      std::vector<CdrPlasmaSurfaceReactionJSON> m_dielectricReactions;      
+      std::vector<CdrPlasmaSurfaceReactionJSON> m_dielectricReactions;
+
+       // ===========================================
+      // DOMAIN SURFACE REACTIONS BEGIN HERE
+      // ===========================================
+
+      /*!
+	@brief Lookup method for the domain reaction rates. The pair is made up of an int representing direction (0=x, 1=y, 2=z) and a Side::LoHiSide
+	representing side (Side::Lo, Side::Hi)
+      */
+      std::map<std::pair<int, Side::LoHiSide>, std::map<int, LookupMethod> > m_domainReactionLookup;
+
+      /*!
+	@brief Constant domain reaction rate. The pair is made up of an int representing direction (0=x, 1=y, 2=z) and a Side::LoHiSide
+	representing side (Side::Lo, Side::Hi)
+      */
+      std::map<std::pair<int, Side::LoHiSide>, std::map<int, Real> > m_domainReactionConstants;
+
+      /*!
+	@brief Domain reaction effiencies. Used for scaling reactions on domains in a "generic" way. 
+	The pair is made up of an int representing direction (0=x, 1=y, 2=z) and a Side::LoHiSide
+	representing side (Side::Lo, Side::Hi)
+      */
+      std::map<std::pair<int, Side::LoHiSide>, std::map<int, FunctionEX> > m_domainReactionEfficiencies;
+
+      /*! 
+	@brief List of domain reactions. The pair is made up of an int representing direction (0=x, 1=y, 2=z) and a Side::LoHiSide
+	representing side (Side::Lo, Side::Hi)
+      */
+      std::map<std::pair<int, Side::LoHiSide>, std::vector<CdrPlasmaSurfaceReactionJSON> > m_domainReactions;
+
+      /*! 
+	@brief map to translate dir from char to int
+      */
+      const std::map<char, int> m_dirCharToInt{{'x', 0}, {'y', 1}, {'z', 2}};
+
+      /*! 
+	@brief map to translate side from std::string to Side::LoHiSide
+      */
+      const std::map<std::string, Side::LoHiSide> m_sideStringToSide{{"lo", Side::Lo}, {"hi", Side::Hi}};
       
       /*!
 	@brief Parse class options
@@ -849,8 +890,7 @@ namespace Physics {
 
       /*!
 	@brief Parse electrode reaction scaling for a specific reaction.
-	@details This currently exists without much functionality -- it just returns one for all reactions. As we
-	expand the functionality, this can be used to adjust for e.g. positional or field dependence.
+	@details This can be used to adjust for e.g. positional or field dependence.
 	@param[in] a_reactionIndex Reaction index (this is the array index in the reaction array supplied in the JSON file)
 	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
       */
@@ -870,12 +910,33 @@ namespace Physics {
 
       /*!
 	@brief Parse dielectric electrode reaction scaling for a specific reaction.
-	@details This currently exists without much functionality -- it just returns one for all reactions. As we
-	expand the functionality, this can be used to adjust for e.g. positional or field dependence.
+	@details This can be used to adjust for e.g. positional or field dependence.
 	@param[in] a_reactionIndex Reaction index (this is the array index in the dielectric reaction array supplied in the JSON file)
 	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
       */
-      virtual void parseDielectricReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);      
+      virtual void parseDielectricReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+
+      /*!
+	@brief Parse secondary emission on domain
+      */
+      virtual void parseDomainReactions();
+
+      /*!
+	@brief Parse reaction rate for domain reactions. 
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'domain reactions' array.
+	@param[in] a_sides          List of the domain sides that this occurs at
+      */
+      virtual void parseDomainReactionRate(const int a_reactionIndex, const json& a_reactionJSON, const std::vector<std::string>& a_sides);      
+
+      /*!
+	@brief Parse domain reaction scaling for a specific reaction.
+	@details This can be used to adjust for e.g. positional or field dependence.
+	@param[in] a_reactionIndex Reaction index (this is the array index in the domain reaction array supplied in the JSON file)
+	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
+	@param[in] a_sides          List of the domain sides that this occurs at
+      */
+      virtual void parseDomainReactionScaling(const int a_reactionIndex, const json& a_reactionJSON, const std::vector<std::string>& a_sides);
 
       /*!
 	@brief Check if a surface-reaction makes sense in terms of the species that have been defined.
