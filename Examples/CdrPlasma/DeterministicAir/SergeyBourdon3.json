@@ -420,5 +420,20 @@
        "lookup": "constant",
        "value": 1E-3
      }
- ] 
+ ],
+ "domain reactions":
+ [
+     { "reaction": "@ -> e",
+       "@": ["N2+", "O2+", "N4+", "O4+", "O2+N2", "Bourdon1", "Bourdon2", "Bourdon3"],
+       "lookup": "constant",
+       "value": 1E-3,
+       "side": ["x_lo", "x_hi", "y_lo", "y_hi"]
+     },
+     { "reaction": "@ -> e",
+       "@": ["N2+", "O2+", "N4+", "O4+", "O2+N2", "Bourdon1", "Bourdon2", "Bourdon3"],
+       "lookup": "constant",
+       "value": 1E-3,
+       "side": ["z_lo", "z_hi"]
+     }
+ ]
 }
