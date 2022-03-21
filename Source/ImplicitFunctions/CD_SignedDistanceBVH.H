@@ -47,7 +47,7 @@ public:
   /*!
     @brief Alias for BVH node with precision T, enclosing DCEL face with a bounding volume type V
   */
-  using Node = EBGeometry::BVH::NodeT<T, Face, BV, K>;
+  using Node = EBGeometry::BVH::LinearBVH<T, Face, BV, K>;
 
   /*!
     @brief Disallowed weak construction

@@ -43,34 +43,23 @@ Tesselation::Tesselation(){
   ParmParse pp("Tesselation");
 
   pp.get("mesh_file",   filename);
-  pp.get("partitioner", partitioner);
   pp.get("z_coord",     zCoord);
-  pp.get("use_bvh",     useBVH);
 
-  // Build the dcel_mesh and the BVH
-  auto m = std::make_shared<Mesh>();
-  EBGeometry::Dcel::Parser::PLY<precision>::readASCII(*m, filename);
-  //  m->reconcile(EBGeometry::Dcel::MeshT<precision>::VertexNormalWeight::Angle);
+  // Read the PLY file and put it in a DCEL mesh. 
+  auto m = EBGeometry::Dcel::Parser::PLY<precision>::readASCII(filename);
 
-  constexpr int K = 2;  
-  
+  // Build the regular BVH tree. Use a quad-tree.
+  constexpr int K = 4;  
   auto root = std::make_shared<EBGeometry::BVH::NodeT<precision, Face, BV, K> >(m->getFaces());
+  root->topDownSortAndPartitionPrimitives(EBGeometry::Dcel::defaultBVConstructor<precision, BV>,
+					  EBGeometry::Dcel::defaultPartitioner<precision, BV, K>,
+					  EBGeometry::Dcel::defaultStopFunction<precision, BV, K>);
+  
+  // Flatten the tree. 
+  auto linearNode = root->flattenTree();
 
-  // Build the BVH
-  if(partitioner == "default"){
-    root->topDownSortAndPartitionPrimitives(EBGeometry::Dcel::defaultStopFunction<precision, BV, K>,
-					    EBGeometry::Dcel::spatialSplitPartitioner<precision, K>,
-					    EBGeometry::Dcel::defaultBVConstructor<precision, BV>);
-  }
-  else if(partitioner == "binary"){
-    root->topDownSortAndPartitionPrimitives(EBGeometry::Dcel::defaultStopFunction<precision, BV, K>,
-					    EBGeometry::Dcel::spatialSplitBinaryPartitioner<precision, K>,
-					    EBGeometry::Dcel::defaultBVConstructor<precision, BV>);
-  }
-  else
-    MayDay::Error("Tesselation::Tesselation() -- badx partitioner requested");
-
-  auto bif = RefCountedPtr<SignedDistanceBVH<precision, BV, K> > (new SignedDistanceBVH<precision, BV, K>(root,false,zCoord));
+  // Create our electrode. 
+  auto bif = RefCountedPtr<SignedDistanceBVH<precision, BV, K> > (new SignedDistanceBVH<precision, BV, K>(linearNode, false, zCoord));
 
   m_electrodes.push_back(Electrode(bif, true));
   

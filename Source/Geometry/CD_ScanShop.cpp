@@ -37,7 +37,7 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   m_baseIF       = &a_localGeom;
   m_hasScanLevel = false;
   m_profile      = false;
-  m_ebGhost      = 1;
+  m_ebGhost      = 4;
   m_fileName     = "ScanShopReport.dat";
   m_boxSorting   = BoxSorting::Morton;
 
