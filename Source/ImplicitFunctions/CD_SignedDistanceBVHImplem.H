@@ -60,7 +60,7 @@ Real SignedDistanceBVH<T, BV, K>::value(const RealVect& a_point) const {
 #endif
 
   high_resolution_clock::time_point t1 = high_resolution_clock::now();  
-  auto d = m_root->pruneTree(p);
+  auto d = m_root->signedDistance(p);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 
