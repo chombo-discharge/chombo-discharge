@@ -72,7 +72,7 @@
      {
 	 "name": "N2+",
 	 "Z":  1,
-	 "mobile": true,
+	 "mobile": false,
 	 "diffusive": false,
 	 "mobility": {
 	     "lookup": "constant",
@@ -93,7 +93,7 @@
      {
 	 "name": "O2+",
 	 "Z":  1,
-	 "mobile": true,
+	 "mobile": false,
 	 "diffusive": false,
 	 "mobility": {
 	     "lookup": "constant",
