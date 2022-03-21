@@ -297,7 +297,8 @@
 	 "T1": "O2",
 	 "T2": "e",
 	 "c1" : 2E-41,
-	 "c2": 1
+	 "c2": 1,
+	 "scale": 1E-6
      },
      {
 	 "reaction": "O2- + O4+ -> O2 + O2 + O2",
@@ -333,7 +334,7 @@
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }	 
      },
@@ -351,7 +352,7 @@
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }	 
      },
@@ -369,7 +370,7 @@
 	 "quenching pressure": 4000,
 	 "scale": 0.06,
 	 "soloviev" : {
-	     "correction": false,
+	     "correction": true,
 	     "species": "e"
 	 }
      }

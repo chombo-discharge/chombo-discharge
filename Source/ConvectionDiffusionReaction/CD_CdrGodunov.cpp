@@ -20,7 +20,7 @@
 #include <CD_ParallelOps.H>
 #include "CD_NamespaceHeader.H"
 
-CdrGodunov::CdrGodunov() : CdrTGA() {
+CdrGodunov::CdrGodunov() : CdrMultigrid() {
   CH_TIME("CdrGodunov::CdrGodunov()");
 
   // Class name and instantiation name. 
@@ -159,8 +159,8 @@ void CdrGodunov::allocateInternals(){
     pout() << m_name + "::allocateInternals()" << endl;
   }
 
-  // CdrTGA allocates everything except storage needed for the advection object. 
-  CdrTGA::allocateInternals();
+  // CdrMultigrid allocates everything except storage needed for the advection object. 
+  CdrMultigrid::allocateInternals();
 
 
   // Allocate levelAdvect only if the solver is mobile. See Chombo design docs for how the EBAdvectLevelIntegrator operates. 
@@ -210,12 +210,23 @@ void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
     // If we are extrapolating in time the source term will yield different states on the face centers. The source term is the source
     // S^k + Div(D*Grad(Phi)), which we add to the solver below. It is stored on m_scratch (which won't be used elsewhere, I think).
   DataOps::setValue(m_scratch, 0.0);
+
+  // Compute viscous source term for the advection.
+#if 0
+  if(m_isDiffusive && a_extrapDt > 0.0) {
+    this->setupDiffusionSolver();
+
+    this->computeKappaLphi(m_scratch, a_cellPhi);
+  }
+#endif
+
+  // If user asks for it, add the source term to the extrapolation. 
   if(m_extrapolateSourceTerm && a_extrapDt > 0.0){
     DataOps::incr(m_scratch, m_source, 1.0);
-    
-    m_amr->averageDown(m_scratch, m_realm, m_phase);
-    m_amr->interpGhost(m_scratch, m_realm, m_phase);
   }
+
+  m_amr->averageDown(m_scratch, m_realm, m_phase);
+  m_amr->interpGhost(m_scratch, m_realm, m_phase);  
 
   // This code extrapolates the cell-centered state to face centers on every grid level, in both space and time. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){

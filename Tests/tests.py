@@ -24,7 +24,6 @@ parser.add_argument('--benchmark',            help="Generate benchmark files onl
 parser.add_argument('--no_exec',              help="Do not run executables.",        action='store_true')
 parser.add_argument('--no_compare',           help="Turn off HDF5 comparisons",      action='store_true')
 parser.add_argument('--parallel',             help="Run in parallel or not",         action='store_true')
-
 parser.add_argument('-exec_mpi',              help="MPI run command.", type=str, default="mpirun")
 parser.add_argument('-cores',                 help="Number of cores to use", type=int, default=6)
 parser.add_argument('-suites',                help="Test suite (e.g. 'geometry' or 'field')", nargs='+', default="all")
@@ -75,10 +74,9 @@ def pre_check(silent):
         print("Please set DISCHARGE_HOME, for example: '> export  DISCHARGE_HOME=<directory>'")
         print("Aborting regtest suite")
         exit()
-    else:
-        if not silent:
-            print("CWD          = " + os.getcwd())
-            print("DISCHARGE_HOME = " + discharge_home)
+
+    print("CWD            = " + os.getcwd())
+    print("DISCHARGE_HOME = " + discharge_home)
 
 # --------------------------------------------------
 # Function that compiles a test
@@ -95,8 +93,7 @@ def compile_test(silent, build_procs, dim, clean, main):
         makeCommand += "clean "
     makeCommand += str(config[str(test)]['exec'])        
 
-    if not silent:
-        print("\t Compiling with = '" + str(makeCommand) + "'\n")
+    print("\t Compiling with = '" + str(makeCommand) + "'")
 
     if args.silent:
         exit_code = subprocess.call(makeCommand, shell=True, stdout=DEVNULL, stderr=DEVNULL)
@@ -183,12 +180,12 @@ for test in config.sections():
         # being run. 
         # --------------------------------------------------
         print("\nRunning regression test '" + str(test) + "'...")
-        if not args.silent:
-            if args.benchmark:
-                print("\t Running benchmark!")
-            print("\t Directory is  = " + directory)
-            print("\t Input file is = " + input)
-            print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(dim) + "d.hdf5")
+        if args.benchmark:
+            print("\t Running benchmark!")
+            
+        print("\t Directory is  = " + directory)
+        print("\t Input file is = " + input)
+        print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(dim) + "d.hdf5")
 
         # --------------------------------------------------
         # Now change to test directory
@@ -225,17 +222,17 @@ for test in config.sections():
                 else:
                     runCommand = "./" + executable + " " + input                
 
-                    runCommand = runCommand + " Driver.output_names="  + str(output)
-                    runCommand = runCommand + " Driver.plot_interval=" + str(nplot)
-                    runCommand = runCommand + " Driver.checkpoint_interval=" + str(nplot)
-                    runCommand = runCommand + " Driver.max_steps="     + str(nsteps)
+                runCommand = runCommand + " Driver.output_names="  + str(output)
+                runCommand = runCommand + " Driver.plot_interval=" + str(nplot)
+                runCommand = runCommand + " Driver.checkpoint_interval=" + str(nplot)
+                runCommand = runCommand + " Driver.max_steps="     + str(nsteps)
                     
-                    if args.benchmark:
-                        runCommand = runCommand + " Driver.restart=0"
-                    else:
-                        runCommand = runCommand + " Driver.restart="     + str(restart)
-                        if not args.silent:
-                            print("\t Executing with '" + str(runCommand) + "'")
+                if args.benchmark:
+                    runCommand = runCommand + " Driver.restart=0"
+                else:
+                    runCommand = runCommand + " Driver.restart="     + str(restart)
+                        
+                print("\t Executing with '" + str(runCommand) + "'")
 
                 # --------------------------------------------------
                 # Run the executable and print the exit code
@@ -253,7 +250,7 @@ for test in config.sections():
                     # Do file comparison if the test ran successfully
                     # --------------------------------------------------
                     if args.benchmark:
-                        print("Regression test '" + str(test) + "' has generated benchmark files.")
+                        print("\t Regression test '" + str(test) + "' has generated benchmark files.")
                     elif not args.benchmark and not args.no_compare:
                         # --------------------------------------------------
                         # Loop through all files that were generated and
@@ -274,8 +271,7 @@ for test in config.sections():
                             if not os.path.exists(benFile):
                                 print("\t Benchmark file(s) not found, generate them with --benchmark")
                             else:
-                                if not args.silent:
-                                    print("\t Comparing files " + regFile +  " and " + str(benFile))
+                                print("\t Comparing files " + regFile +  " and " + str(benFile))
                                 
                                 # --------------------------------------------------
                                 # Run h5diff and compare the two files. Print a
@@ -291,5 +287,4 @@ for test in config.sections():
                                     if not compare_code is 0:
                                         print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
                                     else:
-                                        if not args.silent:
-                                            print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
+                                        print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))

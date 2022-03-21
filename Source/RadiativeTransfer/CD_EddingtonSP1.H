@@ -356,6 +356,11 @@ protected:
     @brief multi-fluid simple solver
   */
   EBSimpleSolver m_simpleSolver;
+
+  /*!
+    @brief For regridding the source term. This is needed when doing a stationary solve. 
+  */
+  EBAMRCellData m_cacheSrc;
   
   /*!
     @brief Multigrid residue

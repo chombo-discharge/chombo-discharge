@@ -382,7 +382,7 @@ protected:
   /*!
     @brief Cached state used for regridding
   */
-  EBAMRCellData m_cache;
+  EBAMRCellData m_cachePhi;
 
   /*!
     @brief Internal state. 

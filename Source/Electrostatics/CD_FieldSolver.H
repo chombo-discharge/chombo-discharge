@@ -520,6 +520,11 @@ protected:
   bool m_plotElectricField;
 
   /*!
+    @brief If true, the electric field on the inside of dielectrics will be added to plot files. 
+  */
+  bool m_plotElectricFieldSolid;  
+
+  /*!
     @brief If true, the residue will be added to plot files. 
   */
   bool m_plotResidue;
@@ -657,13 +662,18 @@ protected:
 
   /*!
     @brief Write multifluid data to single-fluid data holders. 
-    @details This takes the valid data from each phase and writes it to a_output. 
+    @details This takes the valid data from each phase and writes it to a_output. On cut-cells, the a_phase flag determines which phase will be plotted.
     @param[inout] a_output Output data holder
     @param[inout] a_comp   Current component in a_output. 
     @param[in]    a_data   Multifluid data holder
+    @param[in]    a_phase  Main phase in cut-cells. 
     @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
   */
-  virtual void writeMultifluidData(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp);
+  virtual void writeMultifluidData(EBAMRCellData&           a_output,
+				   int&                     a_comp,
+				   const MFAMRCellData&     a_data,
+				   const phase::which_phase a_phase,
+				   const bool               a_interp);
   
   /*!
     @brief Write surface data to volume data holder. 

@@ -196,9 +196,6 @@ void CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity
 
   // Need to scale by electron charge.
   DataOps::scale(a_cellConductivity, Units::Qe);
-
-  m_amr->averageDown(a_cellConductivity, m_realm, m_phase);
-  m_amr->interpGhost(a_cellConductivity, m_realm, m_phase);  
 }
 
 void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
@@ -221,8 +218,6 @@ void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivi
   // Average the cell-centered conductivity to faces. Note that this includes one "ghost face", which we need
   // because the multigrid solver will interpolate face-centered conductivities to face centroids. 
   DataOps::averageCellScalarToFaceScalar(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
-
-  m_amr->averageDown(a_conductivityFace, m_realm, m_phase);
 #else
   DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
 #endif
@@ -480,10 +475,12 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cd
   // This is a special option in case we use upwinding. In that case we need to allocate
   // storage for holding the upwind-weighted data for each cdr solver.
   Vector<EBAMRCellData*> cdrStates(numCdrSpecies);
-  
-  if(m_whichSourceTermComputation == SourceTermComputation::Upwind){
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      const int idx = solverIt.index();
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+      
+    // Do the upwind magic, but only for the first species (which we assume are electrons)
+    if(m_whichSourceTermComputation == SourceTermComputation::Upwind && idx == 0){
 
       // Allocate some storage and compute an upwind approximation to the cell-centered density. This is the Villa et. al magic for stabilizing
       // the drift-reaction mechanism. Only use if you absolute know what you're doing. 
@@ -493,11 +490,7 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cd
       // Compute the upwind approximation. 
       solverIt()->weightedUpwind(*cdrStates[idx], m_upwindFactor);
     }
-  }
-  else{
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      const int idx = solverIt.index();
-      
+    else{
       cdrStates[idx] = a_cdrDensities[idx];
     }
   }
@@ -543,9 +536,9 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_cd
   }
 
   // When we did the upwind approximation we explicitly allocate memory. Now release it. 
-  if(m_whichSourceTermComputation == SourceTermComputation::Upwind){
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-      const int idx = solverIt.index();
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const int idx = solverIt.index();
+    if(m_whichSourceTermComputation == SourceTermComputation::Upwind && idx == 0){            
       
       delete cdrStates[idx];
     }
@@ -1645,20 +1638,44 @@ void CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&     
   // Things that are passed into CdrPlasmaPhysics
   Vector<Real> cdrDensities(numCdrSpecies, 0.0);
 
+  // Interpolation stencils
+  const BaseIVFAB<VoFStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase())[a_lvl][a_dit];    
+
   // Irreegular kernel. 
   auto irregularKernel = [&](const VolIndex& vof) -> void {
 
-    // Physical position and electric field. 
-    const RealVect pos = probLo + Location::position(Location::Cell::Center, vof, ebisbox, a_dx);						     
-    const RealVect E   = RealVect(D_DECL(a_electricFieldCell(vof, 0), a_electricFieldCell(vof, 1), a_electricFieldCell(vof, 2)));
+    // Physical position.
+    const RealVect pos = probLo + Location::position(Location::Cell::Center, vof, ebisbox, a_dx);
+
+    // Interpolation stencil.
+    const VoFStencil& sten = interpStencils(vof, 0);    
 
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx  = solverIt.index();
-
+#if 0
       const Real phi = (*a_cdrDensities[idx])(vof, comp);
-
+#else
+      Real phi = 0.0;
+      for (int i = 0; i < sten.size(); i++){
+	phi += sten.weight(i) * (*a_cdrDensities[idx])(sten.vof(i), comp);
+      }
+#endif
       cdrDensities[idx] = std::max(0.0, phi);
     }
+
+#if 0
+    const RealVect E = RealVect(D_DECL(a_electricFieldCell(vof, 0), a_electricFieldCell(vof, 1), a_electricFieldCell(vof, 2)));
+#else
+    RealVect E = RealVect::Zero;
+    for (int i = 0; i < sten.size(); i++){
+      const VolIndex& ivof    = sten.vof   (i);
+      const Real&     iweight = sten.weight(i);
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	E[dir] += a_electricFieldCell(ivof, dir) * iweight;
+      }
+    }
+#endif    
 
     // Let our nifty plasma physics framework take care of the diffusion coefficients. 
     const Vector<Real> Dcos = m_physics->computeCdrDiffusionCoefficients(a_time,
@@ -1734,8 +1751,8 @@ void CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_c
       DataOps::setValue(*a_cdrDcoFace[idx], std::numeric_limits<Real>::max());
 
       // Coarsen the cell-centered diffusion coefficient before averaging to faces. 
-      m_amr->averageDown(cdrDcoCell[idx], m_realm, m_cdr->getPhase());
-      m_amr->interpGhost(cdrDcoCell[idx], m_realm, m_cdr->getPhase()); 
+      m_amr->averageDown  (cdrDcoCell[idx], m_realm, m_cdr->getPhase());
+      m_amr->interpGhostMG(cdrDcoCell[idx], m_realm, m_cdr->getPhase()); 
 
       // Average to cell faces. Note that this call also includes one ghost face. 
       DataOps::averageCellScalarToFaceScalar(*a_cdrDcoFace[idx], cdrDcoCell[idx], m_amr->getDomains());
@@ -1926,8 +1943,8 @@ void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a
     const int idx = solverIt.index();
     
     if(solverIt()->isMobile()){
-      m_amr->averageDown(*a_cdrVelocities[idx], m_realm, m_cdr->getPhase()); 
-      m_amr->interpGhost(*a_cdrVelocities[idx], m_realm, m_cdr->getPhase());
+      m_amr->averageDown  (*a_cdrVelocities[idx], m_realm, m_cdr->getPhase()); 
+      m_amr->interpGhostMG(*a_cdrVelocities[idx], m_realm, m_cdr->getPhase());
     }
   }
 }
@@ -2114,19 +2131,46 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&   
   // CDR densities -- will be populated in each grid cell
   Vector<Real> cdrDensities(numCdrSpecies, 0.0);
 
+  // Interpolation stencils
+  const BaseIVFAB<VoFStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase())[a_lvl][a_dit];  
+
   // Irregular kernel. 
   auto irregularKernel = [&](const VolIndex& vof) -> void {
 
-    // Position and electric field
-    const RealVect pos  = probLo + Location::position(Location::Cell::Center, vof, ebisBox, a_dx);        
-    const RealVect E    = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
+    // Position.
+    const RealVect pos  = probLo + Location::position(Location::Cell::Center, vof, ebisBox, a_dx);
 
-    // Get CDR densities
+    // Interpolation stencil.
+    const VoFStencil& sten = interpStencils(vof, 0);    
+
+#if 0
+    const RealVect E    = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));    
+#else
+    RealVect E = RealVect::Zero;
+    for (int i = 0; i < sten.size(); i++){
+      const VolIndex& ivof    = sten.vof   (i);
+      const Real&     iweight = sten.weight(i);
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	E[dir] += a_electricField(ivof, dir) * iweight;
+      }
+    }
+
+#endif
+
+    // Get CDR densities. They should also be on the centroid. 
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int  idx = solverIt.index();
+#if 0
       const Real phi = (*a_cdrDensities[idx])(vof, comp);
-      
+#else
+      Real phi = 0.0;
+      for (int i = 0; i < sten.size(); i++){
+	phi += sten.weight(i) * (*a_cdrDensities[idx])(sten.vof(i), comp);
+      }
+#endif      
       cdrDensities[idx] = std::max(zero, phi);
+      
     }
     
     // Plasma physics framework computes the velocities. 
@@ -2863,8 +2907,8 @@ void CdrPlasmaStepper::computeJ(EBAMRCellData& a_J) const{
   DataOps::scale(a_J, Units::Qe);
 
   // Coarsen and update ghost cells
-  m_amr->averageDown(a_J, m_realm, m_phase);
-  m_amr->interpGhost(a_J, m_realm, m_phase);  
+  m_amr->averageDown  (a_J, m_realm, m_phase);
+  m_amr->interpGhostMG(a_J, m_realm, m_phase);  
 }
 
 void CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) const {
@@ -2881,8 +2925,8 @@ void CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellD
   m_fieldSolver->computeElectricField(a_E, a_potential);
 
   // Update ghost cells. 
-  m_amr->averageDown(a_E, m_realm);
-  m_amr->interpGhost(a_E, m_realm);
+  m_amr->averageDown  (a_E, m_realm);
+  m_amr->interpGhostMG(a_E, m_realm);
 }
 
 void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase) const {
@@ -2907,8 +2951,8 @@ void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::whi
 
   m_fieldSolver->computeElectricField(a_E, a_phase, a_potential);
 
-  m_amr->averageDown(a_E, m_realm, a_phase);
-  m_amr->interpGhost(a_E, m_realm, a_phase);
+  m_amr->averageDown  (a_E, m_realm, a_phase);
+  m_amr->interpGhostMG(a_E, m_realm, a_phase);
 }
 
 void CdrPlasmaStepper::computeElectricField(EBAMRFluxData& a_electricFieldFace, const phase::which_phase a_phase, const EBAMRCellData& a_electricFieldCell) const {
@@ -3261,13 +3305,6 @@ void CdrPlasmaStepper::initialData() {
   // Fill solvers with velocity and diffusion
   this->computeCdrDriftVelocities();
   this->computeCdrDiffusion();
-
-  // Do stationary RTE solve if we must
-  if(this->stationaryRTE()){                  // Solve RTE equations by using initial data and electric field
-    const Real dummyDt = 1.0;
-
-    this->solveRadiativeTransfer(dummyDt);                 // Argument does not matter, it's a stationary solver.
-  }
 }
 
 void CdrPlasmaStepper::initialSigma() {
@@ -3457,13 +3494,12 @@ void CdrPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, cons
   this->computeCdrDriftVelocities();
   this->computeCdrDiffusion();
 
-  // If we're doing a stationary RTE solve, recompute source terms
-  if(this->stationaryRTE()){     // Solve RTE equations by using data that exists inside solvers
-    const Real dummyDt = 1.0;
-
-    // Need new source terms for RTE equations
-    this->advanceReactionNetwork(m_time, dummyDt);
-    this->solveRadiativeTransfer(dummyDt);    // Argument does not matter, it's a stationary solver.
+  // If we're doing a stationary RTE, we should update the elliptic equations. The RTE solvers should
+  // have regridded the source term in that case. 
+  if(this->stationaryRTE()){
+    constexpr Real dummyDt = 0.0;
+    
+    this->solveRadiativeTransfer(dummyDt);
   }
 }
 
@@ -4108,8 +4144,8 @@ Real CdrPlasmaStepper::computeRelaxationTime() {
   this->computeCellConductivity(conductivity);
 
   // Coarsen it and put it on centroids. 
-  m_amr->averageDown(conductivity, m_realm, phase::gas);
-  m_amr->interpGhost(conductivity, m_realm, phase::gas);
+  m_amr->averageDown  (conductivity, m_realm, phase::gas);
+  m_amr->interpGhostMG(conductivity, m_realm, phase::gas);
   
   m_amr->interpToCentroids(conductivity, m_realm, phase::gas);  
 
@@ -4414,7 +4450,7 @@ void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 						    (*E[lvl])[dit()](vof, 2)));
 
 	  for (int i = 0; i < cdrDensities.size(); i++){
-	    localCdrDensities[i] = 0.0;(*(*cdrDensities[i])[lvl])[dit()](vof, 0);
+	    localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[dit()](vof, 0);
 	  }
 
 	  for (int i = 0; i < numCdrSpecies; i++){
@@ -4489,7 +4525,8 @@ void CdrPlasmaStepper::postCheckpointSetup() {
 
   // Update RTE solvers if the solver was stationary. 
   if(this->stationaryRTE()){  
-    const Real dummyDt = 0.0;
+    constexpr Real dummyDt = 0.0;
+    
     this->solveRadiativeTransfer(dummyDt);
   }
 

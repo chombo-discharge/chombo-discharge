@@ -419,10 +419,12 @@ void EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel){
 
   const int finestLevel = m_amr->getFinestLevel();
 
-  m_amr->allocate(m_cache, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_cachePhi, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_cacheSrc, m_realm, m_phase, m_nComp);  
 
   for (int lvl = 0; lvl <= finestLevel; lvl++){ // 
-    m_phi[lvl]->localCopyTo(*m_cache[lvl]);
+    m_phi   [lvl]->localCopyTo(*m_cachePhi[lvl]);
+    m_source[lvl]->localCopyTo(*m_cacheSrc[lvl]);    
   }
 }
 
@@ -473,15 +475,18 @@ void EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const in
 
   // These levels have not changed
   for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
-    m_cache[lvl]->copyTo(*m_phi[lvl]); // Base level should never change, but ownership might
+    m_cachePhi[lvl]->copyTo(*m_phi   [lvl]); // Base level should never change, but ownership might.
+    m_cacheSrc[lvl]->copyTo(*m_source[lvl]); // Base level should never change, but ownership might.
   }
 
   // These levels have changed and so we interpolate the data.
-  for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
-    interpolator[lvl]->interpolate(*m_phi[lvl], *m_phi[lvl-1], interv);
+  for (int lvl = std::max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
+    interpolator[lvl]->interpolate(*m_phi   [lvl], *m_phi   [lvl-1], interv);
+    interpolator[lvl]->interpolate(*m_source[lvl], *m_source[lvl-1], interv);    
 
     if(lvl <= a_oldFinestLevel){
-      m_cache[lvl]->copyTo(*m_phi[lvl]);
+      m_cachePhi[lvl]->copyTo(*m_phi   [lvl]);
+      m_cacheSrc[lvl]->copyTo(*m_source[lvl]);      
     }
   }
 
@@ -489,6 +494,10 @@ void EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const in
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
   m_isSolverSetup = false;
+
+  // Deallocate the scratch data.
+  m_amr->deallocate(m_cachePhi);
+  m_amr->deallocate(m_cacheSrc);  
 }
 
 void EddingtonSP1::registerOperators(){
@@ -1128,7 +1137,8 @@ void EddingtonSP1::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   }
 
   // Write state vector
-  write(a_handle, *m_phi[a_level], m_name);
+  write(a_handle, *m_phi   [a_level], m_name + "_phi");
+  write(a_handle, *m_source[a_level], m_name + "_src");  
 }
 #endif
 
@@ -1139,7 +1149,8 @@ void EddingtonSP1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
     pout() << m_name + "::readCheckpointLevel" << endl;
   }
 
-  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_phi   [a_level], m_name + "_phi", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_source[a_level], m_name + "_src", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);  
 }
 #endif
 

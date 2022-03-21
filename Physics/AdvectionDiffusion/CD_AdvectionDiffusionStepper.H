@@ -180,7 +180,7 @@ namespace Physics {
       */
       enum Integrator {
 	Heun,
-	EulerIMEX
+	IMEX
       };
 
       /*!
@@ -222,6 +222,11 @@ namespace Physics {
 	@brief If true, this will use an FHD description
       */
       bool m_fhd;
+
+      /*!
+	@brief For activating debugging. This is an option.
+      */
+      bool m_debug;
 
       /*!
 	@brief Integrator

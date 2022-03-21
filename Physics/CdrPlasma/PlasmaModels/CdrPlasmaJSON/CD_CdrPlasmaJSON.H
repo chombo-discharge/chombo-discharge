@@ -9,6 +9,7 @@
   @file   CD_CdrPlasmaJSON.H
   @brief  Declaration of a generic CdrPlasma model.
   @author Robert Marskar, Fanny Skirbekk
+  @todo   Energy stuff on domain sides is missing. 
 */
 
 #ifndef CD_CdrPlasmaJSON_H
@@ -55,9 +56,9 @@ namespace Physics {
 	@brief Function for encapsulating operations f = f(E,N). 
 	field in Townsend units
 	@param[in] a_E Electric field in SI units.
-	@param[in] a_N Neutral density
+	@param[in] a_N Neutral density.
 	@return Returns f = f(E,N). 
-	@note a_E is in physical units. 
+	@note a_E is in SI units and the neutral density is in m^-3.
       */
       using FunctionEN = std::function<Real(const Real a_E, const Real a_N)>;
 
@@ -86,7 +87,7 @@ namespace Physics {
 	@param[in] a_T1 Some species temperature. 
 	@param[in] a_T2 Some other species temperature. 
       */
-      using FunctionTT = std::function<Real(const Real a_T1, const Real a_T2)>;      
+      using FunctionTT = std::function<Real(const Real a_T1, const Real a_T2)>;
 
       /*!
 	@brief Default constructor.
@@ -97,6 +98,11 @@ namespace Physics {
 	@brief Destructor
       */
       virtual ~CdrPlasmaJSON();
+
+      /*!
+	@brief Parse run-time class options.
+      */
+      virtual void parseRuntimeOptions();      
 
       /*!
 	@brief Get number of plot variables for this physics class. 
@@ -291,9 +297,35 @@ namespace Physics {
 	FunctionT,
 	FunctionTT,
 	FunctionEN,
+	FunctionEX,
 	TableEN,
+	TableEnergy,
 	AlphaV,
 	EtaV
+      };
+
+      /*!
+	@brief Enum for distinguishing integration methods. Note that 'None' just fills directly with source terms. 
+      */
+      enum class ReactionIntegrator {
+	None,
+	ExplicitEuler,
+	ExplicitTrapezoidal,
+	ExplicitMidpoint,	
+	ExplicitRK4
+      };
+
+      /*!
+	@brief Enum class for distinguishing how we add/lose energy when running LEA-based models. The user will
+	specify how to do this in the chemistry file, where 'AddMean' means that we add the mean energy to the equation.
+	Likewise, 'SubtractMean' implies removing the mean energy, and 'External' is a user-specified energy to be added/removed.
+      */
+      enum class ReactiveEnergyLoss {
+	AddMean,
+	SubtractMean,
+	AddDirect,
+	SubtractDirect,
+	External
       };
 
       /*!
@@ -332,12 +364,17 @@ namespace Physics {
       json m_json;
 
       /*!
+	@brief Reaction integrator
+      */
+      ReactionIntegrator m_reactionIntegrator;
+
+      /*!
 	@brief Input JSON file name
       */
       std::string m_jsonFile;
 
       /*!
-	@brief JSON entries for species in plasma_species
+	@brief JSON entries for species in the defined field 'plasma species'. 
       */
       std::vector<json> m_cdrSpeciesJSON;
 
@@ -352,7 +389,7 @@ namespace Physics {
       std::function<Real(const RealVect a_position, const Real a_time)> m_initialSigma;      
 
       /*!
-	@brief Gas pressure (in atmospheres)
+	@brief Gas pressure (in Pascal).
       */
       FunctionX m_gasPressure;
 
@@ -365,6 +402,11 @@ namespace Physics {
 	@brief Gas number density (in m^(-3))
       */
       FunctionX m_gasDensity;
+
+      /*!
+	@brief Chemistry time step. 
+      */
+      Real m_chemistryDt;
 
       /*!
 	@brief Neutral species densities
@@ -398,6 +440,35 @@ namespace Physics {
 	@note This is the inverse of m_cdrSpeciesMap
       */
       std::map<int, std::string> m_cdrSpeciesInverseMap;
+
+      /*!
+	@brief int-bool encoding for determining if a solver is an energy solver. 
+      */
+      std::map<int, bool> m_cdrIsEnergySolver;
+
+      /*!
+	@brief int-bool encoding for determining if a CDR solver HAS an associated energy solver. 
+      */
+      std::map<int, bool> m_cdrHasEnergySolver;
+
+      /*!
+	@brief Parameters for computing the mean energy from energy density and density. 
+	@details The energy is computed as e = max(Emin, min(Emax, E)) where E = n_energy/(min(n_density, safety));
+      */
+      std::map<int, std::tuple<Real, Real, Real> > m_cdrEnergyComputation;
+
+      /*!
+	@brief int-int encoding for associating a transport solver with an energy solver. 
+	@details This is only defined for the species that has/is an energy solver. The first index is the transport solver index
+	and the second index is the energy solver index. 
+      */
+      std::map<int, int> m_cdrTransportEnergyMap;
+
+      /*!
+	@brief Map of the species masses. This is needed for imposing BCs on the energy equations.
+	@details This is populated in initializePlasmaSpecies.
+      */
+      std::map<int, Real> m_cdrMasses;
 
       /*!
 	@brief string-int encoding of the RTE species. 
@@ -461,14 +532,25 @@ namespace Physics {
       std::map<int, Real> m_mobilityConstants;
 
       /*!
-	@brief Map for table-based mobilities.
+	@brief Map for function-based mobilities mu = mu(E,N)
       */
       std::map<int, FunctionEN> m_mobilityFunctionsEN;
 
       /*!
-	@brief Map for function-based mobilities. 
+	@brief Map for function-based mobilities mu = mu(E,x)
+      */
+      std::map<int, FunctionEX> m_mobilityFunctionsEX;
+
+      /*!
+	@brief Map for table-based mobilities. Stored as tables (E/N, mu*N)
       */
       std::map<int, LookupTable<2> > m_mobilityTablesEN;
+
+      /*!
+	@brief Map for table-based mobilities as function of energy. 
+	@details Stored as tables (eV, mu*N)
+      */
+      std::map<int, LookupTable<2> > m_mobilityTablesEnergy;
       
       // ================================      
       // DIFFUSION  QUANTITIES BEGIN HERE
@@ -490,9 +572,16 @@ namespace Physics {
       std::map<int, FunctionEN> m_diffusionFunctionsEN;
 
       /*!
-	@brief Map for table-based diffusion coefficients. 
+	@brief Map for table-based diffusion coefficients D = D(E,N).
+	@details Tables stored as (E/N, D*N)
       */
       std::map<int, LookupTable<2> > m_diffusionTablesEN;
+
+      /*!
+	@brief Map for table-based diffusion coefficients as function of energy. 
+	@details Stored as tables (eV, D*N)
+      */
+      std::map<int, LookupTable<2> > m_diffusionTablesEnergy;            
 
       // ===========================================
       // PLASMA SPECIES TEMPERATURE DATA BEGINS HERE
@@ -559,9 +648,15 @@ namespace Physics {
       std::map<int, FunctionEN> m_plasmaReactionFunctionsEN;
 
       /*!
-	@brief Map for table-based reaction coefficients (using reduced electric field)
+	@brief Map for table-based reaction coefficients, where k = k(E,N).
       */
       std::map<int, LookupTable<2> > m_plasmaReactionTablesEN;
+
+      /*!
+	@brief Map for table-based reaction coefficients where k = k(energy).
+	@details The first index is the reaction index, while the pair describes which species energy and the tabulated data. 
+      */
+      std::map<int, std::pair<int, LookupTable<2> > > m_plasmaReactionTablesEnergy;
 
       /*!
 	@brief Scaled plasma reactions. These account for e.g. reaction efficiencies, collisional quenching, etc. 
@@ -584,6 +679,19 @@ namespace Physics {
       */
       std::map<int, std::pair<bool, int> > m_plasmaReactionSolovievCorrection;
 
+      /*!
+	@brief For mapping reactive energy losses for all reactions. 
+	@details The index in the first map is the reaction (i.e., index in m_plasmaReactions).
+	The second map determines how reactive energy losses/gains are computed for each species. The first index in the second map
+	indicates the species which will add/lose energy, and the std::pair indicates how this loss is computed. 
+      */
+      std::map<int, std::map<int, std::pair<ReactiveEnergyLoss, Real> > > m_plasmaReactionEnergyLosses;      
+
+      /*!
+	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
+      */
+      std::map<int, bool> m_plasmaReactionHasEnergyLoss;      
+
       // ================================
       // PHOTO-REACTIONS BEGIN HERE
       // ================================            
@@ -602,6 +710,18 @@ namespace Physics {
 	@brief Photo-reactions
       */
       std::vector<CdrPlasmaPhotoReactionJSON> m_photoReactions;
+
+      /*!
+	@brief Associated energy losses for a photo-reaction.
+	@details The list is a list of species and the corresponding energy losses for a reaction. Note that although 
+	we write 'loss', this can also be an energy 'gain'. 
+      */
+      std::map<int, std::list<std::pair<int, Real> > > m_photoReactionEnergyLosses;
+
+      /*!
+	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
+      */
+      std::map<int, bool> m_photoReactionHasEnergyLoss;
 
       // ===========================================
       // ELECTRODE SURFACE REACTIONS BEGIN HERE
@@ -627,6 +747,18 @@ namespace Physics {
       */
       std::vector<CdrPlasmaSurfaceReactionJSON> m_electrodeReactions;
 
+      /*!
+	@brief Associated energy losses for a surface reaction on electrodes. 
+	@details The list is a list of species and the corresponding energy losses for a reaction. Note that although 
+	we write 'loss', this can also be an energy 'gain'. 
+      */
+      std::map<int, std::list<std::pair<int, Real> > > m_electrodeReactionEnergyLosses;
+
+      /*!
+	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
+      */
+      std::map<int, bool> m_electrodeReactionHasEnergyLoss;      
+
       // ===========================================
       // DIELECTRIC SURFACE REACTIONS BEGIN HERE
       // ===========================================
@@ -651,7 +783,19 @@ namespace Physics {
       */
       std::vector<CdrPlasmaSurfaceReactionJSON> m_dielectricReactions;
 
-       // ===========================================
+      /*!
+	@brief Associated energy losses for a surface reaction on dielectrics. 
+	@details The list is a list of species and the corresponding energy losses for a reaction. Note that although 
+	we write 'loss', this can also be an energy 'gain'. 
+      */
+      std::map<int, std::list<std::pair<int, Real> > > m_dielectricReactionEnergyLosses;
+
+      /*!
+	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
+      */
+      std::map<int, bool> m_dielectricReactionHasEnergyLoss;
+
+      // ===========================================
       // DOMAIN SURFACE REACTIONS BEGIN HERE
       // ===========================================
 
@@ -689,11 +833,20 @@ namespace Physics {
 	@brief map to translate side from std::string to Side::LoHiSide
       */
       const std::map<std::string, Side::LoHiSide> m_sideStringToSide{{"lo", Side::Lo}, {"hi", Side::Hi}};
+
+      // ===========================================
+      // VARIOUS MEMBER FUNCTIONS BEGIN HERE 
+      // ===========================================      
       
       /*!
 	@brief Parse class options
       */
       virtual void parseOptions();
+
+      /*!
+	@brief Parse the reactive integrator
+      */
+      virtual void parseIntegrator();
 
       /*!
 	@brief Parse the JSON file
@@ -765,11 +918,11 @@ namespace Physics {
 	@param[in] a_reactants List of reactants. Can contain wildcard.
 	@param[in] a_products  List of products. Can contain wildcard.
 	@param[in] a_reaction  JSON reaction entry. 
-	@return Returns a list of reactants and products with wilcards replace. 
+	@return Returns a list of reactants and products with wilcards replaced. The tuple entries are: <wildcard, reactants, products>
       */
-      virtual std::list<std::pair<std::vector<std::string>, std::vector<std::string> > > parseReactionWildcards(const std::vector<std::string>& a_reactants,
-														const std::vector<std::string>& a_products,
-														const json& a_reaction);
+      virtual std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string> > > parseReactionWildcards(const std::vector<std::string>& a_reactants,
+															      const std::vector<std::string>& a_products,
+															      const json& a_reaction);
       /*!
 	@brief Parses a reaction string into reactangs and products
 	@param[out] a_reactants Left-hand side of reaction
@@ -838,14 +991,22 @@ namespace Physics {
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_reactionJSON);
+      virtual void parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_reactionJSON, const std::string a_wildcard);
 
       /*!
 	@brief Parse plasma reaction energy correction. 
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reactionJSON);      
+      virtual void parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reactionJSON);
+
+
+      /*!
+	@brief Parse plasma reaction energy losses.
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+      */      
+      virtual void parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse photo-reactions
@@ -857,7 +1018,14 @@ namespace Physics {
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'photo reactions' array. 
       */
-      virtual void parsePhotoReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);      
+      virtual void parsePhotoReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+
+      /*!
+	@brief Parse photo-reaction energy losses.
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'photo reactions' array. 
+      */      
+      virtual void parsePhotoReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);      
 
       /*!
 	@brief Do a species sanity check
@@ -897,6 +1065,13 @@ namespace Physics {
       virtual void parseElectrodeReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
+	@brief Parse electrode-reaction energy losses.
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'electrode reactions' array. 
+      */      
+      virtual void parseElectrodeReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);            
+
+      /*!
 	@brief Parse secondary emission on dielectrics
       */
       virtual void parseDielectricReactions();
@@ -915,6 +1090,13 @@ namespace Physics {
 	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
       */
       virtual void parseDielectricReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+
+      /*!
+	@brief Parse dielectric-reaction energy losses.
+	@param[in] a_reactionIndex  Reaction index. 
+	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'dielectric reactions' array. 
+      */      
+      virtual void parseDielectricReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);                  
 
       /*!
 	@brief Parse secondary emission on domain
@@ -959,6 +1141,19 @@ namespace Physics {
 								 const std::vector<Real>& a_cdrDensities) const;
 
       /*!
+	@brief Compute the various plasma species energies. Returns a list of energies in electron-volts. We assume that 
+	temperature-energy relations are e = 3/2 * kB * T. 
+	@details If a transported species is associated with an energy solver the energy is computed from e = (n_eps)/ne. Otherwise, we compute
+	the energy and returns 3/2 * kB * T.
+	@param[in] a_position     Physical coordinates
+	@param[in] a_E            Electric field (SI units)
+	@param[in] a_cdrDensities List of plasma species densities.
+      */
+      virtual std::vector<Real> computePlasmaSpeciesEnergies(const RealVect&          a_position,
+							     const RealVect&          a_E,
+							     const std::vector<Real>& a_cdrDensities) const;   
+      
+      /*!
 	@brief Compute the various plasma species mobilities. 
 	@param[in] a_position     Physical coordinates
 	@param[in] a_E            Electric field (SI units)
@@ -969,6 +1164,17 @@ namespace Physics {
 							       const std::vector<Real>& a_cdrDensities) const;
 
       /*!
+	@brief Compute the various plasma species diffusion coefficients. 
+	@param[in] a_position     Physical coordinates
+	@param[in] a_E            Electric field (SI units)
+	@param[in] a_cdrDensities List of plasma species densities
+	@return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. 
+      */
+      virtual std::vector<Real> computePlasmaSpeciesDiffusion(const RealVect          a_position,
+							      const RealVect          a_E,
+							      const std::vector<Real> a_cdrDensities) const;
+
+      /*!
 	@brief Compute the reaction rate for a plasma reaction.
 	@details This routine exists because we need to compute the rates both in advanceReactionNetwork and getPlotVariables. This function
 	reduces code duplication. 
@@ -977,6 +1183,7 @@ namespace Physics {
 	@param[in] a_cdrMobilities            Plasma species mobilities. 
 	@param[in] a_cdrDiffusionCoefficients Plasma species diffusion coefficients. 
 	@param[in] a_cdrTemperatures          Plasma species temperatures. 
+	@param[in] a_cdrEnergies              Plasma species energies.
 	@param[in] a_cdrGradients             Plasma species gradients. 
 	@param[in] a_pos                      Position (physical coordinates)
 	@param[in] a_vectorE                  Electric field (vector)
@@ -991,7 +1198,8 @@ namespace Physics {
 					     const std::vector<Real>&     a_cdrDensities,
 					     const std::vector<Real>&     a_cdrMobilities,
 					     const std::vector<Real>&     a_cdrDiffusionCoefficients,
-					     const std::vector<Real>&     a_cdrTemperatures,					     
+					     const std::vector<Real>&     a_cdrTemperatures,
+					     const std::vector<Real>&     a_cdrEnergies,
 					     const std::vector<RealVect>& a_cdrGradients,					     
 					     const RealVect&              a_pos,					     					     
 					     const RealVect&              a_vectorE,
@@ -1001,8 +1209,8 @@ namespace Physics {
 					     const Real&                  a_alpha,
 					     const Real&                  a_eta,					     
 					     const Real&                  a_time) const;
-					     
 
+      
       /*!
 	@brief Throw a parser error
 	@param[in] a_error Error code.
@@ -1017,9 +1225,22 @@ namespace Physics {
 
       /*!
 	@brief Protect the @ character in a string
-	@param[in] a_str String If it contains the at character we throw an error. 
+	@param[in] a_str Input string. If it contains the at character we throw an error. 
       */
       bool containsWildcard(const std::string a_str) const;
+
+      /*!
+	@brief Protect all kinds of brackets in a string.
+	@param[in] a_str Input string. If it contains any bracket we throw an error.
+      */
+      bool containsBracket(const std::string a_str) const;
+
+      /*!
+	@brief Return true if string starts and ends with a paranthesis.
+	@param[in] a_str Input string. 
+	@return True if the first character in the string is ( and the last character is )
+      */      
+      bool isBracketed(const std::string a_str) const;
 
       /*!
 	@brief Remove whitespace from string
@@ -1050,6 +1271,155 @@ namespace Physics {
       */
       bool doesFileExist(const std::string a_filename) const;
 
+      /*!
+	@brief Add photoionization products to transport equations source terms.
+	@param[inout] a_cdrSources   Source terms for CDR densities.
+	@param[in]    a_rteDensities RTE mesh densities.
+	@param[in]    a_position     Physical coordinates
+	@param[in]    a_E            Electric field (SI units)
+	@param[in]    a_dt           Time step
+	@param[in]    a_dx           Grid resolution. 
+      */
+      virtual void addPhotoIonization(std::vector<Real>&       a_cdrSources,
+				      const std::vector<Real>& a_rteDensities,
+				      const RealVect           a_position,
+				      const Real               a_E,
+				      const Real               a_dt,
+				      const Real               a_dx) const;      
+
+      /*!
+	@brief Routine for integrating the reactive-only problem using various algorithms. 
+	@param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+	@param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
+	@param[in]    a_cdrGradients     CDR gradients at time a_time
+	@param[in]    a_E                Electric field
+	@param[in]    a_pos              Physical coordinates
+	@param[in]    a_dx               Grid resolution
+	@param[in]    a_dt               Time step
+	@param[in]    a_kappa            Volume fraction 
+      */
+      virtual void integrateReactions(std::vector<Real>&          a_cdrDensities,
+				      std::vector<Real>&          a_photonProduction,
+				      const std::vector<RealVect> a_cdrGradients,
+				      const RealVect              a_E,
+				      const RealVect              a_pos,
+				      const Real                  a_dx,
+				      const Real                  a_dt,
+				      const Real                  a_time,
+				      const Real                  a_kappa) const;
+
+      /*!
+	@brief Routine for filling the source terms in the reactive problem.
+	@param[out]   a_cdrSources       Contains source term for CDR equations. 
+	@param[out]   a_rteSources       Contains source terms for RTE equations. 
+	@param[in]    a_cdrDensities     CDR densities
+	@param[in]    a_cdrGradients     CDR gradients at time a_time
+	@param[in]    a_E                Electric field
+	@param[in]    a_pos              Physical coordinates
+	@param[in]    a_dx               Grid resolution
+	@param[in]    a_time             Time
+	@param[in]    a_kappa            Volume fraction 
+      */
+      void fillSourceTerms(std::vector<Real>&          a_cdrSources,
+			   std::vector<Real>&          a_rteSources,
+			   const std::vector<Real>     a_cdrDensities,
+			   const std::vector<RealVect> a_cdrGradients,
+			   const RealVect              a_E,
+			   const RealVect              a_pos,
+			   const Real                  a_dx,
+			   const Real                  a_time,
+			   const Real                  a_kappa) const;
+
+      /*!
+	@brief Routine for integrating the reactive-only problem using the explicit Euler rule. 
+	@param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+	@param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
+	@param[in]    a_cdrGradients     CDR gradients at time a_time
+	@param[in]    a_E                Electric field
+	@param[in]    a_pos              Physical coordinates
+	@param[in]    a_dx               Grid resolution
+	@param[in]    a_dt               Time step
+	@param[in]    a_time             Time
+	@param[in]    a_kappa            Volume fraction 
+      */
+      void integrateReactionsExplicitEuler(std::vector<Real>&          a_cdrDensities,
+					   std::vector<Real>&          a_photonProduction,
+					   const std::vector<RealVect> a_cdrGradients,
+					   const RealVect              a_E,
+					   const RealVect              a_pos,
+					   const Real                  a_dx,
+					   const Real                  a_dt,
+					   const Real                  a_time,
+					   const Real                  a_kappa) const;
+
+      /*!
+	@brief Routine for integrating the reactive-only problem using the implicit Euler rule. 
+	@param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+	@param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
+	@param[in]    a_cdrGradients     CDR gradients at time a_time
+	@param[in]    a_E                Electric field
+	@param[in]    a_pos              Physical coordinates
+	@param[in]    a_dx               Grid resolution
+	@param[in]    a_dt               Time step
+	@param[in]    a_time             Time
+	@param[in]    a_kappa            Volume fraction 
+      */
+      void integrateReactionsImplicitEuler(std::vector<Real>&          a_cdrDensities,
+					   std::vector<Real>&          a_photonProduction,
+					   const std::vector<RealVect> a_cdrGradients,
+					   const RealVect              a_E,
+					   const RealVect              a_pos,
+					   const Real                  a_dx,
+					   const Real                  a_dt,
+					   const Real                  a_time,
+					   const Real                  a_kappa) const;      
+
+      /*!
+	@brief Routine for integrating the reactive-only problem using a second order Runge-Kutta method. 
+	@details This includes the tableu through the a_tableuAlpha parameter. 
+	@param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+	@param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
+	@param[in]    a_cdrGradients     CDR gradients at time a_time
+	@param[in]    a_E                Electric field
+	@param[in]    a_pos              Physical coordinates
+	@param[in]    a_dx               Grid resolution
+	@param[in]    a_dt               Time step
+	@param[in]    a_time             Time
+	@param[in]    a_kappa            Volume fraction 
+	@param[in]    a_tableuAlpha      RK2 tableu alpha. Use 0.5 for midpoint and 1.0 for trapezoidal (Heun's method)
+      */
+      void integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDensities,
+					 std::vector<Real>&          a_photonProduction,
+					 const std::vector<RealVect> a_cdrGradients,
+					 const RealVect              a_E,
+					 const RealVect              a_pos,
+					 const Real                  a_dx,
+					 const Real                  a_dt,
+					 const Real                  a_time,
+					 const Real                  a_kappa,
+					 const Real                  a_tableuAlpha) const;
+
+      /*!
+	@brief Routine for integrating the reactive-only problem using the foruth order Runge-Kutta method. 
+	@param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+	@param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
+	@param[in]    a_cdrGradients     CDR gradients at time a_time
+	@param[in]    a_E                Electric field
+	@param[in]    a_pos              Physical coordinates
+	@param[in]    a_dx               Grid resolution
+	@param[in]    a_dt               Time step
+	@param[in]    a_time             Time
+	@param[in]    a_kappa            Volume fraction 
+      */
+      void integrateReactionsExplicitRK4(std::vector<Real>&          a_cdrDensities,
+					 std::vector<Real>&          a_photonProduction,
+					 const std::vector<RealVect> a_cdrGradients,
+					 const RealVect              a_E,
+					 const RealVect              a_pos,
+					 const Real                  a_dx,
+					 const Real                  a_dt,
+					 const Real                  a_time,
+					 const Real                  a_kappa) const;
     };
   }
 }

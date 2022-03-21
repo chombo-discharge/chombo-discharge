@@ -405,6 +405,9 @@ void FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int
 
   // Set permittivities
   this->setPermittivities();
+
+  // Deallocate the scratch storage.
+  m_amr->deallocate(m_cache);
 }
 
 void FieldSolver::setRho(const Real a_rho){
@@ -525,12 +528,13 @@ void FieldSolver::parsePlotVariables(){
     pout() << "FieldSolver::parsePlotVariables()" << endl;
   }
 
-  m_plotPotential     = false;
-  m_plotRho           = false;
-  m_plotElectricField = false;
-  m_plotResidue       = false;
-  m_plotPermittivity  = false;  
-  m_plotSigma         = false;  
+  m_plotPotential          = false;
+  m_plotRho                = false;
+  m_plotElectricField      = false;
+  m_plotResidue            = false;
+  m_plotPermittivity       = false;  
+  m_plotSigma              = false;
+  m_plotElectricFieldSolid = false;
 
   ParmParse pp(m_className.c_str());
   const int num = pp.countval("plt_vars");
@@ -540,12 +544,13 @@ void FieldSolver::parsePlotVariables(){
     pp.getarr("plt_vars", str, 0, num);
 
     for (int i = 0; i < num; i++){
-      if(     str[i] == "phi")   m_plotPotential     = true;
-      else if(str[i] == "rho")   m_plotRho           = true;
-      else if(str[i] == "resid") m_plotResidue       = true;
-      else if(str[i] == "E")     m_plotElectricField = true;
-      else if(str[i] == "sigma") m_plotSigma         = true;
-      else if(str[i] == "perm")  m_plotPermittivity  = true;            
+      if(     str[i] == "phi")   m_plotPotential          = true;
+      else if(str[i] == "rho")   m_plotRho                = true;
+      else if(str[i] == "resid") m_plotResidue            = true;
+      else if(str[i] == "E")     m_plotElectricField      = true;
+      else if(str[i] == "Esol")  m_plotElectricFieldSolid = true;      
+      else if(str[i] == "sigma") m_plotSigma              = true;
+      else if(str[i] == "perm")  m_plotPermittivity       = true;            
     }
   }
 }
@@ -1006,101 +1011,169 @@ void FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp, const bool
   const bool doInterp = (m_dataLocation == Location::Cell::Center) && !a_forceNoInterp;
 
   // Add phi to output
-  if(m_plotPotential)     this->writeMultifluidData(a_output, a_comp, m_potential,        doInterp); // Possibly on cell center, so-recenter to centroid if needed
-  if(m_plotRho)           this->writeMultifluidData(a_output, a_comp, m_rho,              false   ); // Always centroid
-  if(m_plotSigma)         this->writeSurfaceData   (a_output, a_comp, m_sigma                     ); // m_sigma is EB-centered
-  if(m_plotResidue)       this->writeMultifluidData(a_output, a_comp, m_residue,          false   ); // Always centroid
-  if(m_plotPermittivity)  this->writeMultifluidData(a_output, a_comp, m_permittivityCell, false   ); // Always centroid  
-  if(m_plotElectricField) this->writeMultifluidData(a_output, a_comp, m_electricField,    doInterp); // Possibly on cell center, so-recenter to centroid if needed
+  if(m_plotPotential)          this->writeMultifluidData(a_output, a_comp, m_potential,        phase::gas,   doInterp); 
+  if(m_plotRho)                this->writeMultifluidData(a_output, a_comp, m_rho,              phase::gas,   false   ); 
+  if(m_plotSigma)              this->writeSurfaceData   (a_output, a_comp, m_sigma                                   ); 
+  if(m_plotResidue)            this->writeMultifluidData(a_output, a_comp, m_residue,          phase::gas,   false   ); 
+  if(m_plotPermittivity)       this->writeMultifluidData(a_output, a_comp, m_permittivityCell, phase::gas,   false   ); 
+  if(m_plotElectricField)      this->writeMultifluidData(a_output, a_comp, m_electricField,    phase::gas,   doInterp); 
+  if(m_plotElectricFieldSolid) this->writeMultifluidData(a_output, a_comp, m_electricField,    phase::solid, doInterp); 
 }
 
-void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp){
+void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const phase::which_phase a_phase, const bool a_interp){
   CH_TIME("FieldSolver::writeMultifluidData(EBAMRCellData, int, MFAMRCellData, bool)");
   if(m_verbosity > 5){
     pout() << "FieldSolver::writeMultifluidData(EBAMRCellData, int, MFAMRCellData, bool)" << endl;
   }
 
-  // So the problem with the Chombo HDF5 I/O routines is that they are not really designed for multiphase. 
+  // So the problem with the Chombo HDF5 I/O routines is that they are not really designed for multiphase. We happen to know that a_data can be multifluid data
+  // which we want to put onto a single-phase data holder. There is ambiguity only in the cut-cells because the data there has multiple degrees of freedom. We also
+  // happen to know that a_output is on the gas phase. Our issue is that we need to decide if the gas-side or solid-side data goes into the output data holder. 
 
   const int numComp = a_data[0]->nComp();
 
-  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas  );
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
-  // Allocate some scratch data that we can use
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, phase::gas, numComp);
+  const bool reallyMultiPhase = !(ebisSol.isNull());    
 
-  //
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    LevelData<EBCellFAB> gasData;
-    LevelData<EBCellFAB> solData;
+  // Aliases of the input multifluid data.
+  EBAMRCellData aliasGas  ;
+  EBAMRCellData aliasSolid;
+  if(reallyMultiPhase){
+    aliasGas   = m_amr->alias(phase::gas,   a_data);
+    aliasSolid = m_amr->alias(phase::solid, a_data);
+  }
+  else{
+    aliasGas   = m_amr->alias(phase::gas,   a_data);
+  }
 
-    if(!ebisGas.isNull()) MultifluidAlias::aliasMF(gasData,  phase::gas,   *a_data[lvl]);
-    if(!ebisSol.isNull()) MultifluidAlias::aliasMF(solData,  phase::solid, *a_data[lvl]);
+  // Allocate some scratch data that we can use. We happen to know that the
+  // output data is always on the gas phase realm. 
+  EBAMRCellData scratchSolid;
+  EBAMRCellData scratchGas  ;
+  if(reallyMultiPhase){
+    m_amr->allocate(scratchGas,   m_realm, phase::gas,   numComp);
+    m_amr->allocate(scratchSolid, m_realm, phase::solid, numComp);
+  }
+  else{
+    m_amr->allocate(scratchGas,   m_realm, phase::gas,   numComp);
+  }
 
-    gasData.localCopyTo(*scratch[lvl]);
+  // Copy into data holders and interpolate to centroids if we need to.
+  if(reallyMultiPhase){
+    DataOps::copy(scratchGas,   aliasGas  );
+    DataOps::copy(scratchSolid, aliasSolid);
+  }
+  else{
+    DataOps::copy(scratchGas,   aliasGas  );
+  }
 
-    // Copy all covered cells from the other phase
-    if(!ebisSol.isNull()){
-      for (DataIterator dit = solData.dataIterator(); dit.ok(); ++dit){
-	const Box box = solData.disjointBoxLayout().get(dit());
-	const IntVectSet ivs(box);
-	const EBISBox& ebisboxGas = gasData[dit()].getEBISBox();
-	const EBISBox& ebisboxSol = solData[dit()].getEBISBox();
+  // Coarsen data. 
+  if(reallyMultiPhase){
+    m_amr->averageDown(scratchGas,   m_realm, phase::gas  );
+    m_amr->averageDown(scratchSolid, m_realm, phase::solid);
+  }
+  else{
+    m_amr->averageDown(scratchGas,   m_realm, phase::gas  );
+  }
 
-	FArrayBox& scratchGas    = (*scratch[lvl])[dit()].getFArrayBox();
-	const FArrayBox& fabGas = gasData[dit()].getFArrayBox();
-	const FArrayBox& fabSol = solData[dit()].getFArrayBox();
+  // Interpolate ghost cells. 
+  if(reallyMultiPhase){
+    m_amr->interpGhost(scratchGas,   m_realm, phase::gas  );
+    m_amr->interpGhost(scratchSolid, m_realm, phase::solid);
+  }
+  else{
+    m_amr->interpGhost(scratchGas,   m_realm, phase::gas  );
+  }
 
-	// TLDR: There are four cases
-	// 1. Both are covered => inside electrode
-	// 2. Gas is covered, solid is regular => inside solid phase only
-	// 3. Gas is regular, solid is covered => inside gas phase only
-	// 4. Gas is !(covered || regular) and solid is !(covered || regular) => on dielectric boundary
-	if(!(ebisboxGas.isAllCovered() && ebisboxSol.isAllCovered())){ // Outside electrode, lets do stuff
-	  if(ebisboxGas.isAllCovered() && ebisboxSol.isAllRegular()){ // Case 2, copy directly. 
-	    scratchGas += fabSol;
+  // Put cell-centered data on centroid. 
+  if(a_interp){
+    if(reallyMultiPhase){
+      m_amr->interpToCentroids(scratchGas,   m_realm, phase::gas  );
+      m_amr->interpToCentroids(scratchSolid, m_realm, phase::solid);
+    }
+    else{
+      m_amr->interpToCentroids(scratchGas,   m_realm, phase::gas  );
+    }
+  }
+
+  // Go through all levels and grid patches and replace the covered gas-side scratch data with the regular solid-side scratch data. On cut-cells
+  // we determine the data based on the a_phase input flag.
+  if(reallyMultiPhase) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl        = m_amr->getGrids     (m_realm              )[lvl];
+      const EBISLayout&        ebislGas   = m_amr->getEBISLayout(m_realm, phase::gas  )[lvl];
+      const EBISLayout&        ebislSolid = m_amr->getEBISLayout(m_realm, phase::solid)[lvl];      
+      
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const EBISBox& ebisBoxGas   = ebislGas  [dit()];
+	const EBISBox& ebisBoxSolid = ebislSolid[dit()];
+
+	const bool isGasRegular   = ebisBoxGas.isAllRegular();
+	const bool isGasCovered   = ebisBoxGas.isAllCovered();
+	const bool isGasIrregular = !isGasRegular && !isGasCovered;
+
+	const bool isSolidRegular   = ebisBoxSolid.isAllRegular();
+	const bool isSolidCovered   = ebisBoxSolid.isAllCovered();
+	const bool isSolidIrregular = !isSolidRegular && !isSolidCovered;
+
+	FArrayBox&       fabGas   = (*scratchGas  [lvl])[dit()].getFArrayBox();
+	const FArrayBox& fabSolid = (*scratchSolid[lvl])[dit()].getFArrayBox();	
+
+	// This is true if the current EBISBox covers a region that is either inside the gas phase
+	// or inside the solid phase. 
+	const bool validData = !isGasCovered && !isSolidCovered;
+	if(validData){
+
+	  if(isGasCovered && isSolidRegular){
+	    // In this case we are purely inside the solid region -- take the data from the solid phase.
+	    fabGas += fabSolid;
 	  }
-	  else if(ebisboxGas.isAllRegular() && ebisboxSol.isAllCovered()) { // Case 3. Inside gas phase. Already did this. 
-	  }
-	  else{ // Case 4, needs special treatment. 
-	    auto kernel = [&] (const IntVect& iv) -> void {
-	      if(ebisboxGas.isCovered(iv) && !ebisboxSol.isCovered(iv)){   // Regular cells from phase 2
-		for (int comp = 0; comp < numComp; comp++){
-		  scratchGas(iv, comp) = fabSol(iv, comp);
-		}
-	      }
-	      else if(ebisboxSol.isIrregular(iv) && ebisboxGas.isIrregular(iv)){ // Irregular cells. Use gas side data
-		for (int comp = 0; comp < numComp; comp++){
-		  scratchGas(iv, comp) = fabGas(iv,comp);
-		}
-	      }
-	    };
+	  else if(isGasIrregular && isSolidIrregular){
+	    // In this case we are looking at a grid patch that lies on the gas-solid boundary. We need to determine which cells
+	    // go into the output region. We happen to know that all gas-side data is already filled, so we only need to grok
+	    // the solid-side data. 
 
-	    BoxLoops::loop(box, kernel);
+	    for (int comp = 0; comp < numComp; comp++){
+	      
+	      auto kernel = [&] (const IntVect& iv) -> void {
+		const bool coveredGas   = ebisBoxGas.isCovered  (iv);
+		const bool regularGas   = ebisBoxGas.isRegular  (iv);
+		const bool irregGas     = ebisBoxGas.isIrregular(iv);
+	      
+		const bool coveredSolid = ebisBoxSolid.isCovered  (iv);
+		const bool regularSolid = ebisBoxSolid.isRegular  (iv);
+		const bool irregSolid   = ebisBoxSolid.isIrregular(iv);
+
+		if(regularSolid && coveredGas){
+		  fabGas(iv, comp) = fabSolid(iv, comp);
+		}
+		else if(irregGas && irregSolid){
+		  if(a_phase == phase::solid){
+		    fabGas(iv, comp) = fabSolid(iv, comp);
+		  }
+		}
+	      };
+	    
+	      BoxLoops::loop(dbl[dit()], kernel);
+	    }
 	  }
 	}
       }
     }
   }
 
-  // Average down shit and interpolate to centroids
-  m_amr->averageDown(scratch, m_realm, phase::gas);
-  m_amr->interpGhost(scratch, m_realm, phase::gas);
-  if(a_interp){
-    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
-  }
-
-  const Interval src_interv(0, numComp-1);
-  const Interval dst_interv(a_comp, a_comp + numComp - 1);
+  // Copy the single-phase data to the output data holder. 
+  const Interval srcInterv(0,      numComp - 1         );
+  const Interval dstInterv(a_comp, numComp - 1 + a_comp);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     if(m_realm == a_output.getRealm()){
-      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+      scratchGas[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
     }
     else{
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+      scratchGas[lvl]->copyTo(srcInterv, *a_output[lvl], dstInterv);
     }
   }
 
@@ -1141,12 +1214,13 @@ int FieldSolver::getNumberOfPlotVariables() const {
 
   int numPltVars = 0;
 
-  if(m_plotPotential)     numPltVars = numPltVars + 1;
-  if(m_plotRho)           numPltVars = numPltVars + 1;
-  if(m_plotSigma)         numPltVars = numPltVars + 1;  
-  if(m_plotResidue)       numPltVars = numPltVars + 1;
-  if(m_plotPermittivity)  numPltVars = numPltVars + 1;  
-  if(m_plotElectricField) numPltVars = numPltVars + SpaceDim;
+  if(m_plotPotential)          numPltVars = numPltVars + 1;
+  if(m_plotRho)                numPltVars = numPltVars + 1;
+  if(m_plotSigma)              numPltVars = numPltVars + 1;  
+  if(m_plotResidue)            numPltVars = numPltVars + 1;
+  if(m_plotPermittivity)       numPltVars = numPltVars + 1;  
+  if(m_plotElectricField)      numPltVars = numPltVars + SpaceDim;
+  if(m_plotElectricFieldSolid) numPltVars = numPltVars + SpaceDim;  
 
   return numPltVars;
 }
@@ -1172,6 +1246,14 @@ Vector<std::string> FieldSolver::getPlotVariableNames() const {
       pltVarNames.push_back("z-Electric field");
     }
   }
+
+  if(m_plotElectricFieldSolid){
+    pltVarNames.push_back("x-Electric field solid"); 
+    pltVarNames.push_back("y-Electric field solid"); 
+    if(SpaceDim == 3){
+      pltVarNames.push_back("z-Electric field solid");
+    }
+  }  
   
   return pltVarNames;
 }

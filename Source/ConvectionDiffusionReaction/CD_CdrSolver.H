@@ -102,28 +102,6 @@ public:
   void setDomainBcFunction(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::FluxFunction a_fluxFunction);
 
   /*!
-    @brief Implicit diffusion TGA advance without source term.
-    @param[inout] a_newPhi Solution at time t + dt
-    @param[in]    a_oldPhi Solution at time t
-    @param[in]    a_dt     Time step
-    @note This calls the other version with a zero source term. 
-  */
-  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt);
-
-  /*!
-    @brief Implicit diffusion TGA advance with source term.
-    @param[inout] a_newPhi Solution at time t + dt
-    @param[in]    a_oldPhi Solution at time t
-    @param[in]    a_source Source (at t+dt/2)
-    @param[in]    a_dt     Time step
-    @note Source term should be centered at t+dt/2 for true second order convergence. 
-  */
-  virtual void advanceTGA(EBAMRCellData&       a_newPhi,
-			  const EBAMRCellData& a_oldPhi,
-			  const EBAMRCellData& a_source,
-			  const Real           a_dt) = 0;
-
-  /*!
     @brief Implicit diffusion Euler advance without source term.
     @param[inout] a_newPhi Solution at time t + dt
     @param[in]    a_oldPhi Solution at time t
@@ -146,58 +124,86 @@ public:
 			    const EBAMRCellData& a_source,
 			    const Real           a_dt) = 0;
 
+    /*!
+    @brief Implicit diffusion Crank-Nicholson advance without source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_dt     Time step
+    @note This calls the other version with a zero source term. 
+  */
+  virtual void advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt);
+
+  /*!
+    @brief Implicit diffusion Crank-Nicholson advance with source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_source Source term. 
+    @param[in]    a_dt     Time step
+  */
+  virtual void advanceCrankNicholson(EBAMRCellData&       a_newPhi,
+				     const EBAMRCellData& a_oldPhi,
+				     const EBAMRCellData& a_source,
+				     const Real           a_dt) = 0;
+
   /*!
     @brief Compute div(J) explicitly, where J = nV - D*grad(n)
-    @param[out] a_divJ       Divergence term, i.e. finite volume approximation to 
-    @param[in]  a_phi        Cell-centered state
-    @param[in]  a_extrapDt   Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
-    @param[in]  a_ebFlux     If true, the embedded boundary flux will injected and included in div(J)
-    @param[in]  a_domainFlux If true, the domain flux will injected and included in div(J)
+    @param[out] a_divJ             Divergence term, i.e. finite volume approximation to 
+    @param[in]  a_phi              Cell-centered state
+    @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_conservativeOnly If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve redistribution.
+    @param[in]  a_ebFlux           If true, the embedded boundary flux will injected and included in div(J)
+    @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(J)
     @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivJ(EBAMRCellData& a_divJ,
 			   EBAMRCellData& a_phi,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true,
-			   const bool     a_domainFlux = true) = 0;
+			   const bool     a_conservativeOnly,			   
+			   const bool     a_ebFlux,
+			   const bool     a_domainFlux) = 0;
 
   /*!
     @brief Compute div(v*phi) explicitly
-    @param[out] a_divF       Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. 
-    @param[in]  a_phi        Cell-centered state
-    @param[in]  a_extrapDt   Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
-    @param[in]  a_domainBc   How to set domain fluxes
-    @param[in]  a_ebFlux     If true, the embedded boundary flux will injected be included in div(F)
-    @param[in]  a_domainFlux If true, the domain flux will injected and included in div(F)
+    @param[out] a_divF             Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. 
+    @param[in]  a_phi              Cell-centered state
+    @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_conservativeOnly If true, we compute div(F)=1/dx*sum(fluxes), which does not involve redistribution.
+    @param[in]  a_domainBc         How to set domain fluxes
+    @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)
+    @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(F)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivF(EBAMRCellData&  a_divF,
 			   EBAMRCellData&  a_phi,
 			   const Real      a_extrapDt,
-			   const bool      a_ebFlux = true,
-			   const bool      a_domainFlux = true) = 0;
+			   const bool      a_conservativeOnly,
+			   const bool      a_ebFlux,
+			   const bool      a_domainFlux) = 0;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
-    @param[out] a_divF       Divergence term, i.e. finite volume approximation to Div(D*Grad(phi)), including redistribution magic. 
-    @param[in]  a_phi        Cell-centered state
-    @param[in]  a_domainBc   Flag for setting domain boundary conditions
-    @param[in]  a_useEbFlux  If true, the embedded boundary flux will be injected and included in div(D)
-    @param[in]  a_domainFlux If true, the domain flux will injected and included in div(D)
+    @param[out] a_divF             Divergence term, i.e. finite volume approximation to Div(D*Grad(phi)). 
+    @param[in]  a_phi              Cell-centered state
+    @param[in]  a_domainBc         Flag for setting domain boundary conditions
+    @param[in]  a_conservativeOnly If true, we compute div(D) = 1/dx*sum(fluxes), which does not involve redistribution.
+    @param[in]  a_useEbFlux        If true, the embedded boundary flux will be injected and included in div(D)
+    @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(D)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
 			   EBAMRCellData& a_phi,
-			   const bool     a_ebFlux = false,
-			   const bool     a_domainFlux = false) = 0;
+			   const bool     a_conservativeOnly,			   
+			   const bool     a_ebFlux,
+			   const bool     a_domainFlux) = 0;
 
   /*!
-    @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers
-    @param[in]    a_divG div(G). This includes redistribution and refluxing. 
-    @param[inout] a_G Vector field which contains face-centered fluxes on input. Contains face-centroid fluxes on output. 
-    @param[in]    a_ebFlux Flux on the EB centroids
+    @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers. This can involve mass redistribution.
+    @param[in]    a_divG             div(G) or kappa*div(G).
+    @param[inout] a_G                Vector field which contains face-centered fluxes on input. Contains face-centroid fluxes on output. 
+    @param[in]    a_ebFlux           Flux on the EB centroids
+    @param[in]    a_conservativeOnly If true, we compute div(G)=1/dx*sum(fluxes), which does not involve redistribution.
   */
-  virtual void computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux);
+  virtual void computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux, const bool a_conservativeOnly);
 
   /*!
     @brief Compute a random gaussian white noise source term. 
@@ -871,6 +877,22 @@ protected:
     @note This computes flux = D*grad(phi) on all face centers. The flux is set to zero on domain edges/faces
   */
   virtual void computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const int a_lvl);
+
+  /*!
+    @brief Compute the full advection-diffusion flux. This assumes that the solver is mobile and diffusive.
+    @param[out] a_flux           Face-centered flux. 
+    @param[in]  a_cellStates     Cell-centered states. 
+    @param[in]  a_faceVelocities Face-centered velocities.
+    @param[in]  a_faceStates     Face-centered (advected) states. 
+    @param[in]  a_faceDiffCo     Face-centered diffusion coefficients. 
+    @param[in]  a_addDomainFlux  Add domain flux or not. 
+  */
+  virtual void computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
+					     const EBAMRCellData& a_cellStates,
+					     const EBAMRFluxData& a_faceStates,
+					     const EBAMRFluxData& a_faceVelocities,
+					     const EBAMRFluxData& a_faceDiffCo,
+					     const bool           a_addDomainFlux);
 
   /*!
     @brief Set flux to zero on domain boundaries

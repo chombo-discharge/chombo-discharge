@@ -43,6 +43,13 @@ namespace Physics {
       virtual ~CdrPlasmaPhysics(){}
 
       /*!
+	@brief Parse run-time options
+      */
+      virtual void parseRuntimeOptions() {
+	
+      };
+
+      /*!
 	@brief Get number of plot variables for this physics class. 
 	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. When overriding
 	this method then this routine should return the number of plot variables that will be plotted. The returned number

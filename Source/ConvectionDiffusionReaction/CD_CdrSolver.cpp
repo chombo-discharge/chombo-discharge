@@ -177,24 +177,23 @@ void CdrSolver::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_old
   }
 }
 
-void CdrSolver::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
-  CH_TIME("CdrSolver::advanceTGA(EBAMRCellData, EBAMRCellData, Real)");
+void CdrSolver::advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
+  CH_TIME("CdrSolver::advanceCrankNicholson(EBAMRCellData, EBAMRCellData, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::advanceTGA(EBAMRCellData, EBAMRCellData, Real)" << endl;
+    pout() << m_name + "::advanceCrankNicholson(EBAMRCellData, EBAMRCellData, Real)" << endl;
   }
 
   CH_assert(a_newPhi[0]->nComp() == 1);
   CH_assert(a_oldPhi[0]->nComp() == 1);
 
-  // TLDR: We are solving the TGA equation (a second order implicit Runge-Kutta scheme). We create a source term = 0 and call the
-  //       implementation version. 
-
+  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the implementation
+  //       version.
   if(m_isDiffusive){
     EBAMRCellData src;
     m_amr->allocate(src, m_realm, m_phase, m_nComp);
     DataOps::setValue(src, 0.0);
 
-    this->advanceTGA(a_newPhi, a_oldPhi, src, a_dt);
+    this->advanceCrankNicholson(a_newPhi, a_oldPhi, src, a_dt);
   }
   else{
     DataOps::copy(a_newPhi, a_oldPhi);
@@ -426,10 +425,10 @@ void CdrSolver::coarseFineRedistribution(EBAMRCellData& a_phi){
   }
 }
 
-void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux){
-  CH_TIME("CdrSolver::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData)");
+void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux, const bool a_conservativeOnly){
+  CH_TIME("CdrSolver::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData)" << endl;
+    pout() << m_name + "::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData, bool)" << endl;
   }
 
   CH_assert(a_divG  [0]->nComp() == 1);
@@ -447,17 +446,21 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
   m_amr->averageDown(a_G, m_realm, m_phase);
   
   this->conservativeDivergenceNoKappaDivision(a_divG, a_G, a_ebFlux);      // Make the conservative divergence without kappa-division.
-  this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);          // Compute the non-conservative divergence
-  this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG); // a_divG becomes hybrid divergence. Mass diff computed. 
 
-  if(m_whichRedistribution != Redistribution::None){
-    // Increment redistribution registers with the mass difference.
-    this->incrementRedist    (m_massDifference);
-    this->coarseFineIncrement(m_massDifference);
+  // Compute hybrid divergence.
+  if(!a_conservativeOnly){
+    this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);          // Compute the non-conservative divergence
+    this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG); // a_divG becomes hybrid divergence. Mass diff computed. 
 
-    // Redistribute mass on the level and across the coarse-fine boundaries.
-    this->hyperbolicRedistribution(a_divG);      // Level redistribution. 
-    this->coarseFineRedistribution(a_divG);      // Coarse-fine redistribution
+    if(m_whichRedistribution != Redistribution::None){
+      // Increment redistribution registers with the mass difference.
+      this->incrementRedist    (m_massDifference);
+      this->coarseFineIncrement(m_massDifference);
+
+      // Redistribute mass on the level and across the coarse-fine boundaries.
+      this->hyperbolicRedistribution(a_divG);      // Level redistribution. 
+      this->coarseFineRedistribution(a_divG);      // Coarse-fine redistribution
+    }
   }
 }
 
@@ -634,6 +637,89 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
   }
 }
 
+void CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
+					      const EBAMRCellData& a_cellStates,
+					      const EBAMRFluxData& a_faceStates,
+					      const EBAMRFluxData& a_faceVelocities,
+					      const EBAMRFluxData& a_faceDiffCo,
+					      const bool           a_addDomainFlux) {
+  CH_TIME("CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData, EBAMRCellData, EBAMRFluxDatax3, bool)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::computeAdvectionDiffusionFlux(EBAMRFluxData, EBAMRCellData, EBAMRFluxDatax3, bool)" << endl;
+  }
+
+  DataOps::setValue(a_flux, 0.0);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)              [lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()                   [lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
+    const Real idx               = 1./dx;
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box&       cellBox = dbl  [dit()];    
+      const EBISBox&   ebisbox = ebisl[dit()];
+      const EBGraph&   ebgraph = ebisbox.getEBGraph();
+
+      const EBCellFAB&     phiCell    = (*a_cellStates[lvl])[dit()];
+      const BaseFab<Real>& regPhiCell = phiCell.getSingleValuedFAB();	      
+	
+      for (int dir = 0; dir < SpaceDim; dir++){
+	EBFaceFAB&       fluxFace = (*a_flux          [lvl])[dit()][dir];
+	const EBFaceFAB& phiFace  = (*a_faceStates    [lvl])[dit()][dir];	  
+	const EBFaceFAB& velFace  = (*a_faceVelocities[lvl])[dit()][dir];
+	const EBFaceFAB& dcoFace  = (*a_faceDiffCo    [lvl])[dit()][dir];	  
+
+	// Regular grid data. 
+	BaseFab<Real>&       regFluxFace = fluxFace.getSingleValuedFAB();
+	const BaseFab<Real>& regPhiFace  = phiFace. getSingleValuedFAB();
+	const BaseFab<Real>& regVelFace  = velFace. getSingleValuedFAB();	  	  
+	const BaseFab<Real>& regDcoFace  = dcoFace. getSingleValuedFAB();
+      
+	// Only want interior faces -- the domain flux will be set to zero (what else would it be...?). Anyways, recall that
+	// the cut-cell face centroid fluxes are interpolated between face centers. So, if a face at the edge of a patch is cut
+	// by the EB, the interpolant will reach out of the patch. Thus, we must fill the flux for the tangential ghost faces
+	// outside the grid patch. 
+	Box grownCellBox = cellBox;
+	grownCellBox.grow(1);
+	grownCellBox &= domain;
+	grownCellBox.grow(dir, -1);
+
+	// These are the "regions" for the regular and cut-cell kernels. 
+	const Box grownFaceBox = surroundingNodes(grownCellBox, dir);
+	FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
+
+	// Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
+	// iv, and the cell at the low side is at iv - BASISV(dir).
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  regFluxFace(iv, m_comp) = regPhiFace(iv, m_comp) * regVelFace(iv, m_comp)
+	  - idx * regDcoFace(iv, m_comp) * ( regPhiCell(iv, m_comp) - regPhiCell(iv - BASISV(dir), m_comp) );
+	};
+
+	// Cut-cell kernel. Basically the same as the above but we need to explicity get vofs on the low/high side (because
+	// we may have multi-cells but the above kernel only does single-valued cells). 
+	auto irregularKernel = [&](const FaceIndex& face) -> void {
+	  if(!face.isBoundary()){
+	    const VolIndex hiVoF = face.getVoF(Side::Hi);
+	    const VolIndex loVoF = face.getVoF(Side::Lo);
+
+	    fluxFace(face, m_comp) = phiFace(face, m_comp) * velFace(face, m_comp) - idx * dcoFace(face,m_comp) * (phiCell(hiVoF,m_comp) - phiCell(loVoF, m_comp));
+	  }
+	};
+
+	// Execute kernels.
+	BoxLoops::loop(grownFaceBox,   regularKernel);
+	BoxLoops::loop(faceit,       irregularKernel);
+      }
+    }
+  }
+
+  if(a_addDomainFlux){
+    this->fillDomainFlux(a_flux);
+  }
+}
+
 void CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux){
   CH_TIME("CdrSolver::resetDomainFlux(EBAMRFluxData)");
   if(m_verbosity > 5){
@@ -750,22 +836,31 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 	FaceIterator faceit(ivs, ebgraph, dir, FaceStop::AllBoundaryOnly);
 	
 	auto kernel = [&] (const FaceIndex& face) -> void {
+	  
 	  // Set the flux on the BC. This can be data-based, wall, function-based, outflow (extrapolated). 
 	  switch(bcType){
-	  case CdrDomainBC::BcType::DataBased:{
-	    flux(face, m_comp) = dataBasedFlux(face, m_comp);
+	  case CdrDomainBC::BcType::DataBased:
+	  {
+	    flux(face, m_comp) = sign(sit()) * dataBasedFlux(face, m_comp);
+	    
 	    break;
 	  }
-	  case CdrDomainBC::BcType::Wall:{	    
+	  case CdrDomainBC::BcType::Wall:
+	  {	    
 	    flux(face, m_comp) = 0.0;
+	    
 	    break;
 	  }
-	  case CdrDomainBC::BcType::Function:{	    	    
+	  case CdrDomainBC::BcType::Function:
+	  {	    	    
 	    const RealVect pos = EBArith::getFaceLocation(face, m_amr->getDx()[a_level],m_amr->getProbLo());
+	    
 	    flux(face, m_comp)   = -sign(sit()) * bcFunction(pos, m_time);
+	    
 	    break;
 	  }
-	  case CdrDomainBC::BcType::Outflow:{
+	  case CdrDomainBC::BcType::Outflow:
+	  {
 	    flux(face, m_comp) = 0.0;
 	    
 	    // Get the next interior face(s) and extrapolate from these. 
@@ -788,15 +883,16 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 	    
 	    break;
 	  }
-	  case CdrDomainBC::BcType::Solver:{ // Don't do anything.
+	  case CdrDomainBC::BcType::Solver:{ // Don't do anything beacuse the solver will have filled the flux already. 
 	    break; 
 	  }
 	  default:
-	  MayDay::Error("CdrSolver::fillDomainFlux(LD<EBFluxFAB>, int) - trying to fill unsupported domain bc flux type");
-	  break;
-	  }
+	  {
+	    MayDay::Error("CdrSolver::fillDomainFlux(LD<EBFluxFAB>, int) - trying to fill unsupported domain bc flux type");
+	    
+	    break;
+	  }}
 	};
-
 	// Run the kernel
 	BoxLoops::loop(faceit, kernel);
       }
@@ -1445,7 +1541,7 @@ void CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
   }
 
   // These levels have changed
-  for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
+  for (int lvl = std::max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
     RefCountedPtr<EBPWLFineInterp>& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase)[lvl]; // The interpolator for interpolator from lvl-1 to lvl lives on lvl
 
     // Linearly interpolate (with limiters) from level lvl-1 to lvl
@@ -1465,6 +1561,10 @@ void CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
 
   m_amr->averageDown(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
+
+  // Deallocate the scratch storage.
+  m_amr->deallocate(m_cachePhi   );
+  m_amr->deallocate(m_cacheSource);    
 }
 
 void CdrSolver::reflux(EBAMRCellData& a_phi){
@@ -2673,9 +2773,9 @@ void CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCell
     }
 #endif
 
-    this->fillGwn(m_scratchFluxTwo, 1.0);                         // Gaussian White Noise = W/sqrt(dV)
-    DataOps::multiply(m_scratchFluxOne, m_scratchFluxTwo);        // Now m_scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi). 
-    this->computeDivG(a_noiseSource, m_scratchFluxOne, m_ebZero); // Compute the finite volume approximation and make it into a source term. 
+    this->fillGwn(m_scratchFluxTwo, 1.0);                                // Gaussian White Noise = W/sqrt(dV)
+    DataOps::multiply(m_scratchFluxOne, m_scratchFluxTwo);               // Now m_scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi). 
+    this->computeDivG(a_noiseSource, m_scratchFluxOne, m_ebZero, false); // Compute the finite volume approximation and make it into a source term. 
   
 #if 0 // Debug, check if we have NaNs/Infs
     m_amr->averageDown(a_noiseSource, m_realm, m_phase);

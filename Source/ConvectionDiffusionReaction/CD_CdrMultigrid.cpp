@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CD_CdrTGA.cpp
-  @brief  Implementation of CD_CdrTGA.H
+  @file   CD_CdrMultigrid.cpp
+  @brief  Implementation of CD_CdrMultigrid.H
   @author Robert Marskar
 */
 
@@ -14,27 +14,27 @@
 #include <EBAMRIO.H>
 
 // Our includes
-#include <CD_CdrTGA.H>
+#include <CD_CdrMultigrid.H>
 #include <CD_DataOps.H>
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
 #include <CD_EBHelmholtzDirichletDomainBCFactory.H>
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-CdrTGA::CdrTGA() : CdrSolver() {
-  CH_TIME("CdrTGA::CdrTGA()");
+CdrMultigrid::CdrMultigrid() : CdrSolver() {
+  CH_TIME("CdrMultigrid::CdrMultigrid()");
   
   // Default settings
-  m_name         = "CdrTGA";
-  m_className    = "CdrTGA";
+  m_name         = "CdrMultigrid";
+  m_className    = "CdrMultigrid";
 }
 
-CdrTGA::~CdrTGA(){
+CdrMultigrid::~CdrMultigrid(){
 
 }
 
-void CdrTGA::registerOperators() {
-  CH_TIME("CdrTGA::registerOperators()");
+void CdrMultigrid::registerOperators() {
+  CH_TIME("CdrMultigrid::registerOperators()");
   if(m_verbosity > 5){
     pout() << m_name + "::registerOperators()" << endl;
   }
@@ -45,119 +45,204 @@ void CdrTGA::registerOperators() {
   m_amr->registerOperator(s_eb_multigrid, m_realm, m_phase);
 }
 
-void CdrTGA::allocateInternals() {
-  CH_TIME("CdrTGA::allocateInternals()");
+void CdrMultigrid::allocateInternals() {
+  CH_TIME("CdrMultigrid::allocateInternals()");
   if(m_verbosity > 5){
     pout() << m_name + "::allocateInternals()" << endl;
   }
 
   CdrSolver::allocateInternals();
-
-
 }
 
-void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
-			  const EBAMRCellData& a_oldPhi,
-			  const EBAMRCellData& a_source,
-			  const Real           a_dt){
-  CH_TIME("CdrTGA::advanceEuler(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
+void CdrMultigrid::resetAlphaAndBeta(const Real a_alpha, const Real a_beta) {
+  CH_TIME("CdrMultigrid::resetAlphaAndBeta(Real, Real");
+  if(m_verbosity > 5){
+    pout() << m_name + "::resetAlphaAndBeta(Real, Real)" << endl;
+  }
+
+  if(m_isDiffusive){
+    Vector<MGLevelOp<LevelData<EBCellFAB> >* > multigridOperators = m_multigridSolver->getAllOperators();
+
+    for (int i = 0; i < multigridOperators.size(); i++){
+      TGAHelmOp<LevelData<EBCellFAB> >* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB> >*) multigridOperators[i];
+
+      helmholtzOperator->setAlphaAndBeta(a_alpha, a_beta);
+    }
+  }
+}
+
+void CdrMultigrid::computeKappaLphi(EBAMRCellData& a_kappaLphi, const EBAMRCellData& a_phi) {
+  CH_TIME("CdrMultigrid::computeKappaLphi(EBAMRCellData, EBAMRCellData)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::computeKappaLphi(EBAMRCellData, EBAMRCellData)" << endl;
+  }
+
+  const int coarsestLevel = 0;
+  const int finestLevel   = m_amr->getFinestLevel();  
+
+  Vector<LevelData<EBCellFAB>* > LphiPtr;
+  Vector<LevelData<EBCellFAB>* > phiPtr ;
+
+  m_amr->alias(LphiPtr, a_kappaLphi);
+  m_amr->alias(phiPtr,  a_phi      );
+
+  // Need to reset to make sure we are computing kappa*div(D*grad(phi)) and not something like kappa*(phi - div(D*grad(phi))). 
+  this->resetAlphaAndBeta(0.0, 1.0);
+
+  m_multigridSolver->computeAMROperator(LphiPtr, phiPtr, finestLevel, coarsestLevel, false);
+}
+
+void CdrMultigrid::advanceEuler(EBAMRCellData&       a_newPhi,
+				const EBAMRCellData& a_oldPhi,
+				const EBAMRCellData& a_source,
+				const Real           a_dt){
+  CH_TIME("CdrMultigrid::advanceEuler(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
   if(m_verbosity > 5){
     pout() << m_name + "::advanceEuler(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
   }
   
   if(m_isDiffusive){
-    this->setupDiffusionSolver(); // Set up gmg again since diffusion coefficients might between time steps. 
-    
-    bool converged = false;
 
-    const int finestLevel = m_amr->getFinestLevel();
+    // TLDR: Recall that the elliptic operator solves
+    // 
+    //          kappa*L(phi) = kappa*rho
+    //
+    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass this into multigrid. We assume that the user
+    //       has provided a source-term that comes in is already weighted, but that the old solution comes in unweighted.     
 
-    // We first compute a convergence metric where we stop iterating further. We are solving
-    //
-    //    dphi/dt = L(phi) + rho
-    //
-    // where L(phi) = Div(D*grad(phi))
-    //
-    // This is discretized as phi^(k+1) - dt*L(phi^(k+1)) = phi^k + dt*rho. We set the "source term" to m_scratch = phi^k + dt*rho
-    // which yields phi^(k+1) - dt*L(phi^(k+1)) = m_scratch. We reset the alpha and beta coefficients to 1 and -dt in the TGA operator
-    // lets and compute the residual using phi^(k+1)=0. Then we set the convergence metric. 
+    // Set up multigrid again because the diffusion coefficients might have changed underneath us.
+    this->setupDiffusionSolver(); 
 
+    // Make the right-hand side for the Euler equation. Since we are solving
+    //
+    //     kappa * phi^(k+1) - kappa*dt*L(phi^(k+1)) = kappa * phi^k + kappa*dt*S
+    //
+    // we need to put the right-hand side somewhere. We use m_scratch for holding kappa*phi^k + kappa*dt*S. Note that we assume that S comes in weighted. 
     DataOps::copy(m_scratch, a_oldPhi);
+    DataOps::kappaScale(m_scratch);
     DataOps::incr(m_scratch, a_source, a_dt);
 
-    Vector<LevelData<EBCellFAB>* > zero;
-    Vector<LevelData<EBCellFAB>* > rhs;
-    
-    m_amr->alias(zero, m_zero);
-    m_amr->alias(rhs,  m_scratch);
+    // As above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -a_dt. The kappas on the left-hand side
+    // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those. 
+    this->resetAlphaAndBeta(1.0, -a_dt);
 
-    m_eulerSolver->resetAlphaAndBeta(1.0, -a_dt);
+    // Aliasing because Chombo did not always use smart pointers. 
+    Vector<LevelData<EBCellFAB>* > newPhi;
+    Vector<LevelData<EBCellFAB>* > eulerRHS;
+    Vector<LevelData<EBCellFAB>* > resid;
+    Vector<LevelData<EBCellFAB>* > zero;        
     
-    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, rhs, finestLevel, 0);
-    
+    m_amr->alias(newPhi,   a_newPhi  );
+    m_amr->alias(eulerRHS, m_scratch );
+    m_amr->alias(resid,    m_residual);
+    m_amr->alias(zero,     m_zero    );    
+
+    const int coarsestLevel = 0;
+    const int finestLevel   = m_amr->getFinestLevel();
+
+    // Figure out how far away we are form a "converged" solution.
+    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, eulerRHS, finestLevel, coarsestLevel);
+
+    // Set the convergence metric.
     m_multigridSolver->m_convergenceMetric = zeroResid;
 
-    // Now do the backward Euler solve. 
-    Vector<LevelData<EBCellFAB>* > newPhi;
-    Vector<LevelData<EBCellFAB>* > oldPhi;
-    Vector<LevelData<EBCellFAB>* > source;
-    
-    m_amr->alias(newPhi, a_newPhi);
-    m_amr->alias(oldPhi, a_oldPhi);
-    m_amr->alias(source, a_source);
+    // Always from previous solution.
+    DataOps::copy(a_newPhi, a_oldPhi);    
 
-    m_eulerSolver->oneStep(newPhi, oldPhi, source, a_dt, 0, finestLevel, false);
-    
-    const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){       // 8 => Norm sufficiently small
-      converged = true;
-    }
+    // Do the multigrid solve. 
+    m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
   }
   else{
     DataOps::copy(a_newPhi, a_oldPhi);
   }
 }
 
-void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
-			const EBAMRCellData& a_oldPhi,
-			const EBAMRCellData& a_source,
-			const Real           a_dt){
-  CH_TIME("CdrTGA::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
+void CdrMultigrid::advanceCrankNicholson(EBAMRCellData&       a_newPhi,
+					 const EBAMRCellData& a_oldPhi,
+					 const EBAMRCellData& a_source,
+					 const Real           a_dt){
+  CH_TIME("CdrMultigrid::advanceCrankNicholson(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
+    pout() << m_name + "::advanceCrankNicholson(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
   }
   
   if(m_isDiffusive){
-    this->setupDiffusionSolver(); // Set up gmg again since diffusion coefficients might change between time steps. 
-    
-    bool converged = false;
 
-    const int finestLevel = m_amr->getFinestLevel();
+    const int coarsestLevel = 0;
+    const int finestLevel   = m_amr->getFinestLevel();    
 
-    // Do the aliasing stuff
+    // TLDR: Recall that the elliptic operator solves
+    // 
+    //          kappa*L(phi) = kappa*rho
+    //
+    //       rather than L(phi) = rho. So this means that our right-hand side needs to be kappa-weighted before we pass this into multigrid. We assume that the user
+    //       has provided a source-term that comes in is already weighted, but that the old solution comes in unweighted.     
+
+    // Set up multigrid again because the diffusion coefficients might have changed underneath us.
+    this->setupDiffusionSolver(); 
+
+    // Make the right-hand side for the Euler equation. Since we are solving
+    //
+    //     kappa * phi^(k+1) - 0.5 * kappa*dt*L(phi^(k+1)) = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
+    //
+    // we need to put the right-hand side somewhere. We use m_scratch for holding the right-hand side. Note that S^(k+1/2) should come in weighted and the old solution
+    // come in unweighted.
+
+    // First, put kappa*phi^k in scratch. 
+    DataOps::copy(m_scratch, a_oldPhi);
+    DataOps::kappaScale(m_scratch);
+
+    // Add the source term, which by assumption comes in weighted by the volume fraction. 
+    DataOps::incr(m_scratch, a_source, a_dt);
+
+    // Compute kappa*L(phi^k) and add it to the scratch data holder. 
+    EBAMRCellData kappaLphi;
+    EBAMRCellData phiScratch;
+
+    m_amr->allocate(kappaLphi,  m_realm, m_phase, 1);
+    m_amr->allocate(phiScratch, m_realm, m_phase, 1);
+
+    DataOps::copy(phiScratch, a_oldPhi);
+
+    this->computeKappaLphi(kappaLphi, phiScratch);
+
+    // After this we have m_scratch = kappa * phi^k + 0.5 * kappa*dt*L(phi^k) + kappa*dt*S^(k+1/2)
+    DataOps::incr(m_scratch, kappaLphi, 0.5*a_dt);
+
+    // From the equation above, the alpha and beta-coefficients for the Helmholtz operator need to be 1 and -0.5*a_dt. The kappas on the left-hand side
+    // in the above equation are absorbed into the Helmholtz operator so we don't need to worry about those. 
+    this->resetAlphaAndBeta(1.0, -0.5*a_dt);
+
+    // Aliasing because Chombo did not always use smart pointers. 
     Vector<LevelData<EBCellFAB>* > newPhi;
-    Vector<LevelData<EBCellFAB>* > oldPhi;
-    Vector<LevelData<EBCellFAB>* > source;
+    Vector<LevelData<EBCellFAB>* > eulerRHS;
+    Vector<LevelData<EBCellFAB>* > resid;
+    Vector<LevelData<EBCellFAB>* > zero;        
+    
+    m_amr->alias(newPhi,   a_newPhi  );
+    m_amr->alias(eulerRHS, m_scratch );
+    m_amr->alias(resid,    m_residual);
+    m_amr->alias(zero,     m_zero    );    
 
-    m_amr->alias(newPhi, a_newPhi);
-    m_amr->alias(oldPhi, a_oldPhi);
-    m_amr->alias(source,    a_source);
+    // Figure out how far away we are form a "converged" solution.
+    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, eulerRHS, finestLevel, coarsestLevel);
 
-    // Do the TGA solve. 
-    m_tgaSolver->oneStep(newPhi, oldPhi, source, a_dt, 0, finestLevel, false);
+    // Set the convergence metric.
+    m_multigridSolver->m_convergenceMetric = zeroResid;
 
-    const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){       // 8 => Norm sufficiently small
-      converged = true;
-    }
+    // Always from previous solution.
+    DataOps::copy(a_newPhi, a_oldPhi);    
+
+    // Do the multigrid solve. 
+    m_multigridSolver->solveNoInitResid(newPhi, resid, eulerRHS, finestLevel, coarsestLevel, false);
   }
   else{
     DataOps::copy(a_newPhi, a_oldPhi);
   }
 }
 
-void CdrTGA::setupDiffusionSolver(){
-  CH_TIME("CdrTGA::setupDiffusionSolver()");
+void CdrMultigrid::setupDiffusionSolver(){
+  CH_TIME("CdrMultigrid::setupDiffusionSolver()");
   if(m_verbosity > 5){
     pout() << m_name + "::setupDiffusionSolver()" << endl;
   }
@@ -167,20 +252,20 @@ void CdrTGA::setupDiffusionSolver(){
   if(m_isDiffusive){
     m_amr->allocate(m_zero,      m_realm, m_phase, m_nComp);
     m_amr->allocate(m_helmAcoef, m_realm, m_phase, m_nComp);
+    m_amr->allocate(m_residual,  m_realm, m_phase, m_nComp);
     
     DataOps::setValue(m_zero,      0.0);
     DataOps::setValue(m_helmAcoef, 1.0);
+    DataOps::setValue(m_residual,  0.0);    
 
-    // This sets up the multigrid Helmholtz solver and the TGA/Euler solvers. The TGA/Euler stuff is Chombo code.
+    // This sets up the multigrid Helmholtz solver.
     this->setupHelmholtzFactory();
     this->setupMultigrid();
-    this->setupTGA();
-    this->setupEuler();
   }  
 }
 
-void CdrTGA::setupHelmholtzFactory(){
-  CH_TIME("CdrTGA::setupHelmholtzFactory()");
+void CdrMultigrid::setupHelmholtzFactory(){
+  CH_TIME("CdrMultigrid::setupHelmholtzFactory()");
   if(m_verbosity > 5){
     pout() << m_name + "::setupHelmholtzFactory()" << endl;
   }
@@ -214,8 +299,7 @@ void CdrTGA::setupHelmholtzFactory(){
   //    phi^(k+1) - dt*Div(D*Grad(phi^(k+1)) = phi^k + dt*rho
   //
   // and in that case we have alpha * A = 1 and beta = -dt. EBHelmholtzOpFactory shouldn't be doing anything
-  // with this data but TGA/Euler solvers might change the alpha and beta under us. A-coefficient should be one
-  // anyways. 
+  // with this data but diffusion solvers might change the alpha and beta under us. We set the A-coefficient to one. 
   DataOps::setValue(m_helmAcoef, 1.0);
 
   // Set up the operator
@@ -241,8 +325,8 @@ void CdrTGA::setupHelmholtzFactory(){
 										       m_amr->getMaxBoxSize()));
 }
 
-void CdrTGA::setupMultigrid(){
-  CH_TIME("CdrTGA::setupMultigrid()");
+void CdrMultigrid::setupMultigrid(){
+  CH_TIME("CdrMultigrid::setupMultigrid()");
   if(m_verbosity > 5){
     pout() << m_name + "::setupMultigrid()" << endl;
   }
@@ -260,7 +344,7 @@ void CdrTGA::setupMultigrid(){
     botsolver = &m_gmres;
     m_gmres.m_verbosity = 0; // Shut up. 
   default:
-    MayDay::Error("CdrTGA::setupMultigrid() - logic bust in bottom solver setup");
+    MayDay::Error("CdrMultigrid::setupMultigrid() - logic bust in bottom solver setup");
     break;
   }
 
@@ -274,7 +358,7 @@ void CdrTGA::setupMultigrid(){
     gmgType = 2;
     break;
   default:
-    MayDay::Error("CdrTGA::setupMultigrid() -- logic bust in multigrid type selection");
+    MayDay::Error("CdrMultigrid::setupMultigrid() -- logic bust in multigrid type selection");
   }
 
   const int finestLevel              = m_amr->getFinestLevel();
@@ -316,44 +400,16 @@ void CdrTGA::setupMultigrid(){
   m_multigridSolver->init(phi, rhs, finestLevel, 0);
 }
 
-void CdrTGA::setupTGA(){
-  CH_TIME("CdrTGA::setupTGA()");
+void CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux){
+  CH_TIME("CdrMultigrid::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setupTGA()" << endl;
+    pout() << m_name + "::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool, bool)" << endl;
   }
-  
-  const int finestLevel              = m_amr->getFinestLevel();
-  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
-  const Vector<int> refinementRatios = m_amr->getRefinementRatios();
-
-  m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
-    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refinementRatios, 1 + finestLevel, m_multigridSolver->m_verbosity));
-}
-
-void CdrTGA::setupEuler(){
-  CH_TIME("CdrTGA::setupEuler");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setupEuler" << endl;
-  }
-
-  const int finestLevel              = m_amr->getFinestLevel();
-  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
-  const Vector<int> refinementRatios = m_amr->getRefinementRatios();
-
-  m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
-    (new EBBackwardEuler (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refinementRatios, 1 + finestLevel, m_multigridSolver->m_verbosity));
-}
-
-void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrTGA::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool)" << endl;
-  }
-
-  // Fill ghost cells
-  m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
 
   if(m_isMobile || m_isDiffusive){
+
+    // Fill ghost cells
+    m_amr->interpGhostPwl(a_phi, m_realm, m_phase);    
 
     if(m_whichRedistribution == Redistribution::MassWeighted){
       this->setRedistWeights(a_phi);
@@ -362,26 +418,24 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
     // We will let m_scratchFluxOne hold the total flux = advection + diffusion fluxes
     DataOps::setValue(m_scratchFluxOne, 0.0);
 
-    // Compute advection flux. This is mostly the same as computeDivF. If we can, add domain fluxes here. 
-    if(m_isMobile){
+    if(m_isMobile && !m_isDiffusive){
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
-      
-      this->averageVelocityToFaces(); // Update m_faceVelocity from m_cellVelocity
-      this->advectToFaces(m_faceStates, a_phi, a_extrapDt); // Advect to faces
-      this->computeAdvectionFlux(m_scratchFluxTwo, m_faceVelocity, m_faceStates, a_domainFlux);
 
-      DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, 1.0);
+      // Update face velocity and advect to faces. 
+      this->averageVelocityToFaces(); 
+      this->advectToFaces(m_faceStates, a_phi, a_extrapDt); 
+      this->computeAdvectionFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, a_domainFlux);
     }
+    else if(!m_isMobile && m_isDiffusive) {
+      this->computeDiffusionFlux(m_scratchFluxOne, a_phi, a_domainFlux); // Domain flux needs to come in through here. 
+      DataOps::scale(m_scratchFluxOne, -1.0);
+    }
+    else if(m_isMobile && m_isDiffusive) { // 
+      m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
+      this->averageVelocityToFaces();
+      this->advectToFaces(m_faceStates, a_phi, a_extrapDt);
 
-    // Compute diffusion flux. If we don't have advection, add the domain flux here. 
-    if(m_isDiffusive){
-      if(m_isMobile){
-	this->computeDiffusionFlux(m_scratchFluxTwo, a_phi, false); // Domain flux already in advective flux
-      }
-      else{
-	this->computeDiffusionFlux(m_scratchFluxTwo, a_phi, a_domainFlux); // No advective deriv. Put flux here. 
-      }
-      DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, -1.0);
+      this->computeAdvectionDiffusionFlux(m_scratchFluxOne, a_phi, m_faceStates, m_faceVelocity, m_faceCenteredDiffusionCoefficient, a_domainFlux);
     }
 
     // General divergence computation. Also inject charge. Domain fluxes came in above but eb fluxes come in here. 
@@ -392,7 +446,7 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
     else{
       ebflux = &m_ebZero;
     }
-    this->computeDivG(a_divJ, m_scratchFluxOne, *ebflux);
+    this->computeDivG(a_divJ, m_scratchFluxOne, *ebflux, a_conservativeOnly);
   }
   else{ 
     DataOps::setValue(a_divJ, 0.0);
@@ -401,10 +455,10 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
   return;
 }
 
-void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrTGA::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool)");
+void CdrMultigrid::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux){
+  CH_TIME("CdrMultigrid::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool)" << endl;
+    pout() << m_name + "::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool, bool)" << endl;
   }
 
   if(m_isMobile){
@@ -427,15 +481,15 @@ void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real
     else{
       ebflux = &m_ebZero;
     }
-    this->computeDivG(a_divF, m_scratchFluxOne, *ebflux); 
+    this->computeDivG(a_divF, m_scratchFluxOne, *ebflux, a_conservativeOnly); 
   }
   else{
     DataOps::setValue(a_divF, 0.0);
   }
 }
 
-void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrTGA::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)");
+void CdrMultigrid::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux){
+  CH_TIME("CdrMultigrid::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)" << endl;
   }
@@ -458,7 +512,7 @@ void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool
     else{
       ebflux = &m_ebZero;
     }
-    this->computeDivG(a_divD, m_scratchFluxOne, *ebflux); // General face-centered flux to divergence magic.
+    this->computeDivG(a_divD, m_scratchFluxOne, *ebflux, a_conservativeOnly); // General face-centered flux to divergence magic.
 
     m_amr->averageDown(a_divD, m_realm, m_phase);
     m_amr->interpGhost(a_divD, m_realm, m_phase);
@@ -468,8 +522,8 @@ void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool
   }
 }
 
-void CdrTGA::parseMultigridSettings(){
-  CH_TIME("CdrTGA::parseMultigridSettings()");
+void CdrMultigrid::parseMultigridSettings(){
+  CH_TIME("CdrMultigrid::parseMultigridSettings()");
   if(m_verbosity > 5){
     pout() << m_name + "::parseMultigridSettings()" << endl;
   }
@@ -488,7 +542,7 @@ void CdrTGA::parseMultigridSettings(){
   pp.get("gmg_exit_hang",    m_multigridExitHang);
   pp.get("gmg_min_cells",    m_minCellsBottom);
 
-  // Fetch the desired bottom solver from the input script. We look for things like CdrTGA.gmg_bottom_solver = bicgstab or '= simple <number>'
+  // Fetch the desired bottom solver from the input script. We look for things like CdrMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver. 
   const int num = pp.countval("gmg_bottom_solver");
   if(num == 1){
@@ -500,7 +554,7 @@ void CdrTGA::parseMultigridSettings(){
       m_bottomSolverType = BottomSolverType::GMRES;
     }
     else{
-      MayDay::Error("CdrTGA::parseMultigridSettings - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
+      MayDay::Error("CdrMultigrid::parseMultigridSettings - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
     }
   }
   else if(num == 2){
@@ -512,11 +566,11 @@ void CdrTGA::parseMultigridSettings(){
       m_simpleSolver.setNumSmooths(numSmooth);
     }
     else{
-      MayDay::Error("CdrTGA::parseMultigridSettings - logic bust, you've specified two parameters and I expected 'simple <number>'");
+      MayDay::Error("CdrMultigrid::parseMultigridSettings - logic bust, you've specified two parameters and I expected 'simple <number>'");
     }
   }
   else{
-    MayDay::Error("CdrTGA::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
+    MayDay::Error("CdrMultigrid::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
   // Relaxation type
@@ -531,7 +585,7 @@ void CdrTGA::parseMultigridSettings(){
     m_smoother = EBHelmholtzOp::Smoother::GauSaiMultiColor;
   }
   else{
-    MayDay::Error("CdrTGA::parseMultigridSettings - unknown relaxation method requested");
+    MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown relaxation method requested");
   }
 
   // Cycle type
@@ -540,7 +594,7 @@ void CdrTGA::parseMultigridSettings(){
     m_multigridType = MultigridType::VCycle;
   }
   else{
-    MayDay::Error("CdrTGA::parseMultigridSettings - unknown cycle type requested");
+    MayDay::Error("CdrMultigrid::parseMultigridSettings - unknown cycle type requested");
   }
 
   // No lower than 2. 
@@ -549,8 +603,8 @@ void CdrTGA::parseMultigridSettings(){
   }
 }
 
-void CdrTGA::writePlotData(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("CdrTGA::writePlotData(EBAMRCellData, int)");
+void CdrMultigrid::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("CdrMultigrid::writePlotData(EBAMRCellData, int)");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotData(EBAMRCellData, int)" << endl;
   }

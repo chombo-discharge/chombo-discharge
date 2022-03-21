@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_CdrTGA.H
+  @file   CD_CdrMultigrid.H
   @brief  Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves
   @author Robert Marskar
 */
 
-#ifndef CD_CdrTGA_H
-#define CD_CdrTGA_H
+#ifndef CD_CdrMultigrid_H
+#define CD_CdrMultigrid_H
 
 // Std includes
 #include <random>
@@ -19,9 +19,7 @@
 
 // Chombo includes
 #include <AMRMultiGrid.H>
-#include <AMRTGA.H>
 #include <BiCGStabSolver.H>
-#include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
 #include <GMRESSolver.H>
 
@@ -33,7 +31,7 @@
 /*!
   @brief Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic diffusion.
 */
-class CdrTGA : public CdrSolver {
+class CdrMultigrid : public CdrSolver {
 protected:
 
   /*!
@@ -58,12 +56,12 @@ public:
   /*!
     @brief Constructor
   */
-  CdrTGA();
+  CdrMultigrid();
 
   /*!
     @brief Destructor
   */
-  virtual ~CdrTGA();
+  virtual ~CdrMultigrid();
 
   /*!
     @brief Parse class options
@@ -87,73 +85,79 @@ public:
 
   /*!
     @brief Compute div(J) explicitly, where J = nV - D*grad(n)
-    @param[out] a_divJ      Divergence term, i.e. finite volume approximation to 
-    @param[in]  a_phi       Cell-centered state
-    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
-    @param[in]  a_ebFlux    If true, the embedded boundary flux will injected and included in div(J)
+    @param[out] a_divJ             Divergence term, i.e. finite volume approximation to 
+    @param[in]  a_phi              Cell-centered state
+    @param[in]  a_conservativeOnly If true, we compute div(J) = 1/dx*sum(fluxes), which does not involve redistribution.
+    @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_ebFlux           If true, the embedded boundary flux will injected and included in div(J)
     @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivJ(EBAMRCellData& a_divJ,
 			   EBAMRCellData& a_phi,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true,
-			   const bool     a_domainFlux = true) override final;
+			   const bool     a_conservativeOnly,			   
+			   const bool     a_ebFlux,
+			   const bool     a_domainFlux) override final;
 
   /*!
     @brief Compute div(v*phi) explicitly
-    @param[out] a_divF      Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. 
-    @param[in]  a_phi       Cell-centered state
-    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
-    @param[in]  a_domainBc  How to set domain fluxes
-    @param[in]  a_ebFlux    If true, the embedded boundary flux will injected be included in div(F)
+    @param[out] a_divF             Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. 
+    @param[in]  a_phi              Cell-centered state
+    @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_conservativeOnly If true, we compute div(F) = 1/dx*sum(fluxes), which does not involve redistribution.
+    @param[in]  a_domainBc         How to set domain fluxes
+    @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivF(EBAMRCellData& a_divF,
 			   EBAMRCellData& a_phi,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true,
-			   const bool     a_domainFlux = true) override final;
+			   const bool     a_conservativeOnly,
+			   const bool     a_ebFlux,
+			   const bool     a_domainFlux) override final;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
-    @param[out] a_divF      Divergence term, including redistribution magic. 
-    @param[in]  a_phi       Cell-centered state
-    @param[in]  a_domainBc  How to set domain fluxes
-    @param[in]  a_useEbFlux If true, the embedded boundary flux will be included in div(D)
+    @param[out] a_divF             Divergence term, including redistribution magic. 
+    @param[in]  a_phi              Cell-centered state
+    @param[in]  a_conservativeOnly If true, we compute div(D) = 1/dx*sum(fluxes), which does not involve redistribution.
+    @param[in]  a_domainBc         How to set domain fluxes
+    @param[in]  a_useEbFlux        If true, the embedded boundary flux will be included in div(D)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
 			   EBAMRCellData& a_phi,
-			   const bool     a_ebFlux = false,
-			   const bool     a_domainFlux = false) override final;
-
-  /*!
-    @brief Implicit diffusion TGA advance with source term.
-    @param[inout] a_newPhi Solution at time t + dt
-    @param[in]    a_oldPhi Solution at time t
-    @param[in]    a_source Source (at t+dt/2)
-    @param[in]    a_dt     Time step
-    @note Source term should be centered at t+dt/2 for second order convergence. 
-  */
-  virtual void advanceTGA(EBAMRCellData&       a_newPhi,
-			  const EBAMRCellData& a_oldPhi,
-			  const EBAMRCellData& a_source,
-			  const Real           a_dt) override final;
+			   const bool     a_conservativeOnly,			   
+			   const bool     a_ebFlux,
+			   const bool     a_domainFlux) override final;
   
   /*!
-    @brief Implicit diffusion Euler advance with source term.
+    @brief Implicit diffusion Euler advance with source term. 
+    @details This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and
+    that the incoming source term a_source HAS been weighted by the volume fraction. 
     @param[inout] a_newPhi Solution at time t + dt
-    @param[in]    a_oldPhi Solution at time t
-    @param[in]    a_source Source term. 
-    @param[in]    a_dt     Time step
-    @note For purely implicit Euler the source term should be centered at t+dt (otherwise it's an implicit-explicit method)
-    @details This solves the implicit diffusion equation equation a_newPhi - a_oldPhi = dt*Laplacian(a_newPhi) + dt*a_source. 
+    @param[in]    a_oldPhi Solution at time t. Should be unweighted by the volume fraction. 
+    @param[in]    a_source Source term. Should be weighted by the volume fraction. 
+    @param[in]    a_dt     Time step.
   */
   virtual void advanceEuler(EBAMRCellData&       a_newPhi,
 			    const EBAMRCellData& a_oldPhi,
 			    const EBAMRCellData& a_source,
 			    const Real           a_dt) override final;
 
+  /*!
+    @brief Implicit diffusion Crank-Nicholson advance with source term.
+    @details This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and
+    that the incoming source term a_source HAS been weighted by the volume fraction. 
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_source Source term. 
+    @param[in]    a_dt     Time step
+  */
+  virtual void advanceCrankNicholson(EBAMRCellData&       a_newPhi,
+				     const EBAMRCellData& a_oldPhi,
+				     const EBAMRCellData& a_source,
+				     const Real           a_dt) override final;
 
 
 protected:
@@ -172,16 +176,6 @@ protected:
     @brief Geometric multigrid solver
   */
   RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_multigridSolver;
-
-  /*!
-    @brief TGA solver
-  */
-  RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > > m_tgaSolver;
-
-  /*!
-    @brief Euler solver
-  */
-  RefCountedPtr<EBBackwardEuler> m_eulerSolver;
 
   /*!
     @brief Operator factory
@@ -211,7 +205,12 @@ protected:
   /*!
     @brief Storage for Helmholtz a-coefficient. Always 1. 
   */
-  EBAMRCellData m_helmAcoef;  
+  EBAMRCellData m_helmAcoef;
+
+  /*!
+    @brief Storage for multigrid residual
+  */
+  EBAMRCellData m_residual;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -289,14 +288,19 @@ protected:
   virtual void setupMultigrid();
 
   /*!
-    @brief Setup the TGA solver
+    @brief Reset alpha and beta-coefficients in the multigrid solvers
+    @param[in] a_alpha Alpha-coefficient for EBHelmholtzOp
+    @param[in] a_beta  Beta-coefficient for EBHelmholtzOp
   */
-  virtual void setupTGA();
+  virtual void resetAlphaAndBeta(const Real a_alpha, const Real a_beta);
 
   /*!
-    @brief Setup the Euler solver
+    @brief Compute kappa * L(phi) using the multigrid operator. This is different from computeDivD.
+    @param[in] a_kappaLphi kappa*L(phi)
+    @param[in] a_phi        Cell-centered state
+    @note This will reset the alpha and beta coefficients. 
   */
-  virtual void setupEuler();
+  virtual void computeKappaLphi(EBAMRCellData& a_kappaLphi, const EBAMRCellData& a_phi);
 
   /*!
     @brief Parse solver settings for geometric multigrid
