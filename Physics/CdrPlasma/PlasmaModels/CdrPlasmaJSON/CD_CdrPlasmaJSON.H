@@ -833,6 +833,10 @@ namespace Physics {
 	@brief map to translate side from std::string to Side::LoHiSide
       */
       const std::map<std::string, Side::LoHiSide> m_sideStringToSide{{"lo", Side::Lo}, {"hi", Side::Hi}};
+
+      // ===========================================
+      // VARIOUS MEMBER FUNCTIONS BEGIN HERE 
+      // ===========================================      
       
       /*!
 	@brief Parse class options
