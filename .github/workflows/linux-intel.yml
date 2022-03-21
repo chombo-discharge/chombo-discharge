@@ -86,17 +86,17 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           make -s -j2 DIM=3 discharge-physics
 
-      # - name: Compile tests
-      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-      #   run: |
-      #     source /opt/intel/oneapi/setvars.sh          
-      #     python3 tests.py --compile --benchmark --no_exec -cores 2
+      - name: Compile tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          source /opt/intel/oneapi/setvars.sh          
+          python3 tests.py --compile --benchmark --no_exec -cores 2
 
-      # - name: Run tests
-      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-      #   run: |
-      #     source /opt/intel/oneapi/setvars.sh          
-      #     python3 tests.py --no_compare -cores 2          
+      - name: Run tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          source /opt/intel/oneapi/setvars.sh          
+          python3 tests.py --no_compare -cores 2          
 
   mpi-no-hdf:
     if: github.event.pull_request.draft == false  
@@ -175,14 +175,14 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           make -s -j2 DIM=3 discharge-physics
 
-      # - name: Compile tests
-      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-      #   run: |
-      #     source /opt/intel/oneapi/setvars.sh          
-      #     python3 tests.py --compile --benchmark --no_exec -cores 2
+      - name: Compile tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          source /opt/intel/oneapi/setvars.sh          
+          python3 tests.py --compile --benchmark --no_exec -cores 2
 
-      # - name: Run tests
-      #   working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-      #   run: |
-      #     source /opt/intel/oneapi/setvars.sh          
-      #     python3 tests.py --no_compare -cores 2 --parallel
+      - name: Run tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          source /opt/intel/oneapi/setvars.sh          
+          python3 tests.py --no_compare -cores 2 --parallel
