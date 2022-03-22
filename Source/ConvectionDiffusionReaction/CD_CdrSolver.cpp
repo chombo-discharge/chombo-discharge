@@ -466,10 +466,10 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
   }
 }
 
-void CdrSolver::computeDphiDn(EBAMRIVData& a_DphiDn, const EBAMRCellData& a_cellPhi) {
-  CH_TIME("CdrSolver::computeDphiDn(EBAMRIVData, EBAMRCellData)");
+void CdrSolver::computeDphiDnOnEB(EBAMRIVData& a_DphiDn, const EBAMRCellData& a_cellPhi) {
+  CH_TIME("CdrSolver::computeDphiDnOnEB(EBAMRIVData, EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDphiDn(EBAMRIVData, EBAMRCellData)" << endl;
+    pout() << m_name + "::computeDphiDnOnEB(EBAMRIVData, EBAMRCellData)" << endl;
   }
 
   CH_assert(a_fluxEB [0]->nComp() == 1);

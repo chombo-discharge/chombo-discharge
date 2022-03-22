@@ -712,18 +712,14 @@ void CdrPlasmaGodunovStepper::extrapolateCdrToEB(){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because no mass has been injected. That comes later. 
-  CdrPlasmaStepper::extrapolateToEb(cdrDensitiesEB, m_cdr->getPhase(), cdrDensities);
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    const int idx = solverIt.index();
-    
-    DataOps::floor(*cdrDensitiesEB[idx], 0.0);
-  }
+  CdrPlasmaStepper::extrapolateToEB(cdrDensitiesEB, m_cdr->getPhase(), cdrDensities);
+  CdrPlasmaStepper::floor(cdrDensitiesEB);
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   for (int i = 0; i < cdrDensities.size(); i++){
 
     // Extrapolate the EB to the gradient
-    CdrPlasmaStepper::extrapolateToEb(gradientEB, m_cdr->getPhase(), *cdrGradients[i]);
+    CdrPlasmaStepper::extrapolateToEB(gradientEB, m_cdr->getPhase(), *cdrGradients[i]);
 
     // And project it along the EB normal.
     CdrPlasmaStepper::projectFlux(*cdrGradientsEB[i], gradientEB);
@@ -770,9 +766,8 @@ void CdrPlasmaGodunovStepper::computeCdrFluxesEB(){
 
   // Extrapolate the CDR fluxes and velocities to the EB. After this, we have all
   // the pertinent CDR quantities we need in our BC framework. 
-  Vector<EBAMRCellData*> cdrVelocities = m_cdr->getVelocities();
-  CdrPlasmaStepper::computeExtrapolatedFluxesEB  (extrapCdrFluxesEB,   cdrDensities, 0.0);
-  CdrPlasmaStepper::computeExtrapolatedVelocities(extrapCdrVelocitiesEB, cdrVelocities,                m_cdr->getPhase());
+  CdrPlasmaStepper::computeExtrapolatedFluxesEB    (extrapCdrFluxesEB,   cdrDensities, 0.0);
+  CdrPlasmaStepper::computeExtrapolatedVelocitiesEB(extrapCdrVelocitiesEB);
 
   // Compute RTE flux on the boundary
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt){

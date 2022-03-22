@@ -2617,7 +2617,7 @@ void CdrPlasmaStepper::computeExtrapolatedFluxesEB(Vector<EBAMRIVData*>&        
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     const int idx = solverIt.index();
     
-    solverIt()->extrapFluxEB(*a_extrapCdrFluxesEB[idx], *a_cdrDensities[idx], a_dt);
+    solverIt()->extrapFluxToEB(*a_extrapCdrFluxesEB[idx], *a_cdrDensities[idx], a_dt);
   }
 }
 
@@ -2670,39 +2670,17 @@ void CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&    
   }
 }
 
-
-void CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_cdrVelocitiesEB,
-						     const Vector<EBAMRCellData*> a_cdrVelocitiesCell,
-						     const phase::which_phase     a_phase){
-  CH_TIME("CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>, Vector<EBAMRCellData*>, phase)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>, Vector<EBAMRCellData*>, phase)" << endl;
+void CdrPlasmaStepper::computeExtrapolatedVelocitiesEB(Vector<EBAMRIVData*>& a_cdrVelocitiesEB) {
+  CH_TIME("CdrPlasmaStepper::computeExtrapolatedVelocitiesEB(Vector<EBAMIRVData*>)");
+  if(m_verbosity > 5) {
+    pout() << "CdrPlasmaStepper::computeExtrapolatedVelocitiesEB(Vector<EBAMIRVData*>)" << endl;
   }
 
-  // Number of CDR solvers that we have
-  const int numCdrSolvers = m_physics->getNumCdrSpecies();
-
-  CH_assert(a_cdrVelocitiesEB.  size() == numCdrSolvers);
-  CH_assert(a_cdrVelocitiesCell.size() == numCdrSolvers);
-
-  // Allocate some scratch data -- it is used for extrapolating the vell-centered data to the EB. 
-  EBAMRIVData scratch;
-  m_amr->allocate(scratch, m_realm, a_phase, SpaceDim);
-
-  //  for (int i = 0; i < a_cdrVelocitiesEB.size(); i++){
-  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
     
-    const RefCountedPtr<CdrSolver>& solver = solverIt();
-
-    // If solver is mobile, extrapolate the flux to the EB and project it along the normal. 
-    if(solver->isMobile()){
-
-      // Extrapolate all SpaceDim components. 
-      this->extrapolateToEb(scratch, a_phase, *a_cdrVelocitiesCell[idx]);
-
-      // Project along EB normal
-      this->projectFlux(*a_cdrVelocitiesEB[idx], scratch);
+    if(solverIt()->isMobile()){
+      solverIt()->extrapVelToEB(*a_cdrVelocitiesEB[idx]);
     }
   }
 }
@@ -2951,9 +2929,8 @@ void CdrPlasmaStepper::computeElectricField(EBAMRFluxData& a_electricFieldFace, 
 					  dir,
 					  dir);
       }
-
     }
-    //    DataOps::averageCellToFace(*a_electricFieldFace[lvl], *a_electricFieldCell[lvl], m_amr->getDomains()[lvl]);
+    
     a_electricFieldFace[lvl]->exchange();
   }
 }
@@ -3006,50 +2983,33 @@ void CdrPlasmaStepper::deallocateSolverInternals() {
   m_sigma      ->deallocateInternals();
 }
 
-void CdrPlasmaStepper::extrapolateToEb(Vector<EBAMRIVData*>&         a_ebData,
+void CdrPlasmaStepper::extrapolateToEB(Vector<EBAMRIVData*>&         a_ebData,
 				       const phase::which_phase      a_phase,
 				       const Vector<EBAMRCellData*>& a_cellData){
-  CH_TIME("CdrPlasmaStepper::extrapolateToEb(Vector<EBAMRIVData*>, phase, Vector<EBAMRCellData*>)");
+  CH_TIME("CdrPlasmaStepper::extrapolateToEB(Vector<EBAMRIVData*>, phase, Vector<EBAMRCellData*>)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::extrapolateToEb(Vector<EBAMRIVData*>, phase, Vector<EBAMRCellData*>)" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateToEB(Vector<EBAMRIVData*>, phase, Vector<EBAMRCellData*>)" << endl;
   }
 
   CH_assert(a_ebData.size() == a_cellData.size());
 
   // Call the other AMR version. 
   for (int i = 0; i < a_ebData.size(); i++){
-    this->extrapolateToEb(*a_ebData[i], a_phase, *a_cellData[i]);
+    this->extrapolateToEB(*a_ebData[i], a_phase, *a_cellData[i]);
   }
 }
 
-void CdrPlasmaStepper::extrapolateToEb(EBAMRIVData& a_ebData, const phase::which_phase a_phase, const EBAMRCellData& a_cellData){
-  CH_TIME("CdrPlasmaStepper::extrapolateToEb(EBAMRIVData, phase, EBAMRCellData)");
+void CdrPlasmaStepper::extrapolateToEB(EBAMRIVData& a_ebData, const phase::which_phase a_phase, const EBAMRCellData& a_cellData){
+  CH_TIME("CdrPlasmaStepper::extrapolateToEB(EBAMRIVData, phase, EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::extrapolateToEb(EBAMRIVData, phase, EBAMRCellData)" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateToEB(EBAMRIVData, phase, EBAMRCellData)" << endl;
   }
 
-  // Call the level version. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    this->extrapolateToEb(*a_ebData[lvl], a_phase, *a_cellData[lvl], lvl);
+    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
+
+    stencils.apply(*a_ebData[lvl], *a_cellData[lvl], lvl);    
   }
-}
-
-void CdrPlasmaStepper::extrapolateToEb(LevelData<BaseIVFAB<Real> >& a_ebData,
-				       const phase::which_phase     a_phase,
-				       const LevelData<EBCellFAB>&  a_cellData,
-				       const int                    a_lvl){
-  CH_TIME("CdrPlasmaStepper::extrapolateToEb(LD<BaseIVFAB<Real> >, phase, LD<EBCellFAB>, int)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::extrapolateToEb(LD<BaseIVFAB<Real> >, phase, LD<EBCellFAB>, int)" << endl;
-  }
-
-  CH_assert(a_ebData.nComp() == a_cellData.nComp());
-
-  // Get the stencil for movign cell-centered data to the EB.
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
-
-  // Apply it. 
-  stencils.apply(a_ebData, a_cellData, a_lvl);
 }
 
 void CdrPlasmaStepper::extrapolateToDomainFaces(Vector<EBAMRIFData*>&         a_domainData,
@@ -3160,6 +3120,28 @@ void CdrPlasmaStepper::extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_do
 	}
       }
     }
+  }
+}
+
+void CdrPlasmaStepper::floor(Vector<EBAMRCellData*>& a_data) const {
+  CH_TIME("CdrPlasmaStepper::floor(Vector<EBAMRCellData*>)");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::floor(Vector<EBAMRCellData*>)" << endl;
+  }
+  
+  for (int i = 0; i < a_data.size(); i++){
+    DataOps::floor(*a_data[i], 0.0);
+  }
+}
+
+void CdrPlasmaStepper::floor(Vector<EBAMRIVData*>& a_data) const {
+  CH_TIME("CdrPlasmaStepper::floor(Vector<EBAMRIVData*>)");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::floor(Vector<EBAMIRVData*>)" << endl;
+  }
+  
+  for (int i = 0; i < a_data.size(); i++){
+    DataOps::floor(*a_data[i], 0.0);
   }
 }
 

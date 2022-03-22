@@ -848,18 +848,15 @@ namespace Physics {
       virtual void computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a_cdrDomainFluxes,
 						   const Vector<EBAMRCellData*> a_cdrDensities,
 						   const Vector<EBAMRCellData*> a_cdrVelocities,
-						   const phase::which_phase     a_phase);      
+						   const phase::which_phase     a_phase);
 
       /*!
-	@brief Extrapolated cell-centered velocities to the EB. 
+	@brief Extrapolate cell-centered velocities to the EB centroids. 
 	@details This only computes the normal velocity on the EB, i.e. the output is the extrapolated velocity projected along the EB normal. 
 	@param[out] a_cdrVelocitiesEB   EB-centered velocities
 	@param[in]  a_cdrVelocitiesCell Cell-centered velocities
-	@param[in]  a_phase             Phase
       */
-      virtual void computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_cdrVelocitiesEB,
-						 const Vector<EBAMRCellData*> a_cdrVelocitiesCell,
-						 const phase::which_phase     a_phase);
+      virtual void computeExtrapolatedVelocitiesEB(Vector<EBAMRIVData*>& a_cdrVelocitiesEB);
   
       /*!
 	@brief Deallocate internal solver storages
@@ -872,7 +869,7 @@ namespace Physics {
 	@param[in]  a_phase    Phase 
 	@param[in]  a_cellData Cell-centered data
       */
-      virtual void extrapolateToEb(Vector<EBAMRIVData*>&         a_ebData,
+      virtual void extrapolateToEB(Vector<EBAMRIVData*>&         a_ebData,
 				   const phase::which_phase      a_phase,
 				   const Vector<EBAMRCellData*>& a_cellData);
 
@@ -882,20 +879,7 @@ namespace Physics {
 	@param[in]  a_phase    Phase 
 	@param[in]  a_cellData Cell-centered data
       */
-      virtual void extrapolateToEb(EBAMRIVData& a_ebData, const phase::which_phase a_phase, const EBAMRCellData& a_cellData);      
-
-      /*!
-	@brief Extrapolated cell-centered data to the EB. This is the level version. 
-	@param[out] a_ebData   EB-centered data
-	@param[in]  a_phase    Phase 
-	@param[in]  a_cellData Cell-centered data
-	@param[in]  a_lvl      Grid level
-      */
-      virtual void extrapolateToEb(LevelData<BaseIVFAB<Real> >& a_ebData,
-				   const phase::which_phase     a_phase,
-				   const LevelData<EBCellFAB>&  a_cellData,
-				   const int                    a_lvl);
-
+      virtual void extrapolateToEB(EBAMRIVData& a_ebData, const phase::which_phase a_phase, const EBAMRCellData& a_cellData);
 
       /*!
 	@brief Extrapolate cell-centered data to domain faces. This is the AMR version that does all species. 
@@ -966,6 +950,18 @@ namespace Physics {
 							  const Vector<EBAMRCellData*>& a_cellVelocities);
 
       /*!
+	@brief Floor data
+	@param[in] a_data Data to be floored.
+      */
+      virtual void floor(Vector<EBAMRCellData*>& a_data) const;
+
+      /*!
+	@brief Floor data
+	@param[in] a_data Data to be floored.
+      */
+      virtual void floor(Vector<EBAMRIVData*>& a_data) const;
+
+      /*!
 	@brief Get maximum density in the CDR species. This will fetch both the value and the solver name. 
 	@param[out] a_cdrMax     Maximum density found in one of the CDR solvers
 	@param[out] a_solverName The solver name
@@ -1024,8 +1020,6 @@ namespace Physics {
 	@brief Do a sanity check. Only works when DEBUG=TRUE.
       */
       virtual void sanityCheck() const;
-
-
 
       /*!
 	@brief Setup the CDR solvers. 

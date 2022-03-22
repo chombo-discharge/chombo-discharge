@@ -211,7 +211,7 @@ public:
     @param[in]  a_cellPhi  Phi on cell centers
     @note The normal vector points into the fluid. 
   */
-  virtual void computeDphiDn(EBAMRIVData& a_DphiDn, const EBAMRCellData& a_cellPhi);
+  virtual void computeDphiDnOnEB(EBAMRIVData& a_DphiDn, const EBAMRCellData& a_cellPhi);
 
   /*!
     @brief Extrapolate the flux to the EB.

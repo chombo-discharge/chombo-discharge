@@ -1433,7 +1433,7 @@ void CdrPlasmaImExSdcStepper::computeCdrEbStates(){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  CdrPlasmaImExSdcStepper::extrapolateToEb(eb_states, m_cdr->getPhase(), cdr_states);
+  CdrPlasmaImExSdcStepper::extrapolateToEB(eb_states, m_cdr->getPhase(), cdr_states);
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     DataOps::floor(*eb_states[idx], 0.0);
@@ -1443,7 +1443,7 @@ void CdrPlasmaImExSdcStepper::computeCdrEbStates(){
   EBAMRIVData eb_gradient;
   m_amr->allocate(eb_gradient, m_realm, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    CdrPlasmaImExSdcStepper::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
+    CdrPlasmaImExSdcStepper::extrapolateToEB(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     CdrPlasmaImExSdcStepper::projectFlux(*eb_gradients[i], eb_gradient);
   }
 }
@@ -1468,7 +1468,7 @@ void CdrPlasmaImExSdcStepper::computeCdrEbStates(const Vector<EBAMRCellData*>& a
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  CdrPlasmaImExSdcStepper::extrapolateToEb(eb_states, m_cdr->getPhase(), a_phis);
+  CdrPlasmaImExSdcStepper::extrapolateToEB(eb_states, m_cdr->getPhase(), a_phis);
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     DataOps::floor(*eb_states[idx], 0.0);
@@ -1478,7 +1478,7 @@ void CdrPlasmaImExSdcStepper::computeCdrEbStates(const Vector<EBAMRCellData*>& a
   EBAMRIVData eb_gradient;
   m_amr->allocate(eb_gradient, m_realm, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < a_phis.size(); i++){
-    CdrPlasmaImExSdcStepper::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
+    CdrPlasmaImExSdcStepper::extrapolateToEB(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     CdrPlasmaImExSdcStepper::projectFlux(*eb_gradients[i], eb_gradient);
   }
 }
@@ -1585,11 +1585,9 @@ void CdrPlasmaImExSdcStepper::computeCdrFluxes(const Vector<EBAMRCellData*>& a_p
     extrap_cdr_gradients.push_back(&grad_eb);  // Computed in computeCdrEbStates
   }
 
-
   // Extrapolate densities, velocities, and fluxes
-  Vector<EBAMRCellData*> cdr_velocities = m_cdr->getVelocities();
   CdrPlasmaStepper::computeExtrapolatedFluxesEB(extrap_cdr_fluxes, a_phis, 0.0);
-  CdrPlasmaStepper::computeExtrapolatedVelocities(extrap_cdr_velocities, cdr_velocities, m_cdr->getPhase());
+  CdrPlasmaStepper::computeExtrapolatedVelocitiesEB(extrap_cdr_velocities);
 
   // Compute RTE flux on the boundary
   for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
