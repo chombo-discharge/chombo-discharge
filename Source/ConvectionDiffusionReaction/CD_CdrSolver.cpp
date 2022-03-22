@@ -23,6 +23,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_DischargeIO.H>
 #include <CD_Random.H>
+#include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int CdrSolver::m_comp;
@@ -242,7 +243,7 @@ void CdrSolver::allocateInternals(){
   if(m_isDiffusive){
     m_amr->allocate(m_faceCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
     m_amr->allocate(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase, m_nComp);
-    
+
     DataOps::setValue(m_faceCenteredDiffusionCoefficient, 0.0);
     DataOps::setValue(m_ebCenteredDiffusionCoefficient,   0.0);
   }
@@ -270,8 +271,9 @@ void CdrSolver::allocateInternals(){
   DataOps::setValue(m_massDifference,      0.0);
   DataOps::setValue(m_nonConservativeDivG, 0.0);
 
-  // Define interpolation stencils
+  // Define stencils. 
   this->defineInterpolationStencils();
+  this->defineDphiDnStencils();  
 }
 
 void CdrSolver::deallocateInternals(){
@@ -460,6 +462,97 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
       // Redistribute mass on the level and across the coarse-fine boundaries.
       this->hyperbolicRedistribution(a_divG);      // Level redistribution. 
       this->coarseFineRedistribution(a_divG);      // Coarse-fine redistribution
+    }
+  }
+}
+
+void CdrSolver::extrapFluxEB(EBAMRIVData& a_fluxEB, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) {
+  CH_TIME("CdrSolver::extrapFluxEB(EBAMRIVData, EBAMRCellData, Real)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::extrapFluxEB(EBAMRIVData, EBAMRCellData, Real)" << endl;
+  }
+
+  CH_assert(a_fluxEB [0]->nComp() == 1);
+  CH_assert(a_cellPhi[0]->nComp() == 1);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain&     domain = m_amr->getDomains()[lvl];    
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx     = m_amr->getDx()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box      cellBox = dbl  [dit()];
+      const EBISBox& ebisBox = ebisl[dit()];
+
+      BaseIVFAB<Real>& flux    = (*a_fluxEB [lvl])[dit()];
+      const EBCellFAB& phi     = (*a_cellPhi[lvl])[dit()];
+
+      const bool isAllRegular = ebisBox.isAllRegular();
+      const bool isAllCovered = ebisBox.isAllCovered();
+      const bool isIrregular  = !isAllRegular && !isAllCovered;
+
+      if(isIrregular) {
+
+	// Extrapolation stencils for velocity and diffusion coefficient.
+	const BaseIVFAB<VoFStencil>& ebInterpStencils  = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase)[lvl][dit()];
+	const BaseIVFAB<VoFStencil>& normDerivStencils = (*(m_stencilsDphiDn[lvl]))[dit()];
+
+	auto extrapKernel = [&] (const VolIndex& vof) -> void {
+	  flux(vof, m_comp) = 0;
+
+	  // Interpolation stencil and stencil for computing d(phi)/dn
+	  const VoFStencil& interpSten    = ebInterpStencils (vof, m_comp);
+	  const VoFStencil& normDerivSten = normDerivStencils(vof, m_comp);
+
+	  // If mobile, add extrapolated advective flux. 
+	  if(m_isMobile){
+	    const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[dit()];
+	    
+	    Real phiEB  = 0.0; // Phi on EB
+	    Real velEB  = 0.0; // Velocity on EB
+
+	    // Compute normal velocity on EB face.
+	    RealVect v = RealVect::Zero;
+	    for (int i = 0; i < interpSten.size(); i++){
+	      for (int dir = 0; dir < SpaceDim; dir++){
+		v[dir] += interpSten.weight(i) * cellVel(interpSten.vof(i), dir);
+	      }
+	    }
+	    velEB = v.dotProduct(ebisBox.normal(vof)); // Negative sign because normal points into the computational region. 
+
+	    // Extrapolate phi to EB centroid. 
+	    for (int i = 0; i < interpSten.size(); i++){
+	      phiEB += interpSten.weight(i) * phi(interpSten.vof(i), m_comp);
+	    }
+
+	    flux(vof, m_comp) += phiEB * velEB;
+	  }
+
+	  // If diffusive, add diffusion flux D * d(phi)/dn. 
+	  if(m_isDiffusive) {
+	    const BaseIVFAB<Real>& dcoEB = (*m_ebCenteredDiffusionCoefficient[lvl])[dit()];      	    
+
+	    // Compute d(phi)/dn
+	    Real gradEB = 0.0; // grad(phi) on EB.	    	    
+	    for (int i = 0; i < normDerivSten.size(); i++){
+	      gradEB += normDerivSten.weight(i) * phi(normDerivSten.vof(i), m_comp);
+	    }
+
+	    flux(vof, m_comp) -= dcoEB(vof, m_comp) * gradEB;
+	  }
+
+	  // Flip sign because everything was computed with the EB normal point into the cell but we want
+	  // to have it outwards.
+	  flux(vof, m_comp) = -flux(vof, m_comp);
+	};
+
+	// Kernel region.
+	VoFIterator& vofit = (*(m_amr->getVofIterator(m_realm, m_phase)[lvl]))[dit()];
+
+	// Execute kernel.
+	BoxLoops::loop(vofit, extrapKernel);
+      }
     }
   }
 }
@@ -1084,6 +1177,52 @@ void CdrSolver::defineInterpolationStencils(){
   }
 }
 
+void CdrSolver::defineDphiDnStencils(){
+  CH_TIME("CdrSolver::defineDphiDnStencils()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::defineDphiDnStencils()" << endl;
+  }
+
+  m_stencilsDphiDn.resize(1 + m_amr->getFinestLevel());
+  
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real&              dx     = m_amr->getDx()[lvl];
+
+    m_stencilsDphiDn[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> > (dbl));
+
+    // Go through each grid patch and define stencil. Use a first order least squares stencil which should basically always exist. 
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box&     cellBox = dbl  [dit()];
+      const EBISBox& ebisBox = ebisl[dit()];
+
+      // Define stencils over cut-cells in this patch. 
+      BaseIVFAB<VoFStencil>& stencils = (*m_stencilsDphiDn[lvl])[dit()];
+      stencils.define(ebisBox.getIrregIVS(cellBox), ebisBox.getEBGraph(), m_nComp);
+
+      // Stencil definition kernel. This computes a first order stencil for dphi/dn on the boundary. 
+      auto stencilKernel = [&] (const VolIndex& vof) -> void {
+	constexpr int order  = 1;
+	constexpr int radius = 1;
+	constexpr int p      = 1;
+
+	// Stencil that contains d/dx, d/dx, d/dz, but stored using the multi-index ordering. 
+	const VoFStencil gradSten = LeastSquares::getGradSten(vof, Location::Cell::Boundary, Location::Cell::Center, ebisBox, dx, radius, p, order);
+
+	// Project the stencil along the boundary normal. 
+	stencils(vof, m_comp) = LeastSquares::projectGradSten(gradSten, ebisBox.normal(vof));
+      };
+
+      // Run kernel in cut-cells.
+      VoFIterator& vofit = (*(m_amr->getVofIterator(m_realm, m_phase)[lvl]))[dit()];
+
+      BoxLoops::loop(vofit, stencilKernel);
+    }
+  }
+}
+
 void CdrSolver::incrementRedistFlux(){
   CH_TIME("CdrSolver::incrementRedistFlux()");
   if(m_verbosity > 5){
@@ -1670,7 +1809,7 @@ void CdrSolver::setDiffusionCoefficient(const std::function<Real(const RealVect 
   if(m_verbosity > 5){
     pout() << m_name + "::setDiffusionCoefficient(std::function<Real(const RealVect a_position)>)" << endl;
   }
-  
+
   DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
   DataOps::setValue(m_ebCenteredDiffusionCoefficient,   a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
 }

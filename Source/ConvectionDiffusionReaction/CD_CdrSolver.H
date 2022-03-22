@@ -93,7 +93,7 @@ public:
   */
   void setDomainBcType(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::BcType a_bcType);
 
-    /*!
+  /*!
     @brief Set domain bc function on particular domain side
     @param[in] a_domainSide   Domain side
     @param[in] a_fluxFunction Flux function
@@ -124,7 +124,7 @@ public:
 			    const EBAMRCellData& a_source,
 			    const Real           a_dt) = 0;
 
-    /*!
+  /*!
     @brief Implicit diffusion Crank-Nicholson advance without source term.
     @param[inout] a_newPhi Solution at time t + dt
     @param[in]    a_oldPhi Solution at time t
@@ -204,6 +204,15 @@ public:
     @param[in]    a_conservativeOnly If true, we compute div(G)=1/dx*sum(fluxes), which does not involve redistribution.
   */
   virtual void computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux, const bool a_conservativeOnly);
+
+  /*!
+    @brief Extrapolate the flux to the EB.
+    @param[out] a_fluxEB   Flux on EB centroids
+    @param[in]  a_cellPhi  Phi on cell centers
+    @param[in]  a_extrapDt Time centering/extrapolation (if the advective integrator can do it)
+    @note This routine does straightforward extrapolation to the EB. No limiters involved (override it in sub-classes)
+  */
+  virtual void extrapFluxEB(EBAMRIVData& a_fluxEB, const EBAMRCellData& a_cellPhi, const Real a_extrapDt);
 
   /*!
     @brief Compute a random gaussian white noise source term. 
@@ -616,6 +625,11 @@ protected:
   Vector<RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > > > m_interpStencils[SpaceDim];
 
   /*!
+    @brief Stencils for computing Dphi/Dn.
+  */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_stencilsDphiDn;
+
+  /*!
     @brief Phase
   */
   phase::which_phase m_phase;
@@ -828,7 +842,8 @@ protected:
     @param[in]  a_phi      Phi on cell center
     @param[in]  a_extrapDt Time centering/extrapolation (if the advective integrator can do it)
   */
-  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;  
+  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;
+
 
   /*!
     @brief Set up face-centered advection flux.
@@ -1063,6 +1078,12 @@ protected:
     @note This computes standard finite-difference stencils for interpolating from face centers to face centroids. 
   */
   virtual void defineInterpolationStencils();
+
+  /*!
+    @brief Define stencils for computing Dphi/Dn. 
+    @note This computes least squares reconstruction stencils for computing d(phi)/dn. Stencils are first order.
+  */
+  virtual void defineDphiDnStencils();  
 
   /*!
     @brief Parses domain BC options
