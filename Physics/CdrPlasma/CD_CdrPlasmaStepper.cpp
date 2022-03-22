@@ -2604,68 +2604,20 @@ void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*
   }
 }
 
-void CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extrapCdrFluxesEB,
-						 const Vector<EBAMRCellData*> a_cdrDensities,
-						 const Vector<EBAMRCellData*> a_cdrVelocities,
-						 const phase::which_phase     a_phase){
-  CH_TIME("CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>, Vector<EBAMRCellData*>x2, phase)");
-  if(m_verbosity > 5){
-    pout() << "CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>, Vector<EBAMRCellData*>x2, phase)" << endl;
-  }
-
+void CdrPlasmaStepper::computeExtrapolatedFluxesEB(Vector<EBAMRIVData*>&         a_extrapCdrFluxesEB,
+						   const Vector<EBAMRCellData*>& a_cdrDensities,
+						   const Real                    a_dt) {
   // Number of CDR solvers that we have
   const int numCdrSolvers = m_physics->getNumCdrSpecies();
 
   CH_assert(a_extrapCdrFluxesEB.size() == numCdrSolvers);
   CH_assert(a_cdrDensities.     size() == numCdrSolvers);
-  CH_assert(a_cdrVelocities.    size() == numCdrSolvers);    
+  CH_assert(a_cdrVelocities.    size() == numCdrSolvers);
 
-  // This is how we do it: We extrapolate everything to the BC first. Then we compute the flux and project it along the EB. We do this because
-  // extrapolation stencils may have negative weights, and v*n may therefore nonphysically change sign. Better to compute
-  // F = v_extrap*Max(0.0, phi_extrap) since we expect v to be "smooth" and phi_extrap to be a noisy bastard
-
-  // Allocate some data holders we can use for holding the fluxes. 
-  EBAMRIVData ebFlux; 
-  EBAMRIVData ebVel;
-  EBAMRIVData ebPhi;
-
-  m_amr->allocate(ebFlux, m_realm, a_phase, SpaceDim);
-  m_amr->allocate(ebVel,  m_realm, a_phase, SpaceDim);
-  m_amr->allocate(ebPhi,  m_realm, a_phase, 1       );
-
-  // This stencil takes cell centered data and puts it on the centroid. 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interpStencils = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
-
-  // Go through the CDR solvers. 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
     const int idx = solverIt.index();
     
-    RefCountedPtr<CdrSolver>& solver = solverIt();
-
-    // If the solver is mobile we compute the extrapolated fluxes -- otherwise it is zero (this is only drift fluxes).
-    if(solver->isMobile()){
-
-      // Compute the velocity and density on the EB. 
-      interpStencils.apply(ebVel, *a_cdrVelocities[idx]);
-      interpStencils.apply(ebPhi, *a_cdrDensities[idx]);
-
-      // No negative densities please. 
-      DataOps::floor(ebPhi, 0.0);
-
-      // Now compute v*phi on the EB -- stored in an EBAMRIVData holder with SpaceDim components. 
-      DataOps::setValue(ebFlux, 0.0);
-      DataOps::incr(ebFlux, ebVel, 1.0);
-      DataOps::multiplyScalar(ebFlux, ebPhi);
-
-      // Project the flux in order to only get the normal component. 
-      this->projectFlux(*a_extrapCdrFluxesEB[idx], ebFlux);
-
-      // Synchronize with deeper levels. 
-      m_amr->averageDown(*a_extrapCdrFluxesEB[idx], m_realm, a_phase);
-    }
-    else{
-      DataOps::setValue(*a_extrapCdrFluxesEB[idx], 0.0);
-    }
+    solverIt()->extrapFluxEB(*a_extrapCdrFluxesEB[idx], *a_cdrDensities[idx], a_dt);
   }
 }
 

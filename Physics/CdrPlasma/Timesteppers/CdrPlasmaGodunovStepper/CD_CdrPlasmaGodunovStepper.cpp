@@ -771,7 +771,7 @@ void CdrPlasmaGodunovStepper::computeCdrFluxesEB(){
   // Extrapolate the CDR fluxes and velocities to the EB. After this, we have all
   // the pertinent CDR quantities we need in our BC framework. 
   Vector<EBAMRCellData*> cdrVelocities = m_cdr->getVelocities();
-  CdrPlasmaStepper::computeExtrapolatedFluxes    (extrapCdrFluxesEB,   cdrDensities,  cdrVelocities, m_cdr->getPhase());
+  CdrPlasmaStepper::computeExtrapolatedFluxesEB  (extrapCdrFluxesEB,   cdrDensities, 0.0);
   CdrPlasmaStepper::computeExtrapolatedVelocities(extrapCdrVelocitiesEB, cdrVelocities,                m_cdr->getPhase());
 
   // Compute RTE flux on the boundary

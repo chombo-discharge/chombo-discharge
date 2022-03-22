@@ -1588,7 +1588,7 @@ void CdrPlasmaImExSdcStepper::computeCdrFluxes(const Vector<EBAMRCellData*>& a_p
 
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->getVelocities();
-  CdrPlasmaStepper::computeExtrapolatedFluxes(extrap_cdr_fluxes, a_phis, cdr_velocities, m_cdr->getPhase());
+  CdrPlasmaStepper::computeExtrapolatedFluxesEB(extrap_cdr_fluxes, a_phis, 0.0);
   CdrPlasmaStepper::computeExtrapolatedVelocities(extrap_cdr_velocities, cdr_velocities, m_cdr->getPhase());
 
   // Compute RTE flux on the boundary

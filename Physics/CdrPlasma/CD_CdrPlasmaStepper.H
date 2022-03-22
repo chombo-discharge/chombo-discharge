@@ -827,16 +827,14 @@ namespace Physics {
 					  const int                                  a_lvl);
 
       /*!
-	@brief Extrapolate cell-centered fluxes to the EB centroid.
+	@brief Extrapolate CDR fluxes to the EB centroid
 	@param[out] a_extrapCdrFluxesEB CDR fluxes extrapolated to the EB.
 	@param[in]  a_cdrDensities      CDR densities on the cell center
-	@param[in]  a_cdrVelocities     CDR velocities on the cell center
-	@param[in]  a_phase             Phase
+	@param[in]  a_dt                Time step, in case CDR solvers do anything nifty with time-centering. 
       */
-      virtual void computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extrapCdrFluxesEB,
-					     const Vector<EBAMRCellData*> a_cdrDensities,
-					     const Vector<EBAMRCellData*> a_cdrVelocities,
-					     const phase::which_phase     a_phase);
+      virtual void computeExtrapolatedFluxesEB(Vector<EBAMRIVData*>&         a_extrapCdrFluxesEB,
+					       const Vector<EBAMRCellData*>& a_cdrDensities,
+					       const Real                    a_dt);
 
 
       /*!
