@@ -204,6 +204,14 @@ public:
     @param[in]    a_conservativeOnly If true, we compute div(G)=1/dx*sum(fluxes), which does not involve redistribution.
   */
   virtual void computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux, const bool a_conservativeOnly);
+  
+  /*!
+    @brief Compute d(phi)/dn on the EB. 
+    @param[out] a_DphiDn   d(phi)/dn
+    @param[in]  a_cellPhi  Phi on cell centers
+    @note The normal vector points into the fluid. 
+  */
+  virtual void computeDphiDn(EBAMRIVData& a_DphiDn, const EBAMRCellData& a_cellPhi);
 
   /*!
     @brief Extrapolate the flux to the EB.
@@ -225,12 +233,20 @@ public:
 
   /*!
     @brief Extrapolate velocity to the EB.
+    @details This calls the other version with a_cellVel = m_cellVelocity.
+    @param[out] a_ebVel    Velocity on EB
+    @note This routine does straightforward extrapolation to the EB. 
+  */
+  virtual void extrapVelToEB(EBAMRIVData& a_velEB);
+
+  /*!
+    @brief Extrapolate velocity to the EB.
     @details a_velEB is the extrapolated cell-centered velocity, projected along the EB normal. 
     @param[out] a_ebVel    Velocity on EB
     @param[in]  a_cellVel  Velocity on cell centers
     @note This routine does straightforward extrapolation to the EB. 
   */
-  virtual void extrapVelToEB(EBAMRIVData& a_velEB);
+  virtual void extrapVelToEB(EBAMRIVData& a_velEB, const EBAMRCellData& a_cellVel);  
 
   /*!
     @brief Compute a random gaussian white noise source term. 

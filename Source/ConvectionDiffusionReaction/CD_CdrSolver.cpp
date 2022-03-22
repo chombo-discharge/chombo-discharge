@@ -466,10 +466,61 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
   }
 }
 
-void CdrSolver::extrapFluxEB(EBAMRIVData& a_fluxEB, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) {
-  CH_TIME("CdrSolver::extrapFluxEB(EBAMRIVData, EBAMRCellData, Real)");
+void CdrSolver::computeDphiDn(EBAMRIVData& a_DphiDn, const EBAMRCellData& a_cellPhi) {
+  CH_TIME("CdrSolver::computeDphiDn(EBAMRIVData, EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::extrapFluxEB(EBAMRIVData, EBAMRCellData, Real)" << endl;
+    pout() << m_name + "::computeDphiDn(EBAMRIVData, EBAMRCellData)" << endl;
+  }
+
+  CH_assert(a_fluxEB [0]->nComp() == 1);
+  CH_assert(a_cellPhi[0]->nComp() == 1);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain&     domain = m_amr->getDomains()[lvl];    
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx     = m_amr->getDx()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box      cellBox = dbl  [dit()];
+      const EBISBox& ebisBox = ebisl[dit()];
+
+      BaseIVFAB<Real>& dphidn = (*a_DphiDn [lvl])[dit()];
+      const EBCellFAB& phi    = (*a_cellPhi[lvl])[dit()];
+
+      const bool isAllRegular = ebisBox.isAllRegular();
+      const bool isAllCovered = ebisBox.isAllCovered();
+      const bool isIrregular  = !isAllRegular && !isAllCovered;
+
+      if(isIrregular) {
+
+	const BaseIVFAB<VoFStencil>& normDerivStencils = (*(m_stencilsDphiDn[lvl]))[dit()];
+
+	auto extrapKernel = [&] (const VolIndex& vof) -> void {
+
+	  const VoFStencil& normDerivSten = normDerivStencils(vof, m_comp);
+
+	  dphidn(vof, m_comp) = 0;
+	  
+	  for (int i = 0; i < normDerivSten.size(); i++){
+	    dphidn(vof, m_comp) += normDerivSten.weight(i) * phi(normDerivSten.vof(i), m_comp);
+	  }
+	};
+
+	// Kernel region.
+	VoFIterator& vofit = (*(m_amr->getVofIterator(m_realm, m_phase)[lvl]))[dit()];
+
+	// Execute kernel.
+	BoxLoops::loop(vofit, extrapKernel);
+      }
+    }
+  }
+}
+
+void CdrSolver::extrapFluxToEB(EBAMRIVData& a_fluxEB, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) {
+  CH_TIME("CdrSolver::extrapFluxToEB(EBAMRIVData, EBAMRCellData, Real)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::extrapFluxToEB(EBAMRIVData, EBAMRCellData, Real)" << endl;
   }
 
   CH_assert(a_fluxEB [0]->nComp() == 1);
@@ -557,10 +608,131 @@ void CdrSolver::extrapFluxEB(EBAMRIVData& a_fluxEB, const EBAMRCellData& a_cellP
   }
 }
 
+void CdrSolver::extrapPhiToEB(EBAMRIVData& a_phiEB, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) {
+  CH_TIME("CdrSolver::extrapPhiToEB(EBAMRIVData, EBAMRCellData, Real)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::extrapPhiEB(EBAMRIVData, EBAMRCellData, Real)" << endl;
+  }
+
+  CH_assert(a_phiEB  [0]->nComp() == 1);
+  CH_assert(a_cellPhi[0]->nComp() == 1);
+ 
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain&     domain = m_amr->getDomains()[lvl];    
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box      cellBox = dbl  [dit()];
+      const EBISBox& ebisBox = ebisl[dit()];
+
+      BaseIVFAB<Real>& ebPhi   = (*a_phiEB [lvl])[dit()];
+      const EBCellFAB& cellPhi = (*a_cellPhi[lvl])[dit()];
+
+      const bool isAllRegular = ebisBox.isAllRegular();
+      const bool isAllCovered = ebisBox.isAllCovered();
+      const bool isIrregular  = !isAllRegular && !isAllCovered;
+
+      if(isIrregular) {
+	const BaseIVFAB<VoFStencil>& ebInterpStencils  = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase)[lvl][dit()];
+
+	auto extrapKernel = [&] (const VolIndex& vof) -> void {
+	  const VoFStencil& interpSten = ebInterpStencils (vof, m_comp);
+
+	  // Extrapolate phi to EB centroid.
+	  ebPhi(vof, m_comp)= 0.0;
+	  for (int i = 0; i < interpSten.size(); i++) {
+	    ebPhi(vof, m_comp) += interpSten.weight(i) * cellPhi(interpSten.vof(i), m_comp);
+	  }
+	};
+
+	// Kernel region.
+	VoFIterator& vofit = (*(m_amr->getVofIterator(m_realm, m_phase)[lvl]))[dit()];
+
+	// Execute kernel.
+	BoxLoops::loop(vofit, extrapKernel);
+      }
+    }
+  }
+}
+
+void CdrSolver::extrapVelToEB(EBAMRIVData& a_ebVel) {
+  CH_TIME("CdrSolver::extrapFluxEB(EBAMRIVData)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::extrapFluxEB(EBAMRIVData)" << endl;
+  }
+
+  if(m_isMobile){
+    this->extrapVelToEB(a_ebVel, m_cellVelocity);
+  }
+  else{
+    DataOps::setValue(a_ebVel, 0.0);
+  }
+}
+
+void CdrSolver::extrapVelToEB(EBAMRIVData& a_ebVel, const EBAMRCellData& a_cellVel) {
+  CH_TIME("CdrSolver::extrapFluxEB(EBAMRIVData, EBAMRCellData)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::extrapFluxEB(EBAMRIVData, EBAMRCellData)" << endl;
+  }
+
+  CH_assert(a_ebVel  [0]->nComp() == 1       );
+  CH_assert(a_cellVel[0]->nComp() == SpaceDim);
+
+  DataOps::setValue(a_ebVel, 0.0);
+
+    
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain&     domain = m_amr->getDomains()[lvl];    
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box      cellBox = dbl  [dit()];
+      const EBISBox& ebisBox = ebisl[dit()];
+
+      BaseIVFAB<Real>& ebVel   = (*a_ebVel  [lvl])[dit()];
+      const EBCellFAB& cellVel = (*a_cellVel[lvl])[dit()];
+
+      const bool isAllRegular = ebisBox.isAllRegular();
+      const bool isAllCovered = ebisBox.isAllCovered();
+      const bool isIrregular  = !isAllRegular && !isAllCovered;
+
+      if(isIrregular) {
+	const BaseIVFAB<VoFStencil>& ebInterpStencils  = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase)[lvl][dit()];
+
+	auto extrapKernel = [&] (const VolIndex& vof) -> void {
+	  const VoFStencil& interpSten = ebInterpStencils (vof, m_comp);
+
+	  const RealVect normal = ebisBox.normal(vof);
+
+	  // Extrapolate phi to EB centroid.
+	  ebVel(vof, m_comp)= 0.0;
+	    
+	  for (int i = 0; i < interpSten.size(); i++) {
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      ebVel(vof, m_comp) += interpSten.weight(i) * cellVel(interpSten.vof(i), dir) * normal[dir];
+	    }
+	  }
+
+	  // Because the normal points into the fluid
+	  ebVel(vof, m_comp) = -ebVel(vof, m_comp);
+	};
+
+	// Kernel region.
+	VoFIterator& vofit = (*(m_amr->getVofIterator(m_realm, m_phase)[lvl]))[dit()];
+
+	// Execute kernel.
+	BoxLoops::loop(vofit, extrapKernel);
+      }
+    }
+  }
+}
+
 void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
 				     const EBAMRFluxData& a_facePhi,
 				     const EBAMRFluxData& a_faceVelocity,
-				     const bool           a_addDomainFlux){
+				     const bool           a_addDomainFlux) {
   CH_TIME("CdrSolver::computeAdvectionFlux(EBAMRFluxData, EBAMRFluxData, EBAMRFluxData, bool)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeAdvectionFlux(EBAMRFluxData, EBAMRFluxData, EBAMRFluxData, bool)" << endl;
