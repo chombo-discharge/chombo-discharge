@@ -255,4 +255,122 @@ void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
   }
 }
 
+void CdrGodunov::extrapFluxToEB(EBAMRIVData& a_fluxEB, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) {
+  CH_TIME("CdrGodunov::extrapFluxToEB(EBAMRIVData, EBAMRCellData, Real)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::extrapFluxToEB(EBAMRIVData, EBAMRCellData, Real)" << endl;
+  }
+
+  CH_assert(a_fluxEB [0]->nComp() == 1);
+  CH_assert(a_cellPhi[0]->nComp() == 1);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain&     domain = m_amr->getDomains()[lvl];    
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx     = m_amr->getDx()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box      cellBox = dbl  [dit()];
+      const EBISBox& ebisBox = ebisl[dit()];
+
+      BaseIVFAB<Real>& flux    = (*a_fluxEB [lvl])[dit()];
+      const EBCellFAB& phi     = (*a_cellPhi[lvl])[dit()];
+
+      const bool isAllRegular = ebisBox.isAllRegular();
+      const bool isAllCovered = ebisBox.isAllCovered();
+      const bool isIrregular  = !isAllRegular && !isAllCovered;
+
+      if(isIrregular) {
+
+	EBCellFAB slopes[SpaceDim];
+	if(m_isMobile){ // Compute slopes
+	  const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[dit()];
+	  const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[dit()];	
+	
+	  EBAdvectPatchIntegrator& ebAdvectPatch = m_levelAdvect[lvl]->getPatchAdvect(dit());
+
+	  // These are settings for EBAdvectPatchIntegrator -- it's not a very pretty design but the object has settings
+	  // that permits it to run advection code (through setDoingVel(0)). 
+	  ebAdvectPatch.setVelocities(cellVel, faceVel);       // Set cell/face velocities
+	  ebAdvectPatch.setDoingVel(0);                        // If setDoingVel(0) EBAdvectLevelIntegrator advects a scalar. 
+	  ebAdvectPatch.setEBPhysIBC(ExtrapAdvectBCFactory()); // Set the BC object. It won't matter what we use here because CdrSolver runs its own BC routines. 
+	  ebAdvectPatch.setCurComp(m_comp);                    // Solving for m_comp = 0
+
+	  // Define and compute slopes. 
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    slopes[dir].clone(phi);
+
+	    ebAdvectPatch.slope(slopes[dir],
+				phi,
+				dir, cellBox);
+	  }
+	}	
+
+	// Extrapolation stencils for velocity and diffusion coefficient.
+	const BaseIVFAB<VoFStencil>& ebInterpStencils  = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase)[lvl][dit()];
+	const BaseIVFAB<VoFStencil>& normDerivStencils = (*(m_stencilsDphiDn[lvl]))[dit()];
+
+	auto extrapKernel = [&] (const VolIndex& vof) -> void {
+	  flux(vof, m_comp) = 0;
+
+	  // Interpolation stencil and stencil for computing d(phi)/dn
+	  const VoFStencil& interpSten    = ebInterpStencils (vof, m_comp);
+	  const VoFStencil& normDerivSten = normDerivStencils(vof, m_comp);
+
+	  const RealVect bndryCentroid = ebisBox.bndryCentroid(vof);
+
+	  // If mobile, add extrapolated advective flux. 
+	  if(m_isMobile){
+	    const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[dit()];
+	    
+	    Real phiEB  = 0.0; // Phi on EB
+	    Real velEB  = 0.0; // Velocity on EB
+
+	    // Compute normal velocity on EB face.
+	    RealVect v = RealVect::Zero;
+	    for (int i = 0; i < interpSten.size(); i++){
+	      for (int dir = 0; dir < SpaceDim; dir++){
+		v[dir] += interpSten.weight(i) * cellVel(interpSten.vof(i), dir);
+	      }
+	    }
+	    velEB = v.dotProduct(ebisBox.normal(vof)); // Negative sign because normal points into the computational region. 
+
+	    // Extrapolate phi to EB centroid.
+	    phiEB = phi(vof, m_comp);
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      phiEB += slopes[dir](vof, m_comp) * bndryCentroid[dir];
+	    }
+
+	    flux(vof, m_comp) += phiEB * velEB;
+	  }
+
+	  // If diffusive, add diffusion flux D * d(phi)/dn. 
+	  if(m_isDiffusive) {
+	    const BaseIVFAB<Real>& dcoEB = (*m_ebCenteredDiffusionCoefficient[lvl])[dit()];      	    
+
+	    // Compute d(phi)/dn
+	    Real gradEB = 0.0; // grad(phi) on EB.	    	    
+	    for (int i = 0; i < normDerivSten.size(); i++){
+	      gradEB += normDerivSten.weight(i) * phi(normDerivSten.vof(i), m_comp);
+	    }
+
+	    flux(vof, m_comp) -= dcoEB(vof, m_comp) * gradEB;
+	  }
+
+	  // Flip sign because everything was computed with the EB normal point into the cell but we want
+	  // to have it outwards.
+	  flux(vof, m_comp) = -flux(vof, m_comp);
+	};
+
+	// Kernel region.
+	VoFIterator& vofit = (*(m_amr->getVofIterator(m_realm, m_phase)[lvl]))[dit()];
+
+	// Execute kernel.
+	BoxLoops::loop(vofit, extrapKernel);
+      }
+    }
+  }
+}
+
 #include <CD_NamespaceFooter.H>

@@ -62,6 +62,14 @@ public:
   */
   virtual Real computeAdvectionDt() override;
 
+  /*!
+    @brief Extrapolate the flux to the EB.
+    @param[out] a_fluxEB   Flux on EB centroids
+    @param[in]  a_cellPhi  Phi on cell centers
+    @param[in]  a_extrapDt Time centering/extrapolation (if the advective integrator can do it)
+  */
+  virtual void extrapFluxToEB(EBAMRIVData& a_fluxEB, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) override;  
+
 protected:
 
   /*!
