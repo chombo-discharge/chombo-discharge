@@ -212,7 +212,25 @@ public:
     @param[in]  a_extrapDt Time centering/extrapolation (if the advective integrator can do it)
     @note This routine does straightforward extrapolation to the EB. No limiters involved (override it in sub-classes)
   */
-  virtual void extrapFluxEB(EBAMRIVData& a_fluxEB, const EBAMRCellData& a_cellPhi, const Real a_extrapDt);
+  virtual void extrapFluxToEB(EBAMRIVData& a_fluxEB, const EBAMRCellData& a_cellPhi, const Real a_extrapDt);
+
+  /*!
+    @brief Extrapolate phi to the EB.
+    @param[out] a_phiEB    Phi on EB
+    @param[in]  a_cellPhi  Phi on cell centers
+    @param[in]  a_extrapDt Time centering/extrapolation (if the advective integrator can do it)
+    @note This routine does straightforward extrapolation to the EB. No limiters involved (override it in sub-classes)
+  */
+  virtual void extrapPhiToEB(EBAMRIVData& a_phiEB, const EBAMRCellData& a_cellPhi, const Real a_extrapDt);
+
+  /*!
+    @brief Extrapolate velocity to the EB.
+    @details a_velEB is the extrapolated cell-centered velocity, projected along the EB normal. 
+    @param[out] a_ebVel    Velocity on EB
+    @param[in]  a_cellVel  Velocity on cell centers
+    @note This routine does straightforward extrapolation to the EB. 
+  */
+  virtual void extrapVelToEB(EBAMRIVData& a_velEB);
 
   /*!
     @brief Compute a random gaussian white noise source term. 
