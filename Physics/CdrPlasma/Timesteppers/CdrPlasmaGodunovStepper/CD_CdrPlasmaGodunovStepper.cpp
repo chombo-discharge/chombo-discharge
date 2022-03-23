@@ -1078,6 +1078,15 @@ void CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt){
 	  MayDay::Error("CdrPlasmaGodunovStepper::advanceTransportExplicitField -- logic bust");
 	}
       }
+
+      // Floor mass or not?
+      if(m_floor){
+	this->floorMass(phi, "CdrPlasmaGodunovStepper::advanceTransportExplicitField", solver);
+      }            
+
+      // Coarsen the solution and update ghost cells. 
+      m_amr->averageDown(phi, m_realm, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_realm, m_cdr->getPhase());
     }
 
     // Do the diffusion advance. This can be explicit or implicit. 
@@ -1218,7 +1227,6 @@ void CdrPlasmaGodunovStepper::advanceCdrReactions(const Real a_dt){
     const EBAMRCellData& src = solver->getSource();
 
     DataOps::incr(phi, src, a_dt);
-
 
     // Floor mass if asked for it. If running in debug mode we compute the mass before and after flooring it.
     if(m_floor){
