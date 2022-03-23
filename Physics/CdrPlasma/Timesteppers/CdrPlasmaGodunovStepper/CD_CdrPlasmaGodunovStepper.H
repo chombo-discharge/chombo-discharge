@@ -132,44 +132,45 @@ namespace Physics {
     protected:
 
       /*!
-	@brief Enum for distinguishing various transport algorithms
+	@brief Enum for representing the coupling between the electric field and charge transport
       */
-      enum class TransportAlgorithm {
-	SemiImplicit,
+      enum class FieldCoupling {
+	Explicit,
+	SemiImplicit
+      };
+
+      /*!
+	@brief Enum for switching between various advection solvers.
+      */
+      enum class AdvectionSolver {
 	Euler,
 	RK2,
+	MUSCL
       };
 
       /*!
 	@brief Enum for distinguishing various ways we handle diffusion. 
       */      
-      enum class WhichDiffusionAlgorithm{
+      enum class DiffusionAlgorithm{
 	Explicit,
 	Implicit,
 	Automatic,
-      };
-
-      /*!
-	@brief Enum for switching between implicit Euler or implicit RK2 (using the TGA). 
-      */
-      enum class DiffusionSolver {
-	Euler,
-      };
+      };      
 
       /*!
 	@brief For figuring out which transport algorithm we use. 
       */      
-      TransportAlgorithm m_transportAlgorithm;            
+      FieldCoupling m_fieldCoupling;            
 
       /*!
 	@brief For figuring out how we handle diffusion.
       */
-      WhichDiffusionAlgorithm m_whichDiffusionAlgorithm;
+      DiffusionAlgorithm m_diffusionAlgorithm;
 
       /*!
-	@brief Diffusion solver
+	@brief Advection solver
       */
-      DiffusionSolver m_diffusionSolver;
+      AdvectionSolver m_advectionSolver;
 
       /*!
 	@brief Timer for run-time profiling
@@ -258,6 +259,11 @@ namespace Physics {
       Real m_implicitDiffusionThreshold;
 
       /*!
+	@brief Integration order for diffusion equations
+      */
+      int m_diffusionOrder;
+
+      /*!
 	@brief If true, we are using implicit diffusion. Otherwise it's explicit diffusion
       */
       std::vector<bool> m_useImplicitDiffusion;
@@ -332,7 +338,7 @@ namespace Physics {
 	@brief Advance the transport problem using the explicit or explicit-implicit Euler rule
 	@param[in] a_dt Time step.
       */
-      void advanceTransportEuler(const Real a_dt);
+      void advanceTransportExplicitField(const Real a_dt);
 
       /*!
 	@brief Advance the transport problem using a semi-implicit formulation for the electric field. 
@@ -390,19 +396,19 @@ namespace Physics {
       void computeSourceTerms(const Real a_dt);
 
       /*!
-	@brief Parse how we handle diffusion.
-      */
-      void parseDiffusion();
-
-      /*!
 	@brief Parse centering for the advective integrator.
       */
       void parseAdvection();
+      
+      /*!
+	@brief Parse how we handle diffusion.
+      */
+      void parseDiffusion();      
 
       /*!
 	@brief Parse the transport algorithm
       */
-      void parseTransport();
+      void parseField();
 
       /*!
 	@brief Parse whether or not we should floor the mass
