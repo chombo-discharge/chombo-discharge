@@ -1132,7 +1132,8 @@ void CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt){
   }
   m_timer->stopEvent("Transport advance");  
 
-  // Advance the sigma equation
+  // Advance the sigma equation. This may seem weird but we've kept the flux through the EB constant during the transport step, so it
+  // doesn't matter if we did an Euler or Heun advance in the advective step. 
   EBAMRIVData&       sigma = m_sigma->getPhi();
   const EBAMRIVData& rhs   = m_sigma->getFlux();
   
