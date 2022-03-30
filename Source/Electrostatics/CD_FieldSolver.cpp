@@ -1123,12 +1123,12 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
 
 	// This is true if the current EBISBox covers a region that is either inside the gas phase
 	// or inside the solid phase. 
-	const bool validData = !isGasCovered && !isSolidCovered;
+	const bool validData = !(isGasCovered && isSolidCovered);
 	if(validData){
 
-	  if(isGasCovered && isSolidRegular){
+	  if(isSolidRegular){
 	    // In this case we are purely inside the solid region -- take the data from the solid phase.
-	    fabGas += fabSolid;
+	    fabGas.copy(fabSolid);
 	  }
 	  else if(isGasIrregular && isSolidIrregular){
 	    // In this case we are looking at a grid patch that lies on the gas-solid boundary. We need to determine which cells
