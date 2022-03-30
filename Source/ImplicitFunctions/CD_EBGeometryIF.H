@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_EBGeometry.H
+  @file   CD_EBGeometryIF.H
   @brief  Binding of EBGeometry signed distance functions to Chombo objcts. 
   @author Robert marskar
 */
 
-#ifndef CD_EBGeometry_H
-#define CD_EBGeometry_H
+#ifndef CD_EBGeometryIF_H
+#define CD_EBGeometryIF_H
 
 // Std includes
 #include <memory>
