@@ -4,12 +4,12 @@
  */
 
 /*!
-  @file   CD_EBGeometry.cpp
-  @brief  Implementation of CD_EBGeometry.H
+  @file   CD_EBGeometryIF.cpp
+  @brief  Implementation of CD_EBGeometryIF.H
   @author Robert marskar
 */
 
-#include <CD_EBGeometry.H>
+#include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
 EBGeometryIF::EBGeometryIF() {
