@@ -61,9 +61,9 @@ void CdrPlasmaGodunovStepper::parseOptions(){
   this->parseMinDt();
   this->parseMaxDt();
   this->parseSourceComputation();
-  this->parseDiffusion();
-  this->parseTransport();
+  this->parseField();
   this->parseAdvection();
+  this->parseDiffusion();  
   this->parseFloor();
   this->parseDebug();
   this->parseProfile();  
@@ -85,9 +85,9 @@ void CdrPlasmaGodunovStepper::parseRuntimeOptions(){
   this->parseMinDt();
   this->parseMaxDt();
   this->parseSourceComputation();
-  this->parseDiffusion();
-  this->parseTransport();
+  this->parseField();
   this->parseAdvection();
+  this->parseDiffusion();  
   this->parseFloor();
   this->parseDebug();
   this->parseProfile();  
@@ -117,19 +117,19 @@ void CdrPlasmaGodunovStepper::parseDiffusion(){
   std::string str;
   pp.get("diffusion", str);
   if(str == "explicit"){
-    m_whichDiffusionAlgorithm = WhichDiffusionAlgorithm::Explicit;
+    m_diffusionAlgorithm = DiffusionAlgorithm::Explicit;
 
     // Set explicit diffusion for all species
     m_useImplicitDiffusion.resize(numCdrSpecies, false);    
   }
   else if(str == "implicit"){
-    m_whichDiffusionAlgorithm = WhichDiffusionAlgorithm::Implicit;
+    m_diffusionAlgorithm = DiffusionAlgorithm::Implicit;
 
     // Set implicit diffusion for all species
     m_useImplicitDiffusion.resize(numCdrSpecies, true);        
   }
   else if(str == "auto"){
-    m_whichDiffusionAlgorithm = WhichDiffusionAlgorithm::Automatic;
+    m_diffusionAlgorithm = DiffusionAlgorithm::Automatic;
 
     // Diffusion will be determined during time step computation, but for now we initialize it to explicit.
     m_useImplicitDiffusion.resize(numCdrSpecies, false);            
@@ -138,30 +138,31 @@ void CdrPlasmaGodunovStepper::parseDiffusion(){
     MayDay::Error("CdrPlasmaGodunovStepper::parseDiffusion - unknown diffusion type requested");
   }
 
-  // Fetch the diffusion threshold factor
-  pp.get("diffusion_thresh", m_implicitDiffusionThreshold);
-
-  m_diffusionSolver = DiffusionSolver::Euler;
+  m_diffusionOrder = -1;
+  pp.get("diffusion_order", m_diffusionOrder);
+  if(!(m_diffusionOrder == 1 || m_diffusionOrder == 2)){
+    MayDay::Error("CdrPlasmaGodunovStepper::parseDiffusion - unknown diffusion order requested. Must be 1 or 2. ");
+  }
 }
 
-void CdrPlasmaGodunovStepper::parseTransport(){
-  CH_TIME("CdrPlasmaGodunovStepper::parseTransport()");
+void CdrPlasmaGodunovStepper::parseField(){
+  CH_TIME("CdrPlasmaGodunovStepper::parseField()");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::parseTransport()" << endl;
+    pout() << "CdrPlasmaGodunovStepper::parseField()" << endl;
   }
 
   ParmParse pp(m_className.c_str());
 
   std::string str;
-  pp.get("transport", str);
-  if(str == "euler"){
-    m_transportAlgorithm = TransportAlgorithm::Euler;
+  pp.get("field_coupling", str);
+  if(str == "explicit"){
+    m_fieldCoupling = FieldCoupling::Explicit;
   }
   else if(str == "semi_implicit"){
-    m_transportAlgorithm = TransportAlgorithm::SemiImplicit;
+    m_fieldCoupling = FieldCoupling::SemiImplicit;
   }
   else{
-    MayDay::Error("CdrPlasmaGodunovStepper::parseTransport - unknown transport algorithm requested");
+    MayDay::Error("CdrPlasmaGodunovStepper::parseField - unknown transport algorithm requested");
   }
 }
 
@@ -174,12 +175,16 @@ void CdrPlasmaGodunovStepper::parseAdvection(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
-  pp.get("extrap_advect", str);
-  if(str == "true"){
-    m_extrapAdvect = true;
+  pp.get("advection", str);
+
+  if(str == "euler"){
+    m_advectionSolver = AdvectionSolver::Euler;
   }
-  else if(str == "false"){
-    m_extrapAdvect = false;
+  else if(str == "rk2"){
+    m_advectionSolver = AdvectionSolver::RK2;
+  }
+  else if(str == "muscl"){
+    m_advectionSolver = AdvectionSolver::MUSCL;
   }
   else{
     MayDay::Error("CdrPlasmaGodunovStepper::parseAdvection - unknown argument");
@@ -263,7 +268,7 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
   CdrPlasmaGodunovStepper::advanceTransport(a_dt);
 
   // 2. Solve the Poisson equation and compute the electric field. If we did a semi-implicit solve then the field has already been computed.
-  if(m_transportAlgorithm != TransportAlgorithm::SemiImplicit){  
+  if(m_fieldCoupling != FieldCoupling::SemiImplicit){  
     m_timer->startEvent("Poisson");
     if((m_timeStep +1) % m_fastPoisson == 0){
       CdrPlasmaStepper::solvePoisson();
@@ -322,7 +327,7 @@ void CdrPlasmaGodunovStepper::preRegrid(const int a_lbase, const int a_finestLev
 
   // When we regrid we must compute the field on the new grid using the semi-implicit update. However, we only have
   // the conductivities and space charge on the old grids, so we must store them and interpolate them to the new grids.
-  if(m_transportAlgorithm == TransportAlgorithm::SemiImplicit){
+  if(m_fieldCoupling == FieldCoupling::SemiImplicit){
     m_amr->allocate(m_scratchConductivity,    m_realm, phase::gas, 1);
     m_amr->allocate(m_scratchSemiImplicitRho, m_realm, phase::gas, 1);
 
@@ -341,7 +346,7 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
   //       semi-implicit scheme because we solve for the field using div((eps + dt*sigma^k/eps0)E^(k+1)) = -rho^(k+1)/eps0 but
   //       this means we need the conductivity and space charge at the previous time step for restoring the field on the new mesh.
 
-  if(m_transportAlgorithm != TransportAlgorithm::SemiImplicit || m_timeStep == 0){ // Just use regular regrid when we start the simulation. 
+  if(m_fieldCoupling != FieldCoupling::SemiImplicit || m_timeStep == 0){ // Just use regular regrid when we start the simulation. 
     CdrPlasmaStepper::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   }
   else{
@@ -418,7 +423,7 @@ void CdrPlasmaGodunovStepper::postRegrid() {
   CdrPlasmaStepper::postRegrid();
 
   // Release memory. 
-  if(m_transportAlgorithm == TransportAlgorithm::SemiImplicit){
+  if(m_fieldCoupling == FieldCoupling::SemiImplicit){
     m_amr->deallocate(m_scratchConductivity   );
     m_amr->deallocate(m_scratchSemiImplicitRho);
   }
@@ -433,7 +438,7 @@ void CdrPlasmaGodunovStepper::postCheckpointSetup(){
   // TLDR: Only the semi-implicit part overrides the parent method, and it is done because the field needs to be computed from
   //       a different equation. 
 
-  if(m_transportAlgorithm == TransportAlgorithm::SemiImplicit){
+  if(m_fieldCoupling == FieldCoupling::SemiImplicit){
     
     // When we enter this routine we will already have called read the checkpoint data into the conductivityFactor and semiimplicit space charge. We need
     // to set up the field solver with those quantities rather than the regular space charge.
@@ -965,14 +970,14 @@ void CdrPlasmaGodunovStepper::advanceTransport(const Real a_dt){
     pout() << "CdrPlasmaGodunovStepper::advanceTransport(Real)" << endl;
   }
 
-  switch(m_transportAlgorithm){
-  case TransportAlgorithm::Euler:
+  switch(m_fieldCoupling){
+  case FieldCoupling::Explicit:
     {
-      this->advanceTransportEuler(a_dt);
+      this->advanceTransportExplicitField(a_dt);
       
       break;
     }
-  case TransportAlgorithm::SemiImplicit:
+  case FieldCoupling::SemiImplicit:
     {
       this->advanceTransportSemiImplicit(a_dt);
       
@@ -980,17 +985,17 @@ void CdrPlasmaGodunovStepper::advanceTransport(const Real a_dt){
     }
   default:
     {
-      MayDay::Error("CdrPlasmaGodunovStepper::advanceTransport - logic bust");
+      MayDay::Error("CdrPlasmaGodunovStepper::advanceTransport - logic bust. Must have ");
 
       break;
     }
   }
 }
 
-void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
-  CH_TIME("CdrPlasmaGodunovStepper::advanceTransportEuler(Real)");
+void CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt){
+  CH_TIME("CdrPlasmaGodunovStepper::advanceTransportExplicitField(Real)");
   if(m_verbosity > 5){
-    pout() << "CdrPlasmaGodunovStepper::advanceTransportEuler(Real)" << endl;
+    pout() << "CdrPlasmaGodunovStepper::advanceTransportExplicitField(Real)" << endl;
   }
 
   // TLDR: This advances the CDR equations using an Euler rule. The right-hand side of the CDR equations can be explictly discretized, or
@@ -1020,70 +1025,115 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
 
   m_timer->startEvent("Transport advance");
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
-    RefCountedPtr<CdrSolver>& solver   = solverIt();
-
-    const int idx = solverIt.index();    
-
-    if(solver->isMobile() || solver->isDiffusive()){
-
-      RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
-
-      EBAMRCellData& phi = solver->getPhi();
-      EBAMRCellData& src = solver->getSource();
+    const int idx = solverIt.index();
     
-      EBAMRCellData& scratch  = storage->getScratch();
-      EBAMRCellData& scratch2 = storage->getScratch2();
+    RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solverIt);
 
-      // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion. The
-      // 'extrapDt' variable is for centering the advective discretization at the half time step (if user asks for it). 
-      const Real extrapDt = (m_extrapAdvect) ? a_dt : 0.0;
-      if(!m_useImplicitDiffusion[idx] || !(solver->isDiffusive())){
-	solver->computeDivJ(scratch, phi, extrapDt, false, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
+    // Get CDR density and some scratch storage that we can use. 
+    EBAMRCellData& phi      = solver->getPhi();
+    EBAMRCellData& scratch  = storage->getScratch();
+    EBAMRCellData& scratch2 = storage->getScratch2();    
 
-	DataOps::incr(phi, scratch, -a_dt);
-      }
-      else{
-	// TLDR: Implicit diffusion AND a diffusive solver. We are solving d(phi)/dt + L(phi) = S where S is the finite volume
-	//       approximation of [-div(v*phi)]^(k+1/2). We have stored this term in "scratch", and we just copy the initial solution
-	//       to another scratch data holder.
+    // Do the advective advance. 
+    if(solver->isMobile()){
+      switch(m_advectionSolver){
+      case AdvectionSolver::Euler:
+	{
+	  // Advance is just phi^(k+1) = phi^k - dt*div(F)
+	  solver->computeDivF(scratch, phi, 0.0, false, true, true);
 
-	// Compute the finite volume approximation to [div(v*phi)^{k+1/2}. If using extrapDt = 0.0, this becomes centered on
-	// k rather than k+1/2, but hopefully the user is running with MUSCL reconstruction anyways.
-	
-	solver->computeDivF(scratch, phi, extrapDt, false, true, true);
-	DataOps::scale(scratch, -1.0);
-	DataOps::kappaScale(scratch); // Our multigrid operators will want us to kappa-weight the problem. 
+	  DataOps::incr(phi, scratch, -a_dt);
 
-	// Let scratc2 = initial solution, i.e. phi^k. 
-	DataOps::copy(scratch2, phi);
+	  break;	  
+	}
+      case AdvectionSolver::RK2:
+	{
+	  // Use Heun's method.
+	  solver->computeDivF(scratch, phi, 0.0, false, true, true);
 
-	switch(m_diffusionSolver){
-	case DiffusionSolver::Euler:
-	  {
-	    solver->advanceCrankNicholson(phi, scratch2, scratch, a_dt);
+	  // Make phi = phi^k  - dt * div(F)
+	  DataOps::incr(phi, scratch, -a_dt);
 
-	    break;
-	  }
-	default:
-	  {
-	    MayDay::Error("CdrPlasmaGodunovStepper::advanceTransportEuler -- logic bust");
-	  }
+	  // Compute divF(phi)
+	  solver->computeDivF(scratch2, phi, 0.0, false, true, true);
+
+	  // Make phi = phi^k + 0.5*dt * (scratch1 + scratch2)
+	  DataOps::incr(phi, scratch ,  0.5*a_dt); 
+	  DataOps::incr(phi, scratch2, -0.5*a_dt);
+
+	  break;	  
+	}
+      case AdvectionSolver::MUSCL:
+	{
+	  // Advance is phi^(k+1) = phi^k - dt*div(F). Almost like the Euler method except for the transverse slopes.
+	  solver->computeDivF(scratch, phi, a_dt, false, true, true);
+
+	  DataOps::incr(phi, scratch, -a_dt);
+
+	  break;
+	}
+      default:
+	{
+	  MayDay::Error("CdrPlasmaGodunovStepper::advanceTransportExplicitField -- logic bust");
 	}
       }
 
       // Floor mass or not?
       if(m_floor){
-	this->floorMass(phi, "CdrPlasmaGodunovStepper::advanceTransportEuler", solver);
-      }
+	this->floorMass(phi, "CdrPlasmaGodunovStepper::advanceTransportExplicitField", solver);
+      }            
 
       // Coarsen the solution and update ghost cells. 
       m_amr->averageDown(phi, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi, m_realm, m_cdr->getPhase());
     }
+
+    // Do the diffusion advance. This can be explicit or implicit. 
+    if(solver->isDiffusive()){
+      if(m_useImplicitDiffusion[idx]){
+	DataOps::copy(scratch, phi);
+	DataOps::setValue(scratch2, 0.0);
+	
+	if(m_diffusionOrder == 1){
+	  solver->advanceEuler(phi, scratch, scratch2, a_dt);
+	}
+	else if(m_diffusionOrder == 2){
+	  solver->advanceCrankNicholson(phi, scratch, scratch2, a_dt);	  
+	}
+      }
+      else {
+	if(m_diffusionOrder == 1){
+	  solver->computeDivD(scratch, phi, false, false, false);
+
+	  DataOps::incr(phi, scratch, a_dt);
+	}
+	else if(m_diffusionOrder == 2){
+	  solver->computeDivD(scratch, phi, false, false, false);
+
+	  DataOps::incr(phi, scratch, a_dt);
+
+	  solver->computeDivD(scratch2, phi, false, false, false);
+
+	  DataOps::incr(phi, scratch , -0.5*a_dt);
+	  DataOps::incr(phi, scratch2,  0.5*a_dt);	  
+	}
+      }
+    }
+
+    // Floor mass or not?
+    if(m_floor){
+      this->floorMass(phi, "CdrPlasmaGodunovStepper::advanceTransportExplicitField", solver);
+    }
+
+    // Coarsen the solution and update ghost cells. 
+    m_amr->averageDown(phi, m_realm, m_cdr->getPhase());
+    m_amr->interpGhost(phi, m_realm, m_cdr->getPhase());
   }
   m_timer->stopEvent("Transport advance");  
 
-  // Advance the sigma equation
+  // Advance the sigma equation. This may seem weird but we've kept the flux through the EB constant during the transport step, so it
+  // doesn't matter if we did an Euler or Heun advance in the advective step. 
   EBAMRIVData&       sigma = m_sigma->getPhi();
   const EBAMRIVData& rhs   = m_sigma->getFlux();
   
@@ -1160,7 +1210,7 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
   m_timer->stopEvent("Field and velocities");  
 
   // Now call the Euler transport method -- it will know what to do. 
-  this->advanceTransportEuler(a_dt);
+  this->advanceTransportExplicitField(a_dt);
 }
 
 void CdrPlasmaGodunovStepper::advanceCdrReactions(const Real a_dt){
@@ -1178,7 +1228,6 @@ void CdrPlasmaGodunovStepper::advanceCdrReactions(const Real a_dt){
     const EBAMRCellData& src = solver->getSource();
 
     DataOps::incr(phi, src, a_dt);
-
 
     // Floor mass if asked for it. If running in debug mode we compute the mass before and after flooring it.
     if(m_floor){
@@ -1279,19 +1328,27 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
   // care of that through the input script. 
   
 
-  // First, figure out what the transport time step must be for explicit and explicit-implicit methods. 
-  if(m_whichDiffusionAlgorithm == WhichDiffusionAlgorithm::Explicit){
-    m_dtCFL   = m_cdr->computeAdvectionDiffusionDt();
-    
-    a_timeCode = TimeCode::AdvectionDiffusion;
+  // First, figure out what the transport time step must be for explicit and explicit-implicit methods.
+  if(m_diffusionAlgorithm == DiffusionAlgorithm::Explicit){
+    const Real advectionDt = m_cdr->computeAdvectionDt();
+    const Real diffusionDt = m_cdr->computeDiffusionDt();
+
+    m_dtCFL = std::min(advectionDt, diffusionDt);
     a_dt       = m_cfl*m_dtCFL;
+
+    if(advectionDt < diffusionDt){
+      a_timeCode = TimeCode::Advection;
+    }
+    else {
+      a_timeCode = TimeCode::Diffusion;
+    }
 
     // Turn off implicit diffusion for all species.
     for (int i = 0; i < m_useImplicitDiffusion.size(); i++){
       m_useImplicitDiffusion[i] = false;
     }        
   }
-  else if(m_whichDiffusionAlgorithm == WhichDiffusionAlgorithm::Implicit){
+  else if(m_diffusionAlgorithm == DiffusionAlgorithm::Implicit){
     m_dtCFL   = m_cdr->computeAdvectionDt();
     a_timeCode = TimeCode::Advection;
 
@@ -1302,7 +1359,7 @@ void CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
       m_useImplicitDiffusion[i] = true;
     }    
   }
-  else if (m_whichDiffusionAlgorithm == WhichDiffusionAlgorithm::Automatic){
+  else if (m_diffusionAlgorithm == DiffusionAlgorithm::Automatic){
 
     // When we run with auto-diffusion, we check which species can be done using explicit diffusion and which ones
     // that should use implicit diffusion (based on a user threshold).
