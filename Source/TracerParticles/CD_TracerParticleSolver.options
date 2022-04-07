@@ -1,6 +1,6 @@
 # ====================================================================================================
 # TracerParticleSolver class options
 # ====================================================================================================
-TracerParticleSolver.deposition   = cic    # Deposition method. Must be 'ngp', 'cic', 'tsc'
-TracerParticleSolver.plot_scalars = true   # Turn on/off plotting of the particle scalars
-TracerParticleSolver.plot_vectors = true   # Turn on/off plotting of the particle vectors
+TracerParticleSolver.deposition    = cic    # Deposition method. Must be 'ngp', 'cic', 'tsc'.
+TracerParticleSolver.plot_mass     = true   # Turn on/off plotting of the particle mass.
+TracerParticleSolver.plot_velocity = true   # Turn on/off plotting of the particle velocities. 

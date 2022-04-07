@@ -19,9 +19,9 @@
 #include <CD_TracerParticleSolver.H>
 #include <CD_NamespaceHeader.H>
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-TracerParticleSolver<M, N>::TracerParticleSolver() {
+TracerParticleSolver<P>::TracerParticleSolver() {
   CH_TIME("TracerParticleSolver::TracerParticleSolver()");
   
   // Default settings
@@ -32,39 +32,30 @@ TracerParticleSolver<M, N>::TracerParticleSolver() {
   m_phase             = phase::gas;
   m_pvrBuffer         = 0;
   m_haloBuffer        = 1;
-  m_plotVelocityField = true;
+  m_plotVelocity      = true;
+  m_plotMass          = true;  
   m_deposition        = DepositionType::CIC;
-
-  // Set default names for the particle scalars
-  for (size_t i = 0; i < M; i++){
-    m_scalarNames[i] = "particle_scalar #" + std::to_string(i);
-  }
-
-  // Set default names for the particle scalars
-  for (size_t i = 0; i < N; i++){
-    m_vectorNames[i] = "particle_vector #" + std::to_string(i);
-  }
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-TracerParticleSolver<M, N>::TracerParticleSolver(const RefCountedPtr<AmrMesh>& a_amr,
-						 const RefCountedPtr<ComputationalGeometry> a_compGeom) : TracerParticleSolver<M, N>() {
+TracerParticleSolver<P>::TracerParticleSolver(const RefCountedPtr<AmrMesh>& a_amr,
+					      const RefCountedPtr<ComputationalGeometry> a_compGeom) : TracerParticleSolver<P>() {
   CH_TIME("TracerParticleSolver::TracerParticleSolver(RefCountedPtr<AmrMesh>, RefCountedPtr<ComputationalGeometry>)");  
 
   m_amr                   = a_amr;
   m_computationalGeometry = a_compGeom;
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-TracerParticleSolver<M, N>::~TracerParticleSolver() {
+TracerParticleSolver<P>::~TracerParticleSolver() {
   CH_TIME("TracerParticleSolver::~TracerParticleSolver()");
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::parseOptions() {
+void TracerParticleSolver<P>::parseOptions() {
   CH_TIME("TracerParticleSolver::parseOptions()");
   if(m_verbosity > 5) {
     pout() << m_name + "::parseOptions()" << endl;
@@ -74,9 +65,9 @@ void TracerParticleSolver<M, N>::parseOptions() {
   this->parsePlotVariables();
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::parseRuntimeOptions() {
+void TracerParticleSolver<P>::parseRuntimeOptions() {
   CH_TIME("TracerParticleSolver::parseRuntimeOptions()");
   if(m_verbosity > 5) {
     pout() << m_name + "::parseRuntimeOptions()" << endl;
@@ -86,9 +77,9 @@ void TracerParticleSolver<M, N>::parseRuntimeOptions() {
   this->parsePlotVariables();  
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::parseDeposition() {
+void TracerParticleSolver<P>::parseDeposition() {
   CH_TIME("TracerParticleSolver::parseDeposition()");
   if(m_verbosity > 5) {
     pout() << m_name + "::parseDeposition()" << endl;
@@ -126,9 +117,9 @@ void TracerParticleSolver<M, N>::parseDeposition() {
   }  
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::parsePlotVariables() {
+void TracerParticleSolver<P>::parsePlotVariables() {
   CH_TIME("TracerParticleSolver::parsePlotVariables()");
   if(m_verbosity > 5) {
     pout() << m_name + "::parsePlotVariables()" << endl;
@@ -136,13 +127,13 @@ void TracerParticleSolver<M, N>::parsePlotVariables() {
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("plot_scalars", m_plotScalars);
-  pp.get("plot_vectors", m_plotVectors);  
+  pp.get("plot_mass",     m_plotMass    );
+  pp.get("plot_velocity", m_plotVelocity);  
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::registerOperators() const {
+void TracerParticleSolver<P>::registerOperators() const {
   CH_TIME("TracerParticleSolver::registerOperators()");
   if(m_verbosity > 5) {
     pout() << m_name + "::registerOperators()" << endl;
@@ -163,9 +154,9 @@ void TracerParticleSolver<M, N>::registerOperators() const {
   }
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::allocateInternals() {
+void TracerParticleSolver<P>::allocateInternals() {
   CH_TIME("TracerParticleSolver::allocateInternals()");
   if(m_verbosity > 5) {
     pout() << m_name + "::allocateInternals()" << endl;
@@ -175,9 +166,9 @@ void TracerParticleSolver<M, N>::allocateInternals() {
   m_amr->allocate(m_particles, m_pvrBuffer, m_realm);
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::setRealm(const std::string& a_realm) {
+void TracerParticleSolver<P>::setRealm(const std::string& a_realm) {
   CH_TIME("TracerParticleSolver::setRealm(std::string)");
   if(m_verbosity > 5) {
     pout() << m_name + "::setRealm(std::string)" << endl;
@@ -186,9 +177,9 @@ void TracerParticleSolver<M, N>::setRealm(const std::string& a_realm) {
   m_realm = a_realm;
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::setPhase(const phase::which_phase& a_phase) {
+void TracerParticleSolver<P>::setPhase(const phase::which_phase& a_phase) {
   CH_TIME("TracerParticleSolver::setPhase(phase::which_phase)");
   if(m_verbosity > 5) {
     pout() << m_name + "::setPhase(phase::which_phase)" << endl;
@@ -197,9 +188,9 @@ void TracerParticleSolver<M, N>::setPhase(const phase::which_phase& a_phase) {
   m_phase = a_phase;
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh) {
+void TracerParticleSolver<P>::setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh) {
   CH_TIME("TracerParticleSolver::setAmr(RefCountedPtr<AmrMesh>)");
   if(m_verbosity > 5) {
     pout() << m_name + "::setAmr(RefCountedPtr<AmrMesh>)" << endl;
@@ -208,9 +199,9 @@ void TracerParticleSolver<M, N>::setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh)
   m_amr = a_amrMesh;
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_compGeom) {
+void TracerParticleSolver<P>::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_compGeom) {
   CH_TIME("TracerParticleSolver::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)");
   if(m_verbosity > 5) {
     pout() << m_name + "::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)" << endl;
@@ -219,9 +210,9 @@ void TracerParticleSolver<M, N>::setComputationalGeometry(const RefCountedPtr<Co
   m_computationalGeometry = a_compGeom;
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::setVelocityField(const EBAMRCellData& a_velocityField) {
+void TracerParticleSolver<P>::setVelocityField(const EBAMRCellData& a_velocityField) {
   CH_TIME("TracerParticleSolver::setVelocityField(EBAMRCellData)");
   if(m_verbosity > 5) {
     pout() << m_name + "::setVelocityField(EBAMRCellData)" << endl;
@@ -230,9 +221,9 @@ void TracerParticleSolver<M, N>::setVelocityField(const EBAMRCellData& a_velocit
   m_velocityField = &a_velocityField;
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) {
+void TracerParticleSolver<P>::preRegrid(const int a_lbase, const int a_oldFinestLevel) {
   CH_TIME("TracerParticleSolver::preRegrid(int, int)");
   if(m_verbosity > 5) {
     pout() << m_name + "::preRegrid(int, int)" << endl;
@@ -244,9 +235,9 @@ void TracerParticleSolver<M, N>::preRegrid(const int a_lbase, const int a_oldFin
   m_particles.preRegrid(a_lbase);
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
+void TracerParticleSolver<P>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
   CH_TIME("TracerParticleSolver::regrid(int, int, int)");
   if(m_verbosity > 5) {
     pout() << m_name + "::regrid(int, int, int)" << endl;
@@ -265,9 +256,9 @@ void TracerParticleSolver<M, N>::regrid(const int a_lmin, const int a_oldFinestL
   m_particles.regrid(grids, domains, dx, refRat, a_lmin, a_newFinestLevel);
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-int TracerParticleSolver<M, N>::getNumberOfPlotVariables() const {
+int TracerParticleSolver<P>::getNumberOfPlotVariables() const {
   CH_TIME("TracerParticleSolver::getNumberOfPlotVariables()");
   if(m_verbosity > 5){
     pout() << m_name + "::getNumberOfPlotVariables()" << endl;
@@ -275,16 +266,16 @@ int TracerParticleSolver<M, N>::getNumberOfPlotVariables() const {
 
   int numPlotVars = 0;
 
-  if(m_plotVelocityField) numPlotVars += SpaceDim;
-  if(m_plotScalars      ) numPlotVars += M;
-  if(m_plotVectors      ) numPlotVars += N * SpaceDim;
+  if(m_plotMass    ) numPlotVars += 1;  
+  if(m_plotVelocity) numPlotVars += SpaceDim;
+
 
   return numPlotVars;
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-Vector<std::string> TracerParticleSolver<M, N>::getPlotVariableNames() const {
+Vector<std::string> TracerParticleSolver<P>::getPlotVariableNames() const {
   CH_TIME("TracerParticleSolver::getPlotVariableNames()");
   if(m_verbosity > 5){
     pout() << m_name + "::getPlotVariableNames()" << endl;
@@ -294,57 +285,23 @@ Vector<std::string> TracerParticleSolver<M, N>::getPlotVariableNames() const {
   //       function returns the associated plot variable names, and will be used in the plot files. 
   
   Vector<std::string> plotVarNames(0);
-  
-  if(m_plotVelocityField) plotVarNames.push_back("x-Velocity " + m_name);
-  if(m_plotVelocityField) plotVarNames.push_back("y-Velocity " + m_name);
-#if CH_SPACEDIM==3
-  if(m_plotVelocityField) plotVarNames.push_back("z-Velocity " + m_name);
-#endif
 
-  if(m_plotScalars) {
-    for (const auto& s : m_scalarNames) {
-      plotVarNames.push_back(m_name + " " + s);
-    }
-  }
-
-  if(m_plotVectors) {
-    for (const auto& v : m_vectorNames) {
-      plotVarNames.push_back("x-" + v + " " + m_name);
-      plotVarNames.push_back("y-" + v + " " + m_name);      
-#if CH_SPACEDIM==3
-      plotVarNames.push_back("z-" + v + " " + m_name);
-#endif
-    }
+  if(m_plotMass) {
+    plotVarNames.push_back(m_name + "mass");
   }  
+  
+  if(m_plotVelocity) plotVarNames.push_back("x-Velocity " + m_name);
+  if(m_plotVelocity) plotVarNames.push_back("y-Velocity " + m_name);
+#if CH_SPACEDIM==3
+  if(m_plotVelocity) plotVarNames.push_back("z-Velocity " + m_name);
+#endif
   
   return plotVarNames;
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::setScalarNames(const std::array<std::string, M>& a_scalarNames) {
-  CH_TIME("TracerParticleSolver::setScalarNames(std::array)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setScalarNames(std::array)" << endl;
-  }
-
-  m_scalarNames = a_scalarNames;
-}
-
-template <size_t M, size_t N>
-inline
-void TracerParticleSolver<M, N>::setVectorNames(const std::array<std::string, N>& a_vectorNames) {
-  CH_TIME("TracerParticleSolver::setVectorNames(std::array)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setVectorNames(std::array)" << endl;
-  }
-
-  m_vectorNames = a_vectorNames;  
-}
-
-template <size_t M, size_t N>
-inline
-void TracerParticleSolver<M, N>::writePlotFile() {
+void TracerParticleSolver<P>::writePlotFile() {
   CH_TIME("TracerParticleSolver::writePlotFile()");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotFile()" << endl;
@@ -353,16 +310,34 @@ void TracerParticleSolver<M, N>::writePlotFile() {
   MayDay::Error("TracerParticleSolver::writePlotFile -- not implemented (yet)");  
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::writePlotData(EBAMRCellData& a_output, int& a_icomp) {
+void TracerParticleSolver<P>::writePlotData(EBAMRCellData& a_output, int& a_icomp) {
   CH_TIME("TracerParticleSolver::writePlotData(EBAMRCellData, int)");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotFile(EBAMRCellData, int)" << endl;
   }
 
+  // Write the particle scalars.
+  if(m_plotMass) {
+    EBAMRCellData mass;
+    m_amr->allocate(mass, m_realm, m_phase, 1);
+
+    DataOps::setValue(mass, 0.0);
+    this->depositScalar<P, &P::mass>(mass, m_particles, m_deposition, m_coarseFineDeposition);
+
+    const Interval srcInterval(0, 0);
+    const Interval dstInterval(a_icomp, a_icomp);
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      mass[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    }
+
+    a_icomp++;
+  }  
+
   // Write the velocity field to the output data holder.
-  if(m_plotVelocityField) {
+  if(m_plotVelocity) {
     const Interval srcInterval(0, 0);
     const Interval dstInterval(a_icomp, a_icomp + SpaceDim - 1);
 
@@ -372,51 +347,39 @@ void TracerParticleSolver<M, N>::writePlotData(EBAMRCellData& a_output, int& a_i
     
     a_icomp += SpaceDim;
   }
-
-  // Write the particle scalars.
-  if(m_plotScalars) {
-    EBAMRCellData scratch;
-    m_amr->allocate(scratch, m_realm, m_phase, 1);
-
-    // Deposit everything onto scratch and copy to the output data holder.
-    for (size_t i = 0; i < M; i++){
-      DataOps::setValue(scratch, 0.0);
-      this->depositScalar<TracerParticle<M, N>, &TracerParticle<M,N>::template getScalar<0> >(scratch, m_particles, m_deposition, m_coarseFineDeposition);
-    }
-  }
-
-  MayDay::Error("TracerParticleSolver::writePlotData -- not implemented (yet)");
 }
 
 #ifdef CH_USE_HDF5
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
+void TracerParticleSolver<P>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("TracerParticleSolver::writeCheckpointLevel(HDF5Handle, int)");
   if(m_verbosity > 5){
     pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  MayDay::Error("TracerParticleSolver::writeCheckpointLevel -- not implemented (yet)");  
+  const std::string str = m_name + "_TracerParticleSolver_particles";
+  writeParticlesToHDF(a_handle, m_particles[a_level], str);
 }
 #endif
 
 #ifdef CH_USE_HDF5
-template <size_t M, size_t N>
+template <typename P>
 inline
-void TracerParticleSolver<M, N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) {
+void TracerParticleSolver<P>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) {
   CH_TIME("TracerParticleSolver::readCheckpointLevel(HDF5Handle, int)");
   if(m_verbosity > 5){
     pout() << m_name + "::readCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  MayDay::Error("TracerParticleSolver::readCheckpointLevel -- not implemented (yet)");  
+  const std::string str = m_name + "_TracerParticleSolver_particles";
+  readParticlesFromHDF(a_handle, m_particles[a_level], str);  
 }
 #endif
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-ParticleContainer<TracerParticle<M, N> >& TracerParticleSolver<M, N>::getParticles() {
+ParticleContainer<P>& TracerParticleSolver<P>::getParticles() {
   CH_TIME("TracerParticleSolver::getParticles()");
   if(m_verbosity > 5){
     pout() << m_name + "::getParticles()" << endl;
@@ -425,9 +388,9 @@ ParticleContainer<TracerParticle<M, N> >& TracerParticleSolver<M, N>::getParticl
   return m_particles;
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-const ParticleContainer<TracerParticle<M, N> >& TracerParticleSolver<M, N>::getParticles() const {
+const ParticleContainer<P>& TracerParticleSolver<P>::getParticles() const {
   CH_TIME("TracerParticleSolver::getParticles()");
   if(m_verbosity > 5){
     pout() << m_name + "::getParticles()" << endl;
@@ -436,9 +399,9 @@ const ParticleContainer<TracerParticle<M, N> >& TracerParticleSolver<M, N>::getP
   return m_particles;
 }
 
-template <size_t M, size_t N>
+template <typename P>
 inline
-const EBAMRCellData& TracerParticleSolver<M, N>::getVelocityField() const {
+const EBAMRCellData& TracerParticleSolver<P>::getVelocityField() const {
   CH_TIME("TracerParticleSolver::getVelocityField()");
   if(m_verbosity > 5){
     pout() << m_name + "::getVelocityField()" << endl;

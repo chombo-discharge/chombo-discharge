@@ -20,14 +20,14 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity field.
-  @details The user can set the velocity field through public member functions. This class is templated because the
-  tracer particles can contain an arbitrary number of traced fields. 
+  @brief Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity field where
+  @details The user can set the velocity field through public member functions. This class is templated so the user can 
+  switch tracer particle implementations.
 
   This is also a single-phase solver -- i.e. the particles only live on one of the phases. Extensions to multiphase
   is certainly possible. 
 */
-template <size_t M, size_t N> 
+template <typename P = TracerParticle>
 class TracerParticleSolver {
 public:
 
@@ -154,18 +154,6 @@ public:
   virtual Vector<std::string> getPlotVariableNames() const;
 
   /*!
-    @brief Set the plot variable names for the particle scalars
-    @param[in] a_scalarNames Names for the tracer particle scalars
-  */
-  virtual void setScalarNames(const std::array<std::string, M>& a_scalarNames);
-
-  /*!
-    @brief Set the plot variable names for the particle vectors
-    @param[in] a_scalarNames Names for the tracer particle vectors
-  */
-  virtual void setVectorNames(const std::array<std::string, N>& a_vectorNames);  
-
-  /*!
     @brief Write plot file
     @details The name of the plot file is m_name.stepXXXXX.DIM.hdf5
     @note This calls writePlotData(...)
@@ -203,13 +191,13 @@ public:
     @brief Get particles
     @return m_particles. 
   */
-  virtual ParticleContainer<TracerParticle<M, N> >& getParticles();
+  virtual ParticleContainer<P>& getParticles();
 
   /*!
     @brief Get particles. Const version. 
     @return m_particles. 
   */
-  virtual const ParticleContainer<TracerParticle<M, N> >& getParticles() const;
+  virtual const ParticleContainer<P>& getParticles() const;
 
   /*!
     @brief Return the velocity field
@@ -275,31 +263,14 @@ protected:
   int m_haloBuffer;  
 
   /*!
+    @brief Hook for adding mass to plot file. 
+  */
+  bool m_plotMass;
+
+  /*!
     @brief Hook for adding velocity field to plot file
   */
-  bool m_plotVelocityField;
-
-  /*!
-    @brief Hook for adding particle scalars to plot file
-  */
-  bool m_plotScalars;
-
-  /*!
-    @brief Hook for adding particle vectors to plot file
-  */
-  bool m_plotVectors;
-
-  /*!
-    @brief Names for the particle scalars. 
-    @details Defaults to "scalar #0", "scalar #1", etc but can be overriden in setScalarNames
-  */
-  std::array<std::string, M> m_scalarNames;
-
-  /*!
-    @brief Names for the particle vectors. 
-    @details Defaults to "vector #0", "vector #1", etc but can be overriden in setVectorNames
-  */
-  std::array<std::string, N> m_vectorNames;    
+  bool m_plotVelocity;  
 
   /*!
     @brief Mesh-based velocity field
@@ -309,7 +280,7 @@ protected:
   /*!
     @brief Particle data.
   */
-  ParticleContainer<TracerParticle<M, N> > m_particles;
+  ParticleContainer<P> m_particles;
 
   /*!
     @brief Parse deposition method
@@ -324,32 +295,15 @@ protected:
   /*!
     @brief Generic particle deposition method for putting a scalar field onto the mesh.
   */
-  template <class P,  const Real&(P::*particleScalarField)() const>
-  void depositScalar(EBAMRCellData& a_phi,
+  template <typename T,  const Real&(T::*particleScalarFunction)() const>
+  void depositScalar(EBAMRCellData&             a_phi,
   		     const ParticleContainer<P> a_particles,
-  		     const DepositionType a_baseDeposition,
+  		     const DepositionType       a_baseDeposition,
   		     const CoarseFineDeposition a_coarseFineDeposition) {
 
     
   }
 };
-
-template<size_t M>
-class foo : public BinItem {
-public:
-
-  template<size_t i>
-  void bar(){
-
-  };
-};
-
-template <class P, void (P::*func)()>
-void test(){
-  
-} 
-
-
 
 #include <CD_NamespaceFooter.H>
 

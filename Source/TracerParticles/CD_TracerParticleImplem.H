@@ -16,108 +16,89 @@
 #include <CD_TracerParticle.H>
 #include <CD_NamespaceHeader.H>
 
-template <size_t M, size_t N>
 inline
-TracerParticle<M,N>::TracerParticle() {
-  for (auto& s : m_scalars) {
-    s = 0.0;
-  }
+TracerParticle::TracerParticle() {
 
-  for (auto& v : m_vectors) {
-    v = RealVect::Zero;
-  }
-
-  m_position = RealVect::Zero;
+  m_position = RealVect::Zero;  
+  m_mass     = 0.0;
+  m_velocity = RealVect::Zero;
   m_process  = false;
 }
 
-template <size_t M, size_t N>
 inline  
-TracerParticle<M, N>::TracerParticle(const TracerParticle<M, N>& a_other) {
+TracerParticle::TracerParticle(const TracerParticle& a_other) {
   this->m_position = a_other.m_position;
-  this->m_scalars  = a_other.m_scalars;
-  this->m_vectors  = a_other.m_vectors;    
+  this->m_mass     = a_other.m_mass;
+  this->m_velocity = a_other.m_velocity;
+  this->m_process  = a_other.m_process;      
 }
 
-template <size_t M, size_t N>
 inline
-TracerParticle<M,N>::~TracerParticle() {
+TracerParticle::~TracerParticle() {
+  
 }
 
-template <size_t M, size_t N>
 inline
-bool& TracerParticle<M, N>::processParticle() {
+void TracerParticle::processParticle() {
+  m_process = true;
+}
+
+inline
+void TracerParticle::unprocessParticle() {
+  m_process = false;
+}
+
+inline
+bool& TracerParticle::process() {
   return m_process;
 }
 
-template <size_t M, size_t N>
 inline
-const bool& TracerParticle<M, N>::processParticle() const {
+const bool& TracerParticle::process() const {
   return m_process;
 }
 
-template<size_t M, size_t N>
-template<size_t which>
 inline
-Real& TracerParticle<M, N>::getScalar() {
-  return m_scalars[which];
+Real& TracerParticle::mass() {
+  return m_mass;
 }
 
-template<size_t M, size_t N>
-template<size_t which>
 inline
-const Real& TracerParticle<M, N>::getScalar() const {
-  return m_scalars[which];
+const Real& TracerParticle::mass() const {
+  return m_mass;
 }
 
-template <size_t M, size_t N>
 inline  
-Real& TracerParticle<M, N>::getScalar(const size_t a_which) {
-  return m_scalars[a_which];
+RealVect& TracerParticle::velocity() {
+  return m_velocity;
 }
 
-template <size_t M, size_t N>
 inline  
-const Real& TracerParticle<M, N>::getScalar(const size_t a_which) const {
-  return m_scalars[a_which];
+const RealVect& TracerParticle::velocity() const {
+  return m_velocity;
 }
 
-template <size_t M, size_t N>
-inline  
-RealVect& TracerParticle<M, N>::getVector(const size_t a_which) {
-  return m_vectors[a_which];
-}
-
-template <size_t M, size_t N>
 inline
-const RealVect& TracerParticle<M, N>::getVector(const size_t a_which) const {
-  return m_vectors[a_which];
-}
-
-template <size_t M, size_t N>
-inline
-bool TracerParticle<M, N>::operator==(const TracerParticle<M, N>& a_p) const{
+bool TracerParticle::operator==(const TracerParticle& a_p) const{
   return ( this->m_position == a_p.m_position &&
-	   this->m_scalars  == a_p.m_scalars  &&
-	   this->m_vectors  == a_p.m_vectors);
+	   this->m_mass     == a_p.m_mass     &&
+	   this->m_velocity == a_p.m_velocity &&	   
+	   this->m_process  == a_p.m_process);
 }
 
-template <size_t M, size_t N>
 inline
-bool TracerParticle<M, N>::operator!=(const TracerParticle<M, N>& a_p) const{
+bool TracerParticle::operator!=(const TracerParticle& a_p) const{
   return !(*this == a_p);
 }
 
-template <size_t M, size_t N>
 inline
-int TracerParticle<M, N>::size() const{
-  return BinItem::size() + sizeof(m_scalars) + sizeof(m_vectors) + sizeof(m_process);
+int TracerParticle::size() const{
+  return BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_process);
 }
 
-template <size_t M, size_t N>
 inline
-void TracerParticle<M, N>::linearOut(void* buf) const{
-  Real* buffer = (Real*)buf;
+void TracerParticle::linearOut(void* buf) const{
+  Real* buffer = (Real*) buf;
 
   // Linearize position onto buffer. 
   *buffer++ = m_position[0];
@@ -126,30 +107,23 @@ void TracerParticle<M, N>::linearOut(void* buf) const{
   *buffer++ = m_position[2];
 #endif
 
-  // Linearize scalars onto buffer. 
-  for (size_t i = 0; i < M; i++) {
-    *buffer++ = m_scalars[i];
-  }  
+  // Linearize mass onto buffer
+  *buffer++ = m_mass;
 
-  // Linearize vectors onto buffer. 
-  for (size_t i = 0; i < N; i++) {
-    const RealVect& v = m_vectors[i];
-
-    *buffer++ = v[0];
-    *buffer++ = v[1];
+  // Velocity onto buffer
+  *buffer++ = m_velocity[0];
+  *buffer++ = m_velocity[1];
 #if CH_SPACEDIM==3
-    *buffer++ = v[2];
+  *buffer++ = m_velocity[2];
 #endif
-  }
 
   // Linearize the processing flag onto the buffer. 
   bool* buf2 = (bool*) buf;
   *buf2++ = m_process;
 }
 
-template <size_t M, size_t N>
 inline
-void TracerParticle<M, N>::linearIn(void* buf) {
+void TracerParticle::linearIn(void* buf) {
   Real* buffer = (Real*) buf;
 
   m_position[0] = *buffer++;
@@ -158,42 +132,30 @@ void TracerParticle<M, N>::linearIn(void* buf) {
   m_position[2] = *buffer++;
 #endif
 
-  for (size_t i = 0; i < M; i++) {
-    m_scalars[i] = *buffer++;
-  }
+  // Put mass onto buffer
+  m_mass = *buffer++;
 
-  for (size_t i = 0; i < N; i++) {
-    RealVect& v = m_vectors[i];
-
-    v[0] = *buffer++;
-    v[1] = *buffer++;
+  // Put velocity onto buffer.
+  m_velocity[0] = *buffer++;
+  m_velocity[1] = *buffer++;
 #if CH_SPACEDIM==3
-    v[2] = *buffer++;
+  m_velocity[2] = *buffer++;
 #endif
-  }
 
   // Linearize the processing flag onto the buffer. 
   bool* buf2 = (bool*) buf;
   m_process = *buf2++;
 }
 
-template <size_t M, size_t N>
 inline
-std::ostream & operator<<(std::ostream& ostr, const TracerParticle<M, N>& p) {
+std::ostream & operator<<(std::ostream& ostr, const TracerParticle& p) {
   ostr << "TracerParticle : \n";
 
   // Print position. 
   ostr << "\tPosition  = " << p.position() << "\n";
-
-  // Print scalars. 
-  for (size_t i = 0; i < M; i++){
-    ostr << "\tScalar #" << i << " = " << p.getScalar(i) << "\n";
-  }
-
-  // Print vectors. 
-  for (size_t i = 0; i < N; i++){
-    ostr << "\tVector #" << i << " = " << p.getVector(i) << "\n";
-  }  
+  ostr << "\tMass      = " << p.mass() << "\n";
+  ostr << "\tVelocity  = " << p.velocity() << "\n";
+  ostr << "\tProcess   = " << p.process() << "\n";      
   
   return ostr;
 }

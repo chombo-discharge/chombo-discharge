@@ -25,9 +25,8 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief A tracer particle class. The particle class can contain M independent scalar and N independent vector components.
+  @brief A tracer particle class. 
 */
-template <size_t M, size_t N>
 class TracerParticle : public BinItem {
 public:
 
@@ -51,68 +50,58 @@ public:
   virtual ~TracerParticle();
 
   /*!
-    @brief Check if particle should be processed or not
-    @return m_process
+    @brief Set m_process to true. 
   */
   inline
-  bool& processParticle();
+  void processParticle();
+
+  /*!
+    @brief Set m_process to false. 
+  */
+  inline
+  void unprocessParticle();
 
   /*!
     @brief Check if particle should be processed or not
     @return m_process
   */
   inline
-  const bool& processParticle() const;
+  bool& process();      
 
   /*!
-    @brief Get a particle scalar. 
-    @details Template because we want to have a function getScalar() available but the other option 'getScalar(int)' is 
-    not compile-time constant.
+    @brief Check if particle should be processed or not
+    @return m_process
   */
-  template <size_t which>
   inline
-  Real& getScalar();
+  const bool& process() const;
 
   /*!
-    @brief Get a particle scalar. 
-    @details Template because we want to have a function getScalar() available but the other option 'getScalar(int)' is 
-    not compile-time constant.
-  */
-  template <size_t which>
-  inline
-  const Real& getScalar() const;
-  
-  /*!
-    @brief Get a particle scalar. 
-    @param[in] a_which Which particle scalar to fetch. 
-    @return m_scalars[a_which]
+    @brief Get the particle "mass"
+    @return m_mass
   */
   inline
-  Real& getScalar(const size_t a_which);
+  Real& mass();
 
   /*!
-    @brief Get a particle scalar. 
-    @param[in] a_which Which particle scalar to fetch. 
-    @return m_scalars[a_which]
+    @brief Get the particle "mass"
+    @return m_mass
   */
   inline
-  const Real& getScalar(const size_t a_which) const;  
+  const Real& mass() const;
 
   /*!
-    @brief Get a particle vector
-    @param[in] a_which Which particle vector to fetch. 
-    @return m_vectors[a_which]
+    @brief Get the particle velocity. 
+    @return m_velocity
   */
   inline
-  RealVect& getVector(const size_t a_which);
+  RealVect& velocity();
 
   /*!
-    @brief Get a particle vector
-    @param[in] a_which Which particle vector to fetch. 
-    @return m_vectors[a_which]
+    @brief Get the particle velocity
+    @return m_velocity
   */
   inline
-  const RealVect& getVector(const size_t a_which) const;
+  const RealVect& velocity() const;
 
   /*!
     @brief Comparison operator with other particle
@@ -151,30 +140,17 @@ public:
   inline  
   virtual void linearIn(void* a_buf);
 
-  /*!
-    @brief Friend function for letting ostream print the particle.
-    @param[in] ostr       Output stream
-    @param[in] a_particle Particle to output
-  */
-  //  inline  
-  //  friend std::ostream& operator<<(std::ostream& ostr, const TracerParticle<M, N>& a_particle);
-  template<size_t i>  
-  inline
-  void f(){
-
-  }
-
 protected:
 
   /*!
-    @brief Scalar components
+    @brief Particle "mass".
   */
-  std::array<Real, M> m_scalars;
+  Real m_mass;
 
   /*!
-    @brief Vector components
+    @brief Particle velocity
   */
-  std::array<RealVect, N> m_vectors;
+  RealVect m_velocity;
 
   /*!
     @brief Process particle or not
@@ -187,9 +163,8 @@ protected:
   @param[in] ostr       Output stream
   @param[in] a_particle Particle to output
 */
-template <size_t M, size_t N>
 inline
-std::ostream & operator<<(std::ostream& ostr, const TracerParticle<M, N>& p);
+std::ostream & operator<<(std::ostream& ostr, const TracerParticle& p);
 
 #include <CD_NamespaceFooter.H>
 
