@@ -16,6 +16,8 @@
 #include <CD_AmrMesh.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_TracerParticle.H>
+#include <CD_ParticleContainer.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity field.
@@ -52,7 +54,7 @@ public:
     @param[in] a_compGeom Computational geometry. 
   */
   TracerParticleSolver(const RefCountedPtr<AmrMesh>& a_amr,
-		       const RefCountedPtr<ComputationalGeometry> m_compGeom);
+		       const RefCountedPtr<ComputationalGeometry> a_compGeom);
 
   /*!
     @brief Disallowed assignment operator. 
@@ -77,19 +79,40 @@ public:
   */
   virtual void allocateInternals();
 
+  /*!
+    @brief Register operators needed for AMR core
+  */
+  virtual void registerOperators() const;
 
+  /*!
+    @brief Set AmrMesh
+    @param[in] a_amrMesh AmrMesh
+  */
+  virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh);
+
+  /*!
+    @brief Set the computational geometry
+    @param[in] a_compGeom Computational geometry
+  */
+  virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_compGeom);  
+
+  /*!
+    @brief Set the solver realm
+    @param[in] a_realm Realm name. 
+  */
+  virtual void setRealm(const std::string& a_realm);
+
+  /*!
+    @brief Set the solver phase
+    @param[in] a_phase Phase
+  */
+  virtual void setPhase(const phase::which_phase& a_phase);  
 
   /*!
     @brief Set the tracer particle velocity field
     @param[in] a_velocityField Velocity field.
   */
   virtual void setVelocityField(const EBAMRCellData& a_velocityField);
-
-  /*!
-    @brief Set the tracer particle velocity field
-    @param[in] a_velocityField Velocity field.
-  */  
-  virtual void setVelocityField(const std::function<RealVect(const RealVect& a_position)>& a_velocityField);
 
   /*!
     @brief Perform pre-regrid operations. 
@@ -107,6 +130,40 @@ public:
     @note The velocity is NOT remeshed -- the user is responsible for setting this after the regrid. 
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
+
+  /*!
+    @brief Parse options
+  */
+  virtual void parseOptions();
+
+  /*!
+    @brief Parse run-time options
+  */
+  virtual void parseRuntimeOptions();  
+
+  /*!
+    @brief Get the number of plot variables
+    @return Returns number of plot variables. 
+  */
+  virtual int getNumberOfPlotVariables() const;
+
+  /*!
+    @brief Get plot variable names
+    @return List of plot variable names. 
+  */
+  virtual Vector<std::string> getPlotVariableNames() const;
+
+  /*!
+    @brief Set the plot variable names for the particle scalars
+    @param[in] a_scalarNames Names for the tracer particle scalars
+  */
+  virtual void setScalarNames(const std::array<std::string, M>& a_scalarNames);
+
+  /*!
+    @brief Set the plot variable names for the particle vectors
+    @param[in] a_scalarNames Names for the tracer particle vectors
+  */
+  virtual void setVectorNames(const std::array<std::string, N>& a_vectorNames);  
 
   /*!
     @brief Write plot file
@@ -152,7 +209,13 @@ public:
     @brief Get particles. Const version. 
     @return m_particles. 
   */
-  virtual const ParticleContainer<TracerParticle<M, N> >& getParticles() const;  
+  virtual const ParticleContainer<TracerParticle<M, N> >& getParticles() const;
+
+  /*!
+    @brief Return the velocity field
+    @return *m_velocityField
+  */
+  const EBAMRCellData& getVelocityField() const;
   
 protected:
 
@@ -165,6 +228,16 @@ protected:
     @brief Handle to computational geometry.
   */
   RefCountedPtr<ComputationalGeometry> m_computationalGeometry;
+
+  /*!
+    @brief Deposition type when depositing particles to grid
+  */
+  DepositionType m_deposition;
+
+  /*!
+    @brief Coarse-fine deposition strategy. 
+  */
+  CoarseFineDeposition m_coarseFineDeposition;  
 
   /*!
     @brief Realm where this solver lives
@@ -192,14 +265,96 @@ protected:
   int m_verbosity;
 
   /*!
+    @brief PVR buffer. Defaults to zero.
+  */
+  int m_pvrBuffer;
+
+  /*!
+    @brief PVR buffer. Defaults to one.
+  */
+  int m_haloBuffer;  
+
+  /*!
+    @brief Hook for adding velocity field to plot file
+  */
+  bool m_plotVelocityField;
+
+  /*!
+    @brief Hook for adding particle scalars to plot file
+  */
+  bool m_plotScalars;
+
+  /*!
+    @brief Hook for adding particle vectors to plot file
+  */
+  bool m_plotVectors;
+
+  /*!
+    @brief Names for the particle scalars. 
+    @details Defaults to "scalar #0", "scalar #1", etc but can be overriden in setScalarNames
+  */
+  std::array<std::string, M> m_scalarNames;
+
+  /*!
+    @brief Names for the particle vectors. 
+    @details Defaults to "vector #0", "vector #1", etc but can be overriden in setVectorNames
+  */
+  std::array<std::string, N> m_vectorNames;    
+
+  /*!
     @brief Mesh-based velocity field
   */
-  EBAMRCellData m_velocityField;
+  const EBAMRCellData* m_velocityField;
 
   /*!
     @brief Particle data.
   */
   ParticleContainer<TracerParticle<M, N> > m_particles;
+
+  /*!
+    @brief Parse deposition method
+  */
+  void parseDeposition();
+
+  /*!
+    @brief Parse plot variables.
+  */
+  void parsePlotVariables();
+
+  /*!
+    @brief Generic particle deposition method for putting a scalar field onto the mesh.
+  */
+  template <class P,  const Real&(P::*particleScalarField)() const>
+  void depositScalar(EBAMRCellData& a_phi,
+  		     const ParticleContainer<P> a_particles,
+  		     const DepositionType a_baseDeposition,
+  		     const CoarseFineDeposition a_coarseFineDeposition) {
+
+    
+  }
 };
+
+template<size_t M>
+class foo : public BinItem {
+public:
+
+  template<size_t i>
+  void bar(){
+
+  };
+};
+
+template <class P, void (P::*func)()>
+void test(){
+  
+} 
+
+
+
+#include <CD_NamespaceFooter.H>
+
+#include <CD_TracerParticleSolverImplem.H>
+
+
 
 #endif

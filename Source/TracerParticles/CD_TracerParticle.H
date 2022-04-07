@@ -51,29 +51,65 @@ public:
   virtual ~TracerParticle();
 
   /*!
-    @brief Get the particle velocity
-    @return m_velocity
+    @brief Check if particle should be processed or not
+    @return m_process
+  */
+  inline
+  bool& processParticle();
+
+  /*!
+    @brief Check if particle should be processed or not
+    @return m_process
+  */
+  inline
+  const bool& processParticle() const;
+
+  /*!
+    @brief Get a particle scalar. 
+    @details Template because we want to have a function getScalar() available but the other option 'getScalar(int)' is 
+    not compile-time constant.
+  */
+  template <size_t which>
+  inline
+  Real& getScalar();
+
+  /*!
+    @brief Get a particle scalar. 
+    @details Template because we want to have a function getScalar() available but the other option 'getScalar(int)' is 
+    not compile-time constant.
+  */
+  template <size_t which>
+  inline
+  const Real& getScalar() const;
+  
+  /*!
+    @brief Get a particle scalar. 
+    @param[in] a_which Which particle scalar to fetch. 
+    @return m_scalars[a_which]
   */
   inline
   Real& getScalar(const size_t a_which);
 
   /*!
-    @brief Get the particle velocity
-    @return m_velocity
+    @brief Get a particle scalar. 
+    @param[in] a_which Which particle scalar to fetch. 
+    @return m_scalars[a_which]
   */
   inline
   const Real& getScalar(const size_t a_which) const;  
 
   /*!
-    @brief Get the particle velocity
-    @return m_velocity
+    @brief Get a particle vector
+    @param[in] a_which Which particle vector to fetch. 
+    @return m_vectors[a_which]
   */
   inline
   RealVect& getVector(const size_t a_which);
 
   /*!
-    @brief Get the particle velocity
-    @return m_velocity
+    @brief Get a particle vector
+    @param[in] a_which Which particle vector to fetch. 
+    @return m_vectors[a_which]
   */
   inline
   const RealVect& getVector(const size_t a_which) const;
@@ -122,6 +158,11 @@ public:
   */
   //  inline  
   //  friend std::ostream& operator<<(std::ostream& ostr, const TracerParticle<M, N>& a_particle);
+  template<size_t i>  
+  inline
+  void f(){
+
+  }
 
 protected:
 
@@ -134,6 +175,11 @@ protected:
     @brief Vector components
   */
   std::array<RealVect, N> m_vectors;
+
+  /*!
+    @brief Process particle or not
+  */
+  bool m_process;
 };
 
 /*!

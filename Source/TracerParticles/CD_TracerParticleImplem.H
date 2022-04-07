@@ -28,6 +28,7 @@ TracerParticle<M,N>::TracerParticle() {
   }
 
   m_position = RealVect::Zero;
+  m_process  = false;
 }
 
 template <size_t M, size_t N>
@@ -41,6 +42,32 @@ TracerParticle<M, N>::TracerParticle(const TracerParticle<M, N>& a_other) {
 template <size_t M, size_t N>
 inline
 TracerParticle<M,N>::~TracerParticle() {
+}
+
+template <size_t M, size_t N>
+inline
+bool& TracerParticle<M, N>::processParticle() {
+  return m_process;
+}
+
+template <size_t M, size_t N>
+inline
+const bool& TracerParticle<M, N>::processParticle() const {
+  return m_process;
+}
+
+template<size_t M, size_t N>
+template<size_t which>
+inline
+Real& TracerParticle<M, N>::getScalar() {
+  return m_scalars[which];
+}
+
+template<size_t M, size_t N>
+template<size_t which>
+inline
+const Real& TracerParticle<M, N>::getScalar() const {
+  return m_scalars[which];
 }
 
 template <size_t M, size_t N>
@@ -84,7 +111,7 @@ bool TracerParticle<M, N>::operator!=(const TracerParticle<M, N>& a_p) const{
 template <size_t M, size_t N>
 inline
 int TracerParticle<M, N>::size() const{
-  return BinItem::size() + sizeof(m_scalars) + sizeof(m_vectors);
+  return BinItem::size() + sizeof(m_scalars) + sizeof(m_vectors) + sizeof(m_process);
 }
 
 template <size_t M, size_t N>
@@ -114,12 +141,16 @@ void TracerParticle<M, N>::linearOut(void* buf) const{
     *buffer++ = v[2];
 #endif
   }
+
+  // Linearize the processing flag onto the buffer. 
+  bool* buf2 = (bool*) buf;
+  *buf2++ = m_process;
 }
 
 template <size_t M, size_t N>
 inline
 void TracerParticle<M, N>::linearIn(void* buf) {
-  Real* buffer = (Real*)buf;
+  Real* buffer = (Real*) buf;
 
   m_position[0] = *buffer++;
   m_position[1] = *buffer++;
@@ -140,6 +171,10 @@ void TracerParticle<M, N>::linearIn(void* buf) {
     v[2] = *buffer++;
 #endif
   }
+
+  // Linearize the processing flag onto the buffer. 
+  bool* buf2 = (bool*) buf;
+  m_process = *buf2++;
 }
 
 template <size_t M, size_t N>
