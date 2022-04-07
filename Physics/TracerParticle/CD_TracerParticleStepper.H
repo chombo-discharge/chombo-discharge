@@ -1,4 +1,4 @@
-/* chombo-discharge
+0/* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
@@ -24,6 +24,15 @@
 
 namespace Physics {
   namespace TracerParticlePhysics {
+
+    /*!
+      @brief Various supported integration algorithms. 
+    */
+    enum class IntegrationAlgorithm {
+      Euler,
+      RK2,
+      RK4
+    };    
 
     /*!
       @brief Implementation of TimeStepper for advancing tracer particles in a fixed velocity field. 
@@ -177,6 +186,12 @@ namespace Physics {
 
     protected:
 
+
+      /*!
+	@brief Integration algorithm
+      */
+      IntegrationAlgorithm m_algorithm;
+
       /*!
 	@brief Realm where solver and m_velocityField lives
       */
@@ -228,9 +243,22 @@ namespace Physics {
       virtual void setVelocity();
 
       /*!
-	@brief Advance particles
+	@brief Advance particles using explicit Euler rule
+	@param[in] a_dt Advanced time step
       */
       virtual void advanceParticlesEuler(const Real a_dt);
+
+      /*!
+	@brief Advance particles using second order Runge-Kutta
+	@param[in] a_dt Advanced time step
+      */
+      virtual void advanceParticlesRK2(const Real a_dt);
+
+      /*!
+	@brief Advance particles using fourth order Runge-Kutta
+	@param[in] a_dt Advanced time step
+      */
+      virtual void advanceParticlesRK4(const Real a_dt);            
     };
   }
 }

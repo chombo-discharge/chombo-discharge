@@ -263,6 +263,8 @@ void TracerParticleSolver<P>::remap() {
   if(m_verbosity > 5){
     pout() << m_name + "::remap()" << endl;
   }
+
+  m_particles.remap();
 }
 
 template <typename P>

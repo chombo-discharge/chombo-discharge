@@ -73,6 +73,8 @@ void TracerParticleStepper<P>::initialData() {
   if(m_verbosity > 5){
     pout() << "TracerParticleStepper::initialData()" << endl;
   }
+
+  
 }
 
 template <typename P>
@@ -104,7 +106,10 @@ void TracerParticleStepper<P>::parseOptions() {
   CH_TIME("TracerParticleStepper::parseOptions()");
   if(m_verbosity > 5){
     pout() << "TracerParticleStepper::parseOptions()" << endl;
-  }  
+  }
+
+  this->parseRuntimeOptions();
+
 }
 
 template <typename P>
@@ -113,7 +118,26 @@ void TracerParticleStepper<P>::parseRuntimeOptions() {
   CH_TIME("TracerParticleStepper::parseRuntimeOptions()");
   if(m_verbosity > 5){
     pout() << "TracerParticleStepper::parseRuntimeOptions()" << endl;
-  }  
+  }
+
+  ParmParse pp("TracerParticleStepper");
+
+  std::string str;
+
+  pp.get("cfl",         m_cfl);
+  pp.get("integration", str  );  
+  if(str == "euler"){
+    m_algorithm = IntegrationAlgorithm::Euler;
+  }
+  else if(str == "rk2"){
+    m_algorithm = IntegrationAlgorithm::RK2;
+  }
+  else if(str == "rk4"){
+    m_algorithm = IntegrationAlgorithm::RK4;
+  }
+  else{
+    MayDay::Error("TracerParticleStepper::parseRuntimeOptions -- logic bust");
+  }
 }
 
 #ifdef CH_USE_HDF5
@@ -181,7 +205,30 @@ Real TracerParticleStepper<P>::advance(const Real a_dt) {
     pout() << "TracerParticleStepper::advance(Real)" << endl;
   }
 
-  this->advanceParticlesEuler(a_dt);
+  switch(m_algorithm){
+  case IntegrationAlgorithm::Euler:
+    {
+      this->advanceParticlesEuler(a_dt);
+
+      break;
+    }
+  case IntegrationAlgorithm::RK2:
+    {
+      this->advanceParticlesRK2(a_dt);
+
+      break;
+    }
+  case IntegrationAlgorithm::RK4:
+    {
+      this->advanceParticlesRK4(a_dt);
+
+      break;
+    }
+  default:
+    {
+      MayDay::Error("TracerParticleStepper::advance -- logic bust");
+    }
+  }  
 
   return a_dt;
 }
@@ -259,10 +306,19 @@ void TracerParticleStepper<P>::setVelocity() {
 
 template <typename P>
 inline
-void TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt) {
-  CH_TIME("TracerParticleStepper::advanceParticlesEuler()");
+void TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt) {
+  CH_TIME("TracerParticleStepper::advanceParticlesRK2()");
   if(m_verbosity > 5){
-    pout() << "TracerParticleStepper::advanceParticlesEuler()" << endl;
+    pout() << "TracerParticleStepper::advanceParticlesRK2()" << endl;
+  }
+}
+
+template <typename P>
+inline
+void TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt) {
+  CH_TIME("TracerParticleStepper::advanceParticlesRK4()");
+  if(m_verbosity > 5){
+    pout() << "TracerParticleStepper::advanceParticlesRK4()" << endl;
   }
 }
 
