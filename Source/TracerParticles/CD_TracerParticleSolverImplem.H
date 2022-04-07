@@ -156,10 +156,10 @@ void TracerParticleSolver<P>::registerOperators() const {
 
 template <typename P>
 inline
-void TracerParticleSolver<P>::allocateInternals() {
-  CH_TIME("TracerParticleSolver::allocateInternals()");
+void TracerParticleSolver<P>::allocate() {
+  CH_TIME("TracerParticleSolver::allocate()");
   if(m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals()" << endl;
+    pout() << m_name + "::allocate()" << endl;
   }
 
   // Allocate data for storing the velocity field on the mesh, and storage for the particles. 
@@ -258,6 +258,38 @@ void TracerParticleSolver<P>::regrid(const int a_lmin, const int a_oldFinestLeve
 
 template <typename P>
 inline
+void TracerParticleSolver<P>::remap() {
+  CH_TIME("TracerParticleSolver::remap()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::remap()" << endl;
+  }
+}
+
+template <typename P>
+inline
+void TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const {
+  CH_TIME("TracerParticleSolver::deposit(EBAMRCellData)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit(EBAMRCellData)" << endl;
+  }
+
+  DataOps::setValue(a_phi, 0.0);
+  this->depositParticles<P, &P::mass>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
+}
+
+template <typename P>
+inline
+void TracerParticleSolver<P>::interpolateVelocities() {
+  CH_TIME("TracerParticleSolver::interpolateVelocities()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::interpolateVelocities()" << endl;
+  }
+
+  m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, *m_velocityField, m_deposition, false);
+}
+
+template <typename P>
+inline
 int TracerParticleSolver<P>::getNumberOfPlotVariables() const {
   CH_TIME("TracerParticleSolver::getNumberOfPlotVariables()");
   if(m_verbosity > 5){
@@ -268,7 +300,6 @@ int TracerParticleSolver<P>::getNumberOfPlotVariables() const {
 
   if(m_plotMass    ) numPlotVars += 1;  
   if(m_plotVelocity) numPlotVars += SpaceDim;
-
 
   return numPlotVars;
 }
@@ -323,8 +354,7 @@ void TracerParticleSolver<P>::writePlotData(EBAMRCellData& a_output, int& a_icom
     EBAMRCellData mass;
     m_amr->allocate(mass, m_realm, m_phase, 1);
 
-    DataOps::setValue(mass, 0.0);
-    this->depositScalar<P, &P::mass>(mass, m_particles, m_deposition, m_coarseFineDeposition);
+    this->deposit(mass);
 
     const Interval srcInterval(0, 0);
     const Interval dstInterval(a_icomp, a_icomp);
@@ -408,6 +438,20 @@ const EBAMRCellData& TracerParticleSolver<P>::getVelocityField() const {
   }
 
   return *m_velocityField;
+}
+
+template <typename P>
+template <typename T,  const Real&(T::*particleScalarFunction)() const>
+void TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
+					       const ParticleContainer<P> a_particles,
+					       const DepositionType       a_baseDeposition,
+					       const CoarseFineDeposition a_coarseFineDeposition) const {
+  CH_TIME("TracerParticleSolver::depositParticles()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::depositParticles()" << endl;
+  }
+
+  
 }
 
 #include <CD_NamespaceFooter.H>

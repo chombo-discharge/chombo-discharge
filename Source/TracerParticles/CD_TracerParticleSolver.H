@@ -74,10 +74,9 @@ public:
   virtual ~TracerParticleSolver();
 
   /*!
-    @brief Allocate internal storage
-    @note This allocates a bunch of storage -- if the solver is not diffusive or mobile then we do our best to trim memory. 
+    @brief Define the particle container. 
   */
-  virtual void allocateInternals();
+  virtual void allocate();
 
   /*!
     @brief Register operators needed for AMR core
@@ -130,6 +129,22 @@ public:
     @note The velocity is NOT remeshed -- the user is responsible for setting this after the regrid. 
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
+
+  /*!
+    @brief Remap particles
+  */
+  virtual void remap();
+
+  /*!
+    @brief Deposit particle mass on mesh. 
+    @param[out] a_phi Deposited mass. 
+  */
+  virtual void deposit(EBAMRCellData& a_phi) const;
+
+  /*!
+    @brief Interpolate particles velocities.
+  */
+  virtual void interpolateVelocities();  
 
   /*!
     @brief Parse options
@@ -294,15 +309,16 @@ protected:
 
   /*!
     @brief Generic particle deposition method for putting a scalar field onto the mesh.
+    @param[out] a_phi                  Deposited quantity.
+    @param[out] a_particles            Particles to be deposited. 
+    @param[in]  a_baseDeposition       Base deposition method.
+    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.
   */
   template <typename T,  const Real&(T::*particleScalarFunction)() const>
-  void depositScalar(EBAMRCellData&             a_phi,
-  		     const ParticleContainer<P> a_particles,
-  		     const DepositionType       a_baseDeposition,
-  		     const CoarseFineDeposition a_coarseFineDeposition) {
-
-    
-  }
+  void depositParticles(EBAMRCellData&             a_phi,
+			const ParticleContainer<P> a_particles,
+			const DepositionType       a_baseDeposition,
+			const CoarseFineDeposition a_coarseFineDeposition) const;
 };
 
 #include <CD_NamespaceFooter.H>
