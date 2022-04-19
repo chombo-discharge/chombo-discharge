@@ -19,7 +19,7 @@
 #include <CD_TracerParticleStepper.H>
 #include <CD_NamespaceHeader.H>
 
-using namespace Physics::TracerParticlePhysics;
+using namespace Physics::TracerParticle;
 
 template <typename P>
 inline
@@ -43,15 +43,15 @@ TracerParticleStepper<P>::~TracerParticleStepper() {
 
 template <typename P>
 inline
-void TracerParticleStepper<P>::setupSolver() {
-  CH_TIME("TracerParticleStepper::setupSolver()");
+void TracerParticleStepper<P>::setupSolvers() {
+  CH_TIME("TracerParticleStepper::setupSolvers()");
   if(m_verbosity > 5){
-    pout() << "TracerParticleStepper::setupSolver()" << endl;
+    pout() << "TracerParticleStepper::setupSolvers()" << endl;
   }
 
   m_solver = std::make_shared<TracerParticleSolver<P> >(m_amr, m_computationalGeometry);
   m_solver->setPhase(m_phase);
-  m_solver->setVelocity(&m_velocity);
+  m_solver->setVelocity(m_velocityField);
 }
 
 template <typename P>
@@ -148,7 +148,7 @@ void TracerParticleStepper<P>::writeCheckpointData(HDF5Handle& a_handle, const i
     pout() << "TracerParticleStepper::writeCheckpointData(HDF5Handle, int)" << endl;
   }
 
-  m_solver->writeCheckpointData(HDF5Handle, a_lvl);
+  m_solver->writeCheckpointData(a_handle, a_lvl);
 }
 #endif
 
@@ -161,7 +161,7 @@ void TracerParticleStepper<P>::readCheckpointData(HDF5Handle& a_handle, const in
     pout() << "TracerParticleStepper::readCheckpointData(HDF5Handle, int)" << endl;
   }
 
-  m_solver->readCheckpointData(HDF5Handle, a_lvl);
+  m_solver->readCheckpointData(a_handle, a_lvl);
 }
 #endif
 
@@ -240,9 +240,9 @@ void TracerParticleStepper<P>::synchronizeSolverTimes(const int a_step, const Re
     pout() << "TracerParticleStepper::synchronizeSolverTimes" << endl;
   }
   
-  m_step = a_step;
-  m_time = a_time;
-  m_dt   = a_dt;
+  m_timeStep = a_step;
+  m_time     = a_time;
+  m_dt       = a_dt;
 
   m_solver->setTime(a_step, a_time, a_dt);
 }
@@ -272,7 +272,7 @@ void TracerParticleStepper<P>::regrid(const int a_lmin, const int a_oldFinestLev
   
 
   // Regrid tracer particles. 
-  m_solver->regrid(lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 }
 
 template <typename P>
@@ -301,8 +301,8 @@ void TracerParticleStepper<P>::setVelocity() {
 
   DataOps::setValue(m_velocityField, diagonalVelocity, m_amr->getProbLo(), m_amr->getDx());
 
-  m_amr->averageDown(m_velocity, m_realm, m_phase);
-  m_amr->interpGhost(m_velocity, m_realm, m_phase);  
+  m_amr->averageDown(m_velocityField, m_realm, m_phase);
+  m_amr->interpGhost(m_velocityField, m_realm, m_phase);  
 }
 
 template <typename P>

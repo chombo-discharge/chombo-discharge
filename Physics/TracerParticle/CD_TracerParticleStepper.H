@@ -1,4 +1,4 @@
-0/* chombo-discharge
+/* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
@@ -23,7 +23,7 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  namespace TracerParticlePhysics {
+  namespace TracerParticle {
 
     /*!
       @brief Various supported integration algorithms. 
@@ -37,7 +37,7 @@ namespace Physics {
     /*!
       @brief Implementation of TimeStepper for advancing tracer particles in a fixed velocity field. 
     */
-    template <typename P = TracerParticle>
+    template <typename P>
     class TracerParticleStepper : public TimeStepper {
     public:
 
@@ -54,7 +54,7 @@ namespace Physics {
       /*!
 	@brief Instantiate up the tracer particle solver
       */
-      void setupSolver() override;
+      void setupSolvers() override;
 
       /*!
 	@brief Allocate solvers
@@ -205,7 +205,7 @@ namespace Physics {
       /*!
 	@brief Tracer particle solvers
       */
-      TracerParticleSolver<P> m_solver;
+      std::shared_ptr<TracerParticleSolver<P> > m_solver;
 
       /*!
 	@brief Tracer particle velocity field

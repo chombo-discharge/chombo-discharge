@@ -21,7 +21,7 @@ def write_template(args):
     mainf.write("\n")
 
     mainf.write("using namespace ChomboDischarge;\n")
-    mainf.write("using namespace Physics::TracerParticlePhysics;\n\n")
+    mainf.write("using namespace Physics::TracerParticle;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
@@ -40,16 +40,15 @@ def write_template(args):
     mainf.write("  // Set geometry and AMR \n")
     mainf.write("  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new " + args.geometry + "());\n")
     mainf.write("  RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());\n")
-    mainf.write("  RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());\n")
 
 
     mainf.write("\n")
     mainf.write("  // Set up basic tracer particle physics \n")
-    mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new TracerParticleStepper<TracerParticle>();\n")
+    mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new TracerParticleStepper<TracerParticle>());\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")
-    mainf.write("  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, nullptr, geocoarsen));\n")
+    mainf.write("  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr));\n")
     mainf.write("  engine->setupAndRun(input_file);\n");
     mainf.write("\n")
 

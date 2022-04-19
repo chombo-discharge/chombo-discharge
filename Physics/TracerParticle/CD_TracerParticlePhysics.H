@@ -12,6 +12,8 @@
 #ifndef CD_TracerParticlePhysics_H
 #define CD_TracerParticlePhysics_H
 
+#include <CD_NamespaceHeader.H>
+
 namespace Physics {
   /*!
     @brief Namespace for encapsulating physics code for tracer particles
@@ -21,5 +23,7 @@ namespace Physics {
   }
 
 }
+
+#include <CD_NamespaceFooter.H>
 
 #endif
