@@ -27,9 +27,14 @@ class NeedleIF : public BaseIF{
 public:
   /*!
     @brief Constructor
-    @param[in] a_centerTipSide
+    @param[in] a_centerTipSide Needle tip position
+    @param[in] a_centerBack    Needle position, center of flat end
+    @param[in] a_radius        Needle radius
+    @param[in] a_fluidInside   
+    @param[in] a_tipRadius     Radius of needle tip curvature           
+    @param[in] a_angle         Needle tip (cone) opening angle
   */
-  NeedleIFconst RealVect& a_centerTipSide, const Realvect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, RealVect& a_tip, Real& a_angle);
+  NeedleIFconst RealVect& a_centerTipSide, const Realvect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, const Real& a_angle);
 
   /*!
     @brief Copy constructor
