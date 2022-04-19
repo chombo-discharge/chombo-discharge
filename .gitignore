@@ -31,7 +31,9 @@ docs/**
 **/*.a
 **/*.o
 MyApplications/**
+myApplications/**
 pout.*
 time.table.*
 Research
 slurm*.out
+!docs/.nojekyll
