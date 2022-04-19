@@ -51,7 +51,7 @@ void TracerParticleStepper<P>::setupSolvers() {
 
   m_solver = std::make_shared<TracerParticleSolver<P> >(m_amr, m_computationalGeometry);
   m_solver->setPhase(m_phase);
-  m_solver->setVelocity(m_velocityField);
+  m_solver->setVelocity(m_velocity);
 }
 
 template <typename P>
@@ -62,7 +62,7 @@ void TracerParticleStepper<P>::allocate() {
     pout() << "TracerParticleStepper::allocate()" << endl;
   }
 
-  m_amr->allocate(m_velocityField, m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_velocity, m_realm, m_phase, SpaceDim);
   m_solver->allocate();
 }
 
@@ -74,7 +74,10 @@ void TracerParticleStepper<P>::initialData() {
     pout() << "TracerParticleStepper::initialData()" << endl;
   }
 
-  
+  this->setVelocity();
+  this->initialParticles();
+
+  m_solver->setVelocity(m_velocity);
 }
 
 template <typename P>
@@ -148,7 +151,7 @@ void TracerParticleStepper<P>::writeCheckpointData(HDF5Handle& a_handle, const i
     pout() << "TracerParticleStepper::writeCheckpointData(HDF5Handle, int)" << endl;
   }
 
-  m_solver->writeCheckpointData(a_handle, a_lvl);
+  m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 #endif
 
@@ -161,7 +164,7 @@ void TracerParticleStepper<P>::readCheckpointData(HDF5Handle& a_handle, const in
     pout() << "TracerParticleStepper::readCheckpointData(HDF5Handle, int)" << endl;
   }
 
-  m_solver->readCheckpointData(a_handle, a_lvl);
+  m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 #endif
 
@@ -173,7 +176,8 @@ void TracerParticleStepper<P>::writePlotData(EBAMRCellData& a_output, Vector<std
     pout() << "TracerParticleStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;
   }
 
-  m_solver->writePlotData(a_output, a_plotVariableNames, a_icomp);
+  m_solver->writePlotData(a_output, a_icomp);
+  a_plotVariableNames.append(m_solver->getPlotVariableNames());
 }
 
 template <typename P>
@@ -267,8 +271,8 @@ void TracerParticleStepper<P>::regrid(const int a_lmin, const int a_oldFinestLev
   }
 
   // Define velocity field on the new mesh. 
-  m_amr->reallocate(m_velocityField, m_phase, a_lmin);
-  DataOps::setValue(m_velocityField, 0.0);
+  m_amr->reallocate(m_velocity, m_phase, a_lmin);
+  DataOps::setValue(m_velocity, 0.0);
   
 
   // Regrid tracer particles. 
@@ -299,10 +303,41 @@ void TracerParticleStepper<P>::setVelocity() {
     return RealVect::Unit;
   };
 
-  DataOps::setValue(m_velocityField, diagonalVelocity, m_amr->getProbLo(), m_amr->getDx());
+  DataOps::setValue(m_velocity, diagonalVelocity, m_amr->getProbLo(), m_amr->getDx());
 
-  m_amr->averageDown(m_velocityField, m_realm, m_phase);
-  m_amr->interpGhost(m_velocityField, m_realm, m_phase);  
+  m_amr->averageDown(m_velocity, m_realm, m_phase);
+  m_amr->interpGhost(m_velocity, m_realm, m_phase);  
+}
+
+template <typename P>
+inline
+void TracerParticleStepper<P>::initialParticles() {
+  CH_TIME("TracerParticleStepper::initialParticles()");
+  if(m_verbosity > 5){
+    pout() << "TracerParticleStepper::initialParticles()" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel; lvl++){
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const EBISlayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const ProblemDomain&     domain = m_amr->getDomain()[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box      cellBox = dbl  [dit()];
+      const EBISBox& ebisbox = ebisl[dit()];
+    }
+  }
+}
+
+template <typename P>
+inline
+void TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt) {
+  CH_TIME("TracerParticleStepper::advanceParticlesEuler()");
+  if(m_verbosity > 5){
+    pout() << "TracerParticleStepper::advanceParticlesEuler()" << endl;
+  }
+
+  MayDay::Error("TracerParticleStepper::advanceParticlesEuler -- not implemented");    
 }
 
 template <typename P>
@@ -312,6 +347,8 @@ void TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt) {
   if(m_verbosity > 5){
     pout() << "TracerParticleStepper::advanceParticlesRK2()" << endl;
   }
+
+  MayDay::Error("TracerParticleStepper::advanceParticlesRK2 -- not implemented");
 }
 
 template <typename P>
@@ -321,6 +358,8 @@ void TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt) {
   if(m_verbosity > 5){
     pout() << "TracerParticleStepper::advanceParticlesRK4()" << endl;
   }
+
+  MayDay::Error("TracerParticleStepper::advanceParticlesRK4 -- not implemented");  
 }
 
 #include <CD_NamespaceFooter.H>

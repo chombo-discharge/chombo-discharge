@@ -225,10 +225,10 @@ void TracerParticleSolver<P>::setComputationalGeometry(const RefCountedPtr<Compu
 
 template <typename P>
 inline
-void TracerParticleSolver<P>::setVelocityField(const EBAMRCellData& a_velocityField) {
-  CH_TIME("TracerParticleSolver::setVelocityField(EBAMRCellData)");
+void TracerParticleSolver<P>::setVelocity(const EBAMRCellData& a_velocityField) {
+  CH_TIME("TracerParticleSolver::setVelocity(EBAMRCellData)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::setVelocityField(EBAMRCellData)" << endl;
+    pout() << m_name + "::setVelocity(EBAMRCellData)" << endl;
   }
 
   m_velocityField = &a_velocityField;

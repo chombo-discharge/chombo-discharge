@@ -120,7 +120,7 @@ public:
     @brief Set the tracer particle velocity field
     @param[in] a_velocityField Velocity field.
   */
-  virtual void setVelocityField(const EBAMRCellData& a_velocityField);
+  virtual void setVelocity(const EBAMRCellData& a_velocityField);
 
   /*!
     @brief Perform pre-regrid operations. 

@@ -186,14 +186,13 @@ namespace Physics {
 
     protected:
 
-
       /*!
 	@brief Integration algorithm
       */
       IntegrationAlgorithm m_algorithm;
 
       /*!
-	@brief Realm where solver and m_velocityField lives
+	@brief Realm where solver and m_velocity lives
       */
       std::string m_realm;
 
@@ -210,7 +209,7 @@ namespace Physics {
       /*!
 	@brief Tracer particle velocity field
       */
-      EBAMRCellData m_velocityField;
+      EBAMRCellData m_velocity;
 
       /*!
 	@brief Particle "CFL" time step
@@ -235,7 +234,7 @@ namespace Physics {
       /*!
 	@brief Fill initial particles
       */
-      virtual void fillParticles();
+      virtual void initialParticles();
 
       /*!
 	@brief Set the velocity on the mesh
