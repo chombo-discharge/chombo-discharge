@@ -6,6 +6,7 @@
 /doc/html/*.html
 /doc/html/**
 /doc/html/*
+docs/**
 **/doc/html/**
 **/doc/sphinx/build/html/**
 **/doc/sphinx/build/**
@@ -30,7 +31,9 @@
 **/*.a
 **/*.o
 MyApplications/**
+myApplications/**
 pout.*
 time.table.*
 Research
 slurm*.out
+!docs/.nojekyll
