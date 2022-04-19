@@ -11,7 +11,9 @@ Welcome to ``chombo-discharge``'s user documentation
 ****************************************************
 	      
 ``chombo-discharge`` is a modular and scalable research code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries.
-The code is hosted at `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_ together with the source files for this documentation. 
+The code is hosted at `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_ together with the source files for this documentation.
+
+A separate doxygen-generated API is found `here <doxygen/html/index.html>`_. 
 
 ``chombo-discharge`` supports
 
