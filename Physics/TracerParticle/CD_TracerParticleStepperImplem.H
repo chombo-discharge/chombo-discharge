@@ -49,9 +49,11 @@ void TracerParticleStepper<P>::setupSolvers() {
     pout() << "TracerParticleStepper::setupSolvers()" << endl;
   }
 
-  m_solver = std::make_shared<TracerParticleSolver<P> >(m_amr, m_computationalGeometry);
-  m_solver->setPhase(m_phase);
-  m_solver->setVelocity(m_velocity);
+  m_solver = RefCountedPtr<TracerParticleSolver<P> > (new TracerParticleSolver<P>(m_amr, m_computationalGeometry));
+
+  m_solver->setPhase(m_phase);  
+  m_solver->setRealm(m_realm);
+  m_solver->parseOptions();  
 }
 
 template <typename P>
@@ -89,7 +91,6 @@ void TracerParticleStepper<P>::registerRealms() {
   }
 
   m_amr->registerRealm(m_realm);
-  m_solver->setRealm(m_realm);
 }
 
 template <typename P>
@@ -111,7 +112,7 @@ void TracerParticleStepper<P>::parseOptions() {
     pout() << "TracerParticleStepper::parseOptions()" << endl;
   }
 
-  this->parseRuntimeOptions();
+  this->parseIntegrator();  
 }
 
 template <typename P>
@@ -122,12 +123,26 @@ void TracerParticleStepper<P>::parseRuntimeOptions() {
     pout() << "TracerParticleStepper::parseRuntimeOptions()" << endl;
   }
 
+  this->parseIntegrator();
+
+  m_solver->parseRuntimeOptions();  
+}
+
+template <typename P>
+inline
+void TracerParticleStepper<P>::parseIntegrator() {
+  CH_TIME("TracerParticleStepper::parseIntegrator()");
+  if(m_verbosity > 5){
+    pout() << "TracerParticleStepper::parseIntegrator()" << endl;
+  }
+
   ParmParse pp("TracerParticleStepper");
 
   std::string str;
 
-  pp.get("cfl",         m_cfl);
-  pp.get("integration", str  );  
+  pp.get("verbosity",   m_verbosity);
+  pp.get("cfl",         m_cfl      );
+  pp.get("integration", str        );
   if(str == "euler"){
     m_algorithm = IntegrationAlgorithm::Euler;
   }
@@ -139,7 +154,7 @@ void TracerParticleStepper<P>::parseRuntimeOptions() {
   }
   else{
     MayDay::Error("TracerParticleStepper::parseRuntimeOptions -- logic bust");
-  }
+  }  
 }
 
 #ifdef CH_USE_HDF5
@@ -327,6 +342,15 @@ void TracerParticleStepper<P>::initialParticles() {
       const EBISBox& ebisbox = ebisl[dit()];
     }
   }
+}
+
+template <typename P>
+inline
+void TracerParticleStepper<P>::printStepReport(){
+  CH_TIME("TracerParticleStepper::printStepReport");
+  if(m_verbosity > 5){
+    pout() << "TracerParticleStepper::printStepReport()" << endl;
+  }  
 }
 
 template <typename P>

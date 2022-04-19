@@ -12,9 +12,6 @@
 #ifndef CD_TracerParticleStepper_H
 #define CD_TracerParticleStepper_H
 
-// Std includes
-#include <memory>
-
 // Our includes
 #include <CD_TracerParticle.H>
 #include <CD_TracerParticleSolver.H>
@@ -204,7 +201,7 @@ namespace Physics {
       /*!
 	@brief Tracer particle solvers
       */
-      std::shared_ptr<TracerParticleSolver<P> > m_solver;
+      RefCountedPtr<TracerParticleSolver<P> > m_solver;
 
       /*!
 	@brief Tracer particle velocity field
@@ -240,6 +237,11 @@ namespace Physics {
 	@brief Set the velocity on the mesh
       */
       virtual void setVelocity();
+
+      /*!
+	@brief Parse reactive integrator
+      */
+      virtual void parseIntegrator();
 
       /*!
 	@brief Advance particles using explicit Euler rule

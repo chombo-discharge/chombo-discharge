@@ -332,6 +332,11 @@ protected:
   void parsePlotVariables();
 
   /*!
+    @brief Parse solver verbosity.
+  */
+  void parseVerbosity();  
+
+  /*!
     @brief Generic particle deposition method for putting a scalar field onto the mesh.
     @param[out] a_phi                  Deposited quantity.
     @param[out] a_particles            Particles to be deposited. 

@@ -64,6 +64,7 @@ void TracerParticleSolver<P>::parseOptions() {
 
   this->parseDeposition();
   this->parsePlotVariables();
+  this->parseVerbosity();
 }
 
 template <typename P>
@@ -75,7 +76,8 @@ void TracerParticleSolver<P>::parseRuntimeOptions() {
   }
 
   this->parseDeposition();
-  this->parsePlotVariables();  
+  this->parsePlotVariables();
+  this->parseVerbosity();  
 }
 
 template <typename P>
@@ -130,6 +132,19 @@ void TracerParticleSolver<P>::parsePlotVariables() {
 
   pp.get("plot_mass",     m_plotMass    );
   pp.get("plot_velocity", m_plotVelocity);  
+}
+
+template <typename P>
+inline
+void TracerParticleSolver<P>::parseVerbosity() {
+  CH_TIME("TracerParticleSolver::parseVerbosity()");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::parseVerbosity()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("verbosity", m_verbosity);
 }
 
 template <typename P>
@@ -288,8 +303,8 @@ void TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const {
     pout() << m_name + "::deposit(EBAMRCellData)" << endl;
   }
 
-  DataOps::setValue(a_phi, 0.0);
-  this->depositParticles<P, &P::mass>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
+  //  DataOps::setValue(a_phi, 0.0);
+  //  this->depositParticles<P, &P::mass>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
 }
 
 template <typename P>
@@ -333,7 +348,7 @@ Vector<std::string> TracerParticleSolver<P>::getPlotVariableNames() const {
   Vector<std::string> plotVarNames(0);
 
   if(m_plotMass) {
-    plotVarNames.push_back(m_name + "mass");
+    plotVarNames.push_back(m_name + " density");
   }  
   
   if(m_plotVelocity) plotVarNames.push_back("x-Velocity " + m_name);
@@ -420,7 +435,7 @@ void TracerParticleSolver<P>::writePlotData(EBAMRCellData& a_output, int& a_icom
 
   // Write the velocity field to the output data holder.
   if(m_plotVelocity) {
-    const Interval srcInterval(0, 0);
+    const Interval srcInterval(0,                 SpaceDim - 1);
     const Interval dstInterval(a_icomp, a_icomp + SpaceDim - 1);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -502,7 +517,6 @@ void TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles()" << endl;
   }
-
   
 }
 
