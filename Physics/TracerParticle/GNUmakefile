@@ -1,24 +1,18 @@
-# Contains various definitions of which Chombo libraries we need, and where the various chombo-discharge source files are located
 include $(DISCHARGE_HOME)/Lib/Definitions.make
 
-# This is for Chombo -- it will compile the files in src_dirs into a library. Chombo's makefiles will expand
-# all files found in src_dirs into $objects so we can compile. 
-src_dirs = $(TRACERPARTICLE_DIRS)
+# Things for the Chombo makefile system. 
+ebase    = program
 include $(CHOMBO_HOME)/mk/Make.example
 
-# Name of the library
-SrcLib = $(DISCHARGE_HOME)/Lib/lib$(TRACERPARTICLE_LIB)$(config).a
+# For building this application -- it needs the chombo-discharge source code. 
+$(ebaseobject): dependencies
+.DEFAULT_GOAL=$(ebase)
 
-.DEFAULT_GOAL=TracerParticlePhysics
+# Build dependencies if they do not exis. 
+dependencies: 
+	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-lib
+	$(MAKE) --directory=$(DISCHARGE_HOME) advectiondiffusion
 
-# For making the library.
-GeometryPhysics: $(objects)
-	if test -f $(SrcLib); then $(RM) $(SrcLib); fi
-	ar -cr $(SrcLib) o/$(config)/*.o
-
-# For cleaning up after ourselves. 
-pristine:
-	$(RM) -r [odpf]/$(config)
-	if test -f $(SrcLib); then $(RM) $(SrcLib); fi
-
-.PHONY: pristine TracerParticlePhysics
+# Make advection-diffusion headers and library visible. 
+XTRACPPFLAGS += $(ADVDIFF_INCLUDE)
+XTRALIBFLAGS += $(addprefix -l, $(ADVDIFF_LIB))$(config)

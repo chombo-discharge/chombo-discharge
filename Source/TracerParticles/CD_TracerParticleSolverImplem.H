@@ -17,6 +17,7 @@
 
 // Our includes
 #include <CD_TracerParticleSolver.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename P>
@@ -189,6 +190,18 @@ void TracerParticleSolver<P>::setPhase(const phase::which_phase& a_phase) {
 }
 
 template <typename P>
+void TracerParticleSolver<P>::setTime(const int a_step, const Real a_time, const Real a_dt) {
+  CH_TIME("TracerParticleSolver::setTime(int, Real, Real)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setTime(int, Real, Real)" << endl;
+  }
+
+  m_timeStep = a_step;
+  m_time     = a_time;
+  m_dt       = a_dt;
+}
+
+template <typename P>
 inline
 void TracerParticleSolver<P>::setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh) {
   CH_TIME("TracerParticleSolver::setAmr(RefCountedPtr<AmrMesh>)");
@@ -340,7 +353,44 @@ void TracerParticleSolver<P>::writePlotFile() {
     pout() << m_name + "::writePlotFile()" << endl;
   }
 
-  MayDay::Error("TracerParticleSolver::writePlotFile -- not implemented (yet)");  
+  // Number of output components and their names
+  const int numPlotVars                  = this->getNumberOfPlotVariables();
+  const Vector<std::string> plotVarNames = this->getPlotVariableNames();
+
+  // Allocate storage
+  EBAMRCellData output;
+  m_amr->allocate(output, m_realm, m_phase, numPlotVars);
+  DataOps::setValue(output, 0.0);
+
+  // Copy internal data to be plotted over to 'output'
+  int icomp = 0;
+  this->writePlotData(output, icomp);
+
+  // Filename
+  char filename[100];
+  sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
+  std::string fname(filename);
+  
+  // Alias, because Chombo's EBAMRIO wants raw pointers (but we stick to smart pointers, like God intended). 
+  Vector<LevelData<EBCellFAB>* > outputPtr;
+  m_amr->alias(outputPtr, output);
+
+#ifdef CH_USE_HDF5
+  constexpr int numPlotGhost = 0;
+  
+  DischargeIO::writeEBHDF5(fname,
+			   plotVarNames,			   
+			   m_amr->getGrids(m_realm),
+			   outputPtr,
+			   m_amr->getDomains(),
+			   m_amr->getDx(),
+			   m_amr->getRefinementRatios(),			   
+			   m_dt,
+			   m_time,
+			   m_amr->getProbLo(),			   
+			   m_amr->getFinestLevel() + 1,
+			   numPlotGhost);
+#endif
 }
 
 template <typename P>
@@ -348,7 +398,7 @@ inline
 void TracerParticleSolver<P>::writePlotData(EBAMRCellData& a_output, int& a_icomp) {
   CH_TIME("TracerParticleSolver::writePlotData(EBAMRCellData, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::writePlotFile(EBAMRCellData, int)" << endl;
+    pout() << m_name + "::writePlotData(EBAMRCellData, int)" << endl;
   }
 
   // Write the particle scalars.

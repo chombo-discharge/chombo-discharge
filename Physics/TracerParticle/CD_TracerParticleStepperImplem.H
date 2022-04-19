@@ -109,7 +109,6 @@ void TracerParticleStepper<P>::parseOptions() {
   }
 
   this->parseRuntimeOptions();
-
 }
 
 template <typename P>
@@ -244,6 +243,8 @@ void TracerParticleStepper<P>::synchronizeSolverTimes(const int a_step, const Re
   m_step = a_step;
   m_time = a_time;
   m_dt   = a_dt;
+
+  m_solver->setTime(a_step, a_time, a_dt);
 }
 
 template <typename P>

@@ -105,7 +105,16 @@ public:
     @brief Set the solver phase
     @param[in] a_phase Phase
   */
-  virtual void setPhase(const phase::which_phase& a_phase);  
+  virtual void setPhase(const phase::which_phase& a_phase);
+
+  /*!
+    @brief Set the time for this solver. 
+    @param[in] a_step Time step number
+    @param[in] a_time Time (in seconds)
+    @param[in] a_dt   Time step increment
+    @note This sets m_step=a_step, m_time=a_time, m_dt=a_dt
+  */
+  virtual void setTime(const int a_step, const Real a_time, const Real a_dt);  
 
   /*!
     @brief Set the tracer particle velocity field
@@ -261,6 +270,21 @@ protected:
     @brief Phase where this solver lives
   */
   phase::which_phase m_phase;
+
+  /*!
+    @brief Time step
+  */
+  Real m_dt;
+
+  /*!
+    @brief Time
+  */
+  Real m_time;
+
+  /*!
+    @brief Time step
+  */
+  int m_timeStep;
 
   /*!
     @brief Verbosity level
