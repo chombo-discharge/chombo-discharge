@@ -1,0 +1,4 @@
+<map id="RoughRod" name="RoughRod">
+<area shape="rect" id="node1" title="Class that describes a rod electrode with surface roughness." alt="" coords="53,80,141,107"/>
+<area shape="rect" id="node2" href="$classComputationalGeometry.html" title="Abstract base class for geometries." alt="" coords="5,5,188,32"/>
+</map>

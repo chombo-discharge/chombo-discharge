@@ -1,0 +1,10 @@
+<map id="FieldSolverMultigrid" name="FieldSolverMultigrid">
+<area shape="rect" id="node1" title="Implementation of FieldSolver which uses multigrid." alt="" coords="589,155,741,182"/>
+<area shape="rect" id="node2" href="$classFieldSolver.html" title="Base class for electrostatic solvers." alt="" coords="424,155,519,182"/>
+<area shape="rect" id="node3" href="$classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="29,231,200,258"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="23,5,207,47"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="5,130,224,157"/>
+<area shape="rect" id="node6" href="$classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="47,181,182,207"/>
+<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="15,365,214,391"/>
+<area shape="rect" id="node8" href="$classEBAMRData.html" title=" " alt="" coords="13,79,216,106"/>
+</map>

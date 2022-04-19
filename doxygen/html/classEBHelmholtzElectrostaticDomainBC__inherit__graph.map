@@ -1,0 +1,4 @@
+<map id="EBHelmholtzElectrostaticDomainBC" name="EBHelmholtzElectrostaticDomainBC">
+<area shape="rect" id="node1" title="Class for passing electrostatic domain boundary conditions into EBHelmholtzOp." alt="" coords="5,80,192,121"/>
+<area shape="rect" id="node2" href="$classEBHelmholtzDomainBC.html" title="Base class for passing domain boundary conditions into EBHelmholtzOp." alt="" coords="11,5,186,32"/>
+</map>

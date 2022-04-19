@@ -1,0 +1,5 @@
+<map id="Source/AmrMesh/CD_EbFastFineToCoarRedist.H" name="Source/AmrMesh/CD_EbFastFineToCoarRedist.H">
+<area shape="rect" id="node1" title="New EBFineToCoarRedist class with faster define function." alt="" coords="136,5,340,47"/>
+<area shape="rect" id="node2" href="$CD__EbFastFineToCoarRedist_8cpp.html" title="Implementation of EbFastFineToCoarRedist." alt="" coords="5,95,209,136"/>
+<area shape="rect" id="node3" href="$CD__PhaseRealm_8cpp.html" title="Implementation of CD_PhaseRealm.H." alt="" coords="233,102,504,129"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="Physics/ItoPlasma/CD_ItoPlasmaPhysicsLFA.H" name="Physics/ItoPlasma/CD_ItoPlasmaPhysicsLFA.H">
+<area shape="rect" id="node1" title="Interface file for LFA&#45;based ito plasma physics." alt="" coords="12,5,191,47"/>
+<area shape="rect" id="node2" href="$CD__ItoPlasmaAir3LFA_8H.html" title="Ito plasma three&#45;species model for air." alt="" coords="5,95,197,151"/>
+<area shape="rect" id="node3" href="$CD__ItoPlasmaAir3LFA_8cpp.html" title="Implementation of CD_ItoPlasmaAir3LFA.H." alt="" coords="5,199,197,255"/>
+</map>

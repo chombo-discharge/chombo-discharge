@@ -1,0 +1,11 @@
+<map id="Source/Utilities/CD_ParallelOpsImplem.H" name="Source/Utilities/CD_ParallelOpsImplem.H">
+<area shape="rect" id="node1" title="Implementation of CD_ParallelOps.H." alt="" coords="689,5,856,47"/>
+<area shape="rect" id="node2" href="$CD__ParallelOps_8H.html" title="Agglomeration of basic MPI reductions." alt="" coords="701,95,845,136"/>
+<area shape="rect" id="node3" href="$CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="5,184,220,225"/>
+<area shape="rect" id="node4" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="244,184,445,225"/>
+<area shape="rect" id="node5" href="$CD__Driver_8cpp.html" title="Implementation of CD_Driver.H." alt="" coords="469,191,676,218"/>
+<area shape="rect" id="node6" href="$CD__DataOps_8cpp.html" title="Implementation of CD_DataOps.H." alt="" coords="701,184,845,225"/>
+<area shape="rect" id="node7" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="869,184,1103,225"/>
+<area shape="rect" id="node8" href="$CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="1127,184,1301,225"/>
+<area shape="rect" id="node9" href="$CD__CdrPlasmaTagger_8cpp.html" title="Implementation of CD_CdrPlasmaTagger.H." alt="" coords="1326,184,1494,225"/>
+</map>

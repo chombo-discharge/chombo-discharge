@@ -1,0 +1,6 @@
+<map id="Physics::ItoPlasma::ItoPlasmaStreamerTagger" name="Physics::ItoPlasma::ItoPlasmaStreamerTagger">
+<area shape="rect" id="node1" title="Refinement class for morrow_stephens plasma model only." alt="" coords="5,259,204,300"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaFieldTagger.html" title="Lightweight tagging class. Only tags cells based on electric field." alt="" coords="20,169,189,211"/>
+<area shape="rect" id="node3" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaTagger.html" title="Abstract class for tagging cells across an AMR hierarchy." alt="" coords="33,80,177,121"/>
+<area shape="rect" id="node4" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="59,5,150,32"/>
+</map>

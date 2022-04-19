@@ -1,0 +1,42 @@
+<map id="Physics/CdrPlasma/PlasmaModels/CdrPlasmaAir3Zheleznyak/CD_CdrPlasmaAir3ZheleznyakSpecies.cpp" name="Physics/CdrPlasma/PlasmaModels/CdrPlasmaAir3Zheleznyak/CD_CdrPlasmaAir3ZheleznyakSpecies.cpp">
+<area shape="rect" id="node1" title="Implementation of CD_CdrPlasmaAir3ZheleznyakSpecies.H." alt="" coords="579,5,881,61"/>
+<area shape="rect" id="node2" title=" " alt="" coords="165,117,231,143"/>
+<area shape="rect" id="node3" title=" " alt="" coords="255,117,359,143"/>
+<area shape="rect" id="node4" href="$CD__CdrPlasmaAir3Zheleznyak_8H.html" title="Declaration of a three&#45;species model with (discrete) Zheleznyak photionization model." alt="" coords="1414,199,1649,225"/>
+<area shape="rect" id="node17" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2444,721,2629,748"/>
+<area shape="rect" id="node18" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="793,721,971,748"/>
+<area shape="rect" id="node39" href="$CD__CdrPlasmaAir3ZheleznyakSpecies_8H.html" title="Declaration of charged species and photons for the air zheleznyak model." alt="" coords="1421,109,1641,151"/>
+<area shape="rect" id="node40" href="$CD__Units_8H.html" title="Declaration of various useful units." alt="" coords="1021,647,1117,673"/>
+<area shape="rect" id="node5" title=" " alt="" coords="2799,273,2871,300"/>
+<area shape="rect" id="node6" href="$CD__CdrPlasmaPhysics_8H.html" title="Declaration of basic physics coupling functions for Physics/CdrPlasma." alt="" coords="2150,273,2331,300"/>
+<area shape="rect" id="node31" href="$CD__LookupTable_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="441,572,584,599"/>
+<area shape="rect" id="node7" title=" " alt="" coords="2413,497,2506,524"/>
+<area shape="rect" id="node8" title=" " alt="" coords="1971,348,2100,375"/>
+<area shape="rect" id="node9" title=" " alt="" coords="2125,348,2218,375"/>
+<area shape="rect" id="node10" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="2243,348,2377,375"/>
+<area shape="rect" id="node29" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="2621,423,2748,449"/>
+<area shape="rect" id="node11" title=" " alt="" coords="2084,423,2168,449"/>
+<area shape="rect" id="node12" href="$CD__EBParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh interpolation and deposition." alt="" coords="2193,423,2355,449"/>
+<area shape="rect" id="node13" title=" " alt="" coords="1783,497,1874,524"/>
+<area shape="rect" id="node14" title=" " alt="" coords="1899,497,2001,524"/>
+<area shape="rect" id="node15" title=" " alt="" coords="2355,647,2431,673"/>
+<area shape="rect" id="node16" href="$CD__DepositionType_8H.html" title="Declaration of deposition types." alt="" coords="2455,647,2618,673"/>
+<area shape="rect" id="node19" href="$CD__EBParticleMeshImplem_8H.html" title="Implementatoin of CD_EBParticleMesh.H." alt="" coords="2025,497,2237,524"/>
+<area shape="rect" id="node20" title=" " alt="" coords="1666,572,1765,599"/>
+<area shape="rect" id="node21" href="$CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="1839,572,1965,599"/>
+<area shape="rect" id="node22" title=" " alt="" coords="1378,647,1439,673"/>
+<area shape="rect" id="node23" title=" " alt="" coords="1464,647,1567,673"/>
+<area shape="rect" id="node24" title=" " alt="" coords="1591,647,1733,673"/>
+<area shape="rect" id="node25" title=" " alt="" coords="1922,647,2029,673"/>
+<area shape="rect" id="node26" title=" " alt="" coords="1242,647,1354,673"/>
+<area shape="rect" id="node27" href="$CD__Decorations_8H_source.html" title=" " alt="" coords="1757,647,1897,673"/>
+<area shape="rect" id="node28" href="$CD__BoxLoopsImplem_8H.html" title="Implementation of CD_BoxLoops.H." alt="" coords="2053,647,2228,673"/>
+<area shape="rect" id="node30" title=" " alt="" coords="2632,497,2719,524"/>
+<area shape="rect" id="node32" title=" " alt="" coords="306,721,386,748"/>
+<area shape="rect" id="node33" title=" " alt="" coords="579,647,641,673"/>
+<area shape="rect" id="node34" title=" " alt="" coords="485,647,554,673"/>
+<area shape="rect" id="node35" href="$CD__LookupTableImplem_8H.html" title="Implementation of CD_LookupTable.H." alt="" coords="117,647,309,673"/>
+<area shape="rect" id="node36" title=" " alt="" coords="5,721,79,748"/>
+<area shape="rect" id="node37" title=" " alt="" coords="103,721,189,748"/>
+<area shape="rect" id="node38" title=" " alt="" coords="213,721,281,748"/>
+</map>

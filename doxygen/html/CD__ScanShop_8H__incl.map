@@ -1,0 +1,19 @@
+<map id="Source/Geometry/CD_ScanShop.H" name="Source/Geometry/CD_ScanShop.H">
+<area shape="rect" id="node1" title="Declare a class geometry generation (ScanShop) that uses the signed distance function for optimizatio..." alt="" coords="587,5,746,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="81,95,215,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="239,95,388,121"/>
+<area shape="rect" id="node4" href="$CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="412,95,511,121"/>
+<area shape="rect" id="node9" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="485,244,670,271"/>
+<area shape="rect" id="node10" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="695,244,873,271"/>
+<area shape="rect" id="node16" href="$CD__BoxSorting_8H.html" title="Declaration of an enum for identifying various ways of sorting grid patches." alt="" coords="793,169,927,196"/>
+<area shape="rect" id="node17" href="$CD__ScanShopImplem_8H_source.html" title=" " alt="" coords="642,95,817,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="295,169,361,196"/>
+<area shape="rect" id="node6" title=" " alt="" coords="436,169,487,196"/>
+<area shape="rect" id="node7" title=" " alt="" coords="511,169,566,196"/>
+<area shape="rect" id="node8" title=" " alt="" coords="25,169,95,196"/>
+<area shape="rect" id="node11" href="$CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="119,169,270,196"/>
+<area shape="rect" id="node12" title=" " alt="" coords="5,244,80,271"/>
+<area shape="rect" id="node13" title=" " alt="" coords="104,244,184,271"/>
+<area shape="rect" id="node14" title=" " alt="" coords="209,244,282,271"/>
+<area shape="rect" id="node15" title=" " alt="" coords="307,244,381,271"/>
+</map>

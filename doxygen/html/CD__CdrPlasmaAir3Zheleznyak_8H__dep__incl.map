@@ -1,0 +1,6 @@
+<map id="Physics/CdrPlasma/PlasmaModels/CdrPlasmaAir3Zheleznyak/CD_CdrPlasmaAir3Zheleznyak.H" name="Physics/CdrPlasma/PlasmaModels/CdrPlasmaAir3Zheleznyak/CD_CdrPlasmaAir3Zheleznyak.H">
+<area shape="rect" id="node1" title="Declaration of a three&#45;species model with (discrete) Zheleznyak photionization model." alt="" coords="173,5,419,61"/>
+<area shape="rect" id="node2" href="$CD__CdrPlasmaAir3Zheleznyak_8cpp.html" title="Implementation of CD_CdrPlasmaAir3Zheleznyak.H." alt="" coords="5,213,256,269"/>
+<area shape="rect" id="node3" href="$CD__CdrPlasmaAir3ZheleznyakSpecies_8cpp.html" title="Implementation of CD_CdrPlasmaAir3ZheleznyakSpecies.H." alt="" coords="311,213,612,269"/>
+<area shape="rect" id="node4" href="$CD__CdrPlasmaAir3ZheleznyakSpecies_8H.html" title="Declaration of charged species and photons for the air zheleznyak model." alt="" coords="152,109,440,165"/>
+</map>

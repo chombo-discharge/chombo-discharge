@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CDR plasma &mdash; chombo-discharge latest documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Electrostatics" href="ElectrostaticsModel.html" />
+    <link rel="prev" title="Brownian walker" href="BrownianWalkerModel.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> chombo-discharge
+          </a>
+              <div class="version">
+                latest
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CDR plasma</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#equations-of-motion">Equations of motion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cdrplasmaphysics">CdrPlasmaPhysics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#api">API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initializing-species">Initializing species</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#defining-drift-velocities">Defining drift velocities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#defining-diffusion-coefficients">Defining diffusion coefficients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#defining-chemistry-terms">Defining chemistry terms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fluxes-at-electrode-boundaries">Fluxes at electrode boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fluxes-at-dielectric-boundaries">Fluxes at dielectric boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fluxes-at-domain-boundaries">Fluxes at domain boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-initial-surface-charge">Setting initial surface charge</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#time-discretizations">Time discretizations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#godunov-operator-splitting">Godunov operator splitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specifying-transport-algorithm">Specifying transport algorithm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specifying-diffusion">Specifying diffusion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#time-step-limitations">Time step limitations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#spectral-deferred-corrections">Spectral deferred corrections</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sdc-basics">SDC basics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Time step limitations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#json-interface">JSON interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-input-file">Specifying input file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#discrete-photons">Discrete photons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gas-law-and-neutral-background">Gas law and neutral background</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#general-functionality">General functionality</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ideal-gas">Ideal gas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#troposphere">Troposphere</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tabulated">Tabulated</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#neutral-species-background">Neutral species background</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#plasma-species">Plasma species</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#initial-data">Initial data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mobilities">Mobilities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#diffusion-coefficients">Diffusion coefficients</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#temperatures">Temperatures</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#photon-species">Photon species</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plasma-reactions">Plasma reactions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specifying-reactions">Specifying reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#wildcards">Wildcards</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plotting-reactions">Plotting reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#constant-reaction-rates">Constant reaction rates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#function-based-rates">Function based rates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tabulated-rates">Tabulated rates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#collisional-quenching">Collisional quenching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reaction-efficiencies">Reaction efficiencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scaling-reactions">Scaling reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#energy-correction">Energy correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#photo-reactions">Photo-reactions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id9">Specifying reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#default-behavior">Default behavior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#helmholtz-reconstruction">Helmholtz reconstruction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">Scaling reactions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#eb-boundary-conditions">EB boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#domain-boundary-conditions">Domain boundary conditions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#simulation-quick-start">Simulation quick start</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">chombo-discharge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>CDR plasma</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Applications/CdrPlasmaModel.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="cdr-plasma">
+<span id="chap-cdrplasmamodel"></span><h1>CDR plasma<a class="headerlink" href="#cdr-plasma" title="Permalink to this headline"></a></h1>
+<p>The CDR plasma model resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma</span></code> and describes plasmas in the drift-diffusion approximation.
+This physics model also includes the following subfolders:</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/PlasmaModel</span></code> which contains various implementation of some plasma models that we have used.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/TimeSteppers</span></code> contains various algorithms for advancing the equations of motion.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CellTaggers</span></code> contains various algorithms for flagging cells for refinement and coarsening.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/python</span></code> contains Python source files for quickly setting up new applications.</p></li>
+</ul>
+<div class="section" id="equations-of-motion">
+<h2>Equations of motion<a class="headerlink" href="#equations-of-motion" title="Permalink to this headline"></a></h2>
+<p>In the CDR plasma model we are solving</p>
+<div class="math notranslate nohighlight" id="equation-cdrplasmaequations">
+<span class="eqno">(7)<a class="headerlink" href="#equation-cdrplasmaequations" title="Permalink to this equation"></a></span>\[\begin{split}\begin{align}
+&amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}, \\[1ex]
+&amp;\frac{\partial\sigma}{\partial t} = F_\sigma,\\[1ex]
+&amp;\frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n\right) = S,
+\end{align}\end{split}\]</div>
+<p>The above equations must be supported by additional boundary conditions on electrodes and insulating surfaces.</p>
+<p>Radiative transport can be done either in the diffusive approximation or by means of Monte Carlo methods.
+Diffusive RTE methods involve solving</p>
+<div class="math notranslate nohighlight">
+\[\begin{align}
+   \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) &amp;= \frac{\eta}{c},
+\end{align}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Psi\)</span> is the isotropic photon density, <span class="math notranslate nohighlight">\(\kappa\)</span> is an absorption length and <span class="math notranslate nohighlight">\(\eta\)</span> is an isotropic source term.
+I.e., <span class="math notranslate nohighlight">\(\eta\)</span> is the number of photons produced per unit time and volume.
+The time dependent term can be turned off and the equation can be solved stationary.</p>
+<p>The module also supports discrete photons where photon transport and absorption is done by sampling discrete photons.
+In general, discrete photon methods incorporate better physics (like shadows)
+They can easily be adapted to e.g. scattering media.
+They are, on the other hand, inherently stochastic which implies that some extra caution must be exercised when integrating the equations of motion.</p>
+<p>The coupling that is (currently) available in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is</p>
+<div class="math notranslate nohighlight" id="equation-cdrplasmacoupling">
+<span class="eqno">(8)<a class="headerlink" href="#equation-cdrplasmacoupling" title="Permalink to this equation"></a></span>\[\begin{split}\begin{align}
+   \epsilon_r &amp;= \epsilon_r(\mathbf{x}), (\textrm{can additionally be discontinuous}), \\[1ex]
+   \mathbf{v} &amp;= \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
+   D &amp;= \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
+   S &amp;= S\left(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi\right), \\[1ex]
+   \eta &amp;= \eta\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
+   F &amp;= F(t, \mathbf{x}, \mathbf{E}, n),
+\end{align}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(F\)</span> is the boundary flux on insulators or electrodes (which must be separately implemented).</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> works by embedding the equations above into an abstract C++ framework (see <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>) that the user must implement or reuse existing pieces of, and then compile into an executable.</p>
+</div>
+<div class="section" id="cdrplasmaphysics">
+<span id="chap-cdrplasmaphysics"></span><h2>CdrPlasmaPhysics<a class="headerlink" href="#cdrplasmaphysics" title="Permalink to this headline"></a></h2>
+<p><a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in <a class="reference internal" href="#equation-cdrplasmacoupling">Eq. 8</a>.
+The source code for the class resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CD_CdrPlasmaPhysics.H</span></code>.
+Note that the entire class is an interface, whose implementations are used by the time integrators that advance the equations.</p>
+<p>There are no default input parameters for <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>, as users must generally implement their own kinetics.
+The class exists solely for providing the integrators with the necessary fundamentals for filling solvers with the correct quantities at the same time, for example filling source terms and drift velocities.</p>
+<p>A successful implementation of <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> has the following:</p>
+<ol class="arabic simple">
+<li><p>Instantiated a list of <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a>.
+These become <a class="reference internal" href="../Solvers/CDR.html#chap-cdr"><span class="std std-ref">Convection-Diffusion-Reaction</span></a> solvers and contain initial conditions and basic transport settings for the convection-diffusion-reaction solvers.</p></li>
+<li><p>Instantiated a list <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a>.
+These become <a class="reference internal" href="../Solvers/RTE.html#chap-radiativetransfer"><span class="std std-ref">Radiative transfer</span></a> solvers and contain metadata for the radiative transport solvers.</p></li>
+<li><p>Implemented the core functionality that couple the solvers together.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is intantiated.
+For information on how to interface into the CDR solvers, see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a>.
+Likewise, see <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a> for how to interface into the RTE solvers.</p>
+<p>Implementation of the core functionality is comparatively straightforward, but can lead to boilerplate code.
+For this reason we also provide an implementation layer <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a> that provides a plug-and-play interface for specifying the plasma physics.</p>
+<div class="section" id="api">
+<h3>API<a class="headerlink" href="#api" title="Permalink to this headline"></a></h3>
+<p>The API for <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code> is as follows:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span> <span class="n">Real</span> <span class="nf">computeAlpha</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_E</span><span class="p">)</span> <span class="k">const</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="kt">void</span> <span class="nf">advanceReactionNetwork</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>          <span class="n">a_cdrSources</span><span class="p">,</span>
+                                    <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>          <span class="n">a_rteSources</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>     <span class="n">a_cdrDensities</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span> <span class="n">a_cdrGradients</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>     <span class="n">a_rteDensities</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">RealVect</span>         <span class="n">a_E</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">RealVect</span>         <span class="n">a_pos</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Real</span>             <span class="n">a_dx</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Real</span>             <span class="n">a_dt</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Real</span>             <span class="n">a_time</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Real</span>             <span class="n">a_kappa</span><span class="p">)</span> <span class="k">const</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span> <span class="n">computeCdrDriftVelocities</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_E</span><span class="p">,</span>
+                                                   <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrDensities</span><span class="p">)</span> <span class="k">const</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
+                                                     <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                                     <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_E</span><span class="p">,</span>
+                                                     <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrDensities</span><span class="p">)</span> <span class="k">const</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrElectrodeFluxes</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_normal</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_E</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrDensities</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrVelocities</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrGradients</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_rteFluxes</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_extrapCdrFluxes</span><span class="p">)</span> <span class="k">const</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrDielectricFluxes</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_normal</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_E</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrDensities</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrVelocities</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrGradients</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_rteFluxes</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_extrapCdrFluxes</span><span class="p">)</span> <span class="k">const</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrDomainFluxes</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>           <span class="n">a_time</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">RealVect</span>       <span class="n">a_pos</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="kt">int</span>            <span class="n">a_dir</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span> <span class="n">a_side</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">RealVect</span>       <span class="n">a_E</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>   <span class="n">a_cdrDensities</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>   <span class="n">a_cdrVelocities</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>   <span class="n">a_cdrGradients</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>   <span class="n">a_rteFluxes</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>   <span class="n">a_extrapCdrFluxes</span><span class="p">)</span> <span class="k">const</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">virtual</span> <span class="n">Real</span> <span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_time</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_pos</span><span class="p">)</span> <span class="k">const</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The above code blocks do the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">computeAlpha</span></code> computes the Townsend ionization coefficient.
+This is used by the cell tagger.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">advanceReactionNetwork</span></code> provides the coupling <span class="math notranslate nohighlight">\(S = S(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi)\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">computeCdrDriftVelocities</span></code> provides the coupling <span class="math notranslate nohighlight">\(\mathbf{v} = \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right)\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">computeCdrDiffusionCoefficients</span></code> provides the coupling <span class="math notranslate nohighlight">\(D = \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right)\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">computeCdrElectrodeFluxes</span></code> provides the coupling <span class="math notranslate nohighlight">\(F = F(t, \mathbf{x}, \mathbf{E}, n)\)</span> on electrode EBs.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">computeCdrDielectricFluxes</span></code> provides the coupling <span class="math notranslate nohighlight">\(F = F(t, \mathbf{x}, \mathbf{E}, n)\)</span> on dielectric EBs.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">computeCdrDomainFluxes</span></code> provides the coupling <span class="math notranslate nohighlight">\(F = F(t, \mathbf{x}, \mathbf{E}, n)\)</span> on domain sides.</p></li>
+</ul>
+<p>For a fully documented API, see the <a class="reference external" href="doxygen/html/classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html">doxygen API</a>.</p>
+<p>Below, we include a brief overview of how <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code> can be directly implemented.
+Note that direct implements like these tend to become boilerplate, we also include an interface which implements these functions with pre-defined rules, see <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a>.</p>
+</div>
+<div class="section" id="initializing-species">
+<h3>Initializing species<a class="headerlink" href="#initializing-species" title="Permalink to this headline"></a></h3>
+<p>In the constructor, the user should define the advected/diffused species and the radiative transfer species.
+These are stored in vectors <code class="docutils literal notranslate"><span class="pre">Vector&lt;RefCountedPtr&lt;CdrSpecies&gt;</span> <span class="pre">&gt;</span> <span class="pre">m_CdrSpecies</span></code> and <code class="docutils literal notranslate"><span class="pre">Vector&lt;RefCountedPtr&lt;RtSpecies&gt;</span> <span class="pre">&gt;</span> <span class="pre">m_RtSpecies</span></code>.
+Each species in these vectors become a convection-diffusion-reaction solver or a radiative transfer solver.
+See <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a> and <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a> for details on how to implement these.</p>
+</div>
+<div class="section" id="defining-drift-velocities">
+<h3>Defining drift velocities<a class="headerlink" href="#defining-drift-velocities" title="Permalink to this headline"></a></h3>
+<p>To set the drift velocities, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDriftVelocities</span></code> – this will set the drift velocity <span class="math notranslate nohighlight">\(\mathbf{v}\)</span> in the CDR equations:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span> <span class="n">computeCdrDriftVelocities</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
+                                           <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                           <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_E</span><span class="p">,</span>
+                                           <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrDensities</span><span class="p">)</span> <span class="k">const</span>  <span class="p">{</span>
+   <span class="k">return</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span> <span class="n">a_E</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This implementation is set the advection velocity equal to <span class="math notranslate nohighlight">\(\mathbf{E}\)</span>.
+For a full plasma simulation, there will also be mobilities involved, which the user is reponsible for obtaining.</p>
+</div>
+<div class="section" id="defining-diffusion-coefficients">
+<h3>Defining diffusion coefficients<a class="headerlink" href="#defining-diffusion-coefficients" title="Permalink to this headline"></a></h3>
+<p>To set the diffusion coefficients, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDiffusionCoefficients</span></code> – this will set the diffusion coefficient <span class="math notranslate nohighlight">\(D\)</span> in the CDR equations:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
+                                             <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                             <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_E</span><span class="p">,</span>
+                                             <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrDensities</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+   <span class="k">return</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This sets <span class="math notranslate nohighlight">\(D = 1\)</span> for all species involved.</p>
+</div>
+<div class="section" id="defining-chemistry-terms">
+<h3>Defining chemistry terms<a class="headerlink" href="#defining-chemistry-terms" title="Permalink to this headline"></a></h3>
+<p>To set the source terms <span class="math notranslate nohighlight">\(S\)</span>, implement <code class="docutils literal notranslate"><span class="pre">advanceReactionNetwork</span></code>.
+This routine should set the reaction terms for both the CDR equations <em>and</em> the radiative transfer equations.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For the radiative transfer equations we set the isotropic source term <span class="math notranslate nohighlight">\(\eta\)</span> which is the number of ionizing photons produced per unit volume and time.</p>
+</div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span> <span class="kt">void</span> <span class="nf">advanceReactionNetwork</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>          <span class="n">a_cdrSources</span><span class="p">,</span>
+                                    <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span>          <span class="n">a_rteSources</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>     <span class="n">a_cdrDensities</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span> <span class="n">a_cdrGradients</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>     <span class="n">a_rteDensities</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">RealVect</span>         <span class="n">a_E</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">RealVect</span>         <span class="n">a_pos</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Real</span>             <span class="n">a_dx</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Real</span>             <span class="n">a_dt</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Real</span>             <span class="n">a_time</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Real</span>             <span class="n">a_kappa</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+   <span class="n">a_cdrSources</span> <span class="o">=</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">);</span>
+   <span class="n">a_rteSources</span> <span class="o">=</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numRteSpecies</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The above code will set <span class="math notranslate nohighlight">\(S = \eta = 1\)</span> for all species.</p>
+<p>We point out that in the plasma module the source terms are <em>always</em> used in the form</p>
+<div class="math notranslate nohighlight">
+\[n^{k+1} = n^k + \Delta t S,\]</div>
+<p>where <span class="math notranslate nohighlight">\(S\)</span> is the source term obtained from <code class="docutils literal notranslate"><span class="pre">advanceReactionNetwork</span></code>.
+This implies that it <em>is</em> possible to define fully implicit integrators directly in <code class="docutils literal notranslate"><span class="pre">advanceReactionNetwork</span></code>.
+For example, if the reactive problem consisted only of <span class="math notranslate nohighlight">\(\partial_t n = -\frac{n}{\tau}\)</span>, one could form a reactive integrator with the implicit Euler rule by first computing <span class="math notranslate nohighlight">\(n^{k+1} = \frac{n^k}{1 + \Delta t/\tau}\)</span> and then linearizing <span class="math notranslate nohighlight">\(S = \frac{n^{k+1} - n^k}{\Delta t}\)</span>.</p>
+</div>
+<div class="section" id="fluxes-at-electrode-boundaries">
+<h3>Fluxes at electrode boundaries<a class="headerlink" href="#fluxes-at-electrode-boundaries" title="Permalink to this headline"></a></h3>
+<p>To set the fluxes <span class="math notranslate nohighlight">\(F\)</span> on electrode EBs, implement <code class="docutils literal notranslate"><span class="pre">computeCdrElectrodeFluxes</span></code>.
+Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are those occuring in a finite-volume context; i.e. the total injected or extracted mass.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrElectrodeFluxes</span><span class="p">(</span><span class="n">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
+                                       <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                       <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_normal</span><span class="p">,</span>
+                                       <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_E</span><span class="p">,</span>
+                                       <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrDensities</span><span class="p">,</span>
+                                       <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrVelocities</span><span class="p">,</span>
+                                       <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrGradients</span><span class="p">,</span>
+                                       <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_rteFluxes</span><span class="p">,</span>
+                                       <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_extrapCdrFluxes</span><span class="p">)</span> <span class="n">const</span> <span class="p">{</span>
+   <span class="k">return</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The input variable <code class="docutils literal notranslate"><span class="pre">a_extrapCdrFluxes</span></code> are cell-centered fluxes extrapolated to the EBs.</p>
+</div>
+<div class="section" id="fluxes-at-dielectric-boundaries">
+<h3>Fluxes at dielectric boundaries<a class="headerlink" href="#fluxes-at-dielectric-boundaries" title="Permalink to this headline"></a></h3>
+<p>To set the fluxes <span class="math notranslate nohighlight">\(F\)</span> on dielectric EBs, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDielectricFluxes</span></code>.
+Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are those occuring in a finite-volume context; i.e. the total injected or extracted mass.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrDielectricFluxes</span><span class="p">(</span><span class="n">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
+                                        <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
+                                        <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_normal</span><span class="p">,</span>
+                                        <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_E</span><span class="p">,</span>
+                                        <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrDensities</span><span class="p">,</span>
+                                        <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrVelocities</span><span class="p">,</span>
+                                        <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrGradients</span><span class="p">,</span>
+                                        <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_rteFluxes</span><span class="p">,</span>
+                                        <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_extrapCdrFluxes</span><span class="p">)</span> <span class="n">const</span> <span class="p">{</span>
+   <span class="k">return</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The input variable <code class="docutils literal notranslate"><span class="pre">a_extrapCdrFluxes</span></code> are cell-centered fluxes extrapolated to the EBs.</p>
+</div>
+<div class="section" id="fluxes-at-domain-boundaries">
+<h3>Fluxes at domain boundaries<a class="headerlink" href="#fluxes-at-domain-boundaries" title="Permalink to this headline"></a></h3>
+<p>To set the fluxes <span class="math notranslate nohighlight">\(F\)</span> on dielectric EBs, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDielectricFluxes</span></code>.
+Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are those occuring in a finite-volume context; i.e. the total injected or extracted mass.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrDomainFluxes</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>           <span class="n">a_time</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">RealVect</span>       <span class="n">a_pos</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="kt">int</span>            <span class="n">a_dir</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span> <span class="n">a_side</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">RealVect</span>       <span class="n">a_E</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>   <span class="n">a_cdrDensities</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>   <span class="n">a_cdrVelocities</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>   <span class="n">a_cdrGradients</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>   <span class="n">a_rteFluxes</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>   <span class="n">a_extrapCdrFluxes</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+   <span class="k">return</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The input variable <code class="docutils literal notranslate"><span class="pre">a_extrapCdrFluxes</span></code> are cell-centered fluxes extrapolated to the domain sides.</p>
+</div>
+<div class="section" id="setting-initial-surface-charge">
+<h3>Setting initial surface charge<a class="headerlink" href="#setting-initial-surface-charge" title="Permalink to this headline"></a></h3>
+<p>To set the initial surface charge on dielectric boundaries, implement</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_time</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_pos</span><span class="p">)</span> <span class="k">const</span><span class="p">{</span>
+   <span class="k">return</span> <span class="mf">0.0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="time-discretizations">
+<h2>Time discretizations<a class="headerlink" href="#time-discretizations" title="Permalink to this headline"></a></h2>
+<p>Here, we discuss two discretizations of <a class="reference internal" href="#equation-cdrplasmaequations">Eq. 7</a>.
+Firstly, note that there are two layers to the time integrators:</p>
+<ol class="arabic simple">
+<li><p>A pure class <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> which inherits from <code class="docutils literal notranslate"><span class="pre">TimeSteppers</span></code> but does not implement an <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.
+This class simply provides the base functionality for more easily developing time integrators.
+<code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> contains methods that are necessary for coupling the solvers, e.g. calling the <span class="xref std std-ref">CdrPlasmaPhysics</span> methods at the correct time.</p></li>
+<li><p>Implementations of <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code>, which implement the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method and can thus be used for advancing models.</p></li>
+</ol>
+<p>The supported time integrators are located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/CdrPlasma/TimeSteppers</span></code>.
+There are two integrators that are commonly used.</p>
+<ul class="simple">
+<li><p>A Godunov operator splitting with either explicit or implicit diffusion.
+This integrator also supports semi-implicit formulations.</p></li>
+<li><p>A spectral deferred correction (SDC) integrator with implicit diffusion.
+This integrator is an implicit-explicit.</p></li>
+</ul>
+<p>Briefly put, the Godunov operator is our most stable integrator, while the SDC integrator is our most accurate integrator.</p>
+<div class="section" id="godunov-operator-splitting">
+<span id="chap-godunov"></span><h3>Godunov operator splitting<a class="headerlink" href="#godunov-operator-splitting" title="Permalink to this headline"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper</span></code> implements <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> and defines an operator splitting method between charge transport and plasma chemistry.
+It has a formal order of convergence of one.
+The source code is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma/TimeSteppers/CdrPlasmaGodunovStepper</span></code>.</p>
+<p>The basic advancement routine for <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper</span></code> is as follows:</p>
+<ol class="arabic simple">
+<li><p>Advance the charge transport <span class="math notranslate nohighlight">\(\phi^k \rightarrow \phi^{k+1}\)</span> with the source terms set to zero.</p></li>
+<li><p>Compute the electric field.</p></li>
+<li><p>Advance the plasma chemistry over the same time step using the field computed above
+I.e., advance <span class="math notranslate nohighlight">\(\partial_t\phi = S\)</span> over a time step <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p></li>
+<li><p>Advance the radiative transport part.
+This can also involve discrete photons.</p></li>
+</ol>
+<p>The transport/field steps can be done in various ways:
+The following transport algorithms are available:</p>
+<ul class="simple">
+<li><p><strong>Euler</strong>, where everything is advanced with the Euler rule.</p></li>
+<li><p><strong>Semi-implicit</strong>, where the Euler field/transport step is performed with an implicit coupling to the electric field.</p></li>
+</ul>
+<p>In addition, diffusion can be treated</p>
+<ul class="simple">
+<li><p><strong>Explicitly</strong>, where all diffusion advances are performed with an <em>explicit</em> rule.</p></li>
+<li><p><strong>Implicitly</strong>, where all diffusion advances are performed with an <em>implicit</em> rule.</p></li>
+<li><p><strong>Automatically</strong>, where diffusion advances are performed with an implicit rule only if time steps dictate it, and explicitly otherwise.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When setting up a new problem with the Godunov time integrator, the default setting is to use automatic diffusion and a semi-implicit coupling.
+These settings tend to work for most problems.</p>
+</div>
+<div class="section" id="specifying-transport-algorithm">
+<h4>Specifying transport algorithm<a class="headerlink" href="#specifying-transport-algorithm" title="Permalink to this headline"></a></h4>
+<p>To specify the transport algorithm, modify the flag <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper.transport</span></code>, and set it to <code class="docutils literal notranslate"><span class="pre">semi_implicit</span></code> or <code class="docutils literal notranslate"><span class="pre">euler</span></code>.
+Everything else is an error.</p>
+<p>Note that for the Godunov integrator, it is possible to center the advective discretization at the half time step.
+That is, the advancement algorithm is</p>
+<div class="math notranslate nohighlight">
+\[n^{k+1} = n^{k} - \nabla\cdot\left(n^{k+1/2}\mathbf{v}\right) + \nabla\cdot\left(D\nabla\phi^k\right),\]</div>
+<p>where <span class="math notranslate nohighlight">\(n^{k+1/2}\)</span> is obtained by also including transverse slopes (i.e., extrapolation in time).
+See <span id="id1">Trebotich and Graves [<a class="reference internal" href="../ZZReferences.html#id157" title="David Trebotich and Daniel Graves. An adaptive finite volume method for the incompressible Navier–Stokes equations in complex geometries. Commun. Appl. Math. Comput. Sci., 10(1):43–82, 2015. URL: https://doi.org/10.2140/camcos.2015.10.43, doi:10.2140/camcos.2015.10.43.">7</a>]</span> for details.
+Note that the formal order of accuracy is still one, but the accuracy of the advective discretization is increased substantially.</p>
+</div>
+<div class="section" id="specifying-diffusion">
+<h4>Specifying diffusion<a class="headerlink" href="#specifying-diffusion" title="Permalink to this headline"></a></h4>
+<p>To specify how diffusion is treated, modify the flag <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper.diffusion</span></code>, and set it to <code class="docutils literal notranslate"><span class="pre">auto</span></code>, <code class="docutils literal notranslate"><span class="pre">explicit</span></code>, or <code class="docutils literal notranslate"><span class="pre">implicit</span></code>.
+In addition, the flag <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper.diffusion_thresh</span></code> must be set to a number.</p>
+<p>When diffusion is set to <code class="docutils literal notranslate"><span class="pre">auto</span></code>, the integrator switches to implicit diffusion when</p>
+<div class="math notranslate nohighlight">
+\[\frac{\Delta t_{\textrm{A}}}{\Delta t_{\textrm{AD}}} &gt; \epsilon,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Delta t_{\textrm{A}}\)</span> is the advection-only limited time step and <span class="math notranslate nohighlight">\(\Delta t_{\textrm{AD}}\)</span> is the advection-diffusion limited time step.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When there are multiple species being advected and diffused, the integrator will perform extra checks in order to maximize the time steps for the other species.</p>
+</div>
+</div>
+<div class="section" id="time-step-limitations">
+<h4>Time step limitations<a class="headerlink" href="#time-step-limitations" title="Permalink to this headline"></a></h4>
+<p>The basic time step limitations for the Godunov integrator are:</p>
+<ul class="simple">
+<li><p>Manually set maximum and minimum time steps</p></li>
+<li><p>Courant-Friedrichs-Lewy conditions, either on advection, diffusion, or both.</p></li>
+<li><p>The dielectric relaxation time.</p></li>
+</ul>
+<p>The user is responsible for setting these when running the simulation.
+Note when the the semi-implicit scheme is used, it is not necessary to restrict the time step by the dielectric relaxation time.</p>
+</div>
+</div>
+<div class="section" id="spectral-deferred-corrections">
+<span id="chap-sisdc"></span><h3>Spectral deferred corrections<a class="headerlink" href="#spectral-deferred-corrections" title="Permalink to this headline"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">CdrPlasmaImExSdcStepper</span></code> uses implicit-explicit (ImEx) spectral deferred corrections (SDCs) to advance the equations.
+This integrator implements the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method for <code class="docutils literal notranslate"><span class="pre">CdrPlasmStepper</span></code>, and is a high-order method with implicit diffusion.</p>
+<div class="section" id="sdc-basics">
+<h4>SDC basics<a class="headerlink" href="#sdc-basics" title="Permalink to this headline"></a></h4>
+<p>First, we provide a quick introduction to the SDC procedure.
+Given an ordinary differential equation (ODE) as</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial u}{\partial t} = F(u,t), \quad u(t_0) = u_0,\]</div>
+<p>the exact solution is</p>
+<div class="math notranslate nohighlight">
+\[u(t) = u_0 + \int_{t_0}^tF\left(u,\tau\right)d\tau.\]</div>
+<p>Denote an approximation to this solution by <span class="math notranslate nohighlight">\(\widetilde{u}(t)\)</span> and the correction by <span class="math notranslate nohighlight">\(\delta(t) = u(t) - \widetilde{u}(t)\)</span>. The measure of error in <span class="math notranslate nohighlight">\(\widetilde{u}(t)\)</span> is then</p>
+<div class="math notranslate nohighlight">
+\[R(\widetilde{u}, t) = u_0 + \int_{t_0}^tF(\widetilde{u}, \tau)d\tau - \widetilde{u}(t).\]</div>
+<p>Equivalently, since <span class="math notranslate nohighlight">\(u = \widetilde{u} + \delta\)</span>, we can write</p>
+<div class="math notranslate nohighlight">
+\[\widetilde{u} + \delta = u_0 + \int_{t_0}^t F\left(\widetilde{u}+\delta, \tau\right)d\tau.\]</div>
+<p>This yields</p>
+<div class="math notranslate nohighlight">
+\[\delta = \int_{t_0}^t\left[F\left(\widetilde{u}+\delta, \tau\right) - F\left(\widetilde{u}, \tau\right)\right]d\tau + R\left(\widetilde{u},t\right).\]</div>
+<p>This is called the correction equation. The goal of SDC is to iteratively solve this equation in order to provide a high-order discretization.</p>
+<p>The ImEx SDC method in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses implicit diffusion in the SDC scheme.
+Coupling to the electric field is always explicit.
+The user is responsible for specifying the quadrature nodes, as well as setting the number of sub-intervals in the SDC integration and the number of corrections.
+In general, each correction raises the discretization order by one.</p>
+</div>
+<div class="section" id="id2">
+<h4>Time step limitations<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<p>The ImEx SDC integrator is limited by</p>
+<ul class="simple">
+<li><p>The dielectric relaxation time.</p></li>
+<li><p>An advective CFL conditions.</p></li>
+</ul>
+<p>In addition to this, the user can specify maximum/minimum allowed time steps.</p>
+</div>
+</div>
+</div>
+<div class="section" id="json-interface">
+<span id="chap-cdrplasmajson"></span><h2>JSON interface<a class="headerlink" href="#json-interface" title="Permalink to this headline"></a></h2>
+<p>Since implementations of <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> are usually boilerplate, we provide a class <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> which can initialize and parse various types of initial conditions and reactions from a JSON input file.
+This class is defined in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/PlasmaModels/CdrPlasmaJSON</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> is a full implementation of <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code> which supports the definition of various species (neutral, plasma species, and photons) and methods of coupling them.
+We expect that <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> provides the simplest method of setting up a new plasma model.
+It is also comparatively straightforward to extend the class with further required functionality.</p>
+<p>In the JSON interface, the radiative transfer solvers always solve for the number of photons that lead to photoionization events.
+This means that the interpretation of <span class="math notranslate nohighlight">\(\Psi\)</span> is the number of photoionization events during the previous time step.
+This is true for both continuum and discrete radiative transfer models.</p>
+<div class="section" id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h3>
+<p>To use this plasma model, use <code class="docutils literal notranslate"><span class="pre">-physics</span> <span class="pre">CdrPlasmaJSON</span></code> when setting up a new plasma problem (see <a class="reference internal" href="#chap-cdrplasmanewproblem"><span class="std std-ref">Simulation quick start</span></a>).
+When <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> is instantiated, the constructor will parse species, reactions, initial conditions, and boundary conditions from a JSON file that the user provides.
+In addition, users can parse transport data or reaction rates from tabulated ASCII files that they provide.</p>
+<p>To specify the input plasma kinetics file, include</p>
+</div>
+<div class="section" id="specifying-input-file">
+<h3>Specifying input file<a class="headerlink" href="#specifying-input-file" title="Permalink to this headline"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> will read a JSON file specified by the input variable <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON.chemistry_file</span></code>.</p>
+</div>
+<div class="section" id="discrete-photons">
+<h3>Discrete photons<a class="headerlink" href="#discrete-photons" title="Permalink to this headline"></a></h3>
+<p>There are two approaches when using discrete photons, and both rely on the user setting up the application with the Monte Carlo photon solver (rather than continuum solvers).
+For an introduction to the particle radiative transfer solver, see <a class="reference internal" href="../Solvers/RTE.html#chap-montecarlorte"><span class="std std-ref">Monte Carlo methods</span></a>.</p>
+<p>The user must use one of the following:</p>
+<ol class="arabic">
+<li><p>Set the following class options:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CdrPlasmaJSON.discrete_photons <span class="o">=</span> <span class="nb">true</span>
+
+McPhoto.photon_generation <span class="o">=</span> deterministic
+McPhoto.source_type       <span class="o">=</span> number
+</pre></div>
+</div>
+<p>When specifying <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON.discrete_photons=true</span></code>, <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> will do a Poisson sampling of the number of photons that are generated in each cell and put this in the radiative transfer solvers’ source terms.
+This means that the radiative transfer solver source terms <em>contain the physical number of photons generated in one time step</em>.
+To turn off sampling inside the radiative transfer solver, we specify <code class="docutils literal notranslate"><span class="pre">McPhoto.photon_generation</span> <span class="pre">=</span> <span class="pre">stochastic</span></code> and set <code class="docutils literal notranslate"><span class="pre">McPhoto.source_type</span> <span class="pre">=</span> <span class="pre">number</span></code> to let the solver know that the source contains the number of physical photons.</p>
+</li>
+<li><p>Set the following class options:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CdrPlasmaJSON.discrete_photons <span class="o">=</span> <span class="nb">false</span>
+
+McPhoto.photon_generation <span class="o">=</span> stochastic
+McPhoto.source_type       <span class="o">=</span> volume_rate
+</pre></div>
+</div>
+<p>In this case the <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> class will fill the solver source terms with the volumetric rate, i.e. the number of photons produced per unit volume and time.
+When <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> generates the photons it will compute the number of photons generated in a cell through Poisson sampling <span class="math notranslate nohighlight">\(n = P\left(S_\gamma\Delta V\Delta t\right)\)</span> where <span class="math notranslate nohighlight">\(P\)</span> indicates a Poisson sampling operator.</p>
+</li>
+</ol>
+<p>Fundamentally, the two approaches differ only in where the the Poisson sampling is performed.
+With the first approach, plotting the radiative transfer solver source terms will show the number of physical photons generated.
+In the second approach, the source terms will show the volume photo-generation rate.</p>
+</div>
+<div class="section" id="gas-law-and-neutral-background">
+<h3>Gas law and neutral background<a class="headerlink" href="#gas-law-and-neutral-background" title="Permalink to this headline"></a></h3>
+<div class="section" id="general-functionality">
+<h4>General functionality<a class="headerlink" href="#general-functionality" title="Permalink to this headline"></a></h4>
+<p>To include the gas law and neutral species, include a JSON object <code class="docutils literal notranslate"><span class="pre">gas</span></code> with the the field <code class="docutils literal notranslate"><span class="pre">law</span></code> specified.
+Currently, <code class="docutils literal notranslate"><span class="pre">law</span></code> can be either <code class="docutils literal notranslate"><span class="pre">ideal</span></code>, <code class="docutils literal notranslate"><span class="pre">troposphere</span></code>, or <code class="docutils literal notranslate"><span class="pre">table</span></code>.</p>
+<p>The purpose of the gas law is to set the temperature, pressure, and neutral density of the background gas.
+In addition, we specify the neutral species that are used through the simulation.
+These species are <em>not</em> stored on the mesh; we only store function pointers to their temperature, density, and pressure.</p>
+<p>It is also possible to include a field <code class="docutils literal notranslate"><span class="pre">plot</span></code> which will then include the temperature, pressure, and density in plot files.</p>
+</div>
+<div class="section" id="ideal-gas">
+<h4>Ideal gas<a class="headerlink" href="#ideal-gas" title="Permalink to this headline"></a></h4>
+<p>To specify an ideal gas law, specify ideal gas law as follows:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;gas&quot;</span><span class="p">:</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;law&quot;</span><span class="p">:</span> <span class="s2">&quot;ideal&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;temperature&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+    <span class="nt">&quot;pressure&quot;</span><span class="p">:</span> <span class="mi">1</span>
+  <span class="p">}</span>
+ <span class="p">}</span>
+</pre></div>
+</div>
+<p>In this case the gas pressure and temperatures will be as indicated, and the gas number density will be computed as</p>
+<div class="math notranslate nohighlight">
+\[\rho = \frac{p_0^\prime N_{\textrm{A}}}{RT_0},\]</div>
+<p>where <span class="math notranslate nohighlight">\(p^\prime\)</span> is the pressure converted to Pascals.</p>
+<p>Note that the input temperature should be specified in Kelvin, and the input pressure in atmospheres.</p>
+</div>
+<div class="section" id="troposphere">
+<h4>Troposphere<a class="headerlink" href="#troposphere" title="Permalink to this headline"></a></h4>
+<p>It is also possible to specify the pressure, temperature, and density to be functions of tropospheric altitude.
+In this case one must specify the extra fields</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">molar</span> <span class="pre">mass</span></code> For specifying the molar mass (in <span class="math notranslate nohighlight">\(\textrm{g}\cdot\textrm{mol}^{-1}\)</span>) of the gas.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gravity</span></code> Gravitational acceleration <span class="math notranslate nohighlight">\(g\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lapse</span> <span class="pre">rate</span></code> Temperature lapse rate <span class="math notranslate nohighlight">\(L\)</span> in units of <span class="math notranslate nohighlight">\(\textrm{K}/\textrm{m}\)</span>.</p></li>
+</ul>
+<p>In this case the gas temperature pressure, and number density are computed as</p>
+<div class="math notranslate nohighlight">
+\[T(h) = T_0 - Lh\]</div>
+<div class="math notranslate nohighlight">
+\[p(h) = p_0\left((1 - \frac{Lh}{T_0}\right)^{\frac{g M}{RL}}\]</div>
+<div class="math notranslate nohighlight">
+\[\rho(h) = \frac{p^\prime(h) N_{\textrm{A}}}{RT(h)}\]</div>
+<p>For example, specification of tropospheric conditions can be included by</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;gas&quot;</span><span class="p">:</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;law&quot;</span><span class="p">:</span> <span class="s2">&quot;troposphere&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;temperature&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+    <span class="nt">&quot;pressure&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">&quot;molar_mass&quot;</span><span class="p">:</span> <span class="mf">28.97</span><span class="p">,</span>
+    <span class="nt">&quot;gravity&quot;</span><span class="p">:</span> <span class="mf">9.81</span><span class="p">,</span>
+    <span class="nt">&quot;lapse_rate&quot;</span><span class="p">:</span> <span class="mf">0.0065</span><span class="p">,</span>
+    <span class="nt">&quot;plot&quot;</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tabulated">
+<h4>Tabulated<a class="headerlink" href="#tabulated" title="Permalink to this headline"></a></h4>
+<p>To specify temperature, density, and pressure as function of altitude, set <code class="docutils literal notranslate"><span class="pre">law</span></code> to <code class="docutils literal notranslate"><span class="pre">table</span></code> and incldue the following fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> For specifying which file we read the data from.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">height</span></code> For specifying the column where the height is stored (in meters).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code> For specifying the column where the temperature (in Kelvin) is stored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pressure</span></code> For specifying the column where the pressure (in Pascals) is stored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">density</span></code> For specifying the column where the density (in :math:<a href="#id3"><span class="problematic" id="id4">`</span></a>textrm{kg}cdottextrm{m}^{-3}) is stored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">molar</span> <span class="pre">mass</span></code> For specifying the molar mass (in <span class="math notranslate nohighlight">\(\textrm{g}\cdot\textrm{mol}^{-1}\)</span>) of the gas.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">height</span></code> For setting the minimum altitude in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> internal table.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">height</span></code> For setting the minimum altitude in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> internal table.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">res</span> <span class="pre">height</span></code> For setting the height resolution in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> internal table.</p></li>
+</ul>
+<p>For example, assume that our file <code class="docutils literal notranslate"><span class="pre">MyAtmosphere.dat</span></code> contains the following data:</p>
+<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># z [m]              rho [kg/m^3]    T [K]           p [Pa]
+0.0000000E+00        1.2900000E+00   2.7210000E+02   1.0074046E+05
+1.0000000E+03        1.1500000E+00   2.6890000E+02   8.8751220E+04
+2.0000000E+03        1.0320000E+00   2.6360000E+02   7.8074784E+04
+3.0000000E+03        9.2860000E-01   2.5690000E+02   6.8466555E+04
+4.0000000E+03        8.3540000E-01   2.4960000E+02   5.9844569E+04
+</pre></div>
+</div>
+<p>If we want to truncate this data to altitude <span class="math notranslate nohighlight">\(z \ in[1000\,\textrm{m}, 3000\,\textrm{m}]\)</span> we specify:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;gas&quot;</span><span class="p">:</span>
+  <span class="p">{</span>
+    <span class="nt">&quot;law&quot;</span><span class="p">:</span> <span class="s2">&quot;table&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;ENMSIS_Atmosphere.dat&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;molar mass&quot;</span><span class="p">:</span> <span class="mf">28.97</span><span class="p">,</span>
+    <span class="nt">&quot;height&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="nt">&quot;temperature&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="nt">&quot;pressure&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="nt">&quot;density&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">&quot;min height&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="nt">&quot;max height&quot;</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span>
+    <span class="nt">&quot;res height&quot;</span><span class="p">:</span> <span class="mi">10</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="neutral-species-background">
+<h4>Neutral species background<a class="headerlink" href="#neutral-species-background" title="Permalink to this headline"></a></h4>
+<p>Neutral species are included by an array <code class="docutils literal notranslate"><span class="pre">neutral</span> <span class="pre">species</span></code> in the <code class="docutils literal notranslate"><span class="pre">gas</span></code> object.
+Each neutral species must have the fields</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> Species name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">molar</span> <span class="pre">fraction</span></code> Molar fraction of the species.</p></li>
+</ul>
+<p>If the molar fractions do not add up to one, they will be normalized.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Neutral species are <em>not</em> tracked on the mesh.
+They are simply stored as functions that allow us to obtain the (spatially varying) density, temperature, and pressure for each neutral species.
+If a neutral species needs to be tracked on the mesh (through e.g. a convection-diffusion-reaction solver) it must be defined as a plasma species.
+See <a class="reference internal" href="#chap-plasmaspeciesjson"><span class="std std-ref">Plasma species</span></a>.</p>
+</div>
+<p>For example, a standard nitrogen-oxygen atmosphere will look like:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>  <span class="p">{</span><span class="nt">&quot;gas&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;law&quot;</span><span class="p">:</span> <span class="s2">&quot;ideal&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;temperature&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+      <span class="nt">&quot;pressure&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="nt">&quot;plot&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="nt">&quot;neutral species&quot;</span><span class="p">:</span>
+      <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;O2&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;molar_fraction&quot;</span><span class="p">:</span> <span class="mf">0.2</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+          <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;N2&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;molar_fraction&quot;</span><span class="p">:</span> <span class="mf">0.8</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="plasma-species">
+<span id="chap-plasmaspeciesjson"></span><h3>Plasma species<a class="headerlink" href="#plasma-species" title="Permalink to this headline"></a></h3>
+<p>The list of plasma species is included by an array <code class="docutils literal notranslate"><span class="pre">plasma</span> <span class="pre">species</span></code>.
+Each entry <em>must</em> have the entries</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> (string) For identifying the species name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Z</span></code> (integer) Species charge number.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mobile</span></code> (true/false) Mobile species or not.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">diffusive</span></code> (true/false) Diffusive species or not.</p></li>
+</ul>
+<p>Optionally, the field <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">data</span></code>, can be included for providing initial data to the species
+Details are discussed further below.</p>
+<p>For example, a minimum version would look like</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;N2+&quot;</span><span class="p">,</span> <span class="nt">&quot;Z&quot;</span><span class="p">:</span>  <span class="mi">1</span><span class="p">,</span> <span class="nt">&quot;mobile&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nt">&quot;diffusive&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">},</span>
+    <span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;O2+&quot;</span><span class="p">,</span> <span class="nt">&quot;Z&quot;</span><span class="p">:</span>  <span class="mi">1</span><span class="p">,</span> <span class="nt">&quot;mobile&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nt">&quot;diffusive&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">},</span>
+    <span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;O2-&quot;</span><span class="p">,</span> <span class="nt">&quot;Z&quot;</span><span class="p">:</span> <span class="mi">-1</span><span class="p">,</span> <span class="nt">&quot;mobile&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nt">&quot;diffusive&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="initial-data">
+<h4>Initial data<a class="headerlink" href="#initial-data" title="Permalink to this headline"></a></h4>
+<p>To provide initial data one include <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">data</span></code> for each species.
+Currently, the following fields are supported:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">uniform</span></code> For specifying a uniform background density.
+Simply the field <code class="docutils literal notranslate"><span class="pre">uniform</span></code> and a density (in units of <span class="math notranslate nohighlight">\(m^{-3}\)</span>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gauss2</span></code> for specifying Gaussian seeds <span class="math notranslate nohighlight">\(n = n_0\exp\left(-\frac{\left(\mathbf{x}-\mathbf{x_0}\right)^2}{2R^2}\right)\)</span>.
+<code class="docutils literal notranslate"><span class="pre">gauss2</span></code> is an array where each array entry must contain</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">radius</span></code>, for specifying the radius <span class="math notranslate nohighlight">\(R\)</span>:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amplitude</span></code>, for specifying the amplitude <span class="math notranslate nohighlight">\(n_0\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">position</span></code>, for specifying the seed position <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>.</p></li>
+</ul>
+<p>The position must be a 2D/3D array.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gauss2</span></code> for specifying Gaussian seeds <span class="math notranslate nohighlight">\(n = n_0\exp\left(-\frac{\left(\mathbf{x}-\mathbf{x_0}\right)^4}{2R^4}\right)\)</span>.
+<code class="docutils literal notranslate"><span class="pre">gauss4</span></code> is an array where each array entry must contain</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">radius</span></code>, for specifying the radius <span class="math notranslate nohighlight">\(R\)</span>:</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amplitude</span></code>, for specifying the amplitude <span class="math notranslate nohighlight">\(n_0\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">position</span></code>, for specifying the seed position <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>.</p></li>
+</ul>
+<p>The position must be a 2D/3D array.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">height</span> <span class="pre">profile</span></code> For specifying a height profile along <span class="math notranslate nohighlight">\(y\)</span> in 2D, and <span class="math notranslate nohighlight">\(z\)</span> in 3D.
+To include it, prepare an ASCII files with at least two columns.
+The height (in meters) must be specified in one column and the density (in units of <span class="math notranslate nohighlight">\(m^{-3}\)</span>) in another.
+Internally, this data is stored in a lookup table (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">Lookup tables</span></a>).
+Required fields are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> , for specifying the file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">height</span></code>, for specifying the column that stores the height.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">density</span></code>, for specifying the column that stores the density.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">height</span></code>, for trimming data to a minimum height.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">height</span></code>, for trimming data to a maximum height.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">res</span> <span class="pre">height</span></code>, for specifying the resolution height in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> lookup tables.</p></li>
+</ul>
+<p>In addition, height and density columns can be scaled in the internal tables by including</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">scale</span> <span class="pre">height</span></code> for scaling the height data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scale</span> <span class="pre">density</span></code> for scaling the density data.</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When multiple initial data fields are specified, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> takes the superposition of all of them.</p>
+</div>
+<p>For example, a species with complex initial data can look like:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;N2+&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;Z&quot;</span><span class="p">:</span>  <span class="mi">1</span><span class="p">,</span>
+      <span class="nt">&quot;mobile&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+      <span class="nt">&quot;diffusive&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+      <span class="nt">&quot;initial data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;uniform&quot;</span><span class="p">:</span> <span class="mf">1E10</span><span class="p">,</span>
+        <span class="nt">&quot;gauss2&quot;</span> <span class="p">:</span>
+          <span class="p">[</span>
+            <span class="p">{</span>
+               <span class="nt">&quot;radius&quot;</span><span class="p">:</span> <span class="mf">100E-6</span><span class="p">,</span>
+               <span class="nt">&quot;amplitude&quot;</span><span class="p">:</span> <span class="mf">1E18</span><span class="p">,</span>
+               <span class="nt">&quot;position&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+               <span class="nt">&quot;radius&quot;</span><span class="p">:</span> <span class="mf">200E-6</span><span class="p">,</span>
+               <span class="nt">&quot;amplitude&quot;</span><span class="p">:</span> <span class="mf">2E18</span><span class="p">,</span>
+               <span class="nt">&quot;position&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">}</span>
+          <span class="p">],</span>
+         <span class="nt">&quot;gauss4&quot;</span><span class="p">:</span>
+           <span class="p">[</span>
+             <span class="p">{</span>
+               <span class="nt">&quot;radius&quot;</span><span class="p">:</span> <span class="mf">300E-6</span><span class="p">,</span>
+               <span class="nt">&quot;amplitude&quot;</span><span class="p">:</span> <span class="mf">3E18</span><span class="p">,</span>
+               <span class="nt">&quot;position&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+             <span class="p">},</span>
+             <span class="p">{</span>
+               <span class="nt">&quot;radius&quot;</span><span class="p">:</span> <span class="mf">400E-6</span><span class="p">,</span>
+               <span class="nt">&quot;amplitude&quot;</span><span class="p">:</span> <span class="mf">4E18</span><span class="p">,</span>
+               <span class="nt">&quot;position&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+             <span class="p">}</span>
+           <span class="p">],</span>
+         <span class="nt">&quot;height profile&quot;</span><span class="p">:</span> <span class="p">{</span>
+           <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;MyHeightProfile.dat&quot;</span><span class="p">,</span>
+           <span class="nt">&quot;height&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+           <span class="nt">&quot;density&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+           <span class="nt">&quot;min height&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+           <span class="nt">&quot;max height&quot;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+           <span class="nt">&quot;res height&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+           <span class="nt">&quot;scale height&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+           <span class="nt">&quot;scale density&quot;</span><span class="p">:</span> <span class="mf">1E6</span>
+         <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mobilities">
+<span id="chap-cdrplasmajsonmobility"></span><h4>Mobilities<a class="headerlink" href="#mobilities" title="Permalink to this headline"></a></h4>
+<p>If a species is specified as mobile, the mobility is set from a field <code class="docutils literal notranslate"><span class="pre">mobility</span></code>, and the field <code class="docutils literal notranslate"><span class="pre">lookup</span></code> is used to specify the method for computing it.
+Currently supported are:</p>
+<ul class="simple">
+<li><p>Constant mobility.</p></li>
+<li><p>Function-based mobility, i.e. <span class="math notranslate nohighlight">\(\mu = \mu(E,N)\)</span>.</p></li>
+<li><p>Tabulated mobility, i.e. <span class="math notranslate nohighlight">\(\mu = \mu(E,N)\)</span>.</p></li>
+</ul>
+<p>The cases are discussed below.</p>
+<p><strong>Constant mobility</strong></p>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">constant</span></code> lets the user set a constant mobility.
+If setting a constant mobility, the field <code class="docutils literal notranslate"><span class="pre">value</span></code> is also required.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="nt">&quot;Z&quot;</span><span class="p">:</span>  <span class="mi">-1</span><span class="p">,</span> <span class="nt">&quot;mobile&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nt">&quot;diffusive&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+     <span class="nt">&quot;mobility&quot;</span><span class="p">:</span> <span class="p">{</span>
+       <span class="nt">&quot;lookup&quot;</span> <span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Function-based mobility</strong></p>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">function</span> <span class="pre">E/N</span></code>  lets the user set the mobility as a function of the reduced electric field.
+When setting a function-based mobility, the field <code class="docutils literal notranslate"><span class="pre">function</span></code> is also required.</p>
+<p>Supported functions are:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ABC</span></code>, in which case the mobility is computed as</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\mu(E) = A \frac{E^B}{N^C}.\]</div>
+<p>The fields <code class="docutils literal notranslate"><span class="pre">A</span></code>, <code class="docutils literal notranslate"><span class="pre">B</span></code>, and <code class="docutils literal notranslate"><span class="pre">C</span></code> must also be specified.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="nt">&quot;Z&quot;</span><span class="p">:</span>  <span class="mi">-1</span><span class="p">,</span> <span class="nt">&quot;mobile&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nt">&quot;diffusive&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+     <span class="nt">&quot;mobility&quot;</span><span class="p">:</span> <span class="p">{</span>
+       <span class="nt">&quot;lookup&quot;</span> <span class="p">:</span> <span class="s2">&quot;function E/N&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;function&quot;</span><span class="p">:</span> <span class="s2">&quot;ABC&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;A&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+       <span class="nt">&quot;B&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+       <span class="nt">&quot;C&quot;</span><span class="p">:</span> <span class="mi">1</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+<p><strong>Tabulated mobility</strong></p>
+<p>Specifying <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">E/N</span></code> lets the user set the mobility from a tabulated value of the reduced electric field.
+BOLSIG-like files can be parsed by specifying the header which contains the tabulated data, and the columns that identify the reduced electric field and mobilities.
+This data is then stored in a lookup table, see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">Lookup tables</span></a>.</p>
+<p>For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="nt">&quot;Z&quot;</span><span class="p">:</span>  <span class="mi">-1</span><span class="p">,</span> <span class="nt">&quot;mobile&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nt">&quot;diffusive&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+     <span class="nt">&quot;mobility&quot;</span><span class="p">:</span> <span class="p">{</span>
+       <span class="nt">&quot;lookup&quot;</span> <span class="p">:</span> <span class="s2">&quot;table E/N&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;transport_file.txt&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;header&quot;</span><span class="p">:</span> <span class="s2">&quot;# Electron mobility (E/N, mu*N)&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;E/N &quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+       <span class="nt">&quot;mu*N&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+       <span class="nt">&quot;min E/N&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+       <span class="nt">&quot;max E/N&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+       <span class="nt">&quot;points&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+       <span class="nt">&quot;spacing&quot;</span><span class="p">:</span> <span class="s2">&quot;exponential&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;dump&quot;</span><span class="p">:</span> <span class="s2">&quot;MyMobilityTable.dat&quot;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In the above, the fields have the following meaning:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> The file where the data is found.
+The data must be stored in rows and columns.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">header</span></code>, the contents of the line preceding the table data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span></code>, the column that contains <span class="math notranslate nohighlight">\(E/N\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mu*N</span></code>, the column that contains <span class="math notranslate nohighlight">\(\mu\cdot E\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">E/N</span></code>, for trimming the data range.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">E/N</span></code>, for trimming the data range.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">points</span></code>, for specifying the number of points in the lookup table.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spacing</span></code>, for specifying how to regularize the table.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dump</span></code>, an optional argument (useful for debugging) which will write the table to file.</p></li>
+</ul>
+<p>Note that the input file does <em>not</em> need regularly spaced or sorted data.
+For performance reasons, the tables are always resampled, see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">Lookup tables</span></a>.</p>
+</div>
+<div class="section" id="diffusion-coefficients">
+<h4>Diffusion coefficients<a class="headerlink" href="#diffusion-coefficients" title="Permalink to this headline"></a></h4>
+<p>Setting the diffusion coefficient is done <em>exactly</em> in the same was as the mobility.
+If a species is diffusive, one must include the field <code class="docutils literal notranslate"><span class="pre">diffusion</span></code> as well as <code class="docutils literal notranslate"><span class="pre">lookup</span></code>.
+For example, the JSON input for specifying a tabulated diffusion coefficient is done by</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="nt">&quot;Z&quot;</span><span class="p">:</span>  <span class="mi">-1</span><span class="p">,</span> <span class="nt">&quot;mobile&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nt">&quot;true&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+     <span class="nt">&quot;diffusion&quot;</span><span class="p">:</span> <span class="p">{</span>
+       <span class="nt">&quot;lookup&quot;</span> <span class="p">:</span> <span class="s2">&quot;table E/N&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;transport_file.txt&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;header&quot;</span><span class="p">:</span> <span class="s2">&quot;# Electron diffusion coefficient (E/N, D*N)&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;E/N &quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+       <span class="nt">&quot;D*N&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+       <span class="nt">&quot;min E/N&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+       <span class="nt">&quot;max E/N&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+       <span class="nt">&quot;points&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+       <span class="nt">&quot;spacing&quot;</span><span class="p">:</span> <span class="s2">&quot;exponential&quot;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="temperatures">
+<h4>Temperatures<a class="headerlink" href="#temperatures" title="Permalink to this headline"></a></h4>
+<p>Plasma species temperatures can set by including a field <code class="docutils literal notranslate"><span class="pre">temperature</span></code> for the plasma species.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">temperature</span></code> field is omitted, the species temperature will be set to the gas temperature.</p>
+</div>
+<p><strong>Constant temperature</strong></p>
+<p>To set a constant temperature, include the field <code class="docutils literal notranslate"><span class="pre">temperature</span></code> and set <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to constant and specify the temperature through the field <code class="docutils literal notranslate"><span class="pre">value</span></code> as follows:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;O2&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;Z&quot;</span><span class="p">:</span>  <span class="mi">0</span><span class="p">,</span>
+      <span class="nt">&quot;mobile&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+      <span class="nt">&quot;true&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+      <span class="nt">&quot;temperature&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="mi">300</span>
+      <span class="p">}</span>
+     <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Tabulated temperature</strong></p>
+<p>To include a tabulated temperature <span class="math notranslate nohighlight">\(T = T(E,N)\)</span>, set <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">E/N</span></code>.
+The temperature is then computed as</p>
+<div class="math notranslate nohighlight">
+\[T = \frac{2 \epsilon}{3k_{\textrm{B}}},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\epsilon\)</span> is the energy and <span class="math notranslate nohighlight">\(k_{\textrm{B}}\)</span> is the Boltzmann constant.</p>
+<p>The following fields are required:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> for specifying which file the temperature is stored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">header</span></code> for specifying where in the file the temperature is stored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span></code> for specifying in which column we find <span class="math notranslate nohighlight">\(E/N\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">eV</span></code> for specifying in which column we find the species energy (in units of electron volts).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">E/N</span></code> for trimming the data range.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">E/N</span></code> for trimming the data range.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">points</span></code> for setting the number of points in the lookup table.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spacing</span></code> for setting the grid point spacing type.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dump</span></code> for writing the final table to file.</p></li>
+</ul>
+<p>For a further explanation to these fields, see <a class="reference internal" href="#chap-cdrplasmajsonmobility"><span class="std std-ref">Mobilities</span></a>.</p>
+<p>A complete example is:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;Z&quot;</span><span class="p">:</span>  <span class="mi">-1</span><span class="p">,</span>
+      <span class="nt">&quot;mobile&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="nt">&quot;true&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="nt">&quot;temperature&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;table E/N&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;transport_data.txt&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;header&quot;</span><span class="p">:</span> <span class="s2">&quot;# Electron mean energy (E/N, eV)&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;E/N&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nt">&quot;eV&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nt">&quot;min E/N&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="nt">&quot;max E/N&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="nt">&quot;points&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="nt">&quot;spacing&quot;</span><span class="p">:</span> <span class="s2">&quot;exponential&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;dump&quot;</span><span class="p">:</span> <span class="s2">&quot;MyTemperatureTable.dat&quot;</span>
+      <span class="p">}</span>
+     <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="photon-species">
+<h3>Photon species<a class="headerlink" href="#photon-species" title="Permalink to this headline"></a></h3>
+<p>As for the plasma species, photon species (for including radiative transfer) are included by an array <code class="docutils literal notranslate"><span class="pre">photon</span> <span class="pre">species</span></code>.
+For each species, the required fields are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> For setting the species name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kappa</span></code> For specifying the absorption coefficient.</p></li>
+</ul>
+<p>Currently, <code class="docutils literal notranslate"><span class="pre">kappa</span></code> can be either</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">constant</span></code> Which lets the user set a constant absorption coefficient.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">helmholtz</span></code> Computes the absorption coefficient as</p>
+<div class="math notranslate nohighlight">
+\[\kappa = \frac{p_X\lambda}{\sqrt{3}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\lambda\)</span> is a specified input parameter and <span class="math notranslate nohighlight">\(p_X\)</span> is the partial pressure of some species <span class="math notranslate nohighlight">\(X\)</span>.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stochastic</span> <span class="pre">A</span></code> which samples a random absorption coefficient as</p>
+<div class="math notranslate nohighlight">
+\[\kappa = K_1 \left(\frac{K_2}{K_1}\right)^{\frac{f-f1}{f2-f1}}.\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(f_1\)</span> and <span class="math notranslate nohighlight">\(f_2\)</span> are frequency ranges, <span class="math notranslate nohighlight">\(K_1\)</span> and <span class="math notranslate nohighlight">\(K_2\)</span> are absorption coefficients, and <span class="math notranslate nohighlight">\(f\)</span> is a stochastically sampled frequency.
+Note that this method is only sensible when using discrete photons.</p>
+</li>
+</ul>
+<p><strong>Constant absorption coefficients</strong></p>
+<p>When specifying a constant absorption coefficient, one must include a field <code class="docutils literal notranslate"><span class="pre">value</span></code> as well.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span>
+   <span class="p">[</span>
+     <span class="p">{</span>
+       <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;UVPhoton&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;kappa&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="mf">1E4</span>
+     <span class="p">}</span>
+   <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Helmholtz absorption coefficients</strong></p>
+<p>The interface for the Helmholtz-based absorption coefficients are inspired by <span id="id5">Bourdon <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id12" title="A Bourdon, V P Pasko, N Y Liu, S Célestin, P Ségur, and E Marode. Efficient models for photoionization produced by non-thermal gas discharges in air based on radiative transfer and the Helmholtz equations. Plasma Sources Science and Technology, 16(3):656–678, aug 2007. URL: http://stacks.iop.org/0963-0252/16/i=3/a=026?key=crossref.26470bbe9c1f765777a162c80aa57bb7, doi:10.1088/0963-0252/16/3/026.">2</a>]</span> approach for computing photoionization.
+This method only makes sense if doing a Helmholtz-based reconstruction of the photoionization profile as a relation:</p>
+<div class="math notranslate nohighlight">
+\[\left[\nabla^2 - \left(p_{\textrm{O}_2} \lambda\right)^2\right]S_\gamma = -\left(A p_{\textrm{O}_2}^2\frac{p_q}{p + p_q}\xi\nu\right)S_i,\]</div>
+<p>where</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(S_\gamma\)</span> is the number of photoionization events per unit volume and time.</p></li>
+<li><p><span class="math notranslate nohighlight">\(A\)</span> is a model coefficient.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\frac{p_q}{p + p_q}\)</span> is a quenching factor.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\xi\)</span> is a photoionization efficiency.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\nu\)</span> is a relative excitation efficiency.</p></li>
+<li><p><span class="math notranslate nohighlight">\(S_i\)</span> is the electron impact ionization source term.</p></li>
+</ul>
+<p>Since the radiative transfer solver is based on the Eddington approximation, the Helmholtz reconstruction can be written as</p>
+<div class="math notranslate nohighlight">
+\[\kappa \Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla \Psi\right) = \frac{\eta}{c}\]</div>
+<p>where the absorption coefficient is set as</p>
+<div class="math notranslate nohighlight">
+\[\kappa(\mathbf{x}) = \frac{p_{\textrm{O}_2}\lambda}{\sqrt{3}}.\]</div>
+<p>The photogeneration source term is still</p>
+<div class="math notranslate nohighlight">
+\[\eta = \frac{p_q}{p + p_q}\xi\nu S_i,\]</div>
+<p>but the photoionization term is</p>
+<div class="math notranslate nohighlight">
+\[S_\gamma = \frac{c A p_{\textrm{O}_2}}{\sqrt{3}\lambda}\Psi.\]</div>
+<p>Note that the photoionization term is, in principle, <em>not</em> an Eddington approximation.
+Rather, the Eddington-like equations occur here through an approximation of the exact integral solution to the radiative transfer problem.
+In the pure Eddington approximation, on the other hand, <span class="math notranslate nohighlight">\(\Psi\)</span> represents the total number of ionizing photons per unit volume, and we would have <span class="math notranslate nohighlight">\(S_\gamma = \frac{\Psi}{\Delta t}\)</span> where <span class="math notranslate nohighlight">\(\Delta t\)</span> is the time step.</p>
+<p>When specifying the <code class="docutils literal notranslate"><span class="pre">kappa</span></code> field as <code class="docutils literal notranslate"><span class="pre">helmholtz</span></code>, the absorption coefficient is computed as</p>
+<div class="math notranslate nohighlight">
+\[\kappa(\mathbf{x}) = \frac{p_X\left(\mathbf{x}\right)\lambda}{\sqrt{3}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(p_X\)</span> is the partial pressure of a species <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(\lambda\)</span> is the same input parameter as in the Helmholtz reconstruction.
+These are specified through fields <code class="docutils literal notranslate"><span class="pre">neutral</span></code> and <code class="docutils literal notranslate"><span class="pre">lambda</span></code> as follows:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span>
+   <span class="p">[</span>
+     <span class="p">{</span>
+       <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;UVPhoton&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;kappa&quot;</span><span class="p">:</span> <span class="s2">&quot;helmholtz&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;lambda&quot;</span><span class="p">:</span> <span class="mf">0.0415</span><span class="p">,</span>
+       <span class="nt">&quot;neutral&quot;</span><span class="p">:</span> <span class="s2">&quot;O2&quot;</span>
+     <span class="p">}</span>
+   <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This input will set <span class="math notranslate nohighlight">\(\kappa\left(\mathbf{x}\right) = \frac{p_{\textrm{O}_2}\left(\mathbf{x}\right)\lambda}{\sqrt{3}}\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The source term <span class="math notranslate nohighlight">\(\eta\)</span> is specified when specifying the plasma reactions, see <a class="reference internal" href="#chap-cdrplasmareactionsjson"><span class="std std-ref">Plasma reactions</span></a>.</p>
+</div>
+<p><strong>Stochastic sampling</strong></p>
+<p>Setting the <code class="docutils literal notranslate"><span class="pre">kappa</span></code> field to <code class="docutils literal notranslate"><span class="pre">stochastic</span> <span class="pre">A</span></code> will stochastically sample the absorption length from</p>
+<div class="math notranslate nohighlight">
+\[\kappa = K_1 \left(\frac{K_2}{K_1}\right)^{\frac{f-f1}{f2-f1}}.\]</div>
+<p>where <span class="math notranslate nohighlight">\(K_1 = p_X\chi_{\textrm{min}}\)</span>, <span class="math notranslate nohighlight">\(K_1 = p_X\chi_{\textrm{max}}\)</span>, and <span class="math notranslate nohighlight">\(f_1\)</span> and <span class="math notranslate nohighlight">\(f_2\)</span> are frequency ranges.
+Like above, <span class="math notranslate nohighlight">\(p_X\)</span> is the partial pressure of some species <span class="math notranslate nohighlight">\(X\)</span>.
+Note that all input parameters are given in SI units.</p>
+<p>Stochastic sampling of the absorption length only makes sense when using discrete photons – this particular method is inspired by the method in <span id="id6">Chanrion and Neubert [<a class="reference internal" href="../ZZReferences.html#id163" title="O. Chanrion and T. Neubert. A PIC-MCC code for simulation of streamer propagation in air. Journal of Computational Physics, 2008. doi:10.1016/j.jcp.2008.04.016.">3</a>]</span>.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span>
+   <span class="p">[</span>
+     <span class="p">{</span>
+       <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;UVPhoton&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;kappa&quot;</span><span class="p">:</span> <span class="s2">&quot;stochastic A&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;neutral&quot;</span><span class="p">:</span> <span class="s2">&quot;O2&quot;</span><span class="p">,</span>
+       <span class="nt">&quot;f1&quot;</span><span class="p">:</span>   <span class="mf">2.925E15</span><span class="p">,</span>
+       <span class="nt">&quot;f2&quot;</span><span class="p">:</span>   <span class="mf">3.059E15</span><span class="p">,</span>
+       <span class="nt">&quot;chi min&quot;</span><span class="p">:</span> <span class="mf">2.625E-2</span><span class="p">,</span>
+       <span class="nt">&quot;chi max&quot;</span><span class="p">:</span> <span class="mf">1.5</span>
+     <span class="p">}</span>
+   <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="plasma-reactions">
+<span id="chap-cdrplasmareactionsjson"></span><h3>Plasma reactions<a class="headerlink" href="#plasma-reactions" title="Permalink to this headline"></a></h3>
+<p>Plasma reactions are reactions between charged and neutral species and are written in the form</p>
+<div class="math notranslate nohighlight">
+\[A + B + \ldots \rightarrow C + D + \ldots.\]</div>
+<p>Importantly, the left hand side of the reaction can only consist of charged or neutral species.
+It is not permitted to put a photon species on the left hand side of these reactions; photo-ionization is handled separately by another set of reaction types (see <a class="reference internal" href="#chap-photoreactionsjson"><span class="std std-ref">Photo-reactions</span></a>).
+However, photon species <em>can</em> appear on the left hand side of the equation.</p>
+<p>When specifying reactions in this form, the reaction rate is computed as</p>
+<div class="math notranslate nohighlight">
+\[R = k n_A n_B\ldots\]</div>
+<p>When computing the source term for some species <span class="math notranslate nohighlight">\(X\)</span>, we subtract <span class="math notranslate nohighlight">\(R\)</span> for each time <span class="math notranslate nohighlight">\(X\)</span> appears on the left hand side of the reaction and add <span class="math notranslate nohighlight">\(R\)</span> for each time <span class="math notranslate nohighlight">\(X\)</span> appears on the right-hand side of the reaction.</p>
+<div class="section" id="specifying-reactions">
+<h4>Specifying reactions<a class="headerlink" href="#specifying-reactions" title="Permalink to this headline"></a></h4>
+<p>Reactions of the above type are handled by a JSON array <code class="docutils literal notranslate"><span class="pre">plasma</span> <span class="pre">reactions</span></code>, with required fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">reaction</span></code> (string) containing the reaction process.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lookup</span></code> (string) for determining how to compute the reaction rate.</p></li>
+</ul>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + O2 -&gt; e + e + O2+&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;rate&quot;</span><span class="p">:</span> <span class="mf">1E-30</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This adds a reaction <span class="math notranslate nohighlight">\(\textrm{e} + \textrm{O}_2 \rightarrow \textrm{e} + \textrm{e} + \textrm{O}_2^+\)</span> to the reaction set.
+We compute</p>
+<div class="math notranslate nohighlight">
+\[R = kn_{\textrm{e}}n_{\textrm{O}_2^+}\]</div>
+<p>and set</p>
+<div class="math notranslate nohighlight">
+\[S_{\textrm{e}} = S_{\textrm{O}_2^+} = R.\]</div>
+<p>Some caveats when setting the reaction string are:</p>
+<ul class="simple">
+<li><p>Whitespace are separators.
+For example, <code class="docutils literal notranslate"><span class="pre">O2+e</span></code> will be interpreted as a species with string identifier <code class="docutils literal notranslate"><span class="pre">O2+e</span></code>, but <code class="docutils literal notranslate"><span class="pre">O2</span> <span class="pre">+</span> <span class="pre">e</span></code> will interpreted as a reaction between <code class="docutils literal notranslate"><span class="pre">O2</span></code> and <code class="docutils literal notranslate"><span class="pre">e</span></code>.</p></li>
+<li><p>The reaction string <em>must</em> contain a left and right hand side separated by <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code>.
+An error will be thrown if this symbol can not be found.</p></li>
+<li><p>The left-hand must consist <em>only</em> of neutral or plasma species.
+If the left-hand side consists of species that are not neutral or plasma species, an error will be thrown.</p></li>
+<li><p>The right-hand side can consist of either neutral, plasma species, or photon species.
+Otherwise, an error will be thrown.</p></li>
+<li><p>The reaction string will be checked for charge conservation.</p></li>
+</ul>
+<p>Note that if a reaction involves a right-hand side that is not otherwise tracked, the user should omit the species from the right-hand side altogether.
+For example, if we have a model which tracks the species <span class="math notranslate nohighlight">\(e\)</span> and <span class="math notranslate nohighlight">\(\textrm{O}_2^+\)</span> but we want to include the dissociative recombination reaction <span class="math notranslate nohighlight">\(e + \textrm{O}_2^+ \rightarrow O + O\)</span>, this reaction should be added to the reaction with an empty right-hand side:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + O2 -&gt; e + e + O2+&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;rate&quot;</span><span class="p">:</span> <span class="mf">1E-30</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + O2+ -&gt; &quot;</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;rate&quot;</span><span class="p">:</span> <span class="mf">1E-30</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="wildcards">
+<span id="cdrplasma-wildcards"></span><h4>Wildcards<a class="headerlink" href="#wildcards" title="Permalink to this headline"></a></h4>
+<p>Reaction specifiers may include the wildcard <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> which is a placeholder for another species.
+The wildcards must be specified by including a JSON array <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> of the species that the wildcard is replaced by.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;N2+ + N2 + @ -&gt; N4+ + @&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;@&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;N2&quot;</span><span class="p">,</span> <span class="s2">&quot;O2&quot;</span><span class="p">],</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;rate&quot;</span><span class="p">:</span> <span class="mf">1E-30</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The above code will add two reactions to the reaction set: <span class="math notranslate nohighlight">\(N_2 + N_2 + N_2 \rightarrow N_4^+ + N_2\)</span> and <span class="math notranslate nohighlight">\(N_2 + N_2 + \textrm{O}_2 \rightarrow N_4^+ + \textrm{O}_2\)</span>.
+It is not possible to set different reaction rates for the two reactions.</p>
+</div>
+<div class="section" id="plotting-reactions">
+<h4>Plotting reactions<a class="headerlink" href="#plotting-reactions" title="Permalink to this headline"></a></h4>
+<p>It is possible to have <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> include the reaction rates in the HDF5 output files by including a field <code class="docutils literal notranslate"><span class="pre">plot</span></code> as follows:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + O2 -&gt; e + e + O2+&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;plot&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;rate&quot;</span><span class="p">:</span> <span class="mf">1E-30</span><span class="p">,</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Plotting the reaction rate can be useful for debugging or analysis.
+Note that it is, by extension, also possible to add useful data to the I/O files from reactions that otherwise do not contribute to the discharge evolution.
+For example, if we know the rate <span class="math notranslate nohighlight">\(k\)</span> for excitation of nitrogen to a specific excited state, but do not otherwise care about tracking the excited state, we can add the reaction as follows:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + N2 -&gt; e + N2&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;plot&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;rate&quot;</span><span class="p">:</span> <span class="mf">1E-30</span><span class="p">,</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This reaction is a dud in terms of the discharge evolution (the left and right hand sides are the same), but it can be useful for plotting the excitation rate.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This functionality should be used with care because each reaction increases the I/O load.</p>
+</div>
+</div>
+<div class="section" id="constant-reaction-rates">
+<h4>Constant reaction rates<a class="headerlink" href="#constant-reaction-rates" title="Permalink to this headline"></a></h4>
+<p>To set a constant reaction rate for a reaction, set the field <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">&quot;constant&quot;</span></code> and specify the rate.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + O2 -&gt; e + e + O2+&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;rate&quot;</span><span class="p">:</span> <span class="mf">1E-30</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="function-based-rates">
+<h4>Function based rates<a class="headerlink" href="#function-based-rates" title="Permalink to this headline"></a></h4>
+<ul>
+<li><p>To set a rate dependent on two species temperature in the form <span class="math notranslate nohighlight">\(k(T_1, T_2) = c_1\left(T_1/T_2\right)^{c_2}\)</span>, set <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">functionT1T2</span> <span class="pre">A</span></code>.
+The user must specify which temperatures are involved by specifying the fields <code class="docutils literal notranslate"><span class="pre">T1</span></code>, <code class="docutils literal notranslate"><span class="pre">T2</span></code>, as well as the constants through fields <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>.
+For example, to include the reaction <span class="math notranslate nohighlight">\(e + \textrm{O}_2 + \textrm{O}_2 \rightarrow \textrm{O}_2^- + O2\)</span> in the set, with this reaction having a rate</p>
+<div class="math notranslate nohighlight">
+\[k = 2.4\times 10^{-41}\left(\frac{T_{\textrm{O}_2}}{T_e}\right),\]</div>
+<p>we add the following:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + O2 + O2 -&gt; O2- + O2&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;functionT1T2 A&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;T1&quot;</span><span class="p">:</span> <span class="s2">&quot;O2&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;T2&quot;</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;c1&quot;</span><span class="p">:</span> <span class="mf">2.41E-41</span><span class="p">,</span>
+      <span class="nt">&quot;c2&quot;</span><span class="p">:</span> <span class="mi">1</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="tabulated-rates">
+<h4>Tabulated rates<a class="headerlink" href="#tabulated-rates" title="Permalink to this headline"></a></h4>
+<p>To set a tabulated rate with <span class="math notranslate nohighlight">\(k = k(E,N)\)</span>, set the field <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">E/N</span></code> and specify the file, header, and data format to be used.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + O2 -&gt; e + e + O2+&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;table E/N&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;transport_file.txt&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;header&quot;</span><span class="p">:</span> <span class="s2">&quot;# O2 ionization (E/N, rate/N)&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;E/N &quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="nt">&quot;rate/N&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="nt">&quot;min E/N&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+      <span class="nt">&quot;max E/N&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+      <span class="nt">&quot;spacing&quot;</span><span class="p">:</span> <span class="s2">&quot;exponential&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;points&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+      <span class="nt">&quot;plot&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="nt">&quot;dump&quot;</span><span class="p">:</span> <span class="s2">&quot;O2_ionization.dat&quot;</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">file</span></code> field specifies which field to read the reaction rate from, while <code class="docutils literal notranslate"><span class="pre">header</span></code> indicates where in the file the reaction rate is found.
+The file parser will read the files below the header line until it reaches an empty line.
+The fields <code class="docutils literal notranslate"><span class="pre">E/N</span></code> and <code class="docutils literal notranslate"><span class="pre">rate/N</span></code> indicate the columns where the reduced electric field and reaction rates are stored.</p>
+<p>The final fields <code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">E/N</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">E/N</span></code>, and <code class="docutils literal notranslate"><span class="pre">points</span></code> are formatting fields that trim the range of the data input and organizes the data along a table with <code class="docutils literal notranslate"><span class="pre">points</span></code> entries.
+As with the mobilities (see <span class="xref std std-ref">Chap:CdrPlasmaJSONMobilities</span>), the <code class="docutils literal notranslate"><span class="pre">spacing</span></code> argument determines whether or not the internal interpolation table uses uniform or exponential grid point spacing.
+Finally, the <code class="docutils literal notranslate"><span class="pre">dump</span></code> argument will tell <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> to dump the table to file, which is useful for debugging or quality assurance of the tabulated data.</p>
+</div>
+<div class="section" id="collisional-quenching">
+<h4>Collisional quenching<a class="headerlink" href="#collisional-quenching" title="Permalink to this headline"></a></h4>
+<p>To quench a reaction, include a field <code class="docutils literal notranslate"><span class="pre">qenching_pressure</span></code> and specify the <em>quenching pressure</em> (in atmospheres).
+When computing reaction rates, the rate for the reaction will be modified as</p>
+<div class="math notranslate nohighlight">
+\[k \rightarrow k\frac{p_q}{p_q + p}\]</div>
+<p>where <span class="math notranslate nohighlight">\(p^q\)</span> is the quenching pressure and <span class="math notranslate nohighlight">\(p = p(\mathbf{x})\)</span> is the gas pressure.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The quenching pressure should be specified in Pascal.</p>
+</div>
+<p>For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + N2 -&gt; e + N2 + Y&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;table E/N&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;transport_file.txt&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;header&quot;</span><span class="p">:</span> <span class="s2">&quot;# N2 ionization (E/N, rate/N)&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;E/N &quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="nt">&quot;rate/N&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="nt">&quot;min E/N&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+      <span class="nt">&quot;max E/N&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+      <span class="nt">&quot;points&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+      <span class="nt">&quot;spacing&quot;</span><span class="p">:</span> <span class="s2">&quot;exponential&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;quenching pressure&quot;</span><span class="p">:</span> <span class="mi">4000</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reaction-efficiencies">
+<h4>Reaction efficiencies<a class="headerlink" href="#reaction-efficiencies" title="Permalink to this headline"></a></h4>
+<p>To modify a reaction efficiency, include a field <code class="docutils literal notranslate"><span class="pre">efficiency</span></code> and specify it.
+This will modify the reaction rate as</p>
+<div class="math notranslate nohighlight">
+\[k \rightarrow \nu k\]</div>
+<p>where <span class="math notranslate nohighlight">\(\nu\)</span> is the reaction efficiency.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + N2 -&gt; e + N2 + Y&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;table E/N&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;transport_file.txt&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;header&quot;</span><span class="p">:</span> <span class="s2">&quot;# N2 ionization (E/N, rate/N)&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;E/N &quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="nt">&quot;rate/N&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="nt">&quot;min E/N&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+      <span class="nt">&quot;max E/N&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+      <span class="nt">&quot;points&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+      <span class="nt">&quot;spacing&quot;</span><span class="p">:</span> <span class="s2">&quot;exponential&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;efficiency&quot;</span><span class="p">:</span> <span class="mf">0.6</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="scaling-reactions">
+<h4>Scaling reactions<a class="headerlink" href="#scaling-reactions" title="Permalink to this headline"></a></h4>
+<p>Reactions can be scaled by including a <code class="docutils literal notranslate"><span class="pre">scale</span></code> argument to the reaction.
+This works exactly like the <code class="docutils literal notranslate"><span class="pre">efficiency</span></code> field outlined above.</p>
+</div>
+<div class="section" id="energy-correction">
+<h4>Energy correction<a class="headerlink" href="#energy-correction" title="Permalink to this headline"></a></h4>
+<p>Occasionally, it can be necessary to incorporate an energy correction to models, accounting e.g. for electron energy loss near strong gradients.
+The JSON interface supports the correction in <span id="id7">Soloviev and Krivtsov [<a class="reference internal" href="../ZZReferences.html#id101" title="V R Soloviev and V M Krivtsov. Surface barrier discharge modelling for aerodynamic applications. Journal of Physics D: Applied Physics, 42(12):125208, jun 2009. URL: http://stacks.iop.org/0022-3727/42/i=12/a=125208?key=crossref.6a72c0ae60b829dd552a56b7f9dfa90c, doi:10.1088/0022-3727/42/12/125208.">6</a>]</span>.
+To use it, include an (optional) field <code class="docutils literal notranslate"><span class="pre">soloviev</span></code> and specify <code class="docutils literal notranslate"><span class="pre">correction</span></code> and <code class="docutils literal notranslate"><span class="pre">species</span></code>.
+For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;e + N2 -&gt; e + N2 + Y&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;table E/N&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;transport_file.txt&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;header&quot;</span><span class="p">:</span> <span class="s2">&quot;# N2 ionization (E/N, rate/N)&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;E/N &quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="nt">&quot;rate/N&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="nt">&quot;min E/N&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+      <span class="nt">&quot;max E/N&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+      <span class="nt">&quot;points&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+      <span class="nt">&quot;spacing&quot;</span><span class="p">:</span> <span class="s2">&quot;exponential&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;efficiency&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+      <span class="nt">&quot;soloviev&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;correction&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+        <span class="nt">&quot;species&quot;</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>When this energy correction is enabled, the rate coefficient is modified as</p>
+<div class="math notranslate nohighlight">
+\[k \rightarrow k\left(1 + \frac{\mathbf{E}\cdot D_s\nabla n_s}{\mu_s n_s E^2}\right),\]</div>
+<p>where <span class="math notranslate nohighlight">\(s\)</span> is the species specified in the <code class="docutils literal notranslate"><span class="pre">soloviev</span></code> field, <span class="math notranslate nohighlight">\(n_s\)</span> is the density and <span class="math notranslate nohighlight">\(D_s\)</span> and <span class="math notranslate nohighlight">\(\mu_s\)</span> are diffusion and mobility coefficients.
+We point out that the correction factor is restricted such that the reaction rate is always non-negative.
+Note that this correction makes sense when rates are dependent only on the electric field, see <span id="id8">Soloviev and Krivtsov [<a class="reference internal" href="../ZZReferences.html#id101" title="V R Soloviev and V M Krivtsov. Surface barrier discharge modelling for aerodynamic applications. Journal of Physics D: Applied Physics, 42(12):125208, jun 2009. URL: http://stacks.iop.org/0022-3727/42/i=12/a=125208?key=crossref.6a72c0ae60b829dd552a56b7f9dfa90c, doi:10.1088/0022-3727/42/12/125208.">6</a>]</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When using the energy correction, the specifies species must be both mobile and diffusive.</p>
+</div>
+</div>
+</div>
+<div class="section" id="photo-reactions">
+<span id="chap-photoreactionsjson"></span><h3>Photo-reactions<a class="headerlink" href="#photo-reactions" title="Permalink to this headline"></a></h3>
+<p>Photo-reactions are reactions between charged/neutral and photons in the form</p>
+<div class="math notranslate nohighlight">
+\[A + B + \gamma + \ldots \rightarrow C + D + \ldots.\]</div>
+<p>where species <span class="math notranslate nohighlight">\(A, B, \ldots\)</span> are charged and neutral species and <span class="math notranslate nohighlight">\(\gamma\)</span> is a photon.
+The left hand side can contain only <em>one</em> photon species, and the right-hand side can not contain a photon species.
+In other words, two-photon absorption is not supported, and photons that are absorbed on the mesh cannot become new photons.
+This is not a fundamental limitation, but a restriction imposed by the JSON interface.</p>
+<div class="section" id="id9">
+<h4>Specifying reactions<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h4>
+<p>Reactions of the above type are handled by a JSON array <code class="docutils literal notranslate"><span class="pre">photo</span> <span class="pre">reactions</span></code>, with required fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">reaction</span></code> (string) containing the reaction process.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lookup</span></code> (string) for determining how to compute the reaction rate.</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;photo reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;Y + O2 -&gt; e + O2+&quot;</span><span class="p">},</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The rules for specifying reaction strings are the same as for the plasma reactions, see <span class="xref std std-ref">CdrPlasmaReactionsJSON</span>.
+Wildcards also apply, see <a class="reference internal" href="#cdrplasma-wildcards"><span class="std std-ref">Wildcards</span></a>.</p>
+</div>
+<div class="section" id="default-behavior">
+<h4>Default behavior<a class="headerlink" href="#default-behavior" title="Permalink to this headline"></a></h4>
+<p>Since the radiative transfer solvers solve for the number of ionizing photons, the CDR solver source terms are incremented by</p>
+<div class="math notranslate nohighlight">
+\[S \rightarrow S + \frac{\Psi}{\Delta t}.\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Psi\)</span> is the number of ionizing photons per unit volume (i.e., the solution <span class="math notranslate nohighlight">\(\Psi\)</span>).</p>
+</div>
+<div class="section" id="helmholtz-reconstruction">
+<h4>Helmholtz reconstruction<a class="headerlink" href="#helmholtz-reconstruction" title="Permalink to this headline"></a></h4>
+<p>When performing a Helmholtz reconstruction the photoionization source term is</p>
+<div class="math notranslate nohighlight">
+\[S = \frac{c A p_{\textrm{O}_2}}{\sqrt{3}\lambda}\Psi.\]</div>
+<p>To modify the source term for consistency with Helmholtz reconstruction specify the field <code class="docutils literal notranslate"><span class="pre">helmholtz</span></code> with variables</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">A</span></code>. the <span class="math notranslate nohighlight">\(A\)</span> coefficient.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lambda</span></code>. the <span class="math notranslate nohighlight">\(\lambda\)</span> coefficient.
+This value will also be specified in the photon species, but it is not retrieved automatically.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">neutral</span></code>. The neutral species for which we obtain the partial pressure.</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;photo reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;Y + O2 -&gt; e + O2+&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;helmholtz&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;A&quot;</span><span class="p">:</span> <span class="mf">1.1E-4</span><span class="p">,</span>
+        <span class="nt">&quot;lambda&quot;</span><span class="p">:</span> <span class="mf">0.0415</span><span class="p">,</span>
+        <span class="nt">&quot;neutral&quot;</span><span class="p">:</span> <span class="s2">&quot;O2&quot;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id10">
+<h4>Scaling reactions<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h4>
+<p>Photo-reactions can be scaled by including a <code class="docutils literal notranslate"><span class="pre">scale</span></code> argument.
+For example, to completely turn off the photoreaction above:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;photo reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;Y + O2 -&gt; e + O2+&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;helmholtz&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;A&quot;</span><span class="p">:</span> <span class="mf">1.1E-4</span><span class="p">,</span>
+        <span class="nt">&quot;lambda&quot;</span><span class="p">:</span> <span class="mf">0.0415</span><span class="p">,</span>
+        <span class="nt">&quot;neutral&quot;</span><span class="p">:</span> <span class="s2">&quot;O2&quot;</span>
+      <span class="p">},</span>
+      <span class="nt">&quot;scale&quot;</span><span class="p">:</span> <span class="mf">0.0</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="eb-boundary-conditions">
+<h3>EB boundary conditions<a class="headerlink" href="#eb-boundary-conditions" title="Permalink to this headline"></a></h3>
+<p>Boundary conditions on the embedded boundary are included by the fields</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">electrode</span> <span class="pre">reactions</span></code>, for specifying secondary emission on electrodes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">reactions</span></code>, for specifying secondary emission on dielectrics.</p></li>
+</ul>
+<p>To include secondary emission, the user must specify a reaction string in the form <span class="math notranslate nohighlight">\(A \rightarrow B\)</span>, and also include an emission rate.
+Currently, we only support constant emission rates (i.e., secondary emission coefficients).
+This is likely to change in the future.</p>
+<p>The following points furthermore apply:</p>
+<ul class="simple">
+<li><p>By default, standard outflow boundary conditions.
+When <code class="docutils literal notranslate"><span class="pre">electrode</span> <span class="pre">reactions</span></code> or <code class="docutils literal notranslate"><span class="pre">dielectric</span> <span class="pre">reactions</span></code> are specified, the user only controls the <em>inflow</em> back into the domain.</p></li>
+<li><p>Wildcards can appear on the left hand side of the reaction.</p></li>
+<li><p>If one specifies <span class="math notranslate nohighlight">\(A + B \rightarrow C\)</span> for a surface reaction, this is the same as specifying two reactions <span class="math notranslate nohighlight">\(A \rightarrow C\)</span> and <span class="math notranslate nohighlight">\(B\rightarrow C\)</span>.
+The same emission coefficient will be used for both reactions.</p></li>
+<li><p>Both photon species and plasma species can appear on the left hand side of the reaction.</p></li>
+<li><p>Photon species can not appear on the right-hand side of the reaction; we do not include surface sources for photoionization.</p></li>
+<li><p>To scale reactions, include a modifier <code class="docutils literal notranslate"><span class="pre">scale</span></code>.</p></li>
+</ul>
+<p>For example, the following specification will set secondary emission efficiencies to <span class="math notranslate nohighlight">\(10^{-3}\)</span>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;electrode reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span> <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;@ -&gt; e&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;@&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;N2+&quot;</span><span class="p">,</span> <span class="s2">&quot;O2+&quot;</span><span class="p">,</span> <span class="s2">&quot;N4+&quot;</span><span class="p">,</span> <span class="s2">&quot;O4+&quot;</span><span class="p">,</span> <span class="s2">&quot;O2+N2&quot;</span><span class="p">],</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="mf">1E-4</span>
+    <span class="p">}</span>
+  <span class="p">],</span>
+ <span class="nt">&quot;dielectric reactions&quot;</span><span class="p">:</span>
+  <span class="p">[</span>
+    <span class="p">{</span> <span class="nt">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;@ -&gt; e&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;@&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;N2+&quot;</span><span class="p">,</span> <span class="s2">&quot;O2+&quot;</span><span class="p">,</span> <span class="s2">&quot;N4+&quot;</span><span class="p">,</span> <span class="s2">&quot;O4+&quot;</span><span class="p">,</span> <span class="s2">&quot;O2+N2&quot;</span><span class="p">],</span>
+      <span class="nt">&quot;lookup&quot;</span><span class="p">:</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="mf">1E-3</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="domain-boundary-conditions">
+<h3>Domain boundary conditions<a class="headerlink" href="#domain-boundary-conditions" title="Permalink to this headline"></a></h3>
+<p>TODO.</p>
+</div>
+</div>
+<div class="section" id="simulation-quick-start">
+<span id="chap-cdrplasmanewproblem"></span><h2>Simulation quick start<a class="headerlink" href="#simulation-quick-start" title="Permalink to this headline"></a></h2>
+<p>New problems that use the <code class="docutils literal notranslate"><span class="pre">CdrPlasma</span></code> physics model are best set up by using the Python tools provided with the module.
+Navigate to <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma`</span></code> and set up the problem with.
+To see the list of available options type</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$DISCHARGE_HOME</span>/Physics/CdrPlasma
+./setup.py --help
+</pre></div>
+</div>
+<p>The following options are helpful for setting up the problem:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">base_dir</span></code> The base directory where the application will be placed.
+Defaults to <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/MyApplications</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">app_name</span></code> The application name.
+The application will be put in <code class="file docutils literal notranslate"><span class="pre">base_dir/app_name</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code> The geometry to be used.
+The geometry must be one of the ones provided in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Geometries</span></code> (users can also provide their own models).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">physics</span></code> The plasma physics model.
+This must be one of the folders/class in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma/PlasmaModel</span></code> (users can also provide their own models).
+Defaults to <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> (see <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> Time integrator.
+This must derive from <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> and must be one of the time steppers in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma/TimeSteppers</span></code>.
+The default integrator is <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cell_tagger</span></code> Cell tagger
+This must derive from <code class="docutils literal notranslate"><span class="pre">CdrPlasmaTagger</span></code> and must be one of the cell taggers in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma/CellTaggers</span></code>.</p></li>
+</ul>
+<p>For example, to set up a geometry-less that does not use AMR, do</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$DISCHARGE_HOME</span>
+./setup.py -app_name<span class="o">=</span>MyApplication
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="BrownianWalkerModel.html" class="btn btn-neutral float-left" title="Brownian walker" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ElectrostaticsModel.html" class="btn btn-neutral float-right" title="Electrostatics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, SINTEF Energy Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

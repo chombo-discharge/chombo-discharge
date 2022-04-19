@@ -1,0 +1,4 @@
+<map id="Physics::CdrPlasma::CdrPlasmaAir7Zheleznyak::N4plus" name="Physics::CdrPlasma::CdrPlasmaAir7Zheleznyak::N4plus">
+<area shape="rect" id="node1" title=" " alt="" coords="5,80,208,136"/>
+<area shape="rect" id="node2" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="59,5,154,32"/>
+</map>

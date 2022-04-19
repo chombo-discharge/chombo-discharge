@@ -1,0 +1,4 @@
+<map id="EBHelmholtzDirichletEBBC" name="EBHelmholtzDirichletEBBC">
+<area shape="rect" id="node1" title="Base class for passing Dirichlet EB boundary conditions into EBHelmholtzOp." alt="" coords="5,80,201,107"/>
+<area shape="rect" id="node2" href="$classEBHelmholtzEBBC.html" title="Base class for passing EB boundary conditions into EBHelmholtzOp." alt="" coords="33,5,174,32"/>
+</map>

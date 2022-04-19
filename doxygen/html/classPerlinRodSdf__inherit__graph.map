@@ -1,0 +1,5 @@
+<map id="PerlinRodSdf" name="PerlinRodSdf">
+<area shape="rect" id="node1" title="A rod geometry, but with noise on one of the end caps." alt="" coords="15,155,121,181"/>
+<area shape="rect" id="node2" href="$classPerlinSphereSdf.html" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="5,80,131,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="35,5,101,32"/>
+</map>

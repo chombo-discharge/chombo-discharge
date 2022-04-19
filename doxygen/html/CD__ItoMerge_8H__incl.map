@@ -1,0 +1,12 @@
+<map id="Source/ItoDiffusion/CD_ItoMerge.H" name="Source/ItoDiffusion/CD_ItoMerge.H">
+<area shape="rect" id="node1" title="Namespace containing various merging utilities for ItoSolver particle merging and splitting." alt="" coords="281,5,426,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,95,83,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="107,95,170,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="195,95,288,121"/>
+<area shape="rect" id="node5" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="239,244,425,271"/>
+<area shape="rect" id="node6" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="655,244,833,271"/>
+<area shape="rect" id="node7" href="$CD__ItoMergeImplem_8H.html" title="Implementation of CD_ItoMerge.H." alt="" coords="421,95,592,121"/>
+<area shape="rect" id="node8" title=" " alt="" coords="532,244,631,271"/>
+<area shape="rect" id="node9" href="$CD__ItoMergePartitioners_8H.html" title="Implementation of various partitioners for superparticle handling of ItoSolver." alt="" coords="411,169,605,196"/>
+<area shape="rect" id="node10" title=" " alt="" coords="449,244,508,271"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="Physics/CdrPlasma/PlasmaModels/CdrPlasmaJSON/CD_RteSpeciesJSON.cpp" name="Physics/CdrPlasma/PlasmaModels/CdrPlasmaJSON/CD_RteSpeciesJSON.cpp">
+<area shape="rect" id="node1" title="Implementation of CD_RteSpeciesJSON.H." alt="" coords="167,5,365,61"/>
+<area shape="rect" id="node2" href="$CD__RteSpeciesJSON_8H.html" title="Declaration of a class that encapsulates a RTE species for use with CdrPlasmaJSON." alt="" coords="183,109,349,136"/>
+<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,259,191,285"/>
+<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="445,259,623,285"/>
+<area shape="rect" id="node3" title=" " alt="" coords="186,184,229,211"/>
+<area shape="rect" id="node4" title=" " alt="" coords="215,259,309,285"/>
+<area shape="rect" id="node5" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="304,184,431,211"/>
+<area shape="rect" id="node6" title=" " alt="" coords="333,259,420,285"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="MFHelmholtzOp" name="MFHelmholtzOp">
+<area shape="rect" id="node1" title="Operator for solving multifluid Helmholtz on a grid level." alt="" coords="373,123,500,150"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,224,47"/>
+<area shape="rect" id="node3" href="$classMFCoarAve.html" title="Class for coarsening data in a multifluid context." alt="" coords="67,71,163,98"/>
+<area shape="rect" id="node4" href="$classMFLevelGrid.html" title="Wrapper class for holding multifluid EBLevelGrids." alt="" coords="63,175,167,202"/>
+<area shape="rect" id="node5" href="$classMFMultigridInterpolator.html" title="Wrapper class for holding multifluid EBMultigridInterpolators." alt="" coords="27,226,203,253"/>
+</map>

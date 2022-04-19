@@ -1,0 +1,4 @@
+<map id="Physics::CdrPlasma::CdrPlasmaTagger" name="Physics::CdrPlasma::CdrPlasmaTagger">
+<area shape="rect" id="node1" title="Abstract Class which implements CellTagger for the CDR plasma physics module." alt="" coords="5,80,155,121"/>
+<area shape="rect" id="node2" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="35,5,125,32"/>
+</map>

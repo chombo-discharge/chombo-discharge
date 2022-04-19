@@ -1,0 +1,5 @@
+<map id="MFHelmholtzElectrostaticDomainBCFactory" name="MFHelmholtzElectrostaticDomainBCFactory">
+<area shape="rect" id="node1" title="Class for passing electrostatic boundary conditions into MFHelmholtzOp." alt="" coords="133,95,324,136"/>
+<area shape="rect" id="node2" href="$classMFHelmholtzDomainBCFactory.html" title="Base class for creating domain boundary condition objects in MFHelmholtzOp." alt="" coords="5,5,231,32"/>
+<area shape="rect" id="node3" href="$classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="255,5,426,32"/>
+</map>

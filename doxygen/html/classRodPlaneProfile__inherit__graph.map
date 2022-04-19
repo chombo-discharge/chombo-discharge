@@ -1,0 +1,4 @@
+<map id="RodPlaneProfile" name="RodPlaneProfile">
+<area shape="rect" id="node1" title="Geometry class which defines an electrode blade and a dielectric slab with various surface profiles." alt="" coords="35,80,159,107"/>
+<area shape="rect" id="node2" href="$classComputationalGeometry.html" title="Abstract base class for geometries." alt="" coords="5,5,188,32"/>
+</map>

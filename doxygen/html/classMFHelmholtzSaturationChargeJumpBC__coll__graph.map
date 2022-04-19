@@ -1,0 +1,5 @@
+<map id="MFHelmholtzSaturationChargeJumpBC" name="MFHelmholtzSaturationChargeJumpBC">
+<area shape="rect" id="node1" title="Class for computing matching the saturation charge boundary condition in an MFHelmholtzOp context." alt="" coords="5,171,228,212"/>
+<area shape="rect" id="node2" href="$classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code." alt="" coords="37,95,197,121"/>
+<area shape="rect" id="node3" href="$classMFLevelGrid.html" title="Wrapper class for holding multifluid EBLevelGrids." alt="" coords="65,5,169,32"/>
+</map>

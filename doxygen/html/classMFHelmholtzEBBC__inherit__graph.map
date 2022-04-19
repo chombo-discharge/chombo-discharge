@@ -1,0 +1,8 @@
+<map id="MFHelmholtzEBBC" name="MFHelmholtzEBBC">
+<area shape="rect" id="node1" title="Class for making boundary conditions on the EB in a multifluid context." alt="" coords="195,81,339,108"/>
+<area shape="rect" id="node3" href="$classMFHelmholtzDirichletEBBC.html" title="Class for making Dirichlet boundary conditions on the EB in a multifluid context." alt="" coords="400,5,599,32"/>
+<area shape="rect" id="node4" href="$classMFHelmholtzElectrostaticEBBC.html" title="Class for making Electrostatic boundary conditions on the EB in a multifluid context." alt="" coords="387,56,612,83"/>
+<area shape="rect" id="node5" href="$classMFHelmholtzNeumannEBBC.html" title="Base class for passing Neumann MF boundary conditions into MFHelmholtzOp." alt="" coords="396,107,603,133"/>
+<area shape="rect" id="node6" href="$classMFHelmholtzRobinEBBC.html" title="Base class for passing Robin MF boundary conditions into MFHelmholtzOp." alt="" coords="409,157,590,184"/>
+<area shape="rect" id="node2" href="$classEBHelmholtzEBBC.html" title="Base class for passing EB boundary conditions into EBHelmholtzOp." alt="" coords="5,81,147,108"/>
+</map>

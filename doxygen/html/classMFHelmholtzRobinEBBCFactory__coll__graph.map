@@ -1,0 +1,4 @@
+<map id="MFHelmholtzRobinEBBCFactory" name="MFHelmholtzRobinEBBCFactory">
+<area shape="rect" id="node1" title="Class for making Robin boundary conditions on the EB in a multifluid context." alt="" coords="5,80,233,107"/>
+<area shape="rect" id="node2" href="$classMFHelmholtzEBBCFactory.html" title="Base class for making boundary conditions on the EB in a multifluid context." alt="" coords="24,5,215,32"/>
+</map>

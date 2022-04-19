@@ -1,0 +1,4 @@
+<map id="EBHelmholtzNeumannEBBC" name="EBHelmholtzNeumannEBBC">
+<area shape="rect" id="node1" title="Base class for passing Neumann EB boundary conditions into EBHelmholtzOp." alt="" coords="5,80,209,107"/>
+<area shape="rect" id="node2" href="$classEBHelmholtzEBBC.html" title="Base class for passing EB boundary conditions into EBHelmholtzOp." alt="" coords="37,5,178,32"/>
+</map>

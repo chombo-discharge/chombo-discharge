@@ -1,0 +1,6 @@
+<map id="Physics/ItoPlasma/CD_ItoPlasmaFieldTagger.H" name="Physics/ItoPlasma/CD_ItoPlasmaFieldTagger.H">
+<area shape="rect" id="node1" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="131,5,312,47"/>
+<area shape="rect" id="node2" href="$CD__ItoPlasmaFieldTagger_8cpp.html" title="Implementation of CD_ItoPlasmaFieldTagger.H." alt="" coords="5,102,200,143"/>
+<area shape="rect" id="node3" href="$CD__ItoPlasmaStreamerTagger_8H.html" title="Implementation ItoPlasmaTagger which tags on alpha and curvature of field." alt="" coords="225,95,458,151"/>
+<area shape="rect" id="node4" href="$CD__ItoPlasmaStreamerTagger_8cpp.html" title="Implementation CD_ItoPlasmaStreamerTagger.H." alt="" coords="218,199,465,255"/>
+</map>

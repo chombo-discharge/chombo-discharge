@@ -1,0 +1,4 @@
+<map id="Physics/ItoPlasma/TimeSteppers/ItoPlasmaGodunovStepper/CD_ItoPlasmaGodunovStepper.H" name="Physics/ItoPlasma/TimeSteppers/ItoPlasmaGodunovStepper/CD_ItoPlasmaGodunovStepper.H">
+<area shape="rect" id="node1" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="5,5,240,61"/>
+<area shape="rect" id="node2" href="$CD__ItoPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_ItoPlasmaGodunovStepper.H." alt="" coords="5,109,240,165"/>
+</map>

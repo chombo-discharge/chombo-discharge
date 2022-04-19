@@ -1,0 +1,4 @@
+<map id="Physics::ItoPlasma::ItoPlasmaTagger" name="Physics::ItoPlasma::ItoPlasmaTagger">
+<area shape="rect" id="node1" title="Abstract class for tagging cells across an AMR hierarchy." alt="" coords="5,80,149,121"/>
+<area shape="rect" id="node2" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="32,5,123,32"/>
+</map>

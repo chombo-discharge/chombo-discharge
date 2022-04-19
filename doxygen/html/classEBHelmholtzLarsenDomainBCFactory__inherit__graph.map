@@ -1,0 +1,4 @@
+<map id="EBHelmholtzLarsenDomainBCFactory" name="EBHelmholtzLarsenDomainBCFactory">
+<area shape="rect" id="node1" title="Class for making Larsen boundary conditions." alt="" coords="5,80,271,107"/>
+<area shape="rect" id="node2" href="$classEBHelmholtzDomainBCFactory.html" title="Base class for passing domain boundary conditions into EBHelmholtzOp." alt="" coords="27,5,249,32"/>
+</map>

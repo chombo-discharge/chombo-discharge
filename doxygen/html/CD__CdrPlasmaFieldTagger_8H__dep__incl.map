@@ -1,0 +1,6 @@
+<map id="Physics/CdrPlasma/CD_CdrPlasmaFieldTagger.H" name="Physics/CdrPlasma/CD_CdrPlasmaFieldTagger.H">
+<area shape="rect" id="node1" title="Cell tagger class for Physics/CdrPlasma." alt="" coords="133,5,319,47"/>
+<area shape="rect" id="node2" href="$CD__CdrPlasmaFieldTagger_8cpp.html" title="Implementation of CD_CdrPlasmaFieldTagger.H." alt="" coords="5,102,204,143"/>
+<area shape="rect" id="node3" href="$CD__CdrPlasmaStreamerTagger_8H.html" title="Implementation of CellTagger that tags cells based on field evaluations or the Townsend coefficient." alt="" coords="228,95,467,151"/>
+<area shape="rect" id="node4" href="$CD__CdrPlasmaStreamerTagger_8cpp.html" title="Implementation CD_CdrPlasmaStreamerTagger.H." alt="" coords="222,199,473,255"/>
+</map>

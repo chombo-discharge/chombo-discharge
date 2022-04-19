@@ -1,0 +1,4 @@
+<map id="EBHelmholtzEddingtonSP1DomainBC" name="EBHelmholtzEddingtonSP1DomainBC">
+<area shape="rect" id="node1" title="Class for passing EddingtonSP1 domain boundary conditions into EBHelmholtzOp." alt="" coords="5,80,269,107"/>
+<area shape="rect" id="node2" href="$classEBHelmholtzDomainBC.html" title="Base class for passing domain boundary conditions into EBHelmholtzOp." alt="" coords="50,5,225,32"/>
+</map>

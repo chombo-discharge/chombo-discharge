@@ -1,0 +1,4 @@
+<map id="Physics::CdrPlasma::CdrPlasmaAir9EedBourdon::O2plusN2" name="Physics::CdrPlasma::CdrPlasmaAir9EedBourdon::O2plusN2">
+<area shape="rect" id="node1" title="O2plusN2 class." alt="" coords="5,80,209,136"/>
+<area shape="rect" id="node2" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="60,5,155,32"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="EddingtonSP1" name="EddingtonSP1">
+<area shape="rect" id="node1" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation." alt="" coords="5,80,116,107"/>
+<area shape="rect" id="node2" href="$classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="22,5,99,32"/>
+</map>

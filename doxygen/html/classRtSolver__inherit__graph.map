@@ -1,0 +1,5 @@
+<map id="RtSolver" name="RtSolver">
+<area shape="rect" id="node1" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="81,5,158,32"/>
+<area shape="rect" id="node2" href="$classEddingtonSP1.html" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation." alt="" coords="5,80,116,107"/>
+<area shape="rect" id="node3" href="$classMcPhoto.html" title="Radiative tranfer equation solver using Monte&#45;Carlo simulation." alt="" coords="140,80,219,107"/>
+</map>

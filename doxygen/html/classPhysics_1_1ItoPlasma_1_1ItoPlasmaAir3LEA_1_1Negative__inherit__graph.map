@@ -1,0 +1,4 @@
+<map id="Physics::ItoPlasma::ItoPlasmaAir3LEA::Negative" name="Physics::ItoPlasma::ItoPlasmaAir3LEA::Negative">
+<area shape="rect" id="node1" title=" " alt="" coords="5,80,159,136"/>
+<area shape="rect" id="node2" href="$classItoSpecies.html" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol..." alt="" coords="37,5,127,32"/>
+</map>

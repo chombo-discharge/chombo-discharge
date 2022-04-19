@@ -1,0 +1,6 @@
+<map id="Physics::CdrPlasma::CdrPlasmaFieldTagger" name="Physics::CdrPlasma::CdrPlasmaFieldTagger">
+<area shape="rect" id="node1" title="Lightweight tagging class which flags cells for refinement/coarsening using the electric field only." alt="" coords="19,169,194,211"/>
+<area shape="rect" id="node4" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html" title="Class which implements CdrPlasmaFieldTagger and refines cells based on the criterion alpha*dx &gt; thres..." alt="" coords="5,259,208,300"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract Class which implements CellTagger for the CDR plasma physics module." alt="" coords="32,80,181,121"/>
+<area shape="rect" id="node3" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="61,5,152,32"/>
+</map>

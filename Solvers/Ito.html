@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Îto diffusion &mdash; chombo-discharge latest documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Implemented models" href="../Applications/ImplementedModels.html" />
+    <link rel="prev" title="Surface charge solver" href="Sigma.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> chombo-discharge
+          </a>
+              <div class="version">
+                latest
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Îto diffusion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-ito-particle">The Îto particle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ito-species">ito_species</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setting-initial-conditions">Setting initial conditions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#computing-time-steps">Computing time steps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#drift">Drift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#diffusion">Diffusion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#remapping-particles">Remapping particles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#limitations">Limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-application">Example application</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">chombo-discharge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Îto diffusion</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Solvers/Ito.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="ito-diffusion">
+<span id="chap-itodiffusion"></span><h1>Îto diffusion<a class="headerlink" href="#ito-diffusion" title="Permalink to this headline"></a></h1>
+<p>The Îto diffusion model advances computational particles as Brownian walkers with drift:</p>
+<div class="math notranslate nohighlight">
+\[d\mathbf{X}_i = \mathbf{v}_idt + \sqrt{2D_i}\mathbf{W}_i dt,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{X}_i\)</span> is the spatial position of a particle <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(\mathbf{v}_i\)</span> is the drift coefficient and <span class="math notranslate nohighlight">\(D_i\)</span> is the diffusion coefficient <em>in the continuum limit</em>.
+That is, both <span class="math notranslate nohighlight">\(\mathbf{v}_i\)</span> and <span class="math notranslate nohighlight">\(D_i\)</span> are the quantities that appear in <a class="reference internal" href="CDR.html#chap-cdr"><span class="std std-ref">Convection-Diffusion-Reaction</span></a>.
+The vector term <span class="math notranslate nohighlight">\(\mathbf{W}_i\)</span> is a Gaussian random field with a mean value of 0 and standard deviation of 1.</p>
+<p>The code for Îto diffusion is given in <code class="file docutils literal notranslate"><span class="pre">/src/ito_solver</span></code> and only a brief explanation is given here.
+The source code is used by a physics module in <code class="file docutils literal notranslate"><span class="pre">/physics/brownian_walker</span></code> and in the regression test <code class="file docutils literal notranslate"><span class="pre">/regression/brownian_walker</span></code>.</p>
+<div class="section" id="the-ito-particle">
+<span id="chap-ito-particle"></span><h2>The Îto particle<a class="headerlink" href="#the-ito-particle" title="Permalink to this headline"></a></h2>
+<p>The Îto particle is a computational particle class in <cite>chombo-discharge</cite> which can be used together with the particle tools in <cite>Chombo</cite>.
+The following data fields are implemented in the particle:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span> <span class="n">m_position</span><span class="p">;</span>
+<span class="n">RealVect</span> <span class="n">m_velocity</span><span class="p">;</span>
+<span class="n">Real</span> <span class="n">m_mass</span><span class="p">;</span>
+<span class="n">Real</span> <span class="n">m_diffusion</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>To obtain the fields, the user will call</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">position</span><span class="p">();</span>
+<span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">velocity</span><span class="p">();</span>
+<span class="n">Real</span><span class="o">&amp;</span> <span class="n">mass</span><span class="p">();</span>
+<span class="n">Real</span><span class="o">&amp;</span> <span class="n">diffusion</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>All functions also have <code class="docutils literal notranslate"><span class="pre">const</span></code> versions.
+Note that the field <code class="docutils literal notranslate"><span class="pre">m_mass</span></code> is the same as the <em>weight</em> of the computational particle.
+The following functions are used to set the various properties:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">setPosition</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_pos</span><span class="p">);</span>
+<span class="n">setVelocity</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_vel</span><span class="p">);</span>
+<span class="n">setMass</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_mass</span><span class="p">);</span>
+<span class="n">setDiffusion</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_diffusion</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ito-species">
+<span id="chap-ito-species"></span><h2>ito_species<a class="headerlink" href="#ito-species" title="Permalink to this headline"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ito_species</span></code> is a class for parsing information into the solver class.
+The constructor for the <code class="docutils literal notranslate"><span class="pre">ito_species</span></code> class is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ito_species</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">a_name</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">a_charge</span><span class="p">,</span> <span class="k">const</span> <span class="kt">bool</span> <span class="n">a_mobile</span><span class="p">,</span> <span class="k">const</span> <span class="kt">bool</span> <span class="n">a_diffusive</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>and this will set the name of the class, the charge, and whether or not the transport kernels account for drift and diffusion.</p>
+<div class="section" id="setting-initial-conditions">
+<h3>Setting initial conditions<a class="headerlink" href="#setting-initial-conditions" title="Permalink to this headline"></a></h3>
+<p>In order to set the initial conditions the user must fill the list <code class="docutils literal notranslate"><span class="pre">List&lt;ito_particle&gt;</span> <span class="pre">m_initial_particles</span></code> in <code class="docutils literal notranslate"><span class="pre">ito_species</span></code>.
+When <code class="docutils literal notranslate"><span class="pre">initial_data()</span></code> is called from <code class="docutils literal notranslate"><span class="pre">ito_solver</span></code>, the initial particles are transferred from the instance of <code class="docutils literal notranslate"><span class="pre">ito_species</span></code> and into the instance of <code class="docutils literal notranslate"><span class="pre">ito_solver</span></code>.</p>
+<p>We remark that it is a bad idea to replicate the initial particle list over all MPI ranks in a simulation.
+If one has a list of initial particles, or wants to draw a specified number of particles from a distribution, the initial particles <em>must</em> be distributed over the available MPI ranks.
+For example, the code in <code class="file docutils literal notranslate"><span class="pre">/physics/brownian_walker/brownian_walker_species.cpp</span></code> draws a specified number of particles distributed over all MPI ranks as (the code is called in <code class="docutils literal notranslate"><span class="pre">brownian_walker_species::draw_initial_particles</span></code>)</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// To avoid that MPI ranks draw the same particle positions, increment the seed for each rank</span>
+<span class="n">m_seed</span> <span class="o">+=</span> <span class="n">procID</span><span class="p">();</span>
+
+<span class="c1">// Set up the RNG</span>
+<span class="n">m_rng</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">mt19937_64</span><span class="p">(</span><span class="n">m_seed</span><span class="p">);</span>
+<span class="n">m_gauss</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">normal_distribution</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">m_blob_radius</span><span class="p">);</span>
+<span class="n">m_udist11</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">uniform_real_distribution</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">);</span>
+
+<span class="c1">// Each MPI process draws the desired number of particles from a distribution</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">quotient</span>  <span class="o">=</span> <span class="n">m_num_particles</span><span class="o">/</span><span class="n">numProc</span><span class="p">();</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">remainder</span> <span class="o">=</span> <span class="n">m_num_particles</span> <span class="o">%</span> <span class="n">numProc</span><span class="p">();</span>
+
+<span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">particlesPerRank</span><span class="p">(</span><span class="n">numProc</span><span class="p">(),</span> <span class="n">quotient</span><span class="p">);</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">remainder</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+  <span class="n">particlesPerRank</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Now make the particles</span>
+<span class="n">m_initial_particles</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">particlesPerRank</span><span class="p">[</span><span class="n">procID</span><span class="p">()];</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+  <span class="k">const</span> <span class="n">Real</span> <span class="n">weight</span>  <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
+  <span class="k">const</span> <span class="n">RealVect</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">m_blob_center</span> <span class="o">+</span> <span class="n">random_gaussian</span><span class="p">();</span>
+  <span class="n">m_initial_particles</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">ito_particle</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="n">pos</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="computing-time-steps">
+<h2>Computing time steps<a class="headerlink" href="#computing-time-steps" title="Permalink to this headline"></a></h2>
+<p>The signatures for computing a time step for the <code class="docutils literal notranslate"><span class="pre">ito_solver</span></code> are given separately for the drift part and the diffusion part.</p>
+<div class="section" id="drift">
+<h3>Drift<a class="headerlink" href="#drift" title="Permalink to this headline"></a></h3>
+<p>The drift time step routines are implemented such that one restricts the time step such that the fastest particle does not move more than a specified number of grid cells.</p>
+<p>For the drift, the signatures are</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="nf">compute_min_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_drift_dt</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span> <span class="c1">// Compute dt on all AMR levels, return vector of time step</span>
+<span class="n">Real</span> <span class="nf">compute_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">a_lvl</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="n">Real</span> <span class="nf">compute_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">a_lvl</span><span class="p">,</span> <span class="k">const</span> <span class="n">DataIndex</span><span class="o">&amp;</span> <span class="n">a_dit</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_dx</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>These last three functions all compute <span class="math notranslate nohighlight">\(\Delta t = \Delta x/Max(v_x, v_y, v_z)\)</span> on the the various AMR levels and patches.
+The routine</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>simply scales <span class="math notranslate nohighlight">\(\Delta t\)</span> by <code class="docutils literal notranslate"><span class="pre">a_maxCellsToMove</span></code> on every level.
+Finally, the function <code class="docutils literal notranslate"><span class="pre">compute_min_drift_dt(...)</span></code> computes the smallest time step across every AMR level.</p>
+</div>
+<div class="section" id="diffusion">
+<h3>Diffusion<a class="headerlink" href="#diffusion" title="Permalink to this headline"></a></h3>
+<p>The signatures for the diffusion time step are similar to the ones for drift:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="nf">compute_min_diffusion_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_diffusion_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_diffusion_dt</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="n">Real</span> <span class="nf">compute_diffusion_dt</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">a_lvl</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="n">Real</span> <span class="nf">compute_diffusion_dt</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">a_lvl</span><span class="p">,</span> <span class="k">const</span> <span class="n">DataIndex</span><span class="o">&amp;</span> <span class="n">a_dit</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_dx</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>In these routines, the time step is computed as <span class="math notranslate nohighlight">\(\Delta t = \frac{\Delta x}{\sqrt{2D}}\)</span>.
+Note that there is still a chance that a particle jumps further than specified by <code class="docutils literal notranslate"><span class="pre">a_maxCellsToMove</span></code> since the diffusion hop is</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{d} = \sqrt{2D}\mathbf{Z}\Delta t,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{Z}\)</span> is a random Gaussian.
+The probability that a diffusion hop leads to a jump larger than <span class="math notranslate nohighlight">\(N\)</span> cells can be evaluated and is <span class="math notranslate nohighlight">\(P = \textrm{erf}\left(\sqrt{2}N\right)\)</span>. It is useful to keep this probability in mind when deciding on the PVR.</p>
+</div>
+</div>
+<div class="section" id="remapping-particles">
+<h2>Remapping particles<a class="headerlink" href="#remapping-particles" title="Permalink to this headline"></a></h2>
+<p>Particle remapping has been implemented for the whole AMR hierarchy as a two step process.</p>
+<ol class="arabic simple">
+<li><p>Perform two-level remapping where particles are transferred up or down one grid level if they move out the level PVR.</p></li>
+<li><p>Gather all particles that are remnant in the outcast list on the coarsest level, and then distribute them back to their appropriate levels. For example, particles that hopped over more than one refinement boundary cannot be transferred with a (clean) two-level transfer.</p></li>
+</ol>
+</div>
+<div class="section" id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this headline"></a></h2>
+</div>
+<div class="section" id="example-application">
+<h2>Example application<a class="headerlink" href="#example-application" title="Permalink to this headline"></a></h2>
+<p>An example application of usage of the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> is found in <a class="reference internal" href="../Applications/BrownianWalkerModel.html#chap-brownianwalkermodel"><span class="std std-ref">Brownian walker</span></a>.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Sigma.html" class="btn btn-neutral float-left" title="Surface charge solver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Applications/ImplementedModels.html" class="btn btn-neutral float-right" title="Implemented models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, SINTEF Energy Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

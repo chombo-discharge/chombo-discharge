@@ -1,0 +1,4 @@
+<map id="Vessel" name="Vessel">
+<area shape="rect" id="node1" title="High&#45;voltage vessel geometry." alt="" coords="65,80,129,107"/>
+<area shape="rect" id="node2" href="$classComputationalGeometry.html" title="Abstract base class for geometries." alt="" coords="5,5,188,32"/>
+</map>

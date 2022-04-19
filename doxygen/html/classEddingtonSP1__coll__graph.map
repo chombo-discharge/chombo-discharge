@@ -1,0 +1,8 @@
+<map id="EddingtonSP1" name="EddingtonSP1">
+<area shape="rect" id="node1" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation." alt="" coords="649,185,760,212"/>
+<area shape="rect" id="node2" href="$classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="384,185,461,212"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="13,142,197,183"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="7,48,203,75"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="5,223,204,249"/>
+<area shape="rect" id="node6" href="$classEddingtonSP1DomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="333,309,512,336"/>
+</map>

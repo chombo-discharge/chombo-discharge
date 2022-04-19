@@ -1,0 +1,7 @@
+<map id="Source/ConvectionDiffusionReaction/CD_CdrGodunov.H" name="Source/ConvectionDiffusionReaction/CD_CdrGodunov.H">
+<area shape="rect" id="node1" title="Declaration of a class which implements CdrMultigrid using Godunov&#45;type advection." alt="" coords="243,5,446,47"/>
+<area shape="rect" id="node2" href="$CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="5,102,220,143"/>
+<area shape="rect" id="node3" href="$CD__CdrMuscl_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="244,102,445,143"/>
+<area shape="rect" id="node5" href="$CD__CdrPlasmaImExSdcStepper_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStepper.H." alt="" coords="469,95,708,151"/>
+<area shape="rect" id="node4" href="$CD__CdrMuscl_8cpp.html" title="Implementation of CD_CdrMuscl.H." alt="" coords="244,199,445,240"/>
+</map>

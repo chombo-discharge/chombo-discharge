@@ -1,0 +1,5 @@
+<map id="PhaseRealm" name="PhaseRealm">
+<area shape="rect" id="node1" title="Class that holds important things for doing AMR over a specific phase and processor distribution." alt="" coords="151,95,253,121"/>
+<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,5,201,32"/>
+<area shape="rect" id="node3" href="$classEBAMRParticleMesh.html" title="Class for handling particle&#45;mesh operations with AMR." alt="" coords="226,5,378,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="MFHelmholtzDirichletEBBC" name="MFHelmholtzDirichletEBBC">
+<area shape="rect" id="node1" title="Class for making Dirichlet boundary conditions on the EB in a multifluid context." alt="" coords="5,155,204,181"/>
+<area shape="rect" id="node2" href="$classMFHelmholtzEBBC.html" title="Class for making boundary conditions on the EB in a multifluid context." alt="" coords="33,80,177,107"/>
+<area shape="rect" id="node3" href="$classEBHelmholtzEBBC.html" title="Base class for passing EB boundary conditions into EBHelmholtzOp." alt="" coords="34,5,175,32"/>
+</map>

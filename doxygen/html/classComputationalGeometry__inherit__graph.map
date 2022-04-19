@@ -1,0 +1,16 @@
+<map id="ComputationalGeometry" name="ComputationalGeometry">
+<area shape="rect" id="node1" title="Abstract base class for geometries." alt="" coords="5,309,188,336"/>
+<area shape="rect" id="node2" href="$classAerosol.html" title="Simple class for making a bunch of (manually constructored) dielectric sphere." alt="" coords="269,5,340,32"/>
+<area shape="rect" id="node3" href="$classCoaxialCable.html" title="This is a class that defines a coaxial cable geometry." alt="" coords="251,56,359,83"/>
+<area shape="rect" id="node4" href="$classDoubleRod.html" title="This is a class that defines two dielectric rods." alt="" coords="258,107,351,133"/>
+<area shape="rect" id="node5" href="$classElectrodeArray.html" title="This is a class that defines an array of electrodes." alt="" coords="245,157,364,184"/>
+<area shape="rect" id="node6" href="$classMechanicalShaft.html" title="Mechanical shaft class." alt="" coords="240,208,369,235"/>
+<area shape="rect" id="node7" href="$classRegularGeometry.html" title="This class implements an empty geometry." alt="" coords="236,259,373,285"/>
+<area shape="rect" id="node8" href="$classRodDielectric.html" title="Class that defines an electrode rod and a dielectric (some shapes supported)" alt="" coords="250,309,359,336"/>
+<area shape="rect" id="node9" href="$classRodPlaneProfile.html" title="Geometry class which defines an electrode blade and a dielectric slab with various surface profiles." alt="" coords="243,360,367,387"/>
+<area shape="rect" id="node10" href="$classRoughRod.html" title="Class that describes a rod electrode with surface roughness." alt="" coords="261,411,349,437"/>
+<area shape="rect" id="node11" href="$classRoughSphere.html" title="This is a class that a rough sphere (either electrode or dielectric)" alt="" coords="251,461,359,488"/>
+<area shape="rect" id="node12" href="$classTesselation.html" title="A geometry consisting of a single polygon grid." alt="" coords="257,512,352,539"/>
+<area shape="rect" id="node13" href="$classVessel.html" title="High&#45;voltage vessel geometry." alt="" coords="273,563,337,589"/>
+<area shape="rect" id="node14" href="$classWireWire.html" title="This is a class that defines a wire&#45;wire geometry." alt="" coords="263,613,346,640"/>
+</map>

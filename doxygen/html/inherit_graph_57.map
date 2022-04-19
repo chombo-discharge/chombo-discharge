@@ -1,0 +1,8 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" title=" " alt="" coords="5,115,79,141"/>
+<area shape="rect" id="node2" href="$classItoParticle.html" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="184,5,271,32"/>
+<area shape="rect" id="node3" href="$classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer. @deatils This inherits from Chombo&#39;s Bi..." alt="" coords="194,56,261,83"/>
+<area shape="rect" id="node4" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovParticle.html" title="A particle class for use with Ito diffusion, i.e. drift&#45;diffusion brownian walkers." alt="" coords="127,107,328,149"/>
+<area shape="rect" id="node5" href="$classPointParticle.html" title="A particle class that only has a position and a mass." alt="" coords="176,173,279,200"/>
+<area shape="rect" id="node6" href="$classSimpleItoParticle.html" title="A particle class for reducing HDF5 I/O file sizes when using ItoSolver." alt="" coords="161,224,293,251"/>
+</map>

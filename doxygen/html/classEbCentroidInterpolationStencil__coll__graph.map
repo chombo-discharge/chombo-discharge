@@ -1,0 +1,4 @@
+<map id="EbCentroidInterpolationStencil" name="EbCentroidInterpolationStencil">
+<area shape="rect" id="node1" title="Class which can take cell&#45;centered data and interpolate it to embedded boundary centroids." alt="" coords="5,80,225,107"/>
+<area shape="rect" id="node2" href="$classIrregStencil.html" title="Class for holding stencils on irregular cells over a single AMR level." alt="" coords="67,5,163,32"/>
+</map>

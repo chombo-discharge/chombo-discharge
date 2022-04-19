@@ -1,0 +1,10 @@
+<map id="Physics/ItoPlasma/TimeSteppers/ItoPlasmaGodunovStepper/CD_ItoPlasmaGodunovParticle.H" name="Physics/ItoPlasma/TimeSteppers/ItoPlasmaGodunovStepper/CD_ItoPlasmaGodunovParticle.H">
+<area shape="rect" id="node1" title="Declaration of a particle class for ItoPlasmaGodunovStepper." alt="" coords="189,5,424,61"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,109,64,136"/>
+<area shape="rect" id="node3" title=" " alt="" coords="89,109,165,136"/>
+<area shape="rect" id="node4" title=" " alt="" coords="189,109,251,136"/>
+<area shape="rect" id="node5" title=" " alt="" coords="275,109,338,136"/>
+<area shape="rect" id="node6" title=" " alt="" coords="362,109,449,136"/>
+<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="473,109,658,136"/>
+<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="683,109,861,136"/>
+</map>

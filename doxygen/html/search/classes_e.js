@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['radiativetransferspecies_3105',['RadiativeTransferSpecies',['../classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies.html',1,'Physics::RadiativeTransfer']]],
+  ['radiativetransferstepper_3106',['RadiativeTransferStepper',['../classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html',1,'Physics::RadiativeTransfer']]],
+  ['random_3107',['Random',['../classRandom.html',1,'']]],
+  ['realbox_3108',['RealBox',['../classRealBox.html',1,'']]],
+  ['realm_3109',['Realm',['../classRealm.html',1,'']]],
+  ['regulargeometry_3110',['RegularGeometry',['../classRegularGeometry.html',1,'']]],
+  ['roddielectric_3111',['RodDielectric',['../classRodDielectric.html',1,'']]],
+  ['rodif_3112',['RodIF',['../classRodIF.html',1,'']]],
+  ['rodplaneprofile_3113',['RodPlaneProfile',['../classRodPlaneProfile.html',1,'']]],
+  ['roughrod_3114',['RoughRod',['../classRoughRod.html',1,'']]],
+  ['roughsphere_3115',['RoughSphere',['../classRoughSphere.html',1,'']]],
+  ['roundedboxif_3116',['RoundedBoxIF',['../classRoundedBoxIF.html',1,'']]],
+  ['roundedcylinderif_3117',['RoundedCylinderIF',['../classRoundedCylinderIF.html',1,'']]],
+  ['rtespeciesjson_3118',['RteSpeciesJSON',['../classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html',1,'Physics::CdrPlasma']]],
+  ['rtfactory_3119',['RtFactory',['../classRtFactory.html',1,'']]],
+  ['rtiterator_3120',['RtIterator',['../classRtIterator.html',1,'']]],
+  ['rtlayout_3121',['RtLayout',['../classRtLayout.html',1,'']]],
+  ['rtsolver_3122',['RtSolver',['../classRtSolver.html',1,'']]],
+  ['rtspecies_3123',['RtSpecies',['../classRtSpecies.html',1,'']]],
+  ['rtstorage_3124',['RtStorage',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage.html',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper::RtStorage'],['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1RtStorage.html',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper::RtStorage']]]
+];

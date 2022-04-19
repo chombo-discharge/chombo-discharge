@@ -1,0 +1,8 @@
+<map id="Physics/ItoPlasma/CD_ItoPlasmaReaction.H" name="Physics/ItoPlasma/CD_ItoPlasmaReaction.H">
+<area shape="rect" id="node1" title="Declaration of a class for holding reaction types in ito_plasma physics." alt="" coords="231,5,397,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,95,81,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="106,95,199,121"/>
+<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="195,169,380,196"/>
+<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="430,169,609,196"/>
+<area shape="rect" id="node6" href="$CD__ItoPlasmaReactionImplem_8H.html" title="Implementation of CD_ItoPlasmaReaction.H." alt="" coords="274,95,509,121"/>
+</map>

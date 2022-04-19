@@ -1,0 +1,4 @@
+<map id="Physics::CdrPlasma::CdrPlasmaMorrowZheleznyak" name="Physics::CdrPlasma::CdrPlasmaMorrowZheleznyak">
+<area shape="rect" id="node1" title="Class that implements the fluctuating Morrow&#45;Lowke discharge model for air." alt="" coords="5,95,231,136"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html" title="Abstract base class for specifying plasma kinetics. This is the base class used by CdrPlasmaStepper w..." alt="" coords="43,5,193,47"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="Physics::CdrPlasma::CdrPlasmaStepper" name="Physics::CdrPlasma::CdrPlasmaStepper">
+<area shape="rect" id="node1" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="159,39,309,80"/>
+<area shape="rect" id="node3" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="357,5,565,47"/>
+<area shape="rect" id="node4" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html" title="Class for evolving plasma equations using implicit&#45;explicit spectral deferred corrections." alt="" coords="358,71,565,112"/>
+<area shape="rect" id="node2" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,46,111,73"/>
+</map>

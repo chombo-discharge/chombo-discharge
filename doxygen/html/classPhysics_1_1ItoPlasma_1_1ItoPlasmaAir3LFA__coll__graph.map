@@ -1,0 +1,5 @@
+<map id="Physics::ItoPlasma::ItoPlasmaAir3LFA" name="Physics::ItoPlasma::ItoPlasmaAir3LFA">
+<area shape="rect" id="node1" title="Abstract clas for specifying plasma kinetics." alt="" coords="17,184,161,225"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysicsLFA.html" title="Middle layer for describing ItoPlasmaPhysics in the LFA." alt="" coords="5,95,172,136"/>
+<area shape="rect" id="node3" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html" title="Abstract clas for specifying plasma kinetics." alt="" coords="17,5,161,47"/>
+</map>
