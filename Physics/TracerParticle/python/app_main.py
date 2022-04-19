@@ -45,8 +45,7 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic tracer particle physics \n")
-    mainf.write("  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new " + args.cdrsolver + "());\n")
-    mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
+    mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new TracerParticleStepper<TracerParticle>();\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")

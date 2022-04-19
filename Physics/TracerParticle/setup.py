@@ -5,7 +5,6 @@ import sys
 sys.path.append('./python')
 import app_main
 import app_options
-import app_inc
 
 # Get arguments from input script
 parser = argparse.ArgumentParser();

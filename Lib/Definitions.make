@@ -6,7 +6,7 @@ SOURCE_LIB     = Source
 GEOMETRIES_LIB = Geometries
 
 # Physics libraries
-ADVDIFF_LIB        = PhysicsAdvectionDiffusionPhysics
+ADVDIFF_LIB        = AdvectionDiffusionPhysics
 BROWNIAN_LIB       = BrownianWalkerPhysics
 CDRPLASMA_LIB      = CdrPlasmaPhysics
 ELECTROSTATICS_LIB = ElectrostaticPhysics
