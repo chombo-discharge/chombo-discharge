@@ -317,10 +317,10 @@ void TracerParticleStepper<P>::initialParticles() {
     pout() << "TracerParticleStepper::initialParticles()" << endl;
   }
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel; lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const EBISlayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const ProblemDomain&     domain = m_amr->getDomain()[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const ProblemDomain&     domain = m_amr->getDomains()[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       const Box      cellBox = dbl  [dit()];
