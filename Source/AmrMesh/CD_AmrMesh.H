@@ -1148,6 +1148,12 @@ public:
   const AMRMask& getMask(const std::string a_mask, const int a_buffer, const std::string a_realm) const;
 
   /*!
+    @brief Get a map of all valid cells on a specified realm
+    @param[in] a_realm Realm name
+  */
+  const AMRMask& getValidCells(const std::string a_realm) const;
+
+  /*!
     @brief Get the EBLevelGrid for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)

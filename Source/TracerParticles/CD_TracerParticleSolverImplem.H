@@ -95,21 +95,18 @@ void TracerParticleSolver<P>::parseDeposition() {
   // Deposition for particle-mesh operations
   pp.get("deposition", str);
   if(str == "ngp") {
-    m_pvrBuffer  = 0;
     m_haloBuffer = 0;
     
     m_deposition           = DepositionType::NGP;
-    m_coarseFineDeposition = CoarseFineDeposition::Halo;    
+    m_coarseFineDeposition = CoarseFineDeposition::PVR;    
   }
   else if(str == "cic") {
-    m_pvrBuffer  = 0;
     m_haloBuffer = 1;
     
     m_deposition           = DepositionType::CIC;
     m_coarseFineDeposition = CoarseFineDeposition::Halo;
   }
   else if(str == "tsc") {
-    m_pvrBuffer  = 0;
     m_haloBuffer = 2;
     
     m_deposition           = DepositionType::TSC;
@@ -160,12 +157,14 @@ void TracerParticleSolver<P>::registerOperators() const {
   }
   else{
     m_amr->registerOperator(s_particle_mesh,  m_realm, m_phase);
+    m_amr->registerOperator(s_eb_coar_ave,    m_realm, m_phase);    
 
     // Register mask if using halo deposition
     if(m_haloBuffer > 0) {
       CH_assert(m_pvrBuffer == 0);
       
-      m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
+      m_amr->registerMask(s_particle_halo, 1, m_realm); // For CIC
+      m_amr->registerMask(s_particle_halo, 2, m_realm); // For TSC
     }
   }
 }
@@ -303,8 +302,10 @@ void TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const {
     pout() << m_name + "::deposit(EBAMRCellData)" << endl;
   }
 
-  //  DataOps::setValue(a_phi, 0.0);
-  //  this->depositParticles<P, &P::mass>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
+   DataOps::setValue(a_phi, 0.0);
+   this->depositParticles<P, &P::mass>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
+
+   DataOps::volumeScale(a_phi, m_amr->getDx());
 }
 
 template <typename P>
@@ -510,14 +511,41 @@ const EBAMRCellData& TracerParticleSolver<P>::getVelocityField() const {
 template <typename P>
 template <typename T,  const Real&(T::*particleScalarFunction)() const>
 void TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
-					       const ParticleContainer<P> a_particles,
+					       const ParticleContainer<T> a_particles,
 					       const DepositionType       a_baseDeposition,
 					       const CoarseFineDeposition a_coarseFineDeposition) const {
   CH_TIME("TracerParticleSolver::depositParticles()");
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles()" << endl;
   }
-  
+
+
+  CH_assert(m_halobuffer == 0 || m_pvrBuffer == 0);
+  CH_assert(a_phi[0]->nComp() == 1);
+
+  switch(a_coarseFineDeposition) {
+  case CoarseFineDeposition::PVR:
+    {
+      m_amr->depositParticles<T, particleScalarFunction> (a_phi, m_realm, m_phase, a_particles, a_baseDeposition, CoarseFineDeposition::PVR, false);
+      
+      break;
+    }
+  case CoarseFineDeposition::Halo:
+    {
+      const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+      a_particles.copyMaskParticles(mask);
+      
+      m_amr->depositParticles<T, particleScalarFunction> (a_phi, m_realm, m_phase, a_particles, a_baseDeposition, CoarseFineDeposition::Halo, false);
+
+      a_particles.clearMaskParticles();
+      
+      break;
+    }    
+  default:
+    {
+      MayDay::Error("TracerParticleSolver::depositParticles -- logic bust due to unsupported coarse-fine deposition");
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>

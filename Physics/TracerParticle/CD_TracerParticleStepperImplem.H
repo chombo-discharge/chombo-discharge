@@ -376,16 +376,65 @@ void TracerParticleStepper<P>::initialParticles() {
     pout() << "TracerParticleStepper::initialParticles()" << endl;
   }
 
+  ParticleContainer<P>& amrParticles = m_solver->getParticles();
+
+  const RealVect probLo = m_amr->getProbLo();
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+    const Real               dx     = m_amr->getDx()[lvl];
+
+    // Mask of valid cells
+    const LevelData<BaseFab<bool> >& validCells = *(m_amr->getValidCells(m_realm)[lvl]);
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box      cellBox = dbl  [dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+      const Box            cellBox    = dbl  [dit()];
+      const EBISBox&       ebisbox    = ebisl[dit()];
+      const BaseFab<bool>& validCells = (*(m_amr->getValidCells(m_realm)[lvl]))[dit()];
+
+      List<P>& particles = amrParticles[lvl][dit()].listItems();
+      particles.clear();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+	if(validCells(iv) && ebisbox.isRegular(iv) ){
+
+	  // Add particle to list of particles.
+	  P p;
+	  
+	  p.position() = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
+	  p.mass()     = 1.0;
+
+	  particles.add(p);
+	}
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+	const IntVect iv = vof.gridIndex();
+	if(validCells(iv) && ebisbox.isIrregular(iv)){
+	  const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+
+	  // Add particle to list of particles.
+	  P p;
+
+	  p.position() = pos;
+	  p.mass()     = 1.0;
+
+	  particles.add(p);
+	}
+      };
+
+      // Kernel region for cut-cells
+      VoFIterator& vofit = (*(m_amr->getVofIterator(m_realm, m_phase))[lvl])[dit()];
+
+      BoxLoops::loop(cellBox,  regularKernel);
+      BoxLoops::loop(vofit,  irregularKernel);      
     }
   }
+
+  // Solver should remap because it may have a PVR requirement on the particle distribution.
+  m_solver->remap();
 }
 
 template <typename P>
