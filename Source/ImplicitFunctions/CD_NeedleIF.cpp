@@ -14,7 +14,7 @@
 #include <CD_NeedleIF.H>
 #include <CD_CylinderSdf.H>
 #include <CD_NamespaceHeader.H>
-//#include <CD_EBGeometryIF.H>
+#include <CD_EBGeometryIF.H>
 
 NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, const Real& a_angle){
 

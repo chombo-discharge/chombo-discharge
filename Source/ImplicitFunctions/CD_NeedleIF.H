@@ -10,8 +10,8 @@
   @author Fanny Skirbekk
 */
 
-#ifndef CD_NeedleIF.H
-#define CD_NeedleIF.H
+#ifndef CD_NeedleIF_H
+#define CD_NeedleIF_H
 
 // Chombo includes
 #include <BaseIF.H>
