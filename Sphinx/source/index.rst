@@ -11,11 +11,11 @@ Welcome to ``chombo-discharge``'s user documentation
 ****************************************************
 	      
 ``chombo-discharge`` is a modular and scalable research code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries.
-The code is hosted at `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_ together with the source files for this documentation. 
+The code is hosted at `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_ together with the source files for this documentation.
 
 ``chombo-discharge`` supports
 
-* Written in C++.
+* Fully written in C++.
 * Support for complex geometries.
 * Scalar advection-diffusion-reaction processes.
 * Electrostatics with support for electrodes and dielectrics.
