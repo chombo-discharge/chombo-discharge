@@ -257,6 +257,8 @@ void TracerParticleStepper<P>::computeDt(Real& a_dt, TimeCode& a_timeCode) {
   if(m_verbosity > 5){
     pout() << "TracerParticleStepper::computeDt()" << endl;
   }
+
+  MayDay::Error("TracerParticleStepper::computeDt -- not implemented");
 }
 
 template <typename P>
