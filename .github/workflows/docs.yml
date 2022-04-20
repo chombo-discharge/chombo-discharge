@@ -37,7 +37,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           access_token: ${{ secrets.DEPLOY_DOCS }}
-          repository_name: chombo-discharge/chombo-discharge
           branch: gh-pages
           folder: docs
           clean: false
