@@ -299,7 +299,7 @@ protected:
   /*!
     @brief PVR buffer. Defaults to one.
   */
-  int m_haloBuffer;  
+  int m_haloBuffer;
 
   /*!
     @brief Hook for adding mass to plot file. 
@@ -309,7 +309,12 @@ protected:
   /*!
     @brief Hook for adding velocity field to plot file
   */
-  bool m_plotVelocity;  
+  bool m_plotVelocity;
+
+  /*!
+    @brief Do volumetric scaling or not. 
+  */
+  bool m_volumeScale;
 
   /*!
     @brief Mesh-based velocity field
@@ -334,7 +339,7 @@ protected:
   /*!
     @brief Parse solver verbosity.
   */
-  void parseVerbosity();  
+  void parseVerbosity();
 
   /*!
     @brief Generic particle deposition method for putting a scalar field onto the mesh.

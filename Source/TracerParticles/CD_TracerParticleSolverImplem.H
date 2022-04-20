@@ -34,7 +34,8 @@ TracerParticleSolver<P>::TracerParticleSolver() {
   m_pvrBuffer         = 0;
   m_haloBuffer        = 1;
   m_plotVelocity      = true;
-  m_plotMass          = true;  
+  m_plotMass          = true;
+  m_volumeScale       = false;
   m_deposition        = DepositionType::CIC;
 }
 
@@ -114,7 +115,9 @@ void TracerParticleSolver<P>::parseDeposition() {
   }
   else{
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown deposition method requested.");
-  }  
+  }
+
+  pp.get("volume_scale", m_volumeScale);
 }
 
 template <typename P>
@@ -127,8 +130,8 @@ void TracerParticleSolver<P>::parsePlotVariables() {
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("plot_mass",     m_plotMass    );
-  pp.get("plot_velocity", m_plotVelocity);  
+  pp.get("plot_mass",       m_plotMass      );
+  pp.get("plot_velocity",   m_plotVelocity  );
 }
 
 template <typename P>
@@ -305,7 +308,9 @@ void TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const {
    DataOps::setValue(a_phi, 0.0);
    this->depositParticles<P, &P::mass>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
 
-   DataOps::volumeScale(a_phi, m_amr->getDx());
+   if(m_volumeScale){
+     DataOps::volumeScale(a_phi, m_amr->getDx());
+   }
 }
 
 template <typename P>
@@ -329,7 +334,7 @@ int TracerParticleSolver<P>::getNumberOfPlotVariables() const {
 
   int numPlotVars = 0;
 
-  if(m_plotMass    ) numPlotVars += 1;  
+  if(m_plotMass    ) numPlotVars += 1;
   if(m_plotVelocity) numPlotVars += SpaceDim;
 
   return numPlotVars;

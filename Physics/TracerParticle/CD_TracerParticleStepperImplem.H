@@ -16,6 +16,8 @@
 #include <CH_Timer.H>
 
 // Our includes
+#include <CD_ParticleOps.H>
+#include <CD_Random.H>
 #include <CD_TracerParticleStepper.H>
 #include <CD_NamespaceHeader.H>
 
@@ -114,6 +116,7 @@ void TracerParticleStepper<P>::parseOptions() {
 
   this->parseIntegrator();
   this->parseVelocityField();
+  this->parseInitialConditions();
 }
 
 template <typename P>
@@ -180,6 +183,22 @@ void TracerParticleStepper<P>::parseVelocityField() {
   else{
     MayDay::Error("TracerParticleStepper::parseVelocityField -- logic bust");
   }
+}
+
+template <typename P>
+inline
+void TracerParticleStepper<P>::parseInitialConditions() {
+  CH_TIME("TracerParticleStepper::parseInitialConditions()");
+  if(m_verbosity > 5){
+    pout() << "TracerParticleStepper::parseInitialConditions()" << endl;
+  }
+
+  ParmParse pp("TracerParticleStepper");
+
+  Real numParticles;
+  pp.get("initial_particles", numParticles);
+
+  m_numInitialParticles = size_t(std::max(0.0, numParticles));
 }
 
 #ifdef CH_USE_HDF5
@@ -376,65 +395,47 @@ void TracerParticleStepper<P>::initialParticles() {
     pout() << "TracerParticleStepper::initialParticles()" << endl;
   }
 
-  ParticleContainer<P>& amrParticles = m_solver->getParticles();
+  // TLDR: This code draws distributed particles. Thanks to our nifty ParticleOps and Random static classes this is just
+  //       a matter of defining a distribution function. We define this as a lambda that draws particles uniformly distributed
+  //       inside a box.
+  //
+  //       After creating the distribution we draw the particles (MPI rank distribution being taken care of under the hood) and
+  //       set their mass to one. Finally, we add these particles to the ParticleContainer and remove the particles that lie inside
+  //       the EB. 
 
+  // Create a random distribution which draw particles uniformly distributed in the domain. 
   const RealVect probLo = m_amr->getProbLo();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const ProblemDomain&     domain = m_amr->getDomains()[lvl];
-    const Real               dx     = m_amr->getDx()[lvl];
-
-    // Mask of valid cells
-    const LevelData<BaseFab<bool> >& validCells = *(m_amr->getValidCells(m_realm)[lvl]);
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box            cellBox    = dbl  [dit()];
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = (*(m_amr->getValidCells(m_realm)[lvl]))[dit()];
-
-      List<P>& particles = amrParticles[lvl][dit()].listItems();
-      particles.clear();
-
-      auto regularKernel = [&](const IntVect& iv) -> void {
-	if(validCells(iv) && ebisbox.isRegular(iv) ){
-
-	  // Add particle to list of particles.
-	  P p;
-	  
-	  p.position() = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
-	  p.mass()     = 1.0;
-
-	  particles.add(p);
-	}
-      };
-
-      auto irregularKernel = [&](const VolIndex& vof) -> void {
-	const IntVect iv = vof.gridIndex();
-	if(validCells(iv) && ebisbox.isIrregular(iv)){
-	  const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-
-	  // Add particle to list of particles.
-	  P p;
-
-	  p.position() = pos;
-	  p.mass()     = 1.0;
-
-	  particles.add(p);
-	}
-      };
-
-      // Kernel region for cut-cells
-      VoFIterator& vofit = (*(m_amr->getVofIterator(m_realm, m_phase))[lvl])[dit()];
-
-      BoxLoops::loop(cellBox,  regularKernel);
-      BoxLoops::loop(vofit,  irregularKernel);      
+  const RealVect probHi = m_amr->getProbHi();
+  
+  auto uniformDistribution = [probLo, probHi]() -> RealVect {
+    RealVect ret = probLo;
+    
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      ret[dir] += (probHi-probLo)[dir] * Random::getUniformReal01();
     }
+
+    return ret;
+  };
+
+  // Draw particles using the distribution above. Set their mass to one. 
+  List<P> initialParticles;
+
+  ParticleOps::drawRandomParticles(initialParticles, m_numInitialParticles, uniformDistribution);
+  for (ListIterator<P> lit(initialParticles); lit.ok(); ++lit){
+    lit().mass() = 1.0;
   }
 
-  // Solver should remap because it may have a PVR requirement on the particle distribution.
-  m_solver->remap();
+  // Put the particles in the solver particle data holder. 
+  ParticleContainer<P>& solverParticles = m_solver->getParticles();
+  solverParticles.clearParticles();
+  solverParticles.addParticlesDestructive(initialParticles);
+
+  // Solver should remap because it may have a PVR requirement on the particle distribution. This is
+  // not visible to the TimeStepper. 
+  m_solver->remap();  
+
+  // Remove particles inside the EB. 
+  m_amr->removeCoveredParticlesIF(solverParticles, m_phase);
 }
 
 template <typename P>

@@ -239,7 +239,7 @@ namespace Physics {
       /*!
 	@brief Number of particles
       */
-      int m_numInitialParticles;
+      size_t m_numInitialParticles;
 
       /*!
 	@brief Fill initial particles
@@ -247,19 +247,24 @@ namespace Physics {
       virtual void initialParticles();
 
       /*!
-	@brief Set the velocity on the mesh
+	@brief Set the velocity on the mesh.
       */
       virtual void setVelocity();
 
       /*!
-	@brief Parse reactive integrator
+	@brief Parse reactive integrator.
       */
       virtual void parseIntegrator();
 
       /*!
-	@brief Parse velocity field
+	@brief Parse velocity field.
       */
       virtual void parseVelocityField();
+
+      /*!
+	@brief Parse initial conditions. 
+      */
+      virtual void parseInitialConditions();      
 
       /*!
 	@brief Advance particles using explicit Euler rule
