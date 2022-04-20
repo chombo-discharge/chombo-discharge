@@ -32,10 +32,11 @@ jobs:
           make github
           
       - name: Deploy
-#        if: github.event_name == 'push' && github.repository == 'chombo-discharge/chombo-discharge' && github.ref == 'refs/heads/main'        
+        if: github.event_name == 'push' && github.repository == 'chombo-discharge/chombo-discharge' && github.ref == 'refs/heads/main'        
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          access_token: ${{ secrets.DEPLOY_DOCS }}          
           branch: gh-pages
           folder: docs
           clean: false
