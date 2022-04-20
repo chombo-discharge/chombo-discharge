@@ -34,7 +34,7 @@ public:
     @param[in] a_tipRadius     Radius of needle tip curvature           
     @param[in] a_angle         Needle tip (cone) opening angle
   */
-  NeedleIFconst RealVect& a_centerTipSide, const Realvect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, const Real& a_angle);
+  NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, const Real& a_angle);
 
   /*!
     @brief Copy constructor
@@ -51,7 +51,7 @@ public:
   /*!
     @brief IF factory method
   */
-  virtual BaseIF* newImpicitFunction() const override;
+  virtual BaseIF* newImplicitFunction() const override;
 
 protected:
   RefCountedPtr<BaseIF> m_baseif;

@@ -14,12 +14,12 @@
 #include <CD_NeedleIF.H>
 #include <CD_CylinderSdf.H>
 #include <CD_NamespaceHeader.H>
-#include <CD_EBGeometryIF.H>
+//#include <CD_EBGeometryIF.H>
 
-NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const Realvect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, const Real& a_angle){
+NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, const Real& a_angle){
 
   constexpr Real pi = 3.14159265358979323846;
-  const Real tipLength = a_radius/std::tan(angle*pi/180);
+  const Real tipLength = a_radius/std::tan(a_angle*pi/180);
 
   const RealVect axis    = (a_centerTipSide - a_centerBack);
   const RealVect axisVec = axis/axis.vectorLength(); 
@@ -30,14 +30,14 @@ NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const Realvect& a_centerBack
   // Build the needle-parts
   Vector<BaseIF*> isects;
   isects.push_back(static_cast<BaseIF*> (new CylinderSdf(c, a_centerBack, a_radius, a_fluidInside)));
-  auto cone = make_shared<ConeSDF>(a_centerTipSide, tipLength, a_angle, false);
-  isects.push_back(static_cast<BaseIF*> (new EBGeometryIF(cone, false));
+  //auto cone = std::make_shared<ConeSDF>(a_centerTipSide, tipLength, a_angle, false);
+  //isects.push_back(static_cast<BaseIF*> (new EBGeometryIF(cone, false));
 
   // Build the needle
   m_baseif = RefCountedPtr<BaseIF>(new IntersectionIF(isects));
 
   // Delete everything we have allocated so far
-  for(int i = 0; i < isects.size(); ++i{
+  for(int i = 0; i < isects.size(); ++i){
     delete isects[i];
   }
 }

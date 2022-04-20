@@ -12,10 +12,13 @@
 
 // Chombo includes
 #include <ParmParse.H>
+#include <SmoothUnion.H>
 
 // Our includes
 #include <CD_RodNeedlePlane.H>
 #include <CD_RodIF.H>
+#include <CD_NeedleIF.H>
+#include <CD_RoundedCylinderIF.H>
 #include <CD_NamespaceHeader.H>
 
 RodNeedlePlane::RodNeedlePlane(){
@@ -105,7 +108,7 @@ void RodNeedlePlane::defineRod(){
 
   RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF> (new RodIF(e1, e2, radius, false));
 
-  m_electrodes.push_back(Electrode(bif, live);
+  m_electrodes.push_back(Electrode(bif, live));
 }
 
 void RodNeedlePlane::defineNeedle(){
@@ -128,7 +131,7 @@ void RodNeedlePlane::defineNeedle(){
 
   RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF> (new NeedleIF(e1, e2, radius, false, tipRadius, angle));
 
-  m_electrodes.push_back(Electrode(bif, live);
+  m_electrodes.push_back(Electrode(bif, live));
 }
 
 void RodNeedlePlane::definePlane(){
@@ -150,7 +153,7 @@ void RodNeedlePlane::definePlane(){
 
   RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF> (new RoundedCylinderIF(point, point - thickness*normal, radius, curve, false));
 
-  m_electrodes.push_back(Electrode(bif, live);
+  m_electrodes.push_back(Electrode(bif, live));
 }
 
 #include <CD_NamespaceFooter.H>
