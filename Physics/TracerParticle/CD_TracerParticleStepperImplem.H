@@ -112,7 +112,8 @@ void TracerParticleStepper<P>::parseOptions() {
     pout() << "TracerParticleStepper::parseOptions()" << endl;
   }
 
-  this->parseIntegrator();  
+  this->parseIntegrator();
+  this->parseVelocityField();
 }
 
 template <typename P>
@@ -155,6 +156,30 @@ void TracerParticleStepper<P>::parseIntegrator() {
   else{
     MayDay::Error("TracerParticleStepper::parseRuntimeOptions -- logic bust");
   }  
+}
+
+template <typename P>
+inline
+void TracerParticleStepper<P>::parseVelocityField() {
+  CH_TIME("TracerParticleStepper::parseVelocityField()");
+  if(m_verbosity > 5){
+    pout() << "TracerParticleStepper::parseVelocityField()" << endl;
+  }
+
+  ParmParse pp("TracerParticleStepper");
+
+  int v;
+  pp.get("velocity_field", v);
+
+  if(v == 0){
+    m_velocityField = VelocityField::Diagonal;
+  }
+  else if(v == 1){
+    m_velocityField = VelocityField::Rotational;
+  }
+  else{
+    MayDay::Error("TracerParticleStepper::parseVelocityField -- logic bust");
+  }
 }
 
 #ifdef CH_USE_HDF5
@@ -313,12 +338,31 @@ void TracerParticleStepper<P>::setVelocity() {
     pout() << "TracerParticleStepper::setVelocity()" << endl;
   }
 
-  // Various velocity field definitions that we can use. 
-  auto diagonalVelocity = [](const RealVect& a_position) -> RealVect {
-    return RealVect::Unit;
-  };
+  std::function<RealVect(const RealVect a_position)> velFunc;
 
-  DataOps::setValue(m_velocity, diagonalVelocity, m_amr->getProbLo(), m_amr->getDx());
+  switch(m_velocityField) {
+  case VelocityField::Diagonal:
+    {
+      velFunc = [](const RealVect& a_position) -> RealVect {
+	return RealVect::Unit;
+      };
+      
+      break;
+    }
+  case VelocityField::Rotational:
+    {
+      velFunc = [](const RealVect pos) -> RealVect {
+	const Real r     = pos.vectorLength();
+	const Real theta = atan2(pos[1], pos[0]);
+
+	return RealVect(D_DECL(-r*sin(theta), r*cos(theta), 0.));
+      };
+
+      break;
+    }
+  }
+
+  DataOps::setValue(m_velocity, velFunc, m_amr->getProbLo(), m_amr->getDx());  
 
   m_amr->averageDown(m_velocity, m_realm, m_phase);
   m_amr->interpGhost(m_velocity, m_realm, m_phase);  

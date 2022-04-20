@@ -29,6 +29,14 @@ namespace Physics {
       Euler,
       RK2,
       RK4
+    };
+
+    /*!
+      @brief Enum for handling various velocity fields
+    */
+    enum class VelocityField {
+      Diagonal,
+      Rotational
     };    
 
     /*!
@@ -189,6 +197,11 @@ namespace Physics {
       IntegrationAlgorithm m_algorithm;
 
       /*!
+	@brief Velocity field type
+      */
+      VelocityField m_velocityField;
+
+      /*!
 	@brief Realm where solver and m_velocity lives
       */
       std::string m_realm;
@@ -242,6 +255,11 @@ namespace Physics {
 	@brief Parse reactive integrator
       */
       virtual void parseIntegrator();
+
+      /*!
+	@brief Parse velocity field
+      */
+      virtual void parseVelocityField();
 
       /*!
 	@brief Advance particles using explicit Euler rule
