@@ -34,7 +34,6 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          access_token: ${{ secrets.DEPLOY_DOCS }}
           branch: gh-pages
-          folder: docs
+          folder: ${{runner.workspace}}/docs
           clean: false
