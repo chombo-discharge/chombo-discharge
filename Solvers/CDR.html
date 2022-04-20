@@ -214,10 +214,12 @@ For example, <code class="docutils literal notranslate"><span class="pre">CdrTGA
 It also add multigrid code for performing implicit diffusion.
 Below that, the classes <code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code> and <code class="docutils literal notranslate"><span class="pre">CdrMuscl</span></code> inherit everything from <code class="docutils literal notranslate"><span class="pre">CdrTGA</span></code> and also adds in the advective discretization.
 Thus, adding new advection code is done by inheriting from <code class="docutils literal notranslate"><span class="pre">CdrTGA</span></code> and implementing new advection schemes.</p>
-digraph {
+<div align="center" class="align-center"><div class="graphviz"><img src="../_images/graphviz-8c761ae70a0e6f2a35322d0ab46d37a9cffa6cff.png" alt="digraph {
    rankdir=&quot;LR&quot;;
    &quot;CdrSolver&quot; -&gt; &quot;CdrTGA&quot; -&gt; {&quot;CdrGodunov&quot;, &quot;CdrMuscl&quot;};
-}<p>Currently, we mostly use the <code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code> class which contains a second order accurate discretization with slope limiters, and the advection code for this is distributed by the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> team.
+}" class="graphviz" /></div>
+</div>
+<p>Currently, we mostly use the <code class="docutils literal notranslate"><span class="pre">CdrGodunov</span></code> class which contains a second order accurate discretization with slope limiters, and the advection code for this is distributed by the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> team.
 The alternative implementation in <code class="file docutils literal notranslate"><span class="pre">/src/CdrMuscl.H(cpp)</span></code> contains a MUSCL implementation with van Leer slope limiting (i.e. much the same as the Chombo code), but it does not include extrapolation in time.</p>
 <div class="section" id="cdrtga">
 <h4>CdrTGA<a class="headerlink" href="#cdrtga" title="Permalink to this headline"></a></h4>
