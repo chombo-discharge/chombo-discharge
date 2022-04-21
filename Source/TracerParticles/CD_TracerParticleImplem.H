@@ -22,7 +22,7 @@ TracerParticle::TracerParticle() {
   m_position = RealVect::Zero;  
   m_mass     = 0.0;
   m_velocity = RealVect::Zero;
-  m_process  = false;
+  m_state    = 0.0;
 }
 
 inline  
@@ -30,7 +30,7 @@ TracerParticle::TracerParticle(const TracerParticle& a_other) {
   this->m_position = a_other.m_position;
   this->m_mass     = a_other.m_mass;
   this->m_velocity = a_other.m_velocity;
-  this->m_process  = a_other.m_process;      
+  this->m_state    = a_other.m_state;      
 }
 
 inline
@@ -39,23 +39,13 @@ TracerParticle::~TracerParticle() {
 }
 
 inline
-void TracerParticle::processParticle() {
-  m_process = true;
+Real& TracerParticle::state() {
+  return m_state;
 }
 
 inline
-void TracerParticle::unprocessParticle() {
-  m_process = false;
-}
-
-inline
-bool& TracerParticle::process() {
-  return m_process;
-}
-
-inline
-const bool& TracerParticle::process() const {
-  return m_process;
+const Real& TracerParticle::state() const {
+  return m_state;
 }
 
 inline
@@ -83,7 +73,7 @@ bool TracerParticle::operator==(const TracerParticle& a_p) const{
   return ( this->m_position == a_p.m_position &&
 	   this->m_mass     == a_p.m_mass     &&
 	   this->m_velocity == a_p.m_velocity &&	   
-	   this->m_process  == a_p.m_process);
+	   this->m_state    == a_p.m_state);
 }
 
 inline
@@ -93,7 +83,7 @@ bool TracerParticle::operator!=(const TracerParticle& a_p) const{
 
 inline
 int TracerParticle::size() const{
-  return BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_process);
+  return BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_state);
 }
 
 inline
@@ -117,9 +107,8 @@ void TracerParticle::linearOut(void* buf) const{
   *buffer++ = m_velocity[2];
 #endif
 
-  // Linearize the processing flag onto the buffer. 
-  bool* buf2 = (bool*) buf;
-  *buf2++ = m_process;
+  // Linearize the state flag onto the buffer. 
+  *buffer++ = m_state;
 }
 
 inline
@@ -143,8 +132,7 @@ void TracerParticle::linearIn(void* buf) {
 #endif
 
   // Linearize the processing flag onto the buffer. 
-  bool* buf2 = (bool*) buf;
-  m_process = *buf2++;
+  m_state = *buffer++;
 }
 
 inline
@@ -155,7 +143,7 @@ std::ostream & operator<<(std::ostream& ostr, const TracerParticle& p) {
   ostr << "\tPosition  = " << p.position() << "\n";
   ostr << "\tMass      = " << p.mass() << "\n";
   ostr << "\tVelocity  = " << p.velocity() << "\n";
-  ostr << "\tProcess   = " << p.process() << "\n";      
+  ostr << "\tState     = " << p.state() << "\n";      
   
   return ostr;
 }

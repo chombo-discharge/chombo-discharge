@@ -82,6 +82,7 @@ void TracerParticleStepper<P>::initialData() {
   this->initialParticles();
 
   m_solver->setVelocity(m_velocity);
+  m_solver->interpolateVelocities();
 }
 
 template <typename P>
@@ -258,7 +259,8 @@ void TracerParticleStepper<P>::computeDt(Real& a_dt, TimeCode& a_timeCode) {
     pout() << "TracerParticleStepper::computeDt()" << endl;
   }
 
-  MayDay::Error("TracerParticleStepper::computeDt -- not implemented");
+  a_timeCode = TimeCode::Advection;
+  a_dt       = m_cfl * m_solver->computeDt();
 }
 
 template <typename P>
@@ -457,7 +459,26 @@ void TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt) {
     pout() << "TracerParticleStepper::advanceParticlesEuler()" << endl;
   }
 
-  MayDay::Error("TracerParticleStepper::advanceParticlesEuler -- not implemented");    
+  ParticleContainer<P>& amrParticles = m_solver->getParticles();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      List<P>& particles = amrParticles[lvl][dit].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+	P& p = lit();
+
+	p.position() += p.velocity() * a_dt;
+      }
+    }
+  }
+
+  amrParticles.remap();
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+
+  m_solver->interpolateVelocities();
 }
 
 template <typename P>

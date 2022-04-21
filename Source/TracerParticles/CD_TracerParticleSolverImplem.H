@@ -18,6 +18,7 @@
 // Our includes
 #include <CD_TracerParticleSolver.H>
 #include <CD_DischargeIO.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename P>
@@ -460,8 +461,8 @@ void TracerParticleSolver<P>::writeCheckpointLevel(HDF5Handle& a_handle, const i
   if(m_verbosity > 5){
     pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
-
-  const std::string str = m_name + "_TracerParticleSolver_particles";
+  
+  const std::string str = m_name + "_particles";
   writeParticlesToHDF(a_handle, m_particles[a_level], str);
 }
 #endif
@@ -475,10 +476,42 @@ void TracerParticleSolver<P>::readCheckpointLevel(HDF5Handle& a_handle, const in
     pout() << m_name + "::readCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  const std::string str = m_name + "_TracerParticleSolver_particles";
+  const std::string str = m_name + "_particles";
   readParticlesFromHDF(a_handle, m_particles[a_level], str);  
 }
 #endif
+
+template <typename P>
+Real TracerParticleSolver<P>::computeDt() const {
+  CH_TIME("TracerParticleSolver::computeDt()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::computeDt()" << endl;
+  }
+
+  Real dt = std::numeric_limits<Real>::infinity();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const Real               dx  = m_amr->getDx()          [lvl];
+    
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const List<P>& particles = m_particles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+	const RealVect& v = lit().velocity();
+
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  dt = std::min(dt, dx/std::abs(v[dir]));
+	}
+      }
+    }
+  }
+
+  // Get the minimum of dt over all MPI ranks. 
+  ParallelOps::min(dt);
+
+  return dt;
+}
 
 template <typename P>
 inline

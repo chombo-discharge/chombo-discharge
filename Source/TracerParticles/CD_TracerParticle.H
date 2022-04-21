@@ -50,30 +50,18 @@ public:
   virtual ~TracerParticle();
 
   /*!
-    @brief Set m_process to true. 
+    @brief Check if particle should be processed or not
+    @return m_state
   */
   inline
-  void processParticle();
-
-  /*!
-    @brief Set m_process to false. 
-  */
-  inline
-  void unprocessParticle();
+  Real& state();      
 
   /*!
     @brief Check if particle should be processed or not
-    @return m_process
+    @return m_state
   */
   inline
-  bool& process();      
-
-  /*!
-    @brief Check if particle should be processed or not
-    @return m_process
-  */
-  inline
-  const bool& process() const;
+  const Real& state() const;
 
   /*!
     @brief Get the particle "mass"
@@ -155,7 +143,7 @@ protected:
   /*!
     @brief Process particle or not
   */
-  bool m_process;
+  Real m_state;
 };
 
 /*!

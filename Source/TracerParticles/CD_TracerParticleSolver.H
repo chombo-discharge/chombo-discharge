@@ -163,7 +163,7 @@ public:
   /*!
     @brief Parse run-time options
   */
-  virtual void parseRuntimeOptions();  
+  virtual void parseRuntimeOptions();
 
   /*!
     @brief Get the number of plot variables
@@ -210,6 +210,11 @@ public:
 #ifdef CH_USE_HDF5  
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 #endif
+
+  /*!
+    @brief Compute dt = dx/max(v_x,v_y, v_z)
+  */
+  virtual Real computeDt() const;
 
   /*!
     @brief Get particles
