@@ -459,6 +459,8 @@ void TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt) {
     pout() << "TracerParticleStepper::advanceParticlesEuler()" << endl;
   }
 
+  // TLDR: The new position is just x^(k+1) = x^k + dt*v^k
+
   ParticleContainer<P>& amrParticles = m_solver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -489,7 +491,53 @@ void TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt) {
     pout() << "TracerParticleStepper::advanceParticlesRK2()" << endl;
   }
 
-  MayDay::Error("TracerParticleStepper::advanceParticlesRK2 -- not implemented");
+  // TLDR: The new positions are x^(k+1) = x^k + 0.5*dt*[ v(x^k) + v(x^*) ] where x^* = x^k + dt*v^k. 
+
+  ParticleContainer<P>& amrParticles = m_solver->getParticles();  
+
+  // First step. Store old position and velocity and do the Euler advance. 
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      List<P>& particles = amrParticles[lvl][dit].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+	P& p = lit();
+
+	p.template vect<0>() = p.position();
+	p.template vect<1>() = p.velocity();
+	
+	p.position() += p.velocity() * a_dt;
+      }
+    }
+  }
+
+  // Remap and interpolate the velocities again. This puts the velocity v = v(x^*) into the particles
+  amrParticles.remap();
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);    
+  m_solver->interpolateVelocities();
+
+  // Do the second RK2 stage.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      List<P>& particles = amrParticles[lvl][dit].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+  	P& p = lit();
+	
+  	// x^k+1     = x^k                  + dt/2     * [v(x^k)               + v(x^*)      ]
+	p.position() = p.template vect<0>() + 0.5*a_dt * (p.template vect<1>() + p.velocity());
+      }
+    }
+  }
+
+  // Remap and interpolate the velocities again
+  amrParticles.remap();
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);  
+  m_solver->interpolateVelocities();  
 }
 
 template <typename P>
@@ -500,7 +548,89 @@ void TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt) {
     pout() << "TracerParticleStepper::advanceParticlesRK4()" << endl;
   }
 
-  MayDay::Error("TracerParticleStepper::advanceParticlesRK4 -- not implemented");  
+  // TLDR: Just the standard RK4 method. 
+
+  ParticleContainer<P>& amrParticles = m_solver->getParticles();
+
+  const Real dtHalf  = a_dt/2.0;
+  const Real dtThird = a_dt/3.0;
+  const Real dtSixth = a_dt/6.0;  
+
+  // k1 step.
+  {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit){
+	for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit){
+	  P& p = lit();
+
+	  // Store old position. 
+	  p.template vect<0>() = p.position();
+	  
+	  p.template vect<1>() = p.velocity();                         // k1 = v(x^k)
+	  p.position() = p.template vect<0>() + dtHalf * p.velocity(); // x = x^k + 0.5*dt*k1
+	}
+      }
+    }
+
+    // Remap and compute v = v(x) 
+    amrParticles.remap();
+    m_solver->interpolateVelocities();
+  }
+
+  // k2 step.
+  {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit){
+	for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit){
+	  P& p = lit();
+
+	  p.template vect<2>() = p.velocity();                         // k2 = v(x^k + 0.5 * k1 * dt)
+	  p.position() = p.template vect<0>() + dtHalf * p.velocity(); // x = x^k + 0.5*dt*k2
+	}
+      }
+    }
+
+    // Remap and compute v = v(x)     
+    amrParticles.remap();
+    m_solver->interpolateVelocities();
+  }
+
+  // k3 step.
+  {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit){
+	for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit){
+	  P& p = lit();
+
+	  p.template vect<3>() = p.velocity();                       // k3 = v(x^k + 0.5 * k2 * dt)
+	  p.position() = p.template vect<0>() + a_dt * p.velocity(); // x^k + k3*a_dt
+	}
+      }
+    }
+
+    // Remap and compute v = v(x)     
+    amrParticles.remap();
+    m_solver->interpolateVelocities();
+  }
+
+  // Final step. 
+  {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit){
+	for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit){
+	  P& p = lit();
+
+	  p.position() = p.template vect<0>() + dtSixth * p.template vect<1>() + dtHalf  * p.template vect<2>() + dtHalf  * p.template vect<3>() + dtSixth * p.velocity();
+	}
+      }
+    }
+
+    // Remap and compute v = v(x)     
+    amrParticles.remap();
+    m_solver->interpolateVelocities();
+  }
+
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);      
 }
 
 #include <CD_NamespaceFooter.H>

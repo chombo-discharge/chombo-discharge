@@ -25,8 +25,12 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief A tracer particle class. 
+  @brief A tracer particle class. This is templated so that it can contain transient scalar and vector storages. 
+  @details The template parameters M and N determine extra storage allocated to the particle. M determines
+  the number of allocated scalars (Reals) and N determines the number of allocated vectors (RealVects). These
+  quantities are communicated when remapping particles. 
 */
+template <size_t M, size_t N>
 class TracerParticle : public BinItem {
 public:
 
@@ -41,27 +45,13 @@ public:
     @param[in] a_other Other particle. 
   */
   inline  
-  TracerParticle(const TracerParticle& a_other);
+  TracerParticle(const TracerParticle<M, N>& a_other);
 
   /*!
     @brief Destructor (deallocates runtime memory storage)
   */
   inline  
   virtual ~TracerParticle();
-
-  /*!
-    @brief Check if particle should be processed or not
-    @return m_state
-  */
-  inline
-  Real& state();      
-
-  /*!
-    @brief Check if particle should be processed or not
-    @return m_state
-  */
-  inline
-  const Real& state() const;
 
   /*!
     @brief Get the particle "mass"
@@ -92,18 +82,54 @@ public:
   const RealVect& velocity() const;
 
   /*!
-    @brief Comparison operator with other particle
-    @param[in] a_other Other particle
+    @brief Get scalar. 
+    @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
+    compile-time errors if trying to fetch elements out of range. 
   */
-  inline  
-  bool operator==(const TracerParticle& a_other) const;
+  template <size_t K>
+  inline
+  Real& scalar();
+
+  /*!
+    @brief Get scalar. 
+    @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
+    compile-time errors if trying to fetch elements out of range. 
+  */
+  template <size_t K>
+  inline
+  const Real& scalar() const;
+
+  /*!
+    @brief Get vector. 
+    @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
+    compile-time errors if trying to fetch elements out of range. 
+  */
+  template <size_t K>
+  inline
+  RealVect& vect();
+
+  /*!
+    @brief Get vector. 
+    @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
+    compile-time errors if trying to fetch elements out of range. 
+  */
+  template <size_t K>
+  inline
+  const RealVect& vect() const;    
 
   /*!
     @brief Comparison operator with other particle
     @param[in] a_other Other particle
   */
   inline  
-  bool operator!=(const TracerParticle& a_other) const;
+  bool operator==(const TracerParticle<M, N>& a_other) const;
+
+  /*!
+    @brief Comparison operator with other particle
+    @param[in] a_other Other particle
+  */
+  inline  
+  bool operator!=(const TracerParticle<M, N>& a_other) const;
 
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
@@ -141,9 +167,14 @@ protected:
   RealVect m_velocity;
 
   /*!
-    @brief Process particle or not
+    @brief Scalar storage array
   */
-  Real m_state;
+  std::array<Real, M> m_scalars;
+
+  /*!
+    @brief vector storage array
+  */
+  std::array<RealVect, N> m_vectors;  
 };
 
 /*!
@@ -151,8 +182,9 @@ protected:
   @param[in] ostr       Output stream
   @param[in] a_particle Particle to output
 */
+template <size_t M, size_t N>
 inline
-std::ostream & operator<<(std::ostream& ostr, const TracerParticle& p);
+std::ostream & operator<<(std::ostream& ostr, const TracerParticle<M, N>& p);
 
 #include <CD_NamespaceFooter.H>
 

@@ -26,8 +26,13 @@
 
   This is also a single-phase solver -- i.e. the particles only live on one of the phases. Extensions to multiphase
   is certainly possible. 
+
+  The template requirements on the particle type P are: 
+  1) It must contain a function RealVect& position() (derived from BinItem)
+  2) It must contain a function const Real& mass() const.
+  3) It must contain a function RealVect& velocity().
 */
-template <typename P = TracerParticle>
+template <typename P>
 class TracerParticleSolver {
 public:
 

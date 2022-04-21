@@ -8,15 +8,23 @@ History
 
 ``chombo-discharge`` is aimed at solving discharge problems.
 It was originally developed at SINTEF Energy Research between 2015-2018, and aimed at elucidating discharge dynamics in high-voltage engineering.
-Further development was started in 2021, where much of the code was completely redesigned both for improved modularity and enhanced performance.
+Further development was started in 2021, where much of the code was completely redesigned both for improved modularity and performance. 
 
 ``chombo-discharge`` is distributed via `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_.
-The master branch is essentially isolated, and changes to ``chombo-discharge`` are permitted through pull requests (after code review and passing a test suite).
+The main branch is isolated, and changes to ``chombo-discharge`` are done through pull requests (after code review and passing a test suite).
 
 Key functionalities
 -------------------
 
 ``chombo-discharge`` uses a Cartesian embedded boundary (EB) grid formulation and adaptive mesh refinement (AMR) formalism where the grids frequently change and are adapted to the solution as simulations progress.
+
+.. important::
+
+   ``chombo-discharge`` is **not** a black-box model for discharge applications.
+   It is an evolving research code with occasionally expanded capabilities, API changes, and performance improvements.
+   Although problems can be set up through our Python toos, users should nonetheless be willing to take time to understand how the code works.
+   In particular, developers should invest some effort in understanding the data structures and ``Chombo`` basics (see :ref:`Chap:Basics`). 
+   
 Key functionalities are provided in :numref:`Tab:KeyCapabilities`. 
 
 .. _Tab:KeyCapabilities:
@@ -44,15 +52,17 @@ Key functionalities are provided in :numref:`Tab:KeyCapabilities`.
      - **Mostly explicit**.
    * - Parallel IO?
      - **Yes**, using HDF5.
+   * - Checkpoint-restart?
+     - **Yes**, for both fluid and particles. 
 
 An early version of ``chombo-discharge`` used sub-cycling in time, but this has now been replaced with global time stepping methods. 
 That is, all the AMR levels are advanced using the same time step.       
 ``chombo-discharge`` has also incorporated many changes to the EB functionality supplied by ``Chombo``.
-This includes much faster grid generation, support for polygon surfaces, and many performance optimizations (in particular to the EB formulation). 
+This includes much faster grid generation, support for polygon surfaces, and many performance optimizations (in particular to the EB formulation).
 
 ``chombo-discharge`` supports both fluid and particle methods, and can use multply parallel distributed grids (see :ref:`Chap:Realm`) for individually load balancing e.g. the fluid and particle grids. 
 Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into ``chombo-discharge`` and still use the embedded boundary formalism, ``chombo-discharge`` also provides several physics modules for describing various types of problems.
-These modules reside in :file:`$DISCHARGE_HOME/Physics`.
+These modules reside in :file:`$DISCHARGE_HOME/Physics` and are also listed in :ref:`Chap:ImplementedModels`. 
        
 Design approach
 ---------------
