@@ -14,7 +14,7 @@ parser.add_argument('-use_mpi',         type=bool, help='MPI enabled (default tr
 parser.add_argument('-build',           type=bool, help='Build executable at end', default=False)
 parser.add_argument('-silent',          type=bool, help='Silent build of executable', default=False)
 parser.add_argument('-discharge_home',  type=str,  help="Source code base directory", default=os.environ.get('DISCHARGE_HOME'))
-parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="./mini_apps")
+parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="MyApplications")
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="RegularGeometry")
 

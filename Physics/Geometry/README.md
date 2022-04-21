@@ -11,10 +11,10 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 ```shell
-./setup.py -base_dir=myApplications -app_name=myGeometry -dim=2 -geometry=CoaxialCable
+./setup.py -base_dir=MyApplications -app_name=myGeometry -dim=2 -geometry=CoaxialCable
 ```
 
-The application will be installed to $DISCHARGE_HOME/myApplications/myGeometry.
+The application will be installed to $DISCHARGE_HOME/MyApplications/myGeometry.
 
 ## Modifying the application
 Users are free to modify this application. 
