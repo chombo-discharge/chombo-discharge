@@ -170,15 +170,14 @@ namespace Physics {
       virtual void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
 
       /*!
-	@brief Advancement method. The implementation of this method should advance all equations of motion
+	@brief Advancement method. Swaps between various kernels. 
 	@param[in] a_dt Time step to be used for advancement
-	@return    Returns the time step that was used. 
-	@note The return value does not need to equal a_dt. Adaptive time stepping methods will generally return != a_dt.
+	@return    Returns the time step that was used (equal to a_dt in this case). 
       */
       virtual Real advance(const Real a_dt) override;
 
       /*!
-	@brief Synchronzie solver times and time steps
+	@brief Synchronize solver times and time steps
 	@param[in] a_step Time step
 	@param[in] a_time Time (in seconds)
 	@param[in] a_dt   Time step that was used. 
@@ -187,14 +186,12 @@ namespace Physics {
 
       /*!
 	@brief Print a step report. 
-	@details This is called by Driver after time step. The routine can be used to display use information about the simulation progress. 
+	@details This is called by Driver after time step. The routine can be used to display use information about the simulation progress. Not used by this class. 
       */
-      virtual void printStepReport() override;
+      virtual void printStepReport() override {}
 
       /*!
 	@brief Perform pre-regrid operations.
-	@details This should include all copying all data which should be interpolated to the new grids. It can also include deallocating memory in case the regrid
-	operation takes a lot of memory. 
 	@param[in] a_lmin           The coarsest level that changes
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
       */
@@ -222,7 +219,7 @@ namespace Physics {
       IntegrationAlgorithm m_algorithm;
 
       /*!
-	@brief Velocity field type
+	@brief Velocity field type. 
       */
       VelocityField m_velocityField;
 
@@ -250,16 +247,6 @@ namespace Physics {
 	@brief Particle "CFL" time step
       */
       Real m_cfl;
-
-      /*!
-	@brief Particle blob radius
-      */
-      Real m_blobRadius;
-
-      /*!
-	@brief Particle blob center
-      */
-      RealVect m_blobCenter;
 
       /*!
 	@brief Number of particles

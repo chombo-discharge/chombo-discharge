@@ -350,7 +350,9 @@ void TracerParticleStepper<P>::postRegrid() {
     pout() << "TracerParticleStepper::postRegrid()" << endl;
   }
 
+  // Update particle velocities. 
   this->setVelocity();
+  m_solver->interpolateVelocities();  
 }
 
 template <typename P>
@@ -440,15 +442,6 @@ void TracerParticleStepper<P>::initialParticles() {
 
   // Remove particles inside the EB. 
   m_amr->removeCoveredParticlesIF(solverParticles, m_phase);
-}
-
-template <typename P>
-inline
-void TracerParticleStepper<P>::printStepReport(){
-  CH_TIME("TracerParticleStepper::printStepReport");
-  if(m_verbosity > 5){
-    pout() << "TracerParticleStepper::printStepReport()" << endl;
-  }  
 }
 
 template <typename P>
