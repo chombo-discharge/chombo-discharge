@@ -13,7 +13,6 @@
 #define CD_TracerParticleStepper_H
 
 // Our includes
-#include <CD_TracerParticle.H>
 #include <CD_TracerParticleSolver.H>
 #include <CD_TracerParticlePhysics.H>
 #include <CD_TimeStepper.H>
