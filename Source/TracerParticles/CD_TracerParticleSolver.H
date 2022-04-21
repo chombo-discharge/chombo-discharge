@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_TracerParticleSolver.H
-  @brief  Declaration of a solver class that advances tracer particles
+  @brief  Declaration of a solver class that advances tracer particles.
   @author Robert Marskar
 */
 
@@ -20,11 +20,11 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity field where
+  @brief Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity field.
   @details The user can set the velocity field through public member functions. This class is templated so the user can 
   switch tracer particle implementations.
 
-  This is also a single-phase solver -- i.e. the particles only live on one of the phases. Extensions to multiphase
+  This is a single-phase solver -- i.e. the particles only live on one of the phases. Extensions to multiphase
   is certainly possible. 
 
   The template requirements on the particle type P are: 
@@ -79,35 +79,35 @@ public:
   virtual ~TracerParticleSolver();
 
   /*!
-    @brief Define the particle container. 
+    @brief Allocate storage for this solver. 
   */
   virtual void allocate();
 
   /*!
-    @brief Register operators needed for AMR core
+    @brief Register operators needed for AMR core functionality. 
   */
   virtual void registerOperators() const;
 
   /*!
-    @brief Set AmrMesh
+    @brief Set AmrMesh.
     @param[in] a_amrMesh AmrMesh
   */
   virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh);
 
   /*!
-    @brief Set the computational geometry
+    @brief Set the computational geometry.
     @param[in] a_compGeom Computational geometry
   */
   virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_compGeom);  
 
   /*!
-    @brief Set the solver realm
+    @brief Set the solver realm. 
     @param[in] a_realm Realm name. 
   */
   virtual void setRealm(const std::string& a_realm);
 
   /*!
-    @brief Set the solver phase
+    @brief Set the solver phase.
     @param[in] a_phase Phase
   */
   virtual void setPhase(const phase::which_phase& a_phase);
@@ -122,7 +122,7 @@ public:
   virtual void setTime(const int a_step, const Real a_time, const Real a_dt);  
 
   /*!
-    @brief Set the tracer particle velocity field
+    @brief Set the tracer particle velocity field.
     @param[in] a_velocityField Velocity field.
   */
   virtual void setVelocity(const EBAMRCellData& a_velocityField);
@@ -145,7 +145,7 @@ public:
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
   /*!
-    @brief Remap particles
+    @brief Remap particles.
   */
   virtual void remap();
 
@@ -161,12 +161,12 @@ public:
   virtual void interpolateVelocities();  
 
   /*!
-    @brief Parse options
+    @brief Parse solver options.
   */
   virtual void parseOptions();
 
   /*!
-    @brief Parse run-time options
+    @brief Parse solver run-time options.
   */
   virtual void parseRuntimeOptions();
 
@@ -217,19 +217,19 @@ public:
 #endif
 
   /*!
-    @brief Compute dt = dx/max(v_x,v_y, v_z)
+    @brief Compute dt = dx/max(v_x,v_y, v_z) minimized over all particles
   */
   virtual Real computeDt() const;
 
   /*!
-    @brief Get particles
-    @return m_particles. 
+    @brief Get all particles.
+    @return m_particles
   */
   virtual ParticleContainer<P>& getParticles();
 
   /*!
-    @brief Get particles. Const version. 
-    @return m_particles. 
+    @brief Get all particles. Const version. 
+    @return m_particles
   */
   virtual const ParticleContainer<P>& getParticles() const;
 
@@ -302,12 +302,12 @@ protected:
   int m_verbosity;
 
   /*!
-    @brief PVR buffer. Defaults to zero.
+    @brief PVR buffer for particle deposition. 
   */
   int m_pvrBuffer;
 
   /*!
-    @brief PVR buffer. Defaults to one.
+    @brief Halo buffer for particle deposition. 
   */
   int m_haloBuffer;
 
@@ -317,22 +317,22 @@ protected:
   bool m_plotMass;
 
   /*!
-    @brief Hook for adding velocity field to plot file
+    @brief Hook for adding velocity field to plot file.
   */
   bool m_plotVelocity;
 
   /*!
-    @brief Do volumetric scaling or not. 
+    @brief Do volumetric scaling when depositing (or not).
   */
   bool m_volumeScale;
 
   /*!
-    @brief Mesh-based velocity field
+    @brief Mesh-based velocity field. Must be set through setVelocity
   */
   const EBAMRCellData* m_velocityField;
 
   /*!
-    @brief Particle data.
+    @brief Computational particles. 
   */
   ParticleContainer<P> m_particles;
 

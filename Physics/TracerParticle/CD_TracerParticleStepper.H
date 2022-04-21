@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_TracerParticleStepper.H
-  @brief  Declaration of a TimeStepper implementation for advancing tracer particles
+  @brief  Declaration of a TimeStepper implementation for advancing a tracer particle solver. 
   @author Robert Marskar
 */
 
@@ -32,24 +32,39 @@ namespace Physics {
     };
 
     /*!
-      @brief Enum for handling various velocity fields
+      @brief Enum for handling various velocity fields.
     */
     enum class VelocityField {
       Diagonal,
       Rotational
-    };    
+    };
 
     /*!
       @brief Implementation of TimeStepper for advancing tracer particles in a fixed velocity field. 
+      @details The template requirements on the particle type P are the same as for TracerParticleSolver with the addition 
+      of templated functions of the type RealVect& P::vector<size_t>() which returns a RealVect. This is used for the Runge-Kutta
+      particle advection kernels. This class will work fine with TracerParticle<0, M> where M >= 4. 
     */
     template <typename P>
     class TracerParticleStepper : public TimeStepper {
     public:
 
       /*!
-	@brief Destructor. Doesn't do anything. 
+	@brief Constructor. Does nothing. 
       */
       TracerParticleStepper();
+
+      /*!
+	@brief Copy constructor. Disallowed.
+	@param[in] a_other Other
+      */
+      TracerParticleStepper(const TracerParticleStepper<P>& a_other) = delete;
+
+      /*!
+	@brief Move constructor. Disallowed.
+	@param[in] a_other Other
+      */
+      TracerParticleStepper(const TracerParticleStepper<P>&& a_other) = delete;      
 
       /*!
 	@brief Destructor. 
@@ -57,38 +72,50 @@ namespace Physics {
       virtual ~TracerParticleStepper();
 
       /*!
-	@brief Instantiate up the tracer particle solver
+	@brief Copy assignment operator. Disallowed.
+	@param[in] a_other Other
+      */
+      TracerParticleStepper& operator=(const TracerParticleStepper<P>& a_other) = delete;
+
+      /*!
+	@brief Move assignment operator. Disallowed.
+	@param[in] a_other Other
+      */
+      TracerParticleStepper& operator=(const TracerParticleStepper<P>&& a_other) = delete;      
+
+      /*!
+	@brief Instantiate the tracer particle solver.
       */
       void setupSolvers() override;
 
       /*!
-	@brief Allocate solvers
+	@brief Allocate storage for solvers and time stepper. 
       */
       void allocate() override;
 
       /*!
-	@brief Fill solver with initial data.
+	@brief Fill problem with initial data. 
       */
       void initialData() override;
 
       /*!
-	@brief Perform any post-initialization steps. Not needed for this class. 
+	@brief Perform any post-initialization steps. Not needed for this time stepper. 
       */
       void postInitialize() override { }
 
       /*!
-	@brief Post checkpoint operations. Not needed for this class. 
+	@brief Post checkpoint operations. Not needed for this time stepper. 
       */
       void postCheckpointSetup() override { }
 
       /*!
-	@brief Register realms. Primal is the only realm we need
+	@brief Register realms. Primal is the only realm we need. 
       */
       void registerRealms() override;
 
       /*!
 	@brief Register operators. 
-	@details Only need the solver's operators
+	@details Only need the solver's operators.
       */
       void registerOperators() override;
 
@@ -105,9 +132,8 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /*!  
 	@brief Write checkpoint data to file
-	@param[inout] a_handle HDF5 fil
+	@param[inout] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
-	@details Implement this routine for checkpointing data for restarts. This will typically call the solvers' checkpointing routine. 
       */
       virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
@@ -117,7 +143,6 @@ namespace Physics {
 	@brief Read checkpoint data from file
 	@param[inout] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
-	@details Implement this routine for reading data for restarts. This will typically call the solvers' checkponiting routine. 
       */
       virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
 #endif

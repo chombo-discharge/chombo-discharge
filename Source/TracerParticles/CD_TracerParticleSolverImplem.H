@@ -38,6 +38,7 @@ TracerParticleSolver<P>::TracerParticleSolver() {
   m_plotMass          = true;
   m_volumeScale       = false;
   m_deposition        = DepositionType::CIC;
+  m_velocityField     = nullptr;
 }
 
 template <typename P>
@@ -108,12 +109,6 @@ void TracerParticleSolver<P>::parseDeposition() {
     m_deposition           = DepositionType::CIC;
     m_coarseFineDeposition = CoarseFineDeposition::Halo;
   }
-  else if(str == "tsc") {
-    m_haloBuffer = 2;
-    
-    m_deposition           = DepositionType::TSC;
-    m_coarseFineDeposition = CoarseFineDeposition::Halo;    
-  }
   else{
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown deposition method requested.");
   }
@@ -131,8 +126,8 @@ void TracerParticleSolver<P>::parsePlotVariables() {
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("plot_mass",       m_plotMass      );
-  pp.get("plot_velocity",   m_plotVelocity  );
+  pp.get("plot_mass",       m_plotMass    );
+  pp.get("plot_velocity",   m_plotVelocity);
 }
 
 template <typename P>
@@ -162,14 +157,8 @@ void TracerParticleSolver<P>::registerOperators() const {
   else{
     m_amr->registerOperator(s_particle_mesh,  m_realm, m_phase);
     m_amr->registerOperator(s_eb_coar_ave,    m_realm, m_phase);    
-
-    // Register mask if using halo deposition
-    if(m_haloBuffer > 0) {
-      CH_assert(m_pvrBuffer == 0);
       
-      m_amr->registerMask(s_particle_halo, 1, m_realm); // For CIC
-      m_amr->registerMask(s_particle_halo, 2, m_realm); // For TSC
-    }
+    m_amr->registerMask(s_particle_halo, 1, m_realm); // For CIC halo deposition. 
   }
 }
 
@@ -322,6 +311,8 @@ void TracerParticleSolver<P>::interpolateVelocities() {
     pout() << m_name + "::interpolateVelocities()" << endl;
   }
 
+  CH_assert(!(m_velocityField == nullptr));
+
   m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, *m_velocityField, m_deposition, false);
 }
 
@@ -442,6 +433,8 @@ void TracerParticleSolver<P>::writePlotData(EBAMRCellData& a_output, int& a_icom
 
   // Write the velocity field to the output data holder.
   if(m_plotVelocity) {
+    CH_assert(!(m_velocityField == nullptr));
+    
     const Interval srcInterval(0,                 SpaceDim - 1);
     const Interval dstInterval(a_icomp, a_icomp + SpaceDim - 1);
 
@@ -462,8 +455,7 @@ void TracerParticleSolver<P>::writeCheckpointLevel(HDF5Handle& a_handle, const i
     pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
   
-  const std::string str = m_name + "_particles";
-  writeParticlesToHDF(a_handle, m_particles[a_level], str);
+  writeParticlesToHDF(a_handle, m_particles[a_level], m_name + "_particles");
 }
 #endif
 
@@ -476,8 +468,7 @@ void TracerParticleSolver<P>::readCheckpointLevel(HDF5Handle& a_handle, const in
     pout() << m_name + "::readCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  const std::string str = m_name + "_particles";
-  readParticlesFromHDF(a_handle, m_particles[a_level], str);  
+  readParticlesFromHDF(a_handle, m_particles[a_level], m_name + "_particles");  
 }
 #endif
 
@@ -543,6 +534,8 @@ const EBAMRCellData& TracerParticleSolver<P>::getVelocityField() const {
     pout() << m_name + "::getVelocityField()" << endl;
   }
 
+  CH_assert(!(m_velocityField == nullptr));
+
   return *m_velocityField;
 }
 
@@ -556,7 +549,6 @@ void TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles()" << endl;
   }
-
 
   CH_assert(m_halobuffer == 0 || m_pvrBuffer == 0);
   CH_assert(a_phi[0]->nComp() == 1);

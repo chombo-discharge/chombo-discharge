@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_TracerParticle.H
-  @brief  Declaration of a tracer particle class which can hold N components.
+  @brief  Declaration of a tracer particle class.
   @author Robert Marskar
 */
 
@@ -25,7 +25,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief A tracer particle class. This is templated so that it can contain transient scalar and vector storages. 
+  @brief A tracer particle class. This is templated for holding extra storage (useful for kernels). 
   @details The template parameters M and N determine extra storage allocated to the particle. M determines
   the number of allocated scalars (Reals) and N determines the number of allocated vectors (RealVects). These
   quantities are communicated when remapping particles. 
@@ -75,58 +75,64 @@ public:
   RealVect& velocity();
 
   /*!
-    @brief Get the particle velocity
+    @brief Get the particle velocity.
     @return m_velocity
   */
   inline
   const RealVect& velocity() const;
 
   /*!
-    @brief Get scalar. 
+    @brief Get one of the scalars. 
     @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
+    @return m_scalars[K]
   */
   template <size_t K>
   inline
   Real& scalar();
 
   /*!
-    @brief Get scalar. 
+    @brief Get one of the scalars. 
     @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
+    @return m_scalars[K]
   */
   template <size_t K>
   inline
   const Real& scalar() const;
 
   /*!
-    @brief Get vector. 
+    @brief Get one of the RealVects.
     @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
+    @return m_vectors[K]
   */
   template <size_t K>
   inline
   RealVect& vect();
 
   /*!
-    @brief Get vector. 
+    @brief Get one of the RealVects.
     @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
+    @return m_vectors[K]
   */
   template <size_t K>
   inline
   const RealVect& vect() const;    
 
   /*!
-    @brief Comparison operator with other particle
+    @brief Comparison operator with other particle. 
     @param[in] a_other Other particle
+    @note Does not compare the M and N Reals and RealVects. 
   */
   inline  
   bool operator==(const TracerParticle<M, N>& a_other) const;
 
   /*!
-    @brief Comparison operator with other particle
+    @brief Comparison operator with other particle.
     @param[in] a_other Other particle
+    @note Does not compare the M and N Reals and RealVects. 
   */
   inline  
   bool operator!=(const TracerParticle<M, N>& a_other) const;
@@ -139,20 +145,18 @@ public:
 
   /*!
     @brief Write a linear binary representation of the internal data. Assumes that
-    sufficient memory for the buffer has already been allocated by
-    the caller.
-    @param[in] a_buf Pointer to memory block
+    sufficient memory for the buffer has already been allocated by the caller. 
+    @param[in] a_buffer Pointer to memory block
   */
   inline
-  virtual void linearOut(void* buf) const override;
+  virtual void linearOut(void* a_buffer) const override;
 
   /*!
-    @brief Read a linear binary representation of the internal data.
-    Assumes that the buffer has the correct data.
-    @param[in] a_buf Pointer to memory block
+    @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
+    @param[in] a_buffer Pointer to memory block
   */
   inline  
-  virtual void linearIn(void* a_buf);
+  virtual void linearIn(void* a_bufer);
 
 protected:
 
