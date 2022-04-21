@@ -499,7 +499,7 @@ Real TracerParticleSolver<P>::computeDt() const {
   }
 
   // Get the minimum of dt over all MPI ranks. 
-  ParallelOps::min(dt);
+  dt = ParallelOps::min(dt);
 
   return dt;
 }
