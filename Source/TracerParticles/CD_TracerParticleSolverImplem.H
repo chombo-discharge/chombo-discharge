@@ -550,7 +550,7 @@ void TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
     pout() << m_name + "::depositParticles()" << endl;
   }
 
-  CH_assert(m_halobuffer == 0 || m_pvrBuffer == 0);
+  CH_assert(m_haloBuffer == 0 || m_pvrBuffer == 0);
   CH_assert(a_phi[0]->nComp() == 1);
 
   switch(a_coarseFineDeposition) {
