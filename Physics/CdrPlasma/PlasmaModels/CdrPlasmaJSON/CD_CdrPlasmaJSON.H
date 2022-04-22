@@ -757,7 +757,12 @@ namespace Physics {
       /*!
 	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
       */
-      std::map<int, bool> m_electrodeReactionHasEnergyLoss;      
+      std::map<int, bool> m_electrodeReactionHasEnergyLoss;
+
+      /*!
+	@brief A container which determines if we should bypass all specified reactions and rather apply an extrapolated boundary condition
+      */
+      std::map<int, bool> m_electrodeExtrapBC;
 
       // ===========================================
       // DIELECTRIC SURFACE REACTIONS BEGIN HERE

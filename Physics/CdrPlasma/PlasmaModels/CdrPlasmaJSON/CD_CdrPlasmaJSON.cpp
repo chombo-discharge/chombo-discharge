@@ -2881,7 +2881,13 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
     pout() << "CdrPlasmaJSON::parseElectrodeReactions()" << endl;
   }
 
-  // Check if our JSON f
+  // For all our species, set the extrap BC flag to 'false'. Specifying reactions to be 'extrap' is equivalent
+  // to adding an extrapolated influx to the species.
+  for (const auto& m : m_cdrSpeciesMap) {
+    m_electrodeExtrapBC.emplace(m.second, false);
+  }
+
+  // Check if our JSON file contains the electrode reactions flag. 
   if(m_json.contains("electrode reactions")){
     const json& electrodeReactions = m_json["electrode reactions"];
 
@@ -2891,13 +2897,10 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
     // Iterate through the reactions. 
     for (const auto& electrodeReaction : electrodeReactions){
 
-      // These fields are required
+      // Get the reaction string
       if(!(electrodeReaction.contains("reaction"))) this->throwParserError(baseError + "- found 'electrode reactions' but field 'reaction' was not specified");
-      if(!(electrodeReaction.contains("lookup"  ))) this->throwParserError(baseError + "- found 'electrode reactions' but field 'lookup' was not specified");      
-
-      // Get the reaction and lookup strings. 
       const std::string reaction = this->trim(electrodeReaction["reaction"].get<std::string>());
-      const std::string lookup   = this->trim(electrodeReaction["lookup"  ].get<std::string>());
+
 
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
@@ -2909,44 +2912,71 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
       // we create a list of more reactions.
       const auto reactionSets = this->parseReactionWildcards(reactants, products, electrodeReaction);
 
-      // Go through all the reactions now. 
-      for (const auto& curReaction : reactionSets){
+      // Define special case. If the right-hand side is just 'extrap', we enable m_electrodeExtrapBC for
+      // the specified species. 
+      const bool specialCase1 = products.size() == 1 && this->trim(products.front()) == "extrap";
 
-	const std::vector<std::string> curReactants = std::get<1>(curReaction);
-	const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+      // Go through cases. 
+      if(specialCase1){ // Enable m_electrodeExtrapBC for the specified species. 
 
-	// Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense.
-	this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+	// Go through the reaction set. We should make sure reactants and products make sense, but our 'extrap' keyword
+	// doesn't belong in the list of species so just do a clearout of the products.
+	for (const auto& curReaction: reactionSets){
+	  const std::vector<std::string> curReactants = std::get<1>(curReaction);
+	  const std::vector<std::string> curProducts;
 
-	// This is the reaction index for the current index. The reaction we are currently
-	// dealing with is put in m_electrodeReactions[reactionIndex]. 
-	const int reactionIndex = m_electrodeReactions.size();
+	  this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
 
-	// Parse the scaling factor for the electrode surface reaction
-	this->parseElectrodeReactionRate        (reactionIndex, electrodeReaction);	
-	this->parseElectrodeReactionScaling     (reactionIndex, electrodeReaction);
-	this->parseElectrodeReactionEnergyLosses(reactionIndex, electrodeReaction);
+	  for (const auto& reactant: curReactants){
+	    m_electrodeExtrapBC.at(m_cdrSpeciesMap.at(reactant)) = true;
+	  }
+	}
+      }
+      else { // Normal code.
 
-	// Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
-	std::list<int> plasmaReactants ;
-	std::list<int> neutralReactants;
-	std::list<int> photonReactants ;      
-	std::list<int> plasmaProducts  ;
-	std::list<int> neutralProducts ;
-	std::list<int> photonProducts  ;            
+	// Get the lookup string
+	if(!(electrodeReaction.contains("lookup"  ))) this->throwParserError(baseError + "- found 'electrode reactions' but field 'lookup' was not specified");
+	const std::string lookup   = this->trim(electrodeReaction["lookup"  ].get<std::string>());	
 
-	this->getReactionSpecies(plasmaReactants,
-				 neutralReactants,
-				 photonReactants,			       
-				 plasmaProducts,
-				 neutralProducts,			       
-				 photonProducts,
-				 curReactants,
-				 curProducts);
+	// Go through all the reactions now. 
+	for (const auto& curReaction : reactionSets){
 
-	// Now create the reaction -- note that surface reactions support both plasma species and photon species on
-	// the left hand side of the reaction. 
-	m_electrodeReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+	  const std::vector<std::string> curReactants = std::get<1>(curReaction);
+	  const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+
+	  // Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense.
+	  this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+
+	  // This is the reaction index for the current index. The reaction we are currently
+	  // dealing with is put in m_electrodeReactions[reactionIndex]. 
+	  const int reactionIndex = m_electrodeReactions.size();
+
+	  // Parse the scaling factor for the electrode surface reaction
+	  this->parseElectrodeReactionRate        (reactionIndex, electrodeReaction);	
+	  this->parseElectrodeReactionScaling     (reactionIndex, electrodeReaction);
+	  this->parseElectrodeReactionEnergyLosses(reactionIndex, electrodeReaction);
+
+	  // Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
+	  std::list<int> plasmaReactants ;
+	  std::list<int> neutralReactants;
+	  std::list<int> photonReactants ;      
+	  std::list<int> plasmaProducts  ;
+	  std::list<int> neutralProducts ;
+	  std::list<int> photonProducts  ;            
+
+	  this->getReactionSpecies(plasmaReactants,
+				   neutralReactants,
+				   photonReactants,			       
+				   plasmaProducts,
+				   neutralProducts,			       
+				   photonProducts,
+				   curReactants,
+				   curProducts);
+
+	  // Now create the reaction -- note that surface reactions support both plasma species and photon species on
+	  // the left hand side of the reaction. 
+	  m_electrodeReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+	}
       }
     }
   }
@@ -4398,7 +4428,14 @@ Vector<Real> CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
   
   for (int i = 0; i < m_numCdrSpecies; i++){
-    fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
+
+    // If there is an "extrap" flag we also add the extrapolated flux directly. 
+    if(m_electrodeExtrapBC.at(i)) {
+      fluxes[i] = a_extrapCdrFluxes[i] - inflowFluxes[i];
+    }
+    else {
+      fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
+    }
   }
 
   // Now add an outgoing thermal flux for all species that have an energy solver.
