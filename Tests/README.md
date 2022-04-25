@@ -25,7 +25,15 @@ will do a clean compile of all tests and generate benchmark files.
 Configrable options are
 
 * ```--compile``` Force application to compile first.
-* ```--silent``` Turn off compiler and run-time messages. 
+* ```--silent``` Turn off compiler and run-time messages.
+* ```--clean``` Do a clean compilation.
+* ```--benchmark``` Generate benchmark files.
+* ```--no_exec``` Compile, but do not run tests.
+* ```--no_compare``` Run, but do not compare with benchmark files.
+* ```--parallel``` Compile with MPI.
+* ```-cores #``` Run with specifies number of cores.
+* ```-suites #``` Tests suites to run. E.g. ```-suite AdvectionDiffusion Electrostatics```.
+* ```-tests #``` Specific tests to run. E.g. ```-tests AdvectionDiffusion/Godunov```.
 
 ## Comparing benchmark files
 To compare the benchmark files with a new run, do
