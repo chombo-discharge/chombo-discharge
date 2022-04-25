@@ -3348,7 +3348,7 @@ void CdrPlasmaJSON::parseDomainReactions(){
       }
     }
 
-	// Make sure that all dir+side combinations are included    
+    // Make sure that all dir+side combinations are included    
     for(const auto& curDir : m_dirCharToInt){
       for (const auto& curSide : m_sideStringToSide){
 	if(m_domainReactions.find(std::make_pair(curDir.second, curSide.second)) == m_domainReactions.end()){
@@ -3416,13 +3416,13 @@ void CdrPlasmaJSON::parseDomainReactionScaling(const int a_reactionIndex, const 
 
   Real scale = 1.0;
   if(a_reactionJSON.contains("scale")){
-     scale = a_reactionJSON["scale"].get<Real>();
+    scale = a_reactionJSON["scale"].get<Real>();
   }
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
   auto func = [scale](const Real E, const RealVect x) -> Real{
-     return scale;
+    return scale;
   };
 
   
@@ -4594,10 +4594,17 @@ Vector<Real> CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time
   // Now set the finite volume fluxes on the EB accordingly. The negative sign is because 'inflowFluxes' is the magnitude, but in our
   // finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
-  
+
   for (int i = 0; i < m_numCdrSpecies; i++){
-    fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
-  }
+
+    // If there is an "extrap" flag we also add the extrapolated flux directly. 
+    if(m_dielectricExtrapBC.at(i)) {
+      fluxes[i] = a_extrapCdrFluxes[i] - inflowFluxes[i];
+    }
+    else {
+      fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
+    }
+  }  
 
   // Now add an outgoing thermal flux for all species that have an energy solver.
   for (const auto& m : m_cdrTransportEnergyMap) {

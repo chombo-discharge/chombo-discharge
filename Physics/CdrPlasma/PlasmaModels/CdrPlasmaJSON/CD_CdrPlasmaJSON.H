@@ -844,6 +844,11 @@ namespace Physics {
       */
       const std::map<std::string, Side::LoHiSide> m_sideStringToSide{{"lo", Side::Lo}, {"hi", Side::Hi}};
 
+      /*!
+	@brief A container which determines if we should add the extrapolated flux as an inflow condition. 
+      */
+      std::map<std::pair<int, Side::LoHiSide>, bool> m_domainExtrapBC;
+
       // ===========================================
       // VARIOUS MEMBER FUNCTIONS BEGIN HERE 
       // ===========================================      
