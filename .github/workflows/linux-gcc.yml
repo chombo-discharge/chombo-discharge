@@ -72,15 +72,10 @@ jobs:
         run: |
           make -s -j2 DIM=3 discharge-physics
 
-      - name: Compile tests
+      - name: Compile and run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark --no_exec -cores 2
-
-      - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --no_compare -cores 2
+          python3 tests.py --compile --benchmark --silent -cores 2
 
   serial-hdf:
     if: github.event.pull_request.draft == false    
@@ -145,15 +140,10 @@ jobs:
         run: |
           make -s -j2 DIM=3 discharge-physics
 
-      - name: Compile tests
+      - name: Compile and run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark --no_exec -cores 2
-
-      - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --no_compare -cores 2          
+          python3 tests.py --compile --benchmark --silent -cores 2
         
   mpi-no-hdf5:
     if: github.event.pull_request.draft == false        
@@ -218,15 +208,10 @@ jobs:
         run: |
           make -s -j2 DIM=3 discharge-physics
 
-      - name: Compile tests
+      - name: Compile and run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark --no_exec -cores 2
-
-      - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --no_compare -cores 2 --parallel          
+          python3 tests.py --compile --benchmark --silent -cores 2 --parallel   
 
   mpi-hdf5:
     if: github.event.pull_request.draft == false        
@@ -291,12 +276,7 @@ jobs:
         run: |
           make -s -j2 DIM=3 discharge-physics
 
-      - name: Compile tests
+      - name: Compile and run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark --no_exec -cores 2
-
-      - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
-        run: |
-          python3 tests.py --no_compare --parallel -cores 2 --parallel
+          python3 tests.py --compile --benchmark --silent -cores 2 --parallel
