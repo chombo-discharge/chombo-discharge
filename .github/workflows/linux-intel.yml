@@ -53,7 +53,7 @@ jobs:
       - name: Build Chombo
         run: |
           source /opt/intel/oneapi/setvars.sh          
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim}} chombo
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} chombo
 
       - name: Build chombo-discharge/source
         run: |
