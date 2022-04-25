@@ -2901,7 +2901,6 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
       if(!(electrodeReaction.contains("reaction"))) this->throwParserError(baseError + "- found 'electrode reactions' but field 'reaction' was not specified");
       const std::string reaction = this->trim(electrodeReaction["reaction"].get<std::string>());
 
-
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
       std::vector<std::string> products ;
@@ -3097,6 +3096,12 @@ void CdrPlasmaJSON::parseDielectricReactions() {
     pout() << "CdrPlasmaJSON::parseDielectricReactions()" << endl;
   }
 
+  // For all our species, set the extrap BC flag to 'false'. Specifying reactions to be 'extrap' is equivalent
+  // to adding an extrapolated influx to the species.
+  for (const auto& m : m_cdrSpeciesMap) {
+    m_dielectricExtrapBC.emplace(m.second, false);
+  }  
+
   // Check if our JSON f
   if(m_json.contains("dielectric reactions")){
     const json& dielectricReactions = m_json["dielectric reactions"];
@@ -3107,13 +3112,9 @@ void CdrPlasmaJSON::parseDielectricReactions() {
     // Iterate through the reactions. 
     for (const auto& dielectricReaction : dielectricReactions){
 
-      // These fields are required
+      // Get the reaction string
       if(!(dielectricReaction.contains("reaction"))) this->throwParserError(baseError + "- found 'dielectric reactions' but field 'reaction' was not specified");
-      if(!(dielectricReaction.contains("lookup"  ))) this->throwParserError(baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");      
-
-      // Get the reaction and lookup strings. 
       const std::string reaction = this->trim(dielectricReaction["reaction"].get<std::string>());
-      const std::string lookup   = this->trim(dielectricReaction["lookup"  ].get<std::string>());
 
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
@@ -3125,44 +3126,71 @@ void CdrPlasmaJSON::parseDielectricReactions() {
       // we create a list of more reactions.
       const auto reactionSets = this->parseReactionWildcards(reactants, products, dielectricReaction);
 
-      // Go through all the reactions now. 
-      for (const auto& curReaction : reactionSets){
+      // Define special case. If the right-hand side just 'extrap', we enable m_dielectricExtrapBC for
+      // the specified species.
+      const bool specialCase1 = products.size() == 1 && this->trim(products.front()) == "extrap";
 
-	const std::vector<std::string> curReactants = std::get<1>(curReaction);
-	const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+      // Go through cases. 
+      if(specialCase1){
+	
+	// Go through the reaction set. We should make sure reactants and products make sense, but our 'extrap' keyword
+	// doesn't belong in the list of species so just do a clearout of the products.
+	for (const auto& curReaction: reactionSets){
+	  const std::vector<std::string> curReactants = std::get<1>(curReaction);
+	  const std::vector<std::string> curProducts;
 
-	// Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense.
-	this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+	  this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
 
-	// This is the reaction index for the current index. The reaction we are currently
-	// dealing with is put in m_plasmaReactions[reactionIdex]. 
-	const int reactionIndex = m_dielectricReactions.size();
+	  for (const auto& reactant: curReactants){
+	    m_dielectricExtrapBC.at(m_cdrSpeciesMap.at(reactant)) = true;
+	  }
+	}
+      }
+      else{ // Normal code
 
-	// Parse the scaling factor for the dielectric surface reaction
-	this->parseDielectricReactionRate        (reactionIndex, dielectricReaction);	
-	this->parseDielectricReactionScaling     (reactionIndex, dielectricReaction);
-	this->parseDielectricReactionEnergyLosses(reactionIndex, dielectricReaction);	
+	// Get the lookup string
+	if(!(dielectricReaction.contains("lookup"  ))) this->throwParserError(baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");      
+	const std::string lookup   = this->trim(dielectricReaction["lookup"  ].get<std::string>());
 
-	// Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
-	std::list<int> plasmaReactants ;
-	std::list<int> neutralReactants;
-	std::list<int> photonReactants ;      
-	std::list<int> plasmaProducts  ;
-	std::list<int> neutralProducts ;
-	std::list<int> photonProducts  ;            
+	// Go through all the reactions now. 
+	for (const auto& curReaction : reactionSets){
 
-	this->getReactionSpecies(plasmaReactants,
-				 neutralReactants,
-				 photonReactants,			       
-				 plasmaProducts,
-				 neutralProducts,			       
-				 photonProducts,
-				 curReactants,
-				 curProducts);
+	  const std::vector<std::string> curReactants = std::get<1>(curReaction);
+	  const std::vector<std::string> curProducts  = std::get<2>(curReaction);
 
-	// Now create the reaction -- note that surface reactions support both plasma species and photon species on
-	// the left hand side of the reaction. 
-	m_dielectricReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+	  // Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense.
+	  this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+
+	  // This is the reaction index for the current index. The reaction we are currently
+	  // dealing with is put in m_plasmaReactions[reactionIdex]. 
+	  const int reactionIndex = m_dielectricReactions.size();
+
+	  // Parse the scaling factor for the dielectric surface reaction
+	  this->parseDielectricReactionRate        (reactionIndex, dielectricReaction);	
+	  this->parseDielectricReactionScaling     (reactionIndex, dielectricReaction);
+	  this->parseDielectricReactionEnergyLosses(reactionIndex, dielectricReaction);	
+
+	  // Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
+	  std::list<int> plasmaReactants ;
+	  std::list<int> neutralReactants;
+	  std::list<int> photonReactants ;      
+	  std::list<int> plasmaProducts  ;
+	  std::list<int> neutralProducts ;
+	  std::list<int> photonProducts  ;            
+
+	  this->getReactionSpecies(plasmaReactants,
+				   neutralReactants,
+				   photonReactants,			       
+				   plasmaProducts,
+				   neutralProducts,			       
+				   photonProducts,
+				   curReactants,
+				   curProducts);
+
+	  // Now create the reaction -- note that surface reactions support both plasma species and photon species on
+	  // the left hand side of the reaction. 
+	  m_dielectricReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+	}
       }
     }
   }

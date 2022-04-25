@@ -760,7 +760,7 @@ namespace Physics {
       std::map<int, bool> m_electrodeReactionHasEnergyLoss;
 
       /*!
-	@brief A container which determines if we should bypass all specified reactions and rather apply an extrapolated boundary condition
+	@brief A container which determines if we should add the extrapolated flux as an inflow condition. 
       */
       std::map<int, bool> m_electrodeExtrapBC;
 
@@ -799,6 +799,11 @@ namespace Physics {
 	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
       */
       std::map<int, bool> m_dielectricReactionHasEnergyLoss;
+
+      /*!
+	@brief A container which determines if we should add the extrapolated flux as an inflow condition. 
+      */
+      std::map<int, bool> m_dielectricExtrapBC;      
 
       // ===========================================
       // DOMAIN SURFACE REACTIONS BEGIN HERE
