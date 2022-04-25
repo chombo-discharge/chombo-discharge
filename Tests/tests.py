@@ -93,7 +93,7 @@ def compile_test(silent, build_procs, dim, clean, main):
         makeCommand += "clean "
     makeCommand += str(config[str(test)]['exec'])        
 
-    print("\t Compiling with = '" + str(makeCommand) + "'")
+    print("\t Compiling with   = '" + str(makeCommand) + "'")
 
     if args.silent:
         exit_code = subprocess.call(makeCommand, shell=True, stdout=DEVNULL, stderr=DEVNULL)
@@ -183,8 +183,8 @@ for test in config.sections():
         if args.benchmark:
             print("\t Running benchmark!")
             
-        print("\t Directory is  = " + directory)
-        print("\t Input file is = " + input)
+        print("\t Directory is     = " + directory)
+        print("\t Input file is    = " + input)
         print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(dim) + "d.hdf5")
 
         # --------------------------------------------------

@@ -132,6 +132,7 @@ void Realm::regridBase(const int a_lmin){
     r.second->regridBase(a_lmin);
   }
   this->defineMFLevelGrid(a_lmin);
+  this->defineValidCells();  
 }
 
 void Realm::regridOperators(const int a_lmin){
@@ -335,6 +336,73 @@ void Realm::defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
   }
 }
 
+void Realm::defineValidCells() {
+  CH_TIME("Realm::defineValidCells");
+  if(m_verbosity > 5){
+    pout() << "Realm::defineValidCells" << endl;
+  }
+
+  constexpr int curComp  = 0;
+  constexpr int numComp  = 1;
+  constexpr int numGhost = 0;
+
+  m_validCells.resize(1 + m_finestLevel);
+
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--){
+    const bool hasFine = lvl < m_finestLevel;
+
+    m_validCells[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >(new LevelData<BaseFab<bool> >(m_grids[lvl], numComp, numGhost*IntVect::Unit));
+    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit){
+      BaseFab<bool>& validCells = (*m_validCells[lvl])[dit()];
+      validCells.setVal(true);
+    }    
+
+
+    if(hasFine){
+      // If there is a finer level then we need to coarsen that level onto the current level and set all those cells to
+      // false. I'm calling the current level the 'coarse level' and the finer level the 'fine level'. 
+
+      const DisjointBoxLayout& dblFine = m_grids[lvl+1];
+      const DisjointBoxLayout& dblCoar = m_grids[lvl  ];
+
+      // Coarsened fine grids. 
+      DisjointBoxLayout dblCoFi;
+      coarsen(dblCoFi, dblFine, m_refinementRatios[lvl]);      
+
+      // Create some data = 1 on the fine grid and = 0 on the coarse grid
+      LevelData<FArrayBox> coFiData(dblCoFi, numComp, numGhost*IntVect::Unit);
+      LevelData<FArrayBox> coarData(dblCoar, numComp, numGhost*IntVect::Unit);
+
+      for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
+	coFiData[dit()].setVal(1.0);
+      }
+
+      for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
+	coarData[dit()].setVal(0.0);
+      }
+
+      // Copy from fine to coarse.
+      coFiData.copyTo(coarData);
+
+      // Go through the coarse grid -- wherever we find a value of 1 there is also a fine grid.
+      for (DataIterator dit(dblCoar); dit.ok(); ++dit){
+	const Box cellBox = dblCoar[dit()];
+
+	BaseFab<bool>&   boolMask = (*m_validCells[lvl])[dit()];
+	const FArrayBox& fabMask  = coarData[dit()];
+
+	auto kernel = [&] (const IntVect& iv) -> void {
+	  if(fabMask(iv, curComp) > 0.0) {
+	    boolMask(iv, curComp) = false;
+	  }
+	};
+
+	BoxLoops::loop(cellBox, kernel);
+      }
+    }
+  }
+}
+
 void Realm::registerOperator(const std::string a_operator, const phase::which_phase a_phase){
   CH_TIME("Realm::registerOperator(operator, phase)");
   if(m_verbosity > 5){
@@ -491,6 +559,10 @@ const AMRMask& Realm::getMask(const std::string a_mask, const int a_buffer) cons
   }
 
   return m_masks.at(std::pair<std::string, int>(a_mask, a_buffer));
+}
+
+const AMRMask& Realm::getValidCells() const {
+  return m_validCells;
 }
 
 #include <CD_NamespaceFooter.H>

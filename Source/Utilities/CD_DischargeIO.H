@@ -20,6 +20,7 @@
 #include <DisjointBoxLayout.H>
 #include <LevelData.H>
 #include <EBCellFAB.H>
+#include <ParticleIO.H>
 #include <ProblemDomain.H>
 
 // Our includes

@@ -533,6 +533,12 @@ public:
   static void kappaScale(LevelData<MFCellFAB>& a_data);
 
   /*!
+    @brief Scale data by dx^SpaceDim
+    @param[inout] a_data Data to be scaled. On output we have a_data = dx^SpaceDim * a_data
+  */
+  static void volumeScale(EBAMRCellData& a_data, const Vector<Real>& a_dx);
+
+  /*!
     @brief Multiply data holder by another data holder
     @param[inout] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor

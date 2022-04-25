@@ -978,8 +978,6 @@ void Driver::setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen){
   if(m_verbosity > 5){
     pout() << "Driver::setGeoCoarsen(RefCountedPtr<GeoCoarsener>)" << endl;
   }
-
-  CH_assert(!a_geoCoarsen.isNull());
   
   m_geoCoarsen = a_geoCoarsen;
 }
