@@ -14,6 +14,9 @@ jobs:
     name: GNU@10.0 C++14 serial without HDF5
     runs-on: ubuntu-latest
     timeout-minutes: 300
+    strategy:
+      matrix:
+        dim: [2, 3]
     
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
@@ -40,42 +43,26 @@ jobs:
         run: |
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
 
-      - name: Build Chombo (2D)
+      - name: Build Chombo
         run: |
-          make -s -j2 DIM=2 chombo
+          make -s -j2 DIM=${{ matrix.dim}} chombo
 
-      - name: Build chombo-discharge/source (2D)
+      - name: Build chombo-discharge/source
         run: |
-          make -s -j2 DIM=2 discharge-source
+          make -s -j2 DIM=${{ matrix.dim}} discharge-source
 
-      - name: Build chombo-discharge/geometries (2D)
+      - name: Build chombo-discharge/geometries
         run: |
-          make -s -j2 DIM=2 discharge-geometries
+          make -s -j2 DIM=${{ matrix.dim}} discharge-geometries
 
-      - name: Build chombo-discharge/physics (2D)
+      - name: Build chombo-discharge/physics
         run: |
-          make -s -j2 DIM=2 discharge-physics
-
-      - name: Build Chombo (3D)
-        run: |
-          make -s -j2 DIM=3 chombo          
-
-      - name: Build chombo-discharge/source (3D)
-        run: |
-          make -s -j2 DIM=3 discharge-source
-
-      - name: Build chombo-discharge/geometries (3D)
-        run: |
-          make -s -j2 DIM=3 discharge-geometries
-
-      - name: Build chombo-discharge/physics (3D)
-        run: |
-          make -s -j2 DIM=3 discharge-physics
+          make -s -j2 DIM=${{ matrix.dim}} discharge-physics
 
       - name: Compile and run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark --silent -cores 2
+          python3 tests.py --compile --benchmark --silent -cores 2 -dim ${{ matrix.dim}}
 
   serial-hdf:
     if: github.event.pull_request.draft == false    
