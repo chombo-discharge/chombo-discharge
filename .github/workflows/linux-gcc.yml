@@ -100,23 +100,19 @@ jobs:
 
       - name: Build Chombo
         run: |
-          make -s -j2 DIM=2 chombo
+          make -s -j2 DIM=${{ matrix.dim }} chombo
 
       - name: Build chombo-discharge/source
         run: |
-          make -s -j2 DIM=2 discharge-source
+          make -s -j2 DIM=${{ matrix.dim }} discharge-source
 
       - name: Build chombo-discharge/geometries
         run: |
-          make -s -j2 DIM=2 discharge-geometries
+          make -s -j2 DIM=${{ matrix.dim }} discharge-geometries
 
       - name: Build chombo-discharge/physics
         run: |
-          make -s -j2 DIM=2 discharge-physics
-
-      - name: Build Chombo
-        run: |
-          make -s -j2 DIM=3 chombo
+          make -s -j2 DIM=${{ matrix.dim }} discharge-physics
 
       - name: Compile and run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
@@ -159,19 +155,19 @@ jobs:
 
       - name: Build Chombo
         run: |
-          make -s -j2 DIM=2 chombo
+          make -s -j2 DIM=${{ matrix.dim }} chombo
 
       - name: Build chombo-discharge/source
         run: |
-          make -s -j2 DIM=2 discharge-source
+          make -s -j2 DIM=${{ matrix.dim }} discharge-source
 
       - name: Build chombo-discharge/geometries
         run: |
-          make -s -j2 DIM=2 discharge-geometries
+          make -s -j2 DIM=${{ matrix.dim }} discharge-geometries
 
       - name: Build chombo-discharge/physics
         run: |
-          make -s -j2 DIM=2 discharge-physics
+          make -s -j2 DIM=${{ matrix.dim }} discharge-physics
 
       - name: Compile and run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
@@ -214,19 +210,19 @@ jobs:
 
       - name: Build Chombo
         run: |
-          make -s -j2 DIM=2 chombo
+          make -s -j2 DIM=${{ matrix.dim }} chombo
 
       - name: Build chombo-discharge/source
         run: |
-          make -s -j2 DIM=2 discharge-source
+          make -s -j2 DIM=${{ matrix.dim }} discharge-source
 
       - name: Build chombo-discharge/geometries
         run: |
-          make -s -j2 DIM=2 discharge-geometries
+          make -s -j2 DIM=${{ matrix.dim }} discharge-geometries
 
       - name: Build chombo-discharge/physics
         run: |
-          make -s -j2 DIM=2 discharge-physics
+          make -s -j2 DIM=${{ matrix.dim }} discharge-physics
 
       - name: Compile and run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        

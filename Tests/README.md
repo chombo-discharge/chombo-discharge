@@ -31,9 +31,10 @@ Configrable options are
 * ```--no_exec``` Compile, but do not run tests.
 * ```--no_compare``` Run, but do not compare with benchmark files.
 * ```--parallel``` Compile with MPI.
-* ```-cores #``` Run with specifies number of cores.
-* ```-suites #``` Tests suites to run. E.g. ```-suite AdvectionDiffusion Electrostatics```.
-* ```-tests #``` Specific tests to run. E.g. ```-tests AdvectionDiffusion/Godunov```.
+* ```-cores``` Run with specifies number of cores.
+* ```-suites``` Tests suites to run. E.g. ```-suite AdvectionDiffusion Electrostatics```.
+* ```-tests``` Specific tests to run. E.g. ```-tests AdvectionDiffusion/Godunov```.
+* ```-dim```Test dimensionality. E.g. ```-dim 2``` does all 2d tests. If ```-dim``` is not 2 or 3, both 2d and 3d are run. 
 
 ## Comparing benchmark files
 To compare the benchmark files with a new run, do
