@@ -63,7 +63,7 @@ jobs:
       - name: Compile and run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark --silent -cores ${{ env.CORES }} -dim ${{ matrix.dim}}
+          python3 tests.py --compile --benchmark -cores ${{ env.CORES }} -dim ${{ matrix.dim }}
 
   serial-hdf:
     if: github.event.pull_request.draft == false    
