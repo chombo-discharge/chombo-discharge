@@ -60,10 +60,15 @@ jobs:
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim}} discharge-physics
 
-      - name: Compile and run tests
+      - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark -cores ${{ env.CORES }} -dim ${{ matrix.dim }}
+          python3 tests.py --compile --clean --no_exec -cores ${{ env.CORES }} -dim ${{ matrix.dim }}
+
+      - name: Run tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          python3 tests.py -no_compare -dim ${{ matrix.dim }}
 
   serial-hdf:
     if: github.event.pull_request.draft == false    
@@ -112,14 +117,15 @@ jobs:
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} discharge-geometries
 
-      - name: Build chombo-discharge/physics
-        run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} discharge-physics
-
-      - name: Compile and run tests
+      - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark --silent -cores ${{ env.CORES }} -dim ${{ matrix.dim }}
+          python3 tests.py --compile --clean --no_exec -cores ${{ env.CORES }} -dim ${{ matrix.dim }}
+
+      - name: Run tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          python3 tests.py -no_compare -dim ${{ matrix.dim }}          
         
   mpi-no-hdf5:
     if: github.event.pull_request.draft == false        
@@ -168,14 +174,15 @@ jobs:
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} discharge-geometries
 
-      - name: Build chombo-discharge/physics
-        run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} discharge-physics
-
-      - name: Compile and run tests
+      - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark --silent -cores ${{ env.CORES }} --parallel -dim ${{ matrix.dim }}
+          python3 tests.py --compile --clean --no_exec -cores ${{ env.CORES }} -dim ${{ matrix.dim }}
+
+      - name: Run tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          python3 tests.py -no_compare -dim ${{ matrix.dim }} --parallel 
 
   mpi-hdf5:
     if: github.event.pull_request.draft == false        
@@ -228,7 +235,12 @@ jobs:
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} discharge-physics
 
-      - name: Compile and run tests
+      - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark --silent -cores ${{ env.CORES }} --parallel -dim ${{ matrix.dim }}
+          python3 tests.py --compile --clean --no_exec -cores ${{ env.CORES }} -dim ${{ matrix.dim }}
+
+      - name: Run tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          python3 tests.py -no_compare -dim ${{ matrix.dim }} --parallel 
