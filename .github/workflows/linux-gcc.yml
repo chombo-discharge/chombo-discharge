@@ -21,6 +21,7 @@ jobs:
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
+      CORES: 2
 
     steps:
       - name: Checkout chombo-discharge
@@ -45,24 +46,24 @@ jobs:
 
       - name: Build Chombo
         run: |
-          make -s -j2 DIM=${{ matrix.dim}} chombo
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim}} chombo
 
       - name: Build chombo-discharge/source
         run: |
-          make -s -j2 DIM=${{ matrix.dim}} discharge-source
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim}} discharge-source
 
       - name: Build chombo-discharge/geometries
         run: |
-          make -s -j2 DIM=${{ matrix.dim}} discharge-geometries
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim}} discharge-geometries
 
       - name: Build chombo-discharge/physics
         run: |
-          make -s -j2 DIM=${{ matrix.dim}} discharge-physics
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim}} discharge-physics
 
       - name: Compile and run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --compile --benchmark --silent -cores 2 -dim ${{ matrix.dim}}
+          python3 tests.py --compile --benchmark --silent -cores ${{ env.CORES }} -dim ${{ matrix.dim}}
 
   serial-hdf:
     if: github.event.pull_request.draft == false    
