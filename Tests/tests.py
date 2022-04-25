@@ -29,6 +29,7 @@ parser.add_argument('-exec_mpi',              help="MPI run command.", type=str,
 parser.add_argument('-cores',                 help="Number of cores to use", type=int, default=2)
 parser.add_argument('-suites',                help="Test suite (e.g. 'geometry' or 'field')", nargs='+', default="all")
 parser.add_argument('-tests',                 help="Individual tests in test suite.", nargs='+', required=False)
+parser.add_argument('-dim',                   help="Test dimensionality", type=int, default=-1, required=False)
 
 args = parser.parse_args()
 
@@ -142,12 +143,19 @@ for test in config.sections():
     if not config.has_option(str(test), 'restart'):
         do_test = False
         print(tests_file + " does not contain option [" + str(test) + "][restart]. Skipping this test")
+    if not config.has_option(str(test), 'dim'):
+        do_test = False
+        print(tests_file + " does not contain option [" + str(test) + "][dim]. Skipping this test")        
 
     # --------------------------------------------------
     # If we're not running all tests, check that the test string equals args.test
     # --------------------------------------------------
     if not args.tests:
         do_test = True
+        dim     = int(config[str(test)]['dim'])
+
+        if dim != args.dim and (args.dim==2 or args.dim==3):
+            do_test = False
     else:
         do_test = False
         if str(test) in args.tests:
@@ -157,13 +165,12 @@ for test in config.sections():
     # If moron check passed, try to run the test
     # --------------------------------------------------
     if do_test:
-        start = time.time()
         # --------------------------------------------------
         # Get test suite parameters from .ini file and
         # convert them to the types that they represent. 
         # --------------------------------------------------
         directory  = str(config[str(test)]['directory'])
-        dim        = int(config[str(test)]['dim'])
+        dim        = int(config[str(test)]['dim'])    
         executable = str(config[str(test)]['exec']) + str(dim) + "d.*.ex"
         input      = str(config[str(test)]['input'])
         nplot      = int(config[str(test)]['plot_interval'])
@@ -173,6 +180,8 @@ for test in config.sections():
             output     = str(config[str(test)]['benchmark'])
         else:
             output     = str(config[str(test)]['output'])
+
+        start = time.time()        
         
         # --------------------------------------------------
         # Print some information about the regression test 
