@@ -126,11 +126,11 @@ BrownianWalker.blob_amplitude = 1.0      # Blob amplitude
 BrownianWalker.blob_radius    = 0.5      # Blob radius
 BrownianWalker.blob_center    = 0 0.25 0 # Blob center
 BrownianWalker.seed           = 0        # RNG seed
-BrownianWalker.num_particles  = 5000000   # Number of initial particles
-BrownianWalker.cfl            = 1.0     # CFL-like number. 
+BrownianWalker.num_particles  = 5000     # Number of initial particles
+BrownianWalker.cfl            = 1.0      # CFL-like number. 
 BrownianWalker.ppc            = 16       # Target particles per cell
-BrownianWalker.load_balance   = true    # Turn on/off particle load balancing
-BrownianWalker.which_balance  = mesh    # Switch for load balancing method. Either 'mesh' or 'particle'. 
+BrownianWalker.load_balance   = true     # Turn on/off particle load balancing
+BrownianWalker.which_balance  = mesh     # Switch for load balancing method. Either 'mesh' or 'particle'. 
 
 # Velocity, diffusion, and CFL
 # ----------------------------

@@ -4,6 +4,7 @@ import argparse
 import sys
 import configparser
 import subprocess
+import time
 from subprocess import DEVNULL
 
 # This script requires Python3.5 to work properly
@@ -25,7 +26,7 @@ parser.add_argument('--no_exec',              help="Do not run executables.",   
 parser.add_argument('--no_compare',           help="Turn off HDF5 comparisons",      action='store_true')
 parser.add_argument('--parallel',             help="Run in parallel or not",         action='store_true')
 parser.add_argument('-exec_mpi',              help="MPI run command.", type=str, default="mpirun")
-parser.add_argument('-cores',                 help="Number of cores to use", type=int, default=6)
+parser.add_argument('-cores',                 help="Number of cores to use", type=int, default=2)
 parser.add_argument('-suites',                help="Test suite (e.g. 'geometry' or 'field')", nargs='+', default="all")
 parser.add_argument('-tests',                 help="Individual tests in test suite.", nargs='+', required=False)
 
@@ -129,9 +130,6 @@ for test in config.sections():
     if not config.has_option(str(test), 'output'):
         do_test = False
         print(tests_file + " does not contain option [" + str(test) + "][output]. Skipping this test")
-    if not config.has_option(str(test), 'num_procs'):
-        do_test = False
-        print(tests_file + " does not contain option [" + str(test) + "][num_procs]. Skipping this test")
     if not config.has_option(str(test), 'benchmark'):
         do_test = False
         print(tests_file + " does not contain option [" + str(test) + "][benchmark]. Skipping this test")
@@ -159,6 +157,7 @@ for test in config.sections():
     # If moron check passed, try to run the test
     # --------------------------------------------------
     if do_test:
+        start = time.time()
         # --------------------------------------------------
         # Get test suite parameters from .ini file and
         # convert them to the types that they represent. 
@@ -212,7 +211,7 @@ for test in config.sections():
         # --------------------------------------------------
         if run_suite:
             if args.no_exec:
-                print("\t Exiting test '" + str(test) + "' because of --no_exec")
+                print(f'\t Test completed   = {time.time() - start:.2f}s')                
             else:
                 # --------------------------------------------------
                 # Set up the run command
@@ -231,8 +230,8 @@ for test in config.sections():
                     runCommand = runCommand + " Driver.restart=0"
                 else:
                     runCommand = runCommand + " Driver.restart="     + str(restart)
-                        
-                print("\t Executing with '" + str(runCommand) + "'")
+
+                print("\t Executing with   = '" + str(runCommand) + "'")
 
                 # --------------------------------------------------
                 # Run the executable and print the exit code
@@ -246,6 +245,7 @@ for test in config.sections():
                 if not exit_code is 0:
                     print("\t Test run failed with exit code = " + str(exit_code))
                 else:
+                    print(f'\t Test completed   = {time.time() - start:.2f}s')                    
                     # --------------------------------------------------
                     # Do file comparison if the test ran successfully
                     # --------------------------------------------------
