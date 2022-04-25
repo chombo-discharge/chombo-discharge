@@ -22,7 +22,12 @@ python3 tests.py --compile --clean --silent --benchmark
 ```
 
 will do a clean compile of all tests and generate benchmark files.
+Configrable options are
 
+* ```--compile``` Force application to compile first.
+* ```--silent``` Turn off compiler and run-time messages. 
+
+## Comparing benchmark files
 To compare the benchmark files with a new run, do
 ```shell
 python3 tests.py --compile --clean --silent
