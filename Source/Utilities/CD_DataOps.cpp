@@ -1225,6 +1225,14 @@ void DataOps::kappaScale(LevelData<MFCellFAB>& a_data){
   MFLevelDataOps::kappaWeight(a_data);
 }
 
+void DataOps::volumeScale(EBAMRCellData& a_data, const Vector<Real>& a_dx) {
+  CH_TIME("DataOps::volumeScale(EBAMRCellData, Vector<Real>");
+
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    DataOps::scale(*a_data[lvl], std::pow(a_dx[lvl], SpaceDim));
+  }
+}
+
 void DataOps::multiply(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
   CH_TIME("DataOps::multiply(EBAMRCellData)");
   

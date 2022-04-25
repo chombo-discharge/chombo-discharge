@@ -2190,6 +2190,20 @@ const AMRMask& AmrMesh::getMask(const std::string a_mask, const int a_buffer, co
   return m_realms[a_realm]->getMask(a_mask, a_buffer);
 }
 
+const AMRMask& AmrMesh::getValidCells(const std::string a_realm) const {
+  CH_TIME("AmrMesh::getValidCells(string)");
+  if(m_verbosity > 1){
+    pout() << "AmrMesh::getValidCells(string)" << endl;
+  }
+
+  if(!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getValidCells(string) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+  
+  return m_realms[a_realm]->getValidCells();
+}
+
 const Vector<RefCountedPtr<EBLevelGrid> >& AmrMesh::getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const{
   CH_TIME("AmrMesh::getEBLevelGrid(string, phase::which_phase)");
   if(m_verbosity > 1){

@@ -11,7 +11,7 @@ discharge-source: chombo
 discharge-geometries: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Geometries
 
-discharge-physics: discharge-source advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer
+discharge-physics: discharge-source advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer tracerparticle
 
 advectiondiffusion: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/AdvectionDiffusion
@@ -31,6 +31,9 @@ geometry: discharge-source
 radiativetransfer: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/RadiativeTransfer
 
+tracerparticle: discharge-source
+	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/TracerParticle
+
 libclean:
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Source     pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Geometries pristine
@@ -42,6 +45,7 @@ allclean: libclean
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Electrostatics     pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Geometry           pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/RadiativeTransfer  pristine
+	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/TracerParticles    pristine
 	$(RM) $(DISCHARGE_HOME)/Lib/*.a
 
 pristine: allclean
@@ -50,4 +54,4 @@ pristine: allclean
 	find . -type f -name "*.d" -delete
 	find . -type f -name "*.o" -delete
 
-.PHONY: all chombo discharge-lib discharge-physics discharge-source discharge-geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer libclean allclean pristine
+.PHONY: all chombo discharge-lib discharge-physics discharge-source discharge-geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer tracerparticle libclean allclean pristine

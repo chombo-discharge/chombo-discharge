@@ -19,4 +19,4 @@ A PDF version of this documentation named :file:`chombo-discharge.pdf` will appe
 Doxygen documentation
 ---------------------
 
-A separate Doxygen documentation of the ``chombo-discharge`` code is found `here <doxygen/html/index.html>`_. 
+A separate Doxygen documentation of the ``chombo-discharge`` code is found `here <../doxygen/html/index.html>`_. 
