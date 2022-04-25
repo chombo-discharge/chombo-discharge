@@ -95,6 +95,14 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a3cc943102825613566a32f8b31d90398"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleOps.html#a3cc943102825613566a32f8b31d90398">computeParticleWeights</a> (unsigned long long &amp;a_weight, unsigned long long &amp;a_num, unsigned long long &amp;a_remainder, const unsigned long long a_numPhysicalParticles, const int a_ppc)</td></tr>
 <tr class="memdesc:a3cc943102825613566a32f8b31d90398"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute particle weights.  <a href="classParticleOps.html#a3cc943102825613566a32f8b31d90398">More...</a><br /></td></tr>
 <tr class="separator:a3cc943102825613566a32f8b31d90398"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4f91e3590080d28311e65f3359b58a2"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ac4f91e3590080d28311e65f3359b58a2"><td class="memTemplItemLeft" align="right" valign="top">static T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classParticleOps.html#ac4f91e3590080d28311e65f3359b58a2">partitionParticles</a> (const T a_numParticles)</td></tr>
+<tr class="memdesc:ac4f91e3590080d28311e65f3359b58a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles.  <a href="classParticleOps.html#ac4f91e3590080d28311e65f3359b58a2">More...</a><br /></td></tr>
+<tr class="separator:ac4f91e3590080d28311e65f3359b58a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3e24a175f858fcc5f108216e5dea5ea"><td class="memTemplParams" colspan="2">template&lt;typename P , typename T &gt; </td></tr>
+<tr class="memitem:ad3e24a175f858fcc5f108216e5dea5ea"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classParticleOps.html#ad3e24a175f858fcc5f108216e5dea5ea">drawRandomParticles</a> (List&lt; P &gt; &amp;a_particles, const T a_numParticles, const std::function&lt; RealVect()&gt; &amp;a_distribution)</td></tr>
+<tr class="memdesc:ad3e24a175f858fcc5f108216e5dea5ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a specified number of random particles distributed according to a predefined distribution.  <a href="classParticleOps.html#ad3e24a175f858fcc5f108216e5dea5ea">More...</a><br /></td></tr>
+<tr class="separator:ad3e24a175f858fcc5f108216e5dea5ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A shallow static class for doing various kinds of particle-related operations. </p>
@@ -233,6 +241,60 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ad3e24a175f858fcc5f108216e5dea5ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3e24a175f858fcc5f108216e5dea5ea">&#9670;&nbsp;</a></span>drawRandomParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P , typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleOps::drawRandomParticles </td>
+          <td>(</td>
+          <td class="paramtype">List&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_numParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; RealVect()&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_distribution</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw a specified number of random particles distributed according to a predefined distribution. </p>
+<p>The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles. P is the particle type (must derived from BinItem) and T is an integer type. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_particles</td><td>Output particles (different for each rank) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticles</td><td>Number of particles </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_distribution</td><td>Particle distribution. Must return a random position when calling the function. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a4f2914cd2dc872d5ec05a7d250a677ff"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4f2914cd2dc872d5ec05a7d250a677ff">&#9670;&nbsp;</a></span>ebIntersectionBisect()</h2>
 
@@ -364,6 +426,43 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns true if the particle crossed into the EB. </dd></dl>
+
+</div>
+</div>
+<a id="ac4f91e3590080d28311e65f3359b58a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4f91e3590080d28311e65f3359b58a2">&#9670;&nbsp;</a></span>partitionParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T ParticleOps::partitionParticles </td>
+          <td>(</td>
+          <td class="paramtype">const T&#160;</td>
+          <td class="paramname"><em>a_numParticles</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numParticles</td><td>Total number of particles to be drawn. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the number of particles drawn by each rank. </dd></dl>
 
 </div>
 </div>

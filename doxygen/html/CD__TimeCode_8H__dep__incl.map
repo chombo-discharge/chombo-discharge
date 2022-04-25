@@ -1,15 +1,16 @@
 <map id="Source/Driver/CD_TimeCode.H" name="Source/Driver/CD_TimeCode.H">
-<area shape="rect" id="node1" title="Declaration of various identifiers for &quot;time codes&quot;." alt="" coords="1171,5,1391,32"/>
-<area shape="rect" id="node2" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="1163,80,1399,107"/>
-<area shape="rect" id="node3" href="$CD__Driver_8H_source.html" title=" " alt="" coords="105,162,299,189"/>
-<area shape="rect" id="node5" href="$CD__TimeStepper_8cpp.html" title="Implementation of CD_TimeStepper.H." alt="" coords="416,162,665,189"/>
-<area shape="rect" id="node6" href="$CD__AdvectionDiffusionStepper_8H.html" title="TimeStepper class for only solving the the advection&#45;diffusion equation." alt="" coords="689,155,928,196"/>
-<area shape="rect" id="node8" href="$CD__BrownianWalkerStepper_8H.html" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="952,155,1172,196"/>
-<area shape="rect" id="node10" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="1197,155,1365,196"/>
+<area shape="rect" id="node1" title="Declaration of various identifiers for &quot;time codes&quot;." alt="" coords="1536,5,1756,32"/>
+<area shape="rect" id="node2" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="1528,80,1764,107"/>
+<area shape="rect" id="node3" href="$CD__Driver_8H_source.html" title=" " alt="" coords="227,162,420,189"/>
+<area shape="rect" id="node5" href="$CD__TimeStepper_8cpp.html" title="Implementation of CD_TimeStepper.H." alt="" coords="537,162,787,189"/>
+<area shape="rect" id="node6" href="$CD__AdvectionDiffusionStepper_8H.html" title="TimeStepper class for only solving the the advection&#45;diffusion equation." alt="" coords="811,155,1049,196"/>
+<area shape="rect" id="node8" href="$CD__BrownianWalkerStepper_8H.html" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="1073,155,1293,196"/>
+<area shape="rect" id="node10" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="1318,155,1486,196"/>
 <area shape="rect" id="node26" href="$CD__FieldStepper_8H.html" title="TimeStepper class for only solving the Poisson equation (with surface charge)" alt="" coords="1743,155,1906,196"/>
 <area shape="rect" id="node29" href="$CD__GeometryStepper_8H.html" title="Declaration of a TimeStepper class without any solver functionality, i.e. for geometries only." alt="" coords="1987,155,2150,196"/>
 <area shape="rect" id="node31" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="2389,155,2551,196"/>
 <area shape="rect" id="node41" href="$CD__RadiativeTransferStepper_8H.html" title="TimeStepper class for only evolving radiative transfer modules." alt="" coords="2955,155,3185,196"/>
+<area shape="rect" id="node43" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="3259,155,3462,196"/>
 <area shape="rect" id="node4" href="$CD__Driver_8cpp.html" title="Implementation of CD_Driver.H." alt="" coords="5,259,212,285"/>
 <area shape="rect" id="node7" href="$CD__AdvectionDiffusionStepper_8cpp.html" title="Implementation of CD_AdvectionDiffusionStepper.H." alt="" coords="237,251,487,293"/>
 <area shape="rect" id="node9" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="512,251,745,293"/>
@@ -41,4 +42,5 @@
 <area shape="rect" id="node37" href="$CD__ItoPlasmaStreamerTagger_8cpp.html" title="Implementation CD_ItoPlasmaStreamerTagger.H." alt="" coords="2363,556,2609,612"/>
 <area shape="rect" id="node40" href="$CD__ItoPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_ItoPlasmaGodunovStepper.H." alt="" coords="2671,348,2906,404"/>
 <area shape="rect" id="node42" href="$CD__RadiativeTransferStepperImplem_8H.html" title="Implementation of CD_RadiativeTransferStepper.H." alt="" coords="2930,251,3210,293"/>
+<area shape="rect" id="node44" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="3234,251,3487,293"/>
 </map>

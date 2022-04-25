@@ -59,6 +59,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
@@ -104,22 +120,6 @@
 <li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
@@ -359,7 +359,7 @@ E.g. if you only want to plot the cell-centered states you would do:</p>
 In general, we seek a method-of-lines update <span class="math notranslate nohighlight">\(\phi^{k+1} = \phi^k - \Delta t \left[\nabla\cdot \mathbf{G}^k\right]\)</span> where <span class="math notranslate nohighlight">\(\left[\nabla\cdot\mathbf{G}\right]\)</span> is a stable numerical approximation based on some finite volume approximation.</p>
 <p>Pure finite volume methods use</p>
 <div class="math notranslate nohighlight" id="equation-conservativeupdate">
-<span class="eqno">(2)<a class="headerlink" href="#equation-conservativeupdate" title="Permalink to this equation"></a></span>\[\phi^{k+1} = \phi^k - \frac{\Delta t}{\kappa \Delta x^{\textrm{DIM}}}\int_V\nabla\cdot\mathbf{G}dV,\]</div>
+<span class="eqno">(4)<a class="headerlink" href="#equation-conservativeupdate" title="Permalink to this equation"></a></span>\[\phi^{k+1} = \phi^k - \frac{\Delta t}{\kappa \Delta x^{\textrm{DIM}}}\int_V\nabla\cdot\mathbf{G}dV,\]</div>
 <p>where <span class="math notranslate nohighlight">\(\kappa\)</span> is the volume fraction of a grid cell, <span class="math notranslate nohighlight">\(\textrm{DIM}\)</span> is the spatial dimension and the volume integral is written as discretized surface integral</p>
 <div class="math notranslate nohighlight">
 \[\int_V\nabla\cdot\mathbf{G}dV =\sum_{f\in f(V)}\left(\mathbf{G}_f\cdot \mathbf{n}_f\right)\alpha_f\Delta x^{\textrm{DIM} -1}.\]</div>
@@ -369,7 +369,7 @@ In general, we seek a method-of-lines update <span class="math notranslate nohig
 <p class="caption"><span class="caption-number">Fig. 17 </span><span class="caption-text">Location of centroid fluxes for cut cells.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </div>
 <p>However, taking <span class="math notranslate nohighlight">\([\nabla\cdot\mathbf{G}^k]\)</span> to be this sum leads to a time step constraint proportional to <span class="math notranslate nohighlight">\(\kappa\)</span>, which can be arbitrarily small.
-This leads to an unacceptable time step constraint for <a class="reference internal" href="#equation-conservativeupdate">Eq. 2</a>.
+This leads to an unacceptable time step constraint for <a class="reference internal" href="#equation-conservativeupdate">Eq. 4</a>.
 We use the Chombo approach and expand the range of influence of the cut cells in order to stabilize the discretization and allow the use of a normal time step constraint.
 First, we compute the conservative divergence</p>
 <div class="math notranslate nohighlight">
@@ -554,7 +554,7 @@ We do our best to ensure that the stochastic flux is turned off when <span class
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018, SINTEF Energy Research.</p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

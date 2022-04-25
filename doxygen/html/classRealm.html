@@ -210,6 +210,10 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelG
 <tr class="memitem:ad9999cc3dcaf123cc4bb92021b0b46d3"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__Realm_8H.html#a00a65c91fe29fb97b710cfc842cb481f">AMRMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad9999cc3dcaf123cc4bb92021b0b46d3">getMask</a> (const std::string a_mask, const int a_buffer) const</td></tr>
 <tr class="memdesc:ad9999cc3dcaf123cc4bb92021b0b46d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get AMR mask.  <a href="classRealm.html#ad9999cc3dcaf123cc4bb92021b0b46d3">More...</a><br /></td></tr>
 <tr class="separator:ad9999cc3dcaf123cc4bb92021b0b46d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9413bfe2cf7f117b1c96d270c43a097f"><td class="memItemLeft" align="right" valign="top"><a id="a9413bfe2cf7f117b1c96d270c43a097f"></a>
+const <a class="el" href="CD__Realm_8H.html#a00a65c91fe29fb97b710cfc842cb481f">AMRMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a9413bfe2cf7f117b1c96d270c43a097f">getValidCells</a> () const</td></tr>
+<tr class="memdesc:a9413bfe2cf7f117b1c96d270c43a097f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all valid cells. <br /></td></tr>
+<tr class="separator:a9413bfe2cf7f117b1c96d270c43a097f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -236,6 +240,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a8215d75ea65410c314b7826ba84fb311"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a8215d75ea65410c314b7826ba84fb311">defineHaloMask</a> (LevelData&lt; BaseFab&lt; bool &gt; &gt; &amp;a_coarMask, const ProblemDomain &amp;a_domainCoar, const ProblemDomain &amp;a_domainFine, const DisjointBoxLayout &amp;a_gridsCoar, const DisjointBoxLayout &amp;a_gridsFine, const int a_buffer, const int a_refRat)</td></tr>
 <tr class="memdesc:a8215d75ea65410c314b7826ba84fb311"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define particle halo masks. This is the level-version.  <a href="classRealm.html#a8215d75ea65410c314b7826ba84fb311">More...</a><br /></td></tr>
 <tr class="separator:a8215d75ea65410c314b7826ba84fb311"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f2289a6d36fe1f903b4a05dde660e04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a5f2289a6d36fe1f903b4a05dde660e04">defineValidCells</a> ()</td></tr>
+<tr class="memdesc:a5f2289a6d36fe1f903b4a05dde660e04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the valid cell region mask.  <a href="classRealm.html#a5f2289a6d36fe1f903b4a05dde660e04">More...</a><br /></td></tr>
+<tr class="separator:a5f2289a6d36fe1f903b4a05dde660e04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2dd1d3c2178a15daa58356f9fdfe7d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classPhaseRealm.html">PhaseRealm</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad2dd1d3c2178a15daa58356f9fdfe7d5">getRealm</a> (const phase::which_phase a_phase)</td></tr>
 <tr class="memdesc:ad2dd1d3c2178a15daa58356f9fdfe7d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a particular realm.  <a href="classRealm.html#ad2dd1d3c2178a15daa58356f9fdfe7d5">More...</a><br /></td></tr>
 <tr class="separator:ad2dd1d3c2178a15daa58356f9fdfe7d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -282,6 +289,10 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelG
 RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad58b6a05eeb6da16d5d5d4cfdf619daf">m_multifluidIndexSpace</a></td></tr>
 <tr class="memdesc:ad58b6a05eeb6da16d5d5d4cfdf619daf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index spaces. <br /></td></tr>
 <tr class="separator:ad58b6a05eeb6da16d5d5d4cfdf619daf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1acd12b6e89a96865cf6dc35edc344f4"><td class="memItemLeft" align="right" valign="top"><a id="a1acd12b6e89a96865cf6dc35edc344f4"></a>
+<a class="el" href="CD__Realm_8H.html#a00a65c91fe29fb97b710cfc842cb481f">AMRMask</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a1acd12b6e89a96865cf6dc35edc344f4">m_validCells</a></td></tr>
+<tr class="memdesc:a1acd12b6e89a96865cf6dc35edc344f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mask which is true for all valid cells. <br /></td></tr>
+<tr class="separator:a1acd12b6e89a96865cf6dc35edc344f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87e0c0bd3a397036248609c566e4cfcc"><td class="memItemLeft" align="right" valign="top">std::map&lt; phase::which_phase, RefCountedPtr&lt; <a class="el" href="classPhaseRealm.html">PhaseRealm</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a87e0c0bd3a397036248609c566e4cfcc">m_realms</a></td></tr>
 <tr class="memdesc:a87e0c0bd3a397036248609c566e4cfcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase realms.  <a href="classRealm.html#a87e0c0bd3a397036248609c566e4cfcc">More...</a><br /></td></tr>
 <tr class="separator:a87e0c0bd3a397036248609c566e4cfcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -684,6 +695,39 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that changed during regrid </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5f2289a6d36fe1f903b4a05dde660e04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f2289a6d36fe1f903b4a05dde660e04">&#9670;&nbsp;</a></span>defineValidCells()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Realm::defineValidCells </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the valid cell region mask. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that changed during regrid. </td></tr>
   </table>
   </dd>
 </dl>

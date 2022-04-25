@@ -59,6 +59,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
@@ -112,22 +128,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
@@ -206,28 +206,28 @@ The source code is located in <code class="file docutils literal notranslate"><s
 <h3>Equation of motion<a class="headerlink" href="#equation-of-motion" title="Permalink to this headline"></a></h3>
 <p>In the diffusion approximation, the radiative transport equation is</p>
 <div class="math notranslate nohighlight" id="equation-transientdiffusionrte">
-<span class="eqno">(5)<a class="headerlink" href="#equation-transientdiffusionrte" title="Permalink to this equation"></a></span>\[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
+<span class="eqno">(7)<a class="headerlink" href="#equation-transientdiffusionrte" title="Permalink to this equation"></a></span>\[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\kappa\)</span> is the absorption coefficient (i.e., inverse absorption length).
 Note that in the context below, <span class="math notranslate nohighlight">\(\kappa\)</span> is <em>not</em> the volume fraction of a grid cell.
 This is called the Eddington approximation, and the radiative flux is <span class="math notranslate nohighlight">\(F = -\frac{c}{3\kappa}\nabla \Psi\)</span>.</p>
 <p>In the stationary case this yields a Helmholtz equation</p>
 <div class="math notranslate nohighlight" id="equation-stationarydiffusionrte">
-<span class="eqno">(6)<a class="headerlink" href="#equation-stationarydiffusionrte" title="Permalink to this equation"></a></span>\[\kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
+<span class="eqno">(8)<a class="headerlink" href="#equation-stationarydiffusionrte" title="Permalink to this equation"></a></span>\[\kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
 </div>
 <div class="section" id="implementation">
 <h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> uses multigrid methods for solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a>, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
-The class implements <code class="docutils literal notranslate"><span class="pre">RtSolver::advance()</span></code>, which can switch between <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a>.
-Note that for both the stationary and time-dependent cases the absorption coefficient <span class="math notranslate nohighlight">\(\kappa\)</span> in <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a> are filled using the <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> implementation provided to the solver.
+<p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> uses multigrid methods for solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 7</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 8</a>, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
+The class implements <code class="docutils literal notranslate"><span class="pre">RtSolver::advance()</span></code>, which can switch between <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 7</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 8</a>.
+Note that for both the stationary and time-dependent cases the absorption coefficient <span class="math notranslate nohighlight">\(\kappa\)</span> in <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 7</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 8</a> are filled using the <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> implementation provided to the solver.
 Also note that the absorption coefficient does not need to be constant in space.</p>
 <div class="section" id="stationary-kernel">
 <h4>Stationary kernel<a class="headerlink" href="#stationary-kernel" title="Permalink to this headline"></a></h4>
-<p>For the stationary kernel we solve <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a> directly, using a single multigrid solve.
+<p>For the stationary kernel we solve <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 8</a> directly, using a single multigrid solve.
 See <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a> for discretization details.</p>
 </div>
 <div class="section" id="transient-kernel">
 <h4>Transient kernel<a class="headerlink" href="#transient-kernel" title="Permalink to this headline"></a></h4>
-<p>For solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a>, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implements both the backward Euler method and the Twizell-Gumel-Arigu (TGA) scheme.
+<p>For solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 7</a>, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implements both the backward Euler method and the Twizell-Gumel-Arigu (TGA) scheme.
 Explicit discretizations are not available.
 The Euler discretization is</p>
 <div class="math notranslate nohighlight">
@@ -506,7 +506,7 @@ The following functions are used to set the various properties:</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018, SINTEF Energy Research.</p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

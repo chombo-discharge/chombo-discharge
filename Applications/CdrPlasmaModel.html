@@ -59,23 +59,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Design</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="ImplementedModels.html">Implemented models</a></li>
@@ -166,6 +149,23 @@
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
@@ -221,7 +221,7 @@ This physics model also includes the following subfolders:</p>
 <h2>Equations of motion<a class="headerlink" href="#equations-of-motion" title="Permalink to this headline"></a></h2>
 <p>In the CDR plasma model we are solving</p>
 <div class="math notranslate nohighlight" id="equation-cdrplasmaequations">
-<span class="eqno">(7)<a class="headerlink" href="#equation-cdrplasmaequations" title="Permalink to this equation"></a></span>\[\begin{split}\begin{align}
+<span class="eqno">(2)<a class="headerlink" href="#equation-cdrplasmaequations" title="Permalink to this equation"></a></span>\[\begin{split}\begin{align}
 &amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}, \\[1ex]
 &amp;\frac{\partial\sigma}{\partial t} = F_\sigma,\\[1ex]
 &amp;\frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n\right) = S,
@@ -242,7 +242,7 @@ They can easily be adapted to e.g. scattering media.
 They are, on the other hand, inherently stochastic which implies that some extra caution must be exercised when integrating the equations of motion.</p>
 <p>The coupling that is (currently) available in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is</p>
 <div class="math notranslate nohighlight" id="equation-cdrplasmacoupling">
-<span class="eqno">(8)<a class="headerlink" href="#equation-cdrplasmacoupling" title="Permalink to this equation"></a></span>\[\begin{split}\begin{align}
+<span class="eqno">(3)<a class="headerlink" href="#equation-cdrplasmacoupling" title="Permalink to this equation"></a></span>\[\begin{split}\begin{align}
    \epsilon_r &amp;= \epsilon_r(\mathbf{x}), (\textrm{can additionally be discontinuous}), \\[1ex]
    \mathbf{v} &amp;= \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
    D &amp;= \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
@@ -255,7 +255,7 @@ They are, on the other hand, inherently stochastic which implies that some extra
 </div>
 <div class="section" id="cdrplasmaphysics">
 <span id="chap-cdrplasmaphysics"></span><h2>CdrPlasmaPhysics<a class="headerlink" href="#cdrplasmaphysics" title="Permalink to this headline"></a></h2>
-<p><a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in <a class="reference internal" href="#equation-cdrplasmacoupling">Eq. 8</a>.
+<p><a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in <a class="reference internal" href="#equation-cdrplasmacoupling">Eq. 3</a>.
 The source code for the class resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CD_CdrPlasmaPhysics.H</span></code>.
 Note that the entire class is an interface, whose implementations are used by the time integrators that advance the equations.</p>
 <p>There are no default input parameters for <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>, as users must generally implement their own kinetics.
@@ -485,7 +485,7 @@ Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are
 </div>
 <div class="section" id="time-discretizations">
 <h2>Time discretizations<a class="headerlink" href="#time-discretizations" title="Permalink to this headline"></a></h2>
-<p>Here, we discuss two discretizations of <a class="reference internal" href="#equation-cdrplasmaequations">Eq. 7</a>.
+<p>Here, we discuss two discretizations of <a class="reference internal" href="#equation-cdrplasmaequations">Eq. 2</a>.
 Firstly, note that there are two layers to the time integrators:</p>
 <ol class="arabic simple">
 <li><p>A pure class <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> which inherits from <code class="docutils literal notranslate"><span class="pre">TimeSteppers</span></code> but does not implement an <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.
@@ -1708,7 +1708,7 @@ This must derive from <code class="docutils literal notranslate"><span class="pr
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018, SINTEF Energy Research.</p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

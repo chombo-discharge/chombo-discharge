@@ -562,7 +562,7 @@ $(function() {
 <div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit){</div>
 <div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;      <span class="keyword">const</span> EBCellFAB&amp; data    = (*a_meshScalarField[lvl])[dit()];</div>
 <div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;    </div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;      List&lt;P&gt;&amp; particles = (*a_particles[lvl])[dit()].listItems();</div>
+<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;      List&lt;P&gt;&amp; particles = a_particles[lvl][dit()].listItems();</div>
 <div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;      </div>
 <div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;      <span class="keyword">const</span> <a class="code" href="classEBParticleMesh.html">EBParticleMesh</a>&amp; interp = (*<a class="code" href="classEBAMRParticleMesh.html#aa1199b02a9b4bbf52d883148877ff427">m_ebParticleMesh</a>[lvl])[dit()];</div>
 <div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160; </div>
@@ -594,7 +594,7 @@ $(function() {
 <div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit){</div>
 <div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;      <span class="keyword">const</span> EBCellFAB&amp; data    = (*a_meshVectorField[lvl])[dit()];</div>
 <div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;    </div>
-<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;      List&lt;P&gt;&amp; particles = (*a_particles[lvl])[dit()].listItems();</div>
+<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;      List&lt;P&gt;&amp; particles = a_particles[lvl][dit()].listItems();</div>
 <div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160; </div>
 <div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;      <span class="keyword">const</span> <a class="code" href="classEBParticleMesh.html">EBParticleMesh</a>&amp; interp = (*<a class="code" href="classEBAMRParticleMesh.html#aa1199b02a9b4bbf52d883148877ff427">m_ebParticleMesh</a>[lvl])[dit()];            </div>
 <div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160; </div>

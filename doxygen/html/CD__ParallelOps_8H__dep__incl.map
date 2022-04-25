@@ -1,10 +1,14 @@
 <map id="Source/Utilities/CD_ParallelOps.H" name="Source/Utilities/CD_ParallelOps.H">
-<area shape="rect" id="node1" title="Agglomeration of basic MPI reductions." alt="" coords="701,5,845,47"/>
+<area shape="rect" id="node1" title="Agglomeration of basic MPI reductions." alt="" coords="859,5,1003,47"/>
 <area shape="rect" id="node2" href="$CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="5,95,220,136"/>
 <area shape="rect" id="node3" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="244,95,445,136"/>
 <area shape="rect" id="node4" href="$CD__Driver_8cpp.html" title="Implementation of CD_Driver.H." alt="" coords="469,102,676,129"/>
-<area shape="rect" id="node5" href="$CD__DataOps_8cpp.html" title="Implementation of CD_DataOps.H." alt="" coords="701,95,845,136"/>
-<area shape="rect" id="node6" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="869,95,1103,136"/>
-<area shape="rect" id="node7" href="$CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="1127,95,1301,136"/>
-<area shape="rect" id="node8" href="$CD__CdrPlasmaTagger_8cpp.html" title="Implementation of CD_CdrPlasmaTagger.H." alt="" coords="1326,95,1494,136"/>
+<area shape="rect" id="node5" href="$CD__TracerParticleSolverImplem_8H.html" title="Implementation of CD_TracerParticleSolver.H." alt="" coords="700,95,944,136"/>
+<area shape="rect" id="node9" href="$CD__DataOps_8cpp.html" title="Implementation of CD_DataOps.H." alt="" coords="969,95,1113,136"/>
+<area shape="rect" id="node10" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="1137,95,1371,136"/>
+<area shape="rect" id="node11" href="$CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="1395,95,1569,136"/>
+<area shape="rect" id="node12" href="$CD__CdrPlasmaTagger_8cpp.html" title="Implementation of CD_CdrPlasmaTagger.H." alt="" coords="1594,95,1762,136"/>
+<area shape="rect" id="node6" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="725,184,919,225"/>
+<area shape="rect" id="node7" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="721,273,923,315"/>
+<area shape="rect" id="node8" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="695,363,949,404"/>
 </map>

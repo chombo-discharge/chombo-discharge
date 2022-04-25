@@ -490,12 +490,13 @@ $(function() {
 </td></tr>
 <tr><td><img src="inherit_graph_57.png" border="0" usemap="#ItoParticle" alt=""/>
 <map name="ItoParticle" id="ItoParticle">
-<area shape="rect" title=" " alt="" coords="5,115,79,141"/>
+<area shape="rect" title=" " alt="" coords="5,144,79,171"/>
 <area shape="rect" href="classItoParticle.html" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="184,5,271,32"/>
 <area shape="rect" href="classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer. @deatils This inherits from Chombo&#39;s Bi..." alt="" coords="194,56,261,83"/>
 <area shape="rect" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovParticle.html" title="A particle class for use with Ito diffusion, i.e. drift&#45;diffusion brownian walkers." alt="" coords="127,107,328,149"/>
 <area shape="rect" href="classPointParticle.html" title="A particle class that only has a position and a mass." alt="" coords="176,173,279,200"/>
 <area shape="rect" href="classSimpleItoParticle.html" title="A particle class for reducing HDF5 I/O file sizes when using ItoSolver." alt="" coords="161,224,293,251"/>
+<area shape="rect" href="classTracerParticle.html" title="A tracer particle class. This is templated for holding extra storage (useful for kernels)." alt="" coords="143,275,312,301"/>
 </map>
 </td></tr>
 <tr><td><img src="inherit_graph_58.png" border="0" usemap="#ItoSolver" alt=""/>
@@ -821,7 +822,7 @@ $(function() {
 </td></tr>
 <tr><td><img src="inherit_graph_111.png" border="0" usemap="#TimeStepper" alt=""/>
 <map name="TimeStepper" id="TimeStepper">
-<area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,209,111,235"/>
+<area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,242,111,269"/>
 <area shape="rect" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html" title="Implementation of TimeStepper which runs a single advection&#45;diffusion&#45;reaction solver." alt="" coords="173,5,376,47"/>
 <area shape="rect" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html" title="Implementation of TimeStepper which advances an ItoSolver." alt="" coords="182,71,367,112"/>
 <area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="199,136,350,177"/>
@@ -829,12 +830,18 @@ $(function() {
 <area shape="rect" href="classPhysics_1_1Geometry_1_1GeometryStepper.html" title="This implementation does absolutely nothing – it instantiates a TimeStepper with empty functionality." alt="" coords="199,267,350,308"/>
 <area shape="rect" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html" title=" " alt="" coords="202,332,347,373"/>
 <area shape="rect" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html" title="Implementation of TimeStepper for solving for a single radiative transfer species...." alt="" coords="159,397,391,439"/>
+<area shape="rect" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html" title="Implementation of TimeStepper for advancing tracer particles in a fixed velocity field." alt="" coords="172,463,377,504"/>
 <area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="439,104,647,145"/>
 <area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html" title="Class for evolving plasma equations using implicit&#45;explicit spectral deferred corrections." alt="" coords="439,169,646,211"/>
 <area shape="rect" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html" title=" " alt="" coords="441,332,644,373"/>
 </map>
 </td></tr>
-<tr><td><img src="inherit_graph_112.png" border="0" usemap="#VofUtils" alt=""/>
+<tr><td><img src="inherit_graph_112.png" border="0" usemap="#TracerParticleSolver_3_01P_01_4" alt=""/>
+<map name="TracerParticleSolver_3_01P_01_4" id="TracerParticleSolver_3_01P_01_4">
+<area shape="rect" href="classTracerParticleSolver.html" title="Base class for a tracer particle solver. This solver can advance particles in a pre&#45;defined velocity ..." alt="" coords="5,5,193,32"/>
+</map>
+</td></tr>
+<tr><td><img src="inherit_graph_113.png" border="0" usemap="#VofUtils" alt=""/>
 <map name="VofUtils" id="VofUtils">
 <area shape="rect" href="classVofUtils.html" title="Static class which contains some routines for fetching VoFs using various algorithms...." alt="" coords="5,5,79,32"/>
 </map>

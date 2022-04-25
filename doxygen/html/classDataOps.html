@@ -265,6 +265,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a0b4e399aab0ca657b6c746eaf99807f8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a0b4e399aab0ca657b6c746eaf99807f8">kappaScale</a> (LevelData&lt; MFCellFAB &gt; &amp;a_data)</td></tr>
 <tr class="memdesc:a0b4e399aab0ca657b6c746eaf99807f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by volume fraction.  <a href="classDataOps.html#a0b4e399aab0ca657b6c746eaf99807f8">More...</a><br /></td></tr>
 <tr class="separator:a0b4e399aab0ca657b6c746eaf99807f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b3e0e1adb30575c6a4342f5bb5931de"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a2b3e0e1adb30575c6a4342f5bb5931de">volumeScale</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const Vector&lt; Real &gt; &amp;a_dx)</td></tr>
+<tr class="memdesc:a2b3e0e1adb30575c6a4342f5bb5931de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by dx^SpaceDim.  <a href="classDataOps.html#a2b3e0e1adb30575c6a4342f5bb5931de">More...</a><br /></td></tr>
+<tr class="separator:a2b3e0e1adb30575c6a4342f5bb5931de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72685cbfeebb9d46777890fbf5a0b3e6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a72685cbfeebb9d46777890fbf5a0b3e6">multiply</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_rhs)</td></tr>
 <tr class="memdesc:a72685cbfeebb9d46777890fbf5a0b3e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multiply data holder by another data holder.  <a href="classDataOps.html#a72685cbfeebb9d46777890fbf5a0b3e6">More...</a><br /></td></tr>
 <tr class="separator:a72685cbfeebb9d46777890fbf5a0b3e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -6669,6 +6672,50 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>a_lhs must have one component and a_rhs must have SpaceDim components. </dd></dl>
+
+</div>
+</div>
+<a id="a2b3e0e1adb30575c6a4342f5bb5931de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b3e0e1adb30575c6a4342f5bb5931de">&#9670;&nbsp;</a></span>volumeScale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::volumeScale </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Scale data by dx^SpaceDim. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be scaled. On output we have a_data = dx^SpaceDim * a_data </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

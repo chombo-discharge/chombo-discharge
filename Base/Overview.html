@@ -64,6 +64,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
@@ -80,22 +96,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
@@ -144,14 +144,21 @@
 <h2>History<a class="headerlink" href="#history" title="Permalink to this headline"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is aimed at solving discharge problems.
 It was originally developed at SINTEF Energy Research between 2015-2018, and aimed at elucidating discharge dynamics in high-voltage engineering.
-Further development was started in 2021, where much of the code was completely redesigned both for improved modularity and enhanced performance.</p>
+Further development was started in 2021, where much of the code was completely redesigned both for improved modularity and performance.</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is distributed via <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">GitHub</a>.
-The master branch is essentially isolated, and changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> are permitted through pull requests (after code review and passing a test suite).</p>
+The main branch is isolated, and changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> are done through pull requests (after code review and passing a test suite).</p>
 </div>
 <div class="section" id="key-functionalities">
 <h2>Key functionalities<a class="headerlink" href="#key-functionalities" title="Permalink to this headline"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses a Cartesian embedded boundary (EB) grid formulation and adaptive mesh refinement (AMR) formalism where the grids frequently change and are adapted to the solution as simulations progress.
-Key functionalities are provided in <a class="reference internal" href="#tab-keycapabilities"><span class="std std-numref">Table 1</span></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses a Cartesian embedded boundary (EB) grid formulation and adaptive mesh refinement (AMR) formalism where the grids frequently change and are adapted to the solution as simulations progress.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is <strong>not</strong> a black-box model for discharge applications.
+It is an evolving research code with occasionally expanded capabilities, API changes, and performance improvements.
+Although problems can be set up through our Python toos, users should nonetheless be willing to take time to understand how the code works.
+In particular, developers should invest some effort in understanding the data structures and <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> basics (see <a class="reference internal" href="../Source/ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a>).</p>
+</div>
+<p>Key functionalities are provided in <a class="reference internal" href="#tab-keycapabilities"><span class="std std-numref">Table 1</span></a>.</p>
 <span id="tab-keycapabilities"></span><table class="colwidths-given docutils align-default" id="id1">
 <caption><span class="caption-number">Table 1 </span><span class="caption-text">Key capabilities in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -191,6 +198,9 @@ Key functionalities are provided in <a class="reference internal" href="#tab-key
 <tr class="row-even"><td><p>Parallel IO?</p></td>
 <td><p><strong>Yes</strong>, using HDF5.</p></td>
 </tr>
+<tr class="row-odd"><td><p>Checkpoint-restart?</p></td>
+<td><p><strong>Yes</strong>, for both fluid and particles.</p></td>
+</tr>
 </tbody>
 </table>
 <p>An early version of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> used sub-cycling in time, but this has now been replaced with global time stepping methods.
@@ -199,7 +209,7 @@ That is, all the AMR levels are advanced using the same time step.
 This includes much faster grid generation, support for polygon surfaces, and many performance optimizations (in particular to the EB formulation).</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports both fluid and particle methods, and can use multply parallel distributed grids (see <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>) for individually load balancing e.g. the fluid and particle grids.
 Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and still use the embedded boundary formalism, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also provides several physics modules for describing various types of problems.
-These modules reside in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics</span></code>.</p>
+These modules reside in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics</span></code> and are also listed in <a class="reference internal" href="../Applications/ImplementedModels.html#chap-implementedmodels"><span class="std std-ref">Implemented models</span></a>.</p>
 </div>
 <div class="section" id="design-approach">
 <h2>Design approach<a class="headerlink" href="#design-approach" title="Permalink to this headline"></a></h2>
@@ -245,7 +255,7 @@ Fundamentally, it is also possible to couple different application codes.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018, SINTEF Energy Research.</p>
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
