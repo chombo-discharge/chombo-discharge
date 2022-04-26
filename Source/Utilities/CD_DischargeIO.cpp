@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <CH_HDF5.H>
+#include <EBAMRIO.H>
 #include <PolyGeom.H>
 
 // Our includes
@@ -321,6 +322,21 @@ void DischargeIO::writeEBHDF5(const std::string&                     a_filename,
   for (int lvl = 0; lvl < a_numLevels; lvl++) {
     delete chomboData[lvl];
   }  
+}
+#endif
+
+#ifdef CH_USE_HDF5
+void DischargeIO::writeEBHDF5(const EBAMRCellData& a_data,
+			      const std::string&   a_file) {
+  CH_TIME("DischargeIO::writeEBHDF5(debug)");
+
+  Vector<LevelData<EBCellFAB>* > raw(a_data.size());
+
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    raw[lvl] = &(*a_data[lvl]);
+  }
+
+  writeEBAMRname(&raw, a_file.c_str());
 }
 #endif
 

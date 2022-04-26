@@ -24,6 +24,7 @@
 #include <ProblemDomain.H>
 
 // Our includes
+#include <CD_EBAMRData.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -60,6 +61,16 @@ namespace DischargeIO {
 		   const RealVect                         a_probLo,
 		   const int                              a_numLevels,
 		   const int                              a_numGhost);
+#endif
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Debugging function for quickly writing EBAMRCellData to HDF5
+    @param[in] a_data Cell-centered EB+AMR data
+    @param[in] a_file File name
+  */
+  void writeEBHDF5(const EBAMRCellData& a_data,
+		   const std::string&   a_file);
 #endif
 
 }
