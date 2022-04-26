@@ -846,8 +846,9 @@ namespace Physics {
 
       /*!
 	@brief A container which determines if we should add the extrapolated flux as an inflow condition. 
+	@details The first entry in the map is the species integer index. The tuple indicates (coordinate_direction, side, doExtrap).
       */
-      std::map<std::pair<int, Side::LoHiSide>, bool> m_domainExtrapBC;
+      std::map<int, std::tuple<int, Side::LoHiSide, bool> > m_domainExtrapBC;
 
       // ===========================================
       // VARIOUS MEMBER FUNCTIONS BEGIN HERE 

@@ -3258,6 +3258,16 @@ void CdrPlasmaJSON::parseDomainReactions(){
   if(m_verbose){
     pout() << "CdrPlasmaJSON::parseDomainReactions()" << endl;
   }
+
+  // For all our species, set the extrap BC flag to 'false'. Specifying reactions to be 'extrap' is equivalent
+  // to adding an extrapolated influx to the species.
+  for (const auto& m : m_cdrSpeciesMap) {
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      for (SideIterator sit; sit.ok(); ++sit){
+	m_domainExtrapBC.emplace(m.second, std::make_tuple(dir, sit(), false));
+      }
+    }
+  }    
   
   // Check if JSON file contains domain reactions
   if(m_json.contains("domain reactions")){
