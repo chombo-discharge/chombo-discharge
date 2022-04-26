@@ -152,8 +152,12 @@ void CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
 
     // We don't want to compute slopes using data that lies outside the domain boundary -- that data can be bogus. So,
     // compute the strip of cells and check if these cells are in a_cellBox. 
-    const Box bndryLo   = bdryLo(domainBox, dir, 1); // Strip of cells on the low side in coordinate direction dir
-    const Box bndryHi   = bdryHi(domainBox, dir, 1); // Strip of cells on the high side in coordinate direction dir
+    const Box bndryLo   = adjCellLo(domainBox, dir, 1); // Strip of cells on the low side in coordinate direction dir
+    const Box bndryHi   = adjCellHi(domainBox, dir, 1); // Strip of cells on the high side in coordinate direction dir
+
+    CH_assert(domainBox.cellCentered());
+    CH_assert(bndryLo.  cellCentered());
+    CH_assert(bndryHi.  cellCentered());    
 
     // We need the slopes outside the grid patch so grow the box by 1. 
     const Box compBox   = grow(a_cellBox, 1) & domainBox;        
