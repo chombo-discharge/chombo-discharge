@@ -211,7 +211,7 @@ for test in config.sections():
                                         dim=dim,
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
-            if not compile_code is 0:
+            if compile_code != 0:
                 print("\t Compilation of test '" + str(test) + "' failed. Aborting this regression test.")
                 run_suite = False
 
@@ -251,7 +251,7 @@ for test in config.sections():
                 else:
                     exit_code = subprocess.call(runCommand, shell=True)
                     
-                if not exit_code is 0:
+                if exit_code != 0:
                     print("\t Test run failed with exit code = " + str(exit_code))
                 else:
                     print(f'\t Test completed   = {time.time() - start:.2f}s')                    
@@ -293,7 +293,7 @@ for test in config.sections():
                                 else:
                                     compare_code = subprocess.call(compare_command, shell=True)
                                     
-                                    if not compare_code is 0:
+                                    if compare_code != 0:
                                         print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
                                     else:
                                         print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
