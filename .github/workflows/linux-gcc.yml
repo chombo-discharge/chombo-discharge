@@ -68,7 +68,7 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --no_compare -dim ${{ matrix.dim }}
+          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent
 
   serial-hdf:
     if: github.event.pull_request.draft == false    
@@ -125,7 +125,7 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --no_compare -dim ${{ matrix.dim }}          
+          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent
         
   mpi-no-hdf5:
     if: github.event.pull_request.draft == false        
@@ -182,7 +182,7 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --no_compare -dim ${{ matrix.dim }} --parallel 
+          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent --parallel -cores ${{ env.CORES }}
 
   mpi-hdf5:
     if: github.event.pull_request.draft == false        
@@ -243,4 +243,4 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --no_compare -dim ${{ matrix.dim }} --parallel 
+          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent --parallel -cores ${{ env.CORES }}

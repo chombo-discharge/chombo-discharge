@@ -80,7 +80,7 @@ jobs:
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
           source /opt/intel/oneapi/setvars.sh
-          python3 tests.py --no_compare -dim ${{ matrix.dim }}
+          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent
 
   mpi-no-hdf:
     if: github.event.pull_request.draft == false  
@@ -153,4 +153,4 @@ jobs:
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
           source /opt/intel/oneapi/setvars.sh
-          python3 tests.py --no_compare -dim ${{ matrix.dim }} --parallel -cores ${{ env.CORES }}
+          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent --parallel -cores ${{ env.CORES }}
