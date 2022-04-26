@@ -153,4 +153,4 @@ jobs:
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
           source /opt/intel/oneapi/setvars.sh
-          python3 tests.py --no_compare -dim ${{ matrix.dim }} --parallel -cores ${{ env.CORES }}
+          python3 tests.py --no_compare -dim ${{ matrix.dim }} --parallel -cores ${{ env.CORES }} -exec_mpi=mpiexec
