@@ -38,6 +38,11 @@ args = parser.parse_args()
 # --------------
 baseDir = os.getcwd()
 
+# ---------
+# Exit code
+# ---------
+ret_code = 0
+
 
 # -------------------------------------------------------
 # Set up test suite. If 'suite' is all, do all test files
@@ -214,6 +219,7 @@ for test in config.sections():
             if compile_code != 0:
                 print("\t Compilation of test '" + str(test) + "' failed. Aborting this regression test.")
                 run_suite = False
+                ret_code = 1
 
         # --------------------------------------------------
         # Run the test suite
@@ -250,9 +256,11 @@ for test in config.sections():
                     exit_code = subprocess.call(runCommand, shell=True, stdout=DEVNULL, stderr=DEVNULL)
                 else:
                     exit_code = subprocess.call(runCommand, shell=True)
-                    
+
+
                 if exit_code != 0:
                     print("\t Test run failed with exit code = " + str(exit_code))
+                    ret_code = 2
                 else:
                     print(f'\t Test completed   = {time.time() - start:.2f}s')                    
                     # --------------------------------------------------
@@ -297,3 +305,5 @@ for test in config.sections():
                                         print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
                                     else:
                                         print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
+
+exit(ret_code)
