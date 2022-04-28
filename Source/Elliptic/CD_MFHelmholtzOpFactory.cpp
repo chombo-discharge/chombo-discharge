@@ -728,9 +728,9 @@ void MFHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_c
       MultifluidAlias::aliasMF(fineBco,      i, a_fineBcoef);
       MultifluidAlias::aliasMF(fineBcoIrreg, i, a_fineBcoefIrreg);
 
-      aveOp.average(coarAco,      fineAco,      interv);
-      aveOp.average(coarBco,      fineBco,      interv);
-      aveOp.average(coarBcoIrreg, fineBcoIrreg, interv);
+      aveOp.average            (coarAco,      fineAco,      interv);
+      aveOp.averageFaceData    (coarBco,      fineBco,      interv);
+      aveOp.conservativeAverage(coarBcoIrreg, fineBcoIrreg, interv);
 
       coarAco.     exchange();
       coarBco.     exchange();
