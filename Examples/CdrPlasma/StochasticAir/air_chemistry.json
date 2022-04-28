@@ -370,5 +370,11 @@
        "scale": 1.0       
      },
      {"reaction": "e -> extrap"}
- ] 
+ ],
+ "domain reactions":
+ [
+     {"reaction": "e -> extrap",
+      "side": ["y_lo"]
+     }
+ ]
 }
