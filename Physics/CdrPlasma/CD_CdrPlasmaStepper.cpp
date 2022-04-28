@@ -222,7 +222,6 @@ void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivi
   DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
 #endif
 
-
 #if 1
   // Now compute the conductivity on the EB. 
   const auto& interpStencil = m_amr->getCentroidInterpolationStencils(m_realm, m_phase);
@@ -231,6 +230,10 @@ void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivi
   DataOps::setValue(a_conductivityEB, 0.0);
   DataOps::incr(a_conductivityEB, a_conductivityCell, 1.0);
 #endif
+
+  // Coarsen coefficients. 
+  m_amr->averageFaces       (a_conductivityFace, m_realm, phase::gas);
+  m_amr->conservativeAverage(a_conductivityEB,   m_realm, phase::gas);
 }
 
 void CdrPlasmaStepper::setupSemiImplicitPoisson(const Real a_dt){
@@ -291,6 +294,10 @@ void CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductiv
   // given by epsr + a_factor*sigma
   DataOps::incr(permFaceGas, a_conductivityFace, a_factor);
   DataOps::incr(permEBGas,   a_conductivityEB,   a_factor);
+
+  // Coarsen coefficients. 
+  m_amr->averageFaces       (permFaceGas, m_realm, phase::gas);
+  m_amr->conservativeAverage(permEBGas,   m_realm, phase::gas);  
 
   // Set up the solver with the new "permittivities".
   m_fieldSolver->setupSolver();
