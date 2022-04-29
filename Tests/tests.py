@@ -4,6 +4,7 @@ import argparse
 import sys
 import configparser
 import subprocess
+import time
 from subprocess import DEVNULL
 
 # This script requires Python3.5 to work properly
@@ -25,9 +26,10 @@ parser.add_argument('--no_exec',              help="Do not run executables.",   
 parser.add_argument('--no_compare',           help="Turn off HDF5 comparisons",      action='store_true')
 parser.add_argument('--parallel',             help="Run in parallel or not",         action='store_true')
 parser.add_argument('-exec_mpi',              help="MPI run command.", type=str, default="mpirun")
-parser.add_argument('-cores',                 help="Number of cores to use", type=int, default=6)
+parser.add_argument('-cores',                 help="Number of cores to use", type=int, default=2)
 parser.add_argument('-suites',                help="Test suite (e.g. 'geometry' or 'field')", nargs='+', default="all")
 parser.add_argument('-tests',                 help="Individual tests in test suite.", nargs='+', required=False)
+parser.add_argument('-dim',                   help="Test dimensionality", type=int, default=-1, required=False)
 
 args = parser.parse_args()
 
@@ -35,6 +37,11 @@ args = parser.parse_args()
 # Base directory.
 # --------------
 baseDir = os.getcwd()
+
+# ---------
+# Exit code
+# ---------
+ret_code = 0
 
 
 # -------------------------------------------------------
@@ -129,9 +136,6 @@ for test in config.sections():
     if not config.has_option(str(test), 'output'):
         do_test = False
         print(tests_file + " does not contain option [" + str(test) + "][output]. Skipping this test")
-    if not config.has_option(str(test), 'num_procs'):
-        do_test = False
-        print(tests_file + " does not contain option [" + str(test) + "][num_procs]. Skipping this test")
     if not config.has_option(str(test), 'benchmark'):
         do_test = False
         print(tests_file + " does not contain option [" + str(test) + "][benchmark]. Skipping this test")
@@ -144,12 +148,19 @@ for test in config.sections():
     if not config.has_option(str(test), 'restart'):
         do_test = False
         print(tests_file + " does not contain option [" + str(test) + "][restart]. Skipping this test")
+    if not config.has_option(str(test), 'dim'):
+        do_test = False
+        print(tests_file + " does not contain option [" + str(test) + "][dim]. Skipping this test")        
 
     # --------------------------------------------------
     # If we're not running all tests, check that the test string equals args.test
     # --------------------------------------------------
     if not args.tests:
         do_test = True
+        dim     = int(config[str(test)]['dim'])
+
+        if dim != args.dim and (args.dim==2 or args.dim==3):
+            do_test = False
     else:
         do_test = False
         if str(test) in args.tests:
@@ -164,7 +175,7 @@ for test in config.sections():
         # convert them to the types that they represent. 
         # --------------------------------------------------
         directory  = str(config[str(test)]['directory'])
-        dim        = int(config[str(test)]['dim'])
+        dim        = int(config[str(test)]['dim'])    
         executable = str(config[str(test)]['exec']) + str(dim) + "d.*.ex"
         input      = str(config[str(test)]['input'])
         nplot      = int(config[str(test)]['plot_interval'])
@@ -174,6 +185,8 @@ for test in config.sections():
             output     = str(config[str(test)]['benchmark'])
         else:
             output     = str(config[str(test)]['output'])
+
+        start = time.time()        
         
         # --------------------------------------------------
         # Print some information about the regression test 
@@ -203,16 +216,17 @@ for test in config.sections():
                                         dim=dim,
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
-            if not compile_code is 0:
+            if compile_code != 0:
                 print("\t Compilation of test '" + str(test) + "' failed. Aborting this regression test.")
                 run_suite = False
+                ret_code = 1
 
         # --------------------------------------------------
         # Run the test suite
         # --------------------------------------------------
         if run_suite:
             if args.no_exec:
-                print("\t Exiting test '" + str(test) + "' because of --no_exec")
+                print(f'\t Test completed   = {time.time() - start:.2f}s')                
             else:
                 # --------------------------------------------------
                 # Set up the run command
@@ -231,8 +245,8 @@ for test in config.sections():
                     runCommand = runCommand + " Driver.restart=0"
                 else:
                     runCommand = runCommand + " Driver.restart="     + str(restart)
-                        
-                print("\t Executing with '" + str(runCommand) + "'")
+
+                print("\t Executing with   = '" + str(runCommand) + "'")
 
                 # --------------------------------------------------
                 # Run the executable and print the exit code
@@ -242,10 +256,13 @@ for test in config.sections():
                     exit_code = subprocess.call(runCommand, shell=True, stdout=DEVNULL, stderr=DEVNULL)
                 else:
                     exit_code = subprocess.call(runCommand, shell=True)
-                    
-                if not exit_code is 0:
+
+
+                if exit_code != 0:
                     print("\t Test run failed with exit code = " + str(exit_code))
+                    ret_code = 2
                 else:
+                    print(f'\t Test completed   = {time.time() - start:.2f}s')                    
                     # --------------------------------------------------
                     # Do file comparison if the test ran successfully
                     # --------------------------------------------------
@@ -284,7 +301,9 @@ for test in config.sections():
                                 else:
                                     compare_code = subprocess.call(compare_command, shell=True)
                                     
-                                    if not compare_code is 0:
+                                    if compare_code != 0:
                                         print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
                                     else:
                                         print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
+
+exit(ret_code)

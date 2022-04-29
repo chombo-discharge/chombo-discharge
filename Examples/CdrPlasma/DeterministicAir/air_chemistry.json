@@ -51,8 +51,8 @@
 	     [
 		 {
 		     "radius": 100E-6,
-		     "amplitude": 1.0E10,
-		     "position": [0, 7.5E-3, 0]
+		     "amplitude": 1.0E19,
+		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
 	 },
@@ -83,8 +83,8 @@
 	     [
 		 {
 		     "radius": 100E-6,
-		     "amplitude": 0.8E10,
-		     "position": [0, 7.5E-3, 0]
+		     "amplitude": 0.8E19,
+		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
 	 }
@@ -104,8 +104,8 @@
 	     [
 		 {
 		     "radius": 100E-6,
-		     "amplitude": 0.2E10,
-		     "position": [0, 7.5E-3, 0]
+		     "amplitude": 0.2E19,
+		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
 	 }
@@ -432,6 +432,9 @@
        "lookup": "constant",
        "value": 1E-3,
        "scale": 0.0
+     },
+     { "reaction": "@ -> extrap",
+       "@": ["e"]
      }
  ],
  "dielectric reactions":

@@ -286,7 +286,7 @@ void CdrPlasmaAir9EedBourdon::advanceReactionNetwork(Vector<Real>&          a_cd
   const Real Te              = Max(300., 2.0*(Electron_energy*Units::Qe)/(3.0*Units::kb));  // Kelvin
   const Real EbyN            = (a_E/(m_N*Units::Td)).vectorLength();
 
-#if 1 // Debug
+#if 0 // Debug
   if(Electron_energy > 1.E6) std::cout << Electron_energy << std::endl;
 #endif
 
