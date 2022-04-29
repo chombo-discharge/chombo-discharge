@@ -77,6 +77,7 @@ FieldSolverMultigrid.bc.x.hi   = neumann 0.0          # Bc type.
 FieldSolverMultigrid.bc.y.lo   = dirichlet 0.0     # Bc type.
 FieldSolverMultigrid.bc.y.hi   = dirichlet 1.0     # Bc type.
 FieldSolverMultigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)	
 
 FieldSolverMultigrid.gmg_verbosity     = -1        # GMG verbosity
