@@ -101,7 +101,32 @@ public:
   */
   void regridMinMod(LevelData<EBCellFAB>&       a_fineData,
 		    const LevelData<EBCellFAB>& a_coarData,
-		    const Interval&             a_variables);  
+		    const Interval&             a_variables);
+
+protected:
+
+  /*!
+    @brief Fine grid.
+  */
+  EBLevelGrid m_eblgFine;
+
+  /*!
+    @brief Coarse grid
+  */
+  EBLevelGrid m_eblgCoar;
+
+  /*!
+    @brief Piecewise constant interpolation of an EBCellFAB 
+    @param[out] a_fineData  Piecewise constant interpolation of the coarse data.
+    @param[in]  a_coarData  Coarse data
+    @param[in]  a_dit       Grid index. 
+    @param[in]  a_variables Variables to interpolate. 
+  */
+  void regridNoSlopes(EBCellFAB&       a_fineData,
+		      const EBCellFAB& a_coarData,
+		      const DataIndex& a_dit,
+		      const Interval&  a_variables);
+  
 };
 
 #include <CD_NamespaceFooter.H>

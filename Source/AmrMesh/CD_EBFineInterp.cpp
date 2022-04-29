@@ -14,6 +14,7 @@
 
 // Our includes
 #include <CD_EBFineInterp.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 EBFineInterp::EBFineInterp() {
@@ -54,6 +55,9 @@ void EBFineInterp::define(const EBLevelGrid&        a_eblgFine,
 			  a_refRat,
 			  a_nComp,
 			  a_ebisPtr);
+
+  m_eblgFine = a_eblgFine;
+  m_eblgCoar = a_eblgCoar;
 }
 
 void EBFineInterp::regridNoSlopes(LevelData<EBCellFAB>&       a_fineData,
@@ -61,7 +65,78 @@ void EBFineInterp::regridNoSlopes(LevelData<EBCellFAB>&       a_fineData,
 				  const Interval&             a_variables) {
   CH_TIME("EBFineInterp::regridNoSlopes");
 
-  MayDay::Abort("EBFineInterp::regridNoSlopes -- not implemented (yet)");
+  CH_assert(m_isDefined);
+
+  a_coarData.copyTo(a_variables, m_coarsenedFineData, a_variables);
+
+  for (DataIterator dit(m_coarsenedFineGrids); dit.ok(); ++dit) {
+
+    this->regridNoSlopes(a_fineData[dit()],
+			 m_coarsenedFineData[dit()],
+			 dit(),
+			 a_variables);
+  }
+}
+
+void EBFineInterp::regridNoSlopes(EBCellFAB&       a_fineData,
+				  const EBCellFAB& a_coarData,
+				  const DataIndex& a_dit,
+				  const Interval&  a_variables) {
+  CH_TIME("EBFineInterp::regridNoSlopes");
+
+  const Box coarBox = m_coarsenedFineGrids[a_dit];
+  const Box refiBox = Box(IntVect::Zero, (m_refRat-1)*IntVect::Unit);
+
+  FArrayBox&       fineDataReg = a_fineData.getFArrayBox();
+  const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
+
+  const EBISBox& ebisBoxCoar = m_coarsenedFineEBISL [a_dit];
+  const EBISBox& ebisBoxFine = m_eblgFine.getEBISL()[a_dit];  
+  
+  for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
+
+    // Regular kernel. Set the fine data equal to the coarse data. 
+    auto regularKernel = [&](const IntVect& coarIV) -> void
+      {
+	const Real& coarVal = coarDataReg(coarIV, ivar);
+	
+	for (BoxIterator bit(refiBox); bit.ok(); ++bit) {
+	  const IntVect& fineIV = m_refRat * coarIV + bit();
+	  fineDataReg(fineIV, ivar) = coarVal;
+	}
+      };
+
+    auto irregularKernel = [&] (const VolIndex& coarVoF) -> void
+      {
+	const Vector<VolIndex> fineVoFs = m_coarsenedFineEBISL.refine(coarVoF, m_refRat, a_dit);
+
+	// Compute kappaCoar/sum(kappaFine)
+	Real kappaFactor = 0.0;
+	for (int i = 0; i < fineVoFs.size(); i++) {
+	  kappaFactor += ebisBoxFine.volFrac(fineVoFs[i]);
+	}
+
+	if(kappaFactor > 1.E-9) {
+	  kappaFactor = ebisBoxCoar.volFrac(coarVoF)/kappaFactor;
+	}
+	else{
+	  kappaFactor = 1.0;
+	}
+
+	// Initialize irregular data.
+	for (int i = 0; i < fineVoFs.size(); i++) {
+	  a_fineData(fineVoFs[i], ivar) = kappaFactor * a_coarData(coarVoF, ivar);
+	}
+	
+      };
+
+
+    // Irregular kernel region.
+    VoFIterator vofit(m_irregRegions[a_dit], ebisBoxCoar.getEBGraph());
+    
+    BoxLoops::loop(coarBox,   regularKernel);
+    BoxLoops::loop(vofit,   irregularKernel);
+  }
 }
 
 void EBFineInterp::regridMinMod(LevelData<EBCellFAB>&       a_fineData,
