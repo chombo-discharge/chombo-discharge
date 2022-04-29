@@ -135,6 +135,7 @@ EddingtonSP1.reflectivity        = 0.        # Reflectivity
 EddingtonSP1.use_tga             = false     # Use TGA for integration
 EddingtonSP1.kappa_scale         = false        # Kappa scale source or not (depends on algorithm)
 EddingtonSP1.plt_vars            = phi src   # Plot variables. Available are 'phi' and 'src'
+EddingtonSP1.use_regrid_slopes   = true         # Slopes on/off when regridding
 EddingtonSP1.gmg_verbosity       = -1        # GMG verbosity
 EddingtonSP1.gmg_pre_smooth      = 8         # Number of relaxations in downsweep
 EddingtonSP1.gmg_post_smooth     = 8         # Number of relaxations in upsweep

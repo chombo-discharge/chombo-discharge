@@ -44,7 +44,8 @@ EddingtonSP1::EddingtonSP1() : RtSolver() {
   
   m_verbosity     = -1;
   m_isSolverSetup = false;
-  m_dataLocation  = Location::Cell::Center;  
+  m_dataLocation  = Location::Cell::Center;
+  m_regridSlopes  = true;
   
   this->setDefaultDomainBcFunctions(); // This fills m_domainBcFunctions with s_defaultDomainBcFunction on every domain side. 
 }
@@ -65,6 +66,7 @@ void EddingtonSP1::parseOptions(){
   this->parsePlotVariables();     // Parses plot variables
   this->parseMultigridSettings(); // Parses solver parameters for geometric multigrid
   this->parseKappaScale();        // Parses kappa-scaling
+  this->parseRegridSlopes();      // Slopes on/off when regridding
 }
 
 void EddingtonSP1::parseRuntimeOptions(){
@@ -76,6 +78,7 @@ void EddingtonSP1::parseRuntimeOptions(){
   this->parsePlotVariables();     // Parses plot variables
   this->parseMultigridSettings(); // Parses solver parameters for geometric multigrid
   this->parseKappaScale();        // Parses kappa-scaling
+  this->parseRegridSlopes();      // Slopes on/off when regridding  
 }
 
 void EddingtonSP1::setDefaultDomainBcFunctions(){
@@ -411,6 +414,17 @@ void EddingtonSP1::parseReflection(){
   m_reflectCoefTwo = r/(3.0);
 }
 
+void EddingtonSP1::parseRegridSlopes(){
+  CH_TIME("FieldSolver::parseRegridSlopes()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseRegridSlopes()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("use_regrid_slopes", m_regridSlopes);
+}
+
 void EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel){
   CH_TIME("EddingtonSP1::preRegrid");
   if(m_verbosity > 5){
@@ -469,27 +483,14 @@ void EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const in
 
   const Interval interv(m_comp, m_comp);
 
+  // Allocate storage. 
   this->allocateInternals();
 
-  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase);
+  // Regrid phi and source
+  m_amr->interpToNewGrids(m_phi,    m_cachePhi, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
+  m_amr->interpToNewGrids(m_source, m_cacheSrc, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);  
 
-  // These levels have not changed
-  for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
-    m_cachePhi[lvl]->copyTo(*m_phi   [lvl]); // Base level should never change, but ownership might.
-    m_cacheSrc[lvl]->copyTo(*m_source[lvl]); // Base level should never change, but ownership might.
-  }
-
-  // These levels have changed and so we interpolate the data.
-  for (int lvl = std::max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
-    interpolator[lvl]->interpolate(*m_phi   [lvl], *m_phi   [lvl-1], interv);
-    interpolator[lvl]->interpolate(*m_source[lvl], *m_source[lvl-1], interv);    
-
-    if(lvl <= a_oldFinestLevel){
-      m_cachePhi[lvl]->copyTo(*m_phi   [lvl]);
-      m_cacheSrc[lvl]->copyTo(*m_source[lvl]);      
-    }
-  }
-
+  // Coarsen and update ghost cells. 
   m_amr->averageDown(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
@@ -515,7 +516,7 @@ void EddingtonSP1::registerOperators(){
     m_amr->registerOperator(s_eb_flux_reg,     m_realm, m_phase);
     m_amr->registerOperator(s_eb_gradient,     m_realm, m_phase);
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
-    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, m_phase);
+    m_amr->registerOperator(s_eb_fine_interp,   m_realm, m_phase);
     m_amr->registerOperator(s_eb_multigrid,    m_realm, m_phase);
   }
 }
