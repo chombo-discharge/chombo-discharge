@@ -415,6 +415,7 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
       pout() << "CdrPlasmaGodunovStepper::regrid - Poisson solver failed to converge during semi-implicit regrid." << endl;
 
 #if 1 // For now, add a debug file.
+#ifdef CH_USE_HDF5
       pout() << "CdrPlasmaGodunovStepper::regrid - I'm adding a debug file in 'semi_implicit_debug.hdf5'" << endl;
       EBAMRCellData data;
       m_amr->allocate(data, m_realm, m_phase, 2);
@@ -423,7 +424,9 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
 	m_conductivityFactorCell[lvl]->copyTo(Interval(0,0), *data[lvl], Interval(0,0));
 	m_semiImplicitRho       [lvl]->copyTo(Interval(0,0), *data[lvl], Interval(1,1));	
       }
+
       DischargeIO::writeEBHDF5(data, "semi_implicit_debug.hdf5");
+#endif
 #endif
     }
 
