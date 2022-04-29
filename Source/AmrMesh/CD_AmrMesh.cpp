@@ -1529,6 +1529,80 @@ void AmrMesh::interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, co
   }
 }
 
+void AmrMesh::interpToNewGrids(MFAMRCellData&       a_newData,
+			       const MFAMRCellData& a_oldData,
+			       const int            a_lmin,
+			       const int            a_oldFinestLevel,
+			       const int            a_newFinestLevel,
+			       const bool           a_useSlopes) {
+  CH_TIME("AmrMesh::interpToNewGrids(MFAMRCellData x2, int x3, bool)");
+  if(m_verbosity > 3){
+    pout() << "AmrMesh::interpToNewGrids(MFAMRCellData x2, int x3, bool)" << endl;
+  }
+
+  for (int i = 0; i < phase::numPhases; i++) {
+    phase::which_phase curPhase;
+    
+    if(i == 0) {
+      curPhase = phase::gas;
+    }
+    else {
+      curPhase = phase::solid;
+    }
+
+    const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(curPhase);
+
+    if(!(ebis.isNull())) {
+      EBAMRCellData       newData = this->alias(curPhase, a_newData);
+      const EBAMRCellData oldData = this->alias(curPhase, a_oldData);
+
+      this->interpToNewGrids(newData, oldData, curPhase, a_lmin, a_oldFinestLevel, a_newFinestLevel, a_useSlopes);
+    }
+  }
+}
+
+void AmrMesh::interpToNewGrids(EBAMRCellData&           a_newData,
+			       const EBAMRCellData&     a_oldData,
+			       const phase::which_phase a_phase,
+			       const int                a_lmin,
+			       const int                a_oldFinestLevel,
+			       const int                a_newFinestLevel,
+			       const bool               a_useSlopes) {
+  CH_TIME("AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, bool)");
+  if(m_verbosity > 3){
+    pout() << "AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, bool)" << endl;
+  }
+
+  CH_assert(a_newData.getRealm()  == a_oldData.getRealm() );
+  CH_assert(a_newData[0]->nComp() == a_oldData[0]->nComp());
+
+  const int nComp = a_newData[0]->nComp();
+
+  // These levels have not changed but ownship MIGHT have changed.
+  for (int lvl = 0; lvl <= std::max(0, a_lmin-1); lvl++) {
+    a_oldData[lvl]->copyTo(*a_newData[lvl]);
+  }
+
+  // These levels have changed.
+  for (int lvl = std::max(1, a_lmin); lvl <= a_newFinestLevel; lvl++) {
+    RefCountedPtr<EBFineInterp>& interpolator = this->getFineInterp(a_newData.getRealm(), a_phase)[lvl];
+
+    // Interpolate the data.
+    if(a_useSlopes) {
+      interpolator->regridMinMod(*a_newData[lvl], *a_newData[lvl-1], Interval(0, nComp-1));
+    }
+    else{
+      interpolator->regridNoSlopes(*a_newData[lvl], *a_newData[lvl-1], Interval(0, nComp-1));
+    }
+
+    // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
+    // to pollute the solution with interpolation there since we already have valid data.
+    if(lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)){
+      a_oldData   [lvl]->copyTo(*a_newData[lvl]);
+    }
+  }
+}
+
 void AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const {
   CH_TIME("AmrMesh::interpToCentroids(EBAMRCellData, string, phase::which_phase)");
   if(m_verbosity > 3){
