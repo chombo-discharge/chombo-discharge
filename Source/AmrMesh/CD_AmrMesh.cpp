@@ -2302,18 +2302,18 @@ Vector<RefCountedPtr<AggEBPWLFillPatch> >& AmrMesh::getFillPatch(const std::stri
   return m_realms[a_realm]->getFillPatch(a_phase);
 }
 
-Vector<RefCountedPtr<EBPWLFineInterp> >& AmrMesh::getPwlInterpolator(const std::string a_realm, const phase::which_phase a_phase) const {
-  CH_TIME("AmrMesh::getPwlInterpolator(string, phase::which_phase)");
+Vector<RefCountedPtr<EBFineInterp> >& AmrMesh::getFineInterp(const std::string a_realm, const phase::which_phase a_phase) const {
+  CH_TIME("AmrMesh::getFineInterp(string, phase::which_phase)");
   if(m_verbosity > 1){
-    pout() << "AmrMesh::getPwlInterpolator(string, phase::which_phase)" << endl;
+    pout() << "AmrMesh::getFineInterp(string, phase::which_phase)" << endl;
   }
 
   if(!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getPwlInterpolator(string, phase::which_phase) - could not find realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::getFineInterp(string, phase::which_phase) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
   
-  return m_realms[a_realm]->getPwlInterpolator(a_phase);
+  return m_realms[a_realm]->getFineInterp(a_phase);
 }
 
 Vector<RefCountedPtr<EBFluxRegister> >&  AmrMesh::getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const {

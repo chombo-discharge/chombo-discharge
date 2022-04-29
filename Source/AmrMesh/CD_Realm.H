@@ -286,7 +286,7 @@ public:
     @brief Get piecewise linear ghost cell interpolation utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFineInterp> >& getFineInterp(const phase::which_phase a_phase);
 
   /*!
     @brief Get flux register utility
