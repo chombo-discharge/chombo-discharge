@@ -37,6 +37,7 @@ FieldSolver::FieldSolver(){
   m_className    = "FieldSolver";
   m_realm        = Realm::Primal;
   m_isVoltageSet = false;
+  m_regridSlopes = true;
   m_verbosity    = -1;
 
   this->setDataLocation(Location::Cell::Center);
@@ -57,21 +58,28 @@ void FieldSolver::setDataLocation(const Location::Cell a_dataLocation){
   // the rest of chombo-discharge has not caught up with the centroid formulation. 
   
   switch(a_dataLocation){
-  case Location::Cell::Center:{
-    m_dataLocation = a_dataLocation;
-    m_faceLocation = Location::Face::Center;
-    break;
-  }
-  case Location::Cell::Centroid:{
-    MayDay::Error("FieldSolver::setDataLocation - centroid discretization is not yet fully supported in chombo-discharge");
+  case Location::Cell::Center:
+    {
+      m_dataLocation = a_dataLocation;
+      m_faceLocation = Location::Face::Center;
     
-    m_dataLocation = a_dataLocation;
-    m_faceLocation = Location::Face::Centroid;
-    break;
-  }
+      break;
+    }
+  case Location::Cell::Centroid:
+    {
+      MayDay::Error("FieldSolver::setDataLocation - centroid discretization is not yet fully supported in chombo-discharge");
+    
+      m_dataLocation = a_dataLocation;
+      m_faceLocation = Location::Face::Centroid;
+      
+      break;
+    }
   default:
-    MayDay::Error("FieldSolver::setDataLocation - location must be either cell center or cell centroid");
-    break;
+    {
+      MayDay::Error("FieldSolver::setDataLocation - location must be either cell center or cell centroid");
+      
+      break;
+    }
   }
 }
 
@@ -359,48 +367,14 @@ void FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int
   // Reallocate internals
   this->allocateInternals();
 
-  for (int i = 0; i < phase::numPhases; i++){
-    phase::which_phase curPhase;
-    if(i == 0){
-      curPhase = phase::gas;
-    }
-    else{
-      curPhase = phase::solid;
-    }
-
-    const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(curPhase);
-
-    if(!ebis.isNull()){
-      EBAMRCellData potential_phase = m_amr->alias(curPhase, m_potential);
-      EBAMRCellData scratch_phase   = m_amr->alias(curPhase, m_cache);
-
-      Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_realm, curPhase);
-
-      // These levels have not changed so we can do a direct copy. 
-      for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
-	scratch_phase[lvl]->copyTo(*potential_phase[lvl]); // Base level should never change, but ownership might. So no localCopyTo here...
-      }
-
-      // These levels might have changed so we interpolate data here. 
-      for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
-	interpolator[lvl]->interpolate(*potential_phase[lvl], *potential_phase[lvl-1], interv);
-
-	// Not all regions on the new grids are "new cells" -- for the ones that are not we don't want to
-	// pollute the solution with interpolation errors so we copy. 
-	if(lvl <= a_oldFinestLevel){
-	  scratch_phase[lvl]->copyTo(*potential_phase[lvl]);
-	}
-
-	potential_phase[lvl]->exchange();
-      }
-    }
-  }
+  // Regrid potential data holder
+  m_amr->interpToNewGrids(m_potential, m_cache, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
 
   // Synchronize over levels. 
   m_amr->averageDown(m_potential, m_realm);
   m_amr->interpGhost(m_potential, m_realm);
 
-  // Recompute E. 
+  // Recompute E from the new potential. 
   this->computeElectricField();
 
   // Set permittivities
@@ -553,6 +527,17 @@ void FieldSolver::parsePlotVariables(){
       else if(str[i] == "perm")  m_plotPermittivity       = true;            
     }
   }
+}
+
+void FieldSolver::parseRegridSlopes(){
+  CH_TIME("FieldSolver::parseRegridSlopes()");
+  if(m_verbosity > 5){
+    pout() << "FieldSolver::parseRegridSlopes()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("use_regrid_slopes", m_regridSlopes);
 }
 
 std::string FieldSolver::makeBcString(const int a_dir, const Side::LoHiSide a_side) const {

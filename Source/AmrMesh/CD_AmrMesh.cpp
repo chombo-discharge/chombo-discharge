@@ -59,6 +59,8 @@ EBAMRCellData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRCellDa
 
   this->alias(ret, a_phase, a_mfdata, finestLevel);
 
+  ret.setRealm(a_mfdata.getRealm());
+
   return ret;
 }
 
@@ -76,6 +78,8 @@ EBAMRFluxData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRFluxDa
 
   this->alias(ret, a_phase, a_mfdata, finestLevel);
 
+  ret.setRealm(a_mfdata.getRealm());  
+
   return ret;
 }
 
@@ -90,6 +94,8 @@ EBAMRIVData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRIVData& 
   this->allocatePointer(ret);
 
   this->alias(ret, a_phase, a_mfdata);
+
+  ret.setRealm(a_mfdata.getRealm());  
 
   return ret;
 }
