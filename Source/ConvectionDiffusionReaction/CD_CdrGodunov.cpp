@@ -45,6 +45,7 @@ void CdrGodunov::parseOptions(){
   this->parseMultigridSettings();      // Parses multigrid settings
   this->parseExtrapolateSourceTerm();  // Parses source term extrapolation for Godunov time extrapolation. 
   this->parseDivergenceComputation();  // Parses non-conservative divergence blending
+  this->parseRegridSlopes();           // Parses regrid slopes
 }
 
 void CdrGodunov::parseRuntimeOptions(){
@@ -59,7 +60,8 @@ void CdrGodunov::parseRuntimeOptions(){
   this->parseMultigridSettings();     // Parses multigrid settings
   this->parseDomainBc();              // Parses domain BCs
   this->parseExtrapolateSourceTerm(); // Parses source term extrapolation
-  this->parseDivergenceComputation(); // Parses non-conservative divergence blending. 
+  this->parseDivergenceComputation(); // Parses non-conservative divergence blending.
+  this->parseRegridSlopes();           // Parses regrid slopes  
 }
 
 Real CdrGodunov::computeAdvectionDt(){

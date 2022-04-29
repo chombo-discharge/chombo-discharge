@@ -44,6 +44,7 @@ void CdrMuscl::parseOptions(){
   this->parsePlotVariables();          // Parses plot variables
   this->parseMultigridSettings();      // Parses multigrid settings. 
   this->parseDivergenceComputation();  // Non-conservative divergence blending
+  this->parseRegridSlopes();           // Parses regrid slopes  
 }
 
 void CdrMuscl::parseRuntimeOptions(){
@@ -57,7 +58,8 @@ void CdrMuscl::parseRuntimeOptions(){
   this->parseSlopeLimiter();           // Parses slope limiter settings
   this->parsePlotVariables();          // Parses plot variables
   this->parseMultigridSettings();      // Parses multigrid settings. 
-  this->parseDivergenceComputation();  // Non-conservative divergence blending. 
+  this->parseDivergenceComputation();  // Non-conservative divergence blending.
+  this->parseRegridSlopes();           // Parses regrid slopes    
 }
 
 void CdrMuscl::parseSlopeLimiter(){

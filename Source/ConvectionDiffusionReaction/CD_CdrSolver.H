@@ -809,6 +809,11 @@ protected:
   bool m_plotNumbers;
 
   /*!
+    @brief Use slopes when regridding
+  */
+  bool m_regridSlopes;
+
+  /*!
     @brief RNG seed
   */
   int m_seed;
@@ -1083,6 +1088,11 @@ protected:
     @brief Parse the conservation
   */
   virtual void parseDivergenceComputation();
+
+  /*!
+    @brief Parse slope regrid
+  */
+  virtual void parseRegridSlopes();
   
   /*!
     @brief Shortcut for making a boundary condition string. 
