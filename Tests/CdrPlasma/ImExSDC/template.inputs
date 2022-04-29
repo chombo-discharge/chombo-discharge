@@ -192,6 +192,7 @@ CdrPlasmaGodunovStepper.solver_verbosity = -1        # Individual solver verbosi
 CdrPlasmaGodunovStepper.min_dt           = 0.        # Minimum permitted time step
 CdrPlasmaGodunovStepper.max_dt           = 1.E99     # Maximum permitted time step
 CdrPlasmaGodunovStepper.cfl              = 0.5       # CFL number
+CdrPlasmaGodunovStepper.use_regrid_slopes = true          # Use slopes when regridding (or not)
 CdrPlasmaGodunovStepper.diffusion        = auto      # Diffusion. 'explicit', 'implicit', or 'auto'
 CdrPlasmaGodunovStepper.diffusion_thresh = 2.0           # Diffusion threshold. If dtD/dtA > this then we use implicit diffusion.
 CdrPlasmaGodunovStepper.transport        = euler     # Transport algorithm. 'euler' or 'rk2'
