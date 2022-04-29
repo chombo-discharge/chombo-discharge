@@ -18,6 +18,7 @@
 // Our includes
 #include <CD_CdrPlasmaGodunovStepper.H>
 #include <CD_CdrPlasmaGodunovStorage.H>
+#include <CD_DischargeIO.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
@@ -369,9 +370,24 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
     for (int lvl = std::max(1, a_lmin); lvl <= a_newFinestLevel; lvl++){
       RefCountedPtr<EBPWLFineInterp>& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase)[lvl];
 
+#if 0 // Original code
       // Linearly interpolate (with limiters):
       interpolator->interpolate(*m_conductivityFactorCell[lvl], *m_conductivityFactorCell[lvl-1], interv);
       interpolator->interpolate(*m_semiImplicitRho       [lvl], *m_semiImplicitRho       [lvl-1], interv);
+#else
+      EBMGInterp interp(m_amr->getGrids(m_realm)[lvl],
+			m_amr->getGrids(m_realm)[lvl-1],
+			m_amr->getEBISLayout(m_realm, m_phase)[lvl],
+			m_amr->getEBISLayout(m_realm, m_phase)[lvl-1],
+			m_amr->getDomains()[lvl-1],
+			m_amr->getRefinementRatio(lvl, lvl-1),
+			1,
+			m_amr->getEBIndexSpace(phase::gas),
+			m_amr->getNumberOfGhostCells()*IntVect::Unit);
+
+      interp.pwcInterp(*m_conductivityFactorCell[lvl], *m_conductivityFactorCell[lvl-1], Interval(0,0));
+      interp.pwcInterp(*m_semiImplicitRho       [lvl], *m_semiImplicitRho       [lvl-1], Interval(0,0));      
+#endif
 
       // For parts of the new grid that overlap with the old grid, replace data with a copy.
       if(lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)){
@@ -397,6 +413,21 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
     // If we don't converge, try new Poisson solver settings
     if(!converged){ 
       pout() << "CdrPlasmaGodunovStepper::regrid - Poisson solver failed to converge during semi-implicit regrid." << endl;
+
+#if 1 // For now, add a debug file.
+#ifdef CH_USE_HDF5
+      pout() << "CdrPlasmaGodunovStepper::regrid - I'm adding a debug file in 'semi_implicit_debug.hdf5'" << endl;
+      EBAMRCellData data;
+      m_amr->allocate(data, m_realm, m_phase, 2);
+
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+	m_conductivityFactorCell[lvl]->copyTo(Interval(0,0), *data[lvl], Interval(0,0));
+	m_semiImplicitRho       [lvl]->copyTo(Interval(0,0), *data[lvl], Interval(1,1));	
+      }
+
+      DischargeIO::writeEBHDF5(data, "semi_implicit_debug.hdf5");
+#endif
+#endif
     }
 
     // Now compute drift velocities and diffusion -- using the electric field from last time step on the new mesh. 

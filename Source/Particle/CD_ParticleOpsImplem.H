@@ -174,6 +174,41 @@ void ParticleOps::computeParticleWeights(unsigned long long&      a_weight,
   }
 }
 
+template <typename T>
+inline T ParticleOps::partitionParticles(const T a_numParticles) {
+#ifdef CH_MPI
+  const T numProcs  = T(numProc());
+  const T quotient  = a_numParticles / numProc();
+  const T remainder = a_numParticles % numProc();
+
+  Vector<T> particlesPerRank (numProc(), quotient);
+
+  for (int i = 0; i < remainder; i++){
+    particlesPerRank[i]++;
+  }
+
+  return particlesPerRank[procID()];
+#else
+  return a_numParticles;
+#endif
+}
+
+template <typename P, typename T>
+inline
+void ParticleOps::drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution) {
+
+  a_particles.clear();
+
+  const T numParticles = ParticleOps::partitionParticles(a_numParticles);
+
+  for (T t = 0; t < numParticles; t++){
+    P p;
+    p.position() = a_distribution();
+
+    a_particles.add(p);
+  }
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

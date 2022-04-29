@@ -757,7 +757,12 @@ namespace Physics {
       /*!
 	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
       */
-      std::map<int, bool> m_electrodeReactionHasEnergyLoss;      
+      std::map<int, bool> m_electrodeReactionHasEnergyLoss;
+
+      /*!
+	@brief A container which determines if we should add the extrapolated flux as an inflow condition. 
+      */
+      std::map<int, bool> m_electrodeExtrapBC;
 
       // ===========================================
       // DIELECTRIC SURFACE REACTIONS BEGIN HERE
@@ -794,6 +799,11 @@ namespace Physics {
 	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
       */
       std::map<int, bool> m_dielectricReactionHasEnergyLoss;
+
+      /*!
+	@brief A container which determines if we should add the extrapolated flux as an inflow condition. 
+      */
+      std::map<int, bool> m_dielectricExtrapBC;      
 
       // ===========================================
       // DOMAIN SURFACE REACTIONS BEGIN HERE
@@ -833,6 +843,12 @@ namespace Physics {
 	@brief map to translate side from std::string to Side::LoHiSide
       */
       const std::map<std::string, Side::LoHiSide> m_sideStringToSide{{"lo", Side::Lo}, {"hi", Side::Hi}};
+
+      /*!
+	@brief A container which determines if we should add the extrapolated flux as an inflow condition. 
+	@details The first entry in the map is the species integer index. The tuple indicates (coordinate_direction, side, doExtrap).
+      */
+      std::map<std::tuple<int, Side::LoHiSide, int>, bool> m_domainExtrapBC;      
 
       // ===========================================
       // VARIOUS MEMBER FUNCTIONS BEGIN HERE 

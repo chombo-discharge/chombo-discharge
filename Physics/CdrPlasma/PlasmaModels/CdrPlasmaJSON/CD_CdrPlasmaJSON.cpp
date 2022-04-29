@@ -2881,7 +2881,13 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
     pout() << "CdrPlasmaJSON::parseElectrodeReactions()" << endl;
   }
 
-  // Check if our JSON f
+  // For all our species, set the extrap BC flag to 'false'. Specifying reactions to be 'extrap' is equivalent
+  // to adding an extrapolated influx to the species.
+  for (const auto& m : m_cdrSpeciesMap) {
+    m_electrodeExtrapBC.emplace(m.second, false);
+  }
+
+  // Check if our JSON file contains the electrode reactions flag. 
   if(m_json.contains("electrode reactions")){
     const json& electrodeReactions = m_json["electrode reactions"];
 
@@ -2891,13 +2897,9 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
     // Iterate through the reactions. 
     for (const auto& electrodeReaction : electrodeReactions){
 
-      // These fields are required
+      // Get the reaction string
       if(!(electrodeReaction.contains("reaction"))) this->throwParserError(baseError + "- found 'electrode reactions' but field 'reaction' was not specified");
-      if(!(electrodeReaction.contains("lookup"  ))) this->throwParserError(baseError + "- found 'electrode reactions' but field 'lookup' was not specified");      
-
-      // Get the reaction and lookup strings. 
       const std::string reaction = this->trim(electrodeReaction["reaction"].get<std::string>());
-      const std::string lookup   = this->trim(electrodeReaction["lookup"  ].get<std::string>());
 
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
@@ -2909,44 +2911,71 @@ void CdrPlasmaJSON::parseElectrodeReactions() {
       // we create a list of more reactions.
       const auto reactionSets = this->parseReactionWildcards(reactants, products, electrodeReaction);
 
-      // Go through all the reactions now. 
-      for (const auto& curReaction : reactionSets){
+      // Define special case. If the right-hand side is just 'extrap', we enable m_electrodeExtrapBC for
+      // the specified species. 
+      const bool specialCase1 = products.size() == 1 && this->trim(products.front()) == "extrap";
 
-	const std::vector<std::string> curReactants = std::get<1>(curReaction);
-	const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+      // Go through cases. 
+      if(specialCase1){ // Enable m_electrodeExtrapBC for the specified species. 
 
-	// Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense.
-	this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+	// Go through the reaction set. We should make sure reactants and products make sense, but our 'extrap' keyword
+	// doesn't belong in the list of species so just do a clearout of the products.
+	for (const auto& curReaction: reactionSets){
+	  const std::vector<std::string> curReactants = std::get<1>(curReaction);
+	  const std::vector<std::string> curProducts;
 
-	// This is the reaction index for the current index. The reaction we are currently
-	// dealing with is put in m_electrodeReactions[reactionIndex]. 
-	const int reactionIndex = m_electrodeReactions.size();
+	  this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
 
-	// Parse the scaling factor for the electrode surface reaction
-	this->parseElectrodeReactionRate        (reactionIndex, electrodeReaction);	
-	this->parseElectrodeReactionScaling     (reactionIndex, electrodeReaction);
-	this->parseElectrodeReactionEnergyLosses(reactionIndex, electrodeReaction);
+	  for (const auto& reactant: curReactants){
+	    m_electrodeExtrapBC.at(m_cdrSpeciesMap.at(reactant)) = true;
+	  }
+	}
+      }
+      else { // Normal code.
 
-	// Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
-	std::list<int> plasmaReactants ;
-	std::list<int> neutralReactants;
-	std::list<int> photonReactants ;      
-	std::list<int> plasmaProducts  ;
-	std::list<int> neutralProducts ;
-	std::list<int> photonProducts  ;            
+	// Get the lookup string
+	if(!(electrodeReaction.contains("lookup"  ))) this->throwParserError(baseError + "- found 'electrode reactions' but field 'lookup' was not specified");
+	const std::string lookup   = this->trim(electrodeReaction["lookup"  ].get<std::string>());	
 
-	this->getReactionSpecies(plasmaReactants,
-				 neutralReactants,
-				 photonReactants,			       
-				 plasmaProducts,
-				 neutralProducts,			       
-				 photonProducts,
-				 curReactants,
-				 curProducts);
+	// Go through all the reactions now. 
+	for (const auto& curReaction : reactionSets){
 
-	// Now create the reaction -- note that surface reactions support both plasma species and photon species on
-	// the left hand side of the reaction. 
-	m_electrodeReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+	  const std::vector<std::string> curReactants = std::get<1>(curReaction);
+	  const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+
+	  // Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense.
+	  this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+
+	  // This is the reaction index for the current index. The reaction we are currently
+	  // dealing with is put in m_electrodeReactions[reactionIndex]. 
+	  const int reactionIndex = m_electrodeReactions.size();
+
+	  // Parse the scaling factor for the electrode surface reaction
+	  this->parseElectrodeReactionRate        (reactionIndex, electrodeReaction);	
+	  this->parseElectrodeReactionScaling     (reactionIndex, electrodeReaction);
+	  this->parseElectrodeReactionEnergyLosses(reactionIndex, electrodeReaction);
+
+	  // Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
+	  std::list<int> plasmaReactants ;
+	  std::list<int> neutralReactants;
+	  std::list<int> photonReactants ;      
+	  std::list<int> plasmaProducts  ;
+	  std::list<int> neutralProducts ;
+	  std::list<int> photonProducts  ;            
+
+	  this->getReactionSpecies(plasmaReactants,
+				   neutralReactants,
+				   photonReactants,			       
+				   plasmaProducts,
+				   neutralProducts,			       
+				   photonProducts,
+				   curReactants,
+				   curProducts);
+
+	  // Now create the reaction -- note that surface reactions support both plasma species and photon species on
+	  // the left hand side of the reaction. 
+	  m_electrodeReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+	}
       }
     }
   }
@@ -3067,6 +3096,12 @@ void CdrPlasmaJSON::parseDielectricReactions() {
     pout() << "CdrPlasmaJSON::parseDielectricReactions()" << endl;
   }
 
+  // For all our species, set the extrap BC flag to 'false'. Specifying reactions to be 'extrap' is equivalent
+  // to adding an extrapolated influx to the species.
+  for (const auto& m : m_cdrSpeciesMap) {
+    m_dielectricExtrapBC.emplace(m.second, false);
+  }  
+
   // Check if our JSON f
   if(m_json.contains("dielectric reactions")){
     const json& dielectricReactions = m_json["dielectric reactions"];
@@ -3077,13 +3112,9 @@ void CdrPlasmaJSON::parseDielectricReactions() {
     // Iterate through the reactions. 
     for (const auto& dielectricReaction : dielectricReactions){
 
-      // These fields are required
+      // Get the reaction string
       if(!(dielectricReaction.contains("reaction"))) this->throwParserError(baseError + "- found 'dielectric reactions' but field 'reaction' was not specified");
-      if(!(dielectricReaction.contains("lookup"  ))) this->throwParserError(baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");      
-
-      // Get the reaction and lookup strings. 
       const std::string reaction = this->trim(dielectricReaction["reaction"].get<std::string>());
-      const std::string lookup   = this->trim(dielectricReaction["lookup"  ].get<std::string>());
 
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
@@ -3095,44 +3126,71 @@ void CdrPlasmaJSON::parseDielectricReactions() {
       // we create a list of more reactions.
       const auto reactionSets = this->parseReactionWildcards(reactants, products, dielectricReaction);
 
-      // Go through all the reactions now. 
-      for (const auto& curReaction : reactionSets){
+      // Define special case. If the right-hand side just 'extrap', we enable m_dielectricExtrapBC for
+      // the specified species.
+      const bool specialCase1 = products.size() == 1 && this->trim(products.front()) == "extrap";
 
-	const std::vector<std::string> curReactants = std::get<1>(curReaction);
-	const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+      // Go through cases. 
+      if(specialCase1){
+	
+	// Go through the reaction set. We should make sure reactants and products make sense, but our 'extrap' keyword
+	// doesn't belong in the list of species so just do a clearout of the products.
+	for (const auto& curReaction: reactionSets){
+	  const std::vector<std::string> curReactants = std::get<1>(curReaction);
+	  const std::vector<std::string> curProducts;
 
-	// Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense.
-	this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+	  this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
 
-	// This is the reaction index for the current index. The reaction we are currently
-	// dealing with is put in m_plasmaReactions[reactionIdex]. 
-	const int reactionIndex = m_dielectricReactions.size();
+	  for (const auto& reactant: curReactants){
+	    m_dielectricExtrapBC.at(m_cdrSpeciesMap.at(reactant)) = true;
+	  }
+	}
+      }
+      else{ // Normal code
 
-	// Parse the scaling factor for the dielectric surface reaction
-	this->parseDielectricReactionRate        (reactionIndex, dielectricReaction);	
-	this->parseDielectricReactionScaling     (reactionIndex, dielectricReaction);
-	this->parseDielectricReactionEnergyLosses(reactionIndex, dielectricReaction);	
+	// Get the lookup string
+	if(!(dielectricReaction.contains("lookup"  ))) this->throwParserError(baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");      
+	const std::string lookup   = this->trim(dielectricReaction["lookup"  ].get<std::string>());
 
-	// Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
-	std::list<int> plasmaReactants ;
-	std::list<int> neutralReactants;
-	std::list<int> photonReactants ;      
-	std::list<int> plasmaProducts  ;
-	std::list<int> neutralProducts ;
-	std::list<int> photonProducts  ;            
+	// Go through all the reactions now. 
+	for (const auto& curReaction : reactionSets){
 
-	this->getReactionSpecies(plasmaReactants,
-				 neutralReactants,
-				 photonReactants,			       
-				 plasmaProducts,
-				 neutralProducts,			       
-				 photonProducts,
-				 curReactants,
-				 curProducts);
+	  const std::vector<std::string> curReactants = std::get<1>(curReaction);
+	  const std::vector<std::string> curProducts  = std::get<2>(curReaction);
 
-	// Now create the reaction -- note that surface reactions support both plasma species and photon species on
-	// the left hand side of the reaction. 
-	m_dielectricReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+	  // Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense.
+	  this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+
+	  // This is the reaction index for the current index. The reaction we are currently
+	  // dealing with is put in m_plasmaReactions[reactionIdex]. 
+	  const int reactionIndex = m_dielectricReactions.size();
+
+	  // Parse the scaling factor for the dielectric surface reaction
+	  this->parseDielectricReactionRate        (reactionIndex, dielectricReaction);	
+	  this->parseDielectricReactionScaling     (reactionIndex, dielectricReaction);
+	  this->parseDielectricReactionEnergyLosses(reactionIndex, dielectricReaction);	
+
+	  // Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile. 
+	  std::list<int> plasmaReactants ;
+	  std::list<int> neutralReactants;
+	  std::list<int> photonReactants ;      
+	  std::list<int> plasmaProducts  ;
+	  std::list<int> neutralProducts ;
+	  std::list<int> photonProducts  ;            
+
+	  this->getReactionSpecies(plasmaReactants,
+				   neutralReactants,
+				   photonReactants,			       
+				   plasmaProducts,
+				   neutralProducts,			       
+				   photonProducts,
+				   curReactants,
+				   curProducts);
+
+	  // Now create the reaction -- note that surface reactions support both plasma species and photon species on
+	  // the left hand side of the reaction. 
+	  m_dielectricReactions.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
+	}
       }
     }
   }
@@ -3200,6 +3258,24 @@ void CdrPlasmaJSON::parseDomainReactions(){
   if(m_verbose){
     pout() << "CdrPlasmaJSON::parseDomainReactions()" << endl;
   }
+
+  // For all our species, set the extrap BC flag to 'false'. Specifying reactions to be 'extrap' is equivalent
+  // to adding an extrapolated influx to the species.
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    for (SideIterator sit; sit.ok(); ++sit){
+      for (const auto& m : m_cdrSpeciesMap) {
+	m_domainExtrapBC.emplace(std::make_tuple(dir, sit(), m.second), false);
+      }
+    }
+  }
+
+  // Populate the map for each dir-side
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      m_domainReactions.emplace(std::make_pair(dir, sit()), std::vector<CdrPlasmaSurfaceReactionJSON>());
+    }
+  }
   
   // Check if JSON file contains domain reactions
   if(m_json.contains("domain reactions")){
@@ -3216,12 +3292,11 @@ void CdrPlasmaJSON::parseDomainReactions(){
 
       // These fields are required
       if(!(domainReaction.contains("reaction"))) this->throwParserError(baseError + " - found 'domain reactions' but field 'reaction' was not specified");
-      if(!(domainReaction.contains("lookup  "))) this->throwParserError(baseError + " - found 'domain reactions' but field 'lookup' was not specified"  );
       if(!(domainReaction.contains("side"    ))) this->throwParserError(baseError + " - found 'domain reactions' but field 'side' was not specified"    );
 
-      // Get the reaction lookup strings
-      const std::string reaction = this->trim(domainReaction["reaction"].get<std::string>());
-      const std::string lookup   = this->trim(domainReaction["lookup"  ].get<std::string>());
+      // Get the reaction string and sides
+      const std::string              reaction = this->trim(domainReaction["reaction"].get<std::string>());
+      const std::vector<std::string> sides    = domainReaction["side"].get<std::vector<std::string>>();
 
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
@@ -3232,78 +3307,92 @@ void CdrPlasmaJSON::parseDomainReactions(){
       // we create a list of more reactions.
       const auto reactionSets = this->parseReactionWildcards(reactants, products, domainReaction);
 
-      // Get sides array
-      const std::vector<std::string> sides = domainReaction["side"].get<std::vector<std::string>>();
+      // Define special case. If the right-hand side is just "extrap" then the specified species influx will
+      // be extrapolated from the interior. 
+      const bool specialCase1 = products.size() == 1 && this->trim(products.front()) == "extrap";
 
-      // Create vector for temporary storage of reactions
-      std::vector<CdrPlasmaSurfaceReactionJSON> domainReactionsVec;
-      
-      // Go through all reactions
-      for (const auto& curReaction : reactionSets){
-	const std::vector<std::string> curReactants = std::get<1>(curReaction);
-	const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+      // Go through cases.
+      if(specialCase1) { // Enable m_domainExtrapBC for the specified species and sides. 
 
-	// Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense
-	this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+	// Go through reactants and then specify that we should use an extrapolated condition on the specified species and dir-side.
+	for (const auto& curReaction : reactionSets) {
 
-	// This is the reaction index for the current index. The reaction we are currently
-	// dealing with is put in domainReactionsVec[reactionIndex]
-	const int reactionIndex = domainReactionsVec.size();
+	  const std::vector<std::string> curReactants = std::get<1>(curReaction);
+	  const std::vector<std::string> curProducts;
 
-	// Parse the scaling factor for the electrode surface reaction
-	this->parseDomainReactionRate(reactionIndex, domainReaction, sides);
-	this->parseDomainReactionScaling(reactionIndex, domainReaction, sides);
+	  this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
 
-	// Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile.
-	std::list<int> plasmaReactants;
-	std::list<int> neutralReactants;
-	std::list<int> photonReactants;
-	std::list<int> plasmaProducts;
-	std::list<int> neutralProducts;
-	std::list<int> photonProducts;
+	  // Go through the reactants and sides and set the extrapolated BC to true wherever appropriate.
+	  for (const auto& reactant: curReactants) {
+	    for (std::string dirSide : sides) {
+
+	      dirSide = this->trim(dirSide);
+
+	      const int            dir     = m_dirCharToInt.    at(dirSide.at(0));
+	      const Side::LoHiSide side    = m_sideStringToSide.at(dirSide.substr(2,2));
+	      const int            species = m_cdrSpeciesMap.   at(reactant);
+
+	      m_domainExtrapBC.at(std::make_tuple(dir, side, species)) = true;
+	    }
+	  }
+	}
+      }
+      else{ // "Normal" code
 	
-	this->getReactionSpecies(plasmaReactants,
-				 neutralReactants,
-				 photonReactants,
-				 plasmaProducts,
-				 neutralProducts,
-				 photonProducts,
-				 curReactants,
-				 curProducts);
-
-	// Now create the reaction -- note that the surface reactions support both plasma species and photon species on the
-	// left hand side of the reaction
-	domainReactionsVec.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
-      }
+	// Create vector for temporary storage of reactions
+	std::vector<CdrPlasmaSurfaceReactionJSON> domainReactionsVec;
       
-      for (std::string curSide : sides){
-	// Create an int, Side::LoHiSide pair of dir, side for the m_domainReactions-map
-	curSide = this->trim(curSide);
-	std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2,2)));
+	// Get reaction lookup string
+	if(!(domainReaction.contains("lookup"))) this->throwParserError(baseError + " - found 'domain reactions' but field 'lookup' was not specified"  );
+	const std::string lookup   = this->trim(domainReaction["lookup"  ].get<std::string>());
 
-	// Make sure that the dir+side combination has only been included once
-	if(m_domainReactions.find(curPair) != m_domainReactions.end()){
-	  this->throwParserError(baseError + " - dir+side-pair '" + curSide.substr(2,2) + "' was listed multiple times");
+	// Go through reaction sets. 
+	for (const auto& curReaction : reactionSets){
+	  const std::vector<std::string> curReactants = std::get<1>(curReaction);
+	  const std::vector<std::string> curProducts  = std::get<2>(curReaction);
+
+	  // Sanctify the reaction -- make sure that all left-hand side and right-hand side species make sense
+	  this->sanctifySurfaceReaction(curReactants, curProducts, reaction);
+
+	  // This is the reaction index for the current index. The reaction we are currently
+	  // dealing with is put in domainReactionsVec[reactionIndex]
+	  const int reactionIndex = domainReactionsVec.size();
+
+	  // Parse the scaling factor for the electrode surface reaction
+	  this->parseDomainReactionRate(reactionIndex, domainReaction, sides);
+	  this->parseDomainReactionScaling(reactionIndex, domainReaction, sides);
+
+	  // Make the string-int encoding so we can encode the reaction properly. Then add the reaction to the pile.
+	  std::list<int> plasmaReactants;
+	  std::list<int> neutralReactants;
+	  std::list<int> photonReactants;
+	  std::list<int> plasmaProducts;
+	  std::list<int> neutralProducts;
+	  std::list<int> photonProducts;
+	
+	  this->getReactionSpecies(plasmaReactants,
+				   neutralReactants,
+				   photonReactants,
+				   plasmaProducts,
+				   neutralProducts,
+				   photonProducts,
+				   curReactants,
+				   curProducts);
+
+	  // Now create the reaction -- note that the surface reactions support both plasma species and photon species on the
+	  // left hand side of the reaction
+	  domainReactionsVec.emplace_back(plasmaReactants, photonReactants, plasmaProducts);
 	}
 
-	m_domainReactions.emplace(curPair, domainReactionsVec);
-      }
-    }
+	// Add this reaction to all the specified sides. 
+	for (std::string curSide : sides){
+	  // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactions-map
+	  curSide = this->trim(curSide);
+	  std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2,2)));
 
-	// Make sure that all dir+side combinations are included    
-    for(const auto& curDir : m_dirCharToInt){
-      for (const auto& curSide : m_sideStringToSide){
-	if(m_domainReactions.find(std::make_pair(curDir.second, curSide.second)) == m_domainReactions.end()){
-	  this->throwParserError(baseError + " - dir+side-pair '" + curDir.first + "_" + curSide.first + "' is missing.");
+	  std::vector<CdrPlasmaSurfaceReactionJSON>& reactions = m_domainReactions.at(curPair);
+	  reactions.insert(std::end(reactions), std::begin(domainReactionsVec), std::end(domainReactionsVec));
 	}
-      }
-    }
-  }
-  else{
-    // If the domain_reactions input field was not specified, we need to fill it with empty data.
-    for (int dir = 0; dir < SpaceDim; dir++){
-      for (SideIterator sit; sit.ok(); ++sit){
-	m_domainReactions.emplace(std::make_pair(dir, sit()), std::vector<CdrPlasmaSurfaceReactionJSON>());
       }
     }
   }
@@ -3358,13 +3447,13 @@ void CdrPlasmaJSON::parseDomainReactionScaling(const int a_reactionIndex, const 
 
   Real scale = 1.0;
   if(a_reactionJSON.contains("scale")){
-     scale = a_reactionJSON["scale"].get<Real>();
+    scale = a_reactionJSON["scale"].get<Real>();
   }
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
   auto func = [scale](const Real E, const RealVect x) -> Real{
-     return scale;
+    return scale;
   };
 
   
@@ -4398,7 +4487,14 @@ Vector<Real> CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
   
   for (int i = 0; i < m_numCdrSpecies; i++){
-    fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
+
+    // If there is an "extrap" flag we also add the extrapolated flux directly. 
+    if(m_electrodeExtrapBC.at(i)) {
+      fluxes[i] = a_extrapCdrFluxes[i] - inflowFluxes[i];
+    }
+    else {
+      fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
+    }
   }
 
   // Now add an outgoing thermal flux for all species that have an energy solver.
@@ -4529,10 +4625,17 @@ Vector<Real> CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time
   // Now set the finite volume fluxes on the EB accordingly. The negative sign is because 'inflowFluxes' is the magnitude, but in our
   // finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
-  
+
   for (int i = 0; i < m_numCdrSpecies; i++){
-    fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
-  }
+
+    // If there is an "extrap" flag we also add the extrapolated flux directly. 
+    if(m_dielectricExtrapBC.at(i)) {
+      fluxes[i] = a_extrapCdrFluxes[i] - inflowFluxes[i];
+    }
+    else {
+      fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
+    }
+  }  
 
   // Now add an outgoing thermal flux for all species that have an energy solver.
   for (const auto& m : m_cdrTransportEnergyMap) {
@@ -4567,7 +4670,8 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
   //       use these fluxes to specify an inflow due to secondary emission. 
   
   // The finite volume fluxes. In our finite-volume implementation, a mass inflow will have a negative sign.
-  Vector<Real> fluxes(m_numCdrSpecies, 0.0);  
+  std::vector<Real> outflowFluxes(m_numCdrSpecies, 0.0);
+  std::vector<Real> inflowFluxes (m_numCdrSpecies, 0.0);  
 
   const int sign        = (a_side == Side::Lo) ? 1 : -1;
   const RealVect normal = sign * BASISREALV(a_dir);
@@ -4585,8 +4689,8 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
     const int Z = m_cdrSpecies[i]->getChargeNumber();
 
     // Outflow on of negative species on anodes. 
-    if(Z < 0 && isAnode  ) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
-    if(Z > 0 && isCathode) fluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);      
+    if(Z < 0 && isAnode  ) outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);
+    if(Z > 0 && isCathode) outflowFluxes[i] = std::max(0.0, a_extrapCdrFluxes[i]);      
   }
 
   // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma species
@@ -4627,12 +4731,12 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
 
     // Inflow due to outflow of specified plasma species
     for (const auto& r : plasmaReactants){
-      inflow += fluxes[r];
+      inflow += outflowFluxes[r];
     }
 
     // Inflow due to outflow of specified photon flux
     for (const auto& r : photonReactants){
-      inflow += a_extrapCdrFluxes[r];
+      inflow += a_rteFluxes[r];
     }
 
     // Scale by emission rate in order to get total influx
@@ -4642,7 +4746,21 @@ Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
     // It is subtracted because 'inflowFluxes' is the magnitude, but in our
     // finite-volume implementation a mass inflow into the cut-cell will have a negative sign.
     for (const auto& p : plasmaProducts){
-      fluxes[p] -= inflow;
+      inflowFluxes[p] += inflow;
+    }
+  }
+
+  // Now set the finite volume fluxes accordingly.
+  Vector<Real> fluxes(m_numCdrSpecies, 0.0);
+  
+  for (int i = 0; i < m_numCdrSpecies; i++) {
+
+    // If there is an "extrap" flag we also add the extrapolated flux directly.
+    if(m_domainExtrapBC.at(std::make_tuple(a_dir, a_side, i))) {
+      fluxes[i] = a_extrapCdrFluxes[i] - inflowFluxes[i];
+    }
+    else {
+      fluxes[i] = outflowFluxes[i] - inflowFluxes[i];
     }
   }
   

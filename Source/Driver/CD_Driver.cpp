@@ -978,8 +978,6 @@ void Driver::setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen){
   if(m_verbosity > 5){
     pout() << "Driver::setGeoCoarsen(RefCountedPtr<GeoCoarsener>)" << endl;
   }
-
-  CH_assert(!a_geoCoarsen.isNull());
   
   m_geoCoarsen = a_geoCoarsen;
 }
@@ -2103,93 +2101,97 @@ void Driver::writePlotFile(const std::string a_filename){
   }
   ncomp += this->getNumberOfPlotVariables();
 
-  // Allocate storage
-  m_amr->allocate(output,  m_realm, phase::gas, ncomp);
-  m_amr->allocate(scratch, m_realm, phase::gas, 1);
-  DataOps::setValue(output, 0.0);
-  DataOps::setValue(scratch, 0.0);
+  // If there's nothing to write, return.
+  if(ncomp > 0) {
 
-  // Assemble data
-  int icomp = 0;             // Used as reference for output components
+    // Allocate storage
+    m_amr->allocate(output,  m_realm, phase::gas, ncomp);
+    m_amr->allocate(scratch, m_realm, phase::gas, 1);
+    DataOps::setValue(output, 0.0);
+    DataOps::setValue(scratch, 0.0);
 
-  timer.startEvent("Assemble data");
-  if(m_verbosity >= 3){
-    pout() << "Driver::writePlotFile - assembling data..." << endl;
-  }
+    // Assemble data
+    int icomp = 0;             // Used as reference for output components
+
+    timer.startEvent("Assemble data");
+    if(m_verbosity >= 3){
+      pout() << "Driver::writePlotFile - assembling data..." << endl;
+    }
   
-  // Time stepper writes its data
-  m_timeStepper->writePlotData(output, plotVariableNames, icomp);
+    // Time stepper writes its data
+    m_timeStepper->writePlotData(output, plotVariableNames, icomp);
 
-  // Cell tagger writes data
-  if(!m_cellTagger.isNull()){
-    m_cellTagger->writePlotData(output, plotVariableNames, icomp);
-  }
+    // Cell tagger writes data
+    if(!m_cellTagger.isNull()){
+      m_cellTagger->writePlotData(output, plotVariableNames, icomp);
+    }
 
 									       
-  // Data file aliasing, because Chombo IO wants dumb pointers. 
-  Vector<LevelData<EBCellFAB>* > output_ptr(1 + m_amr->getFinestLevel());
-  m_amr->alias(output_ptr, output);
+    // Data file aliasing, because Chombo IO wants dumb pointers. 
+    Vector<LevelData<EBCellFAB>* > output_ptr(1 + m_amr->getFinestLevel());
+    m_amr->alias(output_ptr, output);
 
-  // Restrict plot depth if need be
-  int plot_depth;
-  if(m_maxPlotDepth < 0){
-    plot_depth = m_amr->getFinestLevel();
-  }
-  else{
-    plot_depth = Min(m_maxPlotDepth, m_amr->getFinestLevel());
-  }
-
-  // Interpolate ghost cells. This might be important if we use multiple Realms. 
-  for (int icomp = 0; icomp < ncomp; icomp++){
-    const Interval interv(icomp, icomp);
-    
-    for (int lvl = 1; lvl <= m_amr->getFinestLevel(); lvl++){
-
-      LevelData<EBCellFAB> fineAlias;
-      LevelData<EBCellFAB> coarAlias;
-
-      aliasLevelData(fineAlias, output_ptr[lvl],   interv);
-      aliasLevelData(coarAlias, output_ptr[lvl-1], interv);
-
-      m_amr->interpGhost(fineAlias, coarAlias, lvl, m_realm, phase::gas);
+    // Restrict plot depth if need be
+    int plot_depth;
+    if(m_maxPlotDepth < 0){
+      plot_depth = m_amr->getFinestLevel();
     }
-  }
+    else{
+      plot_depth = Min(m_maxPlotDepth, m_amr->getFinestLevel());
+    }
 
-  // Update ghost cells
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    output_ptr[lvl]->exchange();
-  }
+    // Interpolate ghost cells. This might be important if we use multiple Realms. 
+    for (int icomp = 0; icomp < ncomp; icomp++){
+      const Interval interv(icomp, icomp);
+    
+      for (int lvl = 1; lvl <= m_amr->getFinestLevel(); lvl++){
 
-  // Write internal data
-  plotVariableNames.append(this->getPlotVariableNames());
-  this->writePlotData(output, icomp);
-  timer.stopEvent("Assemble data");  
+	LevelData<EBCellFAB> fineAlias;
+	LevelData<EBCellFAB> coarAlias;
+
+	aliasLevelData(fineAlias, output_ptr[lvl],   interv);
+	aliasLevelData(coarAlias, output_ptr[lvl-1], interv);
+
+	m_amr->interpGhost(fineAlias, coarAlias, lvl, m_realm, phase::gas);
+      }
+    }
+
+    // Update ghost cells
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      output_ptr[lvl]->exchange();
+    }
+
+    // Write internal data
+    plotVariableNames.append(this->getPlotVariableNames());
+    this->writePlotData(output, icomp);
+    timer.stopEvent("Assemble data");  
 
 
-  // Write.
+    // Write.
 #ifdef CH_USE_HDF5
-  if(m_verbosity >= 3){
-    pout() << "Driver::writePlotFile - writing plot file..." << endl;
-  }
+    if(m_verbosity >= 3){
+      pout() << "Driver::writePlotFile - writing plot file..." << endl;
+    }
   
-  timer.startEvent("Write data");
-  DischargeIO::writeEBHDF5(a_filename,
-			   plotVariableNames, 			   
-			   m_amr->getGrids(m_realm),
-			   output_ptr,
-			   m_amr->getDomains(),
-			   m_amr->getDx(),
-			   m_amr->getRefinementRatios(),			   
-			   m_dt,
-			   m_time,
-			   m_amr->getProbLo(),	      
-			   plot_depth + 1,
-			   m_numPlotGhost);
-  timer.stopEvent("Write data");
+    timer.startEvent("Write data");
+    DischargeIO::writeEBHDF5(a_filename,
+			     plotVariableNames, 			   
+			     m_amr->getGrids(m_realm),
+			     output_ptr,
+			     m_amr->getDomains(),
+			     m_amr->getDx(),
+			     m_amr->getRefinementRatios(),			   
+			     m_dt,
+			     m_time,
+			     m_amr->getProbLo(),	      
+			     plot_depth + 1,
+			     m_numPlotGhost);
+    timer.stopEvent("Write data");
 #endif
   
-  if(m_verbosity >= 3){
-    timer.eventReport(pout());
+    if(m_verbosity >= 3){
+      timer.eventReport(pout());
+    }
   }
 }
 

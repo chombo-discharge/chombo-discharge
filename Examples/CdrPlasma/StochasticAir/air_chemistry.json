@@ -50,9 +50,9 @@
 	     "gauss2":
 	     [
 		 {
-		     "radius": 100E-6,
-		     "amplitude": 1.0E10,
-		     "position": [0, 7.5E-3, 0]
+		     "radius": 200E-6,
+		     "amplitude": 1.0E18,
+		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
 	 },
@@ -82,9 +82,9 @@
 	     "gauss2":
 	     [
 		 {
-		     "radius": 100E-6,
-		     "amplitude": 0.8E10,
-		     "position": [0, 7.5E-3, 0]
+		     "radius": 200E-6,
+		     "amplitude": 0.8E18,
+		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
 	 }
@@ -103,9 +103,9 @@
 	     "gauss2":
 	     [
 		 {
-		     "radius": 100E-6,
-		     "amplitude": 0.2E10,
-		     "position": [0, 7.5E-3, 0]
+		     "radius": 200E-6,
+		     "amplitude": 0.2E18,
+		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
 	 }
@@ -358,7 +358,8 @@
        "lookup": "constant",
        "value": 1E-3,
        "scale": 1.0
-     }
+     },
+     {"reaction": "e -> extrap"}
  ],
  "dielectric reactions":
  [
@@ -367,6 +368,13 @@
        "lookup": "constant",
        "value": 1E-3,
        "scale": 1.0       
+     },
+     {"reaction": "e -> extrap"}
+ ],
+ "domain reactions":
+ [
+     {"reaction": "e -> extrap",
+      "side": ["y_lo"]
      }
- ] 
+ ]
 }

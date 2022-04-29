@@ -37,3 +37,4 @@ time.table.*
 Research
 slurm*.out
 !docs/.nojekyll
+Sphinx/build/**

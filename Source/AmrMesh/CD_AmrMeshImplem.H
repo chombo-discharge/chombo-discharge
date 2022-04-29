@@ -283,13 +283,21 @@ void AmrMesh::removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
 
   switch(a_phase){
   case phase::gas:
-    implicitFunction = m_baseif.at(phase::gas);
-    break;
+    {
+      implicitFunction = m_baseif.at(phase::gas);
+      
+      break;
+    }
   case phase::solid:
-    implicitFunction = m_baseif.at(phase::solid);    
-    break;
+    {
+      implicitFunction = m_baseif.at(phase::solid);
+      
+      break;
+    }
   default:
-    MayDay::Error("AmrMesh::removeCoveredParticlesIF - logic bust");
+    {
+      MayDay::Error("AmrMesh::removeCoveredParticlesIF - logic bust");
+    }
   }
 
   // Get the realm where the particles live. 
@@ -311,7 +319,7 @@ void AmrMesh::removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
 	const Real f = implicitFunction->value(pos);
 	
 	if(f > tol) {
-	  particles.remove(lit);
+	  particles.remove(lit());
 	}
       }
     }

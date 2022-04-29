@@ -159,4 +159,4 @@ AdvectionDiffusion.cfl            = 0.8     # CFL number
 # ------------------
 AdvectionDiffusion.refine_curv = 0.25         # Refine if curvature exceeds this
 AdvectionDiffusion.refine_magn = 1E-2         # Only tag if magnitude eceeds this
-AdvectionDiffusion.buffer      = 0            # Grow tagged cells     
+AdvectionDiffusion.buffer      = 0            # Grow tagged cells

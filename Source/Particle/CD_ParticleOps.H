@@ -95,8 +95,28 @@ public:
 				     unsigned long long&      a_num,
 				     unsigned long long&      a_remainder,
 				     const unsigned long long a_numPhysicalParticles,
-				     const int                a_ppc);  
-  
+				     const int                a_ppc);
+
+  /*!
+    @brief Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles
+    @param[in] a_numParticles Total number of particles to be drawn. 
+    @return Returns the number of particles drawn by each rank. 
+  */
+  template <typename T>
+  static
+  inline T partitionParticles(const T a_numParticles);
+
+  /*!
+    @brief Draw a specified number of random particles distributed according to a predefined distribution. 
+    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
+    P is the particle type (must derived from BinItem) and T is an integer type. 
+    @param[out] a_particles    Output particles (different for each rank)
+    @param[in]  a_numParticles Number of particles
+    @param[in]  a_distribution Particle distribution. Must return a random position when calling the function. 
+  */
+  template <typename P, typename T>
+  static
+  inline void drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution);
 };
 
 #include <CD_NamespaceFooter.H>

@@ -329,6 +329,11 @@ public:
     @param[in] a_phase Phase
   */    
   const AMRMask& getMask(const std::string a_mask, const int a_buffer) const;
+
+  /*!
+    @brief Get all valid cells
+  */
+  const AMRMask& getValidCells() const;
   
 protected:
 
@@ -383,6 +388,11 @@ protected:
   RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
+    @brief Mask which is true for all valid cells
+  */
+  AMRMask m_validCells;
+
+  /*!
     @brief Phase realms. 
     @details Mutable because some of the operators are mutable. 
   */
@@ -433,7 +443,13 @@ protected:
 		      const DisjointBoxLayout&   a_gridsFine,
 		      const int                  a_buffer,
 		      const int                  a_refRat);
-
+ 
+  /*!
+    @brief Define the valid cell region mask. 
+    @param[in] a_lmin Coarsest level that changed during regrid. 
+  */
+  void defineValidCells();
+  
   /*!
     @brief Get a particular realm
     @param[in] a_phase Phase

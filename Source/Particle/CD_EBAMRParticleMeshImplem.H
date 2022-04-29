@@ -490,7 +490,7 @@ void EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       const EBCellFAB& data    = (*a_meshScalarField[lvl])[dit()];
 	
-      List<P>& particles = (*a_particles[lvl])[dit()].listItems();
+      List<P>& particles = a_particles[lvl][dit()].listItems();
       
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
 
@@ -522,7 +522,7 @@ void EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       const EBCellFAB& data    = (*a_meshVectorField[lvl])[dit()];
 	
-      List<P>& particles = (*a_particles[lvl])[dit()].listItems();
+      List<P>& particles = a_particles[lvl][dit()].listItems();
 
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];            
 
