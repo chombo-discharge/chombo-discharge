@@ -415,7 +415,7 @@ void EddingtonSP1::parseReflection(){
 }
 
 void EddingtonSP1::parseRegridSlopes(){
-  CH_TIME("FieldSolver::parseRegridSlopes()");
+  CH_TIME("EddingtonSP1::parseRegridSlopes()");
   if(m_verbosity > 5){
     pout() << m_name + "::parseRegridSlopes()" << endl;
   }
