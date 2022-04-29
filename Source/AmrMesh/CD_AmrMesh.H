@@ -42,7 +42,7 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Class for handling spatial operations for streamer equations.
+  @brief Class for handling spatial operations. 
   @details This class handles most (if not all) spatial operations. Examples are grid generation, coarsening of data, interpolation of data, memory allocations etc. 
 */
 class AmrMesh {
