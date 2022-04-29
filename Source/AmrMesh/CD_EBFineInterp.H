@@ -23,7 +23,8 @@
   @brief Class for interpolating data to fine grids. Can use constant interpolation or include limiters.
 */
 class EBFineInterp : public EBPWLFineInterp {
-
+public:
+  
   /*!
     @brief Default constructor. Must subsequently call the define method. 
   */
