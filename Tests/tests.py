@@ -232,7 +232,7 @@ for test in config.sections():
                 # Set up the run command
                 # --------------------------------------------------
                 if args.parallel:
-                    runCommand = args.exec_mpi   + " -np " + str(args.cores) + " " + executable + " " + input
+                    runCommand = args.exec_mpi   + " -np " + str(args.cores) + " ./" + executable + " " + input
                 else:
                     runCommand = "./" + executable + " " + input                
 
