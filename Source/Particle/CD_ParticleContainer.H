@@ -283,13 +283,15 @@ public:
     @brief Get particle data on a level
     @param[in] a_level AMR level
   */
-  ParticleData<P>& operator[](const int a_level);
+  ParticleData<P>&
+  operator[](const int a_level);
 
   /*!
     @brief Get data on a level. Const version. 
     @param[in] a_level AMR level
   */
-  const ParticleData<P>& operator[](const int a_level) const;
+  const ParticleData<P>&
+  operator[](const int a_level) const;
 
   /*!
     @brief Get all cell particles. 

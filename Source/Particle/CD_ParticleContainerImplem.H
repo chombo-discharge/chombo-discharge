@@ -316,7 +316,8 @@ ParticleContainer<P>::getNonMaskParticles() const
 }
 
 template <class P>
-ParticleData<P>& ParticleContainer<P>::operator[](const int a_lvl)
+ParticleData<P>&
+ParticleContainer<P>::operator[](const int a_lvl)
 {
   CH_assert(m_isDefined);
 
@@ -328,7 +329,8 @@ ParticleData<P>& ParticleContainer<P>::operator[](const int a_lvl)
 }
 
 template <class P>
-const ParticleData<P>& ParticleContainer<P>::operator[](const int a_level) const
+const ParticleData<P>&
+ParticleContainer<P>::operator[](const int a_level) const
 {
   CH_assert(m_isDefined);
 

@@ -79,12 +79,14 @@ public:
   /*!
     @brief Get the stencils over a single box
   */
-  const BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit) const;
+  const BaseIVFAB<VoFStencil>&
+  operator[](const DataIndex& a_dit) const;
 
   /*!
     @brief Get the stencils over a single box
   */
-  BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit);
+  BaseIVFAB<VoFStencil>&
+  operator[](const DataIndex& a_dit);
 
   /*!
     @brief Apply the stencil

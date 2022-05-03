@@ -36,9 +36,17 @@ IrregStencil::IrregStencil(const DisjointBoxLayout&        a_dbl,
   this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, a_type);
 }
 
-const BaseIVFAB<VoFStencil>& IrregStencil::operator[](const DataIndex& a_dit) const { return *m_stencils[a_dit]; }
+const BaseIVFAB<VoFStencil>&
+IrregStencil::operator[](const DataIndex& a_dit) const
+{
+  return *m_stencils[a_dit];
+}
 
-BaseIVFAB<VoFStencil>& IrregStencil::operator[](const DataIndex& a_dit) { return *m_stencils[a_dit]; }
+BaseIVFAB<VoFStencil>&
+IrregStencil::operator[](const DataIndex& a_dit)
+{
+  return *m_stencils[a_dit];
+}
 
 void
 IrregStencil::define(const DisjointBoxLayout&        a_dbl,

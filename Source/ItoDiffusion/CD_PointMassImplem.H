@@ -60,9 +60,17 @@ PointMass::define(const RealVect& a_pos, const Real& a_mass, const Real& a_energ
   m_energy = a_energy;
 }
 
-inline Real& PointMass::operator[](const int a_dir) { return m_pos[a_dir]; }
+inline Real&
+PointMass::operator[](const int a_dir)
+{
+  return m_pos[a_dir];
+}
 
-inline const Real& PointMass::operator[](const int a_dir) const { return m_pos[a_dir]; }
+inline const Real&
+PointMass::operator[](const int a_dir) const
+{
+  return m_pos[a_dir];
+}
 
 inline RealVect&
 PointMass::pos()

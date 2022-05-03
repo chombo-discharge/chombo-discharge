@@ -100,7 +100,8 @@ ItoPlasmaPhysics::addTable(const std::string a_table_name, const std::string a_f
   m_tables.emplace(a_table_name, table); // Add table
 }
 
-void ItoPlasmaPhysics::readFile(LookupTable<2>& a_table, const std::string a_file)
+void
+ItoPlasmaPhysics::readFile(LookupTable<2>& a_table, const std::string a_file)
 {
 
   Real x, y;

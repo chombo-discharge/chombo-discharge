@@ -945,8 +945,8 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
 
     // For sorting fine vofs, based on distance to the ghost vof. Shortest distance goes first.
     auto comparatorFine =
-      [& loc = a_dataLocation, &p = x0, &ebisbox = ebisBoxFine, &dx = a_dxFine](const VolIndex& v1,
-                                                                                const VolIndex& v2) -> bool {
+      [&loc = a_dataLocation, &p = x0, &ebisbox = ebisBoxFine, &dx = a_dxFine](const VolIndex& v1,
+                                                                               const VolIndex& v2) -> bool {
       const RealVect d1 = Location::position(loc, v1, ebisbox, dx) - p;
       const RealVect d2 = Location::position(loc, v2, ebisbox, dx) - p;
 
@@ -958,8 +958,8 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
 
     // For sorting coar vofs, based on distance to the ghost vof. Shortest distance goes first.
     auto comparatorCoar =
-      [& loc = a_dataLocation, &p = x0, &ebisbox = ebisBoxCoar, &dx = a_dxCoar](const VolIndex& v1,
-                                                                                const VolIndex& v2) -> bool {
+      [&loc = a_dataLocation, &p = x0, &ebisbox = ebisBoxCoar, &dx = a_dxCoar](const VolIndex& v1,
+                                                                               const VolIndex& v2) -> bool {
       const RealVect d1 = Location::position(loc, v1, ebisbox, dx) - p;
       const RealVect d2 = Location::position(loc, v2, ebisbox, dx) - p;
 

@@ -62,13 +62,15 @@ public:
     @brief Get the stencils over an AMR level
     @param[in] a_lvl AMR level
   */
-  const IrregStencil& operator[](const int& a_lvl) const;
+  const IrregStencil&
+  operator[](const int& a_lvl) const;
 
   /*!
     @brief Get the stencils over an AMR level
     @param[in] a_lvl AMR level
   */
-  IrregStencil& operator[](const int& a_lvl);
+  IrregStencil&
+  operator[](const int& a_lvl);
 
   /*!
     @brief Define function

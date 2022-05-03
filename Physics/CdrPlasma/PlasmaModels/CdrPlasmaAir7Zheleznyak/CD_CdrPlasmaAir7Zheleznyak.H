@@ -186,7 +186,8 @@ namespace Physics {
       int
       poissonReaction(const Real a_propensity, const Real a_dt) const;
 
-      void readFileEntries(LookupTable<2>& a_table, const std::string a_string);
+      void
+      readFileEntries(LookupTable<2>& a_table, const std::string a_string);
       void
       parseTransportFile();
       void

@@ -45,13 +45,15 @@ IrregAmrStencil<IrregSten>::~IrregAmrStencil()
 }
 
 template <class IrregSten>
-const IrregStencil& IrregAmrStencil<IrregSten>::operator[](const int& a_lvl) const
+const IrregStencil&
+IrregAmrStencil<IrregSten>::operator[](const int& a_lvl) const
 {
   return *m_stencils[a_lvl];
 }
 
 template <class IrregSten>
-IrregStencil& IrregAmrStencil<IrregSten>::operator[](const int& a_lvl)
+IrregStencil&
+IrregAmrStencil<IrregSten>::operator[](const int& a_lvl)
 {
   return *m_stencils[a_lvl];
 }

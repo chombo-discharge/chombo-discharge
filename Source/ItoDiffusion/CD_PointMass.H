@@ -65,14 +65,16 @@ public:
     @param[in] a_dir Coordinate
     @return Returns m_pos[a_dir]
   */
-  inline Real& operator[](const int a_dir);
+  inline Real&
+  operator[](const int a_dir);
 
   /*!
     @brief Position operator. Get the physical position of the input coordinate
     @param[in] a_dir Coordinate
     @return Returns m_pos[a_dir]
   */
-  inline const Real& operator[](int a_dir) const;
+  inline const Real&
+  operator[](int a_dir) const;
 
   /*!
     @brief Get physical position

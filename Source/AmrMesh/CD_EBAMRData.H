@@ -58,13 +58,15 @@ public:
     @brief Indexing operators. Returns m_data[a_level]
     @param[in] a_level Grid level
   */
-  RefCountedPtr<LevelData<T>>& operator[](int a_level);
+  RefCountedPtr<LevelData<T>>&
+  operator[](int a_level);
 
   /*!
     @brief Indexing operators. Returns const m_data[a_level]
     @param[in] a_level Grid level
   */
-  const RefCountedPtr<LevelData<T>>& operator[](int a_level) const;
+  const RefCountedPtr<LevelData<T>>&
+  operator[](int a_level) const;
 
   /*!
     @brief Resize m_data to having size a_size

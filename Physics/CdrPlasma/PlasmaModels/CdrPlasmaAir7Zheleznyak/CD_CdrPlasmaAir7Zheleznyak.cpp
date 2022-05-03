@@ -56,7 +56,8 @@ CdrPlasmaAir7Zheleznyak::CdrPlasmaAir7Zheleznyak()
 
 CdrPlasmaAir7Zheleznyak::~CdrPlasmaAir7Zheleznyak() {}
 
-void CdrPlasmaAir7Zheleznyak::readFileEntries(LookupTable<2>& a_table, const std::string a_string)
+void
+CdrPlasmaAir7Zheleznyak::readFileEntries(LookupTable<2>& a_table, const std::string a_string)
 {
   Real          x, y;
   bool          read_line = false;

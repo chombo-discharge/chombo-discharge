@@ -429,7 +429,7 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     };
 
     // Density is rho = P*Na/(T*R)
-    m_gasDensity = [& p = this->m_gasPressure, &T = this->m_gasTemperature](const RealVect a_position) -> Real {
+    m_gasDensity = [&p = this->m_gasPressure, &T = this->m_gasTemperature](const RealVect a_position) -> Real {
       return (p(a_position) * Units::atm2pascal * Units::Na) / (T(a_position) * Units::R);
     };
   }
@@ -1650,7 +1650,7 @@ CdrPlasmaJSON::parseMobilities()
         // This is a hook for fetching the positive ion from the Morrow-Lowke model. The expression
         // is found in 'Streamer propagation in air', J. Phys. D: Appl. Phys. 30 614
 
-        auto func = [& P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
+        auto func = [&P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
           constexpr Real P0 = Units::atm2pascal; // One atmosphere in Pascal.
 
           return 2.34E-4 * P0 / P(x);
@@ -1663,7 +1663,7 @@ CdrPlasmaJSON::parseMobilities()
         // This is a hook for fetching the negative ion from the Morrow-Lowke model. The expression
         // is found in 'Streamer propagation in air', J. Phys. D: Appl. Phys. 30 614
 
-        auto func = [& N = this->m_gasDensity, &P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
+        auto func = [&N = this->m_gasDensity, &P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
           const Real EN = E / N(x) * 1E4;
 
           constexpr Real P0 = Units::atm2pascal; // One atmosphere in Pascal.

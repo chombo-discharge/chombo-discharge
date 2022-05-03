@@ -80,7 +80,11 @@ MultiIndex::getMultiIndex(const int a_linearIndex) const
   return ret;
 }
 
-int MultiIndex::operator[](const int a_dir) const { return (*m_iter)[a_dir]; }
+int
+MultiIndex::operator[](const int a_dir) const
+{
+  return (*m_iter)[a_dir];
+}
 
 bool
 MultiIndex::ok() const

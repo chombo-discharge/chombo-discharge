@@ -95,7 +95,8 @@ public:
   /*!
     @brief Get one index
   */
-  int operator[](const int a_dir) const;
+  int
+  operator[](const int a_dir) const;
 
   /*!
     @brief Increment multi-index lexigraphically

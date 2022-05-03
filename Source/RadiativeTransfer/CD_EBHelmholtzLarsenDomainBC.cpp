@@ -61,7 +61,7 @@ EBHelmholtzLarsenDomainBC::setRobinFunctions()
   //       the "Larsen coefficients".
 
   // Using our formulation of the Helmholtz operator, the A-coefficient is 1.5*kappa*kappa*(1+3*r2)/(1-2*r1)
-  m_functionA = [& species = this->m_species, r1 = this->m_r1, r2 = this->m_r2](const RealVect& a_position) {
+  m_functionA = [&species = this->m_species, r1 = this->m_r1, r2 = this->m_r2](const RealVect& a_position) {
     Real val = species->getAbsorptionCoefficient(a_position);
 
     val *= val;

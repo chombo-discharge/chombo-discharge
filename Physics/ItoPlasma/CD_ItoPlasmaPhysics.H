@@ -296,7 +296,8 @@ namespace Physics {
       /*!
 	@brief Read a file and put it in a lookup table
       */
-      void readFile(LookupTable<2>& a_table, const std::string a_file);
+      void
+      readFile(LookupTable<2>& a_table, const std::string a_file);
 
       /*!
 	@brief Draw a valid random position somewhere in a cell

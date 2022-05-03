@@ -31,13 +31,15 @@ EBAMRData<T>::~EBAMRData()
 {}
 
 template <typename T>
-RefCountedPtr<LevelData<T>>& EBAMRData<T>::operator[](int a_level)
+RefCountedPtr<LevelData<T>>&
+EBAMRData<T>::operator[](int a_level)
 {
   return m_data[a_level];
 }
 
 template <typename T>
-const RefCountedPtr<LevelData<T>>& EBAMRData<T>::operator[](int a_level) const
+const RefCountedPtr<LevelData<T>>&
+EBAMRData<T>::operator[](int a_level) const
 {
   return m_data[a_level];
 }
