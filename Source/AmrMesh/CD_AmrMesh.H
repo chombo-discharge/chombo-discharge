@@ -42,7 +42,7 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Class for handling spatial operations for streamer equations.
+  @brief Class for handling spatial operations. 
   @details This class handles most (if not all) spatial operations. Examples are grid generation, coarsening of data, interpolation of data, memory allocations etc. 
 */
 class AmrMesh {
@@ -964,7 +964,45 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;  
+  void interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Interpolate data to new grids
+    @details This is called when requiring data to be interpolated to new grids. Takes old data as argument
+    and fills the new grid data with an interpolation of the old grid data. 
+    @param[out] a_newData        New grid data.
+    @param[in]  a_oldData        Old grid data.
+    @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
+    @param[in]  a_oldFinestLevel Previous finest level.
+    @param[in]  a_newFinestLevel New finest level. 
+    @param[in]  a_useSlopes      If true, use slopes when regridding the data. 
+  */
+  void interpToNewGrids(MFAMRCellData&       a_newData,
+			const MFAMRCellData& a_oldData,
+			const int            a_lmin,
+			const int            a_oldFinestLevel,
+			const int            a_newFinestLevel,
+			const bool           a_useSlopes);  
+
+  /*!
+    @brief Interpolate data to new grids
+    @details This is called when requiring data to be interpolated to new grids. Takes old data as argument
+    and fills the new grid data with an interpolation of the old grid data. 
+    @param[out] a_newData        New grid data.
+    @param[in]  a_oldData        Old grid data.
+    @param[in]  a_phase          Phase on which we regrid. 
+    @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
+    @param[in]  a_oldFinestLevel Previous finest level.
+    @param[in]  a_newFinestLevel New finest level. 
+    @param[in]  a_useSlopes      If true, use slopes when regridding the data. 
+  */
+  void interpToNewGrids(EBAMRCellData&           a_newData,
+			const EBAMRCellData&     a_oldData,
+			const phase::which_phase a_phase,
+			const int                a_lmin,
+			const int                a_oldFinestLevel,
+			const int                a_newFinestLevel,
+			const bool               a_useSlopes);
 
   /*!
     @brief Interpolate data to centroids on realm and phase
@@ -1225,7 +1263,7 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EBFineInterp> >& getFineInterp(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get flux register

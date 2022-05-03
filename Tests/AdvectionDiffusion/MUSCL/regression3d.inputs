@@ -74,6 +74,7 @@ CdrMuscl.plt_vars             = phi vel src dco ebflux  # Plot variables. Option
 CdrMuscl.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 CdrMuscl.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
 CdrMuscl.which_redistribution = volume                  # Redistribution type. 'volume', 'mass', or 'none' (turned off)
+CdrMuscl.use_regrid_slopes    = true                    # Turn on/off slopes when regridding
 CdrMuscl.gmg_verbosity        = -1                      # GMG verbosity
 CdrMuscl.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep
 CdrMuscl.gmg_post_smooth      = 6                       # Number of relaxations in upsweep

@@ -155,7 +155,7 @@ void PhaseRealm::regridOperators(const int a_lmin){
     timer.stopEvent("Ghost interp");
 
     timer.startEvent("PWL interp");
-    this->defineEBPWLInterp(a_lmin);
+    this->defineEBFineInterp(a_lmin);
     timer.stopEvent("PWL interp");
 
     timer.startEvent("Flux register");        
@@ -217,7 +217,7 @@ void PhaseRealm::registerOperator(const std::string a_operator){
   // These are the supported operators - issue an error if we ask for something that is not supported. 
   if(!(a_operator.compare(s_eb_coar_ave)     == 0 ||
        a_operator.compare(s_eb_fill_patch)   == 0 ||
-       a_operator.compare(s_eb_pwl_interp)   == 0 ||
+       a_operator.compare(s_eb_fine_interp)   == 0 ||
        a_operator.compare(s_eb_flux_reg)     == 0 ||
        a_operator.compare(s_eb_redist)       == 0 ||
        a_operator.compare(s_noncons_div)     == 0 ||
@@ -486,15 +486,15 @@ void PhaseRealm::defineFillPatch(const int a_lmin){
   }
 }
 
-void PhaseRealm::defineEBPWLInterp(const int a_lmin){
-  CH_TIME("PhaseRealm::defineEBPWLInterp");
+void PhaseRealm::defineEBFineInterp(const int a_lmin){
+  CH_TIME("PhaseRealm::defineEBFineInterp");
   if(m_verbose){
-    pout() << "PhaseRealm::defineEBPWLInterp" << endl;
+    pout() << "PhaseRealm::defineEBFineInterp" << endl;
   }
 
-  const bool doThisOperator = this->queryOperator(s_eb_pwl_interp);
+  const bool doThisOperator = this->queryOperator(s_eb_fine_interp);
 
-  m_pwlInterpGhosts.resize(1 + m_finestLevel);
+  m_ebFineInterp.resize(1 + m_finestLevel);
 
   if(doThisOperator){
 
@@ -506,14 +506,11 @@ void PhaseRealm::defineEBPWLInterp(const int a_lmin){
 
       // Interpolator for filling data on level l from level l-1 lives on level l
       if(hasCoar){
-	m_pwlInterpGhosts[lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids  [lvl  ],
-										     m_grids  [lvl-1],
-										     m_ebisl  [lvl  ],
-										     m_ebisl  [lvl-1],
-										     m_domains[lvl-1],
-										     m_refinementRatios[lvl-1],
-										     comps,
-										     &(*m_ebis)));
+	m_ebFineInterp[lvl] = RefCountedPtr<EBFineInterp> (new EBFineInterp(*m_eblg[lvl  ],
+									    *m_eblg[lvl-1],
+									    m_refinementRatios[lvl-1],
+									    comps,
+									    &(*m_ebis)));
       }
     }
   }
@@ -918,12 +915,12 @@ Vector<RefCountedPtr<AggEBPWLFillPatch> >& PhaseRealm::getFillPatch() const {
   return m_pwlFillPatch;
 }
 
-Vector<RefCountedPtr<EBPWLFineInterp> >& PhaseRealm::getPwlInterpolator() const {
-  if(!this->queryOperator(s_eb_pwl_interp)) {
-    MayDay::Error("PhaseRealm::getPwlInterpolator - operator not registered!");
+Vector<RefCountedPtr<EBFineInterp> >& PhaseRealm::getFineInterp() const {
+  if(!this->queryOperator(s_eb_fine_interp)) {
+    MayDay::Error("PhaseRealm::getFineInterp - operator not registered!");
   }
   
-  return m_pwlInterpGhosts;
+  return m_ebFineInterp;
 }
 
 Vector<RefCountedPtr<EBFluxRegister> >&  PhaseRealm::getFluxRegister() const {

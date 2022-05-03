@@ -45,7 +45,7 @@ allclean: libclean
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Electrostatics     pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Geometry           pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/RadiativeTransfer  pristine
-	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/TracerParticles    pristine
+	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/TracerParticle     pristine
 	$(RM) $(DISCHARGE_HOME)/Lib/*.a
 
 pristine: allclean

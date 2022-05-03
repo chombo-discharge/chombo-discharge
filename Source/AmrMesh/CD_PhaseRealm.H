@@ -39,6 +39,7 @@
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
 #include <CD_EBAMRParticleMesh.H>
+#include <CD_EBFineInterp.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
@@ -50,7 +51,7 @@ static const std::string s_eb_gradient     = "eb_gradient"    ;  // For computin
 static const std::string s_eb_irreg_interp = "eb_irreg_interp";  // For data recentering
 static const std::string s_eb_coar_ave     = "eb_coar_ave"    ;  // For coarsening
 static const std::string s_eb_fill_patch   = "eb_fill_patch"  ;  // For regridding data
-static const std::string s_eb_pwl_interp   = "eb_pwl_interp"  ;  // For linearly filling ghost cells
+static const std::string s_eb_fine_interp   = "eb_fine_interp"  ;  // For linearly filling ghost cells
 static const std::string s_eb_flux_reg     = "eb_flux_reg"    ;  // For flux registeration
 static const std::string s_eb_redist       = "eb_redist"      ;  // For redistribution
 static const std::string s_noncons_div     = "eb_non_cons_div";  // For computing non-conservative divergences
@@ -280,7 +281,7 @@ public:
   /*!
     @brief Get piecewise linear ghost cell interpolation utility
   */
-  Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator() const;
+  Vector<RefCountedPtr<EBFineInterp> >& getFineInterp() const;
 
   /*!
     @brief Get flux register utility
@@ -467,7 +468,7 @@ protected:
   /*!
     @brief Ghost cell interpolation utility
   */
-  mutable Vector<RefCountedPtr<EBPWLFineInterp> > m_pwlInterpGhosts;
+  mutable Vector<RefCountedPtr<EBFineInterp> > m_ebFineInterp;
 
   /*!
     @brief Flux register utility
@@ -559,7 +560,7 @@ protected:
     @brief Define ghost cell interpolation utility
     @param[in] a_lmin Coarsest grid level that changes
   */  
-  void defineEBPWLInterp(const int a_lmin);
+  void defineEBFineInterp(const int a_lmin);
 
   /*!
     @brief Define multigrid injection utility

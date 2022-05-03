@@ -19,6 +19,6 @@ USE_HDF        = FALSE
 #HDFMPILIBFLAGS= -L<hdf_parallel_dir>/lib -lhdf5 -lz
 cxxoptflags    = -O3 -march=native
 flibflags      = -O3 -march=native
-syslibflags    = -mkl=sequential
+syslibflags    = -qmkl=sequential
 
 #end  -- dont change this line

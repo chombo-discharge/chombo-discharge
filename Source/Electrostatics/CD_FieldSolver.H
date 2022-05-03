@@ -540,6 +540,11 @@ protected:
   bool m_plotSigma;
 
   /*!
+    @brief Use slopes when regridding or ont
+  */
+  bool m_regridSlopes;
+
+  /*!
     @brief Verbosity for this calss. 
   */
   int m_verbosity;
@@ -598,6 +603,11 @@ protected:
     @brief Parse domain boundary conditions. 
   */
   virtual void parseDomainBc();
+
+  /*!
+    @brief Parse slope regrid
+  */
+  virtual void parseRegridSlopes();  
 
   /*!
     @brief Set default BC functions. This sets all the m_domainBcFunction objects to s_defaultDomainBcFunction, which return 1 everywhere. 
