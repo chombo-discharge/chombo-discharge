@@ -18,13 +18,13 @@
 // Our includes
 #include <CD_EbCoarAve.H>
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief Class for coarsening data in a multifluid context. 
 */
-class MFCoarAve {
+class MFCoarAve
+{
 public:
-
   /*!
     @brief Constructor. Must subsequently call defined. 
   */
@@ -39,26 +39,27 @@ public:
     @brief Full constructor. Calls define
     @param[in] aveOps Averaging operators on each phase. 
   */
-  MFCoarAve(const Vector<RefCountedPtr<EbCoarAve> >& a_aveOps);
+  MFCoarAve(const Vector<RefCountedPtr<EbCoarAve>>& a_aveOps);
 
   /*!
     @brief Define function
     @param[in] aveOps Averaging operators on each phase. 
   */
-  void define(const Vector<RefCountedPtr<EbCoarAve> >& a_aveOps);
+  void
+  define(const Vector<RefCountedPtr<EbCoarAve>>& a_aveOps);
 
   /*!
     @brief Get coarsening utility for specified phase.
     @param[in] a_phase Phase
   */
-  const RefCountedPtr<EbCoarAve>& getAveOp(const int a_phase) const;
-  
-protected:
+  const RefCountedPtr<EbCoarAve>&
+  getAveOp(const int a_phase) const;
 
+protected:
   /*!
     @brief Interpolation for each phase. 
   */
-  Vector<RefCountedPtr<EbCoarAve> > m_aveOps;
+  Vector<RefCountedPtr<EbCoarAve>> m_aveOps;
 };
 
 #include <CD_NamespaceFooter.H>

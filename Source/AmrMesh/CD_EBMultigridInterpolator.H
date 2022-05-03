@@ -22,9 +22,9 @@
 /*!
   @brief Multigrid interpolator parent class. Virtual beause I want different implementations to do different things. 
 */
-class EBMultigridInterpolator {
+class EBMultigridInterpolator
+{
 public:
-
   /*!
     @brief Disallowed constructor. 
   */
@@ -43,7 +43,8 @@ public:
   /*!
     @brief Return number of ghost cells across CF interface.
   */
-  virtual int getGhostCF() const = 0;
+  virtual int
+  getGhostCF() const = 0;
 
   /*!
     @brief Do inhomogeneous interpolation
@@ -51,14 +52,18 @@ public:
     @param[in]    a_phiCoar   Coarse phi
     @param[in]    a_variables Variables to interpolate
   */
-  virtual void coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) = 0;
+  virtual void
+  coarseFineInterp(LevelData<EBCellFAB>&       a_phiFine,
+                   const LevelData<EBCellFAB>& a_phiCoar,
+                   const Interval              a_variables) = 0;
 
   /*!
     @brief Do homogeneous interpolation
     @param[in] a_phiFine   Fine phi
     @param[in] a_variables Variables to interpolate
   */
-  virtual void coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const = 0;
+  virtual void
+  coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const = 0;
 
   /*!
     @brief Do homogeneous coarse-fine interpolation on a grid patch
@@ -69,7 +74,8 @@ public:
     the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not
     contain enough ghost cells. 
   */
-  virtual void coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const = 0;
+  virtual void
+  coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const = 0;
 };
 
 #include <CD_NamespaceFooter.H>

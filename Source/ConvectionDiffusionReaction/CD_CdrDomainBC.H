@@ -27,13 +27,14 @@
   @note This class will be run-time safe in the sense that its default constructor provides a fully functional object which (shouldn't) 
   cause run-time errors. 
 */
-class CdrDomainBC {
+class CdrDomainBC
+{
 public:
-  
   /*!
     @brief Boundary condition types for the CDR solvers
   */
-  enum class BcType {
+  enum class BcType
+  {
     DataBased,
     Wall,
     Function,
@@ -47,7 +48,7 @@ public:
     @param[in] a_time     Time
     @return Returns flux in time and space
   */
-  using FluxFunction = std::function<Real(const RealVect a_position, const Real a_time) >;
+  using FluxFunction = std::function<Real(const RealVect a_position, const Real a_time)>;
 
   /*!
     @brief Alias for mapping a direction and side. The first element in pair is the coordinate direction and the second is the low/high end in that direction. 
@@ -58,8 +59,7 @@ public:
     @brief Initializing constructor.
     @details This populates m_bcTypes and m_bcFunctions with BcType::Wall and flux functions which return zero (i.e., also wall). 
   */
-  inline
-  CdrDomainBC();
+  inline CdrDomainBC();
 
   /*!
     @brief Copy constructor
@@ -77,13 +77,15 @@ public:
     @brief Copy assignment
     @param[in] a_other Other 
   */
-  CdrDomainBC& operator=(const CdrDomainBC& a_other) = default;
+  CdrDomainBC&
+  operator=(const CdrDomainBC& a_other) = default;
 
   /*!
     @brief Disallowed move assignment
     @param[in] a_other Other 
   */
-  CdrDomainBC& operator=(const CdrDomainBC&& a_other) = delete;
+  CdrDomainBC&
+  operator=(const CdrDomainBC&& a_other) = delete;
 
   /*!
     @brief Create a domain side from dir/side
@@ -91,49 +93,47 @@ public:
     @param[in] a_side Low/high side
     @return Returns std::pair<int, Side::LoHiSide>(a_dir, a_sit)
   */
-  inline
-  DomainSide domainSide(const int a_dir, const Side::LoHiSide a_side) const;
+  inline DomainSide
+  domainSide(const int a_dir, const Side::LoHiSide a_side) const;
 
   /*!
     @brief Destructor. Does nothing. 
   */
-  inline
-  ~CdrDomainBC();
+  inline ~CdrDomainBC();
 
   /*!
     @brief Get the BC type on a particular domain side. 
     @param[in] a_domainSide Domain side
     @returns Returns the BC type on the domain side
   */
-  inline
-  const BcType& getBcType(const DomainSide& a_domainSide) const;
+  inline const BcType&
+  getBcType(const DomainSide& a_domainSide) const;
 
-    /*!
+  /*!
     @brief Get the BC type on a particular domain side
     @param[in] a_domainSide Domain side
     @returns Returns the BC function on the domain side
   */
-  inline
-  const FluxFunction& getBcFunction(const DomainSide& a_domainSide) const;
+  inline const FluxFunction&
+  getBcFunction(const DomainSide& a_domainSide) const;
 
   /*!
     @brief Set the BC type on a domain side
     @param[in] a_domainSide Domain side
     @param[in] a_bcType     Domain BC type
   */
-  inline
-  void setBcType(const DomainSide& a_domainSide, const BcType& a_bcType);
+  inline void
+  setBcType(const DomainSide& a_domainSide, const BcType& a_bcType);
 
   /*!
     @brief Set the BC type on a domain side. 
     @param[in] a_domainSide Domain side
     @param[in] a_function   Flux function on domain side
   */
-  inline
-  void setBcFunction(const DomainSide& a_domainSide, const FluxFunction& a_function);
+  inline void
+  setBcFunction(const DomainSide& a_domainSide, const FluxFunction& a_function);
 
 protected:
-
   /*!
     @brief BC types on various domain edges
   */

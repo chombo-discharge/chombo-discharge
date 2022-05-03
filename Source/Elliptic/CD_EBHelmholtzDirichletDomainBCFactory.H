@@ -25,9 +25,9 @@
 /*!
   @brief Factory class for passing Dirichlet domain boundary conditions into EBHelmholtzOp. 
 */
-class EBHelmholtzDirichletDomainBCFactory : public EBHelmholtzDomainBCFactory {
+class EBHelmholtzDirichletDomainBCFactory : public EBHelmholtzDomainBCFactory
+{
 public:
-
   /*!
     @brief Constructor. 
   */
@@ -54,21 +54,23 @@ public:
     @brief Set the constant value on the domain side. 
     @param[in] a_value Constant value on all domain sides. 
   */
-  void setValue(const Real a_value);
+  void
+  setValue(const Real a_value);
 
   /*!
     @brief Set the spatially dependent value on the domain side. 
     @param[in] a_value Spatially dependent value on all domain sides. 
   */
-  void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+  void
+  setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Factory method
   */
-  virtual RefCountedPtr<EBHelmholtzDomainBC> create() const override;
+  virtual RefCountedPtr<EBHelmholtzDomainBC>
+  create() const override;
 
 protected:
-  
   /*!
     @brief Use constant for BC
   */
@@ -87,7 +89,7 @@ protected:
   /*!
     @brief Value on the EB. 
   */
-  std::function<Real(const RealVect& a_pos) > m_functionValue;
+  std::function<Real(const RealVect& a_pos)> m_functionValue;
 };
 
 #include <CD_NamespaceFooter.H>

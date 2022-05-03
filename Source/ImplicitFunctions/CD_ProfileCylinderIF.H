@@ -23,9 +23,9 @@
   @details The grooves are torii that are cut out of the cylinder. Use the input parameters to adjust the height, distance, and width of the grooves. 
   @note This is a 3D object only!
 */
-class ProfileCylinderIF : public BaseIF {
+class ProfileCylinderIF : public BaseIF
+{
 public:
-
   /*!
     @brief No weak construction, use the full constructor.
   */
@@ -45,17 +45,17 @@ public:
     @param[in] a_numRight         Number of torii to the right of the centerpoint
     @param[in] a_fluidInside      Fluid on inside or not
   */
-  ProfileCylinderIF(const RealVect  a_endPoint1,
-		    const RealVect  a_endPoint2,
-		    const Real      a_cylinderRadius,
-		    const Real      a_torusMajorRadius,
-		    const Real      a_torusMinorRadius,
-		    const Real      a_ccDistance,
-		    const Real      a_shift,
-		    const Real      a_roundingRadius,
-		    const int       a_numLeft,
-		    const int       a_numRight,
-		    const bool      a_fluidInside);
+  ProfileCylinderIF(const RealVect a_endPoint1,
+                    const RealVect a_endPoint2,
+                    const Real     a_cylinderRadius,
+                    const Real     a_torusMajorRadius,
+                    const Real     a_torusMinorRadius,
+                    const Real     a_ccDistance,
+                    const Real     a_shift,
+                    const Real     a_roundingRadius,
+                    const int      a_numLeft,
+                    const int      a_numRight,
+                    const bool     a_fluidInside);
 
   /*!
     @brief Copy constructor
@@ -71,16 +71,17 @@ public:
   /*!
     @brief Value function. Returns distance to object.
     @param[in] a_pos Position
-  */  
-  virtual Real value(const RealVect& a_pos) const override;
+  */
+  virtual Real
+  value(const RealVect& a_pos) const override;
 
   /*!
     @brief Factory method
   */
-  virtual BaseIF* newImplicitFunction() const override;
-  
-protected:
+  virtual BaseIF*
+  newImplicitFunction() const override;
 
+protected:
   /*!
     @brief Implicit function. This is an intersection between a cylinder and several torii. 
   */

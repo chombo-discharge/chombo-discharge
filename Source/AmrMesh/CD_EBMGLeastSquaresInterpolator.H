@@ -44,9 +44,9 @@
   allowed to use the ghost cells in the patch that are filled from neighboring patches. 
   @note This class should work with data holders have exactly one component or SpaceDim components. 
 */
-class EBMultigridInterpolator {
+class EBMultigridInterpolator
+{
 public:
-
   /*!
     @brief Specification of cell-center or cell-centroid type of interpolation
   */
@@ -74,14 +74,13 @@ public:
     @param[in] a_weighting    Weighting factor least squares. 
   */
   EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
-			  const EBLevelGrid& a_eblgCoar,
-			  const CellLocation a_dataLocation,
-			  const IntVect&     a_ghostVector,
-			  const int          a_refRat,
-			  const int          a_ghostCF,
-			  const int          a_order,
-			  const int          a_weighting = 0);
-			  
+                          const EBLevelGrid& a_eblgCoar,
+                          const CellLocation a_dataLocation,
+                          const IntVect&     a_ghostVector,
+                          const int          a_refRat,
+                          const int          a_ghostCF,
+                          const int          a_order,
+                          const int          a_weighting = 0);
 
   /*!
     @brief Destructor (does nothing)
@@ -91,7 +90,8 @@ public:
   /*!
     @brief Return number of ghost cells across CF interface.
   */
-  int getGhostCF() const;
+  int
+  getGhostCF() const;
 
   /*!
     @brief Do inhomogeneous interpolation
@@ -99,7 +99,8 @@ public:
     @param[in]    a_phiCoar   Coarse phi
     @param[in]    a_variables Variables to interpolate
   */
-  void coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables);
+  void
+  coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables);
 
   /*!
     @brief Do inhomogeneous interpolation
@@ -110,14 +111,18 @@ public:
     @note This exists mostly for debugging, but this will be safe to use even if you input fine-grid data which does not
     have ghostCells == a_ghostVector.
   */
-  void slowCoarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables);  
+  void
+  slowCoarseFineInterp(LevelData<EBCellFAB>&       a_phiFine,
+                       const LevelData<EBCellFAB>& a_phiCoar,
+                       const Interval              a_variables);
 
   /*!
     @brief Do homogeneous interpolation
     @param[in] a_phiFine   Fine phi
     @param[in] a_variables Variables to interpolate
   */
-  void coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;
+  void
+  coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;
 
   /*!
     @brief Do homogeneous interpolation
@@ -127,7 +132,8 @@ public:
     @note This exists mostly for debugging, but this will be safe to use even if you input fine-grid data which does not
     have ghostCells == a_ghostVector.
   */
-  void slowCoarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;  
+  void
+  slowCoarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;
 
   /*!
     @brief Do homogeneous coarse-fine interpolation on a grid patch
@@ -138,7 +144,8 @@ public:
     the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not
     contain enough ghost cells. 
   */
-  void coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const;
+  void
+  coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const;
 
   /*!
     @brief Do homogeneous coarse-fine interpolation on a grid patch
@@ -150,10 +157,10 @@ public:
     the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not
     contain enough ghost cells. 
   */
-  void slowCoarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const;  
+  void
+  slowCoarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const;
 
 protected:
-
   /*!
     @brief Component that interpolation stencil is stored at
   */
@@ -162,7 +169,7 @@ protected:
   /*!
     @brief Number of variables in stencil data layouts. 
   */
-  static constexpr int m_numStenComp = 1;  
+  static constexpr int m_numStenComp = 1;
 
   /*!
     @brief Component number. Used for setting interval when data is copied into EBMultigridInterpolator's buffers. 
@@ -176,8 +183,8 @@ protected:
 
   /*!
     @brief For regular interpolation of vector quantities
-  */  
-  RefCountedPtr<QuadCFInterp> m_vectorInterpolator;    
+  */
+  RefCountedPtr<QuadCFInterp> m_vectorInterpolator;
 
   /*!
     @brief How to interpret data locations. 
@@ -249,12 +256,12 @@ protected:
   /*!
     @brief Fine-grid interpolation stencils.
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_fineStencils;
+  LayoutData<BaseIVFAB<VoFStencil>> m_fineStencils;
 
   /*!
     @brief Coarse-grid interpolation stencils.
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_coarStencils;
+  LayoutData<BaseIVFAB<VoFStencil>> m_coarStencils;
 
   /*!
     @brief Fine grid interpolation stencils. 
@@ -262,48 +269,53 @@ protected:
     will reach into whatever data is being interpolated, so the input data must have
     the same number of ghost cells as specified in the constructor. 
   */
-  LayoutData<RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB> > > m_aggFineStencils;
+  LayoutData<RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB>>> m_aggFineStencils;
 
   /*!
     @brief Coarse-grid interpolation stencils. 
     @details This is used for performance optimization. Note that m_aggCoarStencils
     will only reach into m_grownCoarData, which gives well-defined cache offsets. 
   */
-  LayoutData<RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB> > > m_aggCoarStencils;  
+  LayoutData<RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB>>> m_aggCoarStencils;
 
   /*!
     @brief Regular coarse-fine interface boxes. 
     @note This is a map to the "regular" ghost cells that will be interpolated using a standard
     multigrid interpolation stencil (away from the EB). 
   */
-  LayoutData<std::map<std::pair<int, Side::LoHiSide>, Box> > m_cfivs;
+  LayoutData<std::map<std::pair<int, Side::LoHiSide>, Box>> m_cfivs;
 
   /*!
     @brief Define ghost cells to be filled in range m_ghostCF from each cut-cell. 
   */
-  void defineGhostRegions();
+  void
+  defineGhostRegions();
 
   /*!
     @brief Define grids
     @param[in] a_eblgFine Fine grid
     @param[in] a_eblgCoar Coarse grid
   */
-  void defineGrids(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar);
+  void
+  defineGrids(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar);
 
   /*!
     @brief Define data holders. 
   */
-  void defineBuffers();
+  void
+  defineBuffers();
 
   /*!
     @brief Define stencils for interpolation across the EBCF refinement boundary. 
   */
-  void defineStencilsEBCF();
+  void
+  defineStencilsEBCF();
 
   /*!
     @brief Build the AggStencil objects for faster stencil aggregation
   */
-  void makeAggStencils();
+  void
+  makeAggStencils();
 
   /*!
     @brief Build an interpolation stencil
@@ -322,19 +334,20 @@ protected:
     @param[in]  a_weight         Equation weighting for least squares reconstruction. 
     @return Returns true if a stencil was found, in which case it is defined in a_stencilFine and a_stencilCoar. 
   */
-  bool getStencil(VoFStencil&            a_stencilFine,
-		  VoFStencil&            a_stencilCoar,
-		  const CellLocation&    a_dataLocation,
-		  const VolIndex&        a_ghostVofFine,
-		  const VolIndex&        a_ghostVofCoar,
-		  const EBISBox&         a_ebisboxFine,
-		  const EBISBox&         a_ebisboxCoar,
-		  const DenseIntVectSet& a_validFineCells,
-		  const DenseIntVectSet& a_validCoarCells,
-		  const Real&            a_dxFine,
-		  const Real&            a_dxCoar,
-		  const int&             a_order,
-		  const int&             a_weight);
+  bool
+  getStencil(VoFStencil&            a_stencilFine,
+             VoFStencil&            a_stencilCoar,
+             const CellLocation&    a_dataLocation,
+             const VolIndex&        a_ghostVofFine,
+             const VolIndex&        a_ghostVofCoar,
+             const EBISBox&         a_ebisboxFine,
+             const EBISBox&         a_ebisboxCoar,
+             const DenseIntVectSet& a_validFineCells,
+             const DenseIntVectSet& a_validCoarCells,
+             const Real&            a_dxFine,
+             const Real&            a_dxCoar,
+             const int&             a_order,
+             const int&             a_weight);
 };
 
 #include <CD_NamespaceFooter.H>

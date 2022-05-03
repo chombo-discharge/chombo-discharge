@@ -32,9 +32,9 @@
      3. addInvalidCoarseToFine where the coarse-grid deposition clouds are interpolated to the fine grid. This is the case when e.g. the coarse-grid clouds
         deposit underneath the fine level but the mass should end up on the fine level.
 */
-class EBCoarseFineParticleMesh {
+class EBCoarseFineParticleMesh
+{
 public:
-
   /*!
     @brief Default constructor. Leaves object in undefined state and subsequently requires a call to define. 
   */
@@ -48,9 +48,9 @@ public:
     @param[in] a_ghost      Number of ghost cells in mesh data holders. 
   */
   EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar,
-			   const EBLevelGrid& a_eblgFine,
-			   const int          a_refRat,
-			   const IntVect      a_ghost);
+                           const EBLevelGrid& a_eblgFine,
+                           const int          a_refRat,
+                           const IntVect      a_ghost);
 
   /*!
     @brief Destructor (does nothing)
@@ -64,10 +64,8 @@ public:
     @param[in] a_refRat     Refinement factory between levels
     @param[in] a_ghost      Number of ghost cells in mesh data holders. 
   */
-  void define(const EBLevelGrid& a_eblgCoar,
-	      const EBLevelGrid& a_eblgFine,
-	      const int          a_refRat,
-	      const IntVect      a_ghost);
+  void
+  define(const EBLevelGrid& a_eblgCoar, const EBLevelGrid& a_eblgFine, const int a_refRat, const IntVect a_ghost);
 
   /*!
     @brief Coarsen the fine-level ghost cells and add them to the coarse level. 
@@ -77,7 +75,8 @@ public:
     @param[inout] a_coarData Coarse mesh data. 
     @param[in]    a_fineData Fine mesh data. 
   */
-  void addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const;
+  void
+  addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const;
 
   /*!
     @brief Add the valid+ghost cells on the refined coarse level to the valid cells on the fine level.
@@ -87,7 +86,8 @@ public:
     @param[inout] a_fineData Fine mesh data
     @param[in]    a_fiCoData Refined coarse data buffer. Users will have deposited the mesh data onto this 
   */
-  void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const;
+  void
+  addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const;
 
   /*!
     @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid. 
@@ -96,20 +96,22 @@ public:
     @param[inout] a_fineData Fine-level data.
     @param[in]    a_coarData Coarse-level data.
   */
-  void addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData) const;
+  void
+  addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData) const;
 
   /*!
     @brief Get the refined coarse buffer
   */
-  LevelData<EBCellFAB>& getFiCoBuffer() const;
+  LevelData<EBCellFAB>&
+  getFiCoBuffer() const;
 
   /*!
     @brief Get the refined version of the coarse eblevelgrid
   */
-  const EBLevelGrid& getEblgFiCo() const;
+  const EBLevelGrid&
+  getEblgFiCo() const;
 
 protected:
-
   /*!
     @brief Default component
   */
@@ -118,7 +120,7 @@ protected:
   /*!
     @brief Maximum number of components
   */
-  static constexpr int m_nComp = 1;  
+  static constexpr int m_nComp = 1;
 
   /*!
     @brief Is defined or not
@@ -207,7 +209,8 @@ protected:
   /*!
     @brief Define the vof iterators
   */
-  void defineVoFIterators();
+  void
+  defineVoFIterators();
 };
 
 #include <CD_NamespaceFooter.H>

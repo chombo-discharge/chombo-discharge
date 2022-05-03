@@ -20,9 +20,9 @@
   @brief GradedPerlinSphereSdf function
   @details This class is a sphere with graded noise -- there is only noise on one side of the sphere. 
 */
-class GradedPerlinSphereSdf : public PerlinSphereSdf {
+class GradedPerlinSphereSdf : public PerlinSphereSdf
+{
 public:
-  
   /*!
     @brief Full constructor
     @param[in] a_rad         Sphere radius
@@ -36,13 +36,13 @@ public:
     @note The persistence argument indicates how we add octaves. With 0.5 we use half the amplitude and twice the frequency for the next octave. 
   */
   GradedPerlinSphereSdf(const Real&     a_rad,
-			const RealVect& a_center,
-			const bool&     a_inside,
-			const Real&     a_noiseAmp,
-			const RealVect& a_noiseFreq,
-			const Real&     a_persistence,
-			const int&      a_octaves,
-			const bool&     a_reseed = false);
+                        const RealVect& a_center,
+                        const bool&     a_inside,
+                        const Real&     a_noiseAmp,
+                        const RealVect& a_noiseFreq,
+                        const Real&     a_persistence,
+                        const int&      a_octaves,
+                        const bool&     a_reseed = false);
 
   /*!
     @brief Copy constructor
@@ -57,12 +57,14 @@ public:
   /*!
     @brief Value function
   */
-  virtual Real value(const RealVect& a_pos) const;
+  virtual Real
+  value(const RealVect& a_pos) const;
 
   /*!
     @brief Factory function
   */
-  virtual BaseIF* newImplicitFunction() const;
+  virtual BaseIF*
+  newImplicitFunction() const;
 };
 
 #include <CD_NamespaceFooter.H>

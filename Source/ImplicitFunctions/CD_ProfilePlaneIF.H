@@ -22,9 +22,9 @@
   @brief Implicit function which represents an infinite half-plane with "holes". 
   @note This is currently limited to 2D. 
 */
-class ProfilePlaneIF : public BaseIF {
+class ProfilePlaneIF : public BaseIF
+{
 public:
-
   /*!
     @brief Disallowed weak construction
   */
@@ -43,16 +43,16 @@ public:
     @param[in] a_curv        Corner curvatures
     @param[in] a_fluidInside Fluid on inside or not
   */
-  ProfilePlaneIF(const RealVect  a_point,
-		 const Real      a_width,
-		 const BaseIF*   a_impFunc,
-		 const int       a_numLeft,
-		 const int       a_numRight,
-		 const Real      a_ccDist,
-		 const Real      a_xShift,
-		 const Real      a_yShift,
-		 const Real      a_curv,
-		 const bool      a_fluidInside);
+  ProfilePlaneIF(const RealVect a_point,
+                 const Real     a_width,
+                 const BaseIF*  a_impFunc,
+                 const int      a_numLeft,
+                 const int      a_numRight,
+                 const Real     a_ccDist,
+                 const Real     a_xShift,
+                 const Real     a_yShift,
+                 const Real     a_curv,
+                 const bool     a_fluidInside);
 
   /*!
     @brief Copy constructor
@@ -69,15 +69,16 @@ public:
     @brief Level-set function
     @param[in] a_pos Position
   */
-  virtual Real value(const RealVect& a_pos) const;
+  virtual Real
+  value(const RealVect& a_pos) const;
 
   /*!
     @brief Factory method
   */
-  virtual BaseIF* newImplicitFunction() const;
-  
-protected:
+  virtual BaseIF*
+  newImplicitFunction() const;
 
+protected:
   RefCountedPtr<BaseIF> m_baseif;
 
   bool m_fluidInside;

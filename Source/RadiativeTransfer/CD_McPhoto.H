@@ -34,13 +34,14 @@
   runs its own intersection tests with the EB due to dependencies on how the photons are moved (we store free-flight photons, absorbed photons, intersected photons, etc).
   @note The solver is missing appropriate boundary conditions on domain faces. 
 */
-class McPhoto : public RtSolver {
+class McPhoto : public RtSolver
+{
 public:
-
   /*!
     @brief Enum class for identifying various containers. Only used for interface reasons. 
   */
-  enum class WhichContainer {
+  enum class WhichContainer
+  {
     Photons,
     Bulk,
     EB,
@@ -57,7 +58,7 @@ public:
     @brief Disallowed copy constructor
   */
   McPhoto(const McPhoto& a_other);
-  
+
   /*!
     @brief Disallowed move constructor
   */
@@ -66,12 +67,14 @@ public:
   /*!
     @brief Disallowed assignment operator
   */
-  McPhoto& operator=(const McPhoto& a_other);
-  
+  McPhoto&
+  operator=(const McPhoto& a_other);
+
   /*!
     @brief Disallowed move assignement operator
   */
-  McPhoto& operator=(const McPhoto&& a_other);
+  McPhoto&
+  operator=(const McPhoto&& a_other);
 
   /*!
     @brief Destructor
@@ -90,12 +93,14 @@ public:
     will probably use advancePhotonsInstantaneous or advancePhotonsTransient .
     @details This routine switches between stationary and transient solvers depending on whether or not the solver is stationary. 
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) override;
+  virtual bool
+  advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) override;
 
   /*!
     @brief Instantaneous solver or not. 
   */
-  virtual bool isInstantaneous();
+  virtual bool
+  isInstantaneous();
 
   /*!
     @brief Generate computational photon sfrom a source term 
@@ -108,7 +113,8 @@ public:
     @todo This routine could be implemented using the PVR valid mask rather than remapping, which will be more efficient. 
     @todo Implementation could use a lambda to avoid the double definition. 
   */
-  virtual void generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt);
+  virtual void
+  generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt);
 
   /*!
     @brief Move photons and absorb them on various objects
@@ -119,10 +125,11 @@ public:
     @note This routine moves photons with an instantaneous kernel, i.e. all photons are always absorbed and none are left behind as free-flight photons (i.e. a_photons will
     be empty on output)
   */
-  virtual void advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
-					   ParticleContainer<Photon>& a_ebPhotons,
-					   ParticleContainer<Photon>& a_domainPhotons,
-					   ParticleContainer<Photon>& a_photons);
+  virtual void
+  advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
+                              ParticleContainer<Photon>& a_ebPhotons,
+                              ParticleContainer<Photon>& a_domainPhotons,
+                              ParticleContainer<Photon>& a_photons);
 
   /*!
     @brief Move photons and absorb them on various objects
@@ -134,28 +141,32 @@ public:
     @note This routine moves photons with a transient kernel, i.e. all photons propagate at most c*dt and checks are made to determine if they are absorbed on the mesh
     or various objects (EB, domain). a_photons may be non-empty on output, in which case there are still free-flight photons in the solver. 
   */
-  virtual void advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
-				       ParticleContainer<Photon>& a_ebPhotons,
-				       ParticleContainer<Photon>& a_domainPhotons,
-				       ParticleContainer<Photon>& a_photons,
-				       const Real                 a_dt);
+  virtual void
+  advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
+                          ParticleContainer<Photon>& a_ebPhotons,
+                          ParticleContainer<Photon>& a_domainPhotons,
+                          ParticleContainer<Photon>& a_photons,
+                          const Real                 a_dt);
 
   /*!
     @brief Remap computational particles. This remaps m_photons
   */
-  virtual void remap();
+  virtual void
+  remap();
 
   /*!
     @brief Remap computational particles
     @param[in] a_photons Computational particles to be remapped.
   */
-  virtual void remap(ParticleContainer<Photon>& a_photons);
+  virtual void
+  remap(ParticleContainer<Photon>& a_photons);
 
   /*!
     @brief Deposit photons on the mesh. 
     @details This deposits m_photons onto m_phi
   */
-  virtual void depositPhotons();
+  virtual void
+  depositPhotons();
 
   /*!
     @brief Deposit photons
@@ -163,50 +174,58 @@ public:
     @param[in]  a_photons    Computational photons to be deposited
     @param[in]  a_deposition Deposition method
   */
-  virtual void depositPhotons(EBAMRCellData&                   a_phi,
-			      const ParticleContainer<Photon>& a_particles,
-			      const DepositionType&            a_deposition);
+  virtual void
+  depositPhotons(EBAMRCellData&                   a_phi,
+                 const ParticleContainer<Photon>& a_particles,
+                 const DepositionType&            a_deposition);
 
   /*!
     @brief Sort container by cell
     @details WhichContainer::Photon = m_photons, WhichContainer::EB = m_ebPhotons and so on. 
     @param[in] a_which Which container to sort. 
   */
-  virtual void sortPhotonsByCell(const WhichContainer& a_which);
+  virtual void
+  sortPhotonsByCell(const WhichContainer& a_which);
 
   /*!
     @brief Sort container by patch
     @details WhichContainer::Photon = m_photons, WhichContainer::EB = m_ebPhotons and so on. 
     @param[in] a_which Which container to sort. 
   */
-  virtual void sortPhotonsByPatch(const WhichContainer& a_which);
+  virtual void
+  sortPhotonsByPatch(const WhichContainer& a_which);
 
   /*!
     @brief Parse class options
   */
-  virtual void parseOptions() override;
+  virtual void
+  parseOptions() override;
 
   /*!
     @brief Parse runtime options
   */
-  virtual void parseRuntimeOptions() override;
-  
+  virtual void
+  parseRuntimeOptions() override;
+
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocateInternals() override;
+  virtual void
+  allocateInternals() override;
 
   /*!
     @brief preRegrid operations
     @param[in] a_base Coarsest level which changes during regrid
     @param[in] a_oldFinestLevel Finest grid level before regrid
   */
-  virtual void preRegrid(const int a_base, const int a_oldFinestLevel) override;
+  virtual void
+  preRegrid(const int a_base, const int a_oldFinestLevel) override;
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocateInternals() override;
+  virtual void
+  deallocateInternals() override;
 
   /*!
     @brief Regrid function for this class
@@ -214,12 +233,14 @@ public:
     @param[i]  a_oldFinestLevel Finest grid level before the regrid
     @param[i]  a_newFinestLevel Finest grid level after the regrid
   */
-  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+  virtual void
+  regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
   /*!
     @brief Register operators that this solver needs.
   */
-  virtual void registerOperators() override;
+  virtual void
+  registerOperators() override;
 
   /*!
     @brief Compute the boundary flux. 
@@ -227,7 +248,8 @@ public:
     @param[in]  a_phi    RTE solution
     @note This sets the boundary flux to zero. If you want to use a boundary flux, use it through m_ebPhotons
   */
-  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) override;
+  virtual void
+  computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute the domain flux. 
@@ -235,7 +257,8 @@ public:
     @param[in]  a_phi        RTE solution
     @note This sets the boundary flux to zero. If you want to use a domain flux, use it through m_domainPhotons
   */
-  virtual void computeDomainFlux(EBAMRIFData& a_domainFlux, const EBAMRCellData& a_phi) override;
+  virtual void
+  computeDomainFlux(EBAMRIFData& a_domainFlux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute the flux
@@ -243,7 +266,8 @@ public:
     @param[in]  a_phi  RTE solution
     @note Issues an error -- currently don't know how to compute the mesh flux from computational photons....
   */
-  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) override;
+  virtual void
+  computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute isotropic radiative density from mesh solution
@@ -251,43 +275,50 @@ public:
     @param[in]  a_phi       RTE solution
     @note Issues an error - this routine doesn't make a lot of sense, really. 
   */
-  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) override;
+  virtual void
+  computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Clear data holder
     @param[in] a_which Which container to clear
   */
-  virtual void clear(const WhichContainer& a_which);
+  virtual void
+  clear(const WhichContainer& a_which);
 
   /*!
     @brief Clear data holder
   */
-  virtual void clear();
-
-  /*!
-    @brief Clear data holder
-    @param[in] a_photons Which container to clear
-  */
-  virtual void clear(ParticleContainer<Photon>& a_photons);
+  virtual void
+  clear();
 
   /*!
     @brief Clear data holder
     @param[in] a_photons Which container to clear
   */
-  virtual void clear(AMRParticles<Photon>& a_photons);
+  virtual void
+  clear(ParticleContainer<Photon>& a_photons);
+
+  /*!
+    @brief Clear data holder
+    @param[in] a_photons Which container to clear
+  */
+  virtual void
+  clear(AMRParticles<Photon>& a_photons);
 
   /*!
     @brief Write plot file
     @note Currently calls an error because it is not implemented. 
   */
-  virtual void writePlotFile() override;
+  virtual void
+  writePlotFile() override;
 
   /*!
     @brief Write plot data
     @param[inout] a_ouput Output data holder
     @param[inout] a_icomp Starting component where we begin to write data to a_output
   */
-  virtual void writePlotData(EBAMRCellData& a_output, int& a_icomp)override;
+  virtual void
+  writePlotData(EBAMRCellData& a_output, int& a_icomp) override;
 
   /*!
     @brief Write checkpoint data into handle
@@ -295,7 +326,8 @@ public:
     @param[in]    a_level Grid level
   */
 #ifdef CH_USE_HDF5
-  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const override;
+  virtual void
+  writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const override;
 #endif
 
   /*!
@@ -303,94 +335,108 @@ public:
     @param[inout] a_handle HDF5 file
     @param[in]    a_level Grid level
   */
-#ifdef CH_USE_HDF5  
-  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) override;
+#ifdef CH_USE_HDF5
+  virtual void
+  readCheckpointLevel(HDF5Handle& a_handle, const int a_level) override;
 #endif
 
   /*!
     @brief Get output plot names
     @return Returns a list of plot variable names. 
   */
-  virtual Vector<std::string> getPlotVariableNames() const override;
+  virtual Vector<std::string>
+  getPlotVariableNames() const override;
 
   /*!
     @brief Get PVR buffer
     @details Returns m_pvrBuffer. 
   */
-  virtual int getPVRBuffer() const;
+  virtual int
+  getPVRBuffer() const;
 
   /*!
     @brief Get the halo buffer
     @details Returns m_haloBuffer
   */
-  virtual int getHaloBuffer() const;
+  virtual int
+  getHaloBuffer() const;
 
   /*!
     @brief Set the PVR buffer
     @param[in] a_buffer Width of the PVR buffer region
   */
-  virtual void setPVRBuffer(const int a_buffer);
+  virtual void
+  setPVRBuffer(const int a_buffer);
 
   /*!
     @brief Set the halo buffer
     @param[in] a_buffer Width of the halo buffer region
   */
-  virtual void setHaloBuffer(const int a_buffer);
+  virtual void
+  setHaloBuffer(const int a_buffer);
 
   /*!
     @brief Get number of output variables
     @return Returns number of plot variables that will be written to file in writePlotData
   */
-  virtual int getNumberOfPlotVariables() const;
+  virtual int
+  getNumberOfPlotVariables() const;
 
   /*!
     @brief Count number of photons in particle list
     @param[in] a_photons Particle list
   */
-  virtual int countPhotons(const AMRParticles<Photon>& a_photons) const;
+  virtual int
+  countPhotons(const AMRParticles<Photon>& a_photons) const;
 
   /*!
     @brief Count number of outcast photons in particle list
     @param[in] a_photons Particle list
   */
-  virtual int countOutcast(const AMRParticles<Photon>& a_photons) const;
+  virtual int
+  countOutcast(const AMRParticles<Photon>& a_photons) const;
 
   /*!
     @brief Get m_photons
     @return m_photons
   */
-  virtual ParticleContainer<Photon>& getPhotons();
+  virtual ParticleContainer<Photon>&
+  getPhotons();
 
   /*!
     @brief Get bulk photons, i.e. photons absorbed on the mesh
     @return m_bulkPhotons
   */
-  virtual ParticleContainer<Photon>& getBulkPhotons();
+  virtual ParticleContainer<Photon>&
+  getBulkPhotons();
 
   /*!
     @brief Get eb Photons, i.e. photons absorbed on the EB
     @return m_ebPhotons
   */
-  virtual ParticleContainer<Photon>& getEbPhotons();
+  virtual ParticleContainer<Photon>&
+  getEbPhotons();
 
   /*!
     @brief Get domain photons, i.e. photons absorbed on domain edges/faces
     @return m_domainPhotonsl
   */
-  virtual ParticleContainer<Photon>& getDomainPhotons();
+  virtual ParticleContainer<Photon>&
+  getDomainPhotons();
 
   /*!
     @brief Get source photons
     @return m_sourcePhotons
   */
-  virtual ParticleContainer<Photon>& getSourcePhotons();
-  
-protected:
+  virtual ParticleContainer<Photon>&
+  getSourcePhotons();
 
+protected:
   /*!
     @brief Enum for interpreting how photons are generated when using fluid codes
   */
-  enum class PhotonGeneration {
+  enum class PhotonGeneration
+  {
     Deterministic,
     Stochastic
   };
@@ -398,7 +444,8 @@ protected:
   /*!
     @brief Enum for adding flexibility in what the fluid source term contains. 
   */
-  enum class SourceType {
+  enum class SourceType
+  {
     Number,
     PerVol,
     PerVolSecond,
@@ -410,10 +457,11 @@ protected:
     @details Raycast means ray-casting algorithm. Bisection means that the traveled path is divided into intervals and we apply a bisection algorithm
     for computing the intersection point. LSF is just ray-casting, but it uses the implicit function on the mesh rather than calling it directly. 
   */
-  enum class IntersectionEB {
+  enum class IntersectionEB
+  {
     Raycast,
     Bisection,
-  };  
+  };
 
   /*!
     @brief Instantaneous transport or not
@@ -557,20 +605,23 @@ protected:
     @param[in] a_dt     Time step
     @details The return result of this function depends on the input parameters to this class. 
   */
-  int drawPhotons(const Real a_source, const Real a_volume, const Real a_dt);
+  int
+  drawPhotons(const Real a_source, const Real a_volume, const Real a_dt);
 
   /*!
     @brief Mapping function for domain boundary conditions
     @param[in] a_dir  Coordinate direction
     @param[in] a_side Coordinate side
   */
-  int domainBcMap(const int a_dir, const Side::LoHiSide a_side);
+  int
+  domainBcMap(const int a_dir, const Side::LoHiSide a_side);
 
   /*!
     @brief Random exponential trial
     @param[in] a_mean Mean value in exponential distribution. 
   */
-  Real randomExponential(const Real a_mean);
+  Real
+  randomExponential(const Real a_mean);
 
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
@@ -578,16 +629,18 @@ protected:
     @param[in] a_particles  Particles to be deposited
     @param[in] a_deposition Deposition method
   */
-  void depositKappaConservative(EBAMRCellData&                   a_phi,
-				const ParticleContainer<Photon>& a_particles,
-				const DepositionType             a_deposition);
+  void
+  depositKappaConservative(EBAMRCellData&                   a_phi,
+                           const ParticleContainer<Photon>& a_particles,
+                           const DepositionType             a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition
     @param[out] a_depositionNC     Non-conservative deposition in cut-cells
     @param[in]  a_depositionKappaC Conservative deposition
   */
-  void depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
+  void
+  depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
 
   /*!
     @brief Make the hybrid deposition. Also compute the mass difference
@@ -595,81 +648,96 @@ protected:
     @param[out]   a_massDifference Mass difference between conservative and non-conservative
     @param[in]    a_depositioNC    Non-conservative deposition
   */
-  void depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
+  void
+  depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
 
   /*!
     @brief Increment redistribution objects with mass to be redistributed
     @param[in] a_massDifference Mass difference
   */
-  void incrementRedist(const EBAMRIVData& a_massDifference);
+  void
+  incrementRedist(const EBAMRIVData& a_massDifference);
 
   /*!
     @brief Do redistribution on all levels, no coarse-fine EB magic. 
     @param[in] a_phi Data to be redistributed (with whatever has been put in the redistribution registers)
   */
-  void levelRedist(EBAMRCellData& a_phi);
+  void
+  levelRedist(EBAMRCellData& a_phi);
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
     @param[in] m_massDifference Mass difference
   */
-  void coarseFineIncrement(const EBAMRIVData& m_massDifference);
+  void
+  coarseFineIncrement(const EBAMRIVData& m_massDifference);
 
   /*!
     @brief Do coarse-fine redistribution
     @param[inout] Data to be redistributed (with whatever has been put in the redistribution registers)
   */
-  void coarseFineRedistribution(EBAMRCellData& a_phi);
+  void
+  coarseFineRedistribution(EBAMRCellData& a_phi);
 
   /*!
     @brief Parse RNG options
   */
-  void parseRNG();
+  void
+  parseRNG();
 
   /*!
     @brief Parse the divergence computation, i.e. if we blend with non-conservative divergence or not
   */
-  void parseDivergenceComputation();
+  void
+  parseDivergenceComputation();
 
   /*!
     @brief Parse pseudophotons, i.e. parse how many photons can be generated per cell. 
   */
-  void parsePseudoPhotons();
+  void
+  parsePseudoPhotons();
 
   /*!
     @brief Parse photogeneration type
   */
-  void parsePhotoGeneration();
+  void
+  parsePhotoGeneration();
 
   /*!
     @brief Parse whether instantaneous propagation or not
   */
-  void parseInstantaneous();
+  void
+  parseInstantaneous();
 
   /*!
     @brief Parse source term type
   */
-  void parseSourceType();
+  void
+  parseSourceType();
 
   /*!
     @brief Parse EB intersection algorithm
   */
-  void parseIntersectionEB();
+  void
+  parseIntersectionEB();
 
   /*!
     @brief Parse deposition method
   */
-  void parseDeposition();
+  void
+  parseDeposition();
 
   /*!
     @brief Parse PVR buffer
   */
-  void parseBuffer();
+  void
+  parseBuffer();
 
   /*!
     @brief Parse plot variables
   */
-  void parsePlotVariables();
+  void
+  parsePlotVariables();
 };
 
 #include <CD_NamespaceFooter.H>

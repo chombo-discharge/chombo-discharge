@@ -19,7 +19,8 @@
   @brief Deposition types. 
   @details NGP = Nearest grid point, CIC = Cloud-in-cell, TSC = Triangle-shaped cloud, W4=Fourth order. 
 */
-enum class DepositionType {
+enum class DepositionType
+{
   NGP,
   CIC,
   TSC,

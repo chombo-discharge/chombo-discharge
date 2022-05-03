@@ -9,8 +9,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_HyperboloidOneIF_H 
-#define CD_HyperboloidOneIF_H 
+#ifndef CD_HyperboloidOneIF_H
+#define CD_HyperboloidOneIF_H
 
 // Chombo includes
 #include <BaseIF.H>
@@ -25,9 +25,9 @@
   \frac{x^2}{a^2} + \frac{y^2}{b^2} - \frac{z^2}{c^2} = 1.
   \f]
 */
-class HyperboloidOneIF : public BaseIF{
+class HyperboloidOneIF : public BaseIF
+{
 public:
-
   /*!
     @brief Constructor
     @param[in] a_radii Hyperboloid radii
@@ -46,12 +46,14 @@ public:
     @brief Test whether inside or not
     @param[in] a_point Physical position. 
   */
-  virtual Real value(const RealVect& a_point) const; 
+  virtual Real
+  value(const RealVect& a_point) const;
 
   /*!
     @brief IF factory method
   */
-  virtual BaseIF* newImplicitFunction() const;
+  virtual BaseIF*
+  newImplicitFunction() const;
 
 protected:
   /*!

@@ -23,14 +23,14 @@
 /*!
   @brief A rod geometry, but with noise on one of the end caps.
 */
-class PerlinRodSdf : public PerlinSphereSdf {
+class PerlinRodSdf : public PerlinSphereSdf
+{
 public:
-
   /*!
     @brief No weak construction
   */
   PerlinRodSdf() = delete;
-  
+
   /*!
     @brief Constructor
     @param[in] a_rad         Rod radius
@@ -45,14 +45,14 @@ public:
     @note The persistence argument indicates how we add octaves. With 0.5 we use half the amplitude and twice the frequency for the next octave. 
   */
   PerlinRodSdf(const Real&     a_rad,
-	       const RealVect& a_center1,
-	       const RealVect& a_center2,
-	       const bool&     a_inside,
-	       const Real&     a_noiseAmp,
-	       const RealVect& a_noiseFreq,
-	       const Real&     a_persistence,
-	       const int&      a_octaves,
-	       const bool&     a_reseed = false);
+               const RealVect& a_center1,
+               const RealVect& a_center2,
+               const bool&     a_inside,
+               const Real&     a_noiseAmp,
+               const RealVect& a_noiseFreq,
+               const Real&     a_persistence,
+               const int&      a_octaves,
+               const bool&     a_reseed = false);
 
   /*!
     @brief Copy constructor
@@ -69,15 +69,16 @@ public:
     @brief Value function
     @param[in] a_pos Position
   */
-  virtual Real value(const RealVect& a_pos) const;
+  virtual Real
+  value(const RealVect& a_pos) const;
 
   /*!
     @brief Factory function
   */
-  virtual BaseIF* newImplicitFunction() const;
-  
-protected:
+  virtual BaseIF*
+  newImplicitFunction() const;
 
+protected:
   /*!
     @brief Basis rod, used for copying
   */

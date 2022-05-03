@@ -13,13 +13,12 @@
 #include <CD_RegularGeometry.H>
 #include <CD_NamespaceHeader.H>
 
-RegularGeometry::RegularGeometry(){
+RegularGeometry::RegularGeometry()
+{
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
 }
 
-RegularGeometry::~RegularGeometry(){
-  
-}
+RegularGeometry::~RegularGeometry() {}
 
 #include <CD_NamespaceFooter.H>

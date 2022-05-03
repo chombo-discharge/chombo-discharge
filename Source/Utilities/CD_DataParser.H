@@ -32,11 +32,11 @@ namespace DataParser {
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
     @note xColumn = 0 is the FIRST column, xColumn=1 is the SECOND column and so on. 
   */
-  static LookupTable<2> simpleFileReadASCII(const std::string       a_fileName,
-					    const int               a_xColumn     = 0,
-					    const int               a_yColumn     = 1,
-					    const std::vector<char> a_ignoreChars = {'#', '/'});
-
+  static LookupTable<2>
+  simpleFileReadASCII(const std::string       a_fileName,
+                      const int               a_xColumn     = 0,
+                      const int               a_yColumn     = 1,
+                      const std::vector<char> a_ignoreChars = {'#', '/'});
 
   /*!
     @brief Simple ASCII file parser which reads a file and puts the data into two columns (a lookup table)
@@ -51,15 +51,15 @@ namespace DataParser {
     @param[in] a_yColumn     Which column to use as the y-column. 
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
   */
-  static LookupTable<2> fractionalFileReadASCII(const std::string       a_fileName,
-						const std::string       a_startRead,
-						const std::string       a_stopRead,						
-						const int               a_xColumn     = 0,
-						const int               a_yColumn     = 1,
-						const std::vector<char> a_ignoreChars = {'#', '/'});
+  static LookupTable<2>
+  fractionalFileReadASCII(const std::string       a_fileName,
+                          const std::string       a_startRead,
+                          const std::string       a_stopRead,
+                          const int               a_xColumn     = 0,
+                          const int               a_yColumn     = 1,
+                          const std::vector<char> a_ignoreChars = {'#', '/'});
 
-  
-};
+}; // namespace DataParser
 
 #include <CD_NamespaceFooter.H>
 

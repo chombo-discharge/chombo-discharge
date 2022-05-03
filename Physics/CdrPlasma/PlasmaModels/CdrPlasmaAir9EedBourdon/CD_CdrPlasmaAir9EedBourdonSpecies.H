@@ -19,13 +19,12 @@
 namespace Physics {
   namespace CdrPlasma {
 
-
     /*!
       @brief Electron energy distribution
     */
-    class CdrPlasmaAir9EedBourdon::eed : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::eed : public CdrSpecies
+    {
     public:
-
       /*!
 	@brief Constructor
       */
@@ -39,10 +38,10 @@ namespace Physics {
       /*!
 	@brief Initial data
       */
-      virtual Real initialData(const RealVect a_pos, const Real a_time) const;
-  
-    protected:
+      virtual Real
+      initialData(const RealVect a_pos, const Real a_time) const;
 
+    protected:
       /*!
 	@brief Gas temperature
       */
@@ -52,9 +51,9 @@ namespace Physics {
     /*!
       @brief Electron class
     */
-    class CdrPlasmaAir9EedBourdon::Electron : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::Electron : public CdrSpecies
+    {
     public:
-
       /*!
 	@brief Constructor
       */
@@ -68,23 +67,22 @@ namespace Physics {
       /*!
 	@brief Initial data
       */
-      virtual Real initialData(const RealVect a_pos, const Real a_time) const;
-  
-    protected:
+      virtual Real
+      initialData(const RealVect a_pos, const Real a_time) const;
 
+    protected:
       /*!
 	@brief Initial ionization level
       */
       Real m_initial_ionization;
-  
     };
 
     /*!
       @brief N2plus class
     */
-    class CdrPlasmaAir9EedBourdon::N2plus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::N2plus : public CdrSpecies
+    {
     public:
-
       /*!
 	@brief Constructor
       */
@@ -98,19 +96,19 @@ namespace Physics {
       /*!
 	@brief Initial data
       */
-      virtual Real initialData(const RealVect a_pos, const Real a_time) const;
-  
-    protected:
+      virtual Real
+      initialData(const RealVect a_pos, const Real a_time) const;
 
+    protected:
       Real m_initial_ionization;
     };
 
     /*!
       @brief N4plus class
     */
-    class CdrPlasmaAir9EedBourdon::N4plus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::N4plus : public CdrSpecies
+    {
     public:
-
       /*!
 	@brief Constructor
       */
@@ -124,17 +122,18 @@ namespace Physics {
       /*!
 	@brief Initial data
       */
-      virtual Real initialData(const RealVect a_pos, const Real a_time) const;
-  
+      virtual Real
+      initialData(const RealVect a_pos, const Real a_time) const;
+
     protected:
     };
 
     /*!
       @brief O2plus class
     */
-    class CdrPlasmaAir9EedBourdon::O2plus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::O2plus : public CdrSpecies
+    {
     public:
-
       /*!
 	@brief Constructor
       */
@@ -148,19 +147,19 @@ namespace Physics {
       /*!
 	@brief Initial data
       */
-      virtual Real initialData(const RealVect a_pos, const Real a_time) const;
-  
-    protected:
+      virtual Real
+      initialData(const RealVect a_pos, const Real a_time) const;
 
+    protected:
       Real m_initial_ionization;
     };
 
     /*!
       @brief O4plus class
     */
-    class CdrPlasmaAir9EedBourdon::O4plus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::O4plus : public CdrSpecies
+    {
     public:
-
       /*!
 	@brief Constructor
       */
@@ -174,17 +173,18 @@ namespace Physics {
       /*!
 	@brief Initial data
       */
-      virtual Real initialData(const RealVect a_pos, const Real a_time) const;
-  
+      virtual Real
+      initialData(const RealVect a_pos, const Real a_time) const;
+
     protected:
     };
 
     /*!
       @brief O2plusN2 class
     */
-    class CdrPlasmaAir9EedBourdon::O2plusN2 : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::O2plusN2 : public CdrSpecies
+    {
     public:
-
       /*!
 	@brief Constructor
       */
@@ -198,17 +198,18 @@ namespace Physics {
       /*!
 	@brief Initial data
       */
-      virtual Real initialData(const RealVect a_pos, const Real a_time) const;
-  
+      virtual Real
+      initialData(const RealVect a_pos, const Real a_time) const;
+
     protected:
     };
 
     /*!
       @brief O2minus class
     */
-    class CdrPlasmaAir9EedBourdon::O2minus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::O2minus : public CdrSpecies
+    {
     public:
-
       /*!
 	@brief Constructor
       */
@@ -222,17 +223,18 @@ namespace Physics {
       /*!
 	@brief Initial data
       */
-      virtual Real initialData(const RealVect a_pos, const Real a_time) const;
-  
+      virtual Real
+      initialData(const RealVect a_pos, const Real a_time) const;
+
     protected:
     };
 
     /*!
       @brief Ominus class
     */
-    class CdrPlasmaAir9EedBourdon::Ominus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::Ominus : public CdrSpecies
+    {
     public:
-
       /*!
 	@brief Constructor
       */
@@ -246,16 +248,17 @@ namespace Physics {
       /*!
 	@brief Initial data
       */
-      virtual Real initialData(const RealVect a_pos, const Real a_time) const;
-  
+      virtual Real
+      initialData(const RealVect a_pos, const Real a_time) const;
+
     protected:
     };
-
 
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class CdrPlasmaAir9EedBourdon::PhotonOne : public RtSpecies {
+    class CdrPlasmaAir9EedBourdon::PhotonOne : public RtSpecies
+    {
     public:
       /*!
 	@brief Constructor
@@ -270,22 +273,26 @@ namespace Physics {
       /*!
 	@brief Get the absorption coefficient
       */
-      virtual Real getAbsorptionCoefficient(const RealVect a_pos) const;
+      virtual Real
+      getAbsorptionCoefficient(const RealVect a_pos) const;
 
       /*!
 	@brief Get the lambda coefficient
       */
-      virtual Real getLambda() const;
+      virtual Real
+      getLambda() const;
 
       /*!
 	@brief Get the A-coefficient
       */
-      virtual Real getA() const;
+      virtual Real
+      getA() const;
 
       /*!
 	@brief Get the partial oxygen pressure
       */
-      virtual Real getPO2() const;
+      virtual Real
+      getPO2() const;
 
     protected:
       /*!
@@ -307,7 +314,8 @@ namespace Physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class CdrPlasmaAir9EedBourdon::PhotonTwo : public RtSpecies {
+    class CdrPlasmaAir9EedBourdon::PhotonTwo : public RtSpecies
+    {
     public:
       /*!
 	@brief Constructor
@@ -322,22 +330,26 @@ namespace Physics {
       /*!
 	@brief Get the absorption coefficient
       */
-      virtual Real getAbsorptionCoefficient(const RealVect a_pos) const;
+      virtual Real
+      getAbsorptionCoefficient(const RealVect a_pos) const;
 
       /*!
 	@brief Get the lambda coefficient
       */
-      virtual Real getLambda() const;
+      virtual Real
+      getLambda() const;
 
       /*!
 	@brief Get the A-coefficient
       */
-      virtual Real getA() const;
+      virtual Real
+      getA() const;
 
       /*!
 	@brief Get the partial oxygen pressure
       */
-      virtual Real getPO2() const;
+      virtual Real
+      getPO2() const;
 
     protected:
       /*!
@@ -359,7 +371,8 @@ namespace Physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class CdrPlasmaAir9EedBourdon::PhotonThree : public RtSpecies {
+    class CdrPlasmaAir9EedBourdon::PhotonThree : public RtSpecies
+    {
     public:
       /*!
 	@brief Constructor
@@ -374,22 +387,26 @@ namespace Physics {
       /*!
 	@brief Get the absorption coefficient
       */
-      virtual Real getAbsorptionCoefficient(const RealVect a_pos) const;
+      virtual Real
+      getAbsorptionCoefficient(const RealVect a_pos) const;
 
       /*!
 	@brief Get the lambda coefficient
       */
-      virtual Real getLambda() const;
+      virtual Real
+      getLambda() const;
 
       /*!
 	@brief Get the A-coefficient
       */
-      virtual Real getA() const;
+      virtual Real
+      getA() const;
 
       /*!
 	@brief Get the partial oxygen pressure
       */
-      virtual Real getPO2() const;
+      virtual Real
+      getPO2() const;
 
     protected:
       /*!
@@ -407,8 +424,8 @@ namespace Physics {
       */
       Real m_pO2;
     };
-  }
-}
+  } // namespace CdrPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

@@ -22,16 +22,18 @@
   @details This implements MFHelmholtzEBBC, which is essentially an EBHelmholtzEBBC-derived class that performs automatic "matching" on cells
   with jumps in the b-coefficients. Users will never have to interact directly with this object. 
 */
-class MFHelmholtzElectrostaticEBBC : public MFHelmholtzEBBC {
+class MFHelmholtzElectrostaticEBBC : public MFHelmholtzEBBC
+{
 public:
-
   /*!
     @brief Full constructor
     @param[in] a_phase            Phase
     @param[in] a_electrostaticBCs Electrostatic boundary conditions on EBs
     @param[in] a_jumpBC           Jumpc BC object. 
   */
-  MFHelmholtzElectrostaticEBBC(const int a_phase, const ElectrostaticEbBc& a_electrostaticBCs, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
+  MFHelmholtzElectrostaticEBBC(const int                               a_phase,
+                               const ElectrostaticEbBc&                a_electrostaticBCs,
+                               const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 
   /*!
     @brief No weak construction.
@@ -59,13 +61,15 @@ public:
     @brief No copy assignment
     @param[in] a_other Other object
   */
-  MFHelmholtzElectrostaticEBBC& operator=(const MFHelmholtzElectrostaticEBBC& a_other) = delete;
+  MFHelmholtzElectrostaticEBBC&
+  operator=(const MFHelmholtzElectrostaticEBBC& a_other) = delete;
 
   /*!
     @brief No move assignment
     @param[in] a_other Other object
   */
-  MFHelmholtzElectrostaticEBBC& operator=(const MFHelmholtzElectrostaticEBBC&& a_other) = delete;
+  MFHelmholtzElectrostaticEBBC&
+  operator=(const MFHelmholtzElectrostaticEBBC&& a_other) = delete;
 
   /*!
     @brief Set stencil order
@@ -74,17 +78,18 @@ public:
     @param[in] a_order. Must be > 0. 
     @note The radius of the stencil is the same as the order -- do not use an order larger than the number of ghost cells that you will use. 
   */
-  void setOrder(const int a_order);
+  void
+  setOrder(const int a_order);
 
   /*!
     @brief Set stencil weight
     @param[in] a_weight Equation weights. 
     @details EBHelmholtzEBBC uses least-squares based stencils for gradient reconstruction. This routine sets the equation weights in that reconstruction. 
   */
-  void setWeight(const int a_weight);
+  void
+  setWeight(const int a_weight);
 
 protected:
-
   /*!
     @brief Stencil order
   */
@@ -103,7 +108,8 @@ protected:
   /*!
     @brief User define function. 
   */
-  virtual void defineSinglePhase() override;
+  virtual void
+  defineSinglePhase() override;
 
   /*!
     @brief Apply flux single phase
@@ -115,19 +121,20 @@ protected:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  virtual void applyEBFluxSinglePhase(VoFIterator&       a_singlePhaseVofs,
-				      EBCellFAB&         a_Lphi,
-				      const EBCellFAB&   a_phi,
-				      const DataIndex&   a_dit,
-				      const Real&        a_beta,
-				      const bool&        a_homogeneousPhysBC) const override;
+  virtual void
+  applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
+                         EBCellFAB&       a_Lphi,
+                         const EBCellFAB& a_phi,
+                         const DataIndex& a_dit,
+                         const Real&      a_beta,
+                         const bool&      a_homogeneousPhysBC) const override;
 
   /*!
     @brief Get electrode potential
     @param[in] a_pos Position in space
   */
-  inline
-  Real getElectrodePotential(const RealVect& a_pos) const;
+  inline Real
+  getElectrodePotential(const RealVect& a_pos) const;
 };
 
 #include <CD_NamespaceFooter.H>

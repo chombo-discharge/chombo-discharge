@@ -23,9 +23,9 @@
   @details This class is almost like EBHelmholtzEBBC, except that it enforces matching on multiphase cells. The user can inherit from this
   layer if he needs additional BCs in a multiphase context. 
 */
-class MFHelmholtzEBBC : public EBHelmholtzEBBC {
+class MFHelmholtzEBBC : public EBHelmholtzEBBC
+{
 public:
-
   /*!
     @brief Disallowed weak constructor. Factory must call the other version. 
   */
@@ -45,7 +45,7 @@ public:
     @brief Default constructor
   */
   virtual ~MFHelmholtzEBBC();
-  
+
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp. 
     @details Users get a new interface to the subset of cells that are not multi-phase cells. 
@@ -56,15 +56,15 @@ public:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  virtual void applyEBFlux(VoFIterator&       a_vofit,
-			   EBCellFAB&         a_Lphi,
-			   const EBCellFAB&   a_phi,
-			   const DataIndex&   a_dit,
-			   const Real&        a_beta,
-			   const bool&        a_homogeneousPhysBC) const override final;
+  virtual void
+  applyEBFlux(VoFIterator&     a_vofit,
+              EBCellFAB&       a_Lphi,
+              const EBCellFAB& a_phi,
+              const DataIndex& a_dit,
+              const Real&      a_beta,
+              const bool&      a_homogeneousPhysBC) const override final;
 
 protected:
-
   /*!
     @brief Jump bc object
   */
@@ -78,22 +78,25 @@ protected:
   /*!
     @brief Weights for matching cells.
   */
-  LayoutData<BaseIVFAB<Real> > m_boundaryWeights;
+  LayoutData<BaseIVFAB<Real>> m_boundaryWeights;
 
   /*!
     @brief User define function. 
   */
-  void define() override final;
+  void
+  define() override final;
 
   /*!
     @brief Define stuff for multi-phase
   */
-  void defineMultiPhase();
+  void
+  defineMultiPhase();
 
   /*!
     @brief Define stuff for multi-phase
   */
-  virtual void defineSinglePhase() = 0;
+  virtual void
+  defineSinglePhase() = 0;
 
   /*!
     @brief Apply flux single phase
@@ -104,12 +107,13 @@ protected:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  virtual void applyEBFluxSinglePhase(VoFIterator&       a_singlePhaseVofs,
-				      EBCellFAB&         a_Lphi,
-				      const EBCellFAB&   a_phi,
-				      const DataIndex&   a_dit,
-				      const Real&        a_beta,
-				      const bool&        a_homogeneousPhysBC) const = 0;
+  virtual void
+  applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
+                         EBCellFAB&       a_Lphi,
+                         const EBCellFAB& a_phi,
+                         const DataIndex& a_dit,
+                         const Real&      a_beta,
+                         const bool&      a_homogeneousPhysBC) const = 0;
 
   /*!
     @brief Apply flux in multiphase cells.
@@ -120,12 +124,13 @@ protected:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  void applyEBFluxMultiPhase(VoFIterator&       a_multiPhaseVofs,
-			     EBCellFAB&         a_Lphi,
-			     const EBCellFAB&   a_phi,
-			     const DataIndex&   a_dit,
-			     const Real&        a_beta,
-			     const bool&        a_homogeneousPhysBC) const;
+  void
+  applyEBFluxMultiPhase(VoFIterator&     a_multiPhaseVofs,
+                        EBCellFAB&       a_Lphi,
+                        const EBCellFAB& a_phi,
+                        const DataIndex& a_dit,
+                        const Real&      a_beta,
+                        const bool&      a_homogeneousPhysBC) const;
 
   /*!
     @brief Get stencil with specified order. 
@@ -138,12 +143,13 @@ protected:
     @return If this returns true, a_stencil contains a valid stencil and weight. 
     @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
   */
-  virtual bool getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
-						  const VolIndex&              a_vof,
-						  const VofUtils::Neighborhood a_neighborhood,
-						  const DataIndex&             a_dit,
-						  const int                    a_order,
-						  const int                    a_weight) const;
+  virtual bool
+  getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
+                                     const VolIndex&              a_vof,
+                                     const VofUtils::Neighborhood a_neighborhood,
+                                     const DataIndex&             a_dit,
+                                     const int                    a_order,
+                                     const int                    a_weight) const;
 };
 
 #include <CD_NamespaceFooter.H>

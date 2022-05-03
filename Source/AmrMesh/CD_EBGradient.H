@@ -41,9 +41,9 @@
   there are not enough cells available near the EB. 
   @note This class requires at least one ghost cell. 
 */
-class EBGradient {
+class EBGradient
+{
 public:
-
   /*!
     @brief Specification of cell-center or cell-centroid type of interpolation
   */
@@ -69,19 +69,19 @@ public:
     @param[in] a_weighting    Weighting factor least squares. 
   */
   EBGradient(const EBLevelGrid& a_eblg,
-	     const EBLevelGrid& a_eblgFine,
-	     const Real         a_dx,
-	     const int          a_refRat,
-	     const int          a_order,
-	     const int          a_weighting = 0);
+             const EBLevelGrid& a_eblgFine,
+             const Real         a_dx,
+             const int          a_refRat,
+             const int          a_order,
+             const int          a_weighting = 0);
 
   /*!
     @brief Compute gradient using data on the input level only. 
     @param[out] a_gradient Gradient of input scalar
     @param[in]  a_phi      Input scalar
   */
-  void computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
-			    const LevelData<EBCellFAB>& a_phi) const;
+  void
+  computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) const;
 
   /*!
     @brief Compute the gradient component which is normal to the face, using centered differencing. 
@@ -91,8 +91,8 @@ public:
     @param[inout] a_gradient Gradient of input scalar
     @param[in]    a_phi      Input scalar
   */
-  void computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient,
-			       const LevelData<EBCellFAB>& a_phi) const;
+  void
+  computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) const;
 
   /*!
     @brief Compute gradient using two-level stencils (matching at EBCF). 
@@ -100,20 +100,20 @@ public:
     @param[in]  a_phi      Input scalar
     @param[in]  a_phiFine  Input scalar on finer level. 
   */
-  void computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
-			  const LevelData<EBCellFAB>& a_phi,
-			  const LevelData<EBCellFAB>& a_phiFine) const;
+  void
+  computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
+                     const LevelData<EBCellFAB>& a_phi,
+                     const LevelData<EBCellFAB>& a_phiFine) const;
 
   /*!
     @brief Destructor (does nothing)
   */
   virtual ~EBGradient();
-  
-protected:
 
+protected:
   /*!
     @brief Scalar component to reach into
-  */  
+  */
   static constexpr int m_comp = 0;
 
   /*!
@@ -154,7 +154,7 @@ protected:
   /*!
     @brief Resolution on finer level. 
   */
-  Real m_dxFine;  
+  Real m_dxFine;
 
   /*!
     @brief Desired order for least squares stencils. 
@@ -173,7 +173,7 @@ protected:
 
   /*!
     @brief Coarse-grid buffers
-  */  
+  */
   DisjointBoxLayout m_bufferDblCoar;
 
   /*!
@@ -195,19 +195,19 @@ protected:
     @brief Stencils for boundaries and cut-cells
     @note Lives on the coarse layout. 
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_levelStencils;
-  
+  LayoutData<BaseIVFAB<VoFStencil>> m_levelStencils;
+
   /*!
     @brief Part of EBCF gradient stencil which reaches into the coarse level. 
     @note Lives on the buffer layout. 
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_bufferStencilsCoar;
+  LayoutData<BaseIVFAB<VoFStencil>> m_bufferStencilsCoar;
 
   /*!
     @brief Part of EBCF gradient stencil which reaches into the fine level. 
     @note Lives on the buffer layout. 
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_bufferStencilsFine;
+  LayoutData<BaseIVFAB<VoFStencil>> m_bufferStencilsFine;
 
   /*!
     @brief Iterator for boundary cells (either domain or EB)
@@ -219,12 +219,12 @@ protected:
     @brief Iterator for EBCF cells. 
     @note Lives on the coarse layout. 
   */
-  mutable LayoutData<VoFIterator> m_ebcfIterator;    
+  mutable LayoutData<VoFIterator> m_ebcfIterator;
 
   /*!
     @brief Iterator for EBCF cells. Lives on the buffer layout. 
   */
-  mutable LayoutData<VoFIterator> m_bufferIterator;  
+  mutable LayoutData<VoFIterator> m_bufferIterator;
 
   /*!
     @brief Buffer for putting coarse-grid data on the buffer layout. 
@@ -242,25 +242,27 @@ protected:
     @brief Storage for corrected gradient. 
     @note Lives on the coarse layout. 
   */
-  mutable LevelData<BaseIVFAB<Real> > m_ebcfGradient;
+  mutable LevelData<BaseIVFAB<Real>> m_ebcfGradient;
 
   /*!
     @brief Storage for corrected gradient. 
     @note Lives on the buffer layout. 
   */
-  mutable LevelData<BaseIVFAB<Real> > m_bufferGradient;
+  mutable LevelData<BaseIVFAB<Real>> m_bufferGradient;
 
   /*!
     @brief Define level stencils. 
   */
-  void defineLevelStencils();
+  void
+  defineLevelStencils();
 
   /*!
     @brief Make masks
     @param[out] a_coarMaskCF      Mask holding a value of 1 in coarse cells that live on the refinement boundary. 
     @param[out] a_coarMaskInvalid Mask holding a value of 1 in coarse cells that are covered by a finer grid level. 
   */
-  void defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>& a_coarMaskInvalid);
+  void
+  defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>& a_coarMaskInvalid);
 
   /*!
     @brief Define buffers. 
@@ -271,23 +273,26 @@ protected:
     @param[in]  a_coarMaskCF            Mask for CF region on the coarse layout. 
     @param[in]  a_coarMaskInvalid       Mask for invalid regions on the coarse layout. 
   */
-  void defineBuffers(LevelData<FArrayBox>&       a_bufferCoarMaskCF,
-		     LevelData<FArrayBox>&       a_bufferCoarMaskInvalid,
-		     const LevelData<FArrayBox>& a_coarMaskCF,
-		     const LevelData<FArrayBox>& a_coarMaskInvalid);
+  void
+  defineBuffers(LevelData<FArrayBox>&       a_bufferCoarMaskCF,
+                LevelData<FArrayBox>&       a_bufferCoarMaskInvalid,
+                const LevelData<FArrayBox>& a_coarMaskCF,
+                const LevelData<FArrayBox>& a_coarMaskInvalid);
 
   /*!
     @brief Define iterators and cells that need modified stencils
     @param[in]  a_coarMaskCF            Mask for CF region on the coarse layout. 
     @param[in]  a_coarMaskInvalid       Mask for invalid regions on the coarse layout. 
   */
-  void defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF, const LevelData<FArrayBox>& a_coarMaskInvalid);
+  void
+  defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF, const LevelData<FArrayBox>& a_coarMaskInvalid);
 
   /*!
     @brief Define stencils for interpolation across the EBCF refinement boundary. 
     @param[in] a_bufferCoarMaskInvalid Map of coarse cells that are covered by finer cells. 
   */
-  void defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMaskInvalid);
+  void
+  defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMaskInvalid);
 
   /*!
     @brief Get a finite difference stencil, assuming that the data is cell-centered
@@ -297,11 +302,12 @@ protected:
     @param[in]  a_invalidRegion Map of cells that can/can't be used. 
     @param[in]  a_dx            Grid resolution
   */
-  bool getFiniteDifferenceStencil(VoFStencil&            a_stencil,
-				  const VolIndex&        a_vof,
-				  const EBISBox&         a_ebisBox,
-				  const DenseIntVectSet& a_invalidRegion,
-				  const Real             a_dx);
+  bool
+  getFiniteDifferenceStencil(VoFStencil&            a_stencil,
+                             const VolIndex&        a_vof,
+                             const EBISBox&         a_ebisBox,
+                             const DenseIntVectSet& a_invalidRegion,
+                             const Real             a_dx);
 
   /*!
     @brief Build a gradient stencil using least squares. 
@@ -319,19 +325,20 @@ protected:
     @param[in]  a_weight            Equation weighting for least squares reconstruction. 
     @return Returns true if a stencil was found, in which case it is defined in a_stencilFine and a_stencilCoar. 
   */
-  bool getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
-			      VoFStencil&            a_stencilFine,
-			      const VolIndex&        a_vofCoar,
-			      const CellLocation&    a_dataLocation,
-			      const EBISLayout&      a_ebislCoar,
-			      const EBISLayout&      a_ebislFine,
-			      const DataIndex&       a_dit,
-			      const DenseIntVectSet& a_validCellsCoar,
-			      const DenseIntVectSet& a_validCellsFine,
-			      const Real&            a_dxCoar,
-			      const Real&            a_dxFine,					
-			      const int&             a_order,
-			      const int&             a_weight);
+  bool
+  getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
+                         VoFStencil&            a_stencilFine,
+                         const VolIndex&        a_vofCoar,
+                         const CellLocation&    a_dataLocation,
+                         const EBISLayout&      a_ebislCoar,
+                         const EBISLayout&      a_ebislFine,
+                         const DataIndex&       a_dit,
+                         const DenseIntVectSet& a_validCellsCoar,
+                         const DenseIntVectSet& a_validCellsFine,
+                         const Real&            a_dxCoar,
+                         const Real&            a_dxFine,
+                         const int&             a_order,
+                         const int&             a_weight);
 
   /*!
     @brief Check if a cell can produce valid finite difference stencils
@@ -340,9 +347,8 @@ protected:
     @param[in] a_ebisBox       EBISBox
     @param[in] a_invalidRegion Map of cells that are covered by a finer cell. 
   */
-  bool isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
-				      const EBISBox&   a_ebisBox,
-				      const FArrayBox& a_invalidRegion);
+  bool
+  isFiniteDifferenceStencilValid(const IntVect& a_ivCoar, const EBISBox& a_ebisBox, const FArrayBox& a_invalidRegion);
 };
 
 #include <CD_NamespaceFooter.H>

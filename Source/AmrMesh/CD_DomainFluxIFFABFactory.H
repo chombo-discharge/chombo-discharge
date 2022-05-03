@@ -9,8 +9,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_DomainFluxIFFABFactory_ 
-#define  CD_DomainFluxIFFABFactory_ 
+#ifndef CD_DomainFluxIFFABFactory_
+#define CD_DomainFluxIFFABFactory_
 
 // Chombo includes
 #include <Vector.H>
@@ -21,13 +21,13 @@
 // Our includes
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief Factory class for making DomainFluxIFFAB
 */
-class DomainFluxIFFABFactory : public DataFactory<DomainFluxIFFAB> {
+class DomainFluxIFFABFactory : public DataFactory<DomainFluxIFFAB>
+{
 public:
-
   /*!
     @brief Full constructor
     @param[in] a_ebisl  EBISLayout
@@ -37,7 +37,7 @@ public:
 
   /*!
     @brief Destructor (does nothing)
-  */  
+  */
   ~DomainFluxIFFABFactory();
 
   /*!
@@ -46,11 +46,11 @@ public:
     @param[in] a_nComp Number of components
     @param[in] a_dit   Grid index
     @returns Returns a new DomainIFFluxFAB defined over the input region
-  */    
-  virtual DomainFluxIFFAB* create(const Box& a_box, int a_nComp, const DataIndex& a_dit) const;
+  */
+  virtual DomainFluxIFFAB*
+  create(const Box& a_box, int a_nComp, const DataIndex& a_dit) const;
 
 protected:
-
   /*!
     @brief EBIS layout
   */
@@ -58,10 +58,10 @@ protected:
 
   /*!
     @brief Domain
-  */  
+  */
   ProblemDomain m_domain;
 };
-  
+
 #include <CD_NamespaceFooter.H>
 
 #endif

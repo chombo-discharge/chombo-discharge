@@ -22,14 +22,14 @@
 /*!
   @brief Electrode class for encapsulating the concept of an electrical conductor. 
 */
-class Electrode {
+class Electrode
+{
 public:
-
   /*!
     @brief Default constructor. Must subsequently call define()
   */
   Electrode();
-  
+
   /*!
     @brief Constructor. 
     @param[in] a_baseIF          Implicit function for the electrode
@@ -50,28 +50,31 @@ public:
     @param[in] a_live            Live electrode or not
     @param[in] a_voltageFraction Fraction of live voltage (if live)
   */
-  virtual void define(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, const Real a_voltageFraction = 1.0);
+  virtual void
+  define(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, const Real a_voltageFraction = 1.0);
 
   /*!
     @brief Get implicit function
     @return Returns m_baseIF
   */
-  virtual const RefCountedPtr<BaseIF>& getImplicitFunction() const;
+  virtual const RefCountedPtr<BaseIF>&
+  getImplicitFunction() const;
 
   /*!
     @brief Get live or not. 
     @return Returns m_isLive
   */
-  virtual const bool& isLive() const;
+  virtual const bool&
+  isLive() const;
 
   /*!
     @brief Get fraction of live voltage. 
     @return m_voltageFraction
   */
-  virtual const Real& getFraction() const;
+  virtual const Real&
+  getFraction() const;
 
 protected:
-
   /*!
     @brief Implicit function
   */

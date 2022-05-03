@@ -20,9 +20,9 @@
 /*!
   @brief Class for making Larsen boundary conditions 
 */
-class EBHelmholtzLarsenEBBCFactory : public EBHelmholtzRobinEBBCFactory {
+class EBHelmholtzLarsenEBBCFactory : public EBHelmholtzRobinEBBCFactory
+{
 public:
-
   /*!
     @brief Disallowed weak constructor
   */
@@ -39,11 +39,11 @@ public:
     @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients. 
   */
   EBHelmholtzLarsenEBBCFactory(const int                       a_order,
-			       const int                       a_weight,			       
-			       const RefCountedPtr<RtSpecies>& a_species,
-			       const Real                      a_r1,
-			       const Real                      a_r2,
-			       const Real                      a_source);
+                               const int                       a_weight,
+                               const RefCountedPtr<RtSpecies>& a_species,
+                               const Real                      a_r1,
+                               const Real                      a_r2,
+                               const Real                      a_source);
 
   /*!
     @brief No copy construction
@@ -63,15 +63,16 @@ public:
   /*!
     @brief No copy assignment
   */
-  EBHelmholtzLarsenEBBCFactory& operator=(const EBHelmholtzLarsenEBBCFactory& a_other) = delete;
+  EBHelmholtzLarsenEBBCFactory&
+  operator=(const EBHelmholtzLarsenEBBCFactory& a_other) = delete;
 
   /*!
     @brief No move assignment
   */
-  EBHelmholtzLarsenEBBCFactory& operator=(const EBHelmholtzLarsenEBBCFactory&& a_other) = delete;
+  EBHelmholtzLarsenEBBCFactory&
+  operator=(const EBHelmholtzLarsenEBBCFactory&& a_other) = delete;
 
 protected:
-
   /*!
     @brief Radiative transfer species
   */
@@ -95,7 +96,8 @@ protected:
   /*!
     @brief Set Robin coefficients
   */
-  void setRobinCoefficients();
+  void
+  setRobinCoefficients();
 };
 
 #include <CD_NamespaceFooter.H>

@@ -17,7 +17,8 @@
 /*!
   @brief Enum for sorting boxes
 */
-enum class BoxSorting {
+enum class BoxSorting
+{
   None,
   Std,
   Shuffle,

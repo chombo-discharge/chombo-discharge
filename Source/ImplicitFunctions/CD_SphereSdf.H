@@ -21,9 +21,9 @@
 /*!
   @brief Signed distance function for sphere
 */
-class SphereSdf : public BaseIF {
+class SphereSdf : public BaseIF
+{
 public:
-
   /*!
     @brief Constructor
     @param[in] a_center      Sphere center
@@ -47,15 +47,16 @@ public:
     @brief Get distance to sphere. 
     @param[in] a_point Physical position. 
   */
-  virtual Real value(const RealVect& a_point) const; 
+  virtual Real
+  value(const RealVect& a_point) const;
 
   /*!
     @brief IF factory method
   */
-  virtual BaseIF* newImplicitFunction() const;
+  virtual BaseIF*
+  newImplicitFunction() const;
 
 protected:
-
   /*!
     @brief Sphere center
   */
@@ -65,7 +66,7 @@ protected:
     @brief Cylinder radius
   */
   Real m_radius;
-  
+
   /*!
     @brief Inside or outside domain
   */

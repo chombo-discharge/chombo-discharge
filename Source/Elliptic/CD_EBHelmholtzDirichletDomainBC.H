@@ -22,9 +22,9 @@
 /*!
   @brief Boundary condition class for passing Dirichlet domain boundary conditions into EBHelmholtzOp
 */
-class EBHelmholtzDirichletDomainBC : public EBHelmholtzDomainBC {
+class EBHelmholtzDirichletDomainBC : public EBHelmholtzDomainBC
+{
 public:
-
   /*!
     @brief Constructor. Must subsequently call setValue. 
   */
@@ -51,13 +51,15 @@ public:
     @brief Set the constant value on the domain side. 
     @param[in] a_value Constant value on all domain sides. 
   */
-  void setValue(const Real a_value);
+  void
+  setValue(const Real a_value);
 
   /*!
     @brief Set the spatially dependent value on the domain side. 
     @param[in] a_value Spatially dependent value on all domain sides. 
   */
-  void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+  void
+  setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Get face flux. This is for regular cells, and it uses first order finite differences for filling the flux. 
@@ -69,12 +71,13 @@ public:
     @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
     @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
   */
-  virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux,
-			   const BaseFab<Real>&  a_phi,
-			   const int&            a_dir,
-			   const Side::LoHiSide& a_side,
-			   const DataIndex&      a_dit,
-			   const bool            a_useHomogeneous) const override;
+  virtual void
+  getFaceFlux(BaseFab<Real>&        a_faceFlux,
+              const BaseFab<Real>&  a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const override;
 
   /*!
     @brief Get face flux. This is for irregular cells. 
@@ -85,15 +88,15 @@ public:
     @param[in] a_dit            Data index
     @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
   */
-  virtual Real getFaceFlux(const VolIndex&       a_vof,
-			   const EBCellFAB&      a_phi,
-			   const int&            a_dir,
-			   const Side::LoHiSide& a_side,
-			   const DataIndex&      a_dit,
-			   const bool            a_useHomogeneous) const override;
+  virtual Real
+  getFaceFlux(const VolIndex&       a_vof,
+              const EBCellFAB&      a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const override;
 
 protected:
-
   /*!
     @brief Use constant for BC
   */
@@ -112,7 +115,7 @@ protected:
   /*!
     @brief Spatially dependent value on domain sides
   */
-  std::function<Real(const RealVect& a_pos) > m_functionValue;
+  std::function<Real(const RealVect& a_pos)> m_functionValue;
 };
 
 #include <CD_NamespaceFooter.H>

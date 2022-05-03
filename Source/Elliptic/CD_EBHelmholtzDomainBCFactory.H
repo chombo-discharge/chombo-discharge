@@ -23,9 +23,9 @@
 /*!
   @brief Base class for passing domain boundary conditions into EBHelmholtzOp. 
 */
-class EBHelmholtzDomainBCFactory {
+class EBHelmholtzDomainBCFactory
+{
 public:
-
   /*!
     @brief Constructor. 
   */
@@ -44,13 +44,14 @@ public:
   /*!
     @brief Disallowed - don't see why you would need it.
   */
-  EBHelmholtzDomainBCFactory& operator=(const EBHelmholtzDomainBCFactory& a_other) = delete;
+  EBHelmholtzDomainBCFactory&
+  operator=(const EBHelmholtzDomainBCFactory& a_other) = delete;
 
   /*!
     @brief Factory method. Implementations must override this. 
   */
-  virtual RefCountedPtr<EBHelmholtzDomainBC> create() const = 0;
-
+  virtual RefCountedPtr<EBHelmholtzDomainBC>
+  create() const = 0;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -23,9 +23,9 @@
 
   To use this class, simply call the constructor (it will fill all internal data from the input script).
 */
-class Vessel : public ComputationalGeometry {
+class Vessel : public ComputationalGeometry
+{
 public:
-
   /*!
     @brief Constructor
   */
@@ -33,11 +33,10 @@ public:
 
   /*!
     @brief Destructor
-  */  
+  */
   ~Vessel();
-  
-protected:
 
+protected:
   /*!
     @brief Center point for the rod
   */
@@ -80,7 +79,7 @@ protected:
 
   /*!
     @brief If true, plate is at live voltage
-  */  
+  */
   bool m_shroom_live;
 
   /*!
@@ -90,7 +89,7 @@ protected:
 
   /*!
     @brief If false, rod is removed from the geometry
-  */  
+  */
   bool m_rod;
 };
 

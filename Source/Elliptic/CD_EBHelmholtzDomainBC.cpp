@@ -20,23 +20,21 @@
 constexpr int EBHelmholtzDomainBC::m_comp;
 constexpr int EBHelmholtzDomainBC::m_nComp;
 
-EBHelmholtzDomainBC::EBHelmholtzDomainBC(){
-  CH_TIME("EBHelmholtzDomainBC::EBHelmholtzDomainBC()");
-}
+EBHelmholtzDomainBC::EBHelmholtzDomainBC() { CH_TIME("EBHelmholtzDomainBC::EBHelmholtzDomainBC()"); }
 
-EBHelmholtzDomainBC::~EBHelmholtzDomainBC(){
-  CH_TIME("EBHelmholtzDomainBC::~EBHelmholtzDomainBC()");
-}
+EBHelmholtzDomainBC::~EBHelmholtzDomainBC() { CH_TIME("EBHelmholtzDomainBC::~EBHelmholtzDomainBC()"); }
 
-void EBHelmholtzDomainBC::define(const Location::Cell                        a_dataLocation,
-				 const EBLevelGrid&                          a_eblg,
-				 const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
-				 const RealVect&                             a_probLo,
-				 const Real                                  a_dx){
+void
+EBHelmholtzDomainBC::define(const Location::Cell                       a_dataLocation,
+                            const EBLevelGrid&                         a_eblg,
+                            const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
+                            const RealVect&                            a_probLo,
+                            const Real                                 a_dx)
+{
   CH_TIME("EBHelmholtzDomainBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<EBFluxFAB> >, RealVect, Real)");
 
   CH_assert(a_dx > 0.0);
-  
+
   m_dataLocation = a_dataLocation;
   m_eblg         = a_eblg;
   m_Bcoef        = a_Bcoef;
@@ -44,28 +42,28 @@ void EBHelmholtzDomainBC::define(const Location::Cell                        a_d
   m_dx           = a_dx;
 }
 
-void EBHelmholtzDomainBC::multiplyByBcoef(BaseFab<Real>&       a_flux,
-					  const BaseFab<Real>& a_bco,
-					  const int            a_dir,
-					  const Side::LoHiSide a_side) const {
+void
+EBHelmholtzDomainBC::multiplyByBcoef(BaseFab<Real>&       a_flux,
+                                     const BaseFab<Real>& a_bco,
+                                     const int            a_dir,
+                                     const Side::LoHiSide a_side) const
+{
   CH_TIME("EBHelmholtzDomainBC::multiplyByBcoef");
 
   CH_assert(a_flux.nComp() == 1);
-  CH_assert(a_bco. nComp() == 1);  
+  CH_assert(a_bco.nComp() == 1);
 
-  // For shifting the box over. a_flux is cell-centered and bco is face-centered so we need to get the indices right. 
+  // For shifting the box over. a_flux is cell-centered and bco is face-centered so we need to get the indices right.
   IntVect shift;
-  if(a_side == Side::Lo){
+  if (a_side == Side::Lo) {
     shift = IntVect::Zero;
   }
-  else{
+  else {
     shift = BASISV(a_dir);
   }
 
-  // Kernel -- this just multiplies. 
-  auto kernel = [&](const IntVect& iv){
-    a_flux(iv, m_comp) *= a_bco(iv, m_comp);
-  };
+  // Kernel -- this just multiplies.
+  auto kernel = [&](const IntVect& iv) { a_flux(iv, m_comp) *= a_bco(iv, m_comp); };
 
   // Execute kernel.
   BoxLoops::loop(a_flux.box(), kernel);

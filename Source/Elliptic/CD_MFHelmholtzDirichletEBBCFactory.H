@@ -19,9 +19,9 @@
 /*!
   @brief Class for making Dirichlet boundary conditions on the EB in a multifluid context. 
 */
-class MFHelmholtzDirichletEBBCFactory : public MFHelmholtzEBBCFactory {
+class MFHelmholtzDirichletEBBCFactory : public MFHelmholtzEBBCFactory
+{
 public:
-
   /*!
     @brief Weak constructor. Must subsequently set order, weight, and value. 
   */
@@ -41,7 +41,9 @@ public:
     @param[in] a_order Approximation order
     @param[in] a_value Spatially varying value on EBs
   */
-  MFHelmholtzDirichletEBBCFactory(const int a_order, const int a_weight, const std::function<Real(const RealVect& a_pos)>& a_value);
+  MFHelmholtzDirichletEBBCFactory(const int                                         a_order,
+                                  const int                                         a_weight,
+                                  const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Default constructor
@@ -52,22 +54,24 @@ public:
     @brief Set the value on the EB. 
     @param[in] a_value Constant value on EB
   */
-  virtual void setValue(const Real a_value);
+  virtual void
+  setValue(const Real a_value);
 
   /*!
     @brief Set the spatially varying value on the EB. 
     @param[in] a_value Spatially dependent value on EB
   */
-  virtual void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+  virtual void
+  setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Factory method
     @param[in] a_jumpBC Jump bc object. 
   */
-  RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const override;
+  RefCountedPtr<EBHelmholtzEBBC>
+  create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const override;
 
 protected:
-
   /*!
     @brief Use constant for BC
   */
@@ -96,7 +100,7 @@ protected:
   /*!
     @brief Value on the EB. 
   */
-  std::function<Real(const RealVect& a_pos) > m_functionValue;
+  std::function<Real(const RealVect& a_pos)> m_functionValue;
 };
 
 #include <CD_NamespaceFooter.H>

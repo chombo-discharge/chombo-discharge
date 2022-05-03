@@ -19,13 +19,13 @@
 /*!
   @brief Factory class for making saturation charge jump boundary condition objects in multifluid Helmholtz context. 
 */
-class MFHelmholtzSaturationChargeJumpBCFactory : public MFHelmholtzJumpBCFactory {
+class MFHelmholtzSaturationChargeJumpBCFactory : public MFHelmholtzJumpBCFactory
+{
 public:
-
   /*!
     @brief Alias to cut down on typing
-  */  
-  using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB> >;  
+  */
+  using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB>>;
 
   /*!
     @brief Full constructor
@@ -50,17 +50,17 @@ public:
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
     @return Returns an MFHelmholtzJumpBC for encapsulating boundary conditions on multiphase cells. 
   */
-  virtual RefCountedPtr<MFHelmholtzJumpBC> create(const Location::Cell a_dataLocation,
-						  const MFLevelGrid&   a_mflg,
-						  const BcoefPtr&      a_Bcoef,
-						  const Real           a_dx,
-						  const int            a_order,
-						  const int            a_weight,
-						  const int            a_radius,
-						  const int            a_ghostCF) override;
+  virtual RefCountedPtr<MFHelmholtzJumpBC>
+  create(const Location::Cell a_dataLocation,
+         const MFLevelGrid&   a_mflg,
+         const BcoefPtr&      a_Bcoef,
+         const Real           a_dx,
+         const int            a_order,
+         const int            a_weight,
+         const int            a_radius,
+         const int            a_ghostCF) override;
 
 protected:
-
   /*!
     @brief Which phase the saturation BC is applied on
   */

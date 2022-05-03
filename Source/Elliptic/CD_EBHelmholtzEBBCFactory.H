@@ -22,9 +22,9 @@
 /*!
   @brief Factory class for making EBHelmholtzEBBCs. 
 */
-class EBHelmholtzEBBCFactory {
+class EBHelmholtzEBBCFactory
+{
 public:
-
   /*!
     @brief Constructor. 
   */
@@ -43,13 +43,15 @@ public:
   /*!
     @brief Disallowed - don't see why you would need it.
   */
-  EBHelmholtzEBBCFactory& operator=(const EBHelmholtzEBBCFactory& a_other) = delete;
+  EBHelmholtzEBBCFactory&
+  operator=(const EBHelmholtzEBBCFactory& a_other) = delete;
 
   /*!
     @brief Factory method which returns new BC object. 
     @note  Defines are done in EBHelmholtzOp so no need to worry about that here. 
   */
-  virtual RefCountedPtr<EBHelmholtzEBBC> create() = 0;
+  virtual RefCountedPtr<EBHelmholtzEBBC>
+  create() = 0;
 };
 
 #include <CD_NamespaceFooter.H>

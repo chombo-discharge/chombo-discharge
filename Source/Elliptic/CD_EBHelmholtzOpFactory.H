@@ -38,26 +38,26 @@
   @note  This factory is designed without time-dependence in BCs. Time-dependent BCs are still doable by letting the boundary condition classes carry a reference to 
          an externally updated time. 
 */
-class EBHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<EBCellFAB> > {
+class EBHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<EBCellFAB>>
+{
 public:
+  // Various alias for cutting down on typing.
+  using Smoother = EBHelmholtzOp::Smoother;
 
-  // Various alias for cutting down on typing. 
-  using Smoother        = EBHelmholtzOp::Smoother;
+  using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid>>;
+  using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator>>;
+  using AmrFluxRegisters = Vector<RefCountedPtr<EBFluxRegister>>;
+  using AmrCoarseners    = Vector<RefCountedPtr<EbCoarAve>>;
 
-  using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid> >;
-  using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator> >;
-  using AmrFluxRegisters = Vector<RefCountedPtr<EBFluxRegister> >;
-  using AmrCoarseners    = Vector<RefCountedPtr<EbCoarAve> >;
-  
-  using AmrCellData      = Vector<RefCountedPtr<LevelData<EBCellFAB> > >;
-  using AmrFluxData      = Vector<RefCountedPtr<LevelData<EBFluxFAB> > >;
-  using AmrIrreData      = Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > >;
+  using AmrCellData = Vector<RefCountedPtr<LevelData<EBCellFAB>>>;
+  using AmrFluxData = Vector<RefCountedPtr<LevelData<EBFluxFAB>>>;
+  using AmrIrreData = Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>>;
 
-  using AmrResolutions   = Vector<Real>;
-  using AmrRefRatios     = Vector<int>;
+  using AmrResolutions = Vector<Real>;
+  using AmrRefRatios   = Vector<int>;
 
-  using DomainBCFactory  = RefCountedPtr<EBHelmholtzDomainBCFactory>; // Will be replaced with better BC class...
-  using EBBCFactory      = RefCountedPtr<EBHelmholtzEBBCFactory>;
+  using DomainBCFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>; // Will be replaced with better BC class...
+  using EBBCFactory     = RefCountedPtr<EBHelmholtzEBBCFactory>;
 
   /*!
     @brief Disallowed constructor. Use the full constructor
@@ -100,27 +100,27 @@ public:
     @note This operator is for time-independent a- and b-coefficients. 
   */
   EBHelmholtzOpFactory(const Location::Cell    a_dataLocation,
-		       const Real&             a_alpha,
-		       const Real&             a_beta,
-		       const RealVect&         a_probLo,
-		       const AmrLevelGrids&    a_amrLevelGrids,
-		       const AmrInterpolators& a_amrInterpolators,
-		       const AmrFluxRegisters& a_amrFluxRegisters,
-		       const AmrCoarseners&    a_amrCoarseners,
-		       const AmrRefRatios&     a_amrRefRatios,
-		       const AmrResolutions&   a_amrResolutions,					   
-		       const AmrCellData&      a_amrAcoef,
-		       const AmrFluxData&      a_amrBcoef,
-		       const AmrIrreData&      a_amrBcoefIrreg,
-		       const DomainBCFactory&  a_domainBcFactory,
-		       const EBBCFactory&      a_ebbcFactory,
-		       const IntVect&          a_ghostPhi,
-		       const IntVect&          a_ghostRHS,
-		       const Smoother&        a_relaxationMethod,
-		       const ProblemDomain&    a_bottomDomain,
-		       const int&              a_mgBlockingFactor,
-		       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
-  
+                       const Real&             a_alpha,
+                       const Real&             a_beta,
+                       const RealVect&         a_probLo,
+                       const AmrLevelGrids&    a_amrLevelGrids,
+                       const AmrInterpolators& a_amrInterpolators,
+                       const AmrFluxRegisters& a_amrFluxRegisters,
+                       const AmrCoarseners&    a_amrCoarseners,
+                       const AmrRefRatios&     a_amrRefRatios,
+                       const AmrResolutions&   a_amrResolutions,
+                       const AmrCellData&      a_amrAcoef,
+                       const AmrFluxData&      a_amrBcoef,
+                       const AmrIrreData&      a_amrBcoefIrreg,
+                       const DomainBCFactory&  a_domainBcFactory,
+                       const EBBCFactory&      a_ebbcFactory,
+                       const IntVect&          a_ghostPhi,
+                       const IntVect&          a_ghostRHS,
+                       const Smoother&         a_relaxationMethod,
+                       const ProblemDomain&    a_bottomDomain,
+                       const int&              a_mgBlockingFactor,
+                       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
+
   /*!
     @brief Destructor. Does nothing.
   */
@@ -129,12 +129,14 @@ public:
   /*!
     @brief Disallowed assignment operator
   */
-  void operator=(const EBHelmholtzOpFactory& a_opin) = delete;
+  void
+  operator=(const EBHelmholtzOpFactory& a_opin) = delete;
 
-    /*!
+  /*!
     @brief Disallowed move assignment
   */
-  void operator=(const EBHelmholtzOpFactory&& a_opin) = delete;
+  void
+  operator=(const EBHelmholtzOpFactory&& a_opin) = delete;
 
   /*!
     @brief Create multigrid operator
@@ -142,22 +144,24 @@ public:
     @param[in] a_depth           Depth. This specifies that the operator will be created at depth coarsen(a_fineDomain, 2^a_depth);
     @param[in] a_homogeneousOnly If true, only homogeneous boundary conditions will be needed. 
   */
-  EBHelmholtzOp* MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly = true) override final;
+  EBHelmholtzOp*
+  MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly = true) override final;
 
   /*!
     @brief Create AMR operator for specified domain
     @param[in] a_domain Domain
   */
-  EBHelmholtzOp* AMRnewOp(const ProblemDomain& a_domain) override final;
+  EBHelmholtzOp*
+  AMRnewOp(const ProblemDomain& a_domain) override final;
 
   /*!
     @brief Get refinement ratio to next finest level.
     @note Returns -1 when there are no finer levels. 
   */
-  int refToFiner(const ProblemDomain& a_indexspace) const override final;
+  int
+  refToFiner(const ProblemDomain& a_indexspace) const override final;
 
 protected:
-
   /*!
     @brief Component number that is solved for
   */
@@ -166,7 +170,7 @@ protected:
   /*!
     @brief Number of components that we solve for
   */
-  static constexpr int m_nComp = 1;  
+  static constexpr int m_nComp = 1;
 
   /*!
     @brief Data location
@@ -190,7 +194,7 @@ protected:
 
   /*!
     @brief Number of ghost cells that are used. Need because of Chombo prolongation objects. 
-  */  
+  */
   IntVect m_ghostRhs;
 
   /*!
@@ -200,7 +204,7 @@ protected:
 
   /*!
     @brief Operator beta
-  */  
+  */
   Real m_beta;
 
   /*!
@@ -212,57 +216,57 @@ protected:
   /*!
     @brief AMR grids
   */
-  AmrLevelGrids    m_amrLevelGrids;
+  AmrLevelGrids m_amrLevelGrids;
 
   /*!
     @brief Ghost cell interpolations
-  */  
+  */
   AmrInterpolators m_amrInterpolators;
 
   /*!
     @brief Flux registers
-  */    
+  */
   AmrFluxRegisters m_amrFluxRegisters;
 
   /*!
     @brief Data coarseners
-  */      
-  AmrCoarseners    m_amrCoarseners;
+  */
+  AmrCoarseners m_amrCoarseners;
 
   /*!
     @brief Refinement ratios
-  */        
-  AmrRefRatios     m_amrRefRatios;
+  */
+  AmrRefRatios m_amrRefRatios;
 
   /*!
     @brief Resolutions one each level
-  */          
-  AmrResolutions   m_amrResolutions;
+  */
+  AmrResolutions m_amrResolutions;
 
   /*!
     @brief Helmholtz A-coefficient
-  */            
-  AmrCellData      m_amrAcoef;
+  */
+  AmrCellData m_amrAcoef;
 
   /*!
     @brief Helmholtz B-coefficient
-  */              
-  AmrFluxData      m_amrBcoef;
+  */
+  AmrFluxData m_amrBcoef;
 
   /*!
     @brief Helmholtz B-coefficient (on EB faces. 
-  */                
-  AmrIrreData      m_amrBcoefIrreg;
+  */
+  AmrIrreData m_amrBcoefIrreg;
 
   /*!
     @brief Domain BC factory
-  */                
+  */
   DomainBCFactory m_domainBcFactory;
 
   /*!
     @brief EB BC factory. 
-  */                  
-  EBBCFactory     m_ebBcFactory;
+  */
+  EBBCFactory m_ebBcFactory;
 
   /*!
     @brief Bottom domain, i.e. the coarsest domain which will be used in multigrid
@@ -277,12 +281,12 @@ protected:
   /*!
     @brief This is for using pre-defined grids for the deeper multigrid levels, i.e. for the levels that are coarsenings of m_amrLevelGrids[0]
   */
-  AmrLevelGrids    m_deeperLevelGrids;
+  AmrLevelGrids m_deeperLevelGrids;
 
   /*!
     @brief For checking if an AMR level has multigrid levels
   */
-  std::vector<bool>  m_hasMgLevels;
+  std::vector<bool> m_hasMgLevels;
 
   /*!
     @brief Deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
@@ -291,23 +295,24 @@ protected:
 
   /*!
     @brief A-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
-  */  
-  Vector<AmrCellData>   m_mgAcoef;
+  */
+  Vector<AmrCellData> m_mgAcoef;
 
   /*!
     @brief B-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
-  */    
-  Vector<AmrFluxData>   m_mgBcoef;
+  */
+  Vector<AmrFluxData> m_mgBcoef;
 
   /*!
     @brief B-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
-  */      
-  Vector<AmrIrreData>   m_mgBcoefIrreg;
+  */
+  Vector<AmrIrreData> m_mgBcoefIrreg;
 
   /*!
     @brief Function which defines the multigrid levels for this operator factory
   */
-  void defineMultigridLevels();
+  void
+  defineMultigridLevels();
 
   /*!
     @brief Check if a domain is coarser than the other
@@ -315,7 +320,8 @@ protected:
     @param[in] a_domainTwo The second domain
     @return Returns true of a_domainOne has fewer grid points than a_domainTwo
   */
-  bool isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
+  bool
+  isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
 
   /*!
     @brief Check if a domain is finer than the other
@@ -323,7 +329,8 @@ protected:
     @param[in] a_domainTwo The second domain
     @return Returns true of a_domainOne has more grid points than a_domainTwo
   */
-  bool isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
+  bool
+  isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
 
   /*!
     @brief Construct coarsening of a grid level. 
@@ -333,7 +340,11 @@ protected:
     @param[in]  a_blockingFactor Blocking factor to use for grid aggregation
     @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we coarsen directly. 
   */
-  bool getCoarserLayout(EBLevelGrid& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
+  bool
+  getCoarserLayout(EBLevelGrid&       a_coarseGrid,
+                   const EBLevelGrid& a_fineGrid,
+                   const int          a_refRat,
+                   const int          a_blockingFactor) const;
 
   /*!
     @brief Coarsen coefficients (conservatively)
@@ -347,15 +358,16 @@ protected:
     @param[in]  a_eblgFine       Fine grids
     @param[in]  a_refRat         Coarsening factor
   */
-  void coarsenCoefficients(LevelData<EBCellFAB>&              a_coarAcoef,
-			   LevelData<EBFluxFAB>&              a_coarBcoef,
-			   LevelData<BaseIVFAB<Real> >&       a_coarBcoefIrreg,
-			   const LevelData<EBCellFAB>&        a_fineAcoef,
-			   const LevelData<EBFluxFAB>&        a_fineBcoef,
-			   const LevelData<BaseIVFAB<Real> >& a_fineBcoefIrreg,
-			   const EBLevelGrid&                 a_eblgCoar,
-			   const EBLevelGrid&                 a_eblgFine,
-			   const int                          a_refRat);
+  void
+  coarsenCoefficients(LevelData<EBCellFAB>&             a_coarAcoef,
+                      LevelData<EBFluxFAB>&             a_coarBcoef,
+                      LevelData<BaseIVFAB<Real>>&       a_coarBcoefIrreg,
+                      const LevelData<EBCellFAB>&       a_fineAcoef,
+                      const LevelData<EBFluxFAB>&       a_fineBcoef,
+                      const LevelData<BaseIVFAB<Real>>& a_fineBcoefIrreg,
+                      const EBLevelGrid&                a_eblgCoar,
+                      const EBLevelGrid&                a_eblgFine,
+                      const int                         a_refRat);
 
   /*!
     @brief Find level corresponding to amr level
@@ -363,7 +375,8 @@ protected:
     @return Depth in m_amrLevelGrids corresponding to a_domain. 
     @note Run-time error if no level was found. 
   */
-  int findAmrLevel(const ProblemDomain& a_domain) const;
+  int
+  findAmrLevel(const ProblemDomain& a_domain) const;
 };
 
 #include <CD_NamespaceFooter.H>

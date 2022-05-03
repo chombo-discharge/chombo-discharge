@@ -19,16 +19,16 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief Abstract class that describes the scalar quantity that is advected in CdrSolver. 
   @details Instantiations of CdrSpecies (i.e., derived classes thereof) can be passed into CdrSolver in order to provide run-time information
   to the class. The user will typically set a name for the advected quantity, the chargeNumber (if there is one), and whether or not advection 
   and diffusion is turned on or off. 
 */
-class CdrSpecies {
+class CdrSpecies
+{
 public:
-  
   /*!
     @brief Weak constructor. 
   */
@@ -53,45 +53,51 @@ public:
     @param[in] a_pos  Position.
     @param[in] a_time Time
   */
-  virtual Real initialData(const RealVect a_pos, const Real a_time) const = 0;
+  virtual Real
+  initialData(const RealVect a_pos, const Real a_time) const = 0;
 
   /*!
     @brief Return name
   */
-  virtual std::string getName() const;
+  virtual std::string
+  getName() const;
 
   /*!
     @brief Return charge
   */
-  virtual int getChargeNumber() const;
-    
+  virtual int
+  getChargeNumber() const;
+
   /*!
     @brief Diffusive species or not
   */
-  virtual bool isDiffusive() const;
+  virtual bool
+  isDiffusive() const;
 
   /*!
     @brief Mobile species or not
   */
-  virtual bool isMobile() const;
+  virtual bool
+  isMobile() const;
 
   /*!
     @brief Get initial particles
   */
-  virtual const List<Particle>& getInitialParticles() const;
+  virtual const List<Particle>&
+  getInitialParticles() const;
 
   /*!
     @brief Get initial particles
   */
-  List<Particle>& getInitialParticles();
+  List<Particle>&
+  getInitialParticles();
 
 protected:
-
   /*!
     @brief Cdr_Species name
   */
   std::string m_name;
-  
+
   /*!
     @brief Charge
   */

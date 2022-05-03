@@ -26,9 +26,9 @@ namespace Physics {
       @brief Species which is advected/diffused in Brownian walker code
       @details The initial particles are drawn from a Gaussian distribution. The user specifies how many, and the parameters for the distribution.
     */
-    class BrownianWalkerSpecies : public ItoSpecies {
+    class BrownianWalkerSpecies : public ItoSpecies
+    {
     public:
-
       /*!
 	@brief Constructor -- reads in input parameters
       */
@@ -38,13 +38,12 @@ namespace Physics {
 	@brief Destructor (does nothing)
       */
       ~BrownianWalkerSpecies();
-      
-    protected:
 
+    protected:
       /*!
 	@brief Number of initial particles
       */
-      int m_numParticles;      
+      int m_numParticles;
 
       /*!
 	@brief Radius for the initial Gaussian distribution of particles
@@ -59,10 +58,11 @@ namespace Physics {
       /*!
 	@brief Draw initial particles
       */
-      void drawInitParticles();
+      void
+      drawInitParticles();
     };
-  }
-}
+  } // namespace BrownianWalker
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

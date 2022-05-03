@@ -21,9 +21,9 @@
   @details This class will compute a stencil s(phi) = sum(kappa * phi)/sum(kappa) where
   the stencil points consist of cells that can be reached through a monotone path. 
 */
-class NonConservativeDivergenceStencil : public IrregStencil {
+class NonConservativeDivergenceStencil : public IrregStencil
+{
 public:
-
   /*!
     @brief Disallowed weak constructor. 
   */
@@ -40,20 +40,19 @@ public:
     @param[in] a_type   Stencil type (dummy argument)
   */
   NonConservativeDivergenceStencil(const DisjointBoxLayout&        a_dbl,
-				   const EBISLayout&               a_ebisl,
-				   const ProblemDomain&            a_domain,
-				   const Real&                     a_dx,
-				   const int                       a_order,
-				   const int                       a_radius,
-				   const IrregStencil::StencilType a_type);
+                                   const EBISLayout&               a_ebisl,
+                                   const ProblemDomain&            a_domain,
+                                   const Real&                     a_dx,
+                                   const int                       a_order,
+                                   const int                       a_radius,
+                                   const IrregStencil::StencilType a_type);
 
   /*!
     @brief Destructor
   */
   virtual ~NonConservativeDivergenceStencil();
-  
+
 protected:
-  
   /*!
     @brief Build the interpolation stencils
     @param[out] a_sten    Returned stencil
@@ -66,17 +65,17 @@ protected:
     @param[in]  a_cfivs   Coarse-fine interface
     @details This calls one of the other function for computing the stencil. 
   */
-  virtual void buildStencil(VoFStencil&              a_sten,
-			    const VolIndex&          a_vof,
-			    const DisjointBoxLayout& a_dbl,
-			    const ProblemDomain&     a_domain,
-			    const EBISBox&           a_ebisbox,
-			    const Box&               a_box,
-			    const Real&              a_dx,
-			    const IntVectSet&        a_cfivs) override;
-  
+  virtual void
+  buildStencil(VoFStencil&              a_sten,
+               const VolIndex&          a_vof,
+               const DisjointBoxLayout& a_dbl,
+               const ProblemDomain&     a_domain,
+               const EBISBox&           a_ebisbox,
+               const Box&               a_box,
+               const Real&              a_dx,
+               const IntVectSet&        a_cfivs) override;
 };
-  
+
 #include <CD_NamespaceFooter.H>
 
 #endif

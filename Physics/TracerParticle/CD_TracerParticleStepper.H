@@ -24,7 +24,8 @@ namespace Physics {
     /*!
       @brief Various supported integration algorithms. 
     */
-    enum class IntegrationAlgorithm {
+    enum class IntegrationAlgorithm
+    {
       Euler,
       RK2,
       RK4
@@ -33,7 +34,8 @@ namespace Physics {
     /*!
       @brief Enum for handling various velocity fields.
     */
-    enum class VelocityField {
+    enum class VelocityField
+    {
       Diagonal,
       Rotational
     };
@@ -45,9 +47,9 @@ namespace Physics {
       particle advection kernels. This class will work fine with TracerParticle<0, M> where M >= 4. 
     */
     template <typename P>
-    class TracerParticleStepper : public TimeStepper {
+    class TracerParticleStepper : public TimeStepper
+    {
     public:
-
       /*!
 	@brief Constructor. Does nothing. 
       */
@@ -63,7 +65,7 @@ namespace Physics {
 	@brief Move constructor. Disallowed.
 	@param[in] a_other Other
       */
-      TracerParticleStepper(const TracerParticleStepper<P>&& a_other) = delete;      
+      TracerParticleStepper(const TracerParticleStepper<P>&& a_other) = delete;
 
       /*!
 	@brief Destructor. 
@@ -74,59 +76,72 @@ namespace Physics {
 	@brief Copy assignment operator. Disallowed.
 	@param[in] a_other Other
       */
-      TracerParticleStepper& operator=(const TracerParticleStepper<P>& a_other) = delete;
+      TracerParticleStepper&
+      operator=(const TracerParticleStepper<P>& a_other) = delete;
 
       /*!
 	@brief Move assignment operator. Disallowed.
 	@param[in] a_other Other
       */
-      TracerParticleStepper& operator=(const TracerParticleStepper<P>&& a_other) = delete;      
+      TracerParticleStepper&
+      operator=(const TracerParticleStepper<P>&& a_other) = delete;
 
       /*!
 	@brief Instantiate the tracer particle solver.
       */
-      void setupSolvers() override;
+      void
+      setupSolvers() override;
 
       /*!
 	@brief Allocate storage for solvers and time stepper. 
       */
-      void allocate() override;
+      void
+      allocate() override;
 
       /*!
 	@brief Fill problem with initial data. 
       */
-      void initialData() override;
+      void
+      initialData() override;
 
       /*!
 	@brief Perform any post-initialization steps. Not needed for this time stepper. 
       */
-      void postInitialize() override { }
+      void
+      postInitialize() override
+      {}
 
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 
       */
-      void postCheckpointSetup() override { }
+      void
+      postCheckpointSetup() override
+      {}
 
       /*!
 	@brief Register realms. Primal is the only realm we need. 
       */
-      void registerRealms() override;
+      void
+      registerRealms() override;
 
       /*!
 	@brief Register operators. 
 	@details Only need the solver's operators.
       */
-      void registerOperators() override;
+      void
+      registerOperators() override;
 
       /*!
 	@brief Parse options
       */
-      void parseOptions();
+      void
+      parseOptions();
 
       /*!
 	@brief Parse runtime options
       */
-      void parseRuntimeOptions() override;
+      void
+      parseRuntimeOptions() override;
 
 #ifdef CH_USE_HDF5
       /*!  
@@ -134,7 +149,8 @@ namespace Physics {
 	@param[inout] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
       */
-      virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+      virtual void
+      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -143,7 +159,8 @@ namespace Physics {
 	@param[inout] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
       */
-      virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+      virtual void
+      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
 #endif
 
       /*!
@@ -152,28 +169,32 @@ namespace Physics {
 	@param[in]    a_plotVariableNames Plot variable names.
 	@param[inout] a_icomp             Starting component in a_output to begin at. 
       */
-      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
+      virtual void
+      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
 
       /*!
 	@brief Get the number of plot variables for this time stepper. 
 	@details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
 	@return Returns number of plot variables that will be written during writePlotData
       */
-      virtual int getNumberOfPlotVariables() const override;
+      virtual int
+      getNumberOfPlotVariables() const override;
 
       /*!
 	@brief Compute a time step to be used by Driver. 
 	@param[out] a_dt       Time step to be used.
 	@param[out] a_timeCode Identifier for how the time step was computed. 
       */
-      virtual void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+      virtual void
+      computeDt(Real& a_dt, TimeCode& a_timeCode) override;
 
       /*!
 	@brief Advancement method. Swaps between various kernels. 
 	@param[in] a_dt Time step to be used for advancement
 	@return    Returns the time step that was used (equal to a_dt in this case). 
       */
-      virtual Real advance(const Real a_dt) override;
+      virtual Real
+      advance(const Real a_dt) override;
 
       /*!
 	@brief Synchronize solver times and time steps
@@ -181,20 +202,24 @@ namespace Physics {
 	@param[in] a_time Time (in seconds)
 	@param[in] a_dt   Time step that was used. 
       */
-      virtual void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+      virtual void
+      synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
 
       /*!
 	@brief Print a step report. 
 	@details This is called by Driver after time step. The routine can be used to display use information about the simulation progress. Not used by this class. 
       */
-      virtual void printStepReport() override {}
+      virtual void
+      printStepReport() override
+      {}
 
       /*!
 	@brief Perform pre-regrid operations.
 	@param[in] a_lmin           The coarsest level that changes
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
       */
-      virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
+      virtual void
+      preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
 
       /*!
 	@brief Time stepper regrid method. 
@@ -202,16 +227,17 @@ namespace Physics {
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
 	@param[in] a_newFinestLevel The finest level after the regrid. 
       */
-      virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+      virtual void
+      regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
       /*!
 	@brief Perform post-regrid operations. 
 	@details This includes all operations to be done AFTER interpolating data to new grids. 
       */
-      virtual void postRegrid() override;
+      virtual void
+      postRegrid() override;
 
     protected:
-
       /*!
 	@brief Integration algorithm
       */
@@ -235,7 +261,7 @@ namespace Physics {
       /*!
 	@brief Tracer particle solvers
       */
-      RefCountedPtr<TracerParticleSolver<P> > m_solver;
+      RefCountedPtr<TracerParticleSolver<P>> m_solver;
 
       /*!
 	@brief Tracer particle velocity field
@@ -255,48 +281,56 @@ namespace Physics {
       /*!
 	@brief Fill initial particles
       */
-      virtual void initialParticles();
+      virtual void
+      initialParticles();
 
       /*!
 	@brief Set the velocity on the mesh.
       */
-      virtual void setVelocity();
+      virtual void
+      setVelocity();
 
       /*!
 	@brief Parse reactive integrator.
       */
-      virtual void parseIntegrator();
+      virtual void
+      parseIntegrator();
 
       /*!
 	@brief Parse velocity field.
       */
-      virtual void parseVelocityField();
+      virtual void
+      parseVelocityField();
 
       /*!
 	@brief Parse initial conditions. 
       */
-      virtual void parseInitialConditions();      
+      virtual void
+      parseInitialConditions();
 
       /*!
 	@brief Advance particles using explicit Euler rule
 	@param[in] a_dt Advanced time step
       */
-      virtual void advanceParticlesEuler(const Real a_dt);
+      virtual void
+      advanceParticlesEuler(const Real a_dt);
 
       /*!
 	@brief Advance particles using second order Runge-Kutta
 	@param[in] a_dt Advanced time step
       */
-      virtual void advanceParticlesRK2(const Real a_dt);
+      virtual void
+      advanceParticlesRK2(const Real a_dt);
 
       /*!
 	@brief Advance particles using fourth order Runge-Kutta
 	@param[in] a_dt Advanced time step
       */
-      virtual void advanceParticlesRK4(const Real a_dt);            
+      virtual void
+      advanceParticlesRK4(const Real a_dt);
     };
-  }
-}
+  } // namespace TracerParticle
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

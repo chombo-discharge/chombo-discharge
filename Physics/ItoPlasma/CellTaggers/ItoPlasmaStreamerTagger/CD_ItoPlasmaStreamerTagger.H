@@ -18,13 +18,13 @@
 
 namespace Physics {
   namespace ItoPlasma {
-  
+
     /*!
       @brief Refinement class for morrow_stephens plasma model only
     */
-    class ItoPlasmaStreamerTagger : public ItoPlasmaFieldTagger {
+    class ItoPlasmaStreamerTagger : public ItoPlasmaFieldTagger
+    {
     public:
-  
       /*!
 	@brief Constructor
       */
@@ -33,10 +33,10 @@ namespace Physics {
       /*!
 	@brief Constructor
       */
-      ItoPlasmaStreamerTagger(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
-			      const RefCountedPtr<ItoPlasmaStepper>&     a_timeStepper,
-			      const RefCountedPtr<AmrMesh>&               a_amr,
-			      const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
+      ItoPlasmaStreamerTagger(const RefCountedPtr<ItoPlasmaPhysics>&      a_physics,
+                              const RefCountedPtr<ItoPlasmaStepper>&      a_timeStepper,
+                              const RefCountedPtr<AmrMesh>&               a_amr,
+                              const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
       /*!
 	@brief Destructor
@@ -46,47 +46,52 @@ namespace Physics {
       /*!
 	@brief Parse class options
       */
-      virtual void parseOptions();
+      virtual void
+      parseOptions();
 
       /*!
 	@brief Parse class options
       */
-      virtual void parseRuntimeOptions();
+      virtual void
+      parseRuntimeOptions();
 
       /*!
 	@brief Return tracer field
       */
-      virtual Vector<Real> tracer(const RealVect         a_pos,
-				  const Real             a_time,
-				  const Real             a_dx,
-				  const RealVect         a_E,
-				  const Real             a_min_E,
-				  const Real             a_max_E,
-				  const RealVect         a_grad_E,
-				  const Real             a_min_grad_E,
-				  const Real             a_max_grad_E);
+      virtual Vector<Real>
+      tracer(const RealVect a_pos,
+             const Real     a_time,
+             const Real     a_dx,
+             const RealVect a_E,
+             const Real     a_min_E,
+             const Real     a_max_E,
+             const RealVect a_grad_E,
+             const Real     a_min_grad_E,
+             const Real     a_max_grad_E);
 
       /*!
 	@brief Return coarsening criterion. 
       */
-      virtual bool coarsenCell(const RealVect         a_pos,
-			       const Real             a_time,
-			       const Real             a_dx,
-			       const int              a_lvl,
-			       const Vector<Real>     a_tracer,
-			       const Vector<RealVect> a_grad_tracer);
+      virtual bool
+      coarsenCell(const RealVect         a_pos,
+                  const Real             a_time,
+                  const Real             a_dx,
+                  const int              a_lvl,
+                  const Vector<Real>     a_tracer,
+                  const Vector<RealVect> a_grad_tracer);
 
       /*!
 	@brief Return refinement criterion. 
       */
-      virtual bool refineCell(const RealVect         a_pos,
-			      const Real             a_time,
-			      const Real             a_dx,
-			      const int              a_lvl,
-			      const Vector<Real>     a_tracer,
-			      const Vector<RealVect> a_grad_tracer);
-    protected:
+      virtual bool
+      refineCell(const RealVect         a_pos,
+                 const Real             a_time,
+                 const Real             a_dx,
+                 const int              a_lvl,
+                 const Vector<Real>     a_tracer,
+                 const Vector<RealVect> a_grad_tracer);
 
+    protected:
       /*!
 	@brief Threshold for coarsening based on curvature
       */
@@ -96,7 +101,7 @@ namespace Physics {
 	@brief Threshold for refinement based on curvature
       */
       Real m_refi_curv;
-  
+
       /*!
 	@brief Threshold for ionization refinement
       */
@@ -112,8 +117,8 @@ namespace Physics {
       */
       int m_max_coarsen_level;
     };
-  }
-}
+  } // namespace ItoPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

@@ -36,10 +36,10 @@
   @note  This factory is designed without time-dependence in BCs. Time-dependent BCs are still doable by letting the boundary condition classes carry a reference to 
          an externally updated time. If you need new coefficients you will have to set up multigrid again. 
 */
-class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
+class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB>>
+{
 public:
-
-  // Various alias for cutting down on typing. 
+  // Various alias for cutting down on typing.
   using MFIS             = RefCountedPtr<MultiFluidIndexSpace>;
   using AmrLevelGrids    = Vector<MFLevelGrid>;
   using AmrInterpolators = Vector<MFMultigridInterpolator>;
@@ -48,22 +48,22 @@ public:
   using AmrResolutions   = Vector<Real>;
   using AmrRefRatios     = Vector<int>;
 
-  using AmrCellData      = Vector<RefCountedPtr<LevelData<MFCellFAB> > >;
-  using AmrFluxData      = Vector<RefCountedPtr<LevelData<MFFluxFAB> > >;
-  using AmrIrreData      = Vector<RefCountedPtr<LevelData<MFBaseIVFAB> > >;
+  using AmrCellData = Vector<RefCountedPtr<LevelData<MFCellFAB>>>;
+  using AmrFluxData = Vector<RefCountedPtr<LevelData<MFFluxFAB>>>;
+  using AmrIrreData = Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>;
 
   using DomainBCFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>;
   using EBBCFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>;
   using JumpBCFactory   = RefCountedPtr<MFHelmholtzJumpBCFactory>;
 
-  using Smoother       = MFHelmholtzOp::Smoother;
+  using Smoother = MFHelmholtzOp::Smoother;
 
   /*!
     @brief Disallowed constructor
   */
   MFHelmholtzOpFactory() = delete;
 
-    /*!
+  /*!
     @brief Disallowed constructor
   */
   MFHelmholtzOpFactory(const MFHelmholtzOpFactory& a_otherFactory) = delete;
@@ -94,30 +94,30 @@ public:
     @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels. 
   */
   MFHelmholtzOpFactory(const MFIS&             a_mfis,
-		       const Location::Cell    a_dataLocation,
-		       const Real&             a_alpha,
-		       const Real&             a_beta,
-		       const RealVect&         a_probLo,
-		       const AmrLevelGrids&    a_amrLevelGrids,
-		       const AmrInterpolators& a_amrInterpolators,
-		       const AmrFluxRegisters& a_amrFluxRegisters,
-		       const AmrCoarseners&    a_amrCoarseners,
-		       const AmrRefRatios&     a_amrRefRatios,
-		       const AmrResolutions&   a_amrResolutions,
-		       const AmrCellData&      a_amrAcoef,
-		       const AmrFluxData&      a_amrBcoef,
-		       const AmrIrreData&      a_amrBcoefIrreg,
-		       const DomainBCFactory&  a_domainBcFactory,
-		       const EBBCFactory&      a_ebBcFactory,
-		       const JumpBCFactory&    a_jumpBcFactory,		       
-		       const IntVect&          a_ghostPhi,
-		       const IntVect&          a_ghostRhs,
-		       const Smoother&         a_smoother,
-		       const ProblemDomain&    a_bottomDomain,
-		       const int&              a_jumpOrder,
-		       const int&              a_jumpWeight,
-		       const int&              a_blockingFactor,
-		       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
+                       const Location::Cell    a_dataLocation,
+                       const Real&             a_alpha,
+                       const Real&             a_beta,
+                       const RealVect&         a_probLo,
+                       const AmrLevelGrids&    a_amrLevelGrids,
+                       const AmrInterpolators& a_amrInterpolators,
+                       const AmrFluxRegisters& a_amrFluxRegisters,
+                       const AmrCoarseners&    a_amrCoarseners,
+                       const AmrRefRatios&     a_amrRefRatios,
+                       const AmrResolutions&   a_amrResolutions,
+                       const AmrCellData&      a_amrAcoef,
+                       const AmrFluxData&      a_amrBcoef,
+                       const AmrIrreData&      a_amrBcoefIrreg,
+                       const DomainBCFactory&  a_domainBcFactory,
+                       const EBBCFactory&      a_ebBcFactory,
+                       const JumpBCFactory&    a_jumpBcFactory,
+                       const IntVect&          a_ghostPhi,
+                       const IntVect&          a_ghostRhs,
+                       const Smoother&         a_smoother,
+                       const ProblemDomain&    a_bottomDomain,
+                       const int&              a_jumpOrder,
+                       const int&              a_jumpWeight,
+                       const int&              a_blockingFactor,
+                       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
 
   /*!
     @brief Destructor. Does nothing. 
@@ -129,18 +129,21 @@ public:
     @param[in] a_sigma Jump (must be defined on gas phase)
     @param[in] a_scale Scaling factor
   */
-  void setJump(const EBAMRIVData& a_sigma, const Real& a_scale);
+  void
+  setJump(const EBAMRIVData& a_sigma, const Real& a_scale);
 
   /*!
     @param[in] a_sigma Jump
     @param[in] a_scale Scaling factor
   */
-  void setJump(const Real& a_sigma, const Real& a_scale);
+  void
+  setJump(const Real& a_sigma, const Real& a_scale);
 
   /*!
     @brief Get the BC jump factor. 
   */
-  const EBAMRIVData& getSigma() const;
+  const EBAMRIVData&
+  getSigma() const;
 
   /*!
     @brief Create multigrid operator
@@ -148,26 +151,28 @@ public:
     @param[in] a_depth           Depth. This specifies that the operator will be created at depth coarsen(a_fineDomain, 2^a_depth);
     @param[in] a_homogeneousOnly If true, only homogeneous boundary conditions will be needed. 
   */
-  MFHelmholtzOp* MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly = true) override final;
+  MFHelmholtzOp*
+  MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly = true) override final;
 
   /*!
     @brief Create AMR operator for specified domain
     @param[in] a_domain Domain
   */
-  MFHelmholtzOp* AMRnewOp(const ProblemDomain& a_domain) override final;
+  MFHelmholtzOp*
+  AMRnewOp(const ProblemDomain& a_domain) override final;
 
   /*!
     @brief Get refinement ratio to next finest level.
     @note Returns -1 when there are no finer levels. 
   */
-  int refToFiner(const ProblemDomain& a_indexspace) const override final;
+  int
+  refToFiner(const ProblemDomain& a_indexspace) const override final;
 
 protected:
-
   /*!
     @brief Component that this operator solves for
   */
-  static constexpr int m_comp  = 0;
+  static constexpr int m_comp = 0;
 
   /*!
     @brief Number of components that this operator solves for.
@@ -206,7 +211,7 @@ protected:
 
   /*!
     @brief Number of ghost cells that are used. Need because of Chombo prolongation objects. 
-  */  
+  */
   IntVect m_ghostRhs;
 
   /*!
@@ -216,7 +221,7 @@ protected:
 
   /*!
     @brief Operator beta
-  */  
+  */
   Real m_beta;
 
   /*!
@@ -227,31 +232,31 @@ protected:
   /*!
     @brief AMR grids
   */
-  AmrLevelGrids    m_amrLevelGrids;
+  AmrLevelGrids m_amrLevelGrids;
 
   /*!
     @brief Multigrid interpolators
-  */  
+  */
   AmrInterpolators m_amrInterpolators;
 
   /*!
     @brief Flux registers
-  */    
+  */
   AmrFluxRegisters m_amrFluxRegisters;
 
   /*!
     @brief Data coarseners
-  */      
+  */
   AmrCoarseners m_amrCoarseners;
 
   /*!
     @brief Refinement ratios
-  */        
+  */
   AmrRefRatios m_amrRefRatios;
 
   /*!
     @brief Grid resolutions
-  */          
+  */
   AmrResolutions m_amrResolutions;
 
   /*!
@@ -261,12 +266,12 @@ protected:
 
   /*!
     @brief Operator B-coefficient
-  */  
+  */
   AmrFluxData m_amrBcoef;
 
   /*!
     @brief Operator B-coefficient
-  */    
+  */
   AmrIrreData m_amrBcoefIrreg;
 
   /*!
@@ -276,13 +281,13 @@ protected:
 
   /*!
     @brief EB BC factory
-  */  
+  */
   EBBCFactory m_ebBcFactory;
 
   /*!
     @brief Jump BC factory
-  */  
-  JumpBCFactory m_jumpBcFactory;  
+  */
+  JumpBCFactory m_jumpBcFactory;
 
   /*!
     @brief Jump on multiphase cells. 
@@ -312,12 +317,12 @@ protected:
   /*!
     @brief Deeper grids
   */
-  AmrLevelGrids    m_deeperLevelGrids;
+  AmrLevelGrids m_deeperLevelGrids;
 
   /*!
     @brief For checking if an AMR level has multigrid levels
   */
-  std::vector<bool>  m_hasMgLevels;
+  std::vector<bool> m_hasMgLevels;
 
   /*!
     @brief Deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
@@ -326,38 +331,40 @@ protected:
 
   /*!
     @brief A-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
-  */    
-  Vector<AmrCellData>   m_mgAcoef;
+  */
+  Vector<AmrCellData> m_mgAcoef;
 
   /*!
     @brief B-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
-  */      
-  Vector<AmrFluxData>   m_mgBcoef;
+  */
+  Vector<AmrFluxData> m_mgBcoef;
 
   /*!
     @brief B-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
-  */        
-  Vector<AmrIrreData>   m_mgBcoefIrreg;
+  */
+  Vector<AmrIrreData> m_mgBcoefIrreg;
 
   /*!
     @brief Jump coefficient on deeper grids
   */
-  Vector<EBAMRIVData>   m_mgJump;
+  Vector<EBAMRIVData> m_mgJump;
 
   /*!
     @brief Coarsneing operator on deeper grids (used for coarsening jump)
   */
-  Vector<Vector<RefCountedPtr<EbCoarAve> > > m_mgAveOp;
+  Vector<Vector<RefCountedPtr<EbCoarAve>>> m_mgAveOp;
 
   /*!
     @brief Function which defines the multigrid levels for this operator factory
   */
-  void defineMultigridLevels();
+  void
+  defineMultigridLevels();
 
   /*!
     @brief Define jump data
   */
-  void defineJump();
+  void
+  defineJump();
 
   /*!
     @brief Check if a domain is coarser than the other
@@ -365,7 +372,8 @@ protected:
     @param[in] a_domainTwo The second domain
     @return Returns true of a_domainOne has fewer grid points than a_domainTwo
   */
-  bool isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
+  bool
+  isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
 
   /*!
     @brief Check if a domain is finer than the other
@@ -373,7 +381,8 @@ protected:
     @param[in] a_domainTwo The second domain
     @return Returns true of a_domainOne has more grid points than a_domainTwo
   */
-  bool isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
+  bool
+  isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
 
   /*!
     @brief Construct coarsening of a grid level. 
@@ -384,7 +393,11 @@ protected:
     @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we use aggregation with
     the blocking factor. Otherwise we try to coarsen directly. 
   */
-  bool getCoarserLayout(MFLevelGrid& a_coarseGrid, const MFLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
+  bool
+  getCoarserLayout(MFLevelGrid&       a_coarseGrid,
+                   const MFLevelGrid& a_fineGrid,
+                   const int          a_refRat,
+                   const int          a_blockingFactor) const;
 
   /*!
     @brief Coarsen coefficients (conservatively)
@@ -398,15 +411,16 @@ protected:
     @param[in]  a_eblgFine       Fine grids
     @param[in]  a_refRat         Coarsening factor
   */
-  void coarsenCoefficients(LevelData<MFCellFAB>&         a_coarAcoef,
-			   LevelData<MFFluxFAB>&         a_coarBcoef,
-			   LevelData<MFBaseIVFAB>&       a_coarBcoefIrreg,
-			   const LevelData<MFCellFAB>&   a_fineAcoef,
-			   const LevelData<MFFluxFAB>&   a_fineBcoef,
-			   const LevelData<MFBaseIVFAB>& a_fineBcoefIrreg,
-			   const MFLevelGrid&            a_eblgCoar,
-			   const MFLevelGrid&            a_eblgFine,
-			   const int                     a_refRat);
+  void
+  coarsenCoefficients(LevelData<MFCellFAB>&         a_coarAcoef,
+                      LevelData<MFFluxFAB>&         a_coarBcoef,
+                      LevelData<MFBaseIVFAB>&       a_coarBcoefIrreg,
+                      const LevelData<MFCellFAB>&   a_fineAcoef,
+                      const LevelData<MFFluxFAB>&   a_fineBcoef,
+                      const LevelData<MFBaseIVFAB>& a_fineBcoefIrreg,
+                      const MFLevelGrid&            a_eblgCoar,
+                      const MFLevelGrid&            a_eblgFine,
+                      const int                     a_refRat);
 
   /*!
     @brief Find level corresponding to amr level
@@ -414,7 +428,8 @@ protected:
     @return Depth in m_amrLevelGrids corresponding to a_domain. 
     @note Run-time error if no level was found. 
   */
-  int findAmrLevel(const ProblemDomain& a_domain) const;
+  int
+  findAmrLevel(const ProblemDomain& a_domain) const;
 };
 
 #include <CD_NamespaceFooter.H>

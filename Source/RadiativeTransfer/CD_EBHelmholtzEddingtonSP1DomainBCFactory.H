@@ -21,9 +21,9 @@
 /*!
   @brief Base class for passing EddingtonSP1 domain boundary conditions into EBHelmholtzOp
 */
-class EBHelmholtzEddingtonSP1DomainBCFactory : public EBHelmholtzDomainBCFactory{
+class EBHelmholtzEddingtonSP1DomainBCFactory : public EBHelmholtzDomainBCFactory
+{
 public:
-
   /*!
     @brief Weak construction is bad. Use the full constructor. 
   */
@@ -36,7 +36,10 @@ public:
     @param[in] a_r1           "First reflection coefficient"
     @param[in] a_r2           "Second reflection coefficient"
   */
-  EBHelmholtzEddingtonSP1DomainBCFactory(const EddingtonSP1DomainBc& a_eddingtonBCs, const RefCountedPtr<RtSpecies>& a_species, const Real a_r1, const Real a_r2);
+  EBHelmholtzEddingtonSP1DomainBCFactory(const EddingtonSP1DomainBc&     a_eddingtonBCs,
+                                         const RefCountedPtr<RtSpecies>& a_species,
+                                         const Real                      a_r1,
+                                         const Real                      a_r2);
 
   /*!
     @brief Disallowed copy constructor
@@ -51,12 +54,14 @@ public:
   /*!
     @brief Disallowed copy assignment
   */
-  EBHelmholtzEddingtonSP1DomainBCFactory& operator=(EBHelmholtzEddingtonSP1DomainBCFactory& a_other) = delete;
+  EBHelmholtzEddingtonSP1DomainBCFactory&
+  operator=(EBHelmholtzEddingtonSP1DomainBCFactory& a_other) = delete;
 
   /*!
     @brief Disallowed move assignment
   */
-  EBHelmholtzEddingtonSP1DomainBCFactory& operator=(EBHelmholtzEddingtonSP1DomainBCFactory&& a_other) = delete;
+  EBHelmholtzEddingtonSP1DomainBCFactory&
+  operator=(EBHelmholtzEddingtonSP1DomainBCFactory&& a_other) = delete;
 
   /*!
     @brief Destructor
@@ -71,15 +76,16 @@ public:
   /*!
     @brief Disallowed - don't see why you would need it.
   */
-  EBHelmholtzEddingtonSP1DomainBCFactory& operator=(const EBHelmholtzEddingtonSP1DomainBCFactory& a_other) = delete;
+  EBHelmholtzEddingtonSP1DomainBCFactory&
+  operator=(const EBHelmholtzEddingtonSP1DomainBCFactory& a_other) = delete;
 
   /*!
     @brief Factory method
   */
-  RefCountedPtr<EBHelmholtzDomainBC> create() const override final;
+  RefCountedPtr<EBHelmholtzDomainBC>
+  create() const override final;
 
 protected:
-
   /*!
     @brief Domain boundary conditions
   */

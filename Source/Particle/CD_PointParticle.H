@@ -23,13 +23,13 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief A particle class that only has a position and a mass.
 */
-class PointParticle : public BinItem {
+class PointParticle : public BinItem
+{
 public:
-
   /*!
     @brief Default constructor. Sets mass and position to zero.
   */
@@ -52,44 +52,50 @@ public:
     @param[in] a_position Position (in physical space)
     @param[in] a_mass     Particle mass
   */
-  void define(const RealVect a_position, const Real a_mass);
+  void
+  define(const RealVect a_position, const Real a_mass);
 
   /*!
     @brief Set particle mass
     @param[in] a_mass Particle mass
   */
-  void setMass(const Real a_mass);
+  void
+  setMass(const Real a_mass);
 
   /*!
     @brief Get mass
   */
-  Real& mass();
+  Real&
+  mass();
 
   /*! 
     @brief Const retrieve mass
   */
-  const Real& mass() const;
+  const Real&
+  mass() const;
 
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
   */
-  virtual int size() const;
+  virtual int
+  size() const;
 
   /*!
     @brief Write a linear binary representation of the internal data. Assumes that
     sufficient memory for the buffer has already been allocated by the caller
     @param[out] buf Particle 
   */
-  virtual void linearOut(void* buf) const;
+  virtual void
+  linearOut(void* buf) const;
 
   /*!
     @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
     @param[in] buf Other particle.
   */
-  virtual void linearIn(void* buf);
+  virtual void
+  linearIn(void* buf);
 
 protected:
-
   /*!
     @brief Computational particle mass
   */

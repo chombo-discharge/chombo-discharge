@@ -32,8 +32,7 @@
 
 #endif /* simd */
 
-
-// Force inline. 
+// Force inline.
 #if defined(__GNUC__)
 #define ALWAYS_INLINE __attribute__((always_inline)) __inline__
 #else

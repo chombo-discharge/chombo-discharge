@@ -29,13 +29,14 @@
   will construct this object, after which he can associate a polymorphic function with a domain side and a boundary condition type. Currently,
   only Dirichlet and Neumann are supported. 
 */
-class ElectrostaticDomainBc {
+class ElectrostaticDomainBc
+{
 public:
-
   /*!
     @brief Supported boundary condition types.
   */
-  enum class BcType {
+  enum class BcType
+  {
     Dirichlet,
     Neumann
   };
@@ -45,18 +46,18 @@ public:
     @param[in] a_position Physical coordinates
     @param[in] a_time     Time
   */
-  using BcFunction = std::function<Real(const RealVect a_position, const Real a_time) >;
+  using BcFunction = std::function<Real(const RealVect a_position, const Real a_time)>;
 
   /*!
     @brief Alias for mapping a direction and side.
   */
   using DomainSide = std::pair<int, Side::LoHiSide>;
-  
+
   /*!
     @brief Alias for mapping a bctype and function. 
   */
   using Bc = std::pair<BcType, BcFunction>;
-  
+
   /*!
     @brief Initializing constructor. This populates the BC functions with homogeneous Neumann boundary conditions. 
   */
@@ -78,13 +79,15 @@ public:
     @brief Copy assignment
     @param[in] a_other Other
   */
-  ElectrostaticDomainBc& operator=(const ElectrostaticDomainBc& a_other) = default;
+  ElectrostaticDomainBc&
+  operator=(const ElectrostaticDomainBc& a_other) = default;
 
   /*!
     @brief Disallowed move assignment
     @param[in] a_other Other
   */
-  ElectrostaticDomainBc& operator=(const ElectrostaticDomainBc&& a_other) = delete;
+  ElectrostaticDomainBc&
+  operator=(const ElectrostaticDomainBc&& a_other) = delete;
 
   /*!
     @brief Destructor. This 
@@ -96,18 +99,19 @@ public:
     @param[in] a_domainSide Domain side
     @param[in] a_bc         BC type and function
     @note If the boundary condition had been set previously, this code will overwrite the previous setting.
-  */  
-  void setBc(const DomainSide a_wall, const Bc a_bc);
+  */
+  void
+  setBc(const DomainSide a_wall, const Bc a_bc);
 
   /*!
     @brief Returns the boundary condition for a domain side
     @param[in] a_domainSide Domain side
     @note If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. 
   */
-  Bc getBc(const DomainSide a_domainSide) const;
+  Bc
+  getBc(const DomainSide a_domainSide) const;
 
 protected:
-
   /*!
     @brief This holds the map to the boundary condition type and side. The first entry in the map is the direction and side of the boundary condition.
     The other entry in the map is the BC type, and the associated function which returns the value in space and time of the BC. 

@@ -20,9 +20,9 @@
 /*!
   @brief Static class which contains various load balancing routines. 
 */
-class LoadBalancing {
+class LoadBalancing
+{
 public:
-  
   /*!
     @brief Load balancing, assigning ranks to boxes. 
     @param[out] a_ranks Vector containing processor IDs corresponding to boxes (and loads)
@@ -30,7 +30,8 @@ public:
     @param[in]  a_boxes Grid boxes
   */
   template <class T>
-  static void makeBalance(Vector<int>& a_ranks, const Vector<T>& a_loads, const Vector<Box>& a_boxes);
+  static void
+  makeBalance(Vector<int>& a_ranks, const Vector<T>& a_loads, const Vector<Box>& a_boxes);
 
   /*!
     @brief Load balancing function which load balances level by level. 
@@ -39,9 +40,10 @@ public:
     @param[in]  a_boxes Grid boxes
   */
   template <class T>
-  static void balanceLevelByLevel(Vector<Vector<int> >&       a_procs,
-				  const Vector<Vector<T> >&   a_loads,
-				  const Vector<Vector<Box> >& a_boxes);
+  static void
+  balanceLevelByLevel(Vector<Vector<int>>&       a_procs,
+                      const Vector<Vector<T>>&   a_loads,
+                      const Vector<Vector<Box>>& a_boxes);
 
   /*!
     @brief Load balancing function which load balances all boxes at once, not caring about actual levels. 
@@ -50,9 +52,8 @@ public:
     @param[in]  a_boxes Grid boxes
   */
   template <class T>
-  static void balanceHierarchy(Vector<Vector<int> >&       a_procs,
-			       const Vector<Vector<T> >&   a_loads,
-			       const Vector<Vector<Box> >& a_boxes);
+  static void
+  balanceHierarchy(Vector<Vector<int>>& a_procs, const Vector<Vector<T>>& a_loads, const Vector<Vector<Box>>& a_boxes);
 
   /*!
     @brief Sorts boxes and loads over a hierarchy according to some sorting criterion.
@@ -62,8 +63,9 @@ public:
     @return Returns a_boxes and a_loads, sorting according to the argument a_whichSorting.
   */
   template <typename T>
-  static void sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_loads, const BoxSorting a_whichSorting);
-  
+  static void
+  sort(Vector<Vector<Box>>& a_boxes, Vector<Vector<T>>& a_loads, const BoxSorting a_whichSorting);
+
   /*!
     @brief Sorting function for sorting boxes and loads
     @param[inout] a_boxes Grid boxes
@@ -72,55 +74,63 @@ public:
     @return Returns a_boxes and a_loads, sorting according to the argument a_whichSorting.
   */
   template <typename T>
-  static void sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a_which);
+  static void
+  sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a_which);
 
   /*!
     @brief Load balancing of grid boxes using the box volume as computational load
     @param[out] a_ranks Processor IDs
     @param[in]  a_boxes Grid boxes
   */
-  static void makeBalance(Vector<int>& a_ranks, const Vector<Box>& a_boxes);
+  static void
+  makeBalance(Vector<int>& a_ranks, const Vector<Box>& a_boxes);
 
   /*!
     @brief Round robin distribution of boxes
     @param[out] a_ranks Processor IDs
     @param[in]  a_boxes Grid boxes
   */
-  static void roundRobin(Vector<int>& a_ranks, const Vector<Box>& a_boxes);
+  static void
+  roundRobin(Vector<int>& a_ranks, const Vector<Box>& a_boxes);
 
   /*!
     @brief Sorts boxes (according to sorting argument)
     @param[inout] a_boxes Grid boxes
   */
-  static void sort(Vector<Box>& a_boxes, const BoxSorting a_which);
+  static void
+  sort(Vector<Box>& a_boxes, const BoxSorting a_which);
 
   /*!
     @brief Gather boxes
     @param[inout] a_boxes Local boxes
     @return On output, a_boxes contains the global boxes. 
   */
-  static void gatherBoxes(Vector<Box>& a_boxes);
+  static void
+  gatherBoxes(Vector<Box>& a_boxes);
 
   /*!
     @brief Gather computational loads
     @param[inout] a_loads Computational loads
     @return On output, a_loads contains the loads from all ranks. 
   */
-  static void gatherLoads(Vector<Real>& a_loads);
+  static void
+  gatherLoads(Vector<Real>& a_loads);
 
   /*!
     @brief Gather compute loads
     @param[inout] a_loads Computational loads
     @return On output, a_loads contains the loads from all ranks. 
   */
-  static void gatherLoads(Vector<int>& a_loads);
+  static void
+  gatherLoads(Vector<int>& a_loads);
 
   /*!
     @brief Gather compute loads
     @param[inout] a_loads Computational loads
     @return On output, a_loads contains the loads from all ranks. 
   */
-  static void gatherLoads(Vector<long>& a_loads);  
+  static void
+  gatherLoads(Vector<long>& a_loads);
 
   /*!
     @brief Gather boxes and loads
@@ -128,17 +138,18 @@ public:
     @param[inout] a_loads Computational loads
     @return On output, a_boxes and a_loads have been globally gathered from all ranks. 
   */
-  static void gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads);
+  static void
+  gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads);
 
 protected:
-
   /*!
     @brief Utility function which packs boxes and loads into a vector of pairs
     @param[in] a_boxes Grid boxes
     @param[in] a_loads Computational loads
   */
   template <class T>
-  static std::vector<std::pair<Box, T> > packPairs(const Vector<Box>& a_boxes, const Vector<T>& a_loads);
+  static std::vector<std::pair<Box, T>>
+  packPairs(const Vector<Box>& a_boxes, const Vector<T>& a_loads);
 
   /*!
     @brief Splits vector pair into separate boxes and loads. 
@@ -147,7 +158,8 @@ protected:
     @param[out] a_pairs Boxes and loads, stored as a pair. 
   */
   template <class T>
-  static void unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T> >& a_pairs);
+  static void
+  unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T>>& a_pairs);
 
   /*!
     @brief Standard box sorting, calls C++ std::sort
@@ -156,7 +168,8 @@ protected:
     @details This uses lexicographical indexing of boxes. On output, the boxes/loads are sorted with this ordering. 
   */
   template <class T>
-  static void standardSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
+  static void
+  standardSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
 
   /*!
     @brief Randomly shuffles boxes and loads.
@@ -165,7 +178,8 @@ protected:
     @details This shuffles the boxes and loads so that the box distribution is random. 
   */
   template <class T>
-  static void shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
+  static void
+  shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
 
   /*!
     @brief Sort boxes using Morton code.
@@ -174,7 +188,8 @@ protected:
     @details On output, a_boxes and a_loads are Morton sorted. 
   */
   template <class T>
-  static void mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
+  static void
+  mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
 
   /*!
     @brief Morton comparator
@@ -184,14 +199,16 @@ protected:
     @return Returns true if a_lhs.first has a lower Morton index than a_rhs.first. 
   */
   template <class T>
-  static bool mortonComparator(const int a_maxBits, const std::pair<Box,T>& a_lhs, const std::pair<Box, T>& a_rhs);
+  static bool
+  mortonComparator(const int a_maxBits, const std::pair<Box, T>& a_lhs, const std::pair<Box, T>& a_rhs);
 
   /*!
     @brief Utility function for Morton sorting which needs the maximum bits
     @param[in] a_first Iterator 
     @param[in] a_second Iterator 
   */
-  static int maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last);
+  static int
+  maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last);
 };
 
 #include <CD_NamespaceFooter.H>

@@ -32,9 +32,9 @@
   set the electrodes and dielectrics. This is not a pure function, so you can set those objects directly from a ComputationalGeometry object. However, in almost all cases
   one will want to derive from ComputationalGeometry and create a parametrized geometry (that is what $DISCHARGE_HOME/Geometries is for!).
 */
-class ComputationalGeometry {
+class ComputationalGeometry
+{
 public:
-
   /*!
     @brief Constructor. Sets a blank geometry. 
   */
@@ -44,74 +44,86 @@ public:
     @brief Destructor
   */
   virtual ~ComputationalGeometry();
-  
+
   /*!
     @brief Get dielectrics
     @return Dielectrics (m_dielectrics)
   */
-  const Vector<Dielectric>& getDielectrics() const;
+  const Vector<Dielectric>&
+  getDielectrics() const;
 
   /*!
     @brief Get electrodes
     @return Electrodes (m_dielectrics)
   */
-  const Vector<Electrode>& getElectrodes() const;
+  const Vector<Electrode>&
+  getElectrodes() const;
 
   /*!
     @brief Get the background gas permittivity
     @return Background gas permittivity
   */
-  Real getGasPermittivity() const;
+  Real
+  getGasPermittivity() const;
 
   /*!
     @brief Calls for ComputationalGeometry to use ScanShop rather than Chombo's default geometry generation tool.
     @param[in] a_startDomain Coarse domain where ScanShop begins the load balancing recursion process.
   */
-  void useScanShop(const ProblemDomain a_startDomain);
+  void
+  useScanShop(const ProblemDomain a_startDomain);
 
   /*!
     @brief Calls for ComputationalGeometry to use Chombo's geometry generation tool
   */
-  void useChomboShop();
-  
+  void
+  useChomboShop();
+
   /*!
     @brief Set dielectrics
     @param[in] a_dielectrics Dielectris
   */
-  void setDielectrics(const Vector<Dielectric>& a_dielectrics);
+  void
+  setDielectrics(const Vector<Dielectric>& a_dielectrics);
 
   /*!
     @brief Set electrodes
     @param[in] a_electrodes Electrodes
   */
-  void setElectrodes(const Vector<Electrode>& a_electrodes);
+  void
+  setElectrodes(const Vector<Electrode>& a_electrodes);
 
   /*!
     @brief Set the background permittivity
     @param[in] a_eps0 Gas permittivity
   */
-  void setGasPermittivity(const Real a_eps0);
+  void
+  setGasPermittivity(const Real a_eps0);
 
   /*!
     @brief Get the multifluid index space
   */
-  const RefCountedPtr<MultiFluidIndexSpace>& getMfIndexSpace() const;
+  const RefCountedPtr<MultiFluidIndexSpace>&
+  getMfIndexSpace() const;
 
   /*!
     @brief Get the implicit function used to generate the gas-phase EBIS
   */
-  const RefCountedPtr<BaseIF>& getGasImplicitFunction() const;
+  const RefCountedPtr<BaseIF>&
+  getGasImplicitFunction() const;
 
   /*!
     @brief Get the implicit function used to generate the solid-phase EBIS
   */
-  const RefCountedPtr<BaseIF>& getSolidImplicitFunction() const;
+  const RefCountedPtr<BaseIF>&
+  getSolidImplicitFunction() const;
 
   /*!
     @brief Get implicit function
     @param[in] a_phase Phase
   */
-  const RefCountedPtr<BaseIF>& getImplicitFunction(const phase::which_phase a_phase) const;
+  const RefCountedPtr<BaseIF>&
+  getImplicitFunction(const phase::which_phase a_phase) const;
 
   /*!
     @brief Build geometries and the MFIndexSpace.
@@ -124,16 +136,15 @@ public:
     @details This will build the gas and solid phase domain. The input is the finest-level stuff and you can control the division
     into boxes as well as the maximum number of coarsenings. The computed domain is (a_probLo, a_probLo + a_box*a_dx)
   */
-  virtual void buildGeometries(const ProblemDomain a_finestDomain,
-			       const RealVect      a_probLo,
-			       const Real          a_finestDx,
-			       const int           a_nCellMax,
-			       const int           a_maxGhostEB,
-			       const int           a_maxCoarsen = -1);
-  
-protected:
+  virtual void
+  buildGeometries(const ProblemDomain a_finestDomain,
+                  const RealVect      a_probLo,
+                  const Real          a_finestDx,
+                  const int           a_nCellMax,
+                  const int           a_maxGhostEB,
+                  const int           a_maxCoarsen = -1);
 
-  
+protected:
   /*!
     @brief Threshold for Vof computation
   */
@@ -191,10 +202,11 @@ protected:
     @param[in]    a_probLo        Lower-left corner of simulation domain.
     @param[in]    a_finestDx      Finest resolution which will be used.
   */
-  void buildGasGeometry(GeometryService*&   a_geoserver,
-			const ProblemDomain a_finestDomain,
-			const RealVect      a_probLo,
-			const Real          a_finestDx);
+  void
+  buildGasGeometry(GeometryService*&   a_geoserver,
+                   const ProblemDomain a_finestDomain,
+                   const RealVect      a_probLo,
+                   const Real          a_finestDx);
 
   /*!
     @brief Set up the geometry generation tool for the solid phase, i.e. the part inside the dielectrics. 
@@ -203,11 +215,11 @@ protected:
     @param[in]    a_probLo        Lower-left corner of simulation domain.
     @param[in]    a_finestDx      Finest resolution which will be used.
   */
-  void buildSolidGeometry(GeometryService*&   a_geoserver,
-			  const ProblemDomain a_finestDomain,
-			  const RealVect      a_probLo,
-			  const Real          a_finestDx);
-
+  void
+  buildSolidGeometry(GeometryService*&   a_geoserver,
+                     const ProblemDomain a_finestDomain,
+                     const RealVect      a_probLo,
+                     const Real          a_finestDx);
 };
 
 #include <CD_NamespaceFooter.H>

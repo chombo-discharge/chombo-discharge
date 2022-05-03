@@ -23,20 +23,21 @@
   to only iterate through subsets of CdrSolvers, e.g. only for charged species or neutral species, etc. 
 */
 template <class T>
-class CdrIterator {
+class CdrIterator
+{
 public:
-
   /*!
     @brief Enum class for iterating through subsets of species. 
   */
-  enum class SpeciesIteration{
+  enum class SpeciesIteration
+  {
     All,
     Charged,
     Negative,
     Positive,
     Neutral
   };
-  
+
   /*!
     @brief Disallowed weak construction. Always use the full constructor.
   */
@@ -57,45 +58,51 @@ public:
   /*!
     @brief Get number of solvers. 
   */
-  virtual int getNumberOfSolvers();
+  virtual int
+  getNumberOfSolvers();
 
   /*!
     @brief Get current solver number (i.e. index in CdrLayouts solvers). 
   */
-  virtual int index() const;
+  virtual int
+  index() const;
 
   /*!
     @brief Reset iterator
   */
-  virtual void reset();
+  virtual void
+  reset();
 
   /*!
     @brief Ok or not
   */
-  virtual bool ok() const;
-  
+  virtual bool
+  ok() const;
+
   /*!
     @brief Increment. This is different for different iteration modes
   */
-  virtual void operator++();
+  virtual void
+  operator++();
 
   /*!
     @brief Return the current solver. 
   */
-  virtual RefCountedPtr<T>& operator() ();
+  virtual RefCountedPtr<T>&
+  operator()();
 
   /*!
     @brief Return the current species. 
   */
-  virtual RefCountedPtr<CdrSpecies>& getSpecies();
-  
-protected:
+  virtual RefCountedPtr<CdrSpecies>&
+  getSpecies();
 
+protected:
   /*!
     @brief Which species to iterate over
   */
   SpeciesIteration m_mode;
-  
+
   /*!
     @brief 
   */
@@ -104,7 +111,8 @@ protected:
   /*!
     @brief Number of solvers
   */
-  int m_numSolvers;;
+  int m_numSolvers;
+  ;
 
   /*!
     @brief Defined or not
@@ -114,12 +122,12 @@ protected:
   /*!
     @brief Cdr solvers
   */
-  Vector<RefCountedPtr<T> > m_solvers;
+  Vector<RefCountedPtr<T>> m_solvers;
 
   /*!
     @brief Cdr species. 
   */
-  Vector<RefCountedPtr<CdrSpecies> > m_species;
+  Vector<RefCountedPtr<CdrSpecies>> m_species;
 };
 
 #include <CD_NamespaceFooter.H>

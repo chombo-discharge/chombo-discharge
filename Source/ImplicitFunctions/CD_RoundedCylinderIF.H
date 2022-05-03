@@ -21,9 +21,9 @@
 /*!
   @brief Cylinder object with rounded edges (no endcaps)
 */
-class RoundedCylinderIF : public BaseIF {
+class RoundedCylinderIF : public BaseIF
+{
 public:
-
   /*!
     @brief Constructor
     @param[in] a_center1     Cylinder endpoint
@@ -32,7 +32,11 @@ public:
     @param[in] a_curv        Radius of curvature
     @param[in] a_fluidInside Domain on inside or outside
   */
-  RoundedCylinderIF(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside);
+  RoundedCylinderIF(const RealVect a_center1,
+                    const RealVect a_center2,
+                    const Real     a_radius,
+                    const Real     a_curv,
+                    const bool     a_fluidInside);
 
   /*!
     @brief Copy constructor
@@ -44,15 +48,16 @@ public:
     @brief Get distance to object. 
     @param[in] a_point Physical position. 
   */
-  virtual Real value(const RealVect& a_point) const override; 
+  virtual Real
+  value(const RealVect& a_point) const override;
 
   /*!
     @brief IF factory method
   */
-  virtual BaseIF* newImplicitFunction() const override;
+  virtual BaseIF*
+  newImplicitFunction() const override;
 
 protected:
-
   /*!
     @brief Cylinder center
   */
@@ -91,15 +96,18 @@ protected:
   /*!
     @brief Make the implicit function
   */
-  void makeBaseIF();
+  void
+  makeBaseIF();
 
   /*!
     @brief Make BaseIF
   */
-#if CH_SPACEDIM==2
-  BaseIF* makeBaseIF2D();
-#elif CH_SPACEDIM==3
-  BaseIF* makeBaseIF3D();
+#if CH_SPACEDIM == 2
+  BaseIF*
+  makeBaseIF2D();
+#elif CH_SPACEDIM == 3
+  BaseIF*
+  makeBaseIF3D();
 #endif
 };
 

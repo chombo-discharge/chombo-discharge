@@ -19,29 +19,31 @@
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
-void MemoryReport::getMaxMinMemoryUsage(){
+void
+MemoryReport::getMaxMinMemoryUsage()
+{
   CH_TIME("MemoryReport::getMaxMinMemoryUsage");
-  
+
   Real maxPeak;
   Real minPeak;
   Real maxUnfreed;
-  Real minUnfreed;  
+  Real minUnfreed;
 
   MemoryReport::getMaxMinMemoryUsage(maxPeak, minPeak, maxUnfreed, minUnfreed);
 
-  pout() << "MemoryReport::getMaxMinMemoryUsage:" 
-	 << "\t Max peak = "    << 1.0*maxPeak
-	 << "\t Min peak = "    << 1.0*minPeak
-	 << "\t Max unfreed = " << 1.0*maxUnfreed
-	 << "\t Min unfreed = " << 1.0*minUnfreed << endl;
+  pout() << "MemoryReport::getMaxMinMemoryUsage:"
+         << "\t Max peak = " << 1.0 * maxPeak << "\t Min peak = " << 1.0 * minPeak
+         << "\t Max unfreed = " << 1.0 * maxUnfreed << "\t Min unfreed = " << 1.0 * minUnfreed << endl;
 }
 
-void MemoryReport::getMaxMinMemoryUsage(Real& a_maxPeak, Real& a_minPeak, Real& a_maxUnfreed, Real& a_minUnfreed){
+void
+MemoryReport::getMaxMinMemoryUsage(Real& a_maxPeak, Real& a_minPeak, Real& a_maxUnfreed, Real& a_minUnfreed)
+{
   CH_TIME("MemoryReport::getMaxMinMemoryUsage");
-  
-  constexpr int BytesPerMB = 1024*1024;
 
-  // Gets usage in bytes. 
+  constexpr int BytesPerMB = 1024 * 1024;
+
+  // Gets usage in bytes.
   long long curMemLL;
   long long peakMemLL;
   overallMemoryUsage(curMemLL, peakMemLL);
@@ -50,34 +52,36 @@ void MemoryReport::getMaxMinMemoryUsage(Real& a_maxPeak, Real& a_minPeak, Real& 
   const int peakMem    = int(peakMemLL);
 
   int maxPeakMem;
-  int minPeakMem;  
-  int maxUnfreedMem;  
+  int minPeakMem;
+  int maxUnfreedMem;
   int minUnfreedMem;
 
-  // Find maximum/minimum usage. 
+  // Find maximum/minimum usage.
 #ifdef CH_MPI
-  MPI_Allreduce(&peakMem,    &maxPeakMem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-  MPI_Allreduce(&peakMem,    &minPeakMem,    1, MPI_INT, MPI_MIN, Chombo_MPI::comm);  
+  MPI_Allreduce(&peakMem, &maxPeakMem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  MPI_Allreduce(&peakMem, &minPeakMem, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
   MPI_Allreduce(&unfreedMem, &maxUnfreedMem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
   MPI_Allreduce(&unfreedMem, &minUnfreedMem, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
 #else
   maxPeakMem    = peakMem;
-  minPeakMem    = peakMem;  
+  minPeakMem    = peakMem;
   maxUnfreedMem = unfreedMem;
   minUnfreedMem = unfreedMem;
 #endif
 
-  // Convert to real. 
-  a_maxPeak    = 1.0*maxPeakMem   /BytesPerMB;
-  a_minPeak    = 1.0*minPeakMem   /BytesPerMB;
-  a_maxUnfreed = 1.0*maxUnfreedMem/BytesPerMB;
-  a_minUnfreed = 1.0*minUnfreedMem/BytesPerMB;
+  // Convert to real.
+  a_maxPeak    = 1.0 * maxPeakMem / BytesPerMB;
+  a_minPeak    = 1.0 * minPeakMem / BytesPerMB;
+  a_maxUnfreed = 1.0 * maxUnfreedMem / BytesPerMB;
+  a_minUnfreed = 1.0 * minUnfreedMem / BytesPerMB;
 }
 
-void MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed){
+void
+MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed)
+{
   CH_TIME("MemoryReport::getMemoryUsage");
-  
-  constexpr int BytesPerMB = 1024*1024;
+
+  constexpr int BytesPerMB = 1024 * 1024;
 
   long long curMemLL;
   long long peakMemLL;
@@ -87,28 +91,28 @@ void MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed)
   const int peakMem    = int(peakMemLL);
 
 #ifdef CH_MPI
-  int* unfreed = (int*) malloc(numProc()*sizeof(int));//new int[numProc()];
-  int* peak    = (int*) malloc(numProc()*sizeof(int));//new int[numProc()];
+  int* unfreed = (int*)malloc(numProc() * sizeof(int)); //new int[numProc()];
+  int* peak    = (int*)malloc(numProc() * sizeof(int)); //new int[numProc()];
 
-  MPI_Allgather(&peakMem,    1, MPI_INT, peak,    1, MPI_INT, Chombo_MPI::comm);
+  MPI_Allgather(&peakMem, 1, MPI_INT, peak, 1, MPI_INT, Chombo_MPI::comm);
   MPI_Allgather(&unfreedMem, 1, MPI_INT, unfreed, 1, MPI_INT, Chombo_MPI::comm);
 
-  a_peak.   resize(numProc());
+  a_peak.resize(numProc());
   a_unfreed.resize(numProc());
-  
-  for (int i = 0; i < numProc(); i++){
-    a_peak[i]    = 1.0*peak   [i]/BytesPerMB;
-    a_unfreed[i] = 1.0*unfreed[i]/BytesPerMB;
+
+  for (int i = 0; i < numProc(); i++) {
+    a_peak[i]    = 1.0 * peak[i] / BytesPerMB;
+    a_unfreed[i] = 1.0 * unfreed[i] / BytesPerMB;
   }
 
   delete unfreed;
   delete peak;
 #else
-  a_peak.   resize(1);
+  a_peak.resize(1);
   a_unfreed.resize(1);
 
-  a_peak   [0] = peakMem   /BytesPerMB;
-  a_unfreed[0] = unfreedMem/BytesPerMB;
+  a_peak[0]    = peakMem / BytesPerMB;
+  a_unfreed[0] = unfreedMem / BytesPerMB;
 #endif
 }
 

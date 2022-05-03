@@ -21,13 +21,13 @@
 /*!
   @brief Implicit function class describing a slab (box) with surface noise on the top. 
 */
-class PerlinSlabSdf: public BaseIF {
+class PerlinSlabSdf : public BaseIF
+{
 public:
-
   /*!
     @brief No weak constructor allowed, use the full constructor
   */
-  PerlinSlabSdf() = delete;  
+  PerlinSlabSdf() = delete;
 
   /*!
     @brief Constructor
@@ -45,15 +45,15 @@ public:
     @param[in] a_fluidInside Fluid on inside or not
   */
   PerlinSlabSdf(const RealVect a_ccPoint,
-		const RealVect a_normal,
-		const RealVect a_xyz,
-		const RealVect a_noiseFreq,
-		const int      a_octaves,
-		const Real     a_noiseAmp,
-		const Real     a_persistence,
-		const Real     a_cornerCurv,
-		const bool     a_reseed,
-		const bool     a_fluidInside);
+                const RealVect a_normal,
+                const RealVect a_xyz,
+                const RealVect a_noiseFreq,
+                const int      a_octaves,
+                const Real     a_noiseAmp,
+                const Real     a_persistence,
+                const Real     a_cornerCurv,
+                const bool     a_reseed,
+                const bool     a_fluidInside);
 
   /*!
     @brief Copy constructor. Copies over implicit function.
@@ -69,15 +69,16 @@ public:
     @brief Value function. Returns distance to object. 
     @param[in] a_pos Position. 
   */
-  virtual Real value(const RealVect& a_pos) const override;
+  virtual Real
+  value(const RealVect& a_pos) const override;
 
   /*!
     @brief Factory function
   */
-  virtual BaseIF* newImplicitFunction() const override;
+  virtual BaseIF*
+  newImplicitFunction() const override;
 
 protected:
-  
   /*!
     @brief Implicit function. This is a union between cutting planes and a perlin plane
   */

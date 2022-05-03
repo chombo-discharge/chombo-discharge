@@ -21,9 +21,9 @@
 /*!
   @brief Declaration of a cylinder IF class
 */
-class CylinderSdf : public BaseIF {
+class CylinderSdf : public BaseIF
+{
 public:
-
   /*!
     @brief Constructor
     @param[in] a_center1 Cylinder center
@@ -43,15 +43,16 @@ public:
     @brief Test whether inside or not
     @param[in] a_point Physical position. 
   */
-  virtual Real value(const RealVect& a_point) const; 
+  virtual Real
+  value(const RealVect& a_point) const;
 
   /*!
     @brief IF factory method
   */
-  virtual BaseIF* newImplicitFunction() const;
+  virtual BaseIF*
+  newImplicitFunction() const;
 
 protected:
-
   /*!
     @brief One end poitn
   */

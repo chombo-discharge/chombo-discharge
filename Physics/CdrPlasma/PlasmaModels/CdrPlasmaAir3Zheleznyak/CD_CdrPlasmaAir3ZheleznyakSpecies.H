@@ -22,60 +22,76 @@
 namespace Physics {
   namespace CdrPlasma {
 
-    class CdrPlasmaAir3Zheleznyak::Electron : public CdrSpecies {
+    class CdrPlasmaAir3Zheleznyak::Electron : public CdrSpecies
+    {
     public:
       Electron();
       ~Electron() {}
-      Real initialData(const RealVect a_pos, const Real a_time) const;
+      Real
+      initialData(const RealVect a_pos, const Real a_time) const;
 
     protected:
-      Real m_uniform_density;
-      Real m_seed_density;
-      Real m_seed_rad;
+      Real     m_uniform_density;
+      Real     m_seed_density;
+      Real     m_seed_rad;
       RealVect m_seed_pos;
     };
 
-    class CdrPlasmaAir3Zheleznyak::MPlus : public CdrSpecies {
+    class CdrPlasmaAir3Zheleznyak::MPlus : public CdrSpecies
+    {
     public:
       MPlus();
-      ~MPlus(){}
-      Real initialData(const RealVect a_pos, const Real a_time) const;
+      ~MPlus() {}
+      Real
+      initialData(const RealVect a_pos, const Real a_time) const;
+
     protected:
-      Real m_uniform_density;
-      Real m_seed_density;
-      Real m_seed_rad;
+      Real     m_uniform_density;
+      Real     m_seed_density;
+      Real     m_seed_rad;
       RealVect m_seed_pos;
     };
 
-    class CdrPlasmaAir3Zheleznyak::MMinus : public CdrSpecies {
+    class CdrPlasmaAir3Zheleznyak::MMinus : public CdrSpecies
+    {
     public:
       MMinus();
-      ~MMinus(){}
-      Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
+      ~MMinus() {}
+      Real
+      initialData(const RealVect a_pos, const Real a_time) const
+      {
+        return 0.0;
+      }
     };
 
-    class CdrPlasmaAir3Zheleznyak::uv_Photon : public RtSpecies {
+    class CdrPlasmaAir3Zheleznyak::uv_Photon : public RtSpecies
+    {
     public:
       uv_Photon();
       ~uv_Photon();
-      Real getAbsorptionCoefficient(const RealVect a_pos) const;
-      Real getRandomKappa() const;
-      Real get_pO2() const { return m_pO2;}
-  
+      Real
+      getAbsorptionCoefficient(const RealVect a_pos) const;
+      Real
+      getRandomKappa() const;
+      Real
+      get_pO2() const
+      {
+        return m_pO2;
+      }
+
     protected:
-  
       Real m_pO2;
       Real m_f1;
       Real m_f2;
       Real m_K1;
       Real m_K2;
 
-      Real m_seed;
-      std::mt19937_64* m_rng; 
+      Real                                  m_seed;
+      std::mt19937_64*                      m_rng;
       std::uniform_real_distribution<Real>* m_udist01;
     };
-  }
-}
+  } // namespace CdrPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

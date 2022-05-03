@@ -25,9 +25,9 @@
   @note MFHelmholtzRobinEBBC ignores the a_order and a_weight argument passed into MFHelmholtzEBBC. It computes the interpolation of phi onto the boundary
   using a first order accurate stencil (with range 1). 
 */
-class MFHelmholtzRobinEBBC : public MFHelmholtzEBBC {
+class MFHelmholtzRobinEBBC : public MFHelmholtzEBBC
+{
 public:
-
   /*!
     @brief Full constructor. Must subsequently set the order and weight for stencils. 
   */
@@ -42,13 +42,15 @@ public:
     @brief Set BC order
     @param[in] a_order Order
   */
-  void setOrder(const int a_order);
+  void
+  setOrder(const int a_order);
 
   /*!
     @brief Set equation weights for least squares reconstruction. 
     @param[in] a_weight Weights
   */
-  void setWeight(const int a_weight);      
+  void
+  setWeight(const int a_weight);
 
   /*!
     @brief Set constant coefficients
@@ -56,7 +58,8 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  void setCoefficients(const Real a_A, const Real a_B, const Real a_C);
+  void
+  setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Set variable coefficients
@@ -64,13 +67,12 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  void setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
-		       const std::function<Real(const RealVect& a_pos) >& a_B,
-		       const std::function<Real(const RealVect& a_pos) >& a_C);
-
+  void
+  setCoefficients(const std::function<Real(const RealVect& a_pos)>& a_A,
+                  const std::function<Real(const RealVect& a_pos)>& a_B,
+                  const std::function<Real(const RealVect& a_pos)>& a_C);
 
 protected:
-
   /*
     @brief Use constant for BC
   */
@@ -79,7 +81,7 @@ protected:
   /*!
     @brief Use function for BC value
   */
-  bool m_useFunction;  
+  bool m_useFunction;
 
   /*!
     @brief Stencil order
@@ -124,7 +126,8 @@ protected:
   /*!
     @brief User define function. 
   */
-  virtual void defineSinglePhase() override;
+  virtual void
+  defineSinglePhase() override;
 
   /*!
     @brief Apply flux single phase
@@ -135,12 +138,13 @@ protected:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  virtual void applyEBFluxSinglePhase(VoFIterator&       a_singlePhaseVofs,
-				      EBCellFAB&         a_Lphi,
-				      const EBCellFAB&   a_phi,
-				      const DataIndex&   a_dit,
-				      const Real&        a_beta,
-				      const bool&        a_homogeneousPhysBC) const override;
+  virtual void
+  applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
+                         EBCellFAB&       a_Lphi,
+                         const EBCellFAB& a_phi,
+                         const DataIndex& a_dit,
+                         const Real&      a_beta,
+                         const bool&      a_homogeneousPhysBC) const override;
 
   /*!
     @brief Get a least-squares based interpolation stencil 
@@ -150,7 +154,11 @@ protected:
     @param[in] a_order        Stencil order
     @note This extrapolates from cell-centers to the EB using a first order expression. 
   */
-  VoFStencil getInterpolationStencil(const VolIndex& a_vof, const DataIndex& a_dit, const VofUtils::Neighborhood a_neighborhood, const int a_order) const;
+  VoFStencil
+  getInterpolationStencil(const VolIndex&              a_vof,
+                          const DataIndex&             a_dit,
+                          const VofUtils::Neighborhood a_neighborhood,
+                          const int                    a_order) const;
 };
 
 #include <CD_NamespaceFooter.H>

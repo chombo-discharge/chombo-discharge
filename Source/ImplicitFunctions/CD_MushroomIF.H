@@ -23,9 +23,9 @@
   @brief "Mushroom" implicit function. Consists of a cylinder with a circular plate on top. 
   @details Oriented along +z in 3D and +y in 2D. 
 */
-class MushroomIF : public BaseIF {
-public:  
-
+class MushroomIF : public BaseIF
+{
+public:
   /*!
     @brief Full constructor
     @param[in] a_center      Center point of the circular platew
@@ -37,12 +37,12 @@ public:
     @param[in] a_fluidInside Fluid on inside or not
   */
   MushroomIF(const RealVect a_center,
-	     const Real     a_R,
-	     const Real     a_r,
-	     const Real     a_L,
-	     const Real     a_d,
-	     const Real     a_curv,
-	     const bool     a_fluidInside);
+             const Real     a_R,
+             const Real     a_r,
+             const Real     a_L,
+             const Real     a_d,
+             const Real     a_curv,
+             const bool     a_fluidInside);
 
   /*!
     @brief Copy constructor
@@ -59,16 +59,17 @@ public:
     @brief Value function
     @param[in] a_pos Position
   */
-  virtual Real value(const RealVect& a_pos) const override;
+  virtual Real
+  value(const RealVect& a_pos) const override;
 
   /*!
     @brief Factory function.
     @return Returns new MushroomIF object, casted to BaseIF*
-  */  
-  virtual BaseIF* newImplicitFunction() const override;
-  
-protected:
+  */
+  virtual BaseIF*
+  newImplicitFunction() const override;
 
+protected:
   /*!
     @brief Implicit function -- this is a smooth union between the foot and the circular plate
   */

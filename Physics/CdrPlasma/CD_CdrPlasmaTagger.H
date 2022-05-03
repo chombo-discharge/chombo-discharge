@@ -19,7 +19,7 @@
 
 namespace Physics {
   namespace CdrPlasma {
-  
+
     /*!
       @brief Abstract Class which implements CellTagger for the CDR plasma physics module. 
       @details This class exposes a number of mesh data holders which can be used for flagging cells for refinement. It is only
@@ -31,9 +31,9 @@ namespace Physics {
       the routine CdrPlasmaTagger::computeTracerFields. These fields can then be used in the other routines CdrPlasmaTagger::refineCell
       and CdrPlasmaTagger::coarsenCell
     */
-    class CdrPlasmaTagger : public CellTagger{
+    class CdrPlasmaTagger : public CellTagger
+    {
     public:
-
       /*!
 	@brief Weak constructor. Must subsequently call define
       */
@@ -47,9 +47,9 @@ namespace Physics {
 	@param[in] a_computationalGeometry Computational geometry
       */
       CdrPlasmaTagger(const RefCountedPtr<CdrPlasmaPhysics>&      a_physics,
-		      const RefCountedPtr<CdrPlasmaStepper>&      a_timeStepper,
-		      const RefCountedPtr<AmrMesh>&               a_amr,
-		      const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
+                      const RefCountedPtr<CdrPlasmaStepper>&      a_timeStepper,
+                      const RefCountedPtr<AmrMesh>&               a_amr,
+                      const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
       /*!
 	@brief Destructor
@@ -63,32 +63,36 @@ namespace Physics {
 	@param[in] a_amr                   Reference to AmrMesh. 
 	@param[in] a_computationalGeometry Computational geometry
       */
-      void define(const RefCountedPtr<CdrPlasmaPhysics>&      a_physics,
-		  const RefCountedPtr<CdrPlasmaStepper>&      a_timeStepper,
-		  const RefCountedPtr<AmrMesh>&               a_amr,
-		  const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
-
+      void
+      define(const RefCountedPtr<CdrPlasmaPhysics>&      a_physics,
+             const RefCountedPtr<CdrPlasmaStepper>&      a_timeStepper,
+             const RefCountedPtr<AmrMesh>&               a_amr,
+             const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
       /*!
 	@brief Compute tracer fields.
 	@details This should fill m_tracers -- user must implement it. 
       */
-      virtual void computeTracers() const = 0;
+      virtual void
+      computeTracers() const = 0;
 
       /*!
 	@brief Parse class options -- must be implemented by user. 
       */
-      virtual void parseOptions() = 0;
+      virtual void
+      parseOptions() = 0;
 
       /*!
 	@brief Get number of plot variables. This is fetched by Driver and can be used. 
       */
-      virtual int getNumberOfPlotVariables() const override final;
+      virtual int
+      getNumberOfPlotVariables() const override final;
 
       /*!
 	@brief Regrid method -- used for reallocating storage for the tracer fields. 
       */
-      virtual void regrid() override final;
+      virtual void
+      regrid() override final;
 
       /*!
 	@brief Tag cells for refinement. 
@@ -97,7 +101,8 @@ namespace Physics {
 	much the same way as LevelData. The DenseIntVectSet is essentially an IntVectSet restricted to the patch (i.e. one cannot add IntVects that are outside the patch). 
 	This function cells for refinement or coarsening. The user's responsibility is to add (or remove) tags from a_tags. 
       */
-      virtual bool tagCells(EBAMRTags& a_tags) override final;
+      virtual bool
+      tagCells(EBAMRTags& a_tags) override final;
 
       /*!
 	@brief Write plot data
@@ -105,20 +110,22 @@ namespace Physics {
 	@param[inout] a_plotVariableNames Plot variable names
 	@param[inout] a_icomp             Starting variable in a_output where we begin appending data.
       */
-      virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override final;
+      virtual void
+      writePlotData(EBAMRCellData&       a_output,
+                    Vector<std::string>& a_plotVariableNames,
+                    int&                 a_icomp) const override final;
 
     protected:
-
       /*!
 	@brief Realm where this cell tagger allocates its data. 
       */
       std::string m_realm;
-      
+
       /*!
 	@brief Phase where this cell tagger allocates its data. 
       */
       phase::which_phase m_phase;
-  
+
       /*!
 	@brief Plasma physics. 
       */
@@ -168,16 +175,17 @@ namespace Physics {
 	@param[in]  a_dx           Grid resolution
 	@param[in]  a_probLo       Lower-left corner of simulation domain. 
       */
-      virtual void refineCellsBox(DenseIntVectSet&          a_refinedCells,
-				  const Vector<EBCellFAB*>& a_tracers,
-				  const Vector<EBCellFAB*>& a_gradTracers,
-				  const int                 a_lvl,
-				  const DataIndex           a_dit,
-				  const Box                 a_box,
-				  const EBISBox&            a_ebisbox,
-				  const Real                a_time,
-				  const Real                a_dx,
-				  const RealVect            a_probLo);
+      virtual void
+      refineCellsBox(DenseIntVectSet&          a_refinedCells,
+                     const Vector<EBCellFAB*>& a_tracers,
+                     const Vector<EBCellFAB*>& a_gradTracers,
+                     const int                 a_lvl,
+                     const DataIndex           a_dit,
+                     const Box                 a_box,
+                     const EBISBox&            a_ebisbox,
+                     const Real                a_time,
+                     const Real                a_dx,
+                     const RealVect            a_probLo);
 
       /*!
 	@brief Per-box coarsening method. 
@@ -193,17 +201,18 @@ namespace Physics {
 	@param[in]  a_dx             Grid resolution
 	@param[in]  a_probLo         Lower-left corner of simulation domain. 
       */
-      virtual void coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
-				   const Vector<EBCellFAB*>& a_tracers,
-				   const Vector<EBCellFAB*>& a_gradTracers,
-				   const int                 a_lvl,
-				   const DataIndex           a_dit,				   
-				   const Box                 a_box,
-				   const EBISBox&            a_ebisbox,
-				   const Real                a_time,
-				   const Real                a_dx,
-				   const RealVect            a_probLo);
-      
+      virtual void
+      coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
+                      const Vector<EBCellFAB*>& a_tracers,
+                      const Vector<EBCellFAB*>& a_gradTracers,
+                      const int                 a_lvl,
+                      const DataIndex           a_dit,
+                      const Box                 a_box,
+                      const EBISBox&            a_ebisbox,
+                      const Real                a_time,
+                      const Real                a_dx,
+                      const RealVect            a_probLo);
+
       /*!
 	@brief Coarsen a cell based on a tracer field
 	@param[in] a_pos         Physical position
@@ -214,12 +223,13 @@ namespace Physics {
 	@param[in] a_gradTracers Gradient of tracer fields
 	@return Return true if the cell should be coarsened and false otherwise. 
       */
-      virtual bool coarsenCell(const RealVect         a_pos,
-			       const Real             a_time,
-			       const Real             a_dx,
-			       const int              a_lvl,
-			       const Vector<Real>     a_tracers,
-			       const Vector<RealVect> a_gradTracers) const = 0;
+      virtual bool
+      coarsenCell(const RealVect         a_pos,
+                  const Real             a_time,
+                  const Real             a_dx,
+                  const int              a_lvl,
+                  const Vector<Real>     a_tracers,
+                  const Vector<RealVect> a_gradTracers) const = 0;
 
       /*!
 	@brief Refine a cell based on a tracer field
@@ -231,15 +241,16 @@ namespace Physics {
 	@param[in] a_gradTracers Gradient of tracer fields
 	@return True if the cell should be refined and false otherwise. 
       */
-      virtual bool refineCell(const RealVect         a_pos,
-			      const Real             a_time,
-			      const Real             a_dx,
-			      const int              a_lvl,
-			      const Vector<Real>     a_tracers,
-			      const Vector<RealVect> a_gradTracers) const = 0;
+      virtual bool
+      refineCell(const RealVect         a_pos,
+                 const Real             a_time,
+                 const Real             a_dx,
+                 const int              a_lvl,
+                 const Vector<Real>     a_tracers,
+                 const Vector<RealVect> a_gradTracers) const = 0;
     };
-  }
-}
+  } // namespace CdrPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

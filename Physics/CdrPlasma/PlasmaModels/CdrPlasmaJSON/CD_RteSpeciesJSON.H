@@ -28,9 +28,9 @@ namespace Physics {
     /*!
       @brief Encapsulation of radiative transfer species for usage with CdrPlasmaJSON. 
     */
-    class RteSpeciesJSON : public RtSpecies {
+    class RteSpeciesJSON : public RtSpecies
+    {
     public:
-
       /*!
 	@brief Alias for absorption length function. 
 	@details Users must provide this in order to set the absorption coefficient (i.e., kappa) for the radiative transfer equation. 
@@ -47,8 +47,7 @@ namespace Physics {
 	@param[in] a_name        Species name
 	@param[in] a_kappaFunction Initial data function
       */
-      RteSpeciesJSON(const std::string&   a_name,
-		     const KappaFunction& a_kappaFunction);      
+      RteSpeciesJSON(const std::string& a_name, const KappaFunction& a_kappaFunction);
 
       /*!
 	@brief Disallowed constructor.
@@ -66,13 +65,15 @@ namespace Physics {
 	@brief Disallowed copy assignment. 
 	@param[in] a_other Other species
       */
-      RteSpeciesJSON& operator=(const RteSpeciesJSON& a_other) = delete;
+      RteSpeciesJSON&
+      operator=(const RteSpeciesJSON& a_other) = delete;
 
       /*!
 	@brief Disallowed move assignment
 	@param[in] a_other Other species
       */
-      RteSpeciesJSON& operator=(const RteSpeciesJSON&& a_other) = delete;
+      RteSpeciesJSON&
+      operator=(const RteSpeciesJSON&& a_other) = delete;
 
       /*!
 	@brief Destructor
@@ -84,17 +85,18 @@ namespace Physics {
 	@param[in] a_name          Species name
 	@param[in] a_kappaFunction Function for setting absorption coefficient
       */
-      void define(const std::string& a_name, const KappaFunction& a_kappaFunction);                  
+      void
+      define(const std::string& a_name, const KappaFunction& a_kappaFunction);
 
       /*!
 	@brief Initial data function. 
 	@param[in] a_pos  Physical coordinates 
 	@param[in] a_time Time
       */
-      Real getAbsorptionCoefficient(const RealVect a_pos) const override final;
-      
-    protected:
+      Real
+      getAbsorptionCoefficient(const RealVect a_pos) const override final;
 
+    protected:
       /*!
 	@brief Is defined or not. 
       */
@@ -105,9 +107,9 @@ namespace Physics {
       */
       KappaFunction m_absorptionFunction;
     };
-  }
-}
-  
+  } // namespace CdrPlasma
+} // namespace Physics
+
 #include <CD_NamespaceFooter.H>
 
 #endif

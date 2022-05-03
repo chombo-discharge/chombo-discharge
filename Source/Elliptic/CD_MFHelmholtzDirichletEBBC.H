@@ -19,9 +19,9 @@
 /*!
   @brief Class for making Dirichlet boundary conditions on the EB in a multifluid context. 
 */
-class MFHelmholtzDirichletEBBC : public MFHelmholtzEBBC {
+class MFHelmholtzDirichletEBBC : public MFHelmholtzEBBC
+{
 public:
-
   /*!
     @brief Constructor. Must subsequently set value, order, and weight. 
     @param[in] a_phase  Phase
@@ -38,29 +38,32 @@ public:
     @brief Set the value on the EB. 
     @param[in] a_value Constant value on EB
   */
-  virtual void setValue(const Real a_value);
+  virtual void
+  setValue(const Real a_value);
 
   /*!
     @brief Set the value on the EB. 
     @param[in] a_value Spatially dependent value on EB
   */
-  virtual void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+  virtual void
+  setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Set stencil order
     @param[in] a_order Stencil order. Must be > 0
   */
-  void setOrder(const int a_order);
+  void
+  setOrder(const int a_order);
 
   /*!
     @brief Set stencil weight
     @param[in] a_order Stencil weight. Must be >= 0
   */
-  void setWeight(const int a_weight);
+  void
+  setWeight(const int a_weight);
 
 protected:
-
-    /*!
+  /*!
     @brief Use constant for BC
   */
   bool m_useConstant;
@@ -88,12 +91,13 @@ protected:
   /*!
     @brief Value on the EB. Does not apply to matching cells. 
   */
-  std::function<Real(const RealVect& a_pos) > m_functionValue;
+  std::function<Real(const RealVect& a_pos)> m_functionValue;
 
   /*!
     @brief User define function. 
   */
-  virtual void defineSinglePhase() override;
+  virtual void
+  defineSinglePhase() override;
 
   /*!
     @brief Apply flux single phase
@@ -104,13 +108,13 @@ protected:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  virtual void applyEBFluxSinglePhase(VoFIterator&       a_singlePhaseVofs,
-				      EBCellFAB&         a_Lphi,
-				      const EBCellFAB&   a_phi,
-				      const DataIndex&   a_dit,
-				      const Real&        a_beta,
-				      const bool&        a_homogeneousPhysBC) const override;
-
+  virtual void
+  applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
+                         EBCellFAB&       a_Lphi,
+                         const EBCellFAB& a_phi,
+                         const DataIndex& a_dit,
+                         const Real&      a_beta,
+                         const bool&      a_homogeneousPhysBC) const override;
 };
 
 #include <CD_NamespaceFooter.H>

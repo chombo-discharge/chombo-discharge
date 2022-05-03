@@ -25,9 +25,9 @@
   it also provides a factory method for generating any number of field solvers. 
 */
 template <class T>
-class FieldSolverFactory {
+class FieldSolverFactory
+{
 public:
-
   /*!
     @brief Constructor (does nothing)
   */
@@ -42,7 +42,8 @@ public:
     @brief Factory method. 
     @details This instantiates a bare pointer of type T and casts it to RefCountedPtr<FieldSolver>. 
   */
-  RefCountedPtr<FieldSolver> newSolver() const;
+  RefCountedPtr<FieldSolver>
+  newSolver() const;
 };
 
 #include <CD_NamespaceFooter.H>
