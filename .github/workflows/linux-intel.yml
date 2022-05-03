@@ -158,8 +158,15 @@ jobs:
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                    
 
       - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests
+        if: always()
         run: |
           source /opt/intel/oneapi/setvars.sh
           python3 tests.py --no_compare --silent -dim ${{ matrix.dim }} --parallel -cores ${{ env.CORES }}
-          if [[ $? == 0 ]]; then exit 0; else exit 1; fi                    
+          if [[ $? == 0 ]]; then exit 0; else exit 1; fi
+
+      - name: debug test
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests/Electrostatics/MechShaft
+        if: always()        
+        run: |
+          tail -200 pout.0
