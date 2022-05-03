@@ -37,7 +37,7 @@ jobs:
       - name: Run clang-format
         if: always()        
         run: |
-          find ${{ matrix.directory }} \( -name "*.H -o -name "*.cpp" \) -exec clang-format -i {} +
+          find ${{ matrix.directory }} \( -name "*.H" -o -name "*.cpp" \) -exec clang-format -i {} +
 
       - name: Check for modified files
         if: always()
