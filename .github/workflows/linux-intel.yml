@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
+      fail-fast: false
       matrix:
         dim: [2, 3]
     name: Intel serial no-HDF5 DIM=${{ matrix.dim }}    
@@ -91,6 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
+      fail-fast: false      
       matrix:
         dim: [2, 3]
     name: Intel MPI no-HDF5 DIM=${{ matrix.dim }}        
