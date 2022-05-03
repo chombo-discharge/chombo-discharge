@@ -1,0 +1,46 @@
+name: Code integrity
+
+on:
+  pull_request:
+    types: [push, opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.head_ref }}-code-format
+  cancel-in-progress: true
+
+jobs:
+  source-format:
+    if: github.event.pull_request.draft == false  
+    name: Format source
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        directory: [Source, Physics, Geometries, Examples]
+
+    env: 
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
+
+    steps:
+      - name: Checkout chombo-discharge
+        uses: actions/checkout@v2
+        with:
+          submodules: true      
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang-format
+
+      - name: Run clang-format
+        if: always()        
+        run: |
+          find ${{ matrix.directory }} \( -name "*.H -o -name "*.cpp" \) -exec clang-format -i {} +
+
+      - name: Check for modified files
+        if: always()
+        run: |
+          git diff-index --quiet HEAD
+          if [[ $? == 0 ]]; then exit 0; else exit 1; fi
