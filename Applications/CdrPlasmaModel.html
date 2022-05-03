@@ -507,6 +507,11 @@ This integrator is an implicit-explicit.</p></li>
 <p>The <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper</span></code> implements <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> and defines an operator splitting method between charge transport and plasma chemistry.
 It has a formal order of convergence of one.
 The source code is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma/TimeSteppers/CdrPlasmaGodunovStepper</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Splitting the terms yields <em>splitting errors</em> which can dominate for large time steps.
+Typically, the operator splitting discretization is not suitable for large time steps.</p>
+</div>
 <p>The basic advancement routine for <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper</span></code> is as follows:</p>
 <ol class="arabic simple">
 <li><p>Advance the charge transport <span class="math notranslate nohighlight">\(\phi^k \rightarrow \phi^{k+1}\)</span> with the source terms set to zero.</p></li>

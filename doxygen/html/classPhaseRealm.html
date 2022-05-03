@@ -197,10 +197,10 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.ht
 Vector&lt; RefCountedPtr&lt; AggEBPWLFillPatch &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a4f80f10fdc99fcdcb6e0e3472b48102e">getFillPatch</a> () const</td></tr>
 <tr class="memdesc:a4f80f10fdc99fcdcb6e0e3472b48102e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get patch regridding utility. <br /></td></tr>
 <tr class="separator:a4f80f10fdc99fcdcb6e0e3472b48102e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a97555183a18e22bd35077924d5e8ae87"><td class="memItemLeft" align="right" valign="top"><a id="a97555183a18e22bd35077924d5e8ae87"></a>
-Vector&lt; RefCountedPtr&lt; EBPWLFineInterp &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a97555183a18e22bd35077924d5e8ae87">getPwlInterpolator</a> () const</td></tr>
-<tr class="memdesc:a97555183a18e22bd35077924d5e8ae87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear ghost cell interpolation utility. <br /></td></tr>
-<tr class="separator:a97555183a18e22bd35077924d5e8ae87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4887711551e0b535bc7870c4189a047c"><td class="memItemLeft" align="right" valign="top"><a id="a4887711551e0b535bc7870c4189a047c"></a>
+Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFineInterp.html">EBFineInterp</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a4887711551e0b535bc7870c4189a047c">getFineInterp</a> () const</td></tr>
+<tr class="memdesc:a4887711551e0b535bc7870c4189a047c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear ghost cell interpolation utility. <br /></td></tr>
+<tr class="separator:a4887711551e0b535bc7870c4189a047c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a16839e652c1611bc51302b561fb383d4"><td class="memItemLeft" align="right" valign="top"><a id="a16839e652c1611bc51302b561fb383d4"></a>
 Vector&lt; RefCountedPtr&lt; EBFluxRegister &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a16839e652c1611bc51302b561fb383d4">getFluxRegister</a> () const</td></tr>
 <tr class="memdesc:a16839e652c1611bc51302b561fb383d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register utility. <br /></td></tr>
@@ -246,9 +246,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ab05aedd32d7f6c1bed5aeceef65eba82"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ab05aedd32d7f6c1bed5aeceef65eba82">defineFillPatch</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:ab05aedd32d7f6c1bed5aeceef65eba82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define regrid utility.  <a href="classPhaseRealm.html#ab05aedd32d7f6c1bed5aeceef65eba82">More...</a><br /></td></tr>
 <tr class="separator:ab05aedd32d7f6c1bed5aeceef65eba82"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0bea6687dcf418193ac358557168bec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ac0bea6687dcf418193ac358557168bec">defineEBPWLInterp</a> (const int a_lmin)</td></tr>
-<tr class="memdesc:ac0bea6687dcf418193ac358557168bec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define ghost cell interpolation utility.  <a href="classPhaseRealm.html#ac0bea6687dcf418193ac358557168bec">More...</a><br /></td></tr>
-<tr class="separator:ac0bea6687dcf418193ac358557168bec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad758ef01e7922efd8f7e8625574bf8bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#ad758ef01e7922efd8f7e8625574bf8bd">defineEBFineInterp</a> (const int a_lmin)</td></tr>
+<tr class="memdesc:ad758ef01e7922efd8f7e8625574bf8bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define ghost cell interpolation utility.  <a href="classPhaseRealm.html#ad758ef01e7922efd8f7e8625574bf8bd">More...</a><br /></td></tr>
+<tr class="separator:ad758ef01e7922efd8f7e8625574bf8bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c54dc8303bbeb482dd387737de0555c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a6c54dc8303bbeb482dd387737de0555c">defineMultigridInjection</a> (const int a_lmin)</td></tr>
 <tr class="memdesc:a6c54dc8303bbeb482dd387737de0555c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define multigrid injection utility.  <a href="classPhaseRealm.html#a6c54dc8303bbeb482dd387737de0555c">More...</a><br /></td></tr>
 <tr class="separator:a6c54dc8303bbeb482dd387737de0555c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -406,10 +406,10 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.ht
 Vector&lt; RefCountedPtr&lt; AggEBPWLFillPatch &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a3f53ad4a3f7c7e157c849c13b98575c8">m_pwlFillPatch</a></td></tr>
 <tr class="memdesc:a3f53ad4a3f7c7e157c849c13b98575c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regridding utility (for filling new grid patches) <br /></td></tr>
 <tr class="separator:a3f53ad4a3f7c7e157c849c13b98575c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ed255cd7f557fe36d2df188b7983e6b"><td class="memItemLeft" align="right" valign="top"><a id="a9ed255cd7f557fe36d2df188b7983e6b"></a>
-Vector&lt; RefCountedPtr&lt; EBPWLFineInterp &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a9ed255cd7f557fe36d2df188b7983e6b">m_pwlInterpGhosts</a></td></tr>
-<tr class="memdesc:a9ed255cd7f557fe36d2df188b7983e6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ghost cell interpolation utility. <br /></td></tr>
-<tr class="separator:a9ed255cd7f557fe36d2df188b7983e6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ca759ea250007e33403218917ef52cf"><td class="memItemLeft" align="right" valign="top"><a id="a2ca759ea250007e33403218917ef52cf"></a>
+Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFineInterp.html">EBFineInterp</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a2ca759ea250007e33403218917ef52cf">m_ebFineInterp</a></td></tr>
+<tr class="memdesc:a2ca759ea250007e33403218917ef52cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ghost cell interpolation utility. <br /></td></tr>
+<tr class="separator:a2ca759ea250007e33403218917ef52cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8710a4437535cc88ff849fa10fb79b71"><td class="memItemLeft" align="right" valign="top"><a id="a8710a4437535cc88ff849fa10fb79b71"></a>
 Vector&lt; RefCountedPtr&lt; EBFluxRegister &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhaseRealm.html#a8710a4437535cc88ff849fa10fb79b71">m_fluxReg</a></td></tr>
 <tr class="memdesc:a8710a4437535cc88ff849fa10fb79b71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flux register utility. <br /></td></tr>
@@ -453,7 +453,7 @@ RefCountedPtr&lt; <a class="el" href="classIrregAmrStencil.html">IrregAmrStencil
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class that holds important things for doing AMR over a specific phase and processor distribution. </p>
-<p>This class is essentially an EBAMR core-grid class, containing the usually EBAMR stuff within a single EBIndexSpace. In thus contains a set of grids (DisjointBoxLayout) and the usual EB stuff (EBLevelGrid, EBISLayout). In addition, it contains a bunch of operators that can be registered by the user (through the user interface <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a>). These operators live in this class, and they can be fetched e.g. by <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a>. </p><dl class="section note"><dt>Note</dt><dd>This class is a book-keeping class used by <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a> &ndash; it is not meant for direct interaction. </dd>
+<p>This class is essentially an EBAMR core-grid class, containing the usually EBAMR stuff within a single EBIndexSpace. In thus contains a set of grids (DisjointBoxLayout) and the usual EB stuff (EBLevelGrid, EBISLayout). In addition, it contains a bunch of operators that can be registered by the user (through the user interface <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>). These operators live in this class, and they can be fetched e.g. by <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>. </p><dl class="section note"><dt>Note</dt><dd>This class is a book-keeping class used by <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> &ndash; it is not meant for direct interaction. </dd>
 <dd>
 To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.verbose=true </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -790,6 +790,40 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 
 </div>
 </div>
+<a id="ad758ef01e7922efd8f7e8625574bf8bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad758ef01e7922efd8f7e8625574bf8bd">&#9670;&nbsp;</a></span>defineEBFineInterp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PhaseRealm::defineEBFineInterp </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_lmin</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define ghost cell interpolation utility. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a562ed6816530335b95ea2f54ee8d5c1a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a562ed6816530335b95ea2f54ee8d5c1a">&#9670;&nbsp;</a></span>defineEBLevelGrid()</h2>
 
@@ -849,40 +883,6 @@ To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.v
 </div><div class="memdoc">
 
 <p>Define multigrid interpolation utility. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ac0bea6687dcf418193ac358557168bec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac0bea6687dcf418193ac358557168bec">&#9670;&nbsp;</a></span>defineEBPWLInterp()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void PhaseRealm::defineEBPWLInterp </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_lmin</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Define ghost cell interpolation utility. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest grid level that changes </td></tr>

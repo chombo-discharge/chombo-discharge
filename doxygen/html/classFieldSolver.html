@@ -304,6 +304,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ace32482becbb3915bd97d566d4314dfa">parseDomainBc</a> ()</td></tr>
 <tr class="memdesc:ace32482becbb3915bd97d566d4314dfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse domain boundary conditions. <br /></td></tr>
 <tr class="separator:ace32482becbb3915bd97d566d4314dfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a373602a1557beb608410b12be2fca70f"><td class="memItemLeft" align="right" valign="top"><a id="a373602a1557beb608410b12be2fca70f"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a373602a1557beb608410b12be2fca70f">parseRegridSlopes</a> ()</td></tr>
+<tr class="memdesc:a373602a1557beb608410b12be2fca70f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse slope regrid. <br /></td></tr>
+<tr class="separator:a373602a1557beb608410b12be2fca70f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adde0e74c9f140734d3ecfbe7c92e3667"><td class="memItemLeft" align="right" valign="top"><a id="adde0e74c9f140734d3ecfbe7c92e3667"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#adde0e74c9f140734d3ecfbe7c92e3667">setDefaultDomainBcFunctions</a> ()</td></tr>
 <tr class="memdesc:adde0e74c9f140734d3ecfbe7c92e3667"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set default BC functions. This sets all the m_domainBcFunction objects to s_defaultDomainBcFunction, which return 1 everywhere. <br /></td></tr>
@@ -434,6 +438,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a1746f02c98c851c950ddbd7849e5578a">m_plotSigma</a></td></tr>
 <tr class="memdesc:a1746f02c98c851c950ddbd7849e5578a"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, m_sigma will be added to plot files. <br /></td></tr>
 <tr class="separator:a1746f02c98c851c950ddbd7849e5578a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad226eaa6309baf55916211e8b4ec177f"><td class="memItemLeft" align="right" valign="top"><a id="ad226eaa6309baf55916211e8b4ec177f"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ad226eaa6309baf55916211e8b4ec177f">m_regridSlopes</a></td></tr>
+<tr class="memdesc:ad226eaa6309baf55916211e8b4ec177f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use slopes when regridding or ont. <br /></td></tr>
+<tr class="separator:ad226eaa6309baf55916211e8b4ec177f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3c8b8e2c96833404a1d8562819bc7ea"><td class="memItemLeft" align="right" valign="top"><a id="ad3c8b8e2c96833404a1d8562819bc7ea"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ad3c8b8e2c96833404a1d8562819bc7ea">m_verbosity</a></td></tr>
 <tr class="memdesc:ad3c8b8e2c96833404a1d8562819bc7ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verbosity for this calss. <br /></td></tr>
@@ -1424,7 +1432,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <p>Set the amr object. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_amr</td><td><a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a> object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_amr</td><td><a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> object. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2217,7 +2225,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_comp</td><td>Current component in a_output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Multifluid data holder </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Main phase in cut-cells. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_interp</td><td>Special flag which, if true, tells <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a> to interpolate the data to centroids (in irregular cells). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interp</td><td>Special flag which, if true, tells <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> to interpolate the data to centroids (in irregular cells). </td></tr>
   </table>
   </dd>
 </dl>
@@ -2351,7 +2359,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_output</td><td>Output data holder </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_comp</td><td>Current component in a_output. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Surface data. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_interp</td><td>Special flag which, if true, tells <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a> to interpolate the data to centroids (in irregular cells). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_interp</td><td>Special flag which, if true, tells <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> to interpolate the data to centroids (in irregular cells). </td></tr>
   </table>
   </dd>
 </dl>

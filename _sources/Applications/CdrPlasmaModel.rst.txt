@@ -393,6 +393,11 @@ The ``CdrPlasmaGodunovStepper`` implements ``CdrPlasmaStepper`` and defines an o
 It has a formal order of convergence of one.
 The source code is located in :file:`$DISCHARGE_HOME/Physics/CdrPlasma/TimeSteppers/CdrPlasmaGodunovStepper`.
 
+.. warning::
+
+   Splitting the terms yields *splitting errors* which can dominate for large time steps.
+   Typically, the operator splitting discretization is not suitable for large time steps. 
+
 The basic advancement routine for ``CdrPlasmaGodunovStepper`` is as follows:
 
 #. Advance the charge transport :math:`\phi^k \rightarrow \phi^{k+1}` with the source terms set to zero.
@@ -417,7 +422,9 @@ In addition, diffusion can be treated
 .. note::
 
    When setting up a new problem with the Godunov time integrator, the default setting is to use automatic diffusion and a semi-implicit coupling.
-   These settings tend to work for most problems. 
+   These settings tend to work for most problems.
+
+   
 
 Specifying transport algorithm
 ______________________________

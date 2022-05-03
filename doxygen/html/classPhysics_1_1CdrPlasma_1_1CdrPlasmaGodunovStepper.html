@@ -473,7 +473,7 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memdesc:a2d80eb58c811581ef79a0b3749fb5825 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor (does nothing) <br /></td></tr>
 <tr class="separator:a2d80eb58c811581ef79a0b3749fb5825 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefcab8753df3fa6bee6ea9fa5231de47 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aefcab8753df3fa6bee6ea9fa5231de47">setAmr</a> (const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;a_amr)</td></tr>
-<tr class="memdesc:aefcab8753df3fa6bee6ea9fa5231de47 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a>.  <a href="classTimeStepper.html#aefcab8753df3fa6bee6ea9fa5231de47">More...</a><br /></td></tr>
+<tr class="memdesc:aefcab8753df3fa6bee6ea9fa5231de47 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>.  <a href="classTimeStepper.html#aefcab8753df3fa6bee6ea9fa5231de47">More...</a><br /></td></tr>
 <tr class="separator:aefcab8753df3fa6bee6ea9fa5231de47 inherit pub_methods_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">setComputationalGeometry</a> (const RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; &amp;a_computationalGeometry)</td></tr>
 <tr class="memdesc:a2da29e7e5a5ac98dc2316f3439725289 inherit pub_methods_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the computational geometry.  <a href="classTimeStepper.html#a2da29e7e5a5ac98dc2316f3439725289">More...</a><br /></td></tr>
@@ -602,6 +602,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a62561b40a07b1c57a0c0621effab6b9c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a62561b40a07b1c57a0c0621effab6b9c">parseFHD</a> ()</td></tr>
 <tr class="memdesc:a62561b40a07b1c57a0c0621effab6b9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse inclusion of random diffusion flux.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a62561b40a07b1c57a0c0621effab6b9c">More...</a><br /></td></tr>
 <tr class="separator:a62561b40a07b1c57a0c0621effab6b9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac30e033fabbad764173f45681bf81b41"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#ac30e033fabbad764173f45681bf81b41">parseRegridSlopes</a> ()</td></tr>
+<tr class="memdesc:ac30e033fabbad764173f45681bf81b41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse whether or not to use slopes when regridding.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#ac30e033fabbad764173f45681bf81b41">More...</a><br /></td></tr>
+<tr class="separator:ac30e033fabbad764173f45681bf81b41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab311f7ff6200e7d7492d652439a27386"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#ab311f7ff6200e7d7492d652439a27386">solveSemiImplicitPoisson</a> ()</td></tr>
 <tr class="memdesc:ab311f7ff6200e7d7492d652439a27386"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve the semi-implicit Poisson equation.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#ab311f7ff6200e7d7492d652439a27386">More...</a><br /></td></tr>
 <tr class="separator:ab311f7ff6200e7d7492d652439a27386"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -699,6 +702,9 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a1dd8e105ee20ee91aeb7fc237e392ddf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a1dd8e105ee20ee91aeb7fc237e392ddf">m_fhd</a></td></tr>
 <tr class="memdesc:a1dd8e105ee20ee91aeb7fc237e392ddf"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, add a stochastic diffusion flux.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a1dd8e105ee20ee91aeb7fc237e392ddf">More...</a><br /></td></tr>
 <tr class="separator:a1dd8e105ee20ee91aeb7fc237e392ddf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d08f9c63083ecd3da14be66fe50cf75"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a5d08f9c63083ecd3da14be66fe50cf75">m_regridSlopes</a></td></tr>
+<tr class="memdesc:a5d08f9c63083ecd3da14be66fe50cf75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid slopes or not.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a5d08f9c63083ecd3da14be66fe50cf75">More...</a><br /></td></tr>
+<tr class="separator:a5d08f9c63083ecd3da14be66fe50cf75"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45d960d93fc8a89529be7d6e7071b365"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a45d960d93fc8a89529be7d6e7071b365">m_implicitDiffusionThreshold</a></td></tr>
 <tr class="memdesc:a45d960d93fc8a89529be7d6e7071b365"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diffusion threshold factor.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a45d960d93fc8a89529be7d6e7071b365">More...</a><br /></td></tr>
 <tr class="separator:a45d960d93fc8a89529be7d6e7071b365"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -798,7 +804,7 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="separator:a08845ff435d18602bf593abb693355c0 inherit pro_attribs_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abb8b1988c11c8a4e257b068f3158f9b3 inherit pro_attribs_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="abb8b1988c11c8a4e257b068f3158f9b3"></a>
 RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#abb8b1988c11c8a4e257b068f3158f9b3">m_amr</a></td></tr>
-<tr class="memdesc:abb8b1988c11c8a4e257b068f3158f9b3 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a>. <br /></td></tr>
+<tr class="memdesc:abb8b1988c11c8a4e257b068f3158f9b3 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>. <br /></td></tr>
 <tr class="separator:abb8b1988c11c8a4e257b068f3158f9b3 inherit pro_attribs_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87a085f6781132b4eea40f5ab48889e5 inherit pro_attribs_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="a87a085f6781132b4eea40f5ab48889e5"></a>
 RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a87a085f6781132b4eea40f5ab48889e5">m_computationalGeometry</a></td></tr>
@@ -1946,6 +1952,33 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
+<a id="ac30e033fabbad764173f45681bf81b41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac30e033fabbad764173f45681bf81b41">&#9670;&nbsp;</a></span>parseRegridSlopes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CdrPlasmaGodunovStepper::parseRegridSlopes </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Parse whether or not to use slopes when regridding. </p>
+
+</div>
+</div>
 <a id="a53063c0edc8284ba17b79fe31de1acab"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a53063c0edc8284ba17b79fe31de1acab">&#9670;&nbsp;</a></span>parseRuntimeOptions()</h2>
 
@@ -2603,6 +2636,30 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </div><div class="memdoc">
 
 <p>Enable performance profiling. </p>
+
+</div>
+</div>
+<a id="a5d08f9c63083ecd3da14be66fe50cf75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d08f9c63083ecd3da14be66fe50cf75">&#9670;&nbsp;</a></span>m_regridSlopes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Physics::CdrPlasma::CdrPlasmaGodunovStepper::m_regridSlopes</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Regrid slopes or not. </p>
 
 </div>
 </div>

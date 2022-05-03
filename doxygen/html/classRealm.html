@@ -186,9 +186,9 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelG
 <tr class="memitem:aa7a6cbe1e10a669d03328095f0076924"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; AggEBPWLFillPatch &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aa7a6cbe1e10a669d03328095f0076924">getFillPatch</a> (const phase::which_phase a_phase)</td></tr>
 <tr class="memdesc:aa7a6cbe1e10a669d03328095f0076924"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear regrid utility.  <a href="classRealm.html#aa7a6cbe1e10a669d03328095f0076924">More...</a><br /></td></tr>
 <tr class="separator:aa7a6cbe1e10a669d03328095f0076924"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a4f22d4500e95c55627713af3a8984d"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBPWLFineInterp &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a0a4f22d4500e95c55627713af3a8984d">getPwlInterpolator</a> (const phase::which_phase a_phase)</td></tr>
-<tr class="memdesc:a0a4f22d4500e95c55627713af3a8984d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear ghost cell interpolation utility.  <a href="classRealm.html#a0a4f22d4500e95c55627713af3a8984d">More...</a><br /></td></tr>
-<tr class="separator:a0a4f22d4500e95c55627713af3a8984d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad36018c90c23e0a47fab6b8c0a3703dc"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFineInterp.html">EBFineInterp</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad36018c90c23e0a47fab6b8c0a3703dc">getFineInterp</a> (const phase::which_phase a_phase)</td></tr>
+<tr class="memdesc:ad36018c90c23e0a47fab6b8c0a3703dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear ghost cell interpolation utility.  <a href="classRealm.html#ad36018c90c23e0a47fab6b8c0a3703dc">More...</a><br /></td></tr>
+<tr class="separator:ad36018c90c23e0a47fab6b8c0a3703dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac8d64dca55750cf073bf0ae2568287ad"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBFluxRegister &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ac8d64dca55750cf073bf0ae2568287ad">getFluxRegister</a> (const phase::which_phase a_phase)</td></tr>
 <tr class="memdesc:ac8d64dca55750cf073bf0ae2568287ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register utility.  <a href="classRealm.html#ac8d64dca55750cf073bf0ae2568287ad">More...</a><br /></td></tr>
 <tr class="separator:ac8d64dca55750cf073bf0ae2568287ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -988,6 +988,32 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 
 </div>
 </div>
+<a id="ad36018c90c23e0a47fab6b8c0a3703dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad36018c90c23e0a47fab6b8c0a3703dc">&#9670;&nbsp;</a></span>getFineInterp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFineInterp.html">EBFineInterp</a> &gt; &gt; &amp; Realm::getFineInterp </td>
+          <td>(</td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get piecewise linear ghost cell interpolation utility. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a0b3843a6eb357e147930485c2a5e06f3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0b3843a6eb357e147930485c2a5e06f3">&#9670;&nbsp;</a></span>getFineToCoarRedist()</h2>
 
@@ -1272,32 +1298,6 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Which phase </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a0a4f22d4500e95c55627713af3a8984d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0a4f22d4500e95c55627713af3a8984d">&#9670;&nbsp;</a></span>getPwlInterpolator()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBPWLFineInterp &gt; &gt; &amp; Realm::getPwlInterpolator </td>
-          <td>(</td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get piecewise linear ghost cell interpolation utility. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
   </table>
   </dd>
 </dl>

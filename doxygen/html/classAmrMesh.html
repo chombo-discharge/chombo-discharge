@@ -79,7 +79,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Class for handling spatial operations for streamer equations.  
+<p>Class for handling spatial operations.  
  <a href="classAmrMesh.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__AmrMesh_8H_source.html">CD_AmrMesh.H</a>&gt;</code></p>
@@ -370,6 +370,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a187f9807eae7f2c90a6b0ac1c32f8cb1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a187f9807eae7f2c90a6b0ac1c32f8cb1">interpGhostMG</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a187f9807eae7f2c90a6b0ac1c32f8cb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate ghost cells over a realm and phase.  <a href="classAmrMesh.html#a187f9807eae7f2c90a6b0ac1c32f8cb1">More...</a><br /></td></tr>
 <tr class="separator:a187f9807eae7f2c90a6b0ac1c32f8cb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27ced532eeaca03e97e064b0a6cf3bc1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a27ced532eeaca03e97e064b0a6cf3bc1">interpToNewGrids</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_newData, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_oldData, const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel, const bool a_useSlopes)</td></tr>
+<tr class="memdesc:a27ced532eeaca03e97e064b0a6cf3bc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to new grids.  <a href="classAmrMesh.html#a27ced532eeaca03e97e064b0a6cf3bc1">More...</a><br /></td></tr>
+<tr class="separator:a27ced532eeaca03e97e064b0a6cf3bc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d58d2eac35c0c39372e209dd8a1951c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a8d58d2eac35c0c39372e209dd8a1951c">interpToNewGrids</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_newData, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_oldData, const phase::which_phase a_phase, const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel, const bool a_useSlopes)</td></tr>
+<tr class="memdesc:a8d58d2eac35c0c39372e209dd8a1951c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to new grids.  <a href="classAmrMesh.html#a8d58d2eac35c0c39372e209dd8a1951c">More...</a><br /></td></tr>
+<tr class="separator:a8d58d2eac35c0c39372e209dd8a1951c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58008f166bc2d7de06c4c24d879513fe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a58008f166bc2d7de06c4c24d879513fe">interpToCentroids</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a58008f166bc2d7de06c4c24d879513fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to centroids on realm and phase.  <a href="classAmrMesh.html#a58008f166bc2d7de06c4c24d879513fe">More...</a><br /></td></tr>
 <tr class="separator:a58008f166bc2d7de06c4c24d879513fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -466,7 +472,7 @@ const Vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight" valign="botto
 <tr class="memdesc:a1662c260b08bddf92838f6061040619b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get implicit function for a specific phase.  <a href="classAmrMesh.html#a1662c260b08bddf92838f6061040619b">More...</a><br /></td></tr>
 <tr class="separator:a1662c260b08bddf92838f6061040619b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23821170fc1949807a3896dcc9f33b1a"><td class="memItemLeft" align="right" valign="top">const Vector&lt; DisjointBoxLayout &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a23821170fc1949807a3896dcc9f33b1a">getProxyGrids</a> () const</td></tr>
-<tr class="memdesc:a23821170fc1949807a3896dcc9f33b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the "proxy" grids in <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a>.  <a href="classAmrMesh.html#a23821170fc1949807a3896dcc9f33b1a">More...</a><br /></td></tr>
+<tr class="memdesc:a23821170fc1949807a3896dcc9f33b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the "proxy" grids in <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>.  <a href="classAmrMesh.html#a23821170fc1949807a3896dcc9f33b1a">More...</a><br /></td></tr>
 <tr class="separator:a23821170fc1949807a3896dcc9f33b1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a758abcbca57d397805fcc6ad4b6fa632"><td class="memItemLeft" align="right" valign="top"><a id="a758abcbca57d397805fcc6ad4b6fa632"></a>
 const Vector&lt; DisjointBoxLayout &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a758abcbca57d397805fcc6ad4b6fa632">getGrids</a> (const std::string a_realm) const</td></tr>
@@ -513,9 +519,9 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classEbCoarAve.html">EbCoarAve<
 <tr class="memitem:a2947e26ae104dd0bf1476ac94638100a"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; AggEBPWLFillPatch &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a2947e26ae104dd0bf1476ac94638100a">getFillPatch</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a2947e26ae104dd0bf1476ac94638100a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get piecewise linear ghost cell interpolator.  <a href="classAmrMesh.html#a2947e26ae104dd0bf1476ac94638100a">More...</a><br /></td></tr>
 <tr class="separator:a2947e26ae104dd0bf1476ac94638100a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4a2894b0f55adeb67c635fe4f40b99a"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBPWLFineInterp &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#af4a2894b0f55adeb67c635fe4f40b99a">getPwlInterpolator</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:af4a2894b0f55adeb67c635fe4f40b99a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interpolator.  <a href="classAmrMesh.html#af4a2894b0f55adeb67c635fe4f40b99a">More...</a><br /></td></tr>
-<tr class="separator:af4a2894b0f55adeb67c635fe4f40b99a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cbe95dc353cef3fe72aea2f83927e98"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFineInterp.html">EBFineInterp</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a4cbe95dc353cef3fe72aea2f83927e98">getFineInterp</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:a4cbe95dc353cef3fe72aea2f83927e98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interpolator.  <a href="classAmrMesh.html#a4cbe95dc353cef3fe72aea2f83927e98">More...</a><br /></td></tr>
+<tr class="separator:a4cbe95dc353cef3fe72aea2f83927e98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04896ca8511ca4f17a1558d89683085d"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; EBFluxRegister &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a04896ca8511ca4f17a1558d89683085d">getFluxRegister</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a04896ca8511ca4f17a1558d89683085d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flux register.  <a href="classAmrMesh.html#a04896ca8511ca4f17a1558d89683085d">More...</a><br /></td></tr>
 <tr class="separator:a04896ca8511ca4f17a1558d89683085d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -577,7 +583,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="separator:ad67cab9a8a5cf3d884a07df809ca72ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69fc82644d6c1aff9aa67931d3eceb44"><td class="memItemLeft" align="right" valign="top"><a id="a69fc82644d6c1aff9aa67931d3eceb44"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a69fc82644d6c1aff9aa67931d3eceb44">parseVerbosity</a> ()</td></tr>
-<tr class="memdesc:a69fc82644d6c1aff9aa67931d3eceb44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the verbosity for <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a>. <br /></td></tr>
+<tr class="memdesc:a69fc82644d6c1aff9aa67931d3eceb44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse the verbosity for <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>. <br /></td></tr>
 <tr class="separator:a69fc82644d6c1aff9aa67931d3eceb44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e128ab04f54e27a3372f1296de58252"><td class="memItemLeft" align="right" valign="top"><a id="a9e128ab04f54e27a3372f1296de58252"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a9e128ab04f54e27a3372f1296de58252">parseCoarsestLevelNumCells</a> ()</td></tr>
@@ -801,7 +807,7 @@ Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class
 <tr class="separator:a7496a7ae2b97d7e6b609c82a22586433"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Class for handling spatial operations for streamer equations. </p>
+<div class="textblock"><p>Class for handling spatial operations. </p>
 <p>This class handles most (if not all) spatial operations. Examples are grid generation, coarsening of data, interpolation of data, memory allocations etc. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ad3dbdbd76308b0f823ac99ba8c96b030"></a>
@@ -831,7 +837,7 @@ Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class
 <p>Disallowed copy constructor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> </td></tr>
   </table>
   </dd>
 </dl>
@@ -865,7 +871,7 @@ Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class
 <p>Disallowed move constructor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> </td></tr>
   </table>
   </dd>
 </dl>
@@ -2410,7 +2416,7 @@ template&lt;typename T &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_tags</td><td>Sets of cell tags used for the grid generation. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>The finest grid level which changes. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_hardcap</td><td>Hardcap for the maximum grid level which can be generated. If a_hardcap &lt; 0 there is no restriction beyond the <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a> restrictions.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hardcap</td><td>Hardcap for the maximum grid level which can be generated. If a_hardcap &lt; 0 there is no restriction beyond the <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> restrictions.</td></tr>
   </table>
   </dd>
 </dl>
@@ -3468,6 +3474,43 @@ template&lt;class P , RealVect(P::*)() const particleVectorField&gt; </div>
 
 </div>
 </div>
+<a id="a4cbe95dc353cef3fe72aea2f83927e98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4cbe95dc353cef3fe72aea2f83927e98">&#9670;&nbsp;</a></span>getFineInterp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBFineInterp.html">EBFineInterp</a> &gt; &gt; &amp; AmrMesh::getFineInterp </td>
+          <td>(</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get interpolator. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a4352f3a572ffe95357934042c5409ec5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4352f3a572ffe95357934042c5409ec5">&#9670;&nbsp;</a></span>getFineToCoarRedist()</h2>
 
@@ -3850,45 +3893,8 @@ template&lt;class P , RealVect(P::*)() const particleVectorField&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Get the "proxy" grids in <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a>. </p>
+<p>Get the "proxy" grids in <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>. </p>
 <p>Returns m_grids </p>
-
-</div>
-</div>
-<a id="af4a2894b0f55adeb67c635fe4f40b99a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af4a2894b0f55adeb67c635fe4f40b99a">&#9670;&nbsp;</a></span>getPwlInterpolator()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector&lt; RefCountedPtr&lt; EBPWLFineInterp &gt; &gt; &amp; AmrMesh::getPwlInterpolator </td>
-          <td>(</td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get interpolator. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -4493,6 +4499,143 @@ template&lt;class P , RealVect &amp;(P::*)() particleVectorField&gt; </div>
 
 </div>
 </div>
+<a id="a8d58d2eac35c0c39372e209dd8a1951c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d58d2eac35c0c39372e209dd8a1951c">&#9670;&nbsp;</a></span>interpToNewGrids() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::interpToNewGrids </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_newData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_oldData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_lmin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_oldFinestLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_newFinestLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_useSlopes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Interpolate data to new grids. </p>
+<p>This is called when requiring data to be interpolated to new grids. Takes old data as argument and fills the new grid data with an interpolation of the old grid data. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_newData</td><td>New grid data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldData</td><td>Old grid data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase on which we regrid. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that did not change (but distribution may have changed). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Previous finest level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_newFinestLevel</td><td>New finest level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_useSlopes</td><td>If true, use slopes when regridding the data. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a27ced532eeaca03e97e064b0a6cf3bc1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27ced532eeaca03e97e064b0a6cf3bc1">&#9670;&nbsp;</a></span>interpToNewGrids() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::interpToNewGrids </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_newData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_oldData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_lmin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_oldFinestLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_newFinestLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_useSlopes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Interpolate data to new grids. </p>
+<p>This is called when requiring data to be interpolated to new grids. Takes old data as argument and fills the new grid data with an interpolation of the old grid data. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_newData</td><td>New grid data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldData</td><td>Old grid data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that did not change (but distribution may have changed). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldFinestLevel</td><td>Previous finest level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_newFinestLevel</td><td>New finest level. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_useSlopes</td><td>If true, use slopes when regridding the data. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="aff0f00c083961d5921ba325b971838db"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aff0f00c083961d5921ba325b971838db">&#9670;&nbsp;</a></span>intersectParticlesBisectIF()</h2>
 
@@ -4654,7 +4797,7 @@ template&lt;class P &gt; </div>
 <p>Disallowed move assignment. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> </td></tr>
   </table>
   </dd>
 </dl>
@@ -4688,7 +4831,7 @@ template&lt;class P &gt; </div>
 <p>Disallowed copy assignment. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> </td></tr>
   </table>
   </dd>
 </dl>
@@ -5605,7 +5748,7 @@ template&lt;class P &gt; </div>
   </table>
   </dd>
 </dl>
-<p>This will set the grids for <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations for streamer equations.">AmrMesh</a> and realms, load balancing the various realms with the provided loads. </p>
+<p>This will set the grids for <a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> and realms, load balancing the various realms with the provided loads. </p>
 
 </div>
 </div>
