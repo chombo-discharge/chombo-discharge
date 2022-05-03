@@ -524,8 +524,8 @@ Vector<RefCountedPtr<AggEBPWLFillPatch> >& Realm::getFillPatch(const phase::whic
   return m_realms[a_phase]->getFillPatch();
 }
 
-Vector<RefCountedPtr<EBPWLFineInterp> >& Realm::getPwlInterpolator(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getPwlInterpolator();
+Vector<RefCountedPtr<EBFineInterp> >& Realm::getFineInterp(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getFineInterp();
 }
 
 Vector<RefCountedPtr<EBFluxRegister> >&  Realm::getFluxRegister(const phase::which_phase a_phase){

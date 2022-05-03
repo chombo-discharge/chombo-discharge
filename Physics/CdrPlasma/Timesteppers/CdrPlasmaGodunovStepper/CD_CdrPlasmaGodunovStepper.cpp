@@ -37,6 +37,7 @@ CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper(RefCountedPtr<CdrPlasmaPhysics>
   m_className       = "CdrPlasmaGodunovStepper";
   m_physics         = a_physics;
   m_extrapAdvect    = true;
+  m_regridSlopes    = true;
 }
 
 CdrPlasmaGodunovStepper::~CdrPlasmaGodunovStepper(){
@@ -69,6 +70,7 @@ void CdrPlasmaGodunovStepper::parseOptions(){
   this->parseDebug();
   this->parseProfile();  
   this->parseFHD();
+  this->parseRegridSlopes();
 }
 
 void CdrPlasmaGodunovStepper::parseRuntimeOptions(){
@@ -93,6 +95,7 @@ void CdrPlasmaGodunovStepper::parseRuntimeOptions(){
   this->parseDebug();
   this->parseProfile();  
   this->parseFHD();
+  this->parseRegridSlopes();  
 
   // Solvers also parse their runtime options. 
   m_cdr        ->parseRuntimeOptions();
@@ -237,6 +240,17 @@ void CdrPlasmaGodunovStepper::parseFHD(){
   pp.get("fhd", m_fhd);
 }
 
+void CdrPlasmaGodunovStepper::parseRegridSlopes(){
+  CH_TIME("CdrPlasmaGodunovStepper::parseRegridSlopes()");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaGodunovStepper::parseRegridSlopes()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("use_regrid_slopes", m_regridSlopes);
+}
+
 RefCountedPtr<CdrStorage>& CdrPlasmaGodunovStepper::getCdrStorage(const CdrIterator<CdrSolver>& a_solverIt){
   return m_cdrScratch[a_solverIt.index()];
 }
@@ -358,43 +372,21 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
     this->regridSolvers  (a_lmin, a_oldFinestLevel, a_newFinestLevel);
     this->regridInternals(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-    // When computing the electric field on the new mesh, we need the conductivity and space charge from the
-    // previous step. CdrPlasmaGodunvoStepper::preRegrid will have been called before this routine, so we
-    // have the conductivities (stored as sigma*dt/eps0) and space charge stored in scratch data holders. 
-    for (int lvl = 0; lvl <= std::max(0, a_lmin-1); lvl++){
-      m_scratchConductivity   [lvl]->copyTo(*m_conductivityFactorCell[lvl]);
-      m_scratchSemiImplicitRho[lvl]->copyTo(*m_semiImplicitRho       [lvl]);      
-    }
+    m_amr->interpToNewGrids(m_conductivityFactorCell,
+			    m_scratchConductivity,
+			    phase::gas,
+			    a_lmin,
+			    a_oldFinestLevel,
+			    a_newFinestLevel,
+			    m_regridSlopes);
 
-    // Regrid AMR levels. 
-    for (int lvl = std::max(1, a_lmin); lvl <= a_newFinestLevel; lvl++){
-      RefCountedPtr<EBPWLFineInterp>& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase)[lvl];
-
-#if 0 // Original code
-      // Linearly interpolate (with limiters):
-      interpolator->interpolate(*m_conductivityFactorCell[lvl], *m_conductivityFactorCell[lvl-1], interv);
-      interpolator->interpolate(*m_semiImplicitRho       [lvl], *m_semiImplicitRho       [lvl-1], interv);
-#else
-      EBMGInterp interp(m_amr->getGrids(m_realm)[lvl],
-			m_amr->getGrids(m_realm)[lvl-1],
-			m_amr->getEBISLayout(m_realm, m_phase)[lvl],
-			m_amr->getEBISLayout(m_realm, m_phase)[lvl-1],
-			m_amr->getDomains()[lvl-1],
-			m_amr->getRefinementRatio(lvl, lvl-1),
-			1,
-			m_amr->getEBIndexSpace(phase::gas),
-			m_amr->getNumberOfGhostCells()*IntVect::Unit);
-
-      interp.pwcInterp(*m_conductivityFactorCell[lvl], *m_conductivityFactorCell[lvl-1], Interval(0,0));
-      interp.pwcInterp(*m_semiImplicitRho       [lvl], *m_semiImplicitRho       [lvl-1], Interval(0,0));      
-#endif
-
-      // For parts of the new grid that overlap with the old grid, replace data with a copy.
-      if(lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)){
-	m_scratchConductivity   [lvl]->copyTo(*m_conductivityFactorCell[lvl]);
-	m_scratchSemiImplicitRho[lvl]->copyTo(*m_semiImplicitRho       [lvl]);      	
-      }
-    }
+    m_amr->interpToNewGrids(m_semiImplicitRho,
+			    m_scratchSemiImplicitRho,
+			    phase::gas,
+			    a_lmin,
+			    a_oldFinestLevel,
+			    a_newFinestLevel,
+			    m_regridSlopes);    
 
     // Coarsen the conductivity and space charge from the last step and update ghost cells. 
     m_amr->averageDown  (m_conductivityFactorCell, m_realm, m_phase);

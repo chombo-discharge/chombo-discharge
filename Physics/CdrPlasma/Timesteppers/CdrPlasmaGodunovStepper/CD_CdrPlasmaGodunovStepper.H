@@ -254,6 +254,11 @@ namespace Physics {
       bool m_fhd;
 
       /*!
+	@brief Regrid slopes or not
+      */
+      bool m_regridSlopes;
+
+      /*!
 	@brief Diffusion threshold factor
       */
       Real m_implicitDiffusionThreshold;
@@ -429,6 +434,11 @@ namespace Physics {
 	@brief Parse inclusion of random diffusion flux.
       */
       void parseFHD();
+
+      /*!
+	@brief Parse whether or not to use slopes when regridding
+      */
+      void parseRegridSlopes();      
 
       /*!
 	@brief Solve the semi-implicit Poisson equation

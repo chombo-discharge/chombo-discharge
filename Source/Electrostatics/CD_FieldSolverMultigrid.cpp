@@ -52,6 +52,7 @@ void FieldSolverMultigrid::parseOptions(){
   this->parseMultigridSettings();
   this->parseKappaSource();
   this->parseJumpBC();
+  this->parseRegridSlopes();
 }
 
 void FieldSolverMultigrid::parseRuntimeOptions(){
@@ -64,6 +65,7 @@ void FieldSolverMultigrid::parseRuntimeOptions(){
   this->parseMultigridSettings();
   this->parseKappaSource();
   this->parsePlotVariables();
+  this->parseRegridSlopes();  
 }
 
 void FieldSolverMultigrid::parseKappaSource(){
@@ -340,8 +342,8 @@ void FieldSolverMultigrid::registerOperators(){
   m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
   m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::gas  );
   m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::solid);
-  m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas  );
-  m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::solid);
+  m_amr->registerOperator(s_eb_fine_interp,  m_realm, phase::gas  );
+  m_amr->registerOperator(s_eb_fine_interp,  m_realm, phase::solid);
   m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::gas  );
   m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::solid);
   m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::gas  );

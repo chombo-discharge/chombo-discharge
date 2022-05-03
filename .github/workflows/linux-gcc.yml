@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
+      fail-fast: false      
       matrix:
         dim: [2, 3]
     name: GNU@10.0 serial no-HDF5 DIM=${{ matrix.dim }}
@@ -71,7 +72,7 @@ jobs:
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests
         if: always()
         run: |
-          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent
+          python3 tests.py --no_compare --silent -dim ${{ matrix.dim }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                    
 
   serial-hdf:
@@ -79,6 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
+      fail-fast: false
       matrix:
         dim: [2, 3]
     name: GNU@10.0 serial HDF5 DIM=${{ matrix.dim }}
@@ -132,7 +134,7 @@ jobs:
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests
         if: always()        
         run: |
-          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent
+          python3 tests.py --no_compare --silent -dim ${{ matrix.dim }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                    
         
   mpi-no-hdf5:
@@ -140,6 +142,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
+      fail-fast: false
       matrix:
         dim: [2, 3]
     name: GNU@10.0 OpenMPI no-HDF5 DIM=${{ matrix.dim }}
@@ -193,7 +196,7 @@ jobs:
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests
         if: always()
         run: |
-          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent --parallel -cores ${{ env.CORES }}
+          python3 tests.py --no_compare --silent -dim ${{ matrix.dim }} --parallel -cores ${{ env.CORES }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                    
 
   mpi-hdf5:
@@ -201,6 +204,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
+      fail-fast: false
       matrix:
         dim: [2, 3]
     name: GNU@10.0 OpenMPI HDF5 DIM=${{ matrix.dim }}
@@ -258,5 +262,5 @@ jobs:
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests
         if: always()        
         run: |
-          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent --parallel -cores ${{ env.CORES }}
+          python3 tests.py --no_compare --silent -dim ${{ matrix.dim }} --parallel -cores ${{ env.CORES }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                    

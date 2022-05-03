@@ -50,8 +50,8 @@
 	     "gauss2":
 	     [
 		 {
-		     "radius": 100E-6,
-		     "amplitude": 1.0E19,
+		     "radius": 200E-6,
+		     "amplitude": 1.0E18,
 		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
@@ -82,8 +82,8 @@
 	     "gauss2":
 	     [
 		 {
-		     "radius": 100E-6,
-		     "amplitude": 0.8E19,
+		     "radius": 200E-6,
+		     "amplitude": 0.8E18,
 		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
@@ -103,8 +103,8 @@
 	     "gauss2":
 	     [
 		 {
-		     "radius": 100E-6,
-		     "amplitude": 0.2E19,
+		     "radius": 200E-6,
+		     "amplitude": 0.2E18,
 		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]

@@ -31,9 +31,10 @@ constexpr int CdrSolver::m_nComp;
 CdrSolver::CdrSolver(){
 
   // Default options.
-  m_verbosity  = -1;
-  m_name       = "CdrSolver";
-  m_className  = "CdrSolver";
+  m_verbosity    = -1;
+  m_name         = "CdrSolver";
+  m_className    = "CdrSolver";
+  m_regridSlopes = true;
 
   this->setRealm(Realm::Primal);
   this->setDefaultDomainBC();    // Set default domain BCs (wall)
@@ -1528,34 +1529,15 @@ void CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
     pout() << m_name + "::regrid(int, int, int)" << endl;
   }
 
-  const Interval interv(m_comp, m_comp);
-
   // Allocate internal storage. This will fill m_phi with invalid data, but preRegrid(...) should have been called
   // prior to this routine so the old m_phi (before the regrid) is stored in m_cachedPhi. 
   this->allocateInternals();
 
-  // These levels have not changed, but load balancing could have changed the processor ownership of data. 
-  for (int lvl = 0; lvl <= Max(0,a_lmin-1); lvl++){
-    m_cachePhi   [lvl]->copyTo(*m_phi   [lvl]); // Base level should never change, but ownership can.
-    m_cacheSource[lvl]->copyTo(*m_source[lvl]); // Base level should never change, but ownership can.
-  }
+  // Interpolate to the new grids. 
+  m_amr->interpToNewGrids(m_phi,    m_cachePhi,    m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
+  m_amr->interpToNewGrids(m_source, m_cacheSource, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);  
 
-  // These levels have changed
-  for (int lvl = std::max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
-    RefCountedPtr<EBPWLFineInterp>& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase)[lvl]; // The interpolator for interpolator from lvl-1 to lvl lives on lvl
-
-    // Linearly interpolate (with limiters) from level lvl-1 to lvl
-    interpolator->interpolate(*m_phi   [lvl], *m_phi   [lvl-1], interv);
-    interpolator->interpolate(*m_source[lvl], *m_source[lvl-1], interv);
-
-    // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
-    // to pollute the solution with interpolation there since we already have valid data. 
-    if(lvl <= Min(a_oldFinestLevel, a_newFinestLevel)){
-      m_cachePhi   [lvl]->copyTo(*m_phi[lvl]);
-      m_cacheSource[lvl]->copyTo(*m_source[lvl]);
-    }
-  }
-
+  // Coarsen data and update ghost cells. 
   m_amr->averageDown(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
@@ -1613,7 +1595,7 @@ void CdrSolver::registerOperators(){
 
   m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
   m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
-  m_amr->registerOperator(s_eb_pwl_interp,   m_realm, m_phase);
+  m_amr->registerOperator(s_eb_fine_interp,  m_realm, m_phase);
   m_amr->registerOperator(s_eb_flux_reg,     m_realm, m_phase);
   m_amr->registerOperator(s_eb_redist,       m_realm, m_phase);
   m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
@@ -2675,7 +2657,6 @@ void CdrSolver::parseDomainBc(){
   }
 }
 
-
 void CdrSolver::parseDivergenceComputation(){
   CH_TIME("CdrSolver::parseDivergenceComputation()");
   if(m_verbosity > 5){
@@ -2991,6 +2972,17 @@ void CdrSolver::parsePlotMode(){
   else if(str == "numbers"){
     m_plotNumbers = true;
   }
+}
+
+void CdrSolver::parseRegridSlopes(){
+  CH_TIME("CdrSolver::parseRegridSlopes()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseRegridSlopes()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("use_regrid_slopes", m_regridSlopes);
 }
 
 #include <CD_NamespaceFooter.H>

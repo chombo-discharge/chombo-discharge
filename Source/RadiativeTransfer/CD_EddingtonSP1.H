@@ -248,6 +248,11 @@ protected:
   bool m_kappaScale;
 
   /*!
+    @brief Use slopes when regridding (or not)
+  */
+  bool m_regridSlopes;
+
+  /*!
     @brief Verbosity for geometric multigrid
   */
   int m_multigridVerbosity;
@@ -501,6 +506,11 @@ protected:
     @brief Parse reflection coefficients for Robin bcs
   */
   virtual void parseReflection();
+
+  /*!
+    @brief Parse whether or not to use slopes when regridding
+  */
+  virtual void parseRegridSlopes();
 
   /*!
     @brief Set default domain BC functions.

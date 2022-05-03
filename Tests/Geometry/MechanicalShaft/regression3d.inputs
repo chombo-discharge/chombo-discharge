@@ -73,17 +73,17 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 MechanicalShaft.eps0                      = 1               # Background permittivity
 MechanicalShaft.turn_on_electrode         = true            # Turn on/off electrode
-MechanicalShaft.turn_on_dielectric        = true            # Turn on/off dielectric
+MechanicalShaft.turn_on_dielectric        = true           # Turn on/off dielectric
 
 # Electrode settings
 --------------------
 MechanicalShaft.electrode.live            = true            # Live electrode or not
 MechanicalShaft.electrode.endpoint1       = 0 0 0.5         # One endpoint
 MechanicalShaft.electrode.endpoint2       = 0 0 2           # Other endpoint
-MechanicalShaft.electrode.outer_radius    = 0.8             # Electrode outer radius
-MechanicalShaft.electrode.inner_radius    = 0.4             # Electrode inner radius	
-MechanicalShaft.electrode.outer_curvature = 0.1             # Outer curvature
-MechanicalShaft.electrode.inner_curvature = 0.1             # Inner curvature
+MechanicalShaft.electrode.outer_radius    = 0.9             # Electrode outer radius
+MechanicalShaft.electrode.inner_radius    = 0.5             # Electrode inner radius	
+MechanicalShaft.electrode.outer_curvature = 0.01            # Outer curvature
+MechanicalShaft.electrode.inner_curvature = 0.01            # Inner curvature
 
 # Mechshaft settings
 --------------------
@@ -95,8 +95,8 @@ MechanicalShaft.dielectric.permittivity   = 4.0             # Dielectric permitt
 MechanicalShaft.dielectric.polygon.endpoint1  = 0 0 -4      # One endpoint
 MechanicalShaft.dielectric.polygon.endpoint2  = 0 0  4      # Other endpoint
 MechanicalShaft.dielectric.polygon.num_sides  = 6           # Number of sides for polygon shape. 
-MechanicalShaft.dielectric.polygon.radius     = 0.3         # Dielectric rod radius
-MechanicalShaft.dielectric.polygon.curvature  = 0.05        # Rounding radius
+MechanicalShaft.dielectric.polygon.radius     = 0.25        # Dielectric rod radius
+MechanicalShaft.dielectric.polygon.curvature  = 0.01        # Rounding radius
 
 # Subsettings for 'cylinder'
 ----------------------------

@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
+      fail-fast: false
       matrix:
         dim: [2, 3]
     name: Intel serial no-HDF5 DIM=${{ matrix.dim }}    
@@ -83,7 +84,7 @@ jobs:
         if: always()        
         run: |
           source /opt/intel/oneapi/setvars.sh
-          python3 tests.py --no_compare -dim ${{ matrix.dim }} --silent
+          python3 tests.py --no_compare --silent -dim ${{ matrix.dim }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi          
 
   mpi-no-hdf:
@@ -91,6 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
+      fail-fast: false      
       matrix:
         dim: [2, 3]
     name: Intel MPI no-HDF5 DIM=${{ matrix.dim }}        
@@ -159,5 +161,5 @@ jobs:
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
           source /opt/intel/oneapi/setvars.sh
-          python3 tests.py --no_compare -dim ${{ matrix.dim }} --parallel -cores ${{ env.CORES }} -exec_mpi=mpiexec
+          python3 tests.py --no_compare --silent -dim ${{ matrix.dim }} --parallel -cores ${{ env.CORES }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                    
