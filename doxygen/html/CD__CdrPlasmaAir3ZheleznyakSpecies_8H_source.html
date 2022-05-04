@@ -94,75 +94,91 @@ $(function() {
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacePhysics.html">Physics</a> {</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  <span class="keyword">namespace </span>CdrPlasma {</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
-<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html">   25</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html">CdrPlasmaAir3Zheleznyak::Electron</a> : <span class="keyword">public</span> <a class="code" href="classCdrSpecies.html">CdrSpecies</a> {</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html">Electron</a>();</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;      ~<a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html">Electron</a>() {}</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;      Real <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html#a24dfdf3b90c979b4c1c75b9f64de832c">initialData</a>(<span class="keyword">const</span> RealVect a_pos, <span class="keyword">const</span> Real a_time) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;      Real m_uniform_density;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;      Real m_seed_density;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;      Real m_seed_rad;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;      RealVect m_seed_pos;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    };</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
-<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html">   38</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html">CdrPlasmaAir3Zheleznyak::MPlus</a> : <span class="keyword">public</span> <a class="code" href="classCdrSpecies.html">CdrSpecies</a> {</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html">MPlus</a>();</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;      ~<a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html">MPlus</a>(){}</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;      Real <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html#a25259f9843339b498c6e8a9065a21d81">initialData</a>(<span class="keyword">const</span> RealVect a_pos, <span class="keyword">const</span> Real a_time) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;      Real m_uniform_density;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;      Real m_seed_density;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;      Real m_seed_rad;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;      RealVect m_seed_pos;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    };</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
-<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html">   50</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html">CdrPlasmaAir3Zheleznyak::MMinus</a> : <span class="keyword">public</span> <a class="code" href="classCdrSpecies.html">CdrSpecies</a> {</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html">MMinus</a>();</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;      ~<a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html">MMinus</a>(){}</div>
-<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html#a7042c9190132c88c25b3a860a2153067">   54</a></span>&#160;      Real <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html#a7042c9190132c88c25b3a860a2153067">initialData</a>(<span class="keyword">const</span> RealVect a_pos, <span class="keyword">const</span> Real a_time)<span class="keyword"> const </span>{<span class="keywordflow">return</span> 0.0;}</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    };</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html">   57</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html">CdrPlasmaAir3Zheleznyak::uv_Photon</a> : <span class="keyword">public</span> <a class="code" href="classRtSpecies.html">RtSpecies</a> {</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html">uv_Photon</a>();</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;      ~<a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html">uv_Photon</a>();</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;      Real <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html#a1810d740631f783787471280f4f87fa3">getAbsorptionCoefficient</a>(<span class="keyword">const</span> RealVect a_pos) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;      Real getRandomKappa() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;      Real get_pO2()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_pO2;}</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;      Real m_pO2;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;      Real m_f1;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;      Real m_f2;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;      Real m_K1;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;      Real m_K2;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;      Real m_seed;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;      std::mt19937_64* m_rng; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;      std::uniform_real_distribution&lt;Real&gt;* m_udist01;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    };</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  }</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;}</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html">   25</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html">CdrPlasmaAir3Zheleznyak::Electron</a> : <span class="keyword">public</span> <a class="code" href="classCdrSpecies.html">CdrSpecies</a></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    {</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html">Electron</a>();</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;      ~<a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html">Electron</a>() {}</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;      Real</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html#a24dfdf3b90c979b4c1c75b9f64de832c">initialData</a>(<span class="keyword">const</span> RealVect a_pos, <span class="keyword">const</span> Real a_time) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;      Real     m_uniform_density;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;      Real     m_seed_density;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;      Real     m_seed_rad;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;      RealVect m_seed_pos;</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    };</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html">   40</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html">CdrPlasmaAir3Zheleznyak::MPlus</a> : <span class="keyword">public</span> <a class="code" href="classCdrSpecies.html">CdrSpecies</a></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    {</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html">MPlus</a>();</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;      ~<a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html">MPlus</a>() {}</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;      Real</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html#a25259f9843339b498c6e8a9065a21d81">initialData</a>(<span class="keyword">const</span> RealVect a_pos, <span class="keyword">const</span> Real a_time) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;      Real     m_uniform_density;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;      Real     m_seed_density;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;      Real     m_seed_rad;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;      RealVect m_seed_pos;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    };</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00055"></a><span class="lineno"><a class="line" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html">   55</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html">CdrPlasmaAir3Zheleznyak::MMinus</a> : <span class="keyword">public</span> <a class="code" href="classCdrSpecies.html">CdrSpecies</a></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    {</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html">MMinus</a>();</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;      ~<a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html">MMinus</a>() {}</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;      Real</div>
+<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html#a7042c9190132c88c25b3a860a2153067">   61</a></span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html#a7042c9190132c88c25b3a860a2153067">initialData</a>(<span class="keyword">const</span> RealVect a_pos, <span class="keyword">const</span> Real a_time)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="keyword">      </span>{</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="keywordflow">return</span> 0.0;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;      }</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    };</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html">   67</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html">CdrPlasmaAir3Zheleznyak::uv_Photon</a> : <span class="keyword">public</span> <a class="code" href="classRtSpecies.html">RtSpecies</a></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    {</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html">uv_Photon</a>();</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;      ~<a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html">uv_Photon</a>();</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;      Real</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;      <a class="code" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html#a1810d740631f783787471280f4f87fa3">getAbsorptionCoefficient</a>(<span class="keyword">const</span> RealVect a_pos) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;      Real</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;      getRandomKappa() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;      Real</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;      get_pO2()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="keyword">      </span>{</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="keywordflow">return</span> m_pO2;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;      }</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    <span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;      Real m_pO2;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;      Real m_f1;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;      Real m_f2;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;      Real m_K1;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;      Real m_K2;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;      Real                                  m_seed;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;      std::mt19937_64*                      m_rng;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;      std::uniform_real_distribution&lt;Real&gt;* m_udist01;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    };</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  } <span class="comment">// namespace CdrPlasma</span></div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;} <span class="comment">// namespace Physics</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="anamespacePhysics_html"><div class="ttname"><a href="namespacePhysics.html">Physics</a></div><div class="ttdoc">Name containing various physics models for running chombo-discharge code.</div><div class="ttdef"><b>Definition:</b> CD_AdvectionDiffusion.H:15</div></div>
-<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon_html"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::uv_Photon</a></div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.H:57</div></div>
+<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon_html"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::uv_Photon</a></div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.H:67</div></div>
 <div class="ttc" id="aclassRtSpecies_html"><div class="ttname"><a href="classRtSpecies.html">RtSpecies</a></div><div class="ttdoc">Declaration of a class that defines an interface to radiative transfer solvers, i....</div><div class="ttdef"><b>Definition:</b> CD_RtSpecies.H:29</div></div>
-<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus_html"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::MPlus</a></div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.H:38</div></div>
+<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus_html"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::MPlus</a></div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.H:40</div></div>
 <div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron_html"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::Electron</a></div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.H:25</div></div>
-<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus_html"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::MMinus</a></div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.H:50</div></div>
-<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus_html_a25259f9843339b498c6e8a9065a21d81"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html#a25259f9843339b498c6e8a9065a21d81">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::MPlus::initialData</a></div><div class="ttdeci">Real initialData(const RealVect a_pos, const Real a_time) const</div><div class="ttdoc">Initial data.</div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.cpp:74</div></div>
-<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus_html_a7042c9190132c88c25b3a860a2153067"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html#a7042c9190132c88c25b3a860a2153067">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::MMinus::initialData</a></div><div class="ttdeci">Real initialData(const RealVect a_pos, const Real a_time) const</div><div class="ttdoc">Initial data.</div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.H:54</div></div>
-<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron_html_a24dfdf3b90c979b4c1c75b9f64de832c"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html#a24dfdf3b90c979b4c1c75b9f64de832c">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::Electron::initialData</a></div><div class="ttdeci">Real initialData(const RealVect a_pos, const Real a_time) const</div><div class="ttdoc">Initial data.</div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.cpp:68</div></div>
-<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon_html_a1810d740631f783787471280f4f87fa3"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html#a1810d740631f783787471280f4f87fa3">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::uv_Photon::getAbsorptionCoefficient</a></div><div class="ttdeci">Real getAbsorptionCoefficient(const RealVect a_pos) const</div><div class="ttdoc">Get kappa (i.e. the inverse absorption length) at physical coordinates.</div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.cpp:110</div></div>
+<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus_html"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::MMinus</a></div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.H:55</div></div>
+<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus_html_a25259f9843339b498c6e8a9065a21d81"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MPlus.html#a25259f9843339b498c6e8a9065a21d81">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::MPlus::initialData</a></div><div class="ttdeci">Real initialData(const RealVect a_pos, const Real a_time) const</div><div class="ttdoc">Initial data.</div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.cpp:88</div></div>
+<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus_html_a7042c9190132c88c25b3a860a2153067"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1MMinus.html#a7042c9190132c88c25b3a860a2153067">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::MMinus::initialData</a></div><div class="ttdeci">Real initialData(const RealVect a_pos, const Real a_time) const</div><div class="ttdoc">Initial data.</div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.H:61</div></div>
+<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron_html_a24dfdf3b90c979b4c1c75b9f64de832c"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1Electron.html#a24dfdf3b90c979b4c1c75b9f64de832c">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::Electron::initialData</a></div><div class="ttdeci">Real initialData(const RealVect a_pos, const Real a_time) const</div><div class="ttdoc">Initial data.</div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.cpp:80</div></div>
+<div class="ttc" id="aclassPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon_html_a1810d740631f783787471280f4f87fa3"><div class="ttname"><a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaAir3Zheleznyak_1_1uv__Photon.html#a1810d740631f783787471280f4f87fa3">Physics::CdrPlasma::CdrPlasmaAir3Zheleznyak::uv_Photon::getAbsorptionCoefficient</a></div><div class="ttdeci">Real getAbsorptionCoefficient(const RealVect a_pos) const</div><div class="ttdoc">Get kappa (i.e. the inverse absorption length) at physical coordinates.</div><div class="ttdef"><b>Definition:</b> CD_CdrPlasmaAir3ZheleznyakSpecies.cpp:126</div></div>
 <div class="ttc" id="aclassCdrSpecies_html"><div class="ttname"><a href="classCdrSpecies.html">CdrSpecies</a></div><div class="ttdoc">Abstract class that describes the scalar quantity that is advected in CdrSolver.</div><div class="ttdef"><b>Definition:</b> CD_CdrSpecies.H:29</div></div>
 <div class="ttc" id="aCD__CdrPlasmaAir3Zheleznyak_8H_html"><div class="ttname"><a href="CD__CdrPlasmaAir3Zheleznyak_8H.html">CD_CdrPlasmaAir3Zheleznyak.H</a></div><div class="ttdoc">Declaration of a three-species model with (discrete) Zheleznyak photionization model.</div></div>
 <!-- start footer part -->

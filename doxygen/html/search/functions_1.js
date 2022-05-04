@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['balancehierarchy_3708',['balanceHierarchy',['../classLoadBalancing.html#ab95afdffd5bada447865d35320db70b7',1,'LoadBalancing']]],
-  ['balancelevelbylevel_3709',['balanceLevelByLevel',['../classLoadBalancing.html#aa1e45d9e61fd9be60b1a384ceba6b54b',1,'LoadBalancing']]],
+  ['balancehierarchy_3708',['balanceHierarchy',['../classLoadBalancing.html#a1778fcebe3688daf426fe59802a1f93a',1,'LoadBalancing']]],
+  ['balancelevelbylevel_3709',['balanceLevelByLevel',['../classLoadBalancing.html#ad1e72161df40db62ec722b2a4d78f102',1,'LoadBalancing']]],
   ['box_3710',['box',['../classDomainFluxIFFAB.html#ae6a150ba1a55b21cc799e9495230ace0',1,'DomainFluxIFFAB']]],
   ['boxsdf_3711',['BoxSdf',['../classBoxSdf.html#a00246df0e96b19cc7c917f1e9b6f4877',1,'BoxSdf::BoxSdf(const RealVect &amp;a_loCorner, const RealVect &amp;a_hiCorner, const bool &amp;a_fluidInside)'],['../classBoxSdf.html#ab1fa83184dd22fb61d4146704c62842f',1,'BoxSdf::BoxSdf(const BoxSdf &amp;a_inputIF)']]],
   ['brentrootfinder_3712',['brentRootFinder',['../namespacePolyUtils.html#a554dcb29bb180400d8d3f7a9c4db57a5',1,'PolyUtils']]],

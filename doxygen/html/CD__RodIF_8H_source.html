@@ -91,29 +91,30 @@ $(function() {
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">// Our includes</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classRodIF.html">   25</a></span>&#160;<span class="keyword">class </span><a class="code" href="classRodIF.html">RodIF</a> : <span class="keyword">public</span> BaseIF{</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classRodIF.html">   25</a></span>&#160;<span class="keyword">class </span><a class="code" href="classRodIF.html">RodIF</a> : <span class="keyword">public</span> BaseIF</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;{</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  <a class="code" href="classRodIF.html#a2b773d4772aa56912c263af880503936">RodIF</a>(<span class="keyword">const</span> RealVect&amp; a_center1, <span class="keyword">const</span> RealVect&amp; a_center2, <span class="keyword">const</span> Real&amp; a_radius, <span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; a_fluidInside);</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  <a class="code" href="classRodIF.html#a2b773d4772aa56912c263af880503936">RodIF</a>(<span class="keyword">const</span> <a class="code" href="classRodIF.html">RodIF</a>&amp; a_inputIF);</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <span class="keyword">virtual</span> Real <a class="code" href="classRodIF.html#aba5b1a2679655ff081ab1a2f3b3105dc">value</a>(<span class="keyword">const</span> RealVect&amp; a_point) <span class="keyword">const</span>; </div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <span class="keyword">virtual</span> BaseIF* <a class="code" href="classRodIF.html#a07e9639d513449d821ea3c93d26afbac">newImplicitFunction</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <span class="keyword">virtual</span> Real</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;  <a class="code" href="classRodIF.html#aba5b1a2679655ff081ab1a2f3b3105dc">value</a>(<span class="keyword">const</span> RealVect&amp; a_point) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  <span class="keyword">virtual</span> BaseIF*</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <a class="code" href="classRodIF.html#a07e9639d513449d821ea3c93d26afbac">newImplicitFunction</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  RefCountedPtr&lt;BaseIF&gt; m_baseif;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;};</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  RefCountedPtr&lt;BaseIF&gt; m_baseif;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;};</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassRodIF_html"><div class="ttname"><a href="classRodIF.html">RodIF</a></div><div class="ttdoc">Cylinder with rounded caps at its ends.</div><div class="ttdef"><b>Definition:</b> CD_RodIF.H:25</div></div>
-<div class="ttc" id="aclassRodIF_html_aba5b1a2679655ff081ab1a2f3b3105dc"><div class="ttname"><a href="classRodIF.html#aba5b1a2679655ff081ab1a2f3b3105dc">RodIF::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_point) const</div><div class="ttdoc">Value function. Returns distance to objcet.</div><div class="ttdef"><b>Definition:</b> CD_RodIF.cpp:53</div></div>
-<div class="ttc" id="aclassRodIF_html_a07e9639d513449d821ea3c93d26afbac"><div class="ttname"><a href="classRodIF.html#a07e9639d513449d821ea3c93d26afbac">RodIF::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const</div><div class="ttdoc">IF factory method.</div><div class="ttdef"><b>Definition:</b> CD_RodIF.cpp:57</div></div>
+<div class="ttc" id="aclassRodIF_html_aba5b1a2679655ff081ab1a2f3b3105dc"><div class="ttname"><a href="classRodIF.html#aba5b1a2679655ff081ab1a2f3b3105dc">RodIF::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_point) const</div><div class="ttdoc">Value function. Returns distance to objcet.</div><div class="ttdef"><b>Definition:</b> CD_RodIF.cpp:50</div></div>
+<div class="ttc" id="aclassRodIF_html_a07e9639d513449d821ea3c93d26afbac"><div class="ttname"><a href="classRodIF.html#a07e9639d513449d821ea3c93d26afbac">RodIF::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const</div><div class="ttdoc">IF factory method.</div><div class="ttdef"><b>Definition:</b> CD_RodIF.cpp:56</div></div>
 <div class="ttc" id="aclassRodIF_html_a2b773d4772aa56912c263af880503936"><div class="ttname"><a href="classRodIF.html#a2b773d4772aa56912c263af880503936">RodIF::RodIF</a></div><div class="ttdeci">RodIF(const RealVect &amp;a_center1, const RealVect &amp;a_center2, const Real &amp;a_radius, const bool &amp;a_fluidInside)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition:</b> CD_RodIF.cpp:23</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

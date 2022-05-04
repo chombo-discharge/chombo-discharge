@@ -202,9 +202,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a7924f01b09001ce27a0b3a8334ef066c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a7924f01b09001ce27a0b3a8334ef066c">loadBalanceThisRealm</a> (const std::string a_realm) const override</td></tr>
 <tr class="memdesc:a7924f01b09001ce27a0b3a8334ef066c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids.  <a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a7924f01b09001ce27a0b3a8334ef066c">More...</a><br /></td></tr>
 <tr class="separator:a7924f01b09001ce27a0b3a8334ef066c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0dda8ece9671b00a9efccb75ef42a5f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a0dda8ece9671b00a9efccb75ef42a5f1">loadBalanceBoxes</a> (Vector&lt; Vector&lt; int &gt; &gt; &amp;a_procs, Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const std::string a_realm, const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_lmin, const int a_finestLevel) override</td></tr>
-<tr class="memdesc:a0dda8ece9671b00a9efccb75ef42a5f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance grid boxes for a specified realm.  <a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a0dda8ece9671b00a9efccb75ef42a5f1">More...</a><br /></td></tr>
-<tr class="separator:a0dda8ece9671b00a9efccb75ef42a5f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c22bbb82d83dbdf0792c6f885d269b8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a9c22bbb82d83dbdf0792c6f885d269b8">loadBalanceBoxes</a> (Vector&lt; Vector&lt; int &gt;&gt; &amp;a_procs, Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes, const std::string a_realm, const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_lmin, const int a_finestLevel) override</td></tr>
+<tr class="memdesc:a9c22bbb82d83dbdf0792c6f885d269b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balance grid boxes for a specified realm.  <a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a9c22bbb82d83dbdf0792c6f885d269b8">More...</a><br /></td></tr>
+<tr class="separator:a9c22bbb82d83dbdf0792c6f885d269b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a133dd78af79a49ebdc6ae3cfe459d3d7"><td class="memItemLeft" align="right" valign="top"><a id="a133dd78af79a49ebdc6ae3cfe459d3d7"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>intersectParticles</b> (const WhichParticles a_which, const <a class="el" href="CD__EbRepresentation_8H.html#a07b20010dfee95e53d9c9073ca6a6c2b">EbRepresentation</a> a_representation, const bool a_delete)</td></tr>
 <tr class="separator:a133dd78af79a49ebdc6ae3cfe459d3d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -226,15 +226,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>transferCoveredPartic
 <tr class="memitem:aa80eab5f8000f90b570b33c4e328a48b"><td class="memItemLeft" align="right" valign="top"><a id="aa80eab5f8000f90b570b33c4e328a48b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setVerbosity</b> (const int a_verbosity)</td></tr>
 <tr class="separator:aa80eab5f8000f90b570b33c4e328a48b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa840c5e8b9938e20ace7795352c71cdc"><td class="memItemLeft" align="right" valign="top"><a id="aa840c5e8b9938e20ace7795352c71cdc"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setIto</b> (RefCountedPtr&lt; <a class="el" href="classItoLayout.html">ItoLayout</a>&lt; <a class="el" href="classItoSolver.html">ItoSolver</a> &gt; &gt; &amp;a_cdr)</td></tr>
-<tr class="separator:aa840c5e8b9938e20ace7795352c71cdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49002762f9e3079ab2de0fa0727a2370"><td class="memItemLeft" align="right" valign="top"><a id="a49002762f9e3079ab2de0fa0727a2370"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setIto</b> (RefCountedPtr&lt; <a class="el" href="classItoLayout.html">ItoLayout</a>&lt; <a class="el" href="classItoSolver.html">ItoSolver</a> &gt;&gt; &amp;a_cdr)</td></tr>
+<tr class="separator:a49002762f9e3079ab2de0fa0727a2370"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbdc5693b1bcce350ef0635a06a6cc8d"><td class="memItemLeft" align="right" valign="top"><a id="afbdc5693b1bcce350ef0635a06a6cc8d"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setFieldSolver</b> (RefCountedPtr&lt; <a class="el" href="classFieldSolver.html">FieldSolver</a> &gt; &amp;a_poisson)</td></tr>
 <tr class="separator:afbdc5693b1bcce350ef0635a06a6cc8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f1ffffe527ade965b29fea318566333"><td class="memItemLeft" align="right" valign="top"><a id="a5f1ffffe527ade965b29fea318566333"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setRadiativeTransferSolvers</b> (RefCountedPtr&lt; <a class="el" href="classRtLayout.html">RtLayout</a>&lt; <a class="el" href="classMcPhoto.html">McPhoto</a> &gt; &gt; &amp;a_rte)</td></tr>
-<tr class="separator:a5f1ffffe527ade965b29fea318566333"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2121d99e733fbc35c3e0b3f874e2857f"><td class="memItemLeft" align="right" valign="top"><a id="a2121d99e733fbc35c3e0b3f874e2857f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setRadiativeTransferSolvers</b> (RefCountedPtr&lt; <a class="el" href="classRtLayout.html">RtLayout</a>&lt; <a class="el" href="classMcPhoto.html">McPhoto</a> &gt;&gt; &amp;a_rte)</td></tr>
+<tr class="separator:a2121d99e733fbc35c3e0b3f874e2857f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a854b20bf7336889cc165c04989c934a7"><td class="memItemLeft" align="right" valign="top"><a id="a854b20bf7336889cc165c04989c934a7"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setVoltage</b> (const std::function&lt; Real(const Real a_time)&gt; &amp;a_potential)</td></tr>
 <tr class="separator:a854b20bf7336889cc165c04989c934a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -395,11 +395,11 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>advanceReactionNetwor
 void&#160;</td><td class="memItemRight" valign="bottom"><b>advanceReactionNetwork</b> (Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_particles, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; * &gt; &amp;a_Photons, Vector&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; * &gt; &amp;a_newPhotons, const Vector&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &gt; &amp;a_sources, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_E, const Real a_dt)</td></tr>
 <tr class="separator:a709d84596c78d6875a61be3c82a0d768"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a394ff834593ce9f3d109a04d63e1740a"><td class="memItemLeft" align="right" valign="top"><a id="a394ff834593ce9f3d109a04d63e1740a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>advanceReactionNetwork</b> (Vector&lt; <a class="el" href="CD__ParticleContainer_8H.html#a438a4fd4ceddf3ca05df2638804d7ab0">AMRCellParticles</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_particles, Vector&lt; <a class="el" href="CD__ParticleContainer_8H.html#a438a4fd4ceddf3ca05df2638804d7ab0">AMRCellParticles</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; * &gt; &amp;a_Photons, Vector&lt; <a class="el" href="CD__ParticleContainer_8H.html#a438a4fd4ceddf3ca05df2638804d7ab0">AMRCellParticles</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; * &gt; &amp;a_newPhotons, const Vector&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &gt; &amp;a_sources, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_E, const Real a_dt)</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>advanceReactionNetwork</b> (Vector&lt; <a class="el" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_particles, Vector&lt; <a class="el" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; * &gt; &amp;a_Photons, Vector&lt; <a class="el" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; * &gt; &amp;a_newPhotons, const Vector&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &gt; &amp;a_sources, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_E, const Real a_dt)</td></tr>
 <tr class="separator:a394ff834593ce9f3d109a04d63e1740a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a45bedfc590d564a490f5841ed308cceb"><td class="memItemLeft" align="right" valign="top"><a id="a45bedfc590d564a490f5841ed308cceb"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>advanceReactionNetwork</b> (Vector&lt; LayoutData&lt; BinFab&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &gt; * &gt; &amp;a_particles, Vector&lt; LayoutData&lt; BinFab&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &gt; * &gt; &amp;a_Photons, Vector&lt; LayoutData&lt; BinFab&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &gt; * &gt; &amp;a_newPhotons, const Vector&lt; LevelData&lt; EBCellFAB &gt; * &gt; &amp;a_sources, const LevelData&lt; EBCellFAB &gt; &amp;a_E, const int a_lvl, const Real a_dt)</td></tr>
-<tr class="separator:a45bedfc590d564a490f5841ed308cceb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e7cac8370d146a959c1122b595b2b77"><td class="memItemLeft" align="right" valign="top"><a id="a4e7cac8370d146a959c1122b595b2b77"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>advanceReactionNetwork</b> (Vector&lt; LayoutData&lt; BinFab&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt;&gt; * &gt; &amp;a_particles, Vector&lt; LayoutData&lt; BinFab&lt; <a class="el" href="classPhoton.html">Photon</a> &gt;&gt; * &gt; &amp;a_Photons, Vector&lt; LayoutData&lt; BinFab&lt; <a class="el" href="classPhoton.html">Photon</a> &gt;&gt; * &gt; &amp;a_newPhotons, const Vector&lt; LevelData&lt; EBCellFAB &gt; * &gt; &amp;a_sources, const LevelData&lt; EBCellFAB &gt; &amp;a_E, const int a_lvl, const Real a_dt)</td></tr>
+<tr class="separator:a4e7cac8370d146a959c1122b595b2b77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a315f8e72d3501017cb43909fce39cb"><td class="memItemLeft" align="right" valign="top"><a id="a7a315f8e72d3501017cb43909fce39cb"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>advanceReactionNetwork</b> (Vector&lt; BinFab&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;a_particles, Vector&lt; BinFab&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; * &gt; &amp;a_Photons, Vector&lt; BinFab&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; * &gt; &amp;a_newPhotons, const Vector&lt; EBCellFAB * &gt; &amp;a_sources, const EBCellFAB &amp;a_E, const int a_lvl, const DataIndex a_dit, const Box a_box, const Real a_dx, const Real a_dt)</td></tr>
 <tr class="separator:a7a315f8e72d3501017cb43909fce39cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -481,9 +481,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>printTimerDiagnostics
 <tr class="memitem:a6cd08919741d41e8b0beb332def216be"><td class="memItemLeft" align="right" valign="top"><a id="a6cd08919741d41e8b0beb332def216be"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>printTimerTail</b> ()</td></tr>
 <tr class="separator:a6cd08919741d41e8b0beb332def216be"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78541d0a3a162efce962088ef186d7d4"><td class="memItemLeft" align="right" valign="top"><a id="a78541d0a3a162efce962088ef186d7d4"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>loadBalanceParticleRealm</b> (Vector&lt; Vector&lt; int &gt; &gt; &amp;a_procs, Vector&lt; Vector&lt; Box &gt; &gt; &amp;a_boxes, const std::string a_realm, const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_lmin, const int a_finestLevel)</td></tr>
-<tr class="separator:a78541d0a3a162efce962088ef186d7d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0628ef4d7a2165f7571b8c647026aeea"><td class="memItemLeft" align="right" valign="top"><a id="a0628ef4d7a2165f7571b8c647026aeea"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>loadBalanceParticleRealm</b> (Vector&lt; Vector&lt; int &gt;&gt; &amp;a_procs, Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes, const std::string a_realm, const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_lmin, const int a_finestLevel)</td></tr>
+<tr class="separator:a0628ef4d7a2165f7571b8c647026aeea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b179c93c5ee8bc29db414ed31eee59b"><td class="memItemLeft" align="right" valign="top"><a id="a3b179c93c5ee8bc29db414ed31eee59b"></a>
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classItoSolver.html">ItoSolver</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>getLoadBalanceSolvers</b> () const</td></tr>
 <tr class="separator:a3b179c93c5ee8bc29db414ed31eee59b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -820,8 +820,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="a0dda8ece9671b00a9efccb75ef42a5f1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0dda8ece9671b00a9efccb75ef42a5f1">&#9670;&nbsp;</a></span>loadBalanceBoxes()</h2>
+<a id="a9c22bbb82d83dbdf0792c6f885d269b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c22bbb82d83dbdf0792c6f885d269b8">&#9670;&nbsp;</a></span>loadBalanceBoxes()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -832,13 +832,13 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
         <tr>
           <td class="memname">void ItoPlasmaStepper::loadBalanceBoxes </td>
           <td>(</td>
-          <td class="paramtype">Vector&lt; Vector&lt; int &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">Vector&lt; Vector&lt; int &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_procs</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector&lt; Vector&lt; Box &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">Vector&lt; Vector&lt; Box &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_boxes</em>, </td>
         </tr>
         <tr>
@@ -892,7 +892,7 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </dl>
 <p>This is only called by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default implementation uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance(Vector&lt;int&gt;, Vector&lt;T&gt;, Vector&lt;Box&gt;). </p>
 
-<p>Reimplemented from <a class="el" href="classTimeStepper.html#a77d9120fc07c2d552fda78e30562fcbe">TimeStepper</a>.</p>
+<p>Reimplemented from <a class="el" href="classTimeStepper.html#a3542542035fd87a027e6df94b11f293b">TimeStepper</a>.</p>
 
 </div>
 </div>

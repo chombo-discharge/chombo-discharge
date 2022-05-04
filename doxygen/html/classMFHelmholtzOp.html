@@ -129,9 +129,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#ac9a3628ce62e9bc0dca91806c07a1cf4">MFHelmholtzOp</a> (const <a class="el" href="classMFHelmholtzOp.html">MFHelmholtzOp</a> &amp;&amp;a_op)=delete</td></tr>
 <tr class="memdesc:ac9a3628ce62e9bc0dca91806c07a1cf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">No move construction allowed. <br /></td></tr>
 <tr class="separator:ac9a3628ce62e9bc0dca91806c07a1cf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80ff548085d6632cd6c7eeacc94d48cf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a80ff548085d6632cd6c7eeacc94d48cf">MFHelmholtzOp</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflgFine, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflg, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflgCoFi, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflgCoar, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflgCoarMG, const <a class="el" href="classMFMultigridInterpolator.html">MFMultigridInterpolator</a> &amp;a_interpolator, const <a class="el" href="classMFFluxReg.html">MFFluxReg</a> &amp;a_fluxReg, const <a class="el" href="classMFCoarAve.html">MFCoarAve</a> &amp;a_coarAve, const RefCountedPtr&lt; <a class="el" href="classMFHelmholtzDomainBCFactory.html">MFHelmholtzDomainBCFactory</a> &gt; &amp;a_domainBC, const RefCountedPtr&lt; <a class="el" href="classMFHelmholtzEBBCFactory.html">MFHelmholtzEBBCFactory</a> &gt; &amp;a_ebBC, const RefCountedPtr&lt; <a class="el" href="classMFHelmholtzJumpBCFactory.html">MFHelmholtzJumpBCFactory</a> &gt; &amp;a_jumpBcFactory, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int &amp;a_refToFine, const int &amp;a_refToCoar, const bool &amp;a_hasFine, const bool &amp;a_hasCoar, const bool &amp;a_hasMGObjects, const bool &amp;a_isMGOperator, const Real &amp;a_alpha, const Real &amp;a_beta, const RefCountedPtr&lt; LevelData&lt; MFCellFAB &gt; &gt; &amp;a_Acoef, const RefCountedPtr&lt; LevelData&lt; MFFluxFAB &gt; &gt; &amp;a_Bcoef, const RefCountedPtr&lt; LevelData&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt; &gt; &amp;a_BcoefIrreg, const IntVect &amp;a_ghostPhi, const IntVect &amp;a_ghostRhs, const int &amp;a_jumpOrder, const int &amp;a_jumpWeight, const <a class="el" href="classMFHelmholtzOp.html#afa2411375a5509aae293271cda50c2f1">Smoother</a> &amp;a_smoother)</td></tr>
-<tr class="memdesc:a80ff548085d6632cd6c7eeacc94d48cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classMFHelmholtzOp.html#a80ff548085d6632cd6c7eeacc94d48cf">More...</a><br /></td></tr>
-<tr class="separator:a80ff548085d6632cd6c7eeacc94d48cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a351c54a8b4f4d5451ce7ffc0108d6160"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a351c54a8b4f4d5451ce7ffc0108d6160">MFHelmholtzOp</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflgFine, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflg, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflgCoFi, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflgCoar, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflgCoarMG, const <a class="el" href="classMFMultigridInterpolator.html">MFMultigridInterpolator</a> &amp;a_interpolator, const <a class="el" href="classMFFluxReg.html">MFFluxReg</a> &amp;a_fluxReg, const <a class="el" href="classMFCoarAve.html">MFCoarAve</a> &amp;a_coarAve, const RefCountedPtr&lt; <a class="el" href="classMFHelmholtzDomainBCFactory.html">MFHelmholtzDomainBCFactory</a> &gt; &amp;a_domainBC, const RefCountedPtr&lt; <a class="el" href="classMFHelmholtzEBBCFactory.html">MFHelmholtzEBBCFactory</a> &gt; &amp;a_ebBC, const RefCountedPtr&lt; <a class="el" href="classMFHelmholtzJumpBCFactory.html">MFHelmholtzJumpBCFactory</a> &gt; &amp;a_jumpBcFactory, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int &amp;a_refToFine, const int &amp;a_refToCoar, const bool &amp;a_hasFine, const bool &amp;a_hasCoar, const bool &amp;a_hasMGObjects, const bool &amp;a_isMGOperator, const Real &amp;a_alpha, const Real &amp;a_beta, const RefCountedPtr&lt; LevelData&lt; MFCellFAB &gt;&gt; &amp;a_Acoef, const RefCountedPtr&lt; LevelData&lt; MFFluxFAB &gt;&gt; &amp;a_Bcoef, const RefCountedPtr&lt; LevelData&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt;&gt; &amp;a_BcoefIrreg, const IntVect &amp;a_ghostPhi, const IntVect &amp;a_ghostRhs, const int &amp;a_jumpOrder, const int &amp;a_jumpWeight, const <a class="el" href="classMFHelmholtzOp.html#afa2411375a5509aae293271cda50c2f1">Smoother</a> &amp;a_smoother)</td></tr>
+<tr class="memdesc:a351c54a8b4f4d5451ce7ffc0108d6160"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classMFHelmholtzOp.html#a351c54a8b4f4d5451ce7ffc0108d6160">More...</a><br /></td></tr>
+<tr class="separator:a351c54a8b4f4d5451ce7ffc0108d6160"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69ec73632dd8dc05c01c6a6deef81146"><td class="memItemLeft" align="right" valign="top"><a id="a69ec73632dd8dc05c01c6a6deef81146"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a69ec73632dd8dc05c01c6a6deef81146">~MFHelmholtzOp</a> ()</td></tr>
 <tr class="memdesc:a69ec73632dd8dc05c01c6a6deef81146"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
@@ -144,10 +144,10 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classMFHelmholtzOp.html">MFHelmholtzOp</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#aed73c9791f17a66a40b8387789ccd08a">operator=</a> (const <a class="el" href="classMFHelmholtzOp.html">MFHelmholtzOp</a> &amp;&amp;a_oper)=delete</td></tr>
 <tr class="memdesc:aed73c9791f17a66a40b8387789ccd08a"><td class="mdescLeft">&#160;</td><td class="mdescRight">No move assigment allowed. <br /></td></tr>
 <tr class="separator:aed73c9791f17a66a40b8387789ccd08a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae92c02fae0b53c8672f289b68a0c57aa"><td class="memItemLeft" align="right" valign="top"><a id="ae92c02fae0b53c8672f289b68a0c57aa"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#ae92c02fae0b53c8672f289b68a0c57aa">setJump</a> (RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;a_jump)</td></tr>
-<tr class="memdesc:ae92c02fae0b53c8672f289b68a0c57aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the jump boundary condition. <br /></td></tr>
-<tr class="separator:ae92c02fae0b53c8672f289b68a0c57aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6bfee2c9ec20fa14d1d32208266e508"><td class="memItemLeft" align="right" valign="top"><a id="ab6bfee2c9ec20fa14d1d32208266e508"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#ab6bfee2c9ec20fa14d1d32208266e508">setJump</a> (RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt;&gt;&gt; &amp;a_jump)</td></tr>
+<tr class="memdesc:ab6bfee2c9ec20fa14d1d32208266e508"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the jump boundary condition. <br /></td></tr>
+<tr class="separator:ab6bfee2c9ec20fa14d1d32208266e508"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62cc83520c5340a47125ffcfbe10863e"><td class="memItemLeft" align="right" valign="top"><a id="a62cc83520c5340a47125ffcfbe10863e"></a>
 RefCountedPtr&lt; <a class="el" href="classEBHelmholtzOp.html">EBHelmholtzOp</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a62cc83520c5340a47125ffcfbe10863e">getHelmOp</a> (const int a_phase)</td></tr>
 <tr class="memdesc:a62cc83520c5340a47125ffcfbe10863e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get Helmholtz operator. <br /></td></tr>
@@ -242,21 +242,21 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a40509a9878e65e570bc70851f4ea2257"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a40509a9878e65e570bc70851f4ea2257">AMRProlong</a> (LevelData&lt; MFCellFAB &gt; &amp;a_correction, const LevelData&lt; MFCellFAB &gt; &amp;a_coarseCorrection) override final</td></tr>
 <tr class="memdesc:a40509a9878e65e570bc70851f4ea2257"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prolongation onto AMR level.  <a href="classMFHelmholtzOp.html#a40509a9878e65e570bc70851f4ea2257">More...</a><br /></td></tr>
 <tr class="separator:a40509a9878e65e570bc70851f4ea2257"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3a67a9506ec93f4ae3108f7c26e7b8ad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a3a67a9506ec93f4ae3108f7c26e7b8ad">AMRResidual</a> (LevelData&lt; MFCellFAB &gt; &amp;a_residual, const LevelData&lt; MFCellFAB &gt; &amp;a_phiFine, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiCoar, const LevelData&lt; MFCellFAB &gt; &amp;a_rhs, bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt; &gt; *a_finerOp) override final</td></tr>
-<tr class="memdesc:a3a67a9506ec93f4ae3108f7c26e7b8ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute residual on this level. AMR version.  <a href="classMFHelmholtzOp.html#a3a67a9506ec93f4ae3108f7c26e7b8ad">More...</a><br /></td></tr>
-<tr class="separator:a3a67a9506ec93f4ae3108f7c26e7b8ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a053479b55d908505d49b157695ebfffc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a053479b55d908505d49b157695ebfffc">AMRResidual</a> (LevelData&lt; MFCellFAB &gt; &amp;a_residual, const LevelData&lt; MFCellFAB &gt; &amp;a_phiFine, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiCoar, const LevelData&lt; MFCellFAB &gt; &amp;a_rhs, bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt;&gt; *a_finerOp) override final</td></tr>
+<tr class="memdesc:a053479b55d908505d49b157695ebfffc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute residual on this level. AMR version.  <a href="classMFHelmholtzOp.html#a053479b55d908505d49b157695ebfffc">More...</a><br /></td></tr>
+<tr class="separator:a053479b55d908505d49b157695ebfffc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2c749dcb4f81d77cf701da05e775a68"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#ab2c749dcb4f81d77cf701da05e775a68">AMRResidualNF</a> (LevelData&lt; MFCellFAB &gt; &amp;a_residual, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiCoar, const LevelData&lt; MFCellFAB &gt; &amp;a_rhs, bool a_homogeneousPhysBC) override final</td></tr>
 <tr class="memdesc:ab2c749dcb4f81d77cf701da05e775a68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute AMR residual on finest AMR level.  <a href="classMFHelmholtzOp.html#ab2c749dcb4f81d77cf701da05e775a68">More...</a><br /></td></tr>
 <tr class="separator:ab2c749dcb4f81d77cf701da05e775a68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ec87c08e966cf4c4adacd17eef482f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a9ec87c08e966cf4c4adacd17eef482f2">AMRResidualNC</a> (LevelData&lt; MFCellFAB &gt; &amp;a_residual, const LevelData&lt; MFCellFAB &gt; &amp;a_phiFine, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_rhs, bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt; &gt; *a_finerOp) override final</td></tr>
-<tr class="memdesc:a9ec87c08e966cf4c4adacd17eef482f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute AMR residual on coarsest.  <a href="classMFHelmholtzOp.html#a9ec87c08e966cf4c4adacd17eef482f2">More...</a><br /></td></tr>
-<tr class="separator:a9ec87c08e966cf4c4adacd17eef482f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88db31858d37db01fa6030a727a9478d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a88db31858d37db01fa6030a727a9478d">AMRResidualNC</a> (LevelData&lt; MFCellFAB &gt; &amp;a_residual, const LevelData&lt; MFCellFAB &gt; &amp;a_phiFine, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_rhs, bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt;&gt; *a_finerOp) override final</td></tr>
+<tr class="memdesc:a88db31858d37db01fa6030a727a9478d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute AMR residual on coarsest.  <a href="classMFHelmholtzOp.html#a88db31858d37db01fa6030a727a9478d">More...</a><br /></td></tr>
+<tr class="separator:a88db31858d37db01fa6030a727a9478d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6563302292698dfa56e83e64e975e5ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a6563302292698dfa56e83e64e975e5ed">AMROperatorNF</a> (LevelData&lt; MFCellFAB &gt; &amp;a_Lphi, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiCoar, bool a_homogeneousPhysBC) override final</td></tr>
 <tr class="memdesc:a6563302292698dfa56e83e64e975e5ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no finer levels.  <a href="classMFHelmholtzOp.html#a6563302292698dfa56e83e64e975e5ed">More...</a><br /></td></tr>
 <tr class="separator:a6563302292698dfa56e83e64e975e5ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a771a447588626450e1cfe48e88729b45"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a771a447588626450e1cfe48e88729b45">AMROperatorNC</a> (LevelData&lt; MFCellFAB &gt; &amp;a_Lphi, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiCoar, bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt; &gt; *a_finerOp) override final</td></tr>
-<tr class="memdesc:a771a447588626450e1cfe48e88729b45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no coarser AMR levels.  <a href="classMFHelmholtzOp.html#a771a447588626450e1cfe48e88729b45">More...</a><br /></td></tr>
-<tr class="separator:a771a447588626450e1cfe48e88729b45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1666582f7a24d81da3d466a35343a72b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a1666582f7a24d81da3d466a35343a72b">AMROperatorNC</a> (LevelData&lt; MFCellFAB &gt; &amp;a_Lphi, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiCoar, bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt;&gt; *a_finerOp) override final</td></tr>
+<tr class="memdesc:a1666582f7a24d81da3d466a35343a72b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no coarser AMR levels.  <a href="classMFHelmholtzOp.html#a1666582f7a24d81da3d466a35343a72b">More...</a><br /></td></tr>
+<tr class="separator:a1666582f7a24d81da3d466a35343a72b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -272,9 +272,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a77defde9dc79221f5b7295a6469cbe49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a77defde9dc79221f5b7295a6469cbe49">applyOp</a> (LevelData&lt; MFCellFAB &gt; &amp;a_Lphi, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; *const a_phiCoar, const bool a_homogeneousPhysBC, const bool a_homogeneousCFBC)</td></tr>
 <tr class="memdesc:a77defde9dc79221f5b7295a6469cbe49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.  <a href="classMFHelmholtzOp.html#a77defde9dc79221f5b7295a6469cbe49">More...</a><br /></td></tr>
 <tr class="separator:a77defde9dc79221f5b7295a6469cbe49"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03b2d5129e64e73d82edffb822455b90"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a03b2d5129e64e73d82edffb822455b90">AMROperator</a> (LevelData&lt; MFCellFAB &gt; &amp;a_Lphi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiFine, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiCoar, const bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt; &gt; *a_finerOp)</td></tr>
-<tr class="memdesc:a03b2d5129e64e73d82edffb822455b90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context.  <a href="classMFHelmholtzOp.html#a03b2d5129e64e73d82edffb822455b90">More...</a><br /></td></tr>
-<tr class="separator:a03b2d5129e64e73d82edffb822455b90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26766f7e95b409db0480944b0b587db6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a26766f7e95b409db0480944b0b587db6">AMROperator</a> (LevelData&lt; MFCellFAB &gt; &amp;a_Lphi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiFine, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiCoar, const bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt;&gt; *a_finerOp)</td></tr>
+<tr class="memdesc:a26766f7e95b409db0480944b0b587db6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context.  <a href="classMFHelmholtzOp.html#a26766f7e95b409db0480944b0b587db6">More...</a><br /></td></tr>
+<tr class="separator:a26766f7e95b409db0480944b0b587db6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -378,8 +378,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <div class="textblock"><p>Operator for solving multifluid Helmholtz on a grid level. </p>
 <p>This operator should typically not be constructed directly by the user but used together with Chombo's AMRMultiGrid. In this case the user will want to constructor these operators through the factor. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a80ff548085d6632cd6c7eeacc94d48cf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a80ff548085d6632cd6c7eeacc94d48cf">&#9670;&nbsp;</a></span>MFHelmholtzOp()</h2>
+<a id="a351c54a8b4f4d5451ce7ffc0108d6160"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a351c54a8b4f4d5451ce7ffc0108d6160">&#9670;&nbsp;</a></span>MFHelmholtzOp()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -519,19 +519,19 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; MFCellFAB &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; MFCellFAB &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_Acoef</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; MFFluxFAB &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; MFFluxFAB &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_Bcoef</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_BcoefIrreg</em>, </td>
         </tr>
         <tr>
@@ -612,8 +612,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a03b2d5129e64e73d82edffb822455b90"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a03b2d5129e64e73d82edffb822455b90">&#9670;&nbsp;</a></span>AMROperator()</h2>
+<a id="a26766f7e95b409db0480944b0b587db6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26766f7e95b409db0480944b0b587db6">&#9670;&nbsp;</a></span>AMROperator()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -654,7 +654,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt; &gt; *&#160;</td>
+          <td class="paramtype">AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt;&gt; *&#160;</td>
           <td class="paramname"><em>a_finerOp</em>&#160;</td>
         </tr>
         <tr>
@@ -686,8 +686,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a771a447588626450e1cfe48e88729b45"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a771a447588626450e1cfe48e88729b45">&#9670;&nbsp;</a></span>AMROperatorNC()</h2>
+<a id="a1666582f7a24d81da3d466a35343a72b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1666582f7a24d81da3d466a35343a72b">&#9670;&nbsp;</a></span>AMROperatorNC()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -722,7 +722,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt; &gt; *&#160;</td>
+          <td class="paramtype">AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt;&gt; *&#160;</td>
           <td class="paramname"><em>a_finerOp</em>&#160;</td>
         </tr>
         <tr>
@@ -857,8 +857,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a3a67a9506ec93f4ae3108f7c26e7b8ad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3a67a9506ec93f4ae3108f7c26e7b8ad">&#9670;&nbsp;</a></span>AMRResidual()</h2>
+<a id="a053479b55d908505d49b157695ebfffc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a053479b55d908505d49b157695ebfffc">&#9670;&nbsp;</a></span>AMRResidual()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -905,7 +905,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt; &gt; *&#160;</td>
+          <td class="paramtype">AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt;&gt; *&#160;</td>
           <td class="paramname"><em>a_finerOp</em>&#160;</td>
         </tr>
         <tr>
@@ -937,8 +937,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a9ec87c08e966cf4c4adacd17eef482f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9ec87c08e966cf4c4adacd17eef482f2">&#9670;&nbsp;</a></span>AMRResidualNC()</h2>
+<a id="a88db31858d37db01fa6030a727a9478d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88db31858d37db01fa6030a727a9478d">&#9670;&nbsp;</a></span>AMRResidualNC()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -979,7 +979,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt; &gt; *&#160;</td>
+          <td class="paramtype">AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt;&gt; *&#160;</td>
           <td class="paramname"><em>a_finerOp</em>&#160;</td>
         </tr>
         <tr>

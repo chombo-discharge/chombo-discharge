@@ -222,7 +222,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:aa79075d0eefd481c01e3fef9cd3a12ad"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#aa79075d0eefd481c01e3fef9cd3a12ad">setVoltage</a> (std::function&lt; Real(const Real a_time)&gt; a_voltage)</td></tr>
 <tr class="memdesc:aa79075d0eefd481c01e3fef9cd3a12ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set potential dependence in time.  <a href="classFieldSolver.html#aa79075d0eefd481c01e3fef9cd3a12ad">More...</a><br /></td></tr>
 <tr class="separator:aa79075d0eefd481c01e3fef9cd3a12ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30afc2c18bdaa41ea562b85afdc41ff4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a30afc2c18bdaa41ea562b85afdc41ff4">setDomainSideBcFunction</a> (const int a_dir, const Side::LoHiSide a_side, const <a class="el" href="classElectrostaticDomainBc.html#ac37dfb2ab9310ad034116bdbbe27f2da">ElectrostaticDomainBc::BcFunction</a> &amp;a_function)</td></tr>
+<tr class="memitem:a30afc2c18bdaa41ea562b85afdc41ff4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a30afc2c18bdaa41ea562b85afdc41ff4">setDomainSideBcFunction</a> (const int a_dir, const Side::LoHiSide a_side, const <a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">ElectrostaticDomainBc::BcFunction</a> &amp;a_function)</td></tr>
 <tr class="memdesc:a30afc2c18bdaa41ea562b85afdc41ff4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boundary condition function on a domain side.  <a href="classFieldSolver.html#a30afc2c18bdaa41ea562b85afdc41ff4">More...</a><br /></td></tr>
 <tr class="separator:a30afc2c18bdaa41ea562b85afdc41ff4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae51f0a79ee0b74b04508b06cabab3f95"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ae51f0a79ee0b74b04508b06cabab3f95">setElectrodeDirichletFunction</a> (const int a_electrode, const <a class="el" href="classElectrostaticEbBc.html#a03db9643a359651dfca064b206ea1a3e">ElectrostaticEbBc::BcFunction</a> &amp;a_function)</td></tr>
@@ -467,7 +467,7 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memdesc:aaecc3c15e9bd7c1c555972921162c8a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dirichlet boundary conditions on electrodes. <br /></td></tr>
 <tr class="separator:aaecc3c15e9bd7c1c555972921162c8a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae50c7052bde437dd6865059fbf4d388"><td class="memItemLeft" align="right" valign="top"><a id="aae50c7052bde437dd6865059fbf4d388"></a>
-std::map&lt; <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">ElectrostaticDomainBc::DomainSide</a>, <a class="el" href="classElectrostaticDomainBc.html#ac37dfb2ab9310ad034116bdbbe27f2da">ElectrostaticDomainBc::BcFunction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#aae50c7052bde437dd6865059fbf4d388">m_domainBcFunctions</a></td></tr>
+std::map&lt; <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">ElectrostaticDomainBc::DomainSide</a>, <a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">ElectrostaticDomainBc::BcFunction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#aae50c7052bde437dd6865059fbf4d388">m_domainBcFunctions</a></td></tr>
 <tr class="memdesc:aae50c7052bde437dd6865059fbf4d388"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain BC functions. This is used to map space/time to a voltage/field at the domain faces. <br /></td></tr>
 <tr class="separator:aae50c7052bde437dd6865059fbf4d388"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8800f0b06190a38a835cf83fbe0ded59"><td class="memItemLeft" align="right" valign="top"><a id="a8800f0b06190a38a835cf83fbe0ded59"></a>
@@ -1610,7 +1610,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classElectrostaticDomainBc.html#ac37dfb2ab9310ad034116bdbbe27f2da">ElectrostaticDomainBc::BcFunction</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">ElectrostaticDomainBc::BcFunction</a> &amp;&#160;</td>
           <td class="paramname"><em>a_function</em>&#160;</td>
         </tr>
         <tr>

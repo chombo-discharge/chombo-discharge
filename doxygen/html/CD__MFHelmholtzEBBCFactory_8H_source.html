@@ -89,23 +89,24 @@ $(function() {
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__MFHelmholtzJumpBC_8H.html">CD_MFHelmholtzJumpBC.H</a>&gt;</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
-<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="classMFHelmholtzEBBCFactory.html">   23</a></span>&#160;<span class="keyword">class </span><a class="code" href="classMFHelmholtzEBBCFactory.html">MFHelmholtzEBBCFactory</a> {</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="classMFHelmholtzEBBCFactory.html">   23</a></span>&#160;<span class="keyword">class </span><a class="code" href="classMFHelmholtzEBBCFactory.html">MFHelmholtzEBBCFactory</a></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;{</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  <a class="code" href="classMFHelmholtzEBBCFactory.html#a22cc270285ea051a3052eba13aa5b9b2">MFHelmholtzEBBCFactory</a>();</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classMFHelmholtzEBBCFactory.html#a37e5c5429c7a96b926bf7849eeb16e56">~MFHelmholtzEBBCFactory</a>();</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  <span class="keyword">virtual</span> RefCountedPtr&lt;EBHelmholtzEBBC&gt; <a class="code" href="classMFHelmholtzEBBCFactory.html#ada439520a3703565b4f6254cdd12a711">create</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_iphase, <span class="keyword">const</span> RefCountedPtr&lt;MFHelmholtzJumpBC&gt;&amp; a_jumpBC) <span class="keyword">const</span> = 0;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;};</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  <span class="keyword">virtual</span> RefCountedPtr&lt;EBHelmholtzEBBC&gt;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <a class="code" href="classMFHelmholtzEBBCFactory.html#ada439520a3703565b4f6254cdd12a711">create</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_iphase, <span class="keyword">const</span> RefCountedPtr&lt;MFHelmholtzJumpBC&gt;&amp; a_jumpBC) <span class="keyword">const</span> = 0;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;};</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassMFHelmholtzEBBCFactory_html_ada439520a3703565b4f6254cdd12a711"><div class="ttname"><a href="classMFHelmholtzEBBCFactory.html#ada439520a3703565b4f6254cdd12a711">MFHelmholtzEBBCFactory::create</a></div><div class="ttdeci">virtual RefCountedPtr&lt; EBHelmholtzEBBC &gt; create(const int a_iphase, const RefCountedPtr&lt; MFHelmholtzJumpBC &gt; &amp;a_jumpBC) const =0</div><div class="ttdoc">Factory method for.</div></div>
 <div class="ttc" id="aclassMFHelmholtzEBBCFactory_html_a22cc270285ea051a3052eba13aa5b9b2"><div class="ttname"><a href="classMFHelmholtzEBBCFactory.html#a22cc270285ea051a3052eba13aa5b9b2">MFHelmholtzEBBCFactory::MFHelmholtzEBBCFactory</a></div><div class="ttdeci">MFHelmholtzEBBCFactory()</div><div class="ttdoc">Weak constructor. Must subsequently set order, weight, and value.</div><div class="ttdef"><b>Definition:</b> CD_MFHelmholtzEBBCFactory.cpp:19</div></div>
-<div class="ttc" id="aclassMFHelmholtzEBBCFactory_html_a37e5c5429c7a96b926bf7849eeb16e56"><div class="ttname"><a href="classMFHelmholtzEBBCFactory.html#a37e5c5429c7a96b926bf7849eeb16e56">MFHelmholtzEBBCFactory::~MFHelmholtzEBBCFactory</a></div><div class="ttdeci">virtual ~MFHelmholtzEBBCFactory()</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition:</b> CD_MFHelmholtzEBBCFactory.cpp:23</div></div>
+<div class="ttc" id="aclassMFHelmholtzEBBCFactory_html_a37e5c5429c7a96b926bf7849eeb16e56"><div class="ttname"><a href="classMFHelmholtzEBBCFactory.html#a37e5c5429c7a96b926bf7849eeb16e56">MFHelmholtzEBBCFactory::~MFHelmholtzEBBCFactory</a></div><div class="ttdeci">virtual ~MFHelmholtzEBBCFactory()</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition:</b> CD_MFHelmholtzEBBCFactory.cpp:21</div></div>
 <div class="ttc" id="aclassMFHelmholtzEBBCFactory_html"><div class="ttname"><a href="classMFHelmholtzEBBCFactory.html">MFHelmholtzEBBCFactory</a></div><div class="ttdoc">Base class for making boundary conditions on the EB in a multifluid context.</div><div class="ttdef"><b>Definition:</b> CD_MFHelmholtzEBBCFactory.H:23</div></div>
 <div class="ttc" id="aCD__MFHelmholtzJumpBC_8H_html"><div class="ttname"><a href="CD__MFHelmholtzJumpBC_8H.html">CD_MFHelmholtzJumpBC.H</a></div><div class="ttdoc">Declaration of class for computing &quot;jump interface&quot; boundary conditions for multifluid Helmholtz code...</div></div>
 <!-- start footer part -->

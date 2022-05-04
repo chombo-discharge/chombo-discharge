@@ -90,39 +90,35 @@ $(function() {
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">// Our includes</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="classWedgeIF.html">   24</a></span>&#160;<span class="keyword">class </span><a class="code" href="classWedgeIF.html">WedgeIF</a>: <span class="keyword">public</span> BaseIF {</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  <a class="code" href="classWedgeIF.html#a0714e0f2156d534553af05229ecc4f68">WedgeIF</a>(<span class="keyword">const</span> <span class="keywordtype">int</span>      a_dir,</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;      <span class="keyword">const</span> Real     a_angle,</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;      <span class="keyword">const</span> Real     a_curv,</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;      <span class="keyword">const</span> RealVect a_point,</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_inside);</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  <a class="code" href="classWedgeIF.html#a0714e0f2156d534553af05229ecc4f68">WedgeIF</a>(<span class="keyword">const</span> <a class="code" href="classWedgeIF.html">WedgeIF</a>&amp; a_inputIF);</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classWedgeIF.html#a53e8a455ac692eec085c622fa8eeb8f3">~WedgeIF</a>();</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keyword">virtual</span> Real <a class="code" href="classWedgeIF.html#ab9de6e4319549d158dbef98b0b6b8c36">value</a>(<span class="keyword">const</span> RealVect&amp; a_pos) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <span class="keyword">virtual</span> BaseIF* <a class="code" href="classWedgeIF.html#a5cb34a56c64c21a9f23bbe1a2ae99b63">newImplicitFunction</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="classWedgeIF.html#ab3d157a189f3501de006163e4f5ab422">   68</a></span>&#160;  RefCountedPtr&lt;BaseIF&gt; <a class="code" href="classWedgeIF.html#ab3d157a189f3501de006163e4f5ab422">m_baseIF</a>;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;};</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="classWedgeIF.html">   24</a></span>&#160;<span class="keyword">class </span><a class="code" href="classWedgeIF.html">WedgeIF</a> : <span class="keyword">public</span> BaseIF</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;{</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  <a class="code" href="classWedgeIF.html#a0714e0f2156d534553af05229ecc4f68">WedgeIF</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_dir, <span class="keyword">const</span> Real a_angle, <span class="keyword">const</span> Real a_curv, <span class="keyword">const</span> RealVect a_point, <span class="keyword">const</span> <span class="keywordtype">bool</span> a_inside);</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  <a class="code" href="classWedgeIF.html#a0714e0f2156d534553af05229ecc4f68">WedgeIF</a>(<span class="keyword">const</span> <a class="code" href="classWedgeIF.html">WedgeIF</a>&amp; a_inputIF);</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classWedgeIF.html#a53e8a455ac692eec085c622fa8eeb8f3">~WedgeIF</a>();</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  <span class="keyword">virtual</span> Real</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <a class="code" href="classWedgeIF.html#ab9de6e4319549d158dbef98b0b6b8c36">value</a>(<span class="keyword">const</span> RealVect&amp; a_pos) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="keyword">virtual</span> BaseIF*</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <a class="code" href="classWedgeIF.html#a5cb34a56c64c21a9f23bbe1a2ae99b63">newImplicitFunction</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="classWedgeIF.html#ab3d157a189f3501de006163e4f5ab422">   65</a></span>&#160;  RefCountedPtr&lt;BaseIF&gt; <a class="code" href="classWedgeIF.html#ab3d157a189f3501de006163e4f5ab422">m_baseIF</a>;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;};</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassWedgeIF_html_a0714e0f2156d534553af05229ecc4f68"><div class="ttname"><a href="classWedgeIF.html#a0714e0f2156d534553af05229ecc4f68">WedgeIF::WedgeIF</a></div><div class="ttdeci">WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const RealVect a_point, const bool a_inside)</div><div class="ttdoc">Base constructor.</div><div class="ttdef"><b>Definition:</b> CD_WedgeIF.cpp:25</div></div>
-<div class="ttc" id="aclassWedgeIF_html_ab3d157a189f3501de006163e4f5ab422"><div class="ttname"><a href="classWedgeIF.html#ab3d157a189f3501de006163e4f5ab422">WedgeIF::m_baseIF</a></div><div class="ttdeci">RefCountedPtr&lt; BaseIF &gt; m_baseIF</div><div class="ttdoc">Base function.</div><div class="ttdef"><b>Definition:</b> CD_WedgeIF.H:68</div></div>
+<div class="ttc" id="aclassWedgeIF_html_ab3d157a189f3501de006163e4f5ab422"><div class="ttname"><a href="classWedgeIF.html#ab3d157a189f3501de006163e4f5ab422">WedgeIF::m_baseIF</a></div><div class="ttdeci">RefCountedPtr&lt; BaseIF &gt; m_baseIF</div><div class="ttdoc">Base function.</div><div class="ttdef"><b>Definition:</b> CD_WedgeIF.H:65</div></div>
 <div class="ttc" id="aclassWedgeIF_html_a5cb34a56c64c21a9f23bbe1a2ae99b63"><div class="ttname"><a href="classWedgeIF.html#a5cb34a56c64c21a9f23bbe1a2ae99b63">WedgeIF::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const</div><div class="ttdoc">Factory method.</div><div class="ttdef"><b>Definition:</b> CD_WedgeIF.cpp:90</div></div>
-<div class="ttc" id="aclassWedgeIF_html_a53e8a455ac692eec085c622fa8eeb8f3"><div class="ttname"><a href="classWedgeIF.html#a53e8a455ac692eec085c622fa8eeb8f3">WedgeIF::~WedgeIF</a></div><div class="ttdeci">virtual ~WedgeIF()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_WedgeIF.cpp:82</div></div>
+<div class="ttc" id="aclassWedgeIF_html_a53e8a455ac692eec085c622fa8eeb8f3"><div class="ttname"><a href="classWedgeIF.html#a53e8a455ac692eec085c622fa8eeb8f3">WedgeIF::~WedgeIF</a></div><div class="ttdeci">virtual ~WedgeIF()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_WedgeIF.cpp:81</div></div>
 <div class="ttc" id="aclassWedgeIF_html"><div class="ttname"><a href="classWedgeIF.html">WedgeIF</a></div><div class="ttdoc">Implicit function for a wedge.</div><div class="ttdef"><b>Definition:</b> CD_WedgeIF.H:24</div></div>
-<div class="ttc" id="aclassWedgeIF_html_ab9de6e4319549d158dbef98b0b6b8c36"><div class="ttname"><a href="classWedgeIF.html#ab9de6e4319549d158dbef98b0b6b8c36">WedgeIF::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_pos) const</div><div class="ttdoc">Get distance to object.</div><div class="ttdef"><b>Definition:</b> CD_WedgeIF.cpp:86</div></div>
+<div class="ttc" id="aclassWedgeIF_html_ab9de6e4319549d158dbef98b0b6b8c36"><div class="ttname"><a href="classWedgeIF.html#ab9de6e4319549d158dbef98b0b6b8c36">WedgeIF::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_pos) const</div><div class="ttdoc">Get distance to object.</div><div class="ttdef"><b>Definition:</b> CD_WedgeIF.cpp:84</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

@@ -91,50 +91,53 @@ $(function() {
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">// Our includes</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  </div>
-<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="classLinearStencil.html">   28</a></span>&#160;<span class="keyword">class </span><a class="code" href="classLinearStencil.html">LinearStencil</a> {</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code" href="classLinearStencil.html#af5c9b4c02581427e8ab4548eab2ee4cb">getLinearInterpStencil</a>(VoFStencil&amp;          a_stencil, </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;                     <span class="keyword">const</span> RealVect&amp;      a_pos,</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;                     <span class="keyword">const</span> VolIndex&amp;      a_vof,</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;                     <span class="keyword">const</span> ProblemDomain&amp; a_domain,</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;                     <span class="keyword">const</span> EBISBox&amp;       a_ebisbox);</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160; </div>
+<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="classLinearStencil.html">   28</a></span>&#160;<span class="keyword">class </span><a class="code" href="classLinearStencil.html">LinearStencil</a></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;{</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <a class="code" href="classLinearStencil.html#af5c9b4c02581427e8ab4548eab2ee4cb">getLinearInterpStencil</a>(VoFStencil&amp;          a_stencil,</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;                         <span class="keyword">const</span> RealVect&amp;      a_pos,</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;                         <span class="keyword">const</span> VolIndex&amp;      a_vof,</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;                         <span class="keyword">const</span> ProblemDomain&amp; a_domain,</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                         <span class="keyword">const</span> EBISBox&amp;       a_ebisbox);</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="classLinearStencil.html#aaa22ace07e7dc80803bfa86dba981fc1">   50</a></span>&#160;  <span class="keyword">static</span> constexpr Real <a class="code" href="classLinearStencil.html#aaa22ace07e7dc80803bfa86dba981fc1">tolerance</a> = 1.E-6;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code" href="classLinearStencil.html#ac687313e5557352419e56d033501d6b7">computeInterpStencil1D</a>(VoFStencil&amp;          a_stencil,</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                     <span class="keyword">const</span> RealVect&amp;      a_pos,</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                     <span class="keyword">const</span> VolIndex&amp;      a_vof,</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                     <span class="keyword">const</span> ProblemDomain&amp; a_domain,</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                     <span class="keyword">const</span> EBISBox&amp;       a_ebisbox,</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">int</span>            a_interpDir);</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code" href="classLinearStencil.html#a38fd40f378cdc36bd151c83dad6a312e">computeInterpStencil2D</a>(VoFStencil&amp;          a_stencil,</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                     <span class="keyword">const</span> RealVect&amp;      a_pos,</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                     <span class="keyword">const</span> VolIndex&amp;      a_vof,</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                     <span class="keyword">const</span> ProblemDomain&amp; a_domain,</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                     <span class="keyword">const</span> EBISBox&amp;       a_ebisbox,</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">int</span>            a_noInterpDir = 2);</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="preprocessor">#if CH_SPACEDIM==3</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <a class="code" href="classLinearStencil.html#ac687313e5557352419e56d033501d6b7">computeInterpStencil1D</a>(VoFStencil&amp;          a_stencil,</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                         <span class="keyword">const</span> RealVect&amp;      a_pos,</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                         <span class="keyword">const</span> VolIndex&amp;      a_vof,</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                         <span class="keyword">const</span> ProblemDomain&amp; a_domain,</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                         <span class="keyword">const</span> EBISBox&amp;       a_ebisbox,</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                         <span class="keyword">const</span> <span class="keywordtype">int</span>            a_interpDir);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  <a class="code" href="classLinearStencil.html#a38fd40f378cdc36bd151c83dad6a312e">computeInterpStencil2D</a>(VoFStencil&amp;          a_stencil,</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                         <span class="keyword">const</span> RealVect&amp;      a_pos,</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                         <span class="keyword">const</span> VolIndex&amp;      a_vof,</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                         <span class="keyword">const</span> ProblemDomain&amp; a_domain,</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                         <span class="keyword">const</span> EBISBox&amp;       a_ebisbox,</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                         <span class="keyword">const</span> <span class="keywordtype">int</span>            a_noInterpDir = 2);</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">bool</span> computeInterpStencil3D(VoFStencil&amp;          a_stencil,</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;                     <span class="keyword">const</span> RealVect&amp;      a_pos,</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;                     <span class="keyword">const</span> VolIndex&amp;      a_vof,</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                     <span class="keyword">const</span> ProblemDomain&amp; a_domain,</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;                     <span class="keyword">const</span> EBISBox&amp;       a_ebisbox);</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;};</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="preprocessor">#if CH_SPACEDIM == 3</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  computeInterpStencil3D(VoFStencil&amp;          a_stencil,</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;                         <span class="keyword">const</span> RealVect&amp;      a_pos,</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                         <span class="keyword">const</span> VolIndex&amp;      a_vof,</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                         <span class="keyword">const</span> ProblemDomain&amp; a_domain,</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                         <span class="keyword">const</span> EBISBox&amp;       a_ebisbox);</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;};</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassLinearStencil_html_a38fd40f378cdc36bd151c83dad6a312e"><div class="ttname"><a href="classLinearStencil.html#a38fd40f378cdc36bd151c83dad6a312e">LinearStencil::computeInterpStencil2D</a></div><div class="ttdeci">static bool computeInterpStencil2D(VoFStencil &amp;a_stencil, const RealVect &amp;a_pos, const VolIndex &amp;a_vof, const ProblemDomain &amp;a_domain, const EBISBox &amp;a_ebisbox, const int a_noInterpDir=2)</div><div class="ttdoc">Compute a bilinear interpolation stencil.</div><div class="ttdef"><b>Definition:</b> CD_LinearStencil.cpp:127</div></div>
-<div class="ttc" id="aclassLinearStencil_html_ac687313e5557352419e56d033501d6b7"><div class="ttname"><a href="classLinearStencil.html#ac687313e5557352419e56d033501d6b7">LinearStencil::computeInterpStencil1D</a></div><div class="ttdeci">static bool computeInterpStencil1D(VoFStencil &amp;a_stencil, const RealVect &amp;a_pos, const VolIndex &amp;a_vof, const ProblemDomain &amp;a_domain, const EBISBox &amp;a_ebisbox, const int a_interpDir)</div><div class="ttdoc">Compute a linear interpolation stencil.</div><div class="ttdef"><b>Definition:</b> CD_LinearStencil.cpp:50</div></div>
-<div class="ttc" id="aclassLinearStencil_html_af5c9b4c02581427e8ab4548eab2ee4cb"><div class="ttname"><a href="classLinearStencil.html#af5c9b4c02581427e8ab4548eab2ee4cb">LinearStencil::getLinearInterpStencil</a></div><div class="ttdeci">static bool getLinearInterpStencil(VoFStencil &amp;a_stencil, const RealVect &amp;a_pos, const VolIndex &amp;a_vof, const ProblemDomain &amp;a_domain, const EBISBox &amp;a_ebisbox)</div><div class="ttdoc">Get a bi(tri)linear interpolation stencil in 2D(3D)</div><div class="ttdef"><b>Definition:</b> CD_LinearStencil.cpp:21</div></div>
+<div class="ttc" id="aclassLinearStencil_html_a38fd40f378cdc36bd151c83dad6a312e"><div class="ttname"><a href="classLinearStencil.html#a38fd40f378cdc36bd151c83dad6a312e">LinearStencil::computeInterpStencil2D</a></div><div class="ttdeci">static bool computeInterpStencil2D(VoFStencil &amp;a_stencil, const RealVect &amp;a_pos, const VolIndex &amp;a_vof, const ProblemDomain &amp;a_domain, const EBISBox &amp;a_ebisbox, const int a_noInterpDir=2)</div><div class="ttdoc">Compute a bilinear interpolation stencil.</div><div class="ttdef"><b>Definition:</b> CD_LinearStencil.cpp:133</div></div>
+<div class="ttc" id="aclassLinearStencil_html_ac687313e5557352419e56d033501d6b7"><div class="ttname"><a href="classLinearStencil.html#ac687313e5557352419e56d033501d6b7">LinearStencil::computeInterpStencil1D</a></div><div class="ttdeci">static bool computeInterpStencil1D(VoFStencil &amp;a_stencil, const RealVect &amp;a_pos, const VolIndex &amp;a_vof, const ProblemDomain &amp;a_domain, const EBISBox &amp;a_ebisbox, const int a_interpDir)</div><div class="ttdoc">Compute a linear interpolation stencil.</div><div class="ttdef"><b>Definition:</b> CD_LinearStencil.cpp:53</div></div>
+<div class="ttc" id="aclassLinearStencil_html_af5c9b4c02581427e8ab4548eab2ee4cb"><div class="ttname"><a href="classLinearStencil.html#af5c9b4c02581427e8ab4548eab2ee4cb">LinearStencil::getLinearInterpStencil</a></div><div class="ttdeci">static bool getLinearInterpStencil(VoFStencil &amp;a_stencil, const RealVect &amp;a_pos, const VolIndex &amp;a_vof, const ProblemDomain &amp;a_domain, const EBISBox &amp;a_ebisbox)</div><div class="ttdoc">Get a bi(tri)linear interpolation stencil in 2D(3D)</div><div class="ttdef"><b>Definition:</b> CD_LinearStencil.cpp:22</div></div>
 <div class="ttc" id="aclassLinearStencil_html"><div class="ttname"><a href="classLinearStencil.html">LinearStencil</a></div><div class="ttdoc">Class which computes a bi/tri-linear stencil in cut-cells. This class makes appropriate modifications...</div><div class="ttdef"><b>Definition:</b> CD_LinearStencil.H:28</div></div>
 <div class="ttc" id="aclassLinearStencil_html_aaa22ace07e7dc80803bfa86dba981fc1"><div class="ttname"><a href="classLinearStencil.html#aaa22ace07e7dc80803bfa86dba981fc1">LinearStencil::tolerance</a></div><div class="ttdeci">static constexpr Real tolerance</div><div class="ttdoc">Tolerance for when we switch between 1D/2D/3D stencils.</div><div class="ttdef"><b>Definition:</b> CD_LinearStencil.H:50</div></div>
 <!-- start footer part -->

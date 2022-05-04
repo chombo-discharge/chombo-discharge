@@ -94,78 +94,87 @@ $(function() {
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="keyword">using namespace </span>std::chrono;</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> BV, <span class="keywordtype">int</span> K&gt;</div>
-<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classSignedDistanceBVH.html#a53a166bcf22f134a4d35f7c97c442414">   25</a></span>&#160;<a class="code" href="classSignedDistanceBVH.html#a6b24383cd4391a9ca0cc459e2fec4b1c">SignedDistanceBVH&lt;T, BV, K&gt;::SignedDistanceBVH</a>(<span class="keyword">const</span> std::shared_ptr&lt;Node&gt;&amp; a_root, <span class="keyword">const</span> <span class="keywordtype">bool</span> a_flipInside, <span class="keyword">const</span> Real a_zCoord) {</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;  m_root       = a_root;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;  m_zCoord     = a_zCoord;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;  m_flipInside = a_flipInside;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  m_numCalled = 0L;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  m_timespan = std::chrono::duration&lt;double&gt;(0.0);    </div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;}</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> BV, <span class="keywordtype">int</span> K&gt;</div>
-<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="classSignedDistanceBVH.html#ad042a7cf6207fb44fcc36c2b2ef2f0bc">   35</a></span>&#160;<a class="code" href="classSignedDistanceBVH.html#a6b24383cd4391a9ca0cc459e2fec4b1c">SignedDistanceBVH&lt;T, BV, K&gt;::SignedDistanceBVH</a>(<span class="keyword">const</span> <a class="code" href="classSignedDistanceBVH.html">SignedDistanceBVH</a>&amp; a_primitive) {</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  m_root       = a_primitive.<a class="code" href="classSignedDistanceBVH.html#a77fa6af0f99a1da17e46bf262a32ee3d">m_root</a>;</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  m_zCoord     = a_primitive.<a class="code" href="classSignedDistanceBVH.html#a4007937c3c3ef76f628a78aba67f86a7">m_zCoord</a>;  </div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  m_flipInside = a_primitive.<a class="code" href="classSignedDistanceBVH.html#a186f5f0c149b59bfa811247dadb9a24d">m_flipInside</a>;</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  m_numCalled = 0L;</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  m_timespan = std::chrono::duration&lt;double&gt;(0.0);    </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;}</div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classSignedDistanceBVH.html#a53a166bcf22f134a4d35f7c97c442414">   25</a></span>&#160;<a class="code" href="classSignedDistanceBVH.html#a6b24383cd4391a9ca0cc459e2fec4b1c">SignedDistanceBVH&lt;T, BV, K&gt;::SignedDistanceBVH</a>(<span class="keyword">const</span> std::shared_ptr&lt;Node&gt;&amp; a_root,</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;                                               <span class="keyword">const</span> <span class="keywordtype">bool</span>                   a_flipInside,</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;                                               <span class="keyword">const</span> Real                   a_zCoord)</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;{</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  m_root       = a_root;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  m_zCoord     = a_zCoord;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  m_flipInside = a_flipInside;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  m_numCalled = 0L;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  m_timespan  = std::chrono::duration&lt;double&gt;(0.0);</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;}</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> BV, <span class="keywordtype">int</span> K&gt;</div>
+<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classSignedDistanceBVH.html#ad042a7cf6207fb44fcc36c2b2ef2f0bc">   38</a></span>&#160;<a class="code" href="classSignedDistanceBVH.html#a6b24383cd4391a9ca0cc459e2fec4b1c">SignedDistanceBVH&lt;T, BV, K&gt;::SignedDistanceBVH</a>(<span class="keyword">const</span> <a class="code" href="classSignedDistanceBVH.html">SignedDistanceBVH</a>&amp; a_primitive)</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  m_root       = a_primitive.<a class="code" href="classSignedDistanceBVH.html#a77fa6af0f99a1da17e46bf262a32ee3d">m_root</a>;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  m_zCoord     = a_primitive.<a class="code" href="classSignedDistanceBVH.html#a4007937c3c3ef76f628a78aba67f86a7">m_zCoord</a>;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  m_flipInside = a_primitive.<a class="code" href="classSignedDistanceBVH.html#a186f5f0c149b59bfa811247dadb9a24d">m_flipInside</a>;</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> BV, <span class="keywordtype">int</span> K&gt;</div>
-<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="classSignedDistanceBVH.html#aac857e1f9031e093e1877b5eda10c1e3">   45</a></span>&#160;<a class="code" href="classSignedDistanceBVH.html#aac857e1f9031e093e1877b5eda10c1e3">SignedDistanceBVH&lt;T, BV, K&gt;::~SignedDistanceBVH</a>(){</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  <span class="keywordflow">if</span>(m_numCalled &gt; 0L){</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;In file CD_SignedDistanceBVHImplem: SignedDistanceBVH::~SignedDistanceBVH() On destructor: Calls: &quot;</span> &lt;&lt; m_numCalled</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;       &lt;&lt; <span class="stringliteral">&quot;\t Tot: &quot;</span> &lt;&lt; m_timespan.count() &lt;&lt; <span class="stringliteral">&quot;\t Avg./Call = &quot;</span> &lt;&lt; m_timespan.count()/(1.0*m_numCalled) &lt;&lt; endl;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;  }</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;}</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> BV, <span class="keywordtype">int</span> K&gt;</div>
-<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="classSignedDistanceBVH.html#ad99472dd6f3439298566e41cfed6fdb0">   53</a></span>&#160;Real <a class="code" href="classSignedDistanceBVH.html#ad99472dd6f3439298566e41cfed6fdb0">SignedDistanceBVH&lt;T, BV, K&gt;::value</a>(<span class="keyword">const</span> RealVect&amp; a_point)<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <span class="comment">// TLDR: In 2D we ignore z-variations, freezing that coordinate to some value. We then use the bounding volume hierarchy methodology for computing the signed distance. </span></div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#if CH_SPACEDIM==2</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  <a class="code" href="classSignedDistanceBVH.html#aa5a0ee53400e0a5cb2d997ae03350bb2">Vec3</a> p(a_point[0], a_point[1], m_zCoord);</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#else</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <a class="code" href="classSignedDistanceBVH.html#aa5a0ee53400e0a5cb2d997ae03350bb2">Vec3</a> p(a_point[0], a_point[1], a_point[2]);</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  high_resolution_clock::time_point t1 = high_resolution_clock::now();  </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="keyword">auto</span> d = m_root-&gt;signedDistance(p);</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  high_resolution_clock::time_point t2 = high_resolution_clock::now();</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  duration&lt;double&gt; time_span = duration_cast&lt;duration&lt;double&gt;&gt;(t2 - t1);</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  <span class="keywordflow">if</span>(m_flipInside){</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    d = -d;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  }</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  m_timespan += time_span;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  m_numCalled++;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <span class="keywordflow">return</span> Real(d);</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;}</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> BV, <span class="keywordtype">int</span> K&gt;</div>
-<div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="classSignedDistanceBVH.html#a673899bdedb2fae90fc17bafaf03a7bf">   78</a></span>&#160;BaseIF* <a class="code" href="classSignedDistanceBVH.html#a673899bdedb2fae90fc17bafaf03a7bf">SignedDistanceBVH&lt;T, BV, K&gt;::newImplicitFunction</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>BaseIF*<span class="keyword">&gt;</span> (<span class="keyword">new</span> <a class="code" href="classSignedDistanceBVH.html">SignedDistanceBVH</a>(*<span class="keyword">this</span>));</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;}</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  m_numCalled = 0L;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  m_timespan  = std::chrono::duration&lt;double&gt;(0.0);</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;}</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> BV, <span class="keywordtype">int</span> K&gt;</div>
+<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="classSignedDistanceBVH.html#aac857e1f9031e093e1877b5eda10c1e3">   49</a></span>&#160;<a class="code" href="classSignedDistanceBVH.html#aac857e1f9031e093e1877b5eda10c1e3">SignedDistanceBVH&lt;T, BV, K&gt;::~SignedDistanceBVH</a>()</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;{</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  <span class="keywordflow">if</span> (m_numCalled &gt; 0L) {</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;In file CD_SignedDistanceBVHImplem: SignedDistanceBVH::~SignedDistanceBVH() On destructor: Calls: &quot;</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;           &lt;&lt; m_numCalled &lt;&lt; <span class="stringliteral">&quot;\t Tot: &quot;</span> &lt;&lt; m_timespan.count()</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t Avg./Call = &quot;</span> &lt;&lt; m_timespan.count() / (1.0 * m_numCalled) &lt;&lt; endl;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  }</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;}</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> BV, <span class="keywordtype">int</span> K&gt;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;Real</div>
+<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="classSignedDistanceBVH.html#ad99472dd6f3439298566e41cfed6fdb0">   60</a></span>&#160;<a class="code" href="classSignedDistanceBVH.html#ad99472dd6f3439298566e41cfed6fdb0">SignedDistanceBVH&lt;T, BV, K&gt;::value</a>(<span class="keyword">const</span> RealVect&amp; a_point)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="comment">// TLDR: In 2D we ignore z-variations, freezing that coordinate to some value. We then use the bounding volume hierarchy methodology for computing the signed distance.</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">#if CH_SPACEDIM == 2</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <a class="code" href="classSignedDistanceBVH.html#aa5a0ee53400e0a5cb2d997ae03350bb2">Vec3</a> p(a_point[0], a_point[1], m_zCoord);</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  <a class="code" href="classSignedDistanceBVH.html#aa5a0ee53400e0a5cb2d997ae03350bb2">Vec3</a> p(a_point[0], a_point[1], a_point[2]);</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  high_resolution_clock::time_point t1        = high_resolution_clock::now();</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <span class="keyword">auto</span>                              d         = m_root-&gt;signedDistance(p);</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  high_resolution_clock::time_point t2        = high_resolution_clock::now();</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  duration&lt;double&gt;                  time_span = duration_cast&lt;duration&lt;double&gt;&gt;(t2 - t1);</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="keywordflow">if</span> (m_flipInside) {</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    d = -d;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  }</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  m_timespan += time_span;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  m_numCalled++;</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="keywordflow">return</span> Real(d);</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;}</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keyword">class</span> BV, <span class="keywordtype">int</span> K&gt;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;BaseIF*</div>
+<div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="classSignedDistanceBVH.html#a673899bdedb2fae90fc17bafaf03a7bf">   87</a></span>&#160;<a class="code" href="classSignedDistanceBVH.html#a673899bdedb2fae90fc17bafaf03a7bf">SignedDistanceBVH&lt;T, BV, K&gt;::newImplicitFunction</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>BaseIF*<span class="keyword">&gt;</span>(<span class="keyword">new</span> <a class="code" href="classSignedDistanceBVH.html">SignedDistanceBVH</a>(*<span class="keyword">this</span>));</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;}</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassSignedDistanceBVH_html"><div class="ttname"><a href="classSignedDistanceBVH.html">SignedDistanceBVH</a></div><div class="ttdoc">Signed distance function for a DCEL mesh.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVH.H:34</div></div>
 <div class="ttc" id="aCD__SignedDistanceBVH_8H_html"><div class="ttname"><a href="CD__SignedDistanceBVH_8H.html">CD_SignedDistanceBVH.H</a></div><div class="ttdoc">Declaration of an signe distance function class that gets its value function from a DCEL surface Tess...</div></div>
-<div class="ttc" id="aclassSignedDistanceBVH_html_a186f5f0c149b59bfa811247dadb9a24d"><div class="ttname"><a href="classSignedDistanceBVH.html#a186f5f0c149b59bfa811247dadb9a24d">SignedDistanceBVH::m_flipInside</a></div><div class="ttdeci">bool m_flipInside</div><div class="ttdoc">Hook for turning inside to outside.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVH.H:101</div></div>
+<div class="ttc" id="aclassSignedDistanceBVH_html_a186f5f0c149b59bfa811247dadb9a24d"><div class="ttname"><a href="classSignedDistanceBVH.html#a186f5f0c149b59bfa811247dadb9a24d">SignedDistanceBVH::m_flipInside</a></div><div class="ttdeci">bool m_flipInside</div><div class="ttdoc">Hook for turning inside to outside.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVH.H:102</div></div>
 <div class="ttc" id="aclassSignedDistanceBVH_html_a6b24383cd4391a9ca0cc459e2fec4b1c"><div class="ttname"><a href="classSignedDistanceBVH.html#a6b24383cd4391a9ca0cc459e2fec4b1c">SignedDistanceBVH::SignedDistanceBVH</a></div><div class="ttdeci">SignedDistanceBVH()=delete</div><div class="ttdoc">Disallowed weak construction.</div></div>
-<div class="ttc" id="aclassSignedDistanceBVH_html_aac857e1f9031e093e1877b5eda10c1e3"><div class="ttname"><a href="classSignedDistanceBVH.html#aac857e1f9031e093e1877b5eda10c1e3">SignedDistanceBVH::~SignedDistanceBVH</a></div><div class="ttdeci">virtual ~SignedDistanceBVH()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVHImplem.H:45</div></div>
-<div class="ttc" id="aclassSignedDistanceBVH_html_a77fa6af0f99a1da17e46bf262a32ee3d"><div class="ttname"><a href="classSignedDistanceBVH.html#a77fa6af0f99a1da17e46bf262a32ee3d">SignedDistanceBVH::m_root</a></div><div class="ttdeci">std::shared_ptr&lt; Node &gt; m_root</div><div class="ttdoc">Pointer to root node in bounding volume hierarchy.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVH.H:96</div></div>
+<div class="ttc" id="aclassSignedDistanceBVH_html_aac857e1f9031e093e1877b5eda10c1e3"><div class="ttname"><a href="classSignedDistanceBVH.html#aac857e1f9031e093e1877b5eda10c1e3">SignedDistanceBVH::~SignedDistanceBVH</a></div><div class="ttdeci">virtual ~SignedDistanceBVH()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVHImplem.H:49</div></div>
+<div class="ttc" id="aclassSignedDistanceBVH_html_a77fa6af0f99a1da17e46bf262a32ee3d"><div class="ttname"><a href="classSignedDistanceBVH.html#a77fa6af0f99a1da17e46bf262a32ee3d">SignedDistanceBVH::m_root</a></div><div class="ttdeci">std::shared_ptr&lt; Node &gt; m_root</div><div class="ttdoc">Pointer to root node in bounding volume hierarchy.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVH.H:97</div></div>
 <div class="ttc" id="aclassSignedDistanceBVH_html_aa5a0ee53400e0a5cb2d997ae03350bb2"><div class="ttname"><a href="classSignedDistanceBVH.html#aa5a0ee53400e0a5cb2d997ae03350bb2">SignedDistanceBVH::Vec3</a></div><div class="ttdeci">EBGeometry::Vec3T&lt; T &gt; Vec3</div><div class="ttdoc">Alias for always-3D vector with template.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVH.H:40</div></div>
-<div class="ttc" id="aclassSignedDistanceBVH_html_a673899bdedb2fae90fc17bafaf03a7bf"><div class="ttname"><a href="classSignedDistanceBVH.html#a673899bdedb2fae90fc17bafaf03a7bf">SignedDistanceBVH::newImplicitFunction</a></div><div class="ttdeci">BaseIF * newImplicitFunction() const override</div><div class="ttdoc">Factory method. Sends pointers around.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVHImplem.H:78</div></div>
-<div class="ttc" id="aclassSignedDistanceBVH_html_a4007937c3c3ef76f628a78aba67f86a7"><div class="ttname"><a href="classSignedDistanceBVH.html#a4007937c3c3ef76f628a78aba67f86a7">SignedDistanceBVH::m_zCoord</a></div><div class="ttdeci">Real m_zCoord</div><div class="ttdoc">For 2D only. This is the z-coordinate through which we slice the object.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVH.H:91</div></div>
-<div class="ttc" id="aclassSignedDistanceBVH_html_ad99472dd6f3439298566e41cfed6fdb0"><div class="ttname"><a href="classSignedDistanceBVH.html#ad99472dd6f3439298566e41cfed6fdb0">SignedDistanceBVH::value</a></div><div class="ttdeci">Real value(const RealVect &amp;a_point) const override</div><div class="ttdoc">Value function.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVHImplem.H:53</div></div>
+<div class="ttc" id="aclassSignedDistanceBVH_html_a673899bdedb2fae90fc17bafaf03a7bf"><div class="ttname"><a href="classSignedDistanceBVH.html#a673899bdedb2fae90fc17bafaf03a7bf">SignedDistanceBVH::newImplicitFunction</a></div><div class="ttdeci">BaseIF * newImplicitFunction() const override</div><div class="ttdoc">Factory method. Sends pointers around.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVHImplem.H:87</div></div>
+<div class="ttc" id="aclassSignedDistanceBVH_html_a4007937c3c3ef76f628a78aba67f86a7"><div class="ttname"><a href="classSignedDistanceBVH.html#a4007937c3c3ef76f628a78aba67f86a7">SignedDistanceBVH::m_zCoord</a></div><div class="ttdeci">Real m_zCoord</div><div class="ttdoc">For 2D only. This is the z-coordinate through which we slice the object.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVH.H:92</div></div>
+<div class="ttc" id="aclassSignedDistanceBVH_html_ad99472dd6f3439298566e41cfed6fdb0"><div class="ttname"><a href="classSignedDistanceBVH.html#ad99472dd6f3439298566e41cfed6fdb0">SignedDistanceBVH::value</a></div><div class="ttdeci">Real value(const RealVect &amp;a_point) const override</div><div class="ttdoc">Value function.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceBVHImplem.H:60</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

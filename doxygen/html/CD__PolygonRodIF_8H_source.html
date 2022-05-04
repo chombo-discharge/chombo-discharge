@@ -89,41 +89,40 @@ $(function() {
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">// Our includes</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;  </div>
-<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classPolygonRodIF.html">   25</a></span>&#160;<span class="keyword">class </span><a class="code" href="classPolygonRodIF.html">PolygonRodIF</a>: <span class="keyword">public</span> BaseIF {</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classPolygonRodIF.html">   25</a></span>&#160;<span class="keyword">class </span><a class="code" href="classPolygonRodIF.html">PolygonRodIF</a> : <span class="keyword">public</span> BaseIF</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;{</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  <a class="code" href="classPolygonRodIF.html#aae05bb86ae84afaf77540b3d1401456d">PolygonRodIF</a>(<span class="keyword">const</span> RealVect a_center1,</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;           <span class="keyword">const</span> RealVect a_center2,</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;           <span class="keyword">const</span> Real     a_radius,</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;           <span class="keyword">const</span> Real     a_cornerCurv,</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;           <span class="keyword">const</span> <span class="keywordtype">int</span>      a_numSides,</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;           <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_fluidInside);</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;               <span class="keyword">const</span> RealVect a_center2,</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;               <span class="keyword">const</span> Real     a_radius,</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;               <span class="keyword">const</span> Real     a_cornerCurv,</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;               <span class="keyword">const</span> <span class="keywordtype">int</span>      a_numSides,</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;               <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_fluidInside);</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    </div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;  <a class="code" href="classPolygonRodIF.html#aae05bb86ae84afaf77540b3d1401456d">PolygonRodIF</a>(<span class="keyword">const</span> <a class="code" href="classPolygonRodIF.html">PolygonRodIF</a>&amp; a_inputIF);</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classPolygonRodIF.html#a39241bcd4bd8dbe2256ee225c7cff398">~PolygonRodIF</a>();</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <span class="keyword">virtual</span> Real <a class="code" href="classPolygonRodIF.html#a70b5bf32e80d54a9a65ab4a50c67970d">value</a>(<span class="keyword">const</span> RealVect&amp; a_pos) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <a class="code" href="classPolygonRodIF.html#aae05bb86ae84afaf77540b3d1401456d">PolygonRodIF</a>(<span class="keyword">const</span> <a class="code" href="classPolygonRodIF.html">PolygonRodIF</a>&amp; a_inputIF);</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classPolygonRodIF.html#a39241bcd4bd8dbe2256ee225c7cff398">~PolygonRodIF</a>();</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="keyword">virtual</span> Real</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <a class="code" href="classPolygonRodIF.html#a70b5bf32e80d54a9a65ab4a50c67970d">value</a>(<span class="keyword">const</span> RealVect&amp; a_pos) <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <span class="keyword">virtual</span> BaseIF* <a class="code" href="classPolygonRodIF.html#a73520b97097b732f761835ddef4a1a5f">newImplicitFunction</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <span class="keyword">virtual</span> BaseIF*</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <a class="code" href="classPolygonRodIF.html#a73520b97097b732f761835ddef4a1a5f">newImplicitFunction</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00071"></a><span class="lineno"><a class="line" href="classPolygonRodIF.html#ad753d7e322c3599414a26d0b9f1bee3a">   71</a></span>&#160;  RefCountedPtr&lt;BaseIF&gt; <a class="code" href="classPolygonRodIF.html#ad753d7e322c3599414a26d0b9f1bee3a">m_baseif</a>;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;};</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;};</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassPolygonRodIF_html_a39241bcd4bd8dbe2256ee225c7cff398"><div class="ttname"><a href="classPolygonRodIF.html#a39241bcd4bd8dbe2256ee225c7cff398">PolygonRodIF::~PolygonRodIF</a></div><div class="ttdeci">virtual ~PolygonRodIF()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_PolygonRodIF.cpp:90</div></div>
+<div class="ttc" id="aclassPolygonRodIF_html_a39241bcd4bd8dbe2256ee225c7cff398"><div class="ttname"><a href="classPolygonRodIF.html#a39241bcd4bd8dbe2256ee225c7cff398">PolygonRodIF::~PolygonRodIF</a></div><div class="ttdeci">virtual ~PolygonRodIF()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_PolygonRodIF.cpp:89</div></div>
 <div class="ttc" id="aclassPolygonRodIF_html_ad753d7e322c3599414a26d0b9f1bee3a"><div class="ttname"><a href="classPolygonRodIF.html#ad753d7e322c3599414a26d0b9f1bee3a">PolygonRodIF::m_baseif</a></div><div class="ttdeci">RefCountedPtr&lt; BaseIF &gt; m_baseif</div><div class="ttdoc">Base function.</div><div class="ttdef"><b>Definition:</b> CD_PolygonRodIF.H:71</div></div>
 <div class="ttc" id="aclassPolygonRodIF_html_aae05bb86ae84afaf77540b3d1401456d"><div class="ttname"><a href="classPolygonRodIF.html#aae05bb86ae84afaf77540b3d1401456d">PolygonRodIF::PolygonRodIF</a></div><div class="ttdeci">PolygonRodIF(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_cornerCurv, const int a_numSides, const bool a_fluidInside)</div><div class="ttdoc">Base constructor.</div><div class="ttdef"><b>Definition:</b> CD_PolygonRodIF.cpp:26</div></div>
-<div class="ttc" id="aclassPolygonRodIF_html_a73520b97097b732f761835ddef4a1a5f"><div class="ttname"><a href="classPolygonRodIF.html#a73520b97097b732f761835ddef4a1a5f">PolygonRodIF::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const</div><div class="ttdoc">Factory method.</div><div class="ttdef"><b>Definition:</b> CD_PolygonRodIF.cpp:97</div></div>
-<div class="ttc" id="aclassPolygonRodIF_html_a70b5bf32e80d54a9a65ab4a50c67970d"><div class="ttname"><a href="classPolygonRodIF.html#a70b5bf32e80d54a9a65ab4a50c67970d">PolygonRodIF::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_pos) const</div><div class="ttdoc">Value function. Returns distance to object (ish).</div><div class="ttdef"><b>Definition:</b> CD_PolygonRodIF.cpp:93</div></div>
+<div class="ttc" id="aclassPolygonRodIF_html_a73520b97097b732f761835ddef4a1a5f"><div class="ttname"><a href="classPolygonRodIF.html#a73520b97097b732f761835ddef4a1a5f">PolygonRodIF::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const</div><div class="ttdoc">Factory method.</div><div class="ttdef"><b>Definition:</b> CD_PolygonRodIF.cpp:98</div></div>
+<div class="ttc" id="aclassPolygonRodIF_html_a70b5bf32e80d54a9a65ab4a50c67970d"><div class="ttname"><a href="classPolygonRodIF.html#a70b5bf32e80d54a9a65ab4a50c67970d">PolygonRodIF::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_pos) const</div><div class="ttdoc">Value function. Returns distance to object (ish).</div><div class="ttdef"><b>Definition:</b> CD_PolygonRodIF.cpp:92</div></div>
 <div class="ttc" id="aclassPolygonRodIF_html"><div class="ttname"><a href="classPolygonRodIF.html">PolygonRodIF</a></div><div class="ttdoc">Implicit function class describing a rod with a polygonal cross scetion.</div><div class="ttdef"><b>Definition:</b> CD_PolygonRodIF.H:25</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

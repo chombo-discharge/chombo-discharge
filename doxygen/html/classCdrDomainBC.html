@@ -96,9 +96,9 @@ Public Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:ababc737a5bb0b61d6774938f4d37d06b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boundary condition types for the CDR solvers. <br /></td></tr>
 <tr class="separator:ababc737a5bb0b61d6774938f4d37d06b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3aae0c6cf675e3f51e312a5a3fc334c8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#a3aae0c6cf675e3f51e312a5a3fc334c8">FluxFunction</a> = std::function&lt; Real(const RealVect a_position, const Real a_time) &gt;</td></tr>
-<tr class="memdesc:a3aae0c6cf675e3f51e312a5a3fc334c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which maps f(R^3,t) : R. Used for setting the associated value and boundary condition type.  <a href="classCdrDomainBC.html#a3aae0c6cf675e3f51e312a5a3fc334c8">More...</a><br /></td></tr>
-<tr class="separator:a3aae0c6cf675e3f51e312a5a3fc334c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ffe2fab3e0f415bf30fb5d68efdcb51"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#a6ffe2fab3e0f415bf30fb5d68efdcb51">FluxFunction</a> = std::function&lt; Real(const RealVect a_position, const Real a_time)&gt;</td></tr>
+<tr class="memdesc:a6ffe2fab3e0f415bf30fb5d68efdcb51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which maps f(R^3,t) : R. Used for setting the associated value and boundary condition type.  <a href="classCdrDomainBC.html#a6ffe2fab3e0f415bf30fb5d68efdcb51">More...</a><br /></td></tr>
+<tr class="separator:a6ffe2fab3e0f415bf30fb5d68efdcb51"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab012a2d05bf927e27dd38aafaf2dba2d"><td class="memItemLeft" align="right" valign="top"><a id="ab012a2d05bf927e27dd38aafaf2dba2d"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">DomainSide</a> = std::pair&lt; int, Side::LoHiSide &gt;</td></tr>
 <tr class="memdesc:ab012a2d05bf927e27dd38aafaf2dba2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for mapping a direction and side. The first element in pair is the coordinate direction and the second is the low/high end in that direction. <br /></td></tr>
@@ -131,13 +131,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8a57a26a466db4ca69ebcd595dfc5ee1"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classCdrDomainBC.html#ababc737a5bb0b61d6774938f4d37d06b">BcType</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#a8a57a26a466db4ca69ebcd595dfc5ee1">getBcType</a> (const <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">DomainSide</a> &amp;a_domainSide) const</td></tr>
 <tr class="memdesc:a8a57a26a466db4ca69ebcd595dfc5ee1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the BC type on a particular domain side.  <a href="classCdrDomainBC.html#a8a57a26a466db4ca69ebcd595dfc5ee1">More...</a><br /></td></tr>
 <tr class="separator:a8a57a26a466db4ca69ebcd595dfc5ee1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a198f0ea15cc59e59bd66f1bba57165c5"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classCdrDomainBC.html#a3aae0c6cf675e3f51e312a5a3fc334c8">FluxFunction</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#a198f0ea15cc59e59bd66f1bba57165c5">getBcFunction</a> (const <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">DomainSide</a> &amp;a_domainSide) const</td></tr>
+<tr class="memitem:a198f0ea15cc59e59bd66f1bba57165c5"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classCdrDomainBC.html#a6ffe2fab3e0f415bf30fb5d68efdcb51">FluxFunction</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#a198f0ea15cc59e59bd66f1bba57165c5">getBcFunction</a> (const <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">DomainSide</a> &amp;a_domainSide) const</td></tr>
 <tr class="memdesc:a198f0ea15cc59e59bd66f1bba57165c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the BC type on a particular domain side.  <a href="classCdrDomainBC.html#a198f0ea15cc59e59bd66f1bba57165c5">More...</a><br /></td></tr>
 <tr class="separator:a198f0ea15cc59e59bd66f1bba57165c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab131708f26048cb9dafee70ac2b5833a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#ab131708f26048cb9dafee70ac2b5833a">setBcType</a> (const <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">DomainSide</a> &amp;a_domainSide, const <a class="el" href="classCdrDomainBC.html#ababc737a5bb0b61d6774938f4d37d06b">BcType</a> &amp;a_bcType)</td></tr>
 <tr class="memdesc:ab131708f26048cb9dafee70ac2b5833a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the BC type on a domain side.  <a href="classCdrDomainBC.html#ab131708f26048cb9dafee70ac2b5833a">More...</a><br /></td></tr>
 <tr class="separator:ab131708f26048cb9dafee70ac2b5833a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4de1362252e67fe83c2582a332dd8dc9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#a4de1362252e67fe83c2582a332dd8dc9">setBcFunction</a> (const <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">DomainSide</a> &amp;a_domainSide, const <a class="el" href="classCdrDomainBC.html#a3aae0c6cf675e3f51e312a5a3fc334c8">FluxFunction</a> &amp;a_function)</td></tr>
+<tr class="memitem:a4de1362252e67fe83c2582a332dd8dc9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#a4de1362252e67fe83c2582a332dd8dc9">setBcFunction</a> (const <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">DomainSide</a> &amp;a_domainSide, const <a class="el" href="classCdrDomainBC.html#a6ffe2fab3e0f415bf30fb5d68efdcb51">FluxFunction</a> &amp;a_function)</td></tr>
 <tr class="memdesc:a4de1362252e67fe83c2582a332dd8dc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the BC type on a domain side.  <a href="classCdrDomainBC.html#a4de1362252e67fe83c2582a332dd8dc9">More...</a><br /></td></tr>
 <tr class="separator:a4de1362252e67fe83c2582a332dd8dc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -148,7 +148,7 @@ std::map&lt; <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aaf
 <tr class="memdesc:aa5df929967de424039f27a5e2df7f3eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">BC types on various domain edges. <br /></td></tr>
 <tr class="separator:aa5df929967de424039f27a5e2df7f3eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98c10ec21b74eb34403eb82ae3591f20"><td class="memItemLeft" align="right" valign="top"><a id="a98c10ec21b74eb34403eb82ae3591f20"></a>
-std::map&lt; <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">DomainSide</a>, <a class="el" href="classCdrDomainBC.html#a3aae0c6cf675e3f51e312a5a3fc334c8">FluxFunction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#a98c10ec21b74eb34403eb82ae3591f20">m_bcFunctions</a></td></tr>
+std::map&lt; <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">DomainSide</a>, <a class="el" href="classCdrDomainBC.html#a6ffe2fab3e0f415bf30fb5d68efdcb51">FluxFunction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrDomainBC.html#a98c10ec21b74eb34403eb82ae3591f20">m_bcFunctions</a></td></tr>
 <tr class="memdesc:a98c10ec21b74eb34403eb82ae3591f20"><td class="mdescLeft">&#160;</td><td class="mdescRight">BC functions on various domain edges. <br /></td></tr>
 <tr class="separator:a98c10ec21b74eb34403eb82ae3591f20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -158,14 +158,14 @@ std::map&lt; <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aaf
 <dd>
 This class will be run-time safe in the sense that its default constructor provides a fully functional object which (shouldn't) cause run-time errors. </dd></dl>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
-<a id="a3aae0c6cf675e3f51e312a5a3fc334c8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3aae0c6cf675e3f51e312a5a3fc334c8">&#9670;&nbsp;</a></span>FluxFunction</h2>
+<a id="a6ffe2fab3e0f415bf30fb5d68efdcb51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ffe2fab3e0f415bf30fb5d68efdcb51">&#9670;&nbsp;</a></span>FluxFunction</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="classCdrDomainBC.html#a3aae0c6cf675e3f51e312a5a3fc334c8">CdrDomainBC::FluxFunction</a> =  std::function&lt;Real(const RealVect a_position, const Real a_time) &gt;</td>
+          <td class="memname">using <a class="el" href="classCdrDomainBC.html#a6ffe2fab3e0f415bf30fb5d68efdcb51">CdrDomainBC::FluxFunction</a> =  std::function&lt;Real(const RealVect a_position, const Real a_time)&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -336,7 +336,7 @@ This class will be run-time safe in the sense that its default constructor provi
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="classCdrDomainBC.html#a3aae0c6cf675e3f51e312a5a3fc334c8">CdrDomainBC::FluxFunction</a> &amp; CdrDomainBC::getBcFunction </td>
+          <td class="memname">const <a class="el" href="classCdrDomainBC.html#a6ffe2fab3e0f415bf30fb5d68efdcb51">CdrDomainBC::FluxFunction</a> &amp; CdrDomainBC::getBcFunction </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classCdrDomainBC.html#ab012a2d05bf927e27dd38aafaf2dba2d">DomainSide</a> &amp;&#160;</td>
           <td class="paramname"><em>a_domainSide</em></td><td>)</td>
@@ -482,7 +482,7 @@ This class will be run-time safe in the sense that its default constructor provi
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classCdrDomainBC.html#a3aae0c6cf675e3f51e312a5a3fc334c8">FluxFunction</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classCdrDomainBC.html#a6ffe2fab3e0f415bf30fb5d68efdcb51">FluxFunction</a> &amp;&#160;</td>
           <td class="paramname"><em>a_function</em>&#160;</td>
         </tr>
         <tr>

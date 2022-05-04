@@ -118,9 +118,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a4144a128cc67fb1088371a129209c117">operator=</a> (const <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a4144a128cc67fb1088371a129209c117"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed - don't see why you would need it. <br /></td></tr>
 <tr class="separator:a4144a128cc67fb1088371a129209c117"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4d1cd6d523b619565d9379257c50ddb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#af4d1cd6d523b619565d9379257c50ddb">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;a_Bcoef, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int a_ghostCF)</td></tr>
-<tr class="memdesc:af4d1cd6d523b619565d9379257c50ddb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function that is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>.  <a href="classEBHelmholtzEBBC.html#af4d1cd6d523b619565d9379257c50ddb">More...</a><br /></td></tr>
-<tr class="separator:af4d1cd6d523b619565d9379257c50ddb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82c0a8e4d5b442f9730113a35dda8b13"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a82c0a8e4d5b442f9730113a35dda8b13">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt;&gt;&gt; &amp;a_Bcoef, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int a_ghostCF)</td></tr>
+<tr class="memdesc:a82c0a8e4d5b442f9730113a35dda8b13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function that is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>.  <a href="classEBHelmholtzEBBC.html#a82c0a8e4d5b442f9730113a35dda8b13">More...</a><br /></td></tr>
+<tr class="separator:a82c0a8e4d5b442f9730113a35dda8b13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7ee7e79ab9e793de2ede6dd23c70eb2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#aa7ee7e79ab9e793de2ede6dd23c70eb2">applyEBFlux</a> (VoFIterator &amp;a_vofit, EBCellFAB &amp;a_Lphi, const EBCellFAB &amp;a_phi, const DataIndex &amp;a_dit, const Real &amp;a_beta, const bool &amp;a_homogeneousPhysBC) const =0</td></tr>
 <tr class="memdesc:aa7ee7e79ab9e793de2ede6dd23c70eb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the EB flux. This is the version that is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>.  <a href="classEBHelmholtzEBBC.html#aa7ee7e79ab9e793de2ede6dd23c70eb2">More...</a><br /></td></tr>
 <tr class="separator:aa7ee7e79ab9e793de2ede6dd23c70eb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -267,8 +267,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="af4d1cd6d523b619565d9379257c50ddb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af4d1cd6d523b619565d9379257c50ddb">&#9670;&nbsp;</a></span>define()</h2>
+<a id="a82c0a8e4d5b442f9730113a35dda8b13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82c0a8e4d5b442f9730113a35dda8b13">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -288,7 +288,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt;&gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_Bcoef</em>, </td>
         </tr>
         <tr>

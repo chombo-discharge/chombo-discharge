@@ -89,77 +89,85 @@ $(function() {
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="classCdrIterator.html">   26</a></span>&#160;<span class="keyword">class </span><a class="code" href="classCdrIterator.html">CdrIterator</a> {</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">   32</a></span>&#160;  <span class="keyword">enum class</span> <a class="code" href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">SpeciesIteration</a>{</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    All,</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    Charged,</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    Negative,</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    Positive,</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    Neutral</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  };</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  </div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;  <a class="code" href="classCdrIterator.html#ab9fc5e49a7ad1f48891f1d9e394a3aa7">CdrIterator</a>() = <span class="keyword">delete</span>;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  <a class="code" href="classCdrIterator.html#ab9fc5e49a7ad1f48891f1d9e394a3aa7">CdrIterator</a>(<a class="code" href="classCdrLayout.html">CdrLayout&lt;T&gt;</a>&amp; a_layout, <span class="keyword">const</span> <a class="code" href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">SpeciesIteration</a> a_mode = SpeciesIteration::All);</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classCdrIterator.html#ad43a87222356e92b118d6774615fd984">~CdrIterator</a>();</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="classCdrIterator.html#aedf49ecaa5514585f336b4b5fc5aea7f">getNumberOfSolvers</a>();</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="classCdrIterator.html#a4cd2bd5ff13b0b4076d2a15717a8c4f9">index</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCdrIterator.html#a09ae5cc400ef56d6351d460bfe72bd53">reset</a>();</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">ok</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  </div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCdrIterator.html#a8c5cf3c23cffcb92d31db923aff1ad45">operator++</a>();</div>
+<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="classCdrIterator.html">   26</a></span>&#160;<span class="keyword">class </span><a class="code" href="classCdrIterator.html">CdrIterator</a></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;{</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">   32</a></span>&#160;  <span class="keyword">enum class</span> <a class="code" href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">SpeciesIteration</a></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  {</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    All,</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    Charged,</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    Negative,</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    Positive,</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    Neutral</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  };</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <a class="code" href="classCdrIterator.html#ab9fc5e49a7ad1f48891f1d9e394a3aa7">CdrIterator</a>() = <span class="keyword">delete</span>;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  <a class="code" href="classCdrIterator.html#ab9fc5e49a7ad1f48891f1d9e394a3aa7">CdrIterator</a>(<a class="code" href="classCdrLayout.html">CdrLayout&lt;T&gt;</a>&amp; a_layout, <span class="keyword">const</span> <a class="code" href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">SpeciesIteration</a> a_mode = SpeciesIteration::All);</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classCdrIterator.html#ad43a87222356e92b118d6774615fd984">~CdrIterator</a>();</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">int</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  <a class="code" href="classCdrIterator.html#aedf49ecaa5514585f336b4b5fc5aea7f">getNumberOfSolvers</a>();</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">int</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <a class="code" href="classCdrIterator.html#a4cd2bd5ff13b0b4076d2a15717a8c4f9">index</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <a class="code" href="classCdrIterator.html#a09ae5cc400ef56d6351d460bfe72bd53">reset</a>();</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <a class="code" href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">ok</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <span class="keyword">virtual</span> RefCountedPtr&lt;T&gt;&amp; <a class="code" href="classCdrIterator.html#a79a6370eda70a07959a9c2ddeb253dcd">operator() </a>();</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  <span class="keyword">virtual</span> RefCountedPtr&lt;CdrSpecies&gt;&amp; <a class="code" href="classCdrIterator.html#a640c06f98f11b9a75bb669c31c4e811b">getSpecies</a>();</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  </div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  <a class="code" href="classCdrIterator.html#a8c5cf3c23cffcb92d31db923aff1ad45">operator++</a>();</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <span class="keyword">virtual</span> RefCountedPtr&lt;T&gt;&amp;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  <a class="code" href="classCdrIterator.html#a79a6370eda70a07959a9c2ddeb253dcd">operator()</a>();</div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
-<div class="line"><a name="l00097"></a><span class="lineno"><a class="line" href="classCdrIterator.html#ad02e9db152ff730a84515ff6db5ec3e3">   97</a></span>&#160;  <a class="code" href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">SpeciesIteration</a> <a class="code" href="classCdrIterator.html#ad02e9db152ff730a84515ff6db5ec3e3">m_mode</a>;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;  <span class="keywordtype">int</span> m_isolver;</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
-<div class="line"><a name="l00107"></a><span class="lineno"><a class="line" href="classCdrIterator.html#ac3de91533d2e3492912730c4ef43afd2">  107</a></span>&#160;  <span class="keywordtype">int</span> <a class="code" href="classCdrIterator.html#ac3de91533d2e3492912730c4ef43afd2">m_numSolvers</a>;;</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classCdrIterator.html#a1ec99b2010b51e9b2b78267532b37681">m_isDefined</a>;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160; </div>
-<div class="line"><a name="l00117"></a><span class="lineno"><a class="line" href="classCdrIterator.html#a0e3ec29cf3e7e22706d2b1268522420e">  117</a></span>&#160;  Vector&lt;RefCountedPtr&lt;T&gt; &gt; <a class="code" href="classCdrIterator.html#a0e3ec29cf3e7e22706d2b1268522420e">m_solvers</a>;</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160; </div>
-<div class="line"><a name="l00122"></a><span class="lineno"><a class="line" href="classCdrIterator.html#a29a2356521b7a72a6399eaff1aa56154">  122</a></span>&#160;  Vector&lt;RefCountedPtr&lt;CdrSpecies&gt; &gt; <a class="code" href="classCdrIterator.html#a29a2356521b7a72a6399eaff1aa56154">m_species</a>;</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;};</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160; </div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <span class="keyword">virtual</span> RefCountedPtr&lt;CdrSpecies&gt;&amp;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  <a class="code" href="classCdrIterator.html#a640c06f98f11b9a75bb669c31c4e811b">getSpecies</a>();</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00104"></a><span class="lineno"><a class="line" href="classCdrIterator.html#ad02e9db152ff730a84515ff6db5ec3e3">  104</a></span>&#160;  <a class="code" href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">SpeciesIteration</a> <a class="code" href="classCdrIterator.html#ad02e9db152ff730a84515ff6db5ec3e3">m_mode</a>;</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  <span class="keywordtype">int</span> m_isolver;</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160; </div>
+<div class="line"><a name="l00114"></a><span class="lineno"><a class="line" href="classCdrIterator.html#ac3de91533d2e3492912730c4ef43afd2">  114</a></span>&#160;  <span class="keywordtype">int</span> <a class="code" href="classCdrIterator.html#ac3de91533d2e3492912730c4ef43afd2">m_numSolvers</a>;</div>
+<div class="line"><a name="l00115"></a><span class="lineno"><a class="line" href="classCdrIterator.html#a1ec99b2010b51e9b2b78267532b37681">  115</a></span>&#160;  ;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160; </div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classCdrIterator.html#a1ec99b2010b51e9b2b78267532b37681">m_isDefined</a>;</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
+<div class="line"><a name="l00125"></a><span class="lineno"><a class="line" href="classCdrIterator.html#a0e3ec29cf3e7e22706d2b1268522420e">  125</a></span>&#160;  Vector&lt;RefCountedPtr&lt;T&gt;&gt; <a class="code" href="classCdrIterator.html#a0e3ec29cf3e7e22706d2b1268522420e">m_solvers</a>;</div>
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160; </div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__CdrIteratorImplem_8H.html">CD_CdrIteratorImplem.H</a>&gt;</span></div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160; </div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00130"></a><span class="lineno"><a class="line" href="classCdrIterator.html#a29a2356521b7a72a6399eaff1aa56154">  130</a></span>&#160;  Vector&lt;RefCountedPtr&lt;CdrSpecies&gt;&gt; <a class="code" href="classCdrIterator.html#a29a2356521b7a72a6399eaff1aa56154">m_species</a>;</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;};</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160; </div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160; </div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__CdrIteratorImplem_8H.html">CD_CdrIteratorImplem.H</a>&gt;</span></div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160; </div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassCdrIterator_html_ad02e9db152ff730a84515ff6db5ec3e3"><div class="ttname"><a href="classCdrIterator.html#ad02e9db152ff730a84515ff6db5ec3e3">CdrIterator::m_mode</a></div><div class="ttdeci">SpeciesIteration m_mode</div><div class="ttdoc">Which species to iterate over.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:97</div></div>
+<div class="ttc" id="aclassCdrIterator_html_ad02e9db152ff730a84515ff6db5ec3e3"><div class="ttname"><a href="classCdrIterator.html#ad02e9db152ff730a84515ff6db5ec3e3">CdrIterator::m_mode</a></div><div class="ttdeci">SpeciesIteration m_mode</div><div class="ttdoc">Which species to iterate over.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:104</div></div>
 <div class="ttc" id="aclassCdrLayout_html"><div class="ttname"><a href="classCdrLayout.html">CdrLayout</a></div><div class="ttdoc">Class for holding a set of CdrSolvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrLayout.H:36</div></div>
 <div class="ttc" id="aclassCdrIterator_html"><div class="ttname"><a href="classCdrIterator.html">CdrIterator</a></div><div class="ttdoc">Iterator class for CdrLayout. This allows iteration through solvers (or subsets of solvers).</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:26</div></div>
-<div class="ttc" id="aclassCdrIterator_html_a8c5cf3c23cffcb92d31db923aff1ad45"><div class="ttname"><a href="classCdrIterator.html#a8c5cf3c23cffcb92d31db923aff1ad45">CdrIterator::operator++</a></div><div class="ttdeci">virtual void operator++()</div><div class="ttdoc">Increment. This is different for different iteration modes.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:76</div></div>
+<div class="ttc" id="aclassCdrIterator_html_a8c5cf3c23cffcb92d31db923aff1ad45"><div class="ttname"><a href="classCdrIterator.html#a8c5cf3c23cffcb92d31db923aff1ad45">CdrIterator::operator++</a></div><div class="ttdeci">virtual void operator++()</div><div class="ttdoc">Increment. This is different for different iteration modes.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:87</div></div>
 <div class="ttc" id="aCD__CdrIteratorImplem_8H_html"><div class="ttname"><a href="CD__CdrIteratorImplem_8H.html">CD_CdrIteratorImplem.H</a></div><div class="ttdoc">Implementation of CdrIterator.H.</div></div>
-<div class="ttc" id="aclassCdrIterator_html_a79a6370eda70a07959a9c2ddeb253dcd"><div class="ttname"><a href="classCdrIterator.html#a79a6370eda70a07959a9c2ddeb253dcd">CdrIterator::operator()</a></div><div class="ttdeci">virtual RefCountedPtr&lt; T &gt; &amp; operator()()</div><div class="ttdoc">Return the current solver.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:120</div></div>
+<div class="ttc" id="aclassCdrIterator_html_a79a6370eda70a07959a9c2ddeb253dcd"><div class="ttname"><a href="classCdrIterator.html#a79a6370eda70a07959a9c2ddeb253dcd">CdrIterator::operator()</a></div><div class="ttdeci">virtual RefCountedPtr&lt; T &gt; &amp; operator()()</div><div class="ttdoc">Return the current solver.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:133</div></div>
 <div class="ttc" id="aclassCdrIterator_html_ab9fc5e49a7ad1f48891f1d9e394a3aa7"><div class="ttname"><a href="classCdrIterator.html#ab9fc5e49a7ad1f48891f1d9e394a3aa7">CdrIterator::CdrIterator</a></div><div class="ttdeci">CdrIterator()=delete</div><div class="ttdoc">Disallowed weak construction. Always use the full constructor.</div></div>
-<div class="ttc" id="aclassCdrIterator_html_a29a2356521b7a72a6399eaff1aa56154"><div class="ttname"><a href="classCdrIterator.html#a29a2356521b7a72a6399eaff1aa56154">CdrIterator::m_species</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; CdrSpecies &gt; &gt; m_species</div><div class="ttdoc">Cdr species.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:122</div></div>
-<div class="ttc" id="aclassCdrIterator_html_aedf49ecaa5514585f336b4b5fc5aea7f"><div class="ttname"><a href="classCdrIterator.html#aedf49ecaa5514585f336b4b5fc5aea7f">CdrIterator::getNumberOfSolvers</a></div><div class="ttdeci">virtual int getNumberOfSolvers()</div><div class="ttdoc">Get number of solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:40</div></div>
-<div class="ttc" id="aclassCdrIterator_html_a411502952b4a0ae90bec3dd816106bf1"><div class="ttname"><a href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">CdrIterator::ok</a></div><div class="ttdeci">virtual bool ok() const</div><div class="ttdoc">Ok or not.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:67</div></div>
+<div class="ttc" id="aclassCdrIterator_html_a29a2356521b7a72a6399eaff1aa56154"><div class="ttname"><a href="classCdrIterator.html#a29a2356521b7a72a6399eaff1aa56154">CdrIterator::m_species</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; CdrSpecies &gt; &gt; m_species</div><div class="ttdoc">Cdr species.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:130</div></div>
+<div class="ttc" id="aclassCdrIterator_html_aedf49ecaa5514585f336b4b5fc5aea7f"><div class="ttname"><a href="classCdrIterator.html#aedf49ecaa5514585f336b4b5fc5aea7f">CdrIterator::getNumberOfSolvers</a></div><div class="ttdeci">virtual int getNumberOfSolvers()</div><div class="ttdoc">Get number of solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:43</div></div>
+<div class="ttc" id="aclassCdrIterator_html_a411502952b4a0ae90bec3dd816106bf1"><div class="ttname"><a href="classCdrIterator.html#a411502952b4a0ae90bec3dd816106bf1">CdrIterator::ok</a></div><div class="ttdeci">virtual bool ok() const</div><div class="ttdoc">Ok or not.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:76</div></div>
 <div class="ttc" id="aCD__CdrLayout_8H_html"><div class="ttname"><a href="CD__CdrLayout_8H.html">CD_CdrLayout.H</a></div><div class="ttdoc">Declaration of a class that holds a set of CdrSolvers (to cut down on typing).</div></div>
-<div class="ttc" id="aclassCdrIterator_html_ad43a87222356e92b118d6774615fd984"><div class="ttname"><a href="classCdrIterator.html#ad43a87222356e92b118d6774615fd984">CdrIterator::~CdrIterator</a></div><div class="ttdeci">virtual ~CdrIterator()</div><div class="ttdoc">Destructor (does nothing).</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:35</div></div>
-<div class="ttc" id="aclassCdrIterator_html_ac3de91533d2e3492912730c4ef43afd2"><div class="ttname"><a href="classCdrIterator.html#ac3de91533d2e3492912730c4ef43afd2">CdrIterator::m_numSolvers</a></div><div class="ttdeci">int m_numSolvers</div><div class="ttdoc">Number of solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:107</div></div>
+<div class="ttc" id="aclassCdrIterator_html_ad43a87222356e92b118d6774615fd984"><div class="ttname"><a href="classCdrIterator.html#ad43a87222356e92b118d6774615fd984">CdrIterator::~CdrIterator</a></div><div class="ttdeci">virtual ~CdrIterator()</div><div class="ttdoc">Destructor (does nothing).</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:36</div></div>
+<div class="ttc" id="aclassCdrIterator_html_ac3de91533d2e3492912730c4ef43afd2"><div class="ttname"><a href="classCdrIterator.html#ac3de91533d2e3492912730c4ef43afd2">CdrIterator::m_numSolvers</a></div><div class="ttdeci">int m_numSolvers</div><div class="ttdoc">Number of solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:114</div></div>
 <div class="ttc" id="aclassCdrIterator_html_abfed0ae43a81afdd3d4cd47f01be3e50"><div class="ttname"><a href="classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50">CdrIterator::SpeciesIteration</a></div><div class="ttdeci">SpeciesIteration</div><div class="ttdoc">Enum class for iterating through subsets of species.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:32</div></div>
-<div class="ttc" id="aclassCdrIterator_html_a0e3ec29cf3e7e22706d2b1268522420e"><div class="ttname"><a href="classCdrIterator.html#a0e3ec29cf3e7e22706d2b1268522420e">CdrIterator::m_solvers</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; T &gt; &gt; m_solvers</div><div class="ttdoc">Cdr solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:117</div></div>
-<div class="ttc" id="aclassCdrIterator_html_a1ec99b2010b51e9b2b78267532b37681"><div class="ttname"><a href="classCdrIterator.html#a1ec99b2010b51e9b2b78267532b37681">CdrIterator::m_isDefined</a></div><div class="ttdeci">bool m_isDefined</div><div class="ttdoc">Defined or not.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:107</div></div>
-<div class="ttc" id="aclassCdrIterator_html_a640c06f98f11b9a75bb669c31c4e811b"><div class="ttname"><a href="classCdrIterator.html#a640c06f98f11b9a75bb669c31c4e811b">CdrIterator::getSpecies</a></div><div class="ttdeci">virtual RefCountedPtr&lt; CdrSpecies &gt; &amp; getSpecies()</div><div class="ttdoc">Return the current species.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:130</div></div>
-<div class="ttc" id="aclassCdrIterator_html_a4cd2bd5ff13b0b4076d2a15717a8c4f9"><div class="ttname"><a href="classCdrIterator.html#a4cd2bd5ff13b0b4076d2a15717a8c4f9">CdrIterator::index</a></div><div class="ttdeci">virtual int index() const</div><div class="ttdoc">Get current solver number (i.e. index in CdrLayouts solvers).</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:49</div></div>
-<div class="ttc" id="aclassCdrIterator_html_a09ae5cc400ef56d6351d460bfe72bd53"><div class="ttname"><a href="classCdrIterator.html#a09ae5cc400ef56d6351d460bfe72bd53">CdrIterator::reset</a></div><div class="ttdeci">virtual void reset()</div><div class="ttdoc">Reset iterator.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:58</div></div>
+<div class="ttc" id="aclassCdrIterator_html_a0e3ec29cf3e7e22706d2b1268522420e"><div class="ttname"><a href="classCdrIterator.html#a0e3ec29cf3e7e22706d2b1268522420e">CdrIterator::m_solvers</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; T &gt; &gt; m_solvers</div><div class="ttdoc">Cdr solvers.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:125</div></div>
+<div class="ttc" id="aclassCdrIterator_html_a1ec99b2010b51e9b2b78267532b37681"><div class="ttname"><a href="classCdrIterator.html#a1ec99b2010b51e9b2b78267532b37681">CdrIterator::m_isDefined</a></div><div class="ttdeci">bool m_isDefined</div><div class="ttdoc">Defined or not.</div><div class="ttdef"><b>Definition:</b> CD_CdrIterator.H:115</div></div>
+<div class="ttc" id="aclassCdrIterator_html_a640c06f98f11b9a75bb669c31c4e811b"><div class="ttname"><a href="classCdrIterator.html#a640c06f98f11b9a75bb669c31c4e811b">CdrIterator::getSpecies</a></div><div class="ttdeci">virtual RefCountedPtr&lt; CdrSpecies &gt; &amp; getSpecies()</div><div class="ttdoc">Return the current species.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:145</div></div>
+<div class="ttc" id="aclassCdrIterator_html_a4cd2bd5ff13b0b4076d2a15717a8c4f9"><div class="ttname"><a href="classCdrIterator.html#a4cd2bd5ff13b0b4076d2a15717a8c4f9">CdrIterator::index</a></div><div class="ttdeci">virtual int index() const</div><div class="ttdoc">Get current solver number (i.e. index in CdrLayouts solvers).</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:54</div></div>
+<div class="ttc" id="aclassCdrIterator_html_a09ae5cc400ef56d6351d460bfe72bd53"><div class="ttname"><a href="classCdrIterator.html#a09ae5cc400ef56d6351d460bfe72bd53">CdrIterator::reset</a></div><div class="ttdeci">virtual void reset()</div><div class="ttdoc">Reset iterator.</div><div class="ttdef"><b>Definition:</b> CD_CdrIteratorImplem.H:65</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

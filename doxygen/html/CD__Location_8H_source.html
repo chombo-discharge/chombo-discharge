@@ -92,42 +92,38 @@ $(function() {
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
 <div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="namespaceLocation.html">   24</a></span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceLocation.html">Location</a> {</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">   29</a></span>&#160;  <span class="keyword">enum class</span> <a class="code" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Cell</a> {</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    Center,</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    Centroid,</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    Boundary</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  };</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="namespaceLocation.html#a839860d8662841b5e2744450c097002c">   38</a></span>&#160;  <span class="keyword">enum class</span> <a class="code" href="namespaceLocation.html#a839860d8662841b5e2744450c097002c">Face</a> {</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    Center,</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    Centroid,</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    Boundary</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  };</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  RealVect <a class="code" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">position</a>(<span class="keyword">const</span> <a class="code" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_location,</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            <span class="keyword">const</span> VolIndex&amp;      a_vof,</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            <span class="keyword">const</span> EBISBox&amp;       a_ebisbox,</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            <span class="keyword">const</span> Real&amp;          a_dx);</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  RealVect <a class="code" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">position</a>(<span class="keyword">const</span> <a class="code" href="namespaceLocation.html#a839860d8662841b5e2744450c097002c">Location::Face</a> a_location,</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;            <span class="keyword">const</span> FaceIndex&amp;     a_face,</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;            <span class="keyword">const</span> EBISBox&amp;       a_ebisbox,</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;            <span class="keyword">const</span> Real&amp;          a_dx);</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;}</div>
+<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">   29</a></span>&#160;  <span class="keyword">enum class</span> <a class="code" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Cell</a></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  {</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    Center,</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    Centroid,</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    Boundary</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  };</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="namespaceLocation.html#a839860d8662841b5e2744450c097002c">   39</a></span>&#160;  <span class="keyword">enum class</span> <a class="code" href="namespaceLocation.html#a839860d8662841b5e2744450c097002c">Face</a></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  {</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    Center,</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    Centroid,</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    Boundary</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  };</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  <span class="keyword">inline</span> RealVect</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <a class="code" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">position</a>(<span class="keyword">const</span> <a class="code" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_location, <span class="keyword">const</span> VolIndex&amp; a_vof, <span class="keyword">const</span> EBISBox&amp; a_ebisbox, <span class="keyword">const</span> Real&amp; a_dx);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keyword">inline</span> RealVect</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  <a class="code" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">position</a>(<span class="keyword">const</span> <a class="code" href="namespaceLocation.html#a839860d8662841b5e2744450c097002c">Location::Face</a> a_location, <span class="keyword">const</span> FaceIndex&amp; a_face, <span class="keyword">const</span> EBISBox&amp; a_ebisbox, <span class="keyword">const</span> Real&amp; a_dx);</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;} <span class="comment">// namespace Location</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__LocationImplem_8H.html">CD_LocationImplem.H</a>&gt;</span></div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__LocationImplem_8H.html">CD_LocationImplem.H</a>&gt;</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="anamespaceLocation_html_a303c39a31d7afb2dd5650a9117a7d710"><div class="ttname"><a href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">Location::position</a></div><div class="ttdeci">RealVect position(const Location::Cell a_location, const VolIndex &amp;a_vof, const EBISBox &amp;a_ebisbox, const Real &amp;a_dx)</div><div class="ttdoc">Compute the position (ignoring the &quot;origin) of a Vof.</div><div class="ttdef"><b>Definition:</b> CD_LocationImplem.H:20</div></div>
 <div class="ttc" id="anamespaceLocation_html_a54eced96f7ad5684263391a0b726c163"><div class="ttname"><a href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a></div><div class="ttdeci">Cell</div><div class="ttdoc">Enum for distinguishing between cell locations.</div><div class="ttdef"><b>Definition:</b> CD_Location.H:29</div></div>
 <div class="ttc" id="anamespaceLocation_html"><div class="ttname"><a href="namespaceLocation.html">Location</a></div><div class="ttdoc">Namespace for encapsulating various data centerings.</div><div class="ttdef"><b>Definition:</b> CD_Location.H:24</div></div>
 <div class="ttc" id="aCD__LocationImplem_8H_html"><div class="ttname"><a href="CD__LocationImplem_8H.html">CD_LocationImplem.H</a></div><div class="ttdoc">Implementation of CD_Location.H.</div></div>
-<div class="ttc" id="anamespaceLocation_html_a839860d8662841b5e2744450c097002c"><div class="ttname"><a href="namespaceLocation.html#a839860d8662841b5e2744450c097002c">Location::Face</a></div><div class="ttdeci">Face</div><div class="ttdoc">Enum for distinguishing between face locations.</div><div class="ttdef"><b>Definition:</b> CD_Location.H:38</div></div>
+<div class="ttc" id="anamespaceLocation_html_a839860d8662841b5e2744450c097002c"><div class="ttname"><a href="namespaceLocation.html#a839860d8662841b5e2744450c097002c">Location::Face</a></div><div class="ttdeci">Face</div><div class="ttdoc">Enum for distinguishing between face locations.</div><div class="ttdef"><b>Definition:</b> CD_Location.H:39</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

@@ -91,9 +91,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrFactory.html#a6630154acb5e8b255ed6a6c3328d47c6">~CdrFactory</a> ()</td></tr>
 <tr class="memdesc:a6630154acb5e8b255ed6a6c3328d47c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor (does nothing) <br /></td></tr>
 <tr class="separator:a6630154acb5e8b255ed6a6c3328d47c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab47671a46d67eb95ff3315a8e3abdc4d"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; <a class="el" href="classCdrLayout.html">CdrLayout</a>&lt; T &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrFactory.html#ab47671a46d67eb95ff3315a8e3abdc4d">newLayout</a> (const Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &gt; &amp;a_species) const</td></tr>
-<tr class="memdesc:ab47671a46d67eb95ff3315a8e3abdc4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method, create a new <a class="el" href="classCdrLayout.html" title="Class for holding a set of CdrSolvers.">CdrLayout</a>.  <a href="classCdrFactory.html#ab47671a46d67eb95ff3315a8e3abdc4d">More...</a><br /></td></tr>
-<tr class="separator:ab47671a46d67eb95ff3315a8e3abdc4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0adb5580f5720dc2969e7f7ef8a942ad"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; <a class="el" href="classCdrLayout.html">CdrLayout</a>&lt; T &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrFactory.html#a0adb5580f5720dc2969e7f7ef8a942ad">newLayout</a> (const Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt;&gt; &amp;a_species) const</td></tr>
+<tr class="memdesc:a0adb5580f5720dc2969e7f7ef8a942ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method, create a new <a class="el" href="classCdrLayout.html" title="Class for holding a set of CdrSolvers.">CdrLayout</a>.  <a href="classCdrFactory.html#a0adb5580f5720dc2969e7f7ef8a942ad">More...</a><br /></td></tr>
+<tr class="separator:a0adb5580f5720dc2969e7f7ef8a942ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;class T, class S&gt;<br />
@@ -102,8 +102,8 @@ class CdrFactory&lt; T, S &gt;</h3>
 <p>Factory class for <a class="el" href="classCdrLayout.html" title="Class for holding a set of CdrSolvers.">CdrLayout</a>. T is (usually) <a class="el" href="classCdrSolver.html" title="Base class for solving convection-diffusion-reaction equations.">CdrSolver</a> and S is the implementation class (e.g., <a class="el" href="classCdrMuscl.html" title="Class that uses MUSCL discretization advection.">CdrMuscl</a>). </p>
 <p>Factory class is very simple; since we don't want to template <a class="el" href="classCdrLayout.html" title="Class for holding a set of CdrSolvers.">CdrLayout</a> further we use a factory to instantiate solvers of any <a class="el" href="classCdrSolver.html" title="Base class for solving convection-diffusion-reaction equations.">CdrSolver</a> inherited class, and then return a layout with the casted classes. That's about it. This is useful because it allows the factory to act as a "casting-point" for switching between various solver implementation. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ab47671a46d67eb95ff3315a8e3abdc4d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab47671a46d67eb95ff3315a8e3abdc4d">&#9670;&nbsp;</a></span>newLayout()</h2>
+<a id="a0adb5580f5720dc2969e7f7ef8a942ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0adb5580f5720dc2969e7f7ef8a942ad">&#9670;&nbsp;</a></span>newLayout()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -113,7 +113,7 @@ template&lt;class T , class S &gt; </div>
         <tr>
           <td class="memname">RefCountedPtr&lt; <a class="el" href="classCdrLayout.html">CdrLayout</a>&lt; T &gt; &gt; <a class="el" href="classCdrFactory.html">CdrFactory</a>&lt; T, S &gt;::newLayout </td>
           <td>(</td>
-          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_species</em></td><td>)</td>
           <td> const</td>
         </tr>

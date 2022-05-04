@@ -120,15 +120,15 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrFluxRegisters</b>
 <tr class="memitem:a20c70565d7a9257528d7eb0a2ae8c3e2"><td class="memItemLeft" align="right" valign="top"><a id="a20c70565d7a9257528d7eb0a2ae8c3e2"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrCoarseners</b> = Vector&lt; RefCountedPtr&lt; <a class="el" href="classEbCoarAve.html">EbCoarAve</a> &gt; &gt;</td></tr>
 <tr class="separator:a20c70565d7a9257528d7eb0a2ae8c3e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad73a358ae071a90613a0ca916950b8eb"><td class="memItemLeft" align="right" valign="top"><a id="ad73a358ae071a90613a0ca916950b8eb"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrCellData</b> = Vector&lt; RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt; &gt; &gt;</td></tr>
-<tr class="separator:ad73a358ae071a90613a0ca916950b8eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03fe5dada88d410546531504effb124d"><td class="memItemLeft" align="right" valign="top"><a id="a03fe5dada88d410546531504effb124d"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrFluxData</b> = Vector&lt; RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &gt;</td></tr>
-<tr class="separator:a03fe5dada88d410546531504effb124d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd23fb170c18fec49fb968aca7f10842"><td class="memItemLeft" align="right" valign="top"><a id="afd23fb170c18fec49fb968aca7f10842"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrIrreData</b> = Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &gt;</td></tr>
-<tr class="separator:afd23fb170c18fec49fb968aca7f10842"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5ae42f3d78f75a5aa43319616e9dc91"><td class="memItemLeft" align="right" valign="top"><a id="ae5ae42f3d78f75a5aa43319616e9dc91"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrCellData</b> = Vector&lt; RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt; &gt;&gt;</td></tr>
+<tr class="separator:ae5ae42f3d78f75a5aa43319616e9dc91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6b55113861f3360d354a7ac15e18fbd"><td class="memItemLeft" align="right" valign="top"><a id="af6b55113861f3360d354a7ac15e18fbd"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrFluxData</b> = Vector&lt; RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt;&gt;</td></tr>
+<tr class="separator:af6b55113861f3360d354a7ac15e18fbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c61432fe25eba79754446c66dcc01ab"><td class="memItemLeft" align="right" valign="top"><a id="a6c61432fe25eba79754446c66dcc01ab"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrIrreData</b> = Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt;&gt; &gt;</td></tr>
+<tr class="separator:a6c61432fe25eba79754446c66dcc01ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa036e0de6897d7eeb557585317774fa"><td class="memItemLeft" align="right" valign="top"><a id="afa036e0de6897d7eeb557585317774fa"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>AmrResolutions</b> = Vector&lt; Real &gt;</td></tr>
 <tr class="separator:afa036e0de6897d7eeb557585317774fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -196,9 +196,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a2dd9f6cf15399724bd1c2e0c404d23b9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOpFactory.html#a2dd9f6cf15399724bd1c2e0c404d23b9">getCoarserLayout</a> (EBLevelGrid &amp;a_coarseGrid, const EBLevelGrid &amp;a_fineGrid, const int a_refRat, const int a_blockingFactor) const</td></tr>
 <tr class="memdesc:a2dd9f6cf15399724bd1c2e0c404d23b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct coarsening of a grid level.  <a href="classEBHelmholtzOpFactory.html#a2dd9f6cf15399724bd1c2e0c404d23b9">More...</a><br /></td></tr>
 <tr class="separator:a2dd9f6cf15399724bd1c2e0c404d23b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab213a1c911887047b87371c93b668e42"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOpFactory.html#ab213a1c911887047b87371c93b668e42">coarsenCoefficients</a> (LevelData&lt; EBCellFAB &gt; &amp;a_coarAcoef, LevelData&lt; EBFluxFAB &gt; &amp;a_coarBcoef, LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_coarBcoefIrreg, const LevelData&lt; EBCellFAB &gt; &amp;a_fineAcoef, const LevelData&lt; EBFluxFAB &gt; &amp;a_fineBcoef, const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;a_fineBcoefIrreg, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgFine, const int a_refRat)</td></tr>
-<tr class="memdesc:ab213a1c911887047b87371c93b668e42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen coefficients (conservatively)  <a href="classEBHelmholtzOpFactory.html#ab213a1c911887047b87371c93b668e42">More...</a><br /></td></tr>
-<tr class="separator:ab213a1c911887047b87371c93b668e42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60a1dc661a7c02f70f049fb14350fe06"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOpFactory.html#a60a1dc661a7c02f70f049fb14350fe06">coarsenCoefficients</a> (LevelData&lt; EBCellFAB &gt; &amp;a_coarAcoef, LevelData&lt; EBFluxFAB &gt; &amp;a_coarBcoef, LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_coarBcoefIrreg, const LevelData&lt; EBCellFAB &gt; &amp;a_fineAcoef, const LevelData&lt; EBFluxFAB &gt; &amp;a_fineBcoef, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_fineBcoefIrreg, const EBLevelGrid &amp;a_eblgCoar, const EBLevelGrid &amp;a_eblgFine, const int a_refRat)</td></tr>
+<tr class="memdesc:a60a1dc661a7c02f70f049fb14350fe06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen coefficients (conservatively)  <a href="classEBHelmholtzOpFactory.html#a60a1dc661a7c02f70f049fb14350fe06">More...</a><br /></td></tr>
+<tr class="separator:a60a1dc661a7c02f70f049fb14350fe06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c30095f596d9ab8ef2e9f0c5b172be8"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOpFactory.html#a2c30095f596d9ab8ef2e9f0c5b172be8">findAmrLevel</a> (const ProblemDomain &amp;a_domain) const</td></tr>
 <tr class="memdesc:a2c30095f596d9ab8ef2e9f0c5b172be8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find level corresponding to amr level.  <a href="classEBHelmholtzOpFactory.html#a2c30095f596d9ab8ef2e9f0c5b172be8">More...</a><br /></td></tr>
 <tr class="separator:a2c30095f596d9ab8ef2e9f0c5b172be8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -536,8 +536,8 @@ This operator is for time-independent a- and b-coefficients. </dd></dl>
 
 </div>
 </div>
-<a id="ab213a1c911887047b87371c93b668e42"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab213a1c911887047b87371c93b668e42">&#9670;&nbsp;</a></span>coarsenCoefficients()</h2>
+<a id="a60a1dc661a7c02f70f049fb14350fe06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60a1dc661a7c02f70f049fb14350fe06">&#9670;&nbsp;</a></span>coarsenCoefficients()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -560,7 +560,7 @@ This operator is for time-independent a- and b-coefficients. </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_coarBcoefIrreg</em>, </td>
         </tr>
         <tr>
@@ -578,7 +578,7 @@ This operator is for time-independent a- and b-coefficients. </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_fineBcoefIrreg</em>, </td>
         </tr>
         <tr>

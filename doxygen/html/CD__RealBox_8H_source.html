@@ -91,9 +91,9 @@ $(function() {
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">// Our includes</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classRealBox.html">   25</a></span>&#160;<span class="keyword">class </span><a class="code" href="classRealBox.html">RealBox</a>{</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classRealBox.html">   25</a></span>&#160;<span class="keyword">class </span><a class="code" href="classRealBox.html">RealBox</a></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;{</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  <a class="code" href="classRealBox.html#ac9f44203f823f28ab00f6f48f5a8bcc5">RealBox</a>();</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  <a class="code" href="classRealBox.html#ac9f44203f823f28ab00f6f48f5a8bcc5">RealBox</a>(<span class="keyword">const</span> RealVect a_lo, <span class="keyword">const</span> RealVect a_hi);</div>
@@ -102,40 +102,44 @@ $(function() {
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  <a class="code" href="classRealBox.html#a5221bbad04a5d74743013a798cb1c123">~RealBox</a>();</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  RealVect <a class="code" href="classRealBox.html#aebee9f039b3f77e24d93e54622987d39">getLo</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  RealVect <a class="code" href="classRealBox.html#ab7ee0fc3e4f0946985eeab47e8ee5d08">getHi</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  Vector&lt;RealVect&gt; <a class="code" href="classRealBox.html#a63c2159649825f75da8737c3d278ae41">getCorners</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classRealBox.html#af7c3ce0b70726c7b31cf1ea340fb24b4">intersect</a>(<span class="keyword">const</span> <a class="code" href="classRealBox.html">RealBox</a>&amp; a_box) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classRealBox.html#a3415fed48a3205d59de6ad785b5539b2">isPointInside</a>(<span class="keyword">const</span> RealVect a_point) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classRealBox.html#a082a79a68d696775523d0b6eee977169">isBoxInside</a>(<span class="keyword">const</span> <a class="code" href="classRealBox.html">RealBox</a>&amp; a_box) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  </div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
-<div class="line"><a name="l00093"></a><span class="lineno"><a class="line" href="classRealBox.html#a4f9785dcd4d7d8dfde5fd087ba97435b">   93</a></span>&#160;  RealVect <a class="code" href="classRealBox.html#a4f9785dcd4d7d8dfde5fd087ba97435b">m_lo</a>;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
-<div class="line"><a name="l00098"></a><span class="lineno"><a class="line" href="classRealBox.html#ae305c422fbe21ee177717dca237bc6f9">   98</a></span>&#160;  RealVect <a class="code" href="classRealBox.html#ae305c422fbe21ee177717dca237bc6f9">m_hi</a>;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  RealVect</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <a class="code" href="classRealBox.html#aebee9f039b3f77e24d93e54622987d39">getLo</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  RealVect</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <a class="code" href="classRealBox.html#ab7ee0fc3e4f0946985eeab47e8ee5d08">getHi</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  Vector&lt;RealVect&gt;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  <a class="code" href="classRealBox.html#a63c2159649825f75da8737c3d278ae41">getCorners</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  <a class="code" href="classRealBox.html#af7c3ce0b70726c7b31cf1ea340fb24b4">intersect</a>(<span class="keyword">const</span> <a class="code" href="classRealBox.html">RealBox</a>&amp; a_box) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  <a class="code" href="classRealBox.html#a3415fed48a3205d59de6ad785b5539b2">isPointInside</a>(<span class="keyword">const</span> RealVect a_point) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  <a class="code" href="classRealBox.html#a082a79a68d696775523d0b6eee977169">isBoxInside</a>(<span class="keyword">const</span> <a class="code" href="classRealBox.html">RealBox</a>&amp; a_box) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00098"></a><span class="lineno"><a class="line" href="classRealBox.html#a4f9785dcd4d7d8dfde5fd087ba97435b">   98</a></span>&#160;  RealVect <a class="code" href="classRealBox.html#a4f9785dcd4d7d8dfde5fd087ba97435b">m_lo</a>;</div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;};</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno"><a class="line" href="classRealBox.html#ae305c422fbe21ee177717dca237bc6f9">  103</a></span>&#160;  RealVect <a class="code" href="classRealBox.html#ae305c422fbe21ee177717dca237bc6f9">m_hi</a>;</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;};</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassRealBox_html_a082a79a68d696775523d0b6eee977169"><div class="ttname"><a href="classRealBox.html#a082a79a68d696775523d0b6eee977169">RealBox::isBoxInside</a></div><div class="ttdeci">bool isBoxInside(const RealBox &amp;a_box) const</div><div class="ttdoc">Check if a_box is completely inside this box. For this to be true, all the corners of a_box must be c...</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:122</div></div>
-<div class="ttc" id="aclassRealBox_html_a5221bbad04a5d74743013a798cb1c123"><div class="ttname"><a href="classRealBox.html#a5221bbad04a5d74743013a798cb1c123">RealBox::~RealBox</a></div><div class="ttdeci">~RealBox()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:38</div></div>
-<div class="ttc" id="aclassRealBox_html_a3415fed48a3205d59de6ad785b5539b2"><div class="ttname"><a href="classRealBox.html#a3415fed48a3205d59de6ad785b5539b2">RealBox::isPointInside</a></div><div class="ttdeci">bool isPointInside(const RealVect a_point) const</div><div class="ttdoc">Check if a_point is inside this box.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:106</div></div>
-<div class="ttc" id="aclassRealBox_html_ab7ee0fc3e4f0946985eeab47e8ee5d08"><div class="ttname"><a href="classRealBox.html#ab7ee0fc3e4f0946985eeab47e8ee5d08">RealBox::getHi</a></div><div class="ttdeci">RealVect getHi() const</div><div class="ttdoc">Get high corner.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:46</div></div>
-<div class="ttc" id="aclassRealBox_html_aebee9f039b3f77e24d93e54622987d39"><div class="ttname"><a href="classRealBox.html#aebee9f039b3f77e24d93e54622987d39">RealBox::getLo</a></div><div class="ttdeci">RealVect getLo() const</div><div class="ttdoc">Get low corner.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:42</div></div>
-<div class="ttc" id="aclassRealBox_html_a63c2159649825f75da8737c3d278ae41"><div class="ttname"><a href="classRealBox.html#a63c2159649825f75da8737c3d278ae41">RealBox::getCorners</a></div><div class="ttdeci">Vector&lt; RealVect &gt; getCorners() const</div><div class="ttdoc">Get all the corners of this box (4 in 2D, 8 in 3D);.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:50</div></div>
-<div class="ttc" id="aclassRealBox_html_ae305c422fbe21ee177717dca237bc6f9"><div class="ttname"><a href="classRealBox.html#ae305c422fbe21ee177717dca237bc6f9">RealBox::m_hi</a></div><div class="ttdeci">RealVect m_hi</div><div class="ttdoc">High corner.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.H:98</div></div>
-<div class="ttc" id="aclassRealBox_html_a4f9785dcd4d7d8dfde5fd087ba97435b"><div class="ttname"><a href="classRealBox.html#a4f9785dcd4d7d8dfde5fd087ba97435b">RealBox::m_lo</a></div><div class="ttdeci">RealVect m_lo</div><div class="ttdoc">Low corner.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.H:93</div></div>
+<div class="ttc" id="aclassRealBox_html_a082a79a68d696775523d0b6eee977169"><div class="ttname"><a href="classRealBox.html#a082a79a68d696775523d0b6eee977169">RealBox::isBoxInside</a></div><div class="ttdeci">bool isBoxInside(const RealBox &amp;a_box) const</div><div class="ttdoc">Check if a_box is completely inside this box. For this to be true, all the corners of a_box must be c...</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:132</div></div>
+<div class="ttc" id="aclassRealBox_html_a5221bbad04a5d74743013a798cb1c123"><div class="ttname"><a href="classRealBox.html#a5221bbad04a5d74743013a798cb1c123">RealBox::~RealBox</a></div><div class="ttdeci">~RealBox()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:41</div></div>
+<div class="ttc" id="aclassRealBox_html_a3415fed48a3205d59de6ad785b5539b2"><div class="ttname"><a href="classRealBox.html#a3415fed48a3205d59de6ad785b5539b2">RealBox::isPointInside</a></div><div class="ttdeci">bool isPointInside(const RealVect a_point) const</div><div class="ttdoc">Check if a_point is inside this box.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:115</div></div>
+<div class="ttc" id="aclassRealBox_html_ab7ee0fc3e4f0946985eeab47e8ee5d08"><div class="ttname"><a href="classRealBox.html#ab7ee0fc3e4f0946985eeab47e8ee5d08">RealBox::getHi</a></div><div class="ttdeci">RealVect getHi() const</div><div class="ttdoc">Get high corner.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:50</div></div>
+<div class="ttc" id="aclassRealBox_html_aebee9f039b3f77e24d93e54622987d39"><div class="ttname"><a href="classRealBox.html#aebee9f039b3f77e24d93e54622987d39">RealBox::getLo</a></div><div class="ttdeci">RealVect getLo() const</div><div class="ttdoc">Get low corner.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:44</div></div>
+<div class="ttc" id="aclassRealBox_html_a63c2159649825f75da8737c3d278ae41"><div class="ttname"><a href="classRealBox.html#a63c2159649825f75da8737c3d278ae41">RealBox::getCorners</a></div><div class="ttdeci">Vector&lt; RealVect &gt; getCorners() const</div><div class="ttdoc">Get all the corners of this box (4 in 2D, 8 in 3D);.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:56</div></div>
+<div class="ttc" id="aclassRealBox_html_ae305c422fbe21ee177717dca237bc6f9"><div class="ttname"><a href="classRealBox.html#ae305c422fbe21ee177717dca237bc6f9">RealBox::m_hi</a></div><div class="ttdeci">RealVect m_hi</div><div class="ttdoc">High corner.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.H:103</div></div>
+<div class="ttc" id="aclassRealBox_html_a4f9785dcd4d7d8dfde5fd087ba97435b"><div class="ttname"><a href="classRealBox.html#a4f9785dcd4d7d8dfde5fd087ba97435b">RealBox::m_lo</a></div><div class="ttdeci">RealVect m_lo</div><div class="ttdoc">Low corner.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.H:98</div></div>
 <div class="ttc" id="aclassRealBox_html"><div class="ttname"><a href="classRealBox.html">RealBox</a></div><div class="ttdoc">Rectangular box in real space.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.H:25</div></div>
-<div class="ttc" id="aclassRealBox_html_af7c3ce0b70726c7b31cf1ea340fb24b4"><div class="ttname"><a href="classRealBox.html#af7c3ce0b70726c7b31cf1ea340fb24b4">RealBox::intersect</a></div><div class="ttdeci">bool intersect(const RealBox &amp;a_box) const</div><div class="ttdoc">Check if a_box intersects this box. This is done by checking if.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:75</div></div>
+<div class="ttc" id="aclassRealBox_html_af7c3ce0b70726c7b31cf1ea340fb24b4"><div class="ttname"><a href="classRealBox.html#af7c3ce0b70726c7b31cf1ea340fb24b4">RealBox::intersect</a></div><div class="ttdeci">bool intersect(const RealBox &amp;a_box) const</div><div class="ttdoc">Check if a_box intersects this box. This is done by checking if.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:83</div></div>
 <div class="ttc" id="aclassRealBox_html_ac9f44203f823f28ab00f6f48f5a8bcc5"><div class="ttname"><a href="classRealBox.html#ac9f44203f823f28ab00f6f48f5a8bcc5">RealBox::RealBox</a></div><div class="ttdeci">RealBox()</div><div class="ttdoc">Default constructor. Must subsequently set the corners.</div><div class="ttdef"><b>Definition:</b> CD_RealBox.cpp:19</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

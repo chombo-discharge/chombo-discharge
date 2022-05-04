@@ -126,9 +126,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9fd25cc34c8e46d12ebc5ae7c7ea2033"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBHelmholtzElectrostaticDomainBC.html">EBHelmholtzElectrostaticDomainBC</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#a9fd25cc34c8e46d12ebc5ae7c7ea2033">operator=</a> (const <a class="el" href="classEBHelmholtzElectrostaticDomainBC.html">EBHelmholtzElectrostaticDomainBC</a> &amp;&amp;a_other)=delete</td></tr>
 <tr class="memdesc:a9fd25cc34c8e46d12ebc5ae7c7ea2033"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed - don't see why you would need it.  <a href="classEBHelmholtzElectrostaticDomainBC.html#a9fd25cc34c8e46d12ebc5ae7c7ea2033">More...</a><br /></td></tr>
 <tr class="separator:a9fd25cc34c8e46d12ebc5ae7c7ea2033"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa0e6a205cda5f789ca068bb02082714"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#afa0e6a205cda5f789ca068bb02082714">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;a_Bcoef, const RealVect &amp;a_probLo, const Real a_dx) override final</td></tr>
-<tr class="memdesc:afa0e6a205cda5f789ca068bb02082714"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <a href="classEBHelmholtzElectrostaticDomainBC.html#afa0e6a205cda5f789ca068bb02082714">More...</a><br /></td></tr>
-<tr class="separator:afa0e6a205cda5f789ca068bb02082714"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85bda6c40302d955b92c271ceee841f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#a85bda6c40302d955b92c271ceee841f1">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt;&gt; &amp;a_Bcoef, const RealVect &amp;a_probLo, const Real a_dx) override final</td></tr>
+<tr class="memdesc:a85bda6c40302d955b92c271ceee841f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <a href="classEBHelmholtzElectrostaticDomainBC.html#a85bda6c40302d955b92c271ceee841f1">More...</a><br /></td></tr>
+<tr class="separator:a85bda6c40302d955b92c271ceee841f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a010bfdc898fe75ea2e7a6e7f0de40e9a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#a010bfdc898fe75ea2e7a6e7f0de40e9a">getFaceFlux</a> (BaseFab&lt; Real &gt; &amp;a_faceFlux, const BaseFab&lt; Real &gt; &amp;a_phi, const int &amp;a_dir, const Side::LoHiSide &amp;a_side, const DataIndex &amp;a_dit, const bool a_useHomogeneous) const override final</td></tr>
 <tr class="memdesc:a010bfdc898fe75ea2e7a6e7f0de40e9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get face flux. This is for regular cells.  <a href="classEBHelmholtzElectrostaticDomainBC.html#a010bfdc898fe75ea2e7a6e7f0de40e9a">More...</a><br /></td></tr>
 <tr class="separator:a010bfdc898fe75ea2e7a6e7f0de40e9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -310,8 +310,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="afa0e6a205cda5f789ca068bb02082714"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afa0e6a205cda5f789ca068bb02082714">&#9670;&nbsp;</a></span>define()</h2>
+<a id="a85bda6c40302d955b92c271ceee841f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85bda6c40302d955b92c271ceee841f1">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -334,7 +334,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_Bcoef</em>, </td>
         </tr>
         <tr>
@@ -375,7 +375,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This overrides <a class="el" href="classEBHelmholtzDomainBC.html" title="Base class for passing domain boundary conditions into EBHelmholtzOp.">EBHelmholtzDomainBC</a> because <a class="el" href="classEBHelmholtzElectrostaticDomainBC.html" title="Class for passing electrostatic domain boundary conditions into EBHelmholtzOp.">EBHelmholtzElectrostaticDomainBC</a> is just a wrapper class for Dirichlet/Neumann, and those objects need defining. </dd></dl>
 
-<p>Reimplemented from <a class="el" href="classEBHelmholtzDomainBC.html#a3c9619d825162ee6c7bed5237c2f6ea8">EBHelmholtzDomainBC</a>.</p>
+<p>Reimplemented from <a class="el" href="classEBHelmholtzDomainBC.html#af1677641644f6dc7d5df6b011b9d8034">EBHelmholtzDomainBC</a>.</p>
 
 </div>
 </div>

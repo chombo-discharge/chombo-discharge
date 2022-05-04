@@ -94,76 +94,79 @@ $(function() {
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__MultiFluidIndexSpace_8H.html">CD_MultiFluidIndexSpace.H</a>&gt;</span></div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
-<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="classMFLevelGrid.html">   28</a></span>&#160;<span class="keyword">class </span><a class="code" href="classMFLevelGrid.html">MFLevelGrid</a> {</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
+<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="classMFLevelGrid.html">   28</a></span>&#160;<span class="keyword">class </span><a class="code" href="classMFLevelGrid.html">MFLevelGrid</a></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;{</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  <a class="code" href="classMFLevelGrid.html#a922574db896fe47e94ba202590807c5e">MFLevelGrid</a>();</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;  <a class="code" href="classMFLevelGrid.html#a922574db896fe47e94ba202590807c5e">MFLevelGrid</a>(<span class="keyword">const</span> DisjointBoxLayout&amp;                   a_dbl,</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;          <span class="keyword">const</span> ProblemDomain&amp;                       a_domain,</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;          <span class="keyword">const</span> <span class="keywordtype">int</span>                                  a_ebghost,</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;          <span class="keyword">const</span> RefCountedPtr&lt;MultiFluidIndexSpace&gt;&amp; a_mfis);</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;              <span class="keyword">const</span> ProblemDomain&amp;                       a_domain,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;              <span class="keyword">const</span> <span class="keywordtype">int</span>                                  a_ebghost,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;              <span class="keyword">const</span> RefCountedPtr&lt;MultiFluidIndexSpace&gt;&amp; a_mfis);</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <a class="code" href="classMFLevelGrid.html#a922574db896fe47e94ba202590807c5e">MFLevelGrid</a>(<span class="keyword">const</span> RefCountedPtr&lt;MultiFluidIndexSpace&gt;&amp; a_multiFluidIndexSpace,</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;          <span class="keyword">const</span> Vector&lt;EBLevelGrid&gt;&amp;                 a_eblgs);</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classMFLevelGrid.html#aab55f4793d3f2ca0ab94c1527d96769f">~MFLevelGrid</a>();</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="classMFLevelGrid.html#a366f6d82adca13fed2c7ddbda373921c">numPhases</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <a class="code" href="classMFLevelGrid.html#a922574db896fe47e94ba202590807c5e">MFLevelGrid</a>(<span class="keyword">const</span> RefCountedPtr&lt;MultiFluidIndexSpace&gt;&amp; a_multiFluidIndexSpace, <span class="keyword">const</span> Vector&lt;EBLevelGrid&gt;&amp; a_eblgs);</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classMFLevelGrid.html#aab55f4793d3f2ca0ab94c1527d96769f">~MFLevelGrid</a>();</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">int</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <a class="code" href="classMFLevelGrid.html#a366f6d82adca13fed2c7ddbda373921c">numPhases</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMFLevelGrid.html#ac3e0e1afc6070ff2d8c78a93c31a0cf0">define</a>(<span class="keyword">const</span> RefCountedPtr&lt;MultiFluidIndexSpace&gt;&amp; a_multiFluidIndexSpace,</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;              <span class="keyword">const</span> Vector&lt;EBLevelGrid&gt;&amp;                 a_eblgs);</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <a class="code" href="classMFLevelGrid.html#ac3e0e1afc6070ff2d8c78a93c31a0cf0">define</a>(<span class="keyword">const</span> RefCountedPtr&lt;MultiFluidIndexSpace&gt;&amp; a_multiFluidIndexSpace, <span class="keyword">const</span> Vector&lt;EBLevelGrid&gt;&amp; a_eblgs);</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMFLevelGrid.html#a5a7c7974913830614a6ccc934e083203">setMaxRefinementRatio</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_refRat);</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="keyword">virtual</span> <span class="keyword">const</span> RefCountedPtr&lt;MultiFluidIndexSpace&gt;&amp; <a class="code" href="classMFLevelGrid.html#ac388a3f1bcd2295d20bfe9be29ba4420">getMfIndexSpace</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  <span class="keyword">virtual</span> ProblemDomain <a class="code" href="classMFLevelGrid.html#a2e1f46d1be6caae607de0e62a2c663ba">getDomain</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  <span class="keyword">virtual</span> DisjointBoxLayout <a class="code" href="classMFLevelGrid.html#a66404daf7ec3513a2c572c606a3c6fbc">getGrids</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    </div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;  <span class="keyword">virtual</span> EBLevelGrid&amp; <a class="code" href="classMFLevelGrid.html#afcb1c081e8d29c6222ed3363a659f8bf">getEBLevelGrid</a>(<span class="keywordtype">int</span> a_phase);</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  <span class="keyword">virtual</span> <span class="keyword">const</span> EBLevelGrid&amp; <a class="code" href="classMFLevelGrid.html#afcb1c081e8d29c6222ed3363a659f8bf">getEBLevelGrid</a>(<span class="keywordtype">int</span> a_phase) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;  <span class="keyword">virtual</span> IntVectSet <a class="code" href="classMFLevelGrid.html#a8d1006dea323fb9783f2c642fb97dca3">interfaceRegion</a>(<span class="keyword">const</span> Box&amp;       a_box,</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                     <span class="keyword">const</span> DataIndex&amp; a_dit,</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">int</span>        a_phase1 = 0,</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">int</span>        a_phase2 = 1) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160; </div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="preprocessor">#if 0 // Taken out of chombo-discharge for now</span></div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">bool</span> interfacePair(IntVect&amp; a_iv,</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                 <span class="keyword">const</span> IntVect&amp;   a_iv_in,</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;                 <span class="keyword">const</span> Box&amp;       a_box,</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;                 <span class="keyword">const</span> DataIndex&amp; a_dit,</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;                 <span class="keyword">const</span> <span class="keywordtype">int</span>        a_phase1 = 0,</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;                 <span class="keyword">const</span> <span class="keywordtype">int</span>        a_phase2 = 1) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  </div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160; </div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;  RefCountedPtr&lt;MultiFluidIndexSpace&gt; m_multifluidIndexSpace;</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160; </div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;  Vector&lt;EBLevelGrid&gt; m_eblg;</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;};</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160; </div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160; </div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <a class="code" href="classMFLevelGrid.html#a5a7c7974913830614a6ccc934e083203">setMaxRefinementRatio</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_refRat);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  <span class="keyword">virtual</span> <span class="keyword">const</span> RefCountedPtr&lt;MultiFluidIndexSpace&gt;&amp;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <a class="code" href="classMFLevelGrid.html#ac388a3f1bcd2295d20bfe9be29ba4420">getMfIndexSpace</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  <span class="keyword">virtual</span> ProblemDomain</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <a class="code" href="classMFLevelGrid.html#a2e1f46d1be6caae607de0e62a2c663ba">getDomain</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  <span class="keyword">virtual</span> DisjointBoxLayout</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <a class="code" href="classMFLevelGrid.html#a66404daf7ec3513a2c572c606a3c6fbc">getGrids</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  <span class="keyword">virtual</span> EBLevelGrid&amp;</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;  <a class="code" href="classMFLevelGrid.html#afcb1c081e8d29c6222ed3363a659f8bf">getEBLevelGrid</a>(<span class="keywordtype">int</span> a_phase);</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  <span class="keyword">virtual</span> <span class="keyword">const</span> EBLevelGrid&amp;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;  <a class="code" href="classMFLevelGrid.html#afcb1c081e8d29c6222ed3363a659f8bf">getEBLevelGrid</a>(<span class="keywordtype">int</span> a_phase) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160; </div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  <span class="keyword">virtual</span> IntVectSet</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <a class="code" href="classMFLevelGrid.html#a8d1006dea323fb9783f2c642fb97dca3">interfaceRegion</a>(<span class="keyword">const</span> Box&amp; a_box, <span class="keyword">const</span> DataIndex&amp; a_dit, <span class="keyword">const</span> <span class="keywordtype">int</span> a_phase1 = 0, <span class="keyword">const</span> <span class="keywordtype">int</span> a_phase2 = 1) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160; </div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="preprocessor">#if 0 // Taken out of chombo-discharge for now</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160; </div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  <span class="keyword">virtual</span> <span class="keywordtype">bool</span> interfacePair(IntVect&amp; a_iv,</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;                 <span class="keyword">const</span> IntVect&amp;   a_iv_in,</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                 <span class="keyword">const</span> Box&amp;       a_box,</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                 <span class="keyword">const</span> DataIndex&amp; a_dit,</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;                 <span class="keyword">const</span> <span class="keywordtype">int</span>        a_phase1 = 0,</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;                 <span class="keyword">const</span> <span class="keywordtype">int</span>        a_phase2 = 1) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160; </div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  RefCountedPtr&lt;MultiFluidIndexSpace&gt; m_multifluidIndexSpace;</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160; </div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;  Vector&lt;EBLevelGrid&gt; m_eblg;</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;};</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160; </div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160; </div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassMFLevelGrid_html_afcb1c081e8d29c6222ed3363a659f8bf"><div class="ttname"><a href="classMFLevelGrid.html#afcb1c081e8d29c6222ed3363a659f8bf">MFLevelGrid::getEBLevelGrid</a></div><div class="ttdeci">virtual EBLevelGrid &amp; getEBLevelGrid(int a_phase)</div><div class="ttdoc">Get grids on specified phase.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:73</div></div>
+<div class="ttc" id="aclassMFLevelGrid_html_afcb1c081e8d29c6222ed3363a659f8bf"><div class="ttname"><a href="classMFLevelGrid.html#afcb1c081e8d29c6222ed3363a659f8bf">MFLevelGrid::getEBLevelGrid</a></div><div class="ttdeci">virtual EBLevelGrid &amp; getEBLevelGrid(int a_phase)</div><div class="ttdoc">Get grids on specified phase.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:82</div></div>
 <div class="ttc" id="aclassMFLevelGrid_html_a922574db896fe47e94ba202590807c5e"><div class="ttname"><a href="classMFLevelGrid.html#a922574db896fe47e94ba202590807c5e">MFLevelGrid::MFLevelGrid</a></div><div class="ttdeci">MFLevelGrid()</div><div class="ttdoc">Weak constructor, must subsequently call define.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:17</div></div>
-<div class="ttc" id="aclassMFLevelGrid_html_a366f6d82adca13fed2c7ddbda373921c"><div class="ttname"><a href="classMFLevelGrid.html#a366f6d82adca13fed2c7ddbda373921c">MFLevelGrid::numPhases</a></div><div class="ttdeci">virtual int numPhases() const</div><div class="ttdoc">Get number of phases.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:51</div></div>
-<div class="ttc" id="aclassMFLevelGrid_html_a2e1f46d1be6caae607de0e62a2c663ba"><div class="ttname"><a href="classMFLevelGrid.html#a2e1f46d1be6caae607de0e62a2c663ba">MFLevelGrid::getDomain</a></div><div class="ttdeci">virtual ProblemDomain getDomain() const</div><div class="ttdoc">Get the problem domain.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:65</div></div>
-<div class="ttc" id="aclassMFLevelGrid_html_ac388a3f1bcd2295d20bfe9be29ba4420"><div class="ttname"><a href="classMFLevelGrid.html#ac388a3f1bcd2295d20bfe9be29ba4420">MFLevelGrid::getMfIndexSpace</a></div><div class="ttdeci">virtual const RefCountedPtr&lt; MultiFluidIndexSpace &gt; &amp; getMfIndexSpace() const</div><div class="ttdoc">Get the index space.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:61</div></div>
-<div class="ttc" id="aclassMFLevelGrid_html_a5a7c7974913830614a6ccc934e083203"><div class="ttname"><a href="classMFLevelGrid.html#a5a7c7974913830614a6ccc934e083203">MFLevelGrid::setMaxRefinementRatio</a></div><div class="ttdeci">virtual void setMaxRefinementRatio(const int a_refRat)</div><div class="ttdoc">Set max refinement ratio.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:21</div></div>
+<div class="ttc" id="aclassMFLevelGrid_html_a366f6d82adca13fed2c7ddbda373921c"><div class="ttname"><a href="classMFLevelGrid.html#a366f6d82adca13fed2c7ddbda373921c">MFLevelGrid::numPhases</a></div><div class="ttdeci">virtual int numPhases() const</div><div class="ttdoc">Get number of phases.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:50</div></div>
+<div class="ttc" id="aclassMFLevelGrid_html_a2e1f46d1be6caae607de0e62a2c663ba"><div class="ttname"><a href="classMFLevelGrid.html#a2e1f46d1be6caae607de0e62a2c663ba">MFLevelGrid::getDomain</a></div><div class="ttdeci">virtual ProblemDomain getDomain() const</div><div class="ttdoc">Get the problem domain.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:70</div></div>
+<div class="ttc" id="aclassMFLevelGrid_html_ac388a3f1bcd2295d20bfe9be29ba4420"><div class="ttname"><a href="classMFLevelGrid.html#ac388a3f1bcd2295d20bfe9be29ba4420">MFLevelGrid::getMfIndexSpace</a></div><div class="ttdeci">virtual const RefCountedPtr&lt; MultiFluidIndexSpace &gt; &amp; getMfIndexSpace() const</div><div class="ttdoc">Get the index space.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:64</div></div>
+<div class="ttc" id="aclassMFLevelGrid_html_a5a7c7974913830614a6ccc934e083203"><div class="ttname"><a href="classMFLevelGrid.html#a5a7c7974913830614a6ccc934e083203">MFLevelGrid::setMaxRefinementRatio</a></div><div class="ttdeci">virtual void setMaxRefinementRatio(const int a_refRat)</div><div class="ttdoc">Set max refinement ratio.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:20</div></div>
 <div class="ttc" id="aCD__MultiFluidIndexSpace_8H_html"><div class="ttname"><a href="CD__MultiFluidIndexSpace_8H.html">CD_MultiFluidIndexSpace.H</a></div><div class="ttdoc">Multi-fluid index space.</div></div>
-<div class="ttc" id="aclassMFLevelGrid_html_a66404daf7ec3513a2c572c606a3c6fbc"><div class="ttname"><a href="classMFLevelGrid.html#a66404daf7ec3513a2c572c606a3c6fbc">MFLevelGrid::getGrids</a></div><div class="ttdeci">virtual DisjointBoxLayout getGrids() const</div><div class="ttdoc">Get the grids.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:69</div></div>
+<div class="ttc" id="aclassMFLevelGrid_html_a66404daf7ec3513a2c572c606a3c6fbc"><div class="ttname"><a href="classMFLevelGrid.html#a66404daf7ec3513a2c572c606a3c6fbc">MFLevelGrid::getGrids</a></div><div class="ttdeci">virtual DisjointBoxLayout getGrids() const</div><div class="ttdoc">Get the grids.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:76</div></div>
 <div class="ttc" id="aclassMFLevelGrid_html"><div class="ttname"><a href="classMFLevelGrid.html">MFLevelGrid</a></div><div class="ttdoc">Wrapper class for holding multifluid EBLevelGrids.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.H:28</div></div>
-<div class="ttc" id="aclassMFLevelGrid_html_ac3e0e1afc6070ff2d8c78a93c31a0cf0"><div class="ttname"><a href="classMFLevelGrid.html#ac3e0e1afc6070ff2d8c78a93c31a0cf0">MFLevelGrid::define</a></div><div class="ttdeci">virtual void define(const RefCountedPtr&lt; MultiFluidIndexSpace &gt; &amp;a_multiFluidIndexSpace, const Vector&lt; EBLevelGrid &gt; &amp;a_eblgs)</div><div class="ttdoc">Define function.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:55</div></div>
+<div class="ttc" id="aclassMFLevelGrid_html_ac3e0e1afc6070ff2d8c78a93c31a0cf0"><div class="ttname"><a href="classMFLevelGrid.html#ac3e0e1afc6070ff2d8c78a93c31a0cf0">MFLevelGrid::define</a></div><div class="ttdeci">virtual void define(const RefCountedPtr&lt; MultiFluidIndexSpace &gt; &amp;a_multiFluidIndexSpace, const Vector&lt; EBLevelGrid &gt; &amp;a_eblgs)</div><div class="ttdoc">Define function.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:56</div></div>
 <div class="ttc" id="aclassMFLevelGrid_html_aab55f4793d3f2ca0ab94c1527d96769f"><div class="ttname"><a href="classMFLevelGrid.html#aab55f4793d3f2ca0ab94c1527d96769f">MFLevelGrid::~MFLevelGrid</a></div><div class="ttdeci">virtual ~MFLevelGrid()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:47</div></div>
-<div class="ttc" id="aclassMFLevelGrid_html_a8d1006dea323fb9783f2c642fb97dca3"><div class="ttname"><a href="classMFLevelGrid.html#a8d1006dea323fb9783f2c642fb97dca3">MFLevelGrid::interfaceRegion</a></div><div class="ttdeci">virtual IntVectSet interfaceRegion(const Box &amp;a_box, const DataIndex &amp;a_dit, const int a_phase1=0, const int a_phase2=1) const</div><div class="ttdoc">Get interface region between two phases.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:83</div></div>
+<div class="ttc" id="aclassMFLevelGrid_html_a8d1006dea323fb9783f2c642fb97dca3"><div class="ttname"><a href="classMFLevelGrid.html#a8d1006dea323fb9783f2c642fb97dca3">MFLevelGrid::interfaceRegion</a></div><div class="ttdeci">virtual IntVectSet interfaceRegion(const Box &amp;a_box, const DataIndex &amp;a_dit, const int a_phase1=0, const int a_phase2=1) const</div><div class="ttdoc">Get interface region between two phases.</div><div class="ttdef"><b>Definition:</b> CD_MFLevelGrid.cpp:96</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

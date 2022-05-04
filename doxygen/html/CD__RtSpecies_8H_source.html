@@ -93,35 +93,36 @@ $(function() {
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment">// Our includes</span></div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="classRtSpecies.html">   29</a></span>&#160;<span class="keyword">class </span><a class="code" href="classRtSpecies.html">RtSpecies</a> {</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  </div>
+<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="classRtSpecies.html">   29</a></span>&#160;<span class="keyword">class </span><a class="code" href="classRtSpecies.html">RtSpecies</a></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;{</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  <a class="code" href="classRtSpecies.html#ab7457bcfbaf1d3cdc61ef0e19f358ab9">RtSpecies</a>();</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classRtSpecies.html#ac234fd57ec852876dab836223a626255">~RtSpecies</a>();  </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classRtSpecies.html#ac234fd57ec852876dab836223a626255">~RtSpecies</a>();</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  std::string <a class="code" href="classRtSpecies.html#a4b31640213033a77fc8334757f163d56">getName</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  <span class="keyword">virtual</span> Real <a class="code" href="classRtSpecies.html#a3d62dfd621fac6336eaff75d9e3ab98a">getAbsorptionCoefficient</a>(<span class="keyword">const</span> RealVect a_pos) <span class="keyword">const</span> = 0;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="keyword">virtual</span> Real <a class="code" href="classRtSpecies.html#abad73e614aab36d2557b739a34e3c169">getScatteringCoefficient</a>(<span class="keyword">const</span> RealVect a_pos) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;          </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="classRtSpecies.html#a76c8ad0f2cbefa0ea38f37db5f31063a">   65</a></span>&#160;  std::string <a class="code" href="classRtSpecies.html#a76c8ad0f2cbefa0ea38f37db5f31063a">m_name</a>;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;};</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  std::string</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  <a class="code" href="classRtSpecies.html#a4b31640213033a77fc8334757f163d56">getName</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  <span class="keyword">virtual</span> Real</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <a class="code" href="classRtSpecies.html#a3d62dfd621fac6336eaff75d9e3ab98a">getAbsorptionCoefficient</a>(<span class="keyword">const</span> RealVect a_pos) <span class="keyword">const</span> = 0;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;  <span class="keyword">virtual</span> Real</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <a class="code" href="classRtSpecies.html#abad73e614aab36d2557b739a34e3c169">getScatteringCoefficient</a>(<span class="keyword">const</span> RealVect a_pos) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="classRtSpecies.html#a76c8ad0f2cbefa0ea38f37db5f31063a">   67</a></span>&#160;  std::string <a class="code" href="classRtSpecies.html#a76c8ad0f2cbefa0ea38f37db5f31063a">m_name</a>;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;};</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassRtSpecies_html_a76c8ad0f2cbefa0ea38f37db5f31063a"><div class="ttname"><a href="classRtSpecies.html#a76c8ad0f2cbefa0ea38f37db5f31063a">RtSpecies::m_name</a></div><div class="ttdeci">std::string m_name</div><div class="ttdoc">Group name.</div><div class="ttdef"><b>Definition:</b> CD_RtSpecies.H:65</div></div>
+<div class="ttc" id="aclassRtSpecies_html_a76c8ad0f2cbefa0ea38f37db5f31063a"><div class="ttname"><a href="classRtSpecies.html#a76c8ad0f2cbefa0ea38f37db5f31063a">RtSpecies::m_name</a></div><div class="ttdeci">std::string m_name</div><div class="ttdoc">Group name.</div><div class="ttdef"><b>Definition:</b> CD_RtSpecies.H:67</div></div>
 <div class="ttc" id="aclassRtSpecies_html_a4b31640213033a77fc8334757f163d56"><div class="ttname"><a href="classRtSpecies.html#a4b31640213033a77fc8334757f163d56">RtSpecies::getName</a></div><div class="ttdeci">std::string getName() const</div><div class="ttdoc">Get species name.</div><div class="ttdef"><b>Definition:</b> CD_RtSpecies.cpp:25</div></div>
 <div class="ttc" id="aclassRtSpecies_html"><div class="ttname"><a href="classRtSpecies.html">RtSpecies</a></div><div class="ttdoc">Declaration of a class that defines an interface to radiative transfer solvers, i....</div><div class="ttdef"><b>Definition:</b> CD_RtSpecies.H:29</div></div>
 <div class="ttc" id="aclassRtSpecies_html_a3d62dfd621fac6336eaff75d9e3ab98a"><div class="ttname"><a href="classRtSpecies.html#a3d62dfd621fac6336eaff75d9e3ab98a">RtSpecies::getAbsorptionCoefficient</a></div><div class="ttdeci">virtual Real getAbsorptionCoefficient(const RealVect a_pos) const =0</div><div class="ttdoc">Get kappa (i.e. the inverse absorption length) at physical coordinates.</div></div>
-<div class="ttc" id="aclassRtSpecies_html_abad73e614aab36d2557b739a34e3c169"><div class="ttname"><a href="classRtSpecies.html#abad73e614aab36d2557b739a34e3c169">RtSpecies::getScatteringCoefficient</a></div><div class="ttdeci">virtual Real getScatteringCoefficient(const RealVect a_pos) const</div><div class="ttdoc">Get scattering coefficient (i.e. the inverse scattering length) at physical coordinates.</div><div class="ttdef"><b>Definition:</b> CD_RtSpecies.cpp:29</div></div>
-<div class="ttc" id="aclassRtSpecies_html_ac234fd57ec852876dab836223a626255"><div class="ttname"><a href="classRtSpecies.html#ac234fd57ec852876dab836223a626255">RtSpecies::~RtSpecies</a></div><div class="ttdeci">virtual ~RtSpecies()</div><div class="ttdoc">Weak constructor. Sets absorption length and scattering coefficients to one.</div><div class="ttdef"><b>Definition:</b> CD_RtSpecies.cpp:21</div></div>
+<div class="ttc" id="aclassRtSpecies_html_abad73e614aab36d2557b739a34e3c169"><div class="ttname"><a href="classRtSpecies.html#abad73e614aab36d2557b739a34e3c169">RtSpecies::getScatteringCoefficient</a></div><div class="ttdeci">virtual Real getScatteringCoefficient(const RealVect a_pos) const</div><div class="ttdoc">Get scattering coefficient (i.e. the inverse scattering length) at physical coordinates.</div><div class="ttdef"><b>Definition:</b> CD_RtSpecies.cpp:31</div></div>
+<div class="ttc" id="aclassRtSpecies_html_ac234fd57ec852876dab836223a626255"><div class="ttname"><a href="classRtSpecies.html#ac234fd57ec852876dab836223a626255">RtSpecies::~RtSpecies</a></div><div class="ttdeci">virtual ~RtSpecies()</div><div class="ttdoc">Weak constructor. Sets absorption length and scattering coefficients to one.</div><div class="ttdef"><b>Definition:</b> CD_RtSpecies.cpp:22</div></div>
 <div class="ttc" id="aclassRtSpecies_html_ab7457bcfbaf1d3cdc61ef0e19f358ab9"><div class="ttname"><a href="classRtSpecies.html#ab7457bcfbaf1d3cdc61ef0e19f358ab9">RtSpecies::RtSpecies</a></div><div class="ttdeci">RtSpecies()</div><div class="ttdoc">Weak constructor. Sets absorption length and scattering coefficients to one.</div><div class="ttdef"><b>Definition:</b> CD_RtSpecies.cpp:16</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

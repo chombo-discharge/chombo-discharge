@@ -90,205 +90,213 @@ $(function() {
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#include &lt;CD_MultiIndex.H&gt;</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">inline</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="classLeastSquares.html#afe2627cedc83c118b63589e2384cb2bd">   22</a></span>&#160;Vector&lt;Real&gt; <a class="code" href="classLeastSquares.html#afe2627cedc83c118b63589e2384cb2bd">LeastSquares::makeDiagWeights</a>(<span class="keyword">const</span> Vector&lt;RealVect&gt;&amp; a_displacements, <span class="keyword">const</span> <span class="keywordtype">int</span> a_pow){</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  Vector&lt;Real&gt; ret(a_displacements.size(), 1.0);</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  </div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;  <span class="keywordflow">if</span>(a_pow &gt; 0){</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; a_displacements.size(); i++){</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;      <span class="keyword">const</span> RealVect&amp; d = a_displacements[i];</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;      <span class="keyword">const</span> Real len    = d.vectorLength();</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;      <span class="keyword">const</span> Real w      = std::pow(len, -a_pow);</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;      ret[i] = w;</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    }</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  }</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;}</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">   39</a></span>&#160;std::map&lt;IntVect, std::pair&lt;VoFStencil, VoFStencil&gt; &gt; <a class="code" href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">LeastSquares::computeDualLevelStencils</a>(<span class="keyword">const</span> IntVectSet&amp;       a_derivs,</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;                                                 <span class="keyword">const</span> IntVectSet&amp;       a_knownTerms,</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;                                                 <span class="keyword">const</span> Vector&lt;VolIndex&gt;&amp; a_fineVofs,</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;                                                 <span class="keyword">const</span> Vector&lt;VolIndex&gt;&amp; a_coarVofs,</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;                                                 <span class="keyword">const</span> Vector&lt;RealVect&gt;&amp; a_fineDisplacements,</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                                                 <span class="keyword">const</span> Vector&lt;RealVect&gt;&amp; a_coarDisplacements,</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                                                 <span class="keyword">const</span> <span class="keywordtype">int</span>               a_p,           </div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                                                 <span class="keyword">const</span> <span class="keywordtype">int</span>               a_order){</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  <span class="keyword">const</span> Vector&lt;Real&gt; fineWeights = <a class="code" href="classLeastSquares.html#afe2627cedc83c118b63589e2384cb2bd">LeastSquares::makeDiagWeights</a>(a_fineDisplacements, a_p);</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <span class="keyword">const</span> Vector&lt;Real&gt; coarWeights = <a class="code" href="classLeastSquares.html#afe2627cedc83c118b63589e2384cb2bd">LeastSquares::makeDiagWeights</a>(a_coarDisplacements, a_p);</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  <span class="keywordflow">return</span> LeastSquares::computeDualLevelStencils&lt;T&gt;(a_derivs,</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                           a_knownTerms,</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                           a_fineVofs,</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                           a_coarVofs,</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                           a_fineDisplacements,</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                           a_coarDisplacements,</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                           fineWeights,</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                           coarWeights,</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                           a_order);</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;}</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="classLeastSquares.html#aea5b3dfed3462f89cdd0b92f21128799">   62</a></span>&#160;std::map&lt;IntVect, std::pair&lt;VoFStencil, VoFStencil&gt; &gt; <a class="code" href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">LeastSquares::computeDualLevelStencils</a>(<span class="keyword">const</span> IntVectSet&amp;       a_derivs,</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                                                 <span class="keyword">const</span> IntVectSet&amp;       a_knownTerms,</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                                                 <span class="keyword">const</span> Vector&lt;VolIndex&gt;&amp; a_fineVofs,</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                                                 <span class="keyword">const</span> Vector&lt;VolIndex&gt;&amp; a_coarVofs,</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                                                 <span class="keyword">const</span> Vector&lt;RealVect&gt;&amp; a_fineDisplacements,</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                                                 <span class="keyword">const</span> Vector&lt;RealVect&gt;&amp; a_coarDisplacements,</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                                                 <span class="keyword">const</span> Vector&lt;Real&gt;&amp;     a_fineWeights,</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                                                 <span class="keyword">const</span> Vector&lt;Real&gt;&amp;     a_coarWeights,</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                                                 <span class="keyword">const</span> <span class="keywordtype">int</span>               a_order){</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <span class="comment">// TLDR: This routine does a two-level least squares solve of a system of equations, each equation describing</span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="comment">//       a Taylor series expansion up to specified order (a_order). This routine &quot;solves&quot; this overdetermined system</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="comment">//       using weighted least squares so that we can obtain terms in the Taylor series. The user will have specified</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <span class="comment">//       the desired unknowns (a_derivs) to be returned in stencil form as well as any terms that were already</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="comment">//       known (a_knownTerms).</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="comment">//</span></div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  <span class="comment">//       The least squares solve is done by LaPack, and so the least squares system matrix is filled in Fortran</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="comment">//       order. The actual &quot;solve&quot; consists of using the Moore-Penrose pseudoinverse and once we have inverted</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="comment">//       the system we can form stencils for each of the specified terms in the Taylor series.</span></div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <span class="comment">//       </span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  <span class="comment">//       This routine does not contain much code, but can be difficult to understand. </span></div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  </div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  CH_assert(a_order &gt; 0);</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  CH_assert(a_fineVofs.size() == a_fineDisplacements.size());</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  CH_assert(a_coarVofs.size() == a_coarDisplacements.size());</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  CH_assert(a_fineVofs.size() == a_fineWeights.      size());</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  CH_assert(a_coarVofs.size() == a_coarWeights.      size());</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  </div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="comment">// Initialize return stuff</span></div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  std::map&lt;IntVect, std::pair&lt;VoFStencil, VoFStencil&gt; &gt; ret;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <span class="keywordflow">for</span> (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    ret.emplace(ivsIt(), std::make_pair(VoFStencil(), VoFStencil()));</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  }</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  <span class="keywordflow">if</span>(a_derivs.numPts() &gt; 0){</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160; </div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> M     = <a class="code" href="classLeastSquares.html#a6103551ca7156031a449bb484a7eef97">LeastSquares::getTaylorExpansionSize</a>(a_order) - a_knownTerms.numPts(); <span class="comment">// This is because some unknowns (rows) can be eliminated. </span></div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> Kfine = a_fineDisplacements.size();</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> Kcoar = a_coarDisplacements.size();</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> K     = Kfine + Kcoar;</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">inline</span> Vector&lt;Real&gt;</div>
+<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="classLeastSquares.html#afe2627cedc83c118b63589e2384cb2bd">   22</a></span>&#160;<a class="code" href="classLeastSquares.html#afe2627cedc83c118b63589e2384cb2bd">LeastSquares::makeDiagWeights</a>(<span class="keyword">const</span> Vector&lt;RealVect&gt;&amp; a_displacements, <span class="keyword">const</span> <span class="keywordtype">int</span> a_pow)</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;{</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  Vector&lt;Real&gt; ret(a_displacements.size(), 1.0);</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;  <span class="keywordflow">if</span> (a_pow &gt; 0) {</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; a_displacements.size(); i++) {</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;      <span class="keyword">const</span> RealVect&amp; d   = a_displacements[i];</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;      <span class="keyword">const</span> Real      len = d.vectorLength();</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;      <span class="keyword">const</span> Real      w   = std::pow(len, -a_pow);</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;      ret[i] = w;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    }</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  }</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;}</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;std::map&lt;IntVect, std::pair&lt;VoFStencil, VoFStencil&gt;&gt;</div>
+<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">   41</a></span>&#160;<a class="code" href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">LeastSquares::computeDualLevelStencils</a>(<span class="keyword">const</span> IntVectSet&amp;       a_derivs,</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;                                       <span class="keyword">const</span> IntVectSet&amp;       a_knownTerms,</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;                                       <span class="keyword">const</span> Vector&lt;VolIndex&gt;&amp; a_fineVofs,</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                                       <span class="keyword">const</span> Vector&lt;VolIndex&gt;&amp; a_coarVofs,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                                       <span class="keyword">const</span> Vector&lt;RealVect&gt;&amp; a_fineDisplacements,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                                       <span class="keyword">const</span> Vector&lt;RealVect&gt;&amp; a_coarDisplacements,</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                                       <span class="keyword">const</span> <span class="keywordtype">int</span>               a_p,</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                                       <span class="keyword">const</span> <span class="keywordtype">int</span>               a_order)</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;{</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  <span class="keyword">const</span> Vector&lt;Real&gt; fineWeights = <a class="code" href="classLeastSquares.html#afe2627cedc83c118b63589e2384cb2bd">LeastSquares::makeDiagWeights</a>(a_fineDisplacements, a_p);</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  <span class="keyword">const</span> Vector&lt;Real&gt; coarWeights = <a class="code" href="classLeastSquares.html#afe2627cedc83c118b63589e2384cb2bd">LeastSquares::makeDiagWeights</a>(a_coarDisplacements, a_p);</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <span class="keywordflow">return</span> LeastSquares::computeDualLevelStencils&lt;T&gt;(a_derivs,</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                                                   a_knownTerms,</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                                                   a_fineVofs,</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                                                   a_coarVofs,</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                                                   a_fineDisplacements,</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                                                   a_coarDisplacements,</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                                                   fineWeights,</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                                                   coarWeights,</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                                                   a_order);</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;}</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;std::map&lt;IntVect, std::pair&lt;VoFStencil, VoFStencil&gt;&gt;</div>
+<div class="line"><a name="l00066"></a><span class="lineno"><a class="line" href="classLeastSquares.html#aea5b3dfed3462f89cdd0b92f21128799">   66</a></span>&#160;<a class="code" href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">LeastSquares::computeDualLevelStencils</a>(<span class="keyword">const</span> IntVectSet&amp;       a_derivs,</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                                       <span class="keyword">const</span> IntVectSet&amp;       a_knownTerms,</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                                       <span class="keyword">const</span> Vector&lt;VolIndex&gt;&amp; a_fineVofs,</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                                       <span class="keyword">const</span> Vector&lt;VolIndex&gt;&amp; a_coarVofs,</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                                       <span class="keyword">const</span> Vector&lt;RealVect&gt;&amp; a_fineDisplacements,</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                                       <span class="keyword">const</span> Vector&lt;RealVect&gt;&amp; a_coarDisplacements,</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                                       <span class="keyword">const</span> Vector&lt;Real&gt;&amp;     a_fineWeights,</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                                       <span class="keyword">const</span> Vector&lt;Real&gt;&amp;     a_coarWeights,</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                                       <span class="keyword">const</span> <span class="keywordtype">int</span>               a_order)</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;{</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="comment">// TLDR: This routine does a two-level least squares solve of a system of equations, each equation describing</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  <span class="comment">//       a Taylor series expansion up to specified order (a_order). This routine &quot;solves&quot; this overdetermined system</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="comment">//       using weighted least squares so that we can obtain terms in the Taylor series. The user will have specified</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="comment">//       the desired unknowns (a_derivs) to be returned in stencil form as well as any terms that were already</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <span class="comment">//       known (a_knownTerms).</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="comment">//       The least squares solve is done by LaPack, and so the least squares system matrix is filled in Fortran</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="comment">//       order. The actual &quot;solve&quot; consists of using the Moore-Penrose pseudoinverse and once we have inverted</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  <span class="comment">//       the system we can form stencils for each of the specified terms in the Taylor series.</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <span class="comment">//</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  <span class="comment">//       This routine does not contain much code, but can be difficult to understand.</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  CH_assert(a_order &gt; 0);</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  CH_assert(a_fineVofs.size() == a_fineDisplacements.size());</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  CH_assert(a_coarVofs.size() == a_coarDisplacements.size());</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  CH_assert(a_fineVofs.size() == a_fineWeights.size());</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  CH_assert(a_coarVofs.size() == a_coarWeights.size());</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  <span class="comment">// Initialize return stuff</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  std::map&lt;IntVect, std::pair&lt;VoFStencil, VoFStencil&gt;&gt; ret;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  <span class="keywordflow">for</span> (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt) {</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    ret.emplace(ivsIt(), std::make_pair(VoFStencil(), VoFStencil()));</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  }</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  <span class="keywordflow">if</span> (a_derivs.numPts() &gt; 0) {</div>
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keyword">const</span> IntVectSet isect = a_derivs &amp; a_knownTerms;</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="keywordflow">if</span>(K &lt; M)            MayDay::Abort(<span class="stringliteral">&quot;LeastSquares::computeDualLevelStencils -- not enough equations to achieve desired order!&quot;</span>);</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <span class="keywordflow">if</span>(!isect.isEmpty()) MayDay::Abort(<span class="stringliteral">&quot;LeastSquares::computeDualLevelStencils - you have specified the same terms as both unknown and known&quot;</span>);</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> M = <a class="code" href="classLeastSquares.html#a6103551ca7156031a449bb484a7eef97">LeastSquares::getTaylorExpansionSize</a>(a_order) -</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                  a_knownTerms.numPts(); <span class="comment">// This is because some unknowns (rows) can be eliminated.</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> Kfine = a_fineDisplacements.size();</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> Kcoar = a_coarDisplacements.size();</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> K     = Kfine + Kcoar;</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="comment">// Build the A-matrix in column major order (this is what Fortran wants) so we can use LaPackUtils::computePseudoInverse.</span></div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    <span class="comment">// ----------------------------------------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <span class="comment">// If we have an (unweighted) full system then our system A*x = b is </span></div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    <span class="comment">//</span></div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="comment">//              A                   x             b</span></div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    <span class="comment">//             ===                 ===           ===</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    <span class="comment">//     [1 (x-x0) (x-x0)^2 ...] [f(x)     ]     [f(x0)]</span></div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    <span class="comment">//     [1 (x-x1) (x-x1)^2 ...] [df/dx    ]     [f(x1)]</span></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <span class="comment">//     [1 (x-x2) (x-x2)^2 ...] [d^2f/dx^2]  =  [f(x2)]</span></div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="comment">//     [:   :      :         ] [    :    ]     [  :  ]</span></div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    <span class="comment">//     [:   :      :         ] [    :    ]     [  :  ]</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="keyword">const</span> IntVectSet isect = a_derivs &amp; a_knownTerms;</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160; </div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <span class="keywordflow">if</span> (K &lt; M)</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;      MayDay::Abort(<span class="stringliteral">&quot;LeastSquares::computeDualLevelStencils -- not enough equations to achieve desired order!&quot;</span>);</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keywordflow">if</span> (!isect.isEmpty())</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;      MayDay::Abort(</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        <span class="stringliteral">&quot;LeastSquares::computeDualLevelStencils - you have specified the same terms as both unknown and known&quot;</span>);</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160; </div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <span class="comment">// Build the A-matrix in column major order (this is what Fortran wants) so we can use LaPackUtils::computePseudoInverse.</span></div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="comment">// ----------------------------------------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    <span class="comment">// If we have an (unweighted) full system then our system A*x = b is</span></div>
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="comment">//</span></div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    <span class="comment">// Extensions to 2D/3D simply use multi-index notation, and weights are simply multiplied into each row, i.e. we</span></div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    <span class="comment">// solve (w*A) * x = (w*b). Inverting the system gives x = [w * A^+ * w] * b where A^+ is the Moore-Penrose</span></div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="comment">// pseudoinverse. We put the result of [w * A^+ * w] into a stencil.</span></div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    <span class="comment">//</span></div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    <span class="comment">// Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.</span></div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="comment">// This will also correspond to a modification of the right-hand side, but the required modifications are not accesible</span></div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    <span class="comment">// in this routine, and so the user will have to make sense of them.</span></div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    </div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    <span class="keywordtype">int</span> i = 0; <span class="comment">// Exists just because we fill memory linearly. </span></div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    Vector&lt;T&gt; linA    (K*M, 0.0); <span class="comment">// Equal to (w*A)</span></div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    Vector&lt;T&gt; linAplus(M*K, 0.0); <span class="comment">// Equal to (w*A)^+</span></div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;    </div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    <span class="keywordflow">for</span> (<a class="code" href="classMultiIndex.html">MultiIndex</a> mi(a_order); mi.<a class="code" href="classMultiIndex.html#aa1e3dfae4c895093d055d02339e9c1d3">ok</a>(); ++mi){ <span class="comment">// Loop over column    </span></div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;      <span class="keywordflow">if</span>(!a_knownTerms.contains(mi.getCurrentIndex())){ </div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; K; k++){ <span class="comment">// Fill column, write the system using the fine vofs first, then the coarse vofs. </span></div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;      <span class="keywordflow">if</span>(k &lt; Kfine){</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;        linA[i] = a_fineWeights[k]*mi.pow(a_fineDisplacements[k])/mi.factorial(); </div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;      }</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;      <span class="keywordflow">else</span>{</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;        linA[i] = a_coarWeights[k-Kfine]*mi.pow(a_coarDisplacements[k-Kfine])/mi.factorial(); </div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;      }</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;      i++;</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;    }</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;      }</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    }</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160; </div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    <span class="comment">// Compute the pseudo-inverse.</span></div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">bool</span> foundSVD = <a class="code" href="namespaceLaPackUtils.html#ae451bcb5403e96788e9081886e16e342">LaPackUtils::computePseudoInverse</a>(linAplus.stdVector(), linA.stdVector(), K, M);</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    <span class="keywordflow">if</span>(foundSVD){</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;      <span class="comment">// When we have eliminated rows in the linear system we can&#39;t use MultiIndex to map directly, this occurs because</span></div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;      <span class="comment">// if we eliminated unknowns (rows) our system can be something like (if we eliminated term f(x)): </span></div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;      <span class="comment">//</span></div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;      <span class="comment">//     [(x-x0) (x-x0)^2 ...] [df/dx    ]     [f(x0) - f(x)]</span></div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;      <span class="comment">//     [(x-x1) (x-x1)^2 ...] [d^2f/dx^2]     [f(x1) - f(x)]</span></div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;      <span class="comment">//     [(x-x2) (x-x2)^2 ...] [         ]  =  [f(x2) - f(x)]</span></div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;      <span class="comment">//     [  :      :         ] [    :    ]     [  :         ]</span></div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;      <span class="comment">//     [  :      :         ] [    :    ]     [  :         ]</span></div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;      <span class="comment">//</span></div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;      <span class="comment">// The MultiIndex won&#39;t know about this, and will (correctly!), believe that the first row corresponds to</span></div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;      <span class="comment">// multi-index (0,0,0). Since that is truly not the case, we map the rows in A to multi-indices and use that to</span></div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;      <span class="comment">// identify the row in (w*A)^+ that corresponds to a specific unknown in the Taylor series. This is what happens below. </span></div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;      std::map&lt;IntVect, int&gt; rowMap;</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;      <span class="keywordtype">int</span> row = 0;</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;      <span class="keywordflow">for</span> (<a class="code" href="classMultiIndex.html">MultiIndex</a> mi(a_order); mi.<a class="code" href="classMultiIndex.html#aa1e3dfae4c895093d055d02339e9c1d3">ok</a>(); ++mi){</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;    <span class="keywordflow">if</span>(!a_knownTerms.contains(mi.getCurrentIndex())){ <span class="comment">// This is the order in which A was built. </span></div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;      rowMap.emplace(mi.getCurrentIndex(), row);</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;      row++;</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;    }</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;      }</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160; </div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;      <span class="comment">// Recall that linAplus is M*K so the stride is always M, starting at some specified row. </span></div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;      <span class="keywordflow">for</span> (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    <span class="keyword">const</span> IntVect deriv = ivsIt();</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160; </div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;    <span class="keywordflow">if</span>(rowMap.find(ivsIt()) != rowMap.end()){</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;      row = rowMap.at(ivsIt());</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;    }</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    <span class="keywordflow">else</span>{</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;      MayDay::Error(<span class="stringliteral">&quot;LeastSquares::computeDualLevelStencils -- map is out of range but this shouldn&#39;t happen!&quot;</span>);</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    }</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160; </div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    std::pair&lt;VoFStencil, VoFStencil&gt;&amp; sten = ret.at(deriv);</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160; </div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    sten.first. clear();</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;    sten.second.clear();</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160; </div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;    <span class="comment">// Map the pseudoinverse into something that is usable by a stencil. Note that linAplus is (w*A)^+, but we want</span></div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;    <span class="comment">// the term [(w*A)^+ * w], so we also need to multiply in the weights here (because the right-hand side was also weighted). </span></div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; K; k++){</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">int</span> idx = row + k*M;</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;      <span class="keywordflow">if</span>(k &lt; Kfine){</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        sten.first.add(a_fineVofs[k], a_fineWeights[k]*linAplus[idx]);</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;      }</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;      <span class="keywordflow">else</span>{</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;        sten.second.add(a_coarVofs[k-Kfine], a_coarWeights[k-Kfine]*linAplus[idx]);</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;      }</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    }</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;      }</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    }</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    <span class="keywordflow">else</span>{</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;      MayDay::Warning(<span class="stringliteral">&quot;LeastSquares::computeDualLevelStencils - could not perform singular value decomposition&quot;</span>);</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;    }</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  }</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160; </div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;  <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;}</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160; </div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160; </div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    <span class="comment">//              A                   x             b</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    <span class="comment">//             ===                 ===           ===</span></div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="comment">//     [1 (x-x0) (x-x0)^2 ...] [f(x)     ]     [f(x0)]</span></div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    <span class="comment">//     [1 (x-x1) (x-x1)^2 ...] [df/dx    ]     [f(x1)]</span></div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    <span class="comment">//     [1 (x-x2) (x-x2)^2 ...] [d^2f/dx^2]  =  [f(x2)]</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="comment">//     [:   :      :         ] [    :    ]     [  :  ]</span></div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    <span class="comment">//     [:   :      :         ] [    :    ]     [  :  ]</span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    <span class="comment">// Extensions to 2D/3D simply use multi-index notation, and weights are simply multiplied into each row, i.e. we</span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    <span class="comment">// solve (w*A) * x = (w*b). Inverting the system gives x = [w * A^+ * w] * b where A^+ is the Moore-Penrose</span></div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    <span class="comment">// pseudoinverse. We put the result of [w * A^+ * w] into a stencil.</span></div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;    <span class="comment">//</span></div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    <span class="comment">// Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.</span></div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;    <span class="comment">// This will also correspond to a modification of the right-hand side, but the required modifications are not accesible</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    <span class="comment">// in this routine, and so the user will have to make sense of them.</span></div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160; </div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    <span class="keywordtype">int</span>       i = 0;                <span class="comment">// Exists just because we fill memory linearly.</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    Vector&lt;T&gt; linA(K * M, 0.0);     <span class="comment">// Equal to (w*A)</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    Vector&lt;T&gt; linAplus(M * K, 0.0); <span class="comment">// Equal to (w*A)^+</span></div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160; </div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    <span class="keywordflow">for</span> (<a class="code" href="classMultiIndex.html">MultiIndex</a> mi(a_order); mi.<a class="code" href="classMultiIndex.html#aa1e3dfae4c895093d055d02339e9c1d3">ok</a>(); ++mi) { <span class="comment">// Loop over column</span></div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;      <span class="keywordflow">if</span> (!a_knownTerms.contains(mi.getCurrentIndex())) {</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; K; k++) { <span class="comment">// Fill column, write the system using the fine vofs first, then the coarse vofs.</span></div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;          <span class="keywordflow">if</span> (k &lt; Kfine) {</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;            linA[i] = a_fineWeights[k] * mi.pow(a_fineDisplacements[k]) / mi.factorial();</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;          }</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;          <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;            linA[i] = a_coarWeights[k - Kfine] * mi.pow(a_coarDisplacements[k - Kfine]) / mi.factorial();</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;          }</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;          i++;</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        }</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;      }</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    }</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160; </div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    <span class="comment">// Compute the pseudo-inverse.</span></div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">bool</span> foundSVD = <a class="code" href="namespaceLaPackUtils.html#ae451bcb5403e96788e9081886e16e342">LaPackUtils::computePseudoInverse</a>(linAplus.stdVector(), linA.stdVector(), K, M);</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160; </div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    <span class="keywordflow">if</span> (foundSVD) {</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;      <span class="comment">// When we have eliminated rows in the linear system we can&#39;t use MultiIndex to map directly, this occurs because</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;      <span class="comment">// if we eliminated unknowns (rows) our system can be something like (if we eliminated term f(x)):</span></div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;      <span class="comment">//</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;      <span class="comment">//     [(x-x0) (x-x0)^2 ...] [df/dx    ]     [f(x0) - f(x)]</span></div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;      <span class="comment">//     [(x-x1) (x-x1)^2 ...] [d^2f/dx^2]     [f(x1) - f(x)]</span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;      <span class="comment">//     [(x-x2) (x-x2)^2 ...] [         ]  =  [f(x2) - f(x)]</span></div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;      <span class="comment">//     [  :      :         ] [    :    ]     [  :         ]</span></div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;      <span class="comment">//     [  :      :         ] [    :    ]     [  :         ]</span></div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;      <span class="comment">//</span></div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;      <span class="comment">// The MultiIndex won&#39;t know about this, and will (correctly!), believe that the first row corresponds to</span></div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;      <span class="comment">// multi-index (0,0,0). Since that is truly not the case, we map the rows in A to multi-indices and use that to</span></div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;      <span class="comment">// identify the row in (w*A)^+ that corresponds to a specific unknown in the Taylor series. This is what happens below.</span></div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;      std::map&lt;IntVect, int&gt; rowMap;</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;      <span class="keywordtype">int</span>                    row = 0;</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;      <span class="keywordflow">for</span> (<a class="code" href="classMultiIndex.html">MultiIndex</a> mi(a_order); mi.<a class="code" href="classMultiIndex.html#aa1e3dfae4c895093d055d02339e9c1d3">ok</a>(); ++mi) {</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;        <span class="keywordflow">if</span> (!a_knownTerms.contains(mi.getCurrentIndex())) { <span class="comment">// This is the order in which A was built.</span></div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;          rowMap.emplace(mi.getCurrentIndex(), row);</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;          row++;</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;        }</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;      }</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160; </div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;      <span class="comment">// Recall that linAplus is M*K so the stride is always M, starting at some specified row.</span></div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;      <span class="keywordflow">for</span> (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt) {</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;        <span class="keyword">const</span> IntVect deriv = ivsIt();</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160; </div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;        <span class="keywordflow">if</span> (rowMap.find(ivsIt()) != rowMap.end()) {</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;          row = rowMap.at(ivsIt());</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;        }</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;        <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;          MayDay::Error(<span class="stringliteral">&quot;LeastSquares::computeDualLevelStencils -- map is out of range but this shouldn&#39;t happen!&quot;</span>);</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;        }</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160; </div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;        std::pair&lt;VoFStencil, VoFStencil&gt;&amp; sten = ret.at(deriv);</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160; </div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        sten.first.clear();</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;        sten.second.clear();</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160; </div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;        <span class="comment">// Map the pseudoinverse into something that is usable by a stencil. Note that linAplus is (w*A)^+, but we want</span></div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;        <span class="comment">// the term [(w*A)^+ * w], so we also need to multiply in the weights here (because the right-hand side was also weighted).</span></div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; K; k++) {</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;          <span class="keyword">const</span> <span class="keywordtype">int</span> idx = row + k * M;</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;          <span class="keywordflow">if</span> (k &lt; Kfine) {</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;            sten.first.add(a_fineVofs[k], a_fineWeights[k] * linAplus[idx]);</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;          }</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;          <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;            sten.second.add(a_coarVofs[k - Kfine], a_coarWeights[k - Kfine] * linAplus[idx]);</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;          }</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;        }</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;      }</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    }</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;      MayDay::Warning(<span class="stringliteral">&quot;LeastSquares::computeDualLevelStencils - could not perform singular value decomposition&quot;</span>);</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    }</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  }</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160; </div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;  <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;}</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160; </div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160; </div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aCD__LeastSquares_8H_html"><div class="ttname"><a href="CD__LeastSquares_8H.html">CD_LeastSquares.H</a></div><div class="ttdoc">Agglomeration of various routines that use least squares computations.</div></div>
-<div class="ttc" id="aclassLeastSquares_html_a6103551ca7156031a449bb484a7eef97"><div class="ttname"><a href="classLeastSquares.html#a6103551ca7156031a449bb484a7eef97">LeastSquares::getTaylorExpansionSize</a></div><div class="ttdeci">static int getTaylorExpansionSize(const int a_order)</div><div class="ttdoc">Get the size of a Taylor expansion for a given order.</div><div class="ttdef"><b>Definition:</b> CD_LeastSquares.cpp:330</div></div>
-<div class="ttc" id="aclassLeastSquares_html_a072d4ac64192845915f11e86fc8aa534"><div class="ttname"><a href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">LeastSquares::computeDualLevelStencils</a></div><div class="ttdeci">static std::map&lt; IntVect, std::pair&lt; VoFStencil, VoFStencil &gt; &gt; computeDualLevelStencils(const IntVectSet &amp;a_derivs, const IntVectSet &amp;a_knownTerms, const Vector&lt; VolIndex &gt; &amp;a_fineVofs, const Vector&lt; VolIndex &gt; &amp;a_coarVofs, const Vector&lt; RealVect &gt; &amp;a_fineDisplacements, const Vector&lt; RealVect &gt; &amp;a_coarDisplacements, const int a_p, const int a_order)</div><div class="ttdoc">Compute a least squares interpolation to a specified order. This version separates the stencils into ...</div><div class="ttdef"><b>Definition:</b> CD_LeastSquaresImplem.H:39</div></div>
+<div class="ttc" id="aclassLeastSquares_html_a6103551ca7156031a449bb484a7eef97"><div class="ttname"><a href="classLeastSquares.html#a6103551ca7156031a449bb484a7eef97">LeastSquares::getTaylorExpansionSize</a></div><div class="ttdeci">static int getTaylorExpansionSize(const int a_order)</div><div class="ttdoc">Get the size of a Taylor expansion for a given order.</div><div class="ttdef"><b>Definition:</b> CD_LeastSquares.cpp:369</div></div>
+<div class="ttc" id="aclassLeastSquares_html_a072d4ac64192845915f11e86fc8aa534"><div class="ttname"><a href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">LeastSquares::computeDualLevelStencils</a></div><div class="ttdeci">static std::map&lt; IntVect, std::pair&lt; VoFStencil, VoFStencil &gt; &gt; computeDualLevelStencils(const IntVectSet &amp;a_derivs, const IntVectSet &amp;a_knownTerms, const Vector&lt; VolIndex &gt; &amp;a_fineVofs, const Vector&lt; VolIndex &gt; &amp;a_coarVofs, const Vector&lt; RealVect &gt; &amp;a_fineDisplacements, const Vector&lt; RealVect &gt; &amp;a_coarDisplacements, const int a_p, const int a_order)</div><div class="ttdoc">Compute a least squares interpolation to a specified order. This version separates the stencils into ...</div><div class="ttdef"><b>Definition:</b> CD_LeastSquaresImplem.H:41</div></div>
 <div class="ttc" id="aCD__LaPackUtils_8H_html"><div class="ttname"><a href="CD__LaPackUtils_8H.html">CD_LaPackUtils.H</a></div><div class="ttdoc">Interface to some LaPack routines.</div></div>
-<div class="ttc" id="aclassMultiIndex_html_aa1e3dfae4c895093d055d02339e9c1d3"><div class="ttname"><a href="classMultiIndex.html#aa1e3dfae4c895093d055d02339e9c1d3">MultiIndex::ok</a></div><div class="ttdeci">bool ok() const</div><div class="ttdoc">Check that multi-index is ok.</div><div class="ttdef"><b>Definition:</b> CD_MultiIndex.cpp:75</div></div>
+<div class="ttc" id="aclassMultiIndex_html_aa1e3dfae4c895093d055d02339e9c1d3"><div class="ttname"><a href="classMultiIndex.html#aa1e3dfae4c895093d055d02339e9c1d3">MultiIndex::ok</a></div><div class="ttdeci">bool ok() const</div><div class="ttdoc">Check that multi-index is ok.</div><div class="ttdef"><b>Definition:</b> CD_MultiIndex.cpp:90</div></div>
 <div class="ttc" id="aclassMultiIndex_html"><div class="ttname"><a href="classMultiIndex.html">MultiIndex</a></div><div class="ttdoc">SpaceDim multi-index type for use with higher order Taylor series.</div><div class="ttdef"><b>Definition:</b> CD_MultiIndex.H:29</div></div>
 <div class="ttc" id="aclassLeastSquares_html_afe2627cedc83c118b63589e2384cb2bd"><div class="ttname"><a href="classLeastSquares.html#afe2627cedc83c118b63589e2384cb2bd">LeastSquares::makeDiagWeights</a></div><div class="ttdeci">static Vector&lt; Real &gt; makeDiagWeights(const Vector&lt; RealVect &gt; &amp;a_displacements, const int a_pow)</div><div class="ttdoc">Create a list of weights. This routine returns a list of diagonal weights for a least squares system....</div><div class="ttdef"><b>Definition:</b> CD_LeastSquaresImplem.H:22</div></div>
-<div class="ttc" id="anamespaceLaPackUtils_html_ae451bcb5403e96788e9081886e16e342"><div class="ttname"><a href="namespaceLaPackUtils.html#ae451bcb5403e96788e9081886e16e342">LaPackUtils::computePseudoInverse</a></div><div class="ttdeci">bool computePseudoInverse(std::vector&lt; double &gt; &amp;a_linAplus, const std::vector&lt; double &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</div><div class="ttdoc">Compute the pseudoinverse of matrix through singular value decomposition.</div><div class="ttdef"><b>Definition:</b> CD_LaPackUtils.cpp:184</div></div>
+<div class="ttc" id="anamespaceLaPackUtils_html_ae451bcb5403e96788e9081886e16e342"><div class="ttname"><a href="namespaceLaPackUtils.html#ae451bcb5403e96788e9081886e16e342">LaPackUtils::computePseudoInverse</a></div><div class="ttdeci">bool computePseudoInverse(std::vector&lt; double &gt; &amp;a_linAplus, const std::vector&lt; double &gt; &amp;a_linA, const int &amp;a_M, const int &amp;a_N)</div><div class="ttdoc">Compute the pseudoinverse of matrix through singular value decomposition.</div><div class="ttdef"><b>Definition:</b> CD_LaPackUtils.cpp:163</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

@@ -97,295 +97,320 @@ $(function() {
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceItoMerge.html">ItoMerge</a> {</div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#abcd97a5a8a4a40c9364aa69fe31f9043">   29</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#abcd97a5a8a4a40c9364aa69fe31f9043">Node&lt;T&gt;::Node</a>(){</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    m_parent = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    m_left   = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    m_right  = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    </div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    m_data.reserve(ITOMERGE_VECTOR_CAPACITY);</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  }</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a3a2a1c7ff890149e4951256adc172dbc">   38</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a3a2a1c7ff890149e4951256adc172dbc">Node&lt;T&gt;::~Node</a>(){</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    m_data.resize(0);</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  }</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00043"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a3e488609a5366c772c45627dd1489e87">   43</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#abcd97a5a8a4a40c9364aa69fe31f9043">Node&lt;T&gt;::Node</a>(std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a> &gt;&amp; a_parent) : <a class="code" href="classItoMerge_1_1Node.html">Node</a>&lt;T&gt;(){</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    this-&gt;<a class="code" href="classItoMerge_1_1Node.html#acf393842a7d2116ddf00394fd9f67e55">setParent</a>(a_parent);</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  }</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#aeb215fa790285fbd2956b3cc2f649842">   49</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classItoMerge_1_1Node.html#aeb215fa790285fbd2956b3cc2f649842">Node&lt;T&gt;::isLeafNode</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keywordflow">return</span> m_left == <span class="keyword">nullptr</span> &amp;&amp; m_right == <span class="keyword">nullptr</span>;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  }</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a3683b4dbe64d66ca57fb3381d7546792">   55</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classItoMerge_1_1Node.html#a3683b4dbe64d66ca57fb3381d7546792">Node&lt;T&gt;::isRegularNode</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordflow">return</span> !(this-&gt;isLeafNode());</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  }</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a00a3bf7b2d03894861f80b958be26fb5">   61</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classItoMerge_1_1Node.html#a00a3bf7b2d03894861f80b958be26fb5">Node&lt;T&gt;::isRootNode</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keywordflow">return</span> m_parent == <span class="keyword">nullptr</span>;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  }    </div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#acf393842a7d2116ddf00394fd9f67e55">   67</a></span>&#160;  <span class="keywordtype">void</span> <a class="code" href="classItoMerge_1_1Node.html#acf393842a7d2116ddf00394fd9f67e55">Node&lt;T&gt;::setParent</a>(std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a> &gt;&amp; a_parent){</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    m_parent = a_parent;</div>
+<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#abcd97a5a8a4a40c9364aa69fe31f9043">   29</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#abcd97a5a8a4a40c9364aa69fe31f9043">Node&lt;T&gt;::Node</a>()</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  {</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    m_parent = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    m_left   = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    m_right  = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    m_data.reserve(ITOMERGE_VECTOR_CAPACITY);</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  }</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a3a2a1c7ff890149e4951256adc172dbc">   39</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a3a2a1c7ff890149e4951256adc172dbc">Node&lt;T&gt;::~Node</a>()</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  {</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    m_data.resize(0);</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  }</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#aee714f7f454941eea54d3d14f2c85bae">   45</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#abcd97a5a8a4a40c9364aa69fe31f9043">Node&lt;T&gt;::Node</a>(std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a>&gt;&amp; a_parent) : <a class="code" href="classItoMerge_1_1Node.html">Node</a>&lt;T&gt;()</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  {</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    this-&gt;<a class="code" href="classItoMerge_1_1Node.html#a7d010b516ba02d3c79a7d6df11ab5c5b">setParent</a>(a_parent);</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  }</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#aeb215fa790285fbd2956b3cc2f649842">   52</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#aeb215fa790285fbd2956b3cc2f649842">Node&lt;T&gt;::isLeafNode</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="keyword">  </span>{</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordflow">return</span> m_left == <span class="keyword">nullptr</span> &amp;&amp; m_right == <span class="keyword">nullptr</span>;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  }</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a3683b4dbe64d66ca57fb3381d7546792">   59</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a3683b4dbe64d66ca57fb3381d7546792">Node&lt;T&gt;::isRegularNode</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keyword">  </span>{</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordflow">return</span> !(this-&gt;isLeafNode());</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  }</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a00a3bf7b2d03894861f80b958be26fb5">   66</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a00a3bf7b2d03894861f80b958be26fb5">Node&lt;T&gt;::isRootNode</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="keyword">  </span>{</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keywordflow">return</span> m_parent == <span class="keyword">nullptr</span>;</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  }</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a96688b64a087d9277ba47ad59fb5e4fb">   73</a></span>&#160;  <span class="keywordtype">void</span> <a class="code" href="classItoMerge_1_1Node.html#a96688b64a087d9277ba47ad59fb5e4fb">Node&lt;T&gt;::setLeft</a>(std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a> &gt;&amp; a_left){</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    m_left = a_left;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  }</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a97c39f06c11a3b71b5d7368d2209dc9b">   79</a></span>&#160;  <span class="keywordtype">void</span> <a class="code" href="classItoMerge_1_1Node.html#a97c39f06c11a3b71b5d7368d2209dc9b">Node&lt;T&gt;::setRight</a>(std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a> &gt;&amp; a_right){</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    m_right = a_right;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  }</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a5285d6f5db79838cbb9120987bc0a743">   85</a></span>&#160;  <span class="keywordtype">void</span> <a class="code" href="classItoMerge_1_1Node.html#a5285d6f5db79838cbb9120987bc0a743">Node&lt;T&gt;::setData</a>(<span class="keyword">const</span> std::vector&lt;T&gt;&amp; a_data, <span class="keyword">const</span> Real a_mass){</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    m_data = a_data;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    m_mass = a_mass;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  }</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00092"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a568603a786e6d5deb9a8e7bc5d3aff94">   92</a></span>&#160;  <span class="keywordtype">void</span> <a class="code" href="classItoMerge_1_1Node.html#a568603a786e6d5deb9a8e7bc5d3aff94">Node&lt;T&gt;::setMass</a>(<span class="keyword">const</span> Real a_mass){</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    m_mass = a_mass;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  }</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00098"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#af67a4c19b0890a8865b628ca645fa468">   98</a></span>&#160;  std::shared_ptr&lt;Node&lt;T&gt; &gt;&amp; <a class="code" href="classItoMerge_1_1Node.html#af67a4c19b0890a8865b628ca645fa468">Node&lt;T&gt;::getLeft</a>(){</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="keywordflow">return</span> m_left;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  }</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00104"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a1a0a5cc5117495977eb7a4f5f24ad85a">  104</a></span>&#160;  std::shared_ptr&lt;Node&lt;T&gt; &gt;&amp; <a class="code" href="classItoMerge_1_1Node.html#a1a0a5cc5117495977eb7a4f5f24ad85a">Node&lt;T&gt;::getRight</a>(){</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <span class="keywordflow">return</span> m_right;</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;  }</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00110"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a859a4154bc931b13485d3c62c997d2b1">  110</a></span>&#160;  std::shared_ptr&lt;Node&lt;T&gt; &gt;&amp; <a class="code" href="classItoMerge_1_1Node.html#a859a4154bc931b13485d3c62c997d2b1">Node&lt;T&gt;::getParent</a>(){</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    <span class="keywordflow">return</span> m_parent;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a7d010b516ba02d3c79a7d6df11ab5c5b">   73</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a7d010b516ba02d3c79a7d6df11ab5c5b">Node&lt;T&gt;::setParent</a>(std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a>&gt;&amp; a_parent)</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  {</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    m_parent = a_parent;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  }</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#aa781fa1803e595036ced013ae901afb8">   80</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#aa781fa1803e595036ced013ae901afb8">Node&lt;T&gt;::setLeft</a>(std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a>&gt;&amp; a_left)</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  {</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    m_left = a_left;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  }</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a39dc563081f88c1a138b9e0b1f7f802f">   87</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a39dc563081f88c1a138b9e0b1f7f802f">Node&lt;T&gt;::setRight</a>(std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a>&gt;&amp; a_right)</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  {</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    m_right = a_right;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  }</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00094"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a5285d6f5db79838cbb9120987bc0a743">   94</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a5285d6f5db79838cbb9120987bc0a743">Node&lt;T&gt;::setData</a>(<span class="keyword">const</span> std::vector&lt;T&gt;&amp; a_data, <span class="keyword">const</span> Real a_mass)</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  {</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    m_data = a_data;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    m_mass = a_mass;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  }</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a568603a786e6d5deb9a8e7bc5d3aff94">  102</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a568603a786e6d5deb9a8e7bc5d3aff94">Node&lt;T&gt;::setMass</a>(<span class="keyword">const</span> Real a_mass)</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  {</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    m_mass = a_mass;</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  }</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  <span class="keyword">inline</span> std::shared_ptr&lt;Node&lt;T&gt;&gt;&amp;</div>
+<div class="line"><a name="l00109"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#af67a4c19b0890a8865b628ca645fa468">  109</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#af67a4c19b0890a8865b628ca645fa468">Node&lt;T&gt;::getLeft</a>()</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  {</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    <span class="keywordflow">return</span> m_left;</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  }</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160; </div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00116"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a23bbd9e4c5c961874e37a8aa9d794c18">  116</a></span>&#160;  std::vector&lt;T&gt;&amp; <a class="code" href="classItoMerge_1_1Node.html#a23bbd9e4c5c961874e37a8aa9d794c18">Node&lt;T&gt;::getData</a>(){</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="keywordflow">return</span> m_data;</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  }</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160; </div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <span class="keyword">const</span> std::vector&lt;T&gt;&amp; <a class="code" href="classItoMerge_1_1Node.html#a23bbd9e4c5c961874e37a8aa9d794c18">Node&lt;T&gt;::getData</a>()<span class="keyword"> const</span>{</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    <span class="keywordflow">return</span> m_data;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  }</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160; </div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00128"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a2e15ec679440e669833e5c88b7814bca">  128</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classItoMerge_1_1Node.html#a2e15ec679440e669833e5c88b7814bca">Node&lt;T&gt;::canSplit</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    <span class="keywordtype">bool</span> ret = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    <span class="keywordflow">if</span>(m_data.size() &gt; 0){</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;      <span class="keywordflow">if</span>(m_data.size() &gt; 1 || m_data[0].canSplit()){</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    ret = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;      }</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    }</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160; </div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    <span class="keywordflow">return</span> m_mass &gt;= 2.0;</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  }</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160; </div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00142"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#aad1ed0e01fd1a56f5d2f626602ab9246">  142</a></span>&#160;  Real <a class="code" href="classItoMerge_1_1Node.html#aad1ed0e01fd1a56f5d2f626602ab9246">Node&lt;T&gt;::mass</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    <span class="keywordflow">return</span> m_mass;</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;  }</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160; </div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00147"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#ab7774bbf791737c3a305cfe96e42716a">  147</a></span>&#160;  <a class="code" href="classItoMerge_1_1Tree.html#ab7774bbf791737c3a305cfe96e42716a">Tree&lt;T&gt;::Tree</a>(){</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;    m_isDefined = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  }</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160; </div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00152"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#a49d92e9f45b79f12abbe971c16a5c6bf">  152</a></span>&#160;  <a class="code" href="classItoMerge_1_1Tree.html#ab7774bbf791737c3a305cfe96e42716a">Tree&lt;T&gt;::Tree</a>(<span class="keyword">const</span> std::vector&lt;T&gt;&amp; a_data) : <a class="code" href="classItoMerge_1_1Tree.html">Tree</a>() {</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    this-&gt;define(a_data);</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;  }</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160; </div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00157"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#a5fa9808d75f6655ae093df1c13fcbb3b">  157</a></span>&#160;  <a class="code" href="classItoMerge_1_1Tree.html">Tree&lt;T&gt;::~Tree</a>(){</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    m_leaves.resize(0);</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;  }</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160; </div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00163"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#a48bb0e9bcd15b6d661e15dad27c883fc">  163</a></span>&#160;  <span class="keywordtype">void</span> <a class="code" href="classItoMerge_1_1Tree.html">Tree&lt;T&gt;::define</a>(<span class="keyword">const</span> std::vector&lt;T&gt;&amp; a_data){</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160; </div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;    <span class="comment">// Make the root node if we don&#39;t have it. </span></div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;    <span class="keywordflow">if</span>(!m_root) {</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;      m_root = std::make_shared&lt;Node&lt;T&gt; &gt;();</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;    }</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;  <span class="keyword">inline</span> std::shared_ptr&lt;Node&lt;T&gt;&gt;&amp;</div>
+<div class="line"><a name="l00116"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a1a0a5cc5117495977eb7a4f5f24ad85a">  116</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a1a0a5cc5117495977eb7a4f5f24ad85a">Node&lt;T&gt;::getRight</a>()</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;  {</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    <span class="keywordflow">return</span> m_right;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  }</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160; </div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <span class="keyword">inline</span> std::shared_ptr&lt;Node&lt;T&gt;&gt;&amp;</div>
+<div class="line"><a name="l00123"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a859a4154bc931b13485d3c62c997d2b1">  123</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a859a4154bc931b13485d3c62c997d2b1">Node&lt;T&gt;::getParent</a>()</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  {</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="keywordflow">return</span> m_parent;</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  }</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160; </div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  <span class="keyword">inline</span> std::vector&lt;T&gt;&amp;</div>
+<div class="line"><a name="l00130"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a23bbd9e4c5c961874e37a8aa9d794c18">  130</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a23bbd9e4c5c961874e37a8aa9d794c18">Node&lt;T&gt;::getData</a>()</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  {</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    <span class="keywordflow">return</span> m_data;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  }</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160; </div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> std::vector&lt;T&gt;&amp;</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a23bbd9e4c5c961874e37a8aa9d794c18">Node&lt;T&gt;::getData</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;<span class="keyword">  </span>{</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    <span class="keywordflow">return</span> m_data;</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;  }</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160; </div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a name="l00144"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#a2e15ec679440e669833e5c88b7814bca">  144</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#a2e15ec679440e669833e5c88b7814bca">Node&lt;T&gt;::canSplit</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;<span class="keyword">  </span>{</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    <span class="keywordtype">bool</span> ret = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    <span class="keywordflow">if</span> (m_data.size() &gt; 0) {</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;      <span class="keywordflow">if</span> (m_data.size() &gt; 1 || m_data[0].canSplit()) {</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;        ret = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;      }</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    }</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160; </div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    <span class="keywordflow">return</span> m_mass &gt;= 2.0;</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;  }</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160; </div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;  <span class="keyword">inline</span> Real</div>
+<div class="line"><a name="l00159"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Node.html#aad1ed0e01fd1a56f5d2f626602ab9246">  159</a></span>&#160;  <a class="code" href="classItoMerge_1_1Node.html#aad1ed0e01fd1a56f5d2f626602ab9246">Node&lt;T&gt;::mass</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;<span class="keyword">  </span>{</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;    <span class="keywordflow">return</span> m_mass;</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;  }</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160; </div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00165"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#ab7774bbf791737c3a305cfe96e42716a">  165</a></span>&#160;  <a class="code" href="classItoMerge_1_1Tree.html#ab7774bbf791737c3a305cfe96e42716a">Tree&lt;T&gt;::Tree</a>()</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;  {</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;    m_isDefined = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;  }</div>
 <div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160; </div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    <span class="comment">// Compute total mass. </span></div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;    Real mass = 0.0;</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; d : a_data){</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;      mass += d.mass();</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;    }</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00171"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#a49d92e9f45b79f12abbe971c16a5c6bf">  171</a></span>&#160;  <a class="code" href="classItoMerge_1_1Tree.html#ab7774bbf791737c3a305cfe96e42716a">Tree&lt;T&gt;::Tree</a>(<span class="keyword">const</span> std::vector&lt;T&gt;&amp; a_data) : <a class="code" href="classItoMerge_1_1Tree.html">Tree</a>()</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;  {</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    this-&gt;define(a_data);</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;  }</div>
 <div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160; </div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    CH_assert(mass &gt;= 1.0);</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160; </div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    m_root-&gt;setData(a_data, mass);</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160; </div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    m_leaves.resize(1);</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    m_leaves[0] = m_root;</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160; </div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    m_isDefined = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;  }</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160; </div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00188"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#ab3d414355f96dfa25af4b3ff17eac523">  188</a></span>&#160;  std::vector&lt;std::shared_ptr&lt;Node&lt;T&gt; &gt; &gt;&amp; <a class="code" href="classItoMerge_1_1Tree.html">Tree&lt;T&gt;::getLeaves</a>(){</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    CH_assert(m_isDefined);</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    </div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    <span class="keywordflow">return</span> m_leaves;</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  }</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160; </div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  <span class="keyword">inline</span>  </div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  <span class="keyword">const</span> std::vector&lt;std::shared_ptr&lt;Node&lt;T&gt; &gt; &gt;&amp; <a class="code" href="classItoMerge_1_1Tree.html">Tree&lt;T&gt;::getLeaves</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    CH_assert(m_isDefined);</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    </div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    <span class="keywordflow">return</span> m_leaves;</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;  }  </div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00177"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#a5fa9808d75f6655ae093df1c13fcbb3b">  177</a></span>&#160;  <a class="code" href="classItoMerge_1_1Tree.html">Tree&lt;T&gt;::~Tree</a>()</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;  {</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;    m_leaves.resize(0);</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;  }</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160; </div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#a48bb0e9bcd15b6d661e15dad27c883fc">  184</a></span>&#160;  <a class="code" href="classItoMerge_1_1Tree.html">Tree&lt;T&gt;::define</a>(<span class="keyword">const</span> std::vector&lt;T&gt;&amp; a_data)</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;  {</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160; </div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;    <span class="comment">// Make the root node if we don&#39;t have it.</span></div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;    <span class="keywordflow">if</span> (!m_root) {</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;      m_root = std::make_shared&lt;Node&lt;T&gt;&gt;();</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    }</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160; </div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    <span class="comment">// Compute total mass.</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    Real mass = 0.0;</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; d : a_data) {</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;      mass += d.mass();</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;    }</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160; </div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    CH_assert(mass &gt;= 1.0);</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160; </div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    m_root-&gt;setData(a_data, mass);</div>
 <div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160; </div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  <span class="keyword">inline</span></div>
-<div class="line"><a name="l00204"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#abe5c99276201cad00342544bc4a92fda">  204</a></span>&#160;  <span class="keywordtype">void</span> <a class="code" href="classItoMerge_1_1Tree.html">Tree&lt;T&gt;::buildTree</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_firstDir, <span class="keyword">const</span> <span class="keywordtype">int</span> a_numTargetLeaves, <span class="keyword">const</span> <a class="code" href="namespaceItoMerge.html#a9b0072730faf87b90b2e05dd1cb678e9">NodePartitioner&lt;T&gt;</a>&amp; a_partitioner){</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;    CH_TIME(<span class="stringliteral">&quot;ItoMerge::Tree&lt;T&gt;::buildTree&quot;</span>);</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160; </div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    CH_assert(m_isDefined                    );</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;    CH_assert(a_numTargetLeaves &gt;= 1         );</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    CH_assert(a_firstDir        &gt;= 0         );</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    CH_assert(a_firstDir        &lt;= SpaceDim-1);    </div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  </div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    <span class="comment">// Should evaluate to an empty loop and be purged by the compiler if DEBUG=FALSE</span></div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; d : m_root-&gt;getData()){</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;      CH_assert(d.mass() &gt;= 1.0);</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;    }</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;    m_leaves.resize(1);</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;    m_leaves[0] = m_root;</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160; </div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;    m_isDefined = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  }</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160; </div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;  <span class="keyword">inline</span> std::vector&lt;std::shared_ptr&lt;Node&lt;T&gt;&gt;&gt;&amp;</div>
+<div class="line"><a name="l00210"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#ab3d414355f96dfa25af4b3ff17eac523">  210</a></span>&#160;  <a class="code" href="classItoMerge_1_1Tree.html">Tree&lt;T&gt;::getLeaves</a>()</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;  {</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    CH_assert(m_isDefined);</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160; </div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    <span class="keywordflow">return</span> m_leaves;</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;  }</div>
 <div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160; </div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;    <span class="comment">// TLDR: This function splits the primitives recursively until we either have a_numTargetLeaves leaf nodes OR none of the leaf nodes can be</span></div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;    <span class="comment">//       partitioned further. </span></div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160; </div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    std::vector&lt;std::shared_ptr&lt;Node&lt;T&gt; &gt; &gt; newLeaves;</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160; </div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    <span class="comment">// Reset leaves and root. I&#39;m just resizing here so I get the capacity</span></div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;    <span class="comment">// and avoid vector resizing during the splitting process.</span></div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;    m_leaves. resize(a_numTargetLeaves, <span class="keyword">nullptr</span>);</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    newLeaves.resize(a_numTargetLeaves, <span class="keyword">nullptr</span>);</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;    m_leaves[0] = m_root;</div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160; </div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;    <span class="comment">// We always begin with one leaf node. </span></div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;    <span class="keywordtype">int</span> numCurrentLeaves = 1;</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160; </div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;    <span class="keywordtype">int</span>  splitDir      = a_firstDir;    </div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;    <span class="keywordtype">bool</span> keepSplitting = (a_numTargetLeaves &gt; 1);</div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;    </div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;    <span class="keywordflow">while</span>(keepSplitting){</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160; </div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;      <span class="comment">// Flag which determines if we can split any of the nodes further. This will remain false if none of the</span></div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;      <span class="comment">// leaf nodes could be split OR if we didn&#39;t need more leaf nodes (i.e. the tree has finished building). </span></div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;      <span class="keywordtype">bool</span> canSplit = <span class="keyword">false</span>; </div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160; </div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;<span class="preprocessor">#if 0 // I&#39;m not sure this matters so I&#39;m commenting it out. R.M. Nov. 2021. </span></div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;      <span class="comment">// Sort the leaves by their mass(?). We will split the ones with the largest masses.      </span></div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;      std::sort(m_leaves.begin(), m_leaves.begin() + numCurrentLeaves,</div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;        [](<span class="keyword">const</span> std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a> &gt;&amp; n1,</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;           <span class="keyword">const</span> std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a> &gt;&amp; n2){</div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;          return n1-&gt;mass() &lt; n2-&gt;mass();</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;        });</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160; </div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;      <span class="comment">// These are the number of leaves that we need in order to reach a_numTargetLeaves. </span></div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;      <span class="keywordtype">int</span> leavesNeeded = a_numTargetLeaves - numCurrentLeaves;</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160; </div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;      <span class="keywordtype">int</span> N = 0;      </div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numCurrentLeaves; i++){</div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160; </div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;    <span class="comment">// If we needed a new leaf AND we could split this node, split it and go further. This will give us two leaf nodes</span></div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;    <span class="comment">// in the &quot;new&quot; list of leaf nodes.</span></div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;    <span class="keywordflow">if</span>(m_leaves[i]-&gt;canSplit() &amp;&amp; leavesNeeded &gt; 0){</div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;      a_partitioner(m_leaves[i], splitDir);</div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;    </div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;      newLeaves[N  ] = m_leaves[i]-&gt;getLeft (); </div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;      newLeaves[N+1] = m_leaves[i]-&gt;getRight();</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160; </div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;      N += 2;</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;  <span class="keyword">inline</span> <span class="keyword">const</span> std::vector&lt;std::shared_ptr&lt;Node&lt;T&gt;&gt;&gt;&amp;</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;  <a class="code" href="classItoMerge_1_1Tree.html">Tree&lt;T&gt;::getLeaves</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;<span class="keyword">  </span>{</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;    CH_assert(m_isDefined);</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160; </div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;    <span class="keywordflow">return</span> m_leaves;</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;  }</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160; </div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;  <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00228"></a><span class="lineno"><a class="line" href="classItoMerge_1_1Tree.html#abe5c99276201cad00342544bc4a92fda">  228</a></span>&#160;  <a class="code" href="classItoMerge_1_1Tree.html">Tree&lt;T&gt;::buildTree</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> a_firstDir, <span class="keyword">const</span> <span class="keywordtype">int</span> a_numTargetLeaves, <span class="keyword">const</span> <a class="code" href="namespaceItoMerge.html#a9b0072730faf87b90b2e05dd1cb678e9">NodePartitioner&lt;T&gt;</a>&amp; a_partitioner)</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  {</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;    CH_TIME(<span class="stringliteral">&quot;ItoMerge::Tree&lt;T&gt;::buildTree&quot;</span>);</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160; </div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;    CH_assert(m_isDefined);</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;    CH_assert(a_numTargetLeaves &gt;= 1);</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;    CH_assert(a_firstDir &gt;= 0);</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;    CH_assert(a_firstDir &lt;= SpaceDim - 1);</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160; </div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;    <span class="comment">// Should evaluate to an empty loop and be purged by the compiler if DEBUG=FALSE</span></div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; d : m_root-&gt;getData()) {</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;      CH_assert(d.mass() &gt;= 1.0);</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;    }</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160; </div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;    <span class="comment">// TLDR: This function splits the primitives recursively until we either have a_numTargetLeaves leaf nodes OR none of the leaf nodes can be</span></div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;    <span class="comment">//       partitioned further.</span></div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160; </div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    std::vector&lt;std::shared_ptr&lt;Node&lt;T&gt;&gt;&gt; newLeaves;</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160; </div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    <span class="comment">// Reset leaves and root. I&#39;m just resizing here so I get the capacity</span></div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    <span class="comment">// and avoid vector resizing during the splitting process.</span></div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;    m_leaves.resize(a_numTargetLeaves, <span class="keyword">nullptr</span>);</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    newLeaves.resize(a_numTargetLeaves, <span class="keyword">nullptr</span>);</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;    m_leaves[0] = m_root;</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160; </div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;    <span class="comment">// We always begin with one leaf node.</span></div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;    <span class="keywordtype">int</span> numCurrentLeaves = 1;</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160; </div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;    <span class="keywordtype">int</span>  splitDir      = a_firstDir;</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;    <span class="keywordtype">bool</span> keepSplitting = (a_numTargetLeaves &gt; 1);</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160; </div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;    <span class="keywordflow">while</span> (keepSplitting) {</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160; </div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;      <span class="comment">// Flag which determines if we can split any of the nodes further. This will remain false if none of the</span></div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;      <span class="comment">// leaf nodes could be split OR if we didn&#39;t need more leaf nodes (i.e. the tree has finished building).</span></div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;      <span class="keywordtype">bool</span> canSplit = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160; </div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;      leavesNeeded--;</div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160; </div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;      canSplit = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;    }</div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    <span class="keywordflow">else</span>{ <span class="comment">// We did not split the leaf node so just append the current leaf to the list of &quot;new&quot; leaves.</span></div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;      newLeaves[N] = m_leaves[i];</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;      </div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;      N++;</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;    }</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;      }</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160; </div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;      <span class="comment">// Assign new leaf nodes. </span></div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;      m_leaves.assign(newLeaves.begin(), newLeaves.begin() + N);</div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160; </div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;      <span class="comment">// Update the current number of leaf nodes. </span></div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;      numCurrentLeaves = N;</div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160; </div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;      <span class="comment">// Did the tree finish building or are all the nodes unsplittable leaf nodes? If so, exit. </span></div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;      keepSplitting = (N &lt; a_numTargetLeaves) &amp;&amp; canSplit;</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;<span class="preprocessor">#if 0 // I&#39;m not sure this matters so I&#39;m commenting it out. R.M. Nov. 2021. \</span></div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;<span class="preprocessor">      // Sort the leaves by their mass(?). We will split the ones with the largest masses.      </span></div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;      std::sort(m_leaves.begin(), m_leaves.begin() + numCurrentLeaves,</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;        [](<span class="keyword">const</span> std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a> &gt;&amp; n1,</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;           <span class="keyword">const</span> std::shared_ptr&lt;<a class="code" href="classItoMerge_1_1Node.html">Node&lt;T&gt;</a> &gt;&amp; n2){</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;          return n1-&gt;mass() &lt; n2-&gt;mass();</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;        });</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160; </div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;      <span class="comment">// These are the number of leaves that we need in order to reach a_numTargetLeaves.</span></div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;      <span class="keywordtype">int</span> leavesNeeded = a_numTargetLeaves - numCurrentLeaves;</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160; </div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;      <span class="keywordtype">int</span> N = 0;</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numCurrentLeaves; i++) {</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160; </div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;        <span class="comment">// If we needed a new leaf AND we could split this node, split it and go further. This will give us two leaf nodes</span></div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;        <span class="comment">// in the &quot;new&quot; list of leaf nodes.</span></div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;        <span class="keywordflow">if</span> (m_leaves[i]-&gt;canSplit() &amp;&amp; leavesNeeded &gt; 0) {</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;          a_partitioner(m_leaves[i], splitDir);</div>
 <div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160; </div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;      <span class="comment">// Update the splitting coordinate -- the next leaves are split along a different coordinate.</span></div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;      splitDir = (splitDir + 1) % SpaceDim;       </div>
-<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;    }</div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;  }</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;}</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160; </div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160; </div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;          newLeaves[N]     = m_leaves[i]-&gt;getLeft();</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;          newLeaves[N + 1] = m_leaves[i]-&gt;getRight();</div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160; </div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;          N += 2;</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160; </div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;          leavesNeeded--;</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160; </div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;          canSplit = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;        }</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;        <span class="keywordflow">else</span> { <span class="comment">// We did not split the leaf node so just append the current leaf to the list of &quot;new&quot; leaves.</span></div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;          newLeaves[N] = m_leaves[i];</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160; </div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;          N++;</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;        }</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;      }</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160; </div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;      <span class="comment">// Assign new leaf nodes.</span></div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;      m_leaves.assign(newLeaves.begin(), newLeaves.begin() + N);</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160; </div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;      <span class="comment">// Update the current number of leaf nodes.</span></div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;      numCurrentLeaves = N;</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160; </div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;      <span class="comment">// Did the tree finish building or are all the nodes unsplittable leaf nodes? If so, exit.</span></div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;      keepSplitting = (N &lt; a_numTargetLeaves) &amp;&amp; canSplit;</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160; </div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;      <span class="comment">// Update the splitting coordinate -- the next leaves are split along a different coordinate.</span></div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;      splitDir = (splitDir + 1) % SpaceDim;</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;    }</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;  }</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;} <span class="comment">// namespace ItoMerge</span></div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160; </div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160; </div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassItoMerge_1_1Tree_html"><div class="ttname"><a href="classItoMerge_1_1Tree.html">ItoMerge::Tree</a></div><div class="ttdoc">Partitioner function which splits a Node&lt;T&gt; into left/right child nodes with masses differing by at m...</div><div class="ttdef"><b>Definition:</b> CD_ItoMerge.H:222</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_acf393842a7d2116ddf00394fd9f67e55"><div class="ttname"><a href="classItoMerge_1_1Node.html#acf393842a7d2116ddf00394fd9f67e55">ItoMerge::Node::setParent</a></div><div class="ttdeci">void setParent(std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp;a_parent)</div><div class="ttdoc">Set parent node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:67</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a3683b4dbe64d66ca57fb3381d7546792"><div class="ttname"><a href="classItoMerge_1_1Node.html#a3683b4dbe64d66ca57fb3381d7546792">ItoMerge::Node::isRegularNode</a></div><div class="ttdeci">bool isRegularNode() const</div><div class="ttdoc">Check if node is a regular node – i.e. not a leaf node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:55</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Tree_html_ab7774bbf791737c3a305cfe96e42716a"><div class="ttname"><a href="classItoMerge_1_1Tree.html#ab7774bbf791737c3a305cfe96e42716a">ItoMerge::Tree::Tree</a></div><div class="ttdeci">Tree()</div><div class="ttdoc">Weak constructor. Must subsequently call the define function.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:147</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_aad1ed0e01fd1a56f5d2f626602ab9246"><div class="ttname"><a href="classItoMerge_1_1Node.html#aad1ed0e01fd1a56f5d2f626602ab9246">ItoMerge::Node::mass</a></div><div class="ttdeci">Real mass() const</div><div class="ttdoc">Get the total mass in this node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:142</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a97c39f06c11a3b71b5d7368d2209dc9b"><div class="ttname"><a href="classItoMerge_1_1Node.html#a97c39f06c11a3b71b5d7368d2209dc9b">ItoMerge::Node::setRight</a></div><div class="ttdeci">void setRight(std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp;a_right)</div><div class="ttdoc">Set pointer to left child node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:79</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a2e15ec679440e669833e5c88b7814bca"><div class="ttname"><a href="classItoMerge_1_1Node.html#a2e15ec679440e669833e5c88b7814bca">ItoMerge::Node::canSplit</a></div><div class="ttdeci">bool canSplit() const</div><div class="ttdoc">Can split node or not.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:128</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Tree_html"><div class="ttname"><a href="classItoMerge_1_1Tree.html">ItoMerge::Tree</a></div><div class="ttdoc">Partitioner function which splits a Node&lt;T&gt; into left/right child nodes with masses differing by at m...</div><div class="ttdef"><b>Definition:</b> CD_ItoMerge.H:221</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a3683b4dbe64d66ca57fb3381d7546792"><div class="ttname"><a href="classItoMerge_1_1Node.html#a3683b4dbe64d66ca57fb3381d7546792">ItoMerge::Node::isRegularNode</a></div><div class="ttdeci">bool isRegularNode() const</div><div class="ttdoc">Check if node is a regular node – i.e. not a leaf node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:59</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Tree_html_ab7774bbf791737c3a305cfe96e42716a"><div class="ttname"><a href="classItoMerge_1_1Tree.html#ab7774bbf791737c3a305cfe96e42716a">ItoMerge::Tree::Tree</a></div><div class="ttdeci">Tree()</div><div class="ttdoc">Weak constructor. Must subsequently call the define function.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:165</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_aad1ed0e01fd1a56f5d2f626602ab9246"><div class="ttname"><a href="classItoMerge_1_1Node.html#aad1ed0e01fd1a56f5d2f626602ab9246">ItoMerge::Node::mass</a></div><div class="ttdeci">Real mass() const</div><div class="ttdoc">Get the total mass in this node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:159</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a2e15ec679440e669833e5c88b7814bca"><div class="ttname"><a href="classItoMerge_1_1Node.html#a2e15ec679440e669833e5c88b7814bca">ItoMerge::Node::canSplit</a></div><div class="ttdeci">bool canSplit() const</div><div class="ttdoc">Can split node or not.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:144</div></div>
 <div class="ttc" id="aclassItoMerge_1_1Node_html_abcd97a5a8a4a40c9364aa69fe31f9043"><div class="ttname"><a href="classItoMerge_1_1Node.html#abcd97a5a8a4a40c9364aa69fe31f9043">ItoMerge::Node::Node</a></div><div class="ttdeci">Node()</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:29</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a568603a786e6d5deb9a8e7bc5d3aff94"><div class="ttname"><a href="classItoMerge_1_1Node.html#a568603a786e6d5deb9a8e7bc5d3aff94">ItoMerge::Node::setMass</a></div><div class="ttdeci">void setMass(const Real a_mass)</div><div class="ttdoc">Set the mass in the node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:92</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a3a2a1c7ff890149e4951256adc172dbc"><div class="ttname"><a href="classItoMerge_1_1Node.html#a3a2a1c7ff890149e4951256adc172dbc">ItoMerge::Node::~Node</a></div><div class="ttdeci">~Node()</div><div class="ttdoc">Destructor. Destroys data in node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:38</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a00a3bf7b2d03894861f80b958be26fb5"><div class="ttname"><a href="classItoMerge_1_1Node.html#a00a3bf7b2d03894861f80b958be26fb5">ItoMerge::Node::isRootNode</a></div><div class="ttdeci">bool isRootNode() const</div><div class="ttdoc">Check if node is a root node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:61</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_af67a4c19b0890a8865b628ca645fa468"><div class="ttname"><a href="classItoMerge_1_1Node.html#af67a4c19b0890a8865b628ca645fa468">ItoMerge::Node::getLeft</a></div><div class="ttdeci">std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp; getLeft()</div><div class="ttdoc">Get this node's left child node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:98</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a859a4154bc931b13485d3c62c997d2b1"><div class="ttname"><a href="classItoMerge_1_1Node.html#a859a4154bc931b13485d3c62c997d2b1">ItoMerge::Node::getParent</a></div><div class="ttdeci">std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp; getParent()</div><div class="ttdoc">Get this node's parent node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:110</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a568603a786e6d5deb9a8e7bc5d3aff94"><div class="ttname"><a href="classItoMerge_1_1Node.html#a568603a786e6d5deb9a8e7bc5d3aff94">ItoMerge::Node::setMass</a></div><div class="ttdeci">void setMass(const Real a_mass)</div><div class="ttdoc">Set the mass in the node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:102</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a3a2a1c7ff890149e4951256adc172dbc"><div class="ttname"><a href="classItoMerge_1_1Node.html#a3a2a1c7ff890149e4951256adc172dbc">ItoMerge::Node::~Node</a></div><div class="ttdeci">~Node()</div><div class="ttdoc">Destructor. Destroys data in node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:39</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a00a3bf7b2d03894861f80b958be26fb5"><div class="ttname"><a href="classItoMerge_1_1Node.html#a00a3bf7b2d03894861f80b958be26fb5">ItoMerge::Node::isRootNode</a></div><div class="ttdeci">bool isRootNode() const</div><div class="ttdoc">Check if node is a root node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:66</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_af67a4c19b0890a8865b628ca645fa468"><div class="ttname"><a href="classItoMerge_1_1Node.html#af67a4c19b0890a8865b628ca645fa468">ItoMerge::Node::getLeft</a></div><div class="ttdeci">std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp; getLeft()</div><div class="ttdoc">Get this node's left child node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:109</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a859a4154bc931b13485d3c62c997d2b1"><div class="ttname"><a href="classItoMerge_1_1Node.html#a859a4154bc931b13485d3c62c997d2b1">ItoMerge::Node::getParent</a></div><div class="ttdeci">std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp; getParent()</div><div class="ttdoc">Get this node's parent node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:123</div></div>
 <div class="ttc" id="aCD__ItoMergePartitioners_8H_html"><div class="ttname"><a href="CD__ItoMergePartitioners_8H.html">CD_ItoMergePartitioners.H</a></div><div class="ttdoc">Implementation of various partitioners for superparticle handling of ItoSolver.</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_aeb215fa790285fbd2956b3cc2f649842"><div class="ttname"><a href="classItoMerge_1_1Node.html#aeb215fa790285fbd2956b3cc2f649842">ItoMerge::Node::isLeafNode</a></div><div class="ttdeci">bool isLeafNode() const</div><div class="ttdoc">Check if node is a leaf node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:49</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a5285d6f5db79838cbb9120987bc0a743"><div class="ttname"><a href="classItoMerge_1_1Node.html#a5285d6f5db79838cbb9120987bc0a743">ItoMerge::Node::setData</a></div><div class="ttdeci">void setData(const std::vector&lt; T &gt; &amp;a_data, const Real a_mass)</div><div class="ttdoc">Set data. This sets the primitives in the node and the total mass in the node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:85</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a23bbd9e4c5c961874e37a8aa9d794c18"><div class="ttname"><a href="classItoMerge_1_1Node.html#a23bbd9e4c5c961874e37a8aa9d794c18">ItoMerge::Node::getData</a></div><div class="ttdeci">std::vector&lt; T &gt; &amp; getData()</div><div class="ttdoc">Get the data in this node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:116</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a7d010b516ba02d3c79a7d6df11ab5c5b"><div class="ttname"><a href="classItoMerge_1_1Node.html#a7d010b516ba02d3c79a7d6df11ab5c5b">ItoMerge::Node::setParent</a></div><div class="ttdeci">void setParent(std::shared_ptr&lt; Node&lt; T &gt;&gt; &amp;a_parent)</div><div class="ttdoc">Set parent node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:73</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_aeb215fa790285fbd2956b3cc2f649842"><div class="ttname"><a href="classItoMerge_1_1Node.html#aeb215fa790285fbd2956b3cc2f649842">ItoMerge::Node::isLeafNode</a></div><div class="ttdeci">bool isLeafNode() const</div><div class="ttdoc">Check if node is a leaf node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:52</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a39dc563081f88c1a138b9e0b1f7f802f"><div class="ttname"><a href="classItoMerge_1_1Node.html#a39dc563081f88c1a138b9e0b1f7f802f">ItoMerge::Node::setRight</a></div><div class="ttdeci">void setRight(std::shared_ptr&lt; Node&lt; T &gt;&gt; &amp;a_right)</div><div class="ttdoc">Set pointer to left child node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:87</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a5285d6f5db79838cbb9120987bc0a743"><div class="ttname"><a href="classItoMerge_1_1Node.html#a5285d6f5db79838cbb9120987bc0a743">ItoMerge::Node::setData</a></div><div class="ttdeci">void setData(const std::vector&lt; T &gt; &amp;a_data, const Real a_mass)</div><div class="ttdoc">Set data. This sets the primitives in the node and the total mass in the node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:94</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a23bbd9e4c5c961874e37a8aa9d794c18"><div class="ttname"><a href="classItoMerge_1_1Node.html#a23bbd9e4c5c961874e37a8aa9d794c18">ItoMerge::Node::getData</a></div><div class="ttdeci">std::vector&lt; T &gt; &amp; getData()</div><div class="ttdoc">Get the data in this node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:130</div></div>
 <div class="ttc" id="aCD__ItoMerge_8H_html"><div class="ttname"><a href="CD__ItoMerge_8H.html">CD_ItoMerge.H</a></div><div class="ttdoc">Namespace containing various merging utilities for ItoSolver particle merging and splitting.</div></div>
 <div class="ttc" id="aclassItoMerge_1_1Node_html"><div class="ttname"><a href="classItoMerge_1_1Node.html">ItoMerge::Node</a></div><div class="ttdoc">Class for describing a single node with two children and one parent. This is used together with ItoMe...</div><div class="ttdef"><b>Definition:</b> CD_ItoMerge.H:38</div></div>
-<div class="ttc" id="anamespaceItoMerge_html_a9b0072730faf87b90b2e05dd1cb678e9"><div class="ttname"><a href="namespaceItoMerge.html#a9b0072730faf87b90b2e05dd1cb678e9">ItoMerge::NodePartitioner</a></div><div class="ttdeci">std::function&lt; void(std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp;a_node, const int a_dir)&gt; NodePartitioner</div><div class="ttdoc">Declaration of a node partitioner function.</div><div class="ttdef"><b>Definition:</b> CD_ItoMerge.H:204</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a96688b64a087d9277ba47ad59fb5e4fb"><div class="ttname"><a href="classItoMerge_1_1Node.html#a96688b64a087d9277ba47ad59fb5e4fb">ItoMerge::Node::setLeft</a></div><div class="ttdeci">void setLeft(std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp;a_left)</div><div class="ttdoc">Set pointer to left child node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:73</div></div>
+<div class="ttc" id="anamespaceItoMerge_html_a9b0072730faf87b90b2e05dd1cb678e9"><div class="ttname"><a href="namespaceItoMerge.html#a9b0072730faf87b90b2e05dd1cb678e9">ItoMerge::NodePartitioner</a></div><div class="ttdeci">std::function&lt; void(std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp;a_node, const int a_dir)&gt; NodePartitioner</div><div class="ttdoc">Declaration of a node partitioner function.</div><div class="ttdef"><b>Definition:</b> CD_ItoMerge.H:203</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_aa781fa1803e595036ced013ae901afb8"><div class="ttname"><a href="classItoMerge_1_1Node.html#aa781fa1803e595036ced013ae901afb8">ItoMerge::Node::setLeft</a></div><div class="ttdeci">void setLeft(std::shared_ptr&lt; Node&lt; T &gt;&gt; &amp;a_left)</div><div class="ttdoc">Set pointer to left child node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:80</div></div>
 <div class="ttc" id="anamespaceItoMerge_html"><div class="ttname"><a href="namespaceItoMerge.html">ItoMerge</a></div><div class="ttdoc">Namespace for various merging utilities for ItoSolver.</div><div class="ttdef"><b>Definition:</b> CD_ItoMerge.H:32</div></div>
-<div class="ttc" id="aclassItoMerge_1_1Node_html_a1a0a5cc5117495977eb7a4f5f24ad85a"><div class="ttname"><a href="classItoMerge_1_1Node.html#a1a0a5cc5117495977eb7a4f5f24ad85a">ItoMerge::Node::getRight</a></div><div class="ttdeci">std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp; getRight()</div><div class="ttdoc">Get this node's right child node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:104</div></div>
+<div class="ttc" id="aclassItoMerge_1_1Node_html_a1a0a5cc5117495977eb7a4f5f24ad85a"><div class="ttname"><a href="classItoMerge_1_1Node.html#a1a0a5cc5117495977eb7a4f5f24ad85a">ItoMerge::Node::getRight</a></div><div class="ttdeci">std::shared_ptr&lt; Node&lt; T &gt; &gt; &amp; getRight()</div><div class="ttdoc">Get this node's right child node.</div><div class="ttdef"><b>Definition:</b> CD_ItoMergeImplem.H:116</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

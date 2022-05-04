@@ -88,9 +88,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#a9976590cd47c25d23ac23a256d6aaa98">CdrLayout</a> ()=delete</td></tr>
 <tr class="memdesc:a9976590cd47c25d23ac23a256d6aaa98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed weak constructor. Use the full constructor. <br /></td></tr>
 <tr class="separator:a9976590cd47c25d23ac23a256d6aaa98"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8fc46016eed0e78bde98b0e24cf09d31"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#a8fc46016eed0e78bde98b0e24cf09d31">CdrLayout</a> (const Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &gt; &amp;a_species)</td></tr>
-<tr class="memdesc:a8fc46016eed0e78bde98b0e24cf09d31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor, setting the number of solvers to be instantiated.  <a href="classCdrLayout.html#a8fc46016eed0e78bde98b0e24cf09d31">More...</a><br /></td></tr>
-<tr class="separator:a8fc46016eed0e78bde98b0e24cf09d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae45db63c23d84c524f9b7fa21c2e826c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#ae45db63c23d84c524f9b7fa21c2e826c">CdrLayout</a> (const Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt;&gt; &amp;a_species)</td></tr>
+<tr class="memdesc:ae45db63c23d84c524f9b7fa21c2e826c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor, setting the number of solvers to be instantiated.  <a href="classCdrLayout.html#ae45db63c23d84c524f9b7fa21c2e826c">More...</a><br /></td></tr>
+<tr class="separator:ae45db63c23d84c524f9b7fa21c2e826c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62f6e7cacc700113387f8838db8c6619"><td class="memItemLeft" align="right" valign="top"><a id="a62f6e7cacc700113387f8838db8c6619"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrLayout.html#a62f6e7cacc700113387f8838db8c6619">~CdrLayout</a> ()</td></tr>
 <tr class="memdesc:a62f6e7cacc700113387f8838db8c6619"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
@@ -235,8 +235,8 @@ class CdrLayout&lt; T &gt;</h3>
 <p>Class for holding a set of CdrSolvers. </p>
 <p>This is primarily a utility class that just cuts down on typing when there are multiple species are being advected/diffused. This class simply stores a set of CdrSolvers, and it contains an "iterator" for iterating through them. This is simply meant to cut down on typing. Note that a <a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> can keep an instance this class rather than e.g. a Vector&lt;RefCountedPtr&lt;CdrSolver&gt; &gt;, but fundamentally there is no difference between the two. The <a class="el" href="classCdrLayout.html" title="Class for holding a set of CdrSolvers.">CdrLayout</a> can be constructed through a factory method, i.e. the user can do a quick-generation of a set of CdrSolvers by using the factory method for instantiating an arbitrary number of CdrSolvers. </p><dl class="section note"><dt>Note</dt><dd>A separate use case for this is class is that it allows segregation between groups of CdrSolvers that live on different realms and phases. </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a8fc46016eed0e78bde98b0e24cf09d31"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8fc46016eed0e78bde98b0e24cf09d31">&#9670;&nbsp;</a></span>CdrLayout()</h2>
+<a id="ae45db63c23d84c524f9b7fa21c2e826c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae45db63c23d84c524f9b7fa21c2e826c">&#9670;&nbsp;</a></span>CdrLayout()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -246,7 +246,7 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="memname"><a class="el" href="classCdrLayout.html">CdrLayout</a>&lt; T &gt;::<a class="el" href="classCdrLayout.html">CdrLayout</a> </td>
           <td>(</td>
-          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classCdrSpecies.html">CdrSpecies</a> &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_species</em></td><td>)</td>
           <td></td>
         </tr>

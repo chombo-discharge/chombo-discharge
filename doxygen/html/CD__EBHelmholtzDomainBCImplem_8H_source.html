@@ -94,20 +94,22 @@ $(function() {
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &lt;CD_EBHelmholtzDomainBC.H&gt;</span></div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keyword">inline</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="classEBHelmholtzDomainBC.html#a17d17cdc9365a5004575ed2b2015c513">   20</a></span>&#160;RealVect <a class="code" href="classEBHelmholtzDomainBC.html#a17d17cdc9365a5004575ed2b2015c513">EBHelmholtzDomainBC::getBoundaryPosition</a>(<span class="keyword">const</span> IntVect&amp; a_iv, <span class="keyword">const</span> <span class="keywordtype">int</span>&amp; a_dir, <span class="keyword">const</span> Side::LoHiSide&amp; a_side)<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  <span class="keyword">const</span> RealVect pos = <a class="code" href="classEBHelmholtzDomainBC.html#afdcd3c80882f48857366bb00df0b243e">m_probLo</a> + (0.5*RealVect::Unit + RealVect(a_iv))*<a class="code" href="classEBHelmholtzDomainBC.html#add61b95266847390c94ab5b1eeb51348">m_dx</a> + 0.5*<a class="code" href="classEBHelmholtzDomainBC.html#add61b95266847390c94ab5b1eeb51348">m_dx</a>*RealVect(BASISV(a_dir))*sign(a_side);</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  <span class="keywordflow">return</span> pos;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;}</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keyword">inline</span> RealVect</div>
+<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="classEBHelmholtzDomainBC.html#a17d17cdc9365a5004575ed2b2015c513">   20</a></span>&#160;<a class="code" href="classEBHelmholtzDomainBC.html#a17d17cdc9365a5004575ed2b2015c513">EBHelmholtzDomainBC::getBoundaryPosition</a>(<span class="keyword">const</span> IntVect&amp; a_iv, <span class="keyword">const</span> <span class="keywordtype">int</span>&amp; a_dir, <span class="keyword">const</span> Side::LoHiSide&amp; a_side)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160; </div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  <span class="keyword">const</span> RealVect pos =</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <a class="code" href="classEBHelmholtzDomainBC.html#afdcd3c80882f48857366bb00df0b243e">m_probLo</a> + (0.5 * RealVect::Unit + RealVect(a_iv)) * <a class="code" href="classEBHelmholtzDomainBC.html#add61b95266847390c94ab5b1eeb51348">m_dx</a> + 0.5 * <a class="code" href="classEBHelmholtzDomainBC.html#add61b95266847390c94ab5b1eeb51348">m_dx</a> * RealVect(BASISV(a_dir)) * sign(a_side);</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;  <span class="keywordflow">return</span> pos;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;}</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassEBHelmholtzDomainBC_html_add61b95266847390c94ab5b1eeb51348"><div class="ttname"><a href="classEBHelmholtzDomainBC.html#add61b95266847390c94ab5b1eeb51348">EBHelmholtzDomainBC::m_dx</a></div><div class="ttdeci">Real m_dx</div><div class="ttdoc">Grid resolution.</div><div class="ttdef"><b>Definition:</b> CD_EBHelmholtzDomainBC.H:128</div></div>
-<div class="ttc" id="aclassEBHelmholtzDomainBC_html_afdcd3c80882f48857366bb00df0b243e"><div class="ttname"><a href="classEBHelmholtzDomainBC.html#afdcd3c80882f48857366bb00df0b243e">EBHelmholtzDomainBC::m_probLo</a></div><div class="ttdeci">RealVect m_probLo</div><div class="ttdoc">Lower-left corner of computational domain.</div><div class="ttdef"><b>Definition:</b> CD_EBHelmholtzDomainBC.H:133</div></div>
+<div class="ttc" id="aclassEBHelmholtzDomainBC_html_add61b95266847390c94ab5b1eeb51348"><div class="ttname"><a href="classEBHelmholtzDomainBC.html#add61b95266847390c94ab5b1eeb51348">EBHelmholtzDomainBC::m_dx</a></div><div class="ttdeci">Real m_dx</div><div class="ttdoc">Grid resolution.</div><div class="ttdef"><b>Definition:</b> CD_EBHelmholtzDomainBC.H:132</div></div>
+<div class="ttc" id="aclassEBHelmholtzDomainBC_html_afdcd3c80882f48857366bb00df0b243e"><div class="ttname"><a href="classEBHelmholtzDomainBC.html#afdcd3c80882f48857366bb00df0b243e">EBHelmholtzDomainBC::m_probLo</a></div><div class="ttdeci">RealVect m_probLo</div><div class="ttdoc">Lower-left corner of computational domain.</div><div class="ttdef"><b>Definition:</b> CD_EBHelmholtzDomainBC.H:137</div></div>
 <div class="ttc" id="aclassEBHelmholtzDomainBC_html_a17d17cdc9365a5004575ed2b2015c513"><div class="ttname"><a href="classEBHelmholtzDomainBC.html#a17d17cdc9365a5004575ed2b2015c513">EBHelmholtzDomainBC::getBoundaryPosition</a></div><div class="ttdeci">RealVect getBoundaryPosition(const IntVect &amp;a_iv, const int &amp;a_dir, const Side::LoHiSide &amp;a_side) const</div><div class="ttdoc">Returns the cell-centered position at the boundary.</div><div class="ttdef"><b>Definition:</b> CD_EBHelmholtzDomainBCImplem.H:20</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

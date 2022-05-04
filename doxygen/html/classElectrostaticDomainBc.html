@@ -90,15 +90,15 @@ Public Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a313bf6a5f5d16731a6b0349835ebb934"><td class="mdescLeft">&#160;</td><td class="mdescRight">Supported boundary condition types. <br /></td></tr>
 <tr class="separator:a313bf6a5f5d16731a6b0349835ebb934"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac37dfb2ab9310ad034116bdbbe27f2da"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#ac37dfb2ab9310ad034116bdbbe27f2da">BcFunction</a> = std::function&lt; Real(const RealVect a_position, const Real a_time) &gt;</td></tr>
-<tr class="memdesc:ac37dfb2ab9310ad034116bdbbe27f2da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which maps f(R^3,t) : R. Used for setting the associated value and boundary condition type.  <a href="classElectrostaticDomainBc.html#ac37dfb2ab9310ad034116bdbbe27f2da">More...</a><br /></td></tr>
-<tr class="separator:ac37dfb2ab9310ad034116bdbbe27f2da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac70aabaa096724823b87222bf5bd8cb6"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">BcFunction</a> = std::function&lt; Real(const RealVect a_position, const Real a_time)&gt;</td></tr>
+<tr class="memdesc:ac70aabaa096724823b87222bf5bd8cb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which maps f(R^3,t) : R. Used for setting the associated value and boundary condition type.  <a href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">More...</a><br /></td></tr>
+<tr class="separator:ac70aabaa096724823b87222bf5bd8cb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a969add9e24746f806ca9c1448013e45a"><td class="memItemLeft" align="right" valign="top"><a id="a969add9e24746f806ca9c1448013e45a"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f806ca9c1448013e45a">DomainSide</a> = std::pair&lt; int, Side::LoHiSide &gt;</td></tr>
 <tr class="memdesc:a969add9e24746f806ca9c1448013e45a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for mapping a direction and side. <br /></td></tr>
 <tr class="separator:a969add9e24746f806ca9c1448013e45a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a803cc8ad3f065f17090aa193798cc473"><td class="memItemLeft" align="right" valign="top"><a id="a803cc8ad3f065f17090aa193798cc473"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> = std::pair&lt; <a class="el" href="classElectrostaticDomainBc.html#a313bf6a5f5d16731a6b0349835ebb934">BcType</a>, <a class="el" href="classElectrostaticDomainBc.html#ac37dfb2ab9310ad034116bdbbe27f2da">BcFunction</a> &gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElectrostaticDomainBc.html#a803cc8ad3f065f17090aa193798cc473">Bc</a> = std::pair&lt; <a class="el" href="classElectrostaticDomainBc.html#a313bf6a5f5d16731a6b0349835ebb934">BcType</a>, <a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">BcFunction</a> &gt;</td></tr>
 <tr class="memdesc:a803cc8ad3f065f17090aa193798cc473"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for mapping a bctype and function. <br /></td></tr>
 <tr class="separator:a803cc8ad3f065f17090aa193798cc473"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -142,14 +142,14 @@ std::map&lt; <a class="el" href="classElectrostaticDomainBc.html#a969add9e24746f
 <div class="textblock"><p>Class which maps boundary condition types to a side and direction. </p>
 <p>This class is simply meant to hold functions that will be used as boundary conditions for use in various <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a> code. The user will construct this object, after which he can associate a polymorphic function with a domain side and a boundary condition type. Currently, only Dirichlet and Neumann are supported. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
-<a id="ac37dfb2ab9310ad034116bdbbe27f2da"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac37dfb2ab9310ad034116bdbbe27f2da">&#9670;&nbsp;</a></span>BcFunction</h2>
+<a id="ac70aabaa096724823b87222bf5bd8cb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac70aabaa096724823b87222bf5bd8cb6">&#9670;&nbsp;</a></span>BcFunction</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="classElectrostaticDomainBc.html#ac37dfb2ab9310ad034116bdbbe27f2da">ElectrostaticDomainBc::BcFunction</a> =  std::function&lt;Real(const RealVect a_position, const Real a_time) &gt;</td>
+          <td class="memname">using <a class="el" href="classElectrostaticDomainBc.html#ac70aabaa096724823b87222bf5bd8cb6">ElectrostaticDomainBc::BcFunction</a> =  std::function&lt;Real(const RealVect a_position, const Real a_time)&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">

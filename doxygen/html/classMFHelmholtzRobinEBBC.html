@@ -122,9 +122,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a42719f825d5ee2237466c417f94118bb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBC.html#a42719f825d5ee2237466c417f94118bb">setCoefficients</a> (const Real a_A, const Real a_B, const Real a_C)</td></tr>
 <tr class="memdesc:a42719f825d5ee2237466c417f94118bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set constant coefficients.  <a href="classMFHelmholtzRobinEBBC.html#a42719f825d5ee2237466c417f94118bb">More...</a><br /></td></tr>
 <tr class="separator:a42719f825d5ee2237466c417f94118bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4148878c6526b7568ba0a270f12fb593"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBC.html#a4148878c6526b7568ba0a270f12fb593">setCoefficients</a> (const std::function&lt; Real(const RealVect &amp;a_pos) &gt; &amp;a_A, const std::function&lt; Real(const RealVect &amp;a_pos) &gt; &amp;a_B, const std::function&lt; Real(const RealVect &amp;a_pos) &gt; &amp;a_C)</td></tr>
-<tr class="memdesc:a4148878c6526b7568ba0a270f12fb593"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set variable coefficients.  <a href="classMFHelmholtzRobinEBBC.html#a4148878c6526b7568ba0a270f12fb593">More...</a><br /></td></tr>
-<tr class="separator:a4148878c6526b7568ba0a270f12fb593"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac20ad5cc10539f121a4b458e45c37915"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBC.html#ac20ad5cc10539f121a4b458e45c37915">setCoefficients</a> (const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_A, const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_B, const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_C)</td></tr>
+<tr class="memdesc:ac20ad5cc10539f121a4b458e45c37915"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set variable coefficients.  <a href="classMFHelmholtzRobinEBBC.html#ac20ad5cc10539f121a4b458e45c37915">More...</a><br /></td></tr>
+<tr class="separator:ac20ad5cc10539f121a4b458e45c37915"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classMFHelmholtzEBBC"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classMFHelmholtzEBBC')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classMFHelmholtzEBBC.html">MFHelmholtzEBBC</a></td></tr>
 <tr class="memitem:af15c1cc5e32ebec39aac32ed717260f1 inherit pub_methods_classMFHelmholtzEBBC"><td class="memItemLeft" align="right" valign="top"><a id="af15c1cc5e32ebec39aac32ed717260f1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzEBBC.html#af15c1cc5e32ebec39aac32ed717260f1">MFHelmholtzEBBC</a> ()=delete</td></tr>
@@ -162,9 +162,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a4144a128cc67fb1088371a129209c117">operator=</a> (const <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a4144a128cc67fb1088371a129209c117 inherit pub_methods_classEBHelmholtzEBBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed - don't see why you would need it. <br /></td></tr>
 <tr class="separator:a4144a128cc67fb1088371a129209c117 inherit pub_methods_classEBHelmholtzEBBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4d1cd6d523b619565d9379257c50ddb inherit pub_methods_classEBHelmholtzEBBC"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#af4d1cd6d523b619565d9379257c50ddb">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;a_Bcoef, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int a_ghostCF)</td></tr>
-<tr class="memdesc:af4d1cd6d523b619565d9379257c50ddb inherit pub_methods_classEBHelmholtzEBBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function that is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>.  <a href="classEBHelmholtzEBBC.html#af4d1cd6d523b619565d9379257c50ddb">More...</a><br /></td></tr>
-<tr class="separator:af4d1cd6d523b619565d9379257c50ddb inherit pub_methods_classEBHelmholtzEBBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82c0a8e4d5b442f9730113a35dda8b13 inherit pub_methods_classEBHelmholtzEBBC"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a82c0a8e4d5b442f9730113a35dda8b13">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt;&gt;&gt; &amp;a_Bcoef, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int a_ghostCF)</td></tr>
+<tr class="memdesc:a82c0a8e4d5b442f9730113a35dda8b13 inherit pub_methods_classEBHelmholtzEBBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function that is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>.  <a href="classEBHelmholtzEBBC.html#a82c0a8e4d5b442f9730113a35dda8b13">More...</a><br /></td></tr>
+<tr class="separator:a82c0a8e4d5b442f9730113a35dda8b13 inherit pub_methods_classEBHelmholtzEBBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa596c345d2d9135830970ea22d54c487 inherit pub_methods_classEBHelmholtzEBBC"><td class="memItemLeft" align="right" valign="top">const LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#aa596c345d2d9135830970ea22d54c487">getKappaDivFStencils</a> () const</td></tr>
 <tr class="memdesc:aa596c345d2d9135830970ea22d54c487 inherit pub_methods_classEBHelmholtzEBBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the stencil for computing the finite-volume approximation to kappa*Div(F).  <a href="classEBHelmholtzEBBC.html#aa596c345d2d9135830970ea22d54c487">More...</a><br /></td></tr>
 <tr class="separator:aa596c345d2d9135830970ea22d54c487 inherit pub_methods_classEBHelmholtzEBBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -489,8 +489,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a4148878c6526b7568ba0a270f12fb593"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4148878c6526b7568ba0a270f12fb593">&#9670;&nbsp;</a></span>setCoefficients() <span class="overload">[2/2]</span></h2>
+<a id="ac20ad5cc10539f121a4b458e45c37915"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac20ad5cc10539f121a4b458e45c37915">&#9670;&nbsp;</a></span>setCoefficients() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -498,19 +498,19 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="memname">void MFHelmholtzRobinEBBC::setCoefficients </td>
           <td>(</td>
-          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;a_pos) &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_A</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;a_pos) &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_B</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;a_pos) &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_C</em>&#160;</td>
         </tr>
         <tr>

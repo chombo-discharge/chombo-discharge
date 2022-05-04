@@ -126,9 +126,9 @@ const Vector&lt; RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &gt; &amp;&#160;</t
 <tr class="memitem:aee9bfe083aedcaf965d3f5af08858c65"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#aee9bfe083aedcaf965d3f5af08858c65">copy</a> (const Interval a_srcInterval, const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_other, const Interval a_dstInterval)</td></tr>
 <tr class="memdesc:aee9bfe083aedcaf965d3f5af08858c65"><td class="mdescLeft">&#160;</td><td class="mdescRight">General copying of another object. This does a local copy if the two realms are the same. Otherwise it does a communication copy. In Chombo-speak this is localCopyTo versus copyTo.  <a href="classEBAMRData.html#aee9bfe083aedcaf965d3f5af08858c65">More...</a><br /></td></tr>
 <tr class="separator:aee9bfe083aedcaf965d3f5af08858c65"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9824837eaefed877105ca358e4a5b580"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a9824837eaefed877105ca358e4a5b580">push_back</a> (RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp;a_levelData)</td></tr>
-<tr class="memdesc:a9824837eaefed877105ca358e4a5b580"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a LevelData&lt;T&gt; object to the back of the data vector.  <a href="classEBAMRData.html#a9824837eaefed877105ca358e4a5b580">More...</a><br /></td></tr>
-<tr class="separator:a9824837eaefed877105ca358e4a5b580"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16e998681490d9cfb37079e915942262"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#a16e998681490d9cfb37079e915942262">push_back</a> (RefCountedPtr&lt; LevelData&lt; T &gt;&gt; &amp;a_levelData)</td></tr>
+<tr class="memdesc:a16e998681490d9cfb37079e915942262"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a LevelData&lt;T&gt; object to the back of the data vector.  <a href="classEBAMRData.html#a16e998681490d9cfb37079e915942262">More...</a><br /></td></tr>
+<tr class="separator:a16e998681490d9cfb37079e915942262"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addf6043b930cf1890381782164d50882"><td class="memItemLeft" align="right" valign="top"><a id="addf6043b930cf1890381782164d50882"></a>
 const std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAMRData.html#addf6043b930cf1890381782164d50882">getRealm</a> () const</td></tr>
 <tr class="memdesc:addf6043b930cf1890381782164d50882"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the string identifier for whatever realm this data is supposed to be allocated over. <br /></td></tr>
@@ -282,8 +282,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a9824837eaefed877105ca358e4a5b580"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9824837eaefed877105ca358e4a5b580">&#9670;&nbsp;</a></span>push_back()</h2>
+<a id="a16e998681490d9cfb37079e915942262"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16e998681490d9cfb37079e915942262">&#9670;&nbsp;</a></span>push_back()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -293,7 +293,7 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt;::push_back </td>
           <td>(</td>
-          <td class="paramtype">RefCountedPtr&lt; LevelData&lt; T &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">RefCountedPtr&lt; LevelData&lt; T &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_levelData</em></td><td>)</td>
           <td></td>
         </tr>

@@ -90,40 +90,41 @@ $(function() {
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">// Our includes</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="classSphereSdf.html">   24</a></span>&#160;<span class="keyword">class </span><a class="code" href="classSphereSdf.html">SphereSdf</a> : <span class="keyword">public</span> BaseIF {</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
+<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="classSphereSdf.html">   24</a></span>&#160;<span class="keyword">class </span><a class="code" href="classSphereSdf.html">SphereSdf</a> : <span class="keyword">public</span> BaseIF</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;{</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  <a class="code" href="classSphereSdf.html#a8dd84297190599eb0ffb5b7f8fef029f">SphereSdf</a>(<span class="keyword">const</span> RealVect&amp; a_center, <span class="keyword">const</span> Real&amp; a_radius, <span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; a_fluidInside);</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  <a class="code" href="classSphereSdf.html#a8dd84297190599eb0ffb5b7f8fef029f">SphereSdf</a>(<span class="keyword">const</span> <a class="code" href="classSphereSdf.html">SphereSdf</a>&amp; a_inputIF);</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classSphereSdf.html#afab5862d53828146db42b2a63a2cef65">~SphereSdf</a>();</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  <span class="keyword">virtual</span> Real <a class="code" href="classSphereSdf.html#a355e4b5f1a761486ae3aed22d42e25c5">value</a>(<span class="keyword">const</span> RealVect&amp; a_point) <span class="keyword">const</span>; </div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <span class="keyword">virtual</span> BaseIF* <a class="code" href="classSphereSdf.html#a76f23c211c3454d966afb4b0d041c01a">newImplicitFunction</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  <span class="keyword">virtual</span> Real</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  <a class="code" href="classSphereSdf.html#a355e4b5f1a761486ae3aed22d42e25c5">value</a>(<span class="keyword">const</span> RealVect&amp; a_point) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keyword">virtual</span> BaseIF*</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  <a class="code" href="classSphereSdf.html#a76f23c211c3454d966afb4b0d041c01a">newImplicitFunction</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="classSphereSdf.html#a5e40232b472ca7034a20ac097c4be1c0">   62</a></span>&#160;  RealVect <a class="code" href="classSphereSdf.html#a5e40232b472ca7034a20ac097c4be1c0">m_center</a>;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="classSphereSdf.html#a9240fbf6e82d3523f391ef55e51efc4e">   67</a></span>&#160;  Real <a class="code" href="classSphereSdf.html#a9240fbf6e82d3523f391ef55e51efc4e">m_radius</a>;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  </div>
-<div class="line"><a name="l00072"></a><span class="lineno"><a class="line" href="classSphereSdf.html#a011eeb34e9adff7cfecb67b8fcec3ad2">   72</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classSphereSdf.html#a011eeb34e9adff7cfecb67b8fcec3ad2">m_fluidInside</a>;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;};</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00063"></a><span class="lineno"><a class="line" href="classSphereSdf.html#a5e40232b472ca7034a20ac097c4be1c0">   63</a></span>&#160;  RealVect <a class="code" href="classSphereSdf.html#a5e40232b472ca7034a20ac097c4be1c0">m_center</a>;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="classSphereSdf.html#a9240fbf6e82d3523f391ef55e51efc4e">   68</a></span>&#160;  Real <a class="code" href="classSphereSdf.html#a9240fbf6e82d3523f391ef55e51efc4e">m_radius</a>;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="classSphereSdf.html#a011eeb34e9adff7cfecb67b8fcec3ad2">   73</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classSphereSdf.html#a011eeb34e9adff7cfecb67b8fcec3ad2">m_fluidInside</a>;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;};</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassSphereSdf_html_afab5862d53828146db42b2a63a2cef65"><div class="ttname"><a href="classSphereSdf.html#afab5862d53828146db42b2a63a2cef65">SphereSdf::~SphereSdf</a></div><div class="ttdeci">virtual ~SphereSdf()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.cpp:28</div></div>
-<div class="ttc" id="aclassSphereSdf_html_a355e4b5f1a761486ae3aed22d42e25c5"><div class="ttname"><a href="classSphereSdf.html#a355e4b5f1a761486ae3aed22d42e25c5">SphereSdf::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_point) const</div><div class="ttdoc">Get distance to sphere.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.cpp:31</div></div>
-<div class="ttc" id="aclassSphereSdf_html_a76f23c211c3454d966afb4b0d041c01a"><div class="ttname"><a href="classSphereSdf.html#a76f23c211c3454d966afb4b0d041c01a">SphereSdf::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const</div><div class="ttdoc">IF factory method.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.cpp:44</div></div>
-<div class="ttc" id="aclassSphereSdf_html_a5e40232b472ca7034a20ac097c4be1c0"><div class="ttname"><a href="classSphereSdf.html#a5e40232b472ca7034a20ac097c4be1c0">SphereSdf::m_center</a></div><div class="ttdeci">RealVect m_center</div><div class="ttdoc">Sphere center.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.H:62</div></div>
-<div class="ttc" id="aclassSphereSdf_html_a011eeb34e9adff7cfecb67b8fcec3ad2"><div class="ttname"><a href="classSphereSdf.html#a011eeb34e9adff7cfecb67b8fcec3ad2">SphereSdf::m_fluidInside</a></div><div class="ttdeci">bool m_fluidInside</div><div class="ttdoc">Inside or outside domain.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.H:72</div></div>
+<div class="ttc" id="aclassSphereSdf_html_afab5862d53828146db42b2a63a2cef65"><div class="ttname"><a href="classSphereSdf.html#afab5862d53828146db42b2a63a2cef65">SphereSdf::~SphereSdf</a></div><div class="ttdeci">virtual ~SphereSdf()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.cpp:30</div></div>
+<div class="ttc" id="aclassSphereSdf_html_a355e4b5f1a761486ae3aed22d42e25c5"><div class="ttname"><a href="classSphereSdf.html#a355e4b5f1a761486ae3aed22d42e25c5">SphereSdf::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_point) const</div><div class="ttdoc">Get distance to sphere.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.cpp:33</div></div>
+<div class="ttc" id="aclassSphereSdf_html_a76f23c211c3454d966afb4b0d041c01a"><div class="ttname"><a href="classSphereSdf.html#a76f23c211c3454d966afb4b0d041c01a">SphereSdf::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const</div><div class="ttdoc">IF factory method.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.cpp:48</div></div>
+<div class="ttc" id="aclassSphereSdf_html_a5e40232b472ca7034a20ac097c4be1c0"><div class="ttname"><a href="classSphereSdf.html#a5e40232b472ca7034a20ac097c4be1c0">SphereSdf::m_center</a></div><div class="ttdeci">RealVect m_center</div><div class="ttdoc">Sphere center.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.H:63</div></div>
+<div class="ttc" id="aclassSphereSdf_html_a011eeb34e9adff7cfecb67b8fcec3ad2"><div class="ttname"><a href="classSphereSdf.html#a011eeb34e9adff7cfecb67b8fcec3ad2">SphereSdf::m_fluidInside</a></div><div class="ttdeci">bool m_fluidInside</div><div class="ttdoc">Inside or outside domain.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.H:73</div></div>
 <div class="ttc" id="aclassSphereSdf_html"><div class="ttname"><a href="classSphereSdf.html">SphereSdf</a></div><div class="ttdoc">Signed distance function for sphere.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.H:24</div></div>
 <div class="ttc" id="aclassSphereSdf_html_a8dd84297190599eb0ffb5b7f8fef029f"><div class="ttname"><a href="classSphereSdf.html#a8dd84297190599eb0ffb5b7f8fef029f">SphereSdf::SphereSdf</a></div><div class="ttdeci">SphereSdf(const RealVect &amp;a_center, const Real &amp;a_radius, const bool &amp;a_fluidInside)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.cpp:16</div></div>
-<div class="ttc" id="aclassSphereSdf_html_a9240fbf6e82d3523f391ef55e51efc4e"><div class="ttname"><a href="classSphereSdf.html#a9240fbf6e82d3523f391ef55e51efc4e">SphereSdf::m_radius</a></div><div class="ttdeci">Real m_radius</div><div class="ttdoc">Cylinder radius.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.H:67</div></div>
+<div class="ttc" id="aclassSphereSdf_html_a9240fbf6e82d3523f391ef55e51efc4e"><div class="ttname"><a href="classSphereSdf.html#a9240fbf6e82d3523f391ef55e51efc4e">SphereSdf::m_radius</a></div><div class="ttdeci">Real m_radius</div><div class="ttdoc">Cylinder radius.</div><div class="ttdef"><b>Definition:</b> CD_SphereSdf.H:68</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

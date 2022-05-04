@@ -91,43 +91,44 @@ $(function() {
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">// Our includes</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="classMushroomIF.html">   26</a></span>&#160;<span class="keyword">class </span><a class="code" href="classMushroomIF.html">MushroomIF</a> : <span class="keyword">public</span> BaseIF {</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">public</span>:  </div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
+<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="classMushroomIF.html">   26</a></span>&#160;<span class="keyword">class </span><a class="code" href="classMushroomIF.html">MushroomIF</a> : <span class="keyword">public</span> BaseIF</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;{</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  <a class="code" href="classMushroomIF.html#a0e517cf46c60c919066a9ac10b875de6">MushroomIF</a>(<span class="keyword">const</span> RealVect a_center,</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;         <span class="keyword">const</span> Real     a_R,</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;         <span class="keyword">const</span> Real     a_r,</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;         <span class="keyword">const</span> Real     a_L,</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;         <span class="keyword">const</span> Real     a_d,</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;         <span class="keyword">const</span> Real     a_curv,</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;         <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_fluidInside);</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;             <span class="keyword">const</span> Real     a_R,</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;             <span class="keyword">const</span> Real     a_r,</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;             <span class="keyword">const</span> Real     a_L,</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;             <span class="keyword">const</span> Real     a_d,</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;             <span class="keyword">const</span> Real     a_curv,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;             <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_fluidInside);</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  <a class="code" href="classMushroomIF.html#a0e517cf46c60c919066a9ac10b875de6">MushroomIF</a>(<span class="keyword">const</span> <a class="code" href="classMushroomIF.html">MushroomIF</a>&amp; a_inputIF);</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classMushroomIF.html#a43a0e5ac4f1ecea36b65d6246dcb5a44">~MushroomIF</a>();</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  <span class="keyword">virtual</span> Real <a class="code" href="classMushroomIF.html#ad74cfa0251fec8888425b9a0f9ba59b2">value</a>(<span class="keyword">const</span> RealVect&amp; a_pos) <span class="keyword">const override</span>;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <span class="keyword">virtual</span> BaseIF* <a class="code" href="classMushroomIF.html#a24d4f256c44716cf4ddd3f1a725d3c93">newImplicitFunction</a>() <span class="keyword">const override</span>;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  <span class="keyword">virtual</span> Real</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  <a class="code" href="classMushroomIF.html#ad74cfa0251fec8888425b9a0f9ba59b2">value</a>(<span class="keyword">const</span> RealVect&amp; a_pos) <span class="keyword">const override</span>;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  <span class="keyword">virtual</span> BaseIF*</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  <a class="code" href="classMushroomIF.html#a24d4f256c44716cf4ddd3f1a725d3c93">newImplicitFunction</a>() <span class="keyword">const override</span>;</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno"><a class="line" href="classMushroomIF.html#a596646674cd66b2c3cb460075a8d85ba">   75</a></span>&#160;  RefCountedPtr&lt;BaseIF&gt; <a class="code" href="classMushroomIF.html#a596646674cd66b2c3cb460075a8d85ba">m_baseIF</a>;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00080"></a><span class="lineno"><a class="line" href="classMushroomIF.html#ae61958b01f6162f9b6da762547540bbc">   80</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classMushroomIF.html#ae61958b01f6162f9b6da762547540bbc">m_fluidInside</a>;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;};</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00076"></a><span class="lineno"><a class="line" href="classMushroomIF.html#a596646674cd66b2c3cb460075a8d85ba">   76</a></span>&#160;  RefCountedPtr&lt;BaseIF&gt; <a class="code" href="classMushroomIF.html#a596646674cd66b2c3cb460075a8d85ba">m_baseIF</a>;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00081"></a><span class="lineno"><a class="line" href="classMushroomIF.html#ae61958b01f6162f9b6da762547540bbc">   81</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classMushroomIF.html#ae61958b01f6162f9b6da762547540bbc">m_fluidInside</a>;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;};</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassMushroomIF_html"><div class="ttname"><a href="classMushroomIF.html">MushroomIF</a></div><div class="ttdoc">&quot;Mushroom&quot; implicit function. Consists of a cylinder with a circular plate on top.</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.H:26</div></div>
-<div class="ttc" id="aclassMushroomIF_html_a24d4f256c44716cf4ddd3f1a725d3c93"><div class="ttname"><a href="classMushroomIF.html#a24d4f256c44716cf4ddd3f1a725d3c93">MushroomIF::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const override</div><div class="ttdoc">Factory function.</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.cpp:64</div></div>
-<div class="ttc" id="aclassMushroomIF_html_a43a0e5ac4f1ecea36b65d6246dcb5a44"><div class="ttname"><a href="classMushroomIF.html#a43a0e5ac4f1ecea36b65d6246dcb5a44">MushroomIF::~MushroomIF</a></div><div class="ttdeci">virtual ~MushroomIF()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.cpp:50</div></div>
-<div class="ttc" id="aclassMushroomIF_html_a596646674cd66b2c3cb460075a8d85ba"><div class="ttname"><a href="classMushroomIF.html#a596646674cd66b2c3cb460075a8d85ba">MushroomIF::m_baseIF</a></div><div class="ttdeci">RefCountedPtr&lt; BaseIF &gt; m_baseIF</div><div class="ttdoc">Implicit function – this is a smooth union between the foot and the circular plate.</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.H:75</div></div>
-<div class="ttc" id="aclassMushroomIF_html_ae61958b01f6162f9b6da762547540bbc"><div class="ttname"><a href="classMushroomIF.html#ae61958b01f6162f9b6da762547540bbc">MushroomIF::m_fluidInside</a></div><div class="ttdeci">bool m_fluidInside</div><div class="ttdoc">Fluid on the inside or not.</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.H:80</div></div>
+<div class="ttc" id="aclassMushroomIF_html_a24d4f256c44716cf4ddd3f1a725d3c93"><div class="ttname"><a href="classMushroomIF.html#a24d4f256c44716cf4ddd3f1a725d3c93">MushroomIF::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const override</div><div class="ttdoc">Factory function.</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.cpp:67</div></div>
+<div class="ttc" id="aclassMushroomIF_html_a43a0e5ac4f1ecea36b65d6246dcb5a44"><div class="ttname"><a href="classMushroomIF.html#a43a0e5ac4f1ecea36b65d6246dcb5a44">MushroomIF::~MushroomIF</a></div><div class="ttdeci">virtual ~MushroomIF()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.cpp:52</div></div>
+<div class="ttc" id="aclassMushroomIF_html_a596646674cd66b2c3cb460075a8d85ba"><div class="ttname"><a href="classMushroomIF.html#a596646674cd66b2c3cb460075a8d85ba">MushroomIF::m_baseIF</a></div><div class="ttdeci">RefCountedPtr&lt; BaseIF &gt; m_baseIF</div><div class="ttdoc">Implicit function – this is a smooth union between the foot and the circular plate.</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.H:76</div></div>
+<div class="ttc" id="aclassMushroomIF_html_ae61958b01f6162f9b6da762547540bbc"><div class="ttname"><a href="classMushroomIF.html#ae61958b01f6162f9b6da762547540bbc">MushroomIF::m_fluidInside</a></div><div class="ttdeci">bool m_fluidInside</div><div class="ttdoc">Fluid on the inside or not.</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.H:81</div></div>
 <div class="ttc" id="aclassMushroomIF_html_a0e517cf46c60c919066a9ac10b875de6"><div class="ttname"><a href="classMushroomIF.html#a0e517cf46c60c919066a9ac10b875de6">MushroomIF::MushroomIF</a></div><div class="ttdeci">MushroomIF(const RealVect a_center, const Real a_R, const Real a_r, const Real a_L, const Real a_d, const Real a_curv, const bool a_fluidInside)</div><div class="ttdoc">Full constructor.</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.cpp:23</div></div>
-<div class="ttc" id="aclassMushroomIF_html_ad74cfa0251fec8888425b9a0f9ba59b2"><div class="ttname"><a href="classMushroomIF.html#ad74cfa0251fec8888425b9a0f9ba59b2">MushroomIF::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_pos) const override</div><div class="ttdoc">Value function.</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.cpp:54</div></div>
+<div class="ttc" id="aclassMushroomIF_html_ad74cfa0251fec8888425b9a0f9ba59b2"><div class="ttname"><a href="classMushroomIF.html#ad74cfa0251fec8888425b9a0f9ba59b2">MushroomIF::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_pos) const override</div><div class="ttdoc">Value function.</div><div class="ttdef"><b>Definition:</b> CD_MushroomIF.cpp:55</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

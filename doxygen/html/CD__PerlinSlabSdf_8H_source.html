@@ -90,47 +90,48 @@ $(function() {
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">// Our includes</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="classPerlinSlabSdf.html">   24</a></span>&#160;<span class="keyword">class </span><a class="code" href="classPerlinSlabSdf.html">PerlinSlabSdf</a>: <span class="keyword">public</span> BaseIF {</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  <a class="code" href="classPerlinSlabSdf.html#a2cdff173fda876e3c194b7f2472ea9a9">PerlinSlabSdf</a>() = <span class="keyword">delete</span>;  </div>
+<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="classPerlinSlabSdf.html">   24</a></span>&#160;<span class="keyword">class </span><a class="code" href="classPerlinSlabSdf.html">PerlinSlabSdf</a> : <span class="keyword">public</span> BaseIF</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;{</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  <a class="code" href="classPerlinSlabSdf.html#a2cdff173fda876e3c194b7f2472ea9a9">PerlinSlabSdf</a>() = <span class="keyword">delete</span>;</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  <a class="code" href="classPerlinSlabSdf.html#a2cdff173fda876e3c194b7f2472ea9a9">PerlinSlabSdf</a>(<span class="keyword">const</span> RealVect a_ccPoint,</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="keyword">const</span> RealVect a_normal,</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="keyword">const</span> RealVect a_xyz,</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <span class="keyword">const</span> RealVect a_noiseFreq,</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">int</span>      a_octaves,</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="keyword">const</span> Real     a_noiseAmp,</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keyword">const</span> Real     a_persistence,</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keyword">const</span> Real     a_cornerCurv,</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_reseed,</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_fluidInside);</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                <span class="keyword">const</span> RealVect a_normal,</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;                <span class="keyword">const</span> RealVect a_xyz,</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;                <span class="keyword">const</span> RealVect a_noiseFreq,</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">int</span>      a_octaves,</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                <span class="keyword">const</span> Real     a_noiseAmp,</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                <span class="keyword">const</span> Real     a_persistence,</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                <span class="keyword">const</span> Real     a_cornerCurv,</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_reseed,</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_fluidInside);</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <a class="code" href="classPerlinSlabSdf.html#a2cdff173fda876e3c194b7f2472ea9a9">PerlinSlabSdf</a>(<span class="keyword">const</span> <a class="code" href="classPerlinSlabSdf.html">PerlinSlabSdf</a>&amp; a_inputIF);</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classPerlinSlabSdf.html#aa814bf5cc83126d8047762dbb6b3861d">~PerlinSlabSdf</a>();</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="keyword">virtual</span> Real <a class="code" href="classPerlinSlabSdf.html#ae52a8e57b4466526165a3d85412d58a1">value</a>(<span class="keyword">const</span> RealVect&amp; a_pos) <span class="keyword">const override</span>;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  <span class="keyword">virtual</span> BaseIF* <a class="code" href="classPerlinSlabSdf.html#a3c1964d3864cc7fb7d1e00ed9836de38">newImplicitFunction</a>() <span class="keyword">const override</span>;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  </div>
-<div class="line"><a name="l00084"></a><span class="lineno"><a class="line" href="classPerlinSlabSdf.html#ada0d160f671d4d5bf7ddbbf8961318b4">   84</a></span>&#160;  RefCountedPtr&lt;BaseIF&gt; <a class="code" href="classPerlinSlabSdf.html#ada0d160f671d4d5bf7ddbbf8961318b4">m_baseif</a>;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
-<div class="line"><a name="l00089"></a><span class="lineno"><a class="line" href="classPerlinSlabSdf.html#a7bda38a980eabbb99ef663812d2efe5f">   89</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classPerlinSlabSdf.html#a7bda38a980eabbb99ef663812d2efe5f">m_fluidInside</a>;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;};</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;  <span class="keyword">virtual</span> Real</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <a class="code" href="classPerlinSlabSdf.html#ae52a8e57b4466526165a3d85412d58a1">value</a>(<span class="keyword">const</span> RealVect&amp; a_pos) <span class="keyword">const override</span>;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="keyword">virtual</span> BaseIF*</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <a class="code" href="classPerlinSlabSdf.html#a3c1964d3864cc7fb7d1e00ed9836de38">newImplicitFunction</a>() <span class="keyword">const override</span>;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="classPerlinSlabSdf.html#ada0d160f671d4d5bf7ddbbf8961318b4">   85</a></span>&#160;  RefCountedPtr&lt;BaseIF&gt; <a class="code" href="classPerlinSlabSdf.html#ada0d160f671d4d5bf7ddbbf8961318b4">m_baseif</a>;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00090"></a><span class="lineno"><a class="line" href="classPerlinSlabSdf.html#a7bda38a980eabbb99ef663812d2efe5f">   90</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classPerlinSlabSdf.html#a7bda38a980eabbb99ef663812d2efe5f">m_fluidInside</a>;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;};</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassPerlinSlabSdf_html_a3c1964d3864cc7fb7d1e00ed9836de38"><div class="ttname"><a href="classPerlinSlabSdf.html#a3c1964d3864cc7fb7d1e00ed9836de38">PerlinSlabSdf::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const override</div><div class="ttdoc">Factory function.</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.cpp:92</div></div>
+<div class="ttc" id="aclassPerlinSlabSdf_html_a3c1964d3864cc7fb7d1e00ed9836de38"><div class="ttname"><a href="classPerlinSlabSdf.html#a3c1964d3864cc7fb7d1e00ed9836de38">PerlinSlabSdf::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const override</div><div class="ttdoc">Factory function.</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.cpp:97</div></div>
 <div class="ttc" id="aclassPerlinSlabSdf_html"><div class="ttname"><a href="classPerlinSlabSdf.html">PerlinSlabSdf</a></div><div class="ttdoc">Implicit function class describing a slab (box) with surface noise on the top.</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.H:24</div></div>
-<div class="ttc" id="aclassPerlinSlabSdf_html_aa814bf5cc83126d8047762dbb6b3861d"><div class="ttname"><a href="classPerlinSlabSdf.html#aa814bf5cc83126d8047762dbb6b3861d">PerlinSlabSdf::~PerlinSlabSdf</a></div><div class="ttdeci">virtual ~PerlinSlabSdf()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.cpp:78</div></div>
-<div class="ttc" id="aclassPerlinSlabSdf_html_a7bda38a980eabbb99ef663812d2efe5f"><div class="ttname"><a href="classPerlinSlabSdf.html#a7bda38a980eabbb99ef663812d2efe5f">PerlinSlabSdf::m_fluidInside</a></div><div class="ttdeci">bool m_fluidInside</div><div class="ttdoc">Fluid on inside or not.</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.H:89</div></div>
-<div class="ttc" id="aclassPerlinSlabSdf_html_ada0d160f671d4d5bf7ddbbf8961318b4"><div class="ttname"><a href="classPerlinSlabSdf.html#ada0d160f671d4d5bf7ddbbf8961318b4">PerlinSlabSdf::m_baseif</a></div><div class="ttdeci">RefCountedPtr&lt; BaseIF &gt; m_baseif</div><div class="ttdoc">Implicit function. This is a union between cutting planes and a perlin plane.</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.H:84</div></div>
-<div class="ttc" id="aclassPerlinSlabSdf_html_ae52a8e57b4466526165a3d85412d58a1"><div class="ttname"><a href="classPerlinSlabSdf.html#ae52a8e57b4466526165a3d85412d58a1">PerlinSlabSdf::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_pos) const override</div><div class="ttdoc">Value function. Returns distance to object.</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.cpp:82</div></div>
+<div class="ttc" id="aclassPerlinSlabSdf_html_aa814bf5cc83126d8047762dbb6b3861d"><div class="ttname"><a href="classPerlinSlabSdf.html#aa814bf5cc83126d8047762dbb6b3861d">PerlinSlabSdf::~PerlinSlabSdf</a></div><div class="ttdeci">virtual ~PerlinSlabSdf()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.cpp:82</div></div>
+<div class="ttc" id="aclassPerlinSlabSdf_html_a7bda38a980eabbb99ef663812d2efe5f"><div class="ttname"><a href="classPerlinSlabSdf.html#a7bda38a980eabbb99ef663812d2efe5f">PerlinSlabSdf::m_fluidInside</a></div><div class="ttdeci">bool m_fluidInside</div><div class="ttdoc">Fluid on inside or not.</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.H:90</div></div>
+<div class="ttc" id="aclassPerlinSlabSdf_html_ada0d160f671d4d5bf7ddbbf8961318b4"><div class="ttname"><a href="classPerlinSlabSdf.html#ada0d160f671d4d5bf7ddbbf8961318b4">PerlinSlabSdf::m_baseif</a></div><div class="ttdeci">RefCountedPtr&lt; BaseIF &gt; m_baseif</div><div class="ttdoc">Implicit function. This is a union between cutting planes and a perlin plane.</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.H:85</div></div>
+<div class="ttc" id="aclassPerlinSlabSdf_html_ae52a8e57b4466526165a3d85412d58a1"><div class="ttname"><a href="classPerlinSlabSdf.html#ae52a8e57b4466526165a3d85412d58a1">PerlinSlabSdf::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_pos) const override</div><div class="ttdoc">Value function. Returns distance to object.</div><div class="ttdef"><b>Definition:</b> CD_PerlinSlabSdf.cpp:85</div></div>
 <div class="ttc" id="aclassPerlinSlabSdf_html_a2cdff173fda876e3c194b7f2472ea9a9"><div class="ttname"><a href="classPerlinSlabSdf.html#a2cdff173fda876e3c194b7f2472ea9a9">PerlinSlabSdf::PerlinSlabSdf</a></div><div class="ttdeci">PerlinSlabSdf()=delete</div><div class="ttdoc">No weak constructor allowed, use the full constructor.</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

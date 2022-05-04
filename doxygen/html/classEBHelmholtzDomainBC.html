@@ -124,9 +124,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a75031e80f302ee20380d481f94f0ef43">operator=</a> (const <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &amp;&amp;a_other)=delete</td></tr>
 <tr class="memdesc:a75031e80f302ee20380d481f94f0ef43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed - don't see why you would need it. <br /></td></tr>
 <tr class="separator:a75031e80f302ee20380d481f94f0ef43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c9619d825162ee6c7bed5237c2f6ea8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a3c9619d825162ee6c7bed5237c2f6ea8">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;a_Bcoef, const RealVect &amp;a_probLo, const Real a_dx)</td></tr>
-<tr class="memdesc:a3c9619d825162ee6c7bed5237c2f6ea8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <a href="classEBHelmholtzDomainBC.html#a3c9619d825162ee6c7bed5237c2f6ea8">More...</a><br /></td></tr>
-<tr class="separator:a3c9619d825162ee6c7bed5237c2f6ea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1677641644f6dc7d5df6b011b9d8034"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#af1677641644f6dc7d5df6b011b9d8034">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt;&gt; &amp;a_Bcoef, const RealVect &amp;a_probLo, const Real a_dx)</td></tr>
+<tr class="memdesc:af1677641644f6dc7d5df6b011b9d8034"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <a href="classEBHelmholtzDomainBC.html#af1677641644f6dc7d5df6b011b9d8034">More...</a><br /></td></tr>
+<tr class="separator:af1677641644f6dc7d5df6b011b9d8034"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54631221c19c6b5d6ac7afcc17e703fe"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a54631221c19c6b5d6ac7afcc17e703fe">getFaceFlux</a> (BaseFab&lt; Real &gt; &amp;a_faceFlux, const BaseFab&lt; Real &gt; &amp;a_phi, const int &amp;a_dir, const Side::LoHiSide &amp;a_side, const DataIndex &amp;a_dit, const bool a_useHomogeneous) const =0</td></tr>
 <tr class="memdesc:a54631221c19c6b5d6ac7afcc17e703fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get face flux. This is for regular cells.  <a href="classEBHelmholtzDomainBC.html#a54631221c19c6b5d6ac7afcc17e703fe">More...</a><br /></td></tr>
 <tr class="separator:a54631221c19c6b5d6ac7afcc17e703fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,8 +180,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class for passing domain boundary conditions into <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a3c9619d825162ee6c7bed5237c2f6ea8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3c9619d825162ee6c7bed5237c2f6ea8">&#9670;&nbsp;</a></span>define()</h2>
+<a id="af1677641644f6dc7d5df6b011b9d8034"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1677641644f6dc7d5df6b011b9d8034">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -204,7 +204,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;&#160;</td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt;&gt; &amp;&#160;</td>
           <td class="paramname"><em>a_Bcoef</em>, </td>
         </tr>
         <tr>
@@ -244,7 +244,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This sets the internals for the BC object. This is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a> when it defines stencils. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classEBHelmholtzEddingtonSP1DomainBC.html#aa1bb12ae19c08d496eaf2f81bc9827f4">EBHelmholtzEddingtonSP1DomainBC</a>, and <a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#afa0e6a205cda5f789ca068bb02082714">EBHelmholtzElectrostaticDomainBC</a>.</p>
+<p>Reimplemented in <a class="el" href="classEBHelmholtzEddingtonSP1DomainBC.html#ab233eb2e4ddbf3fa40ab8336cc3e4d92">EBHelmholtzEddingtonSP1DomainBC</a>, and <a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#a85bda6c40302d955b92c271ceee841f1">EBHelmholtzElectrostaticDomainBC</a>.</p>
 
 </div>
 </div>

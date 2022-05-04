@@ -89,60 +89,67 @@ $(function() {
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="classSignedDistanceDCEL.html#a2be9aa7f725dcda72ff295fb125eb5d1">   20</a></span>&#160;<a class="code" href="classSignedDistanceDCEL.html#adcc3d9fd7e195438a0d9e1ca4a5448d2">SignedDistanceDCEL&lt;T&gt;::SignedDistanceDCEL</a>(<span class="keyword">const</span> std::shared_ptr&lt;Mesh&gt;&amp; a_mesh, <span class="keyword">const</span> <span class="keywordtype">bool</span> a_flipInside, <span class="keyword">const</span> Real a_zCoord){</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;  m_mesh       = a_mesh;</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  m_zCoord     = a_zCoord;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  m_flipInside = a_flipInside;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;}</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="classSignedDistanceDCEL.html#ad455097887192ba467809a55e635a0ed">   27</a></span>&#160;<a class="code" href="classSignedDistanceDCEL.html#adcc3d9fd7e195438a0d9e1ca4a5448d2">SignedDistanceDCEL&lt;T&gt;::SignedDistanceDCEL</a>(<span class="keyword">const</span> <a class="code" href="classSignedDistanceDCEL.html">SignedDistanceDCEL</a>&amp; a_object){</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;  m_mesh       = a_object.<a class="code" href="classSignedDistanceDCEL.html#a80f9645da5f0d8316e6ef5fd06111293">m_mesh</a>;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  m_zCoord     = a_object.<a class="code" href="classSignedDistanceDCEL.html#a2b908104569d5498f8671e86353ae6e7">m_zCoord</a>;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  m_flipInside = a_object.<a class="code" href="classSignedDistanceDCEL.html#ad8884bbf19339d85d1128f3a3126bd92">m_flipInside</a>;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;}</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="classSignedDistanceDCEL.html#a2de3e060f657631b766de92c8822e50f">   34</a></span>&#160;<a class="code" href="classSignedDistanceDCEL.html#a2de3e060f657631b766de92c8822e50f">SignedDistanceDCEL&lt;T&gt;::~SignedDistanceDCEL</a>(){</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;}</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="classSignedDistanceDCEL.html#a620730f9ee9951b521d6b1e46b226327">   39</a></span>&#160;Real <a class="code" href="classSignedDistanceDCEL.html#a620730f9ee9951b521d6b1e46b226327">SignedDistanceDCEL&lt;T&gt;::value</a>(<span class="keyword">const</span> RealVect&amp; a_point)<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="classSignedDistanceDCEL.html#a2be9aa7f725dcda72ff295fb125eb5d1">   20</a></span>&#160;<a class="code" href="classSignedDistanceDCEL.html#adcc3d9fd7e195438a0d9e1ca4a5448d2">SignedDistanceDCEL&lt;T&gt;::SignedDistanceDCEL</a>(<span class="keyword">const</span> std::shared_ptr&lt;Mesh&gt;&amp; a_mesh,</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;                                          <span class="keyword">const</span> <span class="keywordtype">bool</span>                   a_flipInside,</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;                                          <span class="keyword">const</span> Real                   a_zCoord)</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;{</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  m_mesh       = a_mesh;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;  m_zCoord     = a_zCoord;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;  m_flipInside = a_flipInside;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;}</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00030"></a><span class="lineno"><a class="line" href="classSignedDistanceDCEL.html#ad455097887192ba467809a55e635a0ed">   30</a></span>&#160;<a class="code" href="classSignedDistanceDCEL.html#adcc3d9fd7e195438a0d9e1ca4a5448d2">SignedDistanceDCEL&lt;T&gt;::SignedDistanceDCEL</a>(<span class="keyword">const</span> <a class="code" href="classSignedDistanceDCEL.html">SignedDistanceDCEL</a>&amp; a_object)</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;{</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  m_mesh       = a_object.<a class="code" href="classSignedDistanceDCEL.html#a80f9645da5f0d8316e6ef5fd06111293">m_mesh</a>;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  m_zCoord     = a_object.<a class="code" href="classSignedDistanceDCEL.html#a2b908104569d5498f8671e86353ae6e7">m_zCoord</a>;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  m_flipInside = a_object.<a class="code" href="classSignedDistanceDCEL.html#ad8884bbf19339d85d1128f3a3126bd92">m_flipInside</a>;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;}</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classSignedDistanceDCEL.html#a2de3e060f657631b766de92c8822e50f">   38</a></span>&#160;<a class="code" href="classSignedDistanceDCEL.html#a2de3e060f657631b766de92c8822e50f">SignedDistanceDCEL&lt;T&gt;::~SignedDistanceDCEL</a>()</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{}</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="preprocessor">#if CH_SPACEDIM==2</span></div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  EBGeometry::Vec3T&lt;T&gt; p(a_point[0], a_point[1], m_zCoord);</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="preprocessor">#else</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  EBGeometry::Vec3T&lt;T&gt; p(a_point[0], a_point[1], a_point[2]);</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  T retval = m_mesh-&gt;signedDistance(p); <span class="comment">// Note that Dcel::mesh can return either positive or negative for outside, depending on the orientation of the input normals. </span></div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  </div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;  <span class="keywordflow">if</span>(m_flipInside){</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    retval = -retval;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  }</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <span class="keywordflow">return</span> Real(retval);</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;}</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="classSignedDistanceDCEL.html#afa1495f09f72d0eb1fc3527e5b79db67">   57</a></span>&#160;BaseIF* <a class="code" href="classSignedDistanceDCEL.html#afa1495f09f72d0eb1fc3527e5b79db67">SignedDistanceDCEL&lt;T&gt;::newImplicitFunction</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>BaseIF*<span class="keyword">&gt;</span> (<span class="keyword">new</span> <a class="code" href="classSignedDistanceDCEL.html">SignedDistanceDCEL</a>(*<span class="keyword">this</span>));</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;}</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;Real</div>
+<div class="line"><a name="l00043"></a><span class="lineno"><a class="line" href="classSignedDistanceDCEL.html#a620730f9ee9951b521d6b1e46b226327">   43</a></span>&#160;<a class="code" href="classSignedDistanceDCEL.html#a620730f9ee9951b521d6b1e46b226327">SignedDistanceDCEL&lt;T&gt;::value</a>(<span class="keyword">const</span> RealVect&amp; a_point)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="preprocessor">#if CH_SPACEDIM == 2</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  EBGeometry::Vec3T&lt;T&gt; p(a_point[0], a_point[1], m_zCoord);</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;  EBGeometry::Vec3T&lt;T&gt; p(a_point[0], a_point[1], a_point[2]);</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  T retval = m_mesh-&gt;signedDistance(</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    p); <span class="comment">// Note that Dcel::mesh can return either positive or negative for outside, depending on the orientation of the input normals.</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <span class="keywordflow">if</span> (m_flipInside) {</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    retval = -retval;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;  }</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <span class="keywordflow">return</span> Real(retval);</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;}</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;BaseIF*</div>
+<div class="line"><a name="l00064"></a><span class="lineno"><a class="line" href="classSignedDistanceDCEL.html#afa1495f09f72d0eb1fc3527e5b79db67">   64</a></span>&#160;<a class="code" href="classSignedDistanceDCEL.html#afa1495f09f72d0eb1fc3527e5b79db67">SignedDistanceDCEL&lt;T&gt;::newImplicitFunction</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>BaseIF*<span class="keyword">&gt;</span>(<span class="keyword">new</span> <a class="code" href="classSignedDistanceDCEL.html">SignedDistanceDCEL</a>(*<span class="keyword">this</span>));</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;}</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassSignedDistanceDCEL_html_a620730f9ee9951b521d6b1e46b226327"><div class="ttname"><a href="classSignedDistanceDCEL.html#a620730f9ee9951b521d6b1e46b226327">SignedDistanceDCEL::value</a></div><div class="ttdeci">Real value(const RealVect &amp;a_point) const override</div><div class="ttdoc">Value function.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCELImplem.H:39</div></div>
+<div class="ttc" id="aclassSignedDistanceDCEL_html_a620730f9ee9951b521d6b1e46b226327"><div class="ttname"><a href="classSignedDistanceDCEL.html#a620730f9ee9951b521d6b1e46b226327">SignedDistanceDCEL::value</a></div><div class="ttdeci">Real value(const RealVect &amp;a_point) const override</div><div class="ttdoc">Value function.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCELImplem.H:43</div></div>
 <div class="ttc" id="aclassSignedDistanceDCEL_html_adcc3d9fd7e195438a0d9e1ca4a5448d2"><div class="ttname"><a href="classSignedDistanceDCEL.html#adcc3d9fd7e195438a0d9e1ca4a5448d2">SignedDistanceDCEL::SignedDistanceDCEL</a></div><div class="ttdeci">SignedDistanceDCEL()=delete</div><div class="ttdoc">Disallowed, use the full constructor.</div></div>
-<div class="ttc" id="aclassSignedDistanceDCEL_html_a80f9645da5f0d8316e6ef5fd06111293"><div class="ttname"><a href="classSignedDistanceDCEL.html#a80f9645da5f0d8316e6ef5fd06111293">SignedDistanceDCEL::m_mesh</a></div><div class="ttdeci">std::shared_ptr&lt; Mesh &gt; m_mesh</div><div class="ttdoc">DCEL mesh.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCEL.H:81</div></div>
+<div class="ttc" id="aclassSignedDistanceDCEL_html_a80f9645da5f0d8316e6ef5fd06111293"><div class="ttname"><a href="classSignedDistanceDCEL.html#a80f9645da5f0d8316e6ef5fd06111293">SignedDistanceDCEL::m_mesh</a></div><div class="ttdeci">std::shared_ptr&lt; Mesh &gt; m_mesh</div><div class="ttdoc">DCEL mesh.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCEL.H:82</div></div>
 <div class="ttc" id="aclassSignedDistanceDCEL_html"><div class="ttname"><a href="classSignedDistanceDCEL.html">SignedDistanceDCEL</a></div><div class="ttdoc">Signed distance function from a DCEL mesh.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCEL.H:33</div></div>
-<div class="ttc" id="aclassSignedDistanceDCEL_html_ad8884bbf19339d85d1128f3a3126bd92"><div class="ttname"><a href="classSignedDistanceDCEL.html#ad8884bbf19339d85d1128f3a3126bd92">SignedDistanceDCEL::m_flipInside</a></div><div class="ttdeci">bool m_flipInside</div><div class="ttdoc">Hook for turning inside to outside.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCEL.H:86</div></div>
-<div class="ttc" id="aclassSignedDistanceDCEL_html_a2de3e060f657631b766de92c8822e50f"><div class="ttname"><a href="classSignedDistanceDCEL.html#a2de3e060f657631b766de92c8822e50f">SignedDistanceDCEL::~SignedDistanceDCEL</a></div><div class="ttdeci">~SignedDistanceDCEL()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCELImplem.H:34</div></div>
-<div class="ttc" id="aclassSignedDistanceDCEL_html_afa1495f09f72d0eb1fc3527e5b79db67"><div class="ttname"><a href="classSignedDistanceDCEL.html#afa1495f09f72d0eb1fc3527e5b79db67">SignedDistanceDCEL::newImplicitFunction</a></div><div class="ttdeci">BaseIF * newImplicitFunction() const override</div><div class="ttdoc">Factory method.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCELImplem.H:57</div></div>
-<div class="ttc" id="aclassSignedDistanceDCEL_html_a2b908104569d5498f8671e86353ae6e7"><div class="ttname"><a href="classSignedDistanceDCEL.html#a2b908104569d5498f8671e86353ae6e7">SignedDistanceDCEL::m_zCoord</a></div><div class="ttdeci">Real m_zCoord</div><div class="ttdoc">For 2D only. z-coordinate through which we slice the 3D object.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCEL.H:91</div></div>
+<div class="ttc" id="aclassSignedDistanceDCEL_html_ad8884bbf19339d85d1128f3a3126bd92"><div class="ttname"><a href="classSignedDistanceDCEL.html#ad8884bbf19339d85d1128f3a3126bd92">SignedDistanceDCEL::m_flipInside</a></div><div class="ttdeci">bool m_flipInside</div><div class="ttdoc">Hook for turning inside to outside.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCEL.H:87</div></div>
+<div class="ttc" id="aclassSignedDistanceDCEL_html_a2de3e060f657631b766de92c8822e50f"><div class="ttname"><a href="classSignedDistanceDCEL.html#a2de3e060f657631b766de92c8822e50f">SignedDistanceDCEL::~SignedDistanceDCEL</a></div><div class="ttdeci">~SignedDistanceDCEL()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCELImplem.H:38</div></div>
+<div class="ttc" id="aclassSignedDistanceDCEL_html_afa1495f09f72d0eb1fc3527e5b79db67"><div class="ttname"><a href="classSignedDistanceDCEL.html#afa1495f09f72d0eb1fc3527e5b79db67">SignedDistanceDCEL::newImplicitFunction</a></div><div class="ttdeci">BaseIF * newImplicitFunction() const override</div><div class="ttdoc">Factory method.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCELImplem.H:64</div></div>
+<div class="ttc" id="aclassSignedDistanceDCEL_html_a2b908104569d5498f8671e86353ae6e7"><div class="ttname"><a href="classSignedDistanceDCEL.html#a2b908104569d5498f8671e86353ae6e7">SignedDistanceDCEL::m_zCoord</a></div><div class="ttdeci">Real m_zCoord</div><div class="ttdoc">For 2D only. z-coordinate through which we slice the 3D object.</div><div class="ttdef"><b>Definition:</b> CD_SignedDistanceDCEL.H:92</div></div>
 <div class="ttc" id="aCD__SignedDistanceDCEL_8H_html"><div class="ttname"><a href="CD__SignedDistanceDCEL_8H.html">CD_SignedDistanceDCEL.H</a></div><div class="ttdoc">Declaration of an implicit-function class that gets its value function from a DCEL surface Tesselatio...</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
