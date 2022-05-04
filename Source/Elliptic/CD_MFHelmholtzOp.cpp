@@ -256,8 +256,11 @@ MFHelmholtzOp::fillGrad(const LevelData<MFCellFAB>& a_phi)
 }
 
 void
-MFHelmholtzOp::getFlux(
-  MFFluxFAB& a_flux, const LevelData<MFCellFAB>& a_data, const Box& a_grid, const DataIndex& a_dit, Real a_scale)
+MFHelmholtzOp::getFlux(MFFluxFAB&                  a_flux,
+                       const LevelData<MFCellFAB>& a_data,
+                       const Box&                  a_grid,
+                       const DataIndex&            a_dit,
+                       Real                        a_scale)
 {
   MayDay::Warning("MFHelmholtzOp::getFlux - not implemented (yet)");
 }

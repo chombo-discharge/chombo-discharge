@@ -849,8 +849,11 @@ FieldSolver::setPermittivities()
 }
 
 void
-FieldSolver::setCellPermittivities(
-  EBCellFAB& a_relPerm, const Box& a_cellBox, const EBISBox& a_ebisbox, const RealVect& a_probLo, const Real& a_dx)
+FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
+                                   const Box&      a_cellBox,
+                                   const EBISBox&  a_ebisbox,
+                                   const RealVect& a_probLo,
+                                   const Real&     a_dx)
 {
   CH_TIME("FieldSolver::setCellPermittivities(EBCellFAB, Box, EBISBox, RealVect, Real)");
   if (m_verbosity > 10) {
@@ -887,8 +890,11 @@ FieldSolver::setCellPermittivities(
 }
 
 void
-FieldSolver::setFacePermittivities(
-  EBFluxFAB& a_relPerm, const Box& a_cellBox, const EBISBox& a_ebisbox, const RealVect& a_probLo, const Real& a_dx)
+FieldSolver::setFacePermittivities(EBFluxFAB&      a_relPerm,
+                                   const Box&      a_cellBox,
+                                   const EBISBox&  a_ebisbox,
+                                   const RealVect& a_probLo,
+                                   const Real&     a_dx)
 {
   CH_TIME("FieldSolver::setFacePermittivities(EBFluxFAB, Box, EBISBox, RealVect, Real)");
   if (m_verbosity > 10) {

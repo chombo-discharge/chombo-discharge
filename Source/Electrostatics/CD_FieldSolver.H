@@ -698,8 +698,11 @@ protected:
     @param[in]  a_dx      Resolution
   */
   virtual void
-  setCellPermittivities(
-    EBCellFAB& a_perm, const Box& a_cellBox, const EBISBox& a_ebisbox, const RealVect& a_probLo, const Real& a_dx);
+  setCellPermittivities(EBCellFAB&      a_perm,
+                        const Box&      a_cellBox,
+                        const EBISBox&  a_ebisbox,
+                        const RealVect& a_probLo,
+                        const Real&     a_dx);
 
   /*!
     @brief Set face-centered permittivities
@@ -710,8 +713,11 @@ protected:
     @param[in]  a_dx       Resolution
   */
   virtual void
-  setFacePermittivities(
-    EBFluxFAB& a_perm, const Box& a_cellBox, const EBISBox& a_ebisbox, const RealVect& a_probLo, const Real& a_dx);
+  setFacePermittivities(EBFluxFAB&      a_perm,
+                        const Box&      a_cellBox,
+                        const EBISBox&  a_ebisbox,
+                        const RealVect& a_probLo,
+                        const Real&     a_dx);
 
   /*!
     @brief Set EB-centered permittivities

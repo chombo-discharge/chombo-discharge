@@ -17,8 +17,11 @@
 #include <CD_MFHelmholtzRobinEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(
-  const int a_order, const int a_weight, const Real a_A, const Real a_B, const Real a_C)
+MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const int  a_order,
+                                                         const int  a_weight,
+                                                         const Real a_A,
+                                                         const Real a_B,
+                                                         const Real a_C)
 {
   CH_TIME("MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(int, int, Real, Real, Real)");
 

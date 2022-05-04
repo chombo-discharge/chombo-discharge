@@ -24,8 +24,11 @@ EBHelmholtzRobinEBBCFactory::EBHelmholtzRobinEBBCFactory()
   m_useFunction = false;
 }
 
-EBHelmholtzRobinEBBCFactory::EBHelmholtzRobinEBBCFactory(
-  const int a_order, const int a_weight, const Real a_A, const Real a_B, const Real a_C)
+EBHelmholtzRobinEBBCFactory::EBHelmholtzRobinEBBCFactory(const int  a_order,
+                                                         const int  a_weight,
+                                                         const Real a_A,
+                                                         const Real a_B,
+                                                         const Real a_C)
 {
   CH_TIME("EBHelmholtzRobinEBBCFactory::EBHelmholtzRobinEBBCFactory(int, int, Real, Real, Real)");
 

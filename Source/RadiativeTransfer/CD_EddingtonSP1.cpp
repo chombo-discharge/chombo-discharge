@@ -707,8 +707,11 @@ EddingtonSP1::setHelmholtzCoefficients()
 }
 
 void
-EddingtonSP1::setHelmholtzCoefficientsBox(
-  EBCellFAB& a_helmAco, EBFluxFAB& a_helmBco, BaseIVFAB<Real>& a_helmBcoIrreg, const int a_lvl, const DataIndex& a_dit)
+EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
+                                          EBFluxFAB&       a_helmBco,
+                                          BaseIVFAB<Real>& a_helmBcoIrreg,
+                                          const int        a_lvl,
+                                          const DataIndex& a_dit)
 {
   CH_TIME("EddingtonSP1::setHelmholtzCoefficientsBox");
   if (m_verbosity > 10) {
