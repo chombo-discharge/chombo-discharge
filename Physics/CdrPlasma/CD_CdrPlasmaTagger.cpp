@@ -123,13 +123,6 @@ CdrPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_p
   // Go through the fields and add them to file.
   for (int i = 0; i < m_numTracers; i++) {
 
-    // Make the variable name into 'Tracer field-0', 'Tracer field-1', etc.
-    std::string one = "Tracer field-";
-    long int    j   = i;
-    char        s[2];
-    sprintf(s, "%ld", j);
-    std::string two(s);
-
     // Handle to tracer filed.
     const EBAMRCellData& tracer = m_tracers[i];
 
@@ -144,7 +137,7 @@ CdrPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_p
     }
 
     // Add variable name and update the starting component.
-    a_plotVariableNames.push_back(one + two);
+    a_plotVariableNames.push_back("Tracer field-" + std::to_string(i));
 
     a_icomp++;
   }
