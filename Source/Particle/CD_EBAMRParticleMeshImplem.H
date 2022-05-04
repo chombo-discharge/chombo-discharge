@@ -116,7 +116,31 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
-  MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - not implemented yet.");
+  switch (a_coarseFineDeposition) {
+  case CoarseFineDeposition::PVR:
+    {
+      this->depositPVR<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);      
+
+      break;
+    }
+  case CoarseFineDeposition::Halo:
+    {
+      MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - Halo not implemented yet.");                
+    
+      break;
+    }
+  case CoarseFineDeposition::HaloNGP: {
+    MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - HaloNGP not implemented yet.");          
+    
+    break;
+  }
+  default:
+    {
+      MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - logic bust");
+    
+      break;
+    }
+  }  
 }
 
 template <class P, RealVect (P::*particleVectorField)() const>
@@ -127,12 +151,35 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
                            const CoarseFineDeposition  a_coarseFineDeposition,
                            const bool                  a_forceIrregNGP)
 {
-
   CH_TIME("EBAMRParticleMesh::deposit(vector)");
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
-  MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - not implemented yet.");
+  switch (a_coarseFineDeposition) {
+  case CoarseFineDeposition::PVR:
+    {
+      this->depositPVR<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);      
+
+      break;
+    }
+  case CoarseFineDeposition::Halo:
+    {
+      MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - Halo not implemented yet.");                
+    
+      break;
+    }
+  case CoarseFineDeposition::HaloNGP: {
+    MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - HaloNGP not implemented yet.");          
+    
+    break;
+  }
+  default:
+    {
+      MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - logic bust");
+    
+      break;
+    }
+  }    
 }
 
 template <class P, const Real& (P::*particleScalarField)() const>
@@ -609,6 +656,116 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
 
       interp.interpolate<P, particleVectorField>(particles, data, a_interpType, a_forceIrregNGP);
+    }
+  }
+}
+
+template <class P, const RealVect& (P::*particleVectorField)() const>
+void
+EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
+                              const ParticleContainer<P>& a_particles,
+                              const DepositionType        a_depositionType,
+                              const bool                  a_forceIrregNGP)
+{
+  CH_TIME("EBAMRParticleMesh::depositPVR");
+
+  CH_assert(a_meshData[0]->nComp() == SpaceDim);
+
+  DataOps::setValue(a_meshData, 0.0);
+
+  const Interval interv(0, 0);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
+    const bool               hasCoar = lvl > 0;
+
+    // 1. Deposit particles on this level.
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
+      const ListBox<P>& boxParticles = a_particles[lvl][dit()];
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+
+      interp.deposit<P, particleVectorField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+    }
+
+    // 2. Exchange ghost data on this level. After this, all the mass should be on the current level.
+    a_meshData[lvl]->exchange(interv, m_levelCopiers[lvl], EBAddOp());
+
+    // 3. If the particles deposited over the coarse-fine boundary, add the mass to the coarse level. Since
+    //    the coarse-fine choreography buffer only uses a single component in the memory, we need to alias the data.
+    if (hasCoar) {
+      for (int dir = 0; dir < SpaceDim; dir++) {
+	LevelData<EBCellFAB> coarAlias;
+	LevelData<EBCellFAB> fineAlias;
+
+	// This lets coarAlias be a 1-component data holder which references the dir-component
+	// in a_meshData.
+	aliasLevelData<EBCellFAB>(coarAlias, &(*a_meshData[lvl-1]), Interval(dir,dir));
+	aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl  ]), Interval(dir,dir));
+
+	// Add the mass that hangs from the fine level and over the refinement boundary onto the coarse level.
+	m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
+
+	// Likewise, take the particles that deposited mass to underneath the current level
+	// and put that mas on the fine level. 
+	m_coarseFinePM[lvl]->addInvalidCoarseToFine(fineAlias, coarAlias);
+      }
+    }
+  }
+}
+
+template <class P, RealVect (P::*particleVectorField)() const>
+void
+EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
+                              const ParticleContainer<P>& a_particles,
+                              const DepositionType        a_depositionType,
+                              const bool                  a_forceIrregNGP)
+{
+  CH_TIME("EBAMRParticleMesh::depositPVR");
+
+  CH_assert(a_meshData[0]->nComp() == SpaceDim);
+
+  DataOps::setValue(a_meshData, 0.0);
+
+  const Interval interv(0, 0);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
+    const bool               hasCoar = lvl > 0;
+
+    // 1. Deposit particles on this level.
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
+      const ListBox<P>& boxParticles = a_particles[lvl][dit()];
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+
+      interp.deposit<P, particleVectorField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+    }
+
+    // 2. Exchange ghost data on this level. After this, all the mass should be on the current level.
+    a_meshData[lvl]->exchange(interv, m_levelCopiers[lvl], EBAddOp());
+
+    // 3. If the particles deposited over the coarse-fine boundary, add the mass to the coarse level. Since
+    //    the coarse-fine choreography buffer only uses a single component in the memory, we need to alias the data.
+    if (hasCoar) {
+      for (int dir = 0; dir < SpaceDim; dir++) {
+	LevelData<EBCellFAB> coarAlias;
+	LevelData<EBCellFAB> fineAlias;
+
+	// This lets coarAlias be a 1-component data holder which references the dir-component
+	// in a_meshData.
+	aliasLevelData<EBCellFAB>(coarAlias, &(*a_meshData[lvl-1]), Interval(dir,dir));
+	aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl  ]), Interval(dir,dir));
+
+	// Add the mass that hangs from the fine level and over the refinement boundary onto the coarse level.
+	m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
+
+	// Likewise, take the particles that deposited mass to underneath the current level
+	// and put that mas on the fine level. 
+	m_coarseFinePM[lvl]->addInvalidCoarseToFine(fineAlias, coarAlias);
+      }
     }
   }
 }
