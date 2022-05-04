@@ -333,10 +333,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBLevelGrid&       eblgFiCo  = m_coarseFinePM[lvl]->getEblgFiCo();
       const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
-      const IntVect            numGhost  = m_maxParticleWidth * IntVect::Unit;
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, numGhost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost, EBCellFactory(ebislFiCo));
 
       for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
         EBCellFAB&        dataFiCo      = bufferFiCo[dit()];
@@ -434,10 +433,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBLevelGrid&       eblgFiCo  = m_coarseFinePM[lvl]->getEblgFiCo();
       const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
-      const IntVect            numGhost  = m_maxParticleWidth * IntVect::Unit;
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, numGhost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost, EBCellFactory(ebislFiCo));
 
       for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
         EBCellFAB&        dataFiCo      = bufferFiCo[dit()];
@@ -815,10 +813,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBLevelGrid&       eblgFiCo  = m_coarseFinePM[lvl]->getEblgFiCo();
       const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
-      const IntVect            numGhost  = m_maxParticleWidth * IntVect::Unit;
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, numGhost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost, EBCellFactory(ebislFiCo));
 
       for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
         EBCellFAB&        dataFiCo      = bufferFiCo[dit()];
@@ -919,10 +916,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBLevelGrid&       eblgFiCo  = m_coarseFinePM[lvl]->getEblgFiCo();
       const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
-      const IntVect            numGhost  = m_maxParticleWidth * IntVect::Unit;
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, numGhost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost, EBCellFactory(ebislFiCo));
 
       for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
         EBCellFAB&        dataFiCo      = bufferFiCo[dit()];
