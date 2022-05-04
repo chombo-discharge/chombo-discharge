@@ -361,4 +361,10 @@ EBCoarseFineParticleMesh::getEblgFiCo() const
   return m_eblgFiCo;
 }
 
+const IntVect&
+EBCoarseFineParticleMesh::getNumGhost() const
+{
+  return m_ghost;
+}
+
 #include <CD_NamespaceFooter.H>

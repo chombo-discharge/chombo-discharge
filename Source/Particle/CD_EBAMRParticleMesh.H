@@ -457,6 +457,23 @@ protected:
              const ParticleContainer<P>& a_particles,
              const DepositionType        a_depositionType,
              const bool                  a_forceIrregNGP = false);
+
+  /*!
+    @brief Just like the deposit function, but forced to use the "Halo" algorithm for handling refinement boundaries. 
+    @details See deposit() for details regarding the template arguments. When calling this routine the user must have filled the "halo" particles for this routine
+    to make any sense. This function will run special deposition routines with 2x or 4x the particle width near the refinement boundaries. 
+    @note This routine is currently limited to NGP and CIC.
+    @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
+    @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
+    @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
+    @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
+  */
+  template <class P, const RealVect& (P::*particleScalarField)() const>
+  void
+  depositHalo(EBAMRCellData&              a_meshData,
+              const ParticleContainer<P>& a_particles,
+              const DepositionType        a_depositionType,
+              const bool                  a_forceIrregNGP = false);
 };
 
 #include <CD_NamespaceFooter.H>
