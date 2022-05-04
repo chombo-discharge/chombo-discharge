@@ -111,12 +111,6 @@ public:
   const EBLevelGrid&
   getEblgFiCo() const;
 
-  /*!
-    @brief Get Number of ghost cells used for defining this class
-  */
-  const IntVect&
-  getNumGhost() const;
-
 protected:
   /*!
     @brief Default component
