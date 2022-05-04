@@ -13,6 +13,11 @@
 #ifndef CD_ParticleOps_H
 #define CD_ParticleOps_H
 
+// Chombo includes
+#include <RefCountedPtr.H>
+#include <BaseIF.H>
+#include <RealVect.H>
+
 // Our includes
 #include <CD_NamespaceHeader.H>
 
@@ -34,8 +39,11 @@ public:
     @return Returns true if the particle crossed the domain boundary.
   */
   static inline bool
-  domainIntersection(
-    const RealVect& a_oldPos, const RealVect& a_newPos, const RealVect& a_probLo, const RealVect& a_probHi, Real& a_s);
+  domainIntersection(const RealVect& a_oldPos,
+                     const RealVect& a_newPos,
+                     const RealVect& a_probLo,
+                     const RealVect& a_probHi,
+                     Real&           a_s);
 
   /*!
     @brief Compute the intersection point between a particle path and an implicit function using a bisection algorithm. 

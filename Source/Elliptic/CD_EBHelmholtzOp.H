@@ -173,8 +173,11 @@ public:
     @param[in]    a_dit     Data index
   */
   void
-  pointJacobiKernel(
-    EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& a_cellBox, const DataIndex& a_dit);
+  pointJacobiKernel(EBCellFAB&       a_Lcorr,
+                    EBCellFAB&       a_corr,
+                    const EBCellFAB& a_resid,
+                    const Box&       a_cellBox,
+                    const DataIndex& a_dit);
 
   /*!
     @brief Red-black Gauss-Seidel kernel
@@ -302,8 +305,11 @@ public:
     @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
   */
   void
-  applyOp(
-    EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
+  applyOp(EBCellFAB&       a_Lphi,
+          EBCellFAB&       a_phi,
+          const Box&       a_cellBox,
+          const DataIndex& a_dit,
+          const bool       a_homogeneousPhysBC);
 
   /*!
     @brief Apply operator in regular cells.
@@ -314,8 +320,11 @@ public:
     @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
   */
   void
-  applyOpRegular(
-    EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
+  applyOpRegular(EBCellFAB&       a_Lphi,
+                 EBCellFAB&       a_phi,
+                 const Box&       a_cellBox,
+                 const DataIndex& a_dit,
+                 const bool       a_homogeneousPhysBC);
 
   /*!
     @brief Apply domain flux. 
@@ -988,8 +997,11 @@ protected:
     @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
   */
   void
-  getFaceCentroidFlux(
-    EBFaceFAB& a_fluxCentroid, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const int a_dir);
+  getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
+                      const EBCellFAB& a_phi,
+                      const Box&       a_cellBox,
+                      const DataIndex& a_dit,
+                      const int        a_dir);
 
   /*!
     @brief Compute face-centered fluxes
@@ -1000,8 +1012,11 @@ protected:
     @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
   */
   void
-  computeFaceCenteredFlux(
-    EBFaceFAB& a_fluxCenter, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const int a_dir);
+  computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
+                          const EBCellFAB& a_phi,
+                          const Box&       a_cellBox,
+                          const DataIndex& a_dit,
+                          const int        a_dir);
 
   /*!
     @brief Compute face-centered fluxes
@@ -1012,8 +1027,11 @@ protected:
     @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
   */
   void
-  computeFaceCentroidFlux(
-    EBFaceFAB& a_flux, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const int a_dir);
+  computeFaceCentroidFlux(EBFaceFAB&       a_flux,
+                          const EBCellFAB& a_phi,
+                          const Box&       a_cellBox,
+                          const DataIndex& a_dit,
+                          const int        a_dir);
 
   /*!
     @brief Increment coarse flux register

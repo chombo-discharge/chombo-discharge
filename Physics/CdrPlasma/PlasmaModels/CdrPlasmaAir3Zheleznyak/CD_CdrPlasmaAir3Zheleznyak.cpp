@@ -300,8 +300,11 @@ CdrPlasmaAir3Zheleznyak::addUniformParticles(List<Particle>& a_particles, const 
 }
 
 void
-CdrPlasmaAir3Zheleznyak::addGaussianParticles(
-  List<Particle>& a_particles, const int a_num, const Real a_weight, const Real a_rad, const RealVect a_center)
+CdrPlasmaAir3Zheleznyak::addGaussianParticles(List<Particle>& a_particles,
+                                              const int       a_num,
+                                              const Real      a_weight,
+                                              const Real      a_rad,
+                                              const RealVect  a_center)
 {
   m_gauss = std::normal_distribution<Real>(0., a_rad);
 

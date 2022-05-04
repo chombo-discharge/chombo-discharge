@@ -795,8 +795,11 @@ EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
 }
 
 void
-EBHelmholtzOp::applyOp(
-  EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC)
+EBHelmholtzOp::applyOp(EBCellFAB&       a_Lphi,
+                       EBCellFAB&       a_phi,
+                       const Box&       a_cellBox,
+                       const DataIndex& a_dit,
+                       const bool       a_homogeneousPhysBC)
 {
   CH_TIME("EBHelmholtzOp::applyOp(EBCellFAB, EBCellFAB, Box, DataIndex, bool)");
 
@@ -811,8 +814,11 @@ EBHelmholtzOp::applyOp(
 }
 
 void
-EBHelmholtzOp::applyOpRegular(
-  EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC)
+EBHelmholtzOp::applyOpRegular(EBCellFAB&       a_Lphi,
+                              EBCellFAB&       a_phi,
+                              const Box&       a_cellBox,
+                              const DataIndex& a_dit,
+                              const bool       a_homogeneousPhysBC)
 {
   CH_TIME("EBHelmholtzOp::applyOpRegular(EBCellFAB, EBCellFAB, Box, DataIndex, bool)");
 
@@ -1048,8 +1054,11 @@ EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& a_phi)
 }
 
 void
-EBHelmholtzOp::getFlux(
-  EBFluxFAB& a_flux, const LevelData<EBCellFAB>& a_data, const Box& a_grid, const DataIndex& a_dit, Real a_scale)
+EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
+                       const LevelData<EBCellFAB>& a_data,
+                       const Box&                  a_grid,
+                       const DataIndex&            a_dit,
+                       Real                        a_scale)
 {
   CH_TIME("EBHelmholtzOp::getFlux(EBFluxFAB, LD<EBCellFAB>, Box, DataIndex, Real)");
 
@@ -1566,8 +1575,11 @@ EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataInd
 }
 
 void
-EBHelmholtzOp::getFaceCentroidFlux(
-  EBFaceFAB& a_fluxCentroid, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const int a_dir)
+EBHelmholtzOp::getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
+                                   const EBCellFAB& a_phi,
+                                   const Box&       a_cellBox,
+                                   const DataIndex& a_dit,
+                                   const int        a_dir)
 {
   CH_TIME("EBHelmholtzOp::getFaceCentroidFlux(EBFaceFAB, EBCellFAB, Box, DataIndex, int)");
 
@@ -1582,8 +1594,11 @@ EBHelmholtzOp::getFaceCentroidFlux(
 }
 
 void
-EBHelmholtzOp::computeFaceCenteredFlux(
-  EBFaceFAB& a_fluxCenter, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const int a_dir)
+EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
+                                       const EBCellFAB& a_phi,
+                                       const Box&       a_cellBox,
+                                       const DataIndex& a_dit,
+                                       const int        a_dir)
 {
   CH_TIME("EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB, EBCellFAB, Box, DataIndex, int)");
 
@@ -1616,8 +1631,11 @@ EBHelmholtzOp::computeFaceCenteredFlux(
 }
 
 void
-EBHelmholtzOp::computeFaceCentroidFlux(
-  EBFaceFAB& a_flux, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const int a_dir)
+EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
+                                       const EBCellFAB& a_phi,
+                                       const Box&       a_cellBox,
+                                       const DataIndex& a_dit,
+                                       const int        a_dir)
 {
   CH_TIME("EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB, EBCellFAB, Box, DataIndex, int)");
 

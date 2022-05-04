@@ -345,8 +345,11 @@ namespace Physics {
 
       // Profiling
       void
-      writeStepProfile(
-        const Real a_dt, const Real a_error, const int a_substeps, const int a_corrections, const int a_rejections);
+      writeStepProfile(const Real a_dt,
+                       const Real a_error,
+                       const int  a_substeps,
+                       const int  a_corrections,
+                       const int  a_rejections);
 
       // Parse optiosn that are not really used
       void

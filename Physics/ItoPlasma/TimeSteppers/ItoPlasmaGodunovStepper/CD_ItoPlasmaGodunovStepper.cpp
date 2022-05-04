@@ -840,7 +840,8 @@ ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<ItoPlasm
 
 void
 ItoPlasmaGodunovStepper::deposit_ItoPlasmaGodunovParticles(
-  const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles, const WhichParticles a_WhichParticles)
+  const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles,
+  const WhichParticles                                        a_WhichParticles)
 {
   CH_TIME("ItoPlasmaGodunovStepper::deposit_ItoPlasmaGodunovParticles");
   if (m_verbosity > 5) {
@@ -969,7 +970,8 @@ ItoPlasmaGodunovStepper::computeAllConductivities(
 
 void
 ItoPlasmaGodunovStepper::compute_cell_conductivity(
-  EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles)
+  EBAMRCellData&                                              a_conductivity,
+  const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles)
 {
   CH_TIME("ItoPlasmaGodunovStepper::compute_cell_conductivity(conductivity, ItoPlasmaGodunovParticle");
   if (m_verbosity > 5) {
@@ -1385,7 +1387,8 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
 
 void
 ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(
-  Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_rho_dagger, const Real a_dt)
+  Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_rho_dagger,
+  const Real                                            a_dt)
 {
   CH_TIME("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama");
   if (m_verbosity > 5) {
