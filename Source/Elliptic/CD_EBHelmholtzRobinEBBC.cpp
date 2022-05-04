@@ -30,8 +30,11 @@ EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC()
   m_useFunction = false;
 }
 
-EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(
-  const int a_order, const int a_weight, const Real a_A, const Real a_B, const Real a_C)
+EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const int  a_order,
+                                           const int  a_weight,
+                                           const Real a_A,
+                                           const Real a_B,
+                                           const Real a_C)
   : EBHelmholtzRobinEBBC()
 {
   CH_TIME("EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(int, int, Real, Real, Real)");

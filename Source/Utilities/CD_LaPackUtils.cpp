@@ -396,8 +396,11 @@ LaPackUtils::linearizeRowMajorMatrix(std::vector<double>&                    a_l
 }
 
 void
-LaPackUtils::linearizeMatrix(
-  std::vector<double>& a_linA, int& a_M, int& a_N, const std::vector<std::vector<double>>& a_A, const char& a_format)
+LaPackUtils::linearizeMatrix(std::vector<double>&                    a_linA,
+                             int&                                    a_M,
+                             int&                                    a_N,
+                             const std::vector<std::vector<double>>& a_A,
+                             const char&                             a_format)
 {
   if (a_format == 'C') {
     linearizeColumnMajorMatrix(a_linA, a_M, a_N, a_A);

@@ -217,8 +217,11 @@ namespace Physics {
       void
       addUniformParticles(List<Particle>& a_particles, const int a_num, const Real a_weight);
       void
-      addGaussianParticles(
-        List<Particle>& a_particles, const int a_num, const Real a_weight, const Real a_rad, const RealVect a_center);
+      addGaussianParticles(List<Particle>& a_particles,
+                           const int       a_num,
+                           const Real      a_weight,
+                           const Real      a_rad,
+                           const RealVect  a_center);
 
       Vector<Real>
       computeCdrFluxes(const Real         a_time,

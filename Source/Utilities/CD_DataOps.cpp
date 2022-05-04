@@ -509,8 +509,11 @@ DataOps::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, co
 }
 
 void
-DataOps::plus(
-  EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp)
+DataOps::plus(EBAMRCellData&       a_lhs,
+              const EBAMRCellData& a_rhs,
+              const int            a_srcComp,
+              const int            a_dstComp,
+              const int            a_numComp)
 {
   CH_TIME("DataOps::plus(EBAMRCellData)");
 

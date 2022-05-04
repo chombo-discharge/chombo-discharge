@@ -15,8 +15,11 @@
 
 constexpr int PerlinSdf::m_permutationTable[256];
 
-PerlinSdf::PerlinSdf(
-  const Real a_noiseAmp, const RealVect a_noiseFreq, const Real a_persistence, const int a_octaves, const bool a_reseed)
+PerlinSdf::PerlinSdf(const Real     a_noiseAmp,
+                     const RealVect a_noiseFreq,
+                     const Real     a_persistence,
+                     const int      a_octaves,
+                     const bool     a_reseed)
 {
 
   CH_assert(a_octaves >= 1);

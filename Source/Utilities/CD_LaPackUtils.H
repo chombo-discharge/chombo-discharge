@@ -216,8 +216,11 @@ namespace LaPackUtils {
     Likewise, if 'R' then a_A[0] is the first row of the matrix. 
   */
   void
-  linearizeMatrix(
-    std::vector<double>& a_linA, int& a_M, int& a_N, const std::vector<std::vector<double>>& a_A, const char& a_format);
+  linearizeMatrix(std::vector<double>&                    a_linA,
+                  int&                                    a_M,
+                  int&                                    a_N,
+                  const std::vector<std::vector<double>>& a_A,
+                  const char&                             a_format);
 
   /*!
     @brief Linearize a matrix to column major Fortran form by column major format of the input matrix. 

@@ -241,8 +241,11 @@ DomainFluxIFFAB::clear()
 }
 
 void
-DomainFluxIFFAB::copy(
-  const Box& Rfrom, const Interval& Cdest, const Box& Rto, const DomainFluxIFFAB& src, const Interval& Csrc)
+DomainFluxIFFAB::copy(const Box&             Rfrom,
+                      const Interval&        Cdest,
+                      const Box&             Rto,
+                      const DomainFluxIFFAB& src,
+                      const Interval&        Csrc)
 {
   CH_TIME("DomainFluxIFFAB::copy");
 
