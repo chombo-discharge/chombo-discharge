@@ -164,9 +164,14 @@ McPhoto::parsePseudoPhotons()
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("max_photons", m_maxPhotonsGeneratedPerCell);
-  if (m_maxPhotonsGeneratedPerCell <= 0) { // = -1 => no restriction
-    m_maxPhotonsGeneratedPerCell = std::numeric_limits<int>::max();
+  Real maxPhotons;
+  pp.get("max_photons", maxPhotons);
+
+  if (maxPhotons <= 0.0) { // = -1 => no restriction
+    m_maxPhotonsGeneratedPerCell = std::numeric_limits<size_t>::max();
+  }
+  else {
+    m_maxPhotonsGeneratedPerCell = round(maxPhotons);
   }
 }
 
@@ -868,15 +873,15 @@ McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellDa
             const RealVect pos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
 
             // Number of physical photons
-            const int numPhysPhotons = this->drawPhotons(srcFAB(iv, srcComp), vol, a_dt);
+            const size_t numPhysPhotons = this->drawPhotons(srcFAB(iv, srcComp), vol, a_dt);
 
             // Make superPhotons if we have to
             if (numPhysPhotons > 0) {
-              const int numComputationalPhotons =
+              const size_t numComputationalPhotons =
                 (numPhysPhotons <= m_maxPhotonsGeneratedPerCell) ? numPhysPhotons : m_maxPhotonsGeneratedPerCell;
               const Real weight = (1.0 * numPhysPhotons) / numComputationalPhotons;
 
-              for (int i = 0; i < numComputationalPhotons; i++) {
+              for (size_t i = 0; i < numComputationalPhotons; i++) {
                 const RealVect v = Units::c * Random::getDirection();
                 particles.append(Photon(pos, v, m_rtSpecies->getAbsorptionCoefficient(pos), weight));
               }
@@ -887,15 +892,15 @@ McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellDa
         // Irregular kernel. Same as the above really.
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           const RealVect pos            = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-          const int      numPhysPhotons = this->drawPhotons(source(vof, srcComp), vol, a_dt);
+          const size_t   numPhysPhotons = this->drawPhotons(source(vof, srcComp), vol, a_dt);
 
           if (numPhysPhotons > 0) {
-            const int numComputationalPhotons =
+            const size_t numComputationalPhotons =
               (numPhysPhotons <= m_maxPhotonsGeneratedPerCell) ? numPhysPhotons : m_maxPhotonsGeneratedPerCell;
             const Real weight = (1.0 * numPhysPhotons) / numComputationalPhotons;
 
             // Generate computational Photons
-            for (int i = 0; i < numComputationalPhotons; i++) {
+            for (size_t i = 0; i < numComputationalPhotons; i++) {
               const RealVect v = Units::c * Random::getDirection();
               particles.append(Photon(pos, v, m_rtSpecies->getAbsorptionCoefficient(pos), weight));
             }
@@ -913,7 +918,7 @@ McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellDa
   }
 }
 
-int
+size_t
 McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt)
 {
   CH_TIME("McPhoto::drawPhotons");
@@ -921,7 +926,7 @@ McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt)
     pout() << m_name + "::drawPhotons" << endl;
   }
 
-  int numPhysicalPhotons = 0;
+  size_t numPhysicalPhotons = 0;
 
   // Check if we need any type of source term normalization
   Real factor;
@@ -945,7 +950,7 @@ McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt)
   // Draw a number of Photons with the desired algorithm
   if (m_photoGenerationMethod == PhotonGeneration::Stochastic) {
     const Real mean    = a_source * factor;
-    numPhysicalPhotons = Random::getPoisson<int>(mean);
+    numPhysicalPhotons = Random::getPoisson<size_t>(mean);
   }
   else if (m_photoGenerationMethod == PhotonGeneration::Deterministic) {
     numPhysicalPhotons = round(a_source * factor);
