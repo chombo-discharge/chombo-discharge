@@ -26,9 +26,9 @@
   @brief Class for holding BaseIVFAB<T> on the interface between two phases. 
 */
 template <class T>
-class MFInterfaceFAB {
+class MFInterfaceFAB
+{
 public:
-
   /*!
     @brief Constructor. Must subsequently call define
   */
@@ -51,48 +51,54 @@ public:
     @param[in] a_mflg Level grids
     @param[in] a_dit  Data index for this FBA
   */
-  virtual void define(const MFLevelGrid& a_mflg, const DataIndex& a_dit);
+  virtual void
+  define(const MFLevelGrid& a_mflg, const DataIndex& a_dit);
 
   /*!
     @brief Get defining region
     @return Returns the cells that are irregular on both phases
   */
-  virtual const IntVectSet& getIVS() const;
+  virtual const IntVectSet&
+  getIVS() const;
 
   /*!
     @brief Get BaseIVFAB for specified phase
     @param[in] a_phase Phase
   */
-  virtual BaseIVFAB<T>& getIVFAB(const int a_phase);
+  virtual BaseIVFAB<T>&
+  getIVFAB(const int a_phase);
 
   /*!
     @brief Get BaseIVFAB for specified phase
     @param[in] a_phase Phase
   */
-  virtual const BaseIVFAB<T>& getIVFAB(const int a_phase) const;
+  virtual const BaseIVFAB<T>&
+  getIVFAB(const int a_phase) const;
 
   /*!
     @brief Get BaseIVFAB for specified phase
     @param[in] a_phase Phase
   */
-  virtual BaseIVFAB<T>* getPhasePtr(int a_phase);
+  virtual BaseIVFAB<T>*
+  getPhasePtr(int a_phase);
 
   /*!
     @brief Get number of phases
   */
-  virtual int numPhases() const;
+  virtual int
+  numPhases() const;
 
   /*!
     @brief Set value on both fabs. 
   */
-  virtual void setVal(const T& a_value);
+  virtual void
+  setVal(const T& a_value);
 
 protected:
-
   /*!
     @brief Pointers to storage on both phases
   */
-  Vector<BaseIVFAB<T>* > m_phase;
+  Vector<BaseIVFAB<T>*> m_phase;
 
   /*!
     @brief Defining region

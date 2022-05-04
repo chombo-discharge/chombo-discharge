@@ -24,45 +24,47 @@
 using namespace Physics::TracerParticle;
 
 template <typename P>
-inline
-TracerParticleStepper<P>::TracerParticleStepper() {
+inline TracerParticleStepper<P>::TracerParticleStepper()
+{
   CH_TIME("TracerParticleStepper::TracerParticleStepper");
 
   m_realm = Realm::Primal;
   m_phase = phase::gas;
-  
+
   this->parseOptions();
 }
 
 template <typename P>
-inline
-TracerParticleStepper<P>::~TracerParticleStepper() {
+inline TracerParticleStepper<P>::~TracerParticleStepper()
+{
   CH_TIME("TracerParticleStepper::~TracerParticleStepper");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::~TracerParticleStepper" << endl;
   }
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::setupSolvers() {
+inline void
+TracerParticleStepper<P>::setupSolvers()
+{
   CH_TIME("TracerParticleStepper::setupSolvers()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::setupSolvers()" << endl;
   }
 
-  m_solver = RefCountedPtr<TracerParticleSolver<P> > (new TracerParticleSolver<P>(m_amr, m_computationalGeometry));
+  m_solver = RefCountedPtr<TracerParticleSolver<P>>(new TracerParticleSolver<P>(m_amr, m_computationalGeometry));
 
-  m_solver->setPhase(m_phase);  
+  m_solver->setPhase(m_phase);
   m_solver->setRealm(m_realm);
-  m_solver->parseOptions();  
+  m_solver->parseOptions();
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::allocate() {
+inline void
+TracerParticleStepper<P>::allocate()
+{
   CH_TIME("TracerParticleStepper::allocate()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::allocate()" << endl;
   }
 
@@ -71,10 +73,11 @@ void TracerParticleStepper<P>::allocate() {
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::initialData() {
+inline void
+TracerParticleStepper<P>::initialData()
+{
   CH_TIME("TracerParticleStepper::initialData()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::initialData()" << endl;
   }
 
@@ -86,10 +89,11 @@ void TracerParticleStepper<P>::initialData() {
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::registerRealms() {
+inline void
+TracerParticleStepper<P>::registerRealms()
+{
   CH_TIME("TracerParticleStepper::registerRealms()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::registerRealms()" << endl;
   }
 
@@ -97,10 +101,11 @@ void TracerParticleStepper<P>::registerRealms() {
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::registerOperators() {
+inline void
+TracerParticleStepper<P>::registerOperators()
+{
   CH_TIME("TracerParticleStepper::registerOperators()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::registerOperators()" << endl;
   }
 
@@ -108,10 +113,11 @@ void TracerParticleStepper<P>::registerOperators() {
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::parseOptions() {
+inline void
+TracerParticleStepper<P>::parseOptions()
+{
   CH_TIME("TracerParticleStepper::parseOptions()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::parseOptions()" << endl;
   }
 
@@ -121,23 +127,25 @@ void TracerParticleStepper<P>::parseOptions() {
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::parseRuntimeOptions() {
+inline void
+TracerParticleStepper<P>::parseRuntimeOptions()
+{
   CH_TIME("TracerParticleStepper::parseRuntimeOptions()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::parseRuntimeOptions()" << endl;
   }
 
   this->parseIntegrator();
 
-  m_solver->parseRuntimeOptions();  
+  m_solver->parseRuntimeOptions();
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::parseIntegrator() {
+inline void
+TracerParticleStepper<P>::parseIntegrator()
+{
   CH_TIME("TracerParticleStepper::parseIntegrator()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::parseIntegrator()" << endl;
   }
 
@@ -145,28 +153,29 @@ void TracerParticleStepper<P>::parseIntegrator() {
 
   std::string str;
 
-  pp.get("verbosity",   m_verbosity);
-  pp.get("cfl",         m_cfl      );
-  pp.get("integration", str        );
-  if(str == "euler"){
+  pp.get("verbosity", m_verbosity);
+  pp.get("cfl", m_cfl);
+  pp.get("integration", str);
+  if (str == "euler") {
     m_algorithm = IntegrationAlgorithm::Euler;
   }
-  else if(str == "rk2"){
+  else if (str == "rk2") {
     m_algorithm = IntegrationAlgorithm::RK2;
   }
-  else if(str == "rk4"){
+  else if (str == "rk4") {
     m_algorithm = IntegrationAlgorithm::RK4;
   }
-  else{
+  else {
     MayDay::Error("TracerParticleStepper::parseRuntimeOptions -- logic bust");
-  }  
+  }
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::parseVelocityField() {
+inline void
+TracerParticleStepper<P>::parseVelocityField()
+{
   CH_TIME("TracerParticleStepper::parseVelocityField()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::parseVelocityField()" << endl;
   }
 
@@ -175,22 +184,23 @@ void TracerParticleStepper<P>::parseVelocityField() {
   int v;
   pp.get("velocity_field", v);
 
-  if(v == 0){
+  if (v == 0) {
     m_velocityField = VelocityField::Diagonal;
   }
-  else if(v == 1){
+  else if (v == 1) {
     m_velocityField = VelocityField::Rotational;
   }
-  else{
+  else {
     MayDay::Error("TracerParticleStepper::parseVelocityField -- logic bust");
   }
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::parseInitialConditions() {
+inline void
+TracerParticleStepper<P>::parseInitialConditions()
+{
   CH_TIME("TracerParticleStepper::parseInitialConditions()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::parseInitialConditions()" << endl;
   }
 
@@ -204,10 +214,11 @@ void TracerParticleStepper<P>::parseInitialConditions() {
 
 #ifdef CH_USE_HDF5
 template <typename P>
-inline
-void TracerParticleStepper<P>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
+inline void
+TracerParticleStepper<P>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
+{
   CH_TIME("TracerParticleStepper::writeCheckpointData(HDF5Handle, int)");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::writeCheckpointData(HDF5Handle, int)" << endl;
   }
 
@@ -217,10 +228,11 @@ void TracerParticleStepper<P>::writeCheckpointData(HDF5Handle& a_handle, const i
 
 #ifdef CH_USE_HDF5
 template <typename P>
-inline
-void TracerParticleStepper<P>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl) {
+inline void
+TracerParticleStepper<P>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
+{
   CH_TIME("TracerParticleStepper::readCheckpointData(HDF5Handle, int)");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::readCheckpointData(HDF5Handle, int)" << endl;
   }
 
@@ -229,10 +241,13 @@ void TracerParticleStepper<P>::readCheckpointData(HDF5Handle& a_handle, const in
 #endif
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
+inline void
+TracerParticleStepper<P>::writePlotData(EBAMRCellData&       a_output,
+                                        Vector<std::string>& a_plotVariableNames,
+                                        int&                 a_icomp) const
+{
   CH_TIME("TracerParticleStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;
   }
 
@@ -241,10 +256,11 @@ void TracerParticleStepper<P>::writePlotData(EBAMRCellData& a_output, Vector<std
 }
 
 template <typename P>
-inline
-int TracerParticleStepper<P>::getNumberOfPlotVariables() const {
+inline int
+TracerParticleStepper<P>::getNumberOfPlotVariables() const
+{
   CH_TIME("TracerParticleStepper::getNumberOfPlotVariables()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::getNumberOfPlotVariables()" << endl;
   }
 
@@ -252,10 +268,11 @@ int TracerParticleStepper<P>::getNumberOfPlotVariables() const {
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::computeDt(Real& a_dt, TimeCode& a_timeCode) {
+inline void
+TracerParticleStepper<P>::computeDt(Real& a_dt, TimeCode& a_timeCode)
+{
   CH_TIME("TracerParticleStepper::computeDt()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::computeDt()" << endl;
   }
 
@@ -264,49 +281,47 @@ void TracerParticleStepper<P>::computeDt(Real& a_dt, TimeCode& a_timeCode) {
 }
 
 template <typename P>
-inline
-Real TracerParticleStepper<P>::advance(const Real a_dt) {
+inline Real
+TracerParticleStepper<P>::advance(const Real a_dt)
+{
   CH_TIME("TracerParticleStepper::advance(Real)");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::advance(Real)" << endl;
   }
 
-  switch(m_algorithm){
-  case IntegrationAlgorithm::Euler:
-    {
-      this->advanceParticlesEuler(a_dt);
+  switch (m_algorithm) {
+  case IntegrationAlgorithm::Euler: {
+    this->advanceParticlesEuler(a_dt);
 
-      break;
-    }
-  case IntegrationAlgorithm::RK2:
-    {
-      this->advanceParticlesRK2(a_dt);
+    break;
+  }
+  case IntegrationAlgorithm::RK2: {
+    this->advanceParticlesRK2(a_dt);
 
-      break;
-    }
-  case IntegrationAlgorithm::RK4:
-    {
-      this->advanceParticlesRK4(a_dt);
+    break;
+  }
+  case IntegrationAlgorithm::RK4: {
+    this->advanceParticlesRK4(a_dt);
 
-      break;
-    }
-  default:
-    {
-      MayDay::Error("TracerParticleStepper::advance -- logic bust");
-    }
-  }  
+    break;
+  }
+  default: {
+    MayDay::Error("TracerParticleStepper::advance -- logic bust");
+  }
+  }
 
   return a_dt;
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) {
+inline void
+TracerParticleStepper<P>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt)
+{
   CH_TIME("TracerParticleStepper::synchronizeSolverTimes");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::synchronizeSolverTimes" << endl;
   }
-  
+
   m_timeStep = a_step;
   m_time     = a_time;
   m_dt       = a_dt;
@@ -315,10 +330,11 @@ void TracerParticleStepper<P>::synchronizeSolverTimes(const int a_step, const Re
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::preRegrid(const int a_lmin, const int a_oldFinestLevel) {
+inline void
+TracerParticleStepper<P>::preRegrid(const int a_lmin, const int a_oldFinestLevel)
+{
   CH_TIME("TracerParticleStepper::preRegrid(int, int)");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::preRegrid(int, int)" << endl;
   }
 
@@ -326,78 +342,77 @@ void TracerParticleStepper<P>::preRegrid(const int a_lmin, const int a_oldFinest
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
+inline void
+TracerParticleStepper<P>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+{
   CH_TIME("TracerParticleStepper::regrid(int, int, int)");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::regrid(int, int, int)" << endl;
   }
 
-  // Define velocity field on the new mesh. 
+  // Define velocity field on the new mesh.
   m_amr->reallocate(m_velocity, m_phase, a_lmin);
   DataOps::setValue(m_velocity, 0.0);
-  
 
-  // Regrid tracer particles. 
+  // Regrid tracer particles.
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::postRegrid() {
+inline void
+TracerParticleStepper<P>::postRegrid()
+{
   CH_TIME("TracerParticleStepper::postRegrid()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::postRegrid()" << endl;
   }
 
-  // Update particle velocities. 
+  // Update particle velocities.
   this->setVelocity();
-  m_solver->interpolateVelocities();  
+  m_solver->interpolateVelocities();
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::setVelocity() {
+inline void
+TracerParticleStepper<P>::setVelocity()
+{
   CH_TIME("TracerParticleStepper::setVelocity()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::setVelocity()" << endl;
   }
 
   std::function<RealVect(const RealVect a_position)> velFunc;
 
-  switch(m_velocityField) {
-  case VelocityField::Diagonal:
-    {
-      velFunc = [](const RealVect& a_position) -> RealVect {
-	return RealVect::Unit;
-      };
-      
-      break;
-    }
-  case VelocityField::Rotational:
-    {
-      velFunc = [](const RealVect pos) -> RealVect {
-	const Real r     = pos.vectorLength();
-	const Real theta = atan2(pos[1], pos[0]);
+  switch (m_velocityField) {
+  case VelocityField::Diagonal: {
+    velFunc = [](const RealVect& a_position) -> RealVect { return RealVect::Unit; };
 
-	return RealVect(D_DECL(-r*sin(theta), r*cos(theta), 0.));
-      };
+    break;
+  }
+  case VelocityField::Rotational: {
+    velFunc = [](const RealVect pos) -> RealVect {
+      const Real r     = pos.vectorLength();
+      const Real theta = atan2(pos[1], pos[0]);
 
-      break;
-    }
+      return RealVect(D_DECL(-r * sin(theta), r * cos(theta), 0.));
+    };
+
+    break;
+  }
   }
 
-  DataOps::setValue(m_velocity, velFunc, m_amr->getProbLo(), m_amr->getDx());  
+  DataOps::setValue(m_velocity, velFunc, m_amr->getProbLo(), m_amr->getDx());
 
   m_amr->averageDown(m_velocity, m_realm, m_phase);
-  m_amr->interpGhost(m_velocity, m_realm, m_phase);  
+  m_amr->interpGhost(m_velocity, m_realm, m_phase);
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::initialParticles() {
+inline void
+TracerParticleStepper<P>::initialParticles()
+{
   CH_TIME("TracerParticleStepper::initialParticles()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::initialParticles()" << endl;
   }
 
@@ -407,48 +422,49 @@ void TracerParticleStepper<P>::initialParticles() {
   //
   //       After creating the distribution we draw the particles (MPI rank distribution being taken care of under the hood) and
   //       set their mass to one. Finally, we add these particles to the ParticleContainer and remove the particles that lie inside
-  //       the EB. 
+  //       the EB.
 
-  // Create a random distribution which draw particles uniformly distributed in the domain. 
+  // Create a random distribution which draw particles uniformly distributed in the domain.
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
-  
+
   auto uniformDistribution = [probLo, probHi]() -> RealVect {
     RealVect ret = probLo;
-    
+
     for (int dir = 0; dir < SpaceDim; dir++) {
-      ret[dir] += (probHi-probLo)[dir] * Random::getUniformReal01();
+      ret[dir] += (probHi - probLo)[dir] * Random::getUniformReal01();
     }
 
     return ret;
   };
 
-  // Draw particles using the distribution above. Set their mass to one. 
+  // Draw particles using the distribution above. Set their mass to one.
   List<P> initialParticles;
 
   ParticleOps::drawRandomParticles(initialParticles, m_numInitialParticles, uniformDistribution);
-  for (ListIterator<P> lit(initialParticles); lit.ok(); ++lit){
+  for (ListIterator<P> lit(initialParticles); lit.ok(); ++lit) {
     lit().mass() = 1.0;
   }
 
-  // Put the particles in the solver particle data holder. 
+  // Put the particles in the solver particle data holder.
   ParticleContainer<P>& solverParticles = m_solver->getParticles();
   solverParticles.clearParticles();
   solverParticles.addParticlesDestructive(initialParticles);
 
   // Solver should remap because it may have a PVR requirement on the particle distribution. This is
-  // not visible to the TimeStepper. 
-  m_solver->remap();  
+  // not visible to the TimeStepper.
+  m_solver->remap();
 
-  // Remove particles inside the EB. 
+  // Remove particles inside the EB.
   m_amr->removeCoveredParticlesIF(solverParticles, m_phase);
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt) {
+inline void
+TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt)
+{
   CH_TIME("TracerParticleStepper::advanceParticlesEuler()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::advanceParticlesEuler()" << endl;
   }
 
@@ -456,16 +472,16 @@ void TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt) {
 
   ParticleContainer<P>& amrParticles = m_solver->getParticles();
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
       List<P>& particles = amrParticles[lvl][dit].listItems();
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
-	P& p = lit();
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
 
-	p.position() += p.velocity() * a_dt;
+        p.position() += p.velocity() * a_dt;
       }
     }
   }
@@ -477,95 +493,97 @@ void TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt) {
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt) {
+inline void
+TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt)
+{
   CH_TIME("TracerParticleStepper::advanceParticlesRK2()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::advanceParticlesRK2()" << endl;
   }
 
-  // TLDR: The new positions are x^(k+1) = x^k + 0.5*dt*[ v(x^k) + v(x^*) ] where x^* = x^k + dt*v^k. 
+  // TLDR: The new positions are x^(k+1) = x^k + 0.5*dt*[ v(x^k) + v(x^*) ] where x^* = x^k + dt*v^k.
 
-  ParticleContainer<P>& amrParticles = m_solver->getParticles();  
+  ParticleContainer<P>& amrParticles = m_solver->getParticles();
 
-  // First step. Store old position and velocity and do the Euler advance. 
+  // First step. Store old position and velocity and do the Euler advance.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
       List<P>& particles = amrParticles[lvl][dit].listItems();
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
-	P& p = lit();
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
 
-	p.template vect<0>() = p.position();
-	p.template vect<1>() = p.velocity();
-	
-	p.position() += p.velocity() * a_dt;
+        p.template vect<0>() = p.position();
+        p.template vect<1>() = p.velocity();
+
+        p.position() += p.velocity() * a_dt;
       }
     }
   }
 
   // Remap and interpolate the velocities again. This puts the velocity v = v(x^*) into the particles
   amrParticles.remap();
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);    
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
   m_solver->interpolateVelocities();
 
   // Do the second RK2 stage.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
       List<P>& particles = amrParticles[lvl][dit].listItems();
 
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
-  	P& p = lit();
-	
-  	// x^k+1     = x^k                  + dt/2     * [v(x^k)               + v(x^*)      ]
-	p.position() = p.template vect<0>() + 0.5*a_dt * (p.template vect<1>() + p.velocity());
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+        // x^k+1     = x^k                  + dt/2     * [v(x^k)               + v(x^*)      ]
+        p.position() = p.template vect<0>() + 0.5 * a_dt * (p.template vect<1>() + p.velocity());
       }
     }
   }
 
   // Remap and interpolate the velocities again
   amrParticles.remap();
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);  
-  m_solver->interpolateVelocities();  
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+  m_solver->interpolateVelocities();
 }
 
 template <typename P>
-inline
-void TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt) {
+inline void
+TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
+{
   CH_TIME("TracerParticleStepper::advanceParticlesRK4()");
-  if(m_verbosity > 5){
+  if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::advanceParticlesRK4()" << endl;
   }
 
-  // TLDR: Just the standard RK4 method. 
+  // TLDR: Just the standard RK4 method.
 
   ParticleContainer<P>& amrParticles = m_solver->getParticles();
 
-  const Real dtHalf  = a_dt/2.0;
-  const Real dtThird = a_dt/3.0;
-  const Real dtSixth = a_dt/6.0;  
+  const Real dtHalf  = a_dt / 2.0;
+  const Real dtThird = a_dt / 3.0;
+  const Real dtSixth = a_dt / 6.0;
 
   // k1 step.
   {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit){
-	for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit){
-	  P& p = lit();
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {
+          P& p = lit();
 
-	  // Store old position. 
-	  p.template vect<0>() = p.position();
-	  
-	  p.template vect<1>() = p.velocity();                         // k1 = v(x^k)
-	  p.position() = p.template vect<0>() + dtHalf * p.velocity(); // x = x^k + 0.5*dt*k1
-	}
+          // Store old position.
+          p.template vect<0>() = p.position();
+
+          p.template vect<1>() = p.velocity();                                 // k1 = v(x^k)
+          p.position()         = p.template vect<0>() + dtHalf * p.velocity(); // x = x^k + 0.5*dt*k1
+        }
       }
     }
 
-    // Remap and compute v = v(x) 
+    // Remap and compute v = v(x)
     amrParticles.remap();
     m_solver->interpolateVelocities();
   }
@@ -573,17 +591,17 @@ void TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt) {
   // k2 step.
   {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit){
-	for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit){
-	  P& p = lit();
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {
+          P& p = lit();
 
-	  p.template vect<2>() = p.velocity();                         // k2 = v(x^k + 0.5 * k1 * dt)
-	  p.position() = p.template vect<0>() + dtHalf * p.velocity(); // x = x^k + 0.5*dt*k2
-	}
+          p.template vect<2>() = p.velocity();                                 // k2 = v(x^k + 0.5 * k1 * dt)
+          p.position()         = p.template vect<0>() + dtHalf * p.velocity(); // x = x^k + 0.5*dt*k2
+        }
       }
     }
 
-    // Remap and compute v = v(x)     
+    // Remap and compute v = v(x)
     amrParticles.remap();
     m_solver->interpolateVelocities();
   }
@@ -591,39 +609,40 @@ void TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt) {
   // k3 step.
   {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit){
-	for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit){
-	  P& p = lit();
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {
+          P& p = lit();
 
-	  p.template vect<3>() = p.velocity();                       // k3 = v(x^k + 0.5 * k2 * dt)
-	  p.position() = p.template vect<0>() + a_dt * p.velocity(); // x^k + k3*a_dt
-	}
+          p.template vect<3>() = p.velocity();                               // k3 = v(x^k + 0.5 * k2 * dt)
+          p.position()         = p.template vect<0>() + a_dt * p.velocity(); // x^k + k3*a_dt
+        }
       }
     }
 
-    // Remap and compute v = v(x)     
+    // Remap and compute v = v(x)
     amrParticles.remap();
     m_solver->interpolateVelocities();
   }
 
-  // Final step. 
+  // Final step.
   {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit){
-	for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit){
-	  P& p = lit();
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {
+          P& p = lit();
 
-	  p.position() = p.template vect<0>() + dtSixth * p.template vect<1>() + dtHalf  * p.template vect<2>() + dtHalf  * p.template vect<3>() + dtSixth * p.velocity();
-	}
+          p.position() = p.template vect<0>() + dtSixth * p.template vect<1>() + dtHalf * p.template vect<2>() +
+                         dtHalf * p.template vect<3>() + dtSixth * p.velocity();
+        }
       }
     }
 
-    // Remap and compute v = v(x)     
+    // Remap and compute v = v(x)
     amrParticles.remap();
     m_solver->interpolateVelocities();
   }
 
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);      
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
 }
 
 #include <CD_NamespaceFooter.H>

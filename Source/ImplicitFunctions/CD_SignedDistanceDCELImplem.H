@@ -17,36 +17,42 @@
 #include <CD_NamespaceHeader.H>
 
 template <class T>
-SignedDistanceDCEL<T>::SignedDistanceDCEL(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside, const Real a_zCoord){
+SignedDistanceDCEL<T>::SignedDistanceDCEL(const std::shared_ptr<Mesh>& a_mesh,
+                                          const bool                   a_flipInside,
+                                          const Real                   a_zCoord)
+{
   m_mesh       = a_mesh;
   m_zCoord     = a_zCoord;
   m_flipInside = a_flipInside;
 }
 
 template <class T>
-SignedDistanceDCEL<T>::SignedDistanceDCEL(const SignedDistanceDCEL& a_object){
+SignedDistanceDCEL<T>::SignedDistanceDCEL(const SignedDistanceDCEL& a_object)
+{
   m_mesh       = a_object.m_mesh;
   m_zCoord     = a_object.m_zCoord;
   m_flipInside = a_object.m_flipInside;
 }
 
 template <class T>
-SignedDistanceDCEL<T>::~SignedDistanceDCEL(){
-
-}
+SignedDistanceDCEL<T>::~SignedDistanceDCEL()
+{}
 
 template <class T>
-Real SignedDistanceDCEL<T>::value(const RealVect& a_point) const {
+Real
+SignedDistanceDCEL<T>::value(const RealVect& a_point) const
+{
 
-#if CH_SPACEDIM==2
+#if CH_SPACEDIM == 2
   EBGeometry::Vec3T<T> p(a_point[0], a_point[1], m_zCoord);
 #else
   EBGeometry::Vec3T<T> p(a_point[0], a_point[1], a_point[2]);
 #endif
 
-  T retval = m_mesh->signedDistance(p); // Note that Dcel::mesh can return either positive or negative for outside, depending on the orientation of the input normals. 
-  
-  if(m_flipInside){
+  T retval = m_mesh->signedDistance(
+    p); // Note that Dcel::mesh can return either positive or negative for outside, depending on the orientation of the input normals.
+
+  if (m_flipInside) {
     retval = -retval;
   }
 
@@ -54,11 +60,12 @@ Real SignedDistanceDCEL<T>::value(const RealVect& a_point) const {
 }
 
 template <class T>
-BaseIF* SignedDistanceDCEL<T>::newImplicitFunction() const {
-  return static_cast<BaseIF*> (new SignedDistanceDCEL(*this));
+BaseIF*
+SignedDistanceDCEL<T>::newImplicitFunction() const
+{
+  return static_cast<BaseIF*>(new SignedDistanceDCEL(*this));
 }
 
 #include <CD_NamespaceFooter.H>
 
 #endif
-

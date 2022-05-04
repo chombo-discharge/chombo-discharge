@@ -31,13 +31,13 @@
   @details This class creates stencils for approximating the normal derivative on each side. It uses those stencil to compute a value on the boundary which fulfills
   the discrete version of dphi/dn1 + dphi/dn2 = sigma. This value is used by MFHelmholtzEBBC to compute the fluxes into the cut-cells on each side. 
 */
-class MFHelmholtzJumpBC {
+class MFHelmholtzJumpBC
+{
 public:
-
   /*!
     @brief Alias to cut down on typing
   */
-  using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB> >;
+  using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB>>;
 
   /*!
     @brief Disallowed weak construction
@@ -56,13 +56,13 @@ public:
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
   */
   MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
-		    const MFLevelGrid&   a_mflg,
-		    const BcoefPtr&      a_Bcoef,
-		    const Real           a_dx,
-		    const int            a_order,
-		    const int            a_weight,
-		    const int            a_radius,
-		    const int            a_ghostCF);
+                    const MFLevelGrid&   a_mflg,
+                    const BcoefPtr&      a_Bcoef,
+                    const Real           a_dx,
+                    const int            a_order,
+                    const int            a_weight,
+                    const int            a_radius,
+                    const int            a_ghostCF);
 
   /*!
     @brief Disallowed copy constructor
@@ -77,22 +77,26 @@ public:
   /*!
     @brief Disallowed assignment constructor
   */
-  MFHelmholtzJumpBC& operator=(const MFHelmholtzJumpBC& a_other) = delete;
-  
+  MFHelmholtzJumpBC&
+  operator=(const MFHelmholtzJumpBC& a_other) = delete;
+
   /*!
     @brief Return stencil order
   */
-  int getOrder() const;
+  int
+  getOrder() const;
 
   /*!
     @brief Return stencil weight (for least squares)
   */
-  int getWeight() const;
+  int
+  getWeight() const;
 
   /*!
     @brief Return stencil radius (for least squares)
   */
-  int getRadius() const;
+  int
+  getRadius() const;
 
   /*!
     @brief Match the BC
@@ -100,9 +104,8 @@ public:
     @param[in]    a_phi               Cell-centered data
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not
   */
-  virtual void matchBC(LevelData<BaseIVFAB<Real> >& a_jump,
-		       const LevelData<MFCellFAB>&  a_phi,
-		       const bool                   a_homogeneousPhysBC) const;
+  virtual void
+  matchBC(LevelData<BaseIVFAB<Real>>& a_jump, const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC) const;
 
   /*!
     @brief Match the BC
@@ -111,10 +114,11 @@ public:
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not
     @param[in]    a_dit               Grid index
   */
-  virtual void matchBC(BaseIVFAB<Real>& a_jump,
-		       const MFCellFAB& a_phi,
-		       const bool       a_homogeneousPhysBC,
-		       const DataIndex& a_dit) const;
+  virtual void
+  matchBC(BaseIVFAB<Real>& a_jump,
+          const MFCellFAB& a_phi,
+          const bool       a_homogeneousPhysBC,
+          const DataIndex& a_dit) const;
 
   /*!
     @brief Get phi on the boundary. 
@@ -122,25 +126,28 @@ public:
     @param[in] a_dit   Grid index
     @return Returns phi on the boundary. On multivalued cells, phi always lies on VolIndex(iv, 0). 
   */
-  virtual const BaseIVFAB<Real>& getBndryPhi(const int a_phase, const DataIndex& a_dit) const;
+  virtual const BaseIVFAB<Real>&
+  getBndryPhi(const int a_phase, const DataIndex& a_dit) const;
 
   /*!
     @brief Return vof iterator which iterates over single-phase cells on a specific phase and box. 
   */
-  virtual VoFIterator& getSinglePhaseVofs(const int a_phase, const DataIndex& a_dit) const;
+  virtual VoFIterator&
+  getSinglePhaseVofs(const int a_phase, const DataIndex& a_dit) const;
 
   /*!
     @brief Return vof iterator which iterates over multi-phase cells on a specified phase and box. 
   */
-  virtual VoFIterator& getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) const;
-  
+  virtual VoFIterator&
+  getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) const;
+
   /*!
     @brief Set everything to zero. This is a debugging function.
   */
-  virtual void resetBC() const;
-  
-protected:
+  virtual void
+  resetBC() const;
 
+protected:
   /*!
     @brief Component where stencils are stored. 
   */
@@ -164,7 +171,7 @@ protected:
   /*!
     @brief B-coefficient
   */
-  RefCountedPtr<LevelData<MFBaseIVFAB> > m_Bcoef;
+  RefCountedPtr<LevelData<MFBaseIVFAB>> m_Bcoef;
 
   /*!
     @brief Grid resolution
@@ -204,17 +211,17 @@ protected:
   /*!
     @brief Value of phi on the boundary. 
   */
-  mutable LayoutData<MFInterfaceFAB<Real> > m_boundaryPhi;
-  
+  mutable LayoutData<MFInterfaceFAB<Real>> m_boundaryPhi;
+
   /*!
     @brief Iterators for single-phase cells. The integer index is the phase. 
   */
-  mutable std::map<int, std::shared_ptr<LayoutData<VoFIterator> > > m_singlePhaseVofs;
+  mutable std::map<int, std::shared_ptr<LayoutData<VoFIterator>>> m_singlePhaseVofs;
 
   /*!
     @brief Iterators for multi-phase cells. The integer index is the phase. 
   */
-  mutable std::map<int, std::shared_ptr<LayoutData<VoFIterator> > > m_multiPhaseVofs;
+  mutable std::map<int, std::shared_ptr<LayoutData<VoFIterator>>> m_multiPhaseVofs;
 
   /*!
     @brief IntVectSet over which we run the "averaging"
@@ -224,27 +231,29 @@ protected:
   /*!
     @brief Average stencil
   */
-  LayoutData<MFInterfaceFAB<VoFStencil> > m_avgStencils;
+  LayoutData<MFInterfaceFAB<VoFStencil>> m_avgStencils;
 
   /*!
     @brief Denom factor
   */
-  LayoutData<MFInterfaceFAB<Real> > m_denom;
+  LayoutData<MFInterfaceFAB<Real>> m_denom;
 
   /*!
     @brief Average weights
   */
-  LayoutData<MFInterfaceFAB<Real> > m_avgWeights;
+  LayoutData<MFInterfaceFAB<Real>> m_avgWeights;
 
   /*!
     @brief Define function. Builds stencils. 
   */
-  void defineStencils();
+  void
+  defineStencils();
 
   /*!
     @brief Define function. Builds stencils. 
   */
-  void defineIterators();
+  void
+  defineIterators();
 
   /*!
     @brief Get stencil with specified order. 
@@ -256,11 +265,12 @@ protected:
     @return If this returns true, a_stencil contains a valid stencil and weight. 
     @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
   */
-  virtual bool getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
-						  const VolIndex&              a_vof,
-						  const EBISBox&               a_ebisbox,
-						  const VofUtils::Neighborhood a_neighborhood,
-						  const int                    a_order) const;
+  virtual bool
+  getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
+                                     const VolIndex&              a_vof,
+                                     const EBISBox&               a_ebisbox,
+                                     const VofUtils::Neighborhood a_neighborhood,
+                                     const int                    a_order) const;
 
   /*!
     @brief Check if stencil is valid. 
@@ -268,10 +278,8 @@ protected:
     @param[in] a_stencil Stencil
     @param[in] a_dit     Data index
   */
-  inline
-  bool isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
-
-
+  inline bool
+  isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
 
   /*!
     @brief Apply a stencil and return the result
@@ -279,9 +287,8 @@ protected:
     @param[in] a_phi     Data
     @returns Returns S(phi), S being the stencil. 
   */
-  inline
-  Real applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const;
-
+  inline Real
+  applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const;
 };
 
 #include <CD_NamespaceFooter.H>

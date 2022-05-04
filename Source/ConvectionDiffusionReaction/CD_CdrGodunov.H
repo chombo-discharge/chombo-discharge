@@ -27,9 +27,9 @@
   from EBAdvectLevelIntegrator which uses the Graves/Trebotich discretization in "An adaptive finite volume method for the incompressible Navier–Stokes equations 
   in complex geometries" (DOI: 10.2140/camcos.2015.10.43). Note that if source terms are involved the extrapolation is more involved. 
 */
-class CdrGodunov : public CdrMultigrid {
+class CdrGodunov : public CdrMultigrid
+{
 public:
-
   /*!
     @brief Constructor
   */
@@ -43,52 +43,57 @@ public:
   /*!
     @brief Parse class options to put object in usable state. 
   */
-  virtual void parseOptions() override;
+  virtual void
+  parseOptions() override;
 
   /*!
     @brief Parse runtime options
   */
-  virtual void parseRuntimeOptions() override;
+  virtual void
+  parseRuntimeOptions() override;
 
   /*!
     @brief Allocate internal data holders in class object. 
   */
-  virtual void allocateInternals() override;
+  virtual void
+  allocateInternals() override;
 
   /*!
     @brief Compute the largest possible advective time step (for explicit methods)
     @details This computes dt = dx/max(|vx|,|vy|,|vz|), minimized over all grid levels and patches. 
     @note This is the appropriate time step routine for the BCG reconstruction. 
   */
-  virtual Real computeAdvectionDt() override;
+  virtual Real
+  computeAdvectionDt() override;
 
 protected:
-
   /*!
     @brief Advection object -- this implements the Graves/Trebotich discretization. 
   */
-  Vector<RefCountedPtr<EBAdvectLevelIntegrator> > m_levelAdvect;
+  Vector<RefCountedPtr<EBAdvectLevelIntegrator>> m_levelAdvect;
 
   /*!
     @brief If true, slopes are limited (always use limiting). 
   */
   bool m_limitSlopes;
-  
+
   /*!
     @brief Turn on/off source terms when time-extrapolating
   */
-  bool m_extrapolateSourceTerm;  
+  bool m_extrapolateSourceTerm;
 
   /*!
     @brief Parses slope limiter options
   */
-  virtual void parseSlopeLimiter();
+  virtual void
+  parseSlopeLimiter();
 
   /*!
     ®brief Parse whether or not to include a source-term in the Godunov extrapolation.
   */
-  virtual void parseExtrapolateSourceTerm();
-  
+  virtual void
+  parseExtrapolateSourceTerm();
+
   /*!
     @brief Godunov face extrapolation method for advection
     @param[out] a_facePhi  Phi on face centers
@@ -96,7 +101,8 @@ protected:
     @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states. 
     @details This functions calls Chombo code which implements the Graves/Trebotich discretization. 
   */
-  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
+  virtual void
+  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
 };
 
 #include <CD_NamespaceFooter.H>

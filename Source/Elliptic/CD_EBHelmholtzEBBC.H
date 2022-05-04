@@ -25,9 +25,9 @@
 /*!
   @brief Base class for passing EB boundary conditions into EBHelmholtzOp. 
 */
-class EBHelmholtzEBBC {
+class EBHelmholtzEBBC
+{
 public:
-
   /*!
     @brief Default constructor. 
   */
@@ -46,7 +46,8 @@ public:
   /*!
     @brief Disallowed - don't see why you would need it.
   */
-  EBHelmholtzEBBC& operator=(const EBHelmholtzEBBC& a_other) = delete;
+  EBHelmholtzEBBC&
+  operator=(const EBHelmholtzEBBC& a_other) = delete;
 
   /*!
     @brief Define function that is called by EBHelmholtzOp
@@ -57,12 +58,13 @@ public:
     @param[in] a_dx           Grid resolution. 
     @param[in] a_ghostCF      Number of ghost cells that are filled across CF interface. 
   */
-  void define(const Location::Cell                               a_dataLocation,
-	      const EBLevelGrid&                                 a_eblg,
-	      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef,
-	      const RealVect&                                    a_probLo,
-	      const Real&                                        a_dx,
-	      const int                                          a_ghostCF);
+  void
+  define(const Location::Cell                             a_dataLocation,
+         const EBLevelGrid&                               a_eblg,
+         const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_Bcoef,
+         const RealVect&                                  a_probLo,
+         const Real&                                      a_dx,
+         const int                                        a_ghostCF);
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
@@ -73,12 +75,13 @@ public:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  virtual void applyEBFlux(VoFIterator&       a_vofit,
-			   EBCellFAB&         a_Lphi,
-			   const EBCellFAB&   a_phi,
-			   const DataIndex&   a_dit,
-			   const Real&        a_beta,
-			   const bool&        a_homogeneousPhysBC) const = 0;
+  virtual void
+  applyEBFlux(VoFIterator&     a_vofit,
+              EBCellFAB&       a_Lphi,
+              const EBCellFAB& a_phi,
+              const DataIndex& a_dit,
+              const Real&      a_beta,
+              const bool&      a_homogeneousPhysBC) const = 0;
 
   /*!
     @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). 
@@ -87,10 +90,10 @@ public:
 	     B*wi*phi(i).
     @note    Multiplication by beta is done in the operator.
   */
-  const LayoutData<BaseIVFAB<VoFStencil> >& getKappaDivFStencils() const;
+  const LayoutData<BaseIVFAB<VoFStencil>>&
+  getKappaDivFStencils() const;
 
 protected:
-
   /*!
     @brief Component that everything is defined for. Always have m_comp = 0
   */
@@ -129,17 +132,18 @@ protected:
   /*!
     @brief B-coefficent. 
   */
-  RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_Bcoef;
+  RefCountedPtr<LevelData<BaseIVFAB<Real>>> m_Bcoef;
 
   /*!
     @brief Stencils for computing the flux on a single level. This is a single-level object. 
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_kappaDivFStencils;
+  LayoutData<BaseIVFAB<VoFStencil>> m_kappaDivFStencils;
 
   /*!
     @brief User define function. 
   */
-  virtual void define() = 0;
+  virtual void
+  define() = 0;
 
   /*!
     @brief Check if stencil is valid. 
@@ -147,20 +151,20 @@ protected:
     @param[in] a_stencil Stencil
     @param[in] a_dit     Data index
   */
-  inline
-  bool isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
+  inline bool
+  isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
 
   /*!
     @brief Returns physical position at the boundary
   */
-  inline
-  RealVect getBoundaryPosition(const VolIndex& a_vof, const DataIndex& a_dit) const;
+  inline RealVect
+  getBoundaryPosition(const VolIndex& a_vof, const DataIndex& a_dit) const;
 
   /*!
     @brief Apply stencil to data holder and return result
   */
-  inline
-  Real applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const;
+  inline Real
+  applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const;
 };
 
 #include <CD_NamespaceFooter.H>

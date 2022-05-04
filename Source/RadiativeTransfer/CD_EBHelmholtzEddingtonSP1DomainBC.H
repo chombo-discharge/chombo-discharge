@@ -25,9 +25,9 @@
   the time dependence is captured by reference. The time argument in ElectrostaticDomainBc::BcFunction by this class,
   so whatever function is put in there, it must capture time by reference. 
 */
-class EBHelmholtzEddingtonSP1DomainBC : public EBHelmholtzDomainBC {
+class EBHelmholtzEddingtonSP1DomainBC : public EBHelmholtzDomainBC
+{
 public:
-
   /*!
     @brief Not allowed, use the full constructor. 
   */
@@ -40,7 +40,10 @@ public:
     @param[in] a_r1           "First reflection coefficient"
     @param[in] a_r2           "Second reflection coefficient"
   */
-  EBHelmholtzEddingtonSP1DomainBC(const EddingtonSP1DomainBc& a_eddingtonBCs, const RefCountedPtr<RtSpecies>& a_species, const Real a_r1, const Real a_r2);
+  EBHelmholtzEddingtonSP1DomainBC(const EddingtonSP1DomainBc&     a_eddingtonBCs,
+                                  const RefCountedPtr<RtSpecies>& a_species,
+                                  const Real                      a_r1,
+                                  const Real                      a_r2);
 
   /*!
     @brief Disallowed -- don't see why you would need it.
@@ -63,13 +66,15 @@ public:
     @brief Disallowed - don't see why you would need it.
     @param[in] a_other Other operator
   */
-  EBHelmholtzEddingtonSP1DomainBC& operator=(const EBHelmholtzEddingtonSP1DomainBC& a_other) = delete;
+  EBHelmholtzEddingtonSP1DomainBC&
+  operator=(const EBHelmholtzEddingtonSP1DomainBC& a_other) = delete;
 
   /*!
     @brief Disallowed - don't see why you would need it.
     @param[in] a_other Other operator
   */
-  EBHelmholtzEddingtonSP1DomainBC& operator=(const EBHelmholtzEddingtonSP1DomainBC&& a_other) = delete;
+  EBHelmholtzEddingtonSP1DomainBC&
+  operator=(const EBHelmholtzEddingtonSP1DomainBC&& a_other) = delete;
 
   /*!
     @brief Define function
@@ -79,11 +84,12 @@ public:
     @param[in] a_dx     Grid resolution
     @note Overriding because this is a wrapper class for Dirichlet/Neumann, and those objects need defining. 
   */
-  void define(const Location::Cell                        a_dataLocation,
-	      const EBLevelGrid&                          a_eblg,
-	      const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
-	      const RealVect&                             a_probLo,
-	      const Real                                  a_dx) override final;
+  void
+  define(const Location::Cell                       a_dataLocation,
+         const EBLevelGrid&                         a_eblg,
+         const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
+         const RealVect&                            a_probLo,
+         const Real                                 a_dx) override final;
 
   /*!
     @brief Get face flux. This is for regular cells. 
@@ -95,12 +101,13 @@ public:
     @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
     @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
   */
-  void getFaceFlux(BaseFab<Real>&        a_faceFlux,
-		   const BaseFab<Real>&  a_phi,
-		   const int&            a_dir,
-		   const Side::LoHiSide& a_side,
-		   const DataIndex&      a_dit,
-		   const bool            a_useHomogeneous) const override final;
+  void
+  getFaceFlux(BaseFab<Real>&        a_faceFlux,
+              const BaseFab<Real>&  a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const override final;
 
   /*!
     @brief Get face flux. This is for irregular cells. 
@@ -111,15 +118,15 @@ public:
     @param[in] a_dit            Data index
     @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
   */
-  Real getFaceFlux(const VolIndex&       a_vof,
-		   const EBCellFAB&      a_phi,
-		   const int&            a_dir,
-		   const Side::LoHiSide& a_side,
-		   const DataIndex&      a_dit,
-		   const bool            a_useHomogeneous) const override final;
+  Real
+  getFaceFlux(const VolIndex&       a_vof,
+              const EBCellFAB&      a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const override final;
 
 protected:
-
   /*!
     @brief Eddington domain boundary conditions
   */
@@ -144,7 +151,7 @@ protected:
     @brief BC objects on each domain side. 
     @details These are instantiated in the constructor where we construct Neumann/Dirichlet on each domain side. 
   */
-  std::map<EddingtonSP1DomainBc::DomainSide, std::shared_ptr<EBHelmholtzDomainBC> > m_bcObjects;
+  std::map<EddingtonSP1DomainBc::DomainSide, std::shared_ptr<EBHelmholtzDomainBC>> m_bcObjects;
 };
 
 #include <CD_NamespaceFooter.H>

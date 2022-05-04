@@ -26,7 +26,8 @@
   @brief SpaceDim multi-index type for use with higher order Taylor series
   @note The next() and hasNext() functions are just temporary functions; I'm just too lazy to write an iterator class (yet)
 */
-class MultiIndex {
+class MultiIndex
+{
 public:
   /*!
     @brief Weak construction is bad. 
@@ -52,76 +53,89 @@ public:
   /*!
     @brief Define function
   */
-  void define(const int a_order);
+  void
+  define(const int a_order);
 
   /*!
     @brief Factorial function
   */
-  int factorial() const;
+  int
+  factorial() const;
 
   /*!
     @brief Get index
   */
-  IntVect getCurrentIndex() const;
+  IntVect
+  getCurrentIndex() const;
 
   /*!
     @brief Get highest order for this index
   */
-  int getOrder() const;
+  int
+  getOrder() const;
 
   /*!
     @brief Get the linear index (i.e. column number) for a given multi-index. 
   */
-  int getLinearIndex(const IntVect a_MultiIndex) const;
+  int
+  getLinearIndex(const IntVect a_MultiIndex) const;
 
   /*!
     @brief Get a multi-index corresponding to the linear index (i.e. column number)
   */
-  IntVect getMultiIndex(const int a_linearIndex) const;
+  IntVect
+  getMultiIndex(const int a_linearIndex) const;
 
   /*!
     @brief Assignment operator
   */
-  MultiIndex& operator=(const MultiIndex& a_other) = default;
+  MultiIndex&
+  operator=(const MultiIndex& a_other) = default;
 
   /*!
     @brief Get one index
   */
-  int operator[](const int a_dir) const;
+  int
+  operator[](const int a_dir) const;
 
   /*!
     @brief Increment multi-index lexigraphically
   */
-  void operator++() ;
+  void
+  operator++();
 
   /*!
     @brief Reset multi-index to point to the first index
   */
-  void reset();
+  void
+  reset();
 
   /*!
     @brief Check that multi-index is ok
   */
-  bool ok() const;
+  bool
+  ok() const;
 
   /*!
     @brief Get norm of multi-index.
     @details Returns |alpha| + |alpha2| + ....
   */
-  int norm() const;
+  int
+  norm() const;
 
   /*!
     @brief Return number of indices in MultiIndex range
   */
-  int getNumIndices() const;
+  int
+  getNumIndices() const;
 
   /*!
     @brief Power function for multi-indices
   */
-  Real pow(const RealVect& a_vec);
-  
-protected:
+  Real
+  pow(const RealVect& a_vec);
 
+protected:
   /*!
     @brief Maximum order representable by this multi-index
   */
@@ -155,24 +169,27 @@ protected:
   /*!
     @brief Base factorial function
   */
-  int factorial(const int a_n) const;
+  int
+  factorial(const int a_n) const;
 
   /*!
     @brief Fill m_indices
   */
-  void makeIndices();
+  void
+  makeIndices();
 
   /*!
     @brief Fill maps
   */
-  void makeMaps();
+  void
+  makeMaps();
 
 private:
-  
   /*!
     @brief Get norm
   */
-  int norm(const IntVect a_index) const;
+  int
+  norm(const IntVect a_index) const;
 };
 
 #include <CD_NamespaceFooter.H>

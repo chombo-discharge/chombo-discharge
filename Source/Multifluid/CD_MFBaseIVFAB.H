@@ -25,9 +25,9 @@
 /*!
   @brief Multiphase BaseIVFAB<Real>. 
 */
-class MFBaseIVFAB {
+class MFBaseIVFAB
+{
 public:
-
   /*!
     @brief Weak construction. 
   */
@@ -39,9 +39,7 @@ public:
     @param[in] a_phaseGraphs EBGraphs on the phases
     @param[in] a_nComp       Number of components to allocate
   */
-  MFBaseIVFAB(const Vector<IntVectSet>& a_regions,
-	      const Vector<EBGraph>&    a_phaseGraphs,
-	      const Vector<int>&        a_nComp);
+  MFBaseIVFAB(const Vector<IntVectSet>& a_regions, const Vector<EBGraph>& a_phaseGraphs, const Vector<int>& a_nComp);
 
   /*!
     @brief Destructor (does nothing)
@@ -52,30 +50,35 @@ public:
     @brief Get BaseIVFAB for specified phase
     @param[in] a_phase Phase
   */
-  virtual BaseIVFAB<Real>& getIVFAB(const int a_phase);
+  virtual BaseIVFAB<Real>&
+  getIVFAB(const int a_phase);
 
   /*!
     @brief Get BaseIVFAB for specified phase
     @param[in] a_phase Phase
   */
-  virtual const BaseIVFAB<Real>& getIVFAB(const int a_phase) const;
+  virtual const BaseIVFAB<Real>&
+  getIVFAB(const int a_phase) const;
 
   /*!
     @brief Get BaseIVFAB pointer for phase
     @param[in] a_phase Phase
   */
-  virtual BaseIVFAB<Real>* getPhasePtr(int a_phase);
+  virtual BaseIVFAB<Real>*
+  getPhasePtr(int a_phase);
 
   /*!
     @brief Get number of phases
   */
-  virtual int numPhases();
+  virtual int
+  numPhases();
 
   /*!
     @brief Set value
     @param[in] a_value value in BaseIVFAB
   */
-  virtual void setVal(Real a_value);
+  virtual void
+  setVal(Real a_value);
 
   /*!
     @brief Copy function (see Chombo docs)
@@ -85,40 +88,44 @@ public:
     @param[in] a_src         Source. 
     @param[in] a_srcInterval Source interval
   */
-  virtual void copy(const Box&         a_fromBox,
-		    const Interval&    a_dst_interv,
-		    const Box&         a_toBox,
-		    const MFBaseIVFAB& a_src,
-		    const Interval&    a_srcInterv);
+  virtual void
+  copy(const Box&         a_fromBox,
+       const Interval&    a_dst_interv,
+       const Box&         a_toBox,
+       const MFBaseIVFAB& a_src,
+       const Interval&    a_srcInterv);
 
-  static int preAllocatable();
+  static int
+  preAllocatable();
 
   /*!
     @brief Size function. Required for LevelData construction
   */
-  virtual int size(const Box& R, const Interval& comps) const;
+  virtual int
+  size(const Box& R, const Interval& comps) const;
 
   /*!
     @brief Linearization function
   */
-  virtual void linearOut(void* buf, const Box& R, const Interval& comps) const;
+  virtual void
+  linearOut(void* buf, const Box& R, const Interval& comps) const;
 
   /*!
     @brief Linearization function
   */
-  virtual void linearIn(void* buf, const Box& R, const Interval& comps);
+  virtual void
+  linearIn(void* buf, const Box& R, const Interval& comps);
 
 protected:
-
-  Vector<BaseIVFAB<Real>* > m_phase;
+  Vector<BaseIVFAB<Real>*> m_phase;
 };
 
 /*!
   @brief Factory class for creating MFBaseIVFABs
 */
-class MFBaseIVFABFactory : public DataFactory<MFBaseIVFAB> {
+class MFBaseIVFABFactory : public DataFactory<MFBaseIVFAB>
+{
 public:
-
   /*!
     @brief Don't see why we need a default constructor
   */
@@ -137,15 +144,16 @@ public:
   /*!
     @brief Define function
   */
-  virtual void define(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_nComp);
+  virtual void
+  define(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_nComp);
 
   /*!
     @brief Factory method
   */
-  virtual MFBaseIVFAB* create(const Box& a_box, int a_ignored_argument, const DataIndex& a_dit) const;
+  virtual MFBaseIVFAB*
+  create(const Box& a_box, int a_ignored_argument, const DataIndex& a_dit) const;
 
 protected:
-
   /*!
     @brief EBIS layouts for different phases
   */
@@ -155,7 +163,6 @@ protected:
     @brief Componenents
   */
   Vector<int> m_nComp;
-
 };
 
 #include <CD_NamespaceFooter.H>

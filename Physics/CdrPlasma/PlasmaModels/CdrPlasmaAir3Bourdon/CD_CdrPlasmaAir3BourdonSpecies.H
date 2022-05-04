@@ -22,46 +22,73 @@
 namespace Physics {
   namespace CdrPlasma {
 
-    class CdrPlasmaAir3Bourdon::Electron : public CdrSpecies {
+    class CdrPlasmaAir3Bourdon::Electron : public CdrSpecies
+    {
     public:
       Electron();
       ~Electron() {}
-      Real initialData(const RealVect a_pos, const Real a_time) const;
+      Real
+      initialData(const RealVect a_pos, const Real a_time) const;
 
     protected:
-      Real m_uniform_density;
-      Real m_seed_density;
-      Real m_seed_rad;
+      Real     m_uniform_density;
+      Real     m_seed_density;
+      Real     m_seed_rad;
       RealVect m_seed_pos;
     };
 
-    class CdrPlasmaAir3Bourdon::MPlus : public CdrSpecies {
+    class CdrPlasmaAir3Bourdon::MPlus : public CdrSpecies
+    {
     public:
       MPlus();
-      ~MPlus(){}
-      Real initialData(const RealVect a_pos, const Real a_time) const;
+      ~MPlus() {}
+      Real
+      initialData(const RealVect a_pos, const Real a_time) const;
+
     protected:
-      Real m_uniform_density;
-      Real m_seed_density;
-      Real m_seed_rad;
+      Real     m_uniform_density;
+      Real     m_seed_density;
+      Real     m_seed_rad;
       RealVect m_seed_pos;
     };
 
-    class CdrPlasmaAir3Bourdon::MMinus : public CdrSpecies {
+    class CdrPlasmaAir3Bourdon::MMinus : public CdrSpecies
+    {
     public:
       MMinus();
-      ~MMinus(){}
-      Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
+      ~MMinus() {}
+      Real
+      initialData(const RealVect a_pos, const Real a_time) const
+      {
+        return 0.0;
+      }
     };
 
-    class CdrPlasmaAir3Bourdon::PhotonOne : public RtSpecies {
+    class CdrPlasmaAir3Bourdon::PhotonOne : public RtSpecies
+    {
     public:
       PhotonOne();
-      ~PhotonOne(){}
-      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
-      Real get_lambda() const { return m_lambda;}
-      Real get_A()      const { return m_A;}
-      Real get_pO2()    const { return m_pO2; }
+      ~PhotonOne() {}
+      Real
+      getAbsorptionCoefficient(const RealVect a_pos) const
+      {
+        return m_lambda * m_pO2 / sqrt(3.0);
+      }
+      Real
+      get_lambda() const
+      {
+        return m_lambda;
+      }
+      Real
+      get_A() const
+      {
+        return m_A;
+      }
+      Real
+      get_pO2() const
+      {
+        return m_pO2;
+      }
 
     protected:
       Real m_lambda;
@@ -69,14 +96,31 @@ namespace Physics {
       Real m_pO2;
     };
 
-    class CdrPlasmaAir3Bourdon::PhotonTwo : public RtSpecies {
+    class CdrPlasmaAir3Bourdon::PhotonTwo : public RtSpecies
+    {
     public:
       PhotonTwo();
-      ~PhotonTwo(){}
-      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
-      Real get_lambda() const { return m_lambda;}
-      Real get_A()      const { return m_A;}
-      Real get_pO2()    const { return m_pO2; }
+      ~PhotonTwo() {}
+      Real
+      getAbsorptionCoefficient(const RealVect a_pos) const
+      {
+        return m_lambda * m_pO2 / sqrt(3.0);
+      }
+      Real
+      get_lambda() const
+      {
+        return m_lambda;
+      }
+      Real
+      get_A() const
+      {
+        return m_A;
+      }
+      Real
+      get_pO2() const
+      {
+        return m_pO2;
+      }
 
     protected:
       Real m_lambda;
@@ -84,22 +128,39 @@ namespace Physics {
       Real m_pO2;
     };
 
-    class CdrPlasmaAir3Bourdon::PhotonThree : public RtSpecies {
+    class CdrPlasmaAir3Bourdon::PhotonThree : public RtSpecies
+    {
     public:
       PhotonThree();
-      ~PhotonThree(){}
-      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
-      Real get_lambda() const { return m_lambda;}
-      Real get_A()      const { return m_A;}
-      Real get_pO2()    const { return m_pO2; }
+      ~PhotonThree() {}
+      Real
+      getAbsorptionCoefficient(const RealVect a_pos) const
+      {
+        return m_lambda * m_pO2 / sqrt(3.0);
+      }
+      Real
+      get_lambda() const
+      {
+        return m_lambda;
+      }
+      Real
+      get_A() const
+      {
+        return m_A;
+      }
+      Real
+      get_pO2() const
+      {
+        return m_pO2;
+      }
 
     protected:
       Real m_lambda;
       Real m_A;
       Real m_pO2;
     };
-  }
-}
+  } // namespace CdrPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

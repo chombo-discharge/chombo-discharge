@@ -23,9 +23,9 @@
   @brief Boundary condition class for passing Neumann domain boundary conditions into EBHelmholtzOp
   @details This class can set either dphi/dn or B*dphi/dn on the boundary. 
 */
-class EBHelmholtzNeumannDomainBC : public EBHelmholtzDomainBC {
+class EBHelmholtzNeumannDomainBC : public EBHelmholtzDomainBC
+{
 public:
-
   /*!
     @brief Constructor. Must subsequently call setDphiDn or setBxDphiDn
   */
@@ -55,29 +55,33 @@ public:
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const Real a_DphiDn);
+  void
+  setDphiDn(const Real a_DphiDn);
 
   /*!
     @brief Set spatially dependent value of dphi/dn on the EB. 
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
+  void
+  setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /*!
     @brief Set the value of B*dphi/dn on the EB.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const Real a_BxDphiDn);
+  void
+  setBxDphiDn(const Real a_BxDphiDn);
 
   /*!
     @brief Set the spatially dependent value of B*dphi/dn on the EB.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
-  
+  void
+  setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
+
   /*!
     @brief Get face flux. This is for regular cells
     @param[inout] a_faceFlux       Face-centered flux. 
@@ -88,12 +92,13 @@ public:
     @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
     @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
   */
-  virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux,
-			   const BaseFab<Real>&  a_phi,
-			   const int&            a_dir,
-			   const Side::LoHiSide& a_side,
-			   const DataIndex&      a_dit,
-			   const bool            a_useHomogeneous) const override;
+  virtual void
+  getFaceFlux(BaseFab<Real>&        a_faceFlux,
+              const BaseFab<Real>&  a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const override;
 
   /*!
     @brief Get face flux. This is for irregular cells. 
@@ -104,15 +109,15 @@ public:
     @param[in] a_dit            Data index
     @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
   */
-  virtual Real getFaceFlux(const VolIndex&       a_vof,
-			   const EBCellFAB&      a_phi,
-			   const int&            a_dir,
-			   const Side::LoHiSide& a_side,
-			   const DataIndex&      a_dit,
-			   const bool            a_useHomogeneous) const override;
+  virtual Real
+  getFaceFlux(const VolIndex&       a_vof,
+              const EBCellFAB&      a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const override;
 
 protected:
-
   /*!
     @brief Hook for multiplying by b-coefficient or not
   */
@@ -136,7 +141,7 @@ protected:
   /*!
     @brief Value on the domain side. 
   */
-  std::function<Real(const RealVect& a_pos) > m_functionDphiDn;
+  std::function<Real(const RealVect& a_pos)> m_functionDphiDn;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -20,9 +20,9 @@
 /*!
   @brief Class for making Larsen boundary conditions 
 */
-class EBHelmholtzLarsenDomainBCFactory : public EBHelmholtzDomainBCFactory {
+class EBHelmholtzLarsenDomainBCFactory : public EBHelmholtzDomainBCFactory
+{
 public:
-
   /*!
     @brief Alias for source function
   */
@@ -42,9 +42,9 @@ public:
     @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients. 
   */
   EBHelmholtzLarsenDomainBCFactory(const RefCountedPtr<RtSpecies>& a_species,
-				   const Real                      a_r1,
-				   const Real                      a_r2,
-				   const SourceFunction            a_source);
+                                   const Real                      a_r1,
+                                   const Real                      a_r2,
+                                   const SourceFunction            a_source);
 
   /*!
     @brief Constructor. Source term is set to zero. 
@@ -53,9 +53,7 @@ public:
     @param[in] a_r2      "Second reflection coefficient"
     @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients. 
   */
-  EBHelmholtzLarsenDomainBCFactory(const RefCountedPtr<RtSpecies>& a_species,
-				   const Real                      a_r1,
-				   const Real                      a_r2);
+  EBHelmholtzLarsenDomainBCFactory(const RefCountedPtr<RtSpecies>& a_species, const Real a_r1, const Real a_r2);
 
   /*!
     @brief No copy construction
@@ -75,20 +73,22 @@ public:
   /*!
     @brief No copy assignment
   */
-  EBHelmholtzLarsenDomainBCFactory& operator=(const EBHelmholtzLarsenDomainBCFactory& a_other) = delete;
+  EBHelmholtzLarsenDomainBCFactory&
+  operator=(const EBHelmholtzLarsenDomainBCFactory& a_other) = delete;
 
   /*!
     @brief No move assignment
   */
-  EBHelmholtzLarsenDomainBCFactory& operator=(const EBHelmholtzLarsenDomainBCFactory&& a_other) = delete;
+  EBHelmholtzLarsenDomainBCFactory&
+  operator=(const EBHelmholtzLarsenDomainBCFactory&& a_other) = delete;
 
   /*!
     @brief Factory method
   */
-  virtual RefCountedPtr<EBHelmholtzDomainBC> create() const override;
+  virtual RefCountedPtr<EBHelmholtzDomainBC>
+  create() const override;
 
 protected:
-
   /*!
     @brief Radiative transfer species
   */

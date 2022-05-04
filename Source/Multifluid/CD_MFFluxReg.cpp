@@ -13,30 +13,33 @@
 #include <CD_MFFluxReg.H>
 #include <CD_NamespaceHeader.H>
 
-MFFluxReg::MFFluxReg(){
-}
+MFFluxReg::MFFluxReg() {}
 
-MFFluxReg::MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fluxRegs){
-  this->define(a_fluxRegs);
-}
+MFFluxReg::MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister>>& a_fluxRegs) { this->define(a_fluxRegs); }
 
-MFFluxReg::~MFFluxReg(){
+MFFluxReg::~MFFluxReg() {}
 
-}
-
-void MFFluxReg::define(const Vector<RefCountedPtr<EBFluxRegister> >& a_fluxRegs){
+void
+MFFluxReg::define(const Vector<RefCountedPtr<EBFluxRegister>>& a_fluxRegs)
+{
   m_fluxRegs = a_fluxRegs;
 }
 
-const RefCountedPtr<EBFluxRegister>& MFFluxReg::getFluxRegPointer(const int a_phase) const {
+const RefCountedPtr<EBFluxRegister>&
+MFFluxReg::getFluxRegPointer(const int a_phase) const
+{
   return m_fluxRegs[a_phase];
 }
 
-EBFluxRegister& MFFluxReg::getFluxReg(const int a_phase) {
+EBFluxRegister&
+MFFluxReg::getFluxReg(const int a_phase)
+{
   return *m_fluxRegs[a_phase];
 }
 
-const EBFluxRegister& MFFluxReg::getFluxReg(const int a_phase) const {
+const EBFluxRegister&
+MFFluxReg::getFluxReg(const int a_phase) const
+{
   return *m_fluxRegs[a_phase];
 }
 

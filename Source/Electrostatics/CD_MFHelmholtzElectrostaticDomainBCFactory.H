@@ -22,9 +22,9 @@
   @details This class implements MFHelmholtzDomainBCFactory and must thus return an EBHelmholtzDomainBC object for encapsulating domain boundary conditions
   in EBHelmholtzOp. This is simply a multifluid wrapper. 
 */
-class MFHelmholtzElectrostaticDomainBCFactory : public MFHelmholtzDomainBCFactory{
+class MFHelmholtzElectrostaticDomainBCFactory : public MFHelmholtzDomainBCFactory
+{
 public:
-
   /*!
     @brief Weak construction is bad. Use the full constructor. 
   */
@@ -52,13 +52,15 @@ public:
     @brief Disallowed copy assignment
     @param[in] a_other Other factory
   */
-  MFHelmholtzElectrostaticDomainBCFactory& operator=(MFHelmholtzElectrostaticDomainBCFactory& a_other) = delete;
+  MFHelmholtzElectrostaticDomainBCFactory&
+  operator=(MFHelmholtzElectrostaticDomainBCFactory& a_other) = delete;
 
   /*!
     @brief Disallowed move assignment
     @param[in] a_other Other factory
   */
-  MFHelmholtzElectrostaticDomainBCFactory& operator=(MFHelmholtzElectrostaticDomainBCFactory&& a_other) = delete;
+  MFHelmholtzElectrostaticDomainBCFactory&
+  operator=(MFHelmholtzElectrostaticDomainBCFactory&& a_other) = delete;
 
   /*!
     @brief Destructor (does nothing)
@@ -69,10 +71,10 @@ public:
     @brief Factory method
     @param[in] a_iphase Phase
   */
-  RefCountedPtr<EBHelmholtzDomainBC> create(const int a_iphase) const override final;
+  RefCountedPtr<EBHelmholtzDomainBC>
+  create(const int a_iphase) const override final;
 
 protected:
-
   /*!
     @brief Domain boundary conditions
   */

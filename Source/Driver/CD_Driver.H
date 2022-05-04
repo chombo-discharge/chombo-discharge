@@ -28,14 +28,14 @@
   @brief Main class for time/space advancement of streamer equations. 
   @details This class runs a simulation and controls input/output, regrid intervals etc. 
 */
-class Driver {
+class Driver
+{
 public:
-
   /*!
     @brief Weak constructor. Not allowed.
   */
   Driver() = delete;
-  
+
   /*!
     @brief Full constructor. 
     @param[in] a_computationalGeometry Computational geometry. 
@@ -45,10 +45,10 @@ public:
     @param[in] a_geoCoarsen            geo_coarsen class which can remove tags along the geometry. 
   */
   Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
-	 const RefCountedPtr<TimeStepper>&           a_timeStepper,
-	 const RefCountedPtr<AmrMesh>&               a_amr,
-	 const RefCountedPtr<CellTagger>&            a_cellTagger = RefCountedPtr<CellTagger>(nullptr),
-	 const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen = RefCountedPtr<GeoCoarsener>(nullptr));
+         const RefCountedPtr<TimeStepper>&           a_timeStepper,
+         const RefCountedPtr<AmrMesh>&               a_amr,
+         const RefCountedPtr<CellTagger>&            a_cellTagger = RefCountedPtr<CellTagger>(nullptr),
+         const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen = RefCountedPtr<GeoCoarsener>(nullptr));
 
   /*!
     @brief Destructor (does nothing)
@@ -59,15 +59,17 @@ public:
     @brief Setup and run simulations
     @param[in] a_inputFile Input file containing parameters for the simulation. 
   */
-  void setupAndRun(const std::string a_inputFile);
-  
+  void
+  setupAndRun(const std::string a_inputFile);
+
   /*!
     @brief Run a simulation for a specific time, or until a maximum number of steps have been performed.
     @param[in] a_startTime Starting time of simulation
     @param[in] a_endTime   Simulation end time
     @param[in] a_maxSteps  Maximum number of steps.
   */
-  void run(const Real a_startTime, const Real a_endTime, const int a_maxSteps);
+  void
+  run(const Real a_startTime, const Real a_endTime, const int a_maxSteps);
 
   /*!
     @brief Setup function
@@ -76,10 +78,13 @@ public:
     @param[in] a_restart        Do a restart or not
     @param[in] a_restartFile    Name of restart file (if restarting from a previous time step)
   */
-  void setup(const std::string a_inputFile, const int a_initialRegrids, const bool a_restart, const std::string a_restartFile);
+  void
+  setup(const std::string a_inputFile,
+        const int         a_initialRegrids,
+        const bool        a_restart,
+        const std::string a_restartFile);
 
 protected:
-
   /*!
     @brief Index space
   */
@@ -184,7 +189,7 @@ protected:
   /*!
     @brief Geometric tag depth for conductors
   */
-  int m_conductorTagsDepth;  
+  int m_conductorTagsDepth;
 
   /*!
     @brief Geometric tag depth for dielectrics
@@ -270,7 +275,7 @@ protected:
     @brief MPI timer
   */
   Real m_wallClockStart;
-  
+
   /*!
     @brief MPI timer
   */
@@ -356,74 +361,87 @@ protected:
     @brief Set amr
     @param[in] a_amrMesh AmrMesh
   */
-  void setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh);
+  void
+  setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh);
 
   /*!
     @brief Sanity check
   */
-  void sanityCheck();
+  void
+  sanityCheck();
 
   /*!
     @brief Parse options
     @details Called at the beginning of the simulation. 
   */
-  void parseOptions();
+  void
+  parseOptions();
 
   /*!
     @brief Parse runtime options
     @details Called every time step. 
   */
-  void parseRuntimeOptions();
+  void
+  parseRuntimeOptions();
 
   /*!
     @brief Parse geometrical refinement 
     @details This parses settings for how deep to refine geometries, either based on curvature or a hard limit for electrodes/dielectrics. 
   */
-  void parseGeometryRefinement();
+  void
+  parseGeometryRefinement();
 
   /*!
     @brief Parse plot variables
   */
-  void parsePlotVariables();
+  void
+  parsePlotVariables();
 
   /*!
     @brief Parse option for geometry generation. 
     @details This sets the geometry-generation load balancing method to either use Chombo or chombo-discharge. 
   */
-  void parseGeometryGeneration();
+  void
+  parseGeometryGeneration();
 
   /*!
     @brief Parse irregular tag growth
     @details This parses m_irregTagGrowth, which is used to grow cut-cell tags. 
   */
-  void parseIrregTagGrowth();
+  void
+  parseIrregTagGrowth();
 
   /*!
     @brief Create output directories
   */
-  void createOutputDirectories();
+  void
+  createOutputDirectories();
 
   /*!
     @brief Allocate internal storage for Driver. 
   */
-  void allocateInternals();
-  
+  void
+  allocateInternals();
+
   /*!
     @brief Cache tags. This is used
   */
-  void cacheTags(const EBAMRTags& a_tags);
+  void
+  cacheTags(const EBAMRTags& a_tags);
 
   /*!
     @brief Write the geometry to file
   */
-  void writeEBIS();
+  void
+  writeEBIS();
 
   /*!
     @brief Get geometric tags
     @details This fills m_geomTags with irregular cell tags, using information that was passed into Driver from the input script. This includes
     adding tags that refine surfaces to a certain depth, or tags where the curvature of the surface exceeds a specified value. 
   */
-  void getGeometryTags();
+  void
+  getGeometryTags();
 
   /*!
     @brief Get statics about a DisjointBoxLaout. This will compute the number of grid cells and patches both locally and globally. 
@@ -440,45 +458,50 @@ protected:
     @param[in]  a_finestLevel         Finest AMR level
     @param[in]  a_grids               Input grids
   */
-  void getCellsAndBoxes(long long&         a_numLocalCells,
-			long long&         a_numLocalCellsGhosts,
-			long long&         a_numLocalBoxes,
-			long long&         a_numTotalCells,
-			long long&         a_numTotalCellsGhosts,
-			long long&         a_numTotalBoxes,
-			Vector<long long>& a_numLocalLevelBoxes,
-			Vector<long long>& a_numTotalLevelBoxes,
-			Vector<long long>& a_numLocalLevelCells,
-			Vector<long long>& a_numTotalLevelCells,
-			const int&         a_finestLevel,
-			const Vector<DisjointBoxLayout>& a_grids);
+  void
+  getCellsAndBoxes(long long&                       a_numLocalCells,
+                   long long&                       a_numLocalCellsGhosts,
+                   long long&                       a_numLocalBoxes,
+                   long long&                       a_numTotalCells,
+                   long long&                       a_numTotalCellsGhosts,
+                   long long&                       a_numTotalBoxes,
+                   Vector<long long>&               a_numLocalLevelBoxes,
+                   Vector<long long>&               a_numTotalLevelBoxes,
+                   Vector<long long>&               a_numLocalLevelCells,
+                   Vector<long long>&               a_numTotalLevelCells,
+                   const int&                       a_finestLevel,
+                   const Vector<DisjointBoxLayout>& a_grids);
 
   /*!
     @brief Print regrid report. 
   */
-  void gridReport();
+  void
+  gridReport();
 
   /*!
     @brief Number formatting method -- writes big numbers using an input separator. E.g. the number 123456 is written as 123,456
     @param[in] a_number Number to format as string with separator
     @param[in] a_sep    Separator
   */
-  std::string numberFmt(const long long a_number, char a_sep = ',') const;
+  std::string
+  numberFmt(const long long a_number, char a_sep = ',') const;
 
   /*!
     @brief Number formatting game. This just prints the number 123456 as 123,456
     @param[in] a_numbers Numbers to format as string with separator
     @param[in] a_sep     Separator
   */
-  Vector<std::string> numberFmt(const Vector<long long> a_numbers, char a_sep = ',') const;
+  Vector<std::string>
+  numberFmt(const Vector<long long> a_numbers, char a_sep = ',') const;
 
 #ifdef CH_USE_HDF5
   /*!
     @brief Read checkpoint file
     @details This will read grids and computational loads from an HDF5 file and restart the simulation from that. 
     @param[in] a_restartFile Which file to read
-  */  
-  void readCheckpointFile(const std::string& a_restartFile);
+  */
+  void
+  readCheckpointFile(const std::string& a_restartFile);
 #endif
 
   /*!
@@ -487,116 +510,136 @@ protected:
     @param[in] a_lmax           Finest level that can be generated during the regrid step. 
     @param[in] a_useInitialData If true, fill solvers with initial data after making the new grids. 
   */
-  void regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData);
+  void
+  regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData);
 
   /*!
     @brief Regrid internal storage for this class
     @param[in] a_oldFinestLevel Finest level before the regrid
     @param[in] a_newFinestLevel Finest level before the regrid
   */
-  void regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel);
-  
+  void
+  regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel);
+
   /*!
     @brief Set the computational geometry
     @param[in] a_computationalGeometry Computational geometry
   */
-  void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
+  void
+  setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /*!
     @brief Set the time stepper
     @param[in] a_timeStepper Time stepper
   */
-  void setTimeStepper(const RefCountedPtr<TimeStepper>& a_timeStepper);
+  void
+  setTimeStepper(const RefCountedPtr<TimeStepper>& a_timeStepper);
 
   /*!
     @brief Set the cell tagger
     @param[in] a_cellTagger Cell tagger
   */
-  void setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger);
+  void
+  setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger);
 
   /*!
     @brief Set the geo coarsener
     @param[in] a_geoCoarsen Coarsener for cut-cell tags. 
   */
-  void setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen);
+  void
+  setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen);
 
   /*!
     @brief Setup function
   */
-  void setupFresh(const int a_initialRegrids);
+  void
+  setupFresh(const int a_initialRegrids);
 
   /*!
     @brief Set for restart
   */
 #ifdef CH_USE_HDF5
-  void setupForRestart(const int a_initialRegrids, const std::string a_restartFile);
+  void
+  setupForRestart(const int a_initialRegrids, const std::string a_restartFile);
 #endif
 
   /*!
     @brief Set up for geometry only
   */
-  void setupGeometryOnly();
+  void
+  setupGeometryOnly();
 
   /*!
     @brief Check if restart file exists
   */
-  void checkRestartFile(const std::string a_restartFile) const;
+  void
+  checkRestartFile(const std::string a_restartFile) const;
 
   /*!
     @brief Write a time step report
   */
-  void stepReport(const Real a_startTime, const Real a_endTime, const int a_maxSteps);
+  void
+  stepReport(const Real a_startTime, const Real a_endTime, const int a_maxSteps);
 
   /*!
     @brief Write a plot file
     @param[in] a_file File name
     @details This can write an arbitrary folder. E.g. filename = /crash/abc.hdf5
   */
-  void writePlotFile(const std::string a_filename);    
+  void
+  writePlotFile(const std::string a_filename);
 
   /*!
     @brief Write a plot file. This writes to plt/
   */
-  void writePlotFile();
+  void
+  writePlotFile();
 
   /*!
     @brief Write a regrid file.
     @details This writes a regular plot file to /regrid
   */
-  void writePreRegridFile();
+  void
+  writePreRegridFile();
 
   /*!
     @brief Write a regrid file.
     @details This writes a regular plot file to /regrid
   */
-  void writePostRegridFile();  
+  void
+  writePostRegridFile();
 
   /*!
     @brief Write a restart file
     @details This writes a regular plot file to /restart
   */
-  void writeRestartFile();
+  void
+  writeRestartFile();
 
   /*!
     @brief Write a crash file
     @details This writes a regular plot file to /crash
   */
-  void writeCrashFile();
+  void
+  writeCrashFile();
 
   /*!
     @brief Write the memory usage to file
   */
-  void writeMemoryUsage();
+  void
+  writeMemoryUsage();
 
   /*!
     @brief Write computational loads
   */
-  void writeComputationalLoads();
+  void
+  writeComputationalLoads();
 
   /*!
     @brief Write a checkpoint file
   */
-  void writeCheckpointFile();
+  void
+  writeCheckpointFile();
 
 #ifdef CH_USE_HDF5
   /*!
@@ -604,17 +647,19 @@ protected:
     @param[in] a_handle HDF5 file
     @param[in] a_level  Grid level
     @details This will call writeCheckpointTags and writeCheckpointRealmLoads
-  */  
-  void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level);
+  */
+  void
+  writeCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 #endif
-  
+
 #ifdef CH_USE_HDF5
   /*!
     @brief Write tags to checkpoint file
     @param[in] a_handle HDF5 file
     @param[in] a_level  Grid level
-  */  
-  void writeCheckpointTags(HDF5Handle& a_handle, const int a_level);
+  */
+  void
+  writeCheckpointTags(HDF5Handle& a_handle, const int a_level);
 #endif
 
 #ifdef CH_USE_HDF5
@@ -622,44 +667,54 @@ protected:
     @brief Write computational loads to checkpoint file
     @param[in] a_handle HDF5 file
     @param[in] a_level  Grid level
-  */  
-  void writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level);
+  */
+  void
+  writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level);
 #endif
 
   /*!
     @brief Write checkpoint data
   */
-#ifdef CH_USE_HDF5      
-  void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
+#ifdef CH_USE_HDF5
+  void
+  readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 #endif
 
   /*!
     @brief Read Realm loads. 
   */
-#ifdef CH_USE_HDF5        
-  void readCheckpointRealmLoads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level);
+#ifdef CH_USE_HDF5
+  void
+  readCheckpointRealmLoads(Vector<long int>& a_loads,
+                           HDF5Handle&       a_handle,
+                           const std::string a_realm,
+                           const int         a_level);
 #endif
 
   /*!
     @brief Write the geometry to file. 
   */
-  void writeGeometry();
+  void
+  writeGeometry();
 
   /*!
     @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
   */
-  bool tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags);
+  bool
+  tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags);
 
   /*!
     @brief Get number of plot variables
     @return Returns the number of internal plot variables that Driver will write to file. 
   */
-  int getNumberOfPlotVariables() const;
+  int
+  getNumberOfPlotVariables() const;
 
   /*!
     @brief Get the string identifiers for the internal plot variables from Driver
   */
-  Vector<std::string> getPlotVariableNames() const;
+  Vector<std::string>
+  getPlotVariableNames() const;
 
   /*!
     @brief Write internal plot data
@@ -667,7 +722,8 @@ protected:
     @param[inout] a_comp   Starting component
     @details This will copy Driver's plot data into a_output, starting on component a_comp. 
   */
-  void writePlotData(EBAMRCellData& a_output, int& a_comp);
+  void
+  writePlotData(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write cell tags to file
@@ -675,7 +731,8 @@ protected:
     @param[inout] a_comp   Starting component
     @details This will write cell tags data into a_output, starting on component a_comp. 
   */
-  void writeTags(EBAMRCellData& a_output, int& a_comp);
+  void
+  writeTags(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write MPI ranks to output
@@ -683,7 +740,8 @@ protected:
     @param[inout] a_comp   Starting component
     @details This adds data to a_output where the data in each grid patch is the MPI rank. 
   */
-  void writeRanks(EBAMRCellData& a_output, int& a_comp);
+  void
+  writeRanks(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write level sets
@@ -692,17 +750,20 @@ protected:
     @details This adds data to a_output where the cell-centered data is the level-set value. 
     @note This writes directly to a_output.
   */
-  void writeLevelset(EBAMRCellData& a_output, int& a_comp);
+  void
+  writeLevelset(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Return the finest tag level
   */
-  int getFinestTagLevel(const EBAMRTags& a_cellTags) const;
+  int
+  getFinestTagLevel(const EBAMRTags& a_cellTags) const;
 
   /*!
     @brief Rebuild Parmparse
   */
-  void rebuildParmParse() const;
+  void
+  rebuildParmParse() const;
 };
 
 #include <CD_NamespaceFooter.H>

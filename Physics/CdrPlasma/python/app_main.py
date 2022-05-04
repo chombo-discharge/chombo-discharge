@@ -8,13 +8,13 @@ def write_template(args):
     kinfile = args.discharge_home + "/Physics/CdrPlasma/PlasmaModels" + "/" + args.physics + "/CD_" + args.physics + ".H"
     tagfile = args.discharge_home + "/Physics/CdrPlasma/CellTaggers" +  "/" + args.cell_tagger + "/CD_" + args.cell_tagger + ".H"
     if not os.path.exists(geofile):
-        print 'Could not find ' + geofile
+        print('Could not find ' + geofile)
     if not os.path.exists(tsfile):
-        print 'Could not find ' + tsfile
+        print('Could not find ' + tsfile)
     if not os.path.exists(kinfile):
-        print 'Could not find ' + kinfile
+        print('Could not find ' + kinfile)
     if not os.path.exists(tagfile) and args.cell_tagger != "none":
-        print 'Could not find ' + tagfile
+        print('Could not find ' + tagfile)
                     
     # Create app directory if it does not exist
     app_dir = args.base_dir + "/" + args.app_name

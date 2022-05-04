@@ -22,9 +22,9 @@
 /*!
   @brief Cylinder with rounded caps at its ends. 
 */
-class RodIF : public BaseIF{
+class RodIF : public BaseIF
+{
 public:
-
   /*!
     @brief Constructor
     @param[in] a_center1 Cylinder center (at center of sphere)
@@ -38,22 +38,23 @@ public:
     @brief Copy constructor
     @param[in] a_inputIF Input cylinder
   */
-  
+
   RodIF(const RodIF& a_inputIF);
 
   /*!
     @brief Value function. Returns distance to objcet. 
     @param[in] a_point Physical position. 
   */
-  virtual Real value(const RealVect& a_point) const; 
+  virtual Real
+  value(const RealVect& a_point) const;
 
   /*!
     @brief IF factory method
   */
-  virtual BaseIF* newImplicitFunction() const;
+  virtual BaseIF*
+  newImplicitFunction() const;
 
 protected:
-
   RefCountedPtr<BaseIF> m_baseif;
 };
 

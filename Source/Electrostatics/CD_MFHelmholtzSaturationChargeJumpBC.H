@@ -19,9 +19,9 @@
 /*!
   @brief Class for computing matching the saturation charge boundary condition in an MFHelmholtzOp context
 */
-class MFHelmholtzSaturationChargeJumpBC : public MFHelmholtzJumpBC {
+class MFHelmholtzSaturationChargeJumpBC : public MFHelmholtzJumpBC
+{
 public:
-
   /*!
     @brief Disallowe weak construction. 
   */
@@ -39,15 +39,15 @@ public:
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
   */
   MFHelmholtzSaturationChargeJumpBC(const phase::which_phase a_phase,
-				    const Location::Cell     a_dataLocation,
-				    const MFLevelGrid&       a_mflg,
-				    const BcoefPtr&          a_Bcoef,
-				    const Real               a_dx,
-				    const int                a_order,
-				    const int                a_weight,
-				    const int                a_radius,
-				    const int                a_ghostCF);
-  
+                                    const Location::Cell     a_dataLocation,
+                                    const MFLevelGrid&       a_mflg,
+                                    const BcoefPtr&          a_Bcoef,
+                                    const Real               a_dx,
+                                    const int                a_order,
+                                    const int                a_weight,
+                                    const int                a_radius,
+                                    const int                a_ghostCF);
+
   /*!
     @brief Destructor (does nothing)
   */
@@ -62,13 +62,13 @@ public:
     @param[in]  a_homogeneousPhysBC Homogeneous BC or not
     @param[in]  a_dit               Grid index
   */
-  virtual void matchBC(BaseIVFAB<Real>& a_jump,
-		       const MFCellFAB& a_phi,
-		       const bool       a_homogeneousPhysBC,
-		       const DataIndex& a_dit) const override;
+  virtual void
+  matchBC(BaseIVFAB<Real>& a_jump,
+          const MFCellFAB& a_phi,
+          const bool       a_homogeneousPhysBC,
+          const DataIndex& a_dit) const override;
 
 protected:
-
   /*!
     @brief Phase where the saturation charge BC is applied
   */

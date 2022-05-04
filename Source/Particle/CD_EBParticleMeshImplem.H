@@ -20,375 +20,405 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-template <class P, const Real&(P::*particleScalarField)() const>
-void EBParticleMesh::deposit(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+template <class P, const Real& (P::*particleScalarField)() const>
+void
+EBParticleMesh::deposit(const List<P>&       a_particleList,
+                        EBCellFAB&           a_rho,
+                        const DepositionType a_depositionType,
+                        const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::deposit");
 
   // TLDR: This is a jack-of-all-trades deposition function. The user will use this function to supply a pointer to the field that will be
   //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'
 
-  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();    
-    
-    this->depositParticle(a_rho, 
-			  m_probLo, 
-			  m_dx, 
-			  curPosition, 
-			  &curStrength,
-			  Interval(0,0),
-			  a_depositionType,
-			  a_forceIrregNGP);
-  }  
+    const Real&     curStrength = (curParticle.*particleScalarField)();
+
+    this->depositParticle(a_rho,
+                          m_probLo,
+                          m_dx,
+                          curPosition,
+                          &curStrength,
+                          Interval(0, 0),
+                          a_depositionType,
+                          a_forceIrregNGP);
+  }
 }
 
-template <class P, Real(P::*particleScalarField)() const>
-void EBParticleMesh::deposit(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+template <class P, Real (P::*particleScalarField)() const>
+void
+EBParticleMesh::deposit(const List<P>&       a_particleList,
+                        EBCellFAB&           a_rho,
+                        const DepositionType a_depositionType,
+                        const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::deposit");
 
-  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();    
-    
-    this->depositParticle(a_rho, 
-			  m_probLo, 
-			  m_dx, 
-			  curPosition, 
-			  &curStrength,
-			  Interval(0,0),			  
-			  a_depositionType,
-			  a_forceIrregNGP);
-  }  
+    const Real&     curStrength = (curParticle.*particleScalarField)();
+
+    this->depositParticle(a_rho,
+                          m_probLo,
+                          m_dx,
+                          curPosition,
+                          &curStrength,
+                          Interval(0, 0),
+                          a_depositionType,
+                          a_forceIrregNGP);
+  }
 }
 
-template <class P, const Real&(P::*particleScalarField)() const>
-void EBParticleMesh::deposit2(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+template <class P, const Real& (P::*particleScalarField)() const>
+void
+EBParticleMesh::deposit2(const List<P>&       a_particleList,
+                         EBCellFAB&           a_rho,
+                         const DepositionType a_depositionType,
+                         const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::deposit2");
 
   // TLDR: This is a jack-of-all-trades deposition function. The user will use this function to supply a pointer to the field that will be
-  //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'  
+  //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'
 
-  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();    
+    const Real&     curStrength = (curParticle.*particleScalarField)();
 
-    this->depositParticle2(a_rho, 
-			   m_probLo, 
-			   m_dx, 
-			   curPosition, 
-			   &curStrength,
-			   Interval(0,0),
-			   a_depositionType,
-			   a_forceIrregNGP);
-  }  
+    this->depositParticle2(a_rho,
+                           m_probLo,
+                           m_dx,
+                           curPosition,
+                           &curStrength,
+                           Interval(0, 0),
+                           a_depositionType,
+                           a_forceIrregNGP);
+  }
 }
 
-template <class P,  Real(P::*particleScalarField)() const>
-void EBParticleMesh::deposit2(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+template <class P, Real (P::*particleScalarField)() const>
+void
+EBParticleMesh::deposit2(const List<P>&       a_particleList,
+                         EBCellFAB&           a_rho,
+                         const DepositionType a_depositionType,
+                         const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::deposit2");
 
-  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();    
+    const Real&     curStrength = (curParticle.*particleScalarField)();
 
-    this->depositParticle2(a_rho, 
-			   m_probLo, 
-			   m_dx, 
-			   curPosition, 
-			   &curStrength,
-			   Interval(0,0),
-			   a_depositionType,
-			   a_forceIrregNGP);
-  }  
+    this->depositParticle2(a_rho,
+                           m_probLo,
+                           m_dx,
+                           curPosition,
+                           &curStrength,
+                           Interval(0, 0),
+                           a_depositionType,
+                           a_forceIrregNGP);
+  }
 }
 
-template <class P, const Real&(P::*particleScalarField)() const>
-void EBParticleMesh::deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+template <class P, const Real& (P::*particleScalarField)() const>
+void
+EBParticleMesh::deposit4(const List<P>&       a_particleList,
+                         EBCellFAB&           a_rho,
+                         const DepositionType a_depositionType,
+                         const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::deposit4");
 
   // TLDR: This is a jack-of-all-trades deposition function. The user will use this function to supply a pointer to the field that will be
-  //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'    
+  //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'
 
-  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();    
-    
-    this->depositParticle4(a_rho, 
-			   m_probLo, 
-			   m_dx, 
-			   curPosition,
-			   &curStrength,
-			   Interval(0,0),
-			   a_depositionType,
-			   a_forceIrregNGP);
-  }  
+    const Real&     curStrength = (curParticle.*particleScalarField)();
+
+    this->depositParticle4(a_rho,
+                           m_probLo,
+                           m_dx,
+                           curPosition,
+                           &curStrength,
+                           Interval(0, 0),
+                           a_depositionType,
+                           a_forceIrregNGP);
+  }
 }
 
-template <class P,  Real(P::*particleScalarField)() const>
-void EBParticleMesh::deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+template <class P, Real (P::*particleScalarField)() const>
+void
+EBParticleMesh::deposit4(const List<P>&       a_particleList,
+                         EBCellFAB&           a_rho,
+                         const DepositionType a_depositionType,
+                         const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::deposit4");
 
-  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();    
-    
-    this->depositParticle4(a_rho, 
-			   m_probLo, 
-			   m_dx, 
-			   curPosition,
-			   &curStrength,
-			   Interval(0,0),
-			   a_depositionType,
-			   a_forceIrregNGP);
-  }  
+    const Real&     curStrength = (curParticle.*particleScalarField)();
+
+    this->depositParticle4(a_rho,
+                           m_probLo,
+                           m_dx,
+                           curPosition,
+                           &curStrength,
+                           Interval(0, 0),
+                           a_depositionType,
+                           a_forceIrregNGP);
+  }
 }
 
-template <class P, Real&(P::*particleScalarField)()>
-void EBParticleMesh::interpolate(List<P>&             a_particleList,
-				 const EBCellFAB&     a_meshScalarField,
-				 const DepositionType a_interpType,
-				 const bool           a_forceIrregNGP) const {
+template <class P, Real& (P::*particleScalarField)()>
+void
+EBParticleMesh::interpolate(List<P>&             a_particleList,
+                            const EBCellFAB&     a_meshScalarField,
+                            const DepositionType a_interpType,
+                            const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::interpolate(Real)");
-  
+
   CH_assert(a_meshScalarField.nComp() == 1);
 
   // TLDR: This is a jack-of-all-trades interpolation function. The user will use this function to supply a pointer to the field that will be
-  //       interpolated to. As per API, this function must be of the type 'Real& myParticleClass::myScalarVariable()'      
+  //       interpolated to. As per API, this function must be of the type 'Real& myParticleClass::myScalarVariable()'
 
-  for (ListIterator<P> lit(a_particleList); lit; ++lit){
-    P&              curParticle  = lit();
-    const RealVect& curPosition  = curParticle.position();
+  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
+    P&              curParticle = lit();
+    const RealVect& curPosition = curParticle.position();
 
     // Note: We MUST initialize = 0 because the higher-order kernels do not reset the field. It doesn't matter if we do it here
-    //       or in the Fortran kernel.     
+    //       or in the Fortran kernel.
     Real& curParticleField = (curParticle.*particleScalarField)();
-    this->interpolateParticle(&curParticleField, 
-			      a_meshScalarField,
-			      m_probLo,
-			      m_dx,
-			      curPosition,
-			      Interval(0,0),
-			      a_interpType,
-			      a_forceIrregNGP);
+    this->interpolateParticle(&curParticleField,
+                              a_meshScalarField,
+                              m_probLo,
+                              m_dx,
+                              curPosition,
+                              Interval(0, 0),
+                              a_interpType,
+                              a_forceIrregNGP);
   }
 }
 
-template <class P, RealVect&(P::*particleVectorField)()>
-void EBParticleMesh::interpolate(List<P>&             a_particleList,
-				 const EBCellFAB&     a_meshVectorField,
-				 const DepositionType a_interpType,
-				 const bool           a_forceIrregNGP) const {
+template <class P, RealVect& (P::*particleVectorField)()>
+void
+EBParticleMesh::interpolate(List<P>&             a_particleList,
+                            const EBCellFAB&     a_meshVectorField,
+                            const DepositionType a_interpType,
+                            const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::interpolate(RealVect)");
-  
+
   CH_assert(a_meshVectorField.nComp() == SpaceDim);
 
   // TLDR: This is a jack-of-all-trades interpolation function. The user will use this function to supply a pointer to the field that will be
-  //       interpolated to. As per API, this function must be of the type 'RealVect& myParticleClass::myVectorVariable()'        
+  //       interpolated to. As per API, this function must be of the type 'RealVect& myParticleClass::myVectorVariable()'
 
-  for (ListIterator<P> lit(a_particleList); lit; ++lit){
-    P&              curParticle  = lit();
-    const RealVect& curPosition  = curParticle.position();
+  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
+    P&              curParticle = lit();
+    const RealVect& curPosition = curParticle.position();
 
     // Note: We MUST initialize = 0 because the higher-order kernels do not reset the field. It doesn't matter if we do it here
-    //       or in the Fortran kernel.     
+    //       or in the Fortran kernel.
     RealVect& curParticleField = (curParticle.*particleVectorField)();
 
     this->interpolateParticle(curParticleField.dataPtr(),
-			      a_meshVectorField,
-			      m_probLo,
-			      m_dx,
-			      curPosition,
-			      Interval(0, SpaceDim-1),
-			      a_interpType,
-			      a_forceIrregNGP);
+                              a_meshVectorField,
+                              m_probLo,
+                              m_dx,
+                              curPosition,
+                              Interval(0, SpaceDim - 1),
+                              a_interpType,
+                              a_forceIrregNGP);
   }
 }
 
-inline
-void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
-				     const RealVect&      a_probLo,
-				     const RealVect&      a_dx,
-				     const RealVect&      a_position,
-				     const Real*          a_strength,
-				     const Interval       a_components,
-				     const DepositionType a_depositionType,
-				     const bool           a_forceIrregNGP) const {
+inline void
+EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
+                                const RealVect&      a_probLo,
+                                const RealVect&      a_dx,
+                                const RealVect&      a_position,
+                                const Real*          a_strength,
+                                const Interval       a_components,
+                                const DepositionType a_depositionType,
+                                const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::depositParticle");
 
-
   const int startComp = a_components.begin();
-  const int endComp   = a_components.end  ();
-  
-  CH_assert(a_rho.nComp() >= endComp - 1);  
+  const int endComp   = a_components.end();
+
+  CH_assert(a_rho.nComp() >= endComp - 1);
 
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
-  //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.  
+  //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.
 
   // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
-  // is the displacement from a_probLo and not the physical position. 
-  auto getCellIndex = [&dx=a_dx] (const RealVect a_rv) -> IntVect {
-    return IntVect(D_DECL(std::floor(a_rv[0]/dx[0]), std::floor(a_rv[1]/dx[1]), std::floor(a_rv[2]/dx[2])));
+  // is the displacement from a_probLo and not the physical position.
+  auto getCellIndex = [&dx = a_dx](const RealVect a_rv) -> IntVect {
+    return IntVect(D_DECL(std::floor(a_rv[0] / dx[0]), std::floor(a_rv[1] / dx[1]), std::floor(a_rv[2] / dx[2])));
   };
 
-  // Get grid cell corresponding to this particle. 
+  // Get grid cell corresponding to this particle.
   const IntVect particleIndex = getCellIndex(a_position - a_probLo);
 
-  // Assertion -- particle must live on this patch. 
+  // Assertion -- particle must live on this patch.
   CH_assert(m_region.contains(particleIndex));
 
   // Factors needed for the kernels. The little lambda will give us the distance
   // between the cell we're looking at and the particle position (in units of the grid resolution)
-  const Real invVol = 1./std::pow(a_dx[0], SpaceDim);
+  const Real invVol = 1. / std::pow(a_dx[0], SpaceDim);
 
-  auto particleDisplacement = [&] (const IntVect& iv) -> RealVect {
-    return (a_probLo + (RealVect(iv) + 0.5*RealVect::Unit)*a_dx - a_position)/a_dx;
+  auto particleDisplacement = [&](const IntVect& iv) -> RealVect {
+    return (a_probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * a_dx - a_position) / a_dx;
   };
-  
-  // Get regular data. 
-  FArrayBox& rho = a_rho.getFArrayBox();  
-  
-  // We can force NGP deposition in cut-cells if we want. 
-  if(m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP){
-    for (int comp = startComp; comp <= endComp; comp++){
+
+  // Get regular data.
+  FArrayBox& rho = a_rho.getFArrayBox();
+
+  // We can force NGP deposition in cut-cells if we want.
+  if (m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP) {
+    for (int comp = startComp; comp <= endComp; comp++) {
       rho(particleIndex, comp) += a_strength[comp] * invVol;
-    }    
+    }
   }
-  else{
-    switch (a_depositionType){
-    case DepositionType::NGP:
-      {
-	for (int comp = startComp; comp <= endComp; comp++){
-	  rho(particleIndex, comp) += a_strength[comp] * invVol;	  
-	}
-	break;
+  else {
+    switch (a_depositionType) {
+    case DepositionType::NGP: {
+      for (int comp = startComp; comp <= endComp; comp++) {
+        rho(particleIndex, comp) += a_strength[comp] * invVol;
       }
-    case DepositionType::CIC:
-      {
-	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
-	// the box corresponding to the cloud. 
-	const IntVect loIndex  = getCellIndex(a_position - a_probLo - 0.5*a_dx);
-	const Box     cicBox = Box(loIndex, loIndex + IntVect::Unit);
+      break;
+    }
+    case DepositionType::CIC: {
+      // Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+      // the box corresponding to the cloud.
+      const IntVect loIndex = getCellIndex(a_position - a_probLo - 0.5 * a_dx);
+      const Box     cicBox  = Box(loIndex, loIndex + IntVect::Unit);
 
-	// This is the cloud-in-cell deposition kernel.
-	auto cicKernel = [&](const IntVect& iv) -> void {
-	  Real weight = invVol;
+      // This is the cloud-in-cell deposition kernel.
+      auto cicKernel = [&](const IntVect& iv) -> void {
+        Real weight = invVol;
 
-	  // L is the distance between the grid cell and the particle. 
-	  const RealVect L = particleDisplacement(iv);
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    weight *= (1. - std::abs(L[dir]));
-	  }
+        // L is the distance between the grid cell and the particle.
+        const RealVect L = particleDisplacement(iv);
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          weight *= (1. - std::abs(L[dir]));
+        }
 
-	  for (int comp = startComp; comp <= endComp; comp++){	  
-	    rho(iv,comp) += weight * a_strength[comp];
-	  }
-	};
+        for (int comp = startComp; comp <= endComp; comp++) {
+          rho(iv, comp) += weight * a_strength[comp];
+        }
+      };
 
-	// Add mass to cells. 
-	BoxLoops::loop(cicBox, cicKernel);
+      // Add mass to cells.
+      BoxLoops::loop(cicBox, cicKernel);
 
-	break;
-      }
-    case DepositionType::TSC:
-      {
+      break;
+    }
+    case DepositionType::TSC: {
 
-	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
-	// the box corresponding to the cloud. 
-	const IntVect loIndex = getCellIndex(a_position - a_probLo - a_dx);
-	const Box     tscBox  = Box(loIndex, loIndex + 2*IntVect::Unit);
+      // Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+      // the box corresponding to the cloud.
+      const IntVect loIndex = getCellIndex(a_position - a_probLo - a_dx);
+      const Box     tscBox  = Box(loIndex, loIndex + 2 * IntVect::Unit);
 
-	// This is the triangle-shaped cloud kernel. 
-	auto tscKernel = [&](const IntVect& iv) -> void {
-	  Real weight = invVol;
+      // This is the triangle-shaped cloud kernel.
+      auto tscKernel = [&](const IntVect& iv) -> void {
+        Real weight = invVol;
 
-	  const RealVect L = particleDisplacement(iv);	  
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const Real l = std::abs(L[dir]);
+        const RealVect L = particleDisplacement(iv);
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          const Real l = std::abs(L[dir]);
 
-	    if(l < 0.5){
-	      weight *= 0.75 - l*l;
-	    }
-	    else{
-	      weight *= 0.5 * (1.5 - l) * (1.5 - l);
-	    }
-	  }
+          if (l < 0.5) {
+            weight *= 0.75 - l * l;
+          }
+          else {
+            weight *= 0.5 * (1.5 - l) * (1.5 - l);
+          }
+        }
 
-	  for (int comp = startComp; comp <= endComp; comp++){	  
-	    rho(iv,comp) += weight * a_strength[comp];
-	  }	  
-	};
+        for (int comp = startComp; comp <= endComp; comp++) {
+          rho(iv, comp) += weight * a_strength[comp];
+        }
+      };
 
-	// Run the kernel. 
-	BoxLoops::loop(tscBox, tscKernel);
+      // Run the kernel.
+      BoxLoops::loop(tscBox, tscKernel);
 
-	break;
-      }
-    case DepositionType::W4:
-      {
+      break;
+    }
+    case DepositionType::W4: {
 
-	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
-	// the box corresponding to the cloud. 
-	const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.5*a_dx);
-	const Box     w4Box   = Box(loIndex, loIndex + 3*IntVect::Unit);
+      // Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+      // the box corresponding to the cloud.
+      const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.5 * a_dx);
+      const Box     w4Box   = Box(loIndex, loIndex + 3 * IntVect::Unit);
 
-	// This is the fourth order kernel.
-	auto w4Kernel = [&](const IntVect& iv) -> void {
-	  Real weight = invVol;
-	  
-	  // L is the distance between the grid cell and the particle. 
-	  const RealVect L = particleDisplacement(iv);	  	  
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const Real l = std::abs(L[dir]);
+      // This is the fourth order kernel.
+      auto w4Kernel = [&](const IntVect& iv) -> void {
+        Real weight = invVol;
 
-	    if(l < 1.0) {
-	      weight *= 1.0 - 2.5*l*l + 1.5*l*l*l;
-	    }
-	    else {
-	      weight *= 0.5 * (2. - l) * (2. - l) * (1. - l);
-	    }
-	  }
-	  
-	  for (int comp = startComp; comp <= endComp; comp++){	  
-	    rho(iv,comp) += weight * a_strength[comp];
-	  }	  
-	};
+        // L is the distance between the grid cell and the particle.
+        const RealVect L = particleDisplacement(iv);
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          const Real l = std::abs(L[dir]);
 
-	// Run the kernel.
-	BoxLoops::loop(w4Box, w4Kernel);
+          if (l < 1.0) {
+            weight *= 1.0 - 2.5 * l * l + 1.5 * l * l * l;
+          }
+          else {
+            weight *= 0.5 * (2. - l) * (2. - l) * (1. - l);
+          }
+        }
 
-	break;
-      }
-    default:
-      {
-	MayDay::Error("EBParticleMesh::depositParticle - logic bust, unknown particle deposition.");
-	break;
-      }
+        for (int comp = startComp; comp <= endComp; comp++) {
+          rho(iv, comp) += weight * a_strength[comp];
+        }
+      };
+
+      // Run the kernel.
+      BoxLoops::loop(w4Box, w4Kernel);
+
+      break;
+    }
+    default: {
+      MayDay::Error("EBParticleMesh::depositParticle - logic bust, unknown particle deposition.");
+      break;
+    }
     }
   }
 }
 
-inline
-void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
-				      const RealVect&      a_probLo,
-				      const RealVect&      a_dx,
-				      const RealVect&      a_position,
-				      const Real*          a_strength,
-				      const Interval       a_components,
-				      const DepositionType a_depositionType,
-				      const bool           a_forceIrregNGP) const {
+inline void
+EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
+                                 const RealVect&      a_probLo,
+                                 const RealVect&      a_dx,
+                                 const RealVect&      a_position,
+                                 const Real*          a_strength,
+                                 const Interval       a_components,
+                                 const DepositionType a_depositionType,
+                                 const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::depositParticle2");
 
   const int startComp = a_components.begin();
-  const int endComp   = a_components.end  ();
-  
-  CH_assert(a_rho.nComp() >= endComp - 1);    
-  
+  const int endComp   = a_components.end();
+
+  CH_assert(a_rho.nComp() >= endComp - 1);
+
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
   //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.
   //
@@ -396,103 +426,101 @@ void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
   //       and CIC is supported.
 
   // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
-  // is the displacement from a_probLo and not the physical position. 
-  auto getCellIndex = [&dx=a_dx] (const RealVect a_rv) -> IntVect {
-    return IntVect(D_DECL(std::floor(a_rv[0]/dx[0]), std::floor(a_rv[1]/dx[1]), std::floor(a_rv[2]/dx[2])));
+  // is the displacement from a_probLo and not the physical position.
+  auto getCellIndex = [&dx = a_dx](const RealVect a_rv) -> IntVect {
+    return IntVect(D_DECL(std::floor(a_rv[0] / dx[0]), std::floor(a_rv[1] / dx[1]), std::floor(a_rv[2] / dx[2])));
   };
 
-  // Get grid cell corresponding to this particle. 
+  // Get grid cell corresponding to this particle.
   const IntVect particleIndex = getCellIndex(a_position - a_probLo);
 
-  // Assertion -- particle must live on this patch. 
+  // Assertion -- particle must live on this patch.
   CH_assert(m_region.contains(particleIndex));
 
   // Factors needed for the kernels. The little lambda will give us the distance
   // between the cell we're looking at and the particle position (in units of the grid resolution)
-  const Real invVol = 1./std::pow(a_dx[0], SpaceDim);  
+  const Real invVol = 1. / std::pow(a_dx[0], SpaceDim);
 
-  auto particleDisplacement = [&] (const IntVect& iv) -> RealVect {
-    return (a_probLo + (RealVect(iv) + 0.5*RealVect::Unit)*a_dx - a_position)/a_dx;
+  auto particleDisplacement = [&](const IntVect& iv) -> RealVect {
+    return (a_probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * a_dx - a_position) / a_dx;
   };
-  
-  // Get regular data. 
-  FArrayBox& rho = a_rho.getFArrayBox();  
 
-  // Force NGP in cut-cells if we want. 
-  if(m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP){
-    for (int comp = startComp; comp <= endComp; comp++){
+  // Get regular data.
+  FArrayBox& rho = a_rho.getFArrayBox();
+
+  // Force NGP in cut-cells if we want.
+  if (m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP) {
+    for (int comp = startComp; comp <= endComp; comp++) {
       rho(particleIndex, comp) += a_strength[comp] * invVol;
     }
   }
-  else{
-    switch (a_depositionType){
-    case DepositionType::NGP:
-      {
-	for (int comp = startComp; comp <= endComp; comp++){
-	  rho(particleIndex, comp) += a_strength[comp] * invVol;
-	}
-	
-	break;
+  else {
+    switch (a_depositionType) {
+    case DepositionType::NGP: {
+      for (int comp = startComp; comp <= endComp; comp++) {
+        rho(particleIndex, comp) += a_strength[comp] * invVol;
       }
-    case DepositionType::CIC:
-      {
-	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
-	// the box corresponding to the cloud. 
-	const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.0*a_dx);
-	const Box     cic2Box = Box(loIndex, loIndex + 2*IntVect::Unit);
 
-	// This is the kernel for a CIC particle with with 2*dx
-	auto cic2Kernel = [&](const IntVect& iv) -> void {
-	  Real weight = invVol;
-	  
-	  // L is the distance between the grid cell and the particle. 
-	  const RealVect L = particleDisplacement(iv);
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const Real l = std::abs(L[dir]);
+      break;
+    }
+    case DepositionType::CIC: {
+      // Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+      // the box corresponding to the cloud.
+      const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.0 * a_dx);
+      const Box     cic2Box = Box(loIndex, loIndex + 2 * IntVect::Unit);
 
-	    if(l > 0.5) {
-	      weight *= 0.5 * (1.5 - l);
-	    }
-	    else{
-	      weight *= 0.5;
-	    }
-	  }
+      // This is the kernel for a CIC particle with with 2*dx
+      auto cic2Kernel = [&](const IntVect& iv) -> void {
+        Real weight = invVol;
 
-	  for (int comp = startComp; comp <= endComp; comp++){
-	    rho(iv, comp) += a_strength[comp] * weight;
-	  }	  
-	};
+        // L is the distance between the grid cell and the particle.
+        const RealVect L = particleDisplacement(iv);
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          const Real l = std::abs(L[dir]);
 
-	BoxLoops::loop(cic2Box, cic2Kernel);
-	
-	break;
-      }
-    default:
-      {
-	MayDay::Error("EBParticleMesh::depositParticle2 - Invalid deposition type - only NGP and CIC supported for this deposition method. TSC/W4 have not been worked out.");
-	break;
-      }
+          if (l > 0.5) {
+            weight *= 0.5 * (1.5 - l);
+          }
+          else {
+            weight *= 0.5;
+          }
+        }
+
+        for (int comp = startComp; comp <= endComp; comp++) {
+          rho(iv, comp) += a_strength[comp] * weight;
+        }
+      };
+
+      BoxLoops::loop(cic2Box, cic2Kernel);
+
+      break;
+    }
+    default: {
+      MayDay::Error(
+        "EBParticleMesh::depositParticle2 - Invalid deposition type - only NGP and CIC supported for this deposition method. TSC/W4 have not been worked out.");
+      break;
+    }
     }
   }
 }
 
-inline
-void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
-				      const RealVect&      a_probLo,
-				      const RealVect&      a_dx,
-				      const RealVect&      a_position,
-				      const Real*          a_strength,
-				      const Interval       a_components,				      
-				      const DepositionType a_depositionType,
-				      const bool           a_forceIrregNGP) const {
+inline void
+EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
+                                 const RealVect&      a_probLo,
+                                 const RealVect&      a_dx,
+                                 const RealVect&      a_position,
+                                 const Real*          a_strength,
+                                 const Interval       a_components,
+                                 const DepositionType a_depositionType,
+                                 const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::depositParticle2");
 
   const int startComp = a_components.begin();
-  const int endComp   = a_components.end  ();
-  
-  CH_assert(a_rho.nComp() >= endComp - 1);      
-  
-  
+  const int endComp   = a_components.end();
+
+  CH_assert(a_rho.nComp() >= endComp - 1);
+
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
   //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.
   //
@@ -500,254 +528,253 @@ void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
   //       and CIC is supported.
 
   // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
-  // is the displacement from a_probLo and not the physical position. 
-  auto getCellIndex = [&dx=a_dx] (const RealVect a_rv) -> IntVect {
-    return IntVect(D_DECL(std::floor(a_rv[0]/dx[0]), std::floor(a_rv[1]/dx[1]), std::floor(a_rv[2]/dx[2])));
+  // is the displacement from a_probLo and not the physical position.
+  auto getCellIndex = [&dx = a_dx](const RealVect a_rv) -> IntVect {
+    return IntVect(D_DECL(std::floor(a_rv[0] / dx[0]), std::floor(a_rv[1] / dx[1]), std::floor(a_rv[2] / dx[2])));
   };
 
-  // Get grid cell corresponding to this particle. 
+  // Get grid cell corresponding to this particle.
   const IntVect particleIndex = getCellIndex(a_position - a_probLo);
 
-  // Assertion -- particle must live on this patch. 
+  // Assertion -- particle must live on this patch.
   CH_assert(m_region.contains(particleIndex));
 
   // Factors needed for the kernels. The little lambda will give us the distance
   // between the cell we're looking at and the particle position (in units of the grid resolution)
-  const Real invVol = 1.0/std::pow(a_dx[0], SpaceDim);
+  const Real invVol = 1.0 / std::pow(a_dx[0], SpaceDim);
 
-  auto particleDisplacement = [&] (const IntVect& iv) -> RealVect {
-    return (a_probLo + (RealVect(iv) + 0.5*RealVect::Unit)*a_dx - a_position)/a_dx;
+  auto particleDisplacement = [&](const IntVect& iv) -> RealVect {
+    return (a_probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * a_dx - a_position) / a_dx;
   };
-  
-  // Get regular data. 
-  FArrayBox& rho = a_rho.getFArrayBox();  
 
-  // Force NGP in cut-cells if we want. 
-  if(m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP){
-    for (int comp = startComp; comp >= endComp; comp++){
+  // Get regular data.
+  FArrayBox& rho = a_rho.getFArrayBox();
+
+  // Force NGP in cut-cells if we want.
+  if (m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP) {
+    for (int comp = startComp; comp >= endComp; comp++) {
       rho(particleIndex, comp) += a_strength[comp] * invVol;
     }
   }
-  else{
-    switch (a_depositionType){
-    case DepositionType::NGP:
-      {
-	for (int comp = startComp; comp >= endComp; comp++){
-	  rho(particleIndex, comp) += a_strength[comp] * invVol;
-	}	
-	break;
+  else {
+    switch (a_depositionType) {
+    case DepositionType::NGP: {
+      for (int comp = startComp; comp >= endComp; comp++) {
+        rho(particleIndex, comp) += a_strength[comp] * invVol;
       }
-    case DepositionType::CIC:
-      {
-	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
-	// the box corresponding to the cloud. 
-	const IntVect loIndex = getCellIndex(a_position - a_probLo - 2.0*a_dx);
-	const Box     cic4Box = Box(loIndex, loIndex + 4*IntVect::Unit);
+      break;
+    }
+    case DepositionType::CIC: {
+      // Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+      // the box corresponding to the cloud.
+      const IntVect loIndex = getCellIndex(a_position - a_probLo - 2.0 * a_dx);
+      const Box     cic4Box = Box(loIndex, loIndex + 4 * IntVect::Unit);
 
-	// This is the kernel for a CIC particle with with 4*dx
-	auto cic4Kernel = [&](const IntVect& iv) -> void {
-	  Real weight = invVol;
-	  
-	  // L is the distance between the grid cell and the particle -- in units of dx. 
-	  const RealVect L = particleDisplacement(iv);
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const Real l = std::abs(L[dir]);
+      // This is the kernel for a CIC particle with with 4*dx
+      auto cic4Kernel = [&](const IntVect& iv) -> void {
+        Real weight = invVol;
 
-	    if(l >= 1.5) {
-	      weight *= 0.25 * (2.5 - l);
-	    }
-	    else{
-	      weight *= 0.25;
-	    }
-	  }
+        // L is the distance between the grid cell and the particle -- in units of dx.
+        const RealVect L = particleDisplacement(iv);
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          const Real l = std::abs(L[dir]);
 
-	  for (int comp = startComp; comp >= endComp; comp++){
-	    rho(iv, comp) += a_strength[comp] * weight;
-	  }		  
-	};
+          if (l >= 1.5) {
+            weight *= 0.25 * (2.5 - l);
+          }
+          else {
+            weight *= 0.25;
+          }
+        }
 
-	BoxLoops::loop(cic4Box, cic4Kernel);
+        for (int comp = startComp; comp >= endComp; comp++) {
+          rho(iv, comp) += a_strength[comp] * weight;
+        }
+      };
 
-	break;
-      }
-    default:
-      {
-	MayDay::Error("EBParticleMesh::depositParticle4 - Invalid deposition type - only NGP and CIC supported for this deposition method. TSC/W4 have not been worked out.");
-	break;
-      }
+      BoxLoops::loop(cic4Box, cic4Kernel);
+
+      break;
+    }
+    default: {
+      MayDay::Error(
+        "EBParticleMesh::depositParticle4 - Invalid deposition type - only NGP and CIC supported for this deposition method. TSC/W4 have not been worked out.");
+      break;
+    }
     }
   }
 }
 
-inline
-void EBParticleMesh::interpolateParticle(Real*                a_particleField,
-					 const EBCellFAB&     a_meshField,
-					 const RealVect&      a_probLo,
-					 const RealVect&      a_dx,
-					 const RealVect&      a_position,
-					 const Interval&      a_interval,					 
-					 const DepositionType a_interpType,
-					 const bool           a_forceIrregNGP) const {
+inline void
+EBParticleMesh::interpolateParticle(Real*                a_particleField,
+                                    const EBCellFAB&     a_meshField,
+                                    const RealVect&      a_probLo,
+                                    const RealVect&      a_dx,
+                                    const RealVect&      a_position,
+                                    const Interval&      a_interval,
+                                    const DepositionType a_interpType,
+                                    const bool           a_forceIrregNGP) const
+{
   CH_TIME("EBParticleMesh::interpolateParticle");
 
   const int startComp = a_interval.begin();
-  const int endComp   = a_interval.end  ();
-  
+  const int endComp   = a_interval.end();
+
   CH_assert(a_meshField.nComp() >= endComp - 1);
 
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
-  //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.  
+  //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.
 
   // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
-  // is the displacement from a_probLo and not the physical position. 
-  auto getCellIndex = [&dx=a_dx] (const RealVect a_rv) -> IntVect {
-    return IntVect(D_DECL(std::floor(a_rv[0]/dx[0]), std::floor(a_rv[1]/dx[1]), std::floor(a_rv[2]/dx[2])));
+  // is the displacement from a_probLo and not the physical position.
+  auto getCellIndex = [&dx = a_dx](const RealVect a_rv) -> IntVect {
+    return IntVect(D_DECL(std::floor(a_rv[0] / dx[0]), std::floor(a_rv[1] / dx[1]), std::floor(a_rv[2] / dx[2])));
   };
 
-  // Get grid cell corresponding to this particle. 
+  // Get grid cell corresponding to this particle.
   const IntVect particleIndex = getCellIndex(a_position - a_probLo);
 
-  // Assertion -- particle must live on this patch. 
+  // Assertion -- particle must live on this patch.
   CH_assert(m_region.contains(particleIndex));
 
   // Nifty little lambda for computing the displacement between the particle and a grid cell.
-  auto particleDisplacement = [&] (const IntVect& iv) -> RealVect {
-    return (a_probLo + (RealVect(iv) + 0.5*RealVect::Unit)*a_dx - a_position)/a_dx;
+  auto particleDisplacement = [&](const IntVect& iv) -> RealVect {
+    return (a_probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * a_dx - a_position) / a_dx;
   };
-  
-  // Get regular data. 
-  const FArrayBox& meshField = a_meshField.getFArrayBox();      
 
-  // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
-  if(m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP){
-    for (int comp = startComp; comp <= endComp; comp++){
+  // Get regular data.
+  const FArrayBox& meshField = a_meshField.getFArrayBox();
+
+  // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side.
+  if (m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP) {
+    for (int comp = startComp; comp <= endComp; comp++) {
       a_particleField[comp] = meshField(particleIndex, comp);
     }
   }
-  else if(m_ebisbox.isCovered(particleIndex)){ // Need to set to something.
-    for (int comp = startComp; comp <= endComp; comp++){    
+  else if (m_ebisbox.isCovered(particleIndex)) { // Need to set to something.
+    for (int comp = startComp; comp <= endComp; comp++) {
       a_particleField[comp] = 0.0;
     }
-  }  
-  else{
+  }
+  else {
     switch (a_interpType) {
-    case DepositionType::NGP: // Hook for nearest-grid-point interpolation. 
-      {
-	for (int comp = startComp; comp <= endComp; comp++){    	  
-	  a_particleField[comp] = meshField(particleIndex, comp);
-	}
-	
-	break;
+    case DepositionType::NGP: // Hook for nearest-grid-point interpolation.
+    {
+      for (int comp = startComp; comp <= endComp; comp++) {
+        a_particleField[comp] = meshField(particleIndex, comp);
       }
-    case DepositionType::CIC: // Hook for cloud-in-cell interpolation. 
-      {
-	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
-	// the box corresponding to the cloud. This region contains the cells where we gather the field. 
-	const IntVect loIndex = getCellIndex(a_position - a_probLo - 0.5*a_dx);
-	const Box     cicBox  = Box(loIndex, loIndex + IntVect::Unit);
 
-	// This is the cloud-in-cell interpolation kernel. It computes the weight from the current cell and
-	// gathers the force. 
-	auto cicKernel = [&](const IntVect& iv) -> void {
-	  Real weight = 1.0;
+      break;
+    }
+    case DepositionType::CIC: // Hook for cloud-in-cell interpolation.
+    {
+      // Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+      // the box corresponding to the cloud. This region contains the cells where we gather the field.
+      const IntVect loIndex = getCellIndex(a_position - a_probLo - 0.5 * a_dx);
+      const Box     cicBox  = Box(loIndex, loIndex + IntVect::Unit);
 
-	  // L is the distance between the grid cell and the particle. 
-	  const RealVect L = particleDisplacement(iv);
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    weight *= (1. - std::abs(L[dir]));
-	  }
+      // This is the cloud-in-cell interpolation kernel. It computes the weight from the current cell and
+      // gathers the force.
+      auto cicKernel = [&](const IntVect& iv) -> void {
+        Real weight = 1.0;
 
-	  for (int comp = startComp; comp <= endComp; comp++){    	  	    
-	    a_particleField[comp] += weight * meshField(iv, comp);
-	  }
-	};
+        // L is the distance between the grid cell and the particle.
+        const RealVect L = particleDisplacement(iv);
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          weight *= (1. - std::abs(L[dir]));
+        }
 
-	// Run kernel and gather field from mesh.
-	for (int comp = startComp; comp <= endComp; comp++){
-	  a_particleField[comp] = 0.0;
-	}
-	
-	BoxLoops::loop(cicBox, cicKernel);
+        for (int comp = startComp; comp <= endComp; comp++) {
+          a_particleField[comp] += weight * meshField(iv, comp);
+        }
+      };
 
-	break;
+      // Run kernel and gather field from mesh.
+      for (int comp = startComp; comp <= endComp; comp++) {
+        a_particleField[comp] = 0.0;
       }
-    case DepositionType::TSC: // Hook for triangle-shaped cloud interpolation. 
-      {
-	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
-	// the box corresponding to the cloud. This region contains the cells where we gather the field. 
-	const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.0*a_dx);
-	const Box     tscBox  = Box(loIndex, loIndex + 2*IntVect::Unit);
 
-	// This is the triangle-shaped-cloud interpolation kernel. It computes the weight from the current cell and
-	// gather the force. 
-	auto tscKernel = [&](const IntVect& iv) -> void {
-	  Real weight = 1.0;
+      BoxLoops::loop(cicBox, cicKernel);
 
-	  // L is the distance between the grid cell and the particle. 
-	  const RealVect L = particleDisplacement(iv);
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const Real& l = std::abs(L[dir]);
-	    
-	    if(l < 0.5){
-	      weight *= 0.75 - l*l;
-	    }
-	    else{
-	      weight *= 0.5 * (1.5 - l) * (1.5 - l);
-	    }	    
-	  }
+      break;
+    }
+    case DepositionType::TSC: // Hook for triangle-shaped cloud interpolation.
+    {
+      // Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+      // the box corresponding to the cloud. This region contains the cells where we gather the field.
+      const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.0 * a_dx);
+      const Box     tscBox  = Box(loIndex, loIndex + 2 * IntVect::Unit);
 
-	  for (int comp = startComp; comp <= endComp; comp++){
-	    a_particleField[comp] += weight * meshField(iv, comp);
-	  }
-	};
+      // This is the triangle-shaped-cloud interpolation kernel. It computes the weight from the current cell and
+      // gather the force.
+      auto tscKernel = [&](const IntVect& iv) -> void {
+        Real weight = 1.0;
 
-	// Run kernel and gather field from mesh.
-	for (int comp = startComp; comp <= endComp; comp++){
-	  a_particleField[comp] = 0.0;
-	}	
-	
-	BoxLoops::loop(tscBox, tscKernel);
+        // L is the distance between the grid cell and the particle.
+        const RealVect L = particleDisplacement(iv);
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          const Real& l = std::abs(L[dir]);
 
-	break;
+          if (l < 0.5) {
+            weight *= 0.75 - l * l;
+          }
+          else {
+            weight *= 0.5 * (1.5 - l) * (1.5 - l);
+          }
+        }
+
+        for (int comp = startComp; comp <= endComp; comp++) {
+          a_particleField[comp] += weight * meshField(iv, comp);
+        }
+      };
+
+      // Run kernel and gather field from mesh.
+      for (int comp = startComp; comp <= endComp; comp++) {
+        a_particleField[comp] = 0.0;
       }
-    case DepositionType::W4: // Hook for fourth order interpolation. 
-      {
-	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
-	// the box corresponding to the cloud. This region contains the cells where we gather the field. 
-	const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.5*a_dx);
-	const Box     w4Box   = Box(loIndex, loIndex + 3*IntVect::Unit);
 
-	// This is the fourth order kernel.
-	auto w4Kernel = [&](const IntVect& iv) -> void {
-	  Real weight = 1.0;
-	  
-	  // L is the distance between the grid cell and the particle. 
-	  const RealVect L = particleDisplacement(iv);	  	  
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const Real l = std::abs(L[dir]);
-	    
-	    if(l < 1.0) {
-	      weight *= 1.0 - 2.5*l*l + 1.5*l*l*l;
-	    }
-	    else {
-	      weight *= 0.5 * (2. - l) * (2. - l) * (1. - l);
-	    }
-	  }
+      BoxLoops::loop(tscBox, tscKernel);
 
-	  for (int comp = startComp; comp <= endComp; comp++){
-	    a_particleField[comp] += weight * meshField(iv, comp);
-	  }
-	};
+      break;
+    }
+    case DepositionType::W4: // Hook for fourth order interpolation.
+    {
+      // Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+      // the box corresponding to the cloud. This region contains the cells where we gather the field.
+      const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.5 * a_dx);
+      const Box     w4Box   = Box(loIndex, loIndex + 3 * IntVect::Unit);
 
-	// Run kernel and gather field from mesh.
-	for (int comp = startComp; comp <= endComp; comp++){	  
-	  a_particleField[comp] = 0.0;
-	}		
+      // This is the fourth order kernel.
+      auto w4Kernel = [&](const IntVect& iv) -> void {
+        Real weight = 1.0;
 
-	BoxLoops::loop(w4Box, w4Kernel);
+        // L is the distance between the grid cell and the particle.
+        const RealVect L = particleDisplacement(iv);
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          const Real l = std::abs(L[dir]);
 
-	break;
+          if (l < 1.0) {
+            weight *= 1.0 - 2.5 * l * l + 1.5 * l * l * l;
+          }
+          else {
+            weight *= 0.5 * (2. - l) * (2. - l) * (1. - l);
+          }
+        }
+
+        for (int comp = startComp; comp <= endComp; comp++) {
+          a_particleField[comp] += weight * meshField(iv, comp);
+        }
+      };
+
+      // Run kernel and gather field from mesh.
+      for (int comp = startComp; comp <= endComp; comp++) {
+        a_particleField[comp] = 0.0;
       }
+
+      BoxLoops::loop(w4Box, w4Kernel);
+
+      break;
+    }
     default:
       MayDay::Error("EBParticleMesh::interpolateParticle(RealVect) - Invalid interpolation type requested.");
     }

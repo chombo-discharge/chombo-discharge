@@ -22,9 +22,9 @@
 /*!
   @brief Class for interpolating data to fine grids. Can use constant interpolation or include limiters.
 */
-class EBFineInterp : public EBPWLFineInterp {
+class EBFineInterp : public EBPWLFineInterp
+{
 public:
-  
   /*!
     @brief Default constructor. Must subsequently call the define method. 
   */
@@ -39,10 +39,10 @@ public:
     @param[in] a_ebisPtr  EB index space. 
   */
   EBFineInterp(const EBLevelGrid&        a_eblgFine,
-	       const EBLevelGrid&        a_eblgCoar,
-	       const int&                a_refRat,
-	       const int&                a_nComp,
-	       const EBIndexSpace* const a_ebisPtr);
+               const EBLevelGrid&        a_eblgCoar,
+               const int&                a_refRat,
+               const int&                a_nComp,
+               const EBIndexSpace* const a_ebisPtr);
 
   /*!
     @brief Disallowed copy constructor
@@ -52,7 +52,7 @@ public:
   /*!
     @brief Disallowed move constructor
   */
-  EBFineInterp(const EBFineInterp&&) = delete;  
+  EBFineInterp(const EBFineInterp&&) = delete;
 
   /*!
     @brief Destructor
@@ -62,12 +62,14 @@ public:
   /*!
     @brief Disallowed copy operator
   */
-  EBFineInterp& operator=(const EBFineInterp&) = delete;
+  EBFineInterp&
+  operator=(const EBFineInterp&) = delete;
 
   /*!
     @brief Disallowed move operator
   */
-  EBFineInterp& operator=(const EBFineInterp&&) = delete;
+  EBFineInterp&
+  operator=(const EBFineInterp&&) = delete;
 
   /*!
     @brief Define operation. Puts object in usable state.
@@ -77,11 +79,12 @@ public:
     @param[in] a_nComp    Number of components. 
     @param[in] a_ebisPtr  EB index space. 
   */
-  void define(const EBLevelGrid&        a_eblgFine,
-	      const EBLevelGrid&        a_eblgCoar,
-	      const int&                a_refRat,
-	      const int&                a_nComp,
-	      const EBIndexSpace* const a_ebisPtr);
+  void
+  define(const EBLevelGrid&        a_eblgFine,
+         const EBLevelGrid&        a_eblgCoar,
+         const int&                a_refRat,
+         const int&                a_nComp,
+         const EBIndexSpace* const a_ebisPtr);
 
   /*!
     @brief Do a piecewise constant interpolation to the new grids.
@@ -89,9 +92,8 @@ public:
     @param[in]  a_coarData  Coarse data
     @param[in]  a_variables Variables to interpolate. 
   */
-  void regridNoSlopes(LevelData<EBCellFAB>&       a_fineData,
-		      const LevelData<EBCellFAB>& a_coarData,
-		      const Interval&             a_variables);
+  void
+  regridNoSlopes(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData, const Interval& a_variables);
 
   /*!
     @brief Use min-mod slopes when interpolating to the new grids. 
@@ -99,12 +101,10 @@ public:
     @param[in]  a_coarData  Coarse data
     @param[in]  a_variables Variables to interpolate. 
   */
-  void regridMinMod(LevelData<EBCellFAB>&       a_fineData,
-		    const LevelData<EBCellFAB>& a_coarData,
-		    const Interval&             a_variables);
+  void
+  regridMinMod(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData, const Interval& a_variables);
 
 protected:
-
   /*!
     @brief Fine grid.
   */
@@ -122,11 +122,11 @@ protected:
     @param[in]  a_dit       Grid index. 
     @param[in]  a_variables Variables to interpolate. 
   */
-  void regridNoSlopes(EBCellFAB&       a_fineData,
-		      const EBCellFAB& a_coarData,
-		      const DataIndex& a_dit,
-		      const Interval&  a_variables);
-  
+  void
+  regridNoSlopes(EBCellFAB&       a_fineData,
+                 const EBCellFAB& a_coarData,
+                 const DataIndex& a_dit,
+                 const Interval&  a_variables);
 };
 
 #include <CD_NamespaceFooter.H>

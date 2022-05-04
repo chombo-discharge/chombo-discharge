@@ -23,14 +23,14 @@
 /*!
   @brief Noisy sphere geometry (with Perlin noise).
 */
-class PerlinSphereSdf : public BaseIF {
+class PerlinSphereSdf : public BaseIF
+{
 public:
-
   /*!
     @brief No weak construction
   */
-  PerlinSphereSdf(){}
-  
+  PerlinSphereSdf() {}
+
   /*!
     @brief Constructor
     @param[in] a_rad         Sphere radius
@@ -44,13 +44,13 @@ public:
     @note The persistence argument indicates how we add octaves. With 0.5 we use half the amplitude and twice the frequency for the next octave. 
   */
   PerlinSphereSdf(const Real&     a_rad,
-		  const RealVect& a_center,
-		  const bool&     a_inside,
-		  const Real&     a_noiseAmp,
-		  const RealVect& a_noiseFreq,
-		  const Real&     a_persistence,
-		  const int&      a_octaves,
-		  const bool&     a_reseed = false);
+                  const RealVect& a_center,
+                  const bool&     a_inside,
+                  const Real&     a_noiseAmp,
+                  const RealVect& a_noiseFreq,
+                  const Real&     a_persistence,
+                  const int&      a_octaves,
+                  const bool&     a_reseed = false);
 
   /*!
     @brief Copy constructor
@@ -67,15 +67,16 @@ public:
     @brief Value function. Returns distance to object
     @param[in] a_pos Position
   */
-  virtual Real value(const RealVect& a_pos) const;
+  virtual Real
+  value(const RealVect& a_pos) const;
 
   /*!
     @brief Factory function
   */
-  virtual BaseIF* newImplicitFunction() const;
-  
-protected:
+  virtual BaseIF*
+  newImplicitFunction() const;
 
+protected:
   /*!
     @brief Radius
   */
@@ -90,7 +91,7 @@ protected:
     @brief Inside/outside
   */
   bool m_inside;
-  
+
   /*!
     @brief Noise function
   */

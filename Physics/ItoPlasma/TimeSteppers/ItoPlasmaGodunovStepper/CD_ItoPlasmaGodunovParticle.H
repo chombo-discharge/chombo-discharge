@@ -26,13 +26,13 @@
 
 namespace Physics {
   namespace ItoPlasma {
-  
+
     /*!
       @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
     */
-    class ItoPlasmaGodunovParticle : public BinItem {
+    class ItoPlasmaGodunovParticle : public BinItem
+    {
     public:
-
       /*!
 	@brief Default constructor
       */
@@ -51,47 +51,53 @@ namespace Physics {
       /*!
 	@brief For non-default ctor
       */
-      void define(const RealVect a_position, const Real a_mass);
+      void
+      define(const RealVect a_position, const Real a_mass);
 
       /*!
 	@brief Set particle mass
       */
-      void setMass(const Real a_mass);
+      void
+      setMass(const Real a_mass);
 
       /*!
 	@brief Get mass
       */
-      Real& mass();
+      Real&
+      mass();
 
       /*! 
 	@brief Const retrieve mass
       */
-      const Real& mass() const;
+      const Real&
+      mass() const;
 
       /*!
 	@brief Returns the size, in number of bytes, of a flat representation of the data in this object.
       */
-      virtual int size() const;
+      virtual int
+      size() const;
 
       /*!
 	@brief Write a linear binary representation of the internal data. Assumes that
 	sufficient memory for the buffer has already been allocated by
 	the caller.
       */
-      virtual void linearOut(void* buf) const;
+      virtual void
+      linearOut(void* buf) const;
 
       /*!
 	@brief Read a linear binary representation of the internal data.
 	Assumes that the buffer has the correct data.
       */
-      virtual void linearIn(void* buf);
+      virtual void
+      linearIn(void* buf);
 
     protected:
-  
       Real m_mass;
     };
-  }
-}
+  } // namespace ItoPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

@@ -21,9 +21,9 @@
 /*!
   @brief New intersection IF which does not mess up the return value function when there are no implicit functions.
 */
-class NewIntersectionIF : public BaseIF {
+class NewIntersectionIF : public BaseIF
+{
 public:
-
   /*!
     @brief Weak constructor. Does nothing. 
   */
@@ -44,15 +44,16 @@ public:
     @brief Get distance to objects. 
     @param[in] a_point Physical position. 
   */
-  virtual Real value(const RealVect& a_point) const override;
+  virtual Real
+  value(const RealVect& a_point) const override;
 
   /*!
     @brief Factory method
   */
-  virtual BaseIF* newImplicitFunction() const override;
+  virtual BaseIF*
+  newImplicitFunction() const override;
 
 protected:
-  
   /*!
     @brief Number of implicit functions
   */
@@ -61,7 +62,7 @@ protected:
   /*!
     @brief Implicit functions
   */
-  Vector<BaseIF*> m_impFuncs; 
+  Vector<BaseIF*> m_impFuncs;
 };
 
 #include <CD_NamespaceFooter.H>

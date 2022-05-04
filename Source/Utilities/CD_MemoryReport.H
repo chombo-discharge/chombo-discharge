@@ -27,7 +27,8 @@ namespace MemoryReport {
   /*!
     @brief Print the global maximum and minimum memory usage. This includes peak memory and unfreed memory. 
   */
-  void getMaxMinMemoryUsage();
+  void
+  getMaxMinMemoryUsage();
 
   /*!
     @brief Print the global maximum and minimum memory usage. This includes peak memory and unfreed memory. 
@@ -36,7 +37,8 @@ namespace MemoryReport {
     @param[out] a_maxUnfreed Maximum unfreed memory (maximized over ranks)
     @param[out] a_minUnfreed Minimum unfreed memory (minimized over ranks)
   */
-  void getMaxMinMemoryUsage(Real& a_maxPeak, Real& a_minPeak, Real& a_maxUnfreed, Real& a_minUnfreed);
+  void
+  getMaxMinMemoryUsage(Real& a_maxPeak, Real& a_minPeak, Real& a_maxUnfreed, Real& a_minUnfreed);
 
   /*!
     @brief Get peak and unfreed memory usage per rank. 
@@ -44,8 +46,9 @@ namespace MemoryReport {
     @param[out] a_peak    Peak memory usage
     @param[in]  a_unfreed Unfreed memory usage
   */
-  void getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed);
-}
+  void
+  getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed);
+} // namespace MemoryReport
 
 #include <CD_NamespaceFooter.H>
 

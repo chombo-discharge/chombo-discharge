@@ -19,21 +19,26 @@
 /*!
   @brief Class that defines an electrode rod and a dielectric (some shapes supported)
 */
-class RodDielectric : public ComputationalGeometry {
+class RodDielectric : public ComputationalGeometry
+{
 public:
-
   RodDielectric();
   ~RodDielectric();
 
 protected:
+  void
+  defineElectrode();
+  void
+  defineInsulator();
 
-  void defineElectrode();
-  void defineInsulator();
-
-  RefCountedPtr<BaseIF> getBox();
-  RefCountedPtr<BaseIF> getPlane();
-  RefCountedPtr<BaseIF> getSphere();
-  RefCountedPtr<BaseIF> getPerlinBox();
+  RefCountedPtr<BaseIF>
+  getBox();
+  RefCountedPtr<BaseIF>
+  getPlane();
+  RefCountedPtr<BaseIF>
+  getSphere();
+  RefCountedPtr<BaseIF>
+  getPerlinBox();
 };
 
 #include <CD_NamespaceFooter.H>

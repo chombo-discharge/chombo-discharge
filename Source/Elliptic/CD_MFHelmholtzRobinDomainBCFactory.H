@@ -25,9 +25,9 @@
   @note The B-coefficient is not the same as in the Helmholtz equation...
   @note In our notation, n points into the computational domain. 
 */
-class MFHelmholtzRobinDomainBCFactory : public MFHelmholtzDomainBCFactory {
+class MFHelmholtzRobinDomainBCFactory : public MFHelmholtzDomainBCFactory
+{
 public:
-
   /*!
     @brief Constructor. 
   */
@@ -47,9 +47,9 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  MFHelmholtzRobinDomainBCFactory(const std::function<Real(const RealVect& a_pos) >& a_A,
-				  const std::function<Real(const RealVect& a_pos) >& a_B,
-				  const std::function<Real(const RealVect& a_pos) >& a_C);
+  MFHelmholtzRobinDomainBCFactory(const std::function<Real(const RealVect& a_pos)>& a_A,
+                                  const std::function<Real(const RealVect& a_pos)>& a_B,
+                                  const std::function<Real(const RealVect& a_pos)>& a_C);
 
   /*!
     @brief Destructor
@@ -62,7 +62,8 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  void setCoefficients(const Real a_A, const Real a_B, const Real a_C);
+  void
+  setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Set variable coefficients
@@ -70,17 +71,18 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  void setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
-		       const std::function<Real(const RealVect& a_pos) >& a_B,
-		       const std::function<Real(const RealVect& a_pos) >& a_C);
+  void
+  setCoefficients(const std::function<Real(const RealVect& a_pos)>& a_A,
+                  const std::function<Real(const RealVect& a_pos)>& a_B,
+                  const std::function<Real(const RealVect& a_pos)>& a_C);
 
   /*!
     @brief Factory method
   */
-  RefCountedPtr<EBHelmholtzDomainBC> create(const int a_iphase) const override;
+  RefCountedPtr<EBHelmholtzDomainBC>
+  create(const int a_iphase) const override;
 
 protected:
-  
   /*
     @brief Use constant for BC
   */

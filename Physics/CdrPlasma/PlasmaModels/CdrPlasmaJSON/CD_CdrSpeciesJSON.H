@@ -28,9 +28,9 @@ namespace Physics {
     /*!
       @brief Encapsulation of species settings and initial conditions for CDR species in CdrPlasma. 
     */
-    class CdrSpeciesJSON : public CdrSpecies {
+    class CdrSpeciesJSON : public CdrSpecies
+    {
     public:
-
       /*!
 	@brief Alias for initial data function.
       */
@@ -50,10 +50,10 @@ namespace Physics {
 	@param[in] a_initialData Initial data function
       */
       CdrSpeciesJSON(const std::string  a_name,
-		     const int          a_Z,
-		     const bool         a_diffusive,
-		     const bool         a_mobile,
-		     const InitFunction a_initialData);      
+                     const int          a_Z,
+                     const bool         a_diffusive,
+                     const bool         a_mobile,
+                     const InitFunction a_initialData);
 
       /*!
 	@brief Disallowed constructor.
@@ -71,13 +71,15 @@ namespace Physics {
 	@brief Disallowed copy assignment. 
 	@param[in] a_other Other species
       */
-      CdrSpeciesJSON& operator=(const CdrSpeciesJSON& a_other) = delete;
+      CdrSpeciesJSON&
+      operator=(const CdrSpeciesJSON& a_other) = delete;
 
       /*!
 	@brief Disallowed move assignment
 	@param[in] a_other Other species
       */
-      CdrSpeciesJSON& operator=(const CdrSpeciesJSON&& a_other) = delete;
+      CdrSpeciesJSON&
+      operator=(const CdrSpeciesJSON&& a_other) = delete;
 
       /*!
 	@brief Destructor
@@ -92,21 +94,22 @@ namespace Physics {
 	@param[in] a_diffusive   Diffusive species or not
 	@param[in] a_initialData Initial data function
       */
-      void define(const std::string  a_name,
-		  const int          a_Z,
-		  const bool         a_diffusive,
-		  const bool         a_mobile,
-		  const InitFunction a_initialData);                  
+      void
+      define(const std::string  a_name,
+             const int          a_Z,
+             const bool         a_diffusive,
+             const bool         a_mobile,
+             const InitFunction a_initialData);
 
       /*!
 	@brief Initial data function. 
 	@param[in] a_pos  Physical coordinates 
 	@param[in] a_time Time
       */
-      Real initialData(const RealVect a_pos, const Real a_time) const override final;
-      
-    protected:
+      Real
+      initialData(const RealVect a_pos, const Real a_time) const override final;
 
+    protected:
       /*!
 	@brief Make sure model has initial data
       */
@@ -117,9 +120,9 @@ namespace Physics {
       */
       InitFunction m_initFunction;
     };
-  }
-}
-  
+  } // namespace CdrPlasma
+} // namespace Physics
+
 #include <CD_NamespaceFooter.H>
 
 #endif

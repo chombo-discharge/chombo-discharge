@@ -18,47 +18,51 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  namespace ItoPlasma{
+  namespace ItoPlasma {
 
     /*!
       @brief Abstract clas for specifying plasma kinetics
     */
-    class ItoPlasmaAir3LFA : public ItoPlasmaPhysicsLFA {
+    class ItoPlasmaAir3LFA : public ItoPlasmaPhysicsLFA
+    {
     public:
-
       class Electron;
       class Positive;
       class Negative;
       class PhotonZ;
-      
+
       ItoPlasmaAir3LFA();
       ~ItoPlasmaAir3LFA();
 
-      Real computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const override;
+      Real
+      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const override;
 
-      Real computeAlpha(const RealVect a_E) const override;
+      Real
+      computeAlpha(const RealVect a_E) const override;
 
-      Real computeEta(const RealVect a_E) const;
+      Real
+      computeEta(const RealVect a_E) const;
 
-      void updateReactionRatesLFA(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
+      void
+      updateReactionRatesLFA(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
 
-      Vector<Real> computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const override;
+      Vector<Real>
+      computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const override;
 
-      Vector<Real> computeItoDiffusionLFA(const Real         a_time,
-					  const RealVect     a_pos,
-					  const RealVect     a_E,
-					  const Vector<Real> a_cdr_densities) const override;
-
+      Vector<Real>
+      computeItoDiffusionLFA(const Real         a_time,
+                             const RealVect     a_pos,
+                             const RealVect     a_E,
+                             const Vector<Real> a_cdr_densities) const override;
 
     protected:
-
       // for dt
       Real m_deltaX;
 
       // Stuff for initial conditions
-      Real m_blob_radius;
-      Real m_particle_weight;
-      int m_num_particles;
+      Real     m_blob_radius;
+      Real     m_particle_weight;
+      int      m_num_particles;
       RealVect m_blob_center;
 
       // Indices for species
@@ -75,56 +79,66 @@ namespace Physics {
       Real m_ion_D;
 
       // Pressure, neutral number density etc
-      Real m_N;      
-      Real m_p;      
-      Real m_pq;     
-      Real m_T;      
-      Real m_O2frac; 
-      Real m_N2frac; 
-      Real m_pO2;    
+      Real m_N;
+      Real m_p;
+      Real m_pq;
+      Real m_T;
+      Real m_O2frac;
+      Real m_N2frac;
+      Real m_pO2;
       Real m_photoi_factor;
 
       // Functions for drawing initial particles
-      void drawInitialParticles();
+      void
+      drawInitialParticles();
 
       // Zheleznyak photoionization rates
-      Real excitationRates(const Real a_E) const;
-      Real sergeyFactor(const Real a_O2frac) const;
-      Real photoionizationRate(const Real a_E) const;
+      Real
+      excitationRates(const Real a_E) const;
+      Real
+      sergeyFactor(const Real a_O2frac) const;
+      Real
+      photoionizationRate(const Real a_E) const;
 
       // Electron velocity
-      RealVect computeElectronDriftVelocity(const RealVect a_E) const;
+      RealVect
+      computeElectronDriftVelocity(const RealVect a_E) const;
 
       // Read file into table
-      void readTables();
+      void
+      readTables();
     };
 
-    
-    class ItoPlasmaAir3LFA::Electron : public ItoSpecies {
+    class ItoPlasmaAir3LFA::Electron : public ItoSpecies
+    {
     public:
       Electron();
       ~Electron();
     };
 
-    class ItoPlasmaAir3LFA::Positive : public ItoSpecies {
+    class ItoPlasmaAir3LFA::Positive : public ItoSpecies
+    {
     public:
       Positive();
       ~Positive();
     };
 
-    class ItoPlasmaAir3LFA::Negative : public ItoSpecies {
+    class ItoPlasmaAir3LFA::Negative : public ItoSpecies
+    {
     public:
       Negative();
       ~Negative();
     };
 
-    class ItoPlasmaAir3LFA::PhotonZ : public RtSpecies {
+    class ItoPlasmaAir3LFA::PhotonZ : public RtSpecies
+    {
     public:
       PhotonZ();
       ~PhotonZ();
 
-      Real getAbsorptionCoefficient(const RealVect a_pos) const override;
-      
+      Real
+      getAbsorptionCoefficient(const RealVect a_pos) const override;
+
     protected:
       Real m_pO2;
       Real m_f1;
@@ -132,12 +146,12 @@ namespace Physics {
       Real m_K1;
       Real m_K2;
 
-      Real m_seed;
-      std::mt19937_64* m_rng; 
+      Real                                  m_seed;
+      std::mt19937_64*                      m_rng;
       std::uniform_real_distribution<Real>* m_udist01;
     };
-  }
-}
+  } // namespace ItoPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

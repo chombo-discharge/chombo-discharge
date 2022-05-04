@@ -19,10 +19,11 @@
 /*!
   @brief Geometry class which defines an electrode blade and a dielectric slab with various surface profiles. 
 */
-class RodPlaneProfile : public ComputationalGeometry {
+class RodPlaneProfile : public ComputationalGeometry
+{
 public:
-
-  enum class profile {
+  enum class profile
+  {
     circle,
     square,
   };
@@ -31,12 +32,14 @@ public:
   ~RodPlaneProfile();
 
 protected:
-
   profile m_profile;
 
-  BaseIF* getBaseIF();
-  BaseIF* getBaseIFCircle();
-  BaseIF* getBaseIFSquare();
+  BaseIF*
+  getBaseIF();
+  BaseIF*
+  getBaseIFCircle();
+  BaseIF*
+  getBaseIFSquare();
 };
 
 #include <CD_NamespaceFooter.H>

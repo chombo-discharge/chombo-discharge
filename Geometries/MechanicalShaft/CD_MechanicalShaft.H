@@ -19,20 +19,24 @@
 /*!
   @brief Mechanical shaft class
 */
-class MechanicalShaft : public ComputationalGeometry {
+class MechanicalShaft : public ComputationalGeometry
+{
 public:
-
   MechanicalShaft();
   ~MechanicalShaft();
 
 protected:
+  void
+  defineElectrode();
+  void
+  defineDielectric();
 
-  void defineElectrode();
-  void defineDielectric();
-  
-  RefCountedPtr<BaseIF> getPolygon();
-  RefCountedPtr<BaseIF> getCylinder();
-  RefCountedPtr<BaseIF> getCylinderProfile();
+  RefCountedPtr<BaseIF>
+  getPolygon();
+  RefCountedPtr<BaseIF>
+  getCylinder();
+  RefCountedPtr<BaseIF>
+  getCylinderProfile();
 };
 
 #include <CD_NamespaceFooter.H>

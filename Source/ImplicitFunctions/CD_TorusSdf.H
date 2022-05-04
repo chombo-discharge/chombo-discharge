@@ -21,9 +21,9 @@
 /*!
   @brief Signed distance function for a torus (oriented along z).
 */
-class TorusSdf : public BaseIF {
+class TorusSdf : public BaseIF
+{
 public:
-
   /*!
     @brief No weak construction (yet)
   */
@@ -42,7 +42,7 @@ public:
     @brief Copy constructor
     @param[in] a_inputIF Input cylinder
   */
-  
+
   TorusSdf(const TorusSdf& a_inputIF);
 
   /*!
@@ -54,15 +54,16 @@ public:
     @brief Test whether inside or not
     @param[in] a_point Physical position. 
   */
-  virtual Real value(const RealVect& a_point) const override;
+  virtual Real
+  value(const RealVect& a_point) const override;
 
   /*!
     @brief IF factory method
   */
-  virtual BaseIF* newImplicitFunction() const override;
+  virtual BaseIF*
+  newImplicitFunction() const override;
 
 protected:
-
   /*!
     @brief Sphere center
   */
@@ -77,7 +78,7 @@ protected:
     @brief Cylinder radius
   */
   Real m_minorRadius;
-  
+
   /*!
     @brief Inside or outside domain
   */

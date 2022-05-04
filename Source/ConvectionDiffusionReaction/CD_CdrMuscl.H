@@ -21,9 +21,9 @@
   @brief Class that uses MUSCL discretization advection.
   @details This class performs MUSCL-type advection using a van Leer limiter for obtaining the face-centered states. 
 */
-class CdrMuscl : public CdrMultigrid {
+class CdrMuscl : public CdrMultigrid
+{
 public:
-
   /*!
     @brief Default constructor. 
   */
@@ -37,12 +37,14 @@ public:
   /*!
     @brief Parse class options to put object in usable state. 
   */
-  virtual void parseOptions() override;
+  virtual void
+  parseOptions() override;
 
   /*!
     @brief Parse runtime options
   */
-  virtual void parseRuntimeOptions() override;
+  virtual void
+  parseRuntimeOptions() override;
 
   /*!
     @brief MUSCL advection to faces
@@ -51,10 +53,10 @@ public:
     @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states. 
     @details This compute the face-centered states using van Leer limiting. It calls computeSlopes(...) and upwind(...). 
   */
-  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) override;
+  virtual void
+  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) override;
 
 protected:
-
   /*!
     @brief If true, slopes are limited (always use limiting). 
   */
@@ -69,12 +71,13 @@ protected:
     @param[in]  a_level   AMR level
     @param[in]  a_dit     Grid index
   */
-  virtual void computeSlopes(EBCellFAB&           a_deltaC,
-			     const EBCellFAB&     a_cellPhi,
-			     const Box&           a_cellBox,
-			     const ProblemDomain& a_domain,
-			     const int            a_level,
-			     const DataIndex&     a_dit);
+  virtual void
+  computeSlopes(EBCellFAB&           a_deltaC,
+                const EBCellFAB&     a_cellPhi,
+                const Box&           a_cellBox,
+                const ProblemDomain& a_domain,
+                const int            a_level,
+                const DataIndex&     a_dit);
 
   /*!
     @brief Upwind/Riemann solve. This extrapolates the cell-centered data to the (inside) face centers and chooses the upwind side. 
@@ -87,19 +90,21 @@ protected:
     @param[in]  a_level   AMR level
     @param[in]  a_dit     Grid index. 
   */
-  virtual void upwind(EBFluxFAB&           a_facePhi,
-		      const EBCellFAB&     a_slopes,
-		      const EBCellFAB&     a_cellPhi,
-		      const EBFluxFAB&     a_faceVel,
-		      const ProblemDomain& a_domain,
-		      const Box&           a_cellBox,
-		      const int&           a_level,
-		      const DataIndex&     a_dit);
+  virtual void
+  upwind(EBFluxFAB&           a_facePhi,
+         const EBCellFAB&     a_slopes,
+         const EBCellFAB&     a_cellPhi,
+         const EBFluxFAB&     a_faceVel,
+         const ProblemDomain& a_domain,
+         const Box&           a_cellBox,
+         const int&           a_level,
+         const DataIndex&     a_dit);
 
   /*!
     @brief Parse slope limiting on/off
   */
-  virtual void parseSlopeLimiter();
+  virtual void
+  parseSlopeLimiter();
 };
 
 #include <CD_NamespaceFooter.H>

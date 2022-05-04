@@ -16,33 +16,39 @@
 using namespace Physics::CdrPlasma;
 
 CdrPlasmaReactionJSON::CdrPlasmaReactionJSON(const std::list<int> a_plasmaReactants,
-					     const std::list<int> a_neutralReactants,			    
-					     const std::list<int> a_plasmaProducts,
-					     const std::list<int> a_photonProducts) {
-  m_plasmaReactants  = a_plasmaReactants ;
+                                             const std::list<int> a_neutralReactants,
+                                             const std::list<int> a_plasmaProducts,
+                                             const std::list<int> a_photonProducts)
+{
+  m_plasmaReactants  = a_plasmaReactants;
   m_neutralReactants = a_neutralReactants;
-  m_plasmaProducts   = a_plasmaProducts  ;
-  m_photonProducts   = a_photonProducts  ;
+  m_plasmaProducts   = a_plasmaProducts;
+  m_photonProducts   = a_photonProducts;
 }
 
+CdrPlasmaReactionJSON::~CdrPlasmaReactionJSON() {}
 
-CdrPlasmaReactionJSON::~CdrPlasmaReactionJSON() {
-
-}
-
-const std::list<int>& CdrPlasmaReactionJSON::getPlasmaReactants() const {
+const std::list<int>&
+CdrPlasmaReactionJSON::getPlasmaReactants() const
+{
   return m_plasmaReactants;
 }
 
-const std::list<int>& CdrPlasmaReactionJSON::getNeutralReactants() const {
+const std::list<int>&
+CdrPlasmaReactionJSON::getNeutralReactants() const
+{
   return m_neutralReactants;
 }
 
-const std::list<int>& CdrPlasmaReactionJSON::getPlasmaProducts() const {
+const std::list<int>&
+CdrPlasmaReactionJSON::getPlasmaProducts() const
+{
   return m_plasmaProducts;
 }
 
-const std::list<int>& CdrPlasmaReactionJSON::getPhotonProducts() const {
+const std::list<int>&
+CdrPlasmaReactionJSON::getPhotonProducts() const
+{
   return m_photonProducts;
 }
 

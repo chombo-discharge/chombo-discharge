@@ -23,9 +23,9 @@
    at fine level of refinement. Just like Chombo's EBCoarseAverage, but with an extra
    function. 
 */
-class EbCoarAve : public EBCoarseAverage {
+class EbCoarAve : public EBCoarseAverage
+{
 public:
-
   /*!
      @brief Default constructor. Must call define afterwards. 
   */
@@ -47,14 +47,14 @@ public:
      @param[in] a_nComp      Maximum number of variables to coarsen
      @param[in] a_ebisPtr    EBIndexSpace
   */
-  EbCoarAve(const DisjointBoxLayout&       a_dblFine,
-		  const DisjointBoxLayout& a_dblCoar,
-		  const EBISLayout&        a_ebislFine,
-		  const EBISLayout&        a_ebislCoar,
-		  const ProblemDomain&     a_domainCoar,
-		  const int&               a_refRat,
-		  const int&               a_nComp,
-		  const EBIndexSpace*      a_ebisPtr);
+  EbCoarAve(const DisjointBoxLayout& a_dblFine,
+            const DisjointBoxLayout& a_dblCoar,
+            const EBISLayout&        a_ebislFine,
+            const EBISLayout&        a_ebislCoar,
+            const ProblemDomain&     a_domainCoar,
+            const int&               a_refRat,
+            const int&               a_nComp,
+            const EBIndexSpace*      a_ebisPtr);
 
   /*!
     @brief Defining constructor. Calls the define function. 
@@ -65,10 +65,10 @@ public:
     @param[in] a_nComp    Maximum number of variables to coarsen
   */
   EbCoarAve(const EBLevelGrid& a_eblgFine,
-	    const EBLevelGrid& a_eblgCoar,
-	    const EBLevelGrid& a_eblgCoFi,
-	    const int&         a_refRat,
-	    const int&         a_nComp);
+            const EBLevelGrid& a_eblgCoar,
+            const EBLevelGrid& a_eblgCoFi,
+            const int&         a_refRat,
+            const int&         a_nComp);
 
   /*!
     @brief Destructor (does nothing)
@@ -78,7 +78,8 @@ public:
   /*!
     @brief Assignement not allowed.
   */
-  void operator=(const EbCoarAve& fabin) = delete;
+  void
+  operator=(const EbCoarAve& fabin) = delete;
 
   /*!
     @brief Conservatively average data defined on irregular cells
@@ -88,9 +89,10 @@ public:
     @param[in]    a_fineData  Fine data
     @param[in]    a_variables Variables to coarsen
   */
-  void conservativeAverage(LevelData<BaseIVFAB<Real> >&       a_coarData,
-			   const LevelData<BaseIVFAB<Real> >& a_fineData,
-			   const Interval&                    a_variables);
+  void
+  conservativeAverage(LevelData<BaseIVFAB<Real>>&       a_coarData,
+                      const LevelData<BaseIVFAB<Real>>& a_fineData,
+                      const Interval&                   a_variables);
 
   /*!
     @brief Do an arithmetic average of face data. 
@@ -101,12 +103,12 @@ public:
     @param[in]    a_variables Variables to coarsen
     @note Input data holders should be defined over the input grids. 
   */
-  void averageFaceData(LevelData<EBFluxFAB>&       a_coarData,
-		       const LevelData<EBFluxFAB>& a_fineData,
-		       const Interval&             a_variables);  
+  void
+  averageFaceData(LevelData<EBFluxFAB>&       a_coarData,
+                  const LevelData<EBFluxFAB>& a_fineData,
+                  const Interval&             a_variables);
 
 protected:
-
   /*!
     @brief Conservatively average data defined on irregular cells
     @details a_coarData will be replaced by a conservative coarsening of a_fineData in regions where the 
@@ -116,11 +118,11 @@ protected:
     @param[in]    a_datInd    Grid index
     @param[in]    a_variables Variables to coarsen
   */
-  void conservativeAverageFAB(BaseIVFAB<Real>&       a_coarData,
-			      const BaseIVFAB<Real>& a_fineData,
-			      const DataIndex&       a_datInd,
-			      const Interval&        a_variables) const;
-
+  void
+  conservativeAverageFAB(BaseIVFAB<Real>&       a_coarData,
+                         const BaseIVFAB<Real>& a_fineData,
+                         const DataIndex&       a_datInd,
+                         const Interval&        a_variables) const;
 
   /*!
     @brief Do an arithmetic average of face-centered data when coarsening. 
@@ -133,12 +135,13 @@ protected:
     @param[in] a_coarInterv  Coarse interval
     @param[in] a_dir         Face direction
   */
-  void averageFaces(EBFaceFAB&       a_coarData,
-		    const EBFaceFAB& a_fineData,
-		    const DataIndex& a_datInd,
-		    const Interval&  a_fineInterv,
-		    const Interval&  a_coarInterv,
-		    const int&       a_dir);
+  void
+  averageFaces(EBFaceFAB&       a_coarData,
+               const EBFaceFAB& a_fineData,
+               const DataIndex& a_datInd,
+               const Interval&  a_fineInterv,
+               const Interval&  a_coarInterv,
+               const int&       a_dir);
 };
 
 #include <CD_NamespaceFooter.H>

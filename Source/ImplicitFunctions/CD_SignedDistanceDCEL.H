@@ -30,9 +30,9 @@
   @details This does not use a bounding volume hierarchy for performance. The template parameter is the floating point precision. 
 */
 template <class T>
-class SignedDistanceDCEL : public BaseIF {
+class SignedDistanceDCEL : public BaseIF
+{
 public:
-
   /*!
     @brief Alias for EBGeometry DCEl mesh with precision T
   */
@@ -66,15 +66,16 @@ public:
     @brief Value function
     @param[in] a_point 2D/3D point
   */
-  Real value(const RealVect& a_point) const override;
+  Real
+  value(const RealVect& a_point) const override;
 
   /*!
     @brief Factory method
   */
-  BaseIF* newImplicitFunction() const override;
+  BaseIF*
+  newImplicitFunction() const override;
 
 protected:
-
   /*!
     @brief DCEL mesh
   */
@@ -88,7 +89,7 @@ protected:
   /*!
     @brief For 2D only. z-coordinate through which we slice the 3D object
   */
-  Real m_zCoord;  
+  Real m_zCoord;
 };
 
 #include <CD_NamespaceFooter.H>

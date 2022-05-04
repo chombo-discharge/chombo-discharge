@@ -18,9 +18,9 @@
 /*!
   @brief This is a class that a rough sphere (either electrode or dielectric)
 */
-class RoughSphere : public ComputationalGeometry {
+class RoughSphere : public ComputationalGeometry
+{
 public:
-
   RoughSphere();
   ~RoughSphere();
 };

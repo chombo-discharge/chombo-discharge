@@ -17,85 +17,101 @@
 #include <CD_EBHelmholtzDirichletEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(){
+EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory()
+{
   CH_TIME("EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory()");
-  
+
   m_order       = -1;
   m_weight      = -1;
   m_useConstant = false;
   m_useFunction = false;
 }
 
-EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(const int a_order, const int a_weight, const Real a_value){
+EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(const int  a_order,
+                                                                 const int  a_weight,
+                                                                 const Real a_value)
+{
   CH_TIME("EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(int, int, Real)");
 
-  CH_assert(a_order  >  0);
+  CH_assert(a_order > 0);
   CH_assert(a_weight >= 0);
-  
+
   this->setOrder(a_order);
   this->setWeight(a_weight);
   this->setValue(a_value);
 }
 
-
-EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(const int a_order, const int a_weight, const std::function<Real(const RealVect& a_pos)>& a_value){
+EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(
+  const int a_order, const int a_weight, const std::function<Real(const RealVect& a_pos)>& a_value)
+{
   CH_TIME("EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(int, int, std::function<Real(RealVect)>)");
 
-  CH_assert(a_order  >  0);
+  CH_assert(a_order > 0);
   CH_assert(a_weight >= 0);
-  
+
   this->setOrder(a_order);
   this->setWeight(a_weight);
   this->setValue(a_value);
 }
 
-EBHelmholtzDirichletEBBCFactory::~EBHelmholtzDirichletEBBCFactory(){
+EBHelmholtzDirichletEBBCFactory::~EBHelmholtzDirichletEBBCFactory()
+{
   CH_TIME("EBHelmholtzDirichletEBBCFactory::~EBHelmholtzDirichletEBBCFactory()");
 }
 
-void EBHelmholtzDirichletEBBCFactory::setOrder(const int a_order){
+void
+EBHelmholtzDirichletEBBCFactory::setOrder(const int a_order)
+{
   CH_TIME("EBHelmholtzDirichletEBBCFactory::setOrder(int)");
-  
+
   CH_assert(a_order > 0);
-  
+
   m_order = a_order;
 }
 
-void EBHelmholtzDirichletEBBCFactory::setWeight(const int a_weight){
+void
+EBHelmholtzDirichletEBBCFactory::setWeight(const int a_weight)
+{
   CH_TIME("EBHelmholtzDirichletEBBCFactory::setWeight(int)");
-  
+
   CH_assert(a_weight >= 0);
-  
+
   m_weight = a_weight;
 }
 
-void EBHelmholtzDirichletEBBCFactory::setValue(const Real a_value){
+void
+EBHelmholtzDirichletEBBCFactory::setValue(const Real a_value)
+{
   CH_TIME("EBHelmholtzDirichletEBBCFactory::setValue(Real)");
-  
+
   m_useConstant = true;
   m_useFunction = false;
-  
+
   m_constantValue = a_value;
 }
 
-void EBHelmholtzDirichletEBBCFactory::setValue(const std::function<Real(const RealVect& a_pos)>& a_value){
+void
+EBHelmholtzDirichletEBBCFactory::setValue(const std::function<Real(const RealVect& a_pos)>& a_value)
+{
   CH_TIME("EBHelmholtzDirichletEBBCFactory::setValue(std::function<Real(RealVect)>)");
-  
+
   m_useConstant = false;
   m_useFunction = true;
-  
+
   m_functionValue = a_value;
 }
 
-RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzDirichletEBBCFactory::create() {
+RefCountedPtr<EBHelmholtzEBBC>
+EBHelmholtzDirichletEBBCFactory::create()
+{
   CH_TIME("EBHelmholtzDirichletEBBCFactory::create()");
 
   CH_assert(m_useConstant || m_useFunction);
-  CH_assert(m_order  >  0);
+  CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
   // Also issue run-time error
-  if(!(m_order > 0 && m_weight >= 0)){
+  if (!(m_order > 0 && m_weight >= 0)) {
     MayDay::Error("EBHelmholtzDirichletEBBCFactory::create() - logic bust, must have m_order > 0 && m_weight >= 0");
   }
 
@@ -103,13 +119,13 @@ RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzDirichletEBBCFactory::create() {
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);
-  if(m_useConstant){
+  if (m_useConstant) {
     bc->setValue(m_constantValue);
   }
-  else if(m_useFunction){
+  else if (m_useFunction) {
     bc->setValue(m_functionValue);
   }
-  else{
+  else {
     MayDay::Error("EBHelmholtzDirichletEBBCFactory::create() - logic bust. Not using constant or function");
   }
 

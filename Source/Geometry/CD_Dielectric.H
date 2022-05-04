@@ -25,14 +25,14 @@
 /*!
   @brief dielectric class. Simple tuple.
 */
-class Dielectric {
+class Dielectric
+{
 public:
-
   /*!
     @brief Weak constructor, must subsequently call one of the define methods.
   */
   Dielectric();
-  
+
   /*!
     @brief Full constructor which uses constant permittivity.
     @param[in] a_baseIF       Implicit function
@@ -59,30 +59,33 @@ public:
     @param[in] a_baseIF       Implicit function
     @param[in] a_permittivity Constant permittivity
   */
-  virtual void define(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity);
+  virtual void
+  define(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity);
 
   /*!
     @brief Define function for variable permittivity
     @param[in] a_baseIF       Implicit function
     @param[in] a_permittivity Variable permittivity
   */
-  virtual void define(const RefCountedPtr<BaseIF>& a_baseIF, const std::function<Real(const RealVect a_pos)>& a_permittivity);
+  virtual void
+  define(const RefCountedPtr<BaseIF>& a_baseIF, const std::function<Real(const RealVect a_pos)>& a_permittivity);
 
   /*!
     @brief Get level-set function
     @return Returns m_baseIF
   */
-  virtual const RefCountedPtr<BaseIF>& getImplicitFunction() const;
+  virtual const RefCountedPtr<BaseIF>&
+  getImplicitFunction() const;
 
   /*!
     @brief Get permittivity
     @param[in] a_pos Position
     @return Returns permittivity for physical coordinates a_pos. 
   */
-  virtual Real getPermittivity(const RealVect a_pos) const;
+  virtual Real
+  getPermittivity(const RealVect a_pos) const;
 
 protected:
-
   /*!
     @brief Implicit function
   */
@@ -96,7 +99,7 @@ protected:
   /*!
     @brief Variable permittivity
   */
-  std::function<Real(const RealVect a_pos) > m_variablePermittivity;
+  std::function<Real(const RealVect a_pos)> m_variablePermittivity;
 
   /*!
     @brief Use constant permittivity or not. 

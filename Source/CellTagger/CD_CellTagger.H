@@ -27,9 +27,9 @@
   A supporting utility for CellTagger is that the parent class provides functionality for restricting cell refinement to specified regions in space. This can be used
   to prune tags where it is (heuristically) known that cell refinement is unnecessary. 
 */
-class CellTagger {
+class CellTagger
+{
 public:
-
   /*!
     @brief Weak constructor (does nothing)
   */
@@ -45,19 +45,22 @@ public:
     @details This function exists because implementations may require data to be allocated on a mesh. This function is
     called by Driver to make sure data is reallocated when it needs to. 
   */
-  virtual void regrid() = 0;
+  virtual void
+  regrid() = 0;
 
   /*!
     @brief Parse class options.
     @note This function is called by Driver. 
   */
-  virtual void parseOptions() = 0;
+  virtual void
+  parseOptions() = 0;
 
   /*!
     @brief Parse runtime class options
     @details This function is called by Driver at every time step; the user can use this for run-time updates of e.g. refinement criteria.
   */
-  virtual void parseRuntimeOptions();
+  virtual void
+  parseRuntimeOptions();
 
   /*!
     @brief Tag cells
@@ -66,13 +69,15 @@ public:
     much the same way as LevelData. The DenseIntVectSet is essentially an IntVectSet restricted to the patch (i.e. one cannot add IntVects that are outside the patch). 
     This function cells for refinement or coarsening. The user's responsibility is to add (or remove) tags from a_tags. 
   */
-  virtual bool tagCells(EBAMRTags& a_tags) = 0;
+  virtual bool
+  tagCells(EBAMRTags& a_tags) = 0;
 
   /*!
     @brief Get number of plot variables that will be written to file (by Driver).
     @return Returns number of plot variables that Driver will write to plot files. 
   */
-  virtual int getNumberOfPlotVariables() const;
+  virtual int
+  getNumberOfPlotVariables() const;
 
   /*!
     @brief Write plot data.
@@ -80,7 +85,8 @@ public:
     @param[inout] a_plotVariableNames Plot variable names
     @param[inout] a_icomp             Starting variable in a_output where we begin appending data.
   */
-  virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
+  virtual void
+  writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
 
   /*!
     @brief Get tag buffer. 
@@ -88,10 +94,10 @@ public:
     @return Returns m_buffer
     @note This will look for a string in the form "m_name.buffer = <integer>". 
   */
-  int getBuffer() const;
+  int
+  getBuffer() const;
 
 protected:
-
   /*!
     @brief Cell tagger class name (default is CellTagger).
   */
@@ -117,28 +123,32 @@ protected:
     @param[in] a_pos Physical coordinates. 
     @return Returns true if a_pos is inside any of the boxes in m_tagBoxes. Otherwise it returns false. 
   */
-  bool insideTagBox(const RealVect a_pos) const;
+  bool
+  insideTagBox(const RealVect a_pos) const;
 
   /*!
     @brief Parse boxes.
     @details This will look for input parameters in the form m_name.num_boxes = <integer>. If <integer> = 0 then the function will process additional lines
     in the form "m_name.box1_lo = <float> <float> <float>" which indicates the lower corner of the "tag box". 
   */
-  virtual void parseBoxes();
+  virtual void
+  parseBoxes();
 
   /*!
     @brief Parse refinement buffer.
     @details This will look for an input parameter in the form "m_name.buffer = <integer>". If this is called but the string does not exist, it will cause
     a run-time error. 
   */
-  virtual void parseBuffer();
+  virtual void
+  parseBuffer();
 
   /*!
     @brief Parse the verbosity from the input file or command line.
     @details This will look for an input parameter in the form "m_name.verbosity = <integer>". This is used to control "verbosity" for the cell tagger class. Turning
     on verbosity for this class is mostly for debugging purposes. 
   */
-  virtual void parseVerbosity();
+  virtual void
+  parseVerbosity();
 };
 
 #include <CD_NamespaceFooter.H>

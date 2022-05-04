@@ -17,7 +17,8 @@
 /*!
   @brief Enum for putting some logic into how we think about intersection between particles and EBs. 
 */
-enum class EbIntersection {
+enum class EbIntersection
+{
   Bisection,
   Raycast
 };

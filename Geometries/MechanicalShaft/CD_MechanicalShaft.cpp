@@ -30,7 +30,8 @@
 #include <CD_RoundedCylinderIF.H>
 #include <CD_NamespaceHeader.H>
 
-MechanicalShaft::MechanicalShaft(){
+MechanicalShaft::MechanicalShaft()
+{
 #if CH_SPACEDIM == 2
   MayDay::Abort("MechanicalShaft::MechanicalShaft - this class is for 3D only");
 #endif
@@ -38,86 +39,86 @@ MechanicalShaft::MechanicalShaft(){
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
 
-  ParmParse pp("MechanicalShaft");  
+  ParmParse pp("MechanicalShaft");
 
-  std::string str;
+  std::string  str;
   Vector<Real> vec;
 
   Real eps0;
   bool has_electrode;
   bool has_dielectric;
-  
-  pp.get("eps0",               eps0);
-  pp.get("turn_on_dielectric", has_dielectric);
-  pp.get("turn_on_electrode",  has_electrode);
 
-  
-  // Define shit. 
-  if(has_electrode)  this->defineElectrode();
-  if(has_dielectric) this->defineDielectric();
+  pp.get("eps0", eps0);
+  pp.get("turn_on_dielectric", has_dielectric);
+  pp.get("turn_on_electrode", has_electrode);
+
+  // Define shit.
+  if (has_electrode)
+    this->defineElectrode();
+  if (has_dielectric)
+    this->defineDielectric();
 
   this->setGasPermittivity(eps0);
 }
 
-MechanicalShaft::~MechanicalShaft(){
-  
-}
+MechanicalShaft::~MechanicalShaft() {}
 
-void MechanicalShaft::defineElectrode(){
+void
+MechanicalShaft::defineElectrode()
+{
   ParmParse pp("MechanicalShaft.electrode");
 
   Vector<Real> vec(SpaceDim);
-  bool live;
-  Real innerRadius;
-  Real outerRadius;
-  Real innerCurv;
-  Real outerCurv;
-  
+  bool         live;
+  Real         innerRadius;
+  Real         outerRadius;
+  Real         innerCurv;
+  Real         outerCurv;
+
   RealVect center1, center2;
 
-  pp.get("live",         live);
+  pp.get("live", live);
 
-  pp.get("inner_radius",    innerRadius);
-  pp.get("outer_radius",    outerRadius);  
+  pp.get("inner_radius", innerRadius);
+  pp.get("outer_radius", outerRadius);
   pp.get("inner_curvature", innerCurv);
-  pp.get("outer_curvature", outerCurv);  
+  pp.get("outer_curvature", outerCurv);
 
-  pp.getarr("endpoint1", vec, 0, SpaceDim); center1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-  pp.getarr("endpoint2", vec, 0, SpaceDim); center2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.getarr("endpoint1", vec, 0, SpaceDim);
+  center1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.getarr("endpoint2", vec, 0, SpaceDim);
+  center2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
-  RefCountedPtr<BaseIF> elec = RefCountedPtr<BaseIF> (new HollowCylinderIF(center1,
-									   center2,
-									   outerRadius,
-									   innerRadius,
-									   outerCurv,
-									   innerCurv,
-									   false));
+  RefCountedPtr<BaseIF> elec = RefCountedPtr<BaseIF>(
+    new HollowCylinderIF(center1, center2, outerRadius, innerRadius, outerCurv, innerCurv, false));
 
   m_electrodes.resize(1);
   m_electrodes[0].define(elec, live);
 }
 
-void MechanicalShaft::defineDielectric(){
+void
+MechanicalShaft::defineDielectric()
+{
   ParmParse pp("MechanicalShaft.dielectric");
 
   std::string str;
-  Real eps;
-  
+  Real        eps;
+
   pp.get("shaft_shape", str);
   pp.get("permittivity", eps);
 
   // Get the shape
   RefCountedPtr<BaseIF> shaft = RefCountedPtr<BaseIF>(nullptr);
-  if(str == "polygon"){
+  if (str == "polygon") {
     shaft = this->getPolygon();
   }
-  else if(str == "cylinder"){
+  else if (str == "cylinder") {
     shaft = this->getCylinder();
   }
-  else if(str == "cyl_profile"){
+  else if (str == "cyl_profile") {
     shaft = this->getCylinderProfile();
   }
-  else{
+  else {
     MayDay::Abort("MechanicalShaft::defineDielectric - unknown argument 'shaft_shape' passed");
   }
 
@@ -125,62 +126,75 @@ void MechanicalShaft::defineDielectric(){
   m_dielectrics[0].define(shaft, eps);
 }
 
-RefCountedPtr<BaseIF> MechanicalShaft::getPolygon(){
+RefCountedPtr<BaseIF>
+MechanicalShaft::getPolygon()
+{
   ParmParse pp("MechanicalShaft.dielectric.polygon");
 
-  int numSides;
+  int      numSides;
   RealVect c1, c2;
-  Real radius, curv;
+  Real     radius, curv;
 
   Vector<Real> vec;
 
   pp.get("num_sides", numSides);
-  pp.get("radius",    radius);
+  pp.get("radius", radius);
   pp.get("curvature", curv);
 
-  pp.getarr("endpoint1", vec, 0, SpaceDim); c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-  pp.getarr("endpoint2", vec, 0, SpaceDim); c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.getarr("endpoint1", vec, 0, SpaceDim);
+  c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.getarr("endpoint2", vec, 0, SpaceDim);
+  c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
-  return RefCountedPtr<BaseIF> (new PolygonRodIF(c1, c2, radius, curv, numSides, false));
+  return RefCountedPtr<BaseIF>(new PolygonRodIF(c1, c2, radius, curv, numSides, false));
 }
 
-RefCountedPtr<BaseIF> MechanicalShaft::getCylinder(){
+RefCountedPtr<BaseIF>
+MechanicalShaft::getCylinder()
+{
   ParmParse pp("MechanicalShaft.dielectric.polygon");
-    
+
   RealVect c1, c2;
-  Real radius, curv;
+  Real     radius, curv;
 
   Vector<Real> vec;
 
-  pp.get("radius",    radius);
+  pp.get("radius", radius);
   pp.get("curvature", curv);
 
-  pp.getarr("endpoint1", vec, 0, SpaceDim); c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-  pp.getarr("endpoint2", vec, 0, SpaceDim); c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.getarr("endpoint1", vec, 0, SpaceDim);
+  c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.getarr("endpoint2", vec, 0, SpaceDim);
+  c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
-  return RefCountedPtr<BaseIF> (new RoundedCylinderIF(c1, c2, radius, curv, false));
+  return RefCountedPtr<BaseIF>(new RoundedCylinderIF(c1, c2, radius, curv, false));
 }
 
-RefCountedPtr<BaseIF> MechanicalShaft::getCylinderProfile(){
+RefCountedPtr<BaseIF>
+MechanicalShaft::getCylinderProfile()
+{
   ParmParse pp("MechanicalShaft.dielectric.cylProfile");
-    
-  RealVect c1, c2;
-  Real cylRad, torusMajor, torusMinor, ccDist, shift, curv, nLeft, nRight;
+
+  RealVect     c1, c2;
+  Real         cylRad, torusMajor, torusMinor, ccDist, shift, curv, nLeft, nRight;
   Vector<Real> vec;
 
-  pp.getarr("endpoint1", vec, 0, SpaceDim); c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-  pp.getarr("endpoint2", vec, 0, SpaceDim); c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-  
-  pp.get("cylinder_radius", cylRad);
-  pp.get("torus_major",     torusMajor);
-  pp.get("torus_minor",     torusMinor);
-  pp.get("torus_distance",  ccDist);
-  pp.get("shift",           shift);
-  pp.get("curvature",       curv);
-  pp.get("nleft",           nLeft);
-  pp.get("nright",          nRight);
+  pp.getarr("endpoint1", vec, 0, SpaceDim);
+  c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.getarr("endpoint2", vec, 0, SpaceDim);
+  c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
-  return RefCountedPtr<BaseIF> (new ProfileCylinderIF(c1, c2, cylRad, torusMajor, torusMinor, ccDist, shift, curv, nLeft, nRight, false));
+  pp.get("cylinder_radius", cylRad);
+  pp.get("torus_major", torusMajor);
+  pp.get("torus_minor", torusMinor);
+  pp.get("torus_distance", ccDist);
+  pp.get("shift", shift);
+  pp.get("curvature", curv);
+  pp.get("nleft", nLeft);
+  pp.get("nright", nRight);
+
+  return RefCountedPtr<BaseIF>(
+    new ProfileCylinderIF(c1, c2, cylRad, torusMajor, torusMinor, ccDist, shift, curv, nLeft, nRight, false));
 }
 
 #include <CD_NamespaceFooter.H>

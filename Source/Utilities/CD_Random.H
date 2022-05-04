@@ -30,9 +30,9 @@
   Random.seed = <number> in the input script, the RNG will use a seed of '0 + procID()' for the various ranks. If the user specifies a <number> less than 0, 
   a random seed will be used.
 */
-class Random {
+class Random
+{
 public:
-
   /*!
     @brief Disallowed constructor. 
   */
@@ -54,67 +54,68 @@ public:
     @brief Disallowed copy assignemtn. 
     @param[in] a_other Other RNG engine. 
   */
-  Random& operator=(const Random& a_other) = delete;
+  Random&
+  operator=(const Random& a_other) = delete;
 
   /*!
     @brief Disallowed move assignment. 
     @param[in] a_other Other RNG engine. 
   */
-  Random& operator=(const Random&& a_other) = delete;
+  Random&
+  operator=(const Random&& a_other) = delete;
 
   /*!
     @brief Get Poisson distributed number
   */
   template <typename T>
-  inline
-  static T getPoisson(const Real a_mean);
+  inline static T
+  getPoisson(const Real a_mean);
 
   /*!
     @brief Get a uniform real number on the interval [0,1]
   */
-  inline
-  static Real getUniformReal01();
+  inline static Real
+  getUniformReal01();
 
   /*!
     @brief Get a uniform real number on the interval [-1,1]
   */
-  inline
-  static Real getUniformReal11();
+  inline static Real
+  getUniformReal11();
 
   /*!
     @brief Get a number from a normal distribution centered on zero and variance 1
   */
-  inline
-  static Real getNormal01();  
+  inline static Real
+  getNormal01();
 
   /*!
     @brief Get a random direction in space.
     @details Uses Marsaglia algorithm. 
   */
-  inline
-  static RealVect getDirection();
+  inline static RealVect
+  getDirection();
 
   /*!
     @brief For getting a random number from a user-supplied distribution. T must be a distribution for which we can call T(s_rng)
     @param[in] a_distribution Distribution. Must have object of type
   */
-  template<typename T>
-  inline  
-  static Real get(T& a_distribution);
+  template <typename T>
+  inline static Real
+  get(T& a_distribution);
 
   /*!
     @brief Seed the RNG
   */
-  inline
-  static void seed();  
+  inline static void
+  seed();
 
 private:
-
   /*!
     @brief For checking if RNG has been seeded or not.
   */
   static bool s_seeded;
-  
+
   /*!
     @brief Random number generator
   */
@@ -140,14 +141,14 @@ private:
     @details If using MPI, the seed is set to a_seed + procID().
     @param[in] a_seed Seed to use for RNG.
   */
-  inline
-  static void setSeed(const int a_seed);
+  inline static void
+  setSeed(const int a_seed);
 
   /*!
     @brief Set a random RNG seed
   */
-  inline
-  static void setRandomSeed();    
+  inline static void
+  setRandomSeed();
 };
 
 #include <CD_NamespaceFooter.H>

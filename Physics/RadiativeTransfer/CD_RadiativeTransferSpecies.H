@@ -24,9 +24,9 @@ namespace Physics {
       @brief Implementation of RtSpecies for usage in RadiativeTransfer module.
       @details This reads a constant kappa from the input file which it uses as Beer's length.
     */
-    class RadiativeTransferSpecies : public RtSpecies {
+    class RadiativeTransferSpecies : public RtSpecies
+    {
     public:
-
       /*!
 	@brief Constructor (reads from input script)
       */
@@ -34,25 +34,25 @@ namespace Physics {
 
       /*!
 	@brief Destructor (does nothing)
-      */      
+      */
       virtual ~RadiativeTransferSpecies();
 
       /*!
 	@brief Get absorption coefficient (i.e. the inverse absorption length) at physical coordinates. 
 	@param[in] a_pos Physical coordinates. 
       */
-      virtual Real getAbsorptionCoefficient(const RealVect a_pos) const override;
+      virtual Real
+      getAbsorptionCoefficient(const RealVect a_pos) const override;
 
     protected:
-
       /*!
 	@brief Absorption coefficient.
 	@details Storing this as a std::function to show to easily use lambdas for returning spatially varying coefficients. 
       */
       std::function<Real(const RealVect a_pos)> m_kappa;
     };
-  }
-}
+  } // namespace RadiativeTransfer
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

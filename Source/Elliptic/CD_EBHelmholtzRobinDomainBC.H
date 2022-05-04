@@ -25,9 +25,9 @@
   @note The B-coefficient is not the same as in the Helmholtz equation...
   @note In our notation, n points into the computational domain. 
 */
-class EBHelmholtzRobinDomainBC : public EBHelmholtzDomainBC {
+class EBHelmholtzRobinDomainBC : public EBHelmholtzDomainBC
+{
 public:
-
   /*!
     @brief Default constructor. Must subsequently set coefficients. 
   */
@@ -44,7 +44,8 @@ public:
     @param[in] a_B Constant B-coefficient
     @param[in] a_C Constant C-coefficient
   */
-  void setCoefficients(const Real a_A, const Real a_B, const Real a_C);
+  void
+  setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Set variable coefficients
@@ -52,10 +53,11 @@ public:
     @param[in] a_B Spatially dependent B-coefficient
     @param[in] a_C Spatially dependent C-coefficient
   */
-  void setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
-		       const std::function<Real(const RealVect& a_pos) >& a_B,
-		       const std::function<Real(const RealVect& a_pos) >& a_C);
-  
+  void
+  setCoefficients(const std::function<Real(const RealVect& a_pos)>& a_A,
+                  const std::function<Real(const RealVect& a_pos)>& a_B,
+                  const std::function<Real(const RealVect& a_pos)>& a_C);
+
   /*!
     @brief Get face flux. This is for regular cells
     @param[inout] a_faceFlux       Face-centered flux. 
@@ -66,12 +68,13 @@ public:
     @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
     @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
   */
-  virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux,
-			   const BaseFab<Real>&  a_phi,
-			   const int&            a_dir,
-			   const Side::LoHiSide& a_side,
-			   const DataIndex&      a_dit,
-			   const bool            a_useHomogeneous) const override;
+  virtual void
+  getFaceFlux(BaseFab<Real>&        a_faceFlux,
+              const BaseFab<Real>&  a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const override;
 
   /*!
     @brief Get face flux. This is for irregular cells. 
@@ -82,15 +85,15 @@ public:
     @param[in] a_dit            Data index
     @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
   */
-  virtual Real getFaceFlux(const VolIndex&       a_vof,
-			   const EBCellFAB&      a_phi,
-			   const int&            a_dir,
-			   const Side::LoHiSide& a_side,
-			   const DataIndex&      a_dit,
-			   const bool            a_useHomogeneous) const override;
+  virtual Real
+  getFaceFlux(const VolIndex&       a_vof,
+              const EBCellFAB&      a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const override;
 
 protected:
-
   /*!
     @brief Use constant for BC
   */
@@ -130,7 +133,6 @@ protected:
     @brief Function-based C-coefficient
   */
   std::function<Real(const RealVect& a_pos)> m_functionC;
-
 };
 
 #include <CD_NamespaceFooter.H>

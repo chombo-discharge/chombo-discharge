@@ -25,9 +25,9 @@ namespace Physics {
       @brief Class for tagging cells in AdvectionDiffusion physics
       @details This class refines cells if grad(phi)*dx/phi > r1 or if phi > r2.
     */
-    class AdvectionDiffusionTagger : public CellTagger {
+    class AdvectionDiffusionTagger : public CellTagger
+    {
     public:
-
       /*!
 	@brief Disallowed weak construction.
       */
@@ -38,8 +38,7 @@ namespace Physics {
 	@param[in] a_solver Cdr solver reference -- needed in order to fetch data used for tagging
 	@param[in] a_amr    AmrMesh solver reference
       */
-      AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_solver,
-			       RefCountedPtr<AmrMesh>&   a_amr);
+      AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_solver, RefCountedPtr<AmrMesh>& a_amr);
 
       /*!
 	@brief Destructor (does nothing)
@@ -50,22 +49,24 @@ namespace Physics {
 	@brief Regrid method.
 	@details Does nothing, but is overriden because parent method is pure.
       */
-      void regrid() override;
+      void
+      regrid() override;
 
       /*!
 	@brief Parse options
 	@details Parses m_refCurv and m_refMagn.
       */
-      void parseOptions() override;
+      void
+      parseOptions() override;
 
       /*!
 	@brief Flag cells for refinement.
 	@param[inout] a_tags Cell tags across AMR hierarchy. See CellTagger for details.
       */
-      bool tagCells(EBAMRTags& a_tags) override;
+      bool
+      tagCells(EBAMRTags& a_tags) override;
 
     protected:
-
       /*!
 	@brief Realm where solver is registered.
       */
@@ -78,21 +79,21 @@ namespace Physics {
 
       /*!
 	@brief Reference to AmrMesh
-      */      
+      */
       RefCountedPtr<AmrMesh> m_amr;
 
       /*!
 	@brief Refinement threshold for curvature-based refinement.
       */
       Real m_refCurv;
-      
+
       /*!
 	@brief Refinement threshold for magnitude-based refinement.
-      */      
+      */
       Real m_refMagn;
     };
-  }
-}
+  } // namespace AdvectionDiffusion
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

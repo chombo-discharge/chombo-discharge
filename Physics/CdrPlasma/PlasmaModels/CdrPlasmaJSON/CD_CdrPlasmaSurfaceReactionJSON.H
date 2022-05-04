@@ -30,9 +30,9 @@ namespace Physics {
       @details This class is specifically for surface reactions. When including more species on the left hand side, e.g. A + B -> C, it is the same
       as specifying A -> C, B -> C with equal reaction rates. 
     */
-    class CdrPlasmaSurfaceReactionJSON {
+    class CdrPlasmaSurfaceReactionJSON
+    {
     public:
-
       /*!
 	@brief Disallowed weak construction.
       */
@@ -45,34 +45,36 @@ namespace Physics {
 	@param[in] a_plasmaProducts   Plasma species on the right-hand side of the reaction. 
       */
       CdrPlasmaSurfaceReactionJSON(const std::list<int> a_plasmaReactants,
-				   const std::list<int> a_photonReactants,
-				   const std::list<int> a_plasmaProducts);
+                                   const std::list<int> a_photonReactants,
+                                   const std::list<int> a_plasmaProducts);
 
       /*!
 	@brief Destructor
       */
-      virtual ~CdrPlasmaSurfaceReactionJSON();      
+      virtual ~CdrPlasmaSurfaceReactionJSON();
 
       /*!
 	@brief Get the plasma reactants
 	@return Returns m_plasmaReactants
       */
-      const std::list<int>& getPlasmaReactants() const;
+      const std::list<int>&
+      getPlasmaReactants() const;
 
       /*!
 	@brief Get the photo-reactants
 	@return Returns m_photonReactants
       */
-      const std::list<int>& getPhotonReactants() const;      
+      const std::list<int>&
+      getPhotonReactants() const;
 
       /*!
 	@brief Get the plasma products
 	@return Returns m_plasmaProducts
       */
-      const std::list<int>& getPlasmaProducts() const;
+      const std::list<int>&
+      getPlasmaProducts() const;
 
     protected:
-
       /*!
 	@brief Plasma species on the left-hand side of the reaction
       */
@@ -81,15 +83,15 @@ namespace Physics {
       /*!
 	@brief Photon species on the left-hand side of the reaction
       */
-      std::list<int> m_photonReactants;            
+      std::list<int> m_photonReactants;
 
       /*!
 	@brief Plasma species on the right-hand side of the reaction
-      */      
+      */
       std::list<int> m_plasmaProducts;
     };
-  }
-}
+  } // namespace CdrPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

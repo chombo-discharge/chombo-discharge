@@ -26,9 +26,9 @@
   @note The B-coefficient is not the same as in the Helmholtz equation...
   @note In our notation, n points into the computational domain. 
 */
-class EBHelmholtzRobinEBBC : public EBHelmholtzEBBC {
+class EBHelmholtzRobinEBBC : public EBHelmholtzEBBC
+{
 public:
-
   /*!
     @brief Default constructor. Must subsequently set coefficients.
   */
@@ -42,11 +42,7 @@ public:
     @param[in] a_B      Robin B-coefficient
     @param[in] a_C      Robin C-coefficient
   */
-  EBHelmholtzRobinEBBC(const int  a_order,
-		       const int  a_weight,
-		       const Real a_A,
-		       const Real a_B,
-		       const Real a_C);
+  EBHelmholtzRobinEBBC(const int a_order, const int a_weight, const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Full constructor which sets variable coefficients
@@ -56,11 +52,11 @@ public:
     @param[in] a_B      Robin B-coefficient
     @param[in] a_C      Robin C-coefficient
   */
-  EBHelmholtzRobinEBBC(const int                                          a_order,
-		       const int                                          a_weight,
-		       const std::function<Real(const RealVect& a_pos) >& a_A,
-		       const std::function<Real(const RealVect& a_pos) >& a_B,
-		       const std::function<Real(const RealVect& a_pos) >& a_C);
+  EBHelmholtzRobinEBBC(const int                                         a_order,
+                       const int                                         a_weight,
+                       const std::function<Real(const RealVect& a_pos)>& a_A,
+                       const std::function<Real(const RealVect& a_pos)>& a_B,
+                       const std::function<Real(const RealVect& a_pos)>& a_C);
 
   /*!
     @brief Destructor
@@ -71,21 +67,24 @@ public:
     @brief Set BC order
     @param[in] a_order Order
   */
-  void setOrder(const int a_order);
+  void
+  setOrder(const int a_order);
 
   /*!
     @brief Set equation weights for least squares reconstruction. 
     @param[in] a_weight Weights
   */
-  void setWeight(const int a_weight);    
-  
+  void
+  setWeight(const int a_weight);
+
   /*!
     @brief Set constant coefficients
     @param[in] a_A Constant A-coefficient
     @param[in] a_B Constant B-coefficient
     @param[in] a_C Constant C-coefficient
   */
-  void setCoefficients(const Real a_A, const Real a_B, const Real a_C);
+  void
+  setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Set variable coefficients
@@ -93,10 +92,10 @@ public:
     @param[in] a_B Spatially dependent B-coefficient
     @param[in] a_C Spatially dependent C-coefficient
   */
-  void setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
-		       const std::function<Real(const RealVect& a_pos) >& a_B,
-		       const std::function<Real(const RealVect& a_pos) >& a_C);
-
+  void
+  setCoefficients(const std::function<Real(const RealVect& a_pos)>& a_A,
+                  const std::function<Real(const RealVect& a_pos)>& a_B,
+                  const std::function<Real(const RealVect& a_pos)>& a_C);
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
@@ -107,15 +106,15 @@ public:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  virtual void applyEBFlux(VoFIterator&       a_vofit,
-			   EBCellFAB&         a_Lphi,
-			   const EBCellFAB&   a_phi,
-			   const DataIndex&   a_dit,
-			   const Real&        a_beta,
-			   const bool&        a_homogeneousPhysBC) const override;
-  
-protected:
+  virtual void
+  applyEBFlux(VoFIterator&     a_vofit,
+              EBCellFAB&       a_Lphi,
+              const EBCellFAB& a_phi,
+              const DataIndex& a_dit,
+              const Real&      a_beta,
+              const bool&      a_homogeneousPhysBC) const override;
 
+protected:
   /*!
     @brief Use constant for BC
   */
@@ -134,7 +133,7 @@ protected:
   /*!
     @brief Stencil weight (for weighting equations in least squares reconstruction)
   */
-  int m_weight;    
+  int m_weight;
 
   /*!
     @brief Constant A-coefficient
@@ -165,11 +164,12 @@ protected:
     @brief Function-based C-coefficient
   */
   std::function<Real(const RealVect& a_pos)> m_functionC;
-    
+
   /*!
     @brief User define function. 
   */
-  virtual void define() override;
+  virtual void
+  define() override;
 
   /*!
     @brief Get a least-squares based interpolation stencil 
@@ -179,10 +179,13 @@ protected:
     @param[in] a_order        Stencil order
     @note This extrapolates from cell-centers to the EB using a first order expression. 
   */
-  VoFStencil getInterpolationStencil(const VolIndex& a_vof, const DataIndex& a_dit, const VofUtils::Neighborhood a_neighborhood, const int a_order) const;
+  VoFStencil
+  getInterpolationStencil(const VolIndex&              a_vof,
+                          const DataIndex&             a_dit,
+                          const VofUtils::Neighborhood a_neighborhood,
+                          const int                    a_order) const;
 };
 
 #include <CD_NamespaceFooter.H>
 
 #endif
-

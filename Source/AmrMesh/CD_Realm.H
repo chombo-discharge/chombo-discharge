@@ -32,14 +32,14 @@ static const std::string s_particle_valid_region = "pvr";
 /*!
   @brief Alias for cutting down on the typic of booleans defined over AMR grids. 
 */
-using AMRMask = Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >;
+using AMRMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
 
 /*!
   @brief Class for holding multifluid Realms, which are the Realms that we actually use. 
 */
-class Realm {
+class Realm
+{
 public:
-
   /*!
     @brief Identifier for perimal realm
   */
@@ -48,7 +48,7 @@ public:
   /*!
     @brief Identifier for perimal realm
   */
-  const static std::string primal;  
+  const static std::string primal;
 
   /*!
     @brief Default constructor. Must subsequently call define
@@ -71,13 +71,15 @@ public:
     @brief Disallowed copy assignment operator
     @param[in] a_other Other realm
   */
-  Realm& operator=(const Realm& a_other) = delete;
+  Realm&
+  operator=(const Realm& a_other) = delete;
 
   /*!
     @brief Disallowed move assignment operator
     @param[in] a_other Other realm
   */
-  Realm& operator=(const Realm&& a_other) = delete;
+  Realm&
+  operator=(const Realm&& a_other) = delete;
 
   /*!
     @brief Destructor
@@ -104,46 +106,49 @@ public:
     @param[in] a_baseif           Implicit/signed distance function 
     @param[in] a_mfis             EBIndexSpace discrete information
   */
-  void define(const Vector<DisjointBoxLayout>&                           a_grids,
-  	      const Vector<ProblemDomain>&                               a_domains,
-  	      const Vector<int>&                                         a_refRat,
-  	      const Vector<Real>&                                        a_dx,
-  	      const RealVect                                             a_probLo,
-  	      const int                                                  a_finestLevel,
-  	      const int                                                  a_ebGhost,
-  	      const int                                                  a_numGhost,
-  	      const int                                                  a_lsfGhost,
-  	      const int                                                  a_redistRad,
-  	      const int                                                  a_mgInterpOrder,
-  	      const int                                                  a_mgInterpRadius,
-  	      const int                                                  a_mgInterpWeight,
-  	      const IrregStencil::StencilType                            a_centroidStencil,
-  	      const IrregStencil::StencilType                            a_ebStencil,
-  	      const std::map<phase::which_phase, RefCountedPtr<BaseIF> > a_baseif,
-  	      const RefCountedPtr<MultiFluidIndexSpace>&                 a_mfis);
-
+  void
+  define(const Vector<DisjointBoxLayout>&                          a_grids,
+         const Vector<ProblemDomain>&                              a_domains,
+         const Vector<int>&                                        a_refRat,
+         const Vector<Real>&                                       a_dx,
+         const RealVect                                            a_probLo,
+         const int                                                 a_finestLevel,
+         const int                                                 a_ebGhost,
+         const int                                                 a_numGhost,
+         const int                                                 a_lsfGhost,
+         const int                                                 a_redistRad,
+         const int                                                 a_mgInterpOrder,
+         const int                                                 a_mgInterpRadius,
+         const int                                                 a_mgInterpWeight,
+         const IrregStencil::StencilType                           a_centroidStencil,
+         const IrregStencil::StencilType                           a_ebStencil,
+         const std::map<phase::which_phase, RefCountedPtr<BaseIF>> a_baseif,
+         const RefCountedPtr<MultiFluidIndexSpace>&                a_mfis);
 
   /*!
     @brief Set grid method
     @param[in] a_grids       New grids
     @param[in] a_finestLevel New finest grid level
     @details This sets m_grids to be a_grids, but does not perform a regrid of remaining members.
-  */  
-  void setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel);
+  */
+  void
+  setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel);
 
   /*!
     @brief Regrid method for EBAMR base
     @param[in] a_lmin Coarsest grid level that changed. 
     @details This regrids EBLevelGrid and iterators
   */
-  void regridBase(const int a_lmin);
+  void
+  regridBase(const int a_lmin);
 
   /*!
     @brief Regrid method for EBAMR operators.
     @param[in] a_lmin Coarsest grid level that changed. 
     @details This regrids all operators. 
   */
-  void regridOperators(const int a_lmin);
+  void
+  regridOperators(const int a_lmin);
 
   /*!
     @brief Register an AMR operator
@@ -151,7 +156,8 @@ public:
     @param[in] a_phase Phase where operator is registered
     @details Issues run-time error if a_operator can't be recognized
   */
-  void registerOperator(const std::string a_operator, const phase::which_phase a_phase);
+  void
+  registerOperator(const std::string a_operator, const phase::which_phase a_phase);
 
   /*!
     @brief Query if an AMR operator has been registered
@@ -159,14 +165,16 @@ public:
     @param[in] a_phase Phase where operator is registered
     @return True if operator has been registered and false otherwise
   */
-  bool queryOperator(const std::string a_operator, const phase::which_phase a_phase) const;
+  bool
+  queryOperator(const std::string a_operator, const phase::which_phase a_phase) const;
 
   /*!
     @brief Register a mask
     @param[in] a_mask Mask name
     @param[in] a_phase Phase where mask is registered
   */
-  void registerMask(const std::string a_mask, const int a_buffer);
+  void
+  registerMask(const std::string a_mask, const int a_buffer);
 
   /*!
     @brief Query if a mask has been registered
@@ -174,169 +182,196 @@ public:
     @param[in] a_phase Phase where mask is registered
     @return true if mask has been registered
   */
-  bool queryMask(const std::string a_mask, const int a_buffer) const;
+  bool
+  queryMask(const std::string a_mask, const int a_buffer) const;
 
   /*!
     @brief Get refinement ratios
     @return m_refinementRatios
   */
-  const Vector<int>& getRefinementRatios() const;
+  const Vector<int>&
+  getRefinementRatios() const;
 
   /*!
     @brief Get grid resolutions
     @return m_dx
   */
-  const Vector<Real>& getDx() const;
+  const Vector<Real>&
+  getDx() const;
 
   /*!
     @brief Get AMR grids
     @return m_grids
   */
-  const Vector<DisjointBoxLayout>& getGrids() const;
+  const Vector<DisjointBoxLayout>&
+  getGrids() const;
 
   /*!
     @brief Get problem domains
   */
-  const Vector<ProblemDomain>& getDomains() const;
+  const Vector<ProblemDomain>&
+  getDomains() const;
 
   /*!
     @brief Get MFLevelGrids
   */
-  Vector<RefCountedPtr<MFLevelGrid> >& getMFLevelGrid();
+  Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGrid();
 
   /*!
     @brief Get EBIndexSpace for particular phase
     @param[in] a_phase Phase
   */
-  const RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const phase::which_phase a_phase) const;
+  const RefCountedPtr<EBIndexSpace>&
+  getEBIndexSpace(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get EBISLayout for particular phase
     @param[in] a_phase Phase
   */
-  const Vector<EBISLayout>& getEBISLayout(const phase::which_phase a_phase) const;
+  const Vector<EBISLayout>&
+  getEBISLayout(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get EBLevelGrid for particular phase
     @param[in] a_phase Phase
   */
-  const Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGrid(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get neighbors for particular phase
     @param[in] a_phase Phase
   */
-  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
+  getNeighbors(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get VoFIterators for particular phase
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator(const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getVofIterator(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get stencils for interpolating from cell center to centroids (for specified phase)
     @param[in] a_phase Phase
   */
-  const IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const phase::which_phase a_phase) const;
+  const IrregAmrStencil<CentroidInterpolationStencil>&
+  getCentroidInterpolationStencils(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get stencils for interpolating from cell center to eb centroids
     @param[in] a_phase Phase
   */
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) const;
+  const IrregAmrStencil<EbCentroidInterpolationStencil>&
+  getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get stencils for computing "non-conservative divergences"
     @param[in] a_phase Phase
   */
-  const IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const phase::which_phase a_phase) const;
+  const IrregAmrStencil<NonConservativeDivergenceStencil>&
+  getNonConservativeDivergenceStencils(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get data coarsening utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EbCoarAve>>&
+  getCoarseAverage(const phase::which_phase a_phase);
 
   /*!
     @brief Get the multigrid interpolator
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBMultigridInterpolator>>&
+  getMultigridInterpolator(const phase::which_phase a_phase);
 
   /*!
     @brief Get the particle mesh operator
     @param[in] a_phase Which phase
   */
-  EBAMRParticleMesh& getParticleMesh(const phase::which_phase a_phase);
+  EBAMRParticleMesh&
+  getParticleMesh(const phase::which_phase a_phase);
 
   /*!
     @brief Get gradient operator
     @param[in] a_phase Phase
   */
-  const Vector<RefCountedPtr<EBGradient> >& getGradientOp(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<EBGradient>>&
+  getGradientOp(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get piecewise linear regrid utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<AggEBPWLFillPatch>>&
+  getFillPatch(const phase::which_phase a_phase);
 
   /*!
     @brief Get piecewise linear ghost cell interpolation utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBFineInterp> >& getFineInterp(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFineInterp>>&
+  getFineInterp(const phase::which_phase a_phase);
 
   /*!
     @brief Get flux register utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBFluxRegister> >&  getFluxRegister(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFluxRegister>>&
+  getFluxRegister(const phase::which_phase a_phase);
 
   /*!
     @brief Get level redistribution utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBLevelRedist> >&  getLevelRedist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelRedist>>&
+  getLevelRedist(const phase::which_phase a_phase);
 
   /*!
     @brief Get coarse-to-fine redistribution utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBCoarToFineRedist> >&  getCoarToFineRedist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarToFineRedist>>&
+  getCoarToFineRedist(const phase::which_phase a_phase);
 
   /*!
     @brief Get coarse-to-coarse redistribution utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  getCoarToCoarRedist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarToCoarRedist>>&
+  getCoarToCoarRedist(const phase::which_phase a_phase);
 
   /*!
     @brief Get fine-to-coarse redistribution utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFineToCoarRedist>>&
+  getFineToCoarRedist(const phase::which_phase a_phase);
 
   /*!
     @brief Get level-set function
     @param[in] a_phase Phase
-  */  
-  const EBAMRFAB& getLevelset(const phase::which_phase a_phase) const;
+  */
+  const EBAMRFAB&
+  getLevelset(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get AMR mask
     @param[in] a_phase Phase
-  */    
-  const AMRMask& getMask(const std::string a_mask, const int a_buffer) const;
+  */
+  const AMRMask&
+  getMask(const std::string a_mask, const int a_buffer) const;
 
   /*!
     @brief Get all valid cells
   */
-  const AMRMask& getValidCells() const;
-  
-protected:
+  const AMRMask&
+  getValidCells() const;
 
+protected:
   /*!
     @brief Realm defined or not
   */
@@ -380,7 +415,7 @@ protected:
   /*!
     @brief MFLevelGrids
   */
-  Vector<RefCountedPtr<MFLevelGrid> > m_mflg;
+  Vector<RefCountedPtr<MFLevelGrid>> m_mflg;
 
   /*!
     @brief Index spaces
@@ -396,12 +431,12 @@ protected:
     @brief Phase realms. 
     @details Mutable because some of the operators are mutable. 
   */
-  mutable std::map<phase::which_phase, RefCountedPtr<PhaseRealm> > m_realms;
+  mutable std::map<phase::which_phase, RefCountedPtr<PhaseRealm>> m_realms;
 
   /*!
     @brief Implicit/signed distance functions on each phase
   */
-  std::map<phase::which_phase, RefCountedPtr<BaseIF> > m_baseif;
+  std::map<phase::which_phase, RefCountedPtr<BaseIF>> m_baseif;
 
   /*!
     @brief Masks
@@ -412,19 +447,22 @@ protected:
     @brief Define MFLevelGrid
     @param[in] a_lmin Coarsest level that changed during regrid
   */
-  void defineMFLevelGrid(const int a_lmin);
+  void
+  defineMFLevelGrid(const int a_lmin);
 
   /*!
     @brief Define masks
     @param[in] a_lmin Coarsest level that changed during regrid
   */
-  void defineMasks(const int a_lmin);
+  void
+  defineMasks(const int a_lmin);
 
   /*!
     @brief Define particle halo amsks
     @param[in] a_lmin Coarsest level that changed during regrid
   */
-  void defineHaloMasks(const int a_lmin);
+  void
+  defineHaloMasks(const int a_lmin);
 
   /*!
     @brief Define particle halo masks. This is the level-version. 
@@ -436,25 +474,28 @@ protected:
     @param[in]  a_buffer     Buffer (i.e. width of "halo")
     @param[in]  a_refRat     Refinement ratio between the two levels
   */
-  void defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
-		      const ProblemDomain&       a_domainCoar,
-		      const ProblemDomain&       a_domainFine,
-		      const DisjointBoxLayout&   a_gridsCoar,
-		      const DisjointBoxLayout&   a_gridsFine,
-		      const int                  a_buffer,
-		      const int                  a_refRat);
- 
+  void
+  defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
+                 const ProblemDomain&      a_domainCoar,
+                 const ProblemDomain&      a_domainFine,
+                 const DisjointBoxLayout&  a_gridsCoar,
+                 const DisjointBoxLayout&  a_gridsFine,
+                 const int                 a_buffer,
+                 const int                 a_refRat);
+
   /*!
     @brief Define the valid cell region mask. 
     @param[in] a_lmin Coarsest level that changed during regrid. 
   */
-  void defineValidCells();
-  
+  void
+  defineValidCells();
+
   /*!
     @brief Get a particular realm
     @param[in] a_phase Phase
   */
-  PhaseRealm& getRealm(const phase::which_phase a_phase);
+  PhaseRealm&
+  getRealm(const phase::which_phase a_phase);
 };
 
 #include <CD_NamespaceFooter.H>

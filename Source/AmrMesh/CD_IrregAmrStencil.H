@@ -25,9 +25,9 @@
   @note This does not use aggregate stencil functionality. Do not use this class inside multigrid!
 */
 template <class IrregSten>
-class IrregAmrStencil {
+class IrregAmrStencil
+{
 public:
-
   /*!
     @brief Empty constructor. You must subsequently call define. 
   */
@@ -45,13 +45,13 @@ public:
     @param[in] a_type        Stencil type
   */
   IrregAmrStencil(const Vector<DisjointBoxLayout>& a_grids,
-		  const Vector<EBISLayout>&        a_ebisl,
-		  const Vector<ProblemDomain>&     a_domains,
-		  const Vector<Real>&              a_dx,
-		  const int                        a_finestLevel,
-		  const int                        a_order,
-		  const int                        a_radius,
-		  const IrregStencil::StencilType  a_type);
+                  const Vector<EBISLayout>&        a_ebisl,
+                  const Vector<ProblemDomain>&     a_domains,
+                  const Vector<Real>&              a_dx,
+                  const int                        a_finestLevel,
+                  const int                        a_order,
+                  const int                        a_radius,
+                  const IrregStencil::StencilType  a_type);
 
   /*!
     @brief Destructor
@@ -62,13 +62,15 @@ public:
     @brief Get the stencils over an AMR level
     @param[in] a_lvl AMR level
   */
-  const IrregStencil& operator[](const int& a_lvl) const;
+  const IrregStencil&
+  operator[](const int& a_lvl) const;
 
   /*!
     @brief Get the stencils over an AMR level
     @param[in] a_lvl AMR level
   */
-  IrregStencil& operator[](const int& a_lvl);
+  IrregStencil&
+  operator[](const int& a_lvl);
 
   /*!
     @brief Define function
@@ -81,14 +83,15 @@ public:
     @param[in] a_radius      Stencil radius
     @param[in] a_type        Stencil type
   */
-  virtual void define(const Vector<DisjointBoxLayout>& a_grids,
-		      const Vector<EBISLayout>&        a_ebisl,
-		      const Vector<ProblemDomain>&     a_domains,
-		      const Vector<Real>&              a_dx,
-		      const int                        a_finestLevel,
-		      const int                        a_order,
-		      const int                        a_radius,
-		      const IrregStencil::StencilType  a_type);
+  virtual void
+  define(const Vector<DisjointBoxLayout>& a_grids,
+         const Vector<EBISLayout>&        a_ebisl,
+         const Vector<ProblemDomain>&     a_domains,
+         const Vector<Real>&              a_dx,
+         const int                        a_finestLevel,
+         const int                        a_order,
+         const int                        a_radius,
+         const IrregStencil::StencilType  a_type);
 
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -97,17 +100,16 @@ public:
     @param[in]  a_src Source data
     @param[in]  a_lvl Level
   */
-  virtual void apply(      LevelData<EBCellFAB>& a_dst,
-		     const LevelData<EBCellFAB>& a_src,
-		     const int                   a_lvl) const;
+  virtual void
+  apply(LevelData<EBCellFAB>& a_dst, const LevelData<EBCellFAB>& a_src, const int a_lvl) const;
 
   /*!
     @brief Apply stencils to data holder. This replaces original data
     @param[inout] a_data Transformed data
     @param[in]    a_lvl Level
   */
-  virtual void apply(LevelData<EBCellFAB>& a_data,
-		     const int             a_lvl) const;
+  virtual void
+  apply(LevelData<EBCellFAB>& a_data, const int a_lvl) const;
 
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -116,57 +118,57 @@ public:
     @param[in]  a_src Source data
     @param[in]  a_lvl Level
   */
-  virtual void apply(LevelData<BaseIVFAB<Real> >& a_dst,
-		     const LevelData<EBCellFAB>&  a_src,
-		     const int                    a_lvl) const;
-  
+  virtual void
+  apply(LevelData<BaseIVFAB<Real>>& a_dst, const LevelData<EBCellFAB>& a_src, const int a_lvl) const;
+
   /*!
     @brief Apply the stencils to an existing data holder. 
     @details This routine will perform a copy of all regular cells, and apply stencils to irregular cells only. 
     @param[out] a_dst Destination data. 
     @param[in]  a_src Source data
   */
-  virtual void apply(      EBAMRCellData& a_dst,
-		     const EBAMRCellData& a_src) const;
+  virtual void
+  apply(EBAMRCellData& a_dst, const EBAMRCellData& a_src) const;
 
   /*!
     @brief Apply the stencils to an existing data holder. This replaces original data.
     @param[inout] a_dst Data
   */
-  virtual void apply(EBAMRCellData& a_dst) const;
+  virtual void
+  apply(EBAMRCellData& a_dst) const;
 
   /*!
     @brief Apply the stencils to an existing data holder
     @param[out] a_dst Destination data. 
     @param[in]  a_src Source data
   */
-  virtual void apply(      EBAMRIVData&   a_dst,
-		     const EBAMRCellData& a_src) const;
+  virtual void
+  apply(EBAMRIVData& a_dst, const EBAMRCellData& a_src) const;
 
   /*!
     @brief Apply stencils to an existing data holders. This replaces original data
     @param[inout] a_data
   */
-  virtual void apply(Vector<EBAMRCellData*>& a_data) const;
+  virtual void
+  apply(Vector<EBAMRCellData*>& a_data) const;
 
   /*!
     @brief Apply stencils to existing data holders
     @param[out] a_dst Destination data holders. 
     @param[in]  a_src Source data holders
   */
-  virtual void apply(      Vector<EBAMRCellData*>& a_dst,
-		     const Vector<EBAMRCellData*>& a_src) const;
+  virtual void
+  apply(Vector<EBAMRCellData*>& a_dst, const Vector<EBAMRCellData*>& a_src) const;
 
   /*!
     @brief Apply stencils to existing data holders
     @param[out] a_dst Destination data holders. 
     @param[in]  a_src Source data holders
   */
-  virtual void apply(      Vector<EBAMRIVData*>&   a_dst,
-		     const Vector<EBAMRCellData*>& a_src) const;
+  virtual void
+  apply(Vector<EBAMRIVData*>& a_dst, const Vector<EBAMRCellData*>& a_src) const;
 
 protected:
-
   /*!
     @brief AMR grids
   */
@@ -186,11 +188,11 @@ protected:
     @brief Resolutions
   */
   Vector<Real> m_dx;
-  
+
   /*!
     @brief Stencils. 
   */
-  Vector<RefCountedPtr<IrregStencil> > m_stencils;
+  Vector<RefCountedPtr<IrregStencil>> m_stencils;
 
   /*!
     @brief Stencils defined or not
@@ -206,7 +208,7 @@ protected:
     @brief Radius
   */
   int m_radius;
-  
+
   /*!
     @brief Finest level
   */

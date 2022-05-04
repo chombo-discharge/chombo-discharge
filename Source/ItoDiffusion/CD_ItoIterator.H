@@ -20,20 +20,21 @@
   @details This class does not have any fundamental usefulness -- it simply cuts down on typing if one wants to iterate over a full set or a subset of solvers in an ItoLayout.
 */
 template <class T>
-class ItoIterator {
+class ItoIterator
+{
 public:
-
   /*!
     @brief Enum which specifies which species to iterate through. 
   */
-  enum class SpeciesIteration{
+  enum class SpeciesIteration
+  {
     All,
     Charged,
     Negative,
     Positive,
     Neutral
   };
-  
+
   /*!
     @brief Disallowed constructor -- use the full constructor.
   */
@@ -55,47 +56,53 @@ public:
     @brief Get number of solvers. 
     @return Returns total number of solvers (ignoring subsets)
   */
-  virtual int getNumberOfSolvers();
+  virtual int
+  getNumberOfSolvers();
 
   /*!
     @brief Get current solver number.
     @return This returns the index in the ItoLayout solvers (which stores solvers as Vector<RefCountedPtr<ItoSolver> >
   */
-  virtual int index() const;
+  virtual int
+  index() const;
 
   /*!
     @brief Reset iterator to the first solver. 
   */
-  virtual void reset();
+  virtual void
+  reset();
 
   /*!
     @brief Ok or not
     @return Returns true if there is a next solver and false otherwise. 
   */
-  virtual bool ok();
-  
+  virtual bool
+  ok();
+
   /*!
     @brief Increment. This is different for different iteration modes.
   */
-  virtual void operator++();
+  virtual void
+  operator++();
 
   /*!
     @brief Get current solver
   */
-  virtual RefCountedPtr<T>& operator() ();
+  virtual RefCountedPtr<T>&
+  operator()();
 
   /*!
     @brief Get current species.
   */
-  virtual RefCountedPtr<ItoSpecies>& getSpecies();
-  
-protected:
+  virtual RefCountedPtr<ItoSpecies>&
+  getSpecies();
 
+protected:
   /*!
     @brief Which species to iterate over
   */
   SpeciesIteration m_mode;
-  
+
   /*!
     @brief Current solver pointed to by the iterator. 
   */
@@ -104,7 +111,8 @@ protected:
   /*!
     @brief Number of solvers
   */
-  int m_numSolvers;;
+  int m_numSolvers;
+  ;
 
   /*!
     @brief Defined or not
@@ -114,13 +122,12 @@ protected:
   /*!
     @brief Solvers
   */
-  Vector<RefCountedPtr<T> > m_solvers;
+  Vector<RefCountedPtr<T>> m_solvers;
 
   /*!
     @brief Solver species.
   */
-  Vector<RefCountedPtr<ItoSpecies> > m_species;
-
+  Vector<RefCountedPtr<ItoSpecies>> m_species;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -25,9 +25,9 @@
   @details This class provides a scalable method for grid generation where the grids are generated in a pre-set tile pattern. This 
   work by decomposing the grid into a tiled pattern, and then flagging tiles rather than cells for refinement. 
 */
-class TiledMeshRefine {
+class TiledMeshRefine
+{
 public:
-
   /*!
     @brief Default constructor -- deleted because we never need it
   */
@@ -55,14 +55,14 @@ public:
     @param[in]  a_oldBoxes  Previous grid boxes
     @return Returns the new finest grid level. 
   */
-  int regrid(Vector<Vector<Box> >&       a_newBoxes,
-	     const Vector<IntVectSet>&   a_tagsLevel,
-	     const int                   a_baseLevel,
-	     const int                   a_topLevel,
-	     const Vector<Vector<Box> >& a_oldBoxes) const;
+  int
+  regrid(Vector<Vector<Box>>&       a_newBoxes,
+         const Vector<IntVectSet>&  a_tagsLevel,
+         const int                  a_baseLevel,
+         const int                  a_topLevel,
+         const Vector<Vector<Box>>& a_oldBoxes) const;
 
 protected:
-
   /*!
     @brief Computational domains on each level
   */
@@ -81,7 +81,8 @@ protected:
   /*!
     @brief Sanity check, performs some basic assertions
   */
-  void sanityCheck() const ;
+  void
+  sanityCheck() const;
 
   /*!
     @brief Make tiles on the current level from a_levelTags and coarsenings of the finer level tiles
@@ -92,12 +93,13 @@ protected:
     @param[in]  a_refFine        Refinement factor to fine level
     @param[in]  a_refCoar        Refinement factor to coarse level
   */
-  void makeLevelTiles(IntVectSet&          a_levelTiles,
-		      const IntVectSet&    a_fineLevelTiles,
-		      const IntVectSet&    a_coarLevelTags,
-		      const ProblemDomain& a_levelDomain,
-		      const int            a_refFine,
-		      const int            a_refCoar) const;
+  void
+  makeLevelTiles(IntVectSet&          a_levelTiles,
+                 const IntVectSet&    a_fineLevelTiles,
+                 const IntVectSet&    a_coarLevelTags,
+                 const ProblemDomain& a_levelDomain,
+                 const int            a_refFine,
+                 const int            a_refCoar) const;
 
   /*!
     @brief Given tiles, generate the corresponding boxes
@@ -105,8 +107,10 @@ protected:
     @param[in]  a_levelTiles  Tiles on level
     @param[in]  a_leveLDomain Computational domain on level
   */
-  void makeBoxesFromTiles(Vector<Box>& a_levelBoxes, const IntVectSet& a_levelTiles, const ProblemDomain& a_levelDomain) const;
-
+  void
+  makeBoxesFromTiles(Vector<Box>&         a_levelBoxes,
+                     const IntVectSet&    a_levelTiles,
+                     const ProblemDomain& a_levelDomain) const;
 };
 
 #include <CD_NamespaceFooter.H>

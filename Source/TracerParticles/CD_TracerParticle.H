@@ -31,55 +31,52 @@
   quantities are communicated when remapping particles. 
 */
 template <size_t M, size_t N>
-class TracerParticle : public BinItem {
+class TracerParticle : public BinItem
+{
 public:
-
   /*!
     @brief Default constructor -- initializes everything to zero. 
   */
-  inline  
-  TracerParticle();
+  inline TracerParticle();
 
   /*!
     @brief Copy constructor. Copies all fields.
     @param[in] a_other Other particle. 
   */
-  inline  
-  TracerParticle(const TracerParticle<M, N>& a_other);
+  inline TracerParticle(const TracerParticle<M, N>& a_other);
 
   /*!
     @brief Destructor (deallocates runtime memory storage)
   */
-  inline  
-  virtual ~TracerParticle();
+  inline virtual ~TracerParticle();
 
   /*!
     @brief Get the particle "mass"
     @return m_mass
   */
-  inline
-  Real& mass();
+  inline Real&
+  mass();
 
   /*!
     @brief Get the particle "mass"
     @return m_mass
   */
-  inline
-  const Real& mass() const;
+  inline const Real&
+  mass() const;
 
   /*!
     @brief Get the particle velocity. 
     @return m_velocity
   */
-  inline
-  RealVect& velocity();
+  inline RealVect&
+  velocity();
 
   /*!
     @brief Get the particle velocity.
     @return m_velocity
   */
-  inline
-  const RealVect& velocity() const;
+  inline const RealVect&
+  velocity() const;
 
   /*!
     @brief Get one of the scalars. 
@@ -88,8 +85,8 @@ public:
     @return m_scalars[K]
   */
   template <size_t K>
-  inline
-  Real& scalar();
+  inline Real&
+  scalar();
 
   /*!
     @brief Get one of the scalars. 
@@ -98,8 +95,8 @@ public:
     @return m_scalars[K]
   */
   template <size_t K>
-  inline
-  const Real& scalar() const;
+  inline const Real&
+  scalar() const;
 
   /*!
     @brief Get one of the RealVects.
@@ -108,8 +105,8 @@ public:
     @return m_vectors[K]
   */
   template <size_t K>
-  inline
-  RealVect& vect();
+  inline RealVect&
+  vect();
 
   /*!
     @brief Get one of the RealVects.
@@ -118,48 +115,47 @@ public:
     @return m_vectors[K]
   */
   template <size_t K>
-  inline
-  const RealVect& vect() const;    
+  inline const RealVect&
+  vect() const;
 
   /*!
     @brief Comparison operator with other particle. 
     @param[in] a_other Other particle
     @note Does not compare the M and N Reals and RealVects. 
   */
-  inline  
-  bool operator==(const TracerParticle<M, N>& a_other) const;
+  inline bool
+  operator==(const TracerParticle<M, N>& a_other) const;
 
   /*!
     @brief Comparison operator with other particle.
     @param[in] a_other Other particle
     @note Does not compare the M and N Reals and RealVects. 
   */
-  inline  
-  bool operator!=(const TracerParticle<M, N>& a_other) const;
+  inline bool
+  operator!=(const TracerParticle<M, N>& a_other) const;
 
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
   */
-  inline
-  virtual int size() const override;
+  inline virtual int
+  size() const override;
 
   /*!
     @brief Write a linear binary representation of the internal data. Assumes that
     sufficient memory for the buffer has already been allocated by the caller. 
     @param[in] a_buffer Pointer to memory block
   */
-  inline
-  virtual void linearOut(void* a_buffer) const override;
+  inline virtual void
+  linearOut(void* a_buffer) const override;
 
   /*!
     @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
     @param[in] a_buffer Pointer to memory block
   */
-  inline  
-  virtual void linearIn(void* a_bufer);
+  inline virtual void
+  linearIn(void* a_bufer);
 
 protected:
-
   /*!
     @brief Particle "mass".
   */
@@ -178,7 +174,7 @@ protected:
   /*!
     @brief vector storage array
   */
-  std::array<RealVect, N> m_vectors;  
+  std::array<RealVect, N> m_vectors;
 };
 
 /*!
@@ -187,12 +183,11 @@ protected:
   @param[in] a_particle Particle to output
 */
 template <size_t M, size_t N>
-inline
-std::ostream & operator<<(std::ostream& ostr, const TracerParticle<M, N>& p);
+inline std::ostream&
+operator<<(std::ostream& ostr, const TracerParticle<M, N>& p);
 
 #include <CD_NamespaceFooter.H>
 
 #include <CD_TracerParticleImplem.H>
 
 #endif
-

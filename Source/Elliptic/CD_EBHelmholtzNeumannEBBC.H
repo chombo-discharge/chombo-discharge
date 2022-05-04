@@ -24,9 +24,9 @@
   @details This allows the user to specify dphi/dn on the boundary or B*dphi/dn, either using a constant value
   or with a function. 
 */
-class EBHelmholtzNeumannEBBC : public EBHelmholtzEBBC {
+class EBHelmholtzNeumannEBBC : public EBHelmholtzEBBC
+{
 public:
-
   /*!
     @brief Default constructor. 
   */
@@ -42,28 +42,32 @@ public:
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const Real a_DphiDn);
+  void
+  setDphiDn(const Real a_DphiDn);
 
   /*!
     @brief Set spatially dependent value of dphi/dn on the EB. 
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
+  void
+  setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /*!
     @brief Set the value of B*dphi/dn on the EB.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const Real a_BxDphiDn);
+  void
+  setBxDphiDn(const Real a_BxDphiDn);
 
   /*!
     @brief Set the spatially dependent value of B*dphi/dn on the EB.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
+  void
+  setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
@@ -74,15 +78,15 @@ public:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  virtual void applyEBFlux(VoFIterator&       a_vofit,
-			   EBCellFAB&         a_Lphi,
-			   const EBCellFAB&   a_phi,
-			   const DataIndex&   a_dit,
-			   const Real&        a_beta,
-			   const bool&        a_homogeneousPhysBC) const override;
+  virtual void
+  applyEBFlux(VoFIterator&     a_vofit,
+              EBCellFAB&       a_Lphi,
+              const EBCellFAB& a_phi,
+              const DataIndex& a_dit,
+              const Real&      a_beta,
+              const bool&      a_homogeneousPhysBC) const override;
 
 protected:
-
   /*!
     @brief Multiply by b-coefficient or not
   */
@@ -106,13 +110,13 @@ protected:
   /*!
     @brief Value on the EB. 
   */
-  std::function<Real(const RealVect& a_pos) > m_functionDphiDn;
-    
+  std::function<Real(const RealVect& a_pos)> m_functionDphiDn;
+
   /*!
     @brief User define function. 
   */
-  virtual void define() override;
-
+  virtual void
+  define() override;
 };
 
 #include <CD_NamespaceFooter.H>

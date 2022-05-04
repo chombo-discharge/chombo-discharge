@@ -13,14 +13,13 @@
 #define CD_BrownianWalker_H
 
 namespace Physics {
-  
+
   /*!
     @brief Namespace for encapsulating physics code for describing Brownian walkers. 
   */
   namespace BrownianWalker {
-
   }
 
-}
+} // namespace Physics
 
 #endif

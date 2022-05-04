@@ -12,8 +12,9 @@
 // Our includes
 #include <CD_CdrSpecies.H>
 #include <CD_NamespaceHeader.H>
-  
-CdrSpecies::CdrSpecies(){
+
+CdrSpecies::CdrSpecies()
+{
   CH_TIME("CdrSpecies::CdrSpecies()");
 
   // Default settings
@@ -25,9 +26,13 @@ CdrSpecies::CdrSpecies(){
   m_initialParticles.clear();
 }
 
-CdrSpecies::CdrSpecies(const std::string a_name, const int a_chargeNumber, const bool a_isMobile, const bool a_isDiffusive){
+CdrSpecies::CdrSpecies(const std::string a_name,
+                       const int         a_chargeNumber,
+                       const bool        a_isMobile,
+                       const bool        a_isDiffusive)
+{
   CH_TIME("CdrSpecies::CdrSpecies(string, int, bool, bool)");
-  
+
   m_name         = a_name;
   m_chargeNumber = a_chargeNumber;
   m_isMobile     = a_isMobile;
@@ -36,49 +41,61 @@ CdrSpecies::CdrSpecies(const std::string a_name, const int a_chargeNumber, const
   m_initialParticles.clear();
 }
 
-CdrSpecies::~CdrSpecies(){
+CdrSpecies::~CdrSpecies() {}
 
-}
-
-Real CdrSpecies::initialData(const RealVect a_pos, const Real a_time) const{
+Real
+CdrSpecies::initialData(const RealVect a_pos, const Real a_time) const
+{
   CH_TIME("CdrSpecies::initialData(RealVect, Real)");
-  
+
   return 0.;
 }
 
-std::string CdrSpecies::getName() const {
+std::string
+CdrSpecies::getName() const
+{
   CH_TIME("CdrSpecies::getName()");
-  
+
   return m_name;
 }
 
-int CdrSpecies::getChargeNumber() const {
+int
+CdrSpecies::getChargeNumber() const
+{
   CH_TIME("CdrSpecies::getChargeNumber()");
-  
+
   return m_chargeNumber;
 }
 
-bool CdrSpecies::isDiffusive() const {
+bool
+CdrSpecies::isDiffusive() const
+{
   CH_TIME("CdrSpecies::isDiffusive()");
-  
+
   return m_isDiffusive;
 }
 
-bool CdrSpecies::isMobile() const {
+bool
+CdrSpecies::isMobile() const
+{
   CH_TIME("CdrSpecies::isMobile()");
-  
+
   return m_isMobile;
 }
 
-const List<Particle>& CdrSpecies::getInitialParticles() const {
+const List<Particle>&
+CdrSpecies::getInitialParticles() const
+{
   CH_TIME("CdrSpecies::getInitialParticles()");
-  
+
   return m_initialParticles;
 }
 
-List<Particle>& CdrSpecies::getInitialParticles() {
+List<Particle>&
+CdrSpecies::getInitialParticles()
+{
   CH_TIME("CdrSpecies::getInitialParticles()");
-  
+
   return m_initialParticles;
 }
 

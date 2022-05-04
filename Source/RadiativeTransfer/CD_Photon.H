@@ -23,14 +23,14 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief Particle class for usage with Monte Carlo radiative transfer.
   @deatils This inherits from Chombo's BinItem so it can be used in parallel with our ParticleContainer classes.
 */
-class Photon : public BinItem {
+class Photon : public BinItem
+{
 public:
-
   /*!
     @brief Default constructor. Must subsequently set all parameters
   */
@@ -42,7 +42,7 @@ public:
     @param[in] a_velocity Photon velocity
     @param[in] a_kappa    Mean absorption length
     @param[in] a_mass     Particle weight. a_mass=1 implies a physical photon. 
-  */  
+  */
   Photon(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_mass = 1.0);
 
   /*!
@@ -57,99 +57,114 @@ public:
     @param[in] a_kappa    Mean absorption length
     @param[in] a_mass     Particle weight. a_mass=1 implies a physical photon. 
   */
-  void define(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_mass = 1.0);
+  void
+  define(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_mass = 1.0);
 
   /*!
     @brief Set mean absorption length
     @param[in] a_kappa Mean absorption length
   */
-  void setKappa(const Real a_kappa);
+  void
+  setKappa(const Real a_kappa);
 
   /*!
     @brief Set particle mass
     @param[in] a_mass Particle weight. a_mass=1 implies a physical photon. 
   */
-  void setMass(const Real a_mass);
+  void
+  setMass(const Real a_mass);
 
   /*!
     @brief Set photon velocity
     @param[in] a_velocity Photon velocity
   */
-  void setVelocity(const RealVect& a_velocity);
+  void
+  setVelocity(const RealVect& a_velocity);
 
   /*!
     @brief Get photon mass
   */
-  Real& mass();
+  Real&
+  mass();
 
   /*!
     @brief Get photon absorption length
-  */  
-  Real& kappa();
-
-  /*!
-    @brief Get photon velocity
-  */    
-  RealVect& velocity();
-
-  /*!
-    @brief Get photon mass
-  */    
-  const Real& mass()   const;  
-
-  /*!
-    @brief Get mean absorption length
-  */  
-  const Real& kappa()    const;
+  */
+  Real&
+  kappa();
 
   /*!
     @brief Get photon velocity
   */
-  const RealVect& velocity() const;
+  RealVect&
+  velocity();
+
+  /*!
+    @brief Get photon mass
+  */
+  const Real&
+  mass() const;
+
+  /*!
+    @brief Get mean absorption length
+  */
+  const Real&
+  kappa() const;
+
+  /*!
+    @brief Get photon velocity
+  */
+  const RealVect&
+  velocity() const;
 
   /*!
     @brief Comparison operator
     @param[in] a_p Other photon
-  */  
-  virtual bool operator==(const Photon& a_p) const;
-  
-  /*!
-    @brief Comparison operator
-    @param[in] a_p Other photon
-  */    
-  virtual bool operator==(const Photon* a_p) const;
+  */
+  virtual bool
+  operator==(const Photon& a_p) const;
 
   /*!
     @brief Comparison operator
     @param[in] a_p Other photon
-  */      
-  virtual bool operator!=(const Photon& a_p) const;
+  */
+  virtual bool
+  operator==(const Photon* a_p) const;
+
+  /*!
+    @brief Comparison operator
+    @param[in] a_p Other photon
+  */
+  virtual bool
+  operator!=(const Photon& a_p) const;
 
   /*!
     @brief MPI linearization function, returns the size of the object (this is BinItem + m_kappa, m_mass, m_velocity)
   */
-  virtual int size() const;
+  virtual int
+  size() const;
 
   /*!
     @brief MPI linearization function. Writes this object into the buffer
-  */  
-  virtual void linearOut(void* buf) const;
+  */
+  virtual void
+  linearOut(void* buf) const;
 
   /*!
     @brief MPI linearization function. Takes the input buffer and writes into this object. 
-  */    
-  virtual void linearIn(void* buf);
+  */
+  virtual void
+  linearIn(void* buf);
 
 protected:
-
   /*!
     @brief Mean absorption length
   */
   Real m_kappa;
-  
+
   /*!
     @brief Photon mass (computational weight)
-  */  
+  */
   Real m_mass;
 
   /*!
@@ -160,4 +175,4 @@ protected:
 
 #include <CD_NamespaceFooter.H>
 
-#endif 
+#endif

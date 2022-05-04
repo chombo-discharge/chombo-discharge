@@ -15,13 +15,13 @@
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief This class implements an empty geometry
 */
-class RegularGeometry : public ComputationalGeometry {
+class RegularGeometry : public ComputationalGeometry
+{
 public:
-
   RegularGeometry();
   ~RegularGeometry();
 };

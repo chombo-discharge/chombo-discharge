@@ -20,4 +20,4 @@ The application will be installed to $DISCHARGE_HOME/MyApplications/MyPlasmaAppl
 The user will need to modify the geometry and set the initial conditions through the inputs file. 
 
 ## Modifying the application
-Users are free to modify this application, e.g. adding new initial conditions and flow fields. 
+Users are free to modify this application, e.g. adding new initial conditions and flow fields.

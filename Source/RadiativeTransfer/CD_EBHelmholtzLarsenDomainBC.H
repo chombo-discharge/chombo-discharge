@@ -26,9 +26,9 @@
   @note The B-coefficient is not the same as in the Helmholtz equation...
   @note In our notation, n points into the computational domain. 
 */
-class EBHelmholtzLarsenDomainBC : public EBHelmholtzRobinDomainBC {
+class EBHelmholtzLarsenDomainBC : public EBHelmholtzRobinDomainBC
+{
 public:
-
   /*!
     @brief Alias for source function
   */
@@ -48,9 +48,9 @@ public:
     @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients. 
   */
   EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpecies>& a_species,
-			    const Real                      a_r1,
-			    const Real                      a_r2,
-			    const SourceFunction            a_source);
+                            const Real                      a_r1,
+                            const Real                      a_r2,
+                            const SourceFunction            a_source);
 
   /*!
     @brief Constructor. Source term is set to zero. 
@@ -59,10 +59,7 @@ public:
     @param[in] a_r2      "Second reflection coefficient"
     @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients. 
   */
-  EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpecies>& a_species,
-			    const Real                      a_r1,
-			    const Real                      a_r2);
-
+  EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpecies>& a_species, const Real a_r1, const Real a_r2);
 
   /*!
     @brief Destructor
@@ -70,8 +67,7 @@ public:
   virtual ~EBHelmholtzLarsenDomainBC();
 
 protected:
-
-    /*!
+  /*!
     @brief Radiative transfer species
   */
   RefCountedPtr<RtSpecies> m_species;
@@ -94,7 +90,8 @@ protected:
   /*!
     @brief Set Robin coefficients
   */
-  void setRobinFunctions();
+  void
+  setRobinFunctions();
 };
 
 #include <CD_NamespaceFooter.H>

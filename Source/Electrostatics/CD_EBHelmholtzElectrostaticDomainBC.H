@@ -26,9 +26,9 @@
   the time dependence is captured by reference. FieldSolverMultigrid already does this, by taking the user's boundary condition function
   and replacing the time-argument by a reference to FieldSolver::m_time. 
 */
-class EBHelmholtzElectrostaticDomainBC : public EBHelmholtzDomainBC {
+class EBHelmholtzElectrostaticDomainBC : public EBHelmholtzDomainBC
+{
 public:
-
   /*!
     @brief Not allowed, use the full constructor. 
   */
@@ -61,13 +61,15 @@ public:
     @brief Disallowed - don't see why you would need it.
     @param[in] a_other Other operator
   */
-  EBHelmholtzElectrostaticDomainBC& operator=(const EBHelmholtzElectrostaticDomainBC& a_other) = delete;
+  EBHelmholtzElectrostaticDomainBC&
+  operator=(const EBHelmholtzElectrostaticDomainBC& a_other) = delete;
 
   /*!
     @brief Disallowed - don't see why you would need it.
     @param[in] a_other Other operator
   */
-  EBHelmholtzElectrostaticDomainBC& operator=(const EBHelmholtzElectrostaticDomainBC&& a_other) = delete;
+  EBHelmholtzElectrostaticDomainBC&
+  operator=(const EBHelmholtzElectrostaticDomainBC&& a_other) = delete;
 
   /*!
     @brief Define function
@@ -78,11 +80,12 @@ public:
     @param[in] a_dx           Grid resolution
     @note This overrides EBHelmholtzDomainBC because EBHelmholtzElectrostaticDomainBC is just a wrapper class for Dirichlet/Neumann, and those objects need defining. 
   */
-  void define(const Location::Cell                        a_dataLocation,
-	      const EBLevelGrid&                          a_eblg,
-	      const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
-	      const RealVect&                             a_probLo,
-	      const Real                                  a_dx) override final;
+  void
+  define(const Location::Cell                       a_dataLocation,
+         const EBLevelGrid&                         a_eblg,
+         const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
+         const RealVect&                            a_probLo,
+         const Real                                 a_dx) override final;
 
   /*!
     @brief Get face flux. This is for regular cells. 
@@ -94,12 +97,13 @@ public:
     @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
     @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
   */
-  void getFaceFlux(BaseFab<Real>&        a_faceFlux,
-		   const BaseFab<Real>&  a_phi,
-		   const int&            a_dir,
-		   const Side::LoHiSide& a_side,
-		   const DataIndex&      a_dit,
-		   const bool            a_useHomogeneous) const override final;
+  void
+  getFaceFlux(BaseFab<Real>&        a_faceFlux,
+              const BaseFab<Real>&  a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const override final;
 
   /*!
     @brief Get face flux. This is for irregular cells. 
@@ -110,15 +114,15 @@ public:
     @param[in] a_dit            Data index
     @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
   */
-  Real getFaceFlux(const VolIndex&       a_vof,
-		   const EBCellFAB&      a_phi,
-		   const int&            a_dir,
-		   const Side::LoHiSide& a_side,
-		   const DataIndex&      a_dit,
-		   const bool            a_useHomogeneous) const override final;
+  Real
+  getFaceFlux(const VolIndex&       a_vof,
+              const EBCellFAB&      a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const override final;
 
 protected:
-
   /*!
     @brief Electrostatic domain boundary conditions
   */
@@ -128,8 +132,7 @@ protected:
     @brief BC objects on each domain side. 
     @details These are instantiated in the constructor where we construct Neumann/Dirichlet on each domain side. 
   */
-  std::map<ElectrostaticDomainBc::DomainSide, std::shared_ptr<EBHelmholtzDomainBC> > m_bcObjects;
-  
+  std::map<ElectrostaticDomainBc::DomainSide, std::shared_ptr<EBHelmholtzDomainBC>> m_bcObjects;
 };
 
 #include <CD_NamespaceFooter.H>

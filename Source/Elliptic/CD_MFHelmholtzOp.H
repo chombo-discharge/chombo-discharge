@@ -38,13 +38,14 @@
   @details This operator should typically not be constructed directly by the user but used together with Chombo's AMRMultiGrid. In this
   case the user will want to constructor these operators through the factor.
 */
-class MFHelmholtzOp : public LevelTGAHelmOp<LevelData<MFCellFAB>, MFFluxFAB> {
+class MFHelmholtzOp : public LevelTGAHelmOp<LevelData<MFCellFAB>, MFFluxFAB>
+{
 public:
-
   /*!
     @brief Relaxation methods for this operator
   */
-  enum class Smoother {
+  enum class Smoother
+  {
     PointJacobi,
     GauSaiRedBlack,
     GauSaiMultiColor,
@@ -99,35 +100,35 @@ public:
     @param[in] a_smoother      Which smoother to use
   */
   MFHelmholtzOp(const Location::Cell                             a_dataLocation,
-		const MFLevelGrid&                               a_mflgFine,
-		const MFLevelGrid&                               a_mflg,
-		const MFLevelGrid&                               a_mflgCoFi,		
-		const MFLevelGrid&                               a_mflgCoar,
-		const MFLevelGrid&                               a_mflgCoarMG,
-		const MFMultigridInterpolator&                   a_interpolator,
-		const MFFluxReg&                                 a_fluxReg,
-		const MFCoarAve&                                 a_coarAve,
-		const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBC,
-		const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBC,
-		const RefCountedPtr<MFHelmholtzJumpBCFactory>&   a_jumpBcFactory,
-		const RealVect&                                  a_probLo,
-		const Real&                                      a_dx,
-		const int&                                       a_refToFine,
-		const int&                                       a_refToCoar,
-		const bool&                                      a_hasFine,
-		const bool&                                      a_hasCoar,		
-		const bool&                                      a_hasMGObjects,
-		const bool&                                      a_isMGOperator,
-		const Real&                                      a_alpha,
-		const Real&                                      a_beta,
-		const RefCountedPtr<LevelData<MFCellFAB> >&      a_Acoef,
-		const RefCountedPtr<LevelData<MFFluxFAB> >&      a_Bcoef,
-		const RefCountedPtr<LevelData<MFBaseIVFAB> >&    a_BcoefIrreg,
-		const IntVect&                                   a_ghostPhi,
-		const IntVect&                                   a_ghostRhs,
-		const int&                                       a_jumpOrder,
-		const int&                                       a_jumpWeight,
-		const Smoother&                                  a_smoother);
+                const MFLevelGrid&                               a_mflgFine,
+                const MFLevelGrid&                               a_mflg,
+                const MFLevelGrid&                               a_mflgCoFi,
+                const MFLevelGrid&                               a_mflgCoar,
+                const MFLevelGrid&                               a_mflgCoarMG,
+                const MFMultigridInterpolator&                   a_interpolator,
+                const MFFluxReg&                                 a_fluxReg,
+                const MFCoarAve&                                 a_coarAve,
+                const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBC,
+                const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBC,
+                const RefCountedPtr<MFHelmholtzJumpBCFactory>&   a_jumpBcFactory,
+                const RealVect&                                  a_probLo,
+                const Real&                                      a_dx,
+                const int&                                       a_refToFine,
+                const int&                                       a_refToCoar,
+                const bool&                                      a_hasFine,
+                const bool&                                      a_hasCoar,
+                const bool&                                      a_hasMGObjects,
+                const bool&                                      a_isMGOperator,
+                const Real&                                      a_alpha,
+                const Real&                                      a_beta,
+                const RefCountedPtr<LevelData<MFCellFAB>>&       a_Acoef,
+                const RefCountedPtr<LevelData<MFFluxFAB>>&       a_Bcoef,
+                const RefCountedPtr<LevelData<MFBaseIVFAB>>&     a_BcoefIrreg,
+                const IntVect&                                   a_ghostPhi,
+                const IntVect&                                   a_ghostRhs,
+                const int&                                       a_jumpOrder,
+                const int&                                       a_jumpWeight,
+                const Smoother&                                  a_smoother);
 
   /*!
     @brief Destructor. 
@@ -137,51 +138,60 @@ public:
   /*!
     @brief No copy assigment allowed
   */
-  MFHelmholtzOp& operator=(const MFHelmholtzOp& a_oper) = delete;
+  MFHelmholtzOp&
+  operator=(const MFHelmholtzOp& a_oper) = delete;
 
   /*!
     @brief No move assigment allowed
   */
-  MFHelmholtzOp& operator=(const MFHelmholtzOp&& a_oper) = delete;
+  MFHelmholtzOp&
+  operator=(const MFHelmholtzOp&& a_oper) = delete;
 
   /*!
     @brief Set the jump boundary condition
   */
-  void setJump(RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump);
+  void
+  setJump(RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_jump);
 
   /*!
     @brief Get Helmholtz operator
   */
-  RefCountedPtr<EBHelmholtzOp>& getHelmOp(const int a_phase);
+  RefCountedPtr<EBHelmholtzOp>&
+  getHelmOp(const int a_phase);
 
   /*!
     @brief Return coarsening factor to coarser level (1 if there is no coarser level);
   */
-  int refToCoarser() override final;
+  int
+  refToCoarser() override final;
 
   /*!
     @brief Set alpha and beta
     @param[in] a_alpha  Alpha
     @param[in] a_beta   Beta
   */
-  void setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) override final;
+  void
+  setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) override final;
 
   /*!
     @brief Divide by the a-coefficient
     @param[inout] a_rhs Divided data
   */
-  void divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs) override final;
+  void
+  divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs) override final;
 
   /*!
     @brief Apply operator but turn off all BCs. 
   */
-  void applyOpNoBoundary(LevelData<MFCellFAB>& a_ans, const LevelData<MFCellFAB>& a_phi) override final;
+  void
+  applyOpNoBoundary(LevelData<MFCellFAB>& a_ans, const LevelData<MFCellFAB>& a_phi) override final;
 
-    /*!
+  /*!
     @brief Not called, I think
     @param[in] a_phi Phi
   */
-  void fillGrad(const LevelData<MFCellFAB>& a_phi) override final;
+  void
+  fillGrad(const LevelData<MFCellFAB>& a_phi) override final;
 
   /*!
     @brief Fill flux
@@ -191,11 +201,12 @@ public:
     @param[in]  a_dit   Corresponding data index. 
     @param[in]  a_scale Scaling factor
   */
-  void getFlux(MFFluxFAB&                  a_flux,
-  	       const LevelData<MFCellFAB>& a_data,
-  	       const Box&                  a_grid,
-  	       const DataIndex&            a_dit,
-  	       Real                        a_scale) override final;
+  void
+  getFlux(MFFluxFAB&                  a_flux,
+          const LevelData<MFCellFAB>& a_data,
+          const Box&                  a_grid,
+          const DataIndex&            a_dit,
+          Real                        a_scale) override final;
 
   /*!
     @brief Compute residual on this level. 
@@ -204,7 +215,11 @@ public:
     @param[in]  a_rhs               Right-hand side of system
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
   */
-  void residual(LevelData<MFCellFAB>& a_residual, const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_rhs, const bool a_homogeneousPhysBc);
+  void
+  residual(LevelData<MFCellFAB>&       a_residual,
+           const LevelData<MFCellFAB>& a_phi,
+           const LevelData<MFCellFAB>& a_rhs,
+           const bool                  a_homogeneousPhysBc);
 
   /*!
     @brief Precondition system before bottom solve
@@ -212,7 +227,8 @@ public:
     @param[in] a_residual Residual
     @details This just runs a few relaxations. 
   */
-  void preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual) override final;
+  void
+  preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual) override final;
 
   /*!
     @brief Apply operator 
@@ -221,13 +237,15 @@ public:
     @param[in]  a_homogeneousPhysBc Homogeneous physical BCs or not
     @details This computes a_Lphi = L(a_phi) using homogeneous physical BCs or not
   */
-  void applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCellFAB>& a_phi, bool a_homogeneousPhysBc) override final;
+  void
+  applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCellFAB>& a_phi, bool a_homogeneousPhysBc) override final;
 
   /*!
     @brief Time the applyOp routine
     @param[in] a_timeDit Data iterator for computing the time of applyOp
   */
-  void computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataIterator& a_iterator);
+  void
+  computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataIterator& a_iterator);
 
   /*!
     @brief Relaxation method. This does smoothing for the system L(correction) = residual
@@ -235,7 +253,8 @@ public:
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
-  void relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) override final;
+  void
+  relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) override final;
 
   /*!
     @brief Jacobi relaxation
@@ -243,7 +262,8 @@ public:
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
-  void relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
+  void
+  relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
 
   /*!
     @brief Jacobi relaxation
@@ -251,7 +271,8 @@ public:
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
-  void relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
+  void
+  relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
 
   /*!
     @brief Multi-colored gauss-seidel relaxation
@@ -259,14 +280,16 @@ public:
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
-  void relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
+  void
+  relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
 
   /*!
     @brief Create method
     @param[out] a_lhs Clone
     @param[out] a_rhs Original data
   */
-  void create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
+  void
+  create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
 
   /*!
     @brief Create coarsened data
@@ -274,7 +297,8 @@ public:
     @param[in]  a_fine    Fine data
     @param[in]  a_ghosted Include ghost cells or nto
   */
-  void createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool a_ghosted) override final;
+  void
+  createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool a_ghosted) override final;
 
   /*!
     @brief Create coarsening of data holder
@@ -282,47 +306,54 @@ public:
     @param[in]  a_rhs    Fine data
     @param[in]  a_refRat Coarsening factor
   */
-  void createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& a_refRat) override final;
-  
+  void
+  createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& a_refRat) override final;
+
   /*!
     @brief Increment function
     @param[inout] a_lhs   On output, a_lhs = a_lhs + a_rhs*a_scale
     @param[in]    a_rhs   Data
     @param[in]    a_scale Scaling factor
   */
-  void incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, Real a_scale) override final;
+  void
+  incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, Real a_scale) override final;
 
   /*!
     @brief Dot product.
   */
-  Real dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_2) override final;
+  Real
+  dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_2) override final;
 
   /*!
     @brief Scale function
     @param[inout] a_lhs   On output, a_lhs = a_lhs*a_scale
     @param[in]    a_scale Scaling factor
   */
-  void scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale) override final;
+  void
+  scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale) override final;
 
   /*!
     @brief Set to zero
     @param[out] a_lhs Data
   */
-  void setToZero(LevelData<MFCellFAB>& a_lhs) override final;
+  void
+  setToZero(LevelData<MFCellFAB>& a_lhs) override final;
 
   /*!
     @brief Assignment fucntion
     @param[out] a_lhs. Equal to a_rhs on output
     @param[in]  a_rhs. Data
   */
-  void assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
+  void
+  assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
 
   /*!
     @brief Compute solution norm. 
     @param[in] a_lhs   Data
     @param[in] a_order Norm order. Not used. 
   */
-  Real norm(const LevelData<MFCellFAB>& a_lhs, int a_order) override final;
+  Real
+  norm(const LevelData<MFCellFAB>& a_lhs, int a_order) override final;
 
   /*!
     @brief Set a_lhs = a*x + b*y
@@ -332,7 +363,12 @@ public:
     @param[in]  a_a   Scaling factor
     @param[in]  a_b   Scaling factor
   */
-  void axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_x, const LevelData<MFCellFAB>& a_y, const Real a_a, const Real a_b) override final;
+  void
+  axby(LevelData<MFCellFAB>&       a_lhs,
+       const LevelData<MFCellFAB>& a_x,
+       const LevelData<MFCellFAB>& a_y,
+       const Real                  a_a,
+       const Real                  a_b) override final;
 
   /*!
     @brief Restrict residual onto coarse level
@@ -340,14 +376,18 @@ public:
     @param[inout] a_phi Phi on this level
     @param[in]    a_rhs Rhs on this level
   */
-  void restrictResidual(LevelData<MFCellFAB>& a_resCoar, LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_rhs) override final;
+  void
+  restrictResidual(LevelData<MFCellFAB>&       a_resCoar,
+                   LevelData<MFCellFAB>&       a_phi,
+                   const LevelData<MFCellFAB>& a_rhs) override final;
 
   /*!
     @brief Prolongation method. 
     @param[out] a_phi  Correction on this level
     @param[out] a_correctCoarse Correction on coarse level
   */
-  void prolongIncrement(LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_correctCoarse) override final;
+  void
+  prolongIncrement(LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_correctCoarse) override final;
 
   /*!
     @brief Update AMR residual
@@ -355,9 +395,10 @@ public:
     @param[in] a_correction       Correction
     @param[in] a_coarseCorrection Coarse-level correction
   */
-  void AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
-			 const LevelData<MFCellFAB>& a_correction,
-			 const LevelData<MFCellFAB>& a_coarseCorrection) override final;
+  void
+  AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
+                    const LevelData<MFCellFAB>& a_correction,
+                    const LevelData<MFCellFAB>& a_coarseCorrection) override final;
 
   /*!
     @brief Restrict residual
@@ -367,18 +408,20 @@ public:
     @param[out] a_coarseCorrection Coarse level correction
     @param[in]  a_skip_res         I have no idea what this one is supposed to do. 
   */
-  void AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
-		   const LevelData<MFCellFAB>& a_residual,
-		   const LevelData<MFCellFAB>& a_correction,
-		   const LevelData<MFCellFAB>& a_coarseCorrection,
-		   bool                        a_skip_res) override final;
+  void
+  AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
+              const LevelData<MFCellFAB>& a_residual,
+              const LevelData<MFCellFAB>& a_correction,
+              const LevelData<MFCellFAB>& a_coarseCorrection,
+              bool                        a_skip_res) override final;
 
   /*!
     @brief Prolongation onto AMR level
     @param[out] a_correction       Interpolated correction
     @param[in]  a_coarseCorrection Correction on coarse level
   */
-  void AMRProlong(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_coarseCorrection) override final;
+  void
+  AMRProlong(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_coarseCorrection) override final;
 
   /*!
     @brief Compute residual on this level. AMR version. 
@@ -390,13 +433,14 @@ public:
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
     @param[in]  a_finerOp           Finer operatator
   */
-  void AMRResidual(LevelData<MFCellFAB>&              a_residual,
-		   const LevelData<MFCellFAB>&        a_phiFine,
-		   const LevelData<MFCellFAB>&        a_phi,
-		   const LevelData<MFCellFAB>&        a_phiCoar,
-		   const LevelData<MFCellFAB>&        a_rhs,
-		   bool                               a_homogeneousPhysBC,
-		   AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) override final;
+  void
+  AMRResidual(LevelData<MFCellFAB>&             a_residual,
+              const LevelData<MFCellFAB>&       a_phiFine,
+              const LevelData<MFCellFAB>&       a_phi,
+              const LevelData<MFCellFAB>&       a_phiCoar,
+              const LevelData<MFCellFAB>&       a_rhs,
+              bool                              a_homogeneousPhysBC,
+              AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp) override final;
 
   /*!
     @brief Compute AMR residual on finest AMR level. 
@@ -406,11 +450,12 @@ public:
     @param[in]  a_rhs               Right-hand side on this level
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
   */
-  void AMRResidualNF(LevelData<MFCellFAB>&              a_residual,
-		     const LevelData<MFCellFAB>&        a_phi,
-		     const LevelData<MFCellFAB>&        a_phiCoar,
-		     const LevelData<MFCellFAB>&        a_rhs,
-		     bool                               a_homogeneousPhysBC) override final;
+  void
+  AMRResidualNF(LevelData<MFCellFAB>&       a_residual,
+                const LevelData<MFCellFAB>& a_phi,
+                const LevelData<MFCellFAB>& a_phiCoar,
+                const LevelData<MFCellFAB>& a_rhs,
+                bool                        a_homogeneousPhysBC) override final;
 
   /*!
     @brief Compute AMR residual on coarsest
@@ -421,12 +466,13 @@ public:
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
     @param[in]  a_finerOp           Finer operator
   */
-  void AMRResidualNC(LevelData<MFCellFAB>&              a_residual,
-		     const LevelData<MFCellFAB>&        a_phiFine,
-		     const LevelData<MFCellFAB>&        a_phi,
-		     const LevelData<MFCellFAB>&        a_rhs,
-		     bool                               a_homogeneousPhysBC,
-		     AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) override final;
+  void
+  AMRResidualNC(LevelData<MFCellFAB>&             a_residual,
+                const LevelData<MFCellFAB>&       a_phiFine,
+                const LevelData<MFCellFAB>&       a_phi,
+                const LevelData<MFCellFAB>&       a_rhs,
+                bool                              a_homogeneousPhysBC,
+                AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp) override final;
 
   /*!
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no finer levels. 
@@ -436,10 +482,11 @@ public:
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
   */
-  void AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
-		     const LevelData<MFCellFAB>& a_phi,
-		     const LevelData<MFCellFAB>& a_phiCoar,
-		     bool                        a_homogeneousPhysBC) override final;
+  void
+  AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
+                const LevelData<MFCellFAB>& a_phi,
+                const LevelData<MFCellFAB>& a_phiCoar,
+                bool                        a_homogeneousPhysBC) override final;
 
   /*!
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no coarser AMR levels. 
@@ -449,14 +496,14 @@ public:
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
   */
-  void AMROperatorNC(LevelData<MFCellFAB>&              a_Lphi,
-		     const LevelData<MFCellFAB>&        a_phi,
-		     const LevelData<MFCellFAB>&        a_phiCoar,
-		     bool                               a_homogeneousPhysBC,
-		     AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) override final;
-  
-protected:
+  void
+  AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
+                const LevelData<MFCellFAB>&       a_phi,
+                const LevelData<MFCellFAB>&       a_phiCoar,
+                bool                              a_homogeneousPhysBC,
+                AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp) override final;
 
+protected:
   /*!
     @brief Component that we solve for
   */
@@ -485,7 +532,7 @@ protected:
   /*!
     @brief Helmholtz operators on each phase. Note that I'm using int rather than Phase as identifier because that is the standard terminology for MFCellFAB. 
   */
-  std::map<int, RefCountedPtr<EBHelmholtzOp> > m_helmOps;
+  std::map<int, RefCountedPtr<EBHelmholtzOp>> m_helmOps;
 
   /*!
     @brief BC jump object. This is the one that has the stencils and can compute derivatives. 
@@ -495,12 +542,12 @@ protected:
   /*!
     @brief Actual BC jump in data-based format. This is the right-hand side of dphi/dn1 + dphi/dn2 = jump
   */
-  RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_jump;
+  RefCountedPtr<LevelData<BaseIVFAB<Real>>> m_jump;
 
   /*!
     @brief Dirichlet BC values for each phase
   */
-  std::map<int, RefCountedPtr<LevelData<BaseIVFAB<Real> > > > m_dirichletBcValues;
+  std::map<int, RefCountedPtr<LevelData<BaseIVFAB<Real>>>> m_dirichletBcValues;
 
   /*!
     @brief Level grid
@@ -516,7 +563,7 @@ protected:
     @brief Coarse grid
   */
   MFLevelGrid m_mflgCoar;
-  
+
   /*!
     @brief Coarsened version of this grid
   */
@@ -577,13 +624,15 @@ protected:
     @param[in] a_phi Data
     @param[in] a_homogeneousPhysBC homogeneous physical BC or not
   */
-  void updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC);
+  void
+  updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC);
 
   /*!
     @brief Perform an exchange operation, event if the data is const.
     @param[in] a_phi Data 
   */
-  void exchangeGhost(const LevelData<MFCellFAB>& a_phi) const;
+  void
+  exchangeGhost(const LevelData<MFCellFAB>& a_phi) const;
 
   /*!
     @brief Do coarse-fine interpolation
@@ -592,7 +641,8 @@ protected:
     @param[in]    a_homogeneousCF Homogeneous interpolation or not. 
     @note Only ghost cells in a_phi are touched. 
   */
-  void interpolateCF(const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>* a_phiCoar, const bool a_homogeneousCF);
+  void
+  interpolateCF(const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>* a_phiCoar, const bool a_homogeneousCF);
 
   /*!
     @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
@@ -603,11 +653,12 @@ protected:
     @param[in]  a_homogeneousCFBC   Use homogeneous coarse-fine bcs or not
     @note a_phi is not really const and we do a nasty cast. Leaving it as const because we only modify the ghost cells!
   */
-  void applyOp(LevelData<MFCellFAB>&             a_Lphi,
-	       const LevelData<MFCellFAB>&       a_phi,
-	       const LevelData<MFCellFAB>* const a_phiCoar,
-	       const bool                        a_homogeneousPhysBC,
-	       const bool                        a_homogeneousCFBC);
+  void
+  applyOp(LevelData<MFCellFAB>&             a_Lphi,
+          const LevelData<MFCellFAB>&       a_phi,
+          const LevelData<MFCellFAB>* const a_phiCoar,
+          const bool                        a_homogeneousPhysBC,
+          const bool                        a_homogeneousCFBC);
 
   /*!
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
@@ -619,13 +670,13 @@ protected:
     @param[in]  a_finerOp           Finer operatator
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
   */
-  void AMROperator(LevelData<MFCellFAB>&              a_Lphi,
-		   const LevelData<MFCellFAB>&        a_phiFine,
-		   const LevelData<MFCellFAB>&        a_phi,
-		   const LevelData<MFCellFAB>&        a_phiCoar,
-		   const bool                         a_homogeneousPhysBC,
-		   AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp);
-
+  void
+  AMROperator(LevelData<MFCellFAB>&             a_Lphi,
+              const LevelData<MFCellFAB>&       a_phiFine,
+              const LevelData<MFCellFAB>&       a_phi,
+              const LevelData<MFCellFAB>&       a_phiCoar,
+              const bool                        a_homogeneousPhysBC,
+              AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp);
 };
 
 #include <CD_NamespaceFooter.H>

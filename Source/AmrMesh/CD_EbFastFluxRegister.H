@@ -17,21 +17,21 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief Version of EBFluxRegister with faster define function. 
   @details This is just like EBFluxRegister except it has a much faster define function. This class exists solely because the original
   Chombo definition has crazy nested LayoutIterators, which break when are many boxes. 
   @note To use run-time and profiling, use EbFastFluxRegister.profile=true
 */
-class EbFastFluxRegister : public EBFluxRegister { 
+class EbFastFluxRegister : public EBFluxRegister
+{
 public:
-  
   /*!
     @brief Default constructor. Leaves object in undefined state.
   */
   EbFastFluxRegister();
-  
+
   /*!
     @brief Full constructor.  Calls the define function which creates
     a levels worth of flux registers.
@@ -42,10 +42,10 @@ public:
     @param[in] a_forceNoEBCF Forces EBCF functionality to be turned off if true.
   */
   EbFastFluxRegister(const EBLevelGrid& a_eblgFine,
-		     const EBLevelGrid& a_eblgCoar,
-		     const int&         a_nRef,
-		     const int&         a_nVar,
-		     const bool         a_forceNoEBCF = false);
+                     const EBLevelGrid& a_eblgCoar,
+                     const int&         a_nRef,
+                     const int&         a_nVar,
+                     const bool         a_forceNoEBCF = false);
 
   /*!
     @brief Full constructor.  Calls the define function which creates
@@ -61,14 +61,14 @@ public:
     @param[in] a_forceNoEBCF Forces EBCF functionality to be turned off if true.
   */
   EbFastFluxRegister(const DisjointBoxLayout& a_dblFine,
-		     const DisjointBoxLayout& a_dblCoar,
-		     const EBISLayout&        a_ebislFine,
-		     const EBISLayout&        a_ebislCoar,
-		     const Box&               a_domainCoar,
-		     const int&               a_nRef,
-		     const int&               a_nVar,
-		     const EBIndexSpace*      a_ebisPtr,
-		     const bool               a_forceNoEBCF = false);
+                     const DisjointBoxLayout& a_dblCoar,
+                     const EBISLayout&        a_ebislFine,
+                     const EBISLayout&        a_ebislCoar,
+                     const Box&               a_domainCoar,
+                     const int&               a_nRef,
+                     const int&               a_nVar,
+                     const EBIndexSpace*      a_ebisPtr,
+                     const bool               a_forceNoEBCF = false);
 
   /*!
     @brief (Does nothing)
@@ -87,15 +87,16 @@ public:
     @param[in] a_ebisPtr     EBIndexSpace 
     @param[in] a_forceNoEBCF Forces EBCF functionality to be turned off if true.
   */
-  void define(const DisjointBoxLayout& a_dblFine,
-	      const DisjointBoxLayout& a_dblCoar,
-	      const EBISLayout&        a_ebislFine,
-	      const EBISLayout&        a_ebislCoar,
-	      const ProblemDomain&     a_domainCoar,
-	      const int&               a_nRef,
-	      const int&               a_nVar,
-	      const EBIndexSpace*      a_ebisPtr,
-	      const bool               a_forceNoEBCF = false);
+  void
+  define(const DisjointBoxLayout& a_dblFine,
+         const DisjointBoxLayout& a_dblCoar,
+         const EBISLayout&        a_ebislFine,
+         const EBISLayout&        a_ebislCoar,
+         const ProblemDomain&     a_domainCoar,
+         const int&               a_nRef,
+         const int&               a_nVar,
+         const EBIndexSpace*      a_ebisPtr,
+         const bool               a_forceNoEBCF = false);
 
   /*!
     @brief Define function.
@@ -105,36 +106,38 @@ public:
     @param[in] a_nVar        Number of variables. 
     @param[in] a_forceNoEBCF Forces EBCF functionality to be turned off if true.
   */
-  void define(const EBLevelGrid&       a_eblgFine,
-	      const EBLevelGrid&       a_eblgCoar,
-	      const int&               a_refRat,
-	      const int&               a_nVar,
-	      const bool               a_forceNoEBCF = false);
+  void
+  define(const EBLevelGrid& a_eblgFine,
+         const EBLevelGrid& a_eblgCoar,
+         const int&         a_refRat,
+         const int&         a_nVar,
+         const bool         a_forceNoEBCF = false);
 
 protected:
-  
   /*!
     @brief Mucho faster version than the one in EBFastFR
   */
-  void fastDefineSetsAndIterators();
+  void
+  fastDefineSetsAndIterators();
 
   /*!
     @brief Define masks
   */
-  void defineMasks();
+  void
+  defineMasks();
 
   /*!
     @brief This is a mask for describing which coar cells boarder the CFIVS
   */
-  LayoutData<IntVectSet> m_coarCFIVS[2*SpaceDim];
+  LayoutData<IntVectSet> m_coarCFIVS[2 * SpaceDim];
 
 private:
-
   /*!
     @brief Assignment operator - disallowed for all the usual reasons
     @param[in] a_out Other flux register
   */
-  void operator=(const EbFastFluxRegister& out) = delete;
+  void
+  operator=(const EbFastFluxRegister& out) = delete;
 
   /*!
     @brief Copy constructor is not allowed.
@@ -142,8 +145,7 @@ private:
   */
   EbFastFluxRegister(const EbFastFluxRegister& out) = delete;
 };
-  
+
 #include <CD_NamespaceFooter.H>
 
 #endif
-

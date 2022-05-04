@@ -15,13 +15,13 @@
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief This is a class that defines two dielectric rods.
 */
-class DoubleRod : public ComputationalGeometry {
+class DoubleRod : public ComputationalGeometry
+{
 public:
-
   DoubleRod();
   ~DoubleRod();
 };

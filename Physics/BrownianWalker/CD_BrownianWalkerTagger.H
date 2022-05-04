@@ -26,9 +26,9 @@ namespace Physics {
       @details This class just implements the interface but does not flag any cells for refinement. However, it returns true from the tagging routine
       so that TimeStepper and Driver can load balance the application. 
     */
-    class BrownianWalkerTagger : public CellTagger {
+    class BrownianWalkerTagger : public CellTagger
+    {
     public:
-
       /*!
 	@brief Disallowed weak construction -- use the full constructor
       */
@@ -38,7 +38,7 @@ namespace Physics {
 	@brief Full constructor.
 	@param[in] a_solver Solver to be tracked
 	@param[in] a_amr    Reference to AmrMesh -- needed because we need access to the grids. 
-      */      
+      */
       BrownianWalkerTagger(RefCountedPtr<ItoSolver>& a_solver, RefCountedPtr<AmrMesh>& a_amr);
 
       /*!
@@ -49,21 +49,23 @@ namespace Physics {
       /*!
 	@brief Regrid method (does nothing)
       */
-      void regrid() override;
+      void
+      regrid() override;
 
       /*!
 	@brief Parse options
-      */      
-      void parseOptions() override;
+      */
+      void
+      parseOptions() override;
 
       /*!
 	@brief Tag cells (does nothing, returns false)
 	@param[inout] a_tags Cell tags
       */
-      bool tagCells(EBAMRTags& a_tags) override;
+      bool
+      tagCells(EBAMRTags& a_tags) override;
 
     protected:
-
       /*!
 	@brief Reference to solver
       */
@@ -71,7 +73,7 @@ namespace Physics {
 
       /*!
 	@brief Reference to AmrMesh
-      */      
+      */
       RefCountedPtr<AmrMesh> m_amr;
 
       /*!
@@ -79,8 +81,8 @@ namespace Physics {
       */
       Real m_refMagn;
     };
-  }
-}
+  } // namespace BrownianWalker
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

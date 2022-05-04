@@ -27,9 +27,9 @@ namespace Physics {
     /*!
       @brief Encapsulation of species settings and initial conditiosn for use with CdrPlasma. This is for tracked species.
     */
-    class NeutralSpeciesJSON {
+    class NeutralSpeciesJSON
+    {
     public:
-
       /*!
 	@brief Alias for initial data function
       */
@@ -59,28 +59,31 @@ namespace Physics {
 	@param[in] a_molarFraction Molar fraction
 	@param[in] a_function      Number density function
       */
-      void define(const std::string  a_name, const Real a_molarFraction, const NumberDensityFunction a_function);
+      void
+      define(const std::string a_name, const Real a_molarFraction, const NumberDensityFunction a_function);
 
       /*!
 	@brief Get (number) density at the physical coordinates.
 	@param[in] a_pos Physical position
       */
-      Real operator()(const RealVect a_pos) const;
+      Real
+      operator()(const RealVect a_pos) const;
 
       /*!
 	@brief Get the molar fraction
 	@return m_molarFraction
       */
-      Real getMolarFraction() const;
+      Real
+      getMolarFraction() const;
 
       /*!
 	@brief Get the species name
 	@return m_name
       */
-      std::string getName() const;      
-      
-    protected:
+      std::string
+      getName() const;
 
+    protected:
       /*!
 	@brief Make sure model has initial data
       */
@@ -101,9 +104,9 @@ namespace Physics {
       */
       NumberDensityFunction m_function;
     };
-  }
-}
-  
+  } // namespace CdrPlasma
+} // namespace Physics
+
 #include <CD_NamespaceFooter.H>
 
 #endif
