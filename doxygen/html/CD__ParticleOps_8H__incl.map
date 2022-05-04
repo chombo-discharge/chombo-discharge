@@ -1,11 +1,12 @@
 <map id="Source/Particle/CD_ParticleOps.H" name="Source/Particle/CD_ParticleOps.H">
-<area shape="rect" id="node1" title="Declaration of a static class containing some common useful particle routines that would otherwise be..." alt="" coords="275,5,416,47"/>
-<area shape="rect" id="node2" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="465,244,650,271"/>
-<area shape="rect" id="node3" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="5,244,184,271"/>
-<area shape="rect" id="node4" href="$CD__ParticleOpsImplem_8H.html" title="Implementation of CD_ParticleOps.H." alt="" coords="253,95,438,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="480,169,579,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="158,169,261,196"/>
-<area shape="rect" id="node7" href="$CD__PolyUtils_8H.html" title="Agglomeration of some useful algebraic/polynomial routines." alt="" coords="285,169,405,196"/>
-<area shape="rect" id="node8" title=" " alt="" coords="209,244,338,271"/>
-<area shape="rect" id="node9" title=" " alt="" coords="362,244,441,271"/>
+<area shape="rect" id="node1" title="Declaration of a static class containing some common useful particle routines that would otherwise be..." alt="" coords="374,5,515,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,244,135,271"/>
+<area shape="rect" id="node3" title=" " alt="" coords="159,244,237,271"/>
+<area shape="rect" id="node4" title=" " alt="" coords="755,95,849,121"/>
+<area shape="rect" id="node5" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="575,244,760,271"/>
+<area shape="rect" id="node6" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="262,244,441,271"/>
+<area shape="rect" id="node7" href="$CD__ParticleOpsImplem_8H.html" title="Implementation of CD_ParticleOps.H." alt="" coords="352,95,537,121"/>
+<area shape="rect" id="node8" title=" " alt="" coords="353,169,451,196"/>
+<area shape="rect" id="node9" title=" " alt="" coords="527,169,629,196"/>
+<area shape="rect" id="node10" href="$CD__PolyUtils_8H.html" title="Agglomeration of some useful algebraic/polynomial routines." alt="" coords="209,169,329,196"/>
 </map>

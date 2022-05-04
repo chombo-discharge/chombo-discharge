@@ -390,259 +390,266 @@ $(function() {
 <div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;      <span class="keywordtype">void</span></div>
 <div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;      computeReactiveParticlesPerCell(LevelData&lt;EBCellFAB&gt;&amp; a_ppc, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level);</div>
 <div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;      computeReactiveParticlesPerCell(</div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;        EBCellFAB&amp; a_ppc, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level, <span class="keyword">const</span> DataIndex a_dit, <span class="keyword">const</span> Box a_box, <span class="keyword">const</span> EBISBox&amp; a_ebisbox);</div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160; </div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;      <span class="comment">// Routines for computing the mean energy of the particles in grid cells</span></div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;      computeReactiveMeanEnergiesPerCell(<a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_mean_energies);</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;      computeReactiveMeanEnergiesPerCell(LevelData&lt;EBCellFAB&gt;&amp; a_mean_energies, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level);</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;      computeReactiveMeanEnergiesPerCell(EBCellFAB&amp;      a_mean_energies,</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;                                         <span class="keyword">const</span> <span class="keywordtype">int</span>       a_level,</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;                                         <span class="keyword">const</span> DataIndex a_dit,</div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;                                         <span class="keyword">const</span> Box       a_box,</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;                                         <span class="keyword">const</span> EBISBox&amp;  a_ebisbox);</div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160; </div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;      <span class="comment">// New routines for chemistry advances.</span></div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;      advanceReactionNetworkNWO(<span class="keyword">const</span> Real a_dt);</div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;      advanceReactionNetworkNWO(<span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_E, <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_EdotJ, <span class="keyword">const</span> Real a_dt);</div>
-<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;      advanceReactionNetworkNWO(LevelData&lt;EBCellFAB&gt;&amp;       a_ppc,</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;                                LevelData&lt;EBCellFAB&gt;&amp;       a_ypc,</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;                                LevelData&lt;EBCellFAB&gt;&amp;       a_mean_energies,</div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;                                <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_E,</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;                                <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_EdotJ,</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;                                <span class="keyword">const</span> <span class="keywordtype">int</span>                   a_level,</div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;                                <span class="keyword">const</span> Real                  a_dt);</div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;      advanceReactionNetworkNWO(EBCellFAB&amp;       a_particlesPerCell,</div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;                                EBCellFAB&amp;       a_newPhotonsPerCell,</div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;                                EBCellFAB&amp;       a_meanParticleEnergies,</div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;                                <span class="keyword">const</span> EBCellFAB&amp; a_E,</div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;                                <span class="keyword">const</span> EBCellFAB&amp; a_EdotJ,</div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;                                <span class="keyword">const</span> <span class="keywordtype">int</span>        a_level,</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;                                <span class="keyword">const</span> DataIndex  a_dit,</div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;                                <span class="keyword">const</span> Box        a_box,</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;                                <span class="keyword">const</span> Real       a_dx,</div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;                                <span class="keyword">const</span> Real       a_dt);</div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160; </div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;      <span class="comment">// Routines for reconciling particles.</span></div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;      reconcileParticles(<span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_newParticlesPerCell,</div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;                         <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_oldParticlesPerCell,</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;                         <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_meanParticleEnergies,</div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;                         <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_newPhotonsPerCell);</div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;      reconcileParticles(<span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_newParticlesPerCell,</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;                         <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_oldParticlesPerCell,</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;                         <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_meanParticleEnergies,</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;                         <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_newPhotonsPerCell,</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;                         <span class="keyword">const</span> <span class="keywordtype">int</span>                   a_level);</div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;      reconcileParticles(<span class="keyword">const</span> EBCellFAB&amp; a_newParticlesPerCell,</div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;                         <span class="keyword">const</span> EBCellFAB&amp; a_oldParticlesPerCell,</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;                         <span class="keyword">const</span> EBCellFAB&amp; a_meanParticleEnergies,</div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;                         <span class="keyword">const</span> EBCellFAB&amp; a_newPhotonsPerCell,</div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;                         <span class="keyword">const</span> <span class="keywordtype">int</span>        a_level,</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;                         <span class="keyword">const</span> DataIndex  a_dit,</div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;                         <span class="keyword">const</span> Box        a_box,</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;                         <span class="keyword">const</span> Real       a_dx);</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160; </div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;      <span class="comment">// Old routines for chemistry advances. The physics module will switch between LFA and LEA.</span></div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;      advanceReactionNetwork(<span class="keyword">const</span> Real a_dt);</div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;      advanceReactionNetwork(Vector&lt;<a class="code" href="classParticleContainer.html">ParticleContainer&lt;ItoParticle&gt;</a>*&gt;&amp; a_particles,</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;                             Vector&lt;<a class="code" href="classParticleContainer.html">ParticleContainer&lt;Photon&gt;</a>*&gt;&amp;      a_Photons,</div>
-<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;                             Vector&lt;<a class="code" href="classParticleContainer.html">ParticleContainer&lt;Photon&gt;</a>*&gt;&amp;      a_newPhotons,</div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;                             <span class="keyword">const</span> Vector&lt;EBAMRCellData&gt;&amp;             a_sources,</div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;                             <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;                     a_E,</div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;                             <span class="keyword">const</span> Real                               a_dt);</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;      advanceReactionNetwork(Vector&lt;<a class="code" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles&lt;ItoParticle&gt;</a>*&gt;&amp; a_particles,</div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;                             Vector&lt;<a class="code" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles&lt;Photon&gt;</a>*&gt;&amp;      a_Photons,</div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;                             Vector&lt;<a class="code" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles&lt;Photon&gt;</a>*&gt;&amp;      a_newPhotons,</div>
-<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;                             <span class="keyword">const</span> Vector&lt;EBAMRCellData&gt;&amp;            a_sources,</div>
-<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;                             <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;                    a_E,</div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;                             <span class="keyword">const</span> Real                              a_dt);</div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;      advanceReactionNetwork(Vector&lt;LayoutData&lt;BinFab&lt;ItoParticle&gt;&gt;*&gt;&amp; a_particles,</div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                             Vector&lt;LayoutData&lt;BinFab&lt;Photon&gt;&gt;*&gt;&amp;      a_Photons,</div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;                             Vector&lt;LayoutData&lt;BinFab&lt;Photon&gt;&gt;*&gt;&amp;      a_newPhotons,</div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;                             <span class="keyword">const</span> Vector&lt;LevelData&lt;EBCellFAB&gt;*&gt;&amp;      a_sources,</div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;                             <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp;               a_E,</div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;                             <span class="keyword">const</span> <span class="keywordtype">int</span>                                 a_lvl,</div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;                             <span class="keyword">const</span> Real                                a_dt);</div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;      advanceReactionNetwork(Vector&lt;BinFab&lt;ItoParticle&gt;*&gt;&amp; a_particles,</div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;                             Vector&lt;BinFab&lt;Photon&gt;*&gt;&amp;      a_Photons,</div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;                             Vector&lt;BinFab&lt;Photon&gt;*&gt;&amp;      a_newPhotons,</div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;                             <span class="keyword">const</span> Vector&lt;EBCellFAB*&gt;&amp;     a_sources,</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;                             <span class="keyword">const</span> EBCellFAB&amp;              a_E,</div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;                             <span class="keyword">const</span> <span class="keywordtype">int</span>                     a_lvl,</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;                             <span class="keyword">const</span> DataIndex               a_dit,</div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;                             <span class="keyword">const</span> Box                     a_box,</div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;                             <span class="keyword">const</span> Real                    a_dx,</div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;                             <span class="keyword">const</span> Real                    a_dt);</div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160; </div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;      <span class="comment">// Compute dt routines</span></div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;      Real</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;      computePhysicsDt() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;      Real</div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;      computePhysicsDt(<span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_E, <span class="keyword">const</span> Vector&lt;EBAMRCellData*&gt; a_densities) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;      Real</div>
-<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;      computePhysicsDt(<span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp;         a_E,</div>
-<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;                       <span class="keyword">const</span> Vector&lt;LevelData&lt;EBCellFAB&gt;*&gt; a_densities,</div>
-<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">int</span>                           a_level) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;      Real</div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;      computePhysicsDt(<span class="keyword">const</span> EBCellFAB&amp;         a_E,</div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;                       <span class="keyword">const</span> Vector&lt;EBCellFAB*&gt; a_densities,</div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">int</span>                a_level,</div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;                       <span class="keyword">const</span> DataIndex          a_dit,</div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;                       <span class="keyword">const</span> Box                a_box) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160; </div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;      <span class="comment">// Routines for advancing Photons</span></div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;      advancePhotons(<span class="keyword">const</span> Real a_dt);</div>
-<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160; </div>
-<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;      <span class="comment">// Routines for sorting particles. These routines are here because RtLayout is general for RtSolver, and I&#39;m too</span></div>
-<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;      <span class="comment">// lazy to write an McPhoto_layout. So here you go.</span></div>
-<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;      sortPhotonsByCell(<a class="code" href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">McPhoto::WhichContainer</a> a_which);</div>
-<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;      sortPhotonsByPatch(<a class="code" href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">McPhoto::WhichContainer</a> a_which);</div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160; </div>
-<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;      <span class="comment">// Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.</span></div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;      computeEdotJSource(<span class="keyword">const</span> Real a_dt);</div>
-<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;      computeEdotJSource();</div>
-<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;      computeEdotJSourceNWO();</div>
-<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;      computeEdotJSourceNWO2(<span class="keyword">const</span> Real a_dt);</div>
-<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160; </div>
-<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;    <span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;      std::string        m_fluid_Realm;   <span class="comment">// Realm for Poisson and sigma solver. Defaults to Realm::Primal</span></div>
-<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;      std::string        m_particleRealm; <span class="comment">// Realm for particles. Defaults to Realm::Primal</span></div>
-<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;      std::string        m_name;</div>
-<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;      phase::which_phase m_phase;</div>
-<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160; </div>
-<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;      <a class="code" href="CD__BoxSorting_8H.html#ab5db8b3a96e3a04473aaa898f7eb2128">BoxSorting</a> m_boxSort;</div>
-<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160; </div>
-<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;      RefCountedPtr&lt;ItoPlasmaPhysics&gt;     m_physics;</div>
-<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;      RefCountedPtr&lt;ItoLayout&lt;ItoSolver&gt;&gt; m_ito;</div>
-<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;      RefCountedPtr&lt;RtLayout&lt;McPhoto&gt;&gt;    m_rte;</div>
-<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;      RefCountedPtr&lt;FieldSolver&gt;          m_fieldSolver;</div>
-<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;      RefCountedPtr&lt;SigmaSolver&gt;          m_sigma;</div>
-<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160; </div>
-<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;      <span class="comment">// Filters that can be applied.</span></div>
-<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;      std::deque&lt;std::tuple&lt;Real, int, int&gt;&gt; m_filters;</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;      computeReactiveParticlesPerCell(EBCellFAB&amp;      a_ppc,</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;                                      <span class="keyword">const</span> <span class="keywordtype">int</span>       a_level,</div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;                                      <span class="keyword">const</span> DataIndex a_dit,</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;                                      <span class="keyword">const</span> Box       a_box,</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;                                      <span class="keyword">const</span> EBISBox&amp;  a_ebisbox);</div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160; </div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;      <span class="comment">// Routines for computing the mean energy of the particles in grid cells</span></div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;      computeReactiveMeanEnergiesPerCell(<a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_mean_energies);</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;      computeReactiveMeanEnergiesPerCell(LevelData&lt;EBCellFAB&gt;&amp; a_mean_energies, <span class="keyword">const</span> <span class="keywordtype">int</span> a_level);</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;      computeReactiveMeanEnergiesPerCell(EBCellFAB&amp;      a_mean_energies,</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;                                         <span class="keyword">const</span> <span class="keywordtype">int</span>       a_level,</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;                                         <span class="keyword">const</span> DataIndex a_dit,</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;                                         <span class="keyword">const</span> Box       a_box,</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;                                         <span class="keyword">const</span> EBISBox&amp;  a_ebisbox);</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160; </div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;      <span class="comment">// New routines for chemistry advances.</span></div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;      advanceReactionNetworkNWO(<span class="keyword">const</span> Real a_dt);</div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;      advanceReactionNetworkNWO(<span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_E, <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_EdotJ, <span class="keyword">const</span> Real a_dt);</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;      advanceReactionNetworkNWO(LevelData&lt;EBCellFAB&gt;&amp;       a_ppc,</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;                                LevelData&lt;EBCellFAB&gt;&amp;       a_ypc,</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;                                LevelData&lt;EBCellFAB&gt;&amp;       a_mean_energies,</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;                                <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_E,</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;                                <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_EdotJ,</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;                                <span class="keyword">const</span> <span class="keywordtype">int</span>                   a_level,</div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;                                <span class="keyword">const</span> Real                  a_dt);</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;      advanceReactionNetworkNWO(EBCellFAB&amp;       a_particlesPerCell,</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;                                EBCellFAB&amp;       a_newPhotonsPerCell,</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;                                EBCellFAB&amp;       a_meanParticleEnergies,</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;                                <span class="keyword">const</span> EBCellFAB&amp; a_E,</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;                                <span class="keyword">const</span> EBCellFAB&amp; a_EdotJ,</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;                                <span class="keyword">const</span> <span class="keywordtype">int</span>        a_level,</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;                                <span class="keyword">const</span> DataIndex  a_dit,</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;                                <span class="keyword">const</span> Box        a_box,</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;                                <span class="keyword">const</span> Real       a_dx,</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;                                <span class="keyword">const</span> Real       a_dt);</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160; </div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;      <span class="comment">// Routines for reconciling particles.</span></div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;      reconcileParticles(<span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_newParticlesPerCell,</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;                         <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_oldParticlesPerCell,</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;                         <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_meanParticleEnergies,</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;                         <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_newPhotonsPerCell);</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;      reconcileParticles(<span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_newParticlesPerCell,</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;                         <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_oldParticlesPerCell,</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;                         <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_meanParticleEnergies,</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;                         <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp; a_newPhotonsPerCell,</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;                         <span class="keyword">const</span> <span class="keywordtype">int</span>                   a_level);</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;      reconcileParticles(<span class="keyword">const</span> EBCellFAB&amp; a_newParticlesPerCell,</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;                         <span class="keyword">const</span> EBCellFAB&amp; a_oldParticlesPerCell,</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;                         <span class="keyword">const</span> EBCellFAB&amp; a_meanParticleEnergies,</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;                         <span class="keyword">const</span> EBCellFAB&amp; a_newPhotonsPerCell,</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;                         <span class="keyword">const</span> <span class="keywordtype">int</span>        a_level,</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;                         <span class="keyword">const</span> DataIndex  a_dit,</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;                         <span class="keyword">const</span> Box        a_box,</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;                         <span class="keyword">const</span> Real       a_dx);</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160; </div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;      <span class="comment">// Old routines for chemistry advances. The physics module will switch between LFA and LEA.</span></div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;      advanceReactionNetwork(<span class="keyword">const</span> Real a_dt);</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;      advanceReactionNetwork(Vector&lt;<a class="code" href="classParticleContainer.html">ParticleContainer&lt;ItoParticle&gt;</a>*&gt;&amp; a_particles,</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;                             Vector&lt;<a class="code" href="classParticleContainer.html">ParticleContainer&lt;Photon&gt;</a>*&gt;&amp;      a_Photons,</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;                             Vector&lt;<a class="code" href="classParticleContainer.html">ParticleContainer&lt;Photon&gt;</a>*&gt;&amp;      a_newPhotons,</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;                             <span class="keyword">const</span> Vector&lt;EBAMRCellData&gt;&amp;             a_sources,</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;                             <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;                     a_E,</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;                             <span class="keyword">const</span> Real                               a_dt);</div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;      advanceReactionNetwork(Vector&lt;<a class="code" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles&lt;ItoParticle&gt;</a>*&gt;&amp; a_particles,</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;                             Vector&lt;<a class="code" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles&lt;Photon&gt;</a>*&gt;&amp;      a_Photons,</div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;                             Vector&lt;<a class="code" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles&lt;Photon&gt;</a>*&gt;&amp;      a_newPhotons,</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;                             <span class="keyword">const</span> Vector&lt;EBAMRCellData&gt;&amp;            a_sources,</div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                             <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;                    a_E,</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                             <span class="keyword">const</span> Real                              a_dt);</div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;      advanceReactionNetwork(Vector&lt;LayoutData&lt;BinFab&lt;ItoParticle&gt;&gt;*&gt;&amp; a_particles,</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;                             Vector&lt;LayoutData&lt;BinFab&lt;Photon&gt;&gt;*&gt;&amp;      a_Photons,</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;                             Vector&lt;LayoutData&lt;BinFab&lt;Photon&gt;&gt;*&gt;&amp;      a_newPhotons,</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;                             <span class="keyword">const</span> Vector&lt;LevelData&lt;EBCellFAB&gt;*&gt;&amp;      a_sources,</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;                             <span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp;               a_E,</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;                             <span class="keyword">const</span> <span class="keywordtype">int</span>                                 a_lvl,</div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;                             <span class="keyword">const</span> Real                                a_dt);</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;      advanceReactionNetwork(Vector&lt;BinFab&lt;ItoParticle&gt;*&gt;&amp; a_particles,</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;                             Vector&lt;BinFab&lt;Photon&gt;*&gt;&amp;      a_Photons,</div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;                             Vector&lt;BinFab&lt;Photon&gt;*&gt;&amp;      a_newPhotons,</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;                             <span class="keyword">const</span> Vector&lt;EBCellFAB*&gt;&amp;     a_sources,</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;                             <span class="keyword">const</span> EBCellFAB&amp;              a_E,</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;                             <span class="keyword">const</span> <span class="keywordtype">int</span>                     a_lvl,</div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;                             <span class="keyword">const</span> DataIndex               a_dit,</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;                             <span class="keyword">const</span> Box                     a_box,</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;                             <span class="keyword">const</span> Real                    a_dx,</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;                             <span class="keyword">const</span> Real                    a_dt);</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160; </div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;      <span class="comment">// Compute dt routines</span></div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;      Real</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;      computePhysicsDt() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;      Real</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;      computePhysicsDt(<span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp; a_E, <span class="keyword">const</span> Vector&lt;EBAMRCellData*&gt; a_densities) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;      Real</div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;      computePhysicsDt(<span class="keyword">const</span> LevelData&lt;EBCellFAB&gt;&amp;         a_E,</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;                       <span class="keyword">const</span> Vector&lt;LevelData&lt;EBCellFAB&gt;*&gt; a_densities,</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">int</span>                           a_level) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;      Real</div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;      computePhysicsDt(<span class="keyword">const</span> EBCellFAB&amp;         a_E,</div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;                       <span class="keyword">const</span> Vector&lt;EBCellFAB*&gt; a_densities,</div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">int</span>                a_level,</div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;                       <span class="keyword">const</span> DataIndex          a_dit,</div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;                       <span class="keyword">const</span> Box                a_box) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160; </div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;      <span class="comment">// Routines for advancing Photons</span></div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;      advancePhotons(<span class="keyword">const</span> Real a_dt);</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160; </div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;      <span class="comment">// Routines for sorting particles. These routines are here because RtLayout is general for RtSolver, and I&#39;m too</span></div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;      <span class="comment">// lazy to write an McPhoto_layout. So here you go.</span></div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;      sortPhotonsByCell(<a class="code" href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">McPhoto::WhichContainer</a> a_which);</div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;      sortPhotonsByPatch(<a class="code" href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">McPhoto::WhichContainer</a> a_which);</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160; </div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;      <span class="comment">// Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.</span></div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;      computeEdotJSource(<span class="keyword">const</span> Real a_dt);</div>
+<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;      computeEdotJSource();</div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;      computeEdotJSourceNWO();</div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;      computeEdotJSourceNWO2(<span class="keyword">const</span> Real a_dt);</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160; </div>
+<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;    <span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;      std::string        m_fluid_Realm;   <span class="comment">// Realm for Poisson and sigma solver. Defaults to Realm::Primal</span></div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;      std::string        m_particleRealm; <span class="comment">// Realm for particles. Defaults to Realm::Primal</span></div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;      std::string        m_name;</div>
+<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;      phase::which_phase m_phase;</div>
+<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160; </div>
+<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;      <a class="code" href="CD__BoxSorting_8H.html#ab5db8b3a96e3a04473aaa898f7eb2128">BoxSorting</a> m_boxSort;</div>
+<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160; </div>
+<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;      RefCountedPtr&lt;ItoPlasmaPhysics&gt;     m_physics;</div>
+<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;      RefCountedPtr&lt;ItoLayout&lt;ItoSolver&gt;&gt; m_ito;</div>
+<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;      RefCountedPtr&lt;RtLayout&lt;McPhoto&gt;&gt;    m_rte;</div>
+<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;      RefCountedPtr&lt;FieldSolver&gt;          m_fieldSolver;</div>
+<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;      RefCountedPtr&lt;SigmaSolver&gt;          m_sigma;</div>
 <div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160; </div>
-<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;      std::function&lt;Real(<span class="keyword">const</span> Real a_time)&gt; m_potential;</div>
-<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160; </div>
-<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;      <span class="keywordtype">bool</span> m_regrid_superparticles;</div>
-<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;      <span class="keywordtype">bool</span> m_LoadBalancing;</div>
-<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;      <span class="keywordtype">bool</span> m_nwo_reactions; <span class="comment">// For switching between the old and new reaction algorithms.</span></div>
-<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;      <span class="keywordtype">bool</span> m_filter_rho;</div>
-<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160; </div>
-<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;      <span class="keywordtype">int</span> m_ppc;</div>
-<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;      <span class="keywordtype">int</span> m_halo_buffer;</div>
-<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;      <span class="keywordtype">int</span> m_pvr_buffer;</div>
-<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;      <span class="keywordtype">int</span> m_LoadBalancing_idx;</div>
-<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160; </div>
-<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;      Real m_load_ppc;</div>
-<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;      Real m_max_cells_hop;</div>
-<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;      Real m_dt_relax;</div>
-<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;      Real m_min_dt;</div>
-<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;      Real m_max_dt;</div>
-<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160; </div>
-<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;      <span class="comment">// Storage for current density. This is defined over the particle Realm.</span></div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a>         m_J;</div>
-<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;      <span class="keyword">mutable</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_fluid_scratch1; <span class="comment">// Scratch storage on the fluid Realm with 1 component</span></div>
-<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;      <span class="keyword">mutable</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_fluid_scratchD; <span class="comment">// Scratch storage on the fluid Realm with SpaceDim components</span></div>
-<div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160; </div>
-<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;      <span class="keyword">mutable</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_scratch1; <span class="comment">// Scratch storage on the particle Realm with 1 component</span></div>
-<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;      <span class="keyword">mutable</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_scratchD; <span class="comment">// Scratch storage on the particle Realm with SpaceDim components</span></div>
+<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;      <span class="comment">// Filters that can be applied.</span></div>
+<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;      std::deque&lt;std::tuple&lt;Real, int, int&gt;&gt; m_filters;</div>
+<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160; </div>
+<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;      std::function&lt;Real(<span class="keyword">const</span> Real a_time)&gt; m_potential;</div>
+<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160; </div>
+<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;      <span class="keywordtype">bool</span> m_regrid_superparticles;</div>
+<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;      <span class="keywordtype">bool</span> m_LoadBalancing;</div>
+<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;      <span class="keywordtype">bool</span> m_nwo_reactions; <span class="comment">// For switching between the old and new reaction algorithms.</span></div>
+<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;      <span class="keywordtype">bool</span> m_filter_rho;</div>
+<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160; </div>
+<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;      <span class="keywordtype">int</span> m_ppc;</div>
+<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;      <span class="keywordtype">int</span> m_halo_buffer;</div>
+<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;      <span class="keywordtype">int</span> m_pvr_buffer;</div>
+<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;      <span class="keywordtype">int</span> m_LoadBalancing_idx;</div>
+<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160; </div>
+<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;      Real m_load_ppc;</div>
+<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;      Real m_max_cells_hop;</div>
+<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;      Real m_dt_relax;</div>
+<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;      Real m_min_dt;</div>
+<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;      Real m_max_dt;</div>
+<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160; </div>
+<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;      <span class="comment">// Storage for current density. This is defined over the particle Realm.</span></div>
+<div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a>         m_J;</div>
+<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;      <span class="keyword">mutable</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_fluid_scratch1; <span class="comment">// Scratch storage on the fluid Realm with 1 component</span></div>
+<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;      <span class="keyword">mutable</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_fluid_scratchD; <span class="comment">// Scratch storage on the fluid Realm with SpaceDim components</span></div>
 <div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160; </div>
-<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;      <span class="keyword">mutable</span> Vector&lt;EBAMRCellData&gt;</div>
-<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;        m_fscratch1; <span class="comment">// Scratch storage with a single component for all species. On the fluid Realm.</span></div>
-<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;      <span class="keyword">mutable</span> Vector&lt;EBAMRCellData&gt;</div>
-<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;        m_fscratch2; <span class="comment">// Scratch storage with a single component for all species. On the fluid Realm.</span></div>
-<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160; </div>
-<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a></div>
-<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;                    m_particle_ppc; <span class="comment">// For holding the number of particles per cell for all species. Contains compoents = number of species</span></div>
-<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_ypc; <span class="comment">// For holding the number of generated Photons per cell on the particle Realm.</span></div>
-<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_eps; <span class="comment">// For holding the mean energy on the particle Realm</span></div>
-<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_old; <span class="comment">// For holding the mean energy on the particle Realm</span></div>
-<div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160; </div>
-<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a></div>
-<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;                    m_fluid_ppc; <span class="comment">// For holding the number of particles per cell for all species. Contains compoents = number of species</span></div>
-<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_fluid_ypc; <span class="comment">// For holding the number of generated Photons per cell on the fluid Realm.</span></div>
-<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_fluid_eps; <span class="comment">// For holding the mean energy on the particle Realm</span></div>
-<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160; </div>
-<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;      <span class="comment">// Storage for the electric field on</span></div>
-<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_fluid_E;</div>
-<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_E;</div>
-<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160; </div>
-<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;      <span class="comment">// Storage for energy source terms</span></div>
-<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;      Vector&lt;EBAMRCellData&gt; m_energy_sources;</div>
-<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a>         m_EdotJ;</div>
-<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160; </div>
-<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;      <span class="comment">// For parsing filters</span></div>
-<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;      parseFilters();</div>
-<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160; </div>
-<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;      <span class="comment">// Set the particle buffers</span></div>
-<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;      setParticleBuffers();</div>
-<div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160; </div>
-<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;      <span class="comment">// Diagnostics tool</span></div>
-<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00534"></a><span class="lineno">  534</span>&#160;      getParticleStatistics(</div>
-<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;        Real&amp; a_avg, Real&amp; a_sigma, <span class="keywordtype">size_t</span>&amp; a_minParticles, <span class="keywordtype">size_t</span>&amp; a_maxParticles, <span class="keywordtype">int</span>&amp; a_minRank, <span class="keywordtype">int</span>&amp; a_maxRank);</div>
+<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;      <span class="keyword">mutable</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_scratch1; <span class="comment">// Scratch storage on the particle Realm with 1 component</span></div>
+<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;      <span class="keyword">mutable</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_scratchD; <span class="comment">// Scratch storage on the particle Realm with SpaceDim components</span></div>
+<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160; </div>
+<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;      <span class="keyword">mutable</span> Vector&lt;EBAMRCellData&gt;</div>
+<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;        m_fscratch1; <span class="comment">// Scratch storage with a single component for all species. On the fluid Realm.</span></div>
+<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;      <span class="keyword">mutable</span> Vector&lt;EBAMRCellData&gt;</div>
+<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;        m_fscratch2; <span class="comment">// Scratch storage with a single component for all species. On the fluid Realm.</span></div>
+<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160; </div>
+<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a></div>
+<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;                    m_particle_ppc; <span class="comment">// For holding the number of particles per cell for all species. Contains compoents = number of species</span></div>
+<div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_ypc; <span class="comment">// For holding the number of generated Photons per cell on the particle Realm.</span></div>
+<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_eps; <span class="comment">// For holding the mean energy on the particle Realm</span></div>
+<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_old; <span class="comment">// For holding the mean energy on the particle Realm</span></div>
+<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160; </div>
+<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a></div>
+<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;                    m_fluid_ppc; <span class="comment">// For holding the number of particles per cell for all species. Contains compoents = number of species</span></div>
+<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_fluid_ypc; <span class="comment">// For holding the number of generated Photons per cell on the fluid Realm.</span></div>
+<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_fluid_eps; <span class="comment">// For holding the mean energy on the particle Realm</span></div>
+<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160; </div>
+<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;      <span class="comment">// Storage for the electric field on</span></div>
+<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_fluid_E;</div>
+<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a> m_particle_E;</div>
+<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160; </div>
+<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;      <span class="comment">// Storage for energy source terms</span></div>
+<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;      Vector&lt;EBAMRCellData&gt; m_energy_sources;</div>
+<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;      <a class="code" href="classEBAMRData.html">EBAMRCellData</a>         m_EdotJ;</div>
+<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160; </div>
+<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;      <span class="comment">// For parsing filters</span></div>
+<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;      parseFilters();</div>
+<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160; </div>
+<div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160;      <span class="comment">// Set the particle buffers</span></div>
+<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;      setParticleBuffers();</div>
+<div class="line"><a name="l00534"></a><span class="lineno">  534</span>&#160; </div>
+<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;      <span class="comment">// Diagnostics tool</span></div>
 <div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160;      printTimerHead();</div>
-<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;      printTimerDiagnostics(Real&amp; a_timer, <span class="keyword">const</span> std::string a_prefix); <span class="comment">// Timer should be in percentage</span></div>
-<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;      printTimerTail();</div>
-<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160; </div>
-<div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;      <span class="comment">// Do load balancing of the particle Realm.</span></div>
-<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;      <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;      loadBalanceParticleRealm(Vector&lt;Vector&lt;int&gt;&gt;&amp;             a_procs,</div>
-<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160;                               Vector&lt;Vector&lt;Box&gt;&gt;&amp;             a_boxes,</div>
-<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;                               <span class="keyword">const</span> std::string                a_realm,</div>
-<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;                               <span class="keyword">const</span> Vector&lt;DisjointBoxLayout&gt;&amp; a_grids,</div>
-<div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160;                               <span class="keyword">const</span> <span class="keywordtype">int</span>                        a_lmin,</div>
-<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;                               <span class="keyword">const</span> <span class="keywordtype">int</span>                        a_finestLevel);</div>
-<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160; </div>
-<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;      Vector&lt;RefCountedPtr&lt;ItoSolver&gt;&gt;</div>
-<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;      getLoadBalanceSolvers() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160;    };</div>
-<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;  } <span class="comment">// namespace ItoPlasma</span></div>
-<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;};  <span class="comment">// namespace Physics</span></div>
-<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160; </div>
-<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160; </div>
-<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160;      getParticleStatistics(Real&amp;   a_avg,</div>
+<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;                            Real&amp;   a_sigma,</div>
+<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;                            <span class="keywordtype">size_t</span>&amp; a_minParticles,</div>
+<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;                            <span class="keywordtype">size_t</span>&amp; a_maxParticles,</div>
+<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;                            <span class="keywordtype">int</span>&amp;    a_minRank,</div>
+<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;                            <span class="keywordtype">int</span>&amp;    a_maxRank);</div>
+<div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;      printTimerHead();</div>
+<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160;      printTimerDiagnostics(Real&amp; a_timer, <span class="keyword">const</span> std::string a_prefix); <span class="comment">// Timer should be in percentage</span></div>
+<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;      printTimerTail();</div>
+<div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160; </div>
+<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;      <span class="comment">// Do load balancing of the particle Realm.</span></div>
+<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;      <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;      loadBalanceParticleRealm(Vector&lt;Vector&lt;int&gt;&gt;&amp;             a_procs,</div>
+<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;                               Vector&lt;Vector&lt;Box&gt;&gt;&amp;             a_boxes,</div>
+<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160;                               <span class="keyword">const</span> std::string                a_realm,</div>
+<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;                               <span class="keyword">const</span> Vector&lt;DisjointBoxLayout&gt;&amp; a_grids,</div>
+<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;                               <span class="keyword">const</span> <span class="keywordtype">int</span>                        a_lmin,</div>
+<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;                               <span class="keyword">const</span> <span class="keywordtype">int</span>                        a_finestLevel);</div>
+<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160; </div>
+<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;      Vector&lt;RefCountedPtr&lt;ItoSolver&gt;&gt;</div>
+<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;      getLoadBalanceSolvers() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;    };</div>
+<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;  } <span class="comment">// namespace ItoPlasma</span></div>
+<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;};  <span class="comment">// namespace Physics</span></div>
+<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160; </div>
+<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160; </div>
+<div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aCD__RtLayout_8H_html"><div class="ttname"><a href="CD__RtLayout_8H.html">CD_RtLayout.H</a></div><div class="ttdoc">Declaration of a class that holds a set of RtSolvers.</div></div>
 <div class="ttc" id="anamespacePhysics_html"><div class="ttname"><a href="namespacePhysics.html">Physics</a></div><div class="ttdoc">Name containing various physics models for running chombo-discharge code.</div><div class="ttdef"><b>Definition:</b> CD_AdvectionDiffusion.H:15</div></div>
 <div class="ttc" id="aCD__ParticleContainer_8H_html_a7d58e41c5d4c425cb2ab9d9eb80da621"><div class="ttname"><a href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; LayoutData&lt; BinFab&lt; P &gt; &gt;&gt; &gt; AMRCellParticles</div><div class="ttdoc">Alias for cell-sorted particles on each AMR level.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainer.H:38</div></div>
 <div class="ttc" id="aCD__EbRepresentation_8H_html_a07b20010dfee95e53d9c9073ca6a6c2b"><div class="ttname"><a href="CD__EbRepresentation_8H.html#a07b20010dfee95e53d9c9073ca6a6c2b">EbRepresentation</a></div><div class="ttdeci">EbRepresentation</div><div class="ttdoc">Enum for putting some logic into how we think about EBs. This is just a simply supporting class for v...</div><div class="ttdef"><b>Definition:</b> CD_EbRepresentation.H:21</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a6781644f8f3b6b94f7f69dba1338365f"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a6781644f8f3b6b94f7f69dba1338365f">Physics::ItoPlasma::ItoPlasmaStepper::postCheckpointSetup</a></div><div class="ttdeci">virtual void postCheckpointSetup() override</div><div class="ttdoc">Post-initialize operations to be performed after filling solvers with data read from checkpoint files...</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:254</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_ab8bf669846ebf858574d8289eb9cd90a"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#ab8bf669846ebf858574d8289eb9cd90a">Physics::ItoPlasma::ItoPlasmaStepper::computeDt</a></div><div class="ttdeci">virtual void computeDt(Real &amp;a_dt, TimeCode &amp;a_timeCode) override</div><div class="ttdoc">Compute a time step to be used by Driver.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:774</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a7924f01b09001ce27a0b3a8334ef066c"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a7924f01b09001ce27a0b3a8334ef066c">Physics::ItoPlasma::ItoPlasmaStepper::loadBalanceThisRealm</a></div><div class="ttdeci">bool loadBalanceThisRealm(const std::string a_realm) const override</div><div class="ttdoc">Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines...</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:3292</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_ab8bf669846ebf858574d8289eb9cd90a"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#ab8bf669846ebf858574d8289eb9cd90a">Physics::ItoPlasma::ItoPlasmaStepper::computeDt</a></div><div class="ttdeci">virtual void computeDt(Real &amp;a_dt, TimeCode &amp;a_timeCode) override</div><div class="ttdoc">Compute a time step to be used by Driver.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:778</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a7924f01b09001ce27a0b3a8334ef066c"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a7924f01b09001ce27a0b3a8334ef066c">Physics::ItoPlasma::ItoPlasmaStepper::loadBalanceThisRealm</a></div><div class="ttdeci">bool loadBalanceThisRealm(const std::string a_realm) const override</div><div class="ttdoc">Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines...</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:3302</div></div>
 <div class="ttc" id="aclassItoLayout_html"><div class="ttname"><a href="classItoLayout.html">ItoLayout</a></div><div class="ttdoc">Class for holding a set of ItoSolvers.</div><div class="ttdef"><b>Definition:</b> CD_ItoLayout.H:29</div></div>
 <div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">Templated class for holding particles on an AMR hierarchy with particle remapping.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainer.H:52</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_add0e7d43a32806593356768af8707578"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#add0e7d43a32806593356768af8707578">Physics::ItoPlasma::ItoPlasmaStepper::allocate</a></div><div class="ttdeci">virtual void allocate() override</div><div class="ttdoc">Allocate data for the time stepper and solvers.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:171</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a14729a13fc332765a54640f0f04aa8ae"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a14729a13fc332765a54640f0f04aa8ae">Physics::ItoPlasma::ItoPlasmaStepper::advance</a></div><div class="ttdeci">virtual Real advance(const Real a_dt)=0</div><div class="ttdoc">Advancement method. The implementation of this method should advance all equations of motion.</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a525e518b5ca417a3943fd7fb8eec8ddc"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a525e518b5ca417a3943fd7fb8eec8ddc">Physics::ItoPlasma::ItoPlasmaStepper::postRegrid</a></div><div class="ttdeci">void postRegrid() override</div><div class="ttdoc">Perform post-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:866</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a525e518b5ca417a3943fd7fb8eec8ddc"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a525e518b5ca417a3943fd7fb8eec8ddc">Physics::ItoPlasma::ItoPlasmaStepper::postRegrid</a></div><div class="ttdeci">void postRegrid() override</div><div class="ttdoc">Perform post-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:870</div></div>
 <div class="ttc" id="aCD__TimeStepper_8H_html"><div class="ttname"><a href="CD__TimeStepper_8H.html">CD_TimeStepper.H</a></div><div class="ttdoc">Declaration of main (abstract) time stepper class.</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_af1d703e20ff0b9faf0f0612b4fc07bdf"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#af1d703e20ff0b9faf0f0612b4fc07bdf">Physics::ItoPlasma::ItoPlasmaStepper::printStepReport</a></div><div class="ttdeci">void printStepReport() override</div><div class="ttdoc">Print a step report.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:482</div></div>
 <div class="ttc" id="aCD__BoxSorting_8H_html_ab5db8b3a96e3a04473aaa898f7eb2128"><div class="ttname"><a href="CD__BoxSorting_8H.html#ab5db8b3a96e3a04473aaa898f7eb2128">BoxSorting</a></div><div class="ttdeci">BoxSorting</div><div class="ttdoc">Enum for sorting boxes.</div><div class="ttdef"><b>Definition:</b> CD_BoxSorting.H:20</div></div>
@@ -650,24 +657,24 @@ $(function() {
 <div class="ttc" id="aCD__SigmaSolver_8H_html"><div class="ttname"><a href="CD__SigmaSolver_8H.html">CD_SigmaSolver.H</a></div><div class="ttdoc">Declaration of a surface charge solver.</div></div>
 <div class="ttc" id="aCD__PointParticle_8H_html"><div class="ttname"><a href="CD__PointParticle_8H.html">CD_PointParticle.H</a></div><div class="ttdoc">Declaration of a computational point particle.</div></div>
 <div class="ttc" id="aCD__FieldSolver_8H_html"><div class="ttname"><a href="CD__FieldSolver_8H.html">CD_FieldSolver.H</a></div><div class="ttdoc">Contains declaration of a base electrostatics solver class.</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_aea4514cf2362e1574486f1669a1be2a8"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#aea4514cf2362e1574486f1669a1be2a8">Physics::ItoPlasma::ItoPlasmaStepper::registerRealms</a></div><div class="ttdeci">void registerRealms() override</div><div class="ttdoc">Register realms to be used for the simulation.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:787</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_aea4514cf2362e1574486f1669a1be2a8"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#aea4514cf2362e1574486f1669a1be2a8">Physics::ItoPlasma::ItoPlasmaStepper::registerRealms</a></div><div class="ttdeci">void registerRealms() override</div><div class="ttdoc">Register realms to be used for the simulation.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:791</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a3b87512f1f155195a2145d178559cd1a"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a3b87512f1f155195a2145d178559cd1a">Physics::ItoPlasma::ItoPlasmaStepper::parseRuntimeOptions</a></div><div class="ttdeci">virtual void parseRuntimeOptions()=0</div><div class="ttdoc">Parse runtime options.</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a661f12a5ca6e0ebedb109b0009ce8f05"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a661f12a5ca6e0ebedb109b0009ce8f05">Physics::ItoPlasma::ItoPlasmaStepper::setupSolvers</a></div><div class="ttdeci">virtual void setupSolvers() override</div><div class="ttdoc">Set up solvers.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:64</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a9c22bbb82d83dbdf0792c6f885d269b8"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a9c22bbb82d83dbdf0792c6f885d269b8">Physics::ItoPlasma::ItoPlasmaStepper::loadBalanceBoxes</a></div><div class="ttdeci">void loadBalanceBoxes(Vector&lt; Vector&lt; int &gt;&gt; &amp;a_procs, Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes, const std::string a_realm, const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_lmin, const int a_finestLevel) override</div><div class="ttdoc">Load balance grid boxes for a specified realm.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:3309</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a9c22bbb82d83dbdf0792c6f885d269b8"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a9c22bbb82d83dbdf0792c6f885d269b8">Physics::ItoPlasma::ItoPlasmaStepper::loadBalanceBoxes</a></div><div class="ttdeci">void loadBalanceBoxes(Vector&lt; Vector&lt; int &gt;&gt; &amp;a_procs, Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes, const std::string a_realm, const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_lmin, const int a_finestLevel) override</div><div class="ttdoc">Load balance grid boxes for a specified realm.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:3319</div></div>
 <div class="ttc" id="aclassTimeStepper_html"><div class="ttname"><a href="classTimeStepper.html">TimeStepper</a></div><div class="ttdoc">Base class for advancing equations.</div><div class="ttdef"><b>Definition:</b> CD_TimeStepper.H:27</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_af8dcc9b77f4308ece19c09194ba14f80"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#af8dcc9b77f4308ece19c09194ba14f80">Physics::ItoPlasma::ItoPlasmaStepper::initialData</a></div><div class="ttdeci">virtual void initialData() override</div><div class="ttdoc">Fill solvers with initial data.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:189</div></div>
 <div class="ttc" id="aclassEBAMRData_html"><div class="ttname"><a href="classEBAMRData.html">EBAMRData&lt; EBCellFAB &gt;</a></div></div>
 <div class="ttc" id="aCD__TimeCode_8H_html_abf13f33dcdbc946c9ea354be1f7a182e"><div class="ttname"><a href="CD__TimeCode_8H.html#abf13f33dcdbc946c9ea354be1f7a182e">TimeCode</a></div><div class="ttdeci">TimeCode</div><div class="ttdoc">Enum class for identifying how a time step was restricted.</div><div class="ttdef"><b>Definition:</b> CD_TimeCode.H:22</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a96f306c1bb8f7098afe41f75e81da414"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a96f306c1bb8f7098afe41f75e81da414">Physics::ItoPlasma::ItoPlasmaStepper::getNumberOfPlotVariables</a></div><div class="ttdeci">int getNumberOfPlotVariables() const override</div><div class="ttdoc">Get the number of plot variables for this time stepper.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:870</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a3027c128f4207a79aa964ffcf71961cf"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a3027c128f4207a79aa964ffcf71961cf">Physics::ItoPlasma::ItoPlasmaStepper::regrid</a></div><div class="ttdeci">virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</div><div class="ttdoc">Time stepper regrid method.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:829</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a96f306c1bb8f7098afe41f75e81da414"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a96f306c1bb8f7098afe41f75e81da414">Physics::ItoPlasma::ItoPlasmaStepper::getNumberOfPlotVariables</a></div><div class="ttdeci">int getNumberOfPlotVariables() const override</div><div class="ttdoc">Get the number of plot variables for this time stepper.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:874</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a3027c128f4207a79aa964ffcf71961cf"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a3027c128f4207a79aa964ffcf71961cf">Physics::ItoPlasma::ItoPlasmaStepper::regrid</a></div><div class="ttdeci">virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</div><div class="ttdoc">Time stepper regrid method.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:833</div></div>
 <div class="ttc" id="aclassMcPhoto_html_a3e74abc2e95a4dd5ff480a4cad3288f6"><div class="ttname"><a href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">McPhoto::WhichContainer</a></div><div class="ttdeci">WhichContainer</div><div class="ttdoc">Enum class for identifying various containers. Only used for interface reasons.</div><div class="ttdef"><b>Definition:</b> CD_McPhoto.H:43</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a87ee48f66e51eafcce4bf535f518ea5b"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a87ee48f66e51eafcce4bf535f518ea5b">Physics::ItoPlasma::ItoPlasmaStepper::getCheckpointLoads</a></div><div class="ttdeci">Vector&lt; long int &gt; getCheckpointLoads(const std::string a_realm, const int a_level) const override</div><div class="ttdoc">Get computational loads to be checkpointed.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:3330</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a87ee48f66e51eafcce4bf535f518ea5b"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a87ee48f66e51eafcce4bf535f518ea5b">Physics::ItoPlasma::ItoPlasmaStepper::getCheckpointLoads</a></div><div class="ttdeci">Vector&lt; long int &gt; getCheckpointLoads(const std::string a_realm, const int a_level) const override</div><div class="ttdoc">Get computational loads to be checkpointed.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:3340</div></div>
 <div class="ttc" id="aCD__McPhoto_8H_html"><div class="ttname"><a href="CD__McPhoto_8H.html">CD_McPhoto.H</a></div><div class="ttdoc">Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p...</div></div>
 <div class="ttc" id="aCD__ItoPlasmaPhysics_8H_html"><div class="ttname"><a href="CD__ItoPlasmaPhysics_8H.html">CD_ItoPlasmaPhysics.H</a></div><div class="ttdoc">Main file for describing Ito-based plasma physics.</div></div>
 <div class="ttc" id="aCD__ItoLayout_8H_html"><div class="ttname"><a href="CD__ItoLayout_8H.html">CD_ItoLayout.H</a></div><div class="ttdoc">Declaration of a class that holds a set of ItoSolvers.</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a246f6ec484bbd906ccd1b9e62b7468f5"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a246f6ec484bbd906ccd1b9e62b7468f5">Physics::ItoPlasma::ItoPlasmaStepper::preRegrid</a></div><div class="ttdeci">virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override</div><div class="ttdoc">Perform pre-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:815</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a246f6ec484bbd906ccd1b9e62b7468f5"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a246f6ec484bbd906ccd1b9e62b7468f5">Physics::ItoPlasma::ItoPlasmaStepper::preRegrid</a></div><div class="ttdeci">virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override</div><div class="ttdoc">Perform pre-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:819</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_aac2038449cb8ea1fe9f4694eb3abfa96"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#aac2038449cb8ea1fe9f4694eb3abfa96">Physics::ItoPlasma::ItoPlasmaStepper::synchronizeSolverTimes</a></div><div class="ttdeci">void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override</div><div class="ttdoc">Synchronzie solver times and time steps.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:464</div></div>
-<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_ae91afc5a75e4619b5f01a59ed4e31c15"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#ae91afc5a75e4619b5f01a59ed4e31c15">Physics::ItoPlasma::ItoPlasmaStepper::registerOperators</a></div><div class="ttdeci">void registerOperators() override</div><div class="ttdoc">Register operators to be used for the simulation.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:799</div></div>
+<div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_ae91afc5a75e4619b5f01a59ed4e31c15"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#ae91afc5a75e4619b5f01a59ed4e31c15">Physics::ItoPlasma::ItoPlasmaStepper::registerOperators</a></div><div class="ttdeci">void registerOperators() override</div><div class="ttdoc">Register operators to be used for the simulation.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:803</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html_a392db216ee298ad0ee1d4c27066347e7"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a392db216ee298ad0ee1d4c27066347e7">Physics::ItoPlasma::ItoPlasmaStepper::writePlotData</a></div><div class="ttdeci">virtual void writePlotData(EBAMRCellData &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const override</div><div class="ttdoc">Write plot data to output holder.</div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.cpp:362</div></div>
 <div class="ttc" id="aclassRtLayout_html"><div class="ttname"><a href="classRtLayout.html">RtLayout</a></div><div class="ttdoc">Class for holding a set of RtSolvers. T must derive from RtSolver.</div><div class="ttdef"><b>Definition:</b> CD_RtLayout.H:26</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper_html"><div class="ttname"><a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html">Physics::ItoPlasma::ItoPlasmaStepper</a></div><div class="ttdef"><b>Definition:</b> CD_ItoPlasmaStepper.H:45</div></div>
