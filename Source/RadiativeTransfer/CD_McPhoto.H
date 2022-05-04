@@ -511,7 +511,7 @@ protected:
   /*!
     @brief Number of Photons per pseudoPhoton
   */
-  int m_maxPhotonsGeneratedPerCell;
+  size_t m_maxPhotonsGeneratedPerCell;
 
   /*!
     @brief RNG seed
@@ -605,7 +605,7 @@ protected:
     @param[in] a_dt     Time step
     @details The return result of this function depends on the input parameters to this class. 
   */
-  int
+  size_t
   drawPhotons(const Real a_source, const Real a_volume, const Real a_dt);
 
   /*!
