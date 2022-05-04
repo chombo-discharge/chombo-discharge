@@ -1260,8 +1260,12 @@ CdrPlasmaImExSdcStepper::computeNewDt(bool& a_accept_step, const Real a_dt, cons
 }
 
 void
-CdrPlasmaImExSdcStepper::adaptiveReport(
-  const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err)
+CdrPlasmaImExSdcStepper::adaptiveReport(const Real a_first_dt,
+                                        const Real a_dt,
+                                        const Real a_new_dt,
+                                        const int  a_corr,
+                                        const int  a_rej,
+                                        const Real a_max_err)
 {
   CH_TIME("CdrPlasmaImExSdcStepper::adaptiveReport");
   if (m_verbosity > 5) {
@@ -1993,8 +1997,11 @@ CdrPlasmaImExSdcStepper::getSigmaSolverK(const int a_m)
 }
 
 void
-CdrPlasmaImExSdcStepper::writeStepProfile(
-  const Real a_dt, const Real a_error, const int a_substeps, const int a_corrections, const int a_rejections)
+CdrPlasmaImExSdcStepper::writeStepProfile(const Real a_dt,
+                                          const Real a_error,
+                                          const int  a_substeps,
+                                          const int  a_corrections,
+                                          const int  a_rejections)
 {
   CH_TIME("sissdc::writeStepProfile");
   if (m_verbosity > 5) {

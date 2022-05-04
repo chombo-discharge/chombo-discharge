@@ -548,8 +548,12 @@ ItoPlasmaStepper::printStepReport()
 }
 
 void
-ItoPlasmaStepper::getParticleStatistics(
-  Real& a_avg, Real& a_sigma, size_t& a_minPart, size_t& a_maxPart, int& a_minRank, int& a_maxRank)
+ItoPlasmaStepper::getParticleStatistics(Real&   a_avg,
+                                        Real&   a_sigma,
+                                        size_t& a_minPart,
+                                        size_t& a_maxPart,
+                                        int&    a_minRank,
+                                        int&    a_maxRank)
 {
   CH_TIME("ItoPlasmaStepper::getParticleStatistics");
   if (m_verbosity > 5) {
@@ -2193,8 +2197,11 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, c
 }
 
 void
-ItoPlasmaStepper::computeReactiveParticlesPerCell(
-  EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox)
+ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
+                                                  const int       a_level,
+                                                  const DataIndex a_dit,
+                                                  const Box       a_box,
+                                                  const EBISBox&  a_ebisbox)
 {
   CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc, lvl, dit, box)");
   if (m_verbosity > 5) {
@@ -2288,8 +2295,11 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(LevelData<EBCellFAB>& a_mea
 }
 
 void
-ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(
-  EBCellFAB& a_mean_energies, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox)
+ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_mean_energies,
+                                                     const int       a_level,
+                                                     const DataIndex a_dit,
+                                                     const Box       a_box,
+                                                     const EBISBox&  a_ebisbox)
 {
   CH_TIME("ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(ppc, lvl, dit, box)");
   if (m_verbosity > 5) {

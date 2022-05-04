@@ -26,8 +26,11 @@
 #include <CD_TorusSdf.H>
 #include <CD_NamespaceHeader.H>
 
-RoundedCylinderIF::RoundedCylinderIF(
-  const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside)
+RoundedCylinderIF::RoundedCylinderIF(const RealVect a_center1,
+                                     const RealVect a_center2,
+                                     const Real     a_radius,
+                                     const Real     a_curv,
+                                     const bool     a_fluidInside)
 {
   m_center1     = a_center1;
   m_center2     = a_center2;

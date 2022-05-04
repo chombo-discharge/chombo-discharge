@@ -318,8 +318,11 @@ namespace Physics {
       void
       computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level);
       void
-      computeReactiveParticlesPerCell(
-        EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox);
+      computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
+                                      const int       a_level,
+                                      const DataIndex a_dit,
+                                      const Box       a_box,
+                                      const EBISBox&  a_ebisbox);
 
       // Routines for computing the mean energy of the particles in grid cells
       void
@@ -531,8 +534,12 @@ namespace Physics {
 
       // Diagnostics tool
       void
-      getParticleStatistics(
-        Real& a_avg, Real& a_sigma, size_t& a_minParticles, size_t& a_maxParticles, int& a_minRank, int& a_maxRank);
+      getParticleStatistics(Real&   a_avg,
+                            Real&   a_sigma,
+                            size_t& a_minParticles,
+                            size_t& a_maxParticles,
+                            int&    a_minRank,
+                            int&    a_maxRank);
       void
       printTimerHead();
       void

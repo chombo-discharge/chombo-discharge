@@ -22,8 +22,11 @@
 #include <CD_NamespaceHeader.H>
 
 inline bool
-ParticleOps::domainIntersection(
-  const RealVect& a_oldPos, const RealVect& a_newPos, const RealVect& a_probLo, const RealVect& a_probHi, Real& a_s)
+ParticleOps::domainIntersection(const RealVect& a_oldPos,
+                                const RealVect& a_newPos,
+                                const RealVect& a_probLo,
+                                const RealVect& a_probHi,
+                                Real&           a_s)
 {
 
   // TLDR: This code does a boundary intersection test and returns where on the interval [oldPos, newPos] the intersection

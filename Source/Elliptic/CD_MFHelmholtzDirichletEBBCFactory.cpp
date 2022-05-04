@@ -33,7 +33,9 @@ MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory(const int  a_or
 }
 
 MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory(
-  const int a_order, const int a_weight, const std::function<Real(const RealVect& a_pos)>& a_value)
+  const int                                         a_order,
+  const int                                         a_weight,
+  const std::function<Real(const RealVect& a_pos)>& a_value)
 {
   CH_TIME("MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory(int, int, std::function<Real(RealVect))");
 
