@@ -123,7 +123,7 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
     break;
   }
   case CoarseFineDeposition::HaloNGP: {
-    this->depositHaloNGP<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    this->depositHaloNGP<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
   }
@@ -159,7 +159,7 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
     break;
   }
   case CoarseFineDeposition::HaloNGP: {
-    this->depositHaloNGP<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);        
+    this->depositHaloNGP<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
   }
