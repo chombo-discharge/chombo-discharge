@@ -307,20 +307,28 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
         switch (refRat) {
         case 2:
-          interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-          break;
+	  {
+	    interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
+						    dataFiCo,
+						    a_depositionType,
+						    a_forceIrregNGP);
+	  
+	    break;
+	  }
         case 4:
-          interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-          break;
+	  {
+	    interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
+						    dataFiCo,
+						    a_depositionType,
+						    a_forceIrregNGP);
+	  
+	    break;
+	  }
         default:
-          MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo");
-          break;
+	  {
+	    MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo");
+	    break;
+	  }
         }
       }
 
@@ -397,20 +405,29 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
         switch (refRat) {
         case 2:
-          interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-          break;
+	  {
+	    interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
+						    dataFiCo,
+						    a_depositionType,
+						    a_forceIrregNGP);
+	    
+	    break;
+	  }
         case 4:
-          interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-          break;
+	  {
+	    interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
+						    dataFiCo,
+						    a_depositionType,
+						    a_forceIrregNGP);
+	  
+	    break;
+	  }
         default:
-          MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo");
-          break;
+	  {
+	    MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo");
+	  
+	    break;
+	  }
         }
       }
 
