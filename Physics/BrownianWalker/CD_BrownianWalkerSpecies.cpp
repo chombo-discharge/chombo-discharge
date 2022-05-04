@@ -15,6 +15,7 @@
 
 // Our includes
 #include <CD_Random.H>
+#include <CD_ParticleOps.H>
 #include <CD_BrownianWalkerSpecies.H>
 #include <CD_NamespaceHeader.H>
 
@@ -65,35 +66,13 @@ BrownianWalkerSpecies::drawInitParticles()
     return center + len * dir;
   };
 
-  // Draw initial particles. This is a little bit different in MPI-vs-serial code because if we run with MPI then the ranks should collectively initialize m_numParticles.
   m_initialParticles.clear();
-#if CH_MPI
-  // Compute the number of particles per MPI rank.
-  const int quotient  = m_numParticles / numProc();
-  const int remainder = m_numParticles % numProc();
+  ParticleOps::drawRandomParticles(m_initialParticles, m_numParticles, randomGaussian);
 
-  Vector<int> particlesPerRank(numProc(), quotient);
-
-  // Add in the remainder.
-  for (int i = 0; i < remainder; i++) {
-    particlesPerRank[i] += 1;
+  // Set the particle mass to one.
+  for (ListIterator<ItoParticle> lit(m_initialParticles); lit.ok(); ++lit) {
+    lit().mass() = 1.0;
   }
-
-  // Now make the particles
-  for (int i = 0; i < particlesPerRank[procID()]; i++) {
-    const Real     mass = 1.0;
-    const RealVect pos  = randomGaussian();
-
-    m_initialParticles.add(ItoParticle(mass, pos));
-  }
-#else
-  for (int i = 0; i < m_numParticles; i++) {
-    const Real     mass = 1.0;
-    const RealVect pos  = randomGaussian();
-
-    m_initialParticles.add(ItoParticle(mass, pos));
-  }
-#endif
 }
 
 #include <CD_NamespaceFooter.H>

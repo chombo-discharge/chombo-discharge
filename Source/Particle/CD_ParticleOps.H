@@ -13,6 +13,11 @@
 #ifndef CD_ParticleOps_H
 #define CD_ParticleOps_H
 
+// Chombo includes
+#include <RefCountedPtr.H>
+#include <BaseIF.H>
+#include <RealVect.H>
+
 // Our includes
 #include <CD_NamespaceHeader.H>
 
