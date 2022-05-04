@@ -36,14 +36,8 @@ EBParticleMesh::deposit(const List<P>&       a_particleList,
     const RealVect& curPosition = curParticle.position();
     const Real&     curStrength = (curParticle.*particleScalarField)();
 
-    this->depositParticle(a_rho,
-                          m_probLo,
-                          m_dx,
-                          curPosition,
-                          &curStrength,
-                          variables,
-                          a_depositionType,
-                          a_forceIrregNGP);
+    this
+      ->depositParticle(a_rho, m_probLo, m_dx, curPosition, &curStrength, variables, a_depositionType, a_forceIrregNGP);
   }
 }
 
@@ -56,21 +50,15 @@ EBParticleMesh::deposit(const List<P>&       a_particleList,
 {
   CH_TIME("EBParticleMesh::deposit");
 
-  const Interval variables(0, 0);  
+  const Interval variables(0, 0);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
     const Real&     curStrength = (curParticle.*particleScalarField)();
 
-    this->depositParticle(a_rho,
-                          m_probLo,
-                          m_dx,
-                          curPosition,
-                          &curStrength,
-                          variables,
-                          a_depositionType,
-                          a_forceIrregNGP);
+    this
+      ->depositParticle(a_rho, m_probLo, m_dx, curPosition, &curStrength, variables, a_depositionType, a_forceIrregNGP);
   }
 }
 
@@ -83,7 +71,7 @@ EBParticleMesh::deposit2(const List<P>&       a_particleList,
 {
   CH_TIME("EBParticleMesh::deposit2");
 
-  const Interval variables(0, 0);    
+  const Interval variables(0, 0);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
@@ -110,7 +98,7 @@ EBParticleMesh::deposit2(const List<P>&       a_particleList,
 {
   CH_TIME("EBParticleMesh::deposit2");
 
-  const Interval variables(0, 0);      
+  const Interval variables(0, 0);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
@@ -137,7 +125,7 @@ EBParticleMesh::deposit4(const List<P>&       a_particleList,
 {
   CH_TIME("EBParticleMesh::deposit4");
 
-  const Interval variables(0, 0);        
+  const Interval variables(0, 0);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
@@ -164,7 +152,7 @@ EBParticleMesh::deposit4(const List<P>&       a_particleList,
 {
   CH_TIME("EBParticleMesh::deposit4");
 
-  const Interval variables(0, 0);  
+  const Interval variables(0, 0);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
@@ -194,21 +182,21 @@ EBParticleMesh::deposit(const List<P>&       a_particleList,
   // TLDR: This is a jack-of-all-trades deposition function. The user will use this function to supply a pointer to the field that will be
   //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'
 
-  const Interval variables(0, SpaceDim-1);
-  
+  const Interval variables(0, SpaceDim - 1);
+
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
     const RealVect& curStrength = (curParticle.*particleVectorField)();
 
     this->depositParticle(a_rho,
-			  m_probLo,
-			  m_dx,
-			  curPosition,
-			  curStrength.dataPtr(),
-			  variables,
-			  a_depositionType,
-			  a_forceIrregNGP);
+                          m_probLo,
+                          m_dx,
+                          curPosition,
+                          curStrength.dataPtr(),
+                          variables,
+                          a_depositionType,
+                          a_forceIrregNGP);
   }
 }
 
@@ -221,7 +209,7 @@ EBParticleMesh::deposit(const List<P>&       a_particleList,
 {
   CH_TIME("EBParticleMesh::deposit");
 
-  const Interval variables(0, SpaceDim-1);  
+  const Interval variables(0, SpaceDim - 1);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
@@ -248,7 +236,7 @@ EBParticleMesh::deposit2(const List<P>&       a_particleList,
 {
   CH_TIME("EBParticleMesh::deposit2");
 
-  const Interval variables(0, SpaceDim-1);    
+  const Interval variables(0, SpaceDim - 1);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
@@ -260,7 +248,7 @@ EBParticleMesh::deposit2(const List<P>&       a_particleList,
                            m_dx,
                            curPosition,
                            curStrength.dataPtr(),
-			   variables,
+                           variables,
                            a_depositionType,
                            a_forceIrregNGP);
   }
@@ -275,7 +263,7 @@ EBParticleMesh::deposit2(const List<P>&       a_particleList,
 {
   CH_TIME("EBParticleMesh::deposit2");
 
-  const Interval variables(0, SpaceDim-1);      
+  const Interval variables(0, SpaceDim - 1);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
@@ -302,7 +290,7 @@ EBParticleMesh::deposit4(const List<P>&       a_particleList,
 {
   CH_TIME("EBParticleMesh::deposit4");
 
-  const Interval variables(0, SpaceDim-1);        
+  const Interval variables(0, SpaceDim - 1);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
@@ -329,7 +317,7 @@ EBParticleMesh::deposit4(const List<P>&       a_particleList,
 {
   CH_TIME("EBParticleMesh::deposit4");
 
-  const Interval variables(0, SpaceDim-1);  
+  const Interval variables(0, SpaceDim - 1);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     const P&        curParticle = lit();
@@ -358,8 +346,8 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
 
   CH_assert(a_meshScalarField.nComp() == 1);
 
-  const Interval variables(0,0);
-  
+  const Interval variables(0, 0);
+
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
     P&              curParticle = lit();
     const RealVect& curPosition = curParticle.position();
@@ -389,7 +377,7 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
 
   CH_assert(a_meshVectorField.nComp() == SpaceDim);
 
-  const Interval variables(0, SpaceDim-1);  
+  const Interval variables(0, SpaceDim - 1);
 
   // TLDR: This is a jack-of-all-trades interpolation function. The user will use this function to supply a pointer to the field that will be
   //       interpolated to. As per API, this function must be of the type 'RealVect& myParticleClass::myVectorVariable()'

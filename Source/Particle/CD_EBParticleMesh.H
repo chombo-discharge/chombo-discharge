@@ -284,7 +284,7 @@ public:
   deposit4(const List<P>&       a_particleList,
            EBCellFAB&           a_rho,
            const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;    
+           const bool           a_forceIrregNGP = false) const;
 
   /*!
     @brief Interpolate a scalar field onto the particle position. 

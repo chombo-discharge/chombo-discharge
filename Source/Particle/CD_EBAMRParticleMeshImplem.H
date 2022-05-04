@@ -35,30 +35,26 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   CH_assert(a_meshData[0]->nComp() == 1);
 
   switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::PVR:
-    {
-      this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
-      
-      break;
-    }
-  case CoarseFineDeposition::Halo:
-    {
-      this->depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
-      
-      break;
-    }
-  case CoarseFineDeposition::HaloNGP:
-    {
-      this->depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
-      
-      break;
-    }
-  default:
-    {
-      MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
-      
-      break;
-    }
+  case CoarseFineDeposition::PVR: {
+    this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
+  case CoarseFineDeposition::Halo: {
+    this->depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
+  case CoarseFineDeposition::HaloNGP: {
+    this->depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
+  default: {
+    MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
+
+    break;
+  }
   }
 }
 
@@ -77,29 +73,26 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   CH_assert(a_meshData[0]->nComp() == 1);
 
   switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::PVR:
-    {
-      this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
-      
-      break;
-    }
-  case CoarseFineDeposition::Halo:
-    {
-      this->depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
-    
-      break;
-    }
-  case CoarseFineDeposition::HaloNGP: {
-    this->depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
-    
+  case CoarseFineDeposition::PVR: {
+    this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
     break;
   }
-  default:
-    {
-      MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
-    
-      break;
-    }
+  case CoarseFineDeposition::Halo: {
+    this->depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
+  case CoarseFineDeposition::HaloNGP: {
+    this->depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
+  default: {
+    MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
+
+    break;
+  }
   }
 }
 
@@ -117,30 +110,27 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
   switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::PVR:
-    {
-      this->depositPVR<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);      
+  case CoarseFineDeposition::PVR: {
+    this->depositPVR<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
-      break;
-    }
-  case CoarseFineDeposition::Halo:
-    {
-      MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - Halo not implemented yet.");                
-    
-      break;
-    }
-  case CoarseFineDeposition::HaloNGP: {
-    MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - HaloNGP not implemented yet.");          
-    
     break;
   }
-  default:
-    {
-      MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - logic bust");
-    
-      break;
-    }
-  }  
+  case CoarseFineDeposition::Halo: {
+    MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - Halo not implemented yet.");
+
+    break;
+  }
+  case CoarseFineDeposition::HaloNGP: {
+    MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - HaloNGP not implemented yet.");
+
+    break;
+  }
+  default: {
+    MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - logic bust");
+
+    break;
+  }
+  }
 }
 
 template <class P, RealVect (P::*particleVectorField)() const>
@@ -156,30 +146,27 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
   switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::PVR:
-    {
-      this->depositPVR<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);      
+  case CoarseFineDeposition::PVR: {
+    this->depositPVR<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
-      break;
-    }
-  case CoarseFineDeposition::Halo:
-    {
-      MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - Halo not implemented yet.");                
-    
-      break;
-    }
-  case CoarseFineDeposition::HaloNGP: {
-    MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - HaloNGP not implemented yet.");          
-    
     break;
   }
-  default:
-    {
-      MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - logic bust");
-    
-      break;
-    }
-  }    
+  case CoarseFineDeposition::Halo: {
+    MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - Halo not implemented yet.");
+
+    break;
+  }
+  case CoarseFineDeposition::HaloNGP: {
+    MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - HaloNGP not implemented yet.");
+
+    break;
+  }
+  default: {
+    MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - logic bust");
+
+    break;
+  }
+  }
 }
 
 template <class P, const Real& (P::*particleScalarField)() const>
@@ -353,29 +340,26 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
         const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[dit()];
 
         switch (refRat) {
-        case 2:
-	  {
-	    interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
-						    dataFiCo,
-						    a_depositionType,
-						    a_forceIrregNGP);
-	  
-	    break;
-	  }
-        case 4:
-	  {
-	    interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
-						    dataFiCo,
-						    a_depositionType,
-						    a_forceIrregNGP);
-	  
-	    break;
-	  }
-        default:
-	  {
-	    MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo");
-	    break;
-	  }
+        case 2: {
+          interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
+                                                  dataFiCo,
+                                                  a_depositionType,
+                                                  a_forceIrregNGP);
+
+          break;
+        }
+        case 4: {
+          interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
+                                                  dataFiCo,
+                                                  a_depositionType,
+                                                  a_forceIrregNGP);
+
+          break;
+        }
+        default: {
+          MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo");
+          break;
+        }
         }
       }
 
@@ -451,30 +435,27 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
         const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[dit()];
 
         switch (refRat) {
-        case 2:
-	  {
-	    interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
-						    dataFiCo,
-						    a_depositionType,
-						    a_forceIrregNGP);
-	    
-	    break;
-	  }
-        case 4:
-	  {
-	    interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
-						    dataFiCo,
-						    a_depositionType,
-						    a_forceIrregNGP);
-	  
-	    break;
-	  }
-        default:
-	  {
-	    MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo");
-	  
-	    break;
-	  }
+        case 2: {
+          interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
+                                                  dataFiCo,
+                                                  a_depositionType,
+                                                  a_forceIrregNGP);
+
+          break;
+        }
+        case 4: {
+          interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
+                                                  dataFiCo,
+                                                  a_depositionType,
+                                                  a_forceIrregNGP);
+
+          break;
+        }
+        default: {
+          MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo");
+
+          break;
+        }
         }
       }
 
@@ -696,20 +677,20 @@ EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
     //    the coarse-fine choreography buffer only uses a single component in the memory, we need to alias the data.
     if (hasCoar) {
       for (int dir = 0; dir < SpaceDim; dir++) {
-	LevelData<EBCellFAB> coarAlias;
-	LevelData<EBCellFAB> fineAlias;
+        LevelData<EBCellFAB> coarAlias;
+        LevelData<EBCellFAB> fineAlias;
 
-	// This lets coarAlias be a 1-component data holder which references the dir-component
-	// in a_meshData.
-	aliasLevelData<EBCellFAB>(coarAlias, &(*a_meshData[lvl-1]), Interval(dir,dir));
-	aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl  ]), Interval(dir,dir));
+        // This lets coarAlias be a 1-component data holder which references the dir-component
+        // in a_meshData.
+        aliasLevelData<EBCellFAB>(coarAlias, &(*a_meshData[lvl - 1]), Interval(dir, dir));
+        aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl]), Interval(dir, dir));
 
-	// Add the mass that hangs from the fine level and over the refinement boundary onto the coarse level.
-	m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
+        // Add the mass that hangs from the fine level and over the refinement boundary onto the coarse level.
+        m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
 
-	// Likewise, take the particles that deposited mass to underneath the current level
-	// and put that mas on the fine level. 
-	m_coarseFinePM[lvl]->addInvalidCoarseToFine(fineAlias, coarAlias);
+        // Likewise, take the particles that deposited mass to underneath the current level
+        // and put that mas on the fine level.
+        m_coarseFinePM[lvl]->addInvalidCoarseToFine(fineAlias, coarAlias);
       }
     }
   }
@@ -751,20 +732,20 @@ EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
     //    the coarse-fine choreography buffer only uses a single component in the memory, we need to alias the data.
     if (hasCoar) {
       for (int dir = 0; dir < SpaceDim; dir++) {
-	LevelData<EBCellFAB> coarAlias;
-	LevelData<EBCellFAB> fineAlias;
+        LevelData<EBCellFAB> coarAlias;
+        LevelData<EBCellFAB> fineAlias;
 
-	// This lets coarAlias be a 1-component data holder which references the dir-component
-	// in a_meshData.
-	aliasLevelData<EBCellFAB>(coarAlias, &(*a_meshData[lvl-1]), Interval(dir,dir));
-	aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl  ]), Interval(dir,dir));
+        // This lets coarAlias be a 1-component data holder which references the dir-component
+        // in a_meshData.
+        aliasLevelData<EBCellFAB>(coarAlias, &(*a_meshData[lvl - 1]), Interval(dir, dir));
+        aliasLevelData<EBCellFAB>(fineAlias, &(*a_meshData[lvl]), Interval(dir, dir));
 
-	// Add the mass that hangs from the fine level and over the refinement boundary onto the coarse level.
-	m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
+        // Add the mass that hangs from the fine level and over the refinement boundary onto the coarse level.
+        m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
 
-	// Likewise, take the particles that deposited mass to underneath the current level
-	// and put that mas on the fine level. 
-	m_coarseFinePM[lvl]->addInvalidCoarseToFine(fineAlias, coarAlias);
+        // Likewise, take the particles that deposited mass to underneath the current level
+        // and put that mas on the fine level.
+        m_coarseFinePM[lvl]->addInvalidCoarseToFine(fineAlias, coarAlias);
       }
     }
   }
