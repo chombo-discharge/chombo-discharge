@@ -393,9 +393,9 @@ Protected Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:aa3a70417f7d0b00939ff8ddc1f28c71c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aa3a70417f7d0b00939ff8ddc1f28c71c">drawPhotons</a> (const Real a_source, const Real a_volume, const Real a_dt)</td></tr>
-<tr class="memdesc:aa3a70417f7d0b00939ff8ddc1f28c71c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw photons in a cell and volume.  <a href="classMcPhoto.html#aa3a70417f7d0b00939ff8ddc1f28c71c">More...</a><br /></td></tr>
-<tr class="separator:aa3a70417f7d0b00939ff8ddc1f28c71c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2214e190ebd62bbec704fcdddb9e1d8d"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a2214e190ebd62bbec704fcdddb9e1d8d">drawPhotons</a> (const Real a_source, const Real a_volume, const Real a_dt)</td></tr>
+<tr class="memdesc:a2214e190ebd62bbec704fcdddb9e1d8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw photons in a cell and volume.  <a href="classMcPhoto.html#a2214e190ebd62bbec704fcdddb9e1d8d">More...</a><br /></td></tr>
+<tr class="separator:a2214e190ebd62bbec704fcdddb9e1d8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9202da5518777b2e7de354acd0b7625e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9202da5518777b2e7de354acd0b7625e">domainBcMap</a> (const int a_dir, const Side::LoHiSide a_side)</td></tr>
 <tr class="memdesc:a9202da5518777b2e7de354acd0b7625e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mapping function for domain boundary conditions.  <a href="classMcPhoto.html#a9202da5518777b2e7de354acd0b7625e">More...</a><br /></td></tr>
 <tr class="separator:a9202da5518777b2e7de354acd0b7625e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -507,10 +507,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a0485251e0fbaf03bfa4b552f87cac10f">m_plotDomainPhotons</a></td></tr>
 <tr class="memdesc:a0485251e0fbaf03bfa4b552f87cac10f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if m_ebPhotons should be plotted. <br /></td></tr>
 <tr class="separator:a0485251e0fbaf03bfa4b552f87cac10f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af5028d847d72c58ec188a033be532186"><td class="memItemLeft" align="right" valign="top"><a id="af5028d847d72c58ec188a033be532186"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#af5028d847d72c58ec188a033be532186">m_maxPhotonsGeneratedPerCell</a></td></tr>
-<tr class="memdesc:af5028d847d72c58ec188a033be532186"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of Photons per pseudoPhoton. <br /></td></tr>
-<tr class="separator:af5028d847d72c58ec188a033be532186"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64fee208dfd98b7136e189092a8ed803"><td class="memItemLeft" align="right" valign="top"><a id="a64fee208dfd98b7136e189092a8ed803"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a64fee208dfd98b7136e189092a8ed803">m_maxPhotonsGeneratedPerCell</a></td></tr>
+<tr class="memdesc:a64fee208dfd98b7136e189092a8ed803"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of Photons per pseudoPhoton. <br /></td></tr>
+<tr class="separator:a64fee208dfd98b7136e189092a8ed803"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5cbdbb16e6ee4444c4ebccb96c12286"><td class="memItemLeft" align="right" valign="top"><a id="ad5cbdbb16e6ee4444c4ebccb96c12286"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ad5cbdbb16e6ee4444c4ebccb96c12286">m_seed</a></td></tr>
 <tr class="memdesc:ad5cbdbb16e6ee4444c4ebccb96c12286"><td class="mdescLeft">&#160;</td><td class="mdescRight">RNG seed. <br /></td></tr>
@@ -1597,8 +1597,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="aa3a70417f7d0b00939ff8ddc1f28c71c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa3a70417f7d0b00939ff8ddc1f28c71c">&#9670;&nbsp;</a></span>drawPhotons()</h2>
+<a id="a2214e190ebd62bbec704fcdddb9e1d8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2214e190ebd62bbec704fcdddb9e1d8d">&#9670;&nbsp;</a></span>drawPhotons()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1607,7 +1607,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int McPhoto::drawPhotons </td>
+          <td class="memname">size_t McPhoto::drawPhotons </td>
           <td>(</td>
           <td class="paramtype">const Real&#160;</td>
           <td class="paramname"><em>a_source</em>, </td>

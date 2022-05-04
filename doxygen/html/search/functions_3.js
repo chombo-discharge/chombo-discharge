@@ -93,7 +93,7 @@ var searchData=
   ['drawgaussianparticles_3977',['drawGaussianParticles',['../classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#adaedd57dcb95b540ff031d9169caa1f7',1,'Physics::ItoPlasma::ItoPlasmaPhysics']]],
   ['drawinitparticles_3978',['drawInitParticles',['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html#ac1c08713d64d00b9ba6ecaa24d955751',1,'Physics::BrownianWalker::BrownianWalkerSpecies']]],
   ['drawnewparticles_3979',['drawNewParticles',['../classItoSolver.html#a803e769f2adeed3b1a2f2b9d40c2422f',1,'ItoSolver']]],
-  ['drawphotons_3980',['drawPhotons',['../classMcPhoto.html#aa3a70417f7d0b00939ff8ddc1f28c71c',1,'McPhoto']]],
+  ['drawphotons_3980',['drawPhotons',['../classMcPhoto.html#a2214e190ebd62bbec704fcdddb9e1d8d',1,'McPhoto']]],
   ['drawrandomparticles_3981',['drawRandomParticles',['../classParticleOps.html#ad3e24a175f858fcc5f108216e5dea5ea',1,'ParticleOps']]],
   ['drawsphereparticles_3982',['drawSphereParticles',['../classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#aba59b352ddefffe2e6b0eec5c1134faf',1,'Physics::ItoPlasma::ItoPlasmaPhysics']]],
   ['driver_3983',['Driver',['../classDriver.html#a4247471e2d74633da6c0547bf84e2163',1,'Driver::Driver()=delete'],['../classDriver.html#a33fd1d9e425835a372e881339b16ce43',1,'Driver::Driver(const RefCountedPtr&lt; ComputationalGeometry &gt; &amp;a_computationalGeometry, const RefCountedPtr&lt; TimeStepper &gt; &amp;a_timeStepper, const RefCountedPtr&lt; AmrMesh &gt; &amp;a_amr, const RefCountedPtr&lt; CellTagger &gt; &amp;a_cellTagger=RefCountedPtr&lt; CellTagger &gt;(nullptr), const RefCountedPtr&lt; GeoCoarsener &gt; &amp;a_geoCoarsen=RefCountedPtr&lt; GeoCoarsener &gt;(nullptr))']]],

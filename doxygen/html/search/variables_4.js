@@ -414,7 +414,7 @@ var searchData=
   ['m_5fmaxebisboxsize_5627',['m_maxEbisBoxSize',['../classAmrMesh.html#af68cd81210ec67a38e8c85dfe24c594f',1,'AmrMesh']]],
   ['m_5fmaxghosteb_5628',['m_maxGhostEB',['../classComputationalGeometry.html#a82cf9e36c17278155e30405cef70d327',1,'ComputationalGeometry']]],
   ['m_5fmaxparticlewidth_5629',['m_maxParticleWidth',['../classEBAMRParticleMesh.html#a103990d2c971877e3db80991bcd00cab',1,'EBAMRParticleMesh']]],
-  ['m_5fmaxphotonsgeneratedpercell_5630',['m_maxPhotonsGeneratedPerCell',['../classMcPhoto.html#af5028d847d72c58ec188a033be532186',1,'McPhoto']]],
+  ['m_5fmaxphotonsgeneratedpercell_5630',['m_maxPhotonsGeneratedPerCell',['../classMcPhoto.html#a64fee208dfd98b7136e189092a8ed803',1,'McPhoto']]],
   ['m_5fmaxplotdepth_5631',['m_maxPlotDepth',['../classDriver.html#ade04a28944485b8a330f2201655bd4c4',1,'Driver']]],
   ['m_5fmaxretries_5632',['m_maxRetries',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#a4496b73a0a797479381b4fb8adb4cd76',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper']]],
   ['m_5fmaxsimulationdepth_5633',['m_maxSimulationDepth',['../classAmrMesh.html#a3cdd7ea7c8886171bd2533b6ec39c7f3',1,'AmrMesh']]],
