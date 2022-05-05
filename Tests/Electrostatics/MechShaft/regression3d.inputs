@@ -111,7 +111,7 @@ MechanicalShaft.turn_on_dielectric        = true           # Turn on/off dielect
 --------------------
 MechanicalShaft.electrode.live            = true            # Live electrode or not
 MechanicalShaft.electrode.endpoint1       = 0 0 1.0         # One endpoint
-MechanicalShaft.electrode.endpoint2       = 0 0 2           # Other endpoint
+MechanicalShaft.electrode.endpoint2       = 0 0 4           # Other endpoint
 MechanicalShaft.electrode.outer_radius    = 0.9             # Electrode outer radius
 MechanicalShaft.electrode.inner_radius    = 0.5             # Electrode inner radius	
 MechanicalShaft.electrode.outer_curvature = 0.01            # Outer curvature
