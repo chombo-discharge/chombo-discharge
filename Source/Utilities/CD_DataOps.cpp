@@ -22,6 +22,7 @@
 #include <CD_DataOps.H>
 #include <CD_BoxLoops.H>
 #include <CD_ParallelOps.H>
+#include <CD_MultifluidAlias.H>
 #include <CD_NamespaceHeader.H>
 
 void
@@ -1523,6 +1524,24 @@ DataOps::norm(Real& a_norm, const LevelData<EBCellFAB>& a_data, const ProblemDom
   a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_ALLVOFS, a_domain, a_p);
 }
 
+Real
+DataOps::norm(const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p, const bool a_regOnly)
+{
+  CH_TIME("DataOps::norm");
+
+  Real volume;
+  Real a_norm;
+
+  if(a_regOnly) {
+    a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_REGULARVOFS, a_domain, a_p);
+  }
+  else{
+    a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_ALLVOFS, a_domain, a_p);
+  }
+
+  return a_norm;
+}
+
 void
 DataOps::scale(MFAMRCellData& a_lhs, const Real& a_scale)
 {
@@ -1763,7 +1782,7 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
       auto regularKernel = [&](const IntVect& iv) -> void {
         const RealVect pos = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
 
-        phaseDataFAB(iv, a_comp) = a_function(pos);
+	phaseDataFAB(iv, a_comp) = a_function(pos);
       };
 
       // Cut-cells.
@@ -1772,7 +1791,7 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
 
         const RealVect pos = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
 
-        phaseData(vof, a_comp) = a_function(pos);
+	phaseData(vof, a_comp) = a_function(pos);
       };
 
       // Run kernels.

@@ -135,6 +135,18 @@ namespace Physics {
     }
 
     template <class T>
+    MFAMRCellData&
+    FieldStepper<T>::getPotential()
+    {
+      CH_TIME("FieldStepper::getPotential");
+      if (m_verbosity > 5) {
+        pout() << "FieldStepper<T>::getPotential" << endl;
+      }
+
+      return m_fieldSolver->getPotential();
+    }
+
+    template <class T>
     void
     FieldStepper<T>::initialData()
     {

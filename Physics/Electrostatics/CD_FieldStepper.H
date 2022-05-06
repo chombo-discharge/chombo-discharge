@@ -69,6 +69,11 @@ namespace Physics {
       void
       allocate() override;
 
+      /*!
+	@brief Get the potential.
+      */
+      MFAMRCellData& getPotential();
+
 #ifdef CH_USE_HDF5
       /*!  
 	@brief Write checkpoint data to file -- this physics module does not checkpoint data. 
