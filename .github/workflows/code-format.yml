@@ -23,4 +23,4 @@ jobs:
         with:
           source: ${{ matrix.directory }}
           extensions: 'H, hpp, cpp'
-          clangFormatVersion: 10
+          clangFormatVersion: 13
