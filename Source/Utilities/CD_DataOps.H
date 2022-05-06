@@ -705,7 +705,7 @@ public:
     @param[in]  a_regOnly If true, only include regular cells in norm computation. 
   */
   static Real
-  norm(const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p, const bool a_regOnly);    
+  norm(const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p, const bool a_regOnly);
 
   /*!
     @brief General addition operator for adding together data. The user can choose which components to add. 

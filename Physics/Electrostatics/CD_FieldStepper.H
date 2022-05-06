@@ -72,7 +72,8 @@ namespace Physics {
       /*!
 	@brief Get the potential.
       */
-      MFAMRCellData& getPotential();
+      MFAMRCellData&
+      getPotential();
 
 #ifdef CH_USE_HDF5
       /*!  

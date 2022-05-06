@@ -1819,7 +1819,8 @@ AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, con
 }
 
 void
-AmrMesh::setCoarsestGrid(const IntVect& a_nCells) {
+AmrMesh::setCoarsestGrid(const IntVect& a_nCells)
+{
   CH_TIME("AmrMesh::setCoarsestGrid()");
   if (m_verbosity > 3) {
     pout() << "AmrMesh::setCoarsestGrid()" << endl;

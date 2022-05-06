@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        directory: [Source, Physics, Geometries, Examples]
+        directory: [Source, Physics, Geometries, Examples, Convergence]
 
     env: 
       DISCHARGE_HOME: ${{github.workspace}}

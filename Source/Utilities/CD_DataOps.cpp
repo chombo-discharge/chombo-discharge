@@ -1532,10 +1532,10 @@ DataOps::norm(const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain,
   Real volume;
   Real a_norm;
 
-  if(a_regOnly) {
+  if (a_regOnly) {
     a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_REGULARVOFS, a_domain, a_p);
   }
-  else{
+  else {
     a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_ALLVOFS, a_domain, a_p);
   }
 
@@ -1782,7 +1782,7 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
       auto regularKernel = [&](const IntVect& iv) -> void {
         const RealVect pos = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
 
-	phaseDataFAB(iv, a_comp) = a_function(pos);
+        phaseDataFAB(iv, a_comp) = a_function(pos);
       };
 
       // Cut-cells.
@@ -1791,7 +1791,7 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
 
         const RealVect pos = a_probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
 
-	phaseData(vof, a_comp) = a_function(pos);
+        phaseData(vof, a_comp) = a_function(pos);
       };
 
       // Run kernels.
