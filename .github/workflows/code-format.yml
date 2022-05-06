@@ -21,6 +21,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: DoozyX/clang-format-lint-action@v0.13
         with:
-          source: {{ $matrix.directory }}
+          source: ${{ matrix.directory }}
           extensions: 'H, hpp, cpp'
           clangFormatVersion: 10
