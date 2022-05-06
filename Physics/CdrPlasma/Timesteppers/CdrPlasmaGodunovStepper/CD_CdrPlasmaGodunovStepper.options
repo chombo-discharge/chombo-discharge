@@ -12,7 +12,7 @@ CdrPlasmaGodunovStepper.advection         = muscl         # Advection algorithm.
 CdrPlasmaGodunovStepper.diffusion         = explicit      # Diffusion. 'explicit', 'implicit', or 'auto'. 
 CdrPlasmaGodunovStepper.diffusion_thresh  = 1.2           # Diffusion threshold. If dtD/dtA > this then we use implicit diffusion.
 CdrPlasmaGodunovStepper.diffusion_order   = 2             # Diffusion order. 
-CdrPlasmaGodunovStepper.relax_time        = 25            # Relaxation time constant. Not necessary for semi-implicit scheme. 
+CdrPlasmaGodunovStepper.relax_time        = 100.          # Relaxation time. 100 <= is usually a "safe" choice. 
 CdrPlasmaGodunovStepper.fast_poisson      = 1             # Solve Poisson every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fast_rte          = 1             # Solve RTE every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fhd               = false         # Set to true if you want to add a stochastic diffusion flux
