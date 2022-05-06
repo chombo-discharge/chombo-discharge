@@ -3,7 +3,7 @@
 This example solves the Poisson equation for the electric field around a simplified mechanical bushing.
 It was set up from $DISCHARGE_HOME/Physics/Electrostatics using
 
-```./setup.py -base_dir=$DISCHARGE_HOME/Examples/Electrostatics -app_name=MechShaft -geometry=MechanicalShaft```
+```./setup.py -base_dir=Examples/Electrostatics -app_name=MechShaft -dim=3 -geometry=MechanicalShaft```
 
 This example will take a few minutes to complete, and should be used with MPI.
 To compile it and run it, type
@@ -16,5 +16,4 @@ To run it, type
 
 The figure below shows the electric field magnitude sliced through the center of the domain. 
 
-<img src="example3d.png" alt="Electric field" width="400"/>
-
+<img src="example3d.png" alt="Electric field" width="800"/>
