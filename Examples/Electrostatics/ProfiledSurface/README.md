@@ -16,5 +16,5 @@ To run it, type
 
 The figure below shows the electric field magnitude sliced through the center of the domain. 
 
-<img src="full.png" alt="Electric field" width="800"/>
-<img src="zoom.png" alt="Electric field" width="800"/>
+<img src="full.png" alt="Electric field" width="400"/>
+<img src="clseup.png" alt="Electric field" width="400"/>
