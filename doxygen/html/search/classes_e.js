@@ -1,23 +1,10 @@
 var searchData=
 [
-  ['radiativetransferspecies_3157',['RadiativeTransferSpecies',['../classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies.html',1,'Physics::RadiativeTransfer']]],
-  ['radiativetransferstepper_3158',['RadiativeTransferStepper',['../classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html',1,'Physics::RadiativeTransfer']]],
-  ['random_3159',['Random',['../classRandom.html',1,'']]],
-  ['realbox_3160',['RealBox',['../classRealBox.html',1,'']]],
-  ['realm_3161',['Realm',['../classRealm.html',1,'']]],
-  ['regulargeometry_3162',['RegularGeometry',['../classRegularGeometry.html',1,'']]],
-  ['roddielectric_3163',['RodDielectric',['../classRodDielectric.html',1,'']]],
-  ['rodif_3164',['RodIF',['../classRodIF.html',1,'']]],
-  ['rodplaneprofile_3165',['RodPlaneProfile',['../classRodPlaneProfile.html',1,'']]],
-  ['roughrod_3166',['RoughRod',['../classRoughRod.html',1,'']]],
-  ['roughsphere_3167',['RoughSphere',['../classRoughSphere.html',1,'']]],
-  ['roundedboxif_3168',['RoundedBoxIF',['../classRoundedBoxIF.html',1,'']]],
-  ['roundedcylinderif_3169',['RoundedCylinderIF',['../classRoundedCylinderIF.html',1,'']]],
-  ['rtespeciesjson_3170',['RteSpeciesJSON',['../classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html',1,'Physics::CdrPlasma']]],
-  ['rtfactory_3171',['RtFactory',['../classRtFactory.html',1,'']]],
-  ['rtiterator_3172',['RtIterator',['../classRtIterator.html',1,'']]],
-  ['rtlayout_3173',['RtLayout',['../classRtLayout.html',1,'']]],
-  ['rtsolver_3174',['RtSolver',['../classRtSolver.html',1,'']]],
-  ['rtspecies_3175',['RtSpecies',['../classRtSpecies.html',1,'']]],
-  ['rtstorage_3176',['RtStorage',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1RtStorage.html',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper::RtStorage'],['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage.html',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper::RtStorage']]]
+  ['scanshop_3072',['ScanShop',['../classScanShop.html',1,'']]],
+  ['sigmasolver_3073',['SigmaSolver',['../classSigmaSolver.html',1,'']]],
+  ['sigmastorage_3074',['SigmaStorage',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1SigmaStorage.html',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper::SigmaStorage'],['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1SigmaStorage.html',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper::SigmaStorage']]],
+  ['signeddistancebvh_3075',['SignedDistanceBVH',['../classSignedDistanceBVH.html',1,'']]],
+  ['signeddistancedcel_3076',['SignedDistanceDCEL',['../classSignedDistanceDCEL.html',1,'']]],
+  ['simpleitoparticle_3077',['SimpleItoParticle',['../classSimpleItoParticle.html',1,'']]],
+  ['spheresdf_3078',['SphereSdf',['../classSphereSdf.html',1,'']]]
 ];

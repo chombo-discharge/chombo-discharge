@@ -1,52 +1,52 @@
 <map id="Source/Particle/CD_EBParticleMeshImplem.H" name="Source/Particle/CD_EBParticleMeshImplem.H">
-<area shape="rect" id="node1" title="Implementatoin of CD_EBParticleMesh.H." alt="" coords="4824,5,5017,47"/>
-<area shape="rect" id="node2" href="$CD__EBParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh interpolation and deposition." alt="" coords="4849,95,4992,136"/>
-<area shape="rect" id="node3" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="3136,437,3337,479"/>
-<area shape="rect" id="node29" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="4839,534,4984,575"/>
-<area shape="rect" id="node40" href="$CD__EBAMRParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh operations with AMR." alt="" coords="5051,184,5225,225"/>
-<area shape="rect" id="node48" href="$CD__EBParticleMesh_8cpp.html" title="Implementationof CD_EBParticleMesh.H." alt="" coords="5249,184,5405,225"/>
-<area shape="rect" id="node49" href="$CD__McPhoto_8H.html" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="4671,184,4855,225"/>
-<area shape="rect" id="node4" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="3835,534,4036,575"/>
-<area shape="rect" id="node12" href="$CD__CdrSpecies_8cpp.html" title="Implementation of CD_CdrSpecies.H." alt="" coords="3257,534,3465,575"/>
-<area shape="rect" id="node13" href="$CD__AdvectionDiffusionSpecies_8H.html" title="Simple species for AdvectionDiffusion test problem." alt="" coords="2993,534,3232,575"/>
-<area shape="rect" id="node15" href="$CD__CdrPlasmaPhysics_8H.html" title="Declaration of basic physics coupling functions for Physics/CdrPlasma." alt="" coords="1661,534,1829,575"/>
-<area shape="rect" id="node27" href="$CD__CdrSpeciesJSON_8H.html" title="Declaration of a class that encapsulates a CDR species for use with CdrPlasmaJSON." alt="" coords="141,527,340,583"/>
-<area shape="rect" id="node5" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="3608,638,3809,679"/>
-<area shape="rect" id="node7" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="3834,638,4037,679"/>
-<area shape="rect" id="node8" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="4061,638,4263,679"/>
-<area shape="rect" id="node9" href="$CD__AdvectionDiffusionStepper_8H.html" title="TimeStepper class for only solving the the advection&#45;diffusion equation." alt="" coords="3345,638,3584,679"/>
-<area shape="rect" id="node11" href="$CD__AdvectionDiffusionTagger_8H.html" title="Declaration of a cell tagger class for AdvectionDiffusion physics." alt="" coords="4287,638,4517,679"/>
-<area shape="rect" id="node6" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="3625,742,3793,783"/>
-<area shape="rect" id="node10" href="$CD__AdvectionDiffusionStepper_8cpp.html" title="Implementation of CD_AdvectionDiffusionStepper.H." alt="" coords="3122,742,3373,783"/>
-<area shape="rect" id="node14" href="$CD__AdvectionDiffusionSpecies_8cpp.html" title="Implementation of CD_AdvectionDiffusionSpecies.H." alt="" coords="3069,638,3321,679"/>
-<area shape="rect" id="node16" href="$CD__CdrPlasmaAir3Bourdon_8H.html" title="Standard three&#45;species model for air discharges." alt="" coords="2451,631,2673,687"/>
-<area shape="rect" id="node17" href="$CD__CdrPlasmaAir3Zheleznyak_8H.html" title="Declaration of a three&#45;species model with (discrete) Zheleznyak photionization model." alt="" coords="2698,631,2943,687"/>
-<area shape="rect" id="node18" href="$CD__CdrPlasmaAir7Stephens_8H.html" title="Declaration of a 7&#45;species model for air, using Stephens et. al photoionization model." alt="" coords="505,631,734,687"/>
-<area shape="rect" id="node19" href="$CD__CdrPlasmaAir7Zheleznyak_8H.html" title="Declaration of a 7&#45;species model for air, with Zheleznyak photoionization." alt="" coords="758,631,1003,687"/>
-<area shape="rect" id="node20" href="$CD__CdrPlasmaAir9EedBourdon_8H.html" title="Declaration of a BOLSIG&#45;based transport model for air with electron energy transport." alt="" coords="1028,631,1275,687"/>
-<area shape="rect" id="node21" href="$CD__CdrPlasmaJSON_8H.html" title="Declaration of a generic CdrPlasma model." alt="" coords="1325,735,1524,791"/>
-<area shape="rect" id="node22" href="$CD__CdrPlasmaPhotoReactionJSON_8H.html" title="Declaration of a class that encapsulates reactions for usage with CdrPlasmaJSON." alt="" coords="1625,631,1864,687"/>
-<area shape="rect" id="node23" href="$CD__CdrPlasmaReactionJSON_8H.html" title="Declaration of a class that encapsulates reactions for usage with CdrPlasmaJSON." alt="" coords="278,631,481,687"/>
-<area shape="rect" id="node24" href="$CD__CdrPlasmaSurfaceReactionJSON_8H.html" title="Declaration of a class that encapsulates reactions for usage with CdrPlasmaJSON." alt="" coords="1299,631,1550,687"/>
-<area shape="rect" id="node25" href="$CD__CdrPlasmaMorrowBourdon_8H.html" title="Declaration of the Morrow&#45;Lowke plasma model for air." alt="" coords="1888,631,2135,687"/>
-<area shape="rect" id="node26" href="$CD__CdrPlasmaMorrowZheleznyak_8H.html" title="Declaration of the Morrow&#45;Lowke plasma model for air." alt="" coords="2159,631,2427,687"/>
-<area shape="rect" id="node28" href="$CD__CdrSpeciesJSON_8cpp.html" title="Implementation of CD_CdrSpeciesJSON.H." alt="" coords="5,631,204,687"/>
-<area shape="rect" id="node30" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="5064,638,5209,679"/>
-<area shape="rect" id="node33" href="$CD__BrownianWalkerStepper_8H.html" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="4867,742,5087,783"/>
-<area shape="rect" id="node37" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="4644,638,4789,679"/>
-<area shape="rect" id="node38" href="$CD__ItoSolverImplem_8H.html" title="Implementation of CD_ItoSolver.H." alt="" coords="4813,638,4988,679"/>
-<area shape="rect" id="node39" href="$CD__BrownianWalkerTagger_8H.html" title="Class for tagging cells across an AMR hierarchy." alt="" coords="5234,638,5447,679"/>
-<area shape="rect" id="node31" href="$CD__ItoIterator_8H.html" title="Declaration of an iterator class for ItoLayout." alt="" coords="5187,742,5332,783"/>
-<area shape="rect" id="node32" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="5083,839,5260,880"/>
-<area shape="rect" id="node35" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="4579,742,4742,783"/>
-<area shape="rect" id="node34" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="4825,839,5059,880"/>
-<area shape="rect" id="node36" href="$CD__ItoPlasmaStepper_8cpp.html" title="Implementation of CD_ItoPlasmaStepper.H." alt="" coords="4575,839,4746,880"/>
-<area shape="rect" id="node41" href="$CD__PhaseRealm_8H.html" title="Declaration of the PhaseRealm class." alt="" coords="5009,281,5267,307"/>
-<area shape="rect" id="node43" href="$CD__Realm_8H.html" title="Declaration of the Realm class." alt="" coords="4958,363,5177,389"/>
-<area shape="rect" id="node46" href="$CD__EBAMRParticleMesh_8cpp.html" title="Implementation of CD_EBAMRParticleMesh.H." alt="" coords="5291,273,5478,315"/>
-<area shape="rect" id="node47" href="$CD__EBAMRParticleMeshImplem_8H.html" title="Implementation of CD_EBAMRParticleMesh.H." alt="" coords="5503,273,5725,315"/>
-<area shape="rect" id="node42" href="$CD__PhaseRealm_8cpp.html" title="Implementation of CD_PhaseRealm.H." alt="" coords="5201,363,5472,389"/>
-<area shape="rect" id="node44" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="4644,445,4883,471"/>
-<area shape="rect" id="node45" href="$CD__Realm_8cpp.html" title="Implementation of CD_Realm.H." alt="" coords="4959,445,5189,471"/>
-<area shape="rect" id="node50" href="$CD__McPhoto_8cpp.html" title="Implementation of CD_McPhoto.H." alt="" coords="4671,273,4855,315"/>
+<area shape="rect" id="node1" title="Implementatoin of CD_EBParticleMesh.H." alt="" coords="3077,5,3270,47"/>
+<area shape="rect" id="node2" href="$CD__EBParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh interpolation and deposition." alt="" coords="3102,95,3245,136"/>
+<area shape="rect" id="node3" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="735,437,937,479"/>
+<area shape="rect" id="node27" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="3002,534,3147,575"/>
+<area shape="rect" id="node40" href="$CD__EBAMRParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh operations with AMR." alt="" coords="3087,184,3260,225"/>
+<area shape="rect" id="node48" href="$CD__EBParticleMesh_8cpp.html" title="Implementationof CD_EBParticleMesh.H." alt="" coords="3285,184,3441,225"/>
+<area shape="rect" id="node49" href="$CD__McPhoto_8H.html" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="3585,184,3769,225"/>
+<area shape="rect" id="node4" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="2110,534,2311,575"/>
+<area shape="rect" id="node17" href="$CD__CdrSpecies_8cpp.html" title="Implementation of CD_CdrSpecies.H." alt="" coords="5,534,213,575"/>
+<area shape="rect" id="node18" href="$CD__AdvectionDiffusionSpecies_8H.html" title="Simple species for AdvectionDiffusion test problem." alt="" coords="546,534,785,575"/>
+<area shape="rect" id="node20" href="$CD__CdrPlasmaPhysics_8H.html" title="Declaration of basic physics coupling functions for Physics/CdrPlasma." alt="" coords="921,534,1089,575"/>
+<area shape="rect" id="node25" href="$CD__CdrSpeciesJSON_8H.html" title="Declaration of a class that encapsulates a CDR species for use with CdrPlasmaJSON." alt="" coords="238,527,437,583"/>
+<area shape="rect" id="node5" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="2110,638,2311,679"/>
+<area shape="rect" id="node9" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="2336,638,2539,679"/>
+<area shape="rect" id="node13" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="1885,638,2086,679"/>
+<area shape="rect" id="node14" href="$CD__AdvectionDiffusionStepper_8H.html" title="TimeStepper class for only solving the the advection&#45;diffusion equation." alt="" coords="1570,638,1809,679"/>
+<area shape="rect" id="node16" href="$CD__AdvectionDiffusionTagger_8H.html" title="Declaration of a cell tagger class for AdvectionDiffusion physics." alt="" coords="2563,638,2794,679"/>
+<area shape="rect" id="node6" href="$CD__CdrIterator_8H.html" title="Declaration of an iterator class for CdrLayout (for iterating through subsets of solvers)." alt="" coords="1959,742,2161,783"/>
+<area shape="rect" id="node7" href="$CD__CdrLayoutImplem_8H.html" title="Implementation of CD_CdrLayout.H." alt="" coords="2091,846,2330,887"/>
+<area shape="rect" id="node8" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="1763,742,1931,783"/>
+<area shape="rect" id="node10" href="$CD__CdrGodunov_8H.html" title="Declaration of a class which implements CdrMultigrid using Godunov&#45;type advection." alt="" coords="2569,742,2772,783"/>
+<area shape="rect" id="node11" href="$CD__CdrMuscl_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="2462,846,2663,887"/>
+<area shape="rect" id="node12" href="$CD__CdrMultigrid_8cpp.html" title="Implementation of CD_CdrMultigrid.H." alt="" coords="2329,742,2545,783"/>
+<area shape="rect" id="node15" href="$CD__AdvectionDiffusionStepper_8cpp.html" title="Implementation of CD_AdvectionDiffusionStepper.H." alt="" coords="1243,742,1493,783"/>
+<area shape="rect" id="node19" href="$CD__AdvectionDiffusionSpecies_8cpp.html" title="Implementation of CD_AdvectionDiffusionSpecies.H." alt="" coords="375,638,627,679"/>
+<area shape="rect" id="node21" href="$CD__CdrPlasmaJSON_8H.html" title="Declaration of a generic CdrPlasma model." alt="" coords="774,735,973,791"/>
+<area shape="rect" id="node22" href="$CD__CdrPlasmaPhotoReactionJSON_8H.html" title="Declaration of a class that encapsulates reactions for usage with CdrPlasmaJSON." alt="" coords="754,631,993,687"/>
+<area shape="rect" id="node23" href="$CD__CdrPlasmaReactionJSON_8H.html" title="Declaration of a class that encapsulates reactions for usage with CdrPlasmaJSON." alt="" coords="1017,631,1220,687"/>
+<area shape="rect" id="node24" href="$CD__CdrPlasmaSurfaceReactionJSON_8H.html" title="Declaration of a class that encapsulates reactions for usage with CdrPlasmaJSON." alt="" coords="1244,631,1495,687"/>
+<area shape="rect" id="node26" href="$CD__CdrSpeciesJSON_8cpp.html" title="Implementation of CD_CdrSpeciesJSON.H." alt="" coords="153,631,351,687"/>
+<area shape="rect" id="node28" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="3238,638,3383,679"/>
+<area shape="rect" id="node31" href="$CD__BrownianWalkerStepper_8H.html" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="2951,742,3171,783"/>
+<area shape="rect" id="node37" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="2818,638,2963,679"/>
+<area shape="rect" id="node38" href="$CD__ItoSolverImplem_8H.html" title="Implementation of CD_ItoSolver.H." alt="" coords="2987,638,3162,679"/>
+<area shape="rect" id="node39" href="$CD__BrownianWalkerTagger_8H.html" title="Class for tagging cells across an AMR hierarchy." alt="" coords="3408,638,3621,679"/>
+<area shape="rect" id="node29" href="$CD__ItoIterator_8H.html" title="Declaration of an iterator class for ItoLayout." alt="" coords="3195,742,3341,783"/>
+<area shape="rect" id="node30" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="3241,846,3418,887"/>
+<area shape="rect" id="node33" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="3596,742,3759,783"/>
+<area shape="rect" id="node32" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="2945,846,3178,887"/>
+<area shape="rect" id="node34" href="$CD__ItoPlasmaStepper_8cpp.html" title="Implementation of CD_ItoPlasmaStepper.H." alt="" coords="3443,846,3613,887"/>
+<area shape="rect" id="node35" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="3637,846,3800,887"/>
+<area shape="rect" id="node36" href="$CD__ItoPlasmaGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="3824,839,4059,895"/>
+<area shape="rect" id="node41" href="$CD__PhaseRealm_8H.html" title="Declaration of the PhaseRealm class." alt="" coords="2925,281,3182,307"/>
+<area shape="rect" id="node43" href="$CD__Realm_8H.html" title="Declaration of the Realm class." alt="" coords="2873,363,3092,389"/>
+<area shape="rect" id="node46" href="$CD__EBAMRParticleMesh_8cpp.html" title="Implementation of CD_EBAMRParticleMesh.H." alt="" coords="3207,273,3393,315"/>
+<area shape="rect" id="node47" href="$CD__EBAMRParticleMeshImplem_8H.html" title="Implementation of CD_EBAMRParticleMesh.H." alt="" coords="3418,273,3641,315"/>
+<area shape="rect" id="node42" href="$CD__PhaseRealm_8cpp.html" title="Implementation of CD_PhaseRealm.H." alt="" coords="3117,363,3387,389"/>
+<area shape="rect" id="node44" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2559,445,2798,471"/>
+<area shape="rect" id="node45" href="$CD__Realm_8cpp.html" title="Implementation of CD_Realm.H." alt="" coords="2874,445,3105,471"/>
+<area shape="rect" id="node50" href="$CD__McPhoto_8cpp.html" title="Implementation of CD_McPhoto.H." alt="" coords="3715,273,3899,315"/>
 </map>
