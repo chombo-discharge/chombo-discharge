@@ -11,16 +11,10 @@ concurrency:
 jobs:
   Formatting:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        directory: [Source, Physics, Geometries, Examples]
-
     steps:
       - uses: actions/checkout@v2
       - uses: DoozyX/clang-format-lint-action@v0.13
         with:
-          source: ${{ matrix.directory }}
+          source: './Source ./Physics ./Geometries ./Examples'
           extensions: 'H, cpp'
           clangFormatVersion: 10
