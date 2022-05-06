@@ -14,7 +14,7 @@ To run it, type
 
 ```mpirun -np <num_proc> main3d.*.ex example3d.inputs```
 
-The figure below shows the electric field magnitude on the surface (with an effective resolution of 512x512x512)
+The figure below shows the electric field magnitude sliced through the center of the domain. 
 
 <img src="example3d.png" alt="Electric field" width="400"/>
 
