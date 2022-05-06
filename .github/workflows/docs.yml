@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: chombo-discharge docs
 
 on: [push, pull_request]
 
