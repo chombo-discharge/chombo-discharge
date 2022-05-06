@@ -224,6 +224,16 @@ namespace Physics {
       RefCountedPtr<CdrSpecies> m_species;
 
       /*!
+	@brief Smallest acceptable time step
+      */
+      Real m_minDt;
+
+      /*!
+	@brief Largest acceptable time step
+      */
+      Real m_maxDt;
+
+      /*!
 	@brief CFL number to use
       */
       Real m_cfl;

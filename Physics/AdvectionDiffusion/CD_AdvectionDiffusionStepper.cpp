@@ -64,6 +64,8 @@ AdvectionDiffusionStepper::parseRuntimeOptions()
 
   pp.get("verbosity", m_verbosity);
   pp.get("cfl", m_cfl);
+  pp.get("min_dt", m_minDt);
+  pp.get("max_dt", m_maxDt);
 
   this->parseIntegrator();
 
@@ -276,6 +278,7 @@ AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
 
     a_dt       = m_cfl * dt;
     a_timeCode = TimeCode::AdvectionDiffusion;
+
     break;
   }
   case Integrator::IMEX: {
@@ -283,12 +286,18 @@ AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
 
     a_dt       = m_cfl * dt;
     a_timeCode = TimeCode::Advection;
+
     break;
   }
-  default:
+  default: {
     MayDay::Error("AdvectionDiffusionStepper::computeDt - logic bust");
+
     break;
   }
+  }
+
+  a_dt = std::max(a_dt, m_minDt);
+  a_dt = std::min(a_dt, m_maxDt);
 }
 
 Real

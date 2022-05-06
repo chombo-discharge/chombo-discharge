@@ -159,6 +159,8 @@ AdvectionDiffusion.integrator     = imex    # 'heun' or 'imex'
 AdvectionDiffusion.diffco         = 1E-4    # Diffusion coefficient
 AdvectionDiffusion.omega          = 1.0     # Rotation velocity
 AdvectionDiffusion.cfl            = 0.2     # CFL number
+AdvectionDiffusion.min_dt         = 0.0     # Smallest acceptable time step
+AdvectionDiffusion.max_dt         = 1.E99   # Largest acceptable time step
 
 # Cell tagging stuff
 # ------------------
