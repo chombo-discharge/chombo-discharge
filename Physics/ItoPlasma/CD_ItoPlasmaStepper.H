@@ -505,14 +505,12 @@ namespace Physics {
       mutable Vector<EBAMRCellData>
         m_fscratch2; // Scratch storage with a single component for all species. On the fluid Realm.
 
-      EBAMRCellData
-                    m_particle_ppc; // For holding the number of particles per cell for all species. Contains compoents = number of species
+      EBAMRCellData m_particle_ppc; // For holding the number of particles per cell for all species.
       EBAMRCellData m_particle_ypc; // For holding the number of generated Photons per cell on the particle Realm.
       EBAMRCellData m_particle_eps; // For holding the mean energy on the particle Realm
       EBAMRCellData m_particle_old; // For holding the mean energy on the particle Realm
 
-      EBAMRCellData
-                    m_fluid_ppc; // For holding the number of particles per cell for all species. Contains compoents = number of species
+      EBAMRCellData m_fluid_ppc; // For holding the number of particles per cell for all species.
       EBAMRCellData m_fluid_ypc; // For holding the number of generated Photons per cell on the fluid Realm.
       EBAMRCellData m_fluid_eps; // For holding the mean energy on the particle Realm
 

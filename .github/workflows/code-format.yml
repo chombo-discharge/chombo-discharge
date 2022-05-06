@@ -22,5 +22,5 @@ jobs:
       - uses: DoozyX/clang-format-lint-action@v0.13
         with:
           source: ${{ matrix.directory }}
-          extensions: 'H, hpp, cpp'
-          clangFormatVersion: 13
+          extensions: 'H, cpp'
+          clangFormatVersion: 10
