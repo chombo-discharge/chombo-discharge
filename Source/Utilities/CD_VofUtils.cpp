@@ -54,7 +54,7 @@ VofUtils::getVofsInQuadrant(const VolIndex&    a_startVof,
 
     // Find the quadrant or "half-plane" where the quadrant vofs live, and restrict to that quadrant
     Box quadBox;
-    if (false) {//VofUtils::isQuadrantWellDefined(a_normal)) { // Box is the quadrant box
+    if (VofUtils::isQuadrantWellDefined(a_normal)) { // Box is the quadrant box
       quadBox = VofUtils::getQuadrant(a_normal, a_startVof, a_ebisbox, a_radius);
     }
     else {
