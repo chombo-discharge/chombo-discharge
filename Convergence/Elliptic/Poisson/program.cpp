@@ -19,10 +19,10 @@ main(int argc, char* argv[])
   int exitCode = 0;
 
   std::vector<IntVect>             nCells{32 * IntVect::Unit,
-                              64 * IntVect::Unit,
-                              128 * IntVect::Unit,
-                              256 * IntVect::Unit,
-                              512 * IntVect::Unit};
+      64 * IntVect::Unit,
+      128 * IntVect::Unit,
+      256 * IntVect::Unit,
+      512 * IntVect::Unit};
   std::vector<std::array<Real, 3>> norms;
 
   // Build class options from input script and command line options
@@ -86,7 +86,7 @@ main(int argc, char* argv[])
 
     // Extract error from gas and solid sides
     EBAMRCellData errGas = amr->alias(phase::gas, err);
-    EBAMRCellData errSol = amr->alias(phase::solid, err);
+    //    EBAMRCellData errSol = amr->alias(phase::solid, err);
 
     // Compute the various norms
     const Real Linf = DataOps::norm(*errGas[0], amr->getDomains()[0], 0, true);
@@ -118,9 +118,9 @@ main(int argc, char* argv[])
       const Real coar2 = std::get<2>(norms[i - 1]);
       const Real fine2 = std::get<2>(norms[i]);
 
-      const Real Pinf = log(coarInf / fineInf) / log(2);
-      const Real P1   = log(coar1 / fine1) / log(2);
-      const Real P2   = log(coar2 / fine2) / log(2);
+      const Real Pinf = log(coarInf / fineInf)/log(2.0);
+      const Real P1   = log(coar1 / fine1)/log(2.0);
+      const Real P2   = log(coar2 / fine2)/log(2.0);
 
       const IntVect cellsCoar = nCells[i - 1];
       const IntVect cellsFine = nCells[i];
