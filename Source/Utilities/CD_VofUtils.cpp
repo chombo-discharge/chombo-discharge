@@ -23,14 +23,23 @@ VofUtils::getVofsInRadius(const VolIndex&    a_startVof,
   Vector<VolIndex> vofs;
   switch (a_connectivity) {
   case VofUtils::Connectivity::MonotonePath:
-    vofs = VofUtils::getVofsInMonotonePath(a_startVof, a_ebisbox, a_radius, a_addStartVof);
-    break;
+    {
+      vofs = VofUtils::getVofsInMonotonePath(a_startVof, a_ebisbox, a_radius, a_addStartVof);
+      
+      break;
+    }
   case VofUtils::Connectivity::SimplyConnected:
-    vofs = VofUtils::getConnectedVofsInRadius(a_startVof, a_ebisbox, a_radius, a_addStartVof);
-    break;
+    {
+      vofs = VofUtils::getConnectedVofsInRadius(a_startVof, a_ebisbox, a_radius, a_addStartVof);
+      
+      break;
+    }
   case VofUtils::Connectivity::All:
-    vofs = VofUtils::getAllVofsInRadius(a_startVof, a_ebisbox, a_radius, a_addStartVof);
-    break;
+    {
+      vofs = VofUtils::getAllVofsInRadius(a_startVof, a_ebisbox, a_radius, a_addStartVof);
+      
+      break;
+    }
   }
 
   return vofs;

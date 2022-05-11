@@ -150,19 +150,27 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
 
     switch (a_neighborhood) {
     case Neighborhood::Quadrant:
+      {
       allVofs = VofUtils::getVofsInQuadrant(a_vof,
                                             a_ebisbox,
                                             normal,
                                             a_radius,
                                             VofUtils::Connectivity::MonotonePath,
                                             a_addStartingVof);
+      
       break;
+      }
     case Neighborhood::Radius:
+      {
       allVofs =
         VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, a_addStartingVof);
       break;
+      }
     default:
-      break;
+      {
+	MayDay::Error("LeastSquares::getBndryGradSten -- logic bust");
+	break;
+      }
     }
 
     // Now build the stencil.
