@@ -16,13 +16,12 @@ main(int argc, char* argv[])
   MPI_Init(&argc, &argv);
 #endif
 
-  int exitCode = 0;
-
   std::vector<IntVect>             nCells{32 * IntVect::Unit,
       64 * IntVect::Unit,
       128 * IntVect::Unit,
       256 * IntVect::Unit,
       512 * IntVect::Unit};
+  
   std::vector<std::array<Real, 3>> norms;
 
   // Build class options from input script and command line options
@@ -98,45 +97,9 @@ main(int argc, char* argv[])
 
   // Compute convergence rates
   if (procID() == 0) {
-
-    std::cout << "Convergence rates: " << std::endl;
-    std::cout << "Norm"
-              << "\t"
-              << "Coar err"
-              << "\t"
-              << "Fine err"
-              << "\t"
-              << "Conv. rate" << std::endl;
-    for (size_t i = 1; i < norms.size(); i++) {
-
-      const Real coarInf = std::get<0>(norms[i - 1]);
-      const Real fineInf = std::get<0>(norms[i]);
-
-      const Real coar1 = std::get<1>(norms[i - 1]);
-      const Real fine1 = std::get<1>(norms[i]);
-
-      const Real coar2 = std::get<2>(norms[i - 1]);
-      const Real fine2 = std::get<2>(norms[i]);
-
-      const Real Pinf = log(coarInf / fineInf)/log(2.0);
-      const Real P1   = log(coar1 / fine1)/log(2.0);
-      const Real P2   = log(coar2 / fine2)/log(2.0);
-
-      const IntVect cellsCoar = nCells[i - 1];
-      const IntVect cellsFine = nCells[i];
-
-      std::cout << "Inf"
-                << "\t" << coarInf << "\t" << fineInf << "\t" << Pinf << std::endl;
-      std::cout << "1  "
-                << "\t" << coar1 << "\t" << fine1 << "\t" << P1 << std::endl;
-      std::cout << "2  "
-                << "\t" << coar2 << "\t" << fine2 << "\t" << P2 << std::endl;
-      std::cout << "\n";
-
-      const Real accept = 1.9;
-      if (std::min(P1, P2) < accept) {
-        exitCode = 1;
-      }
+    std::cout << "# cells" << "\t" << "Linf error" << "\t" << "L1 error" << "\t" << "L2 error" << std::endl;
+    for (int i = 0; i < norms.size(); i++){
+      std::cout << nCells[i][0] << "\t" << std::get<0>(norms[i]) << "\t" << std::get<1>(norms[i]) << "\t" << std::get<2>(norms[i]) << std::endl;
     }
   }
 
@@ -144,5 +107,5 @@ main(int argc, char* argv[])
   MPI_Finalize();
 #endif
 
-  return exitCode;
+  return 0;
 }
