@@ -56,17 +56,20 @@ VofUtils::getVofsInQuadrant(const VolIndex&    a_startVof,
 
   Vector<VolIndex> vofs;
 
-  if (a_normal != RealVect::Zero) { // Can only do this if actually have a normal vector
+  // Can only do this if actually have a normal vecto r 
+  if (a_normal != RealVect::Zero) { 
 
     // Fetch vofs using radius.
     vofs = VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, a_addStartVof);
 
     // Find the quadrant or "half-plane" where the quadrant vofs live, and restrict to that quadrant
     Box quadBox;
-    if (VofUtils::isQuadrantWellDefined(a_normal)) { // Box is the quadrant box
+    if (VofUtils::isQuadrantWellDefined(a_normal)) {
+      // Box is the quadrant box      
       quadBox = VofUtils::getQuadrant(a_normal, a_startVof, a_ebisbox, a_radius);
     }
     else {
+      // Box consists of two quadrants. 
       const std::pair<int, Side::LoHiSide> cardinal = VofUtils::getCardinalDirection(a_normal);
       quadBox = VofUtils::getSymmetricQuadrant(cardinal, a_startVof, a_ebisbox, a_radius);
     }
@@ -473,7 +476,8 @@ VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
         }
       }
     }
-    else { // Another path has already visited this vof.
+    else {
+      // Another path has already visited this vof.
       return;
     }
   }
