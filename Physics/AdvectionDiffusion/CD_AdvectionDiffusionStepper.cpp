@@ -40,6 +40,8 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
   m_debug = false;
   pp.query("debug", m_debug);
 
+  m_forceCFL = -1.0;
+
   this->parseIntegrator();
 }
 
@@ -66,9 +68,7 @@ AdvectionDiffusionStepper::parseRuntimeOptions()
 
   pp.get("min_dt", m_minDt);
   pp.get("max_dt", m_maxDt);
-
-  // I'm not letting th
-  //  pp.get("cfl", m_cfl);  
+  pp.get("cfl",    m_cfl);  
 
   this->parseIntegrator();
 
@@ -275,11 +275,21 @@ AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
   // TLDR: If we run explicit advection but implicit diffusion then we are only limited by the advective CFL. Otherwise,
   //       if diffusion is also explicit we need the advection-diffusion limited time step.
 
+  // A weird thing, but sometimes we want to be able to force the CFL so that
+  // we override run-time configurations of the CFL number. This code does that. 
+  Real cfl = 0.0;
+  if(m_forceCFL > 0.0) {
+    cfl = m_forceCFL;
+  }
+  else {
+    cfl = m_cfl;
+  }
+
   switch (m_integrator) {
   case Integrator::Heun: {
     const Real dt = m_solver->computeAdvectionDiffusionDt();
 
-    a_dt       = m_cfl * dt;
+    a_dt       = cfl * dt;
     a_timeCode = TimeCode::AdvectionDiffusion;
 
     break;
@@ -287,7 +297,7 @@ AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
   case Integrator::IMEX: {
     const Real dt = m_solver->computeAdvectionDt();
 
-    a_dt       = m_cfl * dt;
+    a_dt       = cfl * dt;
     a_timeCode = TimeCode::Advection;
 
     break;
@@ -461,7 +471,7 @@ AdvectionDiffusionStepper::postRegrid()
 }
 
 void AdvectionDiffusionStepper::setCFL(const Real a_cfl) {
-  m_cfl = a_cfl;
+  m_forceCFL = a_cfl;
 }
 
 #include <CD_NamespaceFooter.H>

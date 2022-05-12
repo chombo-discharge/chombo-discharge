@@ -246,6 +246,11 @@ namespace Physics {
       Real m_cfl;
 
       /*!
+	@brief Forced CFL (overrides input options)
+      */
+      Real m_forceCFL;
+
+      /*!
 	@brief Diffusion coefficient
       */
       Real m_diffCo;
