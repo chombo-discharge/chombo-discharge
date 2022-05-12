@@ -1,19 +1,19 @@
 #include <CD_Driver.H>
-#include <CD_FieldSolverMultigrid.H>
-#include <CD_CoaxialCable.H>
-#include <CD_FieldStepper.H>
+#include <CD_CdrGodunov.H>
+#include <CD_RegularGeometry.H>
+#include <CD_AdvectionDiffusionStepper.H>
+#include <CD_AdvectionDiffusionTagger.H>
 #include <CD_DischargeIO.H>
 #include <ParmParse.H>
 
 using namespace ChomboDischarge;
-using namespace Physics::Electrostatics;
+using namespace Physics::AdvectionDiffusion;
 
-// This program runs convergence testing on a uniform grid (with EB) for a Poisson problem. It
-// solves a Poisson problem on various resolutions (factor 2 refinement). When there are two solutions
-// available (coarse and fine solutions), the fine solutions is coarsened onto the coarse-grid problem
-// and we compute the error as
+// This program runs convergence testing on a uniform grid for an advection-diffusion problem. When
+// there are two solutions available (coarse and fine solutions), we can coarsen the fine-grid solution
+// and compute the coarse-grid error as
 //
-//     e = coarsen(phi_fine) - phi_coar
+//    e = coarsen(phi_fine) - phi_coar
 //
 // We then compute the various error norms.
 
@@ -24,6 +24,10 @@ main(int argc, char* argv[])
 #ifdef CH_MPI
   MPI_Init(&argc, &argv);
 #endif
+
+  // Build class options from input script and command line options
+  const std::string input_file = argv[1];
+  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // These are the grid resolutions that we run this program for. For the 32^2 grid the "exact solution" is the
   // coarsened solution of the 64^2 grid etc.
@@ -36,10 +40,6 @@ main(int argc, char* argv[])
                               128 * IntVect::Unit,
                               256 * IntVect::Unit,
                               512 * IntVect::Unit};
-
-  // Build class options from input script and command line options
-  const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // This stuff is required because the old/new solutions and grids are discarded
   // every time we reinitialize AmrMesh. So we store it here.
@@ -68,22 +68,21 @@ main(int argc, char* argv[])
   std::vector<std::array<Real, 3>> norms;
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
+  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RegularGeometry());
   RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
   RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
-  RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
 
-  // Set up the time stepper.
-  auto timestepper = RefCountedPtr<FieldStepper<FieldSolverMultigrid>>(new FieldStepper<FieldSolverMultigrid>());
+  // Set up basic AdvectionDiffusion
+  RefCountedPtr<CdrSolver>   solver      = RefCountedPtr<CdrSolver>(new CdrGodunov());
+  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper>(new AdvectionDiffusionStepper(solver));
+  RefCountedPtr<CellTagger>  tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
 
-  // Run simulations at various resolutions.
+  // Run the various cases
   for (const auto& cells : nCells) {
-
-    // Reinitialize AmrMesh so it uses a different base grid.
     amr->setCoarsestGrid(cells);
     amr->buildDomains();
 
-    // Set up the Driver and run our program.
+    // Set up the Driver and run it
     RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
     engine->setupAndRun(input_file);
 
@@ -101,7 +100,7 @@ main(int argc, char* argv[])
                       refRat,
                       nComp,
                       &(*(amr->getEBIndexSpace(phase::gas))));
-      aveOp.average(*finePhi[0], *(amr->alias(phase::gas, timestepper->getPotential()))[0], Interval(0, 0));
+      aveOp.average(*finePhi[0], *(solver->getPhi()[0]), Interval(0, 0));
 
       // Compute the error average(phi_fine) - coar_phi
       DataOps::incr(finePhi, coarPhi, -1.0);
@@ -124,8 +123,7 @@ main(int argc, char* argv[])
     amr->allocate(finePhi, "primal", phase::gas, 1);
 
     // Copy the current solution, it becomes the "coarse" solution for the next iteration.
-    const EBAMRCellData& phi = amr->alias(phase::gas, timestepper->getPotential());
-    coarPhi.copy(phi);
+    coarPhi.copy(solver->getPhi());
 
     notCoarsest = true;
   }
@@ -148,6 +146,4 @@ main(int argc, char* argv[])
   }
   MPI_Finalize();
 #endif
-
-  return 0;
 }
