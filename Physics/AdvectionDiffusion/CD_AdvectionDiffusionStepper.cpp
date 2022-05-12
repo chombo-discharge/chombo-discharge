@@ -68,7 +68,7 @@ AdvectionDiffusionStepper::parseRuntimeOptions()
 
   pp.get("min_dt", m_minDt);
   pp.get("max_dt", m_maxDt);
-  pp.get("cfl",    m_cfl);  
+  pp.get("cfl", m_cfl);
 
   this->parseIntegrator();
 
@@ -276,9 +276,9 @@ AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
   //       if diffusion is also explicit we need the advection-diffusion limited time step.
 
   // A weird thing, but sometimes we want to be able to force the CFL so that
-  // we override run-time configurations of the CFL number. This code does that. 
+  // we override run-time configurations of the CFL number. This code does that.
   Real cfl = 0.0;
-  if(m_forceCFL > 0.0) {
+  if (m_forceCFL > 0.0) {
     cfl = m_forceCFL;
   }
   else {
@@ -470,7 +470,9 @@ AdvectionDiffusionStepper::postRegrid()
   // Nothing to see here.
 }
 
-void AdvectionDiffusionStepper::setCFL(const Real a_cfl) {
+void
+AdvectionDiffusionStepper::setCFL(const Real a_cfl)
+{
   m_forceCFL = a_cfl;
 }
 

@@ -250,15 +250,15 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
       const EBCellFAB& cellPhi = (*a_cellPhi[lvl])[dit()];
       const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[dit()];
       const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[dit()];
-      const EBCellFAB& source = (*m_scratch[lvl])[dit()]; 
-      const Real time = 0.0;
+      const EBCellFAB& source  = (*m_scratch[lvl])[dit()];
+      const Real       time    = 0.0;
 
       EBAdvectPatchIntegrator& ebAdvectPatch = m_levelAdvect[lvl]->getPatchAdvect(dit());
 
       // These are settings for EBAdvectPatchIntegrator -- it's not a very pretty design but the object has settings
       // that permits it to run advection code (through setDoingVel(0)).
-      ebAdvectPatch.setVelocities(cellVel, faceVel); 
-      ebAdvectPatch.setDoingVel(0);                  
+      ebAdvectPatch.setVelocities(cellVel, faceVel);
+      ebAdvectPatch.setDoingVel(0);
       ebAdvectPatch.setCurComp(m_comp);
       ebAdvectPatch.setEBPhysIBC(ExtrapAdvectBCFactory());
 

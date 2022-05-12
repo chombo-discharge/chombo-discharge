@@ -197,10 +197,10 @@ namespace Physics {
 	@brief Set the CFL number
 	@param[in] a_cfl;
       */
-      void setCFL(const Real a_cfl);
+      void
+      setCFL(const Real a_cfl);
 
     protected:
-      
       /*!
 	@brief Switch for different integrators
       */
