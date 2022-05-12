@@ -8,6 +8,15 @@
 using namespace ChomboDischarge;
 using namespace Physics::Electrostatics;
 
+// This program runs convergence testing on a uniform grid (with EB) for a Poisson problem. It
+// solves a Poisson problem on various resolutions (factor 2 refinement). When there are two solutions
+// available (coarse and fine solutions), the fine solutions is coarsened onto the coarse-grid problem
+// and we compute the error as
+//
+//     e = coarsen(phi_fine) - phi_coar
+//
+// We then compute the various error norms.
+
 int
 main(int argc, char* argv[])
 {
@@ -16,48 +25,47 @@ main(int argc, char* argv[])
   MPI_Init(&argc, &argv);
 #endif
 
-  std::vector<IntVect> nCells{32 * IntVect::Unit,
+  // These are the grid resolutions that we run this program for. For the 32^2 grid the "exact solution" is the
+  // coarsened solution of the 64^2 grid etc.
+  constexpr int refRat = 2;
+  constexpr int nComp  = 1;
+
+  std::vector<IntVect> nCells{16 * IntVect::Unit,
+                              32 * IntVect::Unit,
                               64 * IntVect::Unit,
                               128 * IntVect::Unit,
                               256 * IntVect::Unit,
                               512 * IntVect::Unit};
 
-  std::vector<std::array<Real, 3>> norms;
-
   // Build class options from input script and command line options
   const std::string input_file = argv[1];
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
-  // Get R0, R1 etc from the input script
-  ParmParse ppOuter("CoaxialCable.outer");
-  ParmParse ppInner("CoaxialCable.inner");
-  ParmParse ppDiele("CoaxialCable.dielectric");
+  // This stuff is required because the old/new solutions and grids are discarded
+  // every time we reinitialize AmrMesh. So we store it here.
+  //
+  // coarPhi => Solution on coarser grid
+  // finePhi => Coarsened fine-grid solution (i.e., coarsen(phi_fine) as explained above)
+  // coarDBL => Coarse grid
+  // fineDBL => Fine grid
+  // coarEBISL => Coarse EB layout
+  // fineEBISL => Fine EB layout
+  // coarDomain => Coarse grid domain
+  EBAMRCellData     coarPhi;
+  EBAMRCellData     finePhi;
+  
+  DisjointBoxLayout coarDBL;
+  DisjointBoxLayout fineDBL;
+  
+  EBISLayout        coarEBISL;
+  EBISLayout        fineEBISL;
+  
+  ProblemDomain     coarDomain;
 
-  // Parameters from input script
-  Real           R0, R1, R2, eps, a;
-  constexpr Real phi0 = 1.0;
+  bool notCoarsest = false;
 
-  ppInner.get("radius", R0);
-  ppOuter.get("radius", R2);
-  ppDiele.get("radius", R1);
-  ppDiele.get("eps", eps);
-  a = phi0 / (log(R1 / R2) - log(R1 / R0) / eps);
-
-  // Set up the exact solution.
-  auto exactSolution = [R0, R1, R2, eps, phi0, a](const RealVect& x) -> Real {
-    const Real r = sqrt(x[0] * x[0] + x[1] * x[1]);
-
-    Real phi = 0.0;
-
-    if (r >= R0 && r <= R1) {
-      phi = phi0 + a / eps * log(r / R0);
-    }
-    else if (r >= R1 && r <= R2) {
-      phi = a * log(r / R2);
-    }
-
-    return phi;
-  };
+  // Storage for max, L1, and L2 solution error norms.
+  std::vector<std::array<Real, 3>> norms;
 
   // Set geometry and AMR
   RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
@@ -65,11 +73,13 @@ main(int argc, char* argv[])
   RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
   RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
 
-  // Set up basic Poisson, potential = 1
+  // Set up the time stepper.
   auto timestepper = RefCountedPtr<FieldStepper<FieldSolverMultigrid>>(new FieldStepper<FieldSolverMultigrid>());
 
-  // Run the various cases
+  // Run simulations at various resolutions.
   for (const auto& cells : nCells) {
+
+    // Reinitialize AmrMesh so it uses a different base grid.
     amr->setCoarsestGrid(cells);
     amr->buildDomains();
 
@@ -77,44 +87,65 @@ main(int argc, char* argv[])
     RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
     engine->setupAndRun(input_file);
 
-    // Compute the error
-    MFAMRCellData err;
-    amr->allocate(err, "primal", 1);
-    DataOps::setValue(err, exactSolution, amr->getProbLo(), amr->getDx(), 0);
-    DataOps::incr(err, timestepper->getPotential(), -1.0);
+    // Compute the solution errors if there is a coarser solution available.
+    if (notCoarsest) {
+      fineDBL   = amr->getGrids("primal")[0];
+      fineEBISL = amr->getEBISLayout("primal", phase::gas)[0];
 
-    // Extract error from gas and solid sides
-    EBAMRCellData errGas = amr->alias(phase::gas, err);
-    //    EBAMRCellData errSol = amr->alias(phase::solid, err);
+      // Coarsen the fine-grid solution onto the coarse-grid layout
+      EbCoarAve aveOp(fineDBL,
+                      coarDBL,
+                      fineEBISL,
+                      coarEBISL,
+                      coarDomain,
+                      refRat,
+                      nComp,
+                      &(*(amr->getEBIndexSpace(phase::gas))));
+      aveOp.average(*finePhi[0], *(amr->alias(phase::gas, timestepper->getPotential()))[0], Interval(0, 0));
 
-    // Compute the various norms
-    const Real Linf = DataOps::norm(*errGas[0], amr->getDomains()[0], 0, true);
-    const Real L1   = DataOps::norm(*errGas[0], amr->getDomains()[0], 1, true);
-    const Real L2   = DataOps::norm(*errGas[0], amr->getDomains()[0], 2, true);
+      // Compute the error average(phi_fine) - coar_phi
+      DataOps::incr(finePhi, coarPhi, -1.0);
 
-    norms.emplace_back(std::array<Real, 3>{Linf, L1, L2});
+      // Computes max, L1, and L2 norms.
+      const Real Linf = DataOps::norm(*finePhi[0], amr->getDomains()[0], 0, true);
+      const Real L1   = DataOps::norm(*finePhi[0], amr->getDomains()[0], 1, true);
+      const Real L2   = DataOps::norm(*finePhi[0], amr->getDomains()[0], 2, true);
+
+      norms.emplace_back(std::array<Real, 3>{Linf, L1, L2});
+    }
+
+    // Store coarse stuff for next time step.
+    coarDBL    = amr->getGrids("primal")[0];
+    coarDomain = amr->getDomains()[0];
+    coarEBISL  = amr->getEBISLayout("primal", phase::gas)[0];
+
+    // Allocate storage for coarse solution and coarsened fine solution.
+    amr->allocate(coarPhi, "primal", phase::gas, 1);
+    amr->allocate(finePhi, "primal", phase::gas, 1);
+
+    // Copy the current solution, it becomes the "coarse" solution for the next iteration.
+    const EBAMRCellData& phi = amr->alias(phase::gas, timestepper->getPotential());
+    coarPhi.copy(phi);
+
+    notCoarsest = true;
   }
 
-  // Compute convergence rates
+  // Print the grid
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
-    std::cout << "# cells"
-              << "\t"
-              << "Linf error"
-              << "\t"
-              << "L1 error"
-              << "\t"
-              << "L2 error" << std::endl;
+    // clang-format off
+    std::cout << "# cells\t" << "Linf error\t" << "L1 error\t" << "L2 error\n";
+
     for (int i = 0; i < norms.size(); i++) {
-      std::cout << nCells[i][0] << "\t" << std::get<0>(norms[i]) << "\t" << std::get<1>(norms[i]) << "\t"
-                << std::get<2>(norms[i]) << std::endl;
+      std::cout << nCells[i][0] << "\t"
+		<< std::get<0>(norms[i]) << "\t"
+		<< std::get<1>(norms[i]) << "\t"
+                << std::get<2>(norms[i]) << "\n";
     }
+    // clang-format on
 #ifdef CH_MPI
   }
-#endif
-
-#ifdef CH_MPI
   MPI_Finalize();
 #endif
 
