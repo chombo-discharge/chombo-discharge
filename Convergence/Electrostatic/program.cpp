@@ -16,12 +16,12 @@ main(int argc, char* argv[])
   MPI_Init(&argc, &argv);
 #endif
 
-  std::vector<IntVect>             nCells{32 * IntVect::Unit,
-      64 * IntVect::Unit,
-      128 * IntVect::Unit,
-      256 * IntVect::Unit,
-      512 * IntVect::Unit};
-  
+  std::vector<IntVect> nCells{32 * IntVect::Unit,
+                              64 * IntVect::Unit,
+                              128 * IntVect::Unit,
+                              256 * IntVect::Unit,
+                              512 * IntVect::Unit};
+
   std::vector<std::array<Real, 3>> norms;
 
   // Build class options from input script and command line options
@@ -97,9 +97,16 @@ main(int argc, char* argv[])
 
   // Compute convergence rates
   if (procID() == 0) {
-    std::cout << "# cells" << "\t" << "Linf error" << "\t" << "L1 error" << "\t" << "L2 error" << std::endl;
-    for (int i = 0; i < norms.size(); i++){
-      std::cout << nCells[i][0] << "\t" << std::get<0>(norms[i]) << "\t" << std::get<1>(norms[i]) << "\t" << std::get<2>(norms[i]) << std::endl;
+    std::cout << "# cells"
+              << "\t"
+              << "Linf error"
+              << "\t"
+              << "L1 error"
+              << "\t"
+              << "L2 error" << std::endl;
+    for (int i = 0; i < norms.size(); i++) {
+      std::cout << nCells[i][0] << "\t" << std::get<0>(norms[i]) << "\t" << std::get<1>(norms[i]) << "\t"
+                << std::get<2>(norms[i]) << std::endl;
     }
   }
 
