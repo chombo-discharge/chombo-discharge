@@ -1,6 +1,6 @@
 #include <CD_Driver.H>
 #include <CD_CdrGodunov.H>
-#include <CD_RegularGeometry.H>
+#include <CD_RodDielectric.H>
 #include <CD_AdvectionDiffusionStepper.H>
 #include <CD_AdvectionDiffusionTagger.H>
 #include <CD_DischargeIO.H>
@@ -68,7 +68,7 @@ main(int argc, char* argv[])
   std::vector<std::array<Real, 3>> norms;
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RegularGeometry());
+  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
   RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
   RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
 

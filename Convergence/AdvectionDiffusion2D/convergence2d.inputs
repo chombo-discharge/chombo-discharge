@@ -90,6 +90,43 @@ CdrGodunov.gmg_bottom_solver     = bicgstab                # Bottom solver type.
 CdrGodunov.gmg_cycle             = vcycle                  # Cycle type. Only 'vcycle' supported for now
 CdrGodunov.gmg_smoother          = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
+# ====================================================================================================
+# RodDielectric class options
+# ====================================================================================================
+RodDielectric.electrode.on              = false         # Use electrode or not
+RodDielectric.electrode.endpoint1       = 0 2           # One endpoint
+RodDielectric.electrode.endpoint2       = 0 0.5         # Other endpoint
+RodDielectric.electrode.radius          = 0.05          # Electrode radius
+RodDielectric.electrode.live            = true          # Live or not
+
+RodDielectric.dielectric.on             = true          # Use dielectric or not
+RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'.
+RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
+
+# Subsettings for 'plane'
+RodDielectric.plane.point               = 0 0 -0.5      # Plane point
+RodDielectric.plane.normal              = 0 0 1         # Plane normal vector (outward)
+
+# Subsettings for 'box'
+RodDielectric.box.lo_corner             = -.75 -.75 -.75 # Lo box corner
+RodDielectric.box.hi_corner             =  .75  .75 -.25 # High box corner
+RodDielectric.box.curvature             = 0.2
+
+# Subsettings for 'perlin_box'
+RodDielectric.perlin_box.point          = 0  0 -0.5     # Slab center-point (side with roughness)
+RodDielectric.perlin_box.normal         = 0  0  1       # Slab normal
+RodDielectric.perlin_box.curvature      = 0.5           # Slab rounding radius
+RodDielectric.perlin_box.dimensions     = 1  1  10      # Slab dimensions
+RodDielectric.perlin_box.noise_amp      = 0.1           # Noise amplitude
+RodDielectric.perlin_box.noise_octaves  = 1             # Noise octaves
+RodDielectric.perlin_box.noise_persist  = 0.5           # Octave persistence
+RodDielectric.perlin_box.noise_freq     = 5 5 5         # Noise frequency
+RodDielectric.perlin_box.noise_reseed   = false         # Reseed noise or not
+
+# Subsettings for sphere
+RodDielectric.sphere.center             = 0 0           # Low corner
+RodDielectric.sphere.radius             = 0.15          # Radius
+
 
 # ====================================================================================================
 # GeoCoarsener class options
@@ -109,7 +146,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 AdvectionDiffusion.verbosity      = -1      # Verbosity
 AdvectionDiffusion.realm          = primal  # Realm
 AdvectionDiffusion.blob_amplitude = 1.0     # Blob amplitude
-AdvectionDiffusion.blob_radius    = 0.05    # Blob radius
+AdvectionDiffusion.blob_radius    = 0.25    # Blob radius
 AdvectionDiffusion.blob_center    = 0 0.25  # Blob center
 AdvectionDiffusion.diffusion      = true    # Turn on/off diffusion
 AdvectionDiffusion.advection      = true    # Turn on/off advection
