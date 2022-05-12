@@ -9,6 +9,11 @@
 using namespace ChomboDischarge;
 using namespace Physics::AdvectionDiffusion;
 
+// TLDR: This test uses an exact solution to an advection-diffusion problem of a
+//       a "blob" in a rotational flow. The initial conditions/fields are taken
+//       from Physics/AdvectionDiffusion. This convergence test needs to be
+//       modified if anyone makes changes to that model.
+
 int
 main(int argc, char* argv[])
 {
