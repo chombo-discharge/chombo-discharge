@@ -1,4 +1,4 @@
-## Convergence/AdvectionDiffusion/SpatialConvergence2D
+## Convergence/AdvectionDiffusion/SpatialConvergence
 
 This example computes spatial convergence rates for Physics/AdvectionDiffusion.
 The solution errors are computed by coarsening a solution with finer (2x) grid resolution. 

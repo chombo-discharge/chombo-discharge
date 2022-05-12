@@ -1,4 +1,4 @@
-## Convergence/Electrostatics/CoaxialCable2D
+## Convergence/Electrostatics/CoaxialCable
 
 This example computes convergence rates for the Electrostatics physics module.
 The solution errors are computed by coarsening a numerical solution with a finer (2x) resolution. 
