@@ -4,7 +4,7 @@
 AmrMesh.lo_corner        = -1 -1 -1    # Low corner of problem domain
 AmrMesh.hi_corner        =  1  1  1    # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 512 512 512 # Number of cells on coarsest domain
+AmrMesh.coarsest_domain  = 32 32     # Number of cells on coarsest domain
 AmrMesh.max_amr_depth    = 0           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
@@ -41,8 +41,8 @@ Driver.write_restart_files             = false            # Write restart files 
 Driver.initial_regrids                 = 0                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 0.5              # Stop time
-Driver.max_steps                       = 1000             # Maximum number of steps
+Driver.stop_time                       = 1.0              # Stop time
+Driver.max_steps                       = 10000             # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -109,18 +109,18 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 AdvectionDiffusion.verbosity      = -1      # Verbosity
 AdvectionDiffusion.realm          = primal  # Realm
 AdvectionDiffusion.blob_amplitude = 1.0     # Blob amplitude
-AdvectionDiffusion.blob_radius    = 0.1     # Blob radius
-AdvectionDiffusion.blob_center    = 0 0.5    # Blob center
-AdvectionDiffusion.diffusion      = false    # Turn on/off diffusion
+AdvectionDiffusion.blob_radius    = 0.25     # Blob radius
+AdvectionDiffusion.blob_center    = 0 0.5   # Blob center
+AdvectionDiffusion.diffusion      = false   # Turn on/off diffusion
 AdvectionDiffusion.advection      = true    # Turn on/off advection
 AdvectionDiffusion.fhd            = false   # Use FHD or not
 AdvectionDiffusion.integrator     = heun    # 'heun' or 'imex'
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-AdvectionDiffusion.diffco         = 1.0     # Diffusion coefficient
+AdvectionDiffusion.diffco         = 0.0     # Diffusion coefficient
 AdvectionDiffusion.omega          = 1.0     # Rotation velocity
-AdvectionDiffusion.cfl            = 0.8     # CFL number
+AdvectionDiffusion.cfl            = 0.1     # CFL number
 AdvectionDiffusion.min_dt         = 0.002   # Smallest acceptable time step
 AdvectionDiffusion.max_dt         = 0.002   # Largest acceptable time step
 

@@ -1,4 +1,4 @@
-## Convergence/Poisson
+## Convergence/Core/Poisson2D
 
 This example computes convergence rates for MFHelmholtzOp, a Helmholtz operator with support for discontinuous material coefficients.
 The example uses a "coaxial cable" geometry with an embedded dielectric.
