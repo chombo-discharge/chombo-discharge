@@ -1,8 +1,7 @@
-## Convergence/Core/AdvectionSpatial2D
+## Convergence/AdvectionDiffusion2D
 
-This example computes spatial convergence rates for CdrGodunov, a MUSCL-type advection solver.
-It uses the initial data and velocity fields from Physics/AdvectionDiffusion.
-If changes are made to the velocity/initial fields in that physics module, this needs needs to be modified. 
+This example computes spatial convergence rates for Physics/AdvectionDiffusion.
+The solution errors are computed by coarsening a solution with finer (2x) grid resolution. 
 
 # Compilation
 
@@ -18,7 +17,7 @@ To run with MPI:
 
 # Output
 
-The output shows the Linf/L1/L2 errors which are obtained with the help of an exact solution.
+The output shows the Linf/L1/L2 errors. 
 To get the output in a plot-friendly form, re-route the standard output to a file, e.g.
 
 ```mpirun -np <num_proc> program2d.*ex convergence2d.inputs >& convergence.dat```

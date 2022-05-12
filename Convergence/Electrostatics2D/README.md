@@ -1,7 +1,7 @@
-## Convergence/Core/Poisson2D
+## Convergence/Electrostatics2D
 
-This example computes convergence rates for MFHelmholtzOp, a Helmholtz operator with support for discontinuous material coefficients.
-The example uses a "coaxial cable" geometry with an embedded dielectric.
+This example computes convergence rates for the Electrostatics physics module.
+The solution errors are computed by coarsening a numerical solution with a finer (2x) resolution. 
 
 # Compilation
 
@@ -17,7 +17,7 @@ To run with MPI:
 
 # Output
 
-The output shows the Linf/L1/L2 errors which are obtained with the help of an exact solution.
+The output shows the Linf/L1/L2 errors. 
 To get the output in a plot-friendly form, re-route the standard output to a file, e.g.
 
 ```mpirun -np <num_proc> program2d.*ex convergence2d.inputs >& convergence.dat```
