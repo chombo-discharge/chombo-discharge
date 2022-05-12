@@ -63,9 +63,12 @@ AdvectionDiffusionStepper::parseRuntimeOptions()
   ParmParse pp("AdvectionDiffusion");
 
   pp.get("verbosity", m_verbosity);
-  pp.get("cfl", m_cfl);
+
   pp.get("min_dt", m_minDt);
   pp.get("max_dt", m_maxDt);
+
+  // I'm not letting th
+  //  pp.get("cfl", m_cfl);  
 
   this->parseIntegrator();
 
@@ -329,7 +332,7 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
 
     // Add random diffusion flux. This is equivalent to a 1st order. Godunov splitting in an FHD context.
     if (m_fhd) {
-      m_solver->gwnDiffusionSource(m_k1, state); // k1 holds random diffusion
+      m_solver->gwnDiffusionSource(m_k1, state);
       DataOps::incr(state, m_k1, a_dt);
     }
 
@@ -364,7 +367,7 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
       m_solver->advanceCrankNicholson(state, m_k2, m_k1, a_dt);
     }
     else { // Purely inviscid advance.
-      m_solver->computeDivF(m_k1, state, a_dt, true, addEbFlux, addDomainFlux);
+      m_solver->computeDivF(m_k1, state, a_dt, false, addEbFlux, addDomainFlux);
 
       DataOps::incr(state, m_k1, -a_dt);
     }
