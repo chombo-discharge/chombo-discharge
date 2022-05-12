@@ -32,7 +32,7 @@ main(int argc, char* argv[])
 
   // How much we refine the time step. numRefine = 1 => refine once => two runs. And so on.
   Real cfl = 0.8;
-  const int numRefine = 4;
+  const int numRefine = 5;
   
   // Storage for max, L1, and L2 solution error norms.
   std::vector<std::array<Real, 3>> norms;
@@ -75,7 +75,7 @@ main(int argc, char* argv[])
     amr->allocate(error, "primal", phase::gas, 1);    
     error.copy(solver->getPhi());
 
-    //    cfl *= 0.5;
+    cfl *= 0.5;
   }
 
   // Print the grid
