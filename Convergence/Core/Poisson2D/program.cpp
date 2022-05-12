@@ -109,11 +109,10 @@ main(int argc, char* argv[])
     for (int i = 0; i < norms.size(); i++) {
       std::cout << nCells[i][0] << "\t" << std::get<0>(norms[i]) << "\t" << std::get<1>(norms[i]) << "\t"
                 << std::get<2>(norms[i]) << std::endl;
-    }      
+    }
 #ifdef CH_MPI
   }
 #endif
-
 
 #ifdef CH_MPI
   MPI_Finalize();
