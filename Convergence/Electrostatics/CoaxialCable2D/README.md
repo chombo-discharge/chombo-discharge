@@ -1,7 +1,7 @@
-## Convergence/AdvectionDiffusion2D
+## Convergence/Electrostatics/CoaxialCable2D
 
-This example computes spatial convergence rates for Physics/AdvectionDiffusion.
-The solution errors are computed by coarsening a solution with finer (2x) grid resolution. 
+This example computes convergence rates for the Electrostatics physics module.
+The solution errors are computed by coarsening a numerical solution with a finer (2x) resolution. 
 
 # Compilation
 

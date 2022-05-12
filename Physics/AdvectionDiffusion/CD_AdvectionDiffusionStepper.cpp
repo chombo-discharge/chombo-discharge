@@ -457,4 +457,8 @@ AdvectionDiffusionStepper::postRegrid()
   // Nothing to see here.
 }
 
+void AdvectionDiffusionStepper::setCFL(const Real a_cfl) {
+  m_cfl = a_cfl;
+}
+
 #include <CD_NamespaceFooter.H>
