@@ -1,24 +1,21 @@
-#include <CD_Driver.H>
-#include <CD_CdrGodunov.H>
-#include <CD_RodDielectric.H>
-#include <CD_AdvectionDiffusionStepper.H>
-#include <CD_AdvectionDiffusionTagger.H>
-#include <CD_DischargeIO.H>
-#include <ParmParse.H>
+#include "CD_Driver.H"
+#include "CD_EddingtonSP1.H"
+#include "CD_CoaxialCable.H"
+#include <CD_RadiativeTransferStepper.H>
+#include "ParmParse.H"
 
 using namespace ChomboDischarge;
-using namespace Physics::AdvectionDiffusion;
+using namespace Physics::RadiativeTransfer;
 
-// This program runs convergence testing on a uniform grid for an advection-diffusion problem. When there are
+// This program runs convergence testing on a uniform grid (with EB) for a transient radiative transfer
+// problem using the EddingtonSP1 simplification of the RTE. When there are
 // solutions with different temporal resolutions available, we can compute the "error" as
 //
 //    e = phi(T, dt) - phi(T, dt/2)
 //
 // where phi(T,dt) indicates a solution advanced to time T with a time step dt.
 
-int
-main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]){
 
 #ifdef CH_MPI
   MPI_Init(&argc, &argv);
@@ -26,31 +23,31 @@ main(int argc, char* argv[])
 
   // Build class options from input script and command line options
   const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
+  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
 
   // How much we refine the time step. numRefine = 1 => refine once => two runs. And so on.
   Real      cfl       = 0.8;
-  const int numRefine = 5;
+  const int numRefine = 5;  
 
   // Storage for max, L1, and L2 solution error norms.
-  std::vector<std::array<Real, 3>> norms;
+  std::vector<std::array<Real, 3>> norms;    
 
-  // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
+  // Set geometry and AMR 
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new CoaxialCable());
+  RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
+  RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
+  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);
 
-  // Set up basic AdvectionDiffusion
-  RefCountedPtr<CdrSolver> solver  = RefCountedPtr<CdrSolver>(new CdrGodunov());
-  auto timestepper                 = RefCountedPtr<AdvectionDiffusionStepper>(new AdvectionDiffusionStepper(solver));
-  RefCountedPtr<CellTagger> tagger = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
+  // Set up the time stepper. 
+  auto timestepper = RefCountedPtr<RadiativeTransferStepper<EddingtonSP1> >
+     (new RadiativeTransferStepper<EddingtonSP1>());
 
   // Storage for the error.
   EBAMRCellData error;
 
   // Run simulations.
   for (int i = 0; i < numRefine; i++) {
-    timestepper->setCFL(cfl);
+    //    timestepper->setCFL(cfl);
 
     // Run the simulation.
     RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
@@ -58,8 +55,7 @@ main(int argc, char* argv[])
 
     // Can compute error if i > 0
     if (i > 0) {
-      DataOps::incr(error, solver->getPhi(), -1.0);
-      DischargeIO::writeEBHDF5(error, "error.hdf5");
+      DataOps::incr(error, timestepper->getPhi(), -1.0);
 
       // Computes max, L1, and L2 norms.
       const Real Linf = DataOps::norm(*error[0], amr->getDomains()[0], 0, true);
@@ -71,11 +67,11 @@ main(int argc, char* argv[])
 
     // Allocate storage for the fine/coarse solutions.
     amr->allocate(error, "primal", phase::gas, 1);
-    error.copy(solver->getPhi());
+    error.copy(timestepper->getPhi());
 
     cfl *= 0.5;
   }
-
+  
   // Print the solution error. 
 #ifdef CH_MPI
   if (procID() == 0) {

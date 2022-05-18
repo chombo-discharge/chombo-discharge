@@ -70,7 +70,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);
 
-  // Set up basic Poisson, potential = 1 
+  // Set up the radiative transfer time stepper. 
   auto timestepper = RefCountedPtr<RadiativeTransferStepper<EddingtonSP1> >
      (new RadiativeTransferStepper<EddingtonSP1>());
 
