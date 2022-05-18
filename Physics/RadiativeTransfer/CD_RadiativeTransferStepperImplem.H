@@ -246,6 +246,14 @@ RadiativeTransferStepper<T>::postRegrid()
 }
 
 template <typename T>
+const EBAMRCellData&
+RadiativeTransferStepper<T>::getPhi() const {
+  CH_TIME("RadiativeTransferStepper::getPhi");
+
+  return m_solver->getPhi();
+}
+
+template <typename T>
 void
 RadiativeTransferStepper<T>::setGaussianSource()
 {

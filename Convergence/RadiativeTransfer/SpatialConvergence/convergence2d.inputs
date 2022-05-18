@@ -42,7 +42,7 @@ Driver.initial_regrids                 = 0                # Number of initial re
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 10               # Maximum number of steps
+Driver.max_steps                       = 0                # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -133,7 +133,7 @@ RadiativeTransferStepper.verbosity      = -1          # Verbosity
 RadiativeTransferStepper.realm          = primal      # Realm 
 RadiativeTransferStepper.kappa          = 5         # Inverse absorption coefficient
 RadiativeTransferStepper.dt             = 1.E-10      # Time step
-RadiativeTransferStepper.blob_amplitude = 1.0         # Blob amplitude
+RadiativeTransferStepper.blob_amplitude = 1.E8        # Blob amplitude
 RadiativeTransferStepper.blob_radius    = 0.1         # Blob radius
 RadiativeTransferStepper.blob_center    = 0.5 0.5 0.5 # Blob center
 

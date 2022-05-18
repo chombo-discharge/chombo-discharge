@@ -130,7 +130,7 @@ main(int argc, char* argv[])
     notCoarsest = true;
   }
 
-  // Print the grid
+  // Print the convergence rates
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif

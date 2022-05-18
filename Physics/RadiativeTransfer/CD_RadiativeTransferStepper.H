@@ -181,6 +181,11 @@ namespace Physics {
       void
       postRegrid() override;
 
+      /*!
+	@brief Get the solver solution
+      */
+      const EBAMRCellData& getPhi() const;      
+
     protected:
       /*!
 	@brief Realm where solver lives.
