@@ -182,11 +182,26 @@ namespace Physics {
       postRegrid() override;
 
       /*!
+	@brief Force usage of a time step
+	@details To remove the forced time step restriction, set a_dt to something negative
+	@param[in] a_dt Forced time step. 
+      */
+      void
+      forceDt(const Real a_dt);
+
+      /*!
+	@brief Get the time step
+      */
+      Real
+      getDt() const;
+
+      /*!
 	@brief Get the solver solution
       */
-      const EBAMRCellData& getPhi() const;      
+      const EBAMRCellData& getPhi() const;
 
     protected:
+      
       /*!
 	@brief Realm where solver lives.
       */
@@ -197,6 +212,12 @@ namespace Physics {
       */
       Real m_dt;
 
+      /*!
+	@brief Forced time step. 
+	@details This exists because the solver uses m_dt as a runtime input but there are cases when we want to force a time step.
+      */
+      Real m_forceDt;
+      
       /*!
 	@brief Reference to solver
       */

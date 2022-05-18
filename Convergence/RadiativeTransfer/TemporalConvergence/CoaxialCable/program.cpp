@@ -26,8 +26,11 @@ int main(int argc, char* argv[]){
   ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
 
   // How much we refine the time step. numRefine = 1 => refine once => two runs. And so on.
-  Real      cfl       = 0.8;
-  const int numRefine = 5;  
+  Real      dt;
+  const int numRefine = 5;
+
+  ParmParse pp2("RadiativeTransferStepper");
+  pp2.get("dt", dt);
 
   // Storage for max, L1, and L2 solution error norms.
   std::vector<std::array<Real, 3>> norms;    
@@ -47,7 +50,7 @@ int main(int argc, char* argv[]){
 
   // Run simulations.
   for (int i = 0; i < numRefine; i++) {
-    //    timestepper->setCFL(cfl);
+    timestepper->forceDt(dt);
 
     // Run the simulation.
     RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
@@ -69,7 +72,7 @@ int main(int argc, char* argv[]){
     amr->allocate(error, "primal", phase::gas, 1);
     error.copy(timestepper->getPhi());
 
-    cfl *= 0.5;
+    dt *= 0.5;
   }
   
   // Print the solution error. 

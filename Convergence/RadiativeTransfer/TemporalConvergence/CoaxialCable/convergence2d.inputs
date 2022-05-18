@@ -41,8 +41,8 @@ Driver.write_restart_files             = false            # Write restart files 
 Driver.initial_regrids                 = 0                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 0                # Maximum number of steps
+Driver.stop_time                       = 1.E-9            # Stop time
+Driver.max_steps                       = 1000             # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -63,9 +63,9 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # ====================================================================================================
 # EddingtonSP1 class options
 # ====================================================================================================
-EddingtonSP1.stationary          = true         # Stationary solver
+EddingtonSP1.stationary          = false        # Stationary solver
 EddingtonSP1.reflectivity        = 0.           # Reflectivity
-EddingtonSP1.use_tga             = false        # Use TGA for integration
+EddingtonSP1.use_tga             = true        # Use TGA for integration
 EddingtonSP1.kappa_scale         = true         # Kappa scale source or not (depends on algorithm)
 EddingtonSP1.plt_vars            = phi src      # Plot variables. Available are 'phi' and 'src'
 EddingtonSP1.use_regrid_slopes   = true         # Slopes on/off when regridding
@@ -136,5 +136,3 @@ RadiativeTransferStepper.dt             = 1.E-10      # Time step
 RadiativeTransferStepper.blob_amplitude = 1.E8        # Blob amplitude
 RadiativeTransferStepper.blob_radius    = 0.1         # Blob radius
 RadiativeTransferStepper.blob_center    = 0.5 0.5 0.5 # Blob center
-
-

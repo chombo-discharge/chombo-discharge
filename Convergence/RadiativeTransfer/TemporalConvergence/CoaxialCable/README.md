@@ -1,6 +1,6 @@
-## Convergence/AdvectionDiffusion/TemporalConvergence/CoaxialCable
+## Convergence/RadiativeTransfer/TemporalConvergence/CoaxialCable
 
-This example computes temporal convergence rates for Physics/AdvectionDiffusion.
+This example computes temporal convergence rates for Physics/RadiativeTransfer using the Eddington SP1 approximation. 
 The solution errors are computed by subtracting a solution with a finer time step. 
 
 # Compilation
@@ -14,6 +14,8 @@ To compile:
 To run with MPI:
 
 ```mpirun -np <num_proc> program2d.*ex convergence2d.inputs```
+
+To use first/second order integration in time, set ```EddingtonSP1.use_tga``` to false/true. 
 
 # Output
 
