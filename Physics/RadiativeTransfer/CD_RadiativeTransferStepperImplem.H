@@ -102,6 +102,10 @@ RadiativeTransferStepper<T>::postInitialize()
   CH_TIME("RadiativeTransferStepper::postInitialize");
 
   this->setGaussianSource();
+
+  if(m_solver->isStationary()) {
+    m_solver->advance(0.0, false);
+  }  
 }
 
 #ifdef CH_USE_HDF5
