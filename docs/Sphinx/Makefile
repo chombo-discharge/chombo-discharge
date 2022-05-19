@@ -51,7 +51,7 @@ clean:
 
 github:
 	@make clean html
-	@cp -a build/html/. ../docs
+	@cp -a build/html/. ../../docs
 	@make clean
 	rmdir $(BUILDDIR)
 
