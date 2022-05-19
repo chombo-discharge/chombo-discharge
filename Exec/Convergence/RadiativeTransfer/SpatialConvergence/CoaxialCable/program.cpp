@@ -16,7 +16,9 @@ using namespace Physics::RadiativeTransfer;
 //
 // We then compute the various error norms.
 
-int main(int argc, char* argv[]){
+int
+main(int argc, char* argv[])
+{
 
 #ifdef CH_MPI
   MPI_Init(&argc, &argv);
@@ -32,11 +34,11 @@ int main(int argc, char* argv[]){
                               64 * IntVect::Unit,
                               128 * IntVect::Unit,
                               256 * IntVect::Unit,
-                              512 * IntVect::Unit};  
+                              512 * IntVect::Unit};
 
   // Build class options from input script and command line options
   const std::string input_file = argv[1];
-  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
+  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // This stuff is required because the old/new solutions and grids are discarded
   // every time we reinitialize AmrMesh. So we store it here.
@@ -62,17 +64,17 @@ int main(int argc, char* argv[]){
   bool notCoarsest = false;
 
   // Storage for max, L1, and L2 solution error norms.
-  std::vector<std::array<Real, 3>> norms;  
+  std::vector<std::array<Real, 3>> norms;
 
-  // Set geometry and AMR 
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new CoaxialCable());
-  RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
-  RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
-  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);
+  // Set geometry and AMR
+  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
+  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
+  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
+  RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
 
-  // Set up the radiative transfer time stepper. 
-  auto timestepper = RefCountedPtr<RadiativeTransferStepper<EddingtonSP1> >
-     (new RadiativeTransferStepper<EddingtonSP1>());
+  // Set up the radiative transfer time stepper.
+  auto timestepper =
+    RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(new RadiativeTransferStepper<EddingtonSP1>());
 
   // Run simulations at various resolutions.
   for (const auto& cells : nCells) {
@@ -126,7 +128,7 @@ int main(int argc, char* argv[]){
     coarPhi.copy(phi);
 
     notCoarsest = true;
-  }  
+  }
 
   // Print the convergence rates
 #ifdef CH_MPI

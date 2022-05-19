@@ -14,7 +14,9 @@
 
 // This is the voltage curve (constant in this case). Modify it if you want to.
 Real g_voltage;
-Real voltageCurve(const Real a_time){
+Real
+voltageCurve(const Real a_time)
+{
   return g_voltage;
 }
 
@@ -29,7 +31,9 @@ using namespace Physics::CdrPlasma;
 //
 // We then compute the various error norms.
 
-int main(int argc, char* argv[]){
+int
+main(int argc, char* argv[])
+{
 
 #ifdef CH_MPI
   MPI_Init(&argc, &argv);
@@ -37,14 +41,14 @@ int main(int argc, char* argv[]){
 
   // Build class options from input script and command line options
   const std::string input_file = argv[1];
-  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
+  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
-  // Get voltage from input script 
-  std::string basename; 
+  // Get voltage from input script
+  std::string basename;
   {
     ParmParse pp("RodPlane");
     pp.get("voltage", g_voltage);
-    pp.get("basename",  basename);
+    pp.get("basename", basename);
     setPoutBaseName(basename);
   }
 
@@ -54,10 +58,10 @@ int main(int argc, char* argv[]){
   constexpr int nComp  = 1;
 
   std::vector<IntVect> nCells{32 * IntVect::Unit,
-      64 * IntVect::Unit,
-      128 * IntVect::Unit,
-      256 * IntVect::Unit,
-      512 * IntVect::Unit};
+                              64 * IntVect::Unit,
+                              128 * IntVect::Unit,
+                              256 * IntVect::Unit,
+                              512 * IntVect::Unit};
 
   // This stuff is required because the old/new solutions and grids are discarded
   // every time we reinitialize AmrMesh. So we store it here.
@@ -85,17 +89,18 @@ int main(int argc, char* argv[]){
   // Storage for max, L1, and L2 solution error norms.
   std::vector<std::array<Real, 3>> norms;
 
-  for (const auto& cells : nCells) {    
+  for (const auto& cells : nCells) {
 
-    // Set geometry and AMR 
-    RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new RodDielectric());
-    RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
-    RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
+    // Set geometry and AMR
+    RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
+    RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
+    RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
 
-    // Set up physics 
-    RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new CdrPlasmaJSON());
-    RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new CdrPlasmaGodunovStepper(physics));
-    RefCountedPtr<CellTagger> tagger             = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
+    // Set up physics
+    RefCountedPtr<CdrPlasmaPhysics> physics     = RefCountedPtr<CdrPlasmaPhysics>(new CdrPlasmaJSON());
+    RefCountedPtr<CdrPlasmaStepper> timestepper = RefCountedPtr<CdrPlasmaStepper>(new CdrPlasmaGodunovStepper(physics));
+    RefCountedPtr<CellTagger>       tagger =
+      RefCountedPtr<CellTagger>(new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
     // Create solver factories
     auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
@@ -107,20 +112,20 @@ int main(int argc, char* argv[]){
     auto cdr = cdr_fact->newLayout(physics->getCdrSpecies());
     auto rte = rte_fact->newLayout(physics->getRtSpecies());
 
-    // Send solvers to TimeStepper 
+    // Send solvers to TimeStepper
     timestepper->setFieldSolver(poi);
     timestepper->setCdrSolvers(cdr);
     timestepper->setRadiativeTransferSolvers(rte);
 
-    // Set voltage 
+    // Set voltage
     timestepper->setVoltage(voltageCurve);
 
     // Run the various cases
     amr->setCoarsestGrid(cells);
-    amr->buildDomains();  
+    amr->buildDomains();
 
     // Set up the Driver and run it
-    RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
     engine->setupAndRun(input_file);
 
     // Compute the solution errors if there is a coarser solution available.
@@ -162,13 +167,13 @@ int main(int argc, char* argv[]){
     // Copy the current solution, it becomes the "coarse" solution for the next iteration.
     coarPhi.copy(*cdr->getPhis()[0]);
 
-    notCoarsest = true;    
+    notCoarsest = true;
 
     // Clean up memory
     delete poi_fact;
     delete cdr_fact;
     delete rte_fact;
-  }  
+  }
 
   // Print the solution errors
 #ifdef CH_MPI

@@ -76,7 +76,7 @@ main(int argc, char* argv[])
     cfl *= 0.5;
   }
 
-  // Print the solution error. 
+  // Print the solution error.
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif

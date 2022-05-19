@@ -198,10 +198,10 @@ namespace Physics {
       /*!
 	@brief Get the solver solution
       */
-      const EBAMRCellData& getPhi() const;
+      const EBAMRCellData&
+      getPhi() const;
 
     protected:
-      
       /*!
 	@brief Realm where solver lives.
       */
@@ -217,7 +217,7 @@ namespace Physics {
 	@details This exists because the solver uses m_dt as a runtime input but there are cases when we want to force a time step.
       */
       Real m_forceDt;
-      
+
       /*!
 	@brief Reference to solver
       */

@@ -105,9 +105,9 @@ RadiativeTransferStepper<T>::postInitialize()
 
   this->setGaussianSource();
 
-  if(m_solver->isStationary()) {
+  if (m_solver->isStationary()) {
     m_solver->advance(0.0, false);
-  }  
+  }
 }
 
 template <typename T>
@@ -178,8 +178,8 @@ RadiativeTransferStepper<T>::computeDt(Real& a_dt, TimeCode& a_timeCode)
   CH_TIME("RadiativeTransferStepper::computeDt");
 
   a_dt = m_dt;
-  
-  if(m_forceDt > 0.0) {
+
+  if (m_forceDt > 0.0) {
     a_dt = m_forceDt;
   }
 }
@@ -262,7 +262,8 @@ RadiativeTransferStepper<T>::postRegrid()
 
 template <typename T>
 const EBAMRCellData&
-RadiativeTransferStepper<T>::getPhi() const {
+RadiativeTransferStepper<T>::getPhi() const
+{
   CH_TIME("RadiativeTransferStepper::getPhi");
 
   return m_solver->getPhi();

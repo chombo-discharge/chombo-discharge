@@ -68,7 +68,7 @@ main(int argc, char* argv[])
   std::vector<std::array<Real, 3>> norms;
 
   // Run the various cases
-  for (const auto& cells : nCells) {  
+  for (const auto& cells : nCells) {
 
     // Set geometry and AMR
     RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());

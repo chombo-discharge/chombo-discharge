@@ -15,7 +15,9 @@ using namespace Physics::RadiativeTransfer;
 //
 // where phi(T,dt) indicates a solution advanced to time T with a time step dt.
 
-int main(int argc, char* argv[]){
+int
+main(int argc, char* argv[])
+{
 
 #ifdef CH_MPI
   MPI_Init(&argc, &argv);
@@ -23,7 +25,7 @@ int main(int argc, char* argv[]){
 
   // Build class options from input script and command line options
   const std::string input_file = argv[1];
-  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
+  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // How much we refine the time step. numRefine = 1 => refine once => two runs. And so on.
   Real      dt;
@@ -33,17 +35,17 @@ int main(int argc, char* argv[]){
   pp2.get("dt", dt);
 
   // Storage for max, L1, and L2 solution error norms.
-  std::vector<std::array<Real, 3>> norms;    
+  std::vector<std::array<Real, 3>> norms;
 
-  // Set geometry and AMR 
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new CoaxialCable());
-  RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
-  RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
-  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);
+  // Set geometry and AMR
+  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
+  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
+  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
+  RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
 
-  // Set up the time stepper. 
-  auto timestepper = RefCountedPtr<RadiativeTransferStepper<EddingtonSP1> >
-     (new RadiativeTransferStepper<EddingtonSP1>());
+  // Set up the time stepper.
+  auto timestepper =
+    RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(new RadiativeTransferStepper<EddingtonSP1>());
 
   // Storage for the error.
   EBAMRCellData error;
@@ -74,8 +76,8 @@ int main(int argc, char* argv[]){
 
     dt *= 0.5;
   }
-  
-  // Print the solution error. 
+
+  // Print the solution error.
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif

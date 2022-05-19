@@ -27,8 +27,8 @@ main(int argc, char* argv[])
 
   // These are the grid resolutions that we run this program for. For the 32^2 grid the "exact solution" is the
   // coarsened solution of the 64^2 grid etc.
-  constexpr int refRat = 2;
-  constexpr int nComp  = 1;
+  constexpr int refRat  = 2;
+  constexpr int nComp   = 1;
   constexpr int nRefine = 4;
 
   // Build class options from input script and command line options
@@ -36,14 +36,14 @@ main(int argc, char* argv[])
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // Set up the grid resolutions.
-  ParmParse pp2("AmrMesh");
+  ParmParse   pp2("AmrMesh");
   Vector<int> baseGrid;
   pp2.getarr("coarsest_domain", baseGrid, 0, SpaceDim);
 
   std::vector<IntVect> nCells;
   nCells.push_back(IntVect(D_DECL(baseGrid[0], baseGrid[1], baseGrid[2])));
   for (int i = 0; i < nRefine; i++) {
-    nCells.push_back(2*nCells.back());
+    nCells.push_back(2 * nCells.back());
   }
 
   // This stuff is required because the old/new solutions and grids are discarded
