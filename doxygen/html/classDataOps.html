@@ -301,6 +301,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a4ec246d3dbaad26ca35950cd379b32d9"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a4ec246d3dbaad26ca35950cd379b32d9">norm</a> (Real &amp;a_norm, const LevelData&lt; EBCellFAB &gt; &amp;a_data, const ProblemDomain &amp;a_domain, const int a_p)</td></tr>
 <tr class="memdesc:a4ec246d3dbaad26ca35950cd379b32d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute specified norm of data. Calls EBLevelDataOps.  <a href="classDataOps.html#a4ec246d3dbaad26ca35950cd379b32d9">More...</a><br /></td></tr>
 <tr class="separator:a4ec246d3dbaad26ca35950cd379b32d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25d765cca6b744be729e51f9c229d29c"><td class="memItemLeft" align="right" valign="top">static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a25d765cca6b744be729e51f9c229d29c">norm</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_data, const ProblemDomain &amp;a_domain, const int a_p, const bool a_regOnly)</td></tr>
+<tr class="memdesc:a25d765cca6b744be729e51f9c229d29c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute specified norm of data.  <a href="classDataOps.html#a25d765cca6b744be729e51f9c229d29c">More...</a><br /></td></tr>
+<tr class="separator:a25d765cca6b744be729e51f9c229d29c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae30f972ce853e2ffafba4cce6d27f40d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ae30f972ce853e2ffafba4cce6d27f40d">plus</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp)</td></tr>
 <tr class="memdesc:ae30f972ce853e2ffafba4cce6d27f40d"><td class="mdescLeft">&#160;</td><td class="mdescRight">General addition operator for adding together data. The user can choose which components to add.  <a href="classDataOps.html#ae30f972ce853e2ffafba4cce6d27f40d">More...</a><br /></td></tr>
 <tr class="separator:ae30f972ce853e2ffafba4cce6d27f40d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -3920,8 +3923,67 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a25d765cca6b744be729e51f9c229d29c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25d765cca6b744be729e51f9c229d29c">&#9670;&nbsp;</a></span>norm() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Real DataOps::norm </td>
+          <td>(</td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_p</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_regOnly</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute specified norm of data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to compute the norm of </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Norm factor, e.g. a_p = 2 =&gt; squared norm. 0 =&gt; inf norm </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_regOnly</td><td>If true, only include regular cells in norm computation. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a4ec246d3dbaad26ca35950cd379b32d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4ec246d3dbaad26ca35950cd379b32d9">&#9670;&nbsp;</a></span>norm()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ec246d3dbaad26ca35950cd379b32d9">&#9670;&nbsp;</a></span>norm() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3972,7 +4034,7 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_norm</td><td>Norm </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to compute the norm of </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Norm factor, e.g. a_p = 2 =&gt; squared norm. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Norm factor, e.g. a_p = 2 =&gt; squared norm. 0 =&gt; inf norm </td></tr>
   </table>
   </dd>
 </dl>
