@@ -28,7 +28,7 @@ jobs:
 
       - name: Build sphinx
         run: |
-          cd Sphinx
+          cd docs/Sphinx
           make github
           
       - name: Deploy
