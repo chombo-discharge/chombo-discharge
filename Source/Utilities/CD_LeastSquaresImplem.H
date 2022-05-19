@@ -99,19 +99,21 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
 
   if (a_derivs.numPts() > 0) {
 
-    const int M = LeastSquares::getTaylorExpansionSize(a_order) -
-                  a_knownTerms.numPts(); // This is because some unknowns (rows) can be eliminated.
+    // This is because some unknowns (rows) can be eliminated.
+    const int M     = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
     const int Kfine = a_fineDisplacements.size();
     const int Kcoar = a_coarDisplacements.size();
     const int K     = Kfine + Kcoar;
 
     const IntVectSet isect = a_derivs & a_knownTerms;
 
-    if (K < M)
+    if (K < M) {
       MayDay::Abort("LeastSquares::computeDualLevelStencils -- not enough equations to achieve desired order!");
-    if (!isect.isEmpty())
+    }
+    if (!isect.isEmpty()) {
       MayDay::Abort(
         "LeastSquares::computeDualLevelStencils - you have specified the same terms as both unknown and known");
+    }
 
     // Build the A-matrix in column major order (this is what Fortran wants) so we can use LaPackUtils::computePseudoInverse.
     // ----------------------------------------------------------------------------------------------------------------------
@@ -137,9 +139,12 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
     Vector<T> linA(K * M, 0.0);     // Equal to (w*A)
     Vector<T> linAplus(M * K, 0.0); // Equal to (w*A)^+
 
-    for (MultiIndex mi(a_order); mi.ok(); ++mi) { // Loop over column
+    // Loop over column
+    for (MultiIndex mi(a_order); mi.ok(); ++mi) {
       if (!a_knownTerms.contains(mi.getCurrentIndex())) {
-        for (int k = 0; k < K; k++) { // Fill column, write the system using the fine vofs first, then the coarse vofs.
+
+        // Fill column, write the system using the fine vofs first, then the coarse vofs.
+        for (int k = 0; k < K; k++) {
           if (k < Kfine) {
             linA[i] = a_fineWeights[k] * mi.pow(a_fineDisplacements[k]) / mi.factorial();
           }
@@ -170,7 +175,9 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
       std::map<IntVect, int> rowMap;
       int                    row = 0;
       for (MultiIndex mi(a_order); mi.ok(); ++mi) {
-        if (!a_knownTerms.contains(mi.getCurrentIndex())) { // This is the order in which A was built.
+
+        // This is the order in which A was built.
+        if (!a_knownTerms.contains(mi.getCurrentIndex())) {
           rowMap.emplace(mi.getCurrentIndex(), row);
           row++;
         }

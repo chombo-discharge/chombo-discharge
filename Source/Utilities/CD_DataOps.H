@@ -692,10 +692,20 @@ public:
     @param[out] a_norm   Norm
     @param[in]  a_data   Data to compute the norm of
     @param[in]  a_domain Domain
-    @param[in]  a_data   Norm factor, e.g. a_p = 2 => squared norm. 
+    @param[in]  a_data   Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm
   */
   static void
   norm(Real& a_norm, const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p);
+
+  /*!
+    @brief Compute specified norm of data. 
+    @param[in]  a_data    Data to compute the norm of
+    @param[in]  a_domain  Domain
+    @param[in]  a_data    Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm
+    @param[in]  a_regOnly If true, only include regular cells in norm computation. 
+  */
+  static Real
+  norm(const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p, const bool a_regOnly);
 
   /*!
     @brief General addition operator for adding together data. The user can choose which components to add. 

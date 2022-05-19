@@ -193,6 +193,13 @@ namespace Physics {
       void
       postRegrid() override;
 
+      /*!
+	@brief Set the CFL number
+	@param[in] a_cfl;
+      */
+      void
+      setCFL(const Real a_cfl);
+
     protected:
       /*!
 	@brief Switch for different integrators
@@ -224,9 +231,24 @@ namespace Physics {
       RefCountedPtr<CdrSpecies> m_species;
 
       /*!
+	@brief Smallest acceptable time step
+      */
+      Real m_minDt;
+
+      /*!
+	@brief Largest acceptable time step
+      */
+      Real m_maxDt;
+
+      /*!
 	@brief CFL number to use
       */
       Real m_cfl;
+
+      /*!
+	@brief Forced CFL (overrides input options)
+      */
+      Real m_forceCFL;
 
       /*!
 	@brief Diffusion coefficient

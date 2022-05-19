@@ -22,6 +22,7 @@
 #include <CD_DataOps.H>
 #include <CD_BoxLoops.H>
 #include <CD_ParallelOps.H>
+#include <CD_MultifluidAlias.H>
 #include <CD_NamespaceHeader.H>
 
 void
@@ -1521,6 +1522,24 @@ DataOps::norm(Real& a_norm, const LevelData<EBCellFAB>& a_data, const ProblemDom
   Real volume;
 
   a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_ALLVOFS, a_domain, a_p);
+}
+
+Real
+DataOps::norm(const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p, const bool a_regOnly)
+{
+  CH_TIME("DataOps::norm");
+
+  Real volume;
+  Real a_norm;
+
+  if (a_regOnly) {
+    a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_REGULARVOFS, a_domain, a_p);
+  }
+  else {
+    a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_ALLVOFS, a_domain, a_p);
+  }
+
+  return a_norm;
 }
 
 void

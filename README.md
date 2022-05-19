@@ -37,7 +37,7 @@ We welcome feedback, bug reports, or code contributions.
 3. Format the source and example codes using ```clang-format```:
 
    ```
-   find Source Physics Geometries Examples \( -name "*.H" -o -name "*.cpp" \) -exec clang-format -i {} +
+   find Source Physics Geometries Exec \( -name "*.H" -o -name "*.cpp" \) -exec clang-format -i {} +
    ```
    
 4. Push the changes to GitHub

@@ -235,6 +235,12 @@ public:
   setFinestLevel(const int a_finestLevel);
 
   /*!
+    @brief Set the coarsest grid cells
+  */
+  void
+  setCoarsestGrid(const IntVect& a_nCells);
+
+  /*!
     @brief Query if a realm exists
     @param[in] a_realm Name of the realm. 
     @return True if the realm exists and false otherwise. 

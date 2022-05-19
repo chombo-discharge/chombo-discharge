@@ -36,6 +36,8 @@ RadiativeTransferStepper<T>::RadiativeTransferStepper()
   pp.get("verbosity", m_verbosity);
   pp.get("realm", m_realm);
   pp.get("dt", m_dt);
+
+  m_forceDt = -1.0;
 }
 
 template <typename T>
@@ -102,6 +104,19 @@ RadiativeTransferStepper<T>::postInitialize()
   CH_TIME("RadiativeTransferStepper::postInitialize");
 
   this->setGaussianSource();
+
+  if (m_solver->isStationary()) {
+    m_solver->advance(0.0, false);
+  }
+}
+
+template <typename T>
+void
+RadiativeTransferStepper<T>::forceDt(const Real a_dt)
+{
+  CH_TIME("RadiativeTransferStepper::forceDt");
+
+  m_forceDt = a_dt;
 }
 
 #ifdef CH_USE_HDF5
@@ -163,6 +178,10 @@ RadiativeTransferStepper<T>::computeDt(Real& a_dt, TimeCode& a_timeCode)
   CH_TIME("RadiativeTransferStepper::computeDt");
 
   a_dt = m_dt;
+
+  if (m_forceDt > 0.0) {
+    a_dt = m_forceDt;
+  }
 }
 
 template <typename T>
@@ -239,6 +258,15 @@ RadiativeTransferStepper<T>::postRegrid()
   CH_TIME("RadiativeTransferStepper::postRegrid");
 
   this->setGaussianSource();
+}
+
+template <typename T>
+const EBAMRCellData&
+RadiativeTransferStepper<T>::getPhi() const
+{
+  CH_TIME("RadiativeTransferStepper::getPhi");
+
+  return m_solver->getPhi();
 }
 
 template <typename T>

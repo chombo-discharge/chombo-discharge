@@ -66,8 +66,8 @@ LeastSquares::getGradSten(const VolIndex&    a_vof,
   const Vector<VolIndex> allVofs =
     VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
 
-  const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) -
-                          a_knownTerms.numPts(); // Can be smaller than order if you've eliminated some equations.
+  // Can be smaller than order if you've eliminated some equations.
+  const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
 
   // Build the stencil if we can.
   if (allVofs.size() > numUnknowns) {
@@ -114,8 +114,8 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
     for (const auto& v : setVofs)
       allVofs.push_back(v);
 
-    const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) -
-                            a_knownTerms.numPts(); // Can be smaller than order if you've eliminated some equations.
+    // Can be smaller than order if you've eliminated some equations.
+    const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
 
     if (allVofs.size() > numUnknowns) {
       const Vector<RealVect> displacements =
@@ -149,20 +149,25 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
     Vector<VolIndex> allVofs;
 
     switch (a_neighborhood) {
-    case Neighborhood::Quadrant:
+    case Neighborhood::Quadrant: {
       allVofs = VofUtils::getVofsInQuadrant(a_vof,
                                             a_ebisbox,
                                             normal,
                                             a_radius,
                                             VofUtils::Connectivity::MonotonePath,
                                             a_addStartingVof);
+
       break;
-    case Neighborhood::Radius:
+    }
+    case Neighborhood::Radius: {
       allVofs =
         VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, a_addStartingVof);
       break;
-    default:
+    }
+    default: {
+      MayDay::Error("LeastSquares::getBndryGradSten -- logic bust");
       break;
+    }
     }
 
     // Now build the stencil.
@@ -171,14 +176,10 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
       const Vector<RealVect> displacements =
         LeastSquares::getDisplacements(Location::Cell::Boundary, a_cellPositions, a_vof, allVofs, a_ebisbox, a_dx);
 
+      // This routine eliminates a_vof from the system of equations!
       IntVectSet knownTerms;
       knownTerms |= IntVect::Zero;
-      bndrySten =
-        LeastSquares::computeGradSten(allVofs,
-                                      displacements,
-                                      a_p,
-                                      a_order,
-                                      knownTerms); // This routine eliminates a_vof from the system of equations!
+      bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, knownTerms);
     }
   }
 
@@ -454,17 +455,19 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
 
   if (a_derivs.numPts() > 0) {
 
-    const int M = LeastSquares::getTaylorExpansionSize(a_order) -
-                  a_knownTerms.numPts(); // This is because some unknowns (rows) can be been eliminated.
+    // This is because some unknowns (rows) can be been eliminated.
+    const int M = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
     const int K = a_displacements.size();
 
     const IntVectSet isect = a_derivs & a_knownTerms;
 
-    if (K < M)
+    if (K < M) {
       MayDay::Abort("LeastSquares::computeSingleLevelStencils -- not enough equations to achieve desired order!");
-    if (!isect.isEmpty())
+    }
+    if (!isect.isEmpty()) {
       MayDay::Abort(
         "LeastSquares::computeSingleLevelStencils - you have specified the same terms as both unknown and known");
+    }
 
     // Build the A-matrix in column major order (this is what Fortran wants) so we can use LaPackUtils::computePseudoInverse.
     // ----------------------------------------------------------------------------------------------------------------------
@@ -490,8 +493,11 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
     Vector<Real> linA(K * M, 0.0);     // Equal to (w*A)
     Vector<Real> linAplus(M * K, 0.0); // Equal to (w*A)^+
 
-    for (MultiIndex mi(a_order); mi.ok(); ++mi) {         // Loop over column
-      if (!a_knownTerms.contains(mi.getCurrentIndex())) { // Add column if it is an unknown in the lsq system.
+    // Loop over column
+    for (MultiIndex mi(a_order); mi.ok(); ++mi) {
+
+      // Add column if it is an unknown in the lsq system.
+      if (!a_knownTerms.contains(mi.getCurrentIndex())) {
         for (int k = 0; k < K; k++) {
           linA[i] = a_weights[k] * mi.pow(a_displacements[k]) / mi.factorial();
           i++;
@@ -518,7 +524,8 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
       std::map<IntVect, int> rowMap;
       int                    row = 0;
       for (MultiIndex mi(a_order); mi.ok(); ++mi) {
-        if (!a_knownTerms.contains(mi.getCurrentIndex())) { // This is the order in which A was built.
+        // This is the order in which A was built.
+        if (!a_knownTerms.contains(mi.getCurrentIndex())) {
           rowMap.emplace(mi.getCurrentIndex(), row);
           row++;
         }

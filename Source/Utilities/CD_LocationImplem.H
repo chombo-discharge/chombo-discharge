@@ -23,18 +23,26 @@ Location::position(const Location::Cell a_position, const VolIndex& a_vof, const
   RealVect ret;
 
   switch (a_position) {
-  case Location::Cell::Center:
+  case Location::Cell::Center: {
     ret = RealVect(a_vof.gridIndex()) + 0.5 * RealVect::Unit;
+
     break;
-  case Location::Cell::Centroid:
+  }
+  case Location::Cell::Centroid: {
     ret = RealVect(a_vof.gridIndex()) + 0.5 * RealVect::Unit + a_ebisbox.centroid(a_vof);
+
     break;
-  case Location::Cell::Boundary:
+  }
+  case Location::Cell::Boundary: {
     ret = RealVect(a_vof.gridIndex()) + 0.5 * RealVect::Unit + a_ebisbox.bndryCentroid(a_vof);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("LeastSquares::position -- bad location input.");
+
     break;
+  }
   }
 
   ret *= a_dx;
@@ -49,9 +57,11 @@ Location::position(const Location::Face a_position, const FaceIndex& a_face, con
   const IntVect iv = a_face.gridIndex(Side::Hi);
 
   switch (a_position) {
-  case Location::Face::Center:
+  case Location::Face::Center: {
     ret = (RealVect(iv) + 0.5 * RealVect::Unit) - 0.5 * BASISREALV(a_face.direction());
+
     break;
+  }
   case Location::Face::Centroid: {
     ret = (RealVect(iv) + 0.5 * RealVect::Unit) - 0.5 * BASISREALV(a_face.direction());
 
@@ -62,11 +72,14 @@ Location::position(const Location::Face a_position, const FaceIndex& a_face, con
         ret[dir] += faceCentroid[dir];
       }
     }
+
     break;
   }
-  default:
+  default: {
     MayDay::Error("LeastSquares::positon - bad location input.");
+
     break;
+  }
   }
 
   ret *= a_dx;

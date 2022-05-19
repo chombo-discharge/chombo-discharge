@@ -49,7 +49,7 @@ jobs:
         
       - name: Copy makefile
         run: |
-          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
+          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
 
       - name: Build Chombo
         run: |
@@ -72,7 +72,7 @@ jobs:
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} discharge-physics
 
       - name: Compile tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()
         run: |
           source /opt/intel/oneapi/setvars.sh          
@@ -80,7 +80,7 @@ jobs:
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                    
 
       - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()        
         run: |
           source /opt/intel/oneapi/setvars.sh
@@ -127,7 +127,7 @@ jobs:
         
       - name: Copy makefile
         run: |
-          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.MPI.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
+          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.MPI.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
 
       - name: Build Chombo
         run: |
@@ -150,7 +150,7 @@ jobs:
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} discharge-physics
 
       - name: Compile tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()
         run: |
           source /opt/intel/oneapi/setvars.sh          
@@ -158,7 +158,7 @@ jobs:
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                    
 
       - name: Run tests
-        working-directory: ${{ env.DISCHARGE_HOME}}/Tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()
         run: |
           source /opt/intel/oneapi/setvars.sh

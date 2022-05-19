@@ -17,7 +17,7 @@ def write_template(args):
         print('Could not find ' + tagfile)
                     
     # Create app directory if it does not exist
-    app_dir = args.base_dir + "/" + args.app_name
+    app_dir = args.discharge_home + '/' + args.base_dir + "/" + args.app_name
     if not os.path.exists(app_dir):
         os.makedirs(app_dir)
                         
