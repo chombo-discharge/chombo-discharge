@@ -49,7 +49,7 @@ jobs:
         
       - name: Copy makefile
         run: |
-          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
+          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
 
       - name: Build Chombo
         run: |
@@ -127,7 +127,7 @@ jobs:
         
       - name: Copy makefile
         run: |
-          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.MPI.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
+          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.MPI.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
 
       - name: Build Chombo
         run: |
