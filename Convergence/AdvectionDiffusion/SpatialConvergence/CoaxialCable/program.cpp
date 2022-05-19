@@ -67,18 +67,19 @@ main(int argc, char* argv[])
   // Storage for max, L1, and L2 solution error norms.
   std::vector<std::array<Real, 3>> norms;
 
-  // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
-
-  // Set up basic AdvectionDiffusion
-  RefCountedPtr<CdrSolver>   solver      = RefCountedPtr<CdrSolver>(new CdrGodunov());
-  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper>(new AdvectionDiffusionStepper(solver));
-  RefCountedPtr<CellTagger>  tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
-
   // Run the various cases
-  for (const auto& cells : nCells) {
+  for (const auto& cells : nCells) {  
+
+    // Set geometry and AMR
+    RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
+    RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
+    RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
+
+    // Set up basic AdvectionDiffusion
+    RefCountedPtr<CdrSolver>   solver      = RefCountedPtr<CdrSolver>(new CdrGodunov());
+    RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper>(new AdvectionDiffusionStepper(solver));
+    RefCountedPtr<CellTagger>  tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
+
     amr->setCoarsestGrid(cells);
     amr->buildDomains();
 
@@ -128,7 +129,7 @@ main(int argc, char* argv[])
     notCoarsest = true;
   }
 
-  // Print the grid
+  // Print the solution errors
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif

@@ -46,11 +46,11 @@
 	     "spacing": "exponential"
 	 },
 	 "initial data": {
-	     "uniform": 1.0E10,
+	     "uniform": 1.0E1,
 	     "gauss2":
 	     [
 		 {
-		     "radius": 25E-6,
+		     "radius": 50E-6,
 		     "amplitude": 1.0E18,
 		     "position": [0, 500E-6, 0]
 		 }
@@ -78,13 +78,13 @@
 	     "value": 2E-4
 	 },	 
 	 "initial data": {
-	     "uniform": 0.8E10,
+	     "uniform": 0.8E1,
 	     "gauss2":
 	     [
 		 {
-		     "radius": 200E-6,
+		     "radius": 50E-6,
 		     "amplitude": 0.8E18,
-		     "position": [0, 7.5E-2, 0]
+		     "position": [0, 500E-6, 0]
 		 }
 	     ]
 	 }
@@ -99,13 +99,13 @@
 	     "value": 2E-4
 	 },
 	 "initial data": {
-	     "uniform": 0.2E10,
+	     "uniform": 0.2E1,
 	     "gauss2":
 	     [
 		 {
-		     "radius": 200E-6,
+		     "radius": 50E-6,
 		     "amplitude": 0.2E18,
-		     "position": [0, 7.5E-2, 0]
+		     "position": [0, 500E-6, 0]
 		 }
 	     ]
 	 }

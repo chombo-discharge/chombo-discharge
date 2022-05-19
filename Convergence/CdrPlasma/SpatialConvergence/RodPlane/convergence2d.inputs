@@ -1,16 +1,16 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-RodPlane.voltage   = 4E3
+RodPlane.voltage   = 2E3
 RodPlane.basename  = pout
 
 # ====================================================================================================
 # AmrMesh class options
 # ====================================================================================================
-AmrMesh.lo_corner        = -2E-3    0    # Low corner of problem domain
-AmrMesh.hi_corner        =  2E-3    1E-3 # High corner of problem domain
+AmrMesh.lo_corner        = -0.5E-3    0    # Low corner of problem domain
+AmrMesh.hi_corner        =  0.5E-3    1E-3 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 128 32      # Number of cells on coarsest domain
+AmrMesh.coarsest_domain  = 128 128     # Number of cells on coarsest domain
 AmrMesh.max_amr_depth    = 0           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
@@ -27,8 +27,8 @@ AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stu
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
-AmrMesh.centroid_sten    = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
-AmrMesh.eb_sten          = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+AmrMesh.centroid_sten    = lsq      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+AmrMesh.eb_sten          = lsq         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic conservation laws
 
 # ====================================================================================================
@@ -46,13 +46,13 @@ Driver.write_restart_files             = false            # Write restart files 
 Driver.initial_regrids                 = 0                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 2E-10            # Stop time
+Driver.stop_time                       = 1.E-13           # Stop time
 Driver.max_steps                       = 1000             # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
 Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = positive2d       # Simulation output names
+Driver.output_names                    = simulation       # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
@@ -210,11 +210,11 @@ RodDielectric.sphere.radius             = 0.5           # Radius
 # ====================================================================================================
 CdrPlasmaGodunovStepper.verbosity        = -1            # Class verbosity
 CdrPlasmaGodunovStepper.solver_verbosity = -1            # Individual solver verbosities
-CdrPlasmaGodunovStepper.min_dt           = 0.            # Minimum permitted time step
-CdrPlasmaGodunovStepper.max_dt           = 5E-11         # Maximum permitted time step
+CdrPlasmaGodunovStepper.min_dt           = 1E-14         # Minimum permitted time step
+CdrPlasmaGodunovStepper.max_dt           = 1E-14         # Maximum permitted time step
 CdrPlasmaGodunovStepper.cfl              = 0.8           # CFL number
-CdrPlasmaGodunovStepper.use_regrid_slopes = false          # Use slopes when regridding (or not)
-CdrPlasmaGodunovStepper.field_coupling   = semi_implicit # Field coupling. 'explicit' or 'semi_implicit'
+CdrPlasmaGodunovStepper.use_regrid_slopes = false        # Use slopes when regridding (or not)
+CdrPlasmaGodunovStepper.field_coupling   = explicit # Field coupling. 'explicit' or 'semi_implicit'
 CdrPlasmaGodunovStepper.advection        = muscl         # Advection algorithm. 'euler', 'rk2', or 'muscl'
 CdrPlasmaGodunovStepper.diffusion        = explicit      # Diffusion. 'explicit', 'implicit', or 'auto'. 
 CdrPlasmaGodunovStepper.diffusion_thresh = 1.2           # Diffusion threshold. If dtD/dtA > this then we use implicit diffusion.
