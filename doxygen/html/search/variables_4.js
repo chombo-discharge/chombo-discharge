@@ -778,7 +778,7 @@ var searchData=
   ['m_5fwritememory_5842',['m_writeMemory',['../classDriver.html#a9eab014703e7b245713359722dbf6d26',1,'Driver']]],
   ['m_5fwriteregridfiles_5843',['m_writeRegridFiles',['../classDriver.html#aa95b65a98e86bbddb1179c4db21ac5b6',1,'Driver']]],
   ['m_5fwriterestartfiles_5844',['m_writeRestartFiles',['../classDriver.html#a7e00bda2e71803e10a3526b3640caaba',1,'Driver']]],
-  ['m_5fzcoord_5845',['m_zCoord',['../classSignedDistanceBVH.html#a4007937c3c3ef76f628a78aba67f86a7',1,'SignedDistanceBVH::m_zCoord()'],['../classSignedDistanceDCEL.html#a2b908104569d5498f8671e86353ae6e7',1,'SignedDistanceDCEL::m_zCoord()']]],
+  ['m_5fzcoord_5845',['m_zCoord',['../classEBGeometryIF.html#a528dbb315b8579c1311aacda6d9ba79a',1,'EBGeometryIF::m_zCoord()'],['../classSignedDistanceBVH.html#a4007937c3c3ef76f628a78aba67f86a7',1,'SignedDistanceBVH::m_zCoord()'],['../classSignedDistanceDCEL.html#a2b908104569d5498f8671e86353ae6e7',1,'SignedDistanceDCEL::m_zCoord()']]],
   ['m_5fzero_5846',['m_zero',['../classCdrMultigrid.html#a81e5ed3ebcb9e0f2c489bc0b626d81c9',1,'CdrMultigrid::m_zero()'],['../classFieldSolverMultigrid.html#af85b28138b431b717652a6b21c8bf687',1,'FieldSolverMultigrid::m_zero()'],['../classEddingtonSP1.html#a604493c979747001cd38bc63bbeca5df',1,'EddingtonSP1::m_zero()']]],
   ['me_5847',['me',['../namespaceUnits.html#a1ccad8e726951e43dcd72c8d9939f8ef',1,'Units']]]
 ];
