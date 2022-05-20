@@ -42,7 +42,7 @@ public:
   /*!
     @brief DCEL polygon face, which is the primitive type enclosed in the bounding volume hierarchy
   */
-  using Face = EBGeometry::Dcel::FaceT<T>;
+  using Face = EBGeometry::DCEL::FaceT<T>;
 
   /*!
     @brief Alias for BVH node with precision T, enclosing DCEL face with a bounding volume type V
