@@ -36,7 +36,7 @@ public:
   /*!
     @brief Alias for EBGeometry DCEl mesh with precision T
   */
-  using Mesh = EBGeometry::Dcel::MeshT<T>;
+  using Mesh = EBGeometry::DCEL::MeshT<T>;
 
   /*!
     @brief Disallowed, use the full constructor
