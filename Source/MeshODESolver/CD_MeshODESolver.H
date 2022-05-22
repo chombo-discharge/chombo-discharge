@@ -144,7 +144,7 @@ public:
     @note This includes operators for redistribution, flux registers, regridding, ghost cell interpolation, and conservative coarsening. 
   */
   virtual void
-  registerOperators() noexcept;
+  registerOperators() const noexcept;
 
   /*!
     @brief Set the realm for this solver.
@@ -220,7 +220,43 @@ protected:
   /*!
     @brief Chattiness
   */
-  bool m_verbosity;
+  int m_verbosity;
+
+  /*!
+    @brief Solver verbosity. 
+    @details A high number gives lots of output 
+  */
+  int m_verbosity;
+
+  /*!
+    @brief Time step
+  */
+  int m_timeStep;
+
+  /*!
+    @brief Current time
+  */
+  Real m_time;
+
+  /*!
+    @brief Last time step increment. 
+  */
+  Real m_dt;
+
+  /*!
+    @brief Plot solution vector or not. 
+  */
+  bool m_plotPhi;
+
+  /*!
+    @brief Plot source term or not.
+  */
+  bool m_plotSource;
+
+  /*!
+    @brief Use slopes when regridding
+  */
+  bool m_regridSlopes;  
 
   /*!
     @brief Solver name
@@ -247,11 +283,6 @@ protected:
     @brief Cache storage when doing regrids.
   */
   EBAMRCellData m_cache;
-
-  /*!
-    @brief Use slopes when regridding or not
-  */
-  bool m_regridSlopes;
 };
 
 #include <CD_NamespaceFooter.H>

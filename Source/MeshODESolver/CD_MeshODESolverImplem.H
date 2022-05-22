@@ -19,7 +19,7 @@
 #include <CD_MeshODESolver.H>
 
 template <size_t N>
-MeshODESolver<T>::MeshODESolver()
+MeshODESolver<N>::MeshODESolver()
 {
   CH_TIME("MeshODESolver::MeshODESolver");
 
@@ -34,14 +34,14 @@ MeshODESolver<T>::MeshODESolver()
 }
 
 template <size_t N>
-MeshODESolver<T>::~MeshODESolver()
+MeshODESolver<N>::~MeshODESolver()
 {
   CH_TIME("MeshODESolver::~MeshODESolver");
 }
 
 template <size_t N>
 void
-MeshODESolver<T>::parseOptions() noexcept
+MeshODESolver<N>::parseOptions() noexcept
 {
   CH_TIME("MeshODESolver::parseOptions");
 
@@ -57,7 +57,7 @@ MeshODESolver<T>::parseOptions() noexcept
 
 template <size_t N>
 void
-MeshODESolver<T>::parseRuntimeOptions() noexcept
+MeshODESolver<N>::parseRuntimeOptions() noexcept
 {
   CH_TIME("MeshODESolver::parseRuntimeOptions()");
   if(m_verbosity > 5) {
@@ -72,7 +72,7 @@ MeshODESolver<T>::parseRuntimeOptions() noexcept
 
 template <size_t N>
 EBAMRCellData&
-MeshODESolver<T>::getPhi() noexcept
+MeshODESolver<N>::getPhi() noexcept
 {
   CH_TIME("MeshODESolver::getPhi()");
   if(m_verbosity > 5) {
@@ -84,7 +84,7 @@ MeshODESolver<T>::getPhi() noexcept
 
 template <size_t N>
 const EBAMRCellData&
-MeshODESolver<T>::getPhi() const noexcept
+MeshODESolver<N>::getPhi() const noexcept
 {
   CH_TIME("MeshODESolver::getPhi()");
   if(m_verbosity > 5) {
@@ -96,7 +96,7 @@ MeshODESolver<T>::getPhi() const noexcept
 
 template <size_t N>
 EBAMRCellData&
-MeshODESolver<T>::getRHS() noexcept
+MeshODESolver<N>::getRHS() noexcept
 {
   CH_TIME("MeshODESolver::getRHS()");
   if(m_verbosity > 5) {
@@ -108,7 +108,7 @@ MeshODESolver<T>::getRHS() noexcept
 
 template <size_t N>
 const EBAMRCellData&
-MeshODESolver<T>::getRHS() const noexcept
+MeshODESolver<N>::getRHS() const noexcept
 {
   CH_TIME("MeshODESolver::getRHS()");
   if(m_verbosity > 5) {
@@ -120,7 +120,7 @@ MeshODESolver<T>::getRHS() const noexcept
 
 template <size_t N>
 void
-MeshODESolver<T>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept {
+MeshODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept {
   CH_TIME("MeshODESolver::preRegrid(int, int)");
   if(m_verbosity > 5) {
     pout() << m_name + "::preRegrid(int, int)" << endl;
@@ -133,17 +133,26 @@ MeshODESolver<T>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexc
 
 template <size_t N>
 void
-MeshODESolver<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept
+MeshODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept
 {
   CH_TIME("MeshODESolver::regrid(int, int, int)");
   if(m_verbosity > 5) {
     pout() << m_name + "::regrid(int, int, int)" << endl;
   }
+
+  this->allocateInternals();
+
+  m_amr->interpToNewGrids(m_phi, m_cache, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
+
+  m_amr->averageDown(m_phi, m_realm, m_phase);
+  m_amr->interpGhost(m_phi, m_realm, m_phase);  
+
+  m_amr->deallocate(m_cache);
 }
 
 template <size_t N>
 std::string
-MeshODESolver<T>::getRealm() const noexcept
+MeshODESolver<N>::getRealm() const noexcept
 {
   CH_TIME("MeshODESolver::getRealm()");
   if(m_verbosity > 5) {
@@ -153,9 +162,9 @@ MeshODESolver<T>::getRealm() const noexcept
   return m_realm;
 }
 
-template <size t N>
+template <size_t N>
 std::string
-MeshODESolver<T>::getName() const noexcept
+MeshODESolver<N>::getName() const noexcept
 {
   CH_TIME("MeshODESolver::getName()");
   if(m_verbosity > 5) {
@@ -165,94 +174,213 @@ MeshODESolver<T>::getName() const noexcept
   return m_name;
 }
 
-  /*!
-    @brief Get output plot names
-    @return Return a list of plot variable names. 
-  */
-  virtual Vector<std::string>
-  getPlotVariableNames() const;
+template <size_t N>
+Vector<std::string>
+MeshODESolver<N>::getPlotVariableNames() const noexcept
+{
+  CH_TIME("MeshODESolver::getPlotVariableNames()");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::getPlotVariableNames()" << endl;
+  }
 
-  /*!
-    @brief Get number of output fields
-    @return Returns number of plot variables include in writePlotFile() and writePlotData()
-  */
-  virtual int
-  getNumberOfPlotVariables() const;
+  Vector<std::string> plotVarNames(0);
 
-  /*!
-    @brief Register operators for AMR operations
-    @note This includes operators for redistribution, flux registers, regridding, ghost cell interpolation, and conservative coarsening. 
-  */
-  virtual void
-  registerOperators();
+  if(m_plotPhi) {
+    for (size_t i = 0; i < N; i++) {
+      plotVarNames.push_back(m_name + " phi-" + std::to_string(i));
+    }
+  }
 
-  /*!
-    @brief Set the realm for this solver.
-    @param[in] a_realm Realm identifier
-  */
-  virtual void
-  setRealm(const std::string a_realm);
+  if(m_plotSource) {
+    for (size_t i = 0; i < N; i++) {
+      plotVarNames.push_back(m_name + " source-" + std::to_string(i));
+    }
+  }
 
-  /*!
-    @brief Set phase.
-    @param[in] a_phase Phase.
-  */
-  virtual void
-  setPhase(phase::which_phase a_phase);
+  return plotVarNames;
+}
 
-  /*!
-    @brief Set verbosity.
-    @param[in] a_verbosity Verbosity level. 
-  */
-  virtual void
-  setVerbosity(const int a_verbosity);
+template <size_t N>
+int
+MeshODESolver<N>::getNumberOfPlotVariables() const noexcept
+{
+  CH_TIME("MeshODESolver::getNumberOfPlotVariables()");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::getNumberOfPlotVariables()" << endl;
+  }
+  
+  int numPlotVars = 0;
 
-  /*!
-    @brief Set the time for this solver. 
-    @param[in] a_step Time step number
-    @param[in] a_time Time (in seconds)
-    @param[in] a_dt   Time step increment
-    @note This sets m_step=a_step, m_time=a_time, m_dt=a_dt
-  */
-  virtual void
-  setTime(const int a_step, const Real a_time, const Real a_dt);
+  if(m_plotPhi) {
+    numPlotVars += int(N);
+  }
+  
+  if(m_plotSource) {
+    numPlotVars += int(N);
+  }
 
-  /*!
-    @brief Write plot file
-    @details The name of the plot file is m_name.stepXXXXX.DIM.hdf5
-    @note This calls writePlotData(...)
-  */
-  virtual void
-  writePlotFile();
+  return numPlotVars;
+}
 
-  /*!
-    @brief Write output data to a_output
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
-    @note This will write the plot data in this solver to a_output, starting on a_comp
-    @note This routine writes m_phi on centroids (and not cell-centers). 
-  */
-  virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_icomp);
+template <size_t N>
+void
+MeshODESolver<N>::registerOperators() const noexcept
+{
+  CH_TIME("MeshODESolver::registerOperators()");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::registerOperators()" << endl;
+  }
+  
+  CH_assert(!m_amr.isNull());
 
-  /*!
-    @brief Write checkpoint data into HDF5 file. 
-    @paramo[out] a_handle HDF5 file. 
-    @param[in]   a_level Grid level
-  */
+  m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
+  m_amr->registerOperator(s_eb_fill_patch, m_realm, m_phase);
+  m_amr->registerOperator(s_eb_fine_interp, m_realm, m_phase);    
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::setRealm(const std::string a_realm) noexcept
+{
+  CH_TIME("MeshODESolver::setRealm(std::string)");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::setRealm(std::string)" << endl;
+  }
+
+  m_realm.assign(a_realm);  
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::setPhase(phase::which_phase a_phase) noexcept
+{
+  CH_TIME("MeshODESolver::setPhase(phase)");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::setPhase(phase)" << endl;
+  }
+
+  m_phase = a_phase;  
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::setVerbosity(const int a_verbosity) noexcept
+{
+  CH_TIME("MeshODESolver::setVerbosity(int)");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::setVerbosity(int)" << endl;
+  }
+
+  m_verbosity = a_verbosity;
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::setTime(const int a_step, const Real a_time, const Real a_dt)
+{
+  CH_TIME("MeshODESolver::setTime(int, Real, Real)");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::setTime(int, Real, Real)" << endl;
+  }
+
+  m_timeStep = a_step;
+  m_time     = a_time;
+  m_dt       = a_dt;  
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::writePlotFile() noexcept
+{
+  CH_TIME("MeshODESolver::writePlotFile()");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::writePlotFile()" << endl;
+  }
+
+  // Number of output components and their names
+  const int                 numPlotVars  = this->getNumberOfPlotVariables();
+  const Vector<std::string> plotVarNames = this->getPlotVariableNames();
+
+  // Allocate storage
+  EBAMRCellData output;
+  m_amr->allocate(output, m_realm, m_phase, numPlotVars);
+  DataOps::setValue(output, 0.0);
+
+  int icomp = 0;
+  this->writePlotData(output, icomp);
+
+  char filename[100];
+  sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
+  std::string fname(filename);
+
+  // Alias, because Chombo's EBAMRIO wants raw pointers (but we stick to smart pointers, like God intended).
+  Vector<LevelData<EBCellFAB>*> outputPtr;
+  m_amr->alias(outputPtr, output);
+
 #ifdef CH_USE_HDF5
-  virtual void
-  writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
+  constexpr int numPlotGhost = 0;
+
+  DischargeIO::writeEBHDF5(fname,
+                           plotVarNames,
+                           m_amr->getGrids(m_realm),
+                           outputPtr,
+                           m_amr->getDomains(),
+                           m_amr->getDx(),
+                           m_amr->getRefinementRatios(),
+                           m_dt,
+                           m_time,
+                           m_amr->getProbLo(),
+                           m_amr->getFinestLevel() + 1,
+                           numPlotGhost);
+#endif  
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_icomp) noexcept
+{
+  CH_TIME("MeshODESolver::writePlotData(EBAMRCellData, int)");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::writePlotData(EBAMRCellData, int)" << endl;
+  }
+
+  if(m_plotPhi) {
+    this->writeData(a_output, a_icomp, m_phi, true);
+  }
+
+  if(m_plotSource) {
+    this->writeData(a_output, a_icomp, m_source, true);
+  }
+}
+
+#ifdef CH_USE_HDF5
+template <size_t N>
+void
+MeshODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const noexcept
+{
+  CH_TIME("MeshODESolver::writeCheckpointLevel(HDF5Handle, int)");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
+  }
+
+  write(a_handle, *m_phi[a_level], m_name);
+  write(a_handle, *m_source[a_level], m_name + "_src");
+}
 #endif
 
-  /*!
-    @brief Read checkpoint data from HDF5 file. 
-    @param[in] a_handle HDF5 handle.
-    @param[in] const int a_level Grid level
-  */
 #ifdef CH_USE_HDF5
-  virtual void
-  readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
+template <size_t N>
+void
+MeshODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) noexcept
+{
+  CH_TIME("MeshODESolver::writeCheckpointLevel(HDF5Handle, int)");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
+  }
+
+  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], interv, false);
+  read<EBCellFAB>(a_handle, *m_source[a_level], m_name + "_src", m_amr->getGrids(m_realm)[a_level], interv, false);
+}
 #endif  
 
 #include <CD_NamespaceFooter.H>
