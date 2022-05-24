@@ -235,10 +235,9 @@ public:
 #ifdef CH_USE_HDF5
   virtual void
   readCheckpointLevel(HDF5Handle& a_handle, const int a_level) noexcept;
-#endif  
+#endif
 
 protected:
-
   /*!
     @brief AMR mesh reference
   */
@@ -277,7 +276,7 @@ protected:
   /*!
     @brief Use slopes when regridding
   */
-  bool m_regridSlopes;  
+  bool m_regridSlopes;
 
   /*!
     @brief Solver name
@@ -326,7 +325,7 @@ protected:
     @param[in]    a_interp If true, a_data will be interpolated to cell centroids before writing to a_output. 
   */
   virtual void
-  writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp) const noexcept;  
+  writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
