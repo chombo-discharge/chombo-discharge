@@ -17,6 +17,8 @@
 
 // Our includes
 #include <CD_MeshODESolver.H>
+#include <CD_DischargeIO.H>
+#include <CD_NamespaceHeader.H>
 
 template <size_t N>
 MeshODESolver<N>::MeshODESolver()
@@ -103,7 +105,7 @@ MeshODESolver<N>::getRHS() noexcept
     pout() << m_name + "::getRHS()" << endl;
   }
   
-  return m_RHS;
+  return m_rhs;
 }
 
 template <size_t N>
@@ -115,7 +117,7 @@ MeshODESolver<N>::getRHS() const noexcept
     pout() << m_name + "::getRHS()" << endl;
   }
   
-  return m_RHS;
+  return m_rhs;
 }
 
 template <size_t N>
@@ -139,7 +141,20 @@ MeshODESolver<N>::setRHS(const std::function<Real(const RealVect& a_pos)>& a_src
     pout() << m_name + "::setRHS(std::function, size_t)" << endl;
   }
 
-  DataOps::setValue(m_rhs, a_phiFunc, m_amr->getProbLo(), m_amr->getDx(), a_comp);  
+  DataOps::setValue(m_rhs, a_srcFunc, m_amr->getProbLo(), m_amr->getDx(), a_comp);  
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::allocateInternals() noexcept
+{
+  CH_TIME("MeshODESolver::allocateInternals()");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::allocateInternals()" << endl;
+  }
+
+  m_amr->allocate(m_phi, m_realm, m_phase, N);
+  m_amr->allocate(m_rhs, m_realm, m_phase, N);  
 }
 
 template <size_t N>
@@ -300,7 +315,7 @@ MeshODESolver<N>::setVerbosity(const int a_verbosity) noexcept
 
 template <size_t N>
 void
-MeshODESolver<N>::setTime(const int a_step, const Real a_time, const Real a_dt)
+MeshODESolver<N>::setTime(const int a_step, const Real a_time, const Real a_dt) noexcept
 {
   CH_TIME("MeshODESolver::setTime(int, Real, Real)");
   if(m_verbosity > 5) {
@@ -314,7 +329,7 @@ MeshODESolver<N>::setTime(const int a_step, const Real a_time, const Real a_dt)
 
 template <size_t N>
 void
-MeshODESolver<N>::writePlotFile() noexcept
+MeshODESolver<N>::writePlotFile() const noexcept
 {
   CH_TIME("MeshODESolver::writePlotFile()");
   if(m_verbosity > 5) {
@@ -361,7 +376,7 @@ MeshODESolver<N>::writePlotFile() noexcept
 
 template <size_t N>
 void
-MeshODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_icomp) noexcept
+MeshODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_icomp) const noexcept
 {
   CH_TIME("MeshODESolver::writePlotData(EBAMRCellData, int)");
   if(m_verbosity > 5) {
@@ -373,7 +388,7 @@ MeshODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_icomp) noexcept
   }
 
   if(m_plotSource) {
-    this->writeData(a_output, a_icomp, m_source, true);
+    this->writeData(a_output, a_icomp, m_rhs, true);
   }
 }
 
@@ -388,7 +403,7 @@ MeshODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) 
   }
 
   write(a_handle, *m_phi[a_level], m_name);
-  write(a_handle, *m_source[a_level], m_name + "_src");
+  write(a_handle, *m_rhs[a_level], m_name + "_src");
 }
 #endif
 
@@ -402,14 +417,14 @@ MeshODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) n
     pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], interv, false);
-  read<EBCellFAB>(a_handle, *m_source[a_level], m_name + "_src", m_amr->getGrids(m_realm)[a_level], interv, false);
+  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name         , m_amr->getGrids(m_realm)[a_level], Interval(0, N-1), false);
+  read<EBCellFAB>(a_handle, *m_rhs[a_level], m_name + "_src", m_amr->getGrids(m_realm)[a_level], Interval(0, N-1), false);
 }
 #endif
 
 template <size_t N>
 void
-MeshODESolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp)
+MeshODESolver<N>::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp) const noexcept
 {
   CH_TIME("MeshODESolver::writeData(EBAMRCellData, int, EBAMRCellData, bool)");
   if (m_verbosity > 5) {

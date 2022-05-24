@@ -69,6 +69,12 @@ public:
   parseRuntimeOptions() noexcept;
 
   /*!
+    @brief Allocate internal storage
+  */
+  virtual void
+  allocateInternals() noexcept;
+
+  /*!
     @brief Set initial data for specified component. 
     @param[in] a_phiFunc Phi function
     @param[in] a_comp    Component
@@ -234,13 +240,12 @@ public:
 protected:
 
   /*!
-    @brief Chattiness
+    @brief AMR mesh reference
   */
-  int m_verbosity;
+  RefCountedPtr<AmrMesh> m_amr;
 
   /*!
-    @brief Solver verbosity. 
-    @details A high number gives lots of output 
+    @brief Chattiness
   */
   int m_verbosity;
 
@@ -286,6 +291,16 @@ protected:
   std::string m_className;
 
   /*!
+    @brief Realm where solver is registered
+  */
+  std::string m_realm;
+
+  /*!
+    @brief Phase where solver data lives. 
+  */
+  phase::which_phase m_phase;
+
+  /*!
     @brief Solution vector (left hand side of equation). 
   */
   EBAMRCellData m_phi;
@@ -311,7 +326,7 @@ protected:
     @param[in]    a_interp If true, a_data will be interpolated to cell centroids before writing to a_output. 
   */
   virtual void
-  writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);  
+  writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp) const noexcept;  
 };
 
 #include <CD_NamespaceFooter.H>
