@@ -120,6 +120,30 @@ MeshODESolver<N>::getRHS() const noexcept
 
 template <size_t N>
 void
+MeshODESolver<N>::setPhi(const std::function<Real(const RealVect& a_pos)>& a_phiFunc, const size_t a_comp) noexcept
+{
+  CH_TIME("MeshODESolver::setPhi(std::function, size_t)");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::setPhi(std::function, size_t)" << endl;
+  }
+
+  DataOps::setValue(m_phi, a_phiFunc, m_amr->getProbLo(), m_amr->getDx(), a_comp);
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::setRHS(const std::function<Real(const RealVect& a_pos)>& a_srcFunc, const size_t a_comp) noexcept
+{
+  CH_TIME("MeshODESolver::setRHS(std::function, size_t)");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::setRHS(std::function, size_t)" << endl;
+  }
+
+  DataOps::setValue(m_rhs, a_phiFunc, m_amr->getProbLo(), m_amr->getDx(), a_comp);  
+}
+
+template <size_t N>
+void
 MeshODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept {
   CH_TIME("MeshODESolver::preRegrid(int, int)");
   if(m_verbosity > 5) {
@@ -381,7 +405,51 @@ MeshODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) n
   read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], interv, false);
   read<EBCellFAB>(a_handle, *m_source[a_level], m_name + "_src", m_amr->getGrids(m_realm)[a_level], interv, false);
 }
-#endif  
+#endif
+
+template <size_t N>
+void
+MeshODESolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp)
+{
+  CH_TIME("MeshODESolver::writeData(EBAMRCellData, int, EBAMRCellData, bool)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::writeData(EBAMRCellData, int, EBAMRCellData, bool)" << endl;
+  }
+
+  // Number of components we are working with.
+  const int ncomp = a_data[0]->nComp();
+
+  // Component ranges.
+  const Interval srcInterv(0, ncomp - 1);
+  const Interval dstInterv(a_comp, a_comp + ncomp - 1);
+
+  // Copy data to scratch and interpolate scratch to cell centroids if we are asked to.
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, ncomp);
+  DataOps::copy(scratch, a_data);
+
+  if (a_interp) {
+    m_amr->interpToCentroids(scratch, m_realm, phase::gas);
+  }
+
+  m_amr->averageDown(scratch, m_realm, m_phase);
+  m_amr->interpGhost(scratch, m_realm, m_phase);
+
+  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
+  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    if (m_realm == a_output.getRealm()) {
+      scratch[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
+    }
+    else {
+      scratch[lvl]->copyTo(srcInterv, *a_output[lvl], dstInterv);
+    }
+  }
+
+  DataOps::setCoveredValue(a_output, a_comp, 0.0);
+
+  a_comp += ncomp;
+}
 
 #include <CD_NamespaceFooter.H>
 

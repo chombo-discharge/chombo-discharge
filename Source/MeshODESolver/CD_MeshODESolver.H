@@ -69,6 +69,22 @@ public:
   parseRuntimeOptions() noexcept;
 
   /*!
+    @brief Set initial data for specified component. 
+    @param[in] a_phiFunc Phi function
+    @param[in] a_comp    Component
+  */
+  virtual void
+  setPhi(const std::function<Real(const RealVect& a_pos)>& a_phiFunc, const size_t a_comp) noexcept;
+
+  /*!
+    @brief Set right-hand side for specified component. 
+    @param[in] a_srcFunc Source term function.
+    @param[in] a_comp    Component
+  */
+  virtual void
+  setRHS(const std::function<Real(const RealVect& a_pos)>& a_srcFunc, const size_t a_comp) noexcept;
+
+  /*!
     @brief Get the solution vector (left-hand side of equation).
   */
   EBAMRCellData&
@@ -283,6 +299,19 @@ protected:
     @brief Cache storage when doing regrids.
   */
   EBAMRCellData m_cache;
+
+  /*!
+    @brief Write data into data holder
+  */
+  /*!
+    @brief Write data to output. Convenience function. 
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in]    a_data   Data to write. 
+    @param[in]    a_interp If true, a_data will be interpolated to cell centroids before writing to a_output. 
+  */
+  virtual void
+  writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);  
 };
 
 #include <CD_NamespaceFooter.H>

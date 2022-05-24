@@ -2064,9 +2064,10 @@ CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& 
   // Number of components we are working with.
   const int ncomp = a_data[0]->nComp();
 
-  const Interval srcInterv(0, ncomp - 1); // This is the component range in scratch which we want to copy from
+  // Component ranges that we copy to/from. 
+  const Interval srcInterv(0, ncomp - 1);
   const Interval dstInterv(a_comp,
-                           a_comp + ncomp - 1); // This is the component range in a_output which we want to copy into
+                           a_comp + ncomp - 1);
 
   // Copy data to scratch and interpolate scratch to cell centroids if we are asked to.
   EBAMRCellData scratch;
