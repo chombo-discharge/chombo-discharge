@@ -91,6 +91,13 @@ public:
   setRHS(const std::function<Real(const RealVect& a_pos)>& a_srcFunc, const size_t a_comp) noexcept;
 
   /*!
+    @brief Compute right-hand side from left-hand side. I.e. compute f = f(y,t). 
+    @param[in] a_rhsFunction Function for computing the right-hand side. 
+  */
+  virtual void
+  computeRHS(const std::function<std::array<Real, N>(const std::array<Real, N>& a_y, const Real& a_time)> a_rhsFunction) noexcept;
+
+  /*!
     @brief Get the solution vector (left-hand side of equation).
   */
   EBAMRCellData&
