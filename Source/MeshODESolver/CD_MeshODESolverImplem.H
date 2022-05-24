@@ -154,7 +154,7 @@ MeshODESolver<N>::allocateInternals() noexcept
   }
 
   m_amr->allocate(m_phi, m_realm, m_phase, N);
-  m_amr->allocate(m_rhs, m_realm, m_phase, N);  
+  m_amr->allocate(m_rhs, m_realm, m_phase, N);
 }
 
 template <size_t N>
