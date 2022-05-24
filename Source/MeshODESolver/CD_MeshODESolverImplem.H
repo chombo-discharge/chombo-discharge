@@ -147,7 +147,8 @@ MeshODESolver<N>::setRHS(const std::function<Real(const RealVect& a_pos)>& a_src
 
 template <size_t N>
 void
-MeshODESolver<N>::computeRHS(const std::function<std::array<Real, N>(const std::array<Real, N>& a_y, const Real& a_time)> a_rhsFunction) noexcept
+MeshODESolver<N>::computeRHS(
+  const std::function<std::array<Real, N>(const std::array<Real, N>& a_y, const Real& a_time)> a_rhsFunction) noexcept
 {
   CH_TIME("MeshODESolver::computeRHS(std::function<std::array<Real, N>(...)>)");
   if (m_verbosity > 5) {
@@ -159,68 +160,68 @@ MeshODESolver<N>::computeRHS(const std::function<std::array<Real, N>(const std::
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
-      EBCellFAB& rhs = (*m_rhs[lvl])[dit()];
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      EBCellFAB&       rhs = (*m_rhs[lvl])[dit()];
       const EBCellFAB& phi = (*m_phi[lvl])[dit()];
 
-      FArrayBox& rhsFAB = rhs.getFArrayBox();
+      FArrayBox&       rhsFAB = rhs.getFArrayBox();
       const FArrayBox& phiFAB = phi.getFArrayBox();
 
       const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
 
-      // Regular kernel. Only do cells that are not covered by a finer grid. 
+      // Regular kernel. Only do cells that are not covered by a finer grid.
       auto regularKernel = [&](const IntVect& iv) -> void {
-	std::array<Real, N> y{};
-	std::array<Real, N> f{};
-	
-	if(validCells(iv, comp)) {
+        std::array<Real, N> y{};
+        std::array<Real, N> f{};
 
-	  // Make y from the mesh data. 
-	  for (size_t i = 0; i < N; i++) {
-	    y[i] = phiFAB(iv, i);
-	  }
+        if (validCells(iv, comp)) {
 
-	  // Compute the right-hand side. 
-	  const std::array<Real, N> f = a_rhsFunction(y, m_time);
-	}
+          // Make y from the mesh data.
+          for (size_t i = 0; i < N; i++) {
+            y[i] = phiFAB(iv, i);
+          }
 
-	// Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell. 
-	for (size_t i = 0; i < N; i++) {
-	  rhsFAB(iv, i) = f[i];
-	}
+          // Compute the right-hand side.
+          const std::array<Real, N> f = a_rhsFunction(y, m_time);
+        }
+
+        // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
+        for (size_t i = 0; i < N; i++) {
+          rhsFAB(iv, i) = f[i];
+        }
       };
 
-      // Irregular kernel. Only do cells that are not covered by a finer grid. 
+      // Irregular kernel. Only do cells that are not covered by a finer grid.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-	std::array<Real, N> y{};
-	std::array<Real, N> f{};
+        std::array<Real, N> y{};
+        std::array<Real, N> f{};
 
-	const IntVect iv = vof.gridIndex();
-	
-	if(validCells(iv, comp)) {
+        const IntVect iv = vof.gridIndex();
 
-	  // Make y from the mesh data. 
-	  for (size_t i = 0; i < N; i++) {
-	    y[i] = phi(vof, i);
-	  }
+        if (validCells(iv, comp)) {
 
-	  // Compute the right-hand side. 
-	  const std::array<Real, N> f = a_rhsFunction(y, m_time);
-	}
+          // Make y from the mesh data.
+          for (size_t i = 0; i < N; i++) {
+            y[i] = phi(vof, i);
+          }
 
-	// Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell. 
-	for (size_t i = 0; i < N; i++) {
-	  rhs(vof, i) = f[i];
-	}
+          // Compute the right-hand side.
+          const std::array<Real, N> f = a_rhsFunction(y, m_time);
+        }
+
+        // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
+        for (size_t i = 0; i < N; i++) {
+          rhs(vof, i) = f[i];
+        }
       };
 
       // Kernel regions.
-      const Box cellBox = dbl[dit()];
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      const Box    cellBox = dbl[dit()];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
       // Run the kernels.
       BoxLoops::loop(cellBox, regularKernel);
-      BoxLoops::loop(vofit,   irregularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }

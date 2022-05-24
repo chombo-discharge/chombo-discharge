@@ -95,7 +95,8 @@ public:
     @param[in] a_rhsFunction Function for computing the right-hand side. 
   */
   virtual void
-  computeRHS(const std::function<std::array<Real, N>(const std::array<Real, N>& a_y, const Real& a_time)> a_rhsFunction) noexcept;
+  computeRHS(const std::function<std::array<Real, N>(const std::array<Real, N>& a_y, const Real& a_time)>
+               a_rhsFunction) noexcept;
 
   /*!
     @brief Get the solution vector (left-hand side of equation).
