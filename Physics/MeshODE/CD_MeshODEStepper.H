@@ -94,11 +94,10 @@ namespace Physics {
       postInitialize() override;
 
       /*!
-	@brief Post checkpoint operations. Not needed for this time stepper. 
+	@brief Post checkpoint operations. 
       */
       void
-      postCheckpointSetup() override
-      {}
+      postCheckpointSetup() override;
 
       /*!
 	@brief Register realms. Primal is the only realm we need. 
@@ -226,9 +225,9 @@ namespace Physics {
       IntegrationAlgorithm m_algorithm;
 
       /*!
-	@brief Chattiness
+	@brief Time step to use
       */
-      int m_verbosity;
+      Real m_dt;
 
       /*!
 	@brief Realm where solver and m_velocity lives.
@@ -266,6 +265,12 @@ namespace Physics {
       */
       virtual void
       parseVerbosity();
+
+      /*!
+	@brief Parse the problem type. 
+      */
+      virtual void
+      parseProblem();
 
       /*!
 	@brief Advance using the explicit Euler rule

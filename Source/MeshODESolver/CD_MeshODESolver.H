@@ -25,6 +25,11 @@ class MeshODESolver
 {
 public:
   /*!
+    @brief Alias for right-hand side
+  */
+  using RHSFunction = std::function<std::array<Real, N>(const std::array<Real, N>&, const Real)>;
+
+  /*!
     @brief Default constructor. Must subsequently set everything through public member functions.
   */
   MeshODESolver();
@@ -114,8 +119,15 @@ public:
     @param[in] a_rhsFunction Function for computing the right-hand side. 
   */
   virtual void
-  computeRHS(const std::function<std::array<Real, N>(const std::array<Real, N>& a_y, const Real& a_time)>
-               a_rhsFunction) noexcept;
+  computeRHS(const RHSFunction& a_rhsFunction) noexcept;
+
+  /*!
+    @brief Compute right-hand side from left-hand side. I.e. compute f = f(y,t). 
+    @param[out] a_rhs         Right-hand side on the mesh. 
+    @param[in]  a_rhsFunction Function for computing the right-hand side. 
+  */
+  virtual void
+  computeRHS(EBAMRCellData& rhs, const RHSFunction& a_rhsFunction) const noexcept;
 
   /*!
     @brief Get the solution vector (left-hand side of equation).

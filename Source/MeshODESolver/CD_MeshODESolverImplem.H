@@ -216,11 +216,11 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
       auto regularKernel = [&](const IntVect& iv) -> void {
         std::array<Real, N> y{};
 
-        //        if (validCells(iv, comp) && ebisbox.isRegular(iv)) {
-        const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+        if (validCells(iv, comp) && ebisbox.isRegular(iv)) {
+          const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
 
-        y = a_phiFunc(pos);
-        //        }
+          y = a_phiFunc(pos);
+        }
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
         for (size_t i = 0; i < N; i++) {
@@ -251,7 +251,7 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
 
       // Run the kernels.
       BoxLoops::loop(cellBox, regularKernel);
-      //      BoxLoops::loop(vofit, irregularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }
@@ -270,22 +270,35 @@ MeshODESolver<N>::setRHS(const std::function<Real(const RealVect& a_pos)>& a_src
 
 template <size_t N>
 void
-MeshODESolver<N>::computeRHS(
-  const std::function<std::array<Real, N>(const std::array<Real, N>& a_y, const Real& a_time)> a_rhsFunction) noexcept
+MeshODESolver<N>::computeRHS(const RHSFunction& a_rhsFunction) noexcept
 {
   CH_TIME("MeshODESolver::computeRHS(std::function<std::array<Real, N>(...)>)");
   if (m_verbosity > 5) {
     pout() << m_name + "::computeRHS(std::function<std::array<Real, N>(...)>)" << endl;
   }
 
+  this->computeRHS(m_rhs, a_rhsFunction);
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunction) const noexcept
+{
+  CH_TIME("MeshODESolver::computeRHS(EBAMRCellData, std::function<std::array<Real, N>(...)>)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeRHS(EBAMRCellData, std::function<std::array<Real, N>(...)>)" << endl;
+  }
+
   constexpr int comp = 0;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&       rhs = (*m_rhs[lvl])[dit()];
-      const EBCellFAB& phi = (*m_phi[lvl])[dit()];
+      EBCellFAB&       rhs     = (*a_rhs[lvl])[dit()];
+      const EBCellFAB& phi     = (*m_phi[lvl])[dit()];
+      const EBISBox&   ebisbox = ebisl[dit()];
 
       FArrayBox&       rhsFAB = rhs.getFArrayBox();
       const FArrayBox& phiFAB = phi.getFArrayBox();
@@ -297,7 +310,7 @@ MeshODESolver<N>::computeRHS(
         std::array<Real, N> y{};
         std::array<Real, N> f{};
 
-        if (validCells(iv, comp)) {
+        if (validCells(iv, comp) && ebisbox.isRegular(iv)) {
 
           // Make y from the mesh data.
           for (size_t i = 0; i < N; i++) {
@@ -305,7 +318,7 @@ MeshODESolver<N>::computeRHS(
           }
 
           // Compute the right-hand side.
-          const std::array<Real, N> f = a_rhsFunction(y, m_time);
+          f = a_rhsFunction(y, m_time);
         }
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
@@ -329,7 +342,7 @@ MeshODESolver<N>::computeRHS(
           }
 
           // Compute the right-hand side.
-          const std::array<Real, N> f = a_rhsFunction(y, m_time);
+          f = a_rhsFunction(y, m_time);
         }
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
@@ -590,11 +603,11 @@ MeshODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_icomp) const noe
   }
 
   if (m_plotPhi) {
-    this->writeData(a_output, a_icomp, m_phi, true);
+    this->writeData(a_output, a_icomp, m_phi, false);
   }
 
   if (m_plotRHS) {
-    this->writeData(a_output, a_icomp, m_rhs, true);
+    this->writeData(a_output, a_icomp, m_rhs, false);
   }
 }
 

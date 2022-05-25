@@ -27,6 +27,8 @@ MeshODEStepper<N>::MeshODEStepper()
   m_verbosity = 10;
   m_realm     = Realm::Primal;
   m_phase     = phase::gas;
+
+  this->parseOptions();
 }
 
 template <size_t N>
@@ -52,18 +54,6 @@ MeshODEStepper<N>::setupSolvers()
   m_solver->setPhase(m_phase);
   m_solver->setRealm(m_realm);
   m_solver->parseOptions();
-
-  // Initialize functions.
-  m_initialData = [](const RealVect& a_pos) -> std::array<Real, N> {
-    std::array<Real, N> Y;
-    for (auto& y : Y) {
-      y = a_pos[0];
-    }
-
-    return Y;
-  };
-
-  m_rhsFunction = [](const std::array<Real, N>, const Real) -> std::array<Real, N> { return std::array<Real, N>{}; };
 }
 
 template <size_t N>
@@ -104,6 +94,18 @@ MeshODEStepper<N>::postInitialize()
 
 template <size_t N>
 void
+MeshODEStepper<N>::postCheckpointSetup()
+{
+  CH_TIME("MeshODEStepper::postCheckpointSetup()");
+  if (m_verbosity > 5) {
+    pout() << "MeshODEStepper::postCheckpointSetup()" << endl;
+  }
+
+  m_solver->computeRHS(m_rhsFunction);
+}
+
+template <size_t N>
+void
 MeshODEStepper<N>::registerRealms()
 {
   CH_TIME("MeshODEStepper::registerRealms()");
@@ -135,10 +137,9 @@ MeshODEStepper<N>::parseOptions()
     pout() << "MeshODEStepper::parseOptions()" << endl;
   }
 
-  m_solver->parseOptions();
-
   this->parseIntegrator();
   this->parseVerbosity();
+  this->parseProblem();
 }
 
 template <size_t N>
@@ -154,6 +155,45 @@ MeshODEStepper<N>::parseRuntimeOptions()
 
   this->parseIntegrator();
   this->parseVerbosity();
+}
+
+template <size_t N>
+void
+MeshODEStepper<N>::parseProblem()
+{
+  CH_TIME("MeshODEStepper::parseProblem()");
+  if (m_verbosity > 5) {
+    pout() << "MeshODEStepper::parseProblem()" << endl;
+  }
+
+  ParmParse pp("MeshODEStepper");
+
+  Real initPhi   = 0.0;
+  Real frequency = 0.0;
+
+  pp.get("init_phi", initPhi);
+  pp.get("frequency", frequency);
+  pp.get("dt", m_dt);
+
+  m_initialData = [initPhi](const RealVect& a_pos) -> std::array<Real, N> {
+    std::array<Real, N> Y;
+
+    for (auto& y : Y) {
+      y = initPhi;
+    }
+
+    return Y;
+  };
+
+  m_rhsFunction = [frequency](const std::array<Real, N> Y, const Real t) -> std::array<Real, N> {
+    std::array<Real, N> rhs;
+
+    for (auto& r : rhs) {
+      r = cos(2 * M_PI * frequency * t);
+    }
+
+    return rhs;
+  };
 }
 
 #ifdef CH_USE_HDF5
@@ -218,7 +258,7 @@ MeshODEStepper<N>::computeDt(Real& a_dt, TimeCode& a_timeCode)
     pout() << "MeshODEStepper::computeDt()" << endl;
   }
 
-  a_dt = std::numeric_limits<Real>::max();
+  a_dt = m_dt;
 }
 
 template <size_t N>
@@ -229,6 +269,32 @@ MeshODEStepper<N>::advance(const Real a_dt)
   if (m_verbosity > 5) {
     pout() << "MeshODEStepper::advance(Real)" << endl;
   }
+
+  switch (m_algorithm) {
+  case IntegrationAlgorithm::Euler: {
+    this->advanceEuler(a_dt);
+
+    break;
+  }
+  case IntegrationAlgorithm::RK2: {
+    this->advanceRK2(a_dt);
+
+    break;
+  }
+  case IntegrationAlgorithm::RK4: {
+    this->advanceRK4(a_dt);
+
+    break;
+  }
+  default: {
+    MayDay::Error("MeshODEStepper::advance -- logic bust");
+
+    break;
+  }
+  }
+
+  // Update the source term.
+  m_solver->computeRHS(m_rhsFunction);
 
   return a_dt;
 }
@@ -241,6 +307,9 @@ MeshODEStepper<N>::synchronizeSolverTimes(const int a_step, const Real a_time, c
   if (m_verbosity > 5) {
     pout() << "MeshODEStepper::synchronizeSolverTimes(int, Real, Real)" << endl;
   }
+
+  m_timeStep = a_step;
+  m_time     = a_time;
 
   m_solver->setTime(a_step, a_time, a_dt);
 }
@@ -333,7 +402,13 @@ MeshODEStepper<N>::advanceEuler(const Real a_dt)
     pout() << "MeshODEStepper::advanceEuler()" << endl;
   }
 
-  MayDay::Error("MeshODEStepper::advanceEuler -- not implemented");
+  // Let Y = Y + S * dt
+  EBAMRCellData& phi = m_solver->getPhi();
+  EBAMRCellData& rhs = m_solver->getRHS();
+
+  m_solver->computeRHS(rhs, m_rhsFunction);
+
+  DataOps::incr(phi, rhs, a_dt);
 }
 
 template <size_t N>
@@ -345,7 +420,20 @@ MeshODEStepper<N>::advanceRK2(const Real a_dt)
     pout() << "MeshODEStepper::advanceRK2()" << endl;
   }
 
-  MayDay::Error("MeshODEStepper::advanceRK2 -- not implemented");
+  EBAMRCellData& phi = m_solver->getPhi();
+
+  EBAMRCellData k1;
+  EBAMRCellData k2;
+
+  m_amr->allocate(k1, m_realm, m_phase, N);
+  m_amr->allocate(k2, m_realm, m_phase, N);
+
+  m_solver->computeRHS(k1, m_rhsFunction);
+  DataOps::incr(phi, k1, a_dt);
+
+  m_solver->computeRHS(k2, m_rhsFunction);
+  DataOps::incr(phi, k2, 0.5 * a_dt);
+  DataOps::incr(phi, k1, -0.5 * a_dt);
 }
 
 template <size_t N>
