@@ -19,12 +19,13 @@
 #include <CD_MeshODESolver.H>
 #include <CD_DischargeIO.H>
 #include <CD_BoxLoops.H>
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
 template <size_t N>
 MeshODESolver<N>::MeshODESolver()
 {
-  CH_TIME("MeshODESolver::MeshODESolver");
+  CH_TIME("MeshODESolver::MeshODESolver()");
 
   // Default settings.
   m_verbosity = -1;
@@ -37,9 +38,29 @@ MeshODESolver<N>::MeshODESolver()
 }
 
 template <size_t N>
+MeshODESolver<N>::MeshODESolver(const RefCountedPtr<AmrMesh>& a_amr) noexcept : MeshODESolver<N>()
+{
+  CH_TIME("MeshODESolver::MeshODESolver(AMR)");
+
+  m_amr = a_amr;
+}
+
+template <size_t N>
 MeshODESolver<N>::~MeshODESolver()
 {
   CH_TIME("MeshODESolver::~MeshODESolver");
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh) noexcept
+{
+  CH_TIME("MeshODESolver::setAmr");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setAmr" << endl;
+  }
+
+  m_amr = a_amrMesh;
 }
 
 template <size_t N>
@@ -131,6 +152,73 @@ MeshODESolver<N>::setPhi(const std::function<Real(const RealVect& a_pos)>& a_phi
   }
 
   DataOps::setValue(m_phi, a_phiFunc, m_amr->getProbLo(), m_amr->getDx(), a_comp);
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect& a_pos)>& a_phiFunc) noexcept
+{
+  CH_TIME("MeshODESolver::setPhi(std::function)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setPhi(std::function)" << endl;
+  }
+
+  constexpr int comp = 0;
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const Real&              dx     = m_amr->getDx()[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const RealVect&          probLo = m_amr->getProbLo();
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      EBCellFAB&           phi        = (*m_phi[lvl])[dit()];
+      const EBISBox&       ebisbox    = ebisl[dit()];
+      FArrayBox&           phiFAB     = phi.getFArrayBox();
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+
+      // Regular kernel. Only do cells that are not covered by a finer grid.
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        std::array<Real, N> y{};
+
+        if (validCells(iv, comp) && ebisbox.isRegular(iv)) {
+          const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+
+          const std::array<Real, N> y = a_phiFunc(pos);
+        }
+
+        // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
+        for (size_t i = 0; i < N; i++) {
+          phiFAB(iv, i) = y[i];
+        }
+      };
+
+      // Irregular kernel. Only do cells that are not covered by a finer grid.
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        std::array<Real, N> y{};
+        const IntVect       iv = vof.gridIndex();
+
+        if (validCells(iv, comp)) {
+          const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+
+          const std::array<Real, N> y = a_phiFunc(pos);
+        }
+
+        // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
+        for (size_t i = 0; i < N; i++) {
+          phi(vof, i) = y[i];
+        }
+      };
+
+      // Kernel regions.
+      const Box    cellBox = dbl[dit()];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      // Run the kernels.
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
 }
 
 template <size_t N>
@@ -228,11 +316,11 @@ MeshODESolver<N>::computeRHS(
 
 template <size_t N>
 void
-MeshODESolver<N>::allocateInternals() noexcept
+MeshODESolver<N>::allocate() noexcept
 {
-  CH_TIME("MeshODESolver::allocateInternals()");
+  CH_TIME("MeshODESolver::allocate()");
   if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals()" << endl;
+    pout() << m_name + "::allocate()" << endl;
   }
 
   m_amr->allocate(m_phi, m_realm, m_phase, N);
@@ -262,7 +350,7 @@ MeshODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const int
     pout() << m_name + "::regrid(int, int, int)" << endl;
   }
 
-  this->allocateInternals();
+  this->allocate();
 
   m_amr->interpToNewGrids(m_phi, m_cache, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
 

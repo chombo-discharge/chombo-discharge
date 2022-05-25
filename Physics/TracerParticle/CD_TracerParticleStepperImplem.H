@@ -166,7 +166,7 @@ TracerParticleStepper<P>::parseIntegrator()
     m_algorithm = IntegrationAlgorithm::RK4;
   }
   else {
-    MayDay::Error("TracerParticleStepper::parseRuntimeOptions -- logic bust");
+    MayDay::Error("TracerParticleStepper::parseIntegrator -- logic bust");
   }
 }
 

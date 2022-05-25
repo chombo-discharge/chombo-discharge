@@ -30,6 +30,12 @@ public:
   MeshODESolver();
 
   /*!
+    @brief Full constructor. 
+    @param[in] a_amr AMR core.
+  */
+  MeshODESolver(const RefCountedPtr<AmrMesh>& a_amr) noexcept;
+
+  /*!
     @brief Disallowed copy constructor
   */
   MeshODESolver(const MeshODESolver&) = delete;
@@ -57,6 +63,13 @@ public:
   operator=(const MeshODESolver&&) = delete;
 
   /*!
+    @brief Set AmrMesh.
+    @param[in] a_amrMesh AmrMesh
+  */
+  virtual void
+  setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh) noexcept;
+
+  /*!
     @brief Parse class options.
   */
   virtual void
@@ -72,15 +85,21 @@ public:
     @brief Allocate internal storage
   */
   virtual void
-  allocateInternals() noexcept;
+  allocate() noexcept;
 
   /*!
-    @brief Set initial data for specified component. 
+    @brief Set phi for a specific component. 
     @param[in] a_phiFunc Phi function
     @param[in] a_comp    Component
   */
   virtual void
   setPhi(const std::function<Real(const RealVect& a_pos)>& a_phiFunc, const size_t a_comp) noexcept;
+  /*!
+    @brief Set phi everywhere. 
+    @param[in] a_phiFunc Phi function. 
+  */
+  virtual void
+  setPhi(const std::function<std::array<Real, N>(const RealVect& a_pos)>& a_phiFunc) noexcept;
 
   /*!
     @brief Set right-hand side for specified component. 

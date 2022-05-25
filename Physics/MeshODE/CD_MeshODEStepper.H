@@ -4,22 +4,21 @@
  */
 
 /*!
-  @file   CD_TracerParticleStepper.H
-  @brief  Declaration of a TimeStepper implementation for advancing a tracer particle solver. 
+  @file   CD_MeshODEStepper.H
+  @brief  Declaration of a TimeStepper implementation for advancing an ODE on a mesh. 
   @author Robert Marskar
 */
 
-#ifndef CD_TracerParticleStepper_H
-#define CD_TracerParticleStepper_H
+#ifndef CD_MeshODEStepper_H
+#define CD_MeshODEStepper_H
 
 // Our includes
-#include <CD_TracerParticleSolver.H>
-#include <CD_TracerParticlePhysics.H>
 #include <CD_TimeStepper.H>
+#include <CD_MeshODESolver.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
-  namespace TracerParticle {
+  namespace MeshODE {
 
     /*!
       @brief Various supported integration algorithms. 
@@ -32,62 +31,46 @@ namespace Physics {
     };
 
     /*!
-      @brief Enum for handling various velocity fields.
+      @brief Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables. 
     */
-    enum class VelocityField
-    {
-      Diagonal,
-      Rotational
-    };
-
-    /*!
-      @brief Implementation of TimeStepper for advancing tracer particles in a fixed velocity field. 
-      @details The template requirements on the particle type P are the same as for TracerParticleSolver with the addition 
-      of templated functions of the type RealVect& P::vector<size_t>() which returns a RealVect. This is used for the Runge-Kutta
-      particle advection kernels. This class will work fine with TracerParticle<0, M> where M >= 4. 
-    */
-    template <typename P>
-    class TracerParticleStepper : public TimeStepper
+    template <size_t N>
+    class MeshODEStepper : public TimeStepper
     {
     public:
       /*!
 	@brief Constructor. Does nothing. 
       */
-      TracerParticleStepper();
+      MeshODEStepper();
 
       /*!
 	@brief Copy constructor. Disallowed.
-	@param[in] a_other Other
       */
-      TracerParticleStepper(const TracerParticleStepper<P>& a_other) = delete;
+      MeshODEStepper(const MeshODEStepper<P>&) = delete;
 
       /*!
 	@brief Move constructor. Disallowed.
-	@param[in] a_other Other
       */
-      TracerParticleStepper(const TracerParticleStepper<P>&& a_other) = delete;
+      MeshODEStepper(const MeshODEStepper<P>&&) = delete;
 
       /*!
 	@brief Destructor. 
       */
-      virtual ~TracerParticleStepper();
+      virtual ~MeshODEStepper();
 
       /*!
 	@brief Copy assignment operator. Disallowed.
-	@param[in] a_other Other
       */
-      TracerParticleStepper&
-      operator=(const TracerParticleStepper<P>& a_other) = delete;
+      MeshODEStepper&
+      operator=(const MeshODEStepper<P>&) = delete;
 
       /*!
 	@brief Move assignment operator. Disallowed.
-	@param[in] a_other Other
       */
-      TracerParticleStepper&
-      operator=(const TracerParticleStepper<P>&& a_other) = delete;
+      MeshODEStepper&
+      operator=(const MeshODEStepper<P>&&) = delete;
 
       /*!
-	@brief Instantiate the tracer particle solver.
+	@brief Instantiate the ODE solver. 
       */
       void
       setupSolvers() override;
@@ -105,11 +88,10 @@ namespace Physics {
       initialData() override;
 
       /*!
-	@brief Perform any post-initialization steps. Not needed for this time stepper. 
+	@brief Perform any post-initialization steps. 
       */
       void
-      postInitialize() override
-      {}
+      postInitialize() override;
 
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 
@@ -244,51 +226,34 @@ namespace Physics {
       IntegrationAlgorithm m_algorithm;
 
       /*!
-	@brief Velocity field type. 
+	@brief Chattiness
       */
-      VelocityField m_velocityField;
+      int m_verbosity;
 
       /*!
-	@brief Realm where solver and m_velocity lives
+	@brief Realm where solver and m_velocity lives.
       */
       std::string m_realm;
 
       /*!
-	@brief Phase (gas/solid) where the solver lives
+	@brief Phase (gas/solid) where the solver lives.
       */
       phase::which_phase m_phase;
 
       /*!
 	@brief Tracer particle solvers
       */
-      RefCountedPtr<TracerParticleSolver<P>> m_solver;
+      RefCountedPtr<MeshODESolver<N>> m_solver;
 
       /*!
-	@brief Tracer particle velocity field
+	@brief Encapsulation of f = f(y,t)
       */
-      EBAMRCellData m_velocity;
+      std::function<std::array<Real, N>(const std::array<Real, N> y, Real t)> m_rhsFunction;
 
       /*!
-	@brief Particle "CFL" time step
+	@brief Initial data function. 
       */
-      Real m_cfl;
-
-      /*!
-	@brief Number of particles
-      */
-      size_t m_numInitialParticles;
-
-      /*!
-	@brief Fill initial particles
-      */
-      virtual void
-      initialParticles();
-
-      /*!
-	@brief Set the velocity on the mesh.
-      */
-      virtual void
-      setVelocity();
+      std::function<std::array<Real, N>(const RealVect& a_position)> m_initialData;
 
       /*!
 	@brief Parse reactive integrator.
@@ -297,43 +262,31 @@ namespace Physics {
       parseIntegrator();
 
       /*!
-	@brief Parse velocity field.
-      */
-      virtual void
-      parseVelocityField();
-
-      /*!
-	@brief Parse initial conditions. 
-      */
-      virtual void
-      parseInitialConditions();
-
-      /*!
-	@brief Advance particles using explicit Euler rule
+	@brief Advance using the explicit Euler rule
 	@param[in] a_dt Advanced time step
       */
       virtual void
-      advanceParticlesEuler(const Real a_dt);
+      advanceEuler(const Real a_dt);
 
       /*!
-	@brief Advance particles using second order Runge-Kutta
+	@brief Advance using a second-order Runge-Kutta method. 
 	@param[in] a_dt Advanced time step
       */
       virtual void
-      advanceParticlesRK2(const Real a_dt);
+      advanceRK2(const Real a_dt);
 
       /*!
-	@brief Advance particles using fourth order Runge-Kutta
+	@brief Advance using a fourth order Runge-Kutta method. 
 	@param[in] a_dt Advanced time step
       */
       virtual void
-      advanceParticlesRK4(const Real a_dt);
+      advanceRK4(const Real a_dt);
     };
-  } // namespace TracerParticle
+  } // namespace MeshODE
 } // namespace Physics
 
-#include <CD_NamespaceFooter.H>
+#include <CD_NameSpaceFooter.H>
 
-#include <CD_TracerParticleStepperImplem.H>
+#include <CD_MeshODEStepperImplem.H>
 
 #endif
