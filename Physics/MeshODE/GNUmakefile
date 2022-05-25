@@ -7,7 +7,7 @@ src_dirs = $(TRACERPARTICLE_DIRS)
 include $(CHOMBO_HOME)/mk/Make.example
 
 # Name of the library
-SrcLib = $(DISCHARGE_HOME)/Lib/lib$(TRACERPARTICLE_LIB)$(config).a
+SrcLib = $(DISCHARGE_HOME)/Lib/lib$(MESHODE_LIB)$(config).a
 
 .DEFAULT_GOAL=MeshODEPhysics
 

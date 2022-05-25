@@ -45,12 +45,12 @@ namespace Physics {
       /*!
 	@brief Copy constructor. Disallowed.
       */
-      MeshODEStepper(const MeshODEStepper<P>&) = delete;
+      MeshODEStepper(const MeshODEStepper<N>&) = delete;
 
       /*!
 	@brief Move constructor. Disallowed.
       */
-      MeshODEStepper(const MeshODEStepper<P>&&) = delete;
+      MeshODEStepper(const MeshODEStepper<N>&&) = delete;
 
       /*!
 	@brief Destructor. 
@@ -61,13 +61,13 @@ namespace Physics {
 	@brief Copy assignment operator. Disallowed.
       */
       MeshODEStepper&
-      operator=(const MeshODEStepper<P>&) = delete;
+      operator=(const MeshODEStepper<N>&) = delete;
 
       /*!
 	@brief Move assignment operator. Disallowed.
       */
       MeshODEStepper&
-      operator=(const MeshODEStepper<P>&&) = delete;
+      operator=(const MeshODEStepper<N>&&) = delete;
 
       /*!
 	@brief Instantiate the ODE solver. 
@@ -291,7 +291,7 @@ namespace Physics {
   } // namespace MeshODE
 } // namespace Physics
 
-#include <CD_NameSpaceFooter.H>
+#include <CD_NamespaceFooter.H>
 
 #include <CD_MeshODEStepperImplem.H>
 

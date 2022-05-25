@@ -80,7 +80,9 @@ MeshODEStepper<N>::initialData()
   m_solver->setPhi(m_initialData);
 }
 
-template <size_t N void MeshODEStepper<N>::postInitialize()
+template <size_t N>
+void
+MeshODEStepper<N>::postInitialize()
 {
   CH_TIME("MeshODEStepper::postInitialize()");
   if (m_verbosity > 5) {
@@ -154,7 +156,7 @@ MeshODEStepper<N>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) co
     pout() << "MeshODEStepper::writeCheckpointData(HDF5Handle, int)" << endl;
   }
 
-  m_solver->writeCheckpointData(a_handle, a_lvl);
+  m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 #endif
 
@@ -168,7 +170,7 @@ MeshODEStepper<N>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
     pout() << "MeshODEStepper::readCheckpointData(HDF5Handle, int)" << endl;
   }
 
-  m_solver->readCheckpointData(a_handle, a_lvl);
+  m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 #endif
 
@@ -194,7 +196,7 @@ MeshODEStepper<N>::getNumberOfPlotVariables() const
     pout() << "MeshODEStepper::getNumberOfPlotVariables()" << endl;
   }
 
-  return m_solver > getNumberOfPlotVariables();
+  return m_solver->getNumberOfPlotVariables();
 }
 
 template <size_t N>
@@ -206,7 +208,7 @@ MeshODEStepper<N>::computeDt(Real& a_dt, TimeCode& a_timeCode)
     pout() << "MeshODEStepper::computeDt()" << endl;
   }
 
-  return std::numeric_limits<Real>::max();
+  a_dt = std::numeric_limits<Real>::max();
 }
 
 template <size_t N>
@@ -267,7 +269,7 @@ MeshODEStepper<N>::postRegrid()
   }
 
   // Compute new right-hand side.
-  m_solver->computeRHS(m_rhsFunc);
+  m_solver->computeRHS(m_rhsFunction);
 }
 
 template <size_t N>
@@ -348,6 +350,6 @@ MeshODEStepper<N>::advanceRK4(const Real a_dt)
   MayDay::Error("MeshODEStepper::advanceRK4 -- not implemented");
 }
 
-#include <CD_NameSpaceFooter.H>
+#include <CD_NamespaceFooter.H>
 
 #endif

@@ -14,6 +14,7 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <ParmParse.H>
 
 // Our includes
 #include <CD_MeshODESolver.H>

@@ -10,7 +10,7 @@ def write_template(args):
     # Write plasma kinetics options
     options_files = [args.discharge_home + "/Source/AmrMesh/CD_AmrMesh.options", \
                      args.discharge_home + "/Source/Driver/CD_Driver.options", \
-                     args.discharge_home + "/Source/MeshODEs/CD_MeshODESolver.options",\
+                     args.discharge_home + "/Source/MeshODESolver/CD_MeshODESolver.options",\
                      args.discharge_home + "/Geometries/" + args.geometry + "/CD_" + args.geometry + ".options", \
                      args.discharge_home + "/Physics/MeshODE/CD_MeshODEStepper.options"]
 
