@@ -2900,23 +2900,32 @@ CdrSolver::parsePlotVariables()
   m_plotEbFlux               = false;
 
   // Parse plot variables from command line
-  ParmParse           pp(m_className.c_str());
-  const int           num = pp.countval("plt_vars");
-  Vector<std::string> str(num);
-  pp.getarr("plt_vars", str, 0, num);
+  ParmParse pp(m_className.c_str());
+  const int num = pp.countval("plt_vars");
 
-  // Set plot variables
-  for (int i = 0; i < num; i++) {
-    if (str[i] == "phi")
-      m_plotPhi = true;
-    else if (str[i] == "vel")
-      m_plotVelocity = true;
-    else if (str[i] == "dco")
-      m_plotDiffusionCoefficient = true;
-    else if (str[i] == "src")
-      m_plotSource = true;
-    else if (str[i] == "ebflux")
-      m_plotEbFlux = true;
+  if (num > 0) {
+    Vector<std::string> str(num);
+    pp.getarr("plt_vars", str, 0, num);
+
+    // Set plot variables
+    for (int i = 0; i < num; i++) {
+      if (str[i] == "phi") {
+
+        m_plotPhi = true;
+      }
+      else if (str[i] == "vel") {
+        m_plotVelocity = true;
+      }
+      else if (str[i] == "dco") {
+        m_plotDiffusionCoefficient = true;
+      }
+      else if (str[i] == "src") {
+        m_plotSource = true;
+      }
+      else if (str[i] == "ebflux") {
+        m_plotEbFlux = true;
+      }
+    }
   }
 }
 

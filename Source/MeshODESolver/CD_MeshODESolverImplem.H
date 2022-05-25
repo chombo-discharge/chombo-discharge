@@ -75,6 +75,8 @@ MeshODESolver<N>::parseOptions() noexcept
   pp.get("verbosity", m_verbosity);
   pp.get("use_regrid_slopes", m_regridSlopes);
 
+  this->parsePlotVariables();
+
   if (m_verbosity > 5) {
     pout() << m_name + "::parseOptions()" << endl;
   }
@@ -93,6 +95,38 @@ MeshODESolver<N>::parseRuntimeOptions() noexcept
 
   pp.get("verbosity", m_verbosity);
   pp.get("use_regrid_slopes", m_regridSlopes);
+
+  this->parsePlotVariables();
+}
+
+template <size_t N>
+void
+MeshODESolver<N>::parsePlotVariables() noexcept
+{
+  CH_TIME("MeshODESolver::parsePlotVariables()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parsePlotVariables()" << endl;
+  }
+
+  m_plotPhi = false;
+  m_plotRHS = false;
+
+  ParmParse pp(m_className.c_str());
+  const int num = pp.countval("plt_vars");
+
+  if (num > 0) {
+    Vector<std::string> str(num);
+    pp.getarr("plt_vars", str, 0, num);
+
+    for (int i = 0; i < num; i++) {
+      if (str[i] == "phi") {
+        m_plotPhi = true;
+      }
+      else if (str[i] == "rhs") {
+        m_plotRHS = true;
+      }
+    }
+  }
 }
 
 template <size_t N>
@@ -182,11 +216,11 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
       auto regularKernel = [&](const IntVect& iv) -> void {
         std::array<Real, N> y{};
 
-        if (validCells(iv, comp) && ebisbox.isRegular(iv)) {
-          const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+        //        if (validCells(iv, comp) && ebisbox.isRegular(iv)) {
+        const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
 
-          const std::array<Real, N> y = a_phiFunc(pos);
-        }
+        y = a_phiFunc(pos);
+        //        }
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
         for (size_t i = 0; i < N; i++) {
@@ -202,7 +236,7 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
         if (validCells(iv, comp)) {
           const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 
-          const std::array<Real, N> y = a_phiFunc(pos);
+          y = a_phiFunc(pos);
         }
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
@@ -217,7 +251,7 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
 
       // Run the kernels.
       BoxLoops::loop(cellBox, regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);
+      //      BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }
@@ -402,7 +436,7 @@ MeshODESolver<N>::getPlotVariableNames() const noexcept
     }
   }
 
-  if (m_plotSource) {
+  if (m_plotRHS) {
     for (size_t i = 0; i < N; i++) {
       plotVarNames.push_back(m_name + " source-" + std::to_string(i));
     }
@@ -426,7 +460,7 @@ MeshODESolver<N>::getNumberOfPlotVariables() const noexcept
     numPlotVars += int(N);
   }
 
-  if (m_plotSource) {
+  if (m_plotRHS) {
     numPlotVars += int(N);
   }
 
@@ -559,7 +593,7 @@ MeshODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_icomp) const noe
     this->writeData(a_output, a_icomp, m_phi, true);
   }
 
-  if (m_plotSource) {
+  if (m_plotRHS) {
     this->writeData(a_output, a_icomp, m_rhs, true);
   }
 }

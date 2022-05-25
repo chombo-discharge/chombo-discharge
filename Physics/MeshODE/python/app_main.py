@@ -36,17 +36,9 @@ def write_template(args):
     mainf.write("\n")
 
     mainf.write("\n")
-    mainf.write("  // Set geometry and AMR \n")
     mainf.write("  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new " + args.geometry + "());\n")
     mainf.write("  RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());\n")
-
-
-    mainf.write("\n")
-    mainf.write("  // Set up basic tracer particle physics \n")
     mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new MeshODEStepper<1>());\n")
-    mainf.write("\n")
-    
-    mainf.write("  // Set up the Driver and run it\n")
     mainf.write("  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr));\n")
     mainf.write("  engine->setupAndRun(input_file);\n");
     mainf.write("\n")

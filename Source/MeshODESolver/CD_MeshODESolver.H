@@ -298,7 +298,7 @@ protected:
   /*!
     @brief Plot source term or not.
   */
-  bool m_plotSource;
+  bool m_plotRHS;
 
   /*!
     @brief Use slopes when regridding
@@ -342,9 +342,6 @@ protected:
   EBAMRCellData m_cache;
 
   /*!
-    @brief Write data into data holder
-  */
-  /*!
     @brief Write data to output. Convenience function. 
     @param[inout] a_output Output data holder.
     @param[inout] a_icomp  Starting component where this solver begins writing the output. 
@@ -353,6 +350,12 @@ protected:
   */
   virtual void
   writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp) const noexcept;
+
+  /*!
+    @brief Parse plot variables
+  */
+  virtual void
+  parsePlotVariables() noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

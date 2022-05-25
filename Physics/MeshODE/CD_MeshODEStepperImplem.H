@@ -24,11 +24,9 @@ MeshODEStepper<N>::MeshODEStepper()
 {
   CH_TIME("MeshODEStepper::MeshODEStepper");
 
-  m_verbosity = -1;
+  m_verbosity = 10;
   m_realm     = Realm::Primal;
   m_phase     = phase::gas;
-
-  this->parseOptions();
 }
 
 template <size_t N>
@@ -54,6 +52,18 @@ MeshODEStepper<N>::setupSolvers()
   m_solver->setPhase(m_phase);
   m_solver->setRealm(m_realm);
   m_solver->parseOptions();
+
+  // Initialize functions.
+  m_initialData = [](const RealVect& a_pos) -> std::array<Real, N> {
+    std::array<Real, N> Y;
+    for (auto& y : Y) {
+      y = a_pos[0];
+    }
+
+    return Y;
+  };
+
+  m_rhsFunction = [](const std::array<Real, N>, const Real) -> std::array<Real, N> { return std::array<Real, N>{}; };
 }
 
 template <size_t N>
@@ -143,7 +153,7 @@ MeshODEStepper<N>::parseRuntimeOptions()
   m_solver->parseRuntimeOptions();
 
   this->parseIntegrator();
-  this->parseVerbosity();  
+  this->parseVerbosity();
 }
 
 #ifdef CH_USE_HDF5

@@ -265,7 +265,7 @@ namespace Physics {
 	@brief Parse chattiness
       */
       virtual void
-      parseVerbosity();      
+      parseVerbosity();
 
       /*!
 	@brief Advance using the explicit Euler rule
