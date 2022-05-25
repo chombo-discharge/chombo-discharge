@@ -1,0 +1,5 @@
+# ====================================================================================================
+# MeshODESolver class options
+# ====================================================================================================
+MeshODESolver.verbosity          = -1     # Verbosity level
+MeshODESolver.use_regrid_slopes  = false  # Use or don't use slopes when regridding

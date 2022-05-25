@@ -1,0 +1,5 @@
+# ====================================================================================================
+# MeshODEStepper class options
+# ====================================================================================================
+MeshODEStepper.integration       = euler  # 'euler', 'rk2', or 'rk4'
+MeshODEStepper.verbosity         = -1     # Verbosity level

@@ -256,10 +256,16 @@ namespace Physics {
       std::function<std::array<Real, N>(const RealVect& a_position)> m_initialData;
 
       /*!
-	@brief Parse reactive integrator.
+	@brief Parse integrator
       */
       virtual void
       parseIntegrator();
+
+      /*!
+	@brief Parse chattiness
+      */
+      virtual void
+      parseVerbosity();      
 
       /*!
 	@brief Advance using the explicit Euler rule

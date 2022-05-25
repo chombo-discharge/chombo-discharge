@@ -126,6 +126,7 @@ MeshODEStepper<N>::parseOptions()
   m_solver->parseOptions();
 
   this->parseIntegrator();
+  this->parseVerbosity();
 }
 
 template <size_t N>
@@ -140,6 +141,7 @@ MeshODEStepper<N>::parseRuntimeOptions()
   m_solver->parseRuntimeOptions();
 
   this->parseIntegrator();
+  this->parseVerbosity();  
 }
 
 #ifdef CH_USE_HDF5
@@ -294,6 +296,20 @@ MeshODEStepper<N>::parseIntegrator()
   else {
     MayDay::Error("MeshODEStepper::parseIntegrator -- logic bust");
   }
+}
+
+template <size_t N>
+void
+MeshODEStepper<N>::parseVerbosity()
+{
+  CH_TIME("MeshODEStepper::parseVerbosity()");
+  if (m_verbosity > 5) {
+    pout() << "MeshODEStepper::parseVerbosity()" << endl;
+  }
+
+  ParmParse pp("MeshODEStepper");
+
+  pp.get("verbosity", m_verbosity);
 }
 
 template <size_t N>
