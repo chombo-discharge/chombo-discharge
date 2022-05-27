@@ -25,7 +25,7 @@ pip install sphinx-autobuild
 To build the documentation, run
 
 ```
-sphinx-autobuild source/ docs/build/html
+sphinx-autobuild source/ ../build/html
 ```
 
 This will start a server at http://127.0.0.1:8000 and start watching for changes in the `source` directory.
