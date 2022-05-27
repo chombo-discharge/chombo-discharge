@@ -12,6 +12,7 @@ CDRPLASMA_LIB      = CdrPlasmaPhysics
 ELECTROSTATICS_LIB = ElectrostaticPhysics
 GEOMETRYONLY_LIB   = GeometryPhysics
 ITOPLASMA_LIB      = ItoPlasmaPhysics
+MESHODE_LIB        = MeshODEPhysics
 RADTRANSFER_LIB    = RadiativeTransferPhysics
 TRACERPARTICLE_LIB = TracerParticlePhysics
 
@@ -30,6 +31,7 @@ CDRPLASMA_DIRS       := $(shell find $(DISCHARGE_HOME)/Physics/CdrPlasma        
 ELECTROSTATICS_DIRS  := $(shell find $(DISCHARGE_HOME)/Physics/Electrostatics     -type d -print)
 GEOMETRYONLY_DIRS    := $(shell find $(DISCHARGE_HOME)/Physics/Geometry           -type d -print)
 ITOPLASMA_DIRS       := $(shell find $(DISCHARGE_HOME)/Physics/ItoPlasma          -type d -print)
+MESHODE_DIRS         := $(shell find $(DISCHARGE_HOME)/Physics/MeshODE            -type d -print)
 RADTRANSFER_DIRS     := $(shell find $(DISCHARGE_HOME)/Physics/RadiativeTransfer  -type d -print)
 TRACERPARTICLE_DIRS  := $(shell find $(DISCHARGE_HOME)/Physics/TracerParticle     -type d -print)
 
@@ -39,6 +41,7 @@ CDRPLASMA_INCLUDE       := $(foreach dir, $(CDRPLASMA_DIRS),       $(addprefix -
 ELECTROSTATICS_INCLUDE  := $(foreach dir, $(ELECTROSTATICS_DIRS),  $(addprefix -I, $(dir)))
 GEOMETRYONLY_INCLUDE    := $(foreach dir, $(GEOMETRYONLY_DIRS),    $(addprefix -I, $(dir)))
 ITOPLASMA_INCLUDE       := $(foreach dir, $(ITOPLASMA_DIRS),       $(addprefix -I, $(dir)))
+MESHODE_INCLUDE         := $(foreach dir, $(MESHODE_DIRS),         $(addprefix -I, $(dir)))
 RADTRANSFER_INCLUDE     := $(foreach dir, $(RADTRANSFER_DIRS),     $(addprefix -I, $(dir)))
 TRACERPARTICLE_INCLUDE  := $(foreach dir, $(TRACERPARTICLE_DIRS),  $(addprefix -I, $(dir)))
 

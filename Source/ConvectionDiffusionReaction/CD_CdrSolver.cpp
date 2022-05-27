@@ -2064,9 +2064,9 @@ CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& 
   // Number of components we are working with.
   const int ncomp = a_data[0]->nComp();
 
-  const Interval srcInterv(0, ncomp - 1); // This is the component range in scratch which we want to copy from
-  const Interval dstInterv(a_comp,
-                           a_comp + ncomp - 1); // This is the component range in a_output which we want to copy into
+  // Component ranges that we copy to/from.
+  const Interval srcInterv(0, ncomp - 1);
+  const Interval dstInterv(a_comp, a_comp + ncomp - 1);
 
   // Copy data to scratch and interpolate scratch to cell centroids if we are asked to.
   EBAMRCellData scratch;
@@ -2900,23 +2900,32 @@ CdrSolver::parsePlotVariables()
   m_plotEbFlux               = false;
 
   // Parse plot variables from command line
-  ParmParse           pp(m_className.c_str());
-  const int           num = pp.countval("plt_vars");
-  Vector<std::string> str(num);
-  pp.getarr("plt_vars", str, 0, num);
+  ParmParse pp(m_className.c_str());
+  const int num = pp.countval("plt_vars");
 
-  // Set plot variables
-  for (int i = 0; i < num; i++) {
-    if (str[i] == "phi")
-      m_plotPhi = true;
-    else if (str[i] == "vel")
-      m_plotVelocity = true;
-    else if (str[i] == "dco")
-      m_plotDiffusionCoefficient = true;
-    else if (str[i] == "src")
-      m_plotSource = true;
-    else if (str[i] == "ebflux")
-      m_plotEbFlux = true;
+  if (num > 0) {
+    Vector<std::string> str(num);
+    pp.getarr("plt_vars", str, 0, num);
+
+    // Set plot variables
+    for (int i = 0; i < num; i++) {
+      if (str[i] == "phi") {
+
+        m_plotPhi = true;
+      }
+      else if (str[i] == "vel") {
+        m_plotVelocity = true;
+      }
+      else if (str[i] == "dco") {
+        m_plotDiffusionCoefficient = true;
+      }
+      else if (str[i] == "src") {
+        m_plotSource = true;
+      }
+      else if (str[i] == "ebflux") {
+        m_plotEbFlux = true;
+      }
+    }
   }
 }
 

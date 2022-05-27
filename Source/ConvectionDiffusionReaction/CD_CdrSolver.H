@@ -43,7 +43,7 @@ public:
     @brief Disallowed copy constructor
     @param[in] a_other Other solver
   */
-  CdrSolver(const CdrSolver& a_other);
+  CdrSolver(const CdrSolver& a_other) = delete;
 
   /*!
     @brief Disallowed move constructor

@@ -29,6 +29,7 @@
 pout.*
 time.table.*
 
+myApplications/**
 MyApplications/**
 scripts/**
 Research/**
