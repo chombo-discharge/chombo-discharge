@@ -1,4 +1,0 @@
-.. _Chap:GeometryModel:
-
-Geometry
-========
