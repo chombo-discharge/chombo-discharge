@@ -21,8 +21,8 @@ AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stu
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
-AmrMesh.centroid_sten    = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
-AmrMesh.eb_sten          = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+AmrMesh.centroid_sten    = lsq      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+AmrMesh.eb_sten          = lsq         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic conservation laws
 
 
@@ -73,8 +73,8 @@ MeshODESolver.use_regrid_slopes  = false   # Use or don't use slopes when regrid
 # This is a coaxial cable class with outer and inner electrodes, and a dielectric.
 # Use CoaxialCable.endpoint1(2) to specify endpoints. Only endpoint1 is used in 2D. 
 # ====================================================================================================
-CoaxialCable.endpoint1           =  0  0  0  # One endpopint
-CoaxialCable.endpoint2           =  2  2  2  # Other endpoint
+CoaxialCable.endpoint1           =  0  0  -2 # One endpopint
+CoaxialCable.endpoint2           =  0  0  2  # Other endpoint
 
 CoaxialCable.outer.on            = true
 CoaxialCable.outer.radius        = 0.75
