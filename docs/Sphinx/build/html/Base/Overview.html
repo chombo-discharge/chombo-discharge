@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Overview &mdash; chombo-discharge latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Installation" href="Installation.html" />
+    <link rel="prev" title="Using this documentation" href="Documentation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Documentation.html">Using this documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#history">History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-functionalities">Key functionalities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#design-approach">Design approach</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
+</ul>
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">chombo-discharge</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Overview</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/Base/Overview.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="overview">
+<span id="chap-overview"></span><h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="history">
+<h2>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is aimed at solving discharge problems.
+It was originally developed at SINTEF Energy Research between 2015-2018, and aimed at elucidating discharge dynamics in high-voltage engineering.
+Further development was started in 2021, where much of the code was redesigned for improved modularity and performance.</p>
+</div>
+<div class="section" id="key-functionalities">
+<h2>Key functionalities<a class="headerlink" href="#key-functionalities" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses a Cartesian embedded boundary (EB) grid formulation and adaptive mesh refinement (AMR) formalism where the grids frequently change and are adapted to the solution as simulations progress.
+Key functionalities are provided in <a class="reference internal" href="#tab-keycapabilities"><span class="std std-numref">Table 1</span></a>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is <strong>not</strong> a black-box model for discharge applications.
+It is an evolving research code with occasionally expanded capabilities, API changes, and performance improvements.
+Although problems can be set up through our Python toos, users should nonetheless be willing to take time to understand how the code works.
+In particular, developers should invest some effort in understanding the data structures and <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> basics (see <a class="reference internal" href="../Source/ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a>).</p>
+</div>
+<span id="tab-keycapabilities"></span><table class="colwidths-given docutils align-default" id="id1">
+<caption><span class="caption-number">Table 1 </span><span class="caption-text">Key capabilities.</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 71%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Capabilities</p></th>
+<th class="head"><p>Supported?</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Grids</p></td>
+<td><p><strong>Fundamentally Cartesian</strong>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Parallelized?</p></td>
+<td><p><strong>Yes</strong>, using flat MPI.</p></td>
+</tr>
+<tr class="row-even"><td><p>Load balancing?</p></td>
+<td><p><strong>Yes</strong>, with support for individual particle and fluid load balancing.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Complex geometries?</p></td>
+<td><p><strong>Yes</strong>, using embedded boundaries (i.e., cut-cells).</p></td>
+</tr>
+<tr class="row-even"><td><p>Adaptive mesh refinement?</p></td>
+<td><p><strong>Yes</strong>, using patch-based refinement.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Subcycling in time?</p></td>
+<td><p><strong>No</strong>, only global time step methods.</p></td>
+</tr>
+<tr class="row-even"><td><p>Computational particles?</p></td>
+<td><p><strong>Yes.</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Linear solvers?</p></td>
+<td><p><strong>Yes</strong>, using geometric multigrid in complex geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p>Time discretizations?</p></td>
+<td><p><strong>Mostly explicit.</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Parallel IO?</p></td>
+<td><p><strong>Yes</strong>, using HDF5.</p></td>
+</tr>
+<tr class="row-even"><td><p>Checkpoint-restart?</p></td>
+<td><p><strong>Yes</strong>, for both fluid and particles.</p></td>
+</tr>
+</tbody>
+</table>
+<p>An early version of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> used sub-cycling in time, but this has now been replaced with global time stepping methods.
+That is, all the AMR levels are advanced using the same time step.
+<code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has also incorporated many changes to the EB functionality supplied by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
+This includes much faster grid generation, support for polygon surfaces, and many performance optimizations (in particular to the EB formulation).</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports both fluid and particle methods, and can use multiply parallel distributed grids (see <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>) for individually load balancing particle and fluid kernels.
+Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and still use the embedded boundary formalism, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also provides several physics modules for describing various types of problems.
+See e.g. <a class="reference internal" href="../Applications/ImplementedModels.html#chap-implementedmodels"><span class="std std-ref">Implemented models</span></a>.</p>
+</div>
+<div class="section" id="design-approach">
+<h2>Design approach<a class="headerlink" href="#design-approach" title="Permalink to this headline">¶</a></h2>
+<p>A fundamental design principle in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is the division between the AMR core, geometry, solvers, physics coupling, and user applications.
+As an example, the fundamental time integrator class <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is a just an abstraction, i.e. it only presents an API which application codes must use.
+Because of that, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> can be used for solving completely unrelated problems.
+We have, for example, implementations of <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> for solving radiative transfer equations, advection-diffusion problems, electrostatic problems, or for plasma problems.</p>
+<p>The division between computational concepts (e.g., AMR functionality and solvers) exists so that users will be able to solve problems across a range of geometries, add new solvers functionality, or write entirely new applications, without requiring deep changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
+<a class="reference internal" href="#fig-design"><span class="std std-numref">Fig. 1</span></a> shows the basic design sketch of the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> code.
+To the right in this figure we have the AMR core functionality, which supplies the infrastructure for running the solvers.
+In general, solvers may share common features (such as elliptic discretizations) or be completely disjoint.
+For this reason numerical solvers are asked to <em>register</em> AMR requirements.
+For example, elliptic solvers need functionality for interpolating ghost cells over the refinement boundary, but pure particle solvers have no need for such functionality.
+A consequence of this is that the numerical solvers are literally asked (during their instantiation) to register what type of AMR infrastructure they require.
+In return, the AMR core will allocate this infrastructure and make it available to solver, as illustrated in <a class="reference internal" href="#fig-design"><span class="std std-numref">Fig. 1</span></a>.</p>
+<div class="figure align-center" id="id2">
+<span id="fig-design"></span><a class="reference internal image-reference" href="../_images/Design.png"><img alt="../_images/Design.png" src="../_images/Design.png" style="width: 600px;" /></a>
+<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">Concept design sketch for <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also uses <em>loosely coupled</em> solvers as a foundation for the code design, where a <em>solver</em> indicates a piece of code for solving an equation.
+For example, solving the Laplace equation <span class="math notranslate nohighlight">\(\nabla^2\Phi = 0\)</span> is encapsulated by one of the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> solvers.
+Some solvers in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> have a null-implemented API, i.e. we have enforced a strict separation of the solver interface and the solver implementation.
+This constraint exists because while new features may be added to a discretization, we do not want such changes to affect upstream application code.
+An example of this is the <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code>, which conceptualizes a numerical solver for solving for electrostatic field problems.
+The <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is an API with no fundamental discretization – it only contains high-level routines for understanding the type of solver being dealt with.
+Yet, it is the <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> API which is used by application code (and not the implementation class).</p>
+<p>All numerical solvers interact with a common AMR core that encapsulates functionality for running the solvers.
+All solvers are also compatible with mesh refinement and complex geometries, but they can only run through <em>application codes</em>, i.e. <em>physics modules</em>.
+These modules encapsulate the time advancement of either individual or coupled solvers.
+Solvers only interact with one another through these modules, and these modules usually advance the equations of motion using the method-of-lines.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Documentation.html" class="btn btn-neutral float-left" title="Using this documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, SINTEF Energy Research
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

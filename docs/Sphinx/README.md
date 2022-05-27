@@ -25,10 +25,10 @@ pip install sphinx-autobuild
 To build the documentation, run
 
 ```
-sphinx-autobuild sphinx/source docs
+sphinx-autobuild source/ docs/build/html
 ```
 
-This will start a server at http://127.0.0.1:8000 and start watching for changes in the `docs/` directory.
+This will start a server at http://127.0.0.1:8000 and start watching for changes in the `source` directory.
 When a change is detected in `docs/`, the documentation is rebuilt and any open browser windows are reloaded automatically. `KeyboardInterrupt` (<kbd>ctrl</kbd>+<kbd>c</kbd>) will stop the server.
 
 ## Adding Sphinx changes. 

@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Realm &mdash; chombo-discharge latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Linear solvers" href="LinearSolvers.html" />
+    <link rel="prev" title="Particles" href="Particles.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">Discretization</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Realm</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dual-grid">Dual grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#realm-registration">Realm registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#operator-registration">Operator registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#available-operators">Available operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interacting-with-realms">Interacting with realms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
+</ul>
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">chombo-discharge</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Realm</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/Source/Realm.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="realm">
+<span id="chap-realm"></span><h1>Realm<a class="headerlink" href="#realm" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">Realm</span></code> is a class for centralizing EBAMR-related grids and operators for a specific AMR grid.
+For example, a <code class="docutils literal notranslate"><span class="pre">Realm</span></code> consists of a set of grids (i.e. a <code class="docutils literal notranslate"><span class="pre">Vector&lt;DisjointBoxLayout&gt;</span></code>) as well as <em>operators</em>, e.g. functionality for filling ghost cells or averaging down a solution from a fine level to a coarse level.
+One may think of a <code class="docutils literal notranslate"><span class="pre">Realm</span></code> as a fully-fledged AMR hierarchy with associated multilevel operators, i.e. how one would usually do AMR.</p>
+<div class="section" id="dual-grid">
+<h2>Dual grid<a class="headerlink" href="#dual-grid" title="Permalink to this headline">¶</a></h2>
+<p>The reason why <code class="docutils literal notranslate"><span class="pre">Realm</span></code> exists at all is due to individual load balancing of algorithmic components.
+The terminology <em>dual grid</em> is used when more than one <code class="docutils literal notranslate"><span class="pre">Realm</span></code> is used in a simulation, and in this case the user/developer has chosen to solve the equations of motion over a different set of <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> on each level.
+This approach is very useful when using computational particles since users can quickly generate separate Eulerian sets of grids for fluids and particles, and the grids can then be load balanced separately.
+Note that every <code class="docutils literal notranslate"><span class="pre">Realm</span></code> consists of the same boxes, i.e. the physical domain and computational grids are the same for all realms.
+The difference lies primarily in the assignment of MPI ranks to grids; i.e. the load-balancing and domain decomposition.</p>
+<div class="figure align-center" id="id1">
+<span id="fig-dualmesh"></span><a class="reference internal image-reference" href="../_images/DualMesh.png"><img alt="../_images/DualMesh.png" src="../_images/DualMesh.png" style="width: 360px;" /></a>
+<p class="caption"><span class="caption-number">Fig. 10 </span><span class="caption-text">Sketch of dual grid approach.
+Each rectangle represents a grid patch. a) Load balancing with the number of grid cells. b) Load balancing with the number of particles.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p><a class="reference internal" href="#fig-dualmesh"><span class="std std-numref">Fig. 10</span></a> shows an example of a dual-grid approach.
+In  this figure we have a set of grid patches on a particular grid level.
+In the top panel the grid patches are load-balanced using the grid patch volume as a proxy for the computational load.
+The numbers in each grid patch indicates the MPI rank ownership of the patches.
+In the bottom panel we have introduced computational particles in some of the patches.
+For particles, the computational load is better defined by the number of computational particles assigned to the patch, and so using the number of particles as a proxy for the load yields different rank ownership over the grid patches.</p>
+</div>
+<div class="section" id="realm-registration">
+<h2>Realm registration<a class="headerlink" href="#realm-registration" title="Permalink to this headline">¶</a></h2>
+<p>To register a <code class="docutils literal notranslate"><span class="pre">Realm</span></code>, users will have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> allocate the desired number of realms in the pure routine <code class="docutils literal notranslate"><span class="pre">registerRealms()</span></code>, as follows:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="n">myTimeStepper</span><span class="o">::</span><span class="n">registerRealms</span><span class="p">(){</span>
+   <span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="n">Realm</span><span class="o">::</span><span class="n">Primal</span><span class="p">);</span>
+   <span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;particleRealm&quot;</span><span class="p">);</span>
+   <span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;otherParticleRealm&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Since at least one realm is required, <code class="docutils literal notranslate"><span class="pre">Driver</span></code> will <em>always</em> register the realm <code class="docutils literal notranslate"><span class="pre">&quot;Primal&quot;</span></code>.</p>
+<p>During regrid, all realms are initially load balanced with the grid patch volume as the load proxy.
+However, users can change load balancing individually for each realm through the load balancing routines in <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.</p>
+</div>
+<div class="section" id="operator-registration">
+<h2>Operator registration<a class="headerlink" href="#operator-registration" title="Permalink to this headline">¶</a></h2>
+<p>Internally, an instantiation of <code class="docutils literal notranslate"><span class="pre">Realm</span></code> contains the grids and the geometric information (e.g. <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code>), as well as any operators that the user has seen fit to <em>register</em>.
+Various operators are available for e.g. gradient stencils, conservative coarsening, ghost cell interpolation, filling a patch with interpolation data, redistribution, and so on.
+Since operators always incur overhead and not all applications require <em>all</em> operators, they must be <em>registered</em>.
+If a solver needs an operator for, say, piecewise linear ghost cell interpolation, the solver needs to <em>register</em> that operator through the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> public interface:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerOperator</span><span class="p">(</span><span class="n">s_eb_pwl_interp</span><span class="p">,</span>   <span class="n">m_realm</span><span class="p">,</span> <span class="n">m_phase</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Once an operator has been registered, <code class="docutils literal notranslate"><span class="pre">Realm</span></code> will define those operators during initialization e.g. regrids.
+Run-time aborts with error messages are issued if an AMR operator is used, but has not been registered.</p>
+<p>More commonly, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> solvers will contain a routine that registers the operators that the solver needs.
+A valid <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> implementation <em>must</em> register all required operators in the function <code class="docutils literal notranslate"><span class="pre">registerOperators()</span></code>, which is mostly as simple as:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">FieldSolver</span> <span class="n">myPoissonSolver</span><span class="p">;</span>
+<span class="n">CdrSolver</span> <span class="n">myCdrSolver</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="n">myTimeStepper</span><span class="o">::</span><span class="n">registerOperators</span><span class="p">(){</span>
+   <span class="n">myPoissonSolver</span><span class="o">-&gt;</span><span class="n">registerOperators</span><span class="p">();</span>
+   <span class="n">myCdrSolver</span><span class="o">-&gt;</span><span class="n">registerOperators</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This will register the operators needed for <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> and <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code> solver classes.
+Note that if the solvers register the same operators, these operators are only defined once in <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>.</p>
+</div>
+<div class="section" id="available-operators">
+<h2>Available operators<a class="headerlink" href="#available-operators" title="Permalink to this headline">¶</a></h2>
+<p>The current operators are currently available:</p>
+<ol class="arabic simple">
+<li><p>Gradient <code class="docutils literal notranslate"><span class="pre">s_eb_gradient</span></code>.</p></li>
+<li><p>Irregular cell centroid interpolation, <code class="docutils literal notranslate"><span class="pre">s_eb_irreg_interp</span></code>.</p></li>
+<li><p>Coarse grid conservative coarsening, <code class="docutils literal notranslate"><span class="pre">s_eb_coar_ave</span></code>.</p></li>
+<li><p>Piecewise linear interpolation (with slope limiters), <code class="docutils literal notranslate"><span class="pre">s_eb_fill_patch</span></code>.</p></li>
+<li><p>Linear ghost cell interpolation, <code class="docutils literal notranslate"><span class="pre">s_eb_pwl_interp</span></code>.</p></li>
+<li><p>Flux registers, <code class="docutils literal notranslate"><span class="pre">s_eb_flux_reg</span></code>.</p></li>
+<li><p>Redistribution registers, <code class="docutils literal notranslate"><span class="pre">s_eb_redist</span></code>.</p></li>
+<li><p>Non-conservative divergence stencils, <code class="docutils literal notranslate"><span class="pre">s_eb_noncons_div</span></code>.</p></li>
+<li><p>Multigrid interpolators, <code class="docutils literal notranslate"><span class="pre">s_eb_multigrid</span></code> (used for multigrid).</p></li>
+<li><p>Signed distance function defined on grid, <code class="docutils literal notranslate"><span class="pre">s_levelset</span></code>.</p></li>
+<li><p>Particle-mesh support, <code class="docutils literal notranslate"><span class="pre">s_eb_particle_mesh</span></code>.</p></li>
+</ol>
+<p>Solvers will typically allocate a subset of these operators, but for multiphysics code that use both fluid and particles, most of these will be in use.</p>
+</div>
+<div class="section" id="interacting-with-realms">
+<h2>Interacting with realms<a class="headerlink" href="#interacting-with-realms" title="Permalink to this headline">¶</a></h2>
+<p>Users will not interact with <code class="docutils literal notranslate"><span class="pre">Realm</span></code> directly.
+Every <code class="docutils literal notranslate"><span class="pre">Realm</span></code> is owned by <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>, and the user will only interact with realms through the public <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> interface, for example by fetching operators for performing AMR operations.
+In addition, data that is defined on one realm can be copied to another; <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> takes care of this.
+You will simply call a copier:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span> <span class="n">realmOneData</span><span class="p">;</span>
+<span class="n">EBAMRCellData</span> <span class="n">realmTwoData</span><span class="p">;</span>
+
+<span class="n">realmOneData</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="n">realmTwoData</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The rest of the functionality uses the public interface of <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>.
+For example for coarsening of multifluid data:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">multifluidRealm</span><span class="p">;</span>
+<span class="n">MFAMRCellData</span> <span class="n">multifluidData</span><span class="p">;</span>
+<span class="n">AmrMesh</span> <span class="n">amrMesh</span><span class="p">;</span>
+
+<span class="n">amrMesh</span><span class="p">.</span><span class="n">averageDown</span><span class="p">(</span><span class="n">multifluidData</span><span class="p">,</span> <span class="n">multifluidRealm</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="LinearSolvers.html" class="btn btn-neutral float-right" title="Linear solvers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Particles.html" class="btn btn-neutral float-left" title="Particles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, SINTEF Energy Research
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
