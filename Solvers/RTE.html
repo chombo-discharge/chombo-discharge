@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Radiative transfer &mdash; chombo-discharge latest documentation</title>
+  <title>Radiative transfer &mdash; chombo-discharge  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Surface charge solver" href="Sigma.html" />
-    <link rel="prev" title="Electrostatics" href="Electrostatics.html" /> 
+    <link rel="prev" title="Mesh ODE solver" href="MeshODESolver.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,9 +31,6 @@
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> chombo-discharge
           </a>
-              <div class="version">
-                latest
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -45,8 +42,8 @@
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
 </ul>
@@ -58,22 +55,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
@@ -88,6 +69,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Radiative transfer</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#rtspecies">RtSpecies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#rtsolver">RtSolver</a></li>
@@ -127,21 +109,39 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
@@ -206,34 +206,34 @@ The source code is located in <code class="file docutils literal notranslate"><s
 <h3>Equation of motion<a class="headerlink" href="#equation-of-motion" title="Permalink to this headline"></a></h3>
 <p>In the diffusion approximation, the radiative transport equation is</p>
 <div class="math notranslate nohighlight" id="equation-transientdiffusionrte">
-<span class="eqno">(7)<a class="headerlink" href="#equation-transientdiffusionrte" title="Permalink to this equation"></a></span>\[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
+<span class="eqno">(5)<a class="headerlink" href="#equation-transientdiffusionrte" title="Permalink to this equation"></a></span>\[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\kappa\)</span> is the absorption coefficient (i.e., inverse absorption length).
 Note that in the context below, <span class="math notranslate nohighlight">\(\kappa\)</span> is <em>not</em> the volume fraction of a grid cell.
 This is called the Eddington approximation, and the radiative flux is <span class="math notranslate nohighlight">\(F = -\frac{c}{3\kappa}\nabla \Psi\)</span>.</p>
 <p>In the stationary case this yields a Helmholtz equation</p>
 <div class="math notranslate nohighlight" id="equation-stationarydiffusionrte">
-<span class="eqno">(8)<a class="headerlink" href="#equation-stationarydiffusionrte" title="Permalink to this equation"></a></span>\[\kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
+<span class="eqno">(6)<a class="headerlink" href="#equation-stationarydiffusionrte" title="Permalink to this equation"></a></span>\[\kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
 </div>
 <div class="section" id="implementation">
 <h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> uses multigrid methods for solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 7</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 8</a>, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
-The class implements <code class="docutils literal notranslate"><span class="pre">RtSolver::advance()</span></code>, which can switch between <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 7</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 8</a>.
-Note that for both the stationary and time-dependent cases the absorption coefficient <span class="math notranslate nohighlight">\(\kappa\)</span> in <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 7</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 8</a> are filled using the <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> implementation provided to the solver.
+<p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> uses multigrid methods for solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a>, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
+The class implements <code class="docutils literal notranslate"><span class="pre">RtSolver::advance()</span></code>, which can switch between <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a>.
+Note that for both the stationary and time-dependent cases the absorption coefficient <span class="math notranslate nohighlight">\(\kappa\)</span> in <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a> are filled using the <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> implementation provided to the solver.
 Also note that the absorption coefficient does not need to be constant in space.</p>
 <div class="section" id="stationary-kernel">
 <h4>Stationary kernel<a class="headerlink" href="#stationary-kernel" title="Permalink to this headline"></a></h4>
-<p>For the stationary kernel we solve <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 8</a> directly, using a single multigrid solve.
+<p>For the stationary kernel we solve <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a> directly, using a single multigrid solve.
 See <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a> for discretization details.</p>
 </div>
 <div class="section" id="transient-kernel">
 <h4>Transient kernel<a class="headerlink" href="#transient-kernel" title="Permalink to this headline"></a></h4>
-<p>For solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 7</a>, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implements both the backward Euler method and the Twizell-Gumel-Arigu (TGA) scheme.
+<p>For solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a>, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implements both the backward Euler method and the Twizell-Gumel-Arigu (TGA) scheme.
 Explicit discretizations are not available.
 The Euler discretization is</p>
 <div class="math notranslate nohighlight">
 \[\left(1+ \kappa \Delta t\right)\Psi^{k+1} - \Delta t \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi^{k+1}\right) = \Psi^{k} + \frac{\Delta t\eta^{k+1}}{c},\]</div>
 <p>Again, this is a Helmholtz equation for <cite>Psi^{k+1}</cite> which is solved using geometric multigrid.
-Expressions for the TGA scheme are found in <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id34" title="E. H. Twizell, A. B. Gumel, and M. A. Arigu. Second-order,L 0-stable methods for the heat equation with time-dependent boundary conditions. Advances in Computational Mathematics, 6(1):333–352, 1996. URL: http://link.springer.com/10.1007/BF02127712, doi:10.1007/BF02127712.">8</a>]</span>, but note that the TGA scheme requires a solution to two elliptic equations (thus it has approximately twice the cost).</p>
+Expressions for the TGA scheme are found in <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id34" title="E. H. Twizell, A. B. Gumel, and M. A. Arigu. Second-order,L 0-stable methods for the heat equation with time-dependent boundary conditions. Advances in Computational Mathematics, 6(1):333–352, 1996. URL: http://link.springer.com/10.1007/BF02127712, doi:10.1007/BF02127712.">9</a>]</span>, but note that the TGA scheme requires a solution to two elliptic equations (thus it has approximately twice the cost).</p>
 </div>
 </div>
 <div class="section" id="boundary-conditions">
@@ -298,7 +298,7 @@ However, the <code class="docutils literal notranslate"><span class="pre">Edding
 The Larsen boundary condition is an absorbing boundary condition, taking the form of a Robin boundary as follows:</p>
 <div class="math notranslate nohighlight">
 \[\kappa\partial_n\Psi + \frac{3\kappa^2}{2}\frac{1-3r_2}{1-2r_1}\Psi = g,\]</div>
-<p>where <span class="math notranslate nohighlight">\(r_1\)</span> and <span class="math notranslate nohighlight">\(r_2\)</span> are reflection coefficients and <span class="math notranslate nohighlight">\(g\)</span> is a surface source, see <span id="id2">[<a class="reference internal" href="../ZZReferences.html#id51" title="Edward W. Larsen, Guido Thömmes, Axel Klar, Mohammed Seaı̈d, and Thomas Götz. Simplified PN Approximations to the Equations of Radiative Heat Transfer and Applications. Journal of Computational Physics, 183(2):652–675, dec 2002. URL: https://www.sciencedirect.com/science/article/pii/S0021999102972104, doi:10.1006/JCPH.2002.7210.">5</a>]</span> for details.
+<p>where <span class="math notranslate nohighlight">\(r_1\)</span> and <span class="math notranslate nohighlight">\(r_2\)</span> are reflection coefficients and <span class="math notranslate nohighlight">\(g\)</span> is a surface source, see <span id="id2">[<a class="reference internal" href="../ZZReferences.html#id51" title="Edward W. Larsen, Guido Thömmes, Axel Klar, Seaid Mohammed, and Thomas Götz. Simplified PN Approximations to the Equations of Radiative Heat Transfer and Applications. Journal of Computational Physics, 183(2):652–675, dec 2002. URL: https://www.sciencedirect.com/science/article/pii/S0021999102972104, doi:10.1006/JCPH.2002.7210.">6</a>]</span> for details.
 Note that when the user specifies the boundary condition value (e.g. by setting the BC function), he is setting the surface sourge <span class="math notranslate nohighlight">\(g\)</span>.
 In the majority of cases, however, we will have <span class="math notranslate nohighlight">\(r_1 = r_2 = g = 0\)</span> and the BC becomes</p>
 <div class="math notranslate nohighlight">
@@ -499,7 +499,7 @@ The following functions are used to set the various properties:</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Electrostatics.html" class="btn btn-neutral float-left" title="Electrostatics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="MeshODESolver.html" class="btn btn-neutral float-left" title="Mesh ODE solver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Sigma.html" class="btn btn-neutral float-right" title="Surface charge solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

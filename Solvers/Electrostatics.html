@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Electrostatics &mdash; chombo-discharge latest documentation</title>
+  <title>Electrostatics &mdash; chombo-discharge  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -20,7 +20,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Radiative transfer" href="RTE.html" />
+    <link rel="next" title="Mesh ODE solver" href="MeshODESolver.html" />
     <link rel="prev" title="Convection-Diffusion-Reaction" href="CDR.html" /> 
 </head>
 
@@ -31,9 +31,6 @@
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> chombo-discharge
           </a>
-              <div class="version">
-                latest
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -45,8 +42,8 @@
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
 </ul>
@@ -58,22 +55,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
@@ -121,23 +102,42 @@
 <li class="toctree-l2"><a class="reference internal" href="#example-application">Example application</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
@@ -170,7 +170,7 @@
 <span id="chap-electrostatics"></span><h1>Electrostatics<a class="headerlink" href="#electrostatics" title="Permalink to this headline"></a></h1>
 <p>Here, we discuss the discretization of the equation</p>
 <div class="math notranslate nohighlight" id="equation-poisson">
-<span class="eqno">(5)<a class="headerlink" href="#equation-poisson" title="Permalink to this equation"></a></span>\[\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}\]</div>
+<span class="eqno">(3)<a class="headerlink" href="#equation-poisson" title="Permalink to this equation"></a></span>\[\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\Phi\)</span> is the electric potential, <span class="math notranslate nohighlight">\(\rho\)</span> is the space charge density and <span class="math notranslate nohighlight">\(\epsilon_0\)</span> is the vacuum permittivity.
 The relative permittivity is <span class="math notranslate nohighlight">\(\epsilon_r = \epsilon_r\left(\mathbf{x}\right)\)</span> and can additionally be discontinuous at gas-dielectric interfaces.</p>
 <div class="admonition note">
@@ -186,7 +186,7 @@ The code for the electrostatics solver is given in <code class="file docutils li
 Currently, our only supported implementation is <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> (see <a class="reference internal" href="#chap-fieldsolvermultigrid"><span class="std std-ref">FieldSolverMultigrid</span></a>).</p>
 <p>On gas-dielectric interfaces we enforce an extra equation</p>
 <div class="math notranslate nohighlight" id="equation-gaussbc">
-<span class="eqno">(6)<a class="headerlink" href="#equation-gaussbc" title="Permalink to this equation"></a></span>\[\epsilon_1\partial_{n_1}\Phi + \epsilon_2\partial_{n_2}\Phi = \sigma/\epsilon_0\]</div>
+<span class="eqno">(4)<a class="headerlink" href="#equation-gaussbc" title="Permalink to this equation"></a></span>\[\epsilon_1\partial_{n_1}\Phi + \epsilon_2\partial_{n_2}\Phi = \sigma/\epsilon_0\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathbf{n}_1 = -\mathbf{n}_2\)</span> are the normal vectors pointing out of each side of the interface, and <span class="math notranslate nohighlight">\(\sigma\)</span> is the surface charge density.</p>
 <p>We point out that this equation can be enforced in various formats.
 The most common case is that <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span> are free parameters and <span class="math notranslate nohighlight">\(\sigma\)</span> is a fixed parameter.
@@ -202,6 +202,18 @@ Creating a solver is usually done by means of a pointer cast:</p>
 </div>
 <p>In addition, one must parse run-time options to the class, provide the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> and <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> instances, and set the initial conditions.
 This is done as follows:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span> <span class="n">amr</span><span class="p">;</span>
+<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;</span> <span class="n">geo</span><span class="p">;</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">voltage</span><span class="p">;</span>
+
+<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">parseOptions</span><span class="p">();</span>                <span class="c1">// Parse class options</span>
+<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setAmr</span><span class="p">(</span><span class="n">amr</span><span class="p">);</span>                   <span class="c1">// Set amr - we assume that `amr` is an object</span>
+<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setComputationalGeometry</span><span class="p">(</span><span class="n">geo</span><span class="p">);</span> <span class="c1">// Set the computational geometry</span>
+<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">allocateInternals</span><span class="p">();</span>           <span class="c1">// Allocate storage for potential etc.</span>
+<span class="n">fieldSolver</span><span class="o">-&gt;</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">voltage</span><span class="p">);</span>           <span class="c1">// Set the voltage</span>
+</pre></div>
+</div>
 <p>The argument in the function <code class="docutils literal notranslate"><span class="pre">setVoltage(...)</span></code> is a function pointer of the type:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="n">voltage</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_time</span><span class="p">)</span>
 </pre></div>
@@ -329,7 +341,7 @@ I.e. the boundary condition function that is passed into the numerical discretiz
 <span id="chap-poissonebbc"></span><h2>EB boundary conditions<a class="headerlink" href="#eb-boundary-conditions" title="Permalink to this headline"></a></h2>
 <div class="section" id="electrodes">
 <h3>Electrodes<a class="headerlink" href="#electrodes" title="Permalink to this headline"></a></h3>
-<p>For the current <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> the natural BC at the EB is Dirichlet with a specified voltage, whereas on dielectrics we enforce <a class="reference internal" href="#equation-gaussbc">Eq. 6</a>.
+<p>For the current <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> the natural BC at the EB is Dirichlet with a specified voltage, whereas on dielectrics we enforce <a class="reference internal" href="#equation-gaussbc">Eq. 4</a>.
 The voltage on the electrodes are automatically retrieved from the specified voltages on the electrodes in the geometry being used (see <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code>).
 The exception to this is that while <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> specifies that an electrode will be at some fraction of a specified voltage, <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> uses this fraction <em>and</em> the specified voltage wave form in <code class="docutils literal notranslate"><span class="pre">setVoltage</span></code>.</p>
 <p>To understand how the voltage on the electrode is being set, we first remark that our implementation uses a completely general specification of the voltage on each electrode in both space and time.
@@ -377,7 +389,7 @@ The voltages that are set on the various electrodes are thus in the form:</p>
 </div>
 <div class="section" id="dielectrics">
 <span id="chap-poissondielectricbc"></span><h3>Dielectrics<a class="headerlink" href="#dielectrics" title="Permalink to this headline"></a></h3>
-<p>As mentioned above, on dielectric interfaces the user can choose to specify which “form” of <a class="reference internal" href="#equation-gaussbc">Eq. 6</a> to solve.
+<p>As mentioned above, on dielectric interfaces the user can choose to specify which “form” of <a class="reference internal" href="#equation-gaussbc">Eq. 4</a> to solve.
 If the user wants the natural form in which the surface charge is the free parameter, he can specify</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.which_jump <span class="o">=</span> natural
 </pre></div>
@@ -395,7 +407,7 @@ Support for setting <span class="math notranslate nohighlight">\(\partial_n\Phi\
 </div>
 <div class="section" id="fieldsolvermultigrid">
 <span id="chap-fieldsolvermultigrid"></span><span id="chap-electrostaticdispersion"></span><h2>FieldSolverMultigrid<a class="headerlink" href="#fieldsolvermultigrid" title="Permalink to this headline"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> implements a multigrid routine for solving <a class="reference internal" href="#equation-poisson">Eq. 5</a>, and is currently the only implementation of <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> implements a multigrid routine for solving <a class="reference internal" href="#equation-poisson">Eq. 3</a>, and is currently the only implementation of <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code>.</p>
 <p>The discretization used by <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> is described in <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
 The underlying solver type is a Helmholtz solver, but <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> considers only the Laplacian term.</p>
 <div class="section" id="solver-configuration">
@@ -597,7 +609,7 @@ In the meantime, a sufficient workaround is simply to displace the dielectric sl
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="CDR.html" class="btn btn-neutral float-left" title="Convection-Diffusion-Reaction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="RTE.html" class="btn btn-neutral float-right" title="Radiative transfer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="MeshODESolver.html" class="btn btn-neutral float-right" title="Mesh ODE solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

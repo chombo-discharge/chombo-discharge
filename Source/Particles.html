@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Particles &mdash; chombo-discharge latest documentation</title>
+  <title>Particles &mdash; chombo-discharge  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -31,9 +31,6 @@
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> chombo-discharge
           </a>
-              <div class="version">
-                latest
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -45,8 +42,8 @@
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
 </ul>
@@ -82,22 +79,38 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#regridding">Regridding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#masked-particles">Masked particles</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#registering-particle-masks">Registering particle masks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-particle-halo-masks">Creating particle halo masks</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#embedded-boundaries">Embedded boundaries</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#signed-distance-function">Signed distance function</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#deposition-and-interpolation">Deposition and interpolation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#particle-depositon">Particle depositon</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#particle-interpolation">Particle interpolation</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#particle-depositon">Particle depositon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#particle-interpolation">Particle interpolation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
@@ -115,36 +128,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Design</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
@@ -187,6 +184,7 @@ The source code for the particle functionality resides in <code class="file docu
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> uses the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> structure <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code> under the hood, and therefore has template constraints on <code class="docutils literal notranslate"><span class="pre">P</span></code>.
 The simplest way to use <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> for a new type of particle is to let <code class="docutils literal notranslate"><span class="pre">P</span></code> inherit from the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> class <code class="docutils literal notranslate"><span class="pre">BinItem</span></code>.
 <code class="docutils literal notranslate"><span class="pre">BinItem</span></code> only has a single member variable which is its position, but derived classes will contain more and must therefore also add new linearization functions if the new member variables should be communicated.
+There are many examples of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> particles, see e.g. <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticle.html">TracerParticle</a> or <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhoton.html">Photon</a>.
 Please refer to the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> design document for complete specification on the template constraints of <code class="docutils literal notranslate"><span class="pre">P</span></code>, or see some of the examples in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
 </div>
 <div class="section" id="data-structures">
@@ -194,7 +192,7 @@ Please refer to the <code class="docutils literal notranslate"><span class="pre"
 <div class="section" id="list-p-and-listbox-p">
 <h3>List&lt;P&gt; and ListBox&lt;P&gt;<a class="headerlink" href="#list-p-and-listbox-p" title="Permalink to this headline"></a></h3>
 <p>At the lowest level the particles are always stored in a linked list <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code>.
-The class can be simply be through of as a regular list of <code class="docutils literal notranslate"><span class="pre">P</span></code>.</p>
+The class can be simply be through of as a regular list of <code class="docutils literal notranslate"><span class="pre">P</span></code> with non-random access.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">ListBox&lt;P&gt;</span></code> consists of a <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code> <em>and</em> a <code class="docutils literal notranslate"><span class="pre">Box</span></code>.
 The latter specifies the grid patch that the particles are assigned to.</p>
 <p>To get the list of particles from a <code class="docutils literal notranslate"><span class="pre">ListBox&lt;P&gt;</span></code>:</p>
@@ -206,7 +204,7 @@ The latter specifies the grid patch that the particles are assigned to.</p>
 </div>
 <div class="section" id="listiterator-p">
 <h3>ListIterator&lt;P&gt;<a class="headerlink" href="#listiterator-p" title="Permalink to this headline"></a></h3>
-<p>In order to iterate over particles, you will use an iterator <code class="docutils literal notranslate"><span class="pre">ListIterator&lt;P&gt;</span></code> (which is not random access):</p>
+<p>In order to iterate over particles, use an iterator <code class="docutils literal notranslate"><span class="pre">ListIterator&lt;P&gt;</span></code> (which is not random access):</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="n">myParticles</span><span class="p">;</span>
 <span class="k">for</span> <span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="n">lit</span><span class="p">(</span><span class="n">myParticles</span><span class="p">);</span> <span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span> <span class="o">++</span><span class="n">lit</span><span class="p">){</span>
    <span class="n">P</span><span class="o">&amp;</span> <span class="n">p</span> <span class="o">=</span> <span class="n">lit</span><span class="p">();</span>
@@ -224,12 +222,12 @@ The latter specifies the grid patch that the particles are assigned to.</p>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">P</span></code> is the particle type.
-<code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code> can be thought of as a <code class="docutils literal notranslate"><span class="pre">LevelData&lt;P&gt;</span></code>, although it actually inherits from <code class="docutils literal notranslate"><span class="pre">LayoutData&lt;ListBox&lt;P&gt;</span> <span class="pre">&gt;</span></code>.
-Each grid patch therefore contains a <code class="docutils literal notranslate"><span class="pre">ListBox&lt;P&gt;</span></code> of particles.</p>
+<code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code> can be thought of as a <code class="docutils literal notranslate"><span class="pre">LevelData&lt;ListBox&lt;P&gt;</span> <span class="pre">&gt;</span></code>, although it actually inherits from <code class="docutils literal notranslate"><span class="pre">LayoutData&lt;ListBox&lt;P&gt;</span> <span class="pre">&gt;</span></code>.
+Each grid patch contains a <code class="docutils literal notranslate"><span class="pre">ListBox&lt;P&gt;</span></code> of particles.</p>
 </div>
 <div class="section" id="amrparticles-p">
 <h3>AMRParticles&lt;P&gt;<a class="headerlink" href="#amrparticles-p" title="Permalink to this headline"></a></h3>
-<p>AMRParticles&lt;P&gt; is our AMR version of <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code>.
+<p><code class="docutils literal notranslate"><span class="pre">AMRParticles&lt;P&gt;</span></code> is our AMR version of <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code>.
 It is a simply a typedef of a vector of pointers to <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code> on each level:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">P</span><span class="o">&gt;</span>
 <span class="k">using</span> <span class="n">AMRParticles</span> <span class="o">=</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ParticleData</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">;</span>
@@ -240,8 +238,8 @@ It is a simply a typedef of a vector of pointers to <code class="docutils litera
 </div>
 <div class="section" id="basic-use">
 <h2>Basic use<a class="headerlink" href="#basic-use" title="Permalink to this headline"></a></h2>
-<p>The public member functions for <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> can be found in <code class="file docutils literal notranslate"><span class="pre">chombo-discharge/Source/Particle/CD_ParticleContainer.H</span></code>.
-Here, we give some examples of basic use of <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code>.</p>
+<p>Here, we give some examples of basic use of <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code>.
+For the full API, see the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainer.html">ParticleContainer doxygen documentation</a>.</p>
 <div class="section" id="getting-the-particles">
 <h3>Getting the particles<a class="headerlink" href="#getting-the-particles" title="Permalink to this headline"></a></h3>
 <p>To get the particles from a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> one can call <code class="docutils literal notranslate"><span class="pre">AMRParticles&lt;P&gt;&amp;</span> <span class="pre">ParticleContainer&lt;P&gt;::getParticles()</span></code> which will provide the particles:</p>
@@ -250,7 +248,7 @@ Here, we give some examples of basic use of <code class="docutils literal notran
 <span class="n">AMRParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span> <span class="n">myParticles</span> <span class="o">=</span> <span class="n">myParticleContainer</span><span class="p">.</span><span class="n">getParticles</span><span class="p">();</span>
 </pre></div>
 </div>
-<p>Alternatively, one can fetch directly from a specified grid level by calling <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span> <span class="pre">ParticleContainer&lt;P&gt;::operator[](int)</span></code>, e.g.</p>
+<p>Alternatively, one can fetch directly from a specified grid level as follows:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span> <span class="n">lvl</span><span class="p">;</span>
 <span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="n">myParticleContainer</span><span class="p">;</span>
 
@@ -385,14 +383,14 @@ This buffer zone adjusts if particles on the fine side of a refinement boundary 
 There are two reasons why such a functionality is useful:</p>
 <ol class="arabic simple">
 <li><p>Particles that live in the first strip of cells on the fine side of a refinement boundary have deposition clouds that hang over the boundary and into ghost cells.
-This mass must be added to the coarse level.</p></li>
+This mass must be added to the coarse level, which adds algorithmic complexity (<code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can handle this complexity).</p></li>
 <li><p>Deposition and interpolation kernels can be entirely contained within a grid level.
 It might be useful to keep the kernel on a specific AMR level for a certain number of time step.</p></li>
 </ol>
-<div class="figure align-center" id="id3">
+<div class="figure align-center" id="id1">
 <a class="reference internal image-reference" href="../_images/ParticleValidRegion.png"><img alt="../_images/ParticleValidRegion.png" src="../_images/ParticleValidRegion.png" style="width: 360px;" /></a>
-<p class="caption"><span class="caption-number">Fig. 9 </span><span class="caption-text">The <code class="docutils literal notranslate"><span class="pre">ParticleValidRegion</span></code> allows particles whose position fall into a fine grid patch to be moved to a coarser level if they are within a specified distance from the refinement boundary.
-In this case, the green particles that overlap with the fine-level grid are remapped to the coarse level.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 11 </span><span class="caption-text">The <code class="docutils literal notranslate"><span class="pre">ParticleValidRegion</span></code> allows particles whose position fall into a fine grid patch to be moved to a coarser level if they are within a specified distance from the refinement boundary.
+In this case, the green particles that overlap with the fine-level grid are remapped to the coarse level.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </div>
 <p>The PVR is automatically allocated through the particle constructor by specifying the <code class="docutils literal notranslate"><span class="pre">a_pvrBuffer</span></code> flag.
 If you do not want to use PVR functionality, simply set <code class="docutils literal notranslate"><span class="pre">a_pvrBuffer</span> <span class="pre">=</span> <span class="pre">0</span></code> for your <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code>.
@@ -413,9 +411,13 @@ The remapping function for <code class="docutils literal notranslate"><span clas
 <div class="section" id="regridding">
 <h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this headline"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> is comparatively simple to regrid, and this is done in two steps:</p>
-<ol class="arabic simple">
-<li><p>Each MPI rank collects <em>all</em> particles on a single <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code> by calling <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">ParticleContainer&lt;P&gt;::preRegrid(int</span> <span class="pre">a_base)</span></code>.
-This will pull the particles off their current grids and collect them in a single list (on a per-rank basis).</p></li>
+<ol class="arabic">
+<li><p>Each MPI rank collects <em>all</em> particles on a single <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code> by calling</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">preRegrid</span><span class="p">(</span><span class="kt">int</span> <span class="n">a_base</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will pull the particles off their current grids and collect them in a single list (on a per-rank basis).</p>
+</li>
 <li><p>When <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> regrids, each rank adds his <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code> back into the internal particle containers.</p></li>
 </ol>
 <p>The use case typically looks like this:</p>
@@ -449,7 +451,7 @@ This will pull the particles off their current grids and collect them in a singl
 Typically, this “specified region” is the refinement boundary, but the functionality is generic and might prove useful also in other cases.</p>
 <p>When <em>masked particles</em> are used, the user can provide a boolean mask over the AMR hierarchy and obtain the subset of particles that live in regions where the mask evaluates to true.
 This functionality is for example used for some of the particle deposition methods in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> where we deposit particles that live near the refinement boundary with special deposition functions.</p>
-<p>To fill the masked particles, <a href="#id1"><span class="problematic" id="id2">``</span></a>ParticleContainer&lt;P&gt;` has members functions for copying the particles into internal data containers which the user can later fetch.
+<p>To fill the masked particles, <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> has members functions for copying the particles into internal data containers which the user can later fetch.
 The function signatures for these are</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span> <span class="n">AmrMask</span> <span class="o">=</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">BaseFab</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">;</span>
 
@@ -481,21 +483,25 @@ After the user is done with the particles, they should be deleted through the fu
 <span class="n">myParticles</span><span class="p">.</span><span class="n">clearMaskParticles</span><span class="p">();</span>
 </pre></div>
 </div>
-<div class="section" id="registering-particle-masks">
-<h3>Registering particle masks<a class="headerlink" href="#registering-particle-masks" title="Permalink to this headline"></a></h3>
+<div class="section" id="creating-particle-halo-masks">
+<h3>Creating particle halo masks<a class="headerlink" href="#creating-particle-halo-masks" title="Permalink to this headline"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> can register a <em>halo</em> mask with a specified width:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">registerMask</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">a_mask</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">a_buffer</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">a_realm</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> is <code class="docutils literal notranslate"><span class="pre">&quot;s_particle_halo&quot;</span></code>.</p>
-<p>This will register a mask which is false everywhere except in coarse-grid cells that are within a distance a_buffer from the refinement boundary.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> must be <code class="docutils literal notranslate"><span class="pre">&quot;s_particle_halo&quot;</span></code>.
+This will register a mask which is false everywhere except in coarse-grid cells that are within a distance a_buffer from the refinement boundary, see <a class="reference internal" href="#fig-halomask"><span class="std std-numref">Fig. 12</span></a>.</p>
+<div class="figure align-center" id="id2">
+<span id="fig-halomask"></span><a class="reference internal image-reference" href="../_images/HaloMask.png"><img alt="../_images/HaloMask.png" src="../_images/HaloMask.png" style="width: 360px;" /></a>
+<p class="caption"><span class="caption-number">Fig. 12 </span><span class="caption-text">Example of a particle halo mask (shaded green color) surrounding refined grid levels.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+</div>
 </div>
 </div>
 <div class="section" id="embedded-boundaries">
 <h2>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this headline"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> is EB-agnostic and has no information about the embedded boundary.
 This means that particles remap just as if the EB was not there.
-Interaction with the EB is done via the implicit function, and modifications in the interpolation and deposition steps.</p>
+Interaction with the EB is done via the implicit function or discrete information, as well as modifications in the interpolation and deposition steps.</p>
 <div class="section" id="signed-distance-function">
 <h3>Signed distance function<a class="headerlink" href="#signed-distance-function" title="Permalink to this headline"></a></h3>
 <p>When signed distance functions are used, one can always query how far a particle is from a boundary:</p>
@@ -514,12 +520,19 @@ Interaction with the EB is done via the implicit function, and modifications in 
 The distance function can also be used to detect collisions between particles and the EB.</p>
 </div>
 </div>
-<div class="section" id="deposition-and-interpolation">
-<h2>Deposition and interpolation<a class="headerlink" href="#deposition-and-interpolation" title="Permalink to this headline"></a></h2>
 <div class="section" id="particle-depositon">
-<h3>Particle depositon<a class="headerlink" href="#particle-depositon" title="Permalink to this headline"></a></h3>
+<h2>Particle depositon<a class="headerlink" href="#particle-depositon" title="Permalink to this headline"></a></h2>
 <p>To deposit particles on the mesh, the user can call the templated function <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositParticles</span></code> which has a signature</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">P</span><span class="p">,</span> <span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span> <span class="k">const</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span>              <span class="n">a_meshData</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span>          <span class="n">a_realm</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span>   <span class="n">a_phase</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span> <span class="n">a_particles</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">DepositionType</span>        <span class="n">a_depositionType</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">CoarseFineDeposition</span>  <span class="n">a_coarseFineDeposition</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="kt">bool</span>                  <span class="n">a_forceIrregNGP</span><span class="p">);</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">P</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleVectorField</span><span class="p">)()</span> <span class="k">const</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span>              <span class="n">a_meshData</span><span class="p">,</span>
                       <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span>          <span class="n">a_realm</span><span class="p">,</span>
                       <span class="k">const</span> <span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span>   <span class="n">a_phase</span><span class="p">,</span>
@@ -532,8 +545,35 @@ The distance function can also be used to detect collisions between particles an
 <p>Here, the template parameter <code class="docutils literal notranslate"><span class="pre">P</span></code> is the particle type and the template parameter <code class="docutils literal notranslate"><span class="pre">particleScalarField</span></code> is a C++ pointer-to-member-function.
 This function must have the indicated signature <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">Real&amp;</span> <span class="pre">P::particleScalarField()</span> <span class="pre">const</span></code> <em>or</em> the signature <code class="docutils literal notranslate"><span class="pre">Real</span> <span class="pre">P::particleScalarField()</span> <span class="pre">const</span></code>.
 The pointer-to-member <code class="docutils literal notranslate"><span class="pre">particleScalarField</span></code> indicates the variable to be deposited on the mesh.
-This function pointer does not need to return a member in the particle class - derived variables are also fine.
-For example, if the particle type <code class="docutils literal notranslate"><span class="pre">P</span></code> needs to deposit a computational mass on the mesh, the particle class will at least contain the following member functions:</p>
+This function pointer does not need to return a member in the particle class.</p>
+<p>Note that when depositing vector-quantities (such as electric currents), one must call the version which takes <code class="docutils literal notranslate"><span class="pre">RealVect</span> <span class="pre">P::particleVectorField()</span> <span class="pre">const</span></code> as a template parameter.
+The supplied function must return a <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> and <code class="docutils literal notranslate"><span class="pre">a_meshData</span></code> must have <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code> components.</p>
+<p>Next, the input arguments to <code class="docutils literal notranslate"><span class="pre">depositParticles</span></code> are the output mesh data holder (must have exactly one or <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code> components), the realm and phase where the particles live, and the particles themselves (<code class="docutils literal notranslate"><span class="pre">a_particles</span></code>).
+The enum <code class="docutils literal notranslate"><span class="pre">DepositionType</span></code> and input argument <code class="docutils literal notranslate"><span class="pre">a_depositionType</span></code> indicates the deposition method.
+Valid arguments are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::NGP</span></code> (Nearest grid-point).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::CIC</span></code> (Cloud-In-Cell).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::TSC</span></code> (Triangle-Shaped Cloud).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::W4</span></code>  (Fourth order weighted).</p></li>
+</ul>
+<p>The input argument <code class="docutils literal notranslate"><span class="pre">a_coarseFineDeposition</span></code> determines how coarse-fine deposition is handled.
+Strictly speaking, this argument only affects how the particle mass is deposited from the coarse level to the fine level.
+Valid input arguments are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::PVR</span></code> This uses a standard PVR formulation.
+When the particles near the refinement boundary deposit on the mesh, some of the mass from the coarse-side particles will end up underneath the fine grid.
+This mass is interpolated to the fine grid using piecewise constant interpolation.
+If the fine-level particles also have particle clouds that hang over the refinement boundary, the hanging mass will be added to the coarse level.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Halo</span></code> This uses a what we call <em>halo</em> particles.
+Instead of interpolating the mass from the invalid coarse region onto the fine level, the particles near the refinement boundary (i.e., the <em>halo</em> particles) deposit directly into the fine level but with 2x or 4x the particle width.
+So, if a coarse-level particle lives right next to the fine grid and the refinement factor between the grids is <span class="math notranslate nohighlight">\(r\)</span>, it will deposit both into the fine grid with <span class="math notranslate nohighlight">\(r\)</span> times the particle width compared to the coarse grid.
+Again, if the fine-level particles also have particle clouds that hang over the refinement boundary, the hanging mass will be added to the coarse level.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::HaloNGP</span></code> This uses halo particles, but the particles along the refinement boundary are deposited with an NGP scheme.</p></li>
+</ul>
+<p>Finally, the flag <code class="docutils literal notranslate"><span class="pre">a_forceIrregNGP</span></code> permits the user to enforce nearest grid-point deposition in cut-cells.
+This option is motivated by the fact that some applications might require hard mass conservation, and the user can ensure that mass is never deposited into covered grid cells.</p>
+<p>As an example, if the particle type <code class="docutils literal notranslate"><span class="pre">P</span></code> needs to deposit a computational mass on the mesh, the particle class will at least contain the following member functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">P</span> <span class="o">:</span> <span class="k">public</span> <span class="n">BinItem</span> <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
 
@@ -545,47 +585,34 @@ For example, if the particle type <code class="docutils literal notranslate"><sp
       <span class="k">return</span> <span class="n">m_mass</span><span class="o">*</span><span class="n">m_mass</span><span class="p">.</span>
    <span class="p">}</span>
 
+   <span class="n">RealVect</span> <span class="n">momentum</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="n">m_mass</span><span class="o">*</span><span class="n">m_velocity</span><span class="p">;</span>
+   <span class="p">}</span>
+
 <span class="k">protected</span><span class="o">:</span>
 
    <span class="n">Real</span> <span class="n">m_mass</span><span class="p">;</span>
+
+   <span class="n">Real</span> <span class="n">m_velocity</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
 </div>
-<p>Here, we have included an extra member function <code class="docutils literal notranslate"><span class="pre">mass2()</span></code> which returns the squared mass.
+<p>Here, we have included an extra member function <code class="docutils literal notranslate"><span class="pre">mass()</span></code> which returns the squared mass.
 Note that the function does not return a member variable but an r-value.
 When depositing the mass on the mesh the user will e.g. call</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span> <span class="n">amr</span><span class="p">;</span>
 
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">P</span><span class="o">::</span><span class="n">mass</span> <span class="o">&gt;</span><span class="p">(...).</span>
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span>  <span class="n">P</span><span class="o">::</span><span class="n">mass2</span><span class="o">&gt;</span><span class="p">(...).</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">P</span><span class="o">::</span><span class="n">mass</span> <span class="o">&gt;</span><span class="p">(...);</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">P</span><span class="o">::</span><span class="n">mass2</span><span class="o">&gt;</span><span class="p">(...);</span>
 </pre></div>
 </div>
-<p>Next, the input arguments to <code class="docutils literal notranslate"><span class="pre">depositParticles</span></code> are the output mesh data holder (must have exactly one component), the realm and phase where the particles live, and the particles themselves (<code class="docutils literal notranslate"><span class="pre">a_particles</span></code>).
-The enum <code class="docutils literal notranslate"><span class="pre">DepositionType</span></code> and input argument <code class="docutils literal notranslate"><span class="pre">a_depositionType</span></code> indicates the deposition method.
-Valid arguments are</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::NGP</span></code> (Nearest grid-point).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::CIC</span></code> (Cloud-In-Cell).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::TSC</span></code> (Triangle-Shaped Cloud).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::W4</span></code>  (Fourth order weighted).</p></li>
-</ul>
-<p>The input argument <code class="docutils literal notranslate"><span class="pre">a_coarseFineDeposition</span></code> determines how coarse-fine deposition is handled.
-Valid input arguments are</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::PVR</span></code> This uses a standard PVR formulation.
-When the particles near the refinement boundary deposit on the mesh, some of the mass from the coarse-side particles will end up underneath the fine grid.
-This mass is interpolated to the fine grid using piecewise constant interpolation.
-If the fine-level particles also have particle clouds that hang over the refinement boundary, the hanging mass will be added to the coarse level.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Halo</span></code> This uses a what we call <em>halo</em> particles.
-Instead of interpolating the mass from the invalid coarse region onto the fine level, the particles near the refinement boundary (i.e., the <em>halo</em> particles) deposit directly into the fine level but with 2x or 4x the particle width.
-So, if a coarse-level particle lives right next to the fine grid and the refinement factor between the grids is <span class="math notranslate nohighlight">\(r\)</span>, it will deposit both into the fine grid with <span class="math notranslate nohighlight">\(r\)</span> times the particle width compared to the coarse grid.
-Again, if the fine-level particles also have particle clouds that hang over the refinement boundary, the hanging mass will be added to the coarse level.</p></li>
-</ul>
-<p>Finally, the flag <code class="docutils literal notranslate"><span class="pre">a_forceIrregNGP</span></code> permits the user to enforce nearest grid-point deposition in cut-cells.
-This option is motivated by the fact that some applications might require hard mass conservation, and the user can ensure that mass is not deposited into covered regions.</p>
+<p>When depositing momentum, use</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="p">,</span>  <span class="o">&amp;</span><span class="n">P</span><span class="o">::</span><span class="n">momentum</span><span class="o">&gt;</span><span class="p">(...).</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="particle-interpolation">
-<h3>Particle interpolation<a class="headerlink" href="#particle-interpolation" title="Permalink to this headline"></a></h3>
+<h2>Particle interpolation<a class="headerlink" href="#particle-interpolation" title="Permalink to this headline"></a></h2>
 <p>To interpolate a field onto a particle position, the user can call the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> member functions</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">P</span><span class="p">,</span> <span class="n">Real</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">interpolateParticles</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>      <span class="n">a_particles</span><span class="p">,</span>
@@ -614,7 +641,6 @@ For example, in order to interpolate the particle acceleration, the particle cla
 </div>
 <p>Note that if the user interpolates onto a scalar variable, the mesh variable must have exactly one component.
 Likewise, if interpolating a vector variable, the mesh variable must have exact <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code> components.</p>
-</div>
 </div>
 </div>
 

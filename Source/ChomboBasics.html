@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chombo-3 basics &mdash; chombo-discharge latest documentation</title>
+  <title>Chombo-3 basics &mdash; chombo-discharge  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -30,9 +30,6 @@
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> chombo-discharge
           </a>
-              <div class="version">
-                latest
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -44,8 +41,8 @@
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
 </ul>
@@ -71,6 +68,25 @@
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
@@ -87,36 +103,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Design</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
@@ -149,7 +149,7 @@
 <span id="chap-basics"></span><h1><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics<a class="headerlink" href="#chombo-3-basics" title="Permalink to this headline"></a></h1>
 <p>To fully understand this documentation the user should be familiar with <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
 This documentation uses class names from <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and the most relevant <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> data structures are summarized here.
-What follows is a <em>very</em> brief introduction to these data structures, for in-depth explanations please see the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> manual.</p>
+What follows is a <em>very</em> brief introduction to these data structures, for in-depth explanations please see the <a class="reference external" href="https://github.com/applied-numerical-algorithms-group-lbnl/Chombo_3.2/tree/master/doc">Chombo manual</a>.</p>
 <div class="section" id="real">
 <h2>Real<a class="headerlink" href="#real" title="Permalink to this headline"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Real</span></code> is a typedef’ed structure for holding a single floating point number.
@@ -199,6 +199,10 @@ Usually, code for doing anything with the <code class="docutils literal notransl
    <span class="p">(...)</span>
 <span class="p">}</span>
 </pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code> stores the data in column major order.</p>
 </div>
 </div>
 <div class="section" id="vector">

@@ -3,5 +3,9 @@
 Visualization
 =============
 
-``chombo-discharge`` output files are written to HDF5 files in the format ``<simulation_name>.step#.dimension.hdf5`` and the files will be written to the directory specified by :ref:`Chap:driver` runtime parameters.
-Currently, we have only used `VisIt <https://visit-dav.github.io/visit-website/>`_ for visualizing the plot files. 
+``chombo-discharge`` output files are always written to HDF5.
+The plot files will reside in the ``plt`` subfolder where the application was run.
+
+Currently, we have only used `VisIt <https://visit-dav.github.io/visit-website/>`_ for visualizing the plot files.
+Learning how to use VisIt is not a part of this documentation; there are great tutorials on the `VisIt website <https://visit-dav.github.io/visit-website/>`_.
+

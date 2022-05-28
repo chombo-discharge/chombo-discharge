@@ -56,6 +56,7 @@ In addition, one must parse run-time options to the class, provide the ``AmrMesh
 This is done as follows:
 
 .. code-block:: c++
+		
    RefCountedPtr<AmrMesh> amr;
    RefCountedPtr<ComputationalGeometry> geo;
 

@@ -6,6 +6,14 @@ Random numbers
 ``Random`` is a static class for generating pseudo-random numbers, and exist so that all random number operations can be aggregated into a single class.
 Internally, ``Random`` use a Mersenne-Twister random number generation.
 
+To use the ``Random`` class, simply include ``<CD_Random.H>``, e.g.
+
+.. code-block:: c++
+
+   #include <CD_Random.H>
+
+See the `Random API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classRandom.html>`_ for further details. 
+
 Drawing random numbers
 ----------------------
 
@@ -31,7 +39,7 @@ Pre-defined distributions exist for performing the following operations:
 #. For drawing a real number from a normal distribution centered at 0 and with a variance of 1, use ``Real Random::getNormal01()``.
 #. For drawing an integer from a Poisson distribution with a specified mean, use ``T Random::getPoisson<T>(const Real a_mean)`` where ``T`` is an integer type.
 #. For drawing a random direction in space, use ``RealVect Random::getDirection()``.
-   The implementation uses the Marsaglia algorithm for drawing coordinates uniformly distributed over the unit sphere. 
+   The implementation uses the Marsaglia algorithm for drawing coordinates uniformly distributed over the unit sphere.
 
 
 Setting the seed

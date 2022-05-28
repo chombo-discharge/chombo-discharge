@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CDR plasma &mdash; chombo-discharge latest documentation</title>
+  <title>CDR plasma &mdash; chombo-discharge  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -31,9 +31,6 @@
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> chombo-discharge
           </a>
-              <div class="version">
-                latest
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -45,8 +42,8 @@
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
 </ul>
@@ -58,6 +55,25 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul class="current">
@@ -126,10 +142,10 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#photo-reactions">Photo-reactions</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id9">Specifying reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Specifying reactions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#default-behavior">Default behavior</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#helmholtz-reconstruction">Helmholtz reconstruction</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id10">Scaling reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Scaling reactions</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#eb-boundary-conditions">EB boundary conditions</a></li>
@@ -149,36 +165,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Design</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
@@ -220,19 +220,15 @@ This physics model also includes the following subfolders:</p>
 <div class="section" id="equations-of-motion">
 <h2>Equations of motion<a class="headerlink" href="#equations-of-motion" title="Permalink to this headline"></a></h2>
 <p>In the CDR plasma model we are solving</p>
-<div class="math notranslate nohighlight" id="equation-cdrplasmaequations">
-<span class="eqno">(2)<a class="headerlink" href="#equation-cdrplasmaequations" title="Permalink to this equation"></a></span>\[\begin{split}\begin{align}
-&amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}, \\[1ex]
-&amp;\frac{\partial\sigma}{\partial t} = F_\sigma,\\[1ex]
-&amp;\frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n\right) = S,
-\end{align}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}&amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0},\\
+&amp;\frac{\partial\sigma}{\partial t} = F_\sigma,\\
+&amp;\frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n\right) = S,\end{split}\]</div>
 <p>The above equations must be supported by additional boundary conditions on electrodes and insulating surfaces.</p>
 <p>Radiative transport can be done either in the diffusive approximation or by means of Monte Carlo methods.
 Diffusive RTE methods involve solving</p>
 <div class="math notranslate nohighlight">
-\[\begin{align}
-   \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) &amp;= \frac{\eta}{c},
-\end{align}\]</div>
+\[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\Psi\)</span> is the isotropic photon density, <span class="math notranslate nohighlight">\(\kappa\)</span> is an absorption length and <span class="math notranslate nohighlight">\(\eta\)</span> is an isotropic source term.
 I.e., <span class="math notranslate nohighlight">\(\eta\)</span> is the number of photons produced per unit time and volume.
 The time dependent term can be turned off and the equation can be solved stationary.</p>
@@ -242,20 +238,18 @@ They can easily be adapted to e.g. scattering media.
 They are, on the other hand, inherently stochastic which implies that some extra caution must be exercised when integrating the equations of motion.</p>
 <p>The coupling that is (currently) available in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is</p>
 <div class="math notranslate nohighlight" id="equation-cdrplasmacoupling">
-<span class="eqno">(3)<a class="headerlink" href="#equation-cdrplasmacoupling" title="Permalink to this equation"></a></span>\[\begin{split}\begin{align}
-   \epsilon_r &amp;= \epsilon_r(\mathbf{x}), (\textrm{can additionally be discontinuous}), \\[1ex]
-   \mathbf{v} &amp;= \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
-   D &amp;= \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
-   S &amp;= S\left(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi\right), \\[1ex]
-   \eta &amp;= \eta\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
-   F &amp;= F(t, \mathbf{x}, \mathbf{E}, n),
-\end{align}\end{split}\]</div>
+<span class="eqno">(7)<a class="headerlink" href="#equation-cdrplasmacoupling" title="Permalink to this equation"></a></span>\[\begin{split}\epsilon_r =&amp; \epsilon_r(\mathbf{x}), (\textrm{can additionally be discontinuous}), \\
+\mathbf{v} =&amp; \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
+D =&amp; \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
+S =&amp; S\left(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi\right),\\
+\eta =&amp; \eta\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
+F =&amp; F(t, \mathbf{x}, \mathbf{E}, n),\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(F\)</span> is the boundary flux on insulators or electrodes (which must be separately implemented).</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> works by embedding the equations above into an abstract C++ framework (see <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>) that the user must implement or reuse existing pieces of, and then compile into an executable.</p>
 </div>
 <div class="section" id="cdrplasmaphysics">
 <span id="chap-cdrplasmaphysics"></span><h2>CdrPlasmaPhysics<a class="headerlink" href="#cdrplasmaphysics" title="Permalink to this headline"></a></h2>
-<p><a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in <a class="reference internal" href="#equation-cdrplasmacoupling">Eq. 3</a>.
+<p><a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in <a class="reference internal" href="#equation-cdrplasmacoupling">Eq. 7</a>.
 The source code for the class resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CD_CdrPlasmaPhysics.H</span></code>.
 Note that the entire class is an interface, whose implementations are used by the time integrators that advance the equations.</p>
 <p>There are no default input parameters for <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>, as users must generally implement their own kinetics.
@@ -485,7 +479,7 @@ Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are
 </div>
 <div class="section" id="time-discretizations">
 <h2>Time discretizations<a class="headerlink" href="#time-discretizations" title="Permalink to this headline"></a></h2>
-<p>Here, we discuss two discretizations of <a class="reference internal" href="#equation-cdrplasmaequations">Eq. 2</a>.
+<p>Here, we discuss two discretizations of <code class="xref eq docutils literal notranslate"><span class="pre">CdrPlasmaEquations</span></code>.
 Firstly, note that there are two layers to the time integrators:</p>
 <ol class="arabic simple">
 <li><p>A pure class <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> which inherits from <code class="docutils literal notranslate"><span class="pre">TimeSteppers</span></code> but does not implement an <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.
@@ -547,7 +541,7 @@ That is, the advancement algorithm is</p>
 <div class="math notranslate nohighlight">
 \[n^{k+1} = n^{k} - \nabla\cdot\left(n^{k+1/2}\mathbf{v}\right) + \nabla\cdot\left(D\nabla\phi^k\right),\]</div>
 <p>where <span class="math notranslate nohighlight">\(n^{k+1/2}\)</span> is obtained by also including transverse slopes (i.e., extrapolation in time).
-See <span id="id1">Trebotich and Graves [<a class="reference internal" href="../ZZReferences.html#id157" title="David Trebotich and Daniel Graves. An adaptive finite volume method for the incompressible Navier–Stokes equations in complex geometries. Commun. Appl. Math. Comput. Sci., 10(1):43–82, 2015. URL: https://doi.org/10.2140/camcos.2015.10.43, doi:10.2140/camcos.2015.10.43.">7</a>]</span> for details.
+See <span id="id1">Trebotich and Graves [<a class="reference internal" href="../ZZReferences.html#id157" title="David Trebotich and Daniel Graves. An adaptive finite volume method for the incompressible Navier–Stokes equations in complex geometries. Commun. Appl. Math. Comput. Sci., 10(1):43–82, 2015. URL: https://doi.org/10.2140/camcos.2015.10.43, doi:10.2140/camcos.2015.10.43.">8</a>]</span> for details.
 Note that the formal order of accuracy is still one, but the accuracy of the advective discretization is increased substantially.</p>
 </div>
 <div class="section" id="specifying-diffusion">
@@ -735,7 +729,7 @@ In this case one must specify the extra fields</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">height</span></code> For specifying the column where the height is stored (in meters).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code> For specifying the column where the temperature (in Kelvin) is stored.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pressure</span></code> For specifying the column where the pressure (in Pascals) is stored.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">density</span></code> For specifying the column where the density (in :math:<a href="#id3"><span class="problematic" id="id4">`</span></a>textrm{kg}cdottextrm{m}^{-3}) is stored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">density</span></code> For specifying the column where the density (in <span class="math notranslate nohighlight">\(\textrm{kg}\cdot\textrm{m}^{-3}\)</span>) is stored.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">molar</span> <span class="pre">mass</span></code> For specifying the molar mass (in <span class="math notranslate nohighlight">\(\textrm{g}\cdot\textrm{mol}^{-1}\)</span>) of the gas.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">height</span></code> For setting the minimum altitude in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> internal table.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">height</span></code> For setting the minimum altitude in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> internal table.</p></li>
@@ -1161,7 +1155,7 @@ For example:</p>
 </pre></div>
 </div>
 <p><strong>Helmholtz absorption coefficients</strong></p>
-<p>The interface for the Helmholtz-based absorption coefficients are inspired by <span id="id5">Bourdon <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id12" title="A Bourdon, V P Pasko, N Y Liu, S Célestin, P Ségur, and E Marode. Efficient models for photoionization produced by non-thermal gas discharges in air based on radiative transfer and the Helmholtz equations. Plasma Sources Science and Technology, 16(3):656–678, aug 2007. URL: http://stacks.iop.org/0963-0252/16/i=3/a=026?key=crossref.26470bbe9c1f765777a162c80aa57bb7, doi:10.1088/0963-0252/16/3/026.">2</a>]</span> approach for computing photoionization.
+<p>The interface for the Helmholtz-based absorption coefficients are inspired by <span id="id3">Bourdon <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id12" title="A Bourdon, V P Pasko, N Y Liu, S Célestin, P Ségur, and E Marode. Efficient models for photoionization produced by non-thermal gas discharges in air based on radiative transfer and the Helmholtz equations. Plasma Sources Science and Technology, 16(3):656–678, aug 2007. URL: http://stacks.iop.org/0963-0252/16/i=3/a=026?key=crossref.26470bbe9c1f765777a162c80aa57bb7, doi:10.1088/0963-0252/16/3/026.">2</a>]</span> approach for computing photoionization.
 This method only makes sense if doing a Helmholtz-based reconstruction of the photoionization profile as a relation:</p>
 <div class="math notranslate nohighlight">
 \[\left[\nabla^2 - \left(p_{\textrm{O}_2} \lambda\right)^2\right]S_\gamma = -\left(A p_{\textrm{O}_2}^2\frac{p_q}{p + p_q}\xi\nu\right)S_i,\]</div>
@@ -1218,7 +1212,7 @@ These are specified through fields <code class="docutils literal notranslate"><s
 <p>where <span class="math notranslate nohighlight">\(K_1 = p_X\chi_{\textrm{min}}\)</span>, <span class="math notranslate nohighlight">\(K_1 = p_X\chi_{\textrm{max}}\)</span>, and <span class="math notranslate nohighlight">\(f_1\)</span> and <span class="math notranslate nohighlight">\(f_2\)</span> are frequency ranges.
 Like above, <span class="math notranslate nohighlight">\(p_X\)</span> is the partial pressure of some species <span class="math notranslate nohighlight">\(X\)</span>.
 Note that all input parameters are given in SI units.</p>
-<p>Stochastic sampling of the absorption length only makes sense when using discrete photons – this particular method is inspired by the method in <span id="id6">Chanrion and Neubert [<a class="reference internal" href="../ZZReferences.html#id163" title="O. Chanrion and T. Neubert. A PIC-MCC code for simulation of streamer propagation in air. Journal of Computational Physics, 2008. doi:10.1016/j.jcp.2008.04.016.">3</a>]</span>.
+<p>Stochastic sampling of the absorption length only makes sense when using discrete photons – this particular method is inspired by the method in <span id="id4">Chanrion and Neubert [<a class="reference internal" href="../ZZReferences.html#id163" title="O. Chanrion and T. Neubert. A PIC-MCC code for simulation of streamer propagation in air. Journal of Computational Physics, 2008. doi:10.1016/j.jcp.2008.04.016.">3</a>]</span>.
 For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span>
    <span class="p">[</span>
@@ -1501,7 +1495,7 @@ This works exactly like the <code class="docutils literal notranslate"><span cla
 <div class="section" id="energy-correction">
 <h4>Energy correction<a class="headerlink" href="#energy-correction" title="Permalink to this headline"></a></h4>
 <p>Occasionally, it can be necessary to incorporate an energy correction to models, accounting e.g. for electron energy loss near strong gradients.
-The JSON interface supports the correction in <span id="id7">Soloviev and Krivtsov [<a class="reference internal" href="../ZZReferences.html#id101" title="V R Soloviev and V M Krivtsov. Surface barrier discharge modelling for aerodynamic applications. Journal of Physics D: Applied Physics, 42(12):125208, jun 2009. URL: http://stacks.iop.org/0022-3727/42/i=12/a=125208?key=crossref.6a72c0ae60b829dd552a56b7f9dfa90c, doi:10.1088/0022-3727/42/12/125208.">6</a>]</span>.
+The JSON interface supports the correction in <span id="id5">Soloviev and Krivtsov [<a class="reference internal" href="../ZZReferences.html#id101" title="V R Soloviev and V M Krivtsov. Surface barrier discharge modelling for aerodynamic applications. Journal of Physics D: Applied Physics, 42(12):125208, jun 2009. URL: http://stacks.iop.org/0022-3727/42/i=12/a=125208?key=crossref.6a72c0ae60b829dd552a56b7f9dfa90c, doi:10.1088/0022-3727/42/12/125208.">7</a>]</span>.
 To use it, include an (optional) field <code class="docutils literal notranslate"><span class="pre">soloviev</span></code> and specify <code class="docutils literal notranslate"><span class="pre">correction</span></code> and <code class="docutils literal notranslate"><span class="pre">species</span></code>.
 For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
@@ -1532,7 +1526,7 @@ For example:</p>
 \[k \rightarrow k\left(1 + \frac{\mathbf{E}\cdot D_s\nabla n_s}{\mu_s n_s E^2}\right),\]</div>
 <p>where <span class="math notranslate nohighlight">\(s\)</span> is the species specified in the <code class="docutils literal notranslate"><span class="pre">soloviev</span></code> field, <span class="math notranslate nohighlight">\(n_s\)</span> is the density and <span class="math notranslate nohighlight">\(D_s\)</span> and <span class="math notranslate nohighlight">\(\mu_s\)</span> are diffusion and mobility coefficients.
 We point out that the correction factor is restricted such that the reaction rate is always non-negative.
-Note that this correction makes sense when rates are dependent only on the electric field, see <span id="id8">Soloviev and Krivtsov [<a class="reference internal" href="../ZZReferences.html#id101" title="V R Soloviev and V M Krivtsov. Surface barrier discharge modelling for aerodynamic applications. Journal of Physics D: Applied Physics, 42(12):125208, jun 2009. URL: http://stacks.iop.org/0022-3727/42/i=12/a=125208?key=crossref.6a72c0ae60b829dd552a56b7f9dfa90c, doi:10.1088/0022-3727/42/12/125208.">6</a>]</span>.</p>
+Note that this correction makes sense when rates are dependent only on the electric field, see <span id="id6">Soloviev and Krivtsov [<a class="reference internal" href="../ZZReferences.html#id101" title="V R Soloviev and V M Krivtsov. Surface barrier discharge modelling for aerodynamic applications. Journal of Physics D: Applied Physics, 42(12):125208, jun 2009. URL: http://stacks.iop.org/0022-3727/42/i=12/a=125208?key=crossref.6a72c0ae60b829dd552a56b7f9dfa90c, doi:10.1088/0022-3727/42/12/125208.">7</a>]</span>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>When using the energy correction, the specifies species must be both mobile and diffusive.</p>
@@ -1548,8 +1542,8 @@ Note that this correction makes sense when rates are dependent only on the elect
 The left hand side can contain only <em>one</em> photon species, and the right-hand side can not contain a photon species.
 In other words, two-photon absorption is not supported, and photons that are absorbed on the mesh cannot become new photons.
 This is not a fundamental limitation, but a restriction imposed by the JSON interface.</p>
-<div class="section" id="id9">
-<h4>Specifying reactions<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h4>
+<div class="section" id="id7">
+<h4>Specifying reactions<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h4>
 <p>Reactions of the above type are handled by a JSON array <code class="docutils literal notranslate"><span class="pre">photo</span> <span class="pre">reactions</span></code>, with required fields:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">reaction</span></code> (string) containing the reaction process.</p></li>
@@ -1601,8 +1595,8 @@ This value will also be specified in the photon species, but it is not retrieved
 </pre></div>
 </div>
 </div>
-<div class="section" id="id10">
-<h4>Scaling reactions<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h4>
+<div class="section" id="id8">
+<h4>Scaling reactions<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h4>
 <p>Photo-reactions can be scaled by including a <code class="docutils literal notranslate"><span class="pre">scale</span></code> argument.
 For example, to completely turn off the photoreaction above:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;photo reactions&quot;</span><span class="p">:</span>

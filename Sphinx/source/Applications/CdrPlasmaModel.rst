@@ -17,13 +17,10 @@ Equations of motion
 In the CDR plasma model we are solving
 
 .. math::
-   :label: CdrPlasmaEquations
-	   
-   \begin{align}
-   &\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}, \\[1ex]
-   &\frac{\partial\sigma}{\partial t} = F_\sigma,\\[1ex]
+      
+   &\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0},\\
+   &\frac{\partial\sigma}{\partial t} = F_\sigma,\\
    &\frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n\right) = S,
-   \end{align}
    
 The above equations must be supported by additional boundary conditions on electrodes and insulating surfaces. 
 
@@ -32,9 +29,7 @@ Diffusive RTE methods involve solving
 
 .. math::
    
-   \begin{align}
-      \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) &= \frac{\eta}{c},
-   \end{align}
+   \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
    
 where :math:`\Psi` is the isotropic photon density, :math:`\kappa` is an absorption length and :math:`\eta` is an isotropic source term.
 I.e., :math:`\eta` is the number of photons produced per unit time and volume.
@@ -50,15 +45,14 @@ The coupling that is (currently) available in ``chombo-discharge`` is
 
 .. math::
    :label: CdrPlasmaCoupling
-	   
-   \begin{align}
-      \epsilon_r &= \epsilon_r(\mathbf{x}), (\textrm{can additionally be discontinuous}), \\[1ex]
-      \mathbf{v} &= \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
-      D &= \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
-      S &= S\left(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi\right), \\[1ex]
-      \eta &= \eta\left(t, \mathbf{x}, \mathbf{E}, n\right), \\[1ex]
-      F &= F(t, \mathbf{x}, \mathbf{E}, n),
-   \end{align}
+
+   \epsilon_r =& \epsilon_r(\mathbf{x}), (\textrm{can additionally be discontinuous}), \\
+   \mathbf{v} =& \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
+   D =& \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
+   S =& S\left(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi\right),\\
+   \eta =& \eta\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
+   F =& F(t, \mathbf{x}, \mathbf{E}, n),
+
 
 where :math:`F` is the boundary flux on insulators or electrodes (which must be separately implemented).
 
@@ -534,10 +528,10 @@ In addition to this, the user can specify maximum/minimum allowed time steps.
    .. math::
       :nowrap:
 
-      \begin{align}
+      \begin{eqnarray}
       \frac{d\phi_{\mathbf{i}}}{dt} &= \mathcal{F}_{\textrm{AR}}\left(t, \phi_{\mathbf{i}}\right) + \mathcal{F}_{\textrm{D}}\left(t, \phi_{\mathbf{i}}; \mathbf{E}_{\mathbf{i}}\right), \\
       \frac{d\sigma_{\mathbf{i}}}{dt} &= \mathcal{F}_{\sigma}\left(t, \phi_{\mathbf{i}}\right),
-      \end{align}
+      \end{eqnarray}
 
    where :math:`\phi_{\mathbf{i}}` denotes a cell-averaged variable, :math:`\mathcal{F}_{\sigma}` is the surface charge flux, :math:`\mathcal{F}_{\textrm{AR}}` is the advection-reaction operator, and :math:`\mathcal{F}_{\textrm{D}}` is the diffusion operator.
 
@@ -551,10 +545,10 @@ In addition to this, the user can specify maximum/minimum allowed time steps.
    .. math::
       :nowrap:
 
-      \begin{align}
+      \begin{eqnarray}
       \phi_{m+1}^0 &= \phi_m^0 + \Delta t_m\left[\mathcal{F}_{\textrm{AR}}\left(t_m,\phi_m^0\right) + \mathcal{F}_{\textrm{D}}\left(t_{m+1},\phi_{m+1}^0; \mathbf{E}_{m+1}^0\right)\right],\\
       \sigma_{m+1}^0 &= \sigma_m^0 + \Delta t_mF_\sigma\left(t_m,\phi_m^0\right).
-      \end{align}
+      \end{eqnarray}
 
    This defines a Helmholtz problem for :math:`\phi_{m+1}^0` through :math:`\mathcal{F}_{\textrm{D}}`. Generally, the upper subscript denotes an SDC iteration where subscript 0 is the SISDC predictor, and we also have :math:`\phi_0^0 = \phi(t_n)` and :math:`\sigma_0^0 = \sigma(t_n)`. This predictor treats advection and chemistry terms explicitly, and diffusion implicitly. Other types of semi-implicit or multi-implicit couplings are possible :cite:`Bourlioux2003,Layton2004,Nonaka2012`. SDC improves this solution by using deferred corrections: Given a numerical solution :math:`\phi_{m+1}^k`, we compute an error :math:`\delta_{m+1}^k` and obtain the next iterate :math:`\phi_{m+1}^{k+1} = \phi_{m+1}^k + \delta_{m+1}^k`. Each iteration raises the discretization order by one :cite:`Dutt2000,Minion2003`, to maximum order :math:`p+1`. Critical to the success of this approach is the precise evaluation of the numerical quadrature. 
 
@@ -563,10 +557,10 @@ In addition to this, the user can specify maximum/minimum allowed time steps.
    .. math::
       :nowrap:
 
-      \begin{align}
+      \begin{eqnarray}
       \phi_{m+1}^{0,\ast} &= \phi_m^0 + \Delta t_m\mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^0\right), \\
       \sigma_{m+1}^0 &= \sigma_m^0 + \Delta t_mF_\sigma\left(t_m, \phi_m^0\right),
-      \end{align}
+      \end{eqnarray}
 
    Next, we will approximate :math:`\mathbf{E}_{m+1}^{0}` for use in the predictor. There are two choices for this coupling; one may either use :math:`\mathbf{E}_m^0` for computation of the diffusion coefficients, which we will refer to as the semi-implicit coupling, or one may use fixed-point iteration and compute :math:`\mathbf{E}_{m+1}^{0,\ast} = \mathbf{E}\left(\phi_{m+1}^{0, \ast}, \sigma_{m+1}^0\right)`, followed by the diffusion advance
 
@@ -613,10 +607,10 @@ In addition to this, the user can specify maximum/minimum allowed time steps.
    .. math::
       :nowrap:
 
-      \begin{align}
+      \begin{eqnarray}
       \phi_{m+1}^{k+1,\ast} &= \phi_m^{k+1} + \Delta t_m\left[\mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^{k+1}\right) - \mathcal{F}_{\textrm{AR}}\left(t_m, \phi_m^{k}\right)\right] + I_m^{m+1}\left(\phi^k\right),\\
       \sigma_{m+1}^{k+1} &= \sigma_m^{k+1} + \Delta t_m\left[F_\sigma\left(t_m, \phi_m^{k+1}\right) - F_\sigma\left(t_m, \phi_m^{k}\right)\right] + \Sigma_m^{m+1}\left(\phi^k\right). 
-      \end{align}
+      \end{eqnarray}
 
    The solution for :math:`\sigma_{m+1}^{k+1}` is final since all charge is injected through the advection operator for :math:`\phi`. The term :math:`\Sigma_m^{m+1}` contains the injected charge through :math:`I_m^{m+1}\left(\phi^k\right)`, as was discussed in :ref:`Chap:SpatialDiscretization`. We then solve
 
@@ -804,7 +798,7 @@ To specify temperature, density, and pressure as function of altitude, set ``law
 * ``height`` For specifying the column where the height is stored (in meters).
 * ``temperature`` For specifying the column where the temperature (in Kelvin) is stored.
 * ``pressure`` For specifying the column where the pressure (in Pascals) is stored.
-* ``density`` For specifying the column where the density (in :math:`\textrm{kg}\cdot\textrm{m}^{-3}) is stored.
+* ``density`` For specifying the column where the density (in :math:`\textrm{kg}\cdot\textrm{m}^{-3}`) is stored.
 * ``molar mass`` For specifying the molar mass (in :math:`\textrm{g}\cdot\textrm{mol}^{-1}`) of the gas.
 * ``min height`` For setting the minimum altitude in the ``chombo-discharge`` internal table.
 * ``max height`` For setting the minimum altitude in the ``chombo-discharge`` internal table.

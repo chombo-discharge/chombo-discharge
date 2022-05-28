@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Code standard &mdash; chombo-discharge latest documentation</title>
+  <title>Code standard &mdash; chombo-discharge  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="References" href="../ZZReferences.html" />
-    <link rel="prev" title="Contributions" href="Contributions.html" /> 
+    <link rel="prev" title="Continuous integration" href="CI.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -30,9 +30,6 @@
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> chombo-discharge
           </a>
-              <div class="version">
-                latest
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -44,8 +41,8 @@
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Base/GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
 </ul>
@@ -57,6 +54,25 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
@@ -74,33 +90,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Design</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Convergence.html">Convergence testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CI.html">Continuous integration</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Code standard</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#c-standard">C++ standard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#namespace">Namespace</a></li>
@@ -108,15 +108,14 @@
 <li class="toctree-l2"><a class="reference internal" href="#file-headers">File headers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#code-syntax">Code syntax</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#class-names-functions-and-variables">Class names, functions, and variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#indentation-and-brackets">Indentation and brackets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-formatting">Code formatting</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#options-files">Options files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#revisions-of-old-code">Revisions of old code</a></li>
 </ul>
 </li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
 </ul>
@@ -147,8 +146,7 @@
              
   <div class="section" id="code-standard">
 <span id="chap-codestandard"></span><h1>Code standard<a class="headerlink" href="#code-standard" title="Permalink to this headline"></a></h1>
-<p>An effort is underway to standarize <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> code.
-New code that is developed should follow the below guidelines:</p>
+<p>When submitting new code to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, the following guidelines below show be followed.</p>
 <div class="section" id="c-standard">
 <h2>C++ standard<a class="headerlink" href="#c-standard" title="Permalink to this headline"></a></h2>
 <p>We are currently at <code class="docutils literal notranslate"><span class="pre">c++14</span></code>.</p>
@@ -213,7 +211,8 @@ If your code contains templates or inlined functions, these should be defined in
 <span class="cm">/*!</span>
 <span class="cm">  @brief This class does the following: ....</span>
 <span class="cm">*/</span>
-<span class="k">class</span> <span class="nc">MyClass</span> <span class="p">{</span>
+<span class="k">class</span> <span class="nc">MyClass</span>
+<span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
 
 <span class="c1">//...</span>
@@ -247,13 +246,11 @@ E.g. functions should be named <code class="docutils literal notranslate"><span 
 </li>
 </ol>
 </div>
-<div class="section" id="indentation-and-brackets">
-<h3>Indentation and brackets<a class="headerlink" href="#indentation-and-brackets" title="Permalink to this headline"></a></h3>
-<p>Use whitespace indentation for code (not tab characters).
-Curly brackets should trail on the same line as <code class="docutils literal notranslate"><span class="pre">if</span></code> and <code class="docutils literal notranslate"><span class="pre">for</span></code> loops, e.g.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="p">(</span><span class="n">myCondition</span><span class="p">){</span>
-
-<span class="p">}</span>
+<div class="section" id="code-formatting">
+<h3>Code formatting<a class="headerlink" href="#code-formatting" title="Permalink to this headline"></a></h3>
+<p>We use <code class="docutils literal notranslate"><span class="pre">clang-format</span></code> for formatting the source code.
+Before opening a pull request for review, navigate to <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code> and format the code using</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find Source Physics Geometries Exec <span class="se">\(</span> -name <span class="s2">&quot;*.H&quot;</span> -o -name <span class="s2">&quot;*.cpp&quot;</span> <span class="se">\)</span> -exec clang-format -i <span class="o">{}</span> +
 </pre></div>
 </div>
 </div>
@@ -271,17 +268,13 @@ MyClass.bc.x.lo        <span class="o">=</span> dirichlet <span class="m">1</spa
 </pre></div>
 </div>
 </div>
-<div class="section" id="revisions-of-old-code">
-<h2>Revisions of old code<a class="headerlink" href="#revisions-of-old-code" title="Permalink to this headline"></a></h2>
-<p>Revisions or changes to old code that does not meet the above standard should use a fair judgement policy where the developer should try to balance his or her efforts.</p>
-</div>
 </div>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Contributions.html" class="btn btn-neutral float-left" title="Contributions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="CI.html" class="btn btn-neutral float-left" title="Continuous integration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../ZZReferences.html" class="btn btn-neutral float-right" title="References" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

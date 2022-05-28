@@ -14,6 +14,7 @@ Here, :math:`\mathbf{v}` indicates a drift velocity, :math:`D` is the diffusion 
 
 
 .. note::
+   
    Using cell-centered versions :math:`\phi` might be problematic for some models since the state is extended outside the valid region.
    Models might have to recenter the state in order compute e.g. physically meaningful reaction terms in cut-cells.
 
@@ -68,16 +69,6 @@ For example, ``CdrTGA`` inherits from ``CdrSolver`` and adds a second order diff
 It also add multigrid code for performing implicit diffusion. 
 Below that, the classes ``CdrGodunov`` and ``CdrMuscl`` inherit everything from ``CdrTGA`` and also adds in the advective discretization.
 Thus, adding new advection code is done by inheriting from ``CdrTGA`` and implementing new advection schemes.
-
-.. graphviz::
-   :align: center
-	   
-   digraph {
-      rankdir="LR";
-      "CdrSolver" -> "CdrTGA" -> {"CdrGodunov", "CdrMuscl"};
-   }
-
-
 
 Currently, we mostly use the ``CdrGodunov`` class which contains a second order accurate discretization with slope limiters, and the advection code for this is distributed by the ``Chombo`` team. 
 The alternative implementation in :file:`/src/CdrMuscl.H(cpp)` contains a MUSCL implementation with van Leer slope limiting (i.e. much the same as the Chombo code), but it does not include extrapolation in time. 

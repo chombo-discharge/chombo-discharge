@@ -24,7 +24,7 @@ The difference lies primarily in the assignment of MPI ranks to grids; i.e. the 
    :align: center
 
    Sketch of dual grid approach.
-   Each rectangle represents a grid patch. a) Load balancing with the number of grid cells. b) Load balancing with the number of particles.
+   Each rectangle represents a grid patch and the numbers show MPI ranks. a) Load balancing with the number of grid cells. b) Load balancing with the number of particles.
 
 :numref:`Fig:DualMesh` shows an example of a dual-grid approach.
 In  this figure we have a set of grid patches on a particular grid level.
@@ -47,9 +47,10 @@ To register a ``Realm``, users will have ``TimeStepper`` allocate the desired nu
    }
 
 Since at least one realm is required, ``Driver`` will *always* register the realm ``"Primal"``.
+Fundamentally, there is no limitation to the number of realms that can be allocated. 
 
 During regrid, all realms are initially load balanced with the grid patch volume as the load proxy.
-However, users can change load balancing individually for each realm through the load balancing routines in :ref:`Chap:TimeStepper`.    
+However, users can change load balancing individually for each realm through the load balancing routines in :ref:`Chap:TimeStepper`.
 
 
 Operator registration
@@ -62,37 +63,21 @@ If a solver needs an operator for, say, piecewise linear ghost cell interpolatio
 
 .. code-block:: c++
 
-   m_amr->registerOperator(s_eb_pwl_interp,   m_realm, m_phase);
+   m_amr->registerOperator(s_eb_pwl_interp, m_realm, m_phase);
 
 Once an operator has been registered, ``Realm`` will define those operators during initialization e.g. regrids.
-Run-time aborts with error messages are issued if an AMR operator is used, but has not been registered.
+Run-time error messages are issued if an AMR operator is used, but has not been registered.
 
 More commonly, ``chombo-discharge`` solvers will contain a routine that registers the operators that the solver needs.
-A valid ``TimeStepper`` implementation *must* register all required operators in the function ``registerOperators()``, which is mostly as simple as:
+A valid ``TimeStepper`` implementation *must* register all required operators in the function ``registerOperators()``. 
 
-.. code-block:: c++
-		
-   FieldSolver myPoissonSolver;
-   CdrSolver myCdrSolver;
-
-   void myTimeStepper::registerOperators(){
-      myPoissonSolver->registerOperators();
-      myCdrSolver->registerOperators();
-   }
-
-This will register the operators needed for ``FieldSolver`` and ``CdrSolver`` solver classes.
-Note that if the solvers register the same operators, these operators are only defined once in :ref:`Chap:AmrMesh`.
-
-Available operators
--------------------
-
-The current operators are currently available:
+Currently available operators are:
 
 #. Gradient ``s_eb_gradient``.
 #. Irregular cell centroid interpolation, ``s_eb_irreg_interp``.
 #. Coarse grid conservative coarsening, ``s_eb_coar_ave``.
 #. Piecewise linear interpolation (with slope limiters), ``s_eb_fill_patch``.
-#. Linear ghost cell interpolation, ``s_eb_pwl_interp``.
+#. Linear ghost cell interpolation, ``s_eb_fine_interp``.
 #. Flux registers, ``s_eb_flux_reg``.
 #. Redistribution registers, ``s_eb_redist``.
 #. Non-conservative divergence stencils, ``s_eb_noncons_div``.
@@ -100,8 +85,7 @@ The current operators are currently available:
 #. Signed distance function defined on grid, ``s_levelset``.
 #. Particle-mesh support, ``s_eb_particle_mesh``.   
 
-Solvers will typically allocate a subset of these operators, but for multiphysics code that use both fluid and particles, most of these will be in use.
-
+Solvers will typically allocate a subset of these operators, but for multiphysics code that use both fluid and particles, most of these will probably be in use.
 
 Interacting with realms
 -----------------------

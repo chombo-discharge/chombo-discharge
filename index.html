@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to chombo-discharge’s user documentation &mdash; chombo-discharge latest documentation</title>
+  <title>Welcome to chombo-discharge’s user documentation &mdash; chombo-discharge  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -29,9 +29,6 @@
         <div class="wy-side-nav-search" >
             <a href="#" class="icon icon-home"> chombo-discharge
           </a>
-              <div class="version">
-                latest
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -43,8 +40,8 @@
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Base/Documentation.html">Using this documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Base/Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Base/GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Base/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
 </ul>
@@ -56,6 +53,25 @@
 <li class="toctree-l1"><a class="reference internal" href="Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Source/LinearSolvers.html">Linear solvers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Source/Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/TracerParticles.html">Tracer particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
@@ -73,36 +89,20 @@
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Design</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="Source/Driver.html">Driver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/TimeStepper.html">TimeStepper</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/AmrMesh.html">AmrMesh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/GeoCoarsener.html">GeoCoarsener</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Solvers/Electrostatics.html">Electrostatics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Solvers/Sigma.html">Surface charge solver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Solvers/Ito.html">Îto diffusion</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Utilities/LookupTable.html">Lookup tables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Utilities/LeastSquares.html">Least squares</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Utilities/ComplexGeometries.html">Complex geometries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contrib/Convergence.html">Convergence testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ZZReferences.html">References</a></li>
 </ul>
@@ -137,9 +137,12 @@
 </div>
 <div class="section" id="welcome-to-chombo-discharge-s-user-documentation">
 <h1>Welcome to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>’s user documentation<a class="headerlink" href="#welcome-to-chombo-discharge-s-user-documentation" title="Permalink to this headline"></a></h1>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is a modular and scalable research code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries.
 The code is hosted at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">GitHub</a> together with the source files for this documentation.</p>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> features include:</p>
 <ul class="simple">
 <li><p>Fully written in C++.</p></li>
 <li><p>Support for complex geometries.</p></li>
@@ -176,6 +179,7 @@ div#tutorial.section,
 div#utilities.section,
 div#contributing.section,
 div#references.section,
+div#bibliography.section,
 div#epilogue.section {
     display:none;
 }
@@ -190,16 +194,6 @@ div#epilogue.section {
 <div class="toctree-wrapper compound">
 </div>
 </div>
-<div class="section" id="physics-models">
-<h1>Physics models<a class="headerlink" href="#physics-models" title="Permalink to this headline"></a></h1>
-<div class="toctree-wrapper compound">
-</div>
-</div>
-<div class="section" id="tutorial">
-<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline"></a></h1>
-<div class="toctree-wrapper compound">
-</div>
-</div>
 <div class="section" id="design">
 <h1>Design<a class="headerlink" href="#design" title="Permalink to this headline"></a></h1>
 <div class="toctree-wrapper compound">
@@ -207,6 +201,16 @@ div#epilogue.section {
 </div>
 <div class="section" id="solvers">
 <h1>Solvers<a class="headerlink" href="#solvers" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="physics-models">
+<h1>Physics models<a class="headerlink" href="#physics-models" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
 </div>
@@ -219,11 +223,11 @@ div#epilogue.section {
 <h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
-</div>
-<div class="section" id="references">
-<h1>References<a class="headerlink" href="#references" title="Permalink to this headline"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
+</div>
+<div class="section" id="bibliography">
+<h1>Bibliography<a class="headerlink" href="#bibliography" title="Permalink to this headline"></a></h1>
 </div>
 
 

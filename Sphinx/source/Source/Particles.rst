@@ -11,12 +11,13 @@ ParticleContainer
 
 The ``ParticleContainer<P>`` is a template class that
 
-1. Stores computational particles of type ``P`` over an AMR hierchy.
-2. Provides infrastructure for mapping and remapping. 
+#. Stores computational particles of type ``P`` over an AMR hierchy.
+#. Provides infrastructure for mapping and remapping. 
 
 ``ParticleContainer<P>`` uses the ``Chombo`` structure ``ParticleData<P>`` under the hood, and therefore has template constraints on ``P``.
 The simplest way to use ``ParticleContainer`` for a new type of particle is to let ``P`` inherit from the ``Chombo`` class ``BinItem``.
-``BinItem`` only has a single member variable which is its position, but derived classes will contain more and must therefore also add new linearization functions if the new member variables should be communicated. 
+``BinItem`` only has a single member variable which is its position, but derived classes will contain more and must therefore also add new linearization functions if the new member variables should be communicated.
+There are many examples of ``chombo-discharge`` particles, see e.g. `TracerParticle <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticle.html>`_ or `Photon <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhoton.html>`_.
 Please refer to the ``Chombo`` design document for complete specification on the template constraints of ``P``, or see some of the examples in ``chombo-discharge``. 
 
 Data structures
@@ -26,7 +27,7 @@ List<P> and ListBox<P>
 ______________________
 
 At the lowest level the particles are always stored in a linked list ``List<P>``.
-The class can be simply be through of as a regular list of ``P``. 
+The class can be simply be through of as a regular list of ``P`` with non-random access. 
 
 The ``ListBox<P>`` consists of a ``List<P>`` *and* a ``Box``.
 The latter specifies the grid patch that the particles are assigned to.
@@ -43,7 +44,7 @@ To get the list of particles from a ``ListBox<P>``:
 ListIterator<P>
 _______________
 
-In order to iterate over particles, you will use an iterator ``ListIterator<P>`` (which is not random access):
+In order to iterate over particles, use an iterator ``ListIterator<P>`` (which is not random access):
 
 .. code-block:: c++
 
@@ -65,14 +66,14 @@ On each grid level, ``ParticleContainer<P>`` stores the particles in a ``Chombo`
    ParticleData<P>
 
 where ``P`` is the particle type.
-``ParticleData<P>`` can be thought of as a ``LevelData<P>``, although it actually inherits from ``LayoutData<ListBox<P> >``.
-Each grid patch therefore contains a ``ListBox<P>`` of particles. 
+``ParticleData<P>`` can be thought of as a ``LevelData<ListBox<P> >``, although it actually inherits from ``LayoutData<ListBox<P> >``.
+Each grid patch contains a ``ListBox<P>`` of particles. 
 
 
 AMRParticles<P>
 _______________
 
-AMRParticles<P> is our AMR version of ``ParticleData<P>``.
+``AMRParticles<P>`` is our AMR version of ``ParticleData<P>``.
 It is a simply a typedef of a vector of pointers to ``ParticleData<P>`` on each level:
 
 .. code-block:: c++
@@ -85,8 +86,8 @@ Again, the ``Vector`` indicates the AMR level and the ``ParticleData<P>`` is a d
 Basic use
 ---------
 
-The public member functions for ``ParticleContainer`` can be found in :file:`chombo-discharge/Source/Particle/CD_ParticleContainer.H`.
-Here, we give some examples of basic use of ``ParticleContainer``. 
+Here, we give some examples of basic use of ``ParticleContainer``.
+For the full API, see the `ParticleContainer doxygen documentation <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainer.html>`_.
 
 Getting the particles
 _____________________
@@ -99,7 +100,7 @@ To get the particles from a ``ParticleContainer<P>`` one can call ``AMRParticles
    
    AMRParticles<P>& myParticles = myParticleContainer.getParticles();
 
-Alternatively, one can fetch directly from a specified grid level by calling ``ParticleContainer<P> ParticleContainer<P>::operator[](int)``, e.g. 
+Alternatively, one can fetch directly from a specified grid level as follows:
 
 .. code-block:: c++
 
@@ -254,7 +255,7 @@ The ``ParticleValidRegion`` (PVR) allows particles to be transferred to coarser 
 There are two reasons why such a functionality is useful:
 
 #. Particles that live in the first strip of cells on the fine side of a refinement boundary have deposition clouds that hang over the boundary and into ghost cells.
-   This mass must be added to the coarse level.
+   This mass must be added to the coarse level, which adds algorithmic complexity (``chombo-discharge`` can handle this complexity). 
    
 #. Deposition and interpolation kernels can be entirely contained within a grid level.
    It might be useful to keep the kernel on a specific AMR level for a certain number of time step. 
@@ -290,7 +291,12 @@ Regridding
 
 ``ParticleContainer<P>`` is comparatively simple to regrid, and this is done in two steps:
 
-1. Each MPI rank collects *all* particles on a single ``List<P>`` by calling ``void ParticleContainer<P>::preRegrid(int a_base)``.
+1. Each MPI rank collects *all* particles on a single ``List<P>`` by calling
+
+   .. code-block:: c++
+
+      void ParticleContainer<P>::preRegrid(int a_base)
+      
    This will pull the particles off their current grids and collect them in a single list (on a per-rank basis).
    
 2. When ``ParticleContainer<P>`` regrids, each rank adds his ``List<P>`` back into the internal particle containers.
@@ -333,7 +339,7 @@ Typically, this "specified region" is the refinement boundary, but the functiona
 When *masked particles* are used, the user can provide a boolean mask over the AMR hierarchy and obtain the subset of particles that live in regions where the mask evaluates to true.
 This functionality is for example used for some of the particle deposition methods in ``chombo-discharge`` where we deposit particles that live near the refinement boundary with special deposition functions.
 
-To fill the masked particles, ``ParticleContainer<P>` has members functions for copying the particles into internal data containers which the user can later fetch.
+To fill the masked particles, ``ParticleContainer<P>`` has members functions for copying the particles into internal data containers which the user can later fetch.
 The function signatures for these are
 
 .. code-block:: c++
@@ -372,8 +378,8 @@ After the user is done with the particles, they should be deleted through the fu
    // Release the mask particles
    myParticles.clearMaskParticles();
 
-Registering particle masks
-__________________________
+Creating particle halo masks
+____________________________
 
 ``AmrMesh`` can register a *halo* mask with a specified width:
 
@@ -381,16 +387,22 @@ __________________________
 
    void registerMask(const std::string a_mask, const int a_buffer, const std::string a_realm);
 
-where ``a_mask`` is ``"s_particle_halo"``.
+where ``a_mask`` must be ``"s_particle_halo"``.
+This will register a mask which is false everywhere except in coarse-grid cells that are within a distance a_buffer from the refinement boundary, see :numref:`Fig:HaloMask`.
 
-This will register a mask which is false everywhere except in coarse-grid cells that are within a distance a_buffer from the refinement boundary. 
+.. _Fig:HaloMask:
+.. figure:: /_static/figures/HaloMask.png
+   :width: 360px
+   :align: center
+
+   Example of a particle halo mask (shaded green color) surrounding refined grid levels.
    
 Embedded boundaries
 -------------------
 
 ``ParticleContainer<P>`` is EB-agnostic and has no information about the embedded boundary.
 This means that particles remap just as if the EB was not there.
-Interaction with the EB is done via the implicit function, and modifications in the interpolation and deposition steps. 
+Interaction with the EB is done via the implicit function or discrete information, as well as modifications in the interpolation and deposition steps. 
 
 Signed distance function
 ________________________
@@ -412,11 +424,8 @@ When signed distance functions are used, one can always query how far a particle
 If the particle is inside the EB then the signed distance function will be positive and the particle can be removed from the simulation.
 The distance function can also be used to detect collisions between particles and the EB. 
 
-Deposition and interpolation
-----------------------------
-
 Particle depositon
-__________________
+------------------
 
 To deposit particles on the mesh, the user can call the templated function ``AmrMesh::depositParticles`` which has a signature
 
@@ -431,11 +440,50 @@ To deposit particles on the mesh, the user can call the templated function ``Amr
 			const CoarseFineDeposition  a_coarseFineDeposition,
 			const bool                  a_forceIrregNGP);
 
+  template <class P, const RealVect&(P::*particleVectorField)() const>
+  void depositParticles(EBAMRCellData&              a_meshData,
+			const std::string&          a_realm,
+			const phase::which_phase&   a_phase,	       
+			const ParticleContainer<P>& a_particles,
+			const DepositionType        a_depositionType,
+			const CoarseFineDeposition  a_coarseFineDeposition,
+			const bool                  a_forceIrregNGP);			
+
 Here, the template parameter ``P`` is the particle type and the template parameter ``particleScalarField`` is a C++ pointer-to-member-function.
 This function must have the indicated signature ``const Real& P::particleScalarField() const`` *or* the signature ``Real P::particleScalarField() const``.
 The pointer-to-member ``particleScalarField`` indicates the variable to be deposited on the mesh.
-This function pointer does not need to return a member in the particle class - derived variables are also fine. 
-For example, if the particle type ``P`` needs to deposit a computational mass on the mesh, the particle class will at least contain the following member functions:
+This function pointer does not need to return a member in the particle class.
+
+Note that when depositing vector-quantities (such as electric currents), one must call the version which takes ``RealVect P::particleVectorField() const`` as a template parameter.
+The supplied function must return a ``RealVect`` and ``a_meshData`` must have ``SpaceDim`` components. 
+
+Next, the input arguments to ``depositParticles`` are the output mesh data holder (must have exactly one or ``SpaceDim`` components), the realm and phase where the particles live, and the particles themselves (``a_particles``).
+The enum ``DepositionType`` and input argument ``a_depositionType`` indicates the deposition method.
+Valid arguments are
+
+* ``DepositionType::NGP`` (Nearest grid-point).
+* ``DepositionType::CIC`` (Cloud-In-Cell).
+* ``DepositionType::TSC`` (Triangle-Shaped Cloud).
+* ``DepositionType::W4``  (Fourth order weighted).
+
+The input argument ``a_coarseFineDeposition`` determines how coarse-fine deposition is handled.
+Strictly speaking, this argument only affects how the particle mass is deposited from the coarse level to the fine level. 
+Valid input arguments are
+
+* ``CoarseFineDeposition::PVR`` This uses a standard PVR formulation.
+  When the particles near the refinement boundary deposit on the mesh, some of the mass from the coarse-side particles will end up underneath the fine grid.
+  This mass is interpolated to the fine grid using piecewise constant interpolation.
+  If the fine-level particles also have particle clouds that hang over the refinement boundary, the hanging mass will be added to the coarse level.
+* ``CoarseFineDeposition::Halo`` This uses a what we call *halo* particles. 
+  Instead of interpolating the mass from the invalid coarse region onto the fine level, the particles near the refinement boundary (i.e., the *halo* particles) deposit directly into the fine level but with 2x or 4x the particle width.
+  So, if a coarse-level particle lives right next to the fine grid and the refinement factor between the grids is :math:`r`, it will deposit both into the fine grid with :math:`r` times the particle width compared to the coarse grid.
+  Again, if the fine-level particles also have particle clouds that hang over the refinement boundary, the hanging mass will be added to the coarse level.
+* ``CoarseFineDeposition::HaloNGP`` This uses halo particles, but the particles along the refinement boundary are deposited with an NGP scheme. 
+
+Finally, the flag ``a_forceIrregNGP`` permits the user to enforce nearest grid-point deposition in cut-cells.
+This option is motivated by the fact that some applications might require hard mass conservation, and the user can ensure that mass is never deposited into covered grid cells. 
+
+As an example, if the particle type ``P`` needs to deposit a computational mass on the mesh, the particle class will at least contain the following member functions:
 
 .. code-block:: c++
 
@@ -450,12 +498,18 @@ For example, if the particle type ``P`` needs to deposit a computational mass on
          return m_mass*m_mass.
       }
 
+      RealVect momentum() const {
+         return m_mass*m_velocity;
+      }
+
    protected:
 
       Real m_mass;
+
+      Real m_velocity;
    };
 
-Here, we have included an extra member function ``mass2()`` which returns the squared mass.
+Here, we have included an extra member function ``mass()`` which returns the squared mass.
 Note that the function does not return a member variable but an r-value.
 When depositing the mass on the mesh the user will e.g. call
 
@@ -463,36 +517,17 @@ When depositing the mass on the mesh the user will e.g. call
 
    RefCountedPtr<AmrMesh> amr;
 
-   amr->depositParticles<P, &P::mass >(...).
-   amr->depositParticles<P,  P::mass2>(...).   
+   amr->depositParticles<P, &P::mass >(...);
+   amr->depositParticles<P, &P::mass2>(...);
 
-Next, the input arguments to ``depositParticles`` are the output mesh data holder (must have exactly one component), the realm and phase where the particles live, and the particles themselves (``a_particles``).
-The enum ``DepositionType`` and input argument ``a_depositionType`` indicates the deposition method.
-Valid arguments are
+When depositing momentum, use
 
-* ``DepositionType::NGP`` (Nearest grid-point).
-* ``DepositionType::CIC`` (Cloud-In-Cell).
-* ``DepositionType::TSC`` (Triangle-Shaped Cloud).
-* ``DepositionType::W4``  (Fourth order weighted).
-
-The input argument ``a_coarseFineDeposition`` determines how coarse-fine deposition is handled.
-Valid input arguments are
-
-* ``CoarseFineDeposition::PVR`` This uses a standard PVR formulation.
-  When the particles near the refinement boundary deposit on the mesh, some of the mass from the coarse-side particles will end up underneath the fine grid.
-  This mass is interpolated to the fine grid using piecewise constant interpolation.
-  If the fine-level particles also have particle clouds that hang over the refinement boundary, the hanging mass will be added to the coarse level.
-
-* ``CoarseFineDeposition::Halo`` This uses a what we call *halo* particles. 
-  Instead of interpolating the mass from the invalid coarse region onto the fine level, the particles near the refinement boundary (i.e., the *halo* particles) deposit directly into the fine level but with 2x or 4x the particle width.
-  So, if a coarse-level particle lives right next to the fine grid and the refinement factor between the grids is :math:`r`, it will deposit both into the fine grid with :math:`r` times the particle width compared to the coarse grid.
-  Again, if the fine-level particles also have particle clouds that hang over the refinement boundary, the hanging mass will be added to the coarse level.  
-
-Finally, the flag ``a_forceIrregNGP`` permits the user to enforce nearest grid-point deposition in cut-cells.
-This option is motivated by the fact that some applications might require hard mass conservation, and the user can ensure that mass is not deposited into covered regions.
+.. code-block:: c++
+		
+   amr->depositParticles<P,  &P::momentum>(...).      
 
 Particle interpolation
-______________________
+----------------------
 
 To interpolate a field onto a particle position, the user can call the ``AmrMesh`` member functions
 
