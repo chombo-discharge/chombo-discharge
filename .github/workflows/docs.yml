@@ -37,10 +37,10 @@ jobs:
           make github-tex
 
       - name: Build pdf docs
-      - uses: xu-cheng/latex-action@v2        
+      - uses: xu-cheng/latex-action@v2
+        working-directory: ${{ env.DISCHARGE_HOME}}/docs/build/latex
         with: |
           root_file: "chombo-discharge.tex"
-          working-directory: docs/build/latex
           
       - name: Deploy
         if: github.event_name == 'push' && github.repository == 'chombo-discharge/chombo-discharge' && github.ref == 'refs/heads/main'        
