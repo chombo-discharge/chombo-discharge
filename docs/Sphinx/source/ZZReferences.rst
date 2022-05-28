@@ -1,7 +1,5 @@
-.. only:: html
-	  
-   References
-   ----------
+References
+----------
    
 .. bibliography:: references.bib
    :style: plain

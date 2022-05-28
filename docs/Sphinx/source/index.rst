@@ -58,7 +58,8 @@ We aim for (but cannot guarantee) backward compatibility such that existing ``ch
    div#tutorial.section,
    div#utilities.section,
    div#contributing.section,
-   div#references.section,            
+   div#references.section,
+   div#bibliography.section,               
    div#epilogue.section {
        display:none;
    }
@@ -102,7 +103,6 @@ Design
    :caption: Design
    :hidden:	     
 
-   Source/Design      
    Source/Driver
    Source/ComputationalGeometry
    Source/TimeStepper
@@ -120,8 +120,10 @@ Solvers
 
    Solvers/CDR
    Solvers/Electrostatics
+   Solvers/MeshODESolver
    Solvers/RTE
    Solvers/Sigma
+   Solvers/TracerParticles
    Solvers/Ito
 
 Physics models
@@ -173,13 +175,14 @@ Contributing
    :hidden:	     
 
    Contrib/Contributions
+   Contrib/Convergence
    Contrib/CI
    Contrib/CodeStandard
 
 .. only:: html
 	  
    Bibliography
-   **********
+   ************
 
 .. toctree::
    :maxdepth: 3
