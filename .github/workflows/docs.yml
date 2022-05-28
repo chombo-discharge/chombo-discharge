@@ -36,6 +36,7 @@ jobs:
         working-directory: ${{ github.workspace }}/docs/Sphinx
         run: |
           make github-tex
+          ls -ahl ${{ github.workspace }}/docs/build/latex
 
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v2
