@@ -9,6 +9,7 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -18,7 +19,10 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt install doxygen
-          sudo apt install graphviz                    
+          sudo apt install graphviz
+          sudo apt install texlive
+          sudo apt install texlive-latex-extra
+          sudo apt install latexmk
           python3 -m pip install sphinx sphinx_rtd_theme sphinxcontrib-bibtex
           python3 -m pip install -I docutils==0.16  # Downgrade docutils so that bullet points render properly with Sphinx
 
@@ -26,10 +30,19 @@ jobs:
         run: |
           doxygen Doxyfile
 
-      - name: Build sphinx
+      - name: Build HTML documentation
+        working-directory: ${{ github.workspace }}/docs/Sphinx        
         run: |
-          cd docs/Sphinx
           make github
+
+      - name: Build PDF documentation
+        working-directory: ${{ github.workspace }}/docs/Sphinx
+        run: |
+          make github-tex
+          cd ${{ github.workspace }}/docs/build/latex
+          make
+          cp chombo-discharge.pdf ${{ github.workspace }}/docs
+          make clean
           
       - name: Deploy
         if: github.event_name == 'push' && github.repository == 'chombo-discharge/chombo-discharge' && github.ref == 'refs/heads/main'        

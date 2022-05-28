@@ -14,9 +14,9 @@ The Helmholtz equation is represented by
 
    \alpha a\left(\mathbf{x}\right)\Phi + \beta\nabla\cdot\left[b\left(\mathbf{x}\right)\nabla\Phi\right] = \rho
    
-where :math:`\alpha` and :math:`\beta` are constants and :math:`a\left(\mathbf{x}\right)` and :math:`b\left(\mathbf{x}\right)` are spatially dependent (and only piecewise smooth).
+where :math:`\alpha` and :math:`\beta` are constants and :math:`a\left(\mathbf{x}\right)` and :math:`b\left(\mathbf{x}\right)` are spatially dependent and piecewise smooth.
 
-To solve the Helmholtz equation we solve it in the form
+To solve the Helmholtz equation, it is solved in the form
 
 .. math::
 

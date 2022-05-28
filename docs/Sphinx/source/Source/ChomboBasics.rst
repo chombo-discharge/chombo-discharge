@@ -5,7 +5,7 @@
 
 To fully understand this documentation the user should be familiar with ``Chombo``.
 This documentation uses class names from ``Chombo`` and the most relevant ``Chombo`` data structures are summarized here.
-What follows is a *very* brief introduction to these data structures, for in-depth explanations please see the ``Chombo`` manual. 
+What follows is a *very* brief introduction to these data structures, for in-depth explanations please see the `Chombo manual <https://github.com/applied-numerical-algorithms-group-lbnl/Chombo_3.2/tree/master/doc>`_.
 
 Real
 ----
@@ -68,6 +68,10 @@ Usually, code for doing anything with the ``EBCellFAB`` looks like this:
    for (VoFIterator vofit(...); vofit.ok(); ++vofit){
       (...)
    }
+
+.. important::
+
+   The ``FArrayBox`` stores the data in column major order.
 
 Vector
 ------

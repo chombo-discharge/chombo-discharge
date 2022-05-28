@@ -3,8 +3,7 @@
 Code standard
 =============
 
-An effort is underway to standarize ``chombo-discharge`` code.
-New code that is developed should follow the below guidelines:
+When submitting new code to ``chombo-discharge``, the following guidelines below show be followed.
 
 C++ standard
 ------------
@@ -81,7 +80,8 @@ Here is a complete example of a header file in ``chombo-discharge``:
    /*!
      @brief This class does the following: ....
    */
-   class MyClass {
+   class MyClass
+   {
    public:
 
    //...
@@ -117,17 +117,15 @@ We use the following syntax:
      
    * Global variables are prepended by ``//``.
 
-Indentation and brackets
-________________________
+Code formatting
+_______________
 
-Use whitespace indentation for code (not tab characters).
-Curly brackets should trail on the same line as ``if`` and ``for`` loops, e.g.
+We use ``clang-format`` for formatting the source code.
+Before opening a pull request for review, navigate to :file:`$DISCHARGE_HOME` and format the code using
 
-.. code-block:: c++
+.. code-block:: bash
 
-   if(myCondition){
-
-   }
+   find Source Physics Geometries Exec \( -name "*.H" -o -name "*.cpp" \) -exec clang-format -i {} +
 
 Options files
 -------------
@@ -144,8 +142,3 @@ For a class ``MyClass`` and options file might look something like
 
    MyClass.input_variable = 1.0
    MyClass.bc.x.lo        = dirichlet 1.0
-
-Revisions of old code
----------------------
-
-Revisions or changes to old code that does not meet the above standard should use a fair judgement policy where the developer should try to balance his or her efforts.

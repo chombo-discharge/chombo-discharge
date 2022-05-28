@@ -1,4 +1,4 @@
-.. _Chap:GettingStarted:
+.. _Chap:Installation:
 
 Installation
 ============
@@ -11,9 +11,10 @@ The following packages are *required*:
 
 * ``Chombo``, which is supplied with ``chombo-discharge``.
 * The C++ JSON file parser `<https://github.com/nlohmann/json>`_.
+* The ``EBGeometry`` package, see `<https://github.com/rmrsk/EBGeometry>`_.
 * LAPACK and BLAS
 
-The ``Chombo`` and ``nlohmann/json`` dependencies are automatically handled by ``chombo-discharge`` through git submodules. 
+The ``Chombo``, ``nlohmann/json``, and ``EBGeometry`` dependencies are automatically handled by ``chombo-discharge`` through git submodules.
 
 .. warning::
    Our version of ``Chombo`` is hosted at `<https://github.com/chombo-discharge/Chombo-3.3.git>`_. 
@@ -22,30 +23,69 @@ The ``Chombo`` and ``nlohmann/json`` dependencies are automatically handled by `
 
 Optional packages are
 
-* HDF5, used for writing plot and checkpoint file.
-* MPI, used for parallelization.
-* VisIt visualization, used for visualization. 
+* A serial or parallel version of HDF5, which is used for writing plot and checkpoint files.
+* An MPI installation, which is used for parallelization.
+* `<https://visit-dav.github.io/visit-website/>`_ visualization, which used for visualization.
+
+Organization
+------------
+
+The ``chombo-discharge`` source files are organized as follows:
+
+.. list-table:: Code organization.
+   :widths: 10 50
+   :header-rows: 1
+
+   * - Folder
+     - Explanation
+   * - :file:`Source`
+     -  Source files for the AMR core, solvers, and various utilities.
+   * - :file:`Physics`
+     - Various implementations that can run the ``chombo-discharge`` source code.
+   * - :file:`Geometries`
+     - Various geometries.
+   * - :file:`Submodules`
+     - Git submodule dependencies.
+   * - :file:`Exec`
+     - Various executable applications. 
+
 
 Cloning ``chombo-discharge``
 ----------------------------
 
-To compile ``chombo-discharge``, the makefiles must be able to find both ``chombo-discharge`` and ``Chombo``.
-In our makefiles the paths to these are supplied through the environment variables
-
-* ``CHOMBO_HOME``, pointing to your ``Chombo`` library
-* ``DISCHARGE_HOME``, pointing to the ``chombo-discharge`` root directory.
-
-To clone ``chombo-discharge``, set the environment variables and clone (using ``--recursive`` to fetch submodules):
+To obtain ``chombo-discharge``, the simplest approach is to clone it and recursively fetch the submodules:
 
 .. code-block:: bash
 
-   export DISCHARGE_HOME=/home/foo/chombo-discharge
-   export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
-		
-   git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
+   git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git
+
+Setting up the environment
+--------------------------
+
+When compiling ``chombo-discharge``, makefiles must be able to find both ``chombo-discharge`` and ``Chombo``.
+In our makefiles the paths to these are supplied through the environment variables
+
+* ``DISCHARGE_HOME``, pointing to the ``chombo-discharge`` root directory.
+* ``CHOMBO_HOME``, pointing to your ``Chombo`` library  
 
 Note that ``DISCHARGE_HOME`` must point to the root folder in the ``chombo-discharge`` source code, while ``CHOMBO_HOME`` must point to the :file:`lib/` folder in your ``Chombo`` root directory.
-When cloning with submodules, both ``Chombo`` and ``nlohmann/json`` will be placed in the :file:`Submodules` folder in ``$DISCHARGE_HOME``.
+When cloning with submodules, both ``Chombo`` and ``nlohmann/json`` will be placed in the :file:`Submodules` folder in ``$DISCHARGE_HOME``.  
+
+.. note::
+   
+   To clone ``chombo-discharge`` directly to ``$DISCHARGE_HOME``, set the environment variables and clone (using ``--recursive`` to fetch submodules):
+
+   .. code-block:: bash
+
+      export DISCHARGE_HOME=/home/foo/chombo-discharge
+      export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
+		
+      git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
+
+``chombo-discharge`` is built using a configuration file supplied to ``Chombo``.
+This file must reside in ``$CHOMBO_HOME/mk``.
+Some standard configuration files are supplied with ``chombo-discharge``, and reside in ``$DISCHARGE_HOME/Lib/Local``.
+These files may or may not work right off the bat. 
 
 Test build
 ----------
@@ -56,7 +96,7 @@ For a quick compilation test the user can use the GNU configuration file supplie
 
    .. code-block:: text
 
-      cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/mk/Make.defs.local
+      cp $DISCHARGE_HOME/Lib/Local/Make.defs.GNU $CHOMBO_HOME/mk/Make.defs.local
 
 #. If you do not have the GNU compiler suite, install it by
 
@@ -74,7 +114,7 @@ For a quick compilation test the user can use the GNU configuration file supplie
    .. code-block:: text
 
       cd $DISCHARGE_HOME
-      make -s -j4 discharge-lib
+      make -s -j4
 
 This will compile the ``chombo-discharge`` source code in serial and without HDF5 (using four cores for the compilation).
 If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
@@ -149,7 +189,7 @@ Linking to these can often be done using
 Pre-defined configuration files
 _______________________________
 
-Some commonly used configuration files are found in ``$DISCHARGE_HOME/Local``.
+Some commonly used configuration files are found in ``$DISCHARGE_HOME/Lib/Local``.
 ``chombo-discharge`` can be compiled in serial or with MPI, and with or without HDF5.
 The user need to configure the ``Chombo`` makefile to ensure that the ``chombo-discharge`` is properly configured.
 Below, we include brief instructions for compilation on a Linux workstation and for a cluster. 
@@ -159,7 +199,7 @@ GNU configuration for workstations
 __________________________________
 
 Here, we provide a more complete installation example using GNU compilers for a workstation.
-These steps are intended for users that do not have installed MPI or HDF5.
+These steps are intended for users that do not have MPI or HDF5 installed.
 If you already have installed MPI and/or HDF5, the steps below might require modifications.
 
 #. Ensure that ``$DISCHARGE_HOME`` and ``$CHOMBO_HOME`` point to the correct locations:
@@ -204,25 +244,25 @@ If you already have installed MPI and/or HDF5, the steps below might require mod
 
      .. code-block:: text
 
-	cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/mk/Make.defs.local
+	cp $DISCHARGE_HOME/Lib/Local/Make.defs.GNU $CHOMBO_HOME/mk/Make.defs.local
 
    * **Serial build with HDF5**:
 
      .. code-block:: text
 
-	cp $DISCHARGE_HOME/Local/Make.defs.HDF5.GNU $CHOMBO_HOME/mk/Make.defs.local
+	cp $DISCHARGE_HOME/Lib/Local/Make.defs.HDF5.GNU $CHOMBO_HOME/mk/Make.defs.local
 
    * **MPI build without HDF5**:
 
      .. code-block:: text
 
-	cp $DISCHARGE_HOME/Local/Make.defs.MPI.GNU $CHOMBO_HOME/mk/Make.defs.local
+	cp $DISCHARGE_HOME/Lib/Local/Make.defs.MPI.GNU $CHOMBO_HOME/mk/Make.defs.local
 
    * **MPI build with HDF5**:
 
      .. code-block:: text
 
-	cp $DISCHARGE_HOME/Local/Make.defs.MPI.HDF5.GNU $CHOMBO_HOME/mk/Make.defs.local
+	cp $DISCHARGE_HOME/Lib/Local/Make.defs.MPI.HDF5.GNU $CHOMBO_HOME/mk/Make.defs.local
 
 #. Compile the ``chombo-discharge``
 
@@ -238,8 +278,8 @@ If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Li
 Configuration on clusters
 _________________________
 
-To configure ``chombo-discharge`` for executation on a cluster, use one of the makefiles supplied in ``$DISCHARGE_HOME/Local`` if it exists for your computer.
-Alternatively, copy ``$DISCHARGE_HOME/Local/Make.defs.local.template`` to ``$CHOMBO_HOME/mk/Make.defs.local`` and set the compilers, optimization flags, and paths to HDF5 library.
+To configure ``chombo-discharge`` for executation on a cluster, use one of the makefiles supplied in ``$DISCHARGE_HOME/Lib/Local`` if it exists for your computer.
+Alternatively, copy ``$DISCHARGE_HOME/Lib/Local/Make.defs.local.template`` to ``$CHOMBO_HOME/mk/Make.defs.local`` and set the compilers, optimization flags, and paths to HDF5 library.
 
 On clusters, MPI and HDF5 are usually already installed, but must usually be loaded (e.g. as modules) before compilation.
 
@@ -249,13 +289,13 @@ Running an example application
 In ``chombo-discharge``, applications are set up so that they use the ``chombo-discharge`` source code and one ``chombo-discharge`` physics module.
 To run one of the applications that use a particular ``chombo-discharge`` physics module, we will run a simulation of a positive streamer (in air). 
 
-The application code is located in ``$DISCHARGE_HOME/Examples/CdrPlasma/DeterministicAir`` and it uses the convection-diffusion-reaction plasma module (located in ``$DISCHARGE_HOME/Physics/CdrPlasma``).
+The application code is located in ``$DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir`` and it uses the convection-diffusion-reaction plasma module (located in ``$DISCHARGE_HOME/Physics/CdrPlasma``).
 
 First, compile the application by
 
 .. code-block:: text
 
-   cd $DISCHARGE_HOME/Examples/CdrPlasma/DeterministicAir
+   cd $DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir
    make -s -j4 DIM=2 program
 
 This will provide an executable named ``program2d.<bunch_of_options>.ex``.

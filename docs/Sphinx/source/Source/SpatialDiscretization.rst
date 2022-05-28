@@ -7,13 +7,21 @@ Cartesian AMR
 _____________
 
 ``chombo-discharge`` uses patch-based structured adaptive mesh refinement (AMR) provided by ``Chombo`` :cite:`chombo`.
-In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels. 
+In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels, see :numref:`Fig:PatchBasedAMR`.
 With Cartesian AMR each patch is a Cartesian block of grid cells. 
 A *grid level* is composed of a union of grid patches sharing the same grid resolution, with the additional requirement that the patches on a grid level are *non-overlapping*.
 With AMR, such levels can be hierarchically nested; finer grid levels exist on top of coarser ones.
 In patch-based AMR there are only a few fundamental requirements on how such grids are constructed.
 For example, a refined grid level must exist completely within the bounds of it's parent level. 
 In other words, grid levels :math:`l-1` and :math:`l+1` are spatially separated by a non-zero number of grid cells on level :math:`l`.
+
+.. _Fig:PatchBasedAMR:
+.. figure:: /_static/figures/PatchBasedAMR.png
+   :width: 480px
+   :align: center
+
+   Cartesian patch-based refinement showing two grid levels.
+   The fine-grid level lives on top of the coarse level, and consists of two patches (red and blue colors) with two layers of ghost cells (dashed lines and orange shaded region). 
 
 The resolution on level :math:`l+1` is typically finer than the resolution on level :math:`l` by an integer (usually power of two).
 However,
@@ -92,7 +100,6 @@ Here, only :math:`d_1\left(\mathbf{x}\right)` is a signed distance function.
 In ``chombo-discharge``, SDFs can be generated through analytic expressions, constructive solid geometry, or by supplying polygon tesselation.
 NURBS geometries are, unfortunately, not supported.
 Fundamentally, all geometric objects are described using ``BaseIF`` objects from ``Chombo``, see :ref:`Chap:BaseIF`.
-Support for polygon surfaces differ from analytic functions only in how we implement the ``BaseIF::value`` function (see :ref:`Chap:BaseIF`).
 
 Constructive solid geometry (CSG)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -108,45 +115,29 @@ Note that the resulting is an implicit function but is *not* an SDF.
 However, the union typically approximates the signed distance field quite well near the surface.
 ``Chombo`` natively supports many ways of performing CSG.
 
-Polygon surfaces
-^^^^^^^^^^^^^^^^
+EBGeometry
+^^^^^^^^^^
 
 While functions like :math:`R - \left|\mathbf{x}\right|` are quick to compute, a polygon surface may consist of hundreds of thousands of primitives (e.g., triangles).
 Generating signed distance function from polygon tesselations is quite involved as it requires computing the signed distance to the closest feature, which can be a planar polygon (e.g., a triangle), edge, or a vertex. 
-``chombo-discharge`` supports such functions. 
+``chombo-discharge`` supports such functions through the `EBGeometry <https://github.com/rmrsk/EBGeometry>`_ package.
 
 .. warning::
 
    The signed distance function for a polygon surface is only well-defined if it is manifold-2, i.e. it is watertight and does not self-intersect.
    ``chombo-discharge`` should nonetheless compute the distance field as best as it can, but the final result may not make sense in an EB context. 
 
-Searching through all features (faces, edge, vertices) is unacceptably slow, and ``chombo-discharge`` therefore uses a bounding volume hierarchy for accelerating these searches.
+Searching through all features (faces, edge, vertices) is unacceptably slow, and ``EBGeometry`` therefore uses a bounding volume hierarchy for accelerating these searches.
 The bounding volume hierarchy is top-down constructed, using a root bounding volume (typically a cube) that encloses all triangles.
 Using heuristics, the root bounding volume is then subdivided into two separate bounding volumes that contain roughly half of the primitives each.
 The process is then recursed downwards until specified recursion criteria are met.
-Additional details are provided in :ref:`Chap:ComplexGeometries`. 
-
-Some options are available for tuning this process:
-
-* The user can choose between Cartesian bounding volumes or bounding spheres.
-* The implementation uses polymorphic lambdas for subdividing primitives into new bounding volumes.
-  Users are free to construct new types of bounding volumes (e.g., object-oriented boxes).
-* The implementation uses the same type of polymorphic functions for supplying stopping criteria (e.g., terminating at a certain depth).
-  
-Users can choose to use the default implementations for both sub-division and stopping. 
-For example, three default partitioning functions are supported.
-One can sub-divide primitives into two sub-volumes based on their centroids, or such that the volume between the two halves are minimized.
+Additional details are provided in the `EBGeometry documentation <https://rmrsk.github.io/EBGeometry/>`_.
 
 .. figure:: /_static/figures/Armadillo.png
    :width: 360px
    :align: center
 
    Example of an SDF reconstruction and cut-cell grid from a surface tesselation in ``chombo-discharge``.
-
-.. note::
-   
-   The polygon functionality is currently limited to PLY files.
-   Contributions that provide plugins to other file formats are encouraged. 
 
 .. _Chap:GeometryGeneration:
 
@@ -156,19 +147,18 @@ ___________________
 ``Chombo`` approach
 ^^^^^^^^^^^^^^^^^^^
 
-The default geometry generation method in ``Chombo`` is to locate cut-cells on the finest AMR level first.
-This scan looks through all cells on that level, so for a domain which is effectively :math:`N\times N\times N` cells there are at least :math:`N^3` implicit function queries (in 2D, the complexity is :math:`N^2`). 
+The default geometry generation method in ``Chombo`` is to locate cut-cells on the finest AMR level first and then generate the coarser levels cells through grid coarsening.
+This will look through all cells on the finest level, so for a domain which is effectively :math:`N\times N\times N` cells there are :math:`\mathcal{O}\left(N^3\right)` implicit function queries (in 2D, the complexity is :math:`\mathcal{O}\left(N^2\right)`). 
 Note that as :math:`N` becomes large, say :math:`N=10^5`, geometric queries of this type become a bottleneck.
-For example, even if the SDF evaluation for an arbitrary point :math:`\mathbf{x}` only took :math:`10^{-7}` seconds to evaluate, and the application was parallelized over 10,000 cores, it would take at least twenty hours to figure out where the cut-cells are located.
 
 ``chombo-discharge`` pruning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``chombo-discharge`` has made modifications to the geometry generation routines in ``Chombo``, resolving a few bugs and, most importantly, using the signed distance function for load balancing the geometry generation step.
-This modification to ``Chombo`` is motivated by the reduction of the :math:`N^3` scaling in the native ``Chombo`` grid generation to an :math:`N^2` scaling in ``chombo-discharge``.
-Typically, we find that this makes geometry generation computationally trivial (in the sense that it becomes extremely fast). 
+This modification to ``Chombo`` yields a reduction of the original :math:`\mathcal{O}\left(N^3\right)` scaling in ``Chombo`` grid generation to an :math:`\mathcal{O}\left(N^2\right)` scaling in ``chombo-discharge``.
+Typically, we find that this makes geometry generation computationally trivial (in the sense that it is very fast compared to the simulation). 
 
-The SDF satisfies the Eikonal equation
+To understand this process, note that the SDF satisfies the Eikonal equation
 
 .. math::
    :nowrap:
@@ -177,8 +167,9 @@ The SDF satisfies the Eikonal equation
    \left|\nabla f\right| = 1, 
    \end{equation}
    
-and so it is well-behaved for all :math:`\mathbf{x}`, and can be used to prune large regions in space where cut-cells don't exist. 
-For example, consider a Cartesian grid patch with cell size :math:`\Delta x` and cell-centered grid points :math:`\mathbf{x}_{\mathbf{i}} = \left(\mathbf{i} + \mathbf{\frac{1}{2}}\right)\Delta x` where :math:`\mathbf{i} \in \mathbb{Z}^3` are grid cells in the patch, like that shown in :numref:`Fig:Pruning`.
+and so it is well-behaved for all :math:`\mathbf{x}`.
+The SDF can thus be used to prune large regions in space where cut-cells don't exist. 
+For example, consider a Cartesian grid patch with cell size :math:`\Delta x` and cell-centered grid points :math:`\mathbf{x}_{\mathbf{i}} = \left(\mathbf{i} + \mathbf{\frac{1}{2}}\right)\Delta x` where :math:`\mathbf{i} \in \mathbb{Z}^3` are grid cells in the patch, as shown in :numref:`Fig:Pruning`.
 We know that cut cells do not exist in the grid patch if :math:`\left|f\left(\mathbf{x}_{\mathbf{i}}\right)\right| > \frac{1}{2}\Delta x` for all :math:`\mathbf{i}` in the patch.
 One can use this to perform a quick scan of the SDF on a *coarse* grid level first, for example on :math:`l=0`, and recurse deeper into the grid hierarchy to locate cut-cells on the other levels. 
 Typically, a level is decomposed into Cartesian subregions, and each subregion can be scanned independently of the other subregions (i.e. the problem is embarassingly parallel).
@@ -187,7 +178,7 @@ There is no point in recursively refining these to look for cut-cells at finer g
 The subregions that did contain cut-cells are refined and decomposed into sub-subregions. 
 This procedure recurses until :math:`l=l_{\text{max}}`, at which point we have determined all sub-regions in space where cut-cells can exist (on each AMR level), and pruned the ones that don't.
 This process is shown in :numref:`Fig:Pruning`. 
-Once all the grid patches that contain cut-cells have been found, these patches can be distributed (i.e. load balanced) to the various MPI ranks or threads for computing the discrete information.
+Once all the grid patches that contain cut-cells have been found, these patches are distributed (i.e., load balanced) to the various MPI ranks for computing the discrete grid information.
 
 .. _Fig:Pruning:
 .. figure:: /_static/figures/Pruning.png
@@ -209,14 +200,22 @@ However, implicit functions like :math:`d\left(\mathbf{x}\right) = R^2 - \mathbf
 Mesh generation
 _______________
 
-``chombo-discharge`` offers two algorithm for AMR grid generation, the classical Berger-Rigoutsos algorithm and a *tiled* algorithm. 
+``chombo-discharge`` supports two algorithm for AMR grid generation:
+
+#. The classical Berger-Rigoutsos algorithm :cite:`Berger1991`.
+#. A *tiled* algorithm :cite:`Gunney2016`.
+   
 Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags.
+Only *properly nested* grids are generated, in which case two grid levels :math:`l-1` and :math:`l+1` are separated by a non-zero number of grid cells on level :math:`l`.
+This requirement is specific for patch-based grids; itd dieoes not fundamentally exist for quad- and oct-tree grids. 
+For patch based AMR, the rationale for this requirement is that stencils on level :math:`l+1` should should only reach into grid cells on levels :math:`l` and :math:`l+1`. 
+For example, ghost cells on level :math:`l+1` should be interpolated from data only on levels :math:`l` and :math:`l+1`.
 
 Berger-Rigoutsos algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Berger-Rigoustous grid algorithm is implemented in ``Chombo`` and is called by ``chombo-discharge``.
-The classical Berger-Rigoustous algorithm is inherently serial in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes.
+The classical Berger-Rigoustous algorithm is inherently serial in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes, see :cite:`Berger1991` for implementation details. 
 Typically, it is not used at large scale in 3D due to its memory consumption. 
 
 .. _BRMeshRefine:
@@ -230,7 +229,7 @@ Tiled mesh refinement
 ^^^^^^^^^^^^^^^^^^^^^
 ``chombo-discharge`` also supports a tiled algorithm where the grid boxes on each block are generated according to a predefined tiled pattern.
 If a tile contains a single tag, the entire tile is flagged for refinement.
-The tiled algorithm produces grids that are visually similar to octrees, but is more general since it also supports refinement factors other than 2 and is not restricted to domain extensions that are an integer factor of 2 (e.g. :math:`2^{10}` cells in each direction).
+The tiled algorithm produces grids that are visually similar to octrees, but is slightly more general since it also supports refinement factors other than 2 and is not restricted to domain extensions that are an integer factor of 2 (e.g. :math:`2^{10}` cells in each direction).
 Moreover, the algorithm is extremely fast and has low memory consumption even at large scales. 
 
 .. _TiledMeshRefine:

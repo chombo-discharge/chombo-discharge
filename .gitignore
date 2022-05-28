@@ -37,3 +37,4 @@ Research/**
 docs/*
 !docs/.nojekyll
 !docs/Sphinx/
+!docs/chombo-discharge.pdf

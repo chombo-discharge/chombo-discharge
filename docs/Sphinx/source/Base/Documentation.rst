@@ -2,21 +2,19 @@ Using this documentation
 ========================
 
 This documentation is the user documentation for ``chombo-discharge``.
-It includes an explanation of the data structures, algorithms, and code design. 
-It was built using `reStructuredText` with `Sphinx`, and is HTML browser-friendly. 
+It includes an explanation of the data structures, algorithms, and code design.
 
-PDF documentation
------------------
+This documentation is built as a part of the continuous integration (CI) at GitHub, and is automatically kept up-to-date with the latest version of ``chombo-discharge``. 
+It was built using `reStructuredText` with `Sphinx`, and is HTML browser-friendly.
 
-If you want to build a PDF version of this documentation, please navigate to the :file:`sphinx/` subfolder and execute
+.. only:: html
 
-.. code-block:: bash
-   
-   make clean latexpdf
+   PDF documentation
+   -----------------
 
-A PDF version of this documentation named :file:`chombo-discharge.pdf` will appear in :file:`sphinx/build/latex/`.
+   A PDF-version of this documentation is included with the source code and is found at `<https://github.com/chombo-discharge/chombo-discharge/chombo-discharge.pdf>`_
 
 Doxygen documentation
 ---------------------
 
-A separate Doxygen documentation of the ``chombo-discharge`` code is found `here <../doxygen/html/index.html>`_. 
+A separate Doxygen documentation of the ``chombo-discharge`` code is found at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/index.html>`_

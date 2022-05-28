@@ -9,11 +9,13 @@
 
 Welcome to ``chombo-discharge``'s user documentation
 ****************************************************
-	      
-``chombo-discharge`` is a modular and scalable research code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries.
-The code is hosted at `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_ together with the source files for this documentation.
 
-``chombo-discharge`` supports
+.. important::
+
+   ``chombo-discharge`` is a modular and scalable research code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries.
+   The code is hosted at `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_ together with the source files for this documentation.
+
+``chombo-discharge`` features include:
 
 * Fully written in C++.
 * Support for complex geometries.
@@ -28,7 +30,7 @@ The code is hosted at `GitHub <https://github.com/chombo-discharge/chombo-discha
 
 .. * Îto particle models for microscopic drift-diffusion-reaction processes.  
 
-Numerical solvers are designed to run either on their own, or as a part of a larger application. 
+Numerical solvers are designed to run either on their own, or as a part of a larger application.
 
 For scalability, ``chombo-discharge`` is built on top of `Chombo 3 <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_, and therefore additionally features
 
@@ -56,7 +58,8 @@ We aim for (but cannot guarantee) backward compatibility such that existing ``ch
    div#tutorial.section,
    div#utilities.section,
    div#contributing.section,
-   div#references.section,            
+   div#references.section,
+   div#bibliography.section,               
    div#epilogue.section {
        display:none;
    }
@@ -72,7 +75,7 @@ Introduction
 
    Base/Documentation
    Base/Overview
-   Base/GettingStarted
+   Base/Installation
    Base/Visualization
    Base/Control
 
@@ -90,6 +93,38 @@ Discretization
    Source/Particles
    Source/Realm
    Source/LinearSolvers
+
+
+Design
+******
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Design
+   :hidden:	     
+
+   Source/Driver
+   Source/ComputationalGeometry
+   Source/TimeStepper
+   Source/AmrMesh   
+   Source/CellTagger
+   Source/GeoCoarsener
+
+Solvers
+*******
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Solvers
+   :hidden:	     
+
+   Solvers/CDR
+   Solvers/Electrostatics
+   Solvers/MeshODESolver
+   Solvers/RTE
+   Solvers/Sigma
+   Solvers/TracerParticles
+   Solvers/Ito
 
 Physics models
 **************
@@ -117,37 +152,8 @@ Tutorial
    :caption: Tutorial
    :hidden:	     
 
-   Tutorials/Tutorial   
-
-Design
-******
-
-.. toctree::
-   :maxdepth: 3
-   :caption: Design
-   :hidden:	     
-
-   Source/Driver
-   Source/ComputationalGeometry
-   Source/TimeStepper
-   Source/AmrMesh   
-   Source/CellTagger
-   Source/GeoCoarsener
-
-Solvers
-*******
-
-.. toctree::
-   :maxdepth: 3
-   :caption: Solvers
-   :hidden:	     
-
-   Solvers/CDR
-   Solvers/Electrostatics
-   Solvers/RTE
-   Solvers/Sigma
-   Solvers/Ito
-
+   Tutorials/Tutorial
+      
 Utilities
 *********  
 
@@ -159,7 +165,6 @@ Utilities
    Utilities/LookupTable
    Utilities/RandomNumbers
    Utilities/LeastSquares
-   Utilities/ComplexGeometries
 
 Contributing
 ************  
@@ -170,14 +175,18 @@ Contributing
    :hidden:	     
 
    Contrib/Contributions
+   Contrib/Convergence
+   Contrib/CI
    Contrib/CodeStandard
 
-References
-**********
+.. only:: html
+	  
+   Bibliography
+   ************
 
 .. toctree::
    :maxdepth: 3
-   :caption: References
+   :caption: Bibliography
    :hidden:	     
 
    ZZReferences
