@@ -6,7 +6,7 @@ This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for disc
 A modified version of ``Chombo`` is distributed together with this code.
 ``chombo-discharge`` only uses ``Chombo``; it is not affiliated nor endorsed by LBNL.
 
-Installation instructions are found at https://chombo-discharge.github.io/GettingStarted.html
+Installation instructions are found at https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html
 
 License
 -------

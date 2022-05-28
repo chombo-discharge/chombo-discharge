@@ -23,27 +23,33 @@ jobs:
           python3 -m pip install sphinx sphinx_rtd_theme sphinxcontrib-bibtex
           python3 -m pip install -I docutils==0.16  # Downgrade docutils so that bullet points render properly with Sphinx
 
-      - name: Build doxygen
-        run: |
-          doxygen Doxyfile
+#      - name: Build doxygen
+#        run: |
+#          doxygen Doxyfile
 
-      - name: Build sphinx
-        working-directory: ${{ github.workspace }}/docs/Sphinx        
-        run: |
-          make github
+#      - name: Build sphinx
+#        working-directory: ${{ github.workspace }}/docs/Sphinx        
+#        run: |
+#          make github
 
       - name: Build sphinx-tex
         working-directory: ${{ github.workspace }}/docs/Sphinx
         run: |
           make github-tex
-          ls -ahl ${{ github.workspace }}/docs/build/latex
+          cd ${{ github.workspace }}/docs/build/latex
+          make
 
-      - name: Compile LaTeX document
-        uses: xu-cheng/latex-action@v2
-        with:
-          working_directory: ${{ github.workspace }}/docs/build/latex          
-          root_file: chombo-discharge.tex
+      # - name: Compile LaTeX document
+      #   uses: xu-cheng/latex-action@v2
+      #   with:
+      #     working_directory: ${{ github.workspace }}/docs/build/latex          
+      #     root_file: chombo-discharge.tex
 
+      - name: Copy pdf
+        working-directory: ${{ github.workspace}}/docs/build/latex
+        run: |
+          mv chombo-discharge.pdf ${{ github.workspace }}/docs/chombo-discharge.pdf
+          
       - name: Cleanup
         working-directory: ${{ github.workspace}}/docs/Sphinx
         run: |
