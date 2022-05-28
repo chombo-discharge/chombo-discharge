@@ -38,10 +38,9 @@ jobs:
           make github-tex
 
       - name: Compile LaTeX document
-        working-directory: ${{ github.workspace}}/docs/build/latex
         uses: xu-cheng/latex-action@v2
         with:
-          root_file: chombo-discharge.tex
+          root_file: main.tex
           
       - name: Deploy
         if: github.event_name == 'push' && github.repository == 'chombo-discharge/chombo-discharge' && github.ref == 'refs/heads/main'        
