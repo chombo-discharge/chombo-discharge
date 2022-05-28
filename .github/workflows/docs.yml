@@ -28,19 +28,19 @@ jobs:
           doxygen Doxyfile
 
       - name: Build sphinx
-        working-directory: ${{ github.workspace}}/docs/Sphinx        
+        working-directory: ${{ github.workspace }}/docs/Sphinx        
         run: |
           make github
 
       - name: Build sphinx-tex
-        working-directory: ${{ github.workspace}}/docs/Sphinx
+        working-directory: ${{ github.workspace }}/docs/Sphinx
         run: |
           make github-tex
 
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v2
-        working-directory: ${{ github.workspace }}/docs/build/latex
         with:
+          working_directory: ${{ github.workspace }}/docs/build/latex          
           root_file: chombo-discharge.tex
 
       - name: Cleanup
