@@ -7,7 +7,6 @@
 \usepgfplotslibrary{fillbetween}
 
 \begin{document}
-\centering
 
 \begin{tikzpicture}[on grid,x=1cm, y=1cm]
   \draw[xslant=1.5, thick] (0,0) grid[xstep=0.5, ystep=0.25] (6,4);
@@ -22,12 +21,14 @@
   \end{scope}
 
   \begin{scope}[xshift=3.5cm, yshift=3cm]
+    \draw[densely dotted, fill=white, thin, xslant=1.5] grid[xstep=0.25, ystep=0.125] (3,2);    
     \draw[draw=black, thick, xslant=1.5, fill=orange!50!white, fill opacity=0.5] (0,0) rectangle(3,2);
     \draw[draw=black, thick, xslant=1.5, fill=red!50!white, fill opacity=0.5] (0.5,0.25) rectangle(2.5,1.75);
-    \draw[fill=black, thin, xslant=1.5] grid[xstep=0.25, ystep=0.125] (3,2);
-    \draw[thick, densely dashed, black] (0,0) -- ++(0,-2);
-    \draw[thick, densely dashed, black] (6,2) -- ++(0,-2);
-    \draw[thick, densely dashed, black] (3,0) -- ++(0,-2);        
+    \draw[fill=black, thin, xslant=1.5] (0.5, 0.25) grid[xstep=0.25, ystep=0.125] (2.5,1.75);
+    
+    \draw[thick, <->, densely dashed, black] (0,0) -- ++(0,-2);
+    \draw[thick, <->, densely dashed, black] (6,2) -- ++(0,-2);
+    \draw[thick, <->, densely dashed, black] (3,0) -- ++(0,-2);        
   \end{scope}  
 \end{tikzpicture}
 

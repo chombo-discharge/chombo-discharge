@@ -7,13 +7,21 @@ Cartesian AMR
 _____________
 
 ``chombo-discharge`` uses patch-based structured adaptive mesh refinement (AMR) provided by ``Chombo`` :cite:`chombo`.
-In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels. 
+In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels, see :numref:`Fig:PatchBasedAMR`.
 With Cartesian AMR each patch is a Cartesian block of grid cells. 
 A *grid level* is composed of a union of grid patches sharing the same grid resolution, with the additional requirement that the patches on a grid level are *non-overlapping*.
 With AMR, such levels can be hierarchically nested; finer grid levels exist on top of coarser ones.
 In patch-based AMR there are only a few fundamental requirements on how such grids are constructed.
 For example, a refined grid level must exist completely within the bounds of it's parent level. 
 In other words, grid levels :math:`l-1` and :math:`l+1` are spatially separated by a non-zero number of grid cells on level :math:`l`.
+
+.. _Fig:PatchBasedAMR:
+.. figure:: /_static/figures/PatchBasedAMR.png
+   :width: 480px
+   :align: center
+
+   Cartesian patch-based refinement showing two grid levels.
+   The fine-grid level lives on top of the coarse level, with two layers of ghost cells (dashed lines). 
 
 The resolution on level :math:`l+1` is typically finer than the resolution on level :math:`l` by an integer (usually power of two).
 However,
