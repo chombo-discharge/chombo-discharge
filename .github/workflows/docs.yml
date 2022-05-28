@@ -26,16 +26,16 @@ jobs:
           python3 -m pip install sphinx sphinx_rtd_theme sphinxcontrib-bibtex
           python3 -m pip install -I docutils==0.16  # Downgrade docutils so that bullet points render properly with Sphinx
 
-#      - name: Build doxygen
-#        run: |
-#          doxygen Doxyfile
+     - name: Build doxygen
+       run: |
+         doxygen Doxyfile
 
-#      - name: Build sphinx
-#        working-directory: ${{ github.workspace }}/docs/Sphinx        
-#        run: |
-#          make github
+     - name: Build HTML documentation
+       working-directory: ${{ github.workspace }}/docs/Sphinx        
+       run: |
+         make github
 
-      - name: Build sphinx-tex
+      - name: Build PDF documentation
         working-directory: ${{ github.workspace }}/docs/Sphinx
         run: |
           make github-tex
