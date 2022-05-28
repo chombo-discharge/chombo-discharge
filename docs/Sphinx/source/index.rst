@@ -93,33 +93,6 @@ Discretization
    Source/Realm
    Source/LinearSolvers
 
-Physics models
-**************
-
-.. toctree::
-   :maxdepth: 3
-   :caption: Applications
-   :hidden:	     
-
-   Applications/ImplementedModels
-   Applications/AdvectionDiffusionModel
-   Applications/BrownianWalkerModel         
-   Applications/CdrPlasmaModel
-   Applications/ElectrostaticsModel
-   Applications/GeometryModel      
-   Applications/RadiativeTransferModel      
-
-..   ItoPlasmaModel
-
-Tutorial
-********
-
-.. toctree::
-   :maxdepth: 3
-   :caption: Tutorial
-   :hidden:	     
-
-   Tutorials/Tutorial   
 
 Design
 ******
@@ -150,6 +123,34 @@ Solvers
    Solvers/Sigma
    Solvers/Ito
 
+Physics models
+**************
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Applications
+   :hidden:	     
+
+   Applications/ImplementedModels
+   Applications/AdvectionDiffusionModel
+   Applications/BrownianWalkerModel         
+   Applications/CdrPlasmaModel
+   Applications/ElectrostaticsModel
+   Applications/GeometryModel      
+   Applications/RadiativeTransferModel      
+
+..   ItoPlasmaModel
+
+Tutorial
+********
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Tutorial
+   :hidden:	     
+
+   Tutorials/Tutorial
+      
 Utilities
 *********  
 
@@ -161,7 +162,6 @@ Utilities
    Utilities/LookupTable
    Utilities/RandomNumbers
    Utilities/LeastSquares
-   Utilities/ComplexGeometries
 
 Contributing
 ************  

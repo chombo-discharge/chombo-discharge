@@ -333,7 +333,7 @@ Typically, this "specified region" is the refinement boundary, but the functiona
 When *masked particles* are used, the user can provide a boolean mask over the AMR hierarchy and obtain the subset of particles that live in regions where the mask evaluates to true.
 This functionality is for example used for some of the particle deposition methods in ``chombo-discharge`` where we deposit particles that live near the refinement boundary with special deposition functions.
 
-To fill the masked particles, ``ParticleContainer<P>` has members functions for copying the particles into internal data containers which the user can later fetch.
+To fill the masked particles, ``ParticleContainer<P>`` has members functions for copying the particles into internal data containers which the user can later fetch.
 The function signatures for these are
 
 .. code-block:: c++

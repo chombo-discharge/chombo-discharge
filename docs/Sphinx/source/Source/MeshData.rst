@@ -17,7 +17,7 @@ The first entry in the Vector is base AMR level and finer levels follow later in
    This is encapsulated by ``EBAMRData`` where the levels are stored in a ``Vector`` and the grid patches in the ``LevelData`` object. 
 
 The reason for having class encapsulation of mesh data is due to :ref:`Chap:Realm`, so that we can only keep track on which ``Realm`` the mesh data is defined.
-Users will not have to interact with ``EBAMRData<T>`` directly, but will do so primarily through application code, or interacting with the core AMR functionality in :ref:`Chap:AmrMesh` (such as computing gradients, interpolating ghost cells etc.).
+Users will interact with ``EBAMRData<T>`` through application code, or interacting with the core AMR functionality in :ref:`Chap:AmrMesh` (such as computing gradients, interpolating ghost cells etc.).
 ``AmrMesh`` (see :ref:`Chap:AmrMesh`) has functionality for defining most ``EBAMRData<T>`` types one a ``Realm``, and ``EBAMRData<T>`` itself it typically not used anywhere elsewhere within ``chombo-discharge``.
 
 A number of explicit template specifications also exist, and these are outlined below: 

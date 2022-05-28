@@ -798,7 +798,7 @@ To specify temperature, density, and pressure as function of altitude, set ``law
 * ``height`` For specifying the column where the height is stored (in meters).
 * ``temperature`` For specifying the column where the temperature (in Kelvin) is stored.
 * ``pressure`` For specifying the column where the pressure (in Pascals) is stored.
-* ``density`` For specifying the column where the density (in :math:`\textrm{kg}\cdot\textrm{m}^{-3}) is stored.
+* ``density`` For specifying the column where the density (in :math:`\textrm{kg}\cdot\textrm{m}^{-3}`) is stored.
 * ``molar mass`` For specifying the molar mass (in :math:`\textrm{g}\cdot\textrm{mol}^{-1}`) of the gas.
 * ``min height`` For setting the minimum altitude in the ``chombo-discharge`` internal table.
 * ``max height`` For setting the minimum altitude in the ``chombo-discharge`` internal table.
