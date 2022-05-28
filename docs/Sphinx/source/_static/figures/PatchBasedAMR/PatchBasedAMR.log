@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2022.5.28)  28 MAY 2022 12:03
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2022.5.28)  28 MAY 2022 12:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -693,17 +693,17 @@ your preamble.
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./PatchBasedAMR.aux) ) 
 Here is how much of TeX's memory you used:
- 23945 strings out of 481239
- 626158 string characters out of 5920377
+ 23946 strings out of 481239
+ 626179 string characters out of 5920377
  951785 words of memory out of 5000000
- 38818 multiletter control sequences out of 15000+600000
+ 38819 multiletter control sequences out of 15000+600000
  534221 words of font info for 27 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  63i,5n,98p,813b,754s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/u
 sr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/tex
 mf-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on PatchBasedAMR.pdf (1 page, 5600 bytes).
+Output written on PatchBasedAMR.pdf (1 page, 5760 bytes).
 PDF statistics:
  16 PDF objects out of 1000 (max. 8388607)
  11 compressed objects within 1 object stream

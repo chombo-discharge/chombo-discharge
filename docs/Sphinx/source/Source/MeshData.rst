@@ -6,7 +6,15 @@ Mesh data
 Mesh data structures of the type discussed in :ref:`Chap:SpatialDiscretization` are derived from a class ``EBAMRData<T>`` which holds a ``T`` in every grid patch across the AMR hiearchy.
 Internally, the data is stored as a ``Vector<RefCountedPtr<LevelData<T> > >``.
 Here, the ``Vector`` holds data on each AMR level; the data is allocated with a smart pointer called ``RefCountedPtr`` which points to a ``LevelData`` template structure, see :ref:`Chap:Basics`.
-The first entry in the Vector is base AMR level and finer levels follow later in the Vector.
+The first entry in the Vector is base AMR level and finer levels follow later in the Vector, see e.g. :numref:`Fig:EBAMRData`.
+
+.. _Fig:EBAMRData:
+.. figure:: /_static/figures/PatchBasedAMR.png
+   :width: 480px
+   :align: center
+
+   Cartesian patch-based refinement showing two grid levels.
+   This is encapsulated by ``EBAMRData`` where the levels are stored in a ``Vector`` and the grid patches in the ``LevelData`` object. 
 
 The reason for having class encapsulation of mesh data is due to :ref:`Chap:Realm`, so that we can only keep track on which ``Realm`` the mesh data is defined.
 Users will not have to interact with ``EBAMRData<T>`` directly, but will do so primarily through application code, or interacting with the core AMR functionality in :ref:`Chap:AmrMesh` (such as computing gradients, interpolating ghost cells etc.).

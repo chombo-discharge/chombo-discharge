@@ -21,7 +21,7 @@ In other words, grid levels :math:`l-1` and :math:`l+1` are spatially separated 
    :align: center
 
    Cartesian patch-based refinement showing two grid levels.
-   The fine-grid level lives on top of the coarse level, with two layers of ghost cells (dashed lines). 
+   The fine-grid level lives on top of the coarse level, and consists of two patches (red and blue colors) with two layers of ghost cells (dashed lines and orange shaded region). 
 
 The resolution on level :math:`l+1` is typically finer than the resolution on level :math:`l` by an integer (usually power of two).
 However,
