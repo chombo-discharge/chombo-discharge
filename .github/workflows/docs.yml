@@ -9,6 +9,7 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -37,9 +38,9 @@ jobs:
           make github-tex
 
       - name: Build pdf docs
-        working-directory: ${{ env.DISCHARGE_HOME}}/docs/build/latex
+        working-directory: ${{ github.workspace}}/docs/build/latex
         uses: xu-cheng/latex-action@v2        
-        with: |
+        with:
           root_file: "chombo-discharge.tex"
           
       - name: Deploy
