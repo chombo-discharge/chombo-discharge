@@ -142,7 +142,6 @@ ___________________
 The default geometry generation method in ``Chombo`` is to locate cut-cells on the finest AMR level first and then generate the coarser levels cells through grid coarsening.
 This will look through all cells on the finest level, so for a domain which is effectively :math:`N\times N\times N` cells there are :math:`\mathcal{O}\left(N^3\right)` implicit function queries (in 2D, the complexity is :math:`\mathcal{O}\left(N^2\right)`). 
 Note that as :math:`N` becomes large, say :math:`N=10^5`, geometric queries of this type become a bottleneck.
-For example, even if the SDF evaluation for an arbitrary point :math:`\mathbf{x}` only took :math:`10^{-7}` seconds to evaluate, and the application was parallelized over 10,000 cores, it would take at least twenty hours to figure out where the cut-cells are located.
 
 ``chombo-discharge`` pruning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
