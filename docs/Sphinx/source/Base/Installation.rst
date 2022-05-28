@@ -289,13 +289,13 @@ Running an example application
 In ``chombo-discharge``, applications are set up so that they use the ``chombo-discharge`` source code and one ``chombo-discharge`` physics module.
 To run one of the applications that use a particular ``chombo-discharge`` physics module, we will run a simulation of a positive streamer (in air). 
 
-The application code is located in ``$DISCHARGE_HOME/Examples/CdrPlasma/DeterministicAir`` and it uses the convection-diffusion-reaction plasma module (located in ``$DISCHARGE_HOME/Physics/CdrPlasma``).
+The application code is located in ``$DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir`` and it uses the convection-diffusion-reaction plasma module (located in ``$DISCHARGE_HOME/Physics/CdrPlasma``).
 
 First, compile the application by
 
 .. code-block:: text
 
-   cd $DISCHARGE_HOME/Examples/CdrPlasma/DeterministicAir
+   cd $DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir
    make -s -j4 DIM=2 program
 
 This will provide an executable named ``program2d.<bunch_of_options>.ex``.

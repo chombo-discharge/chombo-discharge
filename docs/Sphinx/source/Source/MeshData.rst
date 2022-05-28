@@ -18,9 +18,10 @@ The first entry in the Vector is base AMR level and finer levels follow later in
 
 The reason for having class encapsulation of mesh data is due to :ref:`Chap:Realm`, so that we can only keep track on which ``Realm`` the mesh data is defined.
 Users will interact with ``EBAMRData<T>`` through application code, or interacting with the core AMR functionality in :ref:`Chap:AmrMesh` (such as computing gradients, interpolating ghost cells etc.).
-``AmrMesh`` (see :ref:`Chap:AmrMesh`) has functionality for defining most ``EBAMRData<T>`` types one a ``Realm``, and ``EBAMRData<T>`` itself it typically not used anywhere elsewhere within ``chombo-discharge``.
+``AmrMesh`` (see :ref:`Chap:AmrMesh`) has functionality for defining most ``EBAMRData<T>`` types on a ``Realm``, and ``EBAMRData<T>`` itself it typically not used anywhere elsewhere within ``chombo-discharge``.
 
-A number of explicit template specifications also exist, and these are outlined below: 
+A number of explicit template specifications exist and are frequently used.
+These are outlined below: 
 
 .. code-block:: c++
 
@@ -45,7 +46,7 @@ In the same way, ``EBAMRIFData`` holds data on each face of all cut cells.
 Allocating mesh data
 --------------------
 
-To allocate data over a particular ``Realm``, the user will interact with ``AmrMesh`` (see :ref:`Chap:AmrMesh`):
+To allocate data over a particular ``Realm``, the user will interact with :ref:`Chap:AmrMesh`:
 
 .. code-block:: c++
 
@@ -53,6 +54,7 @@ To allocate data over a particular ``Realm``, the user will interact with ``AmrM
    EBAMRCellData myData;
    m_amr->allocate(myData, "myRealm", phase::gas, nComps);
 
+Here, ``nComps`` determine the number of cell-centered data components.
 Note that it *does* matter on which ``Realm`` and on which ``phase`` the data is defined.
 See :ref:`Chap:Realm` for details.
 

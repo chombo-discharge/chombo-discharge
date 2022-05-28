@@ -69,6 +69,10 @@ Usually, code for doing anything with the ``EBCellFAB`` looks like this:
       (...)
    }
 
+.. important::
+
+   The ``FArrayBox`` stores the data in column major order.
+
 Vector
 ------
 

@@ -102,6 +102,7 @@ Design
    :caption: Design
    :hidden:	     
 
+   Source/Design      
    Source/Driver
    Source/ComputationalGeometry
    Source/TimeStepper
@@ -175,12 +176,14 @@ Contributing
    Contrib/CI
    Contrib/CodeStandard
 
-References
-**********
+.. only:: html
+	  
+   Bibliography
+   **********
 
 .. toctree::
    :maxdepth: 3
-   :caption: References
+   :caption: Bibliography
    :hidden:	     
 
    ZZReferences

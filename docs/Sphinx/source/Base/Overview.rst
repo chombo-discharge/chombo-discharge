@@ -7,7 +7,7 @@ History
 -------
 
 ``chombo-discharge`` is aimed at solving discharge problems.
-It was originally developed at SINTEF Energy Research between 2015-2018, and aimed at elucidating discharge dynamics in high-voltage engineering.
+It was originally developed at SINTEF Energy Research between 2015-2018, and aimed at simulating discharges in high-voltage engineering.
 Further development was started in 2021, where much of the code was redesigned for improved modularity and performance. 
 
 Key functionalities
