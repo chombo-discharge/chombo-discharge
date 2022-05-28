@@ -37,11 +37,11 @@ jobs:
           cd docs/Sphinx
           make github-tex
 
-      - name: Build pdf docs
+      - name: Compile LaTeX document
         working-directory: ${{ github.workspace}}/docs/build/latex
-        uses: xu-cheng/latex-action@v2        
+        uses: xu-cheng/latex-action@v2
         with:
-          root_file: "chombo-discharge.tex"
+          root_file: chombo-discharge.tex
           
       - name: Deploy
         if: github.event_name == 'push' && github.repository == 'chombo-discharge/chombo-discharge' && github.ref == 'refs/heads/main'        
