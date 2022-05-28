@@ -55,6 +55,12 @@ github:
 	@make clean
 	rmdir $(BUILDDIR)
 
+github-pdf:
+	@make clean latexpdf
+	@cp  build/latex/chombo-discharge.pdf ../
+	@make clean
+	rmdir $(BUILDDIR)
+
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
@@ -121,6 +127,8 @@ latexpdf:
 	@echo "Running LaTeX files through pdflatex..."
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
 	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
+
+
 
 latexpdfja:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex

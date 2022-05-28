@@ -30,6 +30,11 @@ jobs:
         run: |
           cd docs/Sphinx
           make github
+
+      - name: Build sphinx-pdf
+        run: |
+          cd docs/Sphinx
+          make github-pdf          
           
       - name: Deploy
         if: github.event_name == 'push' && github.repository == 'chombo-discharge/chombo-discharge' && github.ref == 'refs/heads/main'        
