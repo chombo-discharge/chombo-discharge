@@ -171,7 +171,7 @@ CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi
   DataOps::copy(phi, a_cellPhi);
 
   m_amr->averageDown(phi, m_realm, m_phase);
-  m_amr->interpGhost(phi, m_realm, m_phase);
+  m_amr->interpGhostPwl(phi, m_realm, m_phase);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
@@ -433,7 +433,7 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
       // Compute the transverse (CTU) terms.
       for (int transverseDir = 0; transverseDir < SpaceDim; transverseDir++) {
 
-        if (transverseDir != dir && m_limitSlopes) {
+        if (transverseDir != dir) {
           Real slopeLeft = 0.0;
           Real slopeRigh = 0.0;
 
@@ -446,10 +446,10 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
           }
 
           // Transverse term in cell to the right.
-          if (regCellVel(iv, transverseDir) < 0.0) {
+          if (regCellVel(cellRigh, transverseDir) < 0.0) {
             slopeRigh = regStates(cellRigh + BASISV(transverseDir), m_comp) - regStates(cellRigh, m_comp);
           }
-          else if (regCellVel(iv, transverseDir) > 0.0) {
+          else if (regCellVel(cellRigh, transverseDir) > 0.0) {
             slopeRigh = regStates(cellRigh, m_comp) - regStates(cellRigh - BASISV(transverseDir), m_comp);
           }
 
@@ -498,7 +498,7 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
 
     // Launch the kernels.
     BoxLoops::loop(faceBox, regularKernel);
-    BoxLoops::loop(irregFaces, irregularKernel);
+    //    BoxLoops::loop(irregFaces, irregularKernel);
   }
 }
 
