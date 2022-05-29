@@ -469,7 +469,7 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
         facePhi = primRigh;
       }
       else {
-        facePhi = 0.5 * (primLeft + primRigh);
+        facePhi = 0.0;
       }
     };
 
@@ -498,7 +498,7 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
 
     // Launch the kernels.
     BoxLoops::loop(faceBox, regularKernel);
-    //    BoxLoops::loop(irregFaces, irregularKernel);
+    BoxLoops::loop(irregFaces, irregularKernel);
   }
 }
 
