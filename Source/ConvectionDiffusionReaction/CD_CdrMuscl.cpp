@@ -480,14 +480,44 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
         const VolIndex& vofLeft = face.getVoF(Side::Lo);
         const VolIndex& vofRigh = face.getVoF(Side::Hi);
 
-        const Real velo     = faceVel(face, m_comp);
-        const Real primLeft = a_cellPhi(vofLeft, m_comp) + 0.5 * a_normalSlopes(vofLeft, dir);
-        const Real primRigh = a_cellPhi(vofRigh, m_comp) - 0.5 * a_normalSlopes(vofRigh, dir);
+	Real primLeft = a_cellPhi(vofLeft, m_comp) + 0.5 * std::min(1.0, 1.0 - a_cellVel(vofLeft, dir) * dtx) * a_normalSlopes(vofLeft, dir);
+	Real primRigh = a_cellPhi(vofRigh, m_comp) - 0.5 * std::min(1.0, 1.0 + a_cellVel(vofRigh, dir) * dtx) * a_normalSlopes(vofRigh, dir);
 
-        if (velo > 0.0) {
+	// Compute the transverse (CTU) terms.
+	for (int transverseDir = 0; transverseDir < SpaceDim; transverseDir++) {
+
+	  if (transverseDir != dir) {
+	    Real slopeLeft = 0.0;
+	    Real slopeRigh = 0.0;
+
+#if 0 // These need to fetch the corner vofs
+	    // Transverse term in cell to the left.
+	    if (a_cellVel(vofLeft, transverseDir) < 0.0) {
+	      slopeLeft = a_cellPhi(vofLeft + BASISV(transverseDir), m_comp) - a_cellPhi(vofLeft, m_comp);
+	    }
+	    else if (a_cellVel(vofLeft, transverseDir) > 0.0) {
+	      slopeLeft = a_cellPhi(vofLeft, m_comp) - a_cellPhi(vofLeft - BASISV(transverseDir), m_comp);
+	    }
+
+	    // Transverse term in cell to the right.
+	    if (a_cellVel(vofRigh, transverseDir) < 0.0) {
+	      slopeRigh = a_cellPhi(vofRigh + BASISV(transverseDir), m_comp) - a_cellPhi(vofRigh, m_comp);
+	    }
+	    else if (a_cellVel(vofRigh, transverseDir) > 0.0) {
+	      slopeRigh = a_cellPhi(vofRigh, m_comp) - a_cellPhi(vofRigh - BASISV(transverseDir), m_comp);
+	    }
+#endif
+
+	    primLeft -= 0.5 * dtx * a_cellVel(vofLeft, transverseDir) * slopeLeft;
+	    primRigh -= 0.5 * dtx * a_cellVel(vofRigh, transverseDir) * slopeRigh;
+	  }	  
+	}
+
+	// Solve the Riemann problem. 
+        if (faceVel(face, m_comp) > 0.0) {
           facePhi(face, m_comp) = primLeft;
         }
-        else if (velo < 0.0) {
+        else if (faceVel(face, m_comp) < 0.0) {
           facePhi(face, m_comp) = primRigh;
         }
         else {
