@@ -50,11 +50,19 @@ public:
     @brief MUSCL advection to faces
     @param[out] a_facePhi  Phi on face centers
     @param[in]  a_cellPhi  Phi on cell centers
-    @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states. 
-    @details This compute the face-centered states using van Leer limiting. It calls computeSlopes(...) and upwind(...). 
+    @param[in]  a_dt       Time step (i.e. extrapolation) of the face-centered states. 
+    @details This compute the face-centered states using van Leer limiting. It calls computeNormalSlopes(...) and upwind(...). 
   */
   virtual void
-  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) override;
+  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_dt) override;
+
+  /*!
+    @brief Compute the largest possible advective time step (for explicit methods)
+    @details This computes dt = dx/max(|vx|,|vy|,|vz|), minimized over all grid levels and patches. 
+    @note This is the appropriate time step routine for the BCG reconstruction. 
+  */
+  virtual Real
+  computeAdvectionDt() override;
 
 protected:
   /*!
@@ -64,41 +72,48 @@ protected:
 
   /*!
     @brief Compute slopes. 
-    @param[out] a_deltaC  Cell slopes. Must have SpaceDim components (for slopes in each direction). 
-    @param[in]  a_cellPhi Cell-centered states
-    @param[in]  a_cellBox Cell-centered box identifying the cells where we compute the slopes. 
-    @param[in]  a_domain  Domain on grid level
-    @param[in]  a_level   AMR level
-    @param[in]  a_dit     Grid index
+    @param[out] a_normalSlopes Cell slopes. Must have SpaceDim components (for slopes in each direction). 
+    @param[in]  a_cellPhi      Cell-centered states
+    @param[in]  a_cellBox      Cell-centered box identifying the cells where we compute the slopes. 
+    @param[in]  a_domain       Domain on grid level
+    @param[in]  a_level        AMR level
+    @param[in]  a_dit          Grid index
   */
   virtual void
-  computeSlopes(EBCellFAB&           a_deltaC,
-                const EBCellFAB&     a_cellPhi,
-                const Box&           a_cellBox,
-                const ProblemDomain& a_domain,
-                const int            a_level,
-                const DataIndex&     a_dit);
+  computeNormalSlopes(EBCellFAB&           a_normalSlopes,
+                      const EBCellFAB&     a_cellPhi,
+                      const Box&           a_cellBox,
+                      const ProblemDomain& a_domain,
+                      const int            a_level,
+                      const DataIndex&     a_dit);
 
   /*!
-    @brief Upwind/Riemann solve. This extrapolates the cell-centered data to the (inside) face centers and chooses the upwind side. 
-    @param[out] a_facePhi Face-centered states.
-    @param[in]  a_slopes  Cell slopes
-    @param[in]  a_cellPhi Cell-centered states
-    @param[in]  a_faceVel Face-centered velocities.
-    @param[in]  a_domain  Domain on grid level.
-    @param[in]  a_cellBox Grid box/patch
-    @param[in]  a_level   AMR level
-    @param[in]  a_dit     Grid index. 
+    @brief Upwind/Riemann solve. This extrapolates the cell-centered data to the inside face centers and selects the upwind side.
+    @details This uses the Colella CTU method where we extrapolate with the corner cells as well. a_normalSlopes holds
+    the slopes normal to the face direction, and the transverse slopes are added inside this method. This routine also
+    solves the corresponding Riemann problem (which is just the upwind face). 
+    @param[out] a_facePhi      Face-centered states.
+    @param[in]  a_normalSlopes Normal cell slopes
+    @param[in]  a_cellPhi      Cell-centered states
+    @param[in]  a_cellVel      Cell-centered velocities.
+    @param[in]  a_faceVel      Face-centered velocities.
+    @param[in]  a_domain       Domain on grid level.
+    @param[in]  a_cellBox      Grid box/patch
+    @param[in]  a_level        AMR level
+    @param[in]  a_dit          Grid index. 
+    @param[in]  a_dt           Time step. 
   */
   virtual void
   upwind(EBFluxFAB&           a_facePhi,
-         const EBCellFAB&     a_slopes,
+         const EBCellFAB&     a_normalSlopes,
          const EBCellFAB&     a_cellPhi,
+         const EBCellFAB&     a_cellVel,
          const EBFluxFAB&     a_faceVel,
          const ProblemDomain& a_domain,
          const Box&           a_cellBox,
          const int&           a_level,
-         const DataIndex&     a_dit);
+         const DataIndex&     a_dit,
+         const Real&          a_dt);
 
   /*!
     @brief Parse slope limiting on/off

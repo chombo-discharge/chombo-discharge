@@ -16,13 +16,14 @@
 #include <CD_CdrMuscl.H>
 #include <CD_BoxLoops.H>
 #include <CD_DataOps.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 CdrMuscl::CdrMuscl()
 {
   CH_TIME("CdrMuscl::CdrMuscl()");
 
-  // Class and instantiatio name
+  // Class and object name
   m_className = "CdrMuscl";
   m_name      = "CdrMuscl";
 
@@ -34,7 +35,7 @@ CdrMuscl::~CdrMuscl() { CH_TIME("CdrMuscl::~CdrMuscl()"); }
 void
 CdrMuscl::parseOptions()
 {
-  CH_TIME("CdrGodunov::parseOptions()");
+  CH_TIME("CdrMuscl::parseOptions()");
   if (m_verbosity > 5) {
     pout() << m_name + "::parseOptions()" << endl;
   }
@@ -63,6 +64,76 @@ CdrMuscl::parseRuntimeOptions()
   this->parseMultigridSettings();     // Parses multigrid settings.
   this->parseDivergenceComputation(); // Non-conservative divergence blending.
   this->parseRegridSlopes();          // Parses regrid slopes
+}
+
+Real
+CdrMuscl::computeAdvectionDt()
+{
+  CH_TIME("CdrMuscl::computeAdvectionDt()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeAdvectionDt()" << endl;
+  }
+
+  // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these two papers for details:
+  //
+  //       Bell, Colella, Glaz, J. Comp. Phys 85 (257), 1989
+  //       Minion, J. Comp. Phys 123 (435), 1996
+
+  Real minDt = std::numeric_limits<Real>::max();
+
+  if (m_isMobile) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        const Box        cellBox = dbl[dit()];
+        const EBCellFAB& velo    = (*m_cellVelocity[lvl])[dit()];
+        const EBISBox&   ebisBox = ebisl[dit()];
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+        // Regular grid data.
+        const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
+
+        // Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far.
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          Real velMax = 0.0;
+          if (!ebisBox.isCovered(iv)) {
+            for (int dir = 0; dir < SpaceDim; dir++) {
+              velMax = std::max(velMax, std::abs(veloReg(iv, dir)));
+            }
+          }
+
+          if (velMax > 0.0) {
+            minDt = std::min(dx / velMax, minDt);
+          }
+        };
+
+        // Same kernel, but for cut-cells.
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          Real velMax = 0.0;
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            velMax = std::max(velMax, std::abs(velo(vof, dir)));
+          }
+
+          if (velMax > 0.0) {
+            minDt = std::min(dx / velMax, minDt);
+          }
+        };
+
+        // Execute the kernels.
+        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+
+    // If we are using MPI then ranks need to know of each other's time steps.
+    minDt = ParallelOps::min(minDt);
+  }
+
+  return minDt;
 }
 
 void
@@ -110,43 +181,44 @@ CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       EBFluxFAB&       facePhi = (*a_facePhi[lvl])[dit()];
       const EBCellFAB& cellPhi = (*phi[lvl])[dit()];
-      const EBFluxFAB& velo    = (*m_faceVelocity[lvl])[dit()];
+      const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[dit()];
+      const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[dit()];
 
       const Box      cellBox = dbl[dit()];
       const EBISBox& ebisbox = ebisl[dit()];
 
       // Limit slopes and solve Riemann problem (this is just the upwind state). Note that we need one ghost cell for
       // the slopes because in order to extrapolate to the left/right sides of a face, we need the centered slope on both
-      // sides for the upwind. So, deltaC is bigger than cellBox (by one). Since the limited slope is computed using the
+      // sides for the upwind. So, normalSlopes is bigger than cellBox (by one). Since the limited slope is computed using the
       // left/right slopes, we end up needing two grid cells.
       Box grownBox = cellBox;
       grownBox.grow(1);
-      EBCellFAB deltaC(ebisbox, grownBox, SpaceDim); // Cell-centered slopes
-      deltaC.setVal(0.0);
+      EBCellFAB normalSlopes(ebisbox, grownBox, SpaceDim);
+      normalSlopes.setVal(0.0);
 
       if (m_limitSlopes) {
-        this->computeSlopes(deltaC, cellPhi, cellBox, domain, lvl, dit());
+        this->computeNormalSlopes(normalSlopes, cellPhi, cellBox, domain, lvl, dit());
       }
 
-      this->upwind(facePhi, deltaC, cellPhi, velo, domain, cellBox, lvl, dit());
+      this->upwind(facePhi, normalSlopes, cellPhi, cellVel, faceVel, domain, cellBox, lvl, dit(), a_extrapDt);
     }
   }
 }
 
 void
-CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
-                        const EBCellFAB&     a_cellPhi,
-                        const Box&           a_cellBox,
-                        const ProblemDomain& a_domain,
-                        const int            a_level,
-                        const DataIndex&     a_dit)
+CdrMuscl::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
+                              const EBCellFAB&     a_cellPhi,
+                              const Box&           a_cellBox,
+                              const ProblemDomain& a_domain,
+                              const int            a_level,
+                              const DataIndex&     a_dit)
 {
-  CH_TIME("CdrMuscl::computeSlopes(EBCellFAB, EBCellFAB, Box, ProblemDomain, int, DataIndex)");
+  CH_TIME("CdrMuscl::computeNormalSlopes(EBCellFAB, EBCellFAB, Box, ProblemDomain, int, DataIndex)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeSlopes(EBCellFAB, EBCellFAB, Box, ProblemDomain, int, DataIndex)" << endl;
+    pout() << m_name + "::computeNormalSlopes(EBCellFAB, EBCellFAB, Box, ProblemDomain, int, DataIndex)" << endl;
   }
 
-  CH_assert(a_deltaC.nComp() == SpaceDim);
+  CH_assert(a_normalSlopes.nComp() == SpaceDim);
   CH_assert(a_cellPhi.nComp() == 1);
 
   const Box&     domainBox = a_domain.domainBox();
@@ -154,7 +226,7 @@ CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
   const EBGraph& ebgraph   = ebisbox.getEBGraph();
 
   // Compute slopes in regular cells.
-  BaseFab<Real>&       slopesReg = a_deltaC.getSingleValuedFAB();
+  BaseFab<Real>&       slopesReg = a_normalSlopes.getSingleValuedFAB();
   const BaseFab<Real>& phiReg    = a_cellPhi.getSingleValuedFAB();
 
   // Compute slopes in regular grid cells. Note that we need to grow the input box by one ghost cell in direction 'dir' because we need the
@@ -257,7 +329,7 @@ CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
         dwc = dwl;
       }
       else {
-        MayDay::Error("CdrMuscl::computeSlopes - missed a case");
+        MayDay::Error("CdrMuscl::computeNormalSlopes - missed a case");
       }
 
       // Limit the slopes.
@@ -278,10 +350,10 @@ CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
       }
 
       if (std::isnan(dwc)) {
-        MayDay::Error("CdrMuscl::computeSlopes - dwc != dwc.");
+        MayDay::Error("CdrMuscl::computeNormalSlopes - dwc != dwc.");
       }
 
-      a_deltaC(vof, m_comp) = dwc;
+      a_normalSlopes(vof, m_comp) = dwc;
     };
 
     // Apply the kernels. Beware of corrected slopes near the boundaries.
@@ -299,24 +371,33 @@ CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
 
 void
 CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
-                 const EBCellFAB&     a_slopes,
+                 const EBCellFAB&     a_normalSlopes,
                  const EBCellFAB&     a_cellPhi,
+                 const EBCellFAB&     a_cellVel,
                  const EBFluxFAB&     a_faceVel,
                  const ProblemDomain& a_domain,
                  const Box&           a_cellBox,
                  const int&           a_level,
-                 const DataIndex&     a_dit)
+                 const DataIndex&     a_dit,
+                 const Real&          a_dt)
 {
-  CH_TIME("CdrMuscl::upwind(EBFluxFAB, EBCellFAB, EBCellFAB, EBFluxFAB, ProblemDomain, Box, int, DataIndex)");
+  CH_TIME("CdrMuscl::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)");
   if (m_verbosity > 99) {
-    pout() << m_name + "::upwind(EBFluxFAB, EBCellFAB, EBCellFAB, EBFluxFAB, ProblemDomain, Box, int, DataIndex)"
-           << endl;
+    pout() << m_name + "::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)" << endl;
   }
 
   CH_assert(a_facePhi.nComp() == 1);
-  CH_assert(a_slopes.nComp() == SpaceDim);
+  CH_assert(a_normalSlopes.nComp() == SpaceDim);
   CH_assert(a_cellPhi.nComp() == 1);
+  CH_assert(a_cellVel.nComp() == 1);
   CH_assert(a_faceVel.nComp() == 1);
+
+  // TLDR: We want to compute the states at cell-centers, and possible at the half time step. E.g. we
+  //       want phi_[(i+1/2),j,k]^(k+1/2). The normal slopes (slopes that are normal to the face normal)
+  //       come into this routine through a_normalSlopes, and the transverse slopes are added in this method.
+
+  const Real dx  = m_amr->getDx()[a_level];
+  const Real dtx = a_dt / dx;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     EBFaceFAB&       facePhi = a_facePhi[dir];
@@ -324,10 +405,12 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
     const EBISBox&   ebisbox = a_cellPhi.getEBISBox();
     const EBGraph&   ebgraph = ebisbox.getEBGraph();
 
+    // Single-valued data.
     BaseFab<Real>&       regFacePhi = a_facePhi[dir].getSingleValuedFAB();
-    const BaseFab<Real>& regSlopes  = a_slopes.getSingleValuedFAB();
+    const BaseFab<Real>& regSlopes  = a_normalSlopes.getSingleValuedFAB();
     const BaseFab<Real>& regStates  = a_cellPhi.getSingleValuedFAB();
-    const BaseFab<Real>& regVelo    = a_faceVel[dir].getSingleValuedFAB();
+    const BaseFab<Real>& regCellVel = a_cellVel.getSingleValuedFAB();
+    const BaseFab<Real>& regFaceVel = a_faceVel[dir].getSingleValuedFAB();
 
     // Iteration space for the kernels. When upwinding we want to set phi on the faces, so the iteration space is defined
     // by the faces of this box (in direction dir).
@@ -336,13 +419,48 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
 
     // Regular upwind kernel. Recall that we call this on the faceBox, so the cell on the low side
     // has cell grid index iv - BASISV(dir)
-    const IntVect shift         = BASISV(dir);
-    auto          regularKernel = [&](const IntVect& iv) -> void {
-      const Real primLeft = regStates(iv - shift, m_comp) + 0.5 * regSlopes(iv - shift, dir);
-      const Real primRigh = regStates(iv, m_comp) - 0.5 * regSlopes(iv, dir);
+    auto regularKernel = [&](const IntVect& iv) -> void {
+      // Cells that are left/right of the current face.
+      const IntVect cellLeft = iv - BASISV(dir);
+      const IntVect cellRigh = iv;
 
+      // Normal extrapolation.
+      Real primLeft = regStates(cellLeft, m_comp) +
+                      0.5 * std::min(1.0, 1.0 - regCellVel(cellLeft, dir) * dtx) * regSlopes(cellLeft, dir);
+      Real primRigh = regStates(cellRigh, m_comp) -
+                      0.5 * std::min(1.0, 1.0 + regCellVel(cellRigh, dir) * dtx) * regSlopes(cellRigh, dir);
+
+      // Compute the transverse (CTU) terms.
+      for (int transverseDir = 0; transverseDir < SpaceDim; transverseDir++) {
+
+        if (transverseDir != dir && m_limitSlopes) {
+          Real slopeLeft = 0.0;
+          Real slopeRigh = 0.0;
+
+          // Transverse term in cell to the left.
+          if (regCellVel(cellLeft, transverseDir) < 0.0) {
+            slopeLeft = regStates(cellLeft + BASISV(transverseDir), m_comp) - regStates(cellLeft, m_comp);
+          }
+          else if (regCellVel(cellLeft, transverseDir) > 0.0) {
+            slopeLeft = regStates(cellLeft, m_comp) - regStates(cellLeft - BASISV(transverseDir), m_comp);
+          }
+
+          // Transverse term in cell to the right.
+          if (regCellVel(iv, transverseDir) < 0.0) {
+            slopeRigh = regStates(cellRigh + BASISV(transverseDir), m_comp) - regStates(cellRigh, m_comp);
+          }
+          else if (regCellVel(iv, transverseDir) > 0.0) {
+            slopeRigh = regStates(cellRigh, m_comp) - regStates(cellRigh - BASISV(transverseDir), m_comp);
+          }
+
+          primLeft -= 0.5 * dtx * regCellVel(cellLeft, transverseDir) * slopeLeft;
+          primRigh -= 0.5 * dtx * regCellVel(cellRigh, transverseDir) * slopeRigh;
+        }
+      }
+
+      // Solve the Riemann problem.
       Real&       facePhi = regFacePhi(iv, m_comp);
-      const Real& faceVel = regVelo(iv, m_comp);
+      const Real& faceVel = regFaceVel(iv, m_comp);
 
       if (faceVel > 0.0) {
         facePhi = primLeft;
@@ -363,8 +481,8 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
         const VolIndex& vofRigh = face.getVoF(Side::Hi);
 
         const Real velo     = faceVel(face, m_comp);
-        const Real primLeft = a_cellPhi(vofLeft, m_comp) + 0.5 * a_slopes(vofLeft, dir);
-        const Real primRigh = a_cellPhi(vofRigh, m_comp) - 0.5 * a_slopes(vofRigh, dir);
+        const Real primLeft = a_cellPhi(vofLeft, m_comp) + 0.5 * a_normalSlopes(vofLeft, dir);
+        const Real primRigh = a_cellPhi(vofRigh, m_comp) - 0.5 * a_normalSlopes(vofRigh, dir);
 
         if (velo > 0.0) {
           facePhi(face, m_comp) = primLeft;
