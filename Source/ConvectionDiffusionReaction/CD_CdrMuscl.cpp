@@ -157,7 +157,7 @@ CdrMuscl::parseSlopeLimiter()
 
   std::string slopeLimiter;
   pp.get("use_ctu", m_useCTU);  
-  pp.get("limit_slopes", slopeLimiter);
+  pp.get("slope_limiter", slopeLimiter);
 
   if(slopeLimiter == "none") {
     m_limiter = Limiter::None;
@@ -379,18 +379,11 @@ CdrMuscl::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
 	dwr                         = phiRigh - a_cellPhi(vof, m_comp);
       }
 
-      if (!hasFacesLeft && !hasFacesRigh) {
-	dwl = 0.0;
-	dwr = 0.0;
-      }
-      else if (!hasFacesLeft && hasFacesRigh) {
+      if (!hasFacesLeft && hasFacesRigh) {
 	dwl = dwr;
       }
       else if (hasFacesLeft && !hasFacesRigh) {
 	dwr = dwl;
-      }
-      else {
-	MayDay::Error("CdrMuscl::computeNormalSlopes - missed a case");
       }
 
       // Limit the slopes.
