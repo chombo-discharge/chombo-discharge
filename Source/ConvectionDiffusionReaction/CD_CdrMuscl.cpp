@@ -359,71 +359,71 @@ CdrMuscl::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
       VolIndex vofLeft;
       VolIndex vofRigh;
 
-      Real dwc   = 0.0;
       Real dwl   = 0.0;
       Real dwr   = 0.0;
-      Real dwmin = 0.0;
 
       Real phiLeft = 0.0;
       Real phiRigh = 0.0;
-      Real phiCent = a_cellPhi(vof, m_comp);
 
       // Compute left and right slope
       if (hasFacesLeft) {
 	Vector<FaceIndex> facesLeft = ebisbox.getFaces(vof, dir, Side::Lo);
 	vofLeft                     = facesLeft[0].getVoF(Side::Lo);
 	phiLeft                     = a_cellPhi(vofLeft, m_comp);
-	dwl                         = phiCent - phiLeft;
+	dwl                         = a_cellPhi(vof, m_comp) - phiLeft;
       }
       if (hasFacesRigh) {
 	Vector<FaceIndex> facesRigh = ebisbox.getFaces(vof, dir, Side::Hi);
 	vofRigh                     = facesRigh[0].getVoF(Side::Hi);
 	phiRigh                     = a_cellPhi(vofRigh, m_comp);
-	dwr                         = phiRigh - phiCent;
+	dwr                         = phiRigh - a_cellPhi(vof, m_comp);
       }
 
-      if (hasFacesLeft && hasFacesRigh) {
-	dwc = 0.5 * (dwl + dwr);
-      }
-      else if (!hasFacesLeft && !hasFacesRigh) {
+      if (!hasFacesLeft && !hasFacesRigh) {
 	dwl = 0.0;
-	dwc = 0.0;
 	dwr = 0.0;
       }
       else if (!hasFacesLeft && hasFacesRigh) {
 	dwl = dwr;
-	dwc = dwr;
       }
       else if (hasFacesLeft && !hasFacesRigh) {
 	dwr = dwl;
-	dwc = dwl;
       }
       else {
 	MayDay::Error("CdrMuscl::computeNormalSlopes - missed a case");
       }
 
       // Limit the slopes.
-      dwmin = 2.0 * std::min(std::abs(dwl), std::abs(dwr));
-      if (dwl * dwr < 0.0) {
-	dwc = 0.0;
+      switch(m_limiter) {
+      case Limiter::None:
+      {
+	a_normalSlopes(vof, dir) = 0.0;
+	
+	break;
       }
-      else {
-	if (dwc < 0.0) {
-	  dwc = -std::min(dwmin, std::abs(dwc));
-	}
-	else if (dwc > 0.0) {
-	  dwc = std::min(dwmin, std::abs(dwc));
-	}
-	else {
-	  dwc = 0.0;
-	}
-      }
+      case Limiter::MinMod:
+      {
+	a_normalSlopes(vof, dir) = this->minmod(dwl, dwr);
 
-      if (std::isnan(dwc)) {
-	MayDay::Error("CdrMuscl::computeNormalSlopes - dwc != dwc.");
+	break;
       }
+      case Limiter::Superbee:
+      {
+	a_normalSlopes(vof, dir) = this->superbee(dwl, dwr);
 
-      a_normalSlopes(vof, m_comp) = dwc;
+	break;
+      }
+      case Limiter::MonotonizedCentral:
+      {
+	a_normalSlopes(vof, dir) = this->monotonizedCentral(dwl, dwr);
+
+	break;
+      }
+      default:
+      {
+	MayDay::Error("CD_CdrMuscl::computeNormalSlopes -- logic bust 2");
+      }
+      }
     };
 
     // Kernel for cells abutting the boundaries.
@@ -433,8 +433,6 @@ CdrMuscl::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     auto boundaryKernelHi = [&](const IntVect& iv) -> void {
       slopesReg(iv, dir) = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
     };
-
-
 
     // Apply the kernels. Beware of corrected slopes near the boundaries.
     BoxLoops::loop(compBox, regularKernel);
