@@ -504,7 +504,6 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
 
       // Compute the transverse (CTU) terms.
       for (int transverseDir = 0; transverseDir < SpaceDim; transverseDir++) {
-
 	if (transverseDir != dir) {
 	  Real slopeLeft = 0.0;
 	  Real slopeRigh = 0.0;
@@ -562,23 +561,71 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
 	    Real slopeLeft = 0.0;
 	    Real slopeRigh = 0.0;
 
-#if 0 // These need to fetch the corner vofs
+
 	    // Transverse term in cell to the left.
 	    if (a_cellVel(vofLeft, transverseDir) < 0.0) {
-	      slopeLeft = a_cellPhi(vofLeft + BASISV(transverseDir), m_comp) - a_cellPhi(vofLeft, m_comp);
+	      const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofLeft, transverseDir, Side::Hi);
+
+	      const int nFaces = facesHi.size();
+	      
+	      if(nFaces > 0) {
+		Real phiUp = 0.0;
+		for (int iface = 0; iface < nFaces; iface++) {
+		  phiUp += a_cellPhi(facesHi[iface].getVoF(Side::Hi), m_comp);
+		}
+		phiUp /= nFaces;
+
+		slopeLeft = phiUp - a_cellPhi(vofLeft, m_comp);	      		
+	      }
 	    }
 	    else if (a_cellVel(vofLeft, transverseDir) > 0.0) {
-	      slopeLeft = a_cellPhi(vofLeft, m_comp) - a_cellPhi(vofLeft - BASISV(transverseDir), m_comp);
+	      const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofLeft, transverseDir, Side::Lo);
+
+	      const int nFaces = facesLo.size();
+	      
+	      if(nFaces > 0) {
+		Real phiDown = 0.0;
+		for (int iface = 0; iface < nFaces; iface++) {
+		  phiDown += a_cellPhi(facesLo[iface].getVoF(Side::Lo), m_comp);
+		}
+		phiDown /= nFaces;
+
+		slopeLeft = a_cellPhi(vofLeft, m_comp) - phiDown;	      		
+	      }
 	    }
 
-	    // Transverse term in cell to the right.
+	    // Transverse term in cell to the right
 	    if (a_cellVel(vofRigh, transverseDir) < 0.0) {
-	      slopeRigh = a_cellPhi(vofRigh + BASISV(transverseDir), m_comp) - a_cellPhi(vofRigh, m_comp);
+	      const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofRigh, transverseDir, Side::Hi);
+
+	      const int nFaces = facesHi.size();
+	      
+	      if(nFaces > 0) {
+		Real phiUp = 0.0;
+		for (int iface = 0; iface < nFaces; iface++) {
+		  phiUp += a_cellPhi(facesHi[iface].getVoF(Side::Hi), m_comp);
+		}
+		phiUp /= nFaces;
+
+		slopeRigh = phiUp - a_cellPhi(vofRigh, m_comp);	      		
+	      }
 	    }
 	    else if (a_cellVel(vofRigh, transverseDir) > 0.0) {
-	      slopeRigh = a_cellPhi(vofRigh, m_comp) - a_cellPhi(vofRigh - BASISV(transverseDir), m_comp);
-	    }
-#endif
+	      const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofRigh, transverseDir, Side::Lo);
+
+	      const int nFaces = facesLo.size();
+	      
+	      if(nFaces > 0) {
+		Real phiDown = 0.0;
+		for (int iface = 0; iface < nFaces; iface++) {
+		  phiDown += a_cellPhi(facesLo[iface].getVoF(Side::Lo), m_comp);
+		}
+		phiDown /= nFaces;
+
+		slopeRigh = a_cellPhi(vofRigh, m_comp) - phiDown;	      		
+	      }
+	    }	    
+
 
 	    primLeft -= 0.5 * dtx * a_cellVel(vofLeft, transverseDir) * slopeLeft;
 	    primRigh -= 0.5 * dtx * a_cellVel(vofRigh, transverseDir) * slopeRigh;
