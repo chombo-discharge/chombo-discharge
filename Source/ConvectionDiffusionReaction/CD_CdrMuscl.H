@@ -18,8 +18,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class that uses MUSCL discretization advection.
-  @details This class performs MUSCL-type advection using a van Leer limiter for obtaining the face-centered states. 
+  @brief Class that uses a slope limited method for advection, in combination with corner transport upwind (CTU). 
 */
 class CdrMuscl : public CdrMultigrid
 {
@@ -51,7 +50,6 @@ public:
     @param[out] a_facePhi  Phi on face centers
     @param[in]  a_cellPhi  Phi on cell centers
     @param[in]  a_dt       Time step (i.e. extrapolation) of the face-centered states. 
-    @details This compute the face-centered states using van Leer limiting. It calls computeNormalSlopes(...) and upwind(...). 
   */
   virtual void
   advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_dt) override;
@@ -59,7 +57,6 @@ public:
   /*!
     @brief Compute the largest possible advective time step (for explicit methods)
     @details This computes dt = dx/max(|vx|,|vy|,|vz|), minimized over all grid levels and patches. 
-    @note This is the appropriate time step routine for the BCG reconstruction. 
   */
   virtual Real
   computeAdvectionDt() override;
@@ -67,9 +64,19 @@ public:
 protected:
 
   /*!
+    @brief Supported limiters
+  */
+  enum class Limiter {
+    None,
+    MinMod,
+    Superbee,
+    MonotonizedCentral,
+  };
+
+  /*!
     @brief If true, slopes are limited in the normal dircetion. 
   */
-  bool m_limitSlopes;
+  Limiter m_limiter;
 
   /*!
     @brief If true, the discretization uses CTU. Otherwise it's DCU (donor cell upwind)
@@ -126,6 +133,27 @@ protected:
   */
   virtual void
   parseSlopeLimiter();
+
+  /*!
+    @brief minmod slope function. 
+    @param[in] dwl Left slope
+    @param[in] dwr Right slope
+  */
+  Real minmod(const Real& dwl, const Real& dwr) const noexcept;
+
+  /*!
+    @brief Superbee slope limiter. 
+    @param[in] dwl Left slope
+    @param[in] dwr Right slope
+  */
+  Real superbee(const Real& dwl, const Real& dwr) const noexcept;
+
+  /*!
+    @brief Monotonized central difference slope limiter.
+    @param[in] dwl Left slope
+    @param[in] dwr Right slope
+  */
+  Real monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

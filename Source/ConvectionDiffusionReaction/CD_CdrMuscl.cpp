@@ -26,12 +26,14 @@ CdrMuscl::CdrMuscl()
   // Class and object name
   m_className = "CdrMuscl";
   m_name      = "CdrMuscl";
-
-  m_limitSlopes = true;
-  m_useCTU      = true;
+  m_limiter   = Limiter::MonotonizedCentral;
+  m_useCTU    = true;
 }
 
-CdrMuscl::~CdrMuscl() { CH_TIME("CdrMuscl::~CdrMuscl()"); }
+CdrMuscl::~CdrMuscl()
+{
+  CH_TIME("CdrMuscl::~CdrMuscl()");
+}
 
 void
 CdrMuscl::parseOptions()
@@ -153,8 +155,25 @@ CdrMuscl::parseSlopeLimiter()
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("limit_slopes", m_limitSlopes);
-  pp.get("use_ctu", m_useCTU);
+  std::string slopeLimiter;
+  pp.get("use_ctu", m_useCTU);  
+  pp.get("limit_slopes", slopeLimiter);
+
+  if(slopeLimiter == "none") {
+    m_limiter = Limiter::None;
+  }
+  else if(slopeLimiter == "minmod") {
+    m_limiter = Limiter::MinMod;
+  }
+  else if(slopeLimiter == "superbee") {
+    m_limiter = Limiter::Superbee;
+  }  
+  else if(slopeLimiter == "mc") {
+    m_limiter = Limiter::MonotonizedCentral;
+  }
+  else {
+    MayDay::Error("CdrMuscl::parseSlopeLimiter -- unknown limiter requested");
+  }
 }
 
 void
@@ -204,7 +223,8 @@ CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi
       EBCellFAB normalSlopes(ebisbox, grownBox, SpaceDim);
       normalSlopes.setVal(0.0);
 
-      if (m_limitSlopes) {
+      // Compute normal slopes. 
+      if(m_limiter != Limiter::None) {
         this->computeNormalSlopes(normalSlopes, cellPhi, cellBox, domain, lvl, dit());
       }
 
@@ -259,30 +279,72 @@ CdrMuscl::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     const IntVectSet irregIVS = ebisbox.getIrregIVS(compBox);
     VoFIterator      vofit(irregIVS, ebgraph);
 
-    // Regular kernel. Uses van Leer limiter.
-    const IntVect shift          = BASISV(dir);
-    auto          interiorKernel = [&](const IntVect& iv) -> void {
-      const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
-      const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
-      const Real dwc = 0.5 * (dwl + dwr);
+    const IntVect shift = BASISV(dir);
 
-      if (dwl * dwr < 0.0) {
-        slopesReg(iv, dir) = 0.0;
+    // Set up the regular slope kernels. Add more slopes if you need them. 
+    std::function<void(const IntVect&)> regularKernel;    
+    switch(m_limiter) {
+    case Limiter::None:
+      {
+	regularKernel = [&](const IntVect& iv) -> void {
+	  slopesReg(iv, dir) = 0.0;
+	};
       }
-      else {
-        const Real sgn = Real((dwc > 0.0) - (dwc < 0.0));
+    case Limiter::MinMod:
+      {
+	regularKernel = [&](const IntVect& iv) -> void {
+	  const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
+	  const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
-        slopesReg(iv, dir) = sgn * std::min(std::abs(dwc), 2.0 * std::min(std::abs(dwl), std::abs(dwr)));
+	  if (dwl * dwr > 0.0) {
+	    slopesReg(iv, dir) = this->minmod(dwl, dwr);      	
+	  }
+	  else {
+	    slopesReg(iv, dir) = 0.0;
+	  }
+	};
+
+	break;
       }
-    };
+    case Limiter::Superbee:
+      {
+	regularKernel = [&](const IntVect& iv) -> void {
+	  const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
+	  const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
-    // Kernel for cells abutting the boundaries.
-    auto boundaryKernelLo = [&](const IntVect& iv) -> void {
-      slopesReg(iv, dir) = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
-    };
-    auto boundaryKernelHi = [&](const IntVect& iv) -> void {
-      slopesReg(iv, dir) = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
-    };
+	  if (dwl * dwr > 0.0) {
+	    slopesReg(iv, dir) = this->superbee(dwl, dwr);      	
+	  }
+	  else {
+	    slopesReg(iv, dir) = 0.0;
+	  }
+	};
+
+	break;
+      }
+    case Limiter::MonotonizedCentral:
+      {
+	regularKernel = [&](const IntVect& iv) -> void {
+	  const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
+	  const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
+
+	  if (dwl * dwr > 0.0) {
+	    slopesReg(iv, dir) = this->monotonizedCentral(dwl, dwr);      	
+	  }
+	  else {
+	    slopesReg(iv, dir) = 0.0;
+	  }
+	};
+
+	break;
+      }
+    default:
+      {
+	MayDay::Error("CdrMuscl::computeNormalSlopes -- logic bust");
+
+	break;
+      }
+    }
 
     // CUt-cell kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -308,86 +370,96 @@ CdrMuscl::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
 
       // Compute left and right slope
       if (hasFacesLeft) {
-        Vector<FaceIndex> facesLeft = ebisbox.getFaces(vof, dir, Side::Lo);
-        vofLeft                     = facesLeft[0].getVoF(Side::Lo);
-        phiLeft                     = a_cellPhi(vofLeft, m_comp);
-        dwl                         = phiCent - phiLeft;
+	Vector<FaceIndex> facesLeft = ebisbox.getFaces(vof, dir, Side::Lo);
+	vofLeft                     = facesLeft[0].getVoF(Side::Lo);
+	phiLeft                     = a_cellPhi(vofLeft, m_comp);
+	dwl                         = phiCent - phiLeft;
       }
       if (hasFacesRigh) {
-        Vector<FaceIndex> facesRigh = ebisbox.getFaces(vof, dir, Side::Hi);
-        vofRigh                     = facesRigh[0].getVoF(Side::Hi);
-        phiRigh                     = a_cellPhi(vofRigh, m_comp);
-        dwr                         = phiRigh - phiCent;
+	Vector<FaceIndex> facesRigh = ebisbox.getFaces(vof, dir, Side::Hi);
+	vofRigh                     = facesRigh[0].getVoF(Side::Hi);
+	phiRigh                     = a_cellPhi(vofRigh, m_comp);
+	dwr                         = phiRigh - phiCent;
       }
 
       if (hasFacesLeft && hasFacesRigh) {
-        dwc = 0.5 * (dwl + dwr);
+	dwc = 0.5 * (dwl + dwr);
       }
       else if (!hasFacesLeft && !hasFacesRigh) {
-        dwl = 0.0;
-        dwc = 0.0;
-        dwr = 0.0;
+	dwl = 0.0;
+	dwc = 0.0;
+	dwr = 0.0;
       }
       else if (!hasFacesLeft && hasFacesRigh) {
-        dwl = dwr;
-        dwc = dwr;
+	dwl = dwr;
+	dwc = dwr;
       }
       else if (hasFacesLeft && !hasFacesRigh) {
-        dwr = dwl;
-        dwc = dwl;
+	dwr = dwl;
+	dwc = dwl;
       }
       else {
-        MayDay::Error("CdrMuscl::computeNormalSlopes - missed a case");
+	MayDay::Error("CdrMuscl::computeNormalSlopes - missed a case");
       }
 
       // Limit the slopes.
       dwmin = 2.0 * std::min(std::abs(dwl), std::abs(dwr));
       if (dwl * dwr < 0.0) {
-        dwc = 0.0;
+	dwc = 0.0;
       }
       else {
-        if (dwc < 0.0) {
-          dwc = -std::min(dwmin, std::abs(dwc));
-        }
-        else if (dwc > 0.0) {
-          dwc = std::min(dwmin, std::abs(dwc));
-        }
-        else {
-          dwc = 0.0;
-        }
+	if (dwc < 0.0) {
+	  dwc = -std::min(dwmin, std::abs(dwc));
+	}
+	else if (dwc > 0.0) {
+	  dwc = std::min(dwmin, std::abs(dwc));
+	}
+	else {
+	  dwc = 0.0;
+	}
       }
 
       if (std::isnan(dwc)) {
-        MayDay::Error("CdrMuscl::computeNormalSlopes - dwc != dwc.");
+	MayDay::Error("CdrMuscl::computeNormalSlopes - dwc != dwc.");
       }
 
       a_normalSlopes(vof, m_comp) = dwc;
     };
 
+    // Kernel for cells abutting the boundaries.
+    auto boundaryKernelLo = [&](const IntVect& iv) -> void {
+      slopesReg(iv, dir) = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
+    };
+    auto boundaryKernelHi = [&](const IntVect& iv) -> void {
+      slopesReg(iv, dir) = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
+    };
+
+
+
     // Apply the kernels. Beware of corrected slopes near the boundaries.
-    BoxLoops::loop(compBox, interiorKernel);
+    BoxLoops::loop(compBox, regularKernel);
+    BoxLoops::loop(vofit, irregularKernel);
+
     if (!loBox.isEmpty()) {
       BoxLoops::loop(compBox, boundaryKernelLo);
     }
     if (!hiBox.isEmpty()) {
       BoxLoops::loop(compBox, boundaryKernelHi);
-    }
-
-    BoxLoops::loop(vofit, irregularKernel);
+    }    
   }
 }
 
 void
 CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
-                 const EBCellFAB&     a_normalSlopes,
-                 const EBCellFAB&     a_cellPhi,
-                 const EBCellFAB&     a_cellVel,
-                 const EBFluxFAB&     a_faceVel,
-                 const ProblemDomain& a_domain,
-                 const Box&           a_cellBox,
-                 const int&           a_level,
-                 const DataIndex&     a_dit,
-                 const Real&          a_dt)
+		 const EBCellFAB&     a_normalSlopes,
+		 const EBCellFAB&     a_cellPhi,
+		 const EBCellFAB&     a_cellVel,
+		 const EBFluxFAB&     a_faceVel,
+		 const ProblemDomain& a_domain,
+		 const Box&           a_cellBox,
+		 const int&           a_level,
+		 const DataIndex&     a_dit,
+		 const Real&          a_dt)
 {
   CH_TIME("CdrMuscl::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)");
   if (m_verbosity > 99) {
@@ -435,36 +507,36 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
 
       // Normal extrapolation.
       Real primLeft = regStates(cellLeft, m_comp) +
-                      0.5 * std::min(1.0, 1.0 - regCellVel(cellLeft, dir) * dtx) * regSlopes(cellLeft, dir);
+      0.5 * std::min(1.0, 1.0 - regCellVel(cellLeft, dir) * dtx) * regSlopes(cellLeft, dir);
       Real primRigh = regStates(cellRigh, m_comp) -
-                      0.5 * std::min(1.0, 1.0 + regCellVel(cellRigh, dir) * dtx) * regSlopes(cellRigh, dir);
+      0.5 * std::min(1.0, 1.0 + regCellVel(cellRigh, dir) * dtx) * regSlopes(cellRigh, dir);
 
       // Compute the transverse (CTU) terms.
       for (int transverseDir = 0; transverseDir < SpaceDim; transverseDir++) {
 
-        if (transverseDir != dir) {
-          Real slopeLeft = 0.0;
-          Real slopeRigh = 0.0;
+	if (transverseDir != dir) {
+	  Real slopeLeft = 0.0;
+	  Real slopeRigh = 0.0;
 
-          // Transverse term in cell to the left.
-          if (regCellVel(cellLeft, transverseDir) < 0.0) {
-            slopeLeft = regStates(cellLeft + BASISV(transverseDir), m_comp) - regStates(cellLeft, m_comp);
-          }
-          else if (regCellVel(cellLeft, transverseDir) > 0.0) {
-            slopeLeft = regStates(cellLeft, m_comp) - regStates(cellLeft - BASISV(transverseDir), m_comp);
-          }
+	  // Transverse term in cell to the left.
+	  if (regCellVel(cellLeft, transverseDir) < 0.0) {
+	    slopeLeft = regStates(cellLeft + BASISV(transverseDir), m_comp) - regStates(cellLeft, m_comp);
+	  }
+	  else if (regCellVel(cellLeft, transverseDir) > 0.0) {
+	    slopeLeft = regStates(cellLeft, m_comp) - regStates(cellLeft - BASISV(transverseDir), m_comp);
+	  }
 
-          // Transverse term in cell to the right.
-          if (regCellVel(cellRigh, transverseDir) < 0.0) {
-            slopeRigh = regStates(cellRigh + BASISV(transverseDir), m_comp) - regStates(cellRigh, m_comp);
-          }
-          else if (regCellVel(cellRigh, transverseDir) > 0.0) {
-            slopeRigh = regStates(cellRigh, m_comp) - regStates(cellRigh - BASISV(transverseDir), m_comp);
-          }
+	  // Transverse term in cell to the right.
+	  if (regCellVel(cellRigh, transverseDir) < 0.0) {
+	    slopeRigh = regStates(cellRigh + BASISV(transverseDir), m_comp) - regStates(cellRigh, m_comp);
+	  }
+	  else if (regCellVel(cellRigh, transverseDir) > 0.0) {
+	    slopeRigh = regStates(cellRigh, m_comp) - regStates(cellRigh - BASISV(transverseDir), m_comp);
+	  }
 
-          primLeft -= 0.5 * dtx * regCellVel(cellLeft, transverseDir) * slopeLeft;
-          primRigh -= 0.5 * dtx * regCellVel(cellRigh, transverseDir) * slopeRigh;
-        }
+	  primLeft -= 0.5 * dtx * regCellVel(cellLeft, transverseDir) * slopeLeft;
+	  primRigh -= 0.5 * dtx * regCellVel(cellRigh, transverseDir) * slopeRigh;
+	}
       }
 
       // Solve the Riemann problem.
@@ -472,13 +544,13 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
       const Real& faceVel = regFaceVel(iv, m_comp);
 
       if (faceVel > 0.0) {
-        facePhi = primLeft;
+	facePhi = primLeft;
       }
       else if (faceVel < 0.0) {
-        facePhi = primRigh;
+	facePhi = primRigh;
       }
       else {
-        facePhi = 0.0;
+	facePhi = 0.0;
       }
     };
 
@@ -486,8 +558,8 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
     // we are getting the correct left/right vofs (cells might be multi-valued).
     auto irregularKernel = [&](const FaceIndex& face) -> void {
       if (!face.isBoundary()) {
-        const VolIndex& vofLeft = face.getVoF(Side::Lo);
-        const VolIndex& vofRigh = face.getVoF(Side::Hi);
+	const VolIndex& vofLeft = face.getVoF(Side::Lo);
+	const VolIndex& vofRigh = face.getVoF(Side::Hi);
 
 	Real primLeft = a_cellPhi(vofLeft, m_comp) + 0.5 * std::min(1.0, 1.0 - a_cellVel(vofLeft, dir) * dtx) * a_normalSlopes(vofLeft, dir);
 	Real primRigh = a_cellPhi(vofRigh, m_comp) - 0.5 * std::min(1.0, 1.0 + a_cellVel(vofRigh, dir) * dtx) * a_normalSlopes(vofRigh, dir);
@@ -523,15 +595,15 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
 	}
 
 	// Solve the Riemann problem. 
-        if (faceVel(face, m_comp) > 0.0) {
-          facePhi(face, m_comp) = primLeft;
-        }
-        else if (faceVel(face, m_comp) < 0.0) {
-          facePhi(face, m_comp) = primRigh;
-        }
-        else {
-          facePhi(face, m_comp) = 0.0;
-        }
+	if (faceVel(face, m_comp) > 0.0) {
+	  facePhi(face, m_comp) = primLeft;
+	}
+	else if (faceVel(face, m_comp) < 0.0) {
+	  facePhi(face, m_comp) = primRigh;
+	}
+	else {
+	  facePhi(face, m_comp) = 0.0;
+	}
       }
     };
 
@@ -539,6 +611,44 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
     BoxLoops::loop(faceBox, regularKernel);
     BoxLoops::loop(irregFaces, irregularKernel);
   }
+}
+
+Real CdrMuscl::minmod(const Real& dwl, const Real& dwr) const noexcept {
+  Real slope = 0.0;
+
+  if(dwl*dwr > 0.0) {
+    slope = std::abs(dwl) < std::abs(dwr) ? dwl : dwr;
+  }
+
+  return slope;
+}
+
+Real CdrMuscl::superbee(const Real& dwl, const Real& dwr) const noexcept {
+  Real slope = 0.0;
+  
+  if(dwl*dwr > 0.0) {
+    const Real s1 = this->minmod(dwl, 2*dwr);
+    const Real s2 = this->minmod(dwr, 2*dwl);
+
+    if(s1*s2 > 0.0) {
+      slope = std::abs(s1) > std::abs(s2) ? s1 : s2;
+    }
+  }
+
+  return slope;
+}
+
+Real CdrMuscl::monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept {
+  Real slope = 0.0;
+
+  if(dwl*dwr > 0.0) {
+    const Real dwc = dwl + dwr;
+    const Real sgn = Real((dwc > 0.0) - (dwc < 0.0));
+
+    slope = sgn * std::min(0.5 * std::abs(dwc), 2.0 * std::min(std::abs(dwl), std::abs(dwr)));
+  }
+
+  return slope;
 }
 
 #include <CD_NamespaceFooter.H>
