@@ -28,6 +28,7 @@ CdrMuscl::CdrMuscl()
   m_name      = "CdrMuscl";
 
   m_limitSlopes = true;
+  m_useCTU      = true;
 }
 
 CdrMuscl::~CdrMuscl() { CH_TIME("CdrMuscl::~CdrMuscl()"); }
@@ -74,63 +75,71 @@ CdrMuscl::computeAdvectionDt()
     pout() << m_name + "::computeAdvectionDt()" << endl;
   }
 
-  // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these two papers for details:
-  //
-  //       Bell, Colella, Glaz, J. Comp. Phys 85 (257), 1989
-  //       Minion, J. Comp. Phys 123 (435), 1996
+  Real minDt = std::numeric_limits<Real>::max();  
 
-  Real minDt = std::numeric_limits<Real>::max();
+  if(!m_useCTU) {
+    minDt =  CdrMultigrid::computeAdvectionDt();
+  }
+  else{
 
-  if (m_isMobile) {
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real               dx    = m_amr->getDx()[lvl];
+    // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these two papers for details:
+    //
+    //       Bell, Colella, Glaz, J. Comp. Phys 85 (257), 1989
+    //       Minion, J. Comp. Phys 123 (435), 1996
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box        cellBox = dbl[dit()];
-        const EBCellFAB& velo    = (*m_cellVelocity[lvl])[dit()];
-        const EBISBox&   ebisBox = ebisl[dit()];
 
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
-        // Regular grid data.
-        const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
+    if (m_isMobile) {
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+	const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+	const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+	const Real               dx    = m_amr->getDx()[lvl];
 
-        // Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far.
-        auto regularKernel = [&](const IntVect& iv) -> void {
-          Real velMax = 0.0;
-          if (!ebisBox.isCovered(iv)) {
-            for (int dir = 0; dir < SpaceDim; dir++) {
-              velMax = std::max(velMax, std::abs(veloReg(iv, dir)));
-            }
-          }
+	for (DataIterator dit(dbl); dit.ok(); ++dit) {
+	  const Box        cellBox = dbl[dit()];
+	  const EBCellFAB& velo    = (*m_cellVelocity[lvl])[dit()];
+	  const EBISBox&   ebisBox = ebisl[dit()];
 
-          if (velMax > 0.0) {
-            minDt = std::min(dx / velMax, minDt);
-          }
-        };
+	  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
-        // Same kernel, but for cut-cells.
-        auto irregularKernel = [&](const VolIndex& vof) -> void {
-          Real velMax = 0.0;
-          for (int dir = 0; dir < SpaceDim; dir++) {
-            velMax = std::max(velMax, std::abs(velo(vof, dir)));
-          }
+	  // Regular grid data.
+	  const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
 
-          if (velMax > 0.0) {
-            minDt = std::min(dx / velMax, minDt);
-          }
-        };
+	  // Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far.
+	  auto regularKernel = [&](const IntVect& iv) -> void {
+	    Real velMax = 0.0;
+	    if (!ebisBox.isCovered(iv)) {
+	      for (int dir = 0; dir < SpaceDim; dir++) {
+		velMax = std::max(velMax, std::abs(veloReg(iv, dir)));
+	      }
+	    }
 
-        // Execute the kernels.
-        BoxLoops::loop(cellBox, regularKernel);
-        BoxLoops::loop(vofit, irregularKernel);
+	    if (velMax > 0.0) {
+	      minDt = std::min(dx / velMax, minDt);
+	    }
+	  };
+
+	  // Same kernel, but for cut-cells.
+	  auto irregularKernel = [&](const VolIndex& vof) -> void {
+	    Real velMax = 0.0;
+	    for (int dir = 0; dir < SpaceDim; dir++) {
+	      velMax = std::max(velMax, std::abs(velo(vof, dir)));
+	    }
+
+	    if (velMax > 0.0) {
+	      minDt = std::min(dx / velMax, minDt);
+	    }
+	  };
+
+	  // Execute the kernels.
+	  BoxLoops::loop(cellBox, regularKernel);
+	  BoxLoops::loop(vofit, irregularKernel);
+	}
       }
-    }
 
-    // If we are using MPI then ranks need to know of each other's time steps.
-    minDt = ParallelOps::min(minDt);
+      // If we are using MPI then ranks need to know of each other's time steps.
+      minDt = ParallelOps::min(minDt);
+    }
   }
 
   return minDt;
@@ -147,10 +156,11 @@ CdrMuscl::parseSlopeLimiter()
   ParmParse pp(m_className.c_str());
 
   pp.get("limit_slopes", m_limitSlopes);
+  pp.get("use_ctu", m_useCTU);
 }
 
 void
-CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_extrapDt)
+CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_dt)
 {
   CH_TIME("CdrMuscl::advectToFaces(EBAMRFluxData, EBAMRCellData, Real)");
   if (m_verbosity > 5) {
@@ -187,7 +197,7 @@ CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi
       const Box      cellBox = dbl[dit()];
       const EBISBox& ebisbox = ebisl[dit()];
 
-      // Limit slopes and solve Riemann problem (this is just the upwind state). Note that we need one ghost cell for
+      // Limit slopes and solve Riemann problem (which yields the upwind state at the face). Note that we need one ghost cell for
       // the slopes because in order to extrapolate to the left/right sides of a face, we need the centered slope on both
       // sides for the upwind. So, normalSlopes is bigger than cellBox (by one). Since the limited slope is computed using the
       // left/right slopes, we end up needing two grid cells.
@@ -200,7 +210,7 @@ CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi
         this->computeNormalSlopes(normalSlopes, cellPhi, cellBox, domain, lvl, dit());
       }
 
-      this->upwind(facePhi, normalSlopes, cellPhi, cellVel, faceVel, domain, cellBox, lvl, dit(), a_extrapDt);
+      this->upwind(facePhi, normalSlopes, cellPhi, cellVel, faceVel, domain, cellBox, lvl, dit(), a_dt);
     }
   }
 }
@@ -396,8 +406,9 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
   //       want phi_[(i+1/2),j,k]^(k+1/2). The normal slopes (slopes that are normal to the face normal)
   //       come into this routine through a_normalSlopes, and the transverse slopes are added in this method.
 
+  const Real dt  = m_useCTU ? a_dt : 0.0;
   const Real dx  = m_amr->getDx()[a_level];
-  const Real dtx = a_dt / dx;
+  const Real dtx = dt / dx;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     EBFaceFAB&       facePhi = a_facePhi[dir];

@@ -65,10 +65,16 @@ public:
   computeAdvectionDt() override;
 
 protected:
+
   /*!
-    @brief If true, slopes are limited (always use limiting). 
+    @brief If true, slopes are limited in the normal dircetion. 
   */
   bool m_limitSlopes;
+
+  /*!
+    @brief If true, the discretization uses CTU. Otherwise it's DCU (donor cell upwind)
+  */
+  bool m_useCTU;
 
   /*!
     @brief Compute slopes. 
