@@ -62,11 +62,11 @@ public:
   computeAdvectionDt() override;
 
 protected:
-
   /*!
     @brief Supported limiters
   */
-  enum class Limiter {
+  enum class Limiter
+  {
     None,
     MinMod,
     Superbee,
@@ -139,21 +139,24 @@ protected:
     @param[in] dwl Left slope
     @param[in] dwr Right slope
   */
-  Real minmod(const Real& dwl, const Real& dwr) const noexcept;
+  Real
+  minmod(const Real& dwl, const Real& dwr) const noexcept;
 
   /*!
     @brief Superbee slope limiter. 
     @param[in] dwl Left slope
     @param[in] dwr Right slope
   */
-  Real superbee(const Real& dwl, const Real& dwr) const noexcept;
+  Real
+  superbee(const Real& dwl, const Real& dwr) const noexcept;
 
   /*!
     @brief Monotonized central difference slope limiter.
     @param[in] dwl Left slope
     @param[in] dwr Right slope
   */
-  Real monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept;
+  Real
+  monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
