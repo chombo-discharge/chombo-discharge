@@ -70,6 +70,7 @@ CdrMuscl.bc.y.hi              = wall                    # 'data', 'function', 'w
 CdrMuscl.bc.z.lo              = wall                    # 'data', 'function', 'wall', or 'outflow'
 CdrMuscl.bc.z.hi              = wall                    # 'data', 'function', 'wall', or 'outflow'
 CdrMuscl.limit_slopes         = true                    # Use slope-limiters or not
+CdrMuscl.use_ctu              = true                    # If true, use CTU. Otherwise it's DTU.
 CdrMuscl.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrMuscl.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 CdrMuscl.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
@@ -148,13 +149,13 @@ AdvectionDiffusion.blob_center    = 0 0.25  # Blob center
 AdvectionDiffusion.diffusion      = true    # Turn on/off diffusion
 AdvectionDiffusion.advection      = true    # Turn on/off advection
 AdvectionDiffusion.fhd            = false   # Use FHD or not
-AdvectionDiffusion.integrator     = heun    # 'heun' or 'imex'
+AdvectionDiffusion.integrator     = imex    # 'heun' or 'imex'
 
 # Velocity, diffusion, and CFL
 # ----------------------------
 AdvectionDiffusion.diffco         = 1E-3    # Diffusion coefficient
 AdvectionDiffusion.omega          = 1.0     # Rotation velocity
-AdvectionDiffusion.cfl            = 0.8     # CFL number
+AdvectionDiffusion.cfl            = 0.9     # CFL number
 AdvectionDiffusion.min_dt         = 0.0     # Smallest acceptable time step
 AdvectionDiffusion.max_dt         = 1.E99   # Largest acceptable time step
 

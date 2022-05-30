@@ -9,6 +9,7 @@ CdrMuscl.bc.y.hi              = wall                    # 'data', 'function', 'w
 CdrMuscl.bc.z.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrMuscl.bc.z.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrMuscl.limit_slopes         = true                    # Use slope-limiters or not
+CdrMuscl.use_ctu              = true                    # If true, use CTU. Otherwise it's DTU.
 CdrMuscl.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrMuscl.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 CdrMuscl.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo

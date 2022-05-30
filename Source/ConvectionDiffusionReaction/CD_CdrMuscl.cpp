@@ -82,13 +82,11 @@ CdrMuscl::computeAdvectionDt()
   }
   else{
 
-    // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these two papers for details:
+    // TLDR: For advection, Bell, Collela, and Glaz says we must have dt <= dx/max(|vx|, |vy|, |vz|). See these three papers for details:
     //
+    //       Colella, J. Comp. Phys. 87 (171-200), 1990
     //       Bell, Colella, Glaz, J. Comp. Phys 85 (257), 1989
     //       Minion, J. Comp. Phys 123 (435), 1996
-
-
-
     if (m_isMobile) {
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
 	const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -408,7 +406,7 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
 
   const Real dt  = m_useCTU ? a_dt : 0.0;
   const Real dx  = m_amr->getDx()[a_level];
-  const Real dtx = dt / dx;
+  const Real dtx = a_dt / dx;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     EBFaceFAB&       facePhi = a_facePhi[dir];
@@ -521,7 +519,7 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
 
 	    primLeft -= 0.5 * dtx * a_cellVel(vofLeft, transverseDir) * slopeLeft;
 	    primRigh -= 0.5 * dtx * a_cellVel(vofRigh, transverseDir) * slopeRigh;
-	  }	  
+	  }
 	}
 
 	// Solve the Riemann problem. 
