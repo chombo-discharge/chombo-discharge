@@ -286,7 +286,7 @@ protected:
 };
 
 /*!
-  @brief Factory class for CdrLayout. T is (usually) CdrSolver and S is the implementation class (e.g., CdrMuscl). 
+  @brief Factory class for CdrLayout. T is (usually) CdrSolver and S is the implementation class (e.g., CdrCTU). 
   @details Factory class is very simple; since we don't want to template CdrLayout further we use a factory to instantiate solvers of 
   any CdrSolver inherited class, and then return a layout with the casted classes. That's about it. This is useful because it allows
   the factory to act as a "casting-point" for switching between various solver implementation. 

@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CD_CdrMuscl.cpp
-  @brief  Implementation of CD_CdrMuscl.H
+  @file   CD_CdrCTU.cpp
+  @brief  Implementation of CD_CdrCTU.H
   @author Robert Marskar
 */
 
@@ -13,32 +13,32 @@
 #include <ParmParse.H>
 
 // Our includes
-#include <CD_CdrMuscl.H>
+#include <CD_CdrCTU.H>
 #include <CD_BoxLoops.H>
 #include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
-CdrMuscl::CdrMuscl()
+CdrCTU::CdrCTU()
 {
-  CH_TIME("CdrMuscl::CdrMuscl()");
+  CH_TIME("CdrCTU::CdrCTU()");
 
   // Class and object name
-  m_className = "CdrMuscl";
-  m_name      = "CdrMuscl";
+  m_className = "CdrCTU";
+  m_name      = "CdrCTU";
   m_limiter   = Limiter::MonotonizedCentral;
   m_useCTU    = true;
 }
 
-CdrMuscl::~CdrMuscl()
+CdrCTU::~CdrCTU()
 {
-  CH_TIME("CdrMuscl::~CdrMuscl()");
+  CH_TIME("CdrCTU::~CdrCTU()");
 }
 
 void
-CdrMuscl::parseOptions()
+CdrCTU::parseOptions()
 {
-  CH_TIME("CdrMuscl::parseOptions()");
+  CH_TIME("CdrCTU::parseOptions()");
   if (m_verbosity > 5) {
     pout() << m_name + "::parseOptions()" << endl;
   }
@@ -53,9 +53,9 @@ CdrMuscl::parseOptions()
 }
 
 void
-CdrMuscl::parseRuntimeOptions()
+CdrCTU::parseRuntimeOptions()
 {
-  CH_TIME("CdrMuscl::parseRuntimeOptions()");
+  CH_TIME("CdrCTU::parseRuntimeOptions()");
   if (m_verbosity > 5) {
     pout() << m_name + "::parseRuntimeOptions()" << endl;
   }
@@ -70,9 +70,9 @@ CdrMuscl::parseRuntimeOptions()
 }
 
 Real
-CdrMuscl::computeAdvectionDt()
+CdrCTU::computeAdvectionDt()
 {
-  CH_TIME("CdrMuscl::computeAdvectionDt()");
+  CH_TIME("CdrCTU::computeAdvectionDt()");
   if (m_verbosity > 5) {
     pout() << m_name + "::computeAdvectionDt()" << endl;
   }
@@ -146,9 +146,9 @@ CdrMuscl::computeAdvectionDt()
 }
 
 void
-CdrMuscl::parseSlopeLimiter()
+CdrCTU::parseSlopeLimiter()
 {
-  CH_TIME("CdrMuscl::parseSlopeLimiter()");
+  CH_TIME("CdrCTU::parseSlopeLimiter()");
   if (m_verbosity > 5) {
     pout() << m_name + "::parseSlopeLimiter()" << endl;
   }
@@ -172,14 +172,14 @@ CdrMuscl::parseSlopeLimiter()
     m_limiter = Limiter::MonotonizedCentral;
   }
   else {
-    MayDay::Error("CdrMuscl::parseSlopeLimiter -- unknown limiter requested");
+    MayDay::Error("CdrCTU::parseSlopeLimiter -- unknown limiter requested");
   }
 }
 
 void
-CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_dt)
+CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_dt)
 {
-  CH_TIME("CdrMuscl::advectToFaces(EBAMRFluxData, EBAMRCellData, Real)");
+  CH_TIME("CdrCTU::advectToFaces(EBAMRFluxData, EBAMRCellData, Real)");
   if (m_verbosity > 5) {
     pout() << m_name + "::advectToFaces(EBAMRFluxData, EBAMRCellData, Real)" << endl;
   }
@@ -234,14 +234,14 @@ CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi
 }
 
 void
-CdrMuscl::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
+CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
                               const EBCellFAB&     a_cellPhi,
                               const Box&           a_cellBox,
                               const ProblemDomain& a_domain,
                               const int            a_level,
                               const DataIndex&     a_dit)
 {
-  CH_TIME("CdrMuscl::computeNormalSlopes(EBCellFAB, EBCellFAB, Box, ProblemDomain, int, DataIndex)");
+  CH_TIME("CdrCTU::computeNormalSlopes(EBCellFAB, EBCellFAB, Box, ProblemDomain, int, DataIndex)");
   if (m_verbosity > 5) {
     pout() << m_name + "::computeNormalSlopes(EBCellFAB, EBCellFAB, Box, ProblemDomain, int, DataIndex)" << endl;
   }
@@ -340,7 +340,7 @@ CdrMuscl::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
       }
     default:
       {
-	MayDay::Error("CdrMuscl::computeNormalSlopes -- logic bust");
+	MayDay::Error("CdrCTU::computeNormalSlopes -- logic bust");
 
 	break;
       }
@@ -414,7 +414,7 @@ CdrMuscl::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
       }
       default:
       {
-	MayDay::Error("CD_CdrMuscl::computeNormalSlopes -- logic bust 2");
+	MayDay::Error("CD_CdrCTU::computeNormalSlopes -- logic bust 2");
       }
       }
     };
@@ -441,7 +441,7 @@ CdrMuscl::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
 }
 
 void
-CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
+CdrCTU::upwind(EBFluxFAB&           a_facePhi,
 		 const EBCellFAB&     a_normalSlopes,
 		 const EBCellFAB&     a_cellPhi,
 		 const EBCellFAB&     a_cellVel,
@@ -452,7 +452,7 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
 		 const DataIndex&     a_dit,
 		 const Real&          a_dt)
 {
-  CH_TIME("CdrMuscl::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)");
+  CH_TIME("CdrCTU::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)");
   if (m_verbosity > 99) {
     pout() << m_name + "::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)" << endl;
   }
@@ -604,7 +604,7 @@ CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
   }
 }
 
-Real CdrMuscl::minmod(const Real& dwl, const Real& dwr) const noexcept {
+Real CdrCTU::minmod(const Real& dwl, const Real& dwr) const noexcept {
   Real slope = 0.0;
 
   if(dwl*dwr > 0.0) {
@@ -614,7 +614,7 @@ Real CdrMuscl::minmod(const Real& dwl, const Real& dwr) const noexcept {
   return slope;
 }
 
-Real CdrMuscl::superbee(const Real& dwl, const Real& dwr) const noexcept {
+Real CdrCTU::superbee(const Real& dwl, const Real& dwr) const noexcept {
   Real slope = 0.0;
   
   if(dwl*dwr > 0.0) {
@@ -629,7 +629,7 @@ Real CdrMuscl::superbee(const Real& dwl, const Real& dwr) const noexcept {
   return slope;
 }
 
-Real CdrMuscl::monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept {
+Real CdrCTU::monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept {
   Real slope = 0.0;
 
   if(dwl*dwr > 0.0) {

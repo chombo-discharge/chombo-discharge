@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_CdrMuscl.H
+  @file   CD_CdrCTU.H
   @brief  Declaration of a class which implements CdrMultigrid using MUSCL for advection. 
   @author Robert Marskar
 */
 
-#ifndef CD_CdrMuscl_H
-#define CD_CdrMuscl_H
+#ifndef CD_CdrCTU_H
+#define CD_CdrCTU_H
 
 // Our includes
 #include <CD_CdrMultigrid.H>
@@ -20,18 +20,18 @@
 /*!
   @brief Class that uses a slope limited method for advection, in combination with corner transport upwind (CTU). 
 */
-class CdrMuscl : public CdrMultigrid
+class CdrCTU : public CdrMultigrid
 {
 public:
   /*!
     @brief Default constructor. 
   */
-  CdrMuscl();
+  CdrCTU();
 
   /*!
     @brief Destructor (does nothing)
   */
-  virtual ~CdrMuscl();
+  virtual ~CdrCTU();
 
   /*!
     @brief Parse class options to put object in usable state. 
