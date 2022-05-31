@@ -42,6 +42,7 @@ jobs:
           cd ${{ github.workspace }}/Docs/Sphinx/build/latex
           make
           cp chombo-discharge.pdf ${{ github.workspace }}/Docs
+          cd ${{ github.workspace }}/Docs/Sphinx/          
           make clean
           
       - name: Deploy
