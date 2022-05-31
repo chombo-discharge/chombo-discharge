@@ -34,7 +34,8 @@ MyApplications/**
 scripts/**
 Research/**
 
-docs/*
-!docs/.nojekyll
-!docs/Sphinx/
-!docs/chombo-discharge.pdf
+Docs/*
+!Docs/.nojekyll
+!Docs/Sphinx/
+!Docs/chombo-discharge.pdf
+!Docs/Doxyfile

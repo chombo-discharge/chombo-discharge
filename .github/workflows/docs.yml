@@ -28,7 +28,7 @@ jobs:
 
       - name: Build doxygen
         run: |
-          doxygen Doxyfile
+          doxygen Docs/Doxyfile
 
       - name: Build HTML documentation
         working-directory: ${{ github.workspace }}/Docs/Sphinx        
