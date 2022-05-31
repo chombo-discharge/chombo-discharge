@@ -40,6 +40,8 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
   m_debug = false;
   pp.query("debug", m_debug);
 
+  m_minDt    = 0.0;
+  m_maxDt    = std::numeric_limits<Real>::max();
   m_forceCFL = -1.0;
 
   this->parseIntegrator();
@@ -68,7 +70,7 @@ AdvectionDiffusionStepper::parseRuntimeOptions()
 
   pp.get("min_dt", m_minDt);
   pp.get("max_dt", m_maxDt);
-  pp.get("cfl", m_cfl);
+  pp.get("cfl",    m_cfl);
 
   this->parseIntegrator();
 
