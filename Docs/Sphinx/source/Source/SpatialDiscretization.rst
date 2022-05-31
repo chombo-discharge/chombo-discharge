@@ -207,9 +207,9 @@ _______________
    
 Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags.
 Only *properly nested* grids are generated, in which case two grid levels :math:`l-1` and :math:`l+1` are separated by a non-zero number of grid cells on level :math:`l`.
-This requirement is specific for patch-based grids; itd dieoes not fundamentally exist for quad- and oct-tree grids. 
+This requirement is not fundamentally required for quad- and oct-tree grids, but is nevertheless usually imposed. 
 For patch based AMR, the rationale for this requirement is that stencils on level :math:`l+1` should should only reach into grid cells on levels :math:`l` and :math:`l+1`. 
-For example, ghost cells on level :math:`l+1` should be interpolated from data only on levels :math:`l` and :math:`l+1`.
+For example, ghost cells on level :math:`l+1` can then be interpolated from data only on levels :math:`l` and :math:`l+1`.
 
 Berger-Rigoutsos algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

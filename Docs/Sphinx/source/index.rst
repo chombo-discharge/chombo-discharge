@@ -175,7 +175,6 @@ Contributing
    :hidden:	     
 
    Contrib/Contributions
-   Contrib/Convergence
    Contrib/CI
    Contrib/CodeStandard
 
