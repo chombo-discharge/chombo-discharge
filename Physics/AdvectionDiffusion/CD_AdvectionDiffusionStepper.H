@@ -62,7 +62,7 @@ namespace Physics {
 	@brief Perform post-initialization routines (there are none)
       */
       void
-      postInitialize() override;
+      postInitialize() override {}
 
       // IO routines
 #ifdef CH_USE_HDF5
@@ -129,7 +129,7 @@ namespace Physics {
 	@note Implementation does nothing. 
       */
       void
-      printStepReport() override;
+      printStepReport() override{}
 
       /*!
 	@brief Parse runtime options
@@ -149,12 +149,6 @@ namespace Physics {
       */
       void
       registerOperators() override;
-
-      /*!
-	@brief Internal routine for checking if TimeStepper needs to regrid. Always returns false. 
-      */
-      bool
-      needToRegrid() override;
 
       /*!
 	@brief Perform pre-regrid operations. Calls CdrSolver::preRegrid
@@ -191,7 +185,7 @@ namespace Physics {
 	@brief Perform post-regrid routines. This does nothing
       */
       void
-      postRegrid() override;
+      postRegrid() override {}
 
       /*!
 	@brief Set the CFL number
@@ -199,6 +193,27 @@ namespace Physics {
       */
       void
       setCFL(const Real a_cfl);
+
+      /*!
+	@brief Set the initial data.. 
+	@param[in] a_initData Initial data function. 
+      */
+      void
+      setInitialData(const std::function<Real(const RealVect& a_position)>& a_initData) noexcept;            
+
+      /*!
+	@brief Set the velocity field. 
+	@param[in] a_velocity Velocity field. 
+      */
+      void
+      setVelocity(const std::function<RealVect(const RealVect& a_position)>& a_velocity) noexcept;
+
+      /*!
+	@brief Set the diffusion coeffieint. 
+	@param[in] a_diffusion Diffusion coefficient
+      */
+      void
+      setDiffusionCoefficient(const std::function<Real(const RealVect& a_position)>& a_diffusion) noexcept;      
 
     protected:
       /*!
@@ -211,6 +226,16 @@ namespace Physics {
       };
 
       /*!
+	@brief Reference to solver
+      */
+      RefCountedPtr<CdrSolver> m_solver;
+
+      /*!
+	@brief Reference to advected species
+      */
+      RefCountedPtr<CdrSpecies> m_species;      
+
+      /*!
 	@brief Realm where the solver lives
       */
       std::string m_realm;
@@ -221,14 +246,19 @@ namespace Physics {
       phase::which_phase m_phase;
 
       /*!
-	@brief Reference to solver
+	@brief Velocity field.
       */
-      RefCountedPtr<CdrSolver> m_solver;
+      std::function<RealVect(const RealVect& a_position)> m_velocity;
 
       /*!
-	@brief Reference to advected species
+	@brief Diffusion coefficient. 
       */
-      RefCountedPtr<CdrSpecies> m_species;
+      std::function<Real(const RealVect& a_position)> m_diffCo;
+
+      /*!
+	@brief Initial data
+      */
+      std::function<Real(const RealVect& a_initialData)> m_initialData;
 
       /*!
 	@brief Smallest acceptable time step
@@ -251,21 +281,6 @@ namespace Physics {
       Real m_forceCFL;
 
       /*!
-	@brief Diffusion coefficient
-      */
-      Real m_diffCo;
-
-      /*!
-	@brief Angular velocity for velocity field
-      */
-      Real m_omega;
-
-      /*!
-	@brief If true, this will use an FHD description
-      */
-      bool m_fhd;
-
-      /*!
 	@brief For activating debugging. This is an option.
       */
       bool m_debug;
@@ -274,27 +289,6 @@ namespace Physics {
 	@brief Integrator
       */
       Integrator m_integrator;
-
-      /*!
-	@brief Transient storage
-      */
-      EBAMRCellData m_tmp;
-
-      /*!
-	@brief Transient storage -- used for RK2 coefficients
-      */
-      EBAMRCellData m_k1;
-
-      /*!
-	@brief Transient storage -- used for RK2 coefficients
-      */
-      EBAMRCellData m_k2;
-
-      /*!
-	@brief Set advective velocity for the solver
-      */
-      void
-      setVelocity();
 
       /*!
 	@brief Parse the integration method

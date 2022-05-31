@@ -27,22 +27,36 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
 
   ParmParse pp("AdvectionDiffusion");
 
+  m_realm = Realm::Primal;
   m_phase = phase::gas;
-
-  pp.get("realm", m_realm);
-  pp.get("verbosity", m_verbosity);
-  pp.get("fhd", m_fhd);
-  pp.get("diffco", m_diffCo);
-  pp.get("omega", m_omega);
-  pp.get("cfl", m_cfl);
-
-  // For debugging.
   m_debug = false;
+  
   pp.query("debug", m_debug);
+  pp.get("verbosity", m_verbosity);
+  pp.get("cfl", m_cfl);  
 
   m_minDt    = 0.0;
   m_maxDt    = std::numeric_limits<Real>::max();
   m_forceCFL = -1.0;
+
+  // Parse the default velocity and diffusion coefficients
+  Real diffCo = 0.0;
+  Real omega = 0.0;
+
+  pp.get("diffco", diffCo);
+  pp.get("omega", omega);  
+
+  // Set the default velocity and diffusion fields.
+  m_velocity = [omega](const RealVect& pos) -> RealVect {
+    const Real r     = sqrt(pos[0] * pos[0] + pos[1] * pos[1]);
+    const Real theta = atan2(pos[1], pos[0]);
+
+    return RealVect(D_DECL(-r * omega * sin(theta), r * omega * cos(theta), 0.));
+  };
+
+  m_diffCo = [diffCo](const RealVect& pos) -> Real {
+    return diffCo;
+  };
 
   this->parseIntegrator();
 }
@@ -67,7 +81,6 @@ AdvectionDiffusionStepper::parseRuntimeOptions()
   ParmParse pp("AdvectionDiffusion");
 
   pp.get("verbosity", m_verbosity);
-
   pp.get("min_dt", m_minDt);
   pp.get("max_dt", m_maxDt);
   pp.get("cfl", m_cfl);
@@ -124,12 +137,6 @@ AdvectionDiffusionStepper::setupSolvers()
 }
 
 void
-AdvectionDiffusionStepper::postInitialize()
-{
-  CH_TIME("AdvectionDiffusionStepper::postInitialize");
-}
-
-void
 AdvectionDiffusionStepper::registerRealms()
 {
   CH_TIME("AdvectionDiffusionStepper::registerRealms");
@@ -151,13 +158,7 @@ AdvectionDiffusionStepper::allocate()
 {
   CH_TIME("AdvectionDiffusionStepper::allocate");
 
-  // Allocate storage for running the TimeStepper.
-
   m_solver->allocateInternals();
-
-  m_amr->allocate(m_tmp, m_realm, m_phase, 1);
-  m_amr->allocate(m_k1, m_realm, m_phase, 1);
-  m_amr->allocate(m_k2, m_realm, m_phase, 1);
 }
 
 void
@@ -175,34 +176,13 @@ AdvectionDiffusionStepper::initialData()
     m_solver->setDiffusionCoefficient(m_diffCo);
   }
   if (m_solver->isMobile()) {
-    this->setVelocity();
+    m_solver->setVelocity(m_velocity);
   }
 
   // Set flux functions
   auto fluxFunc = [](const RealVect a_pos, const Real a_time) { return 0.0; };
 
   //  m_solver->setDomainFlux(fluxFunc);
-}
-
-void
-AdvectionDiffusionStepper::setVelocity()
-{
-  CH_TIME("AdvectionDiffusionStepper::setVelocity");
-
-  // Set the velocity.
-  auto veloFunc = [omega = this->m_omega](const RealVect pos) -> RealVect {
-    const Real r     = sqrt(pos[0] * pos[0] + pos[1] * pos[1]);
-    const Real theta = atan2(pos[1], pos[0]);
-
-    return RealVect(D_DECL(-r * omega * sin(theta), r * omega * cos(theta), 0.));
-  };
-
-  m_solver->setVelocity(veloFunc);
-
-  // Make sure we have updated ghost cells (they are needed for the flux computation)
-  EBAMRCellData& vel = m_solver->getCellCenteredVelocity();
-  m_amr->averageDown(vel, m_realm, m_phase);
-  m_amr->interpGhost(vel, m_realm, m_phase);
 }
 
 #ifdef CH_USE_HDF5
@@ -237,7 +217,7 @@ AdvectionDiffusionStepper::postCheckpointSetup()
     m_solver->setDiffusionCoefficient(m_diffCo);
   }
   if (m_solver->isMobile()) {
-    this->setVelocity();
+    m_solver->setVelocity(m_velocity);
   }
 
   // Set flux functions
@@ -332,27 +312,38 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
     const bool addEbFlux        = true;
     const bool addDomainFlux    = true;
 
+    // Transient storage
+    EBAMRCellData yp;
+    EBAMRCellData k1;
+    EBAMRCellData k2;
+
+    m_amr->allocate(yp, m_realm, m_phase, 1);
+    m_amr->allocate(k1, m_realm, m_phase, 1);
+    m_amr->allocate(k2, m_realm, m_phase, 1);      
+
     // Compute k1 coefficient
-    m_solver->computeDivJ(m_k1, state, 0.0, conservativeOnly, addEbFlux, addDomainFlux);
-    DataOps::copy(m_tmp, state);
-    DataOps::incr(m_tmp, m_k1, -a_dt);
+    m_solver->computeDivJ(k1, state, 0.0, conservativeOnly, addEbFlux, addDomainFlux);
+    DataOps::copy(yp, state);
+    DataOps::incr(yp, k1, -a_dt);
 
     // Compute k2 coefficient and final state
-    m_solver->computeDivJ(m_k2, m_tmp, 0.0, conservativeOnly, addEbFlux, addDomainFlux);
-    DataOps::incr(state, m_k1, -0.5 * a_dt);
-    DataOps::incr(state, m_k2, -0.5 * a_dt);
-
-    // Add random diffusion flux. This is equivalent to a 1st order. Godunov splitting in an FHD context.
-    if (m_fhd) {
-      m_solver->gwnDiffusionSource(m_k1, state);
-      DataOps::incr(state, m_k1, a_dt);
-    }
+    m_solver->computeDivJ(k2, yp, 0.0, conservativeOnly, addEbFlux, addDomainFlux);
+    DataOps::incr(state, k1, -0.5 * a_dt);
+    DataOps::incr(state, k2, -0.5 * a_dt);
 
     break;
   }
   case Integrator::IMEX: {
     const bool addEbFlux     = true;
     const bool addDomainFlux = true;
+
+    // Transient storage
+    EBAMRCellData yp;
+    EBAMRCellData k1;
+    EBAMRCellData k2;
+
+    m_amr->allocate(k1, m_realm, m_phase, 1);
+    m_amr->allocate(k2, m_realm, m_phase, 1);          
 
     if (m_solver->isDiffusive()) {
 
@@ -361,27 +352,27 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
       if (false) {
         const bool conservativeOnly = true;
 
-        m_solver->computeDivF(m_k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
+        m_solver->computeDivF(k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
       }
       else {
         const bool conservativeOnly = false;
 
-        m_solver->computeDivF(m_k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
+        m_solver->computeDivF(k1, state, a_dt, conservativeOnly, addEbFlux, addDomainFlux);
       }
 
-      DataOps::kappaScale(m_k1);
-      DataOps::scale(m_k1, -1.0);
+      DataOps::kappaScale(k1);
+      DataOps::scale(k1, -1.0);
 
-      // Use m_k1 as the old solution.
-      DataOps::copy(m_k2, state);
+      // Use k1 as the old solution.
+      DataOps::copy(k2, state);
 
       // Do the Euler solve.
-      m_solver->advanceCrankNicholson(state, m_k2, m_k1, a_dt);
+      m_solver->advanceCrankNicholson(state, k2, k1, a_dt);
     }
     else { // Purely inviscid advance.
-      m_solver->computeDivF(m_k1, state, a_dt, false, addEbFlux, addDomainFlux);
+      m_solver->computeDivF(k1, state, a_dt, false, addEbFlux, addDomainFlux);
 
-      DataOps::incr(state, m_k1, -a_dt);
+      DataOps::incr(state, k1, -a_dt);
     }
 
     break;
@@ -418,25 +409,10 @@ AdvectionDiffusionStepper::synchronizeSolverTimes(const int a_step, const Real a
 }
 
 void
-AdvectionDiffusionStepper::printStepReport()
-{
-  CH_TIME("AdvectionDiffusionStepper::printStepReport");
-}
-
-bool
-AdvectionDiffusionStepper::needToRegrid()
-{
-  CH_TIME("AdvectionDiffusionStepper::needToRegrid");
-
-  return false;
-}
-
-void
 AdvectionDiffusionStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 {
   CH_TIME("AdvectionDiffusionStepper::preRegrid");
 
-  // TLDR: Call solver preRegrid function -- it knows what to do.
   m_solver->preRegrid(a_lbase, a_oldFinestLevel);
 }
 
@@ -445,37 +421,41 @@ AdvectionDiffusionStepper::regrid(const int a_lmin, const int a_oldFinestLevel, 
 {
   CH_TIME("AdvectionDiffusionStepper::regrid");
 
-  // Regrid CDR solver
+  // Regrid CDR solver and set up the flow fields
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-
-  // Set up the flow fields again.
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
+  
   if (m_solver->isDiffusive()) {
     m_solver->setDiffusionCoefficient(m_diffCo);
   }
   if (m_solver->isMobile()) {
-    this->setVelocity();
+    this->setVelocity(m_velocity);
   }
-
-  // Allocate memory for RK steps
-  m_amr->allocate(m_tmp, m_realm, m_phase, 1);
-  m_amr->allocate(m_k1, m_realm, m_phase, 1);
-  m_amr->allocate(m_k2, m_realm, m_phase, 1);
-}
-
-void
-AdvectionDiffusionStepper::postRegrid()
-{
-  CH_TIME("AdvectionDiffusionStepper::postRegrid");
-
-  // Nothing to see here.
 }
 
 void
 AdvectionDiffusionStepper::setCFL(const Real a_cfl)
 {
   m_forceCFL = a_cfl;
+}
+
+void
+AdvectionDiffusionStepper::setInitialData(const std::function<Real(const RealVect& a_position)>& a_initData) noexcept
+{
+  m_initialData = a_initData;
+}
+
+void
+AdvectionDiffusionStepper::setVelocity(const std::function<RealVect(const RealVect& a_position)>& a_velocity) noexcept
+{
+  m_velocity = a_velocity;
+}
+
+void
+AdvectionDiffusionStepper::setDiffusionCoefficient(const std::function<Real(const RealVect& a_position)>& a_diffusion) noexcept
+{
+  m_diffCo = a_diffusion;
 }
 
 #include <CD_NamespaceFooter.H>
