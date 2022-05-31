@@ -38,3 +38,4 @@ Docs/**
 !Docs/.nojekyll
 !Docs/Sphinx/
 !Docs/Doxyfile
+!Docs/README.md
