@@ -39,7 +39,7 @@ jobs:
         working-directory: ${{ github.workspace }}/Docs/Sphinx
         run: |
           make github-tex
-          cd ${{ github.workspace }}/Docs/build/latex
+          cd ${{ github.workspace }}/Docs/Sphinx/build/latex
           make
           cp chombo-discharge.pdf ${{ github.workspace }}/Docs
           make clean
