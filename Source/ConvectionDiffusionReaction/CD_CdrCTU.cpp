@@ -105,7 +105,7 @@ CdrCTU::computeAdvectionDt()
           // Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far.
           auto regularKernel = [&](const IntVect& iv) -> void {
             Real velMax = 0.0;
-            if (!ebisBox.isCovered(iv)) {
+            if (ebisBox.isRegular(iv)) {
               for (int dir = 0; dir < SpaceDim; dir++) {
                 velMax = std::max(velMax, std::abs(veloReg(iv, dir)));
               }
