@@ -1,6 +1,6 @@
-## Convergence/AdvectionDiffusion/SpatialConvergence/CoaxialCable
+## Convergence/AdvectionDiffusion/C1
 
-This example computes temporal convergence rates for Physics/RadiativeTransfer using the Eddington SP1 approximation. 
+This example computes spatial convergence rates for Physics/AdvectionDiffusion.
 The solution errors are computed by coarsening a solution with finer (2x) grid resolution. 
 
 # Compilation

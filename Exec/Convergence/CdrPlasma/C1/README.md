@@ -1,7 +1,7 @@
-## Convergence/AdvectionDiffusion/TemporalConvergence/CoaxialCable
+## Convergence/CdrPlasma/C1
 
-This example computes temporal convergence rates for Physics/AdvectionDiffusion.
-The solution errors are computed by subtracting a solution with a finer time step. 
+This example computes spatial convergence rates for Physics/CdrPlasma, using a rod-plane geometry. 
+The solution errors are computed by coarsening a solution with finer (2x) grid resolution. 
 
 # Compilation
 

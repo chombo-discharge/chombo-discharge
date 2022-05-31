@@ -95,7 +95,7 @@ In this case the time step limitation is
 Initial data
 ------------
 
-The initial data for this problem is given by a super-Gaussian blob
+By default, the initial data for this problem is given by a super-Gaussian blob
 
 .. math::
 
@@ -167,8 +167,25 @@ These can be adjusted through
 Setting up a new problem
 ------------------------
 
+To set up a new problem, use the Python setup tools in :file:`$DISCHARGE_HOME/Physics/AdvectionDiffusion`.
+To see available setup options, run
+
+.. code-block:: bash
+
+   ./setup.py --help
+
+For example, to set up a new problem in :file:`$DISCHARGE_HOME/MyApplications/MyAdvectionDiffusionProblem` for a coaxial cable geometry, run
+
+.. code-block:: bash
+
+   ./setup.py -base_dir=MyApplications -app_name=MyAdvectionDiffusionProblem -geometry=CoaxialCable
+
+This will set up a new problem in a coaxial cable geometry (defined in :file:`Geometries/CoaxialCable`). 
+
 Example program
 ---------------
 
 Convergence testing
 -------------------
+
+

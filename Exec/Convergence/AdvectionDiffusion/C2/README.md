@@ -1,7 +1,7 @@
-## Convergence/Electrostatics/CoaxialCable
+## Convergence/AdvectionDiffusion/C2
 
-This example computes convergence rates for the Electrostatics physics module.
-The solution errors are computed by coarsening a numerical solution with a finer (2x) resolution. 
+This example computes temporal convergence rates for Physics/AdvectionDiffusion.
+The solution errors are computed by subtracting off a solution with a finer (2x) time step. 
 
 # Compilation
 

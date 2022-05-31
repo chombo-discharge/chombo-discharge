@@ -1,7 +1,7 @@
-## Convergence/CdrPlasma/SpatialConvergence/RodPlane
+## Convergence/RadiativeTransfer/C2.
 
-This example computes spatial convergence rates for Physics/CdrPlasma.
-The solution errors are computed by coarsening a solution with finer (2x) grid resolution. 
+This example computes temporal convergence rates for Physics/RadiativeTransfer using the Eddington SP1 approximation in a coaxial cable geometry. 
+The solution errors are computed by subtracting a solution with a finer time step. 
 
 # Compilation
 
@@ -14,6 +14,8 @@ To compile:
 To run with MPI:
 
 ```mpirun -np <num_proc> program2d.*ex convergence2d.inputs```
+
+To use first/second order integration in time, set ```EddingtonSP1.use_tga``` to false/true. 
 
 # Output
 
