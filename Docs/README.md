@@ -1,28 +1,17 @@
-# chombo-discharge documentation quickstart
-
-This is the chombo-discharge documentation.
-chombo-discharge is hosted at https://github.com/chombo-discharge/chombo-discharge.
+# Documentation quickstart
 
 ## Doxygen documentation
-The doxygen documentation is available at https://chombo-discharge.github.io/doxygen/html/index.html
-To build the doxygen documentation locally, navigate to the chombo-discharge root folder and type
+To build the doxygen documentation locally, run
 
 ```
 doxygen Doxyfile
 ```
 
-This will install the doxygen documentation in docs/doxygen. 
+in this folder. 
+This will install the doxygen documentation in the doxygen subfolder. 
 
-## Building the Sphinx documentation locally
-We use sphinx for building the user documentation. 
-sphinx-autobuild is available on [PyPI](https://pypi.org/p/sphinx-autobuild/).
-It can be installed using pip:
-
-```
-pip install sphinx-autobuild
-```
-
-### Manual build
+## Manual build
+We use Sphinx with reStructured text for building the user documentation. 
 To build the documentation locally, navigate to the Sphinx subfolder and run
 
 ```
@@ -39,12 +28,11 @@ for the LaTeX/PDF documentation.
 
 Source files will end up in Sphinx/build/html and Sphinx/build/latex, respectively. 
 
-### Adding Sphinx changes. 
-To add changes to the Sphinx documentation, make the changes in the relevant Sphinx/source folder.
+## Adding Sphinx changes. 
+To add changes to the Sphinx documentation, make the changes in the relevant Sphinx/source files.
 To build the documentation, either build it locally as above or put Sphinx in auto-build mode:
 
 ```
-cd Sphinx
 sphinx-autobuild source/ build/html
 ```
 
