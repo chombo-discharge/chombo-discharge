@@ -3,18 +3,172 @@
 Advection-diffusion
 ===================
 
+The advection-diffusion model simply advects a scalar quantity with EB and AMR.
+The equation of motion is
+
+.. math::
+
+   \frac{\partial\phi}{\partial t} + \nabla\cdot\left(\mathbf{v}\phi - D\nabla\phi\right) = 0.
+
+The full implementation for this model consists of the following classes:
+
+* ``AdvectionDiffusionStepper``, which implements :ref:`Chap:TimeStepper`.
+* ``AdvectionDiffusionSpecies``, which parses the initial conditions into the problem.
+* ``AdvectionDiffusionTagger``, which implements :ref:`Chap:CellTagger` and flags cells for refinement and coarsening.
+
+The source code for this problem is found in :file:`$DISCHARGE_HOME/Physics/AdvectionDiffusion`.
+See `AdvectionDiffusionStepper <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html>`_ for the C++ API for this time stepper.  
+
+
 Time stepping
 -------------
+
+Two time stepping algorithms are supported:
+
+#. A second-order Runge-Kutta method (Heun's method).
+#. An implicit-explicit method (IMEX) which uses corner-transport upwind (CTU, see :ref:`Chap:CdrCTU`) and a Crank-Nicholson diffusion solve.
+
+To select an integrator, set
+
+.. code-block:: none
+
+   AdvectionDiffusion.integrator = imex # 'imex' or 'heun'
+
+The user can set the CFL number and maximum/minimum permitted time steps by
+
+.. code-block:: none
+		
+   AdvectionDiffusion.cfl    = 0.5  
+   AdvectionDiffusion.min_dt = 0.0  
+   AdvectionDiffusion.max_dt = 1.E99
+
+where ``AdvectionDiffusion.cfl`` is computed differently based on the chosen discretization. 
+
+Heun's method
+_____________
+
+For Heun's method we perform the following steps:
+Let :math:`\left[\nabla\cdot\mathbf{J}\left(\phi\right)\right]` be the finite-volume approximation to :math:`\nabla\cdot\left(\mathbf{v}\phi - D\nabla\phi\right)`, where :math:`\mathbf{J}\left(\phi\right) = \mathbf{v}\phi - D\nabla\phi`.
+The Runge-Kutta advance is then
+
+.. math::
+
+   \phi^\prime &= \phi^k - \Delta t\left[\nabla\cdot\mathbf{J}\left(\phi^k\right)\right]\\
+   \phi^{k+1} &= \phi^k - \frac{\Delta t}{2}\left(\left[\nabla\cdot\mathbf{J}\left(\phi^k\right)\right] + \left[\nabla\cdot\mathbf{J}\left(\phi^\prime\right)\right]\right)
+
+Note that when diffusion and advecting is coupled in this way, we do not include the transverse terms in the CTU discretization and limit the time step by
+
+.. math::
+
+   \Delta t \leq \frac{1}{\frac{\sum_{i=1}^d |v_i|}{\Delta x} + \frac{2dD}{\Delta x^2}},
+
+where :math:`d` is the dimensionality and :math:`D` is the diffusion coefficient. 
+
+IMEX
+____
+
+For the implicit-explicit advance, we use the CTU discretization to center the divergence at the half time step.
+We seek the update
+
+.. math::
+   
+   \frac{\phi^{k+1} - \phi^k}{\Delta t} - \frac{1}{2}\left[\nabla\left(D\nabla\phi^k\right) + \nabla\left(D\nabla\phi^{k+1}\right)\right] = -\nabla\cdot\mathbf{v}\phi^{k+1/2},
+
+which is a Crank-Nicholson discretization of the diffusion equation with a source term centered on :math:`k+1/2`.
+We use the CTU discretization (see :ref:`Chap:CdrCTU`) for computing the edge states :math:`\phi^{k+1/2}` and then complete the update by solving the corresponding Helmholtz equation
+
+.. math::
+
+   \phi^{k+1} - \frac{\Delta t}{2}\nabla\left(D\nabla\phi^{k+1}\right) = \phi^k - \Delta t\nabla\cdot\mathbf{v}\phi^{k+1/2} + \frac{\Delta t}{2}\nabla\left(D\nabla\phi^k\right)
+
+In this case the time step limitation is
+
+.. math::
+
+   \Delta t \leq \frac{\Delta x}{\sum_i^d\left|v_i\right|}.
+
+.. warning::
+
+   It is possible to use this module with any implementation of ``CdrSolver``, but the IMEX discretization only makes sense if the hyperbolic term can be centered on :math:`k+1/2`. 
+		
 
 Initial data
 ------------
 
-Velocity field
---------------
+The initial data for this problem is given by a super-Gaussian blob
+
+.. math::
+
+   \phi\left(\mathbf{x},t=0\right) = \phi_0\exp\left(-\frac{\left|\mathbf{x}-\mathbf{x}_0\right|^4}{2R^4}\right),
+
+where :math:`\phi_0` is an amplitude, :math:`\mathbf{x}_0` is the blob center and :math:`R` is the blob radius.
+These are set by the input options
+
+.. code-block:: none
+		
+   AdvectionDiffusion.blob_amplitude = 1.0
+   AdvectionDiffusion.blob_radius    = 0.1
+   AdvectionDiffusion.blob_center    = 0 0 0
+
+Velocity field and diffusion coefficient
+----------------------------------------
+
+The diffusion coefficient is set to a constant while the velocity field for this problem is simply set to
+
+.. math::
+
+   v_x &= -r\omega\sin\theta, \\
+   v_y &=  r\omega\cos\theta, \\
+   v_z &= 0,
+
+where :math:`r = \sqrt{x^2 + y^2}`, :math:`\tan\theta = \frac{x}{y}`.
+I.e. the flow field is a circulation around the Cartesian.
+
+To adjust the diffusion coefficient and :math:`\omega`, set
+
+.. code-block:: none
+
+   AdvectionDiffusion.diffco = 1.0
+   AdvectionDiffusion.omega  = 1.0
+
+to a chosen value. 		
 
 Boundary conditions
 -------------------
 
+At the EB, this module uses a wall boundary condition (i.e. no flux into or out of the EB).
+On domain edges (faces in 3D), the user can select between wall boundary conditions or outflow boundary conditions by selecting the corresponding input option for the solver.
+E.g. for the :ref:`Chap:CdrCTU` discretization:
+
+.. code-block:: none
+
+   CdrCTU.bc.x.lo = wall # 'wall' or 'outflow'
+   CdrCTU.bc.x.hi = wall # 'wall' or 'outflow'
+
+The syntax for the other boundaries are completely analogous.
+
+Cell refinement
+----------------
+
+The cell refinement is based on two criteria:
+
+#. The amplitude of :math:`\phi`.
+#. The local curvature :math:`\left|\nabla\phi\right|\Delta x/\phi`.
+
+We refine if the curvature is above some threshold :math:`\epsilon_1` *and* the amplitude is above some threshold :math:`\epsilon_2`.
+These can be adjusted through
+
+.. code-block:: none
+
+   AdvectionDiffusion.refine_curv = 0.25
+   AdvectionDiffusion.refine_magn = 1E-2
+
+
+Setting up a new problem
+------------------------
+
+Example program
+---------------
+
 Convergence testing
 -------------------
-

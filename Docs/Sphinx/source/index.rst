@@ -65,8 +65,13 @@ We aim for (but cannot guarantee) backward compatibility such that existing ``ch
    }
    </style>
 
+.. only:: latex
+
+   .. toctree::
+      :caption: Contents
+
 Introduction
-*************
+************
 
 .. toctree::
    :maxdepth: 3

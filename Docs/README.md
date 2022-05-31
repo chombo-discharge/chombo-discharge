@@ -35,6 +35,7 @@ To add changes to the Sphinx documentation, make the changes in the relevant Sph
 To build the documentation, either build it locally as above or put Sphinx in auto-build mode:
 
 ```
+cd Sphinx
 sphinx-autobuild source/ build/html
 ```
 
