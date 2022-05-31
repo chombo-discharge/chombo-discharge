@@ -1,0 +1,365 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>AmrMesh &mdash; chombo-discharge  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="CellTagger" href="CellTagger.html" />
+    <link rel="prev" title="TimeStepper" href="TimeStepper.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Design</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">AmrMesh</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main-functionality">Main functionality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#class-options">Class options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#runtime-options">Runtime options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">chombo-discharge</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>AmrMesh</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/Source/AmrMesh.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="amrmesh">
+<span id="chap-amrmesh"></span><h1>AmrMesh<a class="headerlink" href="#amrmesh" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> handles (almost) all spatial operations in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
+Internally, <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> contains a bunch of operators that are useful across classes, such as ghost cell interpolation operators, coarsening operators, and stencils for interpolation and extrapolation near the embedded boundaries. <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> also contains routines for generation and load-balancing of grids based and also contains simple routines for allocation and deallocation of memory.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> only handles spatial <em>operations</em>, it otherwise has limited knowledge of numerical discretizations.</p>
+</div>
+<p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> is an integral part of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, and users will never have the need to modify it unless they are implementing something entirely new. The behavior of <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> is modified through it’s available input parameters, listed below:</p>
+<div class="section" id="main-functionality">
+<h2>Main functionality<a class="headerlink" href="#main-functionality" title="Permalink to this headline">¶</a></h2>
+<p>There are two main functionalities in <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>:</p>
+<ol class="arabic simple">
+<li><p>Building grid hierarchies, and providing geometric information</p></li>
+<li><p>Providing AMR operators.</p></li>
+</ol>
+<p>The grids in <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> consist of a <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> (see <a class="reference internal" href="ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a>) on each level, supported also by the EB information (<code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code>).
+Recall that each grid patch in a <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> is owned by a unique rank.
+However, since <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports multiple decompositions, we support the use of multiple <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> describing the same grid level.
+Although these <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> consist of the same boxes, the patch-to-rank mapping can be different (see <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>).
+To fetch a grid on a particular level, one can call <code class="docutils literal notranslate"><span class="pre">AmrMesh::getGrids(const</span> <span class="pre">std::string</span> <span class="pre">a_realm)</span></code>.
+E.g.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">myRealm</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">myLevel</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="n">DisjointBoxLayout</span><span class="o">&amp;</span> <span class="n">dbl</span> <span class="o">=</span> <span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getGrids</span><span class="p">(</span><span class="s">&quot;myRealm&quot;</span><span class="p">)[</span><span class="n">myLevel</span><span class="p">];</span>
+</pre></div>
+</div>
+<p>Likewise, to fetch the geometric (EB) information for a specified realm, phase, and level:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">myRealm</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">myLevel</span><span class="p">;</span>
+<span class="k">const</span> <span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span> <span class="n">myPhase</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="n">EBISLayout</span><span class="o">&amp;</span> <span class="n">ebisl</span> <span class="o">=</span> <span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getEBISLayout</span><span class="p">(</span><span class="n">myRealm</span><span class="p">,</span> <span class="n">myPhase</span><span class="p">)[</span><span class="n">myLevel</span><span class="p">];</span>
+</pre></div>
+</div>
+<p>In addition to the grids, the user can fetch AMR operators.
+These are, for example, coarsening operators, interpolation operators, ghost cell interpolators etc.
+To save some regrid time, we don’t always build every AMR operator that we might ever need, but have solvers <em>register</em> the ones that they specifically need.
+See <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> for details.</p>
+</div>
+<div class="section" id="class-options">
+<h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this headline">¶</a></h2>
+<p>The class options below control <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.lo_corner</span></code>. Low corner of problem domain (e.g. 0 0 0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.hi_corner</span></code>. High corner of problem domain (e.g. 1 1 1).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.verbosity</span></code>. Class verbosity. Leave to -1 unless you are debugging.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.coarsest_domain</span></code>. Number of grid cells on coarsest domain</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_amr_depth</span></code>. Maximum number of refinement levels.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_sim_depth</span></code>. Maximum simulation depth.
+Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> means that grids can be generated with depths up to <code class="docutils literal notranslate"><span class="pre">AmrMesh.max_amr_depth</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.fill_ratio</span></code>. Fill ratio for BR grid generation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.irreg_growth</span></code>. Buffer region around irregular tagged cells.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.buffer_size</span></code>. Buffer size for BR grid generation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.grid_algorithm</span></code>. Grid generation algorithm. Valid options are <em>br</em> or <em>tiled</em>. See <a class="reference internal" href="SpatialDiscretization.html#chap-meshgeneration"><span class="std std-ref">Mesh generation</span></a> for details.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.box_sorting</span></code>. Box sorting algorithm. Valid options are <em>std</em>, <em>morton</em>, or <em>shuffle</em>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.blocking_factor</span></code>. Blocking factor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_box_size</span></code>. Maximum box size.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_ebis_box</span></code>. Maximum box size during EB geometry generation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.ref_rat</span></code>. Refinement ratios.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.num_ghost</span></code>. Number of ghost cells for mesh data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.lsf_ghost</span></code>. Number of ghost cells when allocating level-set function on the grid.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_ghost</span></code>. Number of ghost cells for EB moments.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.centroid_sten</span></code>. Which centroid interpolation stencils to use. Valid options are <em>pwl</em>, <em>linear</em>, <em>taylor</em>, <em>lsq</em>. Only <em>linear</em> is guaranteed monotone.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_sten</span></code>. EB interpolation stencils.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.redist_radius</span></code>. Redistribution radius.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.ghost_interp</span></code>. Default ghost cell interpolation type. Valid options are <em>pwl</em> or <em>quad</em>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.ebcf</span></code>. Can be set to false if refinement boundaries do not cross the EB. Valid options are <em>true</em> and <em>false</em>.</p></li>
+</ul>
+</div>
+<div class="section" id="runtime-options">
+<h2>Runtime options<a class="headerlink" href="#runtime-options" title="Permalink to this headline">¶</a></h2>
+<p>The following options are runtime options for <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.verbosity</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.fill_ratio</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.irreg_growth</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.buffer_size</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.grid_algorithm</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.box_sorting</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.blocking_factor</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_box_size</span></code>.</p></li>
+</ul>
+<p>These options only affect the grid generation method and parameters, and are thus only effective after the next regrid.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> only supports uniform resolution (i.e., cubic grid cells).
+I.e. the user must specify consist domain sizes and resolutions.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="CellTagger.html" class="btn btn-neutral float-right" title="CellTagger" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="TimeStepper.html" class="btn btn-neutral float-left" title="TimeStepper" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, SINTEF Energy Research
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

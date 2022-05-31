@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Controlling chombo-discharge &mdash; chombo-discharge latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Spatial discretization" href="../Source/SpatialDiscretization.html" />
+    <link rel="prev" title="Visualization" href="Visualization.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> chombo-discharge
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Documentation.html">Using this documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html"><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-applications">Setting up applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#compiling-and-running">Compiling and running</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#compilation-options">Compilation options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-in-serial">Running in serial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-with-mpi">Running with MPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#simulation-inputs">Simulation inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simulation-outputs">Simulation outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#controlling-parallel-processor-verbosity">Controlling parallel processor verbosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#restarting-simulations">Restarting simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-time-configurations">Run-time configurations</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
+<p class="caption"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/ComplexGeometries.html">Complex geometries</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
+</ul>
+<p class="caption"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">chombo-discharge</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/Base/Control.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="controlling-chombo-discharge">
+<span id="chap-control"></span><h1>Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#controlling-chombo-discharge" title="Permalink to this headline">¶</a></h1>
+<p>In this chapter we give a brief overview of how to run a <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulation and control its behavior through input scripts or command line options.</p>
+<div class="section" id="setting-up-applications">
+<h2>Setting up applications<a class="headerlink" href="#setting-up-applications" title="Permalink to this headline">¶</a></h2>
+<p>To set up an application from an existing physics template, navigate to the desired physics module and use the Python setup tools.
+The modules are located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics</span></code> and the Python setup tools will set up the main C++ file, makefile, and a templated inputs file.
+Use the documentation for each module to see how to set up applications (see <a class="reference internal" href="../Applications/ImplementedModels.html#chap-implementedmodels"><span class="std std-ref">Implemented models</span></a>).</p>
+</div>
+<div class="section" id="compiling-and-running">
+<h2>Compiling and running<a class="headerlink" href="#compiling-and-running" title="Permalink to this headline">¶</a></h2>
+<p>To run simulations, the user must first compile his application.
+Once the application has been setup, the user can compile by</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make -s -j <span class="m">32</span> <span class="nv">DIM</span><span class="o">=</span>N &lt;application_name&gt;
+</pre></div>
+</div>
+<p>where <em>N</em> may be 2 or 3, and &lt;application_name&gt; is the name of the file that holds the <code class="docutils literal notranslate"><span class="pre">main()</span></code> function.
+This will compile an executable whose name depends on your application name and compiler settings.
+Please refer to the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> manual for explanation of the executable name. You may, of course, rename your application.</p>
+<div class="section" id="compilation-options">
+<h3>Compilation options<a class="headerlink" href="#compilation-options" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can compile with various code guards enabled, to spot bugs or potential errors in the code.
+To compile with these guards turned on, compile with <code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">-s</span> <span class="pre">-j32</span> <span class="pre">DIM=2</span> <span class="pre">DEBUG=TRUE</span> <span class="pre">&lt;application_name&gt;</span></code>.</p>
+<p>To compile for production runs, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> should generally speaking be compiled with <code class="docutils literal notranslate"><span class="pre">DEBUG=FALSE</span></code> and <code class="docutils literal notranslate"><span class="pre">OPT=HIGH</span></code>, for example</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make -s -j32 <span class="nv">DIM</span><span class="o">=</span><span class="m">2</span> <span class="nv">OPT</span><span class="o">=</span>HIGH <span class="nv">DEBUG</span><span class="o">=</span>FALSE &lt;application_name&gt;
+</pre></div>
+</div>
+<p>Recall also that default settings for the dimension (<code class="docutils literal notranslate"><span class="pre">DIM</span></code>), optimization level (<code class="docutils literal notranslate"><span class="pre">OPT</span></code>), and debug mode (<code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>) can be set in <code class="file docutils literal notranslate"><span class="pre">Make.defs.local</span></code>, see <a class="reference internal" href="GettingStarted.html#chap-gettingstarted"><span class="std std-ref">Installation</span></a>.</p>
+</div>
+<div class="section" id="running-in-serial">
+<h3>Running in serial<a class="headerlink" href="#running-in-serial" title="Permalink to this headline">¶</a></h3>
+<p>Next, if the application was compiled for serial execution one runs it with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./&lt;application_executable&gt; &lt;input_file&gt;
+</pre></div>
+</div>
+<p>where &lt;input_file&gt; is your input file.</p>
+</div>
+<div class="section" id="running-with-mpi">
+<h3>Running with MPI<a class="headerlink" href="#running-with-mpi" title="Permalink to this headline">¶</a></h3>
+<p>If the executable was compiled with MPI, one executes with e.g. <code class="docutils literal notranslate"><span class="pre">mpirun</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">32</span> &lt;application_executable&gt; &lt;input_file&gt;
+</pre></div>
+</div>
+<p>On clusters, this is a little bit different and usually requires passing the above command through a batch system.</p>
+<p>You may also pass input parameters through the command line. For example, running</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">32</span> &lt;application_executable&gt; &lt;input_file&gt; Driver.max_steps<span class="o">=</span><span class="m">10</span>
+</pre></div>
+</div>
+<p>will set the <code class="docutils literal notranslate"><span class="pre">Driver.max_steps</span></code> parameter to 10.
+Command-line parameters override definitions in the input file.
+Moreover, parameters parsed through the command line become static parameters, i.e. they are not run-time configurable (see <a class="reference internal" href="#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>).
+Also note that if you define a parameter multiple times in the input file, the last definition is canon.</p>
+</div>
+</div>
+<div class="section" id="simulation-inputs">
+<h2>Simulation inputs<a class="headerlink" href="#simulation-inputs" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations take their input from a single simulation input file (possibly appended with overriding options on the command line, as in the example above).
+Simulations may consist of several hundred possible switches for altering the behavior of a simulation, and all physics models in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> are therefore equipped with Python setup tools that collect all such options into a single file when setting up a new application.
+Generally, these input parameters are fetched from the options file of component that is used in a simulation.
+Simulation options usually consist of a prefix, a suffix, and a configuration value.
+For example, the configuration options that adjusts the number of time steps that will be run in a simulation is</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Driver.max_steps <span class="o">=</span> <span class="m">100</span>
+</pre></div>
+</div>
+<p>Likewise, for controlling how often plot are written:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Driver.plot_interval <span class="o">=</span> <span class="m">5</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simulation-outputs">
+<h2>Simulation outputs<a class="headerlink" href="#simulation-outputs" title="Permalink to this headline">¶</a></h2>
+<p>Mesh data from <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations is by default written to HDF5 files, and if HDF5 is disabled <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will not write any plot or checkpoint files.
+In addition to plot files, MPI ranks can output information to separate files so that the simulation progress can be tracked.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If users wish to write or output other types of data, they must supply code for this themselves.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> comes with controls for adjusting output.
+Through the <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> class the user may adjust the option <code class="docutils literal notranslate"><span class="pre">Driver.output_directory</span></code> to specify where output files will be placed.
+This directory is relative to the location where the application is run.
+If this directory does not exist, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will create it.
+It will also create the following subdirectories:</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">output_directory/chk</span></code> contains all checkpoint files (these are used for restarting simulations from a specified time step).</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">output_directory/crash</span></code> contains plot files written if a simulation crashes.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">output_directory/geo</span></code> contains plot files for geometries (if you run with <code class="docutils literal notranslate"><span class="pre">Driver.geometry_only</span> <span class="pre">=</span> <span class="pre">true</span></code>).</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">output_directory/mpi</span></code> contains information about individual MPI ranks, such as computational loads or memory consumption per rank.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">output_directory/plt</span></code> contains all plot files.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">output_directory/regrid</span></code> contains plot files written during regrids (if you run with <code class="docutils literal notranslate"><span class="pre">Driver.write_regrid_files</span></code>).</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">output_directory/restart</span></code> contains plot files written during restarts (if you run with <code class="docutils literal notranslate"><span class="pre">Driver.write_regrid_files</span></code>).</p></li>
+</ul>
+<p>The reason for this structure is that <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can end up writing thousands of files per simulation and we feel that having a directory structure helps us navigate simulation data.</p>
+<p>Fundamentally, there are only two types of HDF5 files written:</p>
+<ol class="arabic simple">
+<li><p>Plot files, containing plots of simulation data.</p></li>
+<li><p>Checkpoint files, which are binary files used for restarting a simulation from a given time step.</p></li>
+</ol>
+<p>The <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> class is responsible for writing output files at specified intervals, but the user is responsible for specifying what goes into those files.
+Since not all variables are always of interest, solver classes have options like <code class="docutils literal notranslate"><span class="pre">plt_vars</span></code> that specify which output variables in the solver will be written to the output file.
+For example, one of our convection-diffusion-reaction solver classes have the following output options:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CdrGodunov.plt_vars <span class="o">=</span> phi vel dco src ebflux <span class="c1"># Plot variables. Options are &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;src&#39;, &#39;ebflux&#39;</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">phi</span></code> is the state density, <code class="docutils literal notranslate"><span class="pre">vel</span></code> is the drift velocity, <code class="docutils literal notranslate"><span class="pre">dco</span></code> is the diffusion coefficient, <code class="docutils literal notranslate"><span class="pre">src</span></code> is the source term, and <code class="docutils literal notranslate"><span class="pre">ebflux</span></code> is the flux at embedded boundaries.
+If you only want to plot the density, then you should put <code class="docutils literal notranslate"><span class="pre">cdr_gdnv.plt_vars</span> <span class="pre">=</span> <span class="pre">phi</span></code>.
+An empty entry like <code class="docutils literal notranslate"><span class="pre">cdr_gdnv.plt_vars</span> <span class="pre">=</span></code> will lead to run-time errors, so if you do not want a class to provide plot data you may put <code class="docutils literal notranslate"><span class="pre">cdr_gdnv.plt_vars</span> <span class="pre">=</span> <span class="pre">none</span></code>.</p>
+</div>
+<div class="section" id="controlling-parallel-processor-verbosity">
+<h2>Controlling parallel processor verbosity<a class="headerlink" href="#controlling-parallel-processor-verbosity" title="Permalink to this headline">¶</a></h2>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> will write a process output file <em>per MPI process</em> and this file will be named <code class="file docutils literal notranslate"><span class="pre">pout.n</span></code> where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the MPI rank.
+These files are written in the directory where you executed your application, and are <em>not</em> related to plot files or checkpoint files.
+However, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> prints information to these files as simulations advance (for example by displaying information of the current time step, or convergence rates for multigrid solvers).
+While it is possible to monitor the evolution of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> for each MPI rank, most of these files contain redundant information.
+To adjust the number of files that will be written, <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> can read an environment variable <code class="docutils literal notranslate"><span class="pre">CH_OUTPUT_INTERVAL</span></code>.
+For example, if you only want the master MPI rank to write <code class="file docutils literal notranslate"><span class="pre">pout.0</span></code>, you would do</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">CH_OUTPUT_INTERVAL</span><span class="o">=</span><span class="m">999999999</span>
+</pre></div>
+</div>
+<p>If you run simulations at high concurrencies, you <em>should</em> turn off the number of process output files since they impact the performance of the file system.</p>
+</div>
+<div class="section" id="restarting-simulations">
+<span id="chap-restartingsimulations"></span><h2>Restarting simulations<a class="headerlink" href="#restarting-simulations" title="Permalink to this headline">¶</a></h2>
+<p>Restarting simulations is done in exactly the same way as running simulations, although the user must set the <code class="docutils literal notranslate"><span class="pre">Driver.restart</span></code> parameter.
+For example,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">32</span> &lt;application_executable&gt; &lt;input_file&gt; Driver.restart<span class="o">=</span><span class="m">10</span>
+</pre></div>
+</div>
+<p>will restart from step 10.</p>
+<p>Specifying anything but an integer is an error.
+When a simulation is restarted, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will look for a checkpoint file with the <code class="docutils literal notranslate"><span class="pre">Driver.output_names</span></code> variable and the specified restart step.
+It will look for this file in the subfolder <code class="file docutils literal notranslate"><span class="pre">/chk</span></code> relative to the execution directory.</p>
+<p>If the restart file is not found, restarting will not work and <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will abort.
+You must therefore ensure that your executable can locate this file.
+This also implies that you cannot change the <code class="docutils literal notranslate"><span class="pre">Driver.output_names</span></code> or <code class="docutils literal notranslate"><span class="pre">Driver.output_directory</span></code> variables during restarts, unless you also change the name of your checkpoint file and move it to a new directory.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you set <code class="docutils literal notranslate"><span class="pre">Driver.restart=0</span></code>, you will get a fresh simulation.</p>
+</div>
+</div>
+<div class="section" id="run-time-configurations">
+<span id="chap-runtimeconfig"></span><h2>Run-time configurations<a class="headerlink" href="#run-time-configurations" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> reads input parameters before the simulation starts, but also during run-time.
+This is useful when your simulation waited 5 days in the queue on a cluster before starting, but you forgot to tweak one parameter and don’t want to wait another 5 days.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Driver</span></code> re-reads the simulation input parameters after every time step.
+The new options are parsed by the core classes <code class="docutils literal notranslate"><span class="pre">Driver</span></code>, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>, <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>, and <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> through special routines <code class="docutils literal notranslate"><span class="pre">parseRuntimeOptions()</span></code>.
+Note that not all input configurations are suitable for run-time configuration.
+For example, increasing the size of the simulation domain does not make sense but changing the blocking factor, refinement criteria, or plot intervals do.
+To see which options are run-time configurable, see <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>, or the <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> and <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> that you use.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Source/SpatialDiscretization.html" class="btn btn-neutral float-right" title="Spatial discretization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Visualization.html" class="btn btn-neutral float-left" title="Visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, SINTEF Energy Research
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

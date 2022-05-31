@@ -31,17 +31,17 @@ jobs:
           doxygen Doxyfile
 
       - name: Build HTML documentation
-        working-directory: ${{ github.workspace }}/docs/Sphinx        
+        working-directory: ${{ github.workspace }}/Docs/Sphinx        
         run: |
           make github
 
       - name: Build PDF documentation
-        working-directory: ${{ github.workspace }}/docs/Sphinx
+        working-directory: ${{ github.workspace }}/Docs/Sphinx
         run: |
           make github-tex
-          cd ${{ github.workspace }}/docs/build/latex
+          cd ${{ github.workspace }}/Docs/build/latex
           make
-          cp chombo-discharge.pdf ${{ github.workspace }}/docs
+          cp chombo-discharge.pdf ${{ github.workspace }}/Docs
           make clean
           
       - name: Deploy
@@ -50,5 +50,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
-          folder: docs
+          folder: Docs
           clean: false
