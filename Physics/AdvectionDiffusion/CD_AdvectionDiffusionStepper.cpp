@@ -70,7 +70,7 @@ AdvectionDiffusionStepper::parseRuntimeOptions()
 
   pp.get("min_dt", m_minDt);
   pp.get("max_dt", m_maxDt);
-  pp.get("cfl",    m_cfl);
+  pp.get("cfl", m_cfl);
 
   this->parseIntegrator();
 
