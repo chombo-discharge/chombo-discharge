@@ -1,7 +1,7 @@
 .. _Chap:AdvectionDiffusionModel:
 
-Advection-diffusion
-===================
+Advection-diffusion model
+=========================
 
 The advection-diffusion model simply advects a scalar quantity with EB and AMR.
 The equation of motion is
@@ -110,10 +110,18 @@ These are set by the input options
    AdvectionDiffusion.blob_radius    = 0.1
    AdvectionDiffusion.blob_center    = 0 0 0
 
-Velocity field and diffusion coefficient
-----------------------------------------
+For a more general way of specifying initial data, ``AdvectionDiffusionSpecies`` has a public member function
+
+.. code-block::
+
+   void setInitialData(const std::function<Real(const RealVect& a_pos)>& a_func) noexcept;
+
+Velocity field
+--------------
 
 The diffusion coefficient is set to a constant while the velocity field for this problem is simply set to
+
+The default velocity field for this class is
 
 .. math::
 
@@ -122,16 +130,37 @@ The diffusion coefficient is set to a constant while the velocity field for this
    v_z &= 0,
 
 where :math:`r = \sqrt{x^2 + y^2}`, :math:`\tan\theta = \frac{x}{y}`.
-I.e. the flow field is a circulation around the Cartesian.
+I.e. the flow field is a circulation around the Cartesian grid origin.
 
-To adjust the diffusion coefficient and :math:`\omega`, set
+To adjust the velocity field through :math:`\omega`, set
+
+.. code-block:: none
+
+   AdvectionDiffusion.omega  = 1.0
+
+For a more general way of setting a user-specified velocity, ``AdvectionDiffusionStepper`` has a public member function
+
+.. code-block:: c++
+
+   void setVelocity(const std::function<RealVect(const RealVect a_position)>& a_velocity) noexcept;
+
+Diffusion coefficient
+---------------------
+
+The default diffusion coefficient for this problem is set to a constant.
+To adjust it,  :math:`\omega`, set
 
 .. code-block:: none
 
    AdvectionDiffusion.diffco = 1.0
-   AdvectionDiffusion.omega  = 1.0
 
-to a chosen value. 		
+to a chosen value.
+
+For a more general way of setting the diffusion coefficient, ``AdvectionDiffusionStepper`` has a public member function
+
+.. code-block:: c++
+
+   void setDiffusionCoefficient(const std::function<Real(const RealVect a_position)>& a_diffusion) noexcept;
 
 Boundary conditions
 -------------------
@@ -163,7 +192,6 @@ These can be adjusted through
    AdvectionDiffusion.refine_curv = 0.25
    AdvectionDiffusion.refine_magn = 1E-2
 
-
 Setting up a new problem
 ------------------------
 
@@ -180,7 +208,9 @@ For example, to set up a new problem in :file:`$DISCHARGE_HOME/MyApplications/My
 
    ./setup.py -base_dir=MyApplications -app_name=MyAdvectionDiffusionProblem -geometry=CoaxialCable
 
-This will set up a new problem in a coaxial cable geometry (defined in :file:`Geometries/CoaxialCable`). 
+This will set up a new problem in a coaxial cable geometry (defined in :file:`Geometries/CoaxialCable`).
+
+
 
 Example program
 ---------------

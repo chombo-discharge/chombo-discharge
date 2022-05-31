@@ -27,7 +27,6 @@ CdrSolver
 The ``CdrSolver`` class contains the interface for solving advection-diffusion-reaction problems.
 ``CdrSolver`` is an abstract class and does not contain any specific advective or diffusive discretization (these are added by implementation classes).
 
-
 Currently, the implementation layers consist of the following:
 
 #. :ref:`Chap:CdrMultigrid`, which inherits from ``CdrSolver`` and adds a second order accurate discretization for the diffusion operator.
