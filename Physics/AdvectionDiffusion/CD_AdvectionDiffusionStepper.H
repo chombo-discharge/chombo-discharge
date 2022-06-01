@@ -63,7 +63,8 @@ namespace Physics {
 	@brief Perform post-initialization routines (there are none)
       */
       void
-      postInitialize() override {}
+      postInitialize() override
+      {}
 
       // IO routines
 #ifdef CH_USE_HDF5
@@ -130,7 +131,8 @@ namespace Physics {
 	@note Implementation does nothing. 
       */
       void
-      printStepReport() override{}
+      printStepReport() override
+      {}
 
       /*!
 	@brief Parse runtime options
@@ -186,7 +188,8 @@ namespace Physics {
 	@brief Perform post-regrid routines. This does nothing
       */
       void
-      postRegrid() override {}
+      postRegrid() override
+      {}
 
       /*!
 	@brief Set the CFL number
@@ -200,7 +203,7 @@ namespace Physics {
 	@param[in] a_initData Initial data function. 
       */
       void
-      setInitialData(const std::function<Real(const RealVect& a_position)>& a_initData) noexcept;            
+      setInitialData(const std::function<Real(const RealVect& a_position)>& a_initData) noexcept;
 
       /*!
 	@brief Set the velocity field. 
@@ -214,10 +217,9 @@ namespace Physics {
 	@param[in] a_diffusion Diffusion coefficient
       */
       void
-      setDiffusionCoefficient(const std::function<Real(const RealVect& a_position)>& a_diffusion) noexcept;      
+      setDiffusionCoefficient(const std::function<Real(const RealVect& a_position)>& a_diffusion) noexcept;
 
     protected:
-      
       /*!
 	@brief Switch for different integrators
       */
@@ -235,7 +237,7 @@ namespace Physics {
       /*!
 	@brief Reference to advected species
       */
-      RefCountedPtr<AdvectionDiffusionSpecies> m_species;      
+      RefCountedPtr<AdvectionDiffusionSpecies> m_species;
 
       /*!
 	@brief Realm where the solver lives
