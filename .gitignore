@@ -34,8 +34,8 @@ MyApplications/**
 scripts/**
 Research/**
 
-Docs/**
+Docs/*
 !Docs/.nojekyll
-!Docs/Sphinx/
+!Docs/Sphinx/*
 !Docs/Doxyfile
 !Docs/README.md
