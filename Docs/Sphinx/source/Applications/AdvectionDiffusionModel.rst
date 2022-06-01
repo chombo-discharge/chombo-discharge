@@ -229,10 +229,49 @@ This will set up a new problem in a coaxial cable geometry (defined in :file:`Ge
 Example programs
 ----------------
 
-Example programs for this module are given
+Some example programs for this module are given in
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/DiagonalFlowNoEB`
 * :file:`$DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/PipeFlow`
 
 Convergence testing
 -------------------
+
+Spatial and temporal convergence tests for this module (and thus also the underlying solver implementation) are given in
+
+* :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C1`
+* :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C2`  
+
+Spatial convergence
+___________________
+
+A spatial convergence test is given in :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C1`.
+The problem solves for an advected and diffused scalar in a rotational velocity in the presence of an EB:
+
+.. _Fig:AdvectionDiffusionC1:
+.. figure:: /_static/figures/AdvectionDiffusionC1_1.png
+   :width: 360px
+   :align: center
+   :caption: Final state on a :math:`512^2` uniform grid. 
+
+To compute the convergence rate we compute two solutions at the same time, :math:`\phi_{\Delta x}` and :math:`\phi_{2\Delta x}`.
+We then compute the error as
+
+.. math::
+
+   E_{\Delta x, 2\Delta x} = \phi_{2\Delta x} - \mathcal{A}\left(\phi_{\Delta x}\right).
+
+where :math:`\mathcal{A}_{\Delta x \rightarrow 2\Delta x}` is an averaging operator which coarsens the solution between the two grid resolutions.
+
+Figure :ref:`Fig:AdvectionDiffusionC1_2` shows the computed convergence rates with various choice of slope limiters.
+We find 2nd order convergence in all three norms for sufficiently fine grid when using slope limiters, and first order convergence when limiters are turned off.
+The reduced convergence rates at coarser grids occur due to 1) insufficient resolution of the initial density profile and 2) under-resolution of the geometry. 
+
+.. _Fig:AdvectionDiffusionC1_2:
+.. figure:: /_static/figures/AdvectionDiffusionC1_2.png
+   :width: 480px
+   :align: center
+
+
+Temporal convergence
+____________________
