@@ -16,12 +16,8 @@
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
-EBMultigridInterpolator::EBMultigridInterpolator(){
-  CH_TIME("EBMultigridInterpolator::EBMultigridInterpolator");
-}
+EBMultigridInterpolator::EBMultigridInterpolator() { CH_TIME("EBMultigridInterpolator::EBMultigridInterpolator"); }
 
-EBMultigridInterpolator::~EBMultigridInterpolator(){
-  CH_TIME("EBMultigridInterpolator::~EBMultigridInterpolator");
-}
+EBMultigridInterpolator::~EBMultigridInterpolator() { CH_TIME("EBMultigridInterpolator::~EBMultigridInterpolator"); }
 
 #include <CD_NamespaceFooter.H>

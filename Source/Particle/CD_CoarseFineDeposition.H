@@ -22,7 +22,8 @@
            special deposition routines where the particles have the same physical width as on the coarse level. 
   @details HaloNGP means that particles on the coarse side of the refinement boundary are deposited using an NGP scheme. 
 */
-enum class CoarseFineDeposition {
+enum class CoarseFineDeposition
+{
   PVR,
   Halo,
   HaloNGP

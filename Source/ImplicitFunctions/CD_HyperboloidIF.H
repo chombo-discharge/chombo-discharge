@@ -13,7 +13,7 @@
 #define CD_HyperboloidIF_H
 
 // Chombo includes
-#include <RealVect.H> 
+#include <RealVect.H>
 #include <BaseIF.H>
 
 // Our includes
@@ -26,9 +26,9 @@
   \frac{z}{c} - \sqrt{1 + \frac{x^2}{a^2} + \frac{y^2}{b^2}} = 0
   \f]
 */
-class HyperboloidIF : public BaseIF{
+class HyperboloidIF : public BaseIF
+{
 public:
-
   /*!
     @brief Constructor
     @param[in] a_radii Hyperboloid radii
@@ -47,12 +47,14 @@ public:
     @brief Test whether inside or not
     @param[in] a_point Physical position. 
   */
-  virtual Real value(const RealVect& a_point) const; 
+  virtual Real
+  value(const RealVect& a_point) const;
 
   /*!
     @brief IF factory method
   */
-  virtual BaseIF* newImplicitFunction() const;
+  virtual BaseIF*
+  newImplicitFunction() const;
 
 protected:
   /*!

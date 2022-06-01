@@ -20,9 +20,11 @@
 #include <DisjointBoxLayout.H>
 #include <LevelData.H>
 #include <EBCellFAB.H>
+#include <ParticleIO.H>
 #include <ProblemDomain.H>
 
 // Our includes
+#include <CD_EBAMRData.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -47,21 +49,32 @@ namespace DischargeIO {
     @todo The current implementation doubles the memory in the output data. We should look into more general aliasing functions. 
    */
 #ifdef CH_USE_HDF5
-  void writeEBHDF5(const std::string&                     a_filename,
-		   const Vector<std::string>&             a_variableNames,		   
-		   const Vector<DisjointBoxLayout>&       a_grids,
-		   const Vector<LevelData<EBCellFAB>* > & a_data,
-		   const Vector<ProblemDomain>&           a_domains,
-		   const Vector<Real>                     a_dx,
-		   const Vector<int>                      a_refinementRatios,		   
-		   const Real                             a_dt,
-		   const Real                             a_time,
-		   const RealVect                         a_probLo,
-		   const int                              a_numLevels,
-		   const int                              a_numGhost);
+  void
+  writeEBHDF5(const std::string&                   a_filename,
+              const Vector<std::string>&           a_variableNames,
+              const Vector<DisjointBoxLayout>&     a_grids,
+              const Vector<LevelData<EBCellFAB>*>& a_data,
+              const Vector<ProblemDomain>&         a_domains,
+              const Vector<Real>                   a_dx,
+              const Vector<int>                    a_refinementRatios,
+              const Real                           a_dt,
+              const Real                           a_time,
+              const RealVect                       a_probLo,
+              const int                            a_numLevels,
+              const int                            a_numGhost);
 #endif
 
-}
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Debugging function for quickly writing EBAMRCellData to HDF5
+    @param[in] a_data Cell-centered EB+AMR data
+    @param[in] a_file File name
+  */
+  void
+  writeEBHDF5(const EBAMRCellData& a_data, const std::string& a_file);
+#endif
+
+} // namespace DischargeIO
 
 #include <CD_NamespaceFooter.H>
 

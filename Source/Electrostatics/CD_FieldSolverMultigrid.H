@@ -29,9 +29,9 @@
   alpha*a(x)*phi(x) + beta*div[b(x)*grad(phi)] = rho, we just set alpha to zero and eat the performance penalty. This class runs with electrostatic
   domain and EB boundary conditions that fit in the EBHelmholtzOp/MFHelmholtzOp constructs. 
 */
-class FieldSolverMultigrid : public FieldSolver {
+class FieldSolverMultigrid : public FieldSolver
+{
 public:
-
   /*!
     @brief Weak constructor. 
     @details This sets default options. 
@@ -54,13 +54,15 @@ public:
     @brief Disallowed copy assignment operator.
     @param[in] a_other Other solver
   */
-  FieldSolverMultigrid& operator=(const FieldSolverMultigrid& a_other) = delete;
+  FieldSolverMultigrid&
+  operator=(const FieldSolverMultigrid& a_other) = delete;
 
   /*!
     @brief Disallowed move assignment operator.
     @param[in] a_other Other solver
   */
-  FieldSolverMultigrid& operator=(const FieldSolverMultigrid&& a_other) = delete;
+  FieldSolverMultigrid&
+  operator=(const FieldSolverMultigrid&& a_other) = delete;
 
   /*!
     @brief Constructor (does nothing)
@@ -76,34 +78,39 @@ public:
     @return True if we found a solution and false otherwise. 
     @note a_sigma must be defined on the gas phase. 
   */
-  virtual bool solve(MFAMRCellData&       a_potential,
-		     const MFAMRCellData& a_rho,
-		     const EBAMRIVData&   a_sigma,
-		     const bool           a_zeroPhi = false) override;
+  virtual bool
+  solve(MFAMRCellData&       a_potential,
+        const MFAMRCellData& a_rho,
+        const EBAMRIVData&   a_sigma,
+        const bool           a_zeroPhi = false) override;
 
   /*!
     @brief Parse all class options from command-line or input script. 
   */
-  virtual void parseOptions() override;
+  virtual void
+  parseOptions() override;
 
   /*!
     @brief Parse runtime options from command line or input script. 
   */
-  virtual void parseRuntimeOptions() override;
+  virtual void
+  parseRuntimeOptions() override;
 
   /*!
     @brief Compute the cell-centered electric field. 
     @param[out] a_electricField Cell-centered electric field
     @param[in]  a_potential     Cell-centered potential
   */
-  virtual void computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) const override;
+  virtual void
+  computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) const override;
 
   /*!
     @brief Compute the face-centered electric field. 
     @param[out] a_electricField Face-centered electric field
     @param[in]  a_potential     Cell-centered potential
   */
-  virtual void computeElectricField(MFAMRFluxData& a_E, const MFAMRCellData& a_potential) const override;
+  virtual void
+  computeElectricField(MFAMRFluxData& a_E, const MFAMRCellData& a_potential) const override;
 
   /*!
     @brief Compute the cell-centered electric field on a specific phase. 
@@ -111,7 +118,10 @@ public:
     @param[in]  a_phase         Phase
     @param[in]  a_potential     Cell-centered potential
   */
-  virtual void computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential) const override;
+  virtual void
+  computeElectricField(EBAMRCellData&           a_E,
+                       const phase::which_phase a_phase,
+                       const MFAMRCellData&     a_potential) const override;
 
   /*!
     @brief Compute the face-centered electric field on a specific phase. 
@@ -119,7 +129,10 @@ public:
     @param[in]  a_phase         Phase
     @param[in]  a_potential     Cell-centered potential
   */
-  virtual void computeElectricField(EBAMRFluxData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential) const override;
+  virtual void
+  computeElectricField(EBAMRFluxData&           a_E,
+                       const phase::which_phase a_phase,
+                       const MFAMRCellData&     a_potential) const override;
 
   /*!
     @brief Regrid method. 
@@ -129,22 +142,26 @@ public:
     @param[in] a_newFinestLevel Finest AMR level before the regrid. 
     @details This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). 
   */
-  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+  virtual void
+  regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
   /*!
     @brief Registers required operators for AMR for this class. 
   */
-  virtual void registerOperators() override;
+  virtual void
+  registerOperators() override;
 
   /*!
     @brief Allocates internal storage. 
   */
-  virtual void allocateInternals() override;
-  
+  virtual void
+  allocateInternals() override;
+
   /*!
     @brief Set up multigrid solver
   */
-  virtual void setupSolver() override;
+  virtual void
+  setupSolver() override;
 
   /*!
     @brief Compute grid loads
@@ -152,10 +169,10 @@ public:
     @param[in] a_level Grid level
     @return Returns a vector of estimated loads. The indices in the vector correspond to the indices in DisjointBoxLayout::boxArray()
   */
-  virtual Vector<long long> computeLoads(const DisjointBoxLayout& a_dbl, const int a_level) override;
-  
-protected:
+  virtual Vector<long long>
+  computeLoads(const DisjointBoxLayout& a_dbl, const int a_level) override;
 
+protected:
   /*!
     @brief alpha-coefficient (for Helmholtz operator)
   */
@@ -164,12 +181,13 @@ protected:
   /*!
     @brief Beta-coefficient (for Helmholtz operator)
   */
-  static constexpr Real m_beta  = -1.0;
-  
+  static constexpr Real m_beta = -1.0;
+
   /*!
     @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class BottomSolverType {
+  enum class BottomSolverType
+  {
     Simple,
     BiCGStab,
     GMRES
@@ -178,7 +196,8 @@ protected:
   /*!
     @brief Enum for multigrid cycle types. 
   */
-  enum class MultigridType {
+  enum class MultigridType
+  {
     VCycle,
     WCycle,
   };
@@ -186,7 +205,8 @@ protected:
   /*!
     @brief Jump BC type
   */
-  enum class JumpBCType {
+  enum class JumpBCType
+  {
     Natural,
     SaturationCharge,
   };
@@ -200,7 +220,7 @@ protected:
     @brief GMG multigrid type
   */
   MultigridType m_multigridType;
-  
+
   /*!
     @brief Bottom solver type
   */
@@ -291,7 +311,7 @@ protected:
     @details Multigrid exits if L(phi) < tolerance*L(phi=0)
   */
   Real m_multigridExitTolerance;
-  
+
   /*!
     @brief Exit hang for multigrid
     @details Multigrid exits if residue is not reduce by at least this factor. 
@@ -321,17 +341,17 @@ protected:
   /*!
     @brief Geometric multigrid solver
   */
-  AMRMultiGrid<LevelData<MFCellFAB> > m_multigridSolver;
+  AMRMultiGrid<LevelData<MFCellFAB>> m_multigridSolver;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
   */
-  BiCGStabSolver<LevelData<MFCellFAB> > m_bicgstab;
+  BiCGStabSolver<LevelData<MFCellFAB>> m_bicgstab;
 
   /*!
     @brief GMRES solver
   */
-  GMRESSolver<LevelData<MFCellFAB> > m_gmres;
+  GMRESSolver<LevelData<MFCellFAB>> m_gmres;
 
   /*!
     @brief multi-fluid simple solver
@@ -341,27 +361,32 @@ protected:
   /*!
     @brief Parse multigrid settings
   */
-  virtual void parseMultigridSettings();
+  virtual void
+  parseMultigridSettings();
 
   /*!
     @brief Parse m_kappaSource
   */
-  virtual void parseKappaSource();
+  virtual void
+  parseKappaSource();
 
   /*!
     @brief Parse JumpBC type
   */
-  virtual void parseJumpBC();
+  virtual void
+  parseJumpBC();
 
   /*!
     @brief Set up the multigrid operator factory
   */
-  virtual void setupHelmholtzFactory();
+  virtual void
+  setupHelmholtzFactory();
 
   /*!
     @brief Set up AMRMultiGrid
   */
-  virtual void setupMultigrid();
+  virtual void
+  setupMultigrid();
 };
 
 #include <CD_NamespaceFooter.H>

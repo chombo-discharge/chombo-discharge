@@ -16,11 +16,13 @@
 #include <CD_MFHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzDomainBCFactory::MFHelmholtzDomainBCFactory(){
+MFHelmholtzDomainBCFactory::MFHelmholtzDomainBCFactory()
+{
   CH_TIME("MFHelmholtzDomainBCFactory::MFHelmholtzDomainBCFactory()");
 }
 
-MFHelmholtzDomainBCFactory::~MFHelmholtzDomainBCFactory(){
+MFHelmholtzDomainBCFactory::~MFHelmholtzDomainBCFactory()
+{
   CH_TIME("MFHelmholtzDomainBCFactory::~MFHelmholtzDomainBCFactory()");
 }
 

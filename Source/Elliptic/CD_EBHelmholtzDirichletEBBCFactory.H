@@ -19,9 +19,9 @@
 /*!
   @brief Factory class for making Dirichlet BCs on EBs in EBHelmholtzOp
 */
-class EBHelmholtzDirichletEBBCFactory : public EBHelmholtzEBBCFactory {
+class EBHelmholtzDirichletEBBCFactory : public EBHelmholtzEBBCFactory
+{
 public:
-
   /*!
     @brief Constructor. 
   */
@@ -41,7 +41,9 @@ public:
     @param[in] a_order Approximation order
     @param[in] a_value Spatially varying value on EBs
   */
-  EBHelmholtzDirichletEBBCFactory(const int a_order, const int a_weight, const std::function<Real(const RealVect& a_pos)>& a_value);
+  EBHelmholtzDirichletEBBCFactory(const int                                         a_order,
+                                  const int                                         a_weight,
+                                  const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Destructor
@@ -53,34 +55,38 @@ public:
     @param[in] a_order Approximation order (1 and 2 are accepted)
     @note For least squares, the order is also the attempted radius of the stencil. 
   */
-  virtual void setOrder(const int a_order);
+  virtual void
+  setOrder(const int a_order);
 
   /*!
     @brief Set BC order
     @param[in] a_weight Weight for least squares stencils. 
     @note a_weight = 0 can lead to ill-conditioned least-squares systems. 
   */
-  virtual void setWeight(const int a_weight);
+  virtual void
+  setWeight(const int a_weight);
 
   /*!
     @brief Set the value on the EB. 
     @param[in] a_value Constant value on EB
   */
-  virtual void setValue(const Real a_value);
+  virtual void
+  setValue(const Real a_value);
 
   /*!
     @brief Set the spatially varying value on the EB. 
     @param[in] a_value Spatially dependent value on EB
   */
-  virtual void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+  virtual void
+  setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Factory method
   */
-  virtual RefCountedPtr<EBHelmholtzEBBC> create() override;
+  virtual RefCountedPtr<EBHelmholtzEBBC>
+  create() override;
 
 protected:
-
   /*!
     @brief Use constant for BC
   */
@@ -109,7 +115,7 @@ protected:
   /*!
     @brief Value on the EB. 
   */
-  std::function<Real(const RealVect& a_pos) > m_functionValue;
+  std::function<Real(const RealVect& a_pos)> m_functionValue;
 };
 
 #include <CD_NamespaceFooter.H>

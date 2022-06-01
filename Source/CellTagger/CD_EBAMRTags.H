@@ -19,7 +19,7 @@
   @details EBAMRTags is an AMR alias for storing a DenseIntVectSet in each grid patch. It is used to flag cells for refinement, but only within grid patches. 
   @note DenseIntVectSet is sued for performance reasons. 
 */
-using EBAMRTags = Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > >;
+using EBAMRTags = Vector<RefCountedPtr<LayoutData<DenseIntVectSet>>>;
 
 #include <CD_NamespaceFooter.H>
 

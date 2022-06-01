@@ -24,9 +24,9 @@
   @brief Utility class for removing geometrically tagged cells
   @details This class is an optimization class for coarsening of EBs. The usage of this class is simple; the user defines a set of boxes in which we will remove tags. 
 */
-class GeoCoarsener {
+class GeoCoarsener
+{
 public:
-
   /*!
     @brief Constructor. This parses boxes/voxels from the input script. 
   */
@@ -43,20 +43,22 @@ public:
     @param[in] a_dx     Grid resolutions. 
     @param[in] a_probLo Lower-left corner of simulation domain. 
   */
-  virtual void coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_probLo) const;
+  virtual void
+  coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_probLo) const;
 
   /*!
     @brief Get coarsening boxes
   */
-  virtual Vector<RealBox> getCoarsenBoxes() const;
+  virtual Vector<RealBox>
+  getCoarsenBoxes() const;
 
   /*!
     @brief Get coarsening levels
   */
-  virtual Vector<int> getCoarsenLevels() const;
-  
-protected:
+  virtual Vector<int>
+  getCoarsenLevels() const;
 
+protected:
   /*!
     @brief Coarsening boxes
   */

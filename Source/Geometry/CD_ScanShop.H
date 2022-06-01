@@ -26,14 +26,14 @@
   @details The internals of this class are basically the same as GeometryShop, with the exception that this class will generate an internal map of the computational
   domain on each level. This map is used to load balance the EB generation, most often leading to orders of magnitude speedup compared to Chombo's approach. 
 */
-class ScanShop : public GeometryShop {
+class ScanShop : public GeometryShop
+{
 public:
-
   /*!
     @brief Disallowed default constructor
   */
   ScanShop() = delete;
-  
+
   /*!
     @brief Constructor. 
     @param[in] a_geometry      The implicit function for the geometry
@@ -45,12 +45,12 @@ public:
     @param[in] a_thsdhVoF      Threshold for GeometryShop
   */
   ScanShop(const BaseIF&       a_geometry,
-	   const int           a_verbosity,
-	   const Real          a_finestDx,
-	   const RealVect      a_probLo,
-	   const ProblemDomain a_finestDomain,
-	   const ProblemDomain a_scanLevel,
-	   const Real          a_thrshdVoF = 1.0e-16);
+           const int           a_verbosity,
+           const Real          a_finestDx,
+           const RealVect      a_probLo,
+           const ProblemDomain a_finestDomain,
+           const ProblemDomain a_scanLevel,
+           const Real          a_thrshdVoF = 1.0e-16);
 
   /*!
     @brief Destructor (does nothing)
@@ -60,7 +60,8 @@ public:
   /*!
     @brief If doing profiling, set the output name.
   */
-  void setProfileFileName(const std::string a_fileName);
+  void
+  setProfileFileName(const std::string a_fileName);
 
   /*!
     @brief This grid generation method is called by EBISLevel when using distributed data. 
@@ -70,11 +71,12 @@ public:
     @param[in]  a_maxIrregGridSize Maximum irregular grid size. 
     @details This function will create an internal "map" of the cut-cell geometry and return grids that are load-balanced with respect to the cut cells.
   */
-  void makeGrids(const ProblemDomain&      a_domain,
-		 DisjointBoxLayout&        a_grids,
-		 const int&                a_maxGridSize,
-		 const int&                a_maxIrregGridSize) override;
-  
+  void
+  makeGrids(const ProblemDomain& a_domain,
+            DisjointBoxLayout&   a_grids,
+            const int&           a_maxGridSize,
+            const int&           a_maxIrregGridSize) override;
+
   /*!
     @brief This method is called by EBSILevel when using distributed data. 
     @details This allows EBGraph boxes to be designed covered/regular or irregular without actually calling the implicit function. Since this class
@@ -85,11 +87,12 @@ public:
     @param[in] a_dx     Grid resolution on level
     @param[in] a_dit    Grid index
   */
-  GeometryService::InOut InsideOutside(const Box&           a_region,
-				       const ProblemDomain& a_domain,
-				       const RealVect&      a_probLo,
-				       const Real&          a_dx,
-				       const DataIndex&     a_dit) const override;
+  GeometryService::InOut
+  InsideOutside(const Box&           a_region,
+                const ProblemDomain& a_domain,
+                const RealVect&      a_probLo,
+                const Real&          a_dx,
+                const DataIndex&     a_dit) const override;
 
   /*!
     @brief Override of GeometryShop's fillGraph.
@@ -103,18 +106,17 @@ public:
     @param[in]    a_dx              Grid resolution
     @param[in]    a_di              Grid index
   */
-  virtual void fillGraph(BaseFab<int>&        a_regIrregCovered,
-                         Vector<IrregNode>&   a_nodes,
-                         const Box&           a_validRegion,
-                         const Box&           a_ghostRegion,
-                         const ProblemDomain& a_domain,
-                         const RealVect&      a_probLo,
-                         const Real&          a_dx,
-                         const DataIndex&     a_di) const override;
-
+  virtual void
+  fillGraph(BaseFab<int>&        a_regIrregCovered,
+            Vector<IrregNode>&   a_nodes,
+            const Box&           a_validRegion,
+            const Box&           a_ghostRegion,
+            const ProblemDomain& a_domain,
+            const RealVect&      a_probLo,
+            const Real&          a_dx,
+            const DataIndex&     a_di) const override;
 
 protected:
-
   /*!
     @brief Set output file name (if doing profiling)
   */
@@ -179,7 +181,7 @@ protected:
     @brief Box maps. 
     @details BoxType is a essentially just an integer on each patch which is =0,1,2 depending on whether or not the box is covered/regular/cut. 
   */
-  Vector<RefCountedPtr<LayoutData<GeometryService::InOut> > > m_boxMap;  
+  Vector<RefCountedPtr<LayoutData<GeometryService::InOut>>> m_boxMap;
 
   /*!
     @brief Check if level has been scanned. 0 = false, != 0 implies true
@@ -193,14 +195,19 @@ protected:
     @param[in] a_finestDomain Finest AMR domain
     @param[in] a_scanLevel    Domain where we initiate the load balanced recusion process. 
   */
-  void makeDomains(const Real a_dx, const RealVect a_probLo, const ProblemDomain a_finestDomain, const ProblemDomain a_scanLevel);
+  void
+  makeDomains(const Real          a_dx,
+              const RealVect      a_probLo,
+              const ProblemDomain a_finestDomain,
+              const ProblemDomain a_scanLevel);
 
   /*!
     @brief Refine levels recursively down to the finest level
     @param[in] a_coarserLevel Coarser level
     @param[in] a_maxGridSize Maximum patch size
   */
-  void buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize);
+  void
+  buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize);
 
   /*!
     @brief Build the "coarse level" where we initiate the recursion process.
@@ -209,7 +216,8 @@ protected:
     @param[in] a_coarserLevel Coarser level
     @param[in] a_maxGridSize Maximum patch size
   */
-  void buildCoarseLevel(const int a_finerLevel, const int a_maxGridSize);
+  void
+  buildCoarseLevel(const int a_finerLevel, const int a_maxGridSize);
 
   /*!
     @brief Check if every point in input box is regular
@@ -217,8 +225,8 @@ protected:
     @param[in] a_probLo Lower-left corner of simulation domain
     @param[in] a_dx     Grid resolution
   */
-  inline
-  bool isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
+  inline bool
+  isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
 
   /*!
     @brief Check if every point in box is covered
@@ -226,23 +234,21 @@ protected:
     @param[in] a_probLo Lower-left corner of simulation domain
     @param[in] a_dx     Grid resolution
   */
-  inline
-  bool isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
+  inline bool
+  isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
 
   /*!
     @brief Sort boxes lexicographically. 
     @details A strange but true thing that is necessary because DisjointBoxlayout sorts the boxes under the hood
   */
-  inline
-  std::vector<std::pair<Box, int> > getSortedBoxesAndTypes(const Vector<Box>& a_boxes, const Vector<int>& a_types) const;
+  inline std::vector<std::pair<Box, int>>
+  getSortedBoxesAndTypes(const Vector<Box>& a_boxes, const Vector<int>& a_types) const;
 
   /*!
     @brief Define the "box map" on a specified level
   */
-  void defineLevel(Vector<Box>& coveredBoxes,
-		   Vector<Box>& regularBoxes,
-		   Vector<Box>& cutCellBoxes,
-		   const int    a_level);
+  void
+  defineLevel(Vector<Box>& coveredBoxes, Vector<Box>& regularBoxes, Vector<Box>& cutCellBoxes, const int a_level);
 };
 
 #include <CD_NamespaceFooter.H>

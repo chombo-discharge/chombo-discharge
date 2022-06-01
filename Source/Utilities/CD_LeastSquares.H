@@ -27,9 +27,9 @@
 /*!
   @brief Static class containing useful routines for (weighted) least squares polynomial reconstruction. 
 */
-class LeastSquares {
+class LeastSquares
+{
 public:
-
   /*!
     @brief Static class, no construction here.
   */
@@ -57,16 +57,17 @@ public:
     @param[in] a_order          Interpolation order. 
     @param[in] a_addStartingVof Add starting vof or not (can't be used with a_p > 0) as it would lead to ill-conditioned systems. 
   */
-  static VoFStencil getInterpolationStencil(const CellLocation a_cellPos,
-					    const CellLocation a_otherCellsPos,
-					    const Connectivity a_connectivity,					    
-					    const VolIndex&    a_startVof,
-					    const EBISBox&     a_ebisbox,
-					    const Real         a_dx,
-					    const int          a_p,
-					    const int          a_radius,
-					    const int          a_order,
-					    const bool         a_addStartingVof);
+  static VoFStencil
+  getInterpolationStencil(const CellLocation a_cellPos,
+                          const CellLocation a_otherCellsPos,
+                          const Connectivity a_connectivity,
+                          const VolIndex&    a_startVof,
+                          const EBISBox&     a_ebisbox,
+                          const Real         a_dx,
+                          const int          a_p,
+                          const int          a_radius,
+                          const int          a_order,
+                          const bool         a_addStartingVof);
 
   /*!
     @brief Compute a least squares gradient stencil in a cell.
@@ -81,15 +82,16 @@ public:
     @param[in]  a_order        Truncation order.
     @return     Returns a least squares stencil for computing the gradient. The directional derivatives are in the components of the returned stencil. 
   */
-  static VoFStencil getGradSten(const VolIndex&    a_vof,
-				const CellLocation a_gradLocation,
-				const CellLocation a_cellLocation,
-				const EBISBox&     a_ebisbox,
-				const Real         a_dx,
-				const int          a_radius,
-				const int          a_p,
-				const int          a_order,
-				const IntVectSet   a_knownTerms = IntVectSet());
+  static VoFStencil
+  getGradSten(const VolIndex&    a_vof,
+              const CellLocation a_gradLocation,
+              const CellLocation a_cellLocation,
+              const EBISBox&     a_ebisbox,
+              const Real         a_dx,
+              const int          a_radius,
+              const int          a_p,
+              const int          a_order,
+              const IntVectSet   a_knownTerms = IntVectSet());
 
   /*!
     @brief Compute a least squares gradient stencil on a grid face. 
@@ -104,15 +106,16 @@ public:
     @param[in]  a_order        Truncation order.
     @return     Returns a least squares stencil for computing the gradient. The directional derivatives are in the components of the returned stencil. 
   */
-  static VoFStencil getGradSten(const FaceIndex&   a_face,
-				const FaceLocation a_gradLocation,
-				const CellLocation a_cellLocation,
-				const EBISBox&     a_ebisbox,
-				const Real         a_dx,
-				const int          a_radius,
-				const int          a_p,
-				const int          a_order,
-				const IntVectSet   a_knownTerms = IntVectSet());
+  static VoFStencil
+  getGradSten(const FaceIndex&   a_face,
+              const FaceLocation a_gradLocation,
+              const CellLocation a_cellLocation,
+              const EBISBox&     a_ebisbox,
+              const Real         a_dx,
+              const int          a_radius,
+              const int          a_p,
+              const int          a_order,
+              const IntVectSet   a_knownTerms = IntVectSet());
 
   /*!
     @brief Compute a least squares gradient stencil on the EB centroid with specified order. 
@@ -128,15 +131,16 @@ public:
     @param[in]  a_addStartingVof Use a_vof in the expression for the gradient. This can be ill-conditioned for cell-centered expressions. 
     @return     Returns a least squares stencil for evaluating an approximation normal derivative on the boundary centroid. 
   */
-  static VoFStencil getBndryGradSten(const VolIndex&    a_vof,
-				     const Neighborhood a_neighborhood,
-				     const CellLocation a_cellPositions,
-				     const EBISBox&     a_ebisbox,
-				     const Real         a_dx,
-				     const int          a_radius,
-				     const int          a_p,
-				     const int          a_order,
-				     const bool         a_addStartingVof);
+  static VoFStencil
+  getBndryGradSten(const VolIndex&    a_vof,
+                   const Neighborhood a_neighborhood,
+                   const CellLocation a_cellPositions,
+                   const EBISBox&     a_ebisbox,
+                   const Real         a_dx,
+                   const int          a_radius,
+                   const int          a_p,
+                   const int          a_order,
+                   const bool         a_addStartingVof);
 
   /*!
     @brief Return the sum of weights in the stencil, for a specific variable. 
@@ -144,14 +148,16 @@ public:
     @param[in] a_variable Which variable to sum. 
     @return    Returns sum of weights for a specific variable in the stencil. 
   */
-  static Real sumWeights(const VoFStencil& a_stencil, const int a_variable);
+  static Real
+  sumWeights(const VoFStencil& a_stencil, const int a_variable);
 
   /*!
     @brief Compute the sum of all weights in a stencil. 
     @param[in] a_stencil Stencil
     @return    Returns sum of weights in a_stencil (over all variables).
   */
-  static Real sumAllWeights(const VoFStencil& a_stencil);
+  static Real
+  sumAllWeights(const VoFStencil& a_stencil);
 
   /*!
     @brief Assuming that a_stencil is a gradient stencil, project it along a direction. 
@@ -160,8 +166,9 @@ public:
     @return  Returns gradient stencil projected along a_project. 
     @note Users need to make sure ||a_projection|| = 1 for this routine to make sense. 
   */
-  static VoFStencil projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection);
-  
+  static VoFStencil
+  projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection);
+
   /*!
     @brief Computes the distance between two Vofs that are defined on the same grid level. 
     @param[in] a_from     Specifying position in the cell defined by a_fromVof
@@ -172,12 +179,13 @@ public:
     @param[in] a_dx       Grid resolution
     @returns The vector pos(a_toVof) - pos(a_fromVof). 
   */
-  static RealVect displacement(const CellLocation a_from,
-			       const CellLocation a_to,
-			       const VolIndex&    a_fromVof,
-			       const VolIndex&    a_toVof,
-			       const EBISBox&     a_ebisbox,
-			       const Real&        a_dx);
+  static RealVect
+  displacement(const CellLocation a_from,
+               const CellLocation a_to,
+               const VolIndex&    a_fromVof,
+               const VolIndex&    a_toVof,
+               const EBISBox&     a_ebisbox,
+               const Real&        a_dx);
 
   /*!
     @brief Computes the distance between a vof and and a face
@@ -189,12 +197,13 @@ public:
     @param[in] a_dx        Grid resolution
     @returns The vector pos(a_toVof) - pos(a_fromVof). 
   */
-  static RealVect displacement(const FaceLocation a_fromLoc,
-			       const CellLocation a_toLoc,
-			       const FaceIndex&   a_fromFace,
-			       const VolIndex&    a_toVof,
-			       const EBISBox&     a_ebisbox,
-			       const Real&        a_dx);
+  static RealVect
+  displacement(const FaceLocation a_fromLoc,
+               const CellLocation a_toLoc,
+               const FaceIndex&   a_fromFace,
+               const VolIndex&    a_toVof,
+               const EBISBox&     a_ebisbox,
+               const Real&        a_dx);
 
   /*!
     @brief Computes the distance between two Vofs that are defined on two different grid levels. 
@@ -208,14 +217,15 @@ public:
     @param[in] a_dxTo        Grid resolution for the a_toVof vof
     @returns The vector pos(a_toVof) - pos(a_fromVof). 
   */
-  static RealVect displacement(const CellLocation a_from,
-			       const CellLocation a_to,
-			       const VolIndex&    a_fromVof,
-			       const VolIndex&    a_toVof,
-			       const EBISBox&     a_ebisboxFrom,
-			       const EBISBox&     a_ebisboxTo,
-			       const Real&        a_dxFrom,
-			       const Real&        a_dxTo);
+  static RealVect
+  displacement(const CellLocation a_from,
+               const CellLocation a_to,
+               const VolIndex&    a_fromVof,
+               const VolIndex&    a_toVof,
+               const EBISBox&     a_ebisboxFrom,
+               const EBISBox&     a_ebisboxTo,
+               const Real&        a_dxFrom,
+               const Real&        a_dxTo);
 
   /*!
     @brief Get displacement vectors from a cell position to another cell position for a list of Vofs, i.e. x = (xFrom - xTo).
@@ -226,12 +236,13 @@ public:
     @param[in] a_ebisbox EBISBox
     @param[in] a_dx      Grid resolution
   */
-  static Vector<RealVect> getDisplacements(const CellLocation      a_from,
-					   const CellLocation      a_to,
-					   const VolIndex&         a_fromVof,
-					   const Vector<VolIndex>& a_toVofs,
-					   const EBISBox&          a_ebisbox,
-					   const Real&             a_dx);
+  static Vector<RealVect>
+  getDisplacements(const CellLocation      a_from,
+                   const CellLocation      a_to,
+                   const VolIndex&         a_fromVof,
+                   const Vector<VolIndex>& a_toVofs,
+                   const EBISBox&          a_ebisbox,
+                   const Real&             a_dx);
 
   /*!
     @brief Get displacement vectors from a cell position to another cell position for a list of Vofs, i.e. x = (xFrom - xTo).
@@ -242,12 +253,13 @@ public:
     @param[in] a_ebisbox  EBISBox
     @param[in] a_dx       Grid resolution
   */
-  static Vector<RealVect> getDisplacements(const FaceLocation      a_fromLoc,
-					   const CellLocation      a_to,
-					   const FaceIndex&        a_fromFace,
-					   const Vector<VolIndex>& a_toVofs,
-					   const EBISBox&          a_ebisbox,
-					   const Real&             a_dx);
+  static Vector<RealVect>
+  getDisplacements(const FaceLocation      a_fromLoc,
+                   const CellLocation      a_to,
+                   const FaceIndex&        a_fromFace,
+                   const Vector<VolIndex>& a_toVofs,
+                   const EBISBox&          a_ebisbox,
+                   const Real&             a_dx);
 
   /*!
     @brief Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights
@@ -255,8 +267,8 @@ public:
     @param[in] a_displacements Displacement vectors, i.e. (x1-x0,x2-x0, x3-x0,...,(xN-x0)^T. 
     @param[in] a_power Power factor for weights.
   */
-  inline
-  static Vector<Real> makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow);
+  inline static Vector<Real>
+  makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow);
 
   /*!
     @brief Get a least squares gradient stencil solution for computing the gradient at a point. This routine eliminates the value in the point where
@@ -268,11 +280,12 @@ public:
     @note This computes weights using makeDiagWeights(a_displacements, a_p) and then calls the other version. 
     @return Stencil for obtaining the gradient in a point. Stencils for each direction are put in the VoFStencil.variable(i). 
   */
-  static VoFStencil computeGradSten(const Vector<VolIndex>& a_allVofs,
-				    const Vector<RealVect>& a_displacements,
-				    const int               a_p,
-				    const int               a_order,
-				    const IntVectSet        a_knownTerms);
+  static VoFStencil
+  computeGradSten(const Vector<VolIndex>& a_allVofs,
+                  const Vector<RealVect>& a_displacements,
+                  const int               a_p,
+                  const int               a_order,
+                  const IntVectSet        a_knownTerms);
 
   /*!
     @brief Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.
@@ -285,18 +298,20 @@ public:
     @note This routine will cause a run-time error if you have less than SpaceDim equations, which is the minimum number of equations needed for obtaining a gradient. 
     However, the routine does *not* check if the inputs are degenerate. 
   */
-  static VoFStencil computeGradSten(const Vector<VolIndex>& a_allVofs,
-				    const Vector<RealVect>& a_displacements,
-				    const Vector<Real>&     a_weights,
-				    const int               a_order,
-				    const IntVectSet        a_knownTerms);
-  
+  static VoFStencil
+  computeGradSten(const Vector<VolIndex>& a_allVofs,
+                  const Vector<RealVect>& a_displacements,
+                  const Vector<Real>&     a_weights,
+                  const int               a_order,
+                  const IntVectSet        a_knownTerms);
+
   /*!
     @brief Get the size of a Taylor expansion for a given order
     @param[in] a_order Desired order in Taylor expansion
     @return Returns number of terms in Taylor expansion. 
   */
-  static int getTaylorExpansionSize(const int a_order);
+  static int
+  getTaylorExpansionSize(const int a_order);
 
   /*!
     @brief Compute an interpolation stencil to specified order by solving a least squares system
@@ -307,11 +322,12 @@ public:
     @return Stencil for the least squares solution to the interpolation problem. 
     @note This computes weights using makeDiagWeights(a_displacements, a_pow) and then calls the other version. 
   */
-  static VoFStencil computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,
-						const Vector<RealVect>& a_displacements,
-						const int               a_pow,
-						const int               a_order);
-  
+  static VoFStencil
+  computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,
+                              const Vector<RealVect>& a_displacements,
+                              const int               a_pow,
+                              const int               a_order);
+
   /*!
     @brief Compute an interpolation stencil to specified order by solving a least squares system
     @param[in] a_allVofs Vofs to include in the interpolation method. 
@@ -322,10 +338,11 @@ public:
     @note This calls the more general version with a_derivs = IntVectSet(IntVect(0,0)). 
     @note This will throw an error if you don't have enough equations for obtaining the specified order. 
   */
-  static VoFStencil computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,
-						const Vector<RealVect>& a_displacements,
-						const Vector<Real>&     a_weights,
-						const int               a_order);
+  static VoFStencil
+  computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,
+                              const Vector<RealVect>& a_displacements,
+                              const Vector<Real>&     a_weights,
+                              const int               a_order);
 
   /*!
     @brief Compute a least squares interpolation to a specified order. 
@@ -345,12 +362,13 @@ public:
     @return Stencils for each of the derivatives specified in the input argument. 
     @note This calls the more general version. 
   */
-  static std::map<IntVect, VoFStencil> computeSingleLevelStencils(const IntVectSet&       a_derivs,
-								  const IntVectSet&       a_knownTerms,
-								  const Vector<VolIndex>& a_allVofs,
-								  const Vector<RealVect>& a_displacements,
-								  const int               a_p,
-								  const int               a_order);
+  static std::map<IntVect, VoFStencil>
+  computeSingleLevelStencils(const IntVectSet&       a_derivs,
+                             const IntVectSet&       a_knownTerms,
+                             const Vector<VolIndex>& a_allVofs,
+                             const Vector<RealVect>& a_displacements,
+                             const int               a_p,
+                             const int               a_order);
 
   /*!
     @brief Compute a least squares interpolation to a specified order. 
@@ -371,12 +389,13 @@ public:
     @note This will throw an error if you don't have enough equations for obtaining the specified order. 
     @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
   */
-  static std::map<IntVect, VoFStencil> computeSingleLevelStencils(const IntVectSet&       a_derivs,
-								  const IntVectSet&       a_knownTerms,
-								  const Vector<VolIndex>& a_allVofs,
-								  const Vector<RealVect>& a_displacements,
-								  const Vector<Real>&     a_weights,
-								  const int               a_order);
+  static std::map<IntVect, VoFStencil>
+  computeSingleLevelStencils(const IntVectSet&       a_derivs,
+                             const IntVectSet&       a_knownTerms,
+                             const Vector<VolIndex>& a_allVofs,
+                             const Vector<RealVect>& a_displacements,
+                             const Vector<Real>&     a_weights,
+                             const int               a_order);
 
   /*!
     @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
@@ -401,15 +420,16 @@ public:
     @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
     @note T is the precision used by LAPACK
   */
-  template<typename T>
-  static std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
-											const IntVectSet&       a_knownTerms,
-											const Vector<VolIndex>& a_fineVofs,
-											const Vector<VolIndex>& a_coarVofs,
-											const Vector<RealVect>& a_fineDisplacements,
-											const Vector<RealVect>& a_coarDisplacements,
-											const int               a_p,           
-											const int               a_order);
+  template <typename T>
+  static std::map<IntVect, std::pair<VoFStencil, VoFStencil>>
+  computeDualLevelStencils(const IntVectSet&       a_derivs,
+                           const IntVectSet&       a_knownTerms,
+                           const Vector<VolIndex>& a_fineVofs,
+                           const Vector<VolIndex>& a_coarVofs,
+                           const Vector<RealVect>& a_fineDisplacements,
+                           const Vector<RealVect>& a_coarDisplacements,
+                           const int               a_p,
+                           const int               a_order);
 
   /*!
     @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
@@ -436,17 +456,16 @@ public:
     @note T is the precision used by LAPACK
   */
   template <typename T>
-  static std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
-											const IntVectSet&       a_knownTerms,
-											const Vector<VolIndex>& a_fineVofs,
-											const Vector<VolIndex>& a_coarVofs,
-											const Vector<RealVect>& a_fineDisplacements,
-											const Vector<RealVect>& a_coarDisplacements,
-											const Vector<Real>&     a_fineWeights,
-											const Vector<Real>&     a_coarWeights,
-											const int               a_order);
-
-
+  static std::map<IntVect, std::pair<VoFStencil, VoFStencil>>
+  computeDualLevelStencils(const IntVectSet&       a_derivs,
+                           const IntVectSet&       a_knownTerms,
+                           const Vector<VolIndex>& a_fineVofs,
+                           const Vector<VolIndex>& a_coarVofs,
+                           const Vector<RealVect>& a_fineDisplacements,
+                           const Vector<RealVect>& a_coarDisplacements,
+                           const Vector<Real>&     a_fineWeights,
+                           const Vector<Real>&     a_coarWeights,
+                           const int               a_order);
 };
 
 #include <CD_NamespaceFooter.H>

@@ -25,15 +25,15 @@
 
 namespace Physics {
   namespace CdrPlasma {
-  
+
     /*!
       @brief Class for evolving plasma equations using a split step Godunov method. 
       @details This class can use semi-implicit formulations for the transport. 
     */
-    class CdrPlasmaGodunovStepper : public CdrPlasmaStepper {
+    class CdrPlasmaGodunovStepper : public CdrPlasmaStepper
+    {
     public:
-  
-      // Forward declared utility classes for handling the extra memory when advancing the solvers. 
+      // Forward declared utility classes for handling the extra memory when advancing the solvers.
       class CdrStorage;
       class FieldStorage;
       class RtStorage;
@@ -58,12 +58,14 @@ namespace Physics {
       /*!
 	@brief Parse startup options
       */
-      void parseOptions() override;
+      void
+      parseOptions() override;
 
       /*!
 	@brief Parse run-time adjustable parameters
       */
-      void parseRuntimeOptions() override;      
+      void
+      parseRuntimeOptions() override;
 
       /*!
 	@brief Implementation of the advance method
@@ -71,7 +73,8 @@ namespace Physics {
 	@param[in] a_dt Time step to try
 	@return Returns a_dt (no adjustable time step for this class)
       */
-      Real advance(const Real a_dt) override;
+      Real
+      advance(const Real a_dt) override;
 
       /*!
 	@brief Pre-regrid method. Used for storing important variables for the solvers
@@ -79,7 +82,8 @@ namespace Physics {
 	@param[in] a_lmin           The coarsest level that changes
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
       */
-      void preRegrid(const int a_lbase, const int a_oldFinestLevel) override;      
+      void
+      preRegrid(const int a_lbase, const int a_oldFinestLevel) override;
 
       /*!
 	@brief Regrid method. 
@@ -88,13 +92,15 @@ namespace Physics {
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
 	@param[in] a_newFinestLevel The finest level after the regrid. 
       */
-      void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+      void
+      regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
       /*!
 	@brief Perform post-regrid operations. 
 	@details This releases transient memory needed during the regrid. 
       */
-      void postRegrid() override;
+      void
+      postRegrid() override;
 
       /*!
 	@brief For regridding internal storage. Does nothing. 
@@ -102,65 +108,72 @@ namespace Physics {
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
 	@param[in] a_newFinestLevel The finest level after the regrid. 
       */
-      void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+      void
+      regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
       /*!
 	@brief Allocate internal storage.
 	@details This will set up the memory for handling all the various advances. 
       */
-      void allocateInternals() override;
+      void
+      allocateInternals() override;
 
       /*!
 	@brief Deallocate transient memory
       */
-      void deallocateInternals() override;
+      void
+      deallocateInternals() override;
 
       /*!
 	@brief Compute the time step -- this will be different for the different supported algorithms. 
 	@param[out] a_dt       Time step to be used.
 	@param[out] a_timeCode Identifier for how the time step was restricted.
       */
-      void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+      void
+      computeDt(Real& a_dt, TimeCode& a_timeCode) override;
 
       /*!
 	@brief Run post-checkpoint setup operations. 
 	@details The override is only relevant for the semi-implicit scheme because the field needs to be computed from a different equation. Fortunately,
 	we've stored the necessary quantities (conductivity and space charge) to HDF5 so we can just set up a standard semi-implicit Poisson solve here. 
       */
-      void postCheckpointSetup() override;
+      void
+      postCheckpointSetup() override;
 
     protected:
-
       /*!
 	@brief Enum for representing the coupling between the electric field and charge transport
       */
-      enum class FieldCoupling {
-	Explicit,
-	SemiImplicit
+      enum class FieldCoupling
+      {
+        Explicit,
+        SemiImplicit
       };
 
       /*!
 	@brief Enum for switching between various advection solvers.
       */
-      enum class AdvectionSolver {
-	Euler,
-	RK2,
-	MUSCL
+      enum class AdvectionSolver
+      {
+        Euler,
+        RK2,
+        MUSCL
       };
 
       /*!
 	@brief Enum for distinguishing various ways we handle diffusion. 
-      */      
-      enum class DiffusionAlgorithm{
-	Explicit,
-	Implicit,
-	Automatic,
-      };      
+      */
+      enum class DiffusionAlgorithm
+      {
+        Explicit,
+        Implicit,
+        Automatic,
+      };
 
       /*!
 	@brief For figuring out which transport algorithm we use. 
-      */      
-      FieldCoupling m_fieldCoupling;            
+      */
+      FieldCoupling m_fieldCoupling;
 
       /*!
 	@brief For figuring out how we handle diffusion.
@@ -180,21 +193,21 @@ namespace Physics {
       /*!
 	@brief Scratch storage for the CDR solvers
       */
-      Vector<RefCountedPtr<CdrStorage> > m_cdrScratch;
+      Vector<RefCountedPtr<CdrStorage>> m_cdrScratch;
 
       /*!
 	@brief Scratch storage for the RTE solvers
-      */      
-      Vector<RefCountedPtr<RtStorage> > m_rteScratch;
+      */
+      Vector<RefCountedPtr<RtStorage>> m_rteScratch;
 
       /*!
 	@brief Scratch storage for the field solver
-      */            
+      */
       RefCountedPtr<FieldStorage> m_fieldScratch;
 
       /*!
 	@brief Scratch storage for the surface charge solver
-      */                  
+      */
       RefCountedPtr<SigmaStorage> m_sigmaScratch;
 
       /*!
@@ -207,7 +220,7 @@ namespace Physics {
 	@brief Used for storing conductivity*dt/eps0 on the cell center.
       */
       EBAMRCellData m_conductivityFactorCell;
-      
+
       /*!
 	@brief Used for storing conductivity*dt/eps0 on the face centers.
       */
@@ -215,8 +228,8 @@ namespace Physics {
 
       /*!
 	@brief Used for storing conductivity*dt/eps0 on the EB centers.
-      */      
-      EBAMRIVData m_conductivityFactorEB;   
+      */
+      EBAMRIVData m_conductivityFactorEB;
 
       /*!
 	@brief Scratch storage for storing m_semiImplicitRho on the old grids during regrid operations.
@@ -225,7 +238,7 @@ namespace Physics {
 
       /*!
 	@brief Scratch storage for storing m_conductivityFactorCell on the old grids during regrid operations.
-      */      
+      */
       EBAMRCellData m_scratchConductivity;
 
       /*!
@@ -235,7 +248,7 @@ namespace Physics {
 
       /*!
 	@brief Enable for debugging this class. 
-      */      
+      */
       bool m_debug;
 
       /*!
@@ -252,6 +265,11 @@ namespace Physics {
 	@brief If true, add a stochastic diffusion flux. 
       */
       bool m_fhd;
+
+      /*!
+	@brief Regrid slopes or not
+      */
+      bool m_regridSlopes;
 
       /*!
 	@brief Diffusion threshold factor
@@ -273,93 +291,108 @@ namespace Physics {
 	@param[in] a_solverIt Solver iterator
 	@return This returns the entry in m_cdrScratch corresponding to the solver. 
       */
-      RefCountedPtr<CdrStorage>& getCdrStorage(const CdrIterator<CdrSolver>& a_solverIt);
+      RefCountedPtr<CdrStorage>&
+      getCdrStorage(const CdrIterator<CdrSolver>& a_solverIt);
 
       /*!
 	@brief Function for getting the transient storage assocaited with a particular RTE solver
 	@param[in] a_solverIt Solver iterator
 	@return This returns the entry in m_rteScratch corresponding to the solver. 
-      */      
-      RefCountedPtr<RtStorage>& getRtStorage(const RtIterator<RtSolver>& a_solverIt);
-      
+      */
+      RefCountedPtr<RtStorage>&
+      getRtStorage(const RtIterator<RtSolver>& a_solverIt);
+
       /*!
 	@brief Compute electric field into scratch storage.
 	@details This computes the electric field into the scratch storages in m_fieldScratch
       */
-      void computeElectricFieldIntoScratch();
+      void
+      computeElectricFieldIntoScratch();
 
       /*!
 	@brief Compute gradients of the CDR densities into scratch storage
       */
-      void computeCdrGradients();
+      void
+      computeCdrGradients();
 
       /*!
 	@brief Extrapolate cell-centered states with the source term
 	@details This will compute cell-centered states (in the scratch storage) as n = n(t) + 0.5*a_dt * S(t)
 	@param[in] a_dt Time step size. 
       */
-      void extrapolateWithSourceTerm(const Real a_dt);      
+      void
+      extrapolateWithSourceTerm(const Real a_dt);
 
       /*!
 	@brief Extrapolate the cell-centered states to the EB. 
       */
-      void extrapolateCdrToEB();
+      void
+      extrapolateCdrToEB();
 
       /*!
 	@brief Compute the CDR boundary condition fluxes on the EBs.
 	@details Prior to calling this routine, one must extrapolated the CDR states to the EB (calling extrapolateCdrToEB)
       */
-      void computeCdrFluxesEB();
-      
+      void
+      computeCdrFluxesEB();
+
       /*!
 	@brief Extrapolate the CDR cell-centered densities to domain edges/face
       */
-      void extrapolateCdrToDomain();
+      void
+      extrapolateCdrToDomain();
 
       /*!
 	@brief Compute the CDR boundary condition fluxes on the domain faces. 
 	@details Prior to calling this routine, one must extrapolated the CDR states to the domain faces (calling extrapolateCdrToDomain)
       */
-      void computeCdrDomainFluxes();
+      void
+      computeCdrDomainFluxes();
 
       /*!
 	@brief Compute the surface flux for the surface charge solver. 
       */
-      void computeSigmaFlux();
+      void
+      computeSigmaFlux();
 
       /*!
 	@brief Advance the transport problem.
 	@param[in] a_dt Time step.
 	@note This will switch between transport algorithms and call the other methods. 
       */
-      void advanceTransport(const Real a_dt);
+      void
+      advanceTransport(const Real a_dt);
 
       /*!
 	@brief Advance the transport problem using the explicit or explicit-implicit Euler rule
 	@param[in] a_dt Time step.
       */
-      void advanceTransportExplicitField(const Real a_dt);
+      void
+      advanceTransportExplicitField(const Real a_dt);
 
       /*!
 	@brief Advance the transport problem using a semi-implicit formulation for the electric field. 
 	@details Under the hood, this is still an Euler solve.
 	@param[in] a_dt Time step. 
       */
-      void advanceTransportSemiImplicit(const Real a_dt);      
+      void
+      advanceTransportSemiImplicit(const Real a_dt);
 
       /*!
 	@brief Advance the reactive problem over a time step dt.
 	@param[in] a_dt Time step
 	@note Only does the CDR solvers.
       */
-      void advanceCdrReactions(const Real a_dt);
+      void
+      advanceCdrReactions(const Real a_dt);
 
       /*!
 	@brief Advance the radiative transfer problem. 
 	@param[in] a_dt Time step
 	@note This should be called after advanceReactions because that routine sets up the source terms
       */
-      void advanceRadiativeTransfer(const Real a_dt);
+      void
+      advanceRadiativeTransfer(const Real a_dt);
 
       /*!
 	@brief Print how much mass was injected into the system. 
@@ -368,74 +401,93 @@ namespace Physics {
 	@param[in] a_message Base message
 	@param[in] a_solver  Which CDR solver to compute the mass for. 
       */
-      void floorMass(EBAMRCellData& a_data, const std::string a_message, const RefCountedPtr<CdrSolver>& a_solver) const;
+      void
+      floorMass(EBAMRCellData& a_data, const std::string a_message, const RefCountedPtr<CdrSolver>& a_solver) const;
 
       /*!
 	@brief Perform post-step operations
       */
-      void postStep();
+      void
+      postStep();
 
       /*!
 	@brief Compute CDR drift velocities
 	@details This is just like the parent method, except that we use the electric field stored in the scratch storage. 
 	@param[in] a_time Time step
       */
-      void computeCdrDriftVelocities(const Real a_time);
+      void
+      computeCdrDriftVelocities(const Real a_time);
 
       /*!
 	@brief Compute CDR diffusion coefficients
 	@details This is just like the parent method, except that we use the electric field stored in the scratch storage. 
 	@param[in] a_time Time step
-      */      
-      void computeCdrDiffusionCoefficients(const Real a_time);
+      */
+      void
+      computeCdrDiffusionCoefficients(const Real a_time);
 
       /*!
 	@brief Compute source terms for the CDR and RTE equations
 	@param[in] a_dt Time step
       */
-      void computeSourceTerms(const Real a_dt);
+      void
+      computeSourceTerms(const Real a_dt);
 
       /*!
 	@brief Parse centering for the advective integrator.
       */
-      void parseAdvection();
-      
+      void
+      parseAdvection();
+
       /*!
 	@brief Parse how we handle diffusion.
       */
-      void parseDiffusion();      
+      void
+      parseDiffusion();
 
       /*!
 	@brief Parse the transport algorithm
       */
-      void parseField();
+      void
+      parseField();
 
       /*!
 	@brief Parse whether or not we should floor the mass
       */
-      void parseFloor();
+      void
+      parseFloor();
 
       /*!
 	@brief Parse debug mode
       */
-      void parseDebug();
+      void
+      parseDebug();
 
       /*!
 	@brief Parse profiling mode
       */
-      void parseProfile();      
+      void
+      parseProfile();
 
       /*!
 	@brief Parse inclusion of random diffusion flux.
       */
-      void parseFHD();
+      void
+      parseFHD();
+
+      /*!
+	@brief Parse whether or not to use slopes when regridding
+      */
+      void
+      parseRegridSlopes();
 
       /*!
 	@brief Solve the semi-implicit Poisson equation
 	@note This is just like the parent method for solving it, except that we use m_semiImplicitRho for the space charge density. Note that
 	the user should first have set up the semi-implicit Poisson equation by computing the conductivities and calling CdrPlasmasetupSemiImplicitPoisson.
       */
-      bool solveSemiImplicitPoisson();
+      bool
+      solveSemiImplicitPoisson();
 
 #ifdef CH_USE_HDF5
       /*!  
@@ -443,22 +495,24 @@ namespace Physics {
 	@details Overriden because semi-implicit scheme requires additioanl stuff in HDF5 files. 
 	@param[inout] a_handle HDF5 fil
 	@param[in]    a_lvl    Grid level
-      */            
-      virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+      */
+      virtual void
+      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
-      
+
 #ifdef CH_USE_HDF5
       /*!
 	@brief Read checkpoint data from file. Used for restarts. 
 	@details Overriden because semi-implicit scheme requires additioanl stuff in HDF5 files. 
 	@param[inout] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
-      */            
-      virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
-#endif      
+      */
+      virtual void
+      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+#endif
     };
-  }
-}
+  } // namespace CdrPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

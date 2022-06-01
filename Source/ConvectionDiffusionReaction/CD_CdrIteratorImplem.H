@@ -17,7 +17,8 @@
 #include <CD_NamespaceHeader.H>
 
 template <class T>
-CdrIterator<T>::CdrIterator(CdrLayout<T>& a_layout, const SpeciesIteration a_mode){
+CdrIterator<T>::CdrIterator(CdrLayout<T>& a_layout, const SpeciesIteration a_mode)
+{
   CH_TIME("CdrIterator<T>::CdrIterator(CdrLayout<T>, SpeciesIteration)");
 
   // Default settings
@@ -25,114 +26,129 @@ CdrIterator<T>::CdrIterator(CdrLayout<T>& a_layout, const SpeciesIteration a_mod
   m_species    = a_layout.getSpecies();
   m_numSolvers = m_solvers.size();
   m_mode       = a_mode;
-  
-  m_isDefined    = true;
+
+  m_isDefined = true;
 
   reset();
 }
 
 template <class T>
-CdrIterator<T>::~CdrIterator(){
+CdrIterator<T>::~CdrIterator()
+{
   CH_TIME("CdrIterator<T>::~CdrIterator()");
 }
 
 template <class T>
-int CdrIterator<T>::getNumberOfSolvers(){
+int
+CdrIterator<T>::getNumberOfSolvers()
+{
   CH_TIME("CdrIterator<T>::getNumberOfSolvers()");
-  
+
   CH_assert(m_isDefined);
-  
+
   return m_numSolvers;
 }
 
 template <class T>
-int CdrIterator<T>::index() const {
+int
+CdrIterator<T>::index() const
+{
   CH_TIME("CdrIterator<T>::index()");
-  
+
   CH_assert(m_isDefined);
-  
+
   return m_isolver;
 }
 
 template <class T>
-void CdrIterator<T>::reset(){
+void
+CdrIterator<T>::reset()
+{
   CH_TIME("CdrIterator<T>::reset()");
-  
+
   CH_assert(m_isDefined);
-  
+
   m_isolver = 0;
 }
 
 template <class T>
-bool CdrIterator<T>::ok() const {
+bool
+CdrIterator<T>::ok() const
+{
   CH_TIME("CdrIterator<T>::ok()");
 
   CH_assert(m_isDefined);
-  
+
   return (m_isolver < m_numSolvers);
 }
 
 template <class T>
-void CdrIterator<T>::operator++(){
+void
+CdrIterator<T>::operator++()
+{
   CH_TIME("CdrIterator<T>::operator++()");
 
-  CH_assert(m_isDefined);  
+  CH_assert(m_isDefined);
 
-  if(m_mode == SpeciesIteration::All){
+  if (m_mode == SpeciesIteration::All) {
     m_isolver++;
   }
-  else{
+  else {
     m_isolver++;
 
-    for (int isolver = m_isolver; this->ok(); ++isolver){
-      const RefCountedPtr<T>& solver            = m_solvers[isolver];
+    for (int isolver = m_isolver; this->ok(); ++isolver) {
+      const RefCountedPtr<T>&          solver  = m_solvers[isolver];
       const RefCountedPtr<CdrSpecies>& species = m_species[isolver];
-      
-      if(m_mode == SpeciesIteration::Charged){
-	if(species->getChargeNumber() != 0){
-	  m_isolver = isolver;
-	  break;
-	}
+
+      if (m_mode == SpeciesIteration::Charged) {
+        if (species->getChargeNumber() != 0) {
+          m_isolver = isolver;
+          break;
+        }
       }
-      else if(m_mode == SpeciesIteration::Negative){
-	if(species->getChargeNumber() < 0){
-	  m_isolver = isolver;
-	  break;
-	}
+      else if (m_mode == SpeciesIteration::Negative) {
+        if (species->getChargeNumber() < 0) {
+          m_isolver = isolver;
+          break;
+        }
       }
-      else if(m_mode == SpeciesIteration::Positive){
-	if(species->getChargeNumber() > 0){
-	  m_isolver = isolver;
-	  break;
-	}
+      else if (m_mode == SpeciesIteration::Positive) {
+        if (species->getChargeNumber() > 0) {
+          m_isolver = isolver;
+          break;
+        }
       }
-      else if(m_mode == SpeciesIteration::Neutral){
-	if(species->getChargeNumber() == 0){
-	  m_isolver = isolver;
-	  break;
-	}
+      else if (m_mode == SpeciesIteration::Neutral) {
+        if (species->getChargeNumber() == 0) {
+          m_isolver = isolver;
+          break;
+        }
       }
     }
   }
 }
 
 template <class T>
-RefCountedPtr<T>& CdrIterator<T>::operator() () {
-  CH_TIME("CdrIterator<T>::operator()");  
-  
+RefCountedPtr<T>&
+CdrIterator<T>::operator()()
+{
+  CH_TIME("CdrIterator<T>::operator()");
+
   CH_assert(m_isDefined);
   CH_assert(m_isolver < m_numSolvers);
-  
+
   return m_solvers[m_isolver];
 }
 
 template <class T>
-RefCountedPtr<CdrSpecies>& CdrIterator<T>::getSpecies() {
+RefCountedPtr<CdrSpecies>&
+CdrIterator<T>::getSpecies()
+{
   CH_TIME("CdrIterator<T>::getSpecies()");
-  
+
   CH_assert(m_isDefined);
   CH_assert(m_isolver < m_numSolvers);
-  
+
   return m_species[m_isolver];
 }
 

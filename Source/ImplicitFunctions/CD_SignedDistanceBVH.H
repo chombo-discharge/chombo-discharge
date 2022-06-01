@@ -31,9 +31,9 @@
   are the precision and the bounding volume type. To use this class, the user must first create the DCEL mesh and then create the BVH. 
 */
 template <class T, class BV, int K>
-class SignedDistanceBVH : public BaseIF {
+class SignedDistanceBVH : public BaseIF
+{
 public:
-
   /*!
     @brief Alias for always-3D vector with template
   */
@@ -42,7 +42,7 @@ public:
   /*!
     @brief DCEL polygon face, which is the primitive type enclosed in the bounding volume hierarchy
   */
-  using Face = EBGeometry::Dcel::FaceT<T>;
+  using Face = EBGeometry::DCEL::FaceT<T>;
 
   /*!
     @brief Alias for BVH node with precision T, enclosing DCEL face with a bounding volume type V
@@ -76,15 +76,16 @@ public:
     @brief Value function
     @param[in] a_point Spatial point
   */
-  Real value(const RealVect& a_point) const override;
+  Real
+  value(const RealVect& a_point) const override;
 
   /*!
     @brief Factory method. Sends pointers around. 
   */
-  BaseIF* newImplicitFunction() const override;
+  BaseIF*
+  newImplicitFunction() const override;
 
 protected:
-
   /*!
     @brief For 2D only. This is the z-coordinate through which we slice the object
   */
@@ -107,7 +108,7 @@ protected:
 
   /*!
     @brief Total time spent computing the signed distance. Use for performance tracking. 
-  */  
+  */
   mutable std::chrono::duration<double> m_timespan;
 };
 

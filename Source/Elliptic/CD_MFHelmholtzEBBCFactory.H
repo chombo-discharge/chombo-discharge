@@ -20,9 +20,9 @@
 /*!
   @brief Base class for making boundary conditions on the EB in a multifluid context. 
 */
-class MFHelmholtzEBBCFactory {
+class MFHelmholtzEBBCFactory
+{
 public:
-
   /*!
     @brief Weak constructor. Must subsequently set order, weight, and value. 
   */
@@ -36,7 +36,8 @@ public:
   /*!
     @brief Factory method for 
   */
-  virtual RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const = 0;
+  virtual RefCountedPtr<EBHelmholtzEBBC>
+  create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const = 0;
 };
 
 #include <CD_NamespaceFooter.H>

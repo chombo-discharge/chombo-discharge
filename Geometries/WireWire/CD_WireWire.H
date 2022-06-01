@@ -22,15 +22,15 @@
 /*!
   @brief This is a class that defines a wire-wire geometry
 */
-class WireWire : public ComputationalGeometry {
+class WireWire : public ComputationalGeometry
+{
 public:
-  
   WireWire();
   ~WireWire();
 
 protected:
-
-  void addWire(ParmParse& a_pp);
+  void
+  addWire(ParmParse& a_pp);
 };
 
 #include <CD_NamespaceFooter.H>

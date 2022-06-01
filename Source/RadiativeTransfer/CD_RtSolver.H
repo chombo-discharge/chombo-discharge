@@ -21,14 +21,14 @@
 #include <CD_RtSpecies.H>
 #include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief Abstract RTE solver class for doing various kinds of radiative transfer equations. This class
   is a pure class and it is basically just an interface.
 */
-class RtSolver {
+class RtSolver
+{
 public:
-  
   /*!
     @brief Constructor
   */
@@ -42,34 +42,40 @@ public:
   /*!
     @brief Get solver name
   */
-  virtual std::string getName();
+  virtual std::string
+  getName();
 
   /*!
     @brief Get the realm where the solver lives
   */
-  virtual const std::string getRealm() const;
+  virtual const std::string
+  getRealm() const;
 
   /*!
     @brief Parse options
   */
-  virtual void parseOptions() = 0;
+  virtual void
+  parseOptions() = 0;
 
   /*!
     @brief Parse runtime options
   */
-  virtual void parseRuntimeOptions() = 0;
+  virtual void
+  parseRuntimeOptions() = 0;
 
   /*!
     @brief Get output plot names
   */
-  virtual Vector<std::string> getPlotVariableNames() const;
-  
+  virtual Vector<std::string>
+  getPlotVariableNames() const;
+
   /*!
     @brief Advance equation one time step
     @param[in] a_dt      Time step
     @param[in] a_zeroPhi An optional argument for e.g. elliptic solves which can start from previous solution or zero.
   */
-  virtual bool advance(const Real a_dt, const bool a_zeroPhi = false);
+  virtual bool
+  advance(const Real a_dt, const bool a_zeroPhi = false);
 
   /*!
     @brief Advance method. Advances one time step.
@@ -77,7 +83,8 @@ public:
     @param[in] a_phi     Mesh solution
     @param[in] a_zeroPhi An optional argument for e.g. elliptic solves which can start from previous solution or zero.
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zeroPhi = false);
+  virtual bool
+  advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zeroPhi = false);
 
   /*!
     @brief Advance method. Advances one time step.
@@ -86,44 +93,51 @@ public:
     @param[in] a_source  Source term
     @param[in] a_zeroPhi An optional argument for e.g. elliptic solves which can start from previous solution or zero.
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) = 0;
+  virtual bool
+  advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) = 0;
 
   /*!
     @brief Set realm where this solver lives.
     @param[in] a_realm Realm
   */
-  virtual void setRealm(const std::string a_realm);
+  virtual void
+  setRealm(const std::string a_realm);
 
   /*!
     @brief Set the radiative transfer species (RtSpecies)
     @param[in] a_species Species (see RtSpecies.H)
   */
-  virtual void setRtSpecies(const RefCountedPtr<RtSpecies>& a_species);
+  virtual void
+  setRtSpecies(const RefCountedPtr<RtSpecies>& a_species);
 
   /*!
     @brief Set computational geometry
     @param[in] a_computationalGeometry Computational geometry
   */
-  virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry);
+  virtual void
+  setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry);
 
   /*!
     @brief Set the amr object
     @param[in] a_amr AmrMesh object.
   */
-  virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
+  virtual void
+  setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set phase
     @param[in] a_phase Phase (gas/solid) where the solver lives.
     @details This must be done BEFORE callilng setComputationalGeometry
   */
-  virtual void setPhase(phase::which_phase a_phase = phase::gas);
+  virtual void
+  setPhase(phase::which_phase a_phase = phase::gas);
 
   /*!
     @brief Set verbosity.
     @param[in] a_verbosity Verbosity level.
   */
-  virtual void setVerbosity(const int a_verbosity);
+  virtual void
+  setVerbosity(const int a_verbosity);
 
   /*!
     @brief Set the time for this solver. 
@@ -132,37 +146,43 @@ public:
     @param[in] a_dt   Time step increment
     @note This sets m_step=a_step, m_time=a_time, m_dt=a_dt
   */
-  virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
+  virtual void
+  setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Set stationary solver or not
     @param[in] a_stationary If true, the solver is set to stationary mode.
   */
-  virtual void setStationary(const bool a_stationary);
+  virtual void
+  setStationary(const bool a_stationary);
 
   /*!
     @brief Sanity check
   */
-  virtual void sanityCheck();
+  virtual void
+  sanityCheck();
 
   /*!
     @brief Check if solver is stationary
   */
-  virtual bool isStationary();
+  virtual bool
+  isStationary();
 
   /*!
     @brief Compute the boundary flux given a state (a_phi will be different for different RTE approximations)
     @param[inout] a_ebFlux The flux on the EB
     @param[in]    a_phi    Cell-centered solution for the RTE state (e.g. for Eddington this is just the isotropic part).
   */
-  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) = 0;
+  virtual void
+  computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Compute the domain flux given a state (a_phi will be different for different RTE approximations)
     @param[inout] a_domainFlux The flux on the domain wall
     @param[in]    a_phi        Cell-centered solution for the RTE state (e.g. for Eddington this is just the isotropic part).
   */
-  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) = 0;
+  virtual void
+  computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Compute the flux
@@ -171,7 +191,8 @@ public:
     @details For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux 
     will be contained in a_phi (somehow).
   */
-  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) = 0;
+  virtual void
+  computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Get isotropic part. 
@@ -179,24 +200,28 @@ public:
     @param[in]    a_phi       Full RTE solution.
     @details This is normally just a copy, but I need the function signature in order to have a clear plasma-coupling interface
   */
-  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) = 0;
+  virtual void
+  computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocateInternals() = 0;
+  virtual void
+  allocateInternals() = 0;
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocateInternals() = 0;
+  virtual void
+  deallocateInternals() = 0;
 
   /*!
     @brief Perform pre-regrid operations. 
     @param[in] a_lbase          Coarsest level that changed during regrid. 
     @param[in] a_oldFinestLevel Finest grid level before the regrid operation. 
   */
-  virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel) = 0;
+  virtual void
+  preRegrid(const int a_lbase, const int a_oldFinestLevel) = 0;
 
   /*!
     @brief Regrid this solver. 
@@ -204,41 +229,48 @@ public:
     @param[in] a_oldFinestLevel Finest AMR level before the regrid. 
     @param[in] a_newFinestLevel Finest AMR level after the regrid. 
   */
-  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
+  virtual void
+  regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
 
   /*!
     @brief Register operators
   */
-  virtual void registerOperators() = 0;
+  virtual void
+  registerOperators() = 0;
 
   /*!
     @brief Fill solver with initial data. By default, this sets internal data to zero. 
     @details Default implementation sets to zero -- override if you want to have different initial conditions. 
   */
-  virtual void initialData();
+  virtual void
+  initialData();
 
   /*!
     @brief Set source term
     @param[in] a_source Source term
   */
-  virtual void setSource(const EBAMRCellData& a_source);
+  virtual void
+  setSource(const EBAMRCellData& a_source);
 
   /*!
     @brief Set source
     @param[in] a_source Source term
   */
-  virtual void setSource(const Real a_source);
+  virtual void
+  setSource(const Real a_source);
 
-    /*!
+  /*!
     @brief Set source
     @param[in] a_source Source term (varies in space)
   */
-  virtual void setSource(const std::function<Real(const RealVect a_pos)> a_source);
+  virtual void
+  setSource(const std::function<Real(const RealVect a_pos)> a_source);
 
   /*!
     @brief Write plot file
   */
-  virtual void writePlotFile() = 0;
+  virtual void
+  writePlotFile() = 0;
 
   /*!
     @brief Write output data to a_output
@@ -246,7 +278,8 @@ public:
     @param[inout] a_icomp  Starting component where this solver begins writing the output. 
     @note This routine writes m_phi on centroids (and not cell-centers). 
   */
-  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
+  virtual void
+  writePlotData(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write data to output. Convenience function. 
@@ -255,15 +288,17 @@ public:
     @param[in]    a_data   Data to write. 
     @param[in]    a_interp If true, a_data will be interpolated to cell centroids before writing to a_output. 
   */
-  virtual void writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
+  virtual void
+  writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
 
 #ifdef CH_USE_HDF5
   /*!
     @brief Write checkpoint data into HDF5 file. 
     @paramo[out] a_handle HDF5 file. 
     @param[in]   a_level Grid level
-  */  
-  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const = 0;
+  */
+  virtual void
+  writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const = 0;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -271,65 +306,73 @@ public:
     @brief Read checkpoint data from HDF5 file. 
     @param[in] a_handle HDF5 handle.
     @param[in] const int a_level Grid level
-  */  
-  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) = 0;
+  */
+  virtual void
+  readCheckpointLevel(HDF5Handle& a_handle, const int a_level) = 0;
 #endif
 
   /*!
     @brief Get number of output fields
     @return Returns number of variables that will be plotted to file. 
   */
-  virtual int getNumberOfPlotVariables() const;
+  virtual int
+  getNumberOfPlotVariables() const;
 
   /*!
     @brief Get current time
     @return Returns m_time
   */
-  virtual Real getTime() const;
+  virtual Real
+  getTime() const;
 
   /*!
     @brief Get the RTE phase
     @return Returns m_phase
   */
-  virtual phase::which_phase getPhase();
+  virtual phase::which_phase
+  getPhase();
 
   /*!
     @brief Get solver state.
     @return Returns m_phi. For diffusive solves this will have a single component. 
   */
-  virtual EBAMRCellData& getPhi();
+  virtual EBAMRCellData&
+  getPhi();
 
   /*!
     @brief Get multifluid source
     @return Returns m_source. For diffusive solves this will have a single component. 
   */
-  virtual EBAMRCellData& getSource();
+  virtual EBAMRCellData&
+  getSource();
 
   /*!
     @brief Get the absorption length.
     @return m_kappa
   */
-  virtual EBAMRFluxData& getKappa();
+  virtual EBAMRFluxData&
+  getKappa();
 
   /*!
     @brief Get the absorption coefficient on irregular EB faces
     @return m_kappaEB
   */
-  virtual EBAMRIVData& getKappaEb();
+  virtual EBAMRIVData&
+  getKappaEb();
 
   /*!
     @brief Get species
   */
-  virtual RefCountedPtr<RtSpecies>& getSpecies();
-  
-protected:
+  virtual RefCountedPtr<RtSpecies>&
+  getSpecies();
 
+protected:
   /*!
     @brief Default component that we solve for
   */
   static constexpr int m_comp = 0;
 
-    /*!
+  /*!
     @brief Default number of components
   */
   static constexpr int m_nComp = 1;
@@ -446,7 +489,8 @@ protected:
   /*!
     @brief Set ebis
   */
-  void setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis);
+  void
+  setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis);
 };
 
 #include <CD_NamespaceFooter.H>

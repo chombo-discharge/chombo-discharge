@@ -20,9 +20,10 @@
 #include <CD_NamespaceHeader.H>
 
 template <class T>
-ItoIterator<T>::ItoIterator(ItoLayout<T>& a_layout, const SpeciesIteration a_mode){
+ItoIterator<T>::ItoIterator(ItoLayout<T>& a_layout, const SpeciesIteration a_mode)
+{
   CH_TIME("ItoIterator<T>::ItoIterator<T>");
-    
+
   m_solvers    = a_layout.getSolvers();
   m_species    = a_layout.getSpecies();
   m_numSolvers = m_solvers.size();
@@ -33,91 +34,106 @@ ItoIterator<T>::ItoIterator(ItoLayout<T>& a_layout, const SpeciesIteration a_mod
 }
 
 template <class T>
-ItoIterator<T>::~ItoIterator<T>(){
+ItoIterator<T>::~ItoIterator<T>()
+{
   CH_TIME("ItoIterator<T>::~ItoIterator<T>");
 }
 
 template <class T>
-int ItoIterator<T>::getNumberOfSolvers(){
+int
+ItoIterator<T>::getNumberOfSolvers()
+{
   CH_assert(m_isDefined);
-  
+
   return m_numSolvers;
 }
 
 template <class T>
-int ItoIterator<T>::index() const {
+int
+ItoIterator<T>::index() const
+{
   CH_assert(m_isDefined);
-  
+
   return m_isolver;
 }
 
 template <class T>
-void ItoIterator<T>::reset(){
+void
+ItoIterator<T>::reset()
+{
   CH_assert(m_isDefined);
-  
+
   m_isolver = 0;
 }
 
 template <class T>
-bool ItoIterator<T>::ok(){
+bool
+ItoIterator<T>::ok()
+{
   return (m_isolver < m_numSolvers);
 }
 
 template <class T>
-void ItoIterator<T>::operator++(){
+void
+ItoIterator<T>::operator++()
+{
   CH_assert(m_isDefined);
 
-  if(m_mode == SpeciesIteration::All){
+  if (m_mode == SpeciesIteration::All) {
     m_isolver++;
   }
-  else{
+  else {
     m_isolver++;
 
-    for (int isolver = m_isolver; this->ok(); ++isolver){
+    for (int isolver = m_isolver; this->ok(); ++isolver) {
       const RefCountedPtr<ItoSolver>&  solver  = m_solvers[isolver];
       const RefCountedPtr<ItoSpecies>& species = m_species[isolver];
-      
-      if(m_mode == SpeciesIteration::Charged){
-	if(species->getChargeNumber() != 0){
-	  m_isolver = isolver;
-	  break;
-	}
+
+      if (m_mode == SpeciesIteration::Charged) {
+        if (species->getChargeNumber() != 0) {
+          m_isolver = isolver;
+          break;
+        }
       }
-      else if(m_mode == SpeciesIteration::Negative){
-	if(species->getChargeNumber() < 0){
-	  m_isolver = isolver;
-	  break;
-	}
+      else if (m_mode == SpeciesIteration::Negative) {
+        if (species->getChargeNumber() < 0) {
+          m_isolver = isolver;
+          break;
+        }
       }
-      else if(m_mode == SpeciesIteration::Positive){
-	if(species->getChargeNumber() > 0){
-	  m_isolver = isolver;
-	  break;
-	}
+      else if (m_mode == SpeciesIteration::Positive) {
+        if (species->getChargeNumber() > 0) {
+          m_isolver = isolver;
+          break;
+        }
       }
-      else if(m_mode == SpeciesIteration::Neutral){
-	if(species->getChargeNumber() == 0){
-	  m_isolver = isolver;
-	  break;
-	}
+      else if (m_mode == SpeciesIteration::Neutral) {
+        if (species->getChargeNumber() == 0) {
+          m_isolver = isolver;
+          break;
+        }
       }
     }
   }
 }
 
 template <class T>
-RefCountedPtr<T>& ItoIterator<T>::operator() () {
+RefCountedPtr<T>&
+ItoIterator<T>::operator()()
+{
   CH_assert(m_isDefined);
   CH_assert(m_isolver < m_numSolvers);
-  
+
   return m_solvers[m_isolver];
 }
 
 template <class T>
-RefCountedPtr<ItoSpecies>& ItoIterator<T>::getSpecies() {
+RefCountedPtr<ItoSpecies>&
+ItoIterator<T>::getSpecies()
+{
   CH_assert(m_isDefined);
   CH_assert(m_isolver < m_numSolvers);
-  
+
   return m_species[m_isolver];
 }
 

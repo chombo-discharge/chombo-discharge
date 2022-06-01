@@ -3,7 +3,7 @@ import sys
 
 # Write an options file. This should be a separate routine
 def write_template(args):
-    app_dir = args.base_dir + "/" + args.app_name
+    app_dir = args.discharge_home + '/' + args.base_dir + "/" + args.app_name
     options_filename = app_dir + "/template.inputs"
     optf = open(options_filename, 'w')
     
@@ -36,5 +36,5 @@ def write_template(args):
             optf.write('\n\n')
             f.close()
         else:
-            print 'Could not find options file (this _may_ be normal behavior) ' + opt
+            print('Could not find options file (this _may_ be normal behavior) ' + opt)
     optf.close()

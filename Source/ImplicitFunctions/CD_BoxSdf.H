@@ -17,23 +17,21 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief Class for defining a two- or three-dimensional box with arbitrary centroid and orientation.
 */
-class BoxSdf: public BaseIF {
+class BoxSdf : public BaseIF
+{
 public:
-
   /*!
     @brief Base constructor
     @param[in] a_loCorner Lower left corner
     @param[in] a_hiCorner Upper right corner
     @param[in] a_inside Object on inside or outside
   */
-  BoxSdf(const RealVect& a_loCorner, 
-	 const RealVect& a_hiCorner,
-	 const bool&     a_fluidInside);
-    
+  BoxSdf(const RealVect& a_loCorner, const RealVect& a_hiCorner, const bool& a_fluidInside);
+
   /*!
     @brief Copy constructor
     @param[in] a_inputIF Another BoxSdf
@@ -48,15 +46,16 @@ public:
   /*!
     @brief Test if object is on inside or outside
   */
-  virtual Real value(const RealVect& a_pos) const;
+  virtual Real
+  value(const RealVect& a_pos) const;
 
   /*!
     @brief IF Factory method
   */
-  virtual BaseIF* newImplicitFunction() const;
+  virtual BaseIF*
+  newImplicitFunction() const;
 
 protected:
-  
   /*!
     @brief Lower left corner
   */

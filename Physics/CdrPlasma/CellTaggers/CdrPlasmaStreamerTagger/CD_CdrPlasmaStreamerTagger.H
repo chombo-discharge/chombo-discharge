@@ -18,14 +18,14 @@
 
 namespace Physics {
   namespace CdrPlasma {
-  
+
     /*!
       @brief Class which implements CdrPlasmaFieldTagger and refines cells based on the criterion alpha*dx > threshold or on the curvature of the
       electric field.
     */
-    class CdrPlasmaStreamerTagger : public CdrPlasmaFieldTagger {
+    class CdrPlasmaStreamerTagger : public CdrPlasmaFieldTagger
+    {
     public:
-  
       /*!
 	@brief Disallowed weak constructor. 
       */
@@ -39,9 +39,9 @@ namespace Physics {
 	@param[in] a_computationalGeometry Computational geometry
       */
       CdrPlasmaStreamerTagger(const RefCountedPtr<CdrPlasmaPhysics>&      a_physics,
-			      const RefCountedPtr<CdrPlasmaStepper>&      a_timeStepper,
-			      const RefCountedPtr<AmrMesh>&               a_amr,
-			      const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
+                              const RefCountedPtr<CdrPlasmaStepper>&      a_timeStepper,
+                              const RefCountedPtr<AmrMesh>&               a_amr,
+                              const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
       /*!
 	@brief Destructor
@@ -51,12 +51,14 @@ namespace Physics {
       /*!
 	@brief Parse class options
       */
-      virtual void parseOptions() override;
+      virtual void
+      parseOptions() override;
 
       /*!
 	@brief Parse runtime options. 
       */
-      virtual void parseRuntimeOptions() override;      
+      virtual void
+      parseRuntimeOptions() override;
 
       /*!
 	@brief Compute tracer fields. 
@@ -70,15 +72,16 @@ namespace Physics {
 	@param[in] a_maxGradElectricField Maximum value of |grad(|E|)|
 	@return This should return a Vector of values whose length is equal to the number of tracer fields the subclasses uses. 
       */
-      virtual Vector<Real> tracer(const RealVect a_pos,
-				  const Real     a_time,
-				  const Real     a_dx,
-				  const RealVect a_electricField,
-				  const Real     a_minElectricField,
-				  const Real     a_maxElectricField,
-				  const RealVect a_gradElectricField,
-				  const Real     a_minGradElectricField,
-				  const Real     a_maxGradElectricField) const override;      
+      virtual Vector<Real>
+      tracer(const RealVect a_pos,
+             const Real     a_time,
+             const Real     a_dx,
+             const RealVect a_electricField,
+             const Real     a_minElectricField,
+             const Real     a_maxElectricField,
+             const RealVect a_gradElectricField,
+             const Real     a_minGradElectricField,
+             const Real     a_maxGradElectricField) const override;
 
       /*!
 	@brief Cell-coarsening method.
@@ -90,12 +93,13 @@ namespace Physics {
 	@param[in] a_gradTracers Gradient of tracer fields
 	@return Return true if the cell should be coarsened and false otherwise. 
       */
-      virtual bool coarsenCell(const RealVect         a_pos,
-			       const Real             a_time,
-			       const Real             a_dx,
-			       const int              a_lvl,
-			       const Vector<Real>     a_tracers,
-			       const Vector<RealVect> a_gradTracers) const override;
+      virtual bool
+      coarsenCell(const RealVect         a_pos,
+                  const Real             a_time,
+                  const Real             a_dx,
+                  const int              a_lvl,
+                  const Vector<Real>     a_tracers,
+                  const Vector<RealVect> a_gradTracers) const override;
 
       /*!
 	@brief Cell-refinement method.
@@ -107,15 +111,15 @@ namespace Physics {
 	@param[in] a_gradTracers Gradient of tracer fields
 	@return True if the cell should be refined and false otherwise. 
       */
-      virtual bool refineCell(const RealVect         a_pos,
-			      const Real             a_time,
-			      const Real             a_dx,
-			      const int              a_lvl,
-			      const Vector<Real>     a_tracers,
-			      const Vector<RealVect> a_gradTracers) const override;
-      
-    protected:
+      virtual bool
+      refineCell(const RealVect         a_pos,
+                 const Real             a_time,
+                 const Real             a_dx,
+                 const int              a_lvl,
+                 const Vector<Real>     a_tracers,
+                 const Vector<RealVect> a_gradTracers) const override;
 
+    protected:
       /*!
 	@brief Threshold for coarsening based on curvature
       */
@@ -125,7 +129,7 @@ namespace Physics {
 	@brief Threshold for refinement based on curvature
       */
       Real m_refiCurv;
-  
+
       /*!
 	@brief Threshold for refinement based on Townsend ionization coefficient. 
       */
@@ -141,8 +145,8 @@ namespace Physics {
       */
       int m_maxCoarsenLevel;
     };
-  }
-}
+  } // namespace CdrPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

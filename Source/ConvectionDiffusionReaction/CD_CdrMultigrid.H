@@ -27,17 +27,18 @@
 #include <CD_EBHelmholtzOpFactory.H>
 #include <CD_CdrSolver.H>
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic diffusion.
 */
-class CdrMultigrid : public CdrSolver {
+class CdrMultigrid : public CdrSolver
+{
 protected:
-
   /*!
     @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class BottomSolverType {
+  enum class BottomSolverType
+  {
     Simple,
     BiCGStab,
     GMRES
@@ -46,13 +47,13 @@ protected:
   /*!
     @brief Enum for multigrid cycle types. 
   */
-  enum class MultigridType{
+  enum class MultigridType
+  {
     VCycle,
     WCycle,
   };
-  
-public:
 
+public:
   /*!
     @brief Constructor
   */
@@ -66,22 +67,26 @@ public:
   /*!
     @brief Parse class options
   */
-  virtual void parseOptions() = 0;
+  virtual void
+  parseOptions() = 0;
 
   /*!
     @brief Parse class options
   */
-  virtual void parseRuntimeOptions() = 0;
+  virtual void
+  parseRuntimeOptions() = 0;
 
   /*!
     @brief Register operator
   */
-  virtual void registerOperators() override;
+  virtual void
+  registerOperators() override;
 
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocateInternals() override;
+  virtual void
+  allocateInternals() override;
 
   /*!
     @brief Compute div(J) explicitly, where J = nV - D*grad(n)
@@ -92,12 +97,13 @@ public:
     @param[in]  a_ebFlux           If true, the embedded boundary flux will injected and included in div(J)
     @note a_phi is non-const because ghost cells will be re-filled
   */
-  virtual void computeDivJ(EBAMRCellData& a_divJ,
-			   EBAMRCellData& a_phi,
-			   const Real     a_extrapDt,
-			   const bool     a_conservativeOnly,			   
-			   const bool     a_ebFlux,
-			   const bool     a_domainFlux) override final;
+  virtual void
+  computeDivJ(EBAMRCellData& a_divJ,
+              EBAMRCellData& a_phi,
+              const Real     a_extrapDt,
+              const bool     a_conservativeOnly,
+              const bool     a_ebFlux,
+              const bool     a_domainFlux) override final;
 
   /*!
     @brief Compute div(v*phi) explicitly
@@ -109,12 +115,13 @@ public:
     @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
-  virtual void computeDivF(EBAMRCellData& a_divF,
-			   EBAMRCellData& a_phi,
-			   const Real     a_extrapDt,
-			   const bool     a_conservativeOnly,
-			   const bool     a_ebFlux,
-			   const bool     a_domainFlux) override final;
+  virtual void
+  computeDivF(EBAMRCellData& a_divF,
+              EBAMRCellData& a_phi,
+              const Real     a_extrapDt,
+              const bool     a_conservativeOnly,
+              const bool     a_ebFlux,
+              const bool     a_domainFlux) override final;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
@@ -125,12 +132,13 @@ public:
     @param[in]  a_useEbFlux        If true, the embedded boundary flux will be included in div(D)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
-  virtual void computeDivD(EBAMRCellData& a_divD,
-			   EBAMRCellData& a_phi,
-			   const bool     a_conservativeOnly,			   
-			   const bool     a_ebFlux,
-			   const bool     a_domainFlux) override final;
-  
+  virtual void
+  computeDivD(EBAMRCellData& a_divD,
+              EBAMRCellData& a_phi,
+              const bool     a_conservativeOnly,
+              const bool     a_ebFlux,
+              const bool     a_domainFlux) override final;
+
   /*!
     @brief Implicit diffusion Euler advance with source term. 
     @details This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and
@@ -140,10 +148,11 @@ public:
     @param[in]    a_source Source term. Should be weighted by the volume fraction. 
     @param[in]    a_dt     Time step.
   */
-  virtual void advanceEuler(EBAMRCellData&       a_newPhi,
-			    const EBAMRCellData& a_oldPhi,
-			    const EBAMRCellData& a_source,
-			    const Real           a_dt) override final;
+  virtual void
+  advanceEuler(EBAMRCellData&       a_newPhi,
+               const EBAMRCellData& a_oldPhi,
+               const EBAMRCellData& a_source,
+               const Real           a_dt) override final;
 
   /*!
     @brief Implicit diffusion Crank-Nicholson advance with source term.
@@ -154,14 +163,13 @@ public:
     @param[in]    a_source Source term. 
     @param[in]    a_dt     Time step
   */
-  virtual void advanceCrankNicholson(EBAMRCellData&       a_newPhi,
-				     const EBAMRCellData& a_oldPhi,
-				     const EBAMRCellData& a_source,
-				     const Real           a_dt) override final;
-
+  virtual void
+  advanceCrankNicholson(EBAMRCellData&       a_newPhi,
+                        const EBAMRCellData& a_oldPhi,
+                        const EBAMRCellData& a_source,
+                        const Real           a_dt) override final;
 
 protected:
-
   /*!
     @brief Relaxation type for gmg
   */
@@ -171,11 +179,11 @@ protected:
     @brief GMG multigrid type
   */
   MultigridType m_multigridType;
-  
+
   /*!
     @brief Geometric multigrid solver
   */
-  RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_multigridSolver;
+  RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB>>> m_multigridSolver;
 
   /*!
     @brief Operator factory
@@ -185,7 +193,7 @@ protected:
   /*!
     @brief Conjugate gradient solver bottom MG level
   */
-  BiCGStabSolver<LevelData<EBCellFAB> > m_bicgstab;
+  BiCGStabSolver<LevelData<EBCellFAB>> m_bicgstab;
 
   /*!
     @brief Simple solver
@@ -195,7 +203,7 @@ protected:
   /*!
     @brief GMRES solver
   */
-  GMRESSolver<LevelData<EBCellFAB> > m_gmres;
+  GMRESSolver<LevelData<EBCellFAB>> m_gmres;
 
   /*!
     @brief Data which is always zero. 
@@ -261,7 +269,7 @@ protected:
     @brief Multigrid tolerance
   */
   Real m_multigridExitTolerance;
-  
+
   /*!
     @brief Multigrid hand
   */
@@ -270,29 +278,34 @@ protected:
   /*!
     @brief Advection-only extrapolation to faces
   */
-  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;
+  virtual void
+  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;
 
   /*!
     @brief Set up diffusion solver
   */
-  virtual void setupDiffusionSolver();
+  virtual void
+  setupDiffusionSolver();
 
   /*!
     @brief Setup the operator factory
   */
-  virtual void setupHelmholtzFactory();
+  virtual void
+  setupHelmholtzFactory();
 
   /*!
     @brief Setup multigrid
   */
-  virtual void setupMultigrid();
+  virtual void
+  setupMultigrid();
 
   /*!
     @brief Reset alpha and beta-coefficients in the multigrid solvers
     @param[in] a_alpha Alpha-coefficient for EBHelmholtzOp
     @param[in] a_beta  Beta-coefficient for EBHelmholtzOp
   */
-  virtual void resetAlphaAndBeta(const Real a_alpha, const Real a_beta);
+  virtual void
+  resetAlphaAndBeta(const Real a_alpha, const Real a_beta);
 
   /*!
     @brief Compute kappa * L(phi) using the multigrid operator. This is different from computeDivD.
@@ -300,19 +313,22 @@ protected:
     @param[in] a_phi        Cell-centered state
     @note This will reset the alpha and beta coefficients. 
   */
-  virtual void computeKappaLphi(EBAMRCellData& a_kappaLphi, const EBAMRCellData& a_phi);
+  virtual void
+  computeKappaLphi(EBAMRCellData& a_kappaLphi, const EBAMRCellData& a_phi);
 
   /*!
     @brief Parse solver settings for geometric multigrid
   */
-  virtual void parseMultigridSettings();
+  virtual void
+  parseMultigridSettings();
 
   /*!
     @brief Write output data to a_output
     @param[inout] a_output Output data holder.
     @param[inout] a_icomp  Starting component where this solver begins writing the output. 
   */
-  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp) override final;
+  virtual void
+  writePlotData(EBAMRCellData& a_output, int& a_comp) override final;
 };
 
 #include <CD_NamespaceFooter.H>

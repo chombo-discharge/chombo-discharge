@@ -25,9 +25,9 @@
 /*!
   @brief Base class for passing domain boundary conditions into EBHelmholtzOp. 
 */
-class EBHelmholtzDomainBC {
+class EBHelmholtzDomainBC
+{
 public:
-
   /*!
     @brief Constructor. 
   */
@@ -51,12 +51,14 @@ public:
   /*!
     @brief Disallowed - don't see why you would need it.
   */
-  EBHelmholtzDomainBC& operator=(const EBHelmholtzDomainBC& a_other) = delete;
+  EBHelmholtzDomainBC&
+  operator=(const EBHelmholtzDomainBC& a_other) = delete;
 
   /*!
     @brief Disallowed - don't see why you would need it.
   */
-  EBHelmholtzDomainBC& operator=(const EBHelmholtzDomainBC&& a_other) = delete;
+  EBHelmholtzDomainBC&
+  operator=(const EBHelmholtzDomainBC&& a_other) = delete;
 
   /*!
     @brief Define function
@@ -66,11 +68,12 @@ public:
     @param[in] a_dx     Grid resolution
     @note This sets the internals for the BC object. This is called by EBHelmholtzOp when it defines stencils. 
   */
-  virtual void define(const Location::Cell                        a_dataLocation,
-		      const EBLevelGrid&                          a_eblg,
-		      const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
-		      const RealVect&                             a_probLo,
-		      const Real                                  a_dx);
+  virtual void
+  define(const Location::Cell                       a_dataLocation,
+         const EBLevelGrid&                         a_eblg,
+         const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
+         const RealVect&                            a_probLo,
+         const Real                                 a_dx);
 
   /*!
     @brief Get face flux. This is for regular cells. 
@@ -82,12 +85,13 @@ public:
     @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
     @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
   */
-  virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux,
-			   const BaseFab<Real>&  a_phi,
-			   const int&            a_dir,
-			   const Side::LoHiSide& a_side,
-			   const DataIndex&      a_dit,
-			   const bool            a_useHomogeneous) const = 0;
+  virtual void
+  getFaceFlux(BaseFab<Real>&        a_faceFlux,
+              const BaseFab<Real>&  a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const = 0;
 
   /*!
     @brief Get face flux. This is for irregular cells. 
@@ -98,15 +102,15 @@ public:
     @param[in] a_dit            Data index
     @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
   */
-  virtual Real getFaceFlux(const VolIndex&       a_vof,
-			   const EBCellFAB&      a_phi,
-			   const int&            a_dir,
-			   const Side::LoHiSide& a_side,
-			   const DataIndex&      a_dit,
-			   const bool            a_useHomogeneous) const = 0;			   
+  virtual Real
+  getFaceFlux(const VolIndex&       a_vof,
+              const EBCellFAB&      a_phi,
+              const int&            a_dir,
+              const Side::LoHiSide& a_side,
+              const DataIndex&      a_dit,
+              const bool            a_useHomogeneous) const = 0;
 
 protected:
-
   /*!
     @brief Component that everything is defined for. Always have m_comp = 0
   */
@@ -140,7 +144,7 @@ protected:
   /*!
     @brief B-coefficent. 
   */
-  RefCountedPtr<LevelData<EBFluxFAB> > m_Bcoef;
+  RefCountedPtr<LevelData<EBFluxFAB>> m_Bcoef;
 
   /*!
     @brief Returns the cell-centered position at the boundary. 
@@ -148,8 +152,8 @@ protected:
     @param[in] a_dir  Face coordinate direction
     @param[in] a_side Lo/Hi side
   */
-  inline
-  RealVect getBoundaryPosition(const IntVect& a_iv, const int& a_dir, const Side::LoHiSide& a_side) const;
+  inline RealVect
+  getBoundaryPosition(const IntVect& a_iv, const int& a_dir, const Side::LoHiSide& a_side) const;
 
   /*!
     @brief Utility function which multiplies the flux (or actually, dphi/dn) by the B-coefficient. This is used 
@@ -162,11 +166,11 @@ protected:
     face/edge. So we need to shift the box over when we multiply. Because both Dirichlet, Neumann, and the Robin Bcs need to do this,
     I'm putting this routine in the parent class. 
   */
-  void multiplyByBcoef(BaseFab<Real>&       a_flux,
-		       const BaseFab<Real>& a_bco,
-		       const int            a_dir,
-		       const Side::LoHiSide a_side) const;
-
+  void
+  multiplyByBcoef(BaseFab<Real>&       a_flux,
+                  const BaseFab<Real>& a_bco,
+                  const int            a_dir,
+                  const Side::LoHiSide a_side) const;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -19,13 +19,13 @@
 /*!
   @brief Factory class for making jump boundary condition objects in a multifluid MFHelmholtzOp context. 
 */
-class MFHelmholtzJumpBCFactory {
+class MFHelmholtzJumpBCFactory
+{
 public:
-
   /*!
     @brief Alias to cut down on typing
-  */  
-  using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB> >;  
+  */
+  using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB>>;
 
   /*!
     @brief Weak constructor. 
@@ -48,15 +48,15 @@ public:
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
   */
-  virtual RefCountedPtr<MFHelmholtzJumpBC> create(const Location::Cell a_dataLocation,
-						  const MFLevelGrid&   a_mflg,
-						  const BcoefPtr&      a_Bcoef,
-						  const Real           a_dx,
-						  const int            a_order,
-						  const int            a_weight,
-						  const int            a_radius,
-						  const int            a_ghostCF);
-
+  virtual RefCountedPtr<MFHelmholtzJumpBC>
+  create(const Location::Cell a_dataLocation,
+         const MFLevelGrid&   a_mflg,
+         const BcoefPtr&      a_Bcoef,
+         const Real           a_dx,
+         const int            a_order,
+         const int            a_weight,
+         const int            a_radius,
+         const int            a_ghostCF);
 };
 
 #include <CD_NamespaceFooter.H>

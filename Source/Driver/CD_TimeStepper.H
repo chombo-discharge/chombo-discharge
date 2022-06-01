@@ -24,9 +24,9 @@
   @details This class is used by Driver for advancing sets of equations. In short, this class should implement a time-stepping routine for a
   set of solvers. One should also implement routines for setting up the solvers, allocating necessary memory, regridding etc. 
 */
-class TimeStepper {
+class TimeStepper
+{
 public:
-
   /*!
     @brief Default constructor (does nothing)
   */
@@ -41,55 +41,65 @@ public:
     @brief Set AmrMesh
     @param[in] a_amr AmrMesh
   */
-  void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
+  void
+  setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set the computational geometry
     @param[in] a_computationalGeometry The computational geometry.
   */
-  void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
+  void
+  setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /*!
     @brief Set up solvers
   */
-  virtual void setupSolvers() = 0;
+  virtual void
+  setupSolvers() = 0;
 
   /*!
     @brief Allocate data for the time stepper and solvers. 
   */
-  virtual void allocate() = 0;
+  virtual void
+  allocate() = 0;
 
   /*!
     @brief Fill solvers with initial data
   */
-  virtual void initialData() = 0;
+  virtual void
+  initialData() = 0;
 
   /*!
     @brief Post-initialize operations to be performed after filling solvers with initialData.
   */
-  virtual void postInitialize() = 0;
+  virtual void
+  postInitialize() = 0;
 
   /*!
     @brief Post-initialize operations to be performed after filling solvers with data read from checkpoint files. 
   */
-  virtual void postCheckpointSetup() = 0;
+  virtual void
+  postCheckpointSetup() = 0;
 
   /*!
     @brief Register realms to be used for the simulation.
   */
-  virtual void registerRealms() = 0;
+  virtual void
+  registerRealms() = 0;
 
   /*!
     @brief Register operators to be used for the simulation
   */
-  virtual void registerOperators() = 0;
+  virtual void
+  registerOperators() = 0;
 
   /*!
     @brief Parse runtime options
     @details Override this routine if your time stepper can use run-time configuration of the solvers that it advances. This can e.g.
     be the CFL condition.
   */
-  virtual void parseRuntimeOptions();
+  virtual void
+  parseRuntimeOptions();
 
 #ifdef CH_USE_HDF5
   /*!  
@@ -98,7 +108,8 @@ public:
     @param[in]    a_lvl    Grid level
     @details Implement this routine for checkpointing data for restarts. This will typically call the solvers' checkpointing routine. 
   */
-  virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const = 0;
+  virtual void
+  writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const = 0;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -108,7 +119,8 @@ public:
     @param[in]    a_lvl    Grid level
     @details Implement this routine for reading data for restarts. This will typically call the solvers' checkponiting routine. 
   */
-  virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) = 0;
+  virtual void
+  readCheckpointData(HDF5Handle& a_handle, const int a_lvl) = 0;
 #endif
 
   /*!
@@ -117,14 +129,16 @@ public:
     @param[in]    a_plotVariableNames Plot variable names.
     @param[inout] a_icomp             Starting component in a_output to begin at. 
   */
-  virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const = 0;
+  virtual void
+  writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const = 0;
 
   /*!
     @brief Get the number of plot variables for this time stepper. 
     @details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
     @return Returns number of plot variables that will be written during writePlotData
   */
-  virtual int getNumberOfPlotVariables() const = 0;
+  virtual int
+  getNumberOfPlotVariables() const = 0;
 
   /*!
     @brief Get computational loads to be checkpointed. 
@@ -140,14 +154,16 @@ public:
     @return Returns computational loads for each box on grid level a_level. 
     
   */
-  virtual Vector<long int> getCheckpointLoads(const std::string a_realm, const int a_level) const;
+  virtual Vector<long int>
+  getCheckpointLoads(const std::string a_realm, const int a_level) const;
 
   /*!
     @brief Compute a time step to be used by Driver. 
     @param[out] a_dt       Time step to be used.
     @param[out] a_timeCode Identifier for how the time step was computed. 
   */
-  virtual void computeDt(Real& a_dt, TimeCode& a_timeCode) = 0;
+  virtual void
+  computeDt(Real& a_dt, TimeCode& a_timeCode) = 0;
 
   /*!
     @brief Advancement method. The implementation of this method should advance all equations of motion
@@ -155,7 +171,8 @@ public:
     @return    Returns the time step that was used. 
     @note The return value does not need to equal a_dt. Adaptive time stepping methods will generally return != a_dt.
   */
-  virtual Real advance(const Real a_dt) = 0;
+  virtual Real
+  advance(const Real a_dt) = 0;
 
   /*!
     @brief Synchronzie solver times and time steps
@@ -163,13 +180,15 @@ public:
     @param[in] a_time Time (in seconds)
     @param[in] a_dt   Time step that was used. 
   */
-  virtual void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) = 0;
+  virtual void
+  synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) = 0;
 
   /*!
     @brief Print a step report. 
     @details This is called by Driver after time step. The routine can be used to display use information about the simulation progress. 
   */
-  virtual void printStepReport() = 0;
+  virtual void
+  printStepReport() = 0;
 
   /*!
     @brief Perform pre-regrid operations.
@@ -178,7 +197,8 @@ public:
     @param[in] a_lmin           The coarsest level that changes
     @param[in] a_oldFinestLevel The finest level before the regrid. 
   */
-  virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) = 0;
+  virtual void
+  preRegrid(const int a_lmin, const int a_oldFinestLevel) = 0;
 
   /*!
     @brief Time stepper regrid method. 
@@ -186,26 +206,30 @@ public:
     @param[in] a_oldFinestLevel The finest level before the regrid. 
     @param[in] a_newFinestLevel The finest level after the regrid. 
   */
-  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
+  virtual void
+  regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
 
   /*!
     @brief Perform post-regrid operations. 
     @details This includes all operations to be done AFTER interpolating data to new grids. 
   */
-  virtual void postRegrid() = 0;  
+  virtual void
+  postRegrid() = 0;
 
   /*!
     @brief Fuction which can have Driver do regrids at arbitrary points in the simulation. 
     @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of whether or not it is 
     on the regular "regrid intervals". 
   */
-  virtual bool needToRegrid();
+  virtual bool
+  needToRegrid();
 
   /*!
     @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. 
     @param[in] a_realm Realm name
   */
-  virtual bool loadBalanceThisRealm(const std::string a_realm) const;
+  virtual bool
+  loadBalanceThisRealm(const std::string a_realm) const;
 
   /*!
     @brief Load balance grid boxes for a specified realm. 
@@ -219,15 +243,15 @@ public:
     uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and
     he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance(Vector<int>, Vector<T>, Vector<Box>).
   */
-  virtual void loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
-				Vector<Vector<Box> >&            a_boxes,
-				const std::string                a_realm,
-				const Vector<DisjointBoxLayout>& a_grids,
-				const int                        a_lmin,
-				const int                        a_finestLevel);
+  virtual void
+  loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
+                   Vector<Vector<Box>>&             a_boxes,
+                   const std::string                a_realm,
+                   const Vector<DisjointBoxLayout>& a_grids,
+                   const int                        a_lmin,
+                   const int                        a_finestLevel);
 
 protected:
-
   /*!
     @brief Class verbosity
   */
@@ -237,7 +261,7 @@ protected:
     @brief Time step
   */
   int m_timeStep;
-  
+
   /*!
     @brief TIme
   */

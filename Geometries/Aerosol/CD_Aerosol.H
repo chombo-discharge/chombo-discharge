@@ -19,9 +19,9 @@
 /*!
   @brief Simple class for making a bunch of (manually constructored) dielectric sphere
 */
-class Aerosol : public ComputationalGeometry {
+class Aerosol : public ComputationalGeometry
+{
 public:
-
   /*!
     @brief Constructor
   */
@@ -29,7 +29,7 @@ public:
 
   /*!
     @brief Destructor
-  */  
+  */
   ~Aerosol();
 };
 

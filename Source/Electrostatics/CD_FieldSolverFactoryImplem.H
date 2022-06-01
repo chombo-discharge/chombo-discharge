@@ -17,21 +17,24 @@
 #include <CD_NamespaceHeader.H>
 
 template <class T>
-FieldSolverFactory<T>::FieldSolverFactory(){
+FieldSolverFactory<T>::FieldSolverFactory()
+{
   CH_TIME("FieldSolverFactory<T>::FieldSolverFactory()");
 }
 
-
 template <class T>
-FieldSolverFactory<T>::~FieldSolverFactory(){
-  CH_TIME("FieldSolverFactory<T>::~FieldSolverFactory()");  
+FieldSolverFactory<T>::~FieldSolverFactory()
+{
+  CH_TIME("FieldSolverFactory<T>::~FieldSolverFactory()");
 }
 
 template <class T>
-RefCountedPtr<FieldSolver> FieldSolverFactory<T>::newSolver() const {
+RefCountedPtr<FieldSolver>
+FieldSolverFactory<T>::newSolver() const
+{
   CH_TIME("FieldSolverFactory<T>::newSolver()");
-  
-  return RefCountedPtr<FieldSolver> (new T);
+
+  return RefCountedPtr<FieldSolver>(new T);
 }
 
 #include <CD_NamespaceFooter.H>

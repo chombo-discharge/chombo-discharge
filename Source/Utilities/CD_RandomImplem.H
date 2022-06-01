@@ -23,31 +23,33 @@
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
-inline
-void Random::seed() {
+inline void
+Random::seed()
+{
 
   // Set the RNG seed.
   ParmParse pp("Random");
 
-  if(pp.contains("seed")){
+  if (pp.contains("seed")) {
     int seed;
     pp.get("seed", seed);
-    if(seed < 0){
+    if (seed < 0) {
       Random::setRandomSeed();
     }
-    else{
+    else {
       Random::setSeed(seed);
     }
   }
-  else{
+  else {
     Random::setSeed(0);
   }
 
   s_seeded = true;
 }
 
-inline
-void Random::setSeed(const int a_seed) {
+inline void
+Random::setSeed(const int a_seed)
+{
 #ifdef CH_MPI
   const int seed = a_seed + procID();
 #else
@@ -59,114 +61,121 @@ void Random::setSeed(const int a_seed) {
   s_seeded = true;
 }
 
-inline
-void Random::setRandomSeed() {
+inline void
+Random::setRandomSeed()
+{
 
   int seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-  // Special hook for MPI -- master rank broadcasts the seed and everyone increments by their processor ID. 
+  // Special hook for MPI -- master rank broadcasts the seed and everyone increments by their processor ID.
 #ifdef CH_MPI
   MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
 
-  seed += procID();  
+  seed += procID();
 #endif
 
   // Init the RNG
   s_rng = std::mt19937_64(seed);
 
-  // Duh. 
-  s_seeded = true;  
+  // Duh.
+  s_seeded = true;
 }
 
 template <typename T>
-inline
-T Random::getPoisson(const Real a_mean) {
+inline T
+Random::getPoisson(const Real a_mean)
+{
   CH_assert(s_seeded);
 
-  constexpr T zero = T(0);  
+  constexpr T zero = T(0);
 
   T ret = 0;
 
-  if(a_mean < 250.0){
+  if (a_mean < 250.0) {
     std::poisson_distribution<T> poisson(a_mean);
 
     ret = poisson(s_rng);
   }
-  else{
+  else {
     std::normal_distribution<Real> normal(a_mean, sqrt(a_mean));
 
     ret = T(normal(s_rng));
 
-    ret = std::max(zero, ret);    
+    ret = std::max(zero, ret);
   }
 
   return ret;
 }
 
-inline
-Real Random::getUniformReal01() {
-  CH_assert(s_seeded);  
+inline Real
+Random::getUniformReal01()
+{
+  CH_assert(s_seeded);
 
   return s_uniform01(s_rng);
 }
 
-inline
-Real Random::getUniformReal11() {
-  CH_assert(s_seeded);    
-  
+inline Real
+Random::getUniformReal11()
+{
+  CH_assert(s_seeded);
+
   return s_uniform11(s_rng);
 }
 
-inline
-Real Random::getNormal01() {
-  CH_assert(s_seeded);      
-  
+inline Real
+Random::getNormal01()
+{
+  CH_assert(s_seeded);
+
   return s_normal01(s_rng);
 }
 
-inline
-RealVect Random::getDirection() {
-  CH_assert(s_seeded);        
-  
+inline RealVect
+Random::getDirection()
+{
+  CH_assert(s_seeded);
+
   constexpr Real safety = 1.E-12;
 
-#if CH_SPACEDIM==2
+#if CH_SPACEDIM == 2
   Real x1 = 2.0;
   Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < safety){
+  Real r  = x1 * x1 + x2 * x2;
+  while (r >= 1.0 || r < safety) {
     x1 = Random::getUniformReal11();
     x2 = Random::getUniformReal11();
-    r  = x1*x1 + x2*x2;
+    r  = x1 * x1 + x2 * x2;
   }
 
-  return RealVect(x1,x2)/sqrt(r);
-#elif CH_SPACEDIM==3
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < safety){
+  return RealVect(x1, x2) / sqrt(r);
+#elif CH_SPACEDIM == 3
+  Real      x1   = 2.0;
+  Real      x2   = 2.0;
+  Real      r    = x1 * x1 + x2 * x2;
+  while (r >= 1.0 || r < safety) {
     x1 = Random::getUniformReal11();
-    x2 = Random::getUniformReal11();    
-    r  = x1*x1 + x2*x2;
+    x2 = Random::getUniformReal11();
+    r  = x1 * x1 + x2 * x2;
   }
 
-  const Real x = 2*x1*sqrt(1-r);
-  const Real y = 2*x2*sqrt(1-r);
-  const Real z = 1 - 2*r;
+  const Real x = 2 * x1 * sqrt(1 - r);
+  const Real y = 2 * x2 * sqrt(1 - r);
+  const Real z = 1 - 2 * r;
 
-  return RealVect(x,y,z);
+  return RealVect(x, y, z);
 #endif
 }
 
-template<typename T>
-inline
-Real Random::get(T& a_distribution){
-  CH_assert(s_seeded);          
-  
+template <typename T>
+inline Real
+Random::get(T& a_distribution)
+{
+  CH_assert(s_seeded);
+
   return a_distribution(s_rng);
 }
 
-#include <CD_NamespaceFooter.H>  
+#include <CD_NamespaceFooter.H>
 
 #endif

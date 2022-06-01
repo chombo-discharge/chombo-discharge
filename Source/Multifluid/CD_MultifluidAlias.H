@@ -25,16 +25,17 @@
   @details To use this class, the user will call aliasMF to fetch pointers from multifluid data and have them
   point to their single-fluid counterpart. 
 */
-class MultifluidAlias {
+class MultifluidAlias
+{
 public:
-
   /*!
     @brief Alias MFCellFABs
     @param[out] a_alias Single-phase data
     @param[in]  a_phase Phase
     @param[in]  a_input Multi-phase data
   */
-  static void aliasMF(LevelData<EBCellFAB>& a_alias, const int a_phase, const LevelData<MFCellFAB>& a_input);
+  static void
+  aliasMF(LevelData<EBCellFAB>& a_alias, const int a_phase, const LevelData<MFCellFAB>& a_input);
 
   /*!
     @brief Alias MFFluxFABs
@@ -42,7 +43,8 @@ public:
     @param[in]  a_phase Phase
     @param[in]  a_input Multi-phase data
   */
-  static void aliasMF(LevelData<EBFluxFAB>& a_alias, const int a_phase, const LevelData<MFFluxFAB>& a_input);
+  static void
+  aliasMF(LevelData<EBFluxFAB>& a_alias, const int a_phase, const LevelData<MFFluxFAB>& a_input);
 
   /*!
     @brief Alias MFBaseIVFABs
@@ -50,16 +52,16 @@ public:
     @param[in]  a_phase Phase
     @param[in]  a_input Multi-phase data
   */
-  static void aliasMF(LevelData<BaseIVFAB<Real> >& a_alias, const int a_phase, const LevelData<MFBaseIVFAB>& a_input);
+  static void
+  aliasMF(LevelData<BaseIVFAB<Real>>& a_alias, const int a_phase, const LevelData<MFBaseIVFAB>& a_input);
 
 private:
-  
   /*!
     @brief Class for aliasing. This is used under the hood in MultifluidAlias::aliasMF
   */
-  class MfCellAliasFactory : public DataFactory<EBCellFAB> {
+  class MfCellAliasFactory : public DataFactory<EBCellFAB>
+  {
   public:
-
     /*!
       @brief Don't see what a weak constructor would do here.
     */
@@ -73,18 +75,19 @@ private:
     /*!
       @brief Factory method
     */
-    virtual EBCellFAB* create(const Box& box, int ncomps, const DataIndex& a_datInd) const override;
+    virtual EBCellFAB*
+    create(const Box& box, int ncomps, const DataIndex& a_datInd) const override;
 
     /*!
       @brief Return false (data is not our responsibility)
     */
-    virtual bool callDelete() const override;
+    virtual bool
+    callDelete() const override;
 
   private:
-
     /*!
       @brief Object
-    */ 
+    */
     LevelData<MFCellFAB>* m_mf;
 
     /*!
@@ -92,13 +95,13 @@ private:
     */
     int m_phase;
   };
-  
+
   /*!
     @brief Class for aliasing. This is used under the hood in MultifluidAlias::aliasMF
   */
-  class MfFluxAliasFactory : public DataFactory<EBFluxFAB> {
+  class MfFluxAliasFactory : public DataFactory<EBFluxFAB>
+  {
   public:
-
     /*!
       @brief Don't see what a weak constructor would do here.
     */
@@ -112,18 +115,19 @@ private:
     /*!
       @brief Factory method
     */
-    virtual EBFluxFAB* create(const Box& box, int ncomps, const DataIndex& a_datInd) const override;
+    virtual EBFluxFAB*
+    create(const Box& box, int ncomps, const DataIndex& a_datInd) const override;
 
     /*!
       @brief Return false (data is not our responsibility)
     */
-    virtual bool callDelete() const override;
+    virtual bool
+    callDelete() const override;
 
   private:
-
     /*!
       @brief Object
-    */ 
+    */
     LevelData<MFFluxFAB>* m_mf;
 
     /*!
@@ -135,9 +139,9 @@ private:
   /*!
     @brief Class for aliasing. This is used under the hood in MultifluidAlias::aliasMF
   */
-  class MfIVAliasFactory : public DataFactory<BaseIVFAB<Real> > {
+  class MfIVAliasFactory : public DataFactory<BaseIVFAB<Real>>
+  {
   public:
-
     /*!
       @brief Don't see what a weak constructor would do here.
     */
@@ -151,18 +155,19 @@ private:
     /*!
       @brief Factory method
     */
-    virtual BaseIVFAB<Real>* create(const Box& box, int ncomps, const DataIndex& a_datInd) const override;
+    virtual BaseIVFAB<Real>*
+    create(const Box& box, int ncomps, const DataIndex& a_datInd) const override;
 
     /*!
       @brief Return false (data is not our responsibility)
     */
-    virtual bool callDelete() const override;
+    virtual bool
+    callDelete() const override;
 
   private:
-
     /*!
       @brief Object
-    */ 
+    */
     LevelData<MFBaseIVFAB>* m_mf;
 
     /*!
@@ -174,4 +179,4 @@ private:
 
 #include <CD_NamespaceFooter.H>
 
-#endif 
+#endif

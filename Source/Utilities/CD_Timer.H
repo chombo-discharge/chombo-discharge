@@ -27,9 +27,9 @@
 /*!
   @brief Class which is used for run-time monitoring of events
 */
-class Timer {
+class Timer
+{
 public:
-
   /*!
     @brief Clock implements
   */
@@ -48,26 +48,23 @@ public:
   /*!
     @brief Static function which returns the time (in seconds) between now and an arbitrary time in the past
   */
-  inline
-  static Real wallClock();
+  inline static Real
+  wallClock();
 
   /*!
     @brief Default constructor. This creates a timer without any timer events and without a name. 
   */
-  inline
-  Timer() = default;
+  inline Timer() = default;
 
   /*!
     @brief Default constructor. This creates a timer without any timer events and without a name. 
   */
-  inline
-  Timer(const std::string a_process);  
+  inline Timer(const std::string a_process);
 
   /*!
     @brief Destructor
   */
-  inline
-  ~Timer();
+  inline ~Timer();
 
   /*!
     @brief Copy construction
@@ -79,23 +76,24 @@ public:
     @brief Copy assignement
     @param[in] a_other Other Timer
   */
-  Timer& operator=(const Timer& a_other) = default;
+  Timer&
+  operator=(const Timer& a_other) = default;
 
   /*!
     @brief Start an event
     @param[in] a_event Event name
     @note This will give a run-time error if the event has already been started (i.e. startEvent(a_event) has not been called prior). 
   */
-  inline
-  void startEvent(const std::string a_event) noexcept;
+  inline void
+  startEvent(const std::string a_event) noexcept;
 
   /*!
     @brief Stop an event
     @param[in] a_event Event name
     @note This will give a run-time error if the event has not already been started (i.e. startEvent(a_event) has not been called prior). 
   */
-  inline
-  void stopEvent(const std::string a_event) noexcept;
+  inline void
+  stopEvent(const std::string a_event) noexcept;
 
   /*!
     @brief Print all timed events to cout.
@@ -103,23 +101,23 @@ public:
     are not counted towards the elapsed time. 
     @param[in] a_localReportOnly If true, no reduction over mpi
   */
-  inline
-  void eventReport(std::ostream& a_outputStream, const bool a_localReportOnly = false) const noexcept;
+  inline void
+  eventReport(std::ostream& a_outputStream, const bool a_localReportOnly = false) const noexcept;
 
   /*!
     @brief Print all timed events to a file.
     @details This routine prints a header row consisting of the event names. The remaining rows are the timings for the various ranks.
     @param[in] a_localReportOnly If true, no reduction over mpi
   */
-  inline
-  void writeReportToFile(const std::string a_fileName) const noexcept;
+  inline void
+  writeReportToFile(const std::string a_fileName) const noexcept;
 
 protected:
-
   /*!
     @brief Enum for indexing tuple. A rare case of where unscoped enums are useful. 
   */
-  enum EventFields {
+  enum EventFields
+  {
     StoppedEvent = 0,
     StartClock   = 1,
     ElapsedTime  = 2
@@ -134,23 +132,26 @@ protected:
     @brief Timer events. First entry is the name of the event. 
     @details The second is the identifier for the event
   */
-  std::map<std::string, std::tuple<bool, TimePoint, Duration> > m_events;
+  std::map<std::string, std::tuple<bool, TimePoint, Duration>> m_events;
 
   /*!
     @brief Print report header
   */
-  void printReportHeader(std::ostream& a_outputStream) const noexcept;
+  void
+  printReportHeader(std::ostream& a_outputStream) const noexcept;
 
   /*!
     @brief Print report tail
   */
-  void printReportTail(std::ostream& a_outputStream, const std::pair<Real, Real> a_elapsedTime) const noexcept;
+  void
+  printReportTail(std::ostream& a_outputStream, const std::pair<Real, Real> a_elapsedTime) const noexcept;
 
   /*!
     @brief Compute the total time for all finished events. 
     @return First entry is the local time. Second entry is the global time. 
   */
-  std::pair<Real, Real> computeTotalElapsedTime(const bool a_localReportOnly) const noexcept;
+  std::pair<Real, Real>
+  computeTotalElapsedTime(const bool a_localReportOnly) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

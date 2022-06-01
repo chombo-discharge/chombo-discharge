@@ -24,9 +24,9 @@
   @details This class is used for passing initial data and information into an ItoSolver. This class is required because the ItoSolver may not know about
   whether or not it will use advect/diffusion, and it is also does not know about initial conditions. All of that is supplied by this class. 
 */
-class ItoSpecies {
+class ItoSpecies
+{
 public:
-
   /*!
     @brief Default constructor, but user should set the name, charge/mobility/diffusivity etc. 
   */
@@ -50,23 +50,27 @@ public:
     @brief Return name
     @return Returns m_name
   */
-  std::string getName() const;
+  std::string
+  getName() const;
 
   /*!
     @brief Return charge
     @return Returns m_chargeNumber
   */
-  int getChargeNumber() const;
-    
+  int
+  getChargeNumber() const;
+
   /*!
     @brief Return diffusive or not
   */
-  bool isDiffusive() const;
+  bool
+  isDiffusive() const;
 
   /*!
     @brief Mobile ItoSpecies or not
   */
-  bool isMobile() const;
+  bool
+  isMobile() const;
 
   /*!
     @brief Compute the mobility as a function of energy.
@@ -74,7 +78,8 @@ public:
     @param[in] a_energy Particle energy
     @note Default implementation returns 0.0
   */
-  virtual Real mobility(const Real a_energy) const;
+  virtual Real
+  mobility(const Real a_energy) const;
 
   /*!
     @brief Compute the diffusion coefficient.
@@ -82,27 +87,29 @@ public:
     @param[in] a_energy Particle energy
     @note Default implementation returns 0.0
   */
-  virtual Real diffusion(const Real a_energy) const;
+  virtual Real
+  diffusion(const Real a_energy) const;
 
   /*!
     @brief Get initial particles -- this is called by ItoSolver when filling the solver with initial particles. 
     @return Returns m_initialParticles
   */
-  List<ItoParticle>& getInitialParticles();  
+  List<ItoParticle>&
+  getInitialParticles();
 
   /*!
     @brief Get initial particles -- this is called by ItoSolver when filling the solver with initial particles. 
     @return Returns m_initialParticles
   */
-  const List<ItoParticle>& getInitialParticles() const;
+  const List<ItoParticle>&
+  getInitialParticles() const;
 
 protected:
-
   /*!
     @brief Ito_Species name
   */
   std::string m_name;
-  
+
   /*!
     @brief Charge
   */

@@ -25,9 +25,9 @@
   @note The B-coefficient is not the same as in the Helmholtz equation...
   @note In our notation, n points into the computational domain. 
 */
-class EBHelmholtzRobinEBBCFactory : public EBHelmholtzEBBCFactory {
+class EBHelmholtzRobinEBBCFactory : public EBHelmholtzEBBCFactory
+{
 public:
-
   /*!
     @brief Constructor. 
   */
@@ -41,11 +41,7 @@ public:
     @param[in] a_B      Robin B-coefficient
     @param[in] a_C      Robin C-coefficient
   */
-  EBHelmholtzRobinEBBCFactory(const int  a_order,
-			      const int  a_weight,
-			      const Real a_A,
-			      const Real a_B,
-			      const Real a_C);
+  EBHelmholtzRobinEBBCFactory(const int a_order, const int a_weight, const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Full constructor which sets variable coefficients
@@ -55,11 +51,11 @@ public:
     @param[in] a_B      Robin B-coefficient
     @param[in] a_C      Robin C-coefficient
   */
-  EBHelmholtzRobinEBBCFactory(const int                                          a_order,
-			      const int                                          a_weight,
-			      const std::function<Real(const RealVect& a_pos) >& a_A,
-			      const std::function<Real(const RealVect& a_pos) >& a_B,
-			      const std::function<Real(const RealVect& a_pos) >& a_C);
+  EBHelmholtzRobinEBBCFactory(const int                                         a_order,
+                              const int                                         a_weight,
+                              const std::function<Real(const RealVect& a_pos)>& a_A,
+                              const std::function<Real(const RealVect& a_pos)>& a_B,
+                              const std::function<Real(const RealVect& a_pos)>& a_C);
 
   /*!
     @brief Destructor (does nothing). 
@@ -70,13 +66,15 @@ public:
     @brief Set BC order
     @param[in] a_order Order
   */
-  void setOrder(const int a_order);
+  void
+  setOrder(const int a_order);
 
   /*!
     @brief Set equation weights for least squares reconstruction. 
     @param[in] a_weight Weights
   */
-  void setWeight(const int a_weight);  
+  void
+  setWeight(const int a_weight);
 
   /*!
     @brief Set constant coefficients
@@ -84,7 +82,8 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  void setCoefficients(const Real a_A, const Real a_B, const Real a_C);
+  void
+  setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Set variable coefficients
@@ -92,18 +91,19 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  void setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
-		       const std::function<Real(const RealVect& a_pos) >& a_B,
-		       const std::function<Real(const RealVect& a_pos) >& a_C);
+  void
+  setCoefficients(const std::function<Real(const RealVect& a_pos)>& a_A,
+                  const std::function<Real(const RealVect& a_pos)>& a_B,
+                  const std::function<Real(const RealVect& a_pos)>& a_C);
 
   /*!
     @brief Factory method. 
     @return An EBHelmholtzRobinEBBC object with specified order and coefficients. 
   */
-  RefCountedPtr<EBHelmholtzEBBC> create() override;
+  RefCountedPtr<EBHelmholtzEBBC>
+  create() override;
 
 protected:
-  
   /*
     @brief Use constant for BC
   */
@@ -122,7 +122,7 @@ protected:
   /*!
     @brief Weight for least squares gradient reconstruction. 
   */
-  int m_weight;  
+  int m_weight;
 
   /*!
     @brief Constant A-coefficient

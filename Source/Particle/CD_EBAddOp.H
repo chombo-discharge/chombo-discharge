@@ -22,9 +22,9 @@
 /*!
   @brief A Copier class for making copying between BoxLayoutData<EBCellFAB> easier. This increments EBCellFABs when calling copyTo (with the correct Copier).
 */
-class EBAddOp : public LDOperator<EBCellFAB> {
+class EBAddOp : public LDOperator<EBCellFAB>
+{
 public:
-
   /*!
     @brief Constructor (does nothing)
   */
@@ -42,7 +42,8 @@ public:
     @param[in]    a_region Region
     @param[in]    a_comps  Components to do.
   */
-  virtual void linearIn(EBCellFAB& a_data,  void* a_buffer, const Box& a_region, const Interval& a_comps) const override;
+  virtual void
+  linearIn(EBCellFAB& a_data, void* a_buffer, const Box& a_region, const Interval& a_comps) const override;
 
   /*!
     @brief Operator function. Increments data with source.
@@ -53,12 +54,13 @@ public:
     @param[in]    a_src        Source data
     @param[in]    a_srcVars    Source variables
   */
-  virtual void op(EBCellFAB&       a_dst,
-		  const Box&       a_regionFrom,
-		  const Interval&  a_dstVars,
-		  const Box&       a_regionTo,
-		  const EBCellFAB& a_src,
-		  const Interval&  a_srcVars) const;
+  virtual void
+  op(EBCellFAB&       a_dst,
+     const Box&       a_regionFrom,
+     const Interval&  a_dstVars,
+     const Box&       a_regionTo,
+     const EBCellFAB& a_src,
+     const Interval&  a_srcVars) const;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -19,7 +19,8 @@
 /*!
   @brief This is a class that defines a coaxial cable geometry 
 */
-class CoaxialCable : public ComputationalGeometry {
+class CoaxialCable : public ComputationalGeometry
+{
 public:
   CoaxialCable();
   ~CoaxialCable();

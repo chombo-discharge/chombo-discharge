@@ -17,14 +17,14 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief Implicit function class describing a rod with a polygonal cross scetion. 
   @note  This is a 3D object only!
 */
-class PolygonRodIF: public BaseIF {
+class PolygonRodIF : public BaseIF
+{
 public:
-
   /*!
     @brief Base constructor
     @param[in] a_center1     One endpoint
@@ -35,13 +35,12 @@ public:
     @param[in] a_fluidInside Fluid on inside or not
   */
   PolygonRodIF(const RealVect a_center1,
-	       const RealVect a_center2,
-	       const Real     a_radius,
-	       const Real     a_cornerCurv,
-	       const int      a_numSides,
-	       const bool     a_fluidInside);
+               const RealVect a_center2,
+               const Real     a_radius,
+               const Real     a_cornerCurv,
+               const int      a_numSides,
+               const bool     a_fluidInside);
 
-    
   /*!
     @brief Copy constructor
     @param[in] a_inputIF Another polygon rod
@@ -56,20 +55,20 @@ public:
   /*!
     @brief Value function. Returns distance to object (ish).
   */
-  virtual Real value(const RealVect& a_pos) const;
+  virtual Real
+  value(const RealVect& a_pos) const;
 
   /*!
     @brief Factory method
   */
-  virtual BaseIF* newImplicitFunction() const;
+  virtual BaseIF*
+  newImplicitFunction() const;
 
 protected:
-
   /*!
     @brief Base function
   */
   RefCountedPtr<BaseIF> m_baseif;
-  
 };
 
 #include <CD_NamespaceFooter.H>

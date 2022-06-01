@@ -32,9 +32,9 @@
 /*!
   @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. 
 */
-class EddingtonSP1 : public RtSolver {
+class EddingtonSP1 : public RtSolver
+{
 public:
-
   /*!
     @brief Default function for space-time dependence of domain boundary conditions. 
     @details This is a utility function 
@@ -42,7 +42,8 @@ public:
     @param[in] a_time     Time
     @return Returns 1.0
   */
-  static Real s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
+  static Real
+  s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
 
   /*!
     @brief Weak constructor
@@ -64,15 +65,17 @@ public:
   */
   virtual ~EddingtonSP1();
 
-    /*!
+  /*!
     @brief Disallowed copy assignment
   */
-  EddingtonSP1& operator=(const EddingtonSP1& a_other) = delete;
+  EddingtonSP1&
+  operator=(const EddingtonSP1& a_other) = delete;
 
   /*!
     @brief Disallowed move assignment
   */
-  EddingtonSP1& operator=(const EddingtonSP1&& a_other) = delete;
+  EddingtonSP1&
+  operator=(const EddingtonSP1&& a_other) = delete;
 
   /*!
     @brief Advance RTE onto state a_phi
@@ -81,17 +84,20 @@ public:
     @param[in]    a_source  Source term
     @param[in]    a_zeroPhi Set phi to zero in initial guess for multigrid solve
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) override;
+  virtual bool
+  advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) override;
 
   /*!
     @brief Parse class options
   */
-  virtual void parseOptions() override;
+  virtual void
+  parseOptions() override;
 
   /*!
     @brief Parse class options
   */
-  virtual void parseRuntimeOptions() override;
+  virtual void
+  parseRuntimeOptions() override;
 
   /*!
     @brief Set the boundary condition function on a domain side
@@ -100,24 +106,30 @@ public:
     @param[in] a_function Boundary condition function.
     @details This sets a boundary condition for a particular domain side. The user must also specify how to use this BC in the input script. 
   */
-  virtual void setDomainSideBcFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function);
-  
+  virtual void
+  setDomainSideBcFunction(const int                               a_dir,
+                          const Side::LoHiSide                    a_side,
+                          const EddingtonSP1DomainBc::BcFunction& a_function);
+
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocateInternals() override;
-  
+  virtual void
+  allocateInternals() override;
+
   /*!
     @brief Cache state
     @param[in] a_base           Coarsest level that did not change during regrid
     @param[in] a_oldFinestLevel Finest level before the regrid
   */
-  virtual void preRegrid(const int a_base, const int a_oldFinestLevel) override;
+  virtual void
+  preRegrid(const int a_base, const int a_oldFinestLevel) override;
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocateInternals() override;
+  virtual void
+  deallocateInternals() override;
 
   /*!
     @brief Regrid function for this class
@@ -125,33 +137,38 @@ public:
     @param[in] a_oldFinestLevel Finest level before the regrid
     @param[in] a_newFinestLevel Finest level after the regrid
   */
-  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+  virtual void
+  regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
   /*!
     @brief Register operators
   */
-  virtual void registerOperators() override;
+  virtual void
+  registerOperators() override;
 
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
     @param[out] a_ebFlux Flux on the EBs
     @param[in]  a_phi    Isotropic part of the RTE solution
   */
-  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) override;
+  virtual void
+  computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
     @param[out] a_domainFlux Flux on the domain sides
     @param[in]  a_phi        Isotropic part of the RTE solution
   */
-  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) override;
+  virtual void
+  computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute the flux. For Eddington, the flux is F = -c/(3*kappa)*grad(phi)
     @param[out] a_flux Cell-centered flux
     @param[in]  a_phi  Isotropic part of RTE solution
   */
-  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) override;
+  virtual void
+  computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Get isotropic part. 
@@ -159,12 +176,14 @@ public:
     @param[in]  a_phi       RTE solution
     @details For Eddington, only the isotropic part is solved for so this routine just copies. 
   */
-  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) override;
+  virtual void
+  computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Write plot file
   */
-  virtual void writePlotFile() override;
+  virtual void
+  writePlotFile() override;
 
   /*!
     @brief Write checkpoint data into HDF5 file
@@ -172,7 +191,8 @@ public:
     @param[in]  a_level  Grid level
   */
 #ifdef CH_USE_HDF5
-  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const override;
+  virtual void
+  writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const override;
 #endif
 
   /*!
@@ -180,12 +200,12 @@ public:
     @param[out] a_handle HDF5 file
     @param[in]  a_level  Grid level
   */
-#ifdef CH_USE_HDF5  
-  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) override;
+#ifdef CH_USE_HDF5
+  virtual void
+  readCheckpointLevel(HDF5Handle& a_handle, const int a_level) override;
 #endif
 
 protected:
-
   /*!
     @brief alpha-coefficient for Helmholtz operator
   */
@@ -199,7 +219,8 @@ protected:
   /*!
     @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class BottomSolverType {
+  enum class BottomSolverType
+  {
     Simple,
     BiCGStab,
     GMRES,
@@ -208,7 +229,8 @@ protected:
   /*!
     @brief Enum for multigrid cycle types. 
   */
-  enum class MultigridType{
+  enum class MultigridType
+  {
     VCycle,
     WCycle,
   };
@@ -216,12 +238,13 @@ protected:
   /*!
     @brief Enum for boundary condition types on EBs
   */
-  enum class EBBCType {
+  enum class EBBCType
+  {
     Dirichlet,
     Neumann,
     Larsen
   };
-  
+
   /*!
     @brief Relaxation type for gmg
   */
@@ -246,6 +269,11 @@ protected:
     @brief Use kappa scaling for source or not
   */
   bool m_kappaScale;
+
+  /*!
+    @brief Use slopes when regridding (or not)
+  */
+  bool m_regridSlopes;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -282,7 +310,7 @@ protected:
   */
   int m_multigridBcOrder;
 
-    /*!
+  /*!
     @brief Multigrid EBBC weight (only relevant for Dirichlet)
   */
   int m_multigridBcWeight;
@@ -306,7 +334,7 @@ protected:
     @brief 
   */
   Real m_multigridExitTolerance;
-  
+
   /*!
     @brief 
   */
@@ -325,22 +353,22 @@ protected:
   /*!
     @brief Geometric multigrid solver
   */
-  RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_multigridSolver;
+  RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB>>> m_multigridSolver;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
   */
-  BiCGStabSolver<LevelData<EBCellFAB> > m_bicgstab;
+  BiCGStabSolver<LevelData<EBCellFAB>> m_bicgstab;
 
   /*!
     @brief GMRES solver
   */
-  GMRESSolver<LevelData<EBCellFAB> > m_gmres;
+  GMRESSolver<LevelData<EBCellFAB>> m_gmres;
 
   /*!
     @brief TGA solver
   */
-  RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > > m_tgaSolver;
+  RefCountedPtr<AMRTGA<LevelData<EBCellFAB>>> m_tgaSolver;
 
   /*!
     @brief Euler solver
@@ -361,7 +389,7 @@ protected:
     @brief For regridding the source term. This is needed when doing a stationary solve. 
   */
   EBAMRCellData m_cacheSrc;
-  
+
   /*!
     @brief Multigrid residue
   */
@@ -372,7 +400,7 @@ protected:
   */
   EBAMRCellData m_zero;
 
-    /*!
+  /*!
     @brief Scaled source term
   */
   EBAMRCellData m_scaledSource;
@@ -410,12 +438,14 @@ protected:
   /*!
     @brief Set up geometric multigrid
   */
-  virtual void setupSolver();
+  virtual void
+  setupSolver();
 
   /*!
     @brief Set multigrid coefficients
   */
-  virtual void setHelmholtzCoefficients();
+  virtual void
+  setHelmholtzCoefficients();
 
   /*!
     @brief Set EBHelmholtzOp A- and B-coefficients. 
@@ -426,21 +456,24 @@ protected:
     @param[in]  a_lvl          Grid level
     @param[in]  a_dit          Grid index
   */
-  virtual void setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
-					   EBFluxFAB&       a_helmBco,
-					   BaseIVFAB<Real>& a_helmBcoIrreg,
-					   const int        a_lvl,
-					   const DataIndex& a_dit);
+  virtual void
+  setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
+                              EBFluxFAB&       a_helmBco,
+                              BaseIVFAB<Real>& a_helmBcoIrreg,
+                              const int        a_lvl,
+                              const DataIndex& a_dit);
 
   /*!
     @brief Set the operator factory
   */
-  virtual void setupHelmholtzFactory();
+  virtual void
+  setupHelmholtzFactory();
 
   /*!
     @brief Set the GMG solver
   */
-  virtual void setupMultigrid();
+  virtual void
+  setupMultigrid();
 
   /*!
     @brief Make domain bc string
@@ -449,63 +482,81 @@ protected:
     @details Used for pasing boundary conditions from input script. 
     @returns Returns string of type "bc.x.lo", "bc.y.hi" etc. 
   */
-  virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
+  virtual std::string
+  makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
 
   /*!
     @brief Returns BC type based on string.
     @param[in] a_str Boundary condition string. Must be "dirichlet <number>", "neumann <number>", "robin <number>", "dirichlet_custom", "neumann_custom", or "robin_custom".
   */
-  virtual EddingtonSP1DomainBc::BcType parseBcString(const std::string a_str) const;
+  virtual EddingtonSP1DomainBc::BcType
+  parseBcString(const std::string a_str) const;
 
   /*!
     @brief Set up the TGA solver
   */
-  virtual void setupTGA();
-  
+  virtual void
+  setupTGA();
+
   /*!
     @brief Set up the Euler solver
   */
-  virtual void setupEuler();
+  virtual void
+  setupEuler();
 
   /*!
     @brief Parse domain BC settings
   */
-  virtual void parseDomainBC();
+  virtual void
+  parseDomainBC();
 
   /*!
     @brief Parse domain BC settings
   */
-  virtual void parseEBBC();
+  virtual void
+  parseEBBC();
 
   /*!
     @brief Parse whether or not this is a stationary solver
   */
-  virtual void parseStationary();   
+  virtual void
+  parseStationary();
 
   /*!
     @brief Parse plot variables
   */
-  virtual void parsePlotVariables();
+  virtual void
+  parsePlotVariables();
 
   /*!
     @brief Parse multigrid settings
   */
-  virtual void parseMultigridSettings();
+  virtual void
+  parseMultigridSettings();
 
   /*!
     @brief Parse kappa-scaling or not
   */
-  virtual void parseKappaScale();
+  virtual void
+  parseKappaScale();
 
   /*!
     @brief Parse reflection coefficients for Robin bcs
   */
-  virtual void parseReflection();
+  virtual void
+  parseReflection();
+
+  /*!
+    @brief Parse whether or not to use slopes when regridding
+  */
+  virtual void
+  parseRegridSlopes();
 
   /*!
     @brief Set default domain BC functions.
   */
-  virtual void setDefaultDomainBcFunctions();
+  virtual void
+  setDefaultDomainBcFunctions();
 };
 
 #include <CD_NamespaceFooter.H>

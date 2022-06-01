@@ -33,13 +33,14 @@
   @note By default, a single stencil is allocated in the cut-cells. If you need more, override the define and
   apply functions. 
 */
-class IrregStencil {
+class IrregStencil
+{
 public:
-
   /*!
     @brief Enum for identifying stencil -- only meant for enhancing code visibility. 
   */
-  enum class StencilType {
+  enum class StencilType
+  {
     NoType,
     Linear,
     TaylorExtrapolation,
@@ -63,12 +64,12 @@ public:
     @param[in] a_type   Stencil type
   */
   IrregStencil(const DisjointBoxLayout&        a_dbl,
-	       const EBISLayout&               a_ebisl,
-	       const ProblemDomain&            a_domain,
-	       const Real&                     a_dx,
-	       const int                       a_order,
-	       const int                       a_radius,
-	       const IrregStencil::StencilType a_type);
+               const EBISLayout&               a_ebisl,
+               const ProblemDomain&            a_domain,
+               const Real&                     a_dx,
+               const int                       a_order,
+               const int                       a_radius,
+               const IrregStencil::StencilType a_type);
 
   /*!
     @brief Destructor
@@ -78,25 +79,28 @@ public:
   /*!
     @brief Get the stencils over a single box
   */
-  const BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit) const;
-  
+  const BaseIVFAB<VoFStencil>&
+  operator[](const DataIndex& a_dit) const;
+
   /*!
     @brief Get the stencils over a single box
   */
-  BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit);
+  BaseIVFAB<VoFStencil>&
+  operator[](const DataIndex& a_dit);
 
   /*!
     @brief Apply the stencil
   */
-  virtual void apply(EBCellFAB& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const;
+  virtual void
+  apply(EBCellFAB& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const;
 
   /*!
     @brief Apply the stencil
   */
-  virtual void apply(BaseIVFAB<Real>& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const;  
+  virtual void
+  apply(BaseIVFAB<Real>& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const;
 
 protected:
-
   /*!
     @brief Default stencil component
   */
@@ -105,12 +109,12 @@ protected:
   /*!
     @brief Default stencil component
   */
-  static constexpr int m_defaultNumSten = 1;  
+  static constexpr int m_defaultNumSten = 1;
 
   /*!
     @brief Stencil
   */
-  LayoutData<RefCountedPtr<BaseIVFAB<VoFStencil> > > m_stencils;
+  LayoutData<RefCountedPtr<BaseIVFAB<VoFStencil>>> m_stencils;
 
   /*!
     @brief VoFIterators
@@ -155,25 +159,27 @@ protected:
   /*!
     @brief Define function
   */
-  virtual void define(const DisjointBoxLayout&        a_dbl,
-		      const EBISLayout&               a_ebisl,
-		      const ProblemDomain&            a_domain,
-		      const Real&                     a_dx,
-		      const int                       a_order,
-		      const int                       a_radius,
-		      const IrregStencil::StencilType a_type);
-  
+  virtual void
+  define(const DisjointBoxLayout&        a_dbl,
+         const EBISLayout&               a_ebisl,
+         const ProblemDomain&            a_domain,
+         const Real&                     a_dx,
+         const int                       a_order,
+         const int                       a_radius,
+         const IrregStencil::StencilType a_type);
+
   /*!
     @brief Build the desired stencil
   */
-  virtual void buildStencil(VoFStencil&              a_sten,
-			    const VolIndex&          a_vof,
-			    const DisjointBoxLayout& a_dbl,
-			    const ProblemDomain&     a_domain,
-			    const EBISBox&           a_ebisbox,
-			    const Box&               a_box,
-			    const Real&              a_dx,
-			    const IntVectSet&        a_cfivs) = 0;
+  virtual void
+  buildStencil(VoFStencil&              a_sten,
+               const VolIndex&          a_vof,
+               const DisjointBoxLayout& a_dbl,
+               const ProblemDomain&     a_domain,
+               const EBISBox&           a_ebisbox,
+               const Box&               a_box,
+               const Real&              a_dx,
+               const IntVectSet&        a_cfivs) = 0;
 };
 
 #include <CD_NamespaceFooter.H>

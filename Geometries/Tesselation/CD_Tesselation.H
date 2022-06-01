@@ -19,9 +19,9 @@
 /*!
   @brief A geometry consisting of a single polygon grid.
 */
-class Tesselation : public ComputationalGeometry {
+class Tesselation : public ComputationalGeometry
+{
 public:
-
   /*!
     @brief Constructor
   */
@@ -29,7 +29,7 @@ public:
 
   /*!
     @brief Destructor
-  */  
+  */
   ~Tesselation();
 };
 

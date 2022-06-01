@@ -42,9 +42,9 @@ namespace Physics {
     /*!
       @brief Class which implements CdrPlasmaPhysics and parses plasma chemistry from a JSON input file
     */
-    class CdrPlasmaJSON : public CdrPlasmaPhysics {
+    class CdrPlasmaJSON : public CdrPlasmaPhysics
+    {
     public:
-
       /*!
 	@brief Function alias for initial data function. 
 	@param[in] a_position Physical coordinates
@@ -102,19 +102,22 @@ namespace Physics {
       /*!
 	@brief Parse run-time class options.
       */
-      virtual void parseRuntimeOptions();      
+      virtual void
+      parseRuntimeOptions();
 
       /*!
 	@brief Get number of plot variables for this physics class. 
 	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. The current implementation 
 	plots the gas pressure, temperature, and density
       */
-      virtual int getNumberOfPlotVariables() const override;
+      virtual int
+      getNumberOfPlotVariables() const override;
 
       /*!
 	@brief Get plot variable names. The names and positions between this routine and getPlotVariables must be consistent!
       */
-      virtual Vector<std::string> getPlotVariableNames() const override;
+      virtual Vector<std::string>
+      getPlotVariableNames() const override;
 
       /*!
 	@brief Provide plot variables. This is used by CdrPlasmaStepper when writing plot files. 
@@ -129,22 +132,24 @@ namespace Physics {
 	@param[in]  a_time          Current time.
 	@param[in]  a_kappa         Grid cell unit volume. 
       */
-      virtual Vector<Real> getPlotVariables(const Vector<Real>     a_cdrDensities,
-					    const Vector<RealVect> a_cdrGradients,
-					    const Vector<Real>     a_rteDensities,
-					    const RealVect         a_E,
-					    const RealVect         a_position,
-					    const Real             a_dx,
-					    const Real             a_dt,
-					    const Real             a_time,
-					    const Real             a_kappa) const override;
+      virtual Vector<Real>
+      getPlotVariables(const Vector<Real>     a_cdrDensities,
+                       const Vector<RealVect> a_cdrGradients,
+                       const Vector<Real>     a_rteDensities,
+                       const RealVect         a_E,
+                       const RealVect         a_position,
+                       const Real             a_dx,
+                       const Real             a_dt,
+                       const Real             a_time,
+                       const Real             a_kappa) const override;
 
       /*!
 	@brief Compute alpha. Should return Townsend ionization coefficient. 
 	@details This function is mostly used for the cell tagging classes, but can be used for reactions as well. 
 	@param[in] a_E Electric field.
       */
-      virtual Real computeAlpha(const Real E, const RealVect a_position) const override;
+      virtual Real
+      computeAlpha(const Real E, const RealVect a_position) const override;
 
       /*!
 	@brief Compute eta. Should return Townsend attachment coefficient. 
@@ -152,8 +157,9 @@ namespace Physics {
 	@param[in] a_E        Electric field.
 	@param[in] a_position Position
       */
-      virtual Real computeEta(const Real a_E, const RealVect a_position) const;
-      
+      virtual Real
+      computeEta(const Real a_E, const RealVect a_position) const;
+
       /*!
 	@brief Routine intended for advancing a reaction network over a time a_dt. 
 	@details This routine assumes that the subsequent advance is in the form phi^(k+1) = phi^k + S*a_dt. Thus, this routine exists such that users can EITHER
@@ -170,17 +176,18 @@ namespace Physics {
 	@param[in]  a_time          Current time.
 	@param[in]  a_kappa         Grid cell unit volume. 
       */
-      virtual void advanceReactionNetwork(Vector<Real>&          a_cdrSources,
-					  Vector<Real>&          a_rteSources,
-					  const Vector<Real>     a_cdrDensities,
-					  const Vector<RealVect> a_cdrGradients,
-					  const Vector<Real>     a_rteDensities,
-					  const RealVect         a_E,
-					  const RealVect         a_pos,
-					  const Real             a_dx,
-					  const Real             a_dt,
-					  const Real             a_time,
-					  const Real             a_kappa) const override;
+      virtual void
+      advanceReactionNetwork(Vector<Real>&          a_cdrSources,
+                             Vector<Real>&          a_rteSources,
+                             const Vector<Real>     a_cdrDensities,
+                             const Vector<RealVect> a_cdrGradients,
+                             const Vector<Real>     a_rteDensities,
+                             const RealVect         a_E,
+                             const RealVect         a_pos,
+                             const Real             a_dx,
+                             const Real             a_dt,
+                             const Real             a_time,
+                             const Real             a_kappa) const override;
 
       /*!
 	@brief Compute velocities for the CDR equations
@@ -190,10 +197,11 @@ namespace Physics {
 	@param[in] a_cdrDensities CDR densities
 	@return Returns the drift velocities for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
-      virtual Vector<RealVect> computeCdrDriftVelocities(const Real         a_time,
-							 const RealVect     a_pos,
-							 const RealVect     a_E,
-							 const Vector<Real> a_cdrDensities) const override;
+      virtual Vector<RealVect>
+      computeCdrDriftVelocities(const Real         a_time,
+                                const RealVect     a_pos,
+                                const RealVect     a_E,
+                                const Vector<Real> a_cdrDensities) const override;
 
       /*!
 	@brief Compute diffusion coefficients for the CDR equations. 
@@ -203,11 +211,11 @@ namespace Physics {
 	@param[in] a_cdrDensities CDR densities
 	@return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
-      virtual Vector<Real> computeCdrDiffusionCoefficients(const Real         a_time,
-							   const RealVect     a_pos,
-							   const RealVect     a_E,
-							   const Vector<Real> a_cdrDensities) const override;
-
+      virtual Vector<Real>
+      computeCdrDiffusionCoefficients(const Real         a_time,
+                                      const RealVect     a_pos,
+                                      const RealVect     a_E,
+                                      const Vector<Real> a_cdrDensities) const override;
 
       /*!
 	@brief Compute CDR fluxes on electrode-gas interfaces. This is used as a boundary condition in the CDR equations. 
@@ -222,15 +230,16 @@ namespace Physics {
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
 	@return Returns the flux on an electrode interface cell. The vector ordering must be the same as m_cdrSpecies. 
       */
-      virtual Vector<Real> computeCdrElectrodeFluxes(const Real         a_time,
-						     const RealVect     a_pos,
-						     const RealVect     a_normal,
-						     const RealVect     a_E,
-						     const Vector<Real> a_cdrDensities,
-						     const Vector<Real> a_cdrVelocities,
-						     const Vector<Real> a_cdrGradients,
-						     const Vector<Real> a_rteFluxes,
-						     const Vector<Real> a_extrapCdrFluxes) const override;
+      virtual Vector<Real>
+      computeCdrElectrodeFluxes(const Real         a_time,
+                                const RealVect     a_pos,
+                                const RealVect     a_normal,
+                                const RealVect     a_E,
+                                const Vector<Real> a_cdrDensities,
+                                const Vector<Real> a_cdrVelocities,
+                                const Vector<Real> a_cdrGradients,
+                                const Vector<Real> a_rteFluxes,
+                                const Vector<Real> a_extrapCdrFluxes) const override;
 
       /*!
 	@brief Compute CDR fluxes on dielectric-gas interfaces. This is used as a boundary condition in the CDR equations. 
@@ -245,15 +254,16 @@ namespace Physics {
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
 	@return Returns the flux on a dielectric interface cell. The vector ordering must be the same as m_cdrSpecies. 
       */
-      virtual Vector<Real> computeCdrDielectricFluxes(const Real         a_time,
-						      const RealVect     a_pos,
-						      const RealVect     a_normal,
-						      const RealVect     a_E,
-						      const Vector<Real> a_cdrDensities,
-						      const Vector<Real> a_cdrVelocities,
-						      const Vector<Real> a_cdrGradients,
-						      const Vector<Real> a_rteFluxes,
-						      const Vector<Real> a_extrapCdrFluxes) const override;
+      virtual Vector<Real>
+      computeCdrDielectricFluxes(const Real         a_time,
+                                 const RealVect     a_pos,
+                                 const RealVect     a_normal,
+                                 const RealVect     a_E,
+                                 const Vector<Real> a_cdrDensities,
+                                 const Vector<Real> a_cdrVelocities,
+                                 const Vector<Real> a_cdrGradients,
+                                 const Vector<Real> a_rteFluxes,
+                                 const Vector<Real> a_extrapCdrFluxes) const override;
 
       /*!
 	@brief Compute CDR fluxes through domain sides. This is used as a boundary condition in the CDR equations.
@@ -268,51 +278,54 @@ namespace Physics {
 	@param[in] a_rteFluxes     RTE fluxes (normal component only)
 	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
       */
-      virtual Vector<Real> computeCdrDomainFluxes(const Real           a_time,
-						  const RealVect       a_pos,
-						  const int            a_dir,
-						  const Side::LoHiSide a_side,
-						  const RealVect       a_E,
-						  const Vector<Real>   a_cdrDensities,
-						  const Vector<Real>   a_cdrVelocities,
-						  const Vector<Real>   a_cdrGradients,
-						  const Vector<Real>   a_rteFluxes,
-						  const Vector<Real>   a_extrapCdrFluxes) const override;
+      virtual Vector<Real>
+      computeCdrDomainFluxes(const Real           a_time,
+                             const RealVect       a_pos,
+                             const int            a_dir,
+                             const Side::LoHiSide a_side,
+                             const RealVect       a_E,
+                             const Vector<Real>   a_cdrDensities,
+                             const Vector<Real>   a_cdrVelocities,
+                             const Vector<Real>   a_cdrGradients,
+                             const Vector<Real>   a_rteFluxes,
+                             const Vector<Real>   a_extrapCdrFluxes) const override;
 
       /*!
 	@brief Set the initial surface charge
 	@param[in] a_time Time
 	@param[in] a_pos Position
       */
-      virtual Real initialSigma(const Real a_time, const RealVect a_pos) const override;
-      
-    protected:
+      virtual Real
+      initialSigma(const Real a_time, const RealVect a_pos) const override;
 
+    protected:
       /*!
 	@brief Enum class for distinguishing types of computation methods when computing transport data stuff. 
       */
-      enum class LookupMethod {
-	Constant,
-	FunctionX,
-	FunctionT,
-	FunctionTT,
-	FunctionEN,
-	FunctionEX,
-	TableEN,
-	TableEnergy,
-	AlphaV,
-	EtaV
+      enum class LookupMethod
+      {
+        Constant,
+        FunctionX,
+        FunctionT,
+        FunctionTT,
+        FunctionEN,
+        FunctionEX,
+        TableEN,
+        TableEnergy,
+        AlphaV,
+        EtaV
       };
 
       /*!
 	@brief Enum for distinguishing integration methods. Note that 'None' just fills directly with source terms. 
       */
-      enum class ReactionIntegrator {
-	None,
-	ExplicitEuler,
-	ExplicitTrapezoidal,
-	ExplicitMidpoint,	
-	ExplicitRK4
+      enum class ReactionIntegrator
+      {
+        None,
+        ExplicitEuler,
+        ExplicitTrapezoidal,
+        ExplicitMidpoint,
+        ExplicitRK4
       };
 
       /*!
@@ -320,12 +333,13 @@ namespace Physics {
 	specify how to do this in the chemistry file, where 'AddMean' means that we add the mean energy to the equation.
 	Likewise, 'SubtractMean' implies removing the mean energy, and 'External' is a user-specified energy to be added/removed.
       */
-      enum class ReactiveEnergyLoss {
-	AddMean,
-	SubtractMean,
-	AddDirect,
-	SubtractDirect,
-	External
+      enum class ReactiveEnergyLoss
+      {
+        AddMean,
+        SubtractMean,
+        AddDirect,
+        SubtractDirect,
+        External
       };
 
       /*!
@@ -386,7 +400,7 @@ namespace Physics {
       /*!
 	@brief Initial surface charge
       */
-      std::function<Real(const RealVect a_position, const Real a_time)> m_initialSigma;      
+      std::function<Real(const RealVect a_position, const Real a_time)> m_initialSigma;
 
       /*!
 	@brief Gas pressure (in Pascal).
@@ -416,7 +430,7 @@ namespace Physics {
       /*!
 	@brief These are the neutral species.
       */
-      std::vector<std::shared_ptr<NeutralSpeciesJSON> > m_neutralSpecies;
+      std::vector<std::shared_ptr<NeutralSpeciesJSON>> m_neutralSpecies;
 
       /*!
 	@brief Map for figuring out which where in m_neutralSpecies a neutral species is found. 
@@ -455,7 +469,7 @@ namespace Physics {
 	@brief Parameters for computing the mean energy from energy density and density. 
 	@details The energy is computed as e = max(Emin, min(Emax, E)) where E = n_energy/(min(n_density, safety));
       */
-      std::map<int, std::tuple<Real, Real, Real> > m_cdrEnergyComputation;
+      std::map<int, std::tuple<Real, Real, Real>> m_cdrEnergyComputation;
 
       /*!
 	@brief int-int encoding for associating a transport solver with an energy solver. 
@@ -484,7 +498,7 @@ namespace Physics {
       std::map<int, std::string> m_rteSpeciesInverseMap;
 
       // =====================================================
-      // TOWNSEND IONIZATION COEFFICIENT QUANTITIES BEGIN HERE      
+      // TOWNSEND IONIZATION COEFFICIENT QUANTITIES BEGIN HERE
       // =====================================================
 
       /*!
@@ -495,7 +509,7 @@ namespace Physics {
       /*!
 	@brief Lookup method for Townsend attachment coefficient
       */
-      LookupMethod m_etaLookup;      
+      LookupMethod m_etaLookup;
 
       /*!
 	@brief For when we can put alpha = alpha(E,N) as an analytic function. 
@@ -505,7 +519,7 @@ namespace Physics {
       /*!
 	@brief For when we can put eta = eta(E,N) as an analytic function. 
       */
-      FunctionEN m_etaFunctionEN;      
+      FunctionEN m_etaFunctionEN;
 
       /*!
 	@brief For when we can put alpha = table(E,N)
@@ -515,12 +529,12 @@ namespace Physics {
       /*!
 	@brief For when we can put eta = table(E,N)
       */
-      LookupTable<2> m_etaTableEN;      
-      
-      // ================================      
-      // MOBILITY QUANTITIES BEGIN HERE      
+      LookupTable<2> m_etaTableEN;
+
       // ================================
-      
+      // MOBILITY QUANTITIES BEGIN HERE
+      // ================================
+
       /*!
 	@brief Mobility lookup method for each species. 
       */
@@ -544,15 +558,15 @@ namespace Physics {
       /*!
 	@brief Map for table-based mobilities. Stored as tables (E/N, mu*N)
       */
-      std::map<int, LookupTable<2> > m_mobilityTablesEN;
+      std::map<int, LookupTable<2>> m_mobilityTablesEN;
 
       /*!
 	@brief Map for table-based mobilities as function of energy. 
 	@details Stored as tables (eV, mu*N)
       */
-      std::map<int, LookupTable<2> > m_mobilityTablesEnergy;
-      
-      // ================================      
+      std::map<int, LookupTable<2>> m_mobilityTablesEnergy;
+
+      // ================================
       // DIFFUSION  QUANTITIES BEGIN HERE
       // ================================
 
@@ -575,17 +589,17 @@ namespace Physics {
 	@brief Map for table-based diffusion coefficients D = D(E,N).
 	@details Tables stored as (E/N, D*N)
       */
-      std::map<int, LookupTable<2> > m_diffusionTablesEN;
+      std::map<int, LookupTable<2>> m_diffusionTablesEN;
 
       /*!
 	@brief Map for table-based diffusion coefficients as function of energy. 
 	@details Stored as tables (eV, D*N)
       */
-      std::map<int, LookupTable<2> > m_diffusionTablesEnergy;            
+      std::map<int, LookupTable<2>> m_diffusionTablesEnergy;
 
       // ===========================================
       // PLASMA SPECIES TEMPERATURE DATA BEGINS HERE
-      // ===========================================      
+      // ===========================================
 
       /*!
 	@brief Temperature lookup method
@@ -600,11 +614,11 @@ namespace Physics {
       /*!
 	@brief Temperatures as functions of E/N. 
       */
-      std::map<int, LookupTable<2> > m_temperatureTablesEN;
+      std::map<int, LookupTable<2>> m_temperatureTablesEN;
 
-      // ================================            
+      // ================================
       // REACTION DATA BEGINS HERE
-      // ================================      
+      // ================================
 
       /*!
 	@brief Description of plasma reactions. Only used for I/O
@@ -629,7 +643,7 @@ namespace Physics {
       /*!
 	@brief Plasma reaction rates that are eta*|v|
       */
-      std::map<int, int> m_plasmaReactionEtaV;            
+      std::map<int, int> m_plasmaReactionEtaV;
 
       /*!
 	@brief Maps for functions of the type k = f(T1,T2) where T1 and T2 are the temperatures of some species. 
@@ -640,7 +654,7 @@ namespace Physics {
 	entry in the tuple is the actual function. A special rule occurs if one of the first two indices is < 0 in which case
 	the temperature is replaced by the background gas temperature. 
       */
-      std::map<int, std::tuple<int, int, FunctionTT> > m_plasmaReactionFunctionsTT;
+      std::map<int, std::tuple<int, int, FunctionTT>> m_plasmaReactionFunctionsTT;
 
       /*!
 	@brief Function-based plasma reaction rates. 
@@ -650,13 +664,13 @@ namespace Physics {
       /*!
 	@brief Map for table-based reaction coefficients, where k = k(E,N).
       */
-      std::map<int, LookupTable<2> > m_plasmaReactionTablesEN;
+      std::map<int, LookupTable<2>> m_plasmaReactionTablesEN;
 
       /*!
 	@brief Map for table-based reaction coefficients where k = k(energy).
 	@details The first index is the reaction index, while the pair describes which species energy and the tabulated data. 
       */
-      std::map<int, std::pair<int, LookupTable<2> > > m_plasmaReactionTablesEnergy;
+      std::map<int, std::pair<int, LookupTable<2>>> m_plasmaReactionTablesEnergy;
 
       /*!
 	@brief Scaled plasma reactions. These account for e.g. reaction efficiencies, collisional quenching, etc. 
@@ -677,7 +691,7 @@ namespace Physics {
 	@brief Flag for whether or not reaction includes Soloviev energy correction. 
 	@details If this is true, the rate for a reaction (in the local field approximation) will be modified as k * (1 + E.(D * grad(phi))/n * 
       */
-      std::map<int, std::pair<bool, int> > m_plasmaReactionSolovievCorrection;
+      std::map<int, std::pair<bool, int>> m_plasmaReactionSolovievCorrection;
 
       /*!
 	@brief For mapping reactive energy losses for all reactions. 
@@ -685,16 +699,16 @@ namespace Physics {
 	The second map determines how reactive energy losses/gains are computed for each species. The first index in the second map
 	indicates the species which will add/lose energy, and the std::pair indicates how this loss is computed. 
       */
-      std::map<int, std::map<int, std::pair<ReactiveEnergyLoss, Real> > > m_plasmaReactionEnergyLosses;      
+      std::map<int, std::map<int, std::pair<ReactiveEnergyLoss, Real>>> m_plasmaReactionEnergyLosses;
 
       /*!
 	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
       */
-      std::map<int, bool> m_plasmaReactionHasEnergyLoss;      
+      std::map<int, bool> m_plasmaReactionHasEnergyLoss;
 
       // ================================
       // PHOTO-REACTIONS BEGIN HERE
-      // ================================            
+      // ================================
 
       /*!
 	@brief Flag for photo-reaction efficiencies. Includes Helmholtz corrections, if present. 
@@ -716,7 +730,7 @@ namespace Physics {
 	@details The list is a list of species and the corresponding energy losses for a reaction. Note that although 
 	we write 'loss', this can also be an energy 'gain'. 
       */
-      std::map<int, std::list<std::pair<int, Real> > > m_photoReactionEnergyLosses;
+      std::map<int, std::list<std::pair<int, Real>>> m_photoReactionEnergyLosses;
 
       /*!
 	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
@@ -726,7 +740,7 @@ namespace Physics {
       // ===========================================
       // ELECTRODE SURFACE REACTIONS BEGIN HERE
       // ===========================================
-      
+
       /*!
 	@brief Lookup method for the electrode surface reaction rates
       */
@@ -752,12 +766,17 @@ namespace Physics {
 	@details The list is a list of species and the corresponding energy losses for a reaction. Note that although 
 	we write 'loss', this can also be an energy 'gain'. 
       */
-      std::map<int, std::list<std::pair<int, Real> > > m_electrodeReactionEnergyLosses;
+      std::map<int, std::list<std::pair<int, Real>>> m_electrodeReactionEnergyLosses;
 
       /*!
 	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
       */
-      std::map<int, bool> m_electrodeReactionHasEnergyLoss;      
+      std::map<int, bool> m_electrodeReactionHasEnergyLoss;
+
+      /*!
+	@brief A container which determines if we should add the extrapolated flux as an inflow condition. 
+      */
+      std::map<int, bool> m_electrodeExtrapBC;
 
       // ===========================================
       // DIELECTRIC SURFACE REACTIONS BEGIN HERE
@@ -788,12 +807,17 @@ namespace Physics {
 	@details The list is a list of species and the corresponding energy losses for a reaction. Note that although 
 	we write 'loss', this can also be an energy 'gain'. 
       */
-      std::map<int, std::list<std::pair<int, Real> > > m_dielectricReactionEnergyLosses;
+      std::map<int, std::list<std::pair<int, Real>>> m_dielectricReactionEnergyLosses;
 
       /*!
 	@brief Associative container for determining if a reaction is associated with an energy loss/gain.
       */
       std::map<int, bool> m_dielectricReactionHasEnergyLoss;
+
+      /*!
+	@brief A container which determines if we should add the extrapolated flux as an inflow condition. 
+      */
+      std::map<int, bool> m_dielectricExtrapBC;
 
       // ===========================================
       // DOMAIN SURFACE REACTIONS BEGIN HERE
@@ -803,26 +827,26 @@ namespace Physics {
 	@brief Lookup method for the domain reaction rates. The pair is made up of an int representing direction (0=x, 1=y, 2=z) and a Side::LoHiSide
 	representing side (Side::Lo, Side::Hi)
       */
-      std::map<std::pair<int, Side::LoHiSide>, std::map<int, LookupMethod> > m_domainReactionLookup;
+      std::map<std::pair<int, Side::LoHiSide>, std::map<int, LookupMethod>> m_domainReactionLookup;
 
       /*!
 	@brief Constant domain reaction rate. The pair is made up of an int representing direction (0=x, 1=y, 2=z) and a Side::LoHiSide
 	representing side (Side::Lo, Side::Hi)
       */
-      std::map<std::pair<int, Side::LoHiSide>, std::map<int, Real> > m_domainReactionConstants;
+      std::map<std::pair<int, Side::LoHiSide>, std::map<int, Real>> m_domainReactionConstants;
 
       /*!
 	@brief Domain reaction effiencies. Used for scaling reactions on domains in a "generic" way. 
 	The pair is made up of an int representing direction (0=x, 1=y, 2=z) and a Side::LoHiSide
 	representing side (Side::Lo, Side::Hi)
       */
-      std::map<std::pair<int, Side::LoHiSide>, std::map<int, FunctionEX> > m_domainReactionEfficiencies;
+      std::map<std::pair<int, Side::LoHiSide>, std::map<int, FunctionEX>> m_domainReactionEfficiencies;
 
       /*! 
 	@brief List of domain reactions. The pair is made up of an int representing direction (0=x, 1=y, 2=z) and a Side::LoHiSide
 	representing side (Side::Lo, Side::Hi)
       */
-      std::map<std::pair<int, Side::LoHiSide>, std::vector<CdrPlasmaSurfaceReactionJSON> > m_domainReactions;
+      std::map<std::pair<int, Side::LoHiSide>, std::vector<CdrPlasmaSurfaceReactionJSON>> m_domainReactions;
 
       /*! 
 	@brief map to translate dir from char to int
@@ -834,84 +858,104 @@ namespace Physics {
       */
       const std::map<std::string, Side::LoHiSide> m_sideStringToSide{{"lo", Side::Lo}, {"hi", Side::Hi}};
 
+      /*!
+	@brief A container which determines if we should add the extrapolated flux as an inflow condition. 
+	@details The first entry in the map is the species integer index. The tuple indicates (coordinate_direction, side, doExtrap).
+      */
+      std::map<std::tuple<int, Side::LoHiSide, int>, bool> m_domainExtrapBC;
+
       // ===========================================
-      // VARIOUS MEMBER FUNCTIONS BEGIN HERE 
-      // ===========================================      
-      
+      // VARIOUS MEMBER FUNCTIONS BEGIN HERE
+      // ===========================================
+
       /*!
 	@brief Parse class options
       */
-      virtual void parseOptions();
+      virtual void
+      parseOptions();
 
       /*!
 	@brief Parse the reactive integrator
       */
-      virtual void parseIntegrator();
+      virtual void
+      parseIntegrator();
 
       /*!
 	@brief Parse the JSON file
       */
-      virtual void parseJSON();
+      virtual void
+      parseJSON();
 
       /*!
 	@brief Initialize surface charge
 	@details This will initialize the surface charge based on the "sigma" field in the JSON file. If you want more complex initial surface charges, 
 	you will have to either extend this routine or overwrite it. 
       */
-      virtual void initializeSigma();
+      virtual void
+      initializeSigma();
 
       /*!
 	@brief Initialize neutral species
       */
-      virtual void initializeNeutralSpecies();
-      
+      virtual void
+      initializeNeutralSpecies();
+
       /*!
 	@brief Initialize species. 
 	@details This will initialize the species based on the "plasma_species" field in the JSON file. 
       */
-      virtual void initializePlasmaSpecies();
+      virtual void
+      initializePlasmaSpecies();
 
       /*!
 	@brief Initialize photon species.
 	@details This will initialize the radiative transfer species absed on the "photon_species" field in the JSON file. 
       */
-      virtual void initializePhotonSpecies();
+      virtual void
+      initializePhotonSpecies();
 
       /*!
 	@brief Initialize species mobilities.
       */
-      virtual void parseMobilities();
+      virtual void
+      parseMobilities();
 
       /*!
 	@brief Initialize species diffusion coefficients.
       */
-      virtual void parseDiffusion();
+      virtual void
+      parseDiffusion();
 
       /*!
 	@brief Initialize species temperatures.
       */
-      virtual void parseTemperatures();
+      virtual void
+      parseTemperatures();
 
       /*!
 	@brief Parse the Townsend ionization coefficient
       */
-      virtual void parseAlpha();
+      virtual void
+      parseAlpha();
 
       /*!
 	@brief Parse the Townsend attachment coefficient
       */
-      virtual void parseEta();      
+      virtual void
+      parseEta();
 
       /*!
 	@brief Parse plasma reactions
       */
-      virtual void parsePlasmaReactions();
+      virtual void
+      parsePlasmaReactions();
 
       /*!
 	@brief Generate an initial data function for a given plasma species
 	@param[in] a_json JSON field, usually (always?) describing one of the objects in the 'plasma species' field.
       */
-      virtual InitialDataFunction parsePlasmaSpeciesInitialData(const json& a_json) const;
+      virtual InitialDataFunction
+      parsePlasmaSpeciesInitialData(const json& a_json) const;
 
       /*!
 	@brief Make a reaction set into a superset. This parses wildcards '@' in reaction string.
@@ -920,18 +964,20 @@ namespace Physics {
 	@param[in] a_reaction  JSON reaction entry. 
 	@return Returns a list of reactants and products with wilcards replaced. The tuple entries are: <wildcard, reactants, products>
       */
-      virtual std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string> > > parseReactionWildcards(const std::vector<std::string>& a_reactants,
-															      const std::vector<std::string>& a_products,
-															      const json& a_reaction);
+      virtual std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
+      parseReactionWildcards(const std::vector<std::string>& a_reactants,
+                             const std::vector<std::string>& a_products,
+                             const json&                     a_reaction);
       /*!
 	@brief Parses a reaction string into reactangs and products
 	@param[out] a_reactants Left-hand side of reaction
 	@param[out] a_products  Right-hand side of reaction
 	@param[in]  a_reaction  Reaction string. Must be in format "a + b + c -> e + f + g". 
       */
-      virtual void parseReactionString(std::vector<std::string>& a_reactants,
-				       std::vector<std::string>& a_products,
-				       const std::string&        a_reaction) const;      
+      virtual void
+      parseReactionString(std::vector<std::string>& a_reactants,
+                          std::vector<std::string>& a_products,
+                          const std::string&        a_reaction) const;
 
       /*!
 	@brief Check if a plasma-reaction makes sense in terms of the species that have been defined.
@@ -940,10 +986,10 @@ namespace Physics {
 	@param[in] a_products  Reaction products
 	@param[in] a_reaction  Reaction string
       */
-      virtual void sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
-					  const std::vector<std::string>& a_products,
-					  const std::string               a_reaction) const;
-
+      virtual void
+      sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
+                             const std::vector<std::string>& a_products,
+                             const std::string               a_reaction) const;
 
       /*!
 	@brief Get the int-encoding corresponding to species involved in some reaction. 
@@ -956,82 +1002,94 @@ namespace Physics {
 	@param[in]  a_reactants         Reactant names
 	@param[in]  a_products          Reaction names
       */
-      virtual void getReactionSpecies(std::list<int>&                 a_plasmaReactants,
-				      std::list<int>&                 a_neutralReactants,
-				      std::list<int>&                 a_photonReactants,					    
-				      std::list<int>&                 a_plasmaProducts,
-				      std::list<int>&                 a_neutralProducts,
-				      std::list<int>&                 a_photonProducts,				       
-				      const std::vector<std::string>& a_reactants,
-				      const std::vector<std::string>& a_products) const;
+      virtual void
+      getReactionSpecies(std::list<int>&                 a_plasmaReactants,
+                         std::list<int>&                 a_neutralReactants,
+                         std::list<int>&                 a_photonReactants,
+                         std::list<int>&                 a_plasmaProducts,
+                         std::list<int>&                 a_neutralProducts,
+                         std::list<int>&                 a_photonProducts,
+                         const std::vector<std::string>& a_reactants,
+                         const std::vector<std::string>& a_products) const;
 
       /*!
 	@brief Parse reaction rate for plasma reaction.
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionRate(const int a_reactionIndex, const json& a_reactionJSON);
-      
+      virtual void
+      parsePlasmaReactionRate(const int a_reactionIndex, const json& a_reactionJSON);
+
       /*!
 	@brief Parse scaling factors for reactions. 
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+      virtual void
+      parsePlasmaReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse reaction plotting. 
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_reactionJSON);
+      virtual void
+      parsePlasmaReactionPlot(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse plasma reaction descriptions. 
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionDescription(const int a_reactionIndex, const json& a_reactionJSON, const std::string a_wildcard);
+      virtual void
+      parsePlasmaReactionDescription(const int         a_reactionIndex,
+                                     const json&       a_reactionJSON,
+                                     const std::string a_wildcard);
 
       /*!
 	@brief Parse plasma reaction energy correction. 
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
-      virtual void parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reactionJSON);
-
+      virtual void
+      parsePlasmaReactionSoloviev(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse plasma reaction energy losses.
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
-      */      
-      virtual void parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);
+      */
+      virtual void
+      parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse photo-reactions
       */
-      virtual void parsePhotoReactions();
+      virtual void
+      parsePhotoReactions();
 
       /*!
 	@brief Parse scaling for photo-reactions. Includes Helmholtz corrections if doing Helmholtz reconstruction of photoionization profiles. 
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'photo reactions' array. 
       */
-      virtual void parsePhotoReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+      virtual void
+      parsePhotoReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse photo-reaction energy losses.
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'photo reactions' array. 
-      */      
-      virtual void parsePhotoReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);      
+      */
+      virtual void
+      parsePhotoReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Do a species sanity check
 	@details This will make sure that species names are not duplicates. 
       */
-      virtual void sanityCheckSpecies() const;
+      virtual void
+      sanityCheckSpecies() const;
 
       /*!
 	@brief Check if a photo-reaction makes sense in terms of the species that have been defined.
@@ -1040,21 +1098,24 @@ namespace Physics {
 	@param[in] a_products  Reaction products
 	@param[in] a_reaction  Reaction string
       */
-      virtual void sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
-					 const std::vector<std::string>& a_products,
-					 const std::string               a_reaction) const;
+      virtual void
+      sanctifyPhotoReaction(const std::vector<std::string>& a_reactants,
+                            const std::vector<std::string>& a_products,
+                            const std::string               a_reaction) const;
 
       /*!
 	@brief Parse secondary emission on electrodes
       */
-      virtual void parseElectrodeReactions();
+      virtual void
+      parseElectrodeReactions();
 
       /*!
 	@brief Parse reaction rate for electrode surface reactions. 
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'electrode reactions' array. 
       */
-      virtual void parseElectrodeReactionRate(const int a_reactionIndex, const json& a_reactionJSON);      
+      virtual void
+      parseElectrodeReactionRate(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse electrode reaction scaling for a specific reaction.
@@ -1062,26 +1123,30 @@ namespace Physics {
 	@param[in] a_reactionIndex Reaction index (this is the array index in the reaction array supplied in the JSON file)
 	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
       */
-      virtual void parseElectrodeReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+      virtual void
+      parseElectrodeReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse electrode-reaction energy losses.
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'electrode reactions' array. 
-      */      
-      virtual void parseElectrodeReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);            
+      */
+      virtual void
+      parseElectrodeReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse secondary emission on dielectrics
       */
-      virtual void parseDielectricReactions();
+      virtual void
+      parseDielectricReactions();
 
       /*!
 	@brief Parse reaction rate for dielectric surface reactions. 
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'electrode reactions' array. 
       */
-      virtual void parseDielectricReactionRate(const int a_reactionIndex, const json& a_reactionJSON);      
+      virtual void
+      parseDielectricReactionRate(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse dielectric electrode reaction scaling for a specific reaction.
@@ -1089,19 +1154,22 @@ namespace Physics {
 	@param[in] a_reactionIndex Reaction index (this is the array index in the dielectric reaction array supplied in the JSON file)
 	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
       */
-      virtual void parseDielectricReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+      virtual void
+      parseDielectricReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse dielectric-reaction energy losses.
 	@param[in] a_reactionIndex  Reaction index. 
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'dielectric reactions' array. 
-      */      
-      virtual void parseDielectricReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);                  
+      */
+      virtual void
+      parseDielectricReactionEnergyLosses(const int a_reactionIndex, const json& a_reactionJSON);
 
       /*!
 	@brief Parse secondary emission on domain
       */
-      virtual void parseDomainReactions();
+      virtual void
+      parseDomainReactions();
 
       /*!
 	@brief Parse reaction rate for domain reactions. 
@@ -1109,7 +1177,10 @@ namespace Physics {
 	@param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'domain reactions' array.
 	@param[in] a_sides          List of the domain sides that this occurs at
       */
-      virtual void parseDomainReactionRate(const int a_reactionIndex, const json& a_reactionJSON, const std::vector<std::string>& a_sides);      
+      virtual void
+      parseDomainReactionRate(const int                       a_reactionIndex,
+                              const json&                     a_reactionJSON,
+                              const std::vector<std::string>& a_sides);
 
       /*!
 	@brief Parse domain reaction scaling for a specific reaction.
@@ -1118,7 +1189,10 @@ namespace Physics {
 	@param[in] a_reactionJSON  JSON entry for the reaction in the JSON input file.
 	@param[in] a_sides          List of the domain sides that this occurs at
       */
-      virtual void parseDomainReactionScaling(const int a_reactionIndex, const json& a_reactionJSON, const std::vector<std::string>& a_sides);
+      virtual void
+      parseDomainReactionScaling(const int                       a_reactionIndex,
+                                 const json&                     a_reactionJSON,
+                                 const std::vector<std::string>& a_sides);
 
       /*!
 	@brief Check if a surface-reaction makes sense in terms of the species that have been defined.
@@ -1126,9 +1200,10 @@ namespace Physics {
 	@param[in] a_products  Reaction products
 	@param[in] a_reaction  Reaction string
       */
-      virtual void sanctifySurfaceReaction(const std::vector<std::string>& a_reactants,
-					   const std::vector<std::string>& a_products,
-					   const std::string               a_reaction) const;
+      virtual void
+      sanctifySurfaceReaction(const std::vector<std::string>& a_reactants,
+                              const std::vector<std::string>& a_products,
+                              const std::string               a_reaction) const;
 
       /*!
 	@brief Compute the various plasma species temperatures.
@@ -1136,9 +1211,10 @@ namespace Physics {
 	@param[in] a_E            Electric field (SI units)
 	@param[in] a_cdrDensities List of plasma species densities.
       */
-      virtual std::vector<Real> computePlasmaSpeciesTemperatures(const RealVect&          a_position,
-								 const RealVect&          a_E,
-								 const std::vector<Real>& a_cdrDensities) const;
+      virtual std::vector<Real>
+      computePlasmaSpeciesTemperatures(const RealVect&          a_position,
+                                       const RealVect&          a_E,
+                                       const std::vector<Real>& a_cdrDensities) const;
 
       /*!
 	@brief Compute the various plasma species energies. Returns a list of energies in electron-volts. We assume that 
@@ -1149,19 +1225,21 @@ namespace Physics {
 	@param[in] a_E            Electric field (SI units)
 	@param[in] a_cdrDensities List of plasma species densities.
       */
-      virtual std::vector<Real> computePlasmaSpeciesEnergies(const RealVect&          a_position,
-							     const RealVect&          a_E,
-							     const std::vector<Real>& a_cdrDensities) const;   
-      
+      virtual std::vector<Real>
+      computePlasmaSpeciesEnergies(const RealVect&          a_position,
+                                   const RealVect&          a_E,
+                                   const std::vector<Real>& a_cdrDensities) const;
+
       /*!
 	@brief Compute the various plasma species mobilities. 
 	@param[in] a_position     Physical coordinates
 	@param[in] a_E            Electric field (SI units)
 	@param[in] a_cdrDensities List of plasma species densities.
       */
-      virtual std::vector<Real> computePlasmaSpeciesMobilities(const RealVect&          a_position,
-							       const RealVect&          a_E,
-							       const std::vector<Real>& a_cdrDensities) const;
+      virtual std::vector<Real>
+      computePlasmaSpeciesMobilities(const RealVect&          a_position,
+                                     const RealVect&          a_E,
+                                     const std::vector<Real>& a_cdrDensities) const;
 
       /*!
 	@brief Compute the various plasma species diffusion coefficients. 
@@ -1170,9 +1248,10 @@ namespace Physics {
 	@param[in] a_cdrDensities List of plasma species densities
 	@return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
-      virtual std::vector<Real> computePlasmaSpeciesDiffusion(const RealVect          a_position,
-							      const RealVect          a_E,
-							      const std::vector<Real> a_cdrDensities) const;
+      virtual std::vector<Real>
+      computePlasmaSpeciesDiffusion(const RealVect          a_position,
+                                    const RealVect          a_E,
+                                    const std::vector<Real> a_cdrDensities) const;
 
       /*!
 	@brief Compute the reaction rate for a plasma reaction.
@@ -1194,82 +1273,92 @@ namespace Physics {
 	@param[in] a_eta                      Townsend attachment coefficient
 	@param[in] a_time                     Time
       */
-      virtual Real computePlasmaReactionRate(const int&                   a_reactionIndex,
-					     const std::vector<Real>&     a_cdrDensities,
-					     const std::vector<Real>&     a_cdrMobilities,
-					     const std::vector<Real>&     a_cdrDiffusionCoefficients,
-					     const std::vector<Real>&     a_cdrTemperatures,
-					     const std::vector<Real>&     a_cdrEnergies,
-					     const std::vector<RealVect>& a_cdrGradients,					     
-					     const RealVect&              a_pos,					     					     
-					     const RealVect&              a_vectorE,
-					     const Real&                  a_E,
-					     const Real&                  a_Etd,					     
-					     const Real&                  a_N,
-					     const Real&                  a_alpha,
-					     const Real&                  a_eta,					     
-					     const Real&                  a_time) const;
+      virtual Real
+      computePlasmaReactionRate(const int&                   a_reactionIndex,
+                                const std::vector<Real>&     a_cdrDensities,
+                                const std::vector<Real>&     a_cdrMobilities,
+                                const std::vector<Real>&     a_cdrDiffusionCoefficients,
+                                const std::vector<Real>&     a_cdrTemperatures,
+                                const std::vector<Real>&     a_cdrEnergies,
+                                const std::vector<RealVect>& a_cdrGradients,
+                                const RealVect&              a_pos,
+                                const RealVect&              a_vectorE,
+                                const Real&                  a_E,
+                                const Real&                  a_Etd,
+                                const Real&                  a_N,
+                                const Real&                  a_alpha,
+                                const Real&                  a_eta,
+                                const Real&                  a_time) const;
 
-      
       /*!
 	@brief Throw a parser error
 	@param[in] a_error Error code.
       */
-      void throwParserError(const std::string a_error) const;
+      void
+      throwParserError(const std::string a_error) const;
 
       /*!
 	@brief Throw a parser wearning
 	@param[in] a_error Warning
       */
-      void throwParserWarning(const std::string a_warning) const;
+      void
+      throwParserWarning(const std::string a_warning) const;
 
       /*!
 	@brief Protect the @ character in a string
 	@param[in] a_str Input string. If it contains the at character we throw an error. 
       */
-      bool containsWildcard(const std::string a_str) const;
+      bool
+      containsWildcard(const std::string a_str) const;
 
       /*!
 	@brief Protect all kinds of brackets in a string.
 	@param[in] a_str Input string. If it contains any bracket we throw an error.
       */
-      bool containsBracket(const std::string a_str) const;
+      bool
+      containsBracket(const std::string a_str) const;
 
       /*!
 	@brief Return true if string starts and ends with a paranthesis.
 	@param[in] a_str Input string. 
 	@return True if the first character in the string is ( and the last character is )
-      */      
-      bool isBracketed(const std::string a_str) const;
+      */
+      bool
+      isBracketed(const std::string a_str) const;
 
       /*!
 	@brief Remove whitespace from string
       */
-      std::string trim(const std::string& a_string) const;
+      std::string
+      trim(const std::string& a_string) const;
 
       /*!
 	@brief Return true if species exists in map and false otherwise
 	@param[in] a_name Neutral species name
       */
-      bool isNeutralSpecies(const std::string& a_name) const;            
+      bool
+      isNeutralSpecies(const std::string& a_name) const;
 
       /*!
 	@brief Return true if species exists in map and false otherwise
 	@param[in] a_name Cdr species name
       */
-      bool isPlasmaSpecies(const std::string& a_name) const;
+      bool
+      isPlasmaSpecies(const std::string& a_name) const;
 
       /*!
 	@brief Return true if species exists in map and false otherwise
 	@param[in] a_name Rte species name
       */
-      bool isPhotonSpecies(const std::string& a_name) const;
+      bool
+      isPhotonSpecies(const std::string& a_name) const;
 
       /*!
 	@brief Check if file exists
 	@param[in] a_filename File name
       */
-      bool doesFileExist(const std::string a_filename) const;
+      bool
+      doesFileExist(const std::string a_filename) const;
 
       /*!
 	@brief Add photoionization products to transport equations source terms.
@@ -1280,12 +1369,13 @@ namespace Physics {
 	@param[in]    a_dt           Time step
 	@param[in]    a_dx           Grid resolution. 
       */
-      virtual void addPhotoIonization(std::vector<Real>&       a_cdrSources,
-				      const std::vector<Real>& a_rteDensities,
-				      const RealVect           a_position,
-				      const Real               a_E,
-				      const Real               a_dt,
-				      const Real               a_dx) const;      
+      virtual void
+      addPhotoIonization(std::vector<Real>&       a_cdrSources,
+                         const std::vector<Real>& a_rteDensities,
+                         const RealVect           a_position,
+                         const Real               a_E,
+                         const Real               a_dt,
+                         const Real               a_dx) const;
 
       /*!
 	@brief Routine for integrating the reactive-only problem using various algorithms. 
@@ -1298,15 +1388,16 @@ namespace Physics {
 	@param[in]    a_dt               Time step
 	@param[in]    a_kappa            Volume fraction 
       */
-      virtual void integrateReactions(std::vector<Real>&          a_cdrDensities,
-				      std::vector<Real>&          a_photonProduction,
-				      const std::vector<RealVect> a_cdrGradients,
-				      const RealVect              a_E,
-				      const RealVect              a_pos,
-				      const Real                  a_dx,
-				      const Real                  a_dt,
-				      const Real                  a_time,
-				      const Real                  a_kappa) const;
+      virtual void
+      integrateReactions(std::vector<Real>&          a_cdrDensities,
+                         std::vector<Real>&          a_photonProduction,
+                         const std::vector<RealVect> a_cdrGradients,
+                         const RealVect              a_E,
+                         const RealVect              a_pos,
+                         const Real                  a_dx,
+                         const Real                  a_dt,
+                         const Real                  a_time,
+                         const Real                  a_kappa) const;
 
       /*!
 	@brief Routine for filling the source terms in the reactive problem.
@@ -1320,15 +1411,16 @@ namespace Physics {
 	@param[in]    a_time             Time
 	@param[in]    a_kappa            Volume fraction 
       */
-      void fillSourceTerms(std::vector<Real>&          a_cdrSources,
-			   std::vector<Real>&          a_rteSources,
-			   const std::vector<Real>     a_cdrDensities,
-			   const std::vector<RealVect> a_cdrGradients,
-			   const RealVect              a_E,
-			   const RealVect              a_pos,
-			   const Real                  a_dx,
-			   const Real                  a_time,
-			   const Real                  a_kappa) const;
+      void
+      fillSourceTerms(std::vector<Real>&          a_cdrSources,
+                      std::vector<Real>&          a_rteSources,
+                      const std::vector<Real>     a_cdrDensities,
+                      const std::vector<RealVect> a_cdrGradients,
+                      const RealVect              a_E,
+                      const RealVect              a_pos,
+                      const Real                  a_dx,
+                      const Real                  a_time,
+                      const Real                  a_kappa) const;
 
       /*!
 	@brief Routine for integrating the reactive-only problem using the explicit Euler rule. 
@@ -1342,15 +1434,16 @@ namespace Physics {
 	@param[in]    a_time             Time
 	@param[in]    a_kappa            Volume fraction 
       */
-      void integrateReactionsExplicitEuler(std::vector<Real>&          a_cdrDensities,
-					   std::vector<Real>&          a_photonProduction,
-					   const std::vector<RealVect> a_cdrGradients,
-					   const RealVect              a_E,
-					   const RealVect              a_pos,
-					   const Real                  a_dx,
-					   const Real                  a_dt,
-					   const Real                  a_time,
-					   const Real                  a_kappa) const;
+      void
+      integrateReactionsExplicitEuler(std::vector<Real>&          a_cdrDensities,
+                                      std::vector<Real>&          a_photonProduction,
+                                      const std::vector<RealVect> a_cdrGradients,
+                                      const RealVect              a_E,
+                                      const RealVect              a_pos,
+                                      const Real                  a_dx,
+                                      const Real                  a_dt,
+                                      const Real                  a_time,
+                                      const Real                  a_kappa) const;
 
       /*!
 	@brief Routine for integrating the reactive-only problem using the implicit Euler rule. 
@@ -1364,15 +1457,16 @@ namespace Physics {
 	@param[in]    a_time             Time
 	@param[in]    a_kappa            Volume fraction 
       */
-      void integrateReactionsImplicitEuler(std::vector<Real>&          a_cdrDensities,
-					   std::vector<Real>&          a_photonProduction,
-					   const std::vector<RealVect> a_cdrGradients,
-					   const RealVect              a_E,
-					   const RealVect              a_pos,
-					   const Real                  a_dx,
-					   const Real                  a_dt,
-					   const Real                  a_time,
-					   const Real                  a_kappa) const;      
+      void
+      integrateReactionsImplicitEuler(std::vector<Real>&          a_cdrDensities,
+                                      std::vector<Real>&          a_photonProduction,
+                                      const std::vector<RealVect> a_cdrGradients,
+                                      const RealVect              a_E,
+                                      const RealVect              a_pos,
+                                      const Real                  a_dx,
+                                      const Real                  a_dt,
+                                      const Real                  a_time,
+                                      const Real                  a_kappa) const;
 
       /*!
 	@brief Routine for integrating the reactive-only problem using a second order Runge-Kutta method. 
@@ -1388,16 +1482,17 @@ namespace Physics {
 	@param[in]    a_kappa            Volume fraction 
 	@param[in]    a_tableuAlpha      RK2 tableu alpha. Use 0.5 for midpoint and 1.0 for trapezoidal (Heun's method)
       */
-      void integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDensities,
-					 std::vector<Real>&          a_photonProduction,
-					 const std::vector<RealVect> a_cdrGradients,
-					 const RealVect              a_E,
-					 const RealVect              a_pos,
-					 const Real                  a_dx,
-					 const Real                  a_dt,
-					 const Real                  a_time,
-					 const Real                  a_kappa,
-					 const Real                  a_tableuAlpha) const;
+      void
+      integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDensities,
+                                    std::vector<Real>&          a_photonProduction,
+                                    const std::vector<RealVect> a_cdrGradients,
+                                    const RealVect              a_E,
+                                    const RealVect              a_pos,
+                                    const Real                  a_dx,
+                                    const Real                  a_dt,
+                                    const Real                  a_time,
+                                    const Real                  a_kappa,
+                                    const Real                  a_tableuAlpha) const;
 
       /*!
 	@brief Routine for integrating the reactive-only problem using the foruth order Runge-Kutta method. 
@@ -1411,18 +1506,19 @@ namespace Physics {
 	@param[in]    a_time             Time
 	@param[in]    a_kappa            Volume fraction 
       */
-      void integrateReactionsExplicitRK4(std::vector<Real>&          a_cdrDensities,
-					 std::vector<Real>&          a_photonProduction,
-					 const std::vector<RealVect> a_cdrGradients,
-					 const RealVect              a_E,
-					 const RealVect              a_pos,
-					 const Real                  a_dx,
-					 const Real                  a_dt,
-					 const Real                  a_time,
-					 const Real                  a_kappa) const;
+      void
+      integrateReactionsExplicitRK4(std::vector<Real>&          a_cdrDensities,
+                                    std::vector<Real>&          a_photonProduction,
+                                    const std::vector<RealVect> a_cdrGradients,
+                                    const RealVect              a_E,
+                                    const RealVect              a_pos,
+                                    const Real                  a_dx,
+                                    const Real                  a_dt,
+                                    const Real                  a_time,
+                                    const Real                  a_kappa) const;
     };
-  }
-}
+  } // namespace CdrPlasma
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 

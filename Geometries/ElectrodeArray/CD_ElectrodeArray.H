@@ -15,13 +15,13 @@
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief This is a class that defines an array of electrodes.
 */
-class ElectrodeArray : public ComputationalGeometry {
+class ElectrodeArray : public ComputationalGeometry
+{
 public:
-
   ElectrodeArray();
   ~ElectrodeArray();
 };

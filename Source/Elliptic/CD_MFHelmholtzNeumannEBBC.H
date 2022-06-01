@@ -24,9 +24,9 @@
   @details This allows the user to specify dphi/dn on the boundary or B*dphi/dn, either using a constant value
   or with a function. 
 */
-class MFHelmholtzNeumannEBBC : public MFHelmholtzEBBC {
+class MFHelmholtzNeumannEBBC : public MFHelmholtzEBBC
+{
 public:
-
   /*!
     @brief Full constructor
   */
@@ -42,31 +42,34 @@ public:
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const Real a_DphiDn);
+  void
+  setDphiDn(const Real a_DphiDn);
 
   /*!
     @brief Set spatially dependent value of dphi/dn on the MF. 
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
+  void
+  setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /*!
     @brief Set the value of B*dphi/dn on the MF.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const Real a_BxDphiDn);
+  void
+  setBxDphiDn(const Real a_BxDphiDn);
 
   /*!
     @brief Set the spatially dependent value of B*dphi/dn on the MF.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
+  void
+  setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
 
 protected:
-
   /*!
     @brief Multiply by b-coefficient or not
   */
@@ -90,12 +93,13 @@ protected:
   /*!
     @brief Value on the MF. 
   */
-  std::function<Real(const RealVect& a_pos) > m_functionDphiDn;
+  std::function<Real(const RealVect& a_pos)> m_functionDphiDn;
 
   /*!
     @brief User define function. 
   */
-  virtual void defineSinglePhase() override;
+  virtual void
+  defineSinglePhase() override;
 
   /*!
     @brief Apply flux single phase
@@ -106,13 +110,13 @@ protected:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  virtual void applyEBFluxSinglePhase(VoFIterator&       a_singlePhaseVofs,
-				      EBCellFAB&         a_Lphi,
-				      const EBCellFAB&   a_phi,
-				      const DataIndex&   a_dit,
-				      const Real&        a_beta,
-				      const bool&        a_homogeneousPhysBC) const override;
-
+  virtual void
+  applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
+                         EBCellFAB&       a_Lphi,
+                         const EBCellFAB& a_phi,
+                         const DataIndex& a_dit,
+                         const Real&      a_beta,
+                         const bool&      a_homogeneousPhysBC) const override;
 };
 
 #include <CD_NamespaceFooter.H>

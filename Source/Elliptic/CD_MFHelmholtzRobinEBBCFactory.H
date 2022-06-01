@@ -22,9 +22,9 @@
 /*!
   @brief Class for making Robin boundary conditions on the EB in a multifluid context. 
 */
-class MFHelmholtzRobinEBBCFactory : public MFHelmholtzEBBCFactory {
+class MFHelmholtzRobinEBBCFactory : public MFHelmholtzEBBCFactory
+{
 public:
-
   /*!
     @brief Disallowed weak construction. Use the full constructors. 
   */
@@ -38,11 +38,7 @@ public:
     @param[in] a_B      Robin B-coefficient
     @param[in] a_C      Robin C-coefficient
   */
-  MFHelmholtzRobinEBBCFactory(const int  a_order,
-			      const int  a_weight,
-			      const Real a_A,
-			      const Real a_B,
-			      const Real a_C);
+  MFHelmholtzRobinEBBCFactory(const int a_order, const int a_weight, const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Full constructor which sets variable coefficients
@@ -52,11 +48,11 @@ public:
     @param[in] a_B      Robin B-coefficient
     @param[in] a_C      Robin C-coefficient
   */
-  MFHelmholtzRobinEBBCFactory(const int                                          a_order,
-			      const int                                          a_weight,
-			      const std::function<Real(const RealVect& a_pos) >& a_A,
-			      const std::function<Real(const RealVect& a_pos) >& a_B,
-			      const std::function<Real(const RealVect& a_pos) >& a_C);
+  MFHelmholtzRobinEBBCFactory(const int                                         a_order,
+                              const int                                         a_weight,
+                              const std::function<Real(const RealVect& a_pos)>& a_A,
+                              const std::function<Real(const RealVect& a_pos)>& a_B,
+                              const std::function<Real(const RealVect& a_pos)>& a_C);
 
   /*!
     @brief Default constructor (does nothing)
@@ -67,13 +63,15 @@ public:
     @brief Set BC order
     @param[in] a_order Order. Must be > 0
   */
-  void setOrder(const int a_order);
+  void
+  setOrder(const int a_order);
 
   /*!
     @brief Set equation weights for least squares reconstruction. 
     @param[in] a_weight Weights. Must be >= 0
   */
-  void setWeight(const int a_weight);    
+  void
+  setWeight(const int a_weight);
 
   /*!
     @brief Set constant Robin BC coefficients
@@ -81,7 +79,8 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  void setCoefficients(const Real a_A, const Real a_B, const Real a_C);
+  void
+  setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Set variable Robin BC coefficients
@@ -89,18 +88,19 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  void setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
-		       const std::function<Real(const RealVect& a_pos) >& a_B,
-		       const std::function<Real(const RealVect& a_pos) >& a_C);
+  void
+  setCoefficients(const std::function<Real(const RealVect& a_pos)>& a_A,
+                  const std::function<Real(const RealVect& a_pos)>& a_B,
+                  const std::function<Real(const RealVect& a_pos)>& a_C);
 
   /*!
     @brief Factory method
     @param[in] a_jumpBC Jump bc object. 
   */
-  RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const override;
+  RefCountedPtr<EBHelmholtzEBBC>
+  create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const override;
 
 protected:
-
   /*
     @brief Hook when using constant coefficients on the EB
   */
@@ -150,7 +150,6 @@ protected:
     @brief Function-based C-coefficient
   */
   std::function<Real(const RealVect& a_pos)> m_functionC;
-
 };
 
 #include <CD_NamespaceFooter.H>

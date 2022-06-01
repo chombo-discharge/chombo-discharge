@@ -19,9 +19,9 @@
 /*!
   @brief Class that describes a rod electrode with surface roughness
 */
-class RoughRod : public ComputationalGeometry {
+class RoughRod : public ComputationalGeometry
+{
 public:
-
   RoughRod();
   ~RoughRod();
 };

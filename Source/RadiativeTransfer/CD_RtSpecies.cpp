@@ -12,21 +12,24 @@
 // Our includes
 #include <CD_RtSpecies.H>
 #include <CD_NamespaceHeader.H>
-  
-RtSpecies::RtSpecies(){
+
+RtSpecies::RtSpecies()
+{
   // Default settings
-  m_name    = "DefaultRtSpecies";
+  m_name = "DefaultRtSpecies";
 }
 
-RtSpecies::~RtSpecies(){
+RtSpecies::~RtSpecies() {}
 
-}
-
-std::string RtSpecies::getName() const {
+std::string
+RtSpecies::getName() const
+{
   return m_name;
 }
 
-Real RtSpecies::getScatteringCoefficient(const RealVect a_pos) const {
+Real
+RtSpecies::getScatteringCoefficient(const RealVect a_pos) const
+{
   return 0.0;
 }
 

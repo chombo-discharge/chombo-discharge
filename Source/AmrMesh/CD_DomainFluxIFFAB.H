@@ -26,10 +26,12 @@
   can be linearized and thus put in LevelData as LevelData<DomainFluxIFFAB>. 
   @note The BaseIFFABs are defined over the strip of cells abutting a domain boundary -- it it will also contain a layer of interior cells. 
 */
-class DomainFluxIFFAB {
+class DomainFluxIFFAB
+{
 public:
-
-  static int preAllocatable(){
+  static int
+  preAllocatable()
+  {
     return 1; // Symmetric messaging
   }
 
@@ -44,7 +46,7 @@ public:
     @param[in] a_ebisbox EBISBox 
     @param[in] a_box     Cell-centered box in which we define the BaseIFFABs
     @param[in] a_nComp   Number of components
-  */  
+  */
   DomainFluxIFFAB(const ProblemDomain& a_domain, const EBISBox& a_ebisbox, const Box& a_box, const int a_nComp);
 
   /*!
@@ -55,28 +57,33 @@ public:
   /*!
     @brief Get the defining box
   */
-  const Box& box() const;
+  const Box&
+  box() const;
 
   /*!
     @brief Get number of components
   */
-  int nComp() const;
+  int
+  nComp() const;
 
   /*!
     @brief Get the defining problem domain
   */
-  const ProblemDomain& getDomain() const;
+  const ProblemDomain&
+  getDomain() const;
 
   /*!
     @brief Get the defining ebis box
   */
-  const EBISBox& getEBISBox() const;
+  const EBISBox&
+  getEBISBox() const;
 
   /*!
     @brief Make a clone of an input data holder
     @param[in] a_copy Other domain flux
   */
-  void define(const DomainFluxIFFAB& a_copy);
+  void
+  define(const DomainFluxIFFAB& a_copy);
 
   /*!
     @brief Full define function
@@ -85,39 +92,45 @@ public:
     @param[in] a_box     Cell-centered box in which we define the BaseIFFABs
     @param[in] a_nComp   Number of components
   */
-  void define(const ProblemDomain& a_domain, const EBISBox& a_ebisbox, const Box& a_box, const int a_nComp);
+  void
+  define(const ProblemDomain& a_domain, const EBISBox& a_ebisbox, const Box& a_box, const int a_nComp);
 
   /*!
     @brief Get the BaseIFFAB on a particular domain side
     @param[in] a_dir  Coordinate direction
     @param[in] a_side Side (lo/hi)
   */
-  BaseIFFAB<Real>&       operator()(const int a_dir, const Side::LoHiSide a_side);
+  BaseIFFAB<Real>&
+  operator()(const int a_dir, const Side::LoHiSide a_side);
 
   /*!
     @brief Get the BaseIFFAB on a particular domain side
     @param[in] a_dir  Coordinate direction
     @param[in] a_side Side (lo/hi)
-  */  
-  const BaseIFFAB<Real>& operator()(const int a_dir, const Side::LoHiSide a_side) const;
+  */
+  const BaseIFFAB<Real>&
+  operator()(const int a_dir, const Side::LoHiSide a_side) const;
 
   /*!
     @brief Linearization function.
     @return Returns the sum of the BaseIFFAB sizes
   */
-  int size(const Box& R, const Interval& comps) const;
+  int
+  size(const Box& R, const Interval& comps) const;
 
   /*!
     @brief Linearization function.
     @details This reuses BaseIFFAB linearization function
-  */  
-  void linearOut(void* buf, const Box& R, const Interval& comps) const;
+  */
+  void
+  linearOut(void* buf, const Box& R, const Interval& comps) const;
 
   /*!
     @brief Linearization function.
     @details This reuses BaseIFFAB linearization function
-  */    
-  void linearIn(void* buf, const Box& R, const Interval& comps);
+  */
+  void
+  linearIn(void* buf, const Box& R, const Interval& comps);
 
   /*! 
     @brief Copy functiopn
@@ -126,14 +139,10 @@ public:
     box R is completely contained in both the src and destination
     boxes.  This function equired by BoxLayoutData 
   */
-  void copy(const Box&             Rfrom,
-	    const Interval&        Cdest,
-	    const Box&             Rto,
-	    const DomainFluxIFFAB& src,
-	    const Interval&        Csrc);
-  
-protected:
+  void
+  copy(const Box& Rfrom, const Interval& Cdest, const Box& Rto, const DomainFluxIFFAB& src, const Interval& Csrc);
 
+protected:
   /*!
     @brief Defining domain
   */
@@ -141,12 +150,12 @@ protected:
 
   /*!
     @brief Defining box
-  */  
+  */
   Box m_box;
 
   /*!
     @brief EBISBox
-  */    
+  */
   EBISBox m_ebisbox;
 
   /*!
@@ -156,28 +165,30 @@ protected:
 
   /*!
     @brief Is defined or not
-  */  
+  */
   bool m_isDefined;
 
   /*!
     @brief BaseIFFABs on Side::Lo sides
-  */    
+  */
   Tuple<BaseIFFAB<Real>*, CH_SPACEDIM> m_fluxLo;
 
   /*!
     @brief BaseIFFABs on Side::Hi sides
-  */      
+  */
   Tuple<BaseIFFAB<Real>*, CH_SPACEDIM> m_fluxHi;
 
   /*!
     @brief Set default values
   */
-  void setDefaultValues();
+  void
+  setDefaultValues();
 
   /*!
     @brief Clear object
   */
-  void clear();
+  void
+  clear();
 };
 
 #include <CD_NamespaceFooter.H>

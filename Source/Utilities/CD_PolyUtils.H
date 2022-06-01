@@ -31,8 +31,9 @@ namespace PolyUtils {
     @param[in] a_point2  Other end-point
     @note The root MUST be bracketed, i.e. f(x1)*f(x2) < 0.0. Anything else is an error.
   */
-  RealVect brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2);
-}
+  RealVect
+  brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2);
+} // namespace PolyUtils
 
 #include <CD_NamespaceFooter.H>
 

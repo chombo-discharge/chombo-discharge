@@ -18,23 +18,23 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
   @brief Class which wraps EBFluxRegisters in multiphase. 
 */
-class MFFluxReg {
+class MFFluxReg
+{
 public:
-
   /*!
     @brief Weak constructor. Must subsequently call define. 
   */
   MFFluxReg();
-  
+
   /*!
     @brief Full constructor. Calls define
     @param[in] a_fluxRegs Flux registers on each phase
   */
-  MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fluxRegs);
+  MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister>>& a_fluxRegs);
 
   /*!
     @brief Destructor (does nothing)
@@ -45,33 +45,35 @@ public:
     @brief Define function
     @param[in] a_fluxRegs Flux registers on each phase
   */
-  void define(const Vector<RefCountedPtr<EBFluxRegister> >& a_fluxRegs);
+  void
+  define(const Vector<RefCountedPtr<EBFluxRegister>>& a_fluxRegs);
 
   /*!
     @brief Get flux register for specified phase
     @param[in] a_phase Phase
   */
-  const RefCountedPtr<EBFluxRegister>& getFluxRegPointer(const int a_phase) const;
+  const RefCountedPtr<EBFluxRegister>&
+  getFluxRegPointer(const int a_phase) const;
 
   /*!
     @brief Get flux register for specified phase
     @param[in] a_phase Phase
   */
-  EBFluxRegister& getFluxReg(const int a_phase);
+  EBFluxRegister&
+  getFluxReg(const int a_phase);
 
   /*!
     @brief Get flux register for specified phase
     @param[in] a_phase Phase
   */
-  const EBFluxRegister& getFluxReg(const int a_phase) const;
-  
+  const EBFluxRegister&
+  getFluxReg(const int a_phase) const;
+
 protected:
-
   /*!
     @brief Flux register for each phase. 
   */
-  Vector<RefCountedPtr<EBFluxRegister> > m_fluxRegs;
-  
+  Vector<RefCountedPtr<EBFluxRegister>> m_fluxRegs;
 };
 
 #include <CD_NamespaceFooter.H>

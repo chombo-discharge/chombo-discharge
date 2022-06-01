@@ -19,9 +19,9 @@
 /*!
   @brief Factory class which generates EBHelmholtzNeumannEBBC. 
 */
-class EBHelmholtzNeumannEBBCFactory : public EBHelmholtzEBBCFactory {
+class EBHelmholtzNeumannEBBCFactory : public EBHelmholtzEBBCFactory
+{
 public:
-
   /*!
     @brief Constructor. 
   */
@@ -47,36 +47,40 @@ public:
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const Real a_DphiDn);
+  void
+  setDphiDn(const Real a_DphiDn);
 
   /*!
     @brief Set spatially dependent value of dphi/dn on the EB. 
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
+  void
+  setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /*!
     @brief Set the value of B*dphi/dn on the EB.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const Real a_BxDphiDn);
+  void
+  setBxDphiDn(const Real a_BxDphiDn);
 
   /*!
     @brief Set the spatially dependent value of B*dphi/dn on the EB.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
+  void
+  setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
 
   /*!
     @brief Factory method
   */
-  RefCountedPtr<EBHelmholtzEBBC> create() override;
+  RefCountedPtr<EBHelmholtzEBBC>
+  create() override;
 
 protected:
-
   /*!
     @brief Multiply by b-coefficient or not
   */
@@ -100,7 +104,7 @@ protected:
   /*!
     @brief Value on the EB. 
   */
-  std::function<Real(const RealVect& a_pos) > m_functionDphiDn;
+  std::function<Real(const RealVect& a_pos)> m_functionDphiDn;
 };
 
 #include <CD_NamespaceFooter.H>

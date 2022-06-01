@@ -13,12 +13,8 @@
 #include <CD_EBHelmholtzEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzEBBCFactory::EBHelmholtzEBBCFactory(){
+EBHelmholtzEBBCFactory::EBHelmholtzEBBCFactory() {}
 
-}
-
-EBHelmholtzEBBCFactory::~EBHelmholtzEBBCFactory(){
-
-}
+EBHelmholtzEBBCFactory::~EBHelmholtzEBBCFactory() {}
 
 #include <CD_NamespaceFooter.H>

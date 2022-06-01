@@ -40,14 +40,14 @@
 #include <CD_Realm.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
-  
+
 /*!
-  @brief Class for handling spatial operations for streamer equations.
+  @brief Class for handling spatial operations. 
   @details This class handles most (if not all) spatial operations. Examples are grid generation, coarsening of data, interpolation of data, memory allocations etc. 
 */
-class AmrMesh {
+class AmrMesh
+{
 public:
-
   /*!
     @brief Default constructor. 
   */
@@ -74,34 +74,39 @@ public:
     @brief Disallowed copy assignment
     @param[in] a_other Other AmrMesh
   */
-  AmrMesh& operator=(const AmrMesh& a_other) = delete;
+  AmrMesh&
+  operator=(const AmrMesh& a_other) = delete;
 
   /*!
     @brief Disallowed move assignment
     @param[in] a_other Other AmrMesh
   */
-  AmrMesh& operator=(const AmrMesh&& a_other) = delete;
+  AmrMesh&
+  operator=(const AmrMesh&& a_other) = delete;
 
   /*!
     @brief Deallocate data. 
     @param[inout] a_data Data to be deleted. 
   */
-  template<typename T>
-  void deallocate(Vector<T*>& a_data) const;
+  template <typename T>
+  void
+  deallocate(Vector<T*>& a_data) const;
 
   /*!
     @brief Deallocate smart pointer data.
     @param[inout] a_data Data to be deallocated. 
   */
-  template<typename T>
-  void deallocate(Vector<RefCountedPtr<T> >& a_data) const;
+  template <typename T>
+  void
+  deallocate(Vector<RefCountedPtr<T>>& a_data) const;
 
   /*!
     @brief Deallocate data.
     @param[inout] a_data Data to be deallocated.
   */
-  template<typename T>
-  void deallocate(EBAMRData<T>& a_data) const;
+  template <typename T>
+  void
+  deallocate(EBAMRData<T>& a_data) const;
 
   /*!
     @brief Turn smart-pointer data structure into regular-pointer data structure
@@ -109,8 +114,9 @@ public:
     @param[in]  a_data  Smart-pointer data
     @details This fetches the bare pointer from a_data and sets it in a_alias. 
   */
-  template<typename T>
-  void alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data) const;
+  template <typename T>
+  void
+  alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T>>& a_data) const;
 
   /*!
     @brief Turn smart-pointer data structure into regular-pointer data structure
@@ -118,16 +124,18 @@ public:
     @param[in]  a_data  Smart-pointer data
     @details This fetches the bare pointer from a_data and sets it in a_alias. 
   */
-  template<typename T, typename S>
-  void alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data) const;
+  template <typename T, typename S>
+  void
+  alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data) const;
 
   /*!
     @brief Template class for generic allocation of particle data. 
     @param[out] a_particles Particle data holder. 
     @param[out] a_realm     Realm on which the particles will be allocated. 
   */
-  template <typename T >
-  void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm) const;
+  template <typename T>
+  void
+  allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std::string a_realm) const;
 
   /*!
     @brief Template class for generic allocation of particle containers. 
@@ -137,9 +145,8 @@ public:
     @note Particles that live within a_pvrBuffer on the fine side of the refinement boundary will be mapped to the coarse level. 
   */
   template <typename T>
-  void allocate(ParticleContainer<T>& a_container,
-		const int             a_pvrBuffer,
-		const std::string     a_realm) const;
+  void
+  allocate(ParticleContainer<T>& a_container, const int a_pvrBuffer, const std::string a_realm) const;
 
   /*!
     @brief Allocate pointer but not any memory blocks. 
@@ -147,7 +154,8 @@ public:
     @details This sets all the elements in the vector to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
-  void allocatePointer(Vector<RefCountedPtr<T> >& a_data) const;
+  void
+  allocatePointer(Vector<RefCountedPtr<T>>& a_data) const;
 
   /*!
     @brief Allocate pointer but not any memory blocks. 
@@ -156,7 +164,8 @@ public:
     @details This sets all the elements in the vector to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
-  void allocatePointer(Vector<RefCountedPtr<T> >& a_data, const int a_finestLevel) const;
+  void
+  allocatePointer(Vector<RefCountedPtr<T>>& a_data, const int a_finestLevel) const;
 
   /*!
     @brief Allocate pointer but not any memory blocks. 
@@ -164,7 +173,8 @@ public:
     @details This sets all the elements in a_data to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
-  void allocatePointer(EBAMRData<T>& a_data) const;
+  void
+  allocatePointer(EBAMRData<T>& a_data) const;
 
   /*!
     @brief Allocate pointer but not any memory.
@@ -173,18 +183,21 @@ public:
     @details This sets all the elements in the vector to be RefCountedPtr<T>(nullptr)
   */
   template <typename T>
-  void allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel) const;
+  void
+  allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel) const;
 
   /*!
     @brief Parse options. Called during the constructor. 
   */
-  void parseOptions();
+  void
+  parseOptions();
 
   /*!
     @brief Parse runtime options
     @note Called by Driver as simulations progress. 
   */
-  void parseRuntimeOptions();  
+  void
+  parseRuntimeOptions();
 
   /*!
     @brief Register an operator over a realm and a phase. 
@@ -193,7 +206,8 @@ public:
     @param[in] a_phase    Phase (gas or solid). 
     @note Run-time errors will occur if the operator or realm do not exist. 
   */
-  void registerOperator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
+  void
+  registerOperator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Register a boolean mask over a realm. 
@@ -203,39 +217,51 @@ public:
     @note The meaning of a_buffer differs for different masks.
     @note Run-time errors will occur if the mask or realm do not exist.
   */
-  void registerMask(const std::string a_mask, const int a_buffer, const std::string a_realm);
+  void
+  registerMask(const std::string a_mask, const int a_buffer, const std::string a_realm);
 
   /*!
     @brief Build domains
   */
-  void buildDomains();
+  void
+  buildDomains();
 
   /*!
     @brief Set the finest level
     @param[in] a_finestLevel
     @note This is dangerous routine, but it's needed because Driver reads checkpoint files and needs to set the finest level from those. 
   */
-  void setFinestLevel(const int a_finestLevel);
+  void
+  setFinestLevel(const int a_finestLevel);
+
+  /*!
+    @brief Set the coarsest grid cells
+  */
+  void
+  setCoarsestGrid(const IntVect& a_nCells);
 
   /*!
     @brief Query if a realm exists
     @param[in] a_realm Name of the realm. 
     @return True if the realm exists and false otherwise. 
   */
-  bool queryRealm(const std::string a_realm) const;
+  bool
+  queryRealm(const std::string a_realm) const;
 
   /*!
     @brief Check if mesh has an EBCF
     @note Always returns true, non-EBCF cases are a thing of the past. 
   */
-  bool getEbCf() const;
+  bool
+  getEbCf() const;
 
   /*!
     @brief Register a new realm
     @param[in] a_realm Realm name
     @note It is safe to re-register a realm. 
   */
-  void registerRealm(const std::string a_realm);
+  void
+  registerRealm(const std::string a_realm);
 
   /*!
     @brief Alias multifluid data up to a specified level. 
@@ -244,10 +270,11 @@ public:
     @param[in]  a_mfdata      Multifluid data to be aliased
     @param[in]  a_finestLevel Maximum grid level for aliasing operation. 
   */
-  void alias(EBAMRCellData&           a_data,
-	     const phase::which_phase a_phase,
-	     const MFAMRCellData&     a_mfdata,
-	     const int                a_finestLevel) const;
+  void
+  alias(EBAMRCellData&           a_data,
+        const phase::which_phase a_phase,
+        const MFAMRCellData&     a_mfdata,
+        const int                a_finestLevel) const;
 
   /*!
     @brief Alias multifluid data up to a specified level. 
@@ -256,10 +283,11 @@ public:
     @param[in]  a_mfdata      Multifluid data to be aliased
     @param[in]  a_finestLevel Maximum grid level for aliasing operation. 
   */
-  void alias(EBAMRFluxData&           a_data,
-	     const phase::which_phase a_phase,
-	     const MFAMRFluxData&     a_mfdata,
-	     const int                a_finestLevel) const;
+  void
+  alias(EBAMRFluxData&           a_data,
+        const phase::which_phase a_phase,
+        const MFAMRFluxData&     a_mfdata,
+        const int                a_finestLevel) const;
 
   /*!
     @brief Alias an entire hiearchy of multifluid data. 
@@ -267,7 +295,8 @@ public:
     @param[in]  a_phase       Phase (gas or solid).
     @param[in]  a_mfdata      Multifluid data to be aliased
   */
-  void alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) const;
+  void
+  alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) const;
 
   /*!
     @brief Alias an entire hiearchy of multifluid data. 
@@ -275,7 +304,8 @@ public:
     @param[in]  a_phase       Phase (gas or solid).
     @param[in]  a_mfdata      Multifluid data to be aliased
   */
-  void alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata) const;
+  void
+  alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata) const;
 
   /*!
     @brief Alias an entire hiearchy of multifluid data. 
@@ -283,7 +313,8 @@ public:
     @param[in]  a_phase       Phase (gas or solid).
     @param[in]  a_mfdata      Multifluid data to be aliased
   */
-  void alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAMRIVData& a_mfdata) const;
+  void
+  alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAMRIVData& a_mfdata) const;
 
   /*!
     @brief Alias an entire hiearchy of multifluid data. 
@@ -291,7 +322,8 @@ public:
     @param[in]  a_mfdata      Multifluid data to be aliased
     @return A single-phase alias of the multifluid data, having the same size as the input data. 
   */
-  EBAMRCellData alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) const;
+  EBAMRCellData
+  alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) const;
 
   /*!
     @brief Alias an entire hiearchy of multifluid data. 
@@ -299,7 +331,8 @@ public:
     @param[in]  a_mfdata      Multifluid data to be aliased
     @return A single-phase alias of the multifluid data, having the same size as the input data. 
   */
-  EBAMRFluxData alias(const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata) const;
+  EBAMRFluxData
+  alias(const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata) const;
 
   /*!
     @brief Alias an entire hiearchy of multifluid data. 
@@ -307,8 +340,9 @@ public:
     @param[in]  a_mfdata      Multifluid data to be aliased
     @return A single-phase alias of the multifluid data, having the same size as the input data. 
   */
-  EBAMRIVData alias(const phase::which_phase a_phase, const MFAMRIVData& a_mfdata) const;
-  
+  EBAMRIVData
+  alias(const phase::which_phase a_phase, const MFAMRIVData& a_mfdata) const;
+
   /*!
     @brief Compute cell-centered gradient over an AMR hierarchy. 
     @param[out] a_gradient Cell centered gradient. 
@@ -318,11 +352,12 @@ public:
     @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
     ghost cells are updated before using this routine. 
   */
-  void computeGradient(EBAMRCellData&           a_gradient,
-		       const EBAMRCellData&     a_phi,
-		       const std::string        a_realm,  
-		       const phase::which_phase a_phase) const;
-  
+  void
+  computeGradient(EBAMRCellData&           a_gradient,
+                  const EBAMRCellData&     a_phi,
+                  const std::string        a_realm,
+                  const phase::which_phase a_phase) const;
+
   /*!
     @brief Compute face-centered gradient over an AMR hierarchy. 
     @param[out] a_gradient Face centered gradient. 
@@ -332,10 +367,11 @@ public:
     @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
     ghost cells are updated before using this routine. 
   */
-  void computeGradient(EBAMRFluxData&           a_gradient,
-		       const EBAMRCellData&     a_phi,
-		       const std::string        a_realm,  
-		       const phase::which_phase a_phase) const;
+  void
+  computeGradient(EBAMRFluxData&           a_gradient,
+                  const EBAMRCellData&     a_phi,
+                  const std::string        a_realm,
+                  const phase::which_phase a_phase) const;
 
   /*!
     @brief Compute cell-centered gradient over an AMR hierarchy. 
@@ -345,7 +381,8 @@ public:
     @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
     ghost cells are updated before using this routine. 
   */
-  void computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const;  
+  void
+  computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const;
 
   /*!
     @brief Compute face-centered gradient over an AMR hierarchy. 
@@ -355,7 +392,8 @@ public:
     @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
     ghost cells are updated before using this routine. 
   */
-  void computeGradient(MFAMRFluxData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const;  
+  void
+  computeGradient(MFAMRFluxData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const;
 
   /*!
     @brief Allocate a data holder over a specific realm
@@ -366,11 +404,12 @@ public:
     @param[in]  a_nGhost Number of ghost cells for a_data
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
-  void allocate(EBAMRCellData&           a_data,
-		const std::string        a_realm,
-		const phase::which_phase a_phase,
-		const int                a_nComp,
-		const int                a_nGhost = -1) const;
+  void
+  allocate(EBAMRCellData&           a_data,
+           const std::string        a_realm,
+           const phase::which_phase a_phase,
+           const int                a_nComp,
+           const int                a_nGhost = -1) const;
 
   /*!
     @brief Allocate a data holder over a specific realm
@@ -381,11 +420,12 @@ public:
     @param[in]  a_nGhost Number of ghost cells for a_data
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
-  void allocate(EBAMRFluxData&           a_data,
-		const std::string        a_realm,
-		const phase::which_phase a_phase,
-		const int                a_nComp,
-		const int                a_nGhost = -1) const;
+  void
+  allocate(EBAMRFluxData&           a_data,
+           const std::string        a_realm,
+           const phase::which_phase a_phase,
+           const int                a_nComp,
+           const int                a_nGhost = -1) const;
 
   /*!
     @brief Allocate a data holder over a specific realm
@@ -396,11 +436,12 @@ public:
     @param[in]  a_nGhost Number of ghost cells for a_data
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
-  void allocate(EBAMRIVData&             a_data,
-		const std::string        a_realm,
-		const phase::which_phase a_phase,
-		const int                a_nComp,
-		const int                a_nGhost = 0) const;
+  void
+  allocate(EBAMRIVData&             a_data,
+           const std::string        a_realm,
+           const phase::which_phase a_phase,
+           const int                a_nComp,
+           const int                a_nGhost = 0) const;
 
   /*!
     @brief Allocate a data holder over a specific realm
@@ -410,11 +451,12 @@ public:
     @param[in]  a_nGhost Number of ghost cells for a_data
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
-  void allocate(EBAMRIFData&             a_data,
-		const std::string        a_realm,
-		const phase::which_phase a_phase,
-		const int                a_nComp,
-		const int                a_nGhost = 0) const;
+  void
+  allocate(EBAMRIFData&             a_data,
+           const std::string        a_realm,
+           const phase::which_phase a_phase,
+           const int                a_nComp,
+           const int                a_nGhost = 0) const;
 
   /*!
     @brief Allocate Boolean data over a specific realm
@@ -424,17 +466,8 @@ public:
     @param[in]  a_nGhost Number of ghost cells for a_data
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
-  void allocate(EBAMRBool& a_data, const std::string a_realm, const int a_nComp, const int a_nGhost = -1) const;
-  
-  /*!
-    @brief Allocate a data holder over a specific realm.
-    @param[out] a_data   Data holder to be allocated
-    @param[in]  a_realm  Realm of the name where the data will be allocated. 
-    @param[in]  a_nComp  Number of components in a_data
-    @param[in]  a_nGhost Number of ghost cells for a_data
-    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
-  */
-  void allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_nComp, const int a_nGhost = -1) const;
+  void
+  allocate(EBAMRBool& a_data, const std::string a_realm, const int a_nComp, const int a_nGhost = -1) const;
 
   /*!
     @brief Allocate a data holder over a specific realm.
@@ -444,7 +477,19 @@ public:
     @param[in]  a_nGhost Number of ghost cells for a_data
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
-  void allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost = -1) const;
+  void
+  allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_nComp, const int a_nGhost = -1) const;
+
+  /*!
+    @brief Allocate a data holder over a specific realm.
+    @param[out] a_data   Data holder to be allocated
+    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_nComp  Number of components in a_data
+    @param[in]  a_nGhost Number of ghost cells for a_data
+    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
+  */
+  void
+  allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost = -1) const;
 
   /*!
     @brief Allocate a data holder over a specific realm
@@ -454,7 +499,8 @@ public:
     @param[in]  a_nGhost Number of ghost cells for a_data
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
-  void allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost = 0) const;
+  void
+  allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost = 0) const;
 
   /*!
     @brief Reallocate data. 
@@ -463,7 +509,8 @@ public:
     @param[in]  a_lmin  The lowest grid level that will be reallocated. 
     @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
-  void reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin) const;
+  void
+  reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin) const;
 
   /*!
     @brief Reallocate data. 
@@ -472,7 +519,8 @@ public:
     @param[in]  a_lmin  The lowest grid level that will be reallocated. 
     @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
-  void reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin) const;
+  void
+  reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin) const;
 
   /*!
     @brief Reallocate data. 
@@ -481,7 +529,8 @@ public:
     @param[in]  a_lmin  The lowest grid level that will be reallocated. 
     @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
-  void reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin) const;
+  void
+  reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin) const;
 
   /*!
     @brief Reallocate data. 
@@ -490,7 +539,8 @@ public:
     @param[in]  a_lmin  The lowest grid level that will be reallocated. 
     @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
-  void reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin) const;
+  void
+  reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin) const;
 
   /*!
     @brief Reallocate data. 
@@ -498,7 +548,8 @@ public:
     @param[in]  a_lmin  The lowest grid level that will be reallocated. 
     @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
-  void reallocate(EBAMRBool& a_data, const int a_lmin) const;
+  void
+  reallocate(EBAMRBool& a_data, const int a_lmin) const;
 
   /*!
     @brief Reallocate data. 
@@ -506,7 +557,8 @@ public:
     @param[in]  a_lmin  The lowest grid level that will be reallocated. 
     @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
-  void reallocate(MFAMRCellData& a_data, const int a_lmin) const;
+  void
+  reallocate(MFAMRCellData& a_data, const int a_lmin) const;
 
   /*!
     @brief Reallocate data. 
@@ -514,28 +566,32 @@ public:
     @param[in]  a_lmin  The lowest grid level that will be reallocated. 
     @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
-  void reallocate(MFAMRFluxData& a_data, const int a_lmin) const;
-  
+  void
+  reallocate(MFAMRFluxData& a_data, const int a_lmin) const;
+
   /*!
     @brief Reallocate data. 
     @param[out] a_data  Data to be reallocated
     @param[in]  a_lmin  The lowest grid level that will be reallocated. 
     @details This will reallocate data for all grid levels lvl >= a_lmin. 
   */
-  void reallocate(MFAMRIVData& a_data, const int a_lmin) const;
+  void
+  reallocate(MFAMRIVData& a_data, const int a_lmin) const;
   /*!
     @brief Average down multifluid data over a realm. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
-  void averageDown(MFAMRCellData& a_data, const std::string a_realm) const;
+  void
+  averageDown(MFAMRCellData& a_data, const std::string a_realm) const;
 
   /*!
     @brief Average down multifluid data over a realm. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
-  void averageDown(MFAMRFluxData& a_data, const std::string a_realm) const;
+  void
+  averageDown(MFAMRFluxData& a_data, const std::string a_realm) const;
 
   /*!
     @brief Average multifluid data over a realm. 
@@ -543,7 +599,8 @@ public:
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
-  void averageFaces(MFAMRFluxData& a_data, const std::string a_realm) const;  
+  void
+  averageFaces(MFAMRFluxData& a_data, const std::string a_realm) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -551,7 +608,8 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  void
+  averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -561,8 +619,11 @@ public:
     @param[in]    a_level The coarse level.
     @details This coarsens data from level a_lvl+1 to level a_lvl
   */
-  void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl) const;
-
+  void
+  averageDown(EBAMRCellData&           a_data,
+              const std::string        a_realm,
+              const phase::which_phase a_phase,
+              const int                a_lvl) const;
 
   /*!
     @brief Coarsen cells over a realm. This does a specific level. 
@@ -572,11 +633,12 @@ public:
     @param[in]    a_realm    Realm name
     @param[in]    a_phase    Phase (gas or solid)
   */
-  void averageDown(LevelData<EBCellFAB>&       a_coarData,
-		   const LevelData<EBCellFAB>& a_fineData,
-		   const int                   a_level,
-		   const std::string           a_realm,
-		   const phase::which_phase    a_phase) const;  
+  void
+  averageDown(LevelData<EBCellFAB>&       a_coarData,
+              const LevelData<EBCellFAB>& a_fineData,
+              const int                   a_level,
+              const std::string           a_realm,
+              const phase::which_phase    a_phase) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -584,7 +646,8 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void averageDown(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  void
+  averageDown(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -593,7 +656,8 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void averageFaces(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;  
+  void
+  averageFaces(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -601,7 +665,8 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void averageDown(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  void
+  averageDown(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Do conservative coarsening for data defined on cut-cells. 
@@ -609,7 +674,8 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  void
+  conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Deposit scalar particle quantities on the mesh. 
@@ -632,14 +698,15 @@ public:
     @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
     @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
   */
-  template <class P, const Real&(P::*particleScalarField)() const>
-  void depositParticles(EBAMRCellData&              a_meshData,
-			const std::string&          a_realm,
-			const phase::which_phase&   a_phase,	       
-			const ParticleContainer<P>& a_particles,
-			const DepositionType        a_depositionType,
-			const CoarseFineDeposition  a_coarseFineDeposition,
-			const bool                  a_forceIrregNGP = false);
+  template <class P, const Real& (P::*particleScalarField)() const>
+  void
+  depositParticles(EBAMRCellData&              a_meshData,
+                   const std::string&          a_realm,
+                   const phase::which_phase&   a_phase,
+                   const ParticleContainer<P>& a_particles,
+                   const DepositionType        a_depositionType,
+                   const CoarseFineDeposition  a_coarseFineDeposition,
+                   const bool                  a_forceIrregNGP = false);
 
   /*!
     @brief Deposit scalar particle quantities on the mesh. 
@@ -652,14 +719,15 @@ public:
     @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
     @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
   */
-  template <class P, Real(P::*particleScalarField)() const>
-  void depositParticles(EBAMRCellData&              a_meshData,
-			const std::string&          a_realm,
-			const phase::which_phase&   a_phase,	       
-			const ParticleContainer<P>& a_particles,
-			const DepositionType        a_depositionType,
-			const CoarseFineDeposition  a_coarseFineDeposition,
-			const bool                  a_forceIrregNGP = false);  
+  template <class P, Real (P::*particleScalarField)() const>
+  void
+  depositParticles(EBAMRCellData&              a_meshData,
+                   const std::string&          a_realm,
+                   const phase::which_phase&   a_phase,
+                   const ParticleContainer<P>& a_particles,
+                   const DepositionType        a_depositionType,
+                   const CoarseFineDeposition  a_coarseFineDeposition,
+                   const bool                  a_forceIrregNGP = false);
 
   /*!
     @brief Deposit vector particle quantities on the mesh. 
@@ -682,14 +750,15 @@ public:
     @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
     @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
   */
-  template <class P, const RealVect&(P::*particleVectorField)() const>
-  void depositParticles(EBAMRCellData&              a_meshData,
-			const std::string&          a_realm,
-			const phase::which_phase&   a_phase,	       
-			const ParticleContainer<P>& a_particles,
-			const DepositionType        a_depositionType,
-			const CoarseFineDeposition  a_coarseFineDeposition,
-			const bool                  a_forceIrregNGP = false);
+  template <class P, const RealVect& (P::*particleVectorField)() const>
+  void
+  depositParticles(EBAMRCellData&              a_meshData,
+                   const std::string&          a_realm,
+                   const phase::which_phase&   a_phase,
+                   const ParticleContainer<P>& a_particles,
+                   const DepositionType        a_depositionType,
+                   const CoarseFineDeposition  a_coarseFineDeposition,
+                   const bool                  a_forceIrregNGP = false);
 
   /*!
     @brief Deposit vector particle quantities on the mesh. 
@@ -702,15 +771,16 @@ public:
     @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
     @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
   */
-  template <class P, RealVect(P::*particleVectorField)() const>
-  void depositParticles(EBAMRCellData&              a_meshData,
-			const std::string&          a_realm,
-			const phase::which_phase&   a_phase,	       
-			const ParticleContainer<P>& a_particles,
-			const DepositionType        a_depositionType,
-			const CoarseFineDeposition  a_coarseFineDeposition,
-			const bool                  a_forceIrregNGP = false);    
- 
+  template <class P, RealVect (P::*particleVectorField)() const>
+  void
+  depositParticles(EBAMRCellData&              a_meshData,
+                   const std::string&          a_realm,
+                   const phase::which_phase&   a_phase,
+                   const ParticleContainer<P>& a_particles,
+                   const DepositionType        a_depositionType,
+                   const CoarseFineDeposition  a_coarseFineDeposition,
+                   const bool                  a_forceIrregNGP = false);
+
   /*!
     @brief Interpolate a scalar field onto the particle position. 
     @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
@@ -729,14 +799,15 @@ public:
     @param[in]    a_interpType           Interpolation type. 
     @param[in]    a_forceIrregNGP        Force NGP interpolation in cut-cells. 
   */
-  template <class P, Real&(P::*particleScalarField)()>
-  void interpolateParticles(ParticleContainer<P>&      a_particles,
-			    const std::string&         a_realm,
-			    const phase::which_phase&  a_phase,	       			    
-			    const EBAMRCellData&       a_meshScalarField,
-			    const DepositionType       a_interpType,	
-			    const bool                 a_forceIrregNGP = false) const;
-  
+  template <class P, Real& (P::*particleScalarField)()>
+  void
+  interpolateParticles(ParticleContainer<P>&     a_particles,
+                       const std::string&        a_realm,
+                       const phase::which_phase& a_phase,
+                       const EBAMRCellData&      a_meshScalarField,
+                       const DepositionType      a_interpType,
+                       const bool                a_forceIrregNGP = false) const;
+
   /*!
     @brief Interpolate a vector field onto the particle position. 
     @details This is just like regular particle-mesh interpolation. The input field should have exactly SpaceDim components and the
@@ -755,13 +826,14 @@ public:
     @param[in]    a_interpType           Interpolation type. 
     @param[in]    a_forceIrregNGP        Force NGP interpolation in cut-cells. 
   */
-  template <class P, RealVect&(P::*particleVectorField)()>
-  void interpolateParticles(ParticleContainer<P>&      a_particles,
-			    const std::string&         a_realm,
-			    const phase::which_phase&  a_phase,	       			    			    
-			    const EBAMRCellData&       a_meshVectorField,
-			    const DepositionType       a_interpType,
-			    const bool                 a_forceIrregNGP = false) const;
+  template <class P, RealVect& (P::*particleVectorField)()>
+  void
+  interpolateParticles(ParticleContainer<P>&     a_particles,
+                       const std::string&        a_realm,
+                       const phase::which_phase& a_phase,
+                       const EBAMRCellData&      a_meshVectorField,
+                       const DepositionType      a_interpType,
+                       const bool                a_forceIrregNGP = false) const;
 
   /*!
     @brief Function which removes particles from the domain if they fall inside the EB.
@@ -774,9 +846,10 @@ public:
     @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct EBISBox.
   */
   template <class P>
-  void removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
-				const phase::which_phase& a_phase,
-				const Real                a_tolerance = 0.0) const;
+  void
+  removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
+                           const phase::which_phase& a_phase,
+                           const Real                a_tolerance = 0.0) const;
 
   /*!
     @brief Function which removes particles from the domain if they fall inside the EB.
@@ -789,9 +862,10 @@ public:
     @note This function will only work if the particles are mapped to the correct EBISBox. 
   */
   template <class P>
-  void removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
-				      const phase::which_phase& a_phase,
-				      const Real                a_tolerance = 0.0) const;
+  void
+  removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
+                                 const phase::which_phase& a_phase,
+                                 const Real                a_tolerance = 0.0) const;
 
   /*!
     @brief Function which removes particles from the domain if they fall inside the EB.
@@ -802,8 +876,8 @@ public:
     @note This function will only work if the particles are mapped to the correct EBISBox. 
   */
   template <class P>
-  void removeCoveredParticlesVoxels(ParticleContainer<P>&     a_particles,
-				    const phase::which_phase& a_phase) const;
+  void
+  removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const phase::which_phase& a_phase) const;
 
   /*!
     @brief Function which transferse particles from one particle container to another if they fall inside the EB.
@@ -817,10 +891,11 @@ public:
     @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct boxes (but remapping will be necessary)
   */
   template <class P>
-  void transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
-				  ParticleContainer<P>&     a_particlesTo,				  
-				  const phase::which_phase& a_phase,
-				  const Real                a_tolerance = 0.0) const;
+  void
+  transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
+                             ParticleContainer<P>&     a_particlesTo,
+                             const phase::which_phase& a_phase,
+                             const Real                a_tolerance = 0.0) const;
 
   /*!
     @brief Function which transferse particles from one particle container to another if they fall inside the EB.
@@ -834,10 +909,11 @@ public:
     @note This function will only work if the particles are mapped to the correct EBISBox. 
   */
   template <class P>
-  void transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesFrom,
-					ParticleContainer<P>&     a_particlesTo,				      
-					const phase::which_phase& a_phase,
-					const Real                a_tolerance = 0.0) const;
+  void
+  transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesFrom,
+                                   ParticleContainer<P>&     a_particlesTo,
+                                   const phase::which_phase& a_phase,
+                                   const Real                a_tolerance = 0.0) const;
 
   /*!
     @brief Function which transferse particles from one particle container to another if they fall inside the EB.
@@ -850,9 +926,10 @@ public:
     @note This function will only work if the particles are mapped to the correct EBISBox. 
   */
   template <class P>
-  void transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFrom,
-				      ParticleContainer<P>&     a_particlesTo,				      
-				      const phase::which_phase& a_phase) const;
+  void
+  transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFrom,
+                                 ParticleContainer<P>&     a_particlesTo,
+                                 const phase::which_phase& a_phase) const;
 
   /*!
     @brief Particle intersection algorithm based on ray-casting.
@@ -873,13 +950,14 @@ public:
     @param[in]    a_deleteParticles If true, particles will be removed from a_activeParticles if they intersect the geometry.
   */
   template <class P>
-  void intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
-				   ParticleContainer<P>&    a_ebParticles,
-				   ParticleContainer<P>&    a_domainParticles,
-				   const phase::which_phase a_phase,
-				   const Real               a_tolerance,
-				   const bool               a_deleteParticles) const;
-  
+  void
+  intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
+                              ParticleContainer<P>&    a_ebParticles,
+                              ParticleContainer<P>&    a_domainParticles,
+                              const phase::which_phase a_phase,
+                              const Real               a_tolerance,
+                              const bool               a_deleteParticles) const;
+
   /*!
     @brief Particle intersection algorithm based on bisection. 
     @details This routine will iterate through all the particles and check if they intersect the geometry. The template
@@ -895,19 +973,21 @@ public:
     @param[in]    a_deleteParticles If true, particles will be removed from a_activeParticles if they intersect the geometry.
   */
   template <class P>
-  void intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
-				  ParticleContainer<P>&    a_ebParticles,
-				  ParticleContainer<P>&    a_domainParticles,
-				  const phase::which_phase a_phase,
-				  const Real               a_bisectionStep,
-				  const bool               a_deleteParticles) const;  
+  void
+  intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
+                             ParticleContainer<P>&    a_ebParticles,
+                             ParticleContainer<P>&    a_domainParticles,
+                             const phase::which_phase a_phase,
+                             const Real               a_bisectionStep,
+                             const bool               a_deleteParticles) const;
   /*!
     @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method. 
     @param[inout] a_data  Data to be interpolated.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void interpGhost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  void
+  interpGhost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Interpolate ghost cells over a realm, using the default ghost cell interpolation method on a specific level. 
@@ -917,18 +997,20 @@ public:
     @param[in]    a_realm    Realm name
     @param[in]    a_phase    Phase (gas or solid)
   */
-  void interpGhost(LevelData<EBCellFAB>&       a_fineData,
-		   const LevelData<EBCellFAB>& a_coarData,
-		   const int                   a_level,
-		   const std::string           a_realm,
-		   const phase::which_phase    a_phase) const;
+  void
+  interpGhost(LevelData<EBCellFAB>&       a_fineData,
+              const LevelData<EBCellFAB>& a_coarData,
+              const int                   a_level,
+              const std::string           a_realm,
+              const phase::which_phase    a_phase) const;
 
   /*!
     @brief Interpolate ghost cells over a realm. Calls the default ghost cell interpolation method. 
     @param[inout] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
   */
-  void interpGhost(MFAMRCellData& a_data, const std::string a_realm) const;
+  void
+  interpGhost(MFAMRCellData& a_data, const std::string a_realm) const;
 
   /*!
     @brief Interpolate ghost cells over a realm and phase. This uses piecewise linear interpolation (with limiters)
@@ -936,7 +1018,8 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void interpGhostPwl(MFAMRCellData& a_data, const std::string a_realm) const;  
+  void
+  interpGhostPwl(MFAMRCellData& a_data, const std::string a_realm) const;
 
   /*!
     @brief Interpolate ghost cells over a realm and phase. This uses piecewise linear interpolation (with limiters)
@@ -944,7 +1027,8 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void interpGhostPwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  void
+  interpGhostPwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Interpolate ghost cells over a realm and phase. 
@@ -954,7 +1038,8 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void interpGhostMG(MFAMRCellData& a_data, const std::string a_realm) const;    
+  void
+  interpGhostMG(MFAMRCellData& a_data, const std::string a_realm) const;
 
   /*!
     @brief Interpolate ghost cells over a realm and phase. 
@@ -964,7 +1049,48 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
-  void interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;  
+  void
+  interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Interpolate data to new grids
+    @details This is called when requiring data to be interpolated to new grids. Takes old data as argument
+    and fills the new grid data with an interpolation of the old grid data. 
+    @param[out] a_newData        New grid data.
+    @param[in]  a_oldData        Old grid data.
+    @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
+    @param[in]  a_oldFinestLevel Previous finest level.
+    @param[in]  a_newFinestLevel New finest level. 
+    @param[in]  a_useSlopes      If true, use slopes when regridding the data. 
+  */
+  void
+  interpToNewGrids(MFAMRCellData&       a_newData,
+                   const MFAMRCellData& a_oldData,
+                   const int            a_lmin,
+                   const int            a_oldFinestLevel,
+                   const int            a_newFinestLevel,
+                   const bool           a_useSlopes);
+
+  /*!
+    @brief Interpolate data to new grids
+    @details This is called when requiring data to be interpolated to new grids. Takes old data as argument
+    and fills the new grid data with an interpolation of the old grid data. 
+    @param[out] a_newData        New grid data.
+    @param[in]  a_oldData        Old grid data.
+    @param[in]  a_phase          Phase on which we regrid. 
+    @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
+    @param[in]  a_oldFinestLevel Previous finest level.
+    @param[in]  a_newFinestLevel New finest level. 
+    @param[in]  a_useSlopes      If true, use slopes when regridding the data. 
+  */
+  void
+  interpToNewGrids(EBAMRCellData&           a_newData,
+                   const EBAMRCellData&     a_oldData,
+                   const phase::which_phase a_phase,
+                   const int                a_lmin,
+                   const int                a_oldFinestLevel,
+                   const int                a_newFinestLevel,
+                   const bool               a_useSlopes);
 
   /*!
     @brief Interpolate data to centroids on realm and phase
@@ -973,20 +1099,23 @@ public:
     @param[in]    a_phase Phase (gas or solid)
     @details This leaves regular data intact, while the values in irregular are replaced by the corresponding interpolation to centroids. 
   */
-  void interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
-  
+  void
+  interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
   /*!
     @brief Sets multifluid index space. 
     @param[in] a_multiFluidIndexSpace Multifluid index space wrapper. 
   */
-  void setMultifluidIndexSpace(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace);
+  void
+  setMultifluidIndexSpace(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace);
 
   /*!
     @brief Set implicit function for a specific phase. Need e.g. for level-sets. 
     @param[in] a_phase  Phase
     @param[in] a_baseIF The level-set function describing the phase. 
   */
-  void setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseIF);
+  void
+  setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseIF);
 
   /*!
     @brief Regrid AMR. This versions generates the grids and Realms, but not the operator. 
@@ -994,9 +1123,8 @@ public:
     @param[in] a_lmin    Coarsest grid level allowed to change. 
     @param[in] a_hardcap Grid generation hardcap. If < 0 there are no limitations to grid depth. 
   */
-  void regridAmr(const Vector<IntVectSet>& a_tags,
-		 const int                 a_lmin,
-		 const int                 a_hardcap=-1);
+  void
+  regridAmr(const Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
   /*!
     @brief Regrid a realm. This generates the grids for the realm, but does not do the operators on the realm. 
@@ -1005,10 +1133,11 @@ public:
     @param[in] a_boxes Grid boxes
     @param[in] a_lmin  Coarsest level that changes. 
   */
-  void regridRealm(const std::string           a_realm,
-		   const Vector<Vector<int> >& a_procs,
-		   const Vector<Vector<Box> >& a_boxes,
-		   const int                   a_lmin);
+  void
+  regridRealm(const std::string          a_realm,
+              const Vector<Vector<int>>& a_procs,
+              const Vector<Vector<Box>>& a_boxes,
+              const int                  a_lmin);
 
   /*!
     @brief Set grids from boxes and computational loads.
@@ -1016,98 +1145,117 @@ public:
     @param[in] a_realmsAndLoads Realm names and computational loads for realms
     @details This will set the grids for AmrMesh and realms, load balancing the various realms with the provided loads. 
   */
-  void setGrids(const Vector<Vector<Box> >& a_boxes, const std::map<std::string, Vector<Vector<long int> > >& a_realmsAndLoads);
+  void
+  setGrids(const Vector<Vector<Box>>& a_boxes, const std::map<std::string, Vector<Vector<long int>>>& a_realmsAndLoads);
 
   /*!
     @brief Regrid AMR operators. This is done for all realms. 
     @param[in] a_lmin Coarsest grid level that changes. 
   */
-  void regridOperators(const int a_lmin);
+  void
+  regridOperators(const int a_lmin);
 
   /*!
     @brief Do a sanity check to make sure everything is set up correctly
   */
-  void sanityCheck() const;
+  void
+  sanityCheck() const;
 
   /*!
     @brief Get finest grid level. 
   */
-  int getFinestLevel() const;
+  int
+  getFinestLevel() const;
 
   /*!
     @brief Get maximum permitted amr depth.
   */
-  int getMaxAmrDepth() const;
+  int
+  getMaxAmrDepth() const;
 
   /*!
     @brief Get maximum permitted simulation depth.
   */
-  int getMaxSimulationDepth() const;
+  int
+  getMaxSimulationDepth() const;
 
   /*!
     @brief Get blocking factor (i.e. the smallest possible box).
   */
-  int getBlockingFactor() const;
+  int
+  getBlockingFactor() const;
 
   /*!
     @brief Get maximum permitted box size
   */
-  int getMaxBoxSize() const;
+  int
+  getMaxBoxSize() const;
 
   /*!
     @brief Return buffer for B-R mesh refinement algorithm. 
   */
-  int getBrBuffer() const;
+  int
+  getBrBuffer() const;
 
   /*!
     @brief Get maximum box size for EBIS generation. 
   */
-  int getMaxEbisBoxSize() const;
+  int
+  getMaxEbisBoxSize() const;
 
   /*!
     @brief Get the default number of ghost cells
   */
-  int getNumberOfGhostCells() const;
+  int
+  getNumberOfGhostCells() const;
 
   /*!
     @brief Get number of ghost cells used for EB grid generation. 
   */
-  int getNumberOfEbGhostCells() const;
+  int
+  getNumberOfEbGhostCells() const;
 
   /*!
     @brief Get default redistribution radius
   */
-  int getRedistributionRadius() const;
-  
+  int
+  getRedistributionRadius() const;
+
   /*!
     @brief Get resolution on the finest grid level. 
   */
-  Real getFinestDx() const;
+  Real
+  getFinestDx() const;
 
   /*!
     @brief Get lower-left corner of computational domain. 
   */
-  RealVect getProbLo() const;
+  RealVect
+  getProbLo() const;
 
   /*!
     @brief Get upper-left corner of computational domain. 
   */
-  RealVect getProbHi() const;
+  RealVect
+  getProbHi() const;
 
   /*!
     @brief Get finest domain
   */
-  ProblemDomain getFinestDomain() const;
+  ProblemDomain
+  getFinestDomain() const;
 
   /*!
     @brief Get spatial resolutions
   */
-  const Vector<Real>& getDx() const;
+  const Vector<Real>&
+  getDx() const;
 
   /*!
     @brief Get refinement ratios
   */
-  const Vector<int>& getRefinementRatios() const;
+  const Vector<int>&
+  getRefinementRatios() const;
 
   /*!
     @brief Get refinement factor between two levels
@@ -1115,29 +1263,34 @@ public:
     @param[in] a_level2 Second level
     @details This will work correctly in reverse as well.
   */
-  int getRefinementRatio(const int a_level1, const int a_level2) const ;
+  int
+  getRefinementRatio(const int a_level1, const int a_level2) const;
 
   /*!
     @brief Get implicit function for a specific phase
     @param[in] a_phase Phase 8gas or solid)
   */
-  const RefCountedPtr<BaseIF>& getBaseImplicitFunction(const phase::which_phase a_phase) const;
+  const RefCountedPtr<BaseIF>&
+  getBaseImplicitFunction(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the "proxy" grids in AmrMesh.
     @details Returns m_grids
   */
-  const Vector<DisjointBoxLayout>& getProxyGrids() const;
+  const Vector<DisjointBoxLayout>&
+  getProxyGrids() const;
 
   /*!
     @brief Get the grids
   */
-  const Vector<DisjointBoxLayout>& getGrids(const std::string a_realm) const;
+  const Vector<DisjointBoxLayout>&
+  getGrids(const std::string a_realm) const;
 
   /*!
     @brief Get domains
   */
-  const Vector<ProblemDomain>& getDomains() const;
+  const Vector<ProblemDomain>&
+  getDomains() const;
 
   /*!
     @brief Get a registered mask.
@@ -1145,165 +1298,194 @@ public:
     @param[in] a_buffer Buffer (used when registering mask)
     @param[in] a_realm  Realm name
   */
-  const AMRMask& getMask(const std::string a_mask, const int a_buffer, const std::string a_realm) const;
+  const AMRMask&
+  getMask(const std::string a_mask, const int a_buffer, const std::string a_realm) const;
+
+  /*!
+    @brief Get a map of all valid cells on a specified realm
+    @param[in] a_realm Realm name
+  */
+  const AMRMask&
+  getValidCells(const std::string a_realm) const;
 
   /*!
     @brief Get the EBLevelGrid for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const;
-  
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const;
+
   /*!
     @brief Get EBISLayouts for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const Vector<EBISLayout>& getEBISLayout(const std::string a_realm, const phase::which_phase a_phase) const;
+  const Vector<EBISLayout>&
+  getEBISLayout(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get EBISLayouts for a Realm
     @param[in] a_realm Realm name
   */
-  const Vector<RefCountedPtr<MFLevelGrid> >& getMFLevelGrid(const std::string a_realm) const;
+  const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGrid(const std::string a_realm) const;
 
   /*!
     @brief Get vof iterators for a Realm and phase. This has the capability of iterating through cut-cells. 
     @details Not const because we need to reset the vofiterator
   */
-  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getVofIterator(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get neighboring boxes
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors(const std::string        a_realm,
-										const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>>&
+  getNeighbors(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get levelset function, allocated over a grid for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const EBAMRFAB& getLevelset(const std::string a_realm, const phase::which_phase a_phase) const;
+  const EBAMRFAB&
+  getLevelset(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get EBAMRParticleMesh operator
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)    
   */
-  EBAMRParticleMesh& getParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const;
+  EBAMRParticleMesh&
+  getParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the coarsening utility
   */
-  Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EbCoarAve>>&
+  getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get multigrid interpolation utility
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EBMultigridInterpolator>>&
+  getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get piecewise linear ghost cell interpolator
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<AggEBPWLFillPatch>>&
+  getFillPatch(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get interpolator 
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EBFineInterp>>&
+  getFineInterp(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get flux register
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBFluxRegister> >&  getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EBFluxRegister>>&
+  getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get redistribution
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBLevelRedist> >&  getLevelRedist(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EBLevelRedist>>&
+  getLevelRedist(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get coar-to-fine redistribution for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBCoarToFineRedist> >&  getCoarToFineRedist(const std::string a_realm, const phase::which_phase a_phase) const;
-  
+  Vector<RefCountedPtr<EBCoarToFineRedist>>&
+  getCoarToFineRedist(const std::string a_realm, const phase::which_phase a_phase) const;
+
   /*!
     @brief Get coar-to-coar redistribution objects
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  getCoarToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EBCoarToCoarRedist>>&
+  getCoarToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get coar-to-coar redistribution redistribution objects
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const;
-  
+  Vector<RefCountedPtr<EBFineToCoarRedist>>&
+  getFineToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const;
+
   /*!
     @brief Get interpolation stencils for going from cell center to cell centroid
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
+  const IrregAmrStencil<CentroidInterpolationStencil>&
+  getCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get interpolation stencils for going from cell center to cell boundary centroid
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencils(const std::string        a_realm,
-											    const phase::which_phase a_phase) const;
+  const IrregAmrStencil<EbCentroidInterpolationStencil>&
+  getEbCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the nonconservative divergence stencils
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
+  const IrregAmrStencil<NonConservativeDivergenceStencil>&
+  getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the name of all Realms
     @return Names of all Realms
   */
-  std::vector<std::string> getRealms() const;
+  std::vector<std::string>
+  getRealms() const;
 
   /*!
     @brief Get box sorting method
     @return Box sorting method.
   */
-  BoxSorting getBoxSorting() const;
+  BoxSorting
+  getBoxSorting() const;
 
   /*!
     @brief Get EBIndexSpace corresponding to a particular phase
     @param[in] a_phase Phase (gas/solid)
   */
-  RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const phase::which_phase a_phase){
+  RefCountedPtr<EBIndexSpace>&
+  getEBIndexSpace(const phase::which_phase a_phase)
+  {
     return m_multifluidIndexSpace->getEBIndexSpace(a_phase);
   }
-  
-protected:
 
+protected:
   /*!
     @brief Enum for having understandable notation for grid generation
   */
-  enum class GridGenerationMethod{
+  enum class GridGenerationMethod
+  {
     BergerRigoutsous,
     Tiled,
   };
@@ -1311,12 +1493,12 @@ protected:
   /*!
     @brief These are all the Realms
   */
-  mutable std::map<std::string, RefCountedPtr<Realm> > m_realms;
+  mutable std::map<std::string, RefCountedPtr<Realm>> m_realms;
 
   /*!
     @brief Implicit functions
   */
-  std::map<phase::which_phase, RefCountedPtr<BaseIF> > m_baseif;
+  std::map<phase::which_phase, RefCountedPtr<BaseIF>> m_baseif;
 
   /*!
     @brief Grid generation method
@@ -1506,7 +1688,8 @@ protected:
   /*!
     @brief Define Realms
   */
-  void defineRealms();
+  void
+  defineRealms();
 
   /*!
     @brief Build new internal AMR grids.
@@ -1515,100 +1698,118 @@ protected:
     @param[in]    a_hardcap Hardcap for the maximum grid level which can be generated. If a_hardcap < 0 there is no restriction beyond the AmrMesh restrictions.
     @details This will call the specified grid generation method and fill m_grids with the new grids. 
   */
-  void buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
+  void
+  buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
   /*!
     @brief Parse the low/high corners of the computational domain. 
   */
-  void parseProbLoHiCorners();
-
+  void
+  parseProbLoHiCorners();
 
   /*!
     @brief Parse the grid generation algorithm. 
   */
-  void parseGridGeneration();
+  void
+  parseGridGeneration();
 
   /*!
     @brief Parse the verbosity for AmrMesh. 
   */
-  void parseVerbosity();
+  void
+  parseVerbosity();
 
   /*!
     @brief Parse the coarsest domain grid.
   */
-  void parseCoarsestLevelNumCells();
+  void
+  parseCoarsestLevelNumCells();
 
   /*!
     @brief Parse the maximum permitted AMR depth
   */
-  void parseMaxAmrDepth();
+  void
+  parseMaxAmrDepth();
 
   /*!
     @brief Set maximum simulation depth. 
   */
-  void parseMaxSimulationDepth();
+  void
+  parseMaxSimulationDepth();
 
   /*!
     @brief Parse refinement ratios
   */
-  void parseRefinementRatios();
+  void
+  parseRefinementRatios();
 
   /*!
     @brief Parse buffer size for Berger-Rigoutsous grid algorithm. 
   */
-  void parseBrBufferSize();
+  void
+  parseBrBufferSize();
 
   /*!
     @brief Parse the Berger-Rigoutsos fill ratio. 
   */
-  void parseBrFillRatio();
+  void
+  parseBrFillRatio();
 
   /*!
     @brief Parse the maximum permitted box size. 
   */
-  void parseMaxBoxSize();
+  void
+  parseMaxBoxSize();
 
   /*!
     @brief Parse the maximum permitted box size. 
     @details Only relevant for the grid generation step. 
   */
-  void parseMaxEbisBoxSize();
+  void
+  parseMaxEbisBoxSize();
 
   /*!
     @brief Parse the B-R blocking factor. For tiled mesh refinement this parses the tile size. 
   */
-  void parseBlockingFactor();
+  void
+  parseBlockingFactor();
 
   /*!
     @brief Parse number of ghost cells for eb stuff
     @details Only matters for the grid generation step. 
-  */ 
-  void parseEbGhostCells();
+  */
+  void
+  parseEbGhostCells();
 
   /*!
     @brief Parse the number of ghost cells 
-  */ 
-  void parseNumGhostCells();
+  */
+  void
+  parseNumGhostCells();
 
   /*!
     @brief Parse settings for the multigrid interpolator
   */
-  void parseMultigridInterpolator();
+  void
+  parseMultigridInterpolator();
 
   /*!
     @brief Parse the default redistribution radius
   */
-  void parseRedistributionRadius();
+  void
+  parseRedistributionRadius();
 
   /*!
     @brief Parse centroid interpolation stencils
   */
-  void parseCentroidStencils();
+  void
+  parseCentroidStencils();
 
   /*!
     @brief Parse EB interpolation (or extrapolation) stencils
   */
-  void parseEbCentroidStencils();
+  void
+  parseEbCentroidStencils();
 
   /*!
     @brief Compute cell-centered gradient for a grid level.
@@ -1620,11 +1821,12 @@ protected:
     @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
     ghost cells updated before using this routine. 
   */
-  void computeGradient(LevelData<EBCellFAB>&       a_gradient,
-		       const LevelData<EBCellFAB>& a_phi,
-		       const std::string           a_realm,
-		       const phase::which_phase    a_phase,
-		       const int                   a_lvl) const;
+  void
+  computeGradient(LevelData<EBCellFAB>&       a_gradient,
+                  const LevelData<EBCellFAB>& a_phi,
+                  const std::string           a_realm,
+                  const phase::which_phase    a_phase,
+                  const int                   a_lvl) const;
 };
 
 #include <CD_NamespaceFooter.H>

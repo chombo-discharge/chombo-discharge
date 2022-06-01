@@ -18,7 +18,8 @@
   @brief Enum for putting some logic into how we think about EBs. This is just a simply supporting class for various solvers/algorithms that can distinguish
   between ways of think about the EB: 
 */
-enum class EbRepresentation {
+enum class EbRepresentation
+{
   ImplicitFunction,
   Discrete,
   Voxel,

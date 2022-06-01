@@ -28,7 +28,8 @@
   with linear interpolation (i.e. virtually padding the data with a slope connecting the first
   two or last two entries in the table). 
 */
-enum class OutOfRangeStrategy {
+enum class OutOfRangeStrategy
+{
   Constant,
   Linear
 };
@@ -36,7 +37,8 @@ enum class OutOfRangeStrategy {
 /*!
   @brief For identifying columns in the LookupTable.
 */
-enum StateStatus {
+enum StateStatus
+{
   Column  = 0,
   Sorted  = 1,
   Uniform = 2,
@@ -45,7 +47,8 @@ enum StateStatus {
 /*!
   @brief Enum for classifying how table is spaced. 
 */
-enum class TableSpacing {
+enum class TableSpacing
+{
   Uniform,
   Exponential
 };
@@ -53,10 +56,10 @@ enum class TableSpacing {
 /*!
   @brief Class for looking up and interpolation (x,y) data. 
 */
-template<int N>
-class LookupTable {
+template <int N>
+class LookupTable
+{
 public:
-
   /*!
     @brief Default constructor. Creates a table without any entries. 
   */
@@ -75,16 +78,16 @@ public:
   /*!
     @brief Clear all data
   */
-  inline
-  void clear();
+  inline void
+  clear();
 
   /*!
     @brief Make the table into a uniform table with the number of entries. 
     @details This will make the data uniform with constant spacing along the specified column data. 
     @note The spacing that is used is based on the smallest and largest value in the specified column. 
   */
-  inline
-  void makeUniform(const int a_numRows);
+  inline void
+  makeUniform(const int a_numRows);
 
   /*!
     @brief Scale data in column by a specified factor. 
@@ -93,16 +96,16 @@ public:
     @param[in] a_whichColumn Column to scale
   */
   template <int K>
-  inline
-  void scale(const Real a_scale);
+  inline void
+  scale(const Real a_scale);
 
   /*!
     @brief Swap two columns
     @param[in] a_column1 First column
     @param[in] a_column2 Second column
   */
-  inline
-  void swap(const int a_column1, const int a_column2);
+  inline void
+  swap(const int a_column1, const int a_column2);
 
   /*!
     @brief Restrict table range to maximum and minimum. Data outside these ranges are discarded. 
@@ -110,60 +113,60 @@ public:
     @param[in] a_max         Maximum x-value in the table. 
     @param[in] a_whichColumn Ranges based on this column. 
   */
-  inline
-  void setRange(const Real a_min, const Real a_max, const int a_whichColumn = 0);
+  inline void
+  setRange(const Real a_min, const Real a_max, const int a_whichColumn = 0);
 
   /*!
     @brief Set the strategy when retrieving data that is out of range on the low side
     @details Set the input parameter a_strategy to Constant if you want to virtually pad the data with the last endpoint or Linear if you want linear interpolation.
     @param[in] a_strategy Range strategy. 
   */
-  inline
-  void setOutOfRangeStrategyLow(const OutOfRangeStrategy a_strategy);
+  inline void
+  setOutOfRangeStrategyLow(const OutOfRangeStrategy a_strategy);
 
   /*!
     @brief Set the strategy when retrieving data that is out of range on the high side
     @details Set the input parameter a_strategy to Constant if you want to virtually pad the data with the last endpoint or Linear if you want linear interpolation.
     @param[in] a_strategy Range strategy. 
   */
-  inline
-  void setOutOfRangeStrategyHigh(const OutOfRangeStrategy a_strategy);
+  inline void
+  setOutOfRangeStrategyHigh(const OutOfRangeStrategy a_strategy);
 
   /*!
     @brief Set the table spacing mode
     @param[in] a_spacing Spacing mode.
   */
-  inline
-  void setTableSpacing(const TableSpacing a_spacing);  
+  inline void
+  setTableSpacing(const TableSpacing a_spacing);
 
   /*!
     @brief Sort the table. Useful if the input data was not already sorted. 
     @param[in] a_whichColumn Sort along this column. 
     @details On output, the data in the table is sorted -- smallest x goes first. 
   */
-  inline
-  void sort(const int a_whichColumn = 0);
+  inline void
+  sort(const int a_whichColumn = 0);
 
   /*!
     @brief Add entry. 
     @param[in] x Entry to add. You can add an entire array through the variadic template. 
   */
-  template<typename... Ts>  
-  inline
-  void addEntry(const Ts&... x);
+  template <typename... Ts>
+  inline void
+  addEntry(const Ts&... x);
 
   /*!
     @brief Dump table to pout()
   */
-  inline
-  void dumpTable(std::ostream& a_outputStream = std::cout) const;
+  inline void
+  dumpTable(std::ostream& a_outputStream = std::cout) const;
 
   /*!
     @brief Dump table to a file. 
     @param[in] a_fileName File name
   */
-  inline
-  void dumpTable(const std::string a_fileName) const;  
+  inline void
+  dumpTable(const std::string a_fileName) const;
 
   /*!
     @brief Get entry
@@ -171,33 +174,30 @@ public:
     @param[in] a_x Interpolation point (independent variable)
   */
   template <int K>
-  inline
-  Real getEntry(const Real a_x) const;
+  inline Real
+  getEntry(const Real a_x) const;
 
   /*!
     @brief Get data.
     @note When calling this, make sure the data is sorted AND uniform. For performance reasons this is not checked when calling this routine. 
     @param[in] a_x Interpolation point (independent variable)
   */
-  inline
-  std::array<Real, N> getData(const Real a_x) const;  
+  inline std::array<Real, N>
+  getData(const Real a_x) const;
 
   /*!
     @brief Get size of the table.
     @returns m_data.size()
   */
-  inline
-  int getNumEntries() const;
-
+  inline int
+  getNumEntries() const;
 
 protected:
-
-
   /*!
     @brief End point stategy on the low end of the data 
   */
   OutOfRangeStrategy m_strategyLo;
-  
+
   /*!
     @brief End point stategy on the high end of the data 
   */
@@ -207,7 +207,7 @@ protected:
     @brief For setting the table spacing
   */
   TableSpacing m_spacing;
-  
+
   /*!
     @brief Table state. First entry is the column along which we sort and make the table uniform. The second entry is 
     whether or not the table is actually sorted, and the third entry is whether or not the table is uniform along the sorted column.
@@ -222,22 +222,22 @@ protected:
   /*!
     @brief Data
   */
-  std::vector<std::array<Real, N> > m_data;
+  std::vector<std::array<Real, N>> m_data;
 
   /*!
     @brief Direct lookup, assumes non-uniform ordering. 
     @details This is very slow, because it will look through the entire table. 
     @note The data MUST be sorted along the input column for this to work. 
   */
-  inline
-  std::array<Real, N> directLookup(const Real a_x) const;
+  inline std::array<Real, N>
+  directLookup(const Real a_x) const;
 
   /*!
     @brief Get the lower index during a lookup
     @param[in] a_x Interpolation point. 
   */
-  inline
-  int getIndexLo(const Real a_x) const;
+  inline int
+  getIndexLo(const Real a_x) const;
 };
 
 #include <CD_NamespaceFooter.H>

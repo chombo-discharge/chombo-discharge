@@ -19,10 +19,11 @@
   @brief Enum class for identifying how a time step was restricted. 
   @details If the time code you are looking for is not in here, put it in and submit a pull request. 
 */
-enum class TimeCode {
+enum class TimeCode
+{
   Advection,
   Diffusion,
-  AdvectionDiffusion,  
+  AdvectionDiffusion,
   Source,
   RelaxationTime,
   Restricted,

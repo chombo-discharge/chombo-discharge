@@ -18,18 +18,21 @@
 
 using namespace Physics::ItoPlasma;
 
-inline
-const int& ItoPlasmaPhotoReaction::source() const {
+inline const int&
+ItoPlasmaPhotoReaction::source() const
+{
   return m_source;
 }
 
-inline
-const std::deque<int>& ItoPlasmaPhotoReaction::targets() const {
+inline const std::deque<int>&
+ItoPlasmaPhotoReaction::targets() const
+{
   return m_targets;
 }
 
-inline
-const std::deque<std::pair<int, Real> >& ItoPlasmaPhotoReaction::getTargetEnergies() const{
+inline const std::deque<std::pair<int, Real>>&
+ItoPlasmaPhotoReaction::getTargetEnergies() const
+{
   return m_energies;
 }
 

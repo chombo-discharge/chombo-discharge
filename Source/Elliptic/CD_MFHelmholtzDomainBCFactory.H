@@ -22,9 +22,9 @@
 /*!
   @brief Base class for creating domain boundary condition objects in MFHelmholtzOp. 
 */
-class MFHelmholtzDomainBCFactory {
+class MFHelmholtzDomainBCFactory
+{
 public:
-
   /*!
     @brief Constructor. 
   */
@@ -43,13 +43,14 @@ public:
   /*!
     @brief Disallowed - don't see why you would need it.
   */
-  MFHelmholtzDomainBCFactory& operator=(const MFHelmholtzDomainBCFactory& a_other) = delete;
+  MFHelmholtzDomainBCFactory&
+  operator=(const MFHelmholtzDomainBCFactory& a_other) = delete;
 
   /*!
     @brief Factory method
   */
-  virtual RefCountedPtr<EBHelmholtzDomainBC> create(const int a_iphase) const = 0;
-
+  virtual RefCountedPtr<EBHelmholtzDomainBC>
+  create(const int a_iphase) const = 0;
 };
 
 #include <CD_NamespaceFooter.H>

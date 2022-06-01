@@ -13,15 +13,20 @@
 #ifndef CD_ParticleOps_H
 #define CD_ParticleOps_H
 
+// Chombo includes
+#include <RefCountedPtr.H>
+#include <BaseIF.H>
+#include <RealVect.H>
+
 // Our includes
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief A shallow static class for doing various kinds of particle-related operations.
 */
-class ParticleOps {
+class ParticleOps
+{
 public:
-
   /*!
     @brief Compute the intersection point between a particle path and a domain side.
     @details If the particle crossed the domain side, the output argument a_s determines the intersection point by x(s) = x0 + s*(x1-x0) where
@@ -33,12 +38,12 @@ public:
     @param[out] a_s      Relative length along the path 
     @return Returns true if the particle crossed the domain boundary.
   */
-  static
-  inline bool domainIntersection(const RealVect& a_oldPos,
-				 const RealVect& a_newPos,
-				 const RealVect& a_probLo,
-				 const RealVect& a_probHi,
-				 Real&           a_s);
+  static inline bool
+  domainIntersection(const RealVect& a_oldPos,
+                     const RealVect& a_newPos,
+                     const RealVect& a_probLo,
+                     const RealVect& a_probHi,
+                     Real&           a_s);
 
   /*!
     @brief Compute the intersection point between a particle path and an implicit function using a bisection algorithm. 
@@ -51,13 +56,13 @@ public:
     @param[in]  a_bisectStep Bisection step length
     @param[out] a_s          Relative length along the path 
     @return Returns true if the particle crossed into the EB. 
-  */  
-  static
-  inline bool ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impFunc,
-				   const RealVect&              a_oldPos,
-				   const RealVect&              a_newPos,
-				   const Real&                  a_bisectStep,
-				   Real&                        a_s);
+  */
+  static inline bool
+  ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impFunc,
+                       const RealVect&              a_oldPos,
+                       const RealVect&              a_newPos,
+                       const Real&                  a_bisectStep,
+                       Real&                        a_s);
 
   /*!
     @brief Compute the intersection point between a particle path and an implicit function using a ray-casting algorithm.
@@ -71,13 +76,13 @@ public:
     @param[in]  a_tolerace   Tolerance for intersectinon method. If the distance to the EB is less than this, the particle is absorbed. 
     @param[out] a_s          Relative length along the path 
     @return Returns true if the particle crossed into the EB.
-  */    
-  static
-  inline bool ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
-				    const RealVect&              a_oldPos,
-				    const RealVect&              a_newPos,
-				    const Real&                  a_tolerance,
-				    Real&                        a_s);
+  */
+  static inline bool
+  ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
+                        const RealVect&              a_oldPos,
+                        const RealVect&              a_newPos,
+                        const Real&                  a_tolerance,
+                        Real&                        a_s);
 
   /*!
     @brief Compute particle weights. 
@@ -90,13 +95,33 @@ public:
     the number of "whole" computational particles and a remainder. So, if we have 10 physical particles but want 3 computational particles
     we have a_weight = 3, a_num=3, and a_remainder = 1
   */
-  static
-  inline void computeParticleWeights(unsigned long long&      a_weight,
-				     unsigned long long&      a_num,
-				     unsigned long long&      a_remainder,
-				     const unsigned long long a_numPhysicalParticles,
-				     const int                a_ppc);  
-  
+  static inline void
+  computeParticleWeights(unsigned long long&      a_weight,
+                         unsigned long long&      a_num,
+                         unsigned long long&      a_remainder,
+                         const unsigned long long a_numPhysicalParticles,
+                         const int                a_ppc);
+
+  /*!
+    @brief Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles
+    @param[in] a_numParticles Total number of particles to be drawn. 
+    @return Returns the number of particles drawn by each rank. 
+  */
+  template <typename T>
+  static inline T
+  partitionParticles(const T a_numParticles);
+
+  /*!
+    @brief Draw a specified number of random particles distributed according to a predefined distribution. 
+    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
+    P is the particle type (must derived from BinItem) and T is an integer type. 
+    @param[out] a_particles    Output particles (different for each rank)
+    @param[in]  a_numParticles Number of particles
+    @param[in]  a_distribution Particle distribution. Must return a random position when calling the function. 
+  */
+  template <typename P, typename T>
+  static inline void
+  drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution);
 };
 
 #include <CD_NamespaceFooter.H>

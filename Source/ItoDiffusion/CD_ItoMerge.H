@@ -30,14 +30,14 @@
   into a tree structure. Currently, this tree structure is a kd-tree. 
 */
 namespace ItoMerge {
-  
+
   /*!
     @brief Class for describing a single node with two children and one parent. This is used together with ItoMerge::Tree for particle handling. 
   */
   template <class T>
-  class Node : public std::enable_shared_from_this<Node<T> > {
+  class Node : public std::enable_shared_from_this<Node<T>>
+  {
   public:
-
     /*!
       @brief Default constructor.
     */
@@ -47,7 +47,7 @@ namespace ItoMerge {
       @brief Constructor. Sets the parent. 
       @param[in] a_parent Parent node
     */
-    Node(std::shared_ptr<Node<T> >& a_parent);
+    Node(std::shared_ptr<Node<T>>& a_parent);
 
     /*!
       @brief Destructor. Destroys data in node
@@ -58,131 +58,130 @@ namespace ItoMerge {
       @brief Can split node or not. 
       @details This will check if there is more than one primitive in the node (in which case we can split) or if the single primitive in the node can be split. 
     */
-    inline
-    bool canSplit() const;
+    inline bool
+    canSplit() const;
 
     /*!
       @brief Check if node is a leaf node
       @details This returns true if this node does not have children nodes. 
     */
-    inline
-    bool isLeafNode() const;
+    inline bool
+    isLeafNode() const;
 
     /*!
       @brief Check if node is a regular node -- i.e. not a leaf node.
     */
-    inline
-    bool isRegularNode() const;
+    inline bool
+    isRegularNode() const;
 
     /*!
       @brief Check if node is a root node. 
       @details Returns true if this node does not have a parent node. 
     */
-    inline
-    bool isRootNode() const;        
+    inline bool
+    isRootNode() const;
 
     /*!
       @brief Set parent node
       @param[in] a_parent Pointer to parent node
     */
-    inline
-    void setParent(std::shared_ptr<Node<T> >& a_parent);
+    inline void
+    setParent(std::shared_ptr<Node<T>>& a_parent);
 
     /*!
       @brief Set pointer to left child node
       @param[in] a_left Left child node
     */
-    inline
-    void setLeft(std::shared_ptr<Node<T> >& a_left);
+    inline void
+    setLeft(std::shared_ptr<Node<T>>& a_left);
 
     /*!
       @brief Set pointer to left child node
       @param[in] a_right Right child node
-    */    
-    inline
-    void setRight(std::shared_ptr<Node<T> >& a_right);
+    */
+    inline void
+    setRight(std::shared_ptr<Node<T>>& a_right);
 
     /*!
       @brief Set data. This sets the primitives in the node and the total mass in the node.
       @param[in] a_data Data
       @param[in] a_mass Mass of all primitives.
     */
-    inline
-    void setData(const std::vector<T>& a_data, const Real a_mass);
+    inline void
+    setData(const std::vector<T>& a_data, const Real a_mass);
 
     /*!
       @brief Set the mass in the node
       @param[in] a_mass Mass of all primitives.
     */
-    inline
-    void setMass(const Real a_mass);
+    inline void
+    setMass(const Real a_mass);
 
     /*!
       @brief Split node along the input coordinate.
       @details This will split the node along the input coordinate and make this node into a regular node. The left/right nodes become new leaf nodes.
       @param[in] a_dir Splitting coordinate -- this will compute a coordinate plane and put about half the mass on one side and half the mass on the other. 
     */
-    inline
-    void split(const int a_dir);
+    inline void
+    split(const int a_dir);
 
     /*!
       @brief Get the data in this node.
       @return Returns m_data
     */
-    inline
-    std::vector<T>& getData();
+    inline std::vector<T>&
+    getData();
 
     /*!
       @brief Get the data in this node.
       @return Returns m_data
     */
-    inline
-    const std::vector<T>& getData() const;
+    inline const std::vector<T>&
+    getData() const;
 
     /*!
       @brief Get the total mass in this node
       @return m_mass
     */
-    inline
-    Real mass() const;
+    inline Real
+    mass() const;
 
     /*!
       @brief Get this node's parent node
       @return m_parent
     */
-    inline
-    std::shared_ptr<Node<T> >& getParent();
+    inline std::shared_ptr<Node<T>>&
+    getParent();
 
     /*!
       @brief Get this node's left child node
       @return m_left
     */
-    inline
-    std::shared_ptr<Node<T> >& getLeft();
+    inline std::shared_ptr<Node<T>>&
+    getLeft();
 
     /*!
       @brief Get this node's right child node
       @return m_right
-    */     
-    inline
-    std::shared_ptr<Node<T> >& getRight();
+    */
+    inline std::shared_ptr<Node<T>>&
+    getRight();
 
   protected:
-
     /*!
       @brief Pointer to parent node (can be nullptr if this node is the root node)
     */
-    std::shared_ptr<Node<T> > m_parent;
+    std::shared_ptr<Node<T>> m_parent;
 
     /*!
       @brief Pointer to left child node (can be nullptr if this node is a leaf node)
-    */    
-    std::shared_ptr<Node<T> > m_left;
+    */
+    std::shared_ptr<Node<T>> m_left;
 
     /*!
       @brief Pointer to left child node (can be nullptr if this node is a leaf node)
-    */        
-    std::shared_ptr<Node<T> > m_right;
+    */
+    std::shared_ptr<Node<T>> m_right;
 
     /*!
       @brief Total mass in this node
@@ -201,7 +200,7 @@ namespace ItoMerge {
     @param[in]    a_dir  Coordinate to split along
   */
   template <class T>
-  using NodePartitioner = std::function<void(std::shared_ptr<Node<T> >& a_node, const int a_dir)>;
+  using NodePartitioner = std::function<void(std::shared_ptr<Node<T>>& a_node, const int a_dir)>;
 
   /*!
     @brief Partitioner function which splits a Node<T> into left/right child nodes with masses differing by at most one physical particle
@@ -219,9 +218,9 @@ namespace ItoMerge {
     which determines how leaf nodes are split. 
   */
   template <class T>
-  class Tree {
+  class Tree
+  {
   public:
-
     /*!
       @brief Weak constructor. Must subsequently call the define function
     */
@@ -241,9 +240,9 @@ namespace ItoMerge {
     /*!
       @brief Full define function. Takes a list of primitives to be merged/split.
       @param[in] a_point List of primitives that will be partitioned by the tree
-    */    
-    inline
-    void define(const std::vector<T>& a_points);
+    */
+    inline void
+    define(const std::vector<T>& a_points);
 
     /*!
       @brief Build tree with desired number of leaves. This will recursively partition the primitives.
@@ -251,25 +250,26 @@ namespace ItoMerge {
       @param[in] a_numTargetLeaves Desired number of leaves when building the tree.
       @param[in] a_partitioner     Partitioning function. 
     */
-    inline
-    void buildTree(const int a_firstDir, const int a_numTargetLeaves, const NodePartitioner<T>& a_partitioner);// = ItoMerge::NodePartitionEqualMass<T>); 
+    inline void
+    buildTree(const int                 a_firstDir,
+              const int                 a_numTargetLeaves,
+              const NodePartitioner<T>& a_partitioner); // = ItoMerge::NodePartitionEqualMass<T>);
 
     /*!
       @brief Get the leaf nodes
       @return Returns m_leaves
     */
-    inline
-    std::vector<std::shared_ptr<Node<T> > >& getLeaves();
+    inline std::vector<std::shared_ptr<Node<T>>>&
+    getLeaves();
 
     /*!
       @brief Get the leaf nodes
       @return Returns m_leaves
     */
-    inline
-    const std::vector<std::shared_ptr<Node<T> > >& getLeaves() const;
-  
+    inline const std::vector<std::shared_ptr<Node<T>>>&
+    getLeaves() const;
+
   protected:
-
     /*!
       @brief Is defined or not
     */
@@ -278,14 +278,14 @@ namespace ItoMerge {
     /*!
       @brief Pointer to root node. 
     */
-    std::shared_ptr<Node<T> > m_root; 
+    std::shared_ptr<Node<T>> m_root;
 
     /*!
       @brief All leaf nodes. Yes, I know this is O(log N) lookup but why not just keep a list since we ALWAYS need to return it. 
     */
-    std::vector<std::shared_ptr<Node<T> > > m_leaves;
+    std::vector<std::shared_ptr<Node<T>>> m_leaves;
   };
-}
+} // namespace ItoMerge
 
 #include <CD_NamespaceFooter.H>
 
