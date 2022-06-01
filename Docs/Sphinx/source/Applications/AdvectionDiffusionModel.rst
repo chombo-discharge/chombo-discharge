@@ -95,6 +95,9 @@ In this case the time step limitation is
 Initial data
 ------------
 
+Default behavior
+________________
+
 By default, the initial data for this problem is given by a super-Gaussian blob
 
 .. math::
@@ -110,7 +113,10 @@ These are set by the input options
    AdvectionDiffusion.blob_radius    = 0.1
    AdvectionDiffusion.blob_center    = 0 0 0
 
-For a more general way of specifying initial data, ``AdvectionDiffusionSpecies`` has a public member function
+Custom value
+____________
+
+For a more general way of specifying initial data, ``AdvectionDiffusionStepper`` has a public member function
 
 .. code-block::
 
@@ -119,7 +125,8 @@ For a more general way of specifying initial data, ``AdvectionDiffusionSpecies``
 Velocity field
 --------------
 
-The diffusion coefficient is set to a constant while the velocity field for this problem is simply set to
+Default behavior
+________________
 
 The default velocity field for this class is
 
@@ -138,6 +145,9 @@ To adjust the velocity field through :math:`\omega`, set
 
    AdvectionDiffusion.omega  = 1.0
 
+Custom value
+____________
+
 For a more general way of setting a user-specified velocity, ``AdvectionDiffusionStepper`` has a public member function
 
 .. code-block:: c++
@@ -147,6 +157,9 @@ For a more general way of setting a user-specified velocity, ``AdvectionDiffusio
 Diffusion coefficient
 ---------------------
 
+Default behavior
+________________
+
 The default diffusion coefficient for this problem is set to a constant.
 To adjust it,  :math:`\omega`, set
 
@@ -155,6 +168,9 @@ To adjust it,  :math:`\omega`, set
    AdvectionDiffusion.diffco = 1.0
 
 to a chosen value.
+
+Custom value
+____________
 
 For a more general way of setting the diffusion coefficient, ``AdvectionDiffusionStepper`` has a public member function
 
@@ -195,7 +211,7 @@ These can be adjusted through
 Setting up a new problem
 ------------------------
 
-To set up a new problem, use the Python setup tools in :file:`$DISCHARGE_HOME/Physics/AdvectionDiffusion`.
+To set up a new problem, using the Python setup tools in :file:`$DISCHARGE_HOME/Physics/AdvectionDiffusion` is the simplest way. 
 To see available setup options, run
 
 .. code-block:: bash
@@ -210,12 +226,13 @@ For example, to set up a new problem in :file:`$DISCHARGE_HOME/MyApplications/My
 
 This will set up a new problem in a coaxial cable geometry (defined in :file:`Geometries/CoaxialCable`).
 
+Example programs
+----------------
 
+Example programs for this module are given
 
-Example program
----------------
+* :file:`$DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/DiagonalFlowNoEB`
+* :file:`$DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/PipeFlow`
 
 Convergence testing
 -------------------
-
-
