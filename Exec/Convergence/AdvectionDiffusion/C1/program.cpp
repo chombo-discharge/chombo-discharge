@@ -76,9 +76,9 @@ main(int argc, char* argv[])
     RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
 
     // Set up basic AdvectionDiffusion
-    RefCountedPtr<CdrSolver>   solver      = RefCountedPtr<CdrSolver>(new CdrCTU());
-    RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper>(new AdvectionDiffusionStepper(solver));
-    RefCountedPtr<CellTagger>  tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
+    auto solver      = RefCountedPtr<CdrSolver>(new CdrCTU());
+    auto timestepper = RefCountedPtr<AdvectionDiffusionStepper>(new AdvectionDiffusionStepper(solver));
+    auto tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
 
     amr->setCoarsestGrid(cells);
     amr->buildDomains();

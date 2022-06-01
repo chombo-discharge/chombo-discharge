@@ -41,9 +41,9 @@ main(int argc, char* argv[])
   RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
 
   // Set up basic AdvectionDiffusion
-  RefCountedPtr<CdrSolver> solver  = RefCountedPtr<CdrSolver>(new CdrGodunov());
-  auto timestepper                 = RefCountedPtr<AdvectionDiffusionStepper>(new AdvectionDiffusionStepper(solver));
-  RefCountedPtr<CellTagger> tagger = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
+  auto solver      = RefCountedPtr<CdrSolver>(new CdrGodunov());
+  auto timestepper = RefCountedPtr<AdvectionDiffusionStepper>(new AdvectionDiffusionStepper(solver));
+  auto tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
 
   // Storage for the error.
   EBAMRCellData error;

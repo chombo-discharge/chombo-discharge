@@ -46,9 +46,9 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic AdvectionDiffusion \n")
-    mainf.write("  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new " + args.cdrsolver + "());\n")
-    mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
-    mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new AdvectionDiffusionTagger(solver, amr));\n")
+    mainf.write("  auto solver      = RefCountedPtr<CdrSolver>   (new " + args.cdrsolver + "());\n")
+    mainf.write("  auto timestepper = RefCountedPtr<AdvectionDiffusionStepper> (new " + args.stepper + "(solver));\n")
+    mainf.write("  auto tagger      = RefCountedPtr<CellTagger>  (new AdvectionDiffusionTagger(solver, amr));\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")
