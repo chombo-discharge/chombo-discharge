@@ -248,11 +248,13 @@ ___________________
 A spatial convergence test is given in :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C1`.
 The problem solves for an advected and diffused scalar in a rotational velocity in the presence of an EB:
 
-.. _Fig:AdvectionDiffusionC1:
-.. figure:: /_static/figures/AdvectionDiffusionC1_1.png
+.. _Fig:AdvectionDiffusionC1_1:
+.. figure:: ../_static/figures/AdvectionDiffusionC1_1.png
    :width: 360px
    :align: center
-   :caption: Final state on a :math:`512^2` uniform grid. 
+
+   Final state on a :math:`512^2` uniform grid. 
+	   
 
 To compute the convergence rate we compute two solutions at the same time, :math:`\phi_{\Delta x}` and :math:`\phi_{2\Delta x}`.
 We then compute the error as
@@ -263,15 +265,35 @@ We then compute the error as
 
 where :math:`\mathcal{A}_{\Delta x \rightarrow 2\Delta x}` is an averaging operator which coarsens the solution between the two grid resolutions.
 
-Figure :ref:`Fig:AdvectionDiffusionC1_2` shows the computed convergence rates with various choice of slope limiters.
+Figure :numref:`Fig:AdvectionDiffusionC1_2` shows the computed convergence rates with various choice of slope limiters.
 We find 2nd order convergence in all three norms for sufficiently fine grid when using slope limiters, and first order convergence when limiters are turned off.
 The reduced convergence rates at coarser grids occur due to 1) insufficient resolution of the initial density profile and 2) under-resolution of the geometry. 
 
 .. _Fig:AdvectionDiffusionC1_2:
-.. figure:: /_static/figures/AdvectionDiffusionC1_2.png
-   :width: 480px
+.. figure:: ../_static/figures/AdvectionDiffusionC1_2.png
+   :width: 600px
    :align: center
 
+   Spatial convergence rates with various limiters. 
 
 Temporal convergence
 ____________________
+
+
+A temporal convergence test is given in :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C2`.
+We compute two solutions :math:`\phi_\Delta t(T)` and :math:`\phi_{2\Delta t}(T)` where the subscript indicates the time step used.
+The solution error is computed as
+
+.. math::
+
+   E_{\Delta t, 2\Delta t} = \phi_{2\Delta t}(T) - \phi_{\Delta t}(T).
+
+Figure :numref:`Fig:AdvectionDiffusionC2` shows the computed convergence rates for the second order Runge-Kutta and the IMEX discretization. 
+We find 2nd order convergence for Heun's method and first order convergence for the IMEX discretization. 
+
+.. _Fig:AdvectionDiffusionC2:
+.. figure:: /_static/figures/AdvectionDiffusionC2.png
+   :width: 600px
+   :align: center
+
+   Temporal convergence rates. 
