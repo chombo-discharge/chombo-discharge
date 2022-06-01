@@ -445,7 +445,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
   CH_assert(a_facePhi.nComp() == 1);
   CH_assert(a_normalSlopes.nComp() == SpaceDim);
   CH_assert(a_cellPhi.nComp() == 1);
-  CH_assert(a_cellVel.nComp() == 1);
+  CH_assert(a_cellVel.nComp() == SpaceDim);
   CH_assert(a_faceVel.nComp() == 1);
 
   // TLDR: We want to compute the states at cell-centers, and possible at the half time step. E.g. we
