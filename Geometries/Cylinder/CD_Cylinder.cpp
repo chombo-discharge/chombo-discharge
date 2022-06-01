@@ -37,6 +37,7 @@ Cylinder::Cylinder()
   pp.get("turn_off", turnOff);
   pp.get("fluid_outside", fluidOutside);
   pp.get("radius", radius);
+  pp.get("z_coord", zCoord);
   pp.get("live", isLive);
   pp.get("permittivity", perm);
   pp.get("material", material);
