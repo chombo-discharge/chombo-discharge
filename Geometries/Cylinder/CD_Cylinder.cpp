@@ -58,9 +58,9 @@ Cylinder::Cylinder()
     // Create the 3D cylinder
     const EBGeometry::Vec3T<Real> v1(c1[0], c1[1], c1[2]);
     const EBGeometry::Vec3T<Real> v2(c2[0], c2[1], c2[2]);
-    auto                          cylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(v1, v2, radius, false);
 
-    // Chombo-fi it.
+    auto cylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(v1, v2, radius, false);
+
     RefCountedPtr<BaseIF> baseIF = RefCountedPtr<BaseIF>(new EBGeometryIF(cylinder, fluidOutside, zCoord));
 
     if (isElectrode) {
