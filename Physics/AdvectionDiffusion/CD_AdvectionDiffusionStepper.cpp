@@ -77,6 +77,9 @@ void
 AdvectionDiffusionStepper::parseRuntimeOptions()
 {
   CH_TIME("AdvectionDiffusionStepper::parseRuntimeOptions");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::parseRuntimeOptions" << endl;
+  }
 
   ParmParse pp("AdvectionDiffusion");
 
@@ -94,6 +97,9 @@ void
 AdvectionDiffusionStepper::parseIntegrator()
 {
   CH_TIME("AdvectionDiffusionStepper::parseIntegrator");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::parseIntegrator" << endl;
+  }  
 
   ParmParse pp("AdvectionDiffusion");
 
@@ -116,6 +122,9 @@ void
 AdvectionDiffusionStepper::setupSolvers()
 {
   CH_TIME("AdvectionDiffusionStepper::setupSolvers");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::setupSolvers" << endl;
+  }    
 
   CH_assert(!m_solver.isNull());
 
@@ -140,6 +149,9 @@ void
 AdvectionDiffusionStepper::registerRealms()
 {
   CH_TIME("AdvectionDiffusionStepper::registerRealms");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::registerRealms" << endl;
+  }      
 
   m_amr->registerRealm(m_realm);
 }
@@ -148,6 +160,9 @@ void
 AdvectionDiffusionStepper::registerOperators()
 {
   CH_TIME("AdvectionDiffusionStepper::registerOperators");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::registerOperators" << endl;
+  }        
 
   // Let the solver do this -- it knows what it needs.
   m_solver->registerOperators();
@@ -157,6 +172,9 @@ void
 AdvectionDiffusionStepper::allocate()
 {
   CH_TIME("AdvectionDiffusionStepper::allocate");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::allocate" << endl;
+  }          
 
   m_solver->allocateInternals();
 }
@@ -165,6 +183,9 @@ void
 AdvectionDiffusionStepper::initialData()
 {
   CH_TIME("AdvectionDiffusionStepper::initialData");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::initialData" << endl;
+  }            
 
   // Fill the solver with initial data from the species.
   m_solver->initialData();
@@ -190,6 +211,9 @@ void
 AdvectionDiffusionStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
 {
   CH_TIME("AdvectionDiffusionStepper::writeCheckpointData");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::writeCheckpointData" << endl;
+  }              
 
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
@@ -200,6 +224,9 @@ void
 AdvectionDiffusionStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
 {
   CH_TIME("AdvectionDiffusionStepper::readCheckpointData");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::readCheckpointData" << endl;
+  }                
 
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
@@ -209,12 +236,15 @@ void
 AdvectionDiffusionStepper::postCheckpointSetup()
 {
   CH_TIME("AdvectionDiffusionStepper::postCheckpointSetup");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::postCheckpointSetup" << endl;
+  }                  
 
   // Set velocity, diffusion coefficient, and boundary conditions.
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
   if (m_solver->isDiffusive()) {
-    m_solver->setDiffusionCoefficient(m_diffCo);
+    //    m_solver->setDiffusionCoefficient(m_diffCo);
   }
   if (m_solver->isMobile()) {
     m_solver->setVelocity(m_velocity);
@@ -230,6 +260,9 @@ int
 AdvectionDiffusionStepper::getNumberOfPlotVariables() const
 {
   CH_TIME("AdvectionDiffusionStepper::getNumberOfPlotVariables");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::getNumberOfPlotVariables" << endl;
+  }                    
 
   // Not plotting anything of our own, so return whatever the solver wants to plot.
   return m_solver->getNumberOfPlotVariables();
@@ -241,6 +274,9 @@ AdvectionDiffusionStepper::writePlotData(EBAMRCellData&       a_output,
                                          int&                 a_icomp) const
 {
   CH_TIME("AdvectionDiffusionStepper::writePlotData");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::writePlotData" << endl;
+  }                      
 
   // Append plot variable names
   a_plotVariableNames.append(m_solver->getPlotVariableNames());
@@ -253,6 +289,9 @@ void
 AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
 {
   CH_TIME("AdvectionDiffusionStepper::computeDt");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::computeDt" << endl;
+  }                        
 
   // TLDR: If we run explicit advection but implicit diffusion then we are only limited by the advective CFL. Otherwise,
   //       if diffusion is also explicit we need the advection-diffusion limited time step.
@@ -299,6 +338,9 @@ Real
 AdvectionDiffusionStepper::advance(const Real a_dt)
 {
   CH_TIME("AdvectionDiffusionStepper::advance");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::advance" << endl;
+  }                          
 
   // State to be advanced.
   EBAMRCellData& state = m_solver->getPhi();
@@ -400,6 +442,9 @@ void
 AdvectionDiffusionStepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt)
 {
   CH_TIME("AdvectionDiffusionStepper::synchronizeSolverTimes");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::synchronizeSolverTimes" << endl;
+  }                            
 
   m_timeStep = a_step;
   m_time     = a_time;
@@ -412,6 +457,9 @@ void
 AdvectionDiffusionStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 {
   CH_TIME("AdvectionDiffusionStepper::preRegrid");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::preRegrid" << endl;
+  }                              
 
   m_solver->preRegrid(a_lbase, a_oldFinestLevel);
 }
@@ -420,6 +468,9 @@ void
 AdvectionDiffusionStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
 {
   CH_TIME("AdvectionDiffusionStepper::regrid");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::regrid" << endl;
+  }                                
 
   // Regrid CDR solver and set up the flow fields
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
@@ -427,34 +478,54 @@ AdvectionDiffusionStepper::regrid(const int a_lmin, const int a_oldFinestLevel, 
   m_solver->setEbFlux(0.0);
   
   if (m_solver->isDiffusive()) {
-    m_solver->setDiffusionCoefficient(m_diffCo);
+    //    m_solver->setDiffusionCoefficient(m_diffCo);
   }
   if (m_solver->isMobile()) {
-    this->setVelocity(m_velocity);
+    m_solver->setVelocity(m_velocity);
   }
 }
 
 void
 AdvectionDiffusionStepper::setCFL(const Real a_cfl)
 {
+  CH_TIME("AdvectionDiffusionStepper::setCFL");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::setCFL" << endl;
+  }
+  
   m_forceCFL = a_cfl;
 }
 
 void
 AdvectionDiffusionStepper::setInitialData(const std::function<Real(const RealVect& a_position)>& a_initData) noexcept
 {
+  CH_TIME("AdvectionDiffusionStepper::setInitialData");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::setInitialData" << endl;
+  }
+  
   m_initialData = a_initData;
 }
 
 void
 AdvectionDiffusionStepper::setVelocity(const std::function<RealVect(const RealVect& a_position)>& a_velocity) noexcept
 {
+  CH_TIME("AdvectionDiffusionStepper::setVelocity");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::setVelocity" << endl;
+  }
+  
   m_velocity = a_velocity;
 }
 
 void
 AdvectionDiffusionStepper::setDiffusionCoefficient(const std::function<Real(const RealVect& a_position)>& a_diffusion) noexcept
 {
+  CH_TIME("AdvectionDiffusionStepper::setDiffusionCoefficient");
+  if(m_verbosity > 5) {
+    pout() << "AdvectionDiffusionStepper::setDiffusionCoefficient" << endl;
+  }
+  
   m_diffCo = a_diffusion;
 }
 
