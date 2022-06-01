@@ -15,3 +15,4 @@ and to run:
 
 ```
 mpirun -np <num_proc> program<bunch_of_options>.ex example.inputs
+```
