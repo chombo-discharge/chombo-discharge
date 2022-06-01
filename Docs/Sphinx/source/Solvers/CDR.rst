@@ -325,9 +325,10 @@ The finite volume discretization uses an upstream-centered Taylor expansion that
 
 .. math::
 
-   \phi_{i+1/2,j,}^{n+1/2} = \phi_{i,j,k}^n + \frac{\Delta x}{2}\frac{\partial \phi}{\partial x} + \frac{\Delta t}{2}\frac{\partial \phi}{\partial t}.
+   \phi_{i+1/2,j,}^{n+1/2} = \phi_{i,j,k}^n + \frac{\Delta x}{2}\frac{\partial \phi}{\partial x} + \frac{\Delta t}{2}\frac{\partial \phi}{\partial t} + \mathcal{O}\left(\Delta t^2\right) + \mathcal{O}\left(\Delta t\Delta x\right)
 
-For brevity, the resulting expression in 2D for a velocity field :math:`\mathbf{v} = (u,v)` is
+Note that the truncation order is :math:`\Delta t^2 + \Delta x\Delta t` where the latter term is due to the cross-derivative :math:`\frac{\partial^2\phi}{\partial t\partial x}`. 
+The resulting expression in 2D for a velocity field :math:`\mathbf{v} = (u,v)` is
 
 .. math::
 

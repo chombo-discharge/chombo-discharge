@@ -89,7 +89,10 @@ In this case the time step limitation is
 
 .. warning::
 
-   It is possible to use this module with any implementation of ``CdrSolver``, but the IMEX discretization only makes sense if the hyperbolic term can be centered on :math:`k+1/2`. 
+   It is possible to use this module with any implementation of ``CdrSolver``, but the IMEX discretization only makes sense if the hyperbolic term can be centered on :math:`k+1/2`.
+
+If the truncation order of :math:`\phi^{k+1/2}` is :math:`\mathcal{O}\left(\Delta t^2\right)`, the resulting IMEX discretization is globally second order accurate.
+For the :ref:`Chap:CdrCTU` discretization the edge states are accurate to :math:`\mathcal{O}\left(\Delta t\Delta x\right)`, so the scheme is globally first order convergent (but with a small error constant).
 		
 
 Initial data
@@ -278,7 +281,6 @@ The reduced convergence rates at coarser grids occur due to 1) insufficient reso
 
 Temporal convergence
 ____________________
-
 
 A temporal convergence test is given in :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C2`.
 We compute two solutions :math:`\phi_{\Delta t}(T)` and :math:`\phi_{2\Delta t}(T)` where the subscript indicates the time step used.
