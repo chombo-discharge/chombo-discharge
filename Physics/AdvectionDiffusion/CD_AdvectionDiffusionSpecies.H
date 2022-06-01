@@ -26,10 +26,14 @@ namespace Physics {
     class AdvectionDiffusionSpecies : public CdrSpecies
     {
     public:
+      
       /*!
 	@brief Constructor
+	@param[in] a_initialData Initial data
+	@param[in] a_mobile      Mobile or not
+	@param[in] a_diffusive   Diffusive or not
       */
-      AdvectionDiffusionSpecies(const std::function<Real(const RealVect& a_pos)>& a_initialData, const bool a_diffusive, const bool a_mobile) {
+      AdvectionDiffusionSpecies(const std::function<Real(const RealVect& a_pos)>& a_initialData, const bool a_mobile, const bool a_diffusive) {
 	m_initialData = a_initialData;
 	m_isMobile = a_mobile;
 	m_isDiffusive = a_diffusive;  

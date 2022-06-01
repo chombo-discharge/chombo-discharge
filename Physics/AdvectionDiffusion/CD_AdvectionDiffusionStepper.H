@@ -15,6 +15,7 @@
 // Our includes
 #include <CD_TimeStepper.H>
 #include <CD_CdrSolver.H>
+#include <CD_AdvectionDiffusionSpecies.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -234,7 +235,7 @@ namespace Physics {
       /*!
 	@brief Reference to advected species
       */
-      RefCountedPtr<CdrSpecies> m_species;      
+      RefCountedPtr<AdvectionDiffusionSpecies> m_species;      
 
       /*!
 	@brief Realm where the solver lives
@@ -285,6 +286,16 @@ namespace Physics {
 	@brief For activating debugging. This is an option.
       */
       bool m_debug;
+
+      /*!
+	@brief Mobile or not
+      */
+      bool m_mobile;
+
+      /*!
+	@brief Diffusive or not
+      */
+      bool m_diffusive;
 
       /*!
 	@brief Integrator

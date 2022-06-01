@@ -33,7 +33,9 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
   
   pp.query("debug", m_debug);
   pp.get("verbosity", m_verbosity);
-  pp.get("cfl", m_cfl);  
+  pp.get("cfl", m_cfl);
+  pp.get("advection", m_mobile);
+  pp.get("diffusion", m_diffusive);  
 
   m_minDt    = 0.0;
   m_maxDt    = std::numeric_limits<Real>::max();
@@ -143,9 +145,9 @@ AdvectionDiffusionStepper::setupSolvers()
   CH_assert(!m_solver.isNull());
 
   // Instantiate the species.
-  m_species = RefCountedPtr<CdrSpecies>(new AdvectionDiffusionSpecies(m_initialData, true, true));
+  m_species = RefCountedPtr<AdvectionDiffusionSpecies>(new AdvectionDiffusionSpecies(m_initialData, m_mobile, m_diffusive));
 
-  // Set up the solver.
+  // Prep the solver. 
   m_solver->setVerbosity(m_verbosity);
   m_solver->setSpecies(m_species);
   m_solver->parseOptions();
