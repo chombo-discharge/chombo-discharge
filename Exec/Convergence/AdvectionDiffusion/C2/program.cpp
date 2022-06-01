@@ -1,5 +1,5 @@
 #include <CD_Driver.H>
-#include <CD_CdrGodunov.H>
+#include <CD_CdrCTU.H>
 #include <CD_RodDielectric.H>
 #include <CD_AdvectionDiffusionStepper.H>
 #include <CD_AdvectionDiffusionTagger.H>
@@ -41,7 +41,7 @@ main(int argc, char* argv[])
   RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
 
   // Set up basic AdvectionDiffusion
-  auto solver      = RefCountedPtr<CdrSolver>(new CdrGodunov());
+  auto solver      = RefCountedPtr<CdrSolver>(new CdrCTU());
   auto timestepper = RefCountedPtr<AdvectionDiffusionStepper>(new AdvectionDiffusionStepper(solver));
   auto tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
 
