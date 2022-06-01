@@ -13,10 +13,11 @@
 // Our includes
 #include <CD_NeedleIF.H>
 #include <CD_CylinderSdf.H>
+#include <UnionIF.H>
 #include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
-using Vec3 = EBGeometry::Vec3T<double>;
+using Vec3 = EBGeometry::Vec3T<Real>;
 
 NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, const double& a_angle){
 
@@ -27,24 +28,24 @@ NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack
   const RealVect axisVec = axis/axis.vectorLength(); 
 
   // find new center for where the cylinder and cone should meet.
-  const RealVect c = a_centerTipSide - axisVec*tipLength;
+  const RealVect c = a_centerTipSide - tipLength*axisVec;
 
 #if CH_SPACEDIM==2
-    const Vec3 centerT(a_centerTipSide[0], a_centerTipSide[1], 0.0);
+    const Vec3 centerT(0.0, 0.0, 0.0);
 #else
-    const Vec3 centerT(a_centerTipSide[0], a_centerTipSide[1], a_centerTipSide[2]);
+    const Vec3 centerT(0.0, 0.0, 0.0);
 #endif
-
-    const bool flipInside = false;  //tried this in order to remove an error..
 
   // Build the needle-parts
   Vector<BaseIF*> isects;
-  isects.push_back(static_cast<BaseIF*> (new CylinderSdf(c, a_centerBack, a_radius, a_fluidInside)));
-  auto cone = std::make_shared<EBGeometry::ConeSDF>(centerT, tipLength, a_angle, flipInside);
-  isects.push_back(static_cast<BaseIF*> (new EBGeometryIF(cone, false));
+  //isects.push_back(static_cast<BaseIF*> (new CylinderSdf(c, a_centerBack, a_radius, a_fluidInside)));
+  auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, 0.5, a_angle, false);
+  std::cout << c << " " <<  tipLength << " " << a_angle << "\n"; 
+  cone->rotate(90,0);
+  isects.push_back(static_cast<BaseIF*> (new EBGeometryIF(cone, false)));
 
   // Build the needle
-  m_baseif = RefCountedPtr<BaseIF>(new IntersectionIF(isects));
+  m_baseif = RefCountedPtr<BaseIF>(new UnionIF(isects));
 
   // Delete everything we have allocated so far
   for(int i = 0; i < isects.size(); ++i){
