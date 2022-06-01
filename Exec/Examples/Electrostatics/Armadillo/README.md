@@ -1,4 +1,4 @@
-## Examples/Electrostatics/Armadillo
+## Exec/Examples/Electrostatics/Armadillo
 
 This example solves the Poisson equation for the electric field for a single electrode in the shape of an armadillo. It was set up from $DISCHARGE_HOME/Physics/Electrostatics using
 

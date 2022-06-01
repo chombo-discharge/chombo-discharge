@@ -1,4 +1,4 @@
-## Examples/Electrostatics/ProfiledSurface
+## Exec/Examples/Electrostatics/ProfiledSurface
 
 This example solves the Poisson equation for the electric field around a simplified mechanical bushing.
 It was set up from $DISCHARGE_HOME/Physics/Electrostatics using
