@@ -141,7 +141,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # AdvectionDiffusionStepper class options
 # ====================================================================================================
 AdvectionDiffusion.verbosity      = -1      # Verbosity
-AdvectionDiffusion.diffusion      = false   # Turn on/off diffusion
+AdvectionDiffusion.diffusion      = true    # Turn on/off diffusion
 AdvectionDiffusion.advection      = true    # Turn on/off advection
 AdvectionDiffusion.integrator     = imex    # 'heun' or 'imex'
 
