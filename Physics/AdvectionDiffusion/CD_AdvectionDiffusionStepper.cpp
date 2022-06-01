@@ -42,9 +42,18 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
   // Parse the default velocity and diffusion coefficients
   Real diffCo = 0.0;
   Real omega = 0.0;
-
+  Real blobAmplitude = 0.0;
+  Real blobRadius = 0.0;
+  RealVect blobCenter = RealVect::Zero;
+  Vector<Real> v = Vector<Real>(SpaceDim, 0.0);
+  
   pp.get("diffco", diffCo);
-  pp.get("omega", omega);  
+  pp.get("omega", omega);
+  pp.get("blob_amplitude", blobAmplitude);
+  pp.get("blob_radius", blobRadius);
+  pp.getarr("blob_center", v, 0, SpaceDim);
+
+  blobCenter = RealVect(D_DECL(v[0], v[1], v[2]));
 
   // Set the default velocity and diffusion fields.
   m_velocity = [omega](const RealVect& pos) -> RealVect {
@@ -56,6 +65,11 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
 
   m_diffCo = [diffCo](const RealVect& pos) -> Real {
     return diffCo;
+  };
+
+  m_initialData = [r=blobRadius, a=blobAmplitude, c=blobCenter](const RealVect& x) -> Real {
+    const Real d = (x - c).dotProduct(x-c);
+    return a * exp(-d*d/(2*r*r*r*r));
   };
 
   this->parseIntegrator();
@@ -129,7 +143,7 @@ AdvectionDiffusionStepper::setupSolvers()
   CH_assert(!m_solver.isNull());
 
   // Instantiate the species.
-  m_species = RefCountedPtr<CdrSpecies>(new AdvectionDiffusionSpecies());
+  m_species = RefCountedPtr<CdrSpecies>(new AdvectionDiffusionSpecies(m_initialData, true, true));
 
   // Set up the solver.
   m_solver->setVerbosity(m_verbosity);
@@ -244,7 +258,7 @@ AdvectionDiffusionStepper::postCheckpointSetup()
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
   if (m_solver->isDiffusive()) {
-    //    m_solver->setDiffusionCoefficient(m_diffCo);
+    m_solver->setDiffusionCoefficient(m_diffCo);
   }
   if (m_solver->isMobile()) {
     m_solver->setVelocity(m_velocity);

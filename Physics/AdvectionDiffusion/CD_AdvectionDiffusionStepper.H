@@ -216,6 +216,7 @@ namespace Physics {
       setDiffusionCoefficient(const std::function<Real(const RealVect& a_position)>& a_diffusion) noexcept;      
 
     protected:
+      
       /*!
 	@brief Switch for different integrators
       */
