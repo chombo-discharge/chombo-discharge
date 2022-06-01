@@ -6,6 +6,7 @@
 *.log
 *.aux
 
+
 **/doc/html/**
 **/doc/sphinx/build/html/**
 **/doc/sphinx/build/**
@@ -37,6 +38,7 @@ MyApplications/**
 scripts/**
 Research/**
 
+docs
 Docs/*
 !Docs/.nojekyll
 !Docs/Sphinx/
