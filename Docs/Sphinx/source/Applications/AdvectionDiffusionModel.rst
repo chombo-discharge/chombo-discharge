@@ -281,7 +281,7 @@ ____________________
 
 
 A temporal convergence test is given in :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C2`.
-We compute two solutions :math:`\phi_\Delta t(T)` and :math:`\phi_{2\Delta t}(T)` where the subscript indicates the time step used.
+We compute two solutions :math:`\phi_{\Delta t}(T)` and :math:`\phi_{2\Delta t}(T)` where the subscript indicates the time step used.
 The solution error is computed as
 
 .. math::
