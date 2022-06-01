@@ -249,7 +249,7 @@ A spatial convergence test is given in :file:`$DISCHARGE_HOME/Exec/Convergence/A
 The problem solves for an advected and diffused scalar in a rotational velocity in the presence of an EB:
 
 .. _Fig:AdvectionDiffusionC1_1:
-.. figure:: ../_static/figures/AdvectionDiffusionC1_1.png
+.. figure:: /_static/figures/AdvectionDiffusionC1_1.png
    :width: 360px
    :align: center
 
@@ -270,7 +270,7 @@ We find 2nd order convergence in all three norms for sufficiently fine grid when
 The reduced convergence rates at coarser grids occur due to 1) insufficient resolution of the initial density profile and 2) under-resolution of the geometry. 
 
 .. _Fig:AdvectionDiffusionC1_2:
-.. figure:: ../_static/figures/AdvectionDiffusionC1_2.png
+.. figure:: /_static/figures/AdvectionDiffusionC1_2.png
    :width: 600px
    :align: center
 
