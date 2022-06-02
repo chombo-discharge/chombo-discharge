@@ -1889,7 +1889,7 @@ DataOps::setValue(LevelData<EBFluxFAB>&                      a_lhs,
       BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
 
       // Kernel regions.
-      const Box         box     = lhs.getRegion();
+      const Box         box     = lhs.getCellRegion();
       const EBISBox&    ebisbox = lhs.getEBISBox();
       const EBGraph&    ebgraph = ebisbox.getEBGraph();
       const IntVectSet& irreg   = ebisbox.getIrregIVS(box);

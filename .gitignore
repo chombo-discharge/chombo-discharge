@@ -3,6 +3,9 @@
 *.MPI
 *.session*
 **/Make.defs.local
+*.log
+*.aux
+
 
 **/doc/html/**
 **/doc/sphinx/build/html/**
@@ -26,6 +29,7 @@
 **/*.a
 **/*.o
 
+
 pout.*
 time.table.*
 
@@ -34,7 +38,10 @@ MyApplications/**
 scripts/**
 Research/**
 
-docs/*
-!docs/.nojekyll
-!docs/Sphinx/
-!docs/chombo-discharge.pdf
+docs
+Docs/*
+!Docs/.nojekyll
+!Docs/Sphinx/
+!Docs/Doxyfile
+!Docs/README.md
+Docs/Sphinx/build

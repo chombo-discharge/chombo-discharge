@@ -26,10 +26,9 @@ def write_template(args):
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
-    if args.use_mpi:
-        mainf.write("#ifdef CH_MPI\n")
-        mainf.write("  MPI_Init(&argc, &argv);\n")
-        mainf.write("#endif\n")
+    mainf.write("#ifdef CH_MPI\n")
+    mainf.write("  MPI_Init(&argc, &argv);\n")
+    mainf.write("#endif\n")
     
     mainf.write("\n")
     mainf.write("  // Build class options from input script and command line options\n")
@@ -46,9 +45,9 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic AdvectionDiffusion \n")
-    mainf.write("  RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new " + args.cdrsolver + "());\n")
-    mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
-    mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new AdvectionDiffusionTagger(solver, amr));\n")
+    mainf.write("  auto solver      = RefCountedPtr<CdrSolver>   (new " + args.cdrsolver + "());\n")
+    mainf.write("  auto timestepper = RefCountedPtr<AdvectionDiffusionStepper> (new " + args.stepper + "(solver));\n")
+    mainf.write("  auto tagger      = RefCountedPtr<CellTagger>  (new AdvectionDiffusionTagger(solver, amr));\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")
@@ -56,11 +55,10 @@ def write_template(args):
     mainf.write("  engine->setupAndRun(input_file);\n");
     mainf.write("\n")
 
-    if args.use_mpi:
-        mainf.write("#ifdef CH_MPI\n")
-        mainf.write("  CH_TIMER_REPORT();\n")
-        mainf.write("  MPI_Finalize();\n")
-        mainf.write("#endif\n")
-        mainf.write("}\n")
+    mainf.write("#ifdef CH_MPI\n")
+    mainf.write("  CH_TIMER_REPORT();\n")
+    mainf.write("  MPI_Finalize();\n")
+    mainf.write("#endif\n")
+    mainf.write("}\n")
         
     mainf.close()
