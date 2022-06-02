@@ -66,7 +66,7 @@ Note that there is a dielectric embedded between the two cylindrical shells.
 
 .. _Fig:ElectrostaticsC1_1:
 .. figure:: /_static/figures/ElectrostaticsC1_1.png
-   :width: 360
+   :width: 40%
    :align: center
 
    Field distribution for a coaxial cable geometry on a :math:`512^2` grid. 
@@ -76,7 +76,7 @@ We find second order convergence in all three norms.
 
 .. _Fig:ElectrostaticsC1_2:
 .. figure:: /_static/figures/ElectrostaticsC1_2.png
-   :width: 360px
+   :width: 45%
    :align: center
 
    Spatial convergence rates for two-dimensional coaxial cable geometry. 
@@ -90,7 +90,7 @@ Figure :numref:`Fig:ElectrostaticsC2_1` shows the field distribution.
 
 .. _Fig:ElectrostaticsC2_1:
 .. figure:: /_static/figures/ElectrostaticsC2_1.png
-   :width: 600px
+   :width: 45%
    :align: center
 
    Field distribution for a profiled surface geometry on a :math:`2048^2` grid. 
@@ -100,7 +100,7 @@ We find second order convergence in all three norms.
 
 .. _Fig:ElectrostaticsC2_2:
 .. figure:: /_static/figures/ElectrostaticsC2_2.png
-   :width: 360px
+   :width: 45%
    :align: center
 
    Spatial convergence rates for two-dimensional dielectric surface profile. 
@@ -113,7 +113,7 @@ Figure :numref:`Fig:ElectrostaticsC3_1` shows the field distribution for a :math
 
 .. _Fig:ElectrostaticsC3_1:
 .. figure:: /_static/figures/ElectrostaticsC3_1.png
-   :width: 360px
+   :width: 25%
    :align: center
 
    Field distribution for a profiled surface geometry on a :math:`256^3` grid. 
@@ -124,7 +124,12 @@ On coarser grids, the reduced convergence rate in the max-norm is probably due t
 
 .. _Fig:ElectrostaticsC3_2:
 .. figure:: /_static/figures/ElectrostaticsC3_2.png
-   :width: 360px
+   :width: 45%
    :align: center
 
    Spatial convergence rates.
+
+   
+     
+
+   

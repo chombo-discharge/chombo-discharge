@@ -265,7 +265,7 @@ The reduced convergence rates at coarser grids occur due to 1) insufficient reso
 
 .. _Fig:AdvectionDiffusionC1_2:
 .. figure:: /_static/figures/AdvectionDiffusionC1_2.png
-   :width: 600px
+   :width: 480
    :align: center
 
    Spatial convergence rates with various limiters. 
@@ -280,7 +280,7 @@ As expected, we find 2nd order convergence for Heun's method and first order con
 
 .. _Fig:AdvectionDiffusionC2:
 .. figure:: /_static/figures/AdvectionDiffusionC2.png
-   :width: 600px
+   :width: 480px
    :align: center
 
    Temporal convergence rates. 
