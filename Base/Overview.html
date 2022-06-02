@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -83,7 +84,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -105,7 +106,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -139,15 +139,15 @@
            <div itemprop="articleBody">
              
   <div class="section" id="overview">
-<span id="chap-overview"></span><h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline"></a></h1>
+<span id="chap-overview"></span><h1>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h1>
 <div class="section" id="history">
-<h2>History<a class="headerlink" href="#history" title="Permalink to this headline"></a></h2>
+<h2>History<a class="headerlink" href="#history" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is aimed at solving discharge problems.
 It was originally developed at SINTEF Energy Research between 2015-2018, and aimed at simulating discharges in high-voltage engineering.
 Further development was started in 2021, where much of the code was redesigned for improved modularity and performance.</p>
 </div>
 <div class="section" id="key-functionalities">
-<h2>Key functionalities<a class="headerlink" href="#key-functionalities" title="Permalink to this headline"></a></h2>
+<h2>Key functionalities<a class="headerlink" href="#key-functionalities" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses a Cartesian embedded boundary (EB) grid formulation and adaptive mesh refinement (AMR) formalism where the grids frequently change and are adapted to the solution as simulations progress.
 Key functionalities are provided in <a class="reference internal" href="#tab-keycapabilities"><span class="std std-numref">Table 1</span></a>.</p>
 <div class="admonition important">
@@ -213,7 +213,7 @@ Although many abstractions are in place so that user can describe a new set of p
 See e.g. <a class="reference internal" href="../Applications/ImplementedModels.html#chap-implementedmodels"><span class="std std-ref">Implemented models</span></a>.</p>
 </div>
 <div class="section" id="design-approach">
-<h2>Design approach<a class="headerlink" href="#design-approach" title="Permalink to this headline"></a></h2>
+<h2>Design approach<a class="headerlink" href="#design-approach" title="Permalink to this heading"></a></h2>
 <p>A fundamental design principle in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is the division between the AMR core, geometry, solvers, physics coupling, and user applications.
 As an example, the fundamental time integrator class <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is a just an abstraction, i.e. it only presents an API which application codes must use.
 Because of that, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> can be used for solving completely unrelated problems.

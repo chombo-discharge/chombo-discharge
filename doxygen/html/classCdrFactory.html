@@ -76,7 +76,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Factory class for <a class="el" href="classCdrLayout.html" title="Class for holding a set of CdrSolvers.">CdrLayout</a>. T is (usually) <a class="el" href="classCdrSolver.html" title="Base class for solving convection-diffusion-reaction equations.">CdrSolver</a> and S is the implementation class (e.g., <a class="el" href="classCdrMuscl.html" title="Class that uses MUSCL discretization advection.">CdrMuscl</a>).  
+<p>Factory class for <a class="el" href="classCdrLayout.html" title="Class for holding a set of CdrSolvers.">CdrLayout</a>. T is (usually) <a class="el" href="classCdrSolver.html" title="Base class for solving convection-diffusion-reaction equations.">CdrSolver</a> and S is the implementation class (e.g., <a class="el" href="classCdrCTU.html" title="Class that uses a slope limited method for advection, in combination with corner transport upwind (CT...">CdrCTU</a>).  
  <a href="classCdrFactory.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__CdrLayout_8H_source.html">CD_CdrLayout.H</a>&gt;</code></p>
@@ -99,7 +99,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><h3>template&lt;class T, class S&gt;<br />
 class CdrFactory&lt; T, S &gt;</h3>
 
-<p>Factory class for <a class="el" href="classCdrLayout.html" title="Class for holding a set of CdrSolvers.">CdrLayout</a>. T is (usually) <a class="el" href="classCdrSolver.html" title="Base class for solving convection-diffusion-reaction equations.">CdrSolver</a> and S is the implementation class (e.g., <a class="el" href="classCdrMuscl.html" title="Class that uses MUSCL discretization advection.">CdrMuscl</a>). </p>
+<p>Factory class for <a class="el" href="classCdrLayout.html" title="Class for holding a set of CdrSolvers.">CdrLayout</a>. T is (usually) <a class="el" href="classCdrSolver.html" title="Base class for solving convection-diffusion-reaction equations.">CdrSolver</a> and S is the implementation class (e.g., <a class="el" href="classCdrCTU.html" title="Class that uses a slope limited method for advection, in combination with corner transport upwind (CT...">CdrCTU</a>). </p>
 <p>Factory class is very simple; since we don't want to template <a class="el" href="classCdrLayout.html" title="Class for holding a set of CdrSolvers.">CdrLayout</a> further we use a factory to instantiate solvers of any <a class="el" href="classCdrSolver.html" title="Base class for solving convection-diffusion-reaction equations.">CdrSolver</a> inherited class, and then return a layout with the casted classes. That's about it. This is useful because it allows the factory to act as a "casting-point" for switching between various solver implementation. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a0adb5580f5720dc2969e7f7ef8a942ad"></a>

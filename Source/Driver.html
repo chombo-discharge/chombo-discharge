@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -89,7 +90,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -111,7 +112,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -145,7 +145,7 @@
            <div itemprop="articleBody">
              
   <div class="section" id="driver">
-<span id="chap-driver"></span><h1>Driver<a class="headerlink" href="#driver" title="Permalink to this headline"></a></h1>
+<span id="chap-driver"></span><h1>Driver<a class="headerlink" href="#driver" title="Permalink to this heading"></a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class is the class that runs <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations and is defined in <code class="file docutils literal notranslate"><span class="pre">/Source/Driver/CD_Driver.cpp(H)</span></code>.
 The constructor for this class is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Driver</span><span class="p">(</span><span class="k">const</span> <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span> <span class="n">a_compgeom</span><span class="p">,</span>
@@ -160,7 +160,7 @@ If users decide to omit a cell tagger, regridding functionality is completely tu
 <p>The usage of the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class is primarily object construction with dependency injection of the geometry, the physics (i.e. <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>), the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> instance, and possibly a cell tagger.
 The <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class will retrieve configurations from the input script during construction.</p>
 <div class="section" id="simulation-setup">
-<h2>Simulation setup<a class="headerlink" href="#simulation-setup" title="Permalink to this headline"></a></h2>
+<h2>Simulation setup<a class="headerlink" href="#simulation-setup" title="Permalink to this heading"></a></h2>
 <p>Usually, only a single routine is used:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">setupAndRun</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">a_input_file</span><span class="p">);</span>
 </pre></div>
@@ -168,7 +168,7 @@ The <code class="docutils literal notranslate"><span class="pre">Driver</span></
 <p>This routine will set up and run a simulation.
 Simulation setup depends on the way a simulation is run.</p>
 <div class="section" id="new-simulations">
-<h3>New simulations<a class="headerlink" href="#new-simulations" title="Permalink to this headline"></a></h3>
+<h3>New simulations<a class="headerlink" href="#new-simulations" title="Permalink to this heading"></a></h3>
 <p>If a simulation starts from the first time step, the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class will perform the following major steps within <code class="docutils literal notranslate"><span class="pre">setupAndRun()</span></code>.</p>
 <ol class="arabic simple">
 <li><p>Ask <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> to generate the cut-cell moments.</p></li>
@@ -183,7 +183,7 @@ Also note that it is possible to restrict the maximum level that can be generate
 <p>The full code is given in <code class="docutils literal notranslate"><span class="pre">Driver::setupFresh()</span></code>.</p>
 </div>
 <div class="section" id="restarting-simulations">
-<h3>Restarting simulations<a class="headerlink" href="#restarting-simulations" title="Permalink to this headline"></a></h3>
+<h3>Restarting simulations<a class="headerlink" href="#restarting-simulations" title="Permalink to this heading"></a></h3>
 <p>If a simulation <em>does not start</em> from the first time step, the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class will perform the following major steps within <code class="docutils literal notranslate"><span class="pre">setupAndRun(...)</span></code>.</p>
 <ol class="arabic simple">
 <li><p>Ask <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> to generate the cut-cell moments.</p></li>
@@ -199,7 +199,7 @@ For example, an electric field solver only needs to write the electric potential
 </div>
 </div>
 <div class="section" id="simulation-advancement">
-<h2>Simulation advancement<a class="headerlink" href="#simulation-advancement" title="Permalink to this headline"></a></h2>
+<h2>Simulation advancement<a class="headerlink" href="#simulation-advancement" title="Permalink to this heading"></a></h2>
 <p>The algorithm for running a simulation is conceptually simple; the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class simply calls <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> for computing a reasonable time step for advancing the equations, and then it asks <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> to actually perform the advance.
 Regrids, plot files, and checkpoint files are written at certain step intervals (or when the <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> demands them).
 In essence, the algorithm looks like this:</p>
@@ -227,7 +227,7 @@ In essence, the algorithm looks like this:</p>
 </div>
 </div>
 <div class="section" id="regridding">
-<h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this headline"></a></h2>
+<h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
 <p>Regrids are called by the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class and occur as follows in <code class="docutils literal notranslate"><span class="pre">Driver::regrid(...)</span></code>:</p>
 <ol class="arabic simple">
 <li><p>Ask <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> to generate tags for grid refinement and coarsening.</p></li>
@@ -265,7 +265,7 @@ Implementing a deallocation function for <code class="docutils literal notransla
 <p>The full code is defined in <code class="docutils literal notranslate"><span class="pre">Driver::regrid()</span></code> in file <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Driver/CD_Driver.cpp</span></code>.</p>
 </div>
 <div class="section" id="class-options">
-<h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this headline"></a></h2>
+<h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this heading"></a></h2>
 <p>Various class options are available for adjusting the behavior of the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Driver.verbosity</span></code> controls output will be given to <code class="docutils literal notranslate"><span class="pre">pout.n</span></code>. We use 2 or 3 - higher values are for debugging.</p></li>
@@ -306,7 +306,7 @@ Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> means all le
 </ul>
 </div>
 <div class="section" id="runtime-options">
-<h2>Runtime options<a class="headerlink" href="#runtime-options" title="Permalink to this headline"></a></h2>
+<h2>Runtime options<a class="headerlink" href="#runtime-options" title="Permalink to this heading"></a></h2>
 <p>The following options can be adjusted during runtime:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Driver.verbosity</span></code>.</p></li>

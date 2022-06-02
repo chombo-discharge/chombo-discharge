@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -93,7 +94,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -115,7 +116,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -149,7 +149,7 @@
            <div itemprop="articleBody">
              
   <div class="section" id="ito-diffusion">
-<span id="chap-itodiffusion"></span><h1>Îto diffusion<a class="headerlink" href="#ito-diffusion" title="Permalink to this headline"></a></h1>
+<span id="chap-itodiffusion"></span><h1>Îto diffusion<a class="headerlink" href="#ito-diffusion" title="Permalink to this heading"></a></h1>
 <p>The Îto diffusion model advances computational particles as Brownian walkers with drift:</p>
 <div class="math notranslate nohighlight">
 \[d\mathbf{X}_i = \mathbf{v}_idt + \sqrt{2D_i}\mathbf{W}_i dt,\]</div>
@@ -159,7 +159,7 @@ The vector term <span class="math notranslate nohighlight">\(\mathbf{W}_i\)</spa
 <p>The code for Îto diffusion is given in <code class="file docutils literal notranslate"><span class="pre">/src/ito_solver</span></code> and only a brief explanation is given here.
 The source code is used by a physics module in <code class="file docutils literal notranslate"><span class="pre">/physics/brownian_walker</span></code> and in the regression test <code class="file docutils literal notranslate"><span class="pre">/regression/brownian_walker</span></code>.</p>
 <div class="section" id="the-ito-particle">
-<span id="chap-ito-particle"></span><h2>The Îto particle<a class="headerlink" href="#the-ito-particle" title="Permalink to this headline"></a></h2>
+<span id="chap-ito-particle"></span><h2>The Îto particle<a class="headerlink" href="#the-ito-particle" title="Permalink to this heading"></a></h2>
 <p>The Îto particle is a computational particle class in <cite>chombo-discharge</cite> which can be used together with the particle tools in <cite>Chombo</cite>.
 The following data fields are implemented in the particle:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span> <span class="n">m_position</span><span class="p">;</span>
@@ -186,7 +186,7 @@ The following functions are used to set the various properties:</p>
 </div>
 </div>
 <div class="section" id="ito-species">
-<span id="chap-ito-species"></span><h2>ito_species<a class="headerlink" href="#ito-species" title="Permalink to this headline"></a></h2>
+<span id="chap-ito-species"></span><h2>ito_species<a class="headerlink" href="#ito-species" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ito_species</span></code> is a class for parsing information into the solver class.
 The constructor for the <code class="docutils literal notranslate"><span class="pre">ito_species</span></code> class is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ito_species</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">a_name</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">a_charge</span><span class="p">,</span> <span class="k">const</span> <span class="kt">bool</span> <span class="n">a_mobile</span><span class="p">,</span> <span class="k">const</span> <span class="kt">bool</span> <span class="n">a_diffusive</span><span class="p">);</span>
@@ -194,7 +194,7 @@ The constructor for the <code class="docutils literal notranslate"><span class="
 </div>
 <p>and this will set the name of the class, the charge, and whether or not the transport kernels account for drift and diffusion.</p>
 <div class="section" id="setting-initial-conditions">
-<h3>Setting initial conditions<a class="headerlink" href="#setting-initial-conditions" title="Permalink to this headline"></a></h3>
+<h3>Setting initial conditions<a class="headerlink" href="#setting-initial-conditions" title="Permalink to this heading"></a></h3>
 <p>In order to set the initial conditions the user must fill the list <code class="docutils literal notranslate"><span class="pre">List&lt;ito_particle&gt;</span> <span class="pre">m_initial_particles</span></code> in <code class="docutils literal notranslate"><span class="pre">ito_species</span></code>.
 When <code class="docutils literal notranslate"><span class="pre">initial_data()</span></code> is called from <code class="docutils literal notranslate"><span class="pre">ito_solver</span></code>, the initial particles are transferred from the instance of <code class="docutils literal notranslate"><span class="pre">ito_species</span></code> and into the instance of <code class="docutils literal notranslate"><span class="pre">ito_solver</span></code>.</p>
 <p>We remark that it is a bad idea to replicate the initial particle list over all MPI ranks in a simulation.
@@ -230,10 +230,10 @@ For example, the code in <code class="file docutils literal notranslate"><span c
 </div>
 </div>
 <div class="section" id="computing-time-steps">
-<h2>Computing time steps<a class="headerlink" href="#computing-time-steps" title="Permalink to this headline"></a></h2>
+<h2>Computing time steps<a class="headerlink" href="#computing-time-steps" title="Permalink to this heading"></a></h2>
 <p>The signatures for computing a time step for the <code class="docutils literal notranslate"><span class="pre">ito_solver</span></code> are given separately for the drift part and the diffusion part.</p>
 <div class="section" id="drift">
-<h3>Drift<a class="headerlink" href="#drift" title="Permalink to this headline"></a></h3>
+<h3>Drift<a class="headerlink" href="#drift" title="Permalink to this heading"></a></h3>
 <p>The drift time step routines are implemented such that one restricts the time step such that the fastest particle does not move more than a specified number of grid cells.</p>
 <p>For the drift, the signatures are</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="nf">compute_min_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
@@ -253,7 +253,7 @@ The routine</p>
 Finally, the function <code class="docutils literal notranslate"><span class="pre">compute_min_drift_dt(...)</span></code> computes the smallest time step across every AMR level.</p>
 </div>
 <div class="section" id="diffusion">
-<h3>Diffusion<a class="headerlink" href="#diffusion" title="Permalink to this headline"></a></h3>
+<h3>Diffusion<a class="headerlink" href="#diffusion" title="Permalink to this heading"></a></h3>
 <p>The signatures for the diffusion time step are similar to the ones for drift:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="nf">compute_min_diffusion_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
 <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_diffusion_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
@@ -272,7 +272,7 @@ The probability that a diffusion hop leads to a jump larger than <span class="ma
 </div>
 </div>
 <div class="section" id="remapping-particles">
-<h2>Remapping particles<a class="headerlink" href="#remapping-particles" title="Permalink to this headline"></a></h2>
+<h2>Remapping particles<a class="headerlink" href="#remapping-particles" title="Permalink to this heading"></a></h2>
 <p>Particle remapping has been implemented for the whole AMR hierarchy as a two step process.</p>
 <ol class="arabic simple">
 <li><p>Perform two-level remapping where particles are transferred up or down one grid level if they move out the level PVR.</p></li>
@@ -280,10 +280,10 @@ The probability that a diffusion hop leads to a jump larger than <span class="ma
 </ol>
 </div>
 <div class="section" id="limitations">
-<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this headline"></a></h2>
+<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this heading"></a></h2>
 </div>
 <div class="section" id="example-application">
-<h2>Example application<a class="headerlink" href="#example-application" title="Permalink to this headline"></a></h2>
+<h2>Example application<a class="headerlink" href="#example-application" title="Permalink to this heading"></a></h2>
 <p>An example application of usage of the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> is found in <a class="reference internal" href="../Applications/BrownianWalkerModel.html#chap-brownianwalkermodel"><span class="std std-ref">Brownian walker</span></a>.</p>
 </div>
 </div>

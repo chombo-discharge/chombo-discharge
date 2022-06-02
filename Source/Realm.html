@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -83,7 +84,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -105,7 +106,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -139,12 +139,12 @@
            <div itemprop="articleBody">
              
   <div class="section" id="realm">
-<span id="chap-realm"></span><h1>Realm<a class="headerlink" href="#realm" title="Permalink to this headline"></a></h1>
+<span id="chap-realm"></span><h1>Realm<a class="headerlink" href="#realm" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">Realm</span></code> is a class for centralizing EBAMR-related grids and operators for a specific AMR grid.
 For example, a <code class="docutils literal notranslate"><span class="pre">Realm</span></code> consists of a set of grids (i.e. a <code class="docutils literal notranslate"><span class="pre">Vector&lt;DisjointBoxLayout&gt;</span></code>) as well as <em>operators</em>, e.g. functionality for filling ghost cells or averaging down a solution from a fine level to a coarse level.
 One may think of a <code class="docutils literal notranslate"><span class="pre">Realm</span></code> as a fully-fledged AMR hierarchy with associated multilevel operators, i.e. how one would usually do AMR.</p>
 <div class="section" id="dual-grid">
-<h2>Dual grid<a class="headerlink" href="#dual-grid" title="Permalink to this headline"></a></h2>
+<h2>Dual grid<a class="headerlink" href="#dual-grid" title="Permalink to this heading"></a></h2>
 <p>The reason why <code class="docutils literal notranslate"><span class="pre">Realm</span></code> exists at all is due to individual load balancing of algorithmic components.
 The terminology <em>dual grid</em> is used when more than one <code class="docutils literal notranslate"><span class="pre">Realm</span></code> is used in a simulation, and in this case the user/developer has chosen to solve the equations of motion over a different set of <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> on each level.
 This approach is very useful when using computational particles since users can quickly generate separate Eulerian sets of grids for fluids and particles, and the grids can then be load balanced separately.
@@ -163,7 +163,7 @@ In the bottom panel we have introduced computational particles in some of the pa
 For particles, the computational load is better defined by the number of computational particles assigned to the patch, and so using the number of particles as a proxy for the load yields different rank ownership over the grid patches.</p>
 </div>
 <div class="section" id="realm-registration">
-<h2>Realm registration<a class="headerlink" href="#realm-registration" title="Permalink to this headline"></a></h2>
+<h2>Realm registration<a class="headerlink" href="#realm-registration" title="Permalink to this heading"></a></h2>
 <p>To register a <code class="docutils literal notranslate"><span class="pre">Realm</span></code>, users will have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> allocate the desired number of realms in the pure routine <code class="docutils literal notranslate"><span class="pre">registerRealms()</span></code>, as follows:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="n">myTimeStepper</span><span class="o">::</span><span class="n">registerRealms</span><span class="p">(){</span>
    <span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="n">Realm</span><span class="o">::</span><span class="n">Primal</span><span class="p">);</span>
@@ -178,7 +178,7 @@ Fundamentally, there is no limitation to the number of realms that can be alloca
 However, users can change load balancing individually for each realm through the load balancing routines in <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.</p>
 </div>
 <div class="section" id="operator-registration">
-<h2>Operator registration<a class="headerlink" href="#operator-registration" title="Permalink to this headline"></a></h2>
+<h2>Operator registration<a class="headerlink" href="#operator-registration" title="Permalink to this heading"></a></h2>
 <p>Internally, an instantiation of <code class="docutils literal notranslate"><span class="pre">Realm</span></code> contains the grids and the geometric information (e.g. <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code>), as well as any operators that the user has seen fit to <em>register</em>.
 Various operators are available for e.g. gradient stencils, conservative coarsening, ghost cell interpolation, filling a patch with interpolation data, redistribution, and so on.
 Since operators always incur overhead and not all applications require <em>all</em> operators, they must be <em>registered</em>.
@@ -207,7 +207,7 @@ A valid <code class="docutils literal notranslate"><span class="pre">TimeStepper
 <p>Solvers will typically allocate a subset of these operators, but for multiphysics code that use both fluid and particles, most of these will probably be in use.</p>
 </div>
 <div class="section" id="interacting-with-realms">
-<h2>Interacting with realms<a class="headerlink" href="#interacting-with-realms" title="Permalink to this headline"></a></h2>
+<h2>Interacting with realms<a class="headerlink" href="#interacting-with-realms" title="Permalink to this heading"></a></h2>
 <p>Users will not interact with <code class="docutils literal notranslate"><span class="pre">Realm</span></code> directly.
 Every <code class="docutils literal notranslate"><span class="pre">Realm</span></code> is owned by <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>, and the user will only interact with realms through the public <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> interface, for example by fetching operators for performing AMR operations.
 In addition, data that is defined on one realm can be copied to another; <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> takes care of this.

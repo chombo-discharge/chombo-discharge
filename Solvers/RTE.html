@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -115,7 +116,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -137,7 +138,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -171,12 +171,12 @@
            <div itemprop="articleBody">
              
   <div class="section" id="radiative-transfer">
-<span id="chap-radiativetransfer"></span><h1>Radiative transfer<a class="headerlink" href="#radiative-transfer" title="Permalink to this headline"></a></h1>
+<span id="chap-radiativetransfer"></span><h1>Radiative transfer<a class="headerlink" href="#radiative-transfer" title="Permalink to this heading"></a></h1>
 <p>Radiative transfer is supported in the diffusion (i.e. Eddington or Helmholtz) approximation and with Monte Carlo sampling of discrete photons.
 The solvers share a common interface (a parent class), but note that the radiative transfer equation is inherently deterministic while Monte Carlo photon transport is inherently stochastic.
 The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or ‘’stationary’’ transport.</p>
 <div class="section" id="rtspecies">
-<span id="chap-rtspecies"></span><h2>RtSpecies<a class="headerlink" href="#rtspecies" title="Permalink to this headline"></a></h2>
+<span id="chap-rtspecies"></span><h2>RtSpecies<a class="headerlink" href="#rtspecies" title="Permalink to this heading"></a></h2>
 <p>The class <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> is an abstract base class for parsing necessary information into radiative transfer solvers.
 When creating a radiative transfer solver one will need to pass in a pointer to <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> such that the solvers can look up the required infromation.
 Currently, <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> is a lightweight class where the user needs to implement the function</p>
@@ -187,7 +187,7 @@ Currently, <code class="docutils literal notranslate"><span class="pre">RtSpecie
 <p>One can also assign a name to the species through the member variable <code class="docutils literal notranslate"><span class="pre">RtSpecies::m_name</span></code>.</p>
 </div>
 <div class="section" id="rtsolver">
-<span id="chap-rtsolver"></span><h2>RtSolver<a class="headerlink" href="#rtsolver" title="Permalink to this headline"></a></h2>
+<span id="chap-rtsolver"></span><h2>RtSolver<a class="headerlink" href="#rtsolver" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> is the base class for encapsulating a radiative transfer solver.
 The source code for the solver is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/RadiativeTransfer</span></code> and it is a fairly lightweight abstract class.
 As with other solvers, <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> can use a specified <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>.</p>
@@ -195,15 +195,15 @@ As with other solvers, <code class="docutils literal notranslate"><span class="p
 Since most of the <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> is an interface which is implemented by other radiative transfer solvers, documentation of boundary conditions, kernels and so on are found in the implementation classes.</p>
 </div>
 <div class="section" id="diffusion-approximation">
-<span id="chap-diffusionrte"></span><h2>Diffusion approximation<a class="headerlink" href="#diffusion-approximation" title="Permalink to this headline"></a></h2>
+<span id="chap-diffusionrte"></span><h2>Diffusion approximation<a class="headerlink" href="#diffusion-approximation" title="Permalink to this heading"></a></h2>
 <div class="section" id="eddingtonsp1">
-<h3>EddingtonSP1<a class="headerlink" href="#eddingtonsp1" title="Permalink to this headline"></a></h3>
+<h3>EddingtonSP1<a class="headerlink" href="#eddingtonsp1" title="Permalink to this heading"></a></h3>
 <p>The first-order diffusion approximation to the radiative transfer equation is encapsulated by the <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> class which implements a first order Eddington approximation of the radiative transfer equation.
 <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implements <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> using both stationary and transient advance methods (e.g. for stationary or time-dependent radiative transport).
 The source code is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/RadiativeTransfer</span></code>.</p>
 </div>
 <div class="section" id="equation-of-motion">
-<h3>Equation of motion<a class="headerlink" href="#equation-of-motion" title="Permalink to this headline"></a></h3>
+<h3>Equation of motion<a class="headerlink" href="#equation-of-motion" title="Permalink to this heading"></a></h3>
 <p>In the diffusion approximation, the radiative transport equation is</p>
 <div class="math notranslate nohighlight" id="equation-transientdiffusionrte">
 <span class="eqno">(5)<a class="headerlink" href="#equation-transientdiffusionrte" title="Permalink to this equation"></a></span>\[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
@@ -215,18 +215,18 @@ This is called the Eddington approximation, and the radiative flux is <span clas
 <span class="eqno">(6)<a class="headerlink" href="#equation-stationarydiffusionrte" title="Permalink to this equation"></a></span>\[\kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
 </div>
 <div class="section" id="implementation">
-<h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline"></a></h3>
+<h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> uses multigrid methods for solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a>, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
 The class implements <code class="docutils literal notranslate"><span class="pre">RtSolver::advance()</span></code>, which can switch between <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a>.
 Note that for both the stationary and time-dependent cases the absorption coefficient <span class="math notranslate nohighlight">\(\kappa\)</span> in <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a> are filled using the <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> implementation provided to the solver.
 Also note that the absorption coefficient does not need to be constant in space.</p>
 <div class="section" id="stationary-kernel">
-<h4>Stationary kernel<a class="headerlink" href="#stationary-kernel" title="Permalink to this headline"></a></h4>
+<h4>Stationary kernel<a class="headerlink" href="#stationary-kernel" title="Permalink to this heading"></a></h4>
 <p>For the stationary kernel we solve <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a> directly, using a single multigrid solve.
 See <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a> for discretization details.</p>
 </div>
 <div class="section" id="transient-kernel">
-<h4>Transient kernel<a class="headerlink" href="#transient-kernel" title="Permalink to this headline"></a></h4>
+<h4>Transient kernel<a class="headerlink" href="#transient-kernel" title="Permalink to this heading"></a></h4>
 <p>For solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a>, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implements both the backward Euler method and the Twizell-Gumel-Arigu (TGA) scheme.
 Explicit discretizations are not available.
 The Euler discretization is</p>
@@ -237,15 +237,15 @@ Expressions for the TGA scheme are found in <span id="id1">[<a class="reference 
 </div>
 </div>
 <div class="section" id="boundary-conditions">
-<span id="chap-eddingtonsp1bc"></span><h3>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this headline"></a></h3>
+<span id="chap-eddingtonsp1bc"></span><h3>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading"></a></h3>
 <div class="section" id="simplified-domain-boundary-conditions">
-<h4>Simplified domain boundary conditions<a class="headerlink" href="#simplified-domain-boundary-conditions" title="Permalink to this headline"></a></h4>
+<h4>Simplified domain boundary conditions<a class="headerlink" href="#simplified-domain-boundary-conditions" title="Permalink to this heading"></a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> solver supports the following boundary conditions on domain faces and EBs.
 The domain boundary condition <em>type</em>, which is either Dirichlet, Neumann, or Larsen (a special type of Robin boundary condition) is always passed in through the input file.
 If the user passes in a value, say <code class="docutils literal notranslate"><span class="pre">neumann</span> <span class="pre">0.0</span></code>, for a particular domain side/face, then the class will use a homogeneous Neumann boundary for the entire domain edge/face.</p>
 </div>
 <div class="section" id="custom-domain-boundary-conditions">
-<h4>Custom domain boundary conditions<a class="headerlink" href="#custom-domain-boundary-conditions" title="Permalink to this headline"></a></h4>
+<h4>Custom domain boundary conditions<a class="headerlink" href="#custom-domain-boundary-conditions" title="Permalink to this heading"></a></h4>
 <p>It is possible to use more complex boundary conditions by passing in <code class="docutils literal notranslate"><span class="pre">dirichlet_custom</span></code>, <code class="docutils literal notranslate"><span class="pre">neumann_custom</span></code>, or <code class="docutils literal notranslate"><span class="pre">larsen_custom</span></code> options.
 In this case the <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> solver will use a specified function at the domain edge/face.
 To specify that function, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> has a member function</p>
@@ -275,7 +275,7 @@ For example, to set the boundary condition on the left <span class="math notrans
 </div>
 </div>
 <div class="section" id="embedded-boundaries">
-<h4>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this headline"></a></h4>
+<h4>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this heading"></a></h4>
 <p>On the EB, we currently only support constant-value boundary conditions.
 In the input script, the user can specify</p>
 <ul class="simple">
@@ -285,7 +285,7 @@ In the input script, the user can specify</p>
 </ul>
 </div>
 <div class="section" id="boundary-condition-types">
-<h4>Boundary condition types<a class="headerlink" href="#boundary-condition-types" title="Permalink to this headline"></a></h4>
+<h4>Boundary condition types<a class="headerlink" href="#boundary-condition-types" title="Permalink to this heading"></a></h4>
 <ol class="arabic">
 <li><p><strong>Dirichlet</strong>.
 For Dirichlet boundary conditions we specify the value of <span class="math notranslate nohighlight">\(\Psi\)</span> on the boundary.
@@ -308,7 +308,7 @@ In the majority of cases, however, we will have <span class="math notranslate no
 </div>
 </div>
 <div class="section" id="solver-configuration">
-<h3>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this headline"></a></h3>
+<h3>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implementation has a number of configurable options for running the solver, and these are given below:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
 <span class="c1"># EddingtonSP1 class options</span>
@@ -345,7 +345,7 @@ EddingtonSP1.gmg_smoother        <span class="o">=</span> red_black    <span cla
 </pre></div>
 </div>
 <div class="section" id="basic-options">
-<h4>Basic options<a class="headerlink" href="#basic-options" title="Permalink to this headline"></a></h4>
+<h4>Basic options<a class="headerlink" href="#basic-options" title="Permalink to this heading"></a></h4>
 <p>Basic input options to <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> are as follows:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.stationary</span></code> for setting whether or not the solver is stationary.</p></li>
@@ -359,7 +359,7 @@ If <code class="docutils literal notranslate"><span class="pre">EddingtonSP1.kap
 </ul>
 </div>
 <div class="section" id="setting-boundary-conditions">
-<h4>Setting boundary conditions<a class="headerlink" href="#setting-boundary-conditions" title="Permalink to this headline"></a></h4>
+<h4>Setting boundary conditions<a class="headerlink" href="#setting-boundary-conditions" title="Permalink to this heading"></a></h4>
 <p>Boundary conditions are parsed through the flags</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.ebbc</span></code> Which sets the boundary conditions on the EBs.</p></li>
@@ -367,7 +367,7 @@ If <code class="docutils literal notranslate"><span class="pre">EddingtonSP1.kap
 </ul>
 </div>
 <div class="section" id="tuning-multigrid-performance">
-<h4>Tuning multigrid performance<a class="headerlink" href="#tuning-multigrid-performance" title="Permalink to this headline"></a></h4>
+<h4>Tuning multigrid performance<a class="headerlink" href="#tuning-multigrid-performance" title="Permalink to this heading"></a></h4>
 <p>All parameters that begin with the form <code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_</span></code> indicate a tuning parameter for geometric multigrid.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_verbosity</span></code>.
@@ -409,7 +409,7 @@ Sets the multigrid smoother.</p></li>
 </ul>
 </div>
 <div class="section" id="runtime-parameters">
-<h4>Runtime parameters<a class="headerlink" href="#runtime-parameters" title="Permalink to this headline"></a></h4>
+<h4>Runtime parameters<a class="headerlink" href="#runtime-parameters" title="Permalink to this heading"></a></h4>
 <p>The following parameters for <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> are run-time configurable:</p>
 <ul class="simple">
 <li><p>All multigrid tuning parameters, i.e. parameters starting with <code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_</span></code>.</p></li>
@@ -420,7 +420,7 @@ Sets the multigrid smoother.</p></li>
 </div>
 </div>
 <div class="section" id="monte-carlo-methods">
-<span id="chap-montecarlorte"></span><h2>Monte Carlo methods<a class="headerlink" href="#monte-carlo-methods" title="Permalink to this headline"></a></h2>
+<span id="chap-montecarlorte"></span><h2>Monte Carlo methods<a class="headerlink" href="#monte-carlo-methods" title="Permalink to this heading"></a></h2>
 <p>All types of moment-closed radiative transfer equations contain nonphysical artifacts (which may or may not be acceptable).
 For example, in the diffusion approximation the radiative flux is <span class="math notranslate nohighlight">\(F = -\frac{c}{3\kappa}\nabla \Psi\)</span>, implying that photons can leak around boundaries.
 I.e. the diffusion approximation does not correctly describe shadows.
@@ -428,7 +428,7 @@ It is possible to go beyond the diffusion approximation by also solving for high
 While such methods can describe shadows, they do, contain other nonphysical features.</p>
 <p>Both ‘’stationary’’ and transient Monte Carlo methods are offered as an alternative to the diffusion approximation.</p>
 <div class="section" id="photon-particle">
-<h3>photon particle<a class="headerlink" href="#photon-particle" title="Permalink to this headline"></a></h3>
+<h3>photon particle<a class="headerlink" href="#photon-particle" title="Permalink to this heading"></a></h3>
 <p>The Îto particle is a computational particle class in <cite>chombo-discharge</cite> which can be used together with the particle tools in <cite>Chombo</cite>.
 The following data fields are implemented in the particle:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span> <span class="n">m_position</span><span class="p">;</span>
@@ -455,10 +455,10 @@ The following functions are used to set the various properties:</p>
 </div>
 </div>
 <div class="section" id="interaction-with-boundaries">
-<h3>Interaction with boundaries<a class="headerlink" href="#interaction-with-boundaries" title="Permalink to this headline"></a></h3>
+<h3>Interaction with boundaries<a class="headerlink" href="#interaction-with-boundaries" title="Permalink to this heading"></a></h3>
 </div>
 <div class="section" id="stationary-monte-carlo">
-<h3>Stationary Monte Carlo<a class="headerlink" href="#stationary-monte-carlo" title="Permalink to this headline"></a></h3>
+<h3>Stationary Monte Carlo<a class="headerlink" href="#stationary-monte-carlo" title="Permalink to this heading"></a></h3>
 <p>The stationary Monte Carlo method proceeds as follows.</p>
 <ol class="arabic simple">
 <li><p>For each cell in the mesh, draw a discrete number of photons <span class="math notranslate nohighlight">\(\mathcal{P}\left(\eta \Delta V\Delta t\right)\)</span> where <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> is a Poisson distribution. The user may also choose to use pseudophotons rather than physical photons by modifying photon weights. Each photon is generated in the cell centroid <span class="math notranslate nohighlight">\(\mathbf{x}_0\)</span> and given a random propagation direction <span class="math notranslate nohighlight">\(\mathbf{n}\)</span>.</p></li>
@@ -470,7 +470,7 @@ The following functions are used to set the various properties:</p>
 <p>The Monte Carlo methods use computational particles for advancing the photons in exactly the same way a Particle-In-Cell method would use them for advancing electrons. Although a computational photon would normally live on the finest grid level that overlaps its position, this is not practical for all particle deposition kernels. For example, for cloud-in-cell deposition schemes it is useful to have the restrict the interpolation kernels to the grid level where the particle lives. In Chombo-speak, we therefore use a buffer region that extends some cells from a refinement boundary where the photons are not allowed to live. Instead, photons in that buffer region are transferred to a coarser level, and their deposition clouds are first interpolated to the fine level before deposition on the fine level happens. Selecting a deposition scheme and adjusting the buffer region is done through an input script associated with the solver.</p>
 </div>
 <div class="section" id="transient-monte-carlo">
-<h3>Transient Monte Carlo<a class="headerlink" href="#transient-monte-carlo" title="Permalink to this headline"></a></h3>
+<h3>Transient Monte Carlo<a class="headerlink" href="#transient-monte-carlo" title="Permalink to this heading"></a></h3>
 <p>The transient Monte Carlo method is almost identical to the stationary method, except that it does not deposit all generated photons on the mesh but tracks them through time. The transient method is implemented as follows:</p>
 <ol class="arabic simple">
 <li><p>For each cell in the mesh, draw a discrete number of photons <span class="math notranslate nohighlight">\(\mathcal{P}\left(\eta \Delta V\Delta t\right)\)</span> as above, and append these to the already existing photons. Each photon is given a uniformly distributed random creation time within <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p></li>
@@ -487,10 +487,10 @@ The following functions are used to set the various properties:</p>
 </div>
 </div>
 <div class="section" id="limitations">
-<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this headline"></a></h2>
+<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this heading"></a></h2>
 </div>
 <div class="section" id="example-application">
-<h2>Example application<a class="headerlink" href="#example-application" title="Permalink to this headline"></a></h2>
+<h2>Example application<a class="headerlink" href="#example-application" title="Permalink to this heading"></a></h2>
 <p>An example application of usage of the <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> is found in <a class="reference internal" href="../Applications/RadiativeTransferModel.html#chap-radiativetransfermodel"><span class="std std-ref">Radiative transfer</span></a>.</p>
 </div>
 </div>

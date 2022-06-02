@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -115,7 +116,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -137,7 +138,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -171,11 +171,11 @@
            <div itemprop="articleBody">
              
   <div class="section" id="particles">
-<span id="chap-particles"></span><h1>Particles<a class="headerlink" href="#particles" title="Permalink to this headline"></a></h1>
+<span id="chap-particles"></span><h1>Particles<a class="headerlink" href="#particles" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports computational particles using native <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> particle data.
 The source code for the particle functionality resides in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Particle</span></code>.</p>
 <div class="section" id="particlecontainer">
-<h2>ParticleContainer<a class="headerlink" href="#particlecontainer" title="Permalink to this headline"></a></h2>
+<h2>ParticleContainer<a class="headerlink" href="#particlecontainer" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> is a template class that</p>
 <ol class="arabic simple">
 <li><p>Stores computational particles of type <code class="docutils literal notranslate"><span class="pre">P</span></code> over an AMR hierchy.</p></li>
@@ -188,9 +188,9 @@ There are many examples of <code class="docutils literal notranslate"><span clas
 Please refer to the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> design document for complete specification on the template constraints of <code class="docutils literal notranslate"><span class="pre">P</span></code>, or see some of the examples in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
 </div>
 <div class="section" id="data-structures">
-<h2>Data structures<a class="headerlink" href="#data-structures" title="Permalink to this headline"></a></h2>
+<h2>Data structures<a class="headerlink" href="#data-structures" title="Permalink to this heading"></a></h2>
 <div class="section" id="list-p-and-listbox-p">
-<h3>List&lt;P&gt; and ListBox&lt;P&gt;<a class="headerlink" href="#list-p-and-listbox-p" title="Permalink to this headline"></a></h3>
+<h3>List&lt;P&gt; and ListBox&lt;P&gt;<a class="headerlink" href="#list-p-and-listbox-p" title="Permalink to this heading"></a></h3>
 <p>At the lowest level the particles are always stored in a linked list <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code>.
 The class can be simply be through of as a regular list of <code class="docutils literal notranslate"><span class="pre">P</span></code> with non-random access.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">ListBox&lt;P&gt;</span></code> consists of a <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code> <em>and</em> a <code class="docutils literal notranslate"><span class="pre">Box</span></code>.
@@ -203,7 +203,7 @@ The latter specifies the grid patch that the particles are assigned to.</p>
 </div>
 </div>
 <div class="section" id="listiterator-p">
-<h3>ListIterator&lt;P&gt;<a class="headerlink" href="#listiterator-p" title="Permalink to this headline"></a></h3>
+<h3>ListIterator&lt;P&gt;<a class="headerlink" href="#listiterator-p" title="Permalink to this heading"></a></h3>
 <p>In order to iterate over particles, use an iterator <code class="docutils literal notranslate"><span class="pre">ListIterator&lt;P&gt;</span></code> (which is not random access):</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="n">myParticles</span><span class="p">;</span>
 <span class="k">for</span> <span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="n">lit</span><span class="p">(</span><span class="n">myParticles</span><span class="p">);</span> <span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span> <span class="o">++</span><span class="n">lit</span><span class="p">){</span>
@@ -215,7 +215,7 @@ The latter specifies the grid patch that the particles are assigned to.</p>
 </div>
 </div>
 <div class="section" id="particledata-p">
-<h3>ParticleData&lt;P&gt;<a class="headerlink" href="#particledata-p" title="Permalink to this headline"></a></h3>
+<h3>ParticleData&lt;P&gt;<a class="headerlink" href="#particledata-p" title="Permalink to this heading"></a></h3>
 <p>On each grid level, <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> stores the particles in a <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> class <code class="docutils literal notranslate"><span class="pre">ParticleData</span></code>.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">P</span><span class="o">&gt;</span>
 <span class="n">ParticleData</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span>
@@ -226,7 +226,7 @@ The latter specifies the grid patch that the particles are assigned to.</p>
 Each grid patch contains a <code class="docutils literal notranslate"><span class="pre">ListBox&lt;P&gt;</span></code> of particles.</p>
 </div>
 <div class="section" id="amrparticles-p">
-<h3>AMRParticles&lt;P&gt;<a class="headerlink" href="#amrparticles-p" title="Permalink to this headline"></a></h3>
+<h3>AMRParticles&lt;P&gt;<a class="headerlink" href="#amrparticles-p" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">AMRParticles&lt;P&gt;</span></code> is our AMR version of <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code>.
 It is a simply a typedef of a vector of pointers to <code class="docutils literal notranslate"><span class="pre">ParticleData&lt;P&gt;</span></code> on each level:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">P</span><span class="o">&gt;</span>
@@ -237,11 +237,11 @@ It is a simply a typedef of a vector of pointers to <code class="docutils litera
 </div>
 </div>
 <div class="section" id="basic-use">
-<h2>Basic use<a class="headerlink" href="#basic-use" title="Permalink to this headline"></a></h2>
+<h2>Basic use<a class="headerlink" href="#basic-use" title="Permalink to this heading"></a></h2>
 <p>Here, we give some examples of basic use of <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code>.
 For the full API, see the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainer.html">ParticleContainer doxygen documentation</a>.</p>
 <div class="section" id="getting-the-particles">
-<h3>Getting the particles<a class="headerlink" href="#getting-the-particles" title="Permalink to this headline"></a></h3>
+<h3>Getting the particles<a class="headerlink" href="#getting-the-particles" title="Permalink to this heading"></a></h3>
 <p>To get the particles from a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> one can call <code class="docutils literal notranslate"><span class="pre">AMRParticles&lt;P&gt;&amp;</span> <span class="pre">ParticleContainer&lt;P&gt;::getParticles()</span></code> which will provide the particles:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="n">myParticleContainer</span><span class="p">;</span>
 
@@ -257,7 +257,7 @@ For the full API, see the <a class="reference external" href="https://chombo-dis
 </div>
 </div>
 <div class="section" id="iterating-over-particles">
-<h3>Iterating over particles<a class="headerlink" href="#iterating-over-particles" title="Permalink to this headline"></a></h3>
+<h3>Iterating over particles<a class="headerlink" href="#iterating-over-particles" title="Permalink to this heading"></a></h3>
 <p>To do something basic with the particle in a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code>, one will typically iterate over the particles in all grid levels and patches.</p>
 <p>The code bit below shows a typical example of how the particles can be moved, and then remapped onto the correct grid patches and ranks if they fall off their original one.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="n">myParticleContainer</span><span class="p">;</span>
@@ -294,9 +294,9 @@ For the full API, see the <a class="reference external" href="https://chombo-dis
 </div>
 </div>
 <div class="section" id="sorting-particles">
-<h2>Sorting particles<a class="headerlink" href="#sorting-particles" title="Permalink to this headline"></a></h2>
+<h2>Sorting particles<a class="headerlink" href="#sorting-particles" title="Permalink to this heading"></a></h2>
 <div class="section" id="sorting-by-cell">
-<h3>Sorting by cell<a class="headerlink" href="#sorting-by-cell" title="Permalink to this headline"></a></h3>
+<h3>Sorting by cell<a class="headerlink" href="#sorting-by-cell" title="Permalink to this heading"></a></h3>
 <p>The particles can also be sorted by cell by calling <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">ParticleContainer&lt;P&gt;::sortParticleByCell()</span></code>, like so:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="n">myParticleContainer</span><span class="p">;</span>
 
@@ -349,7 +349,7 @@ Due to the horrific template depth, this container is typedef’ed as <code clas
 </div>
 </div>
 <div class="section" id="sorting-by-patch">
-<h3>Sorting by patch<a class="headerlink" href="#sorting-by-patch" title="Permalink to this headline"></a></h3>
+<h3>Sorting by patch<a class="headerlink" href="#sorting-by-patch" title="Permalink to this heading"></a></h3>
 <p>If the particles need to return to patch-sorted particles:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="n">myParticleContainer</span><span class="p">;</span>
 
@@ -366,7 +366,7 @@ Calling <code class="docutils literal notranslate"><span class="pre">remap()</sp
 </div>
 </div>
 <div class="section" id="allocating-particles">
-<h2>Allocating particles<a class="headerlink" href="#allocating-particles" title="Permalink to this headline"></a></h2>
+<h2>Allocating particles<a class="headerlink" href="#allocating-particles" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> has a very simple function for allocating a <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code>:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">P</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">allocate</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span> <span class="n">a_container</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">a_pvrBuffer</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">a_realm</span><span class="p">);</span>
@@ -376,9 +376,9 @@ Calling <code class="docutils literal notranslate"><span class="pre">remap()</sp
 This buffer zone adjusts if particles on the fine side of a refinement boundary map to the coarse grid or the fine grid (see <a class="reference internal" href="#chap-particlemapping"><span class="std std-ref">Mapping and remapping</span></a>).</p>
 </div>
 <div class="section" id="mapping-and-remapping">
-<span id="chap-particlemapping"></span><h2>Mapping and remapping<a class="headerlink" href="#mapping-and-remapping" title="Permalink to this headline"></a></h2>
+<span id="chap-particlemapping"></span><h2>Mapping and remapping<a class="headerlink" href="#mapping-and-remapping" title="Permalink to this heading"></a></h2>
 <div class="section" id="mapping-particles-with-particlevalidregion">
-<h3>Mapping particles with ParticleValidRegion<a class="headerlink" href="#mapping-particles-with-particlevalidregion" title="Permalink to this headline"></a></h3>
+<h3>Mapping particles with ParticleValidRegion<a class="headerlink" href="#mapping-particles-with-particlevalidregion" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">ParticleValidRegion</span></code> (PVR) allows particles to be transferred to coarser grid levels if they are within a specified number of grid cells from the refinement boundary.
 There are two reasons why such a functionality is useful:</p>
 <ol class="arabic simple">
@@ -397,7 +397,7 @@ If you do not want to use PVR functionality, simply set <code class="docutils li
 In this case the particles will live on the grid patch that contains them.</p>
 </div>
 <div class="section" id="remapping-particles">
-<h3>Remapping particles<a class="headerlink" href="#remapping-particles" title="Permalink to this headline"></a></h3>
+<h3>Remapping particles<a class="headerlink" href="#remapping-particles" title="Permalink to this heading"></a></h3>
 <p>Particles that move off their original grid patch must be remapped in order to ensure that they are assigned to the correct grid.
 The remapping function for <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> is <code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">ParticleContainer&lt;P&gt;::remap()</span></code>, which is simply used as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="n">myParticles</span><span class="p">;</span>
@@ -409,7 +409,7 @@ The remapping function for <code class="docutils literal notranslate"><span clas
 </div>
 </div>
 <div class="section" id="regridding">
-<h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this headline"></a></h2>
+<h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> is comparatively simple to regrid, and this is done in two steps:</p>
 <ol class="arabic">
 <li><p>Each MPI rank collects <em>all</em> particles on a single <code class="docutils literal notranslate"><span class="pre">List&lt;P&gt;</span></code> by calling</p>
@@ -446,7 +446,7 @@ The remapping function for <code class="docutils literal notranslate"><span clas
 <p>Here, <code class="docutils literal notranslate"><span class="pre">baseLevel</span></code> is the finest level that didn’t change and <code class="docutils literal notranslate"><span class="pre">newFinestLevel</span></code> is the finest AMR level after the regrid.</p>
 </div>
 <div class="section" id="masked-particles">
-<span id="chap-maskedparticles"></span><h2>Masked particles<a class="headerlink" href="#masked-particles" title="Permalink to this headline"></a></h2>
+<span id="chap-maskedparticles"></span><h2>Masked particles<a class="headerlink" href="#masked-particles" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> also supports the concept of <em>masked particles</em>, where one can fetch a subset of particles that live only in specified regions in space.
 Typically, this “specified region” is the refinement boundary, but the functionality is generic and might prove useful also in other cases.</p>
 <p>When <em>masked particles</em> are used, the user can provide a boolean mask over the AMR hierarchy and obtain the subset of particles that live in regions where the mask evaluates to true.
@@ -484,7 +484,7 @@ After the user is done with the particles, they should be deleted through the fu
 </pre></div>
 </div>
 <div class="section" id="creating-particle-halo-masks">
-<h3>Creating particle halo masks<a class="headerlink" href="#creating-particle-halo-masks" title="Permalink to this headline"></a></h3>
+<h3>Creating particle halo masks<a class="headerlink" href="#creating-particle-halo-masks" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> can register a <em>halo</em> mask with a specified width:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">registerMask</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">a_mask</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">a_buffer</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">a_realm</span><span class="p">);</span>
 </pre></div>
@@ -498,12 +498,12 @@ This will register a mask which is false everywhere except in coarse-grid cells 
 </div>
 </div>
 <div class="section" id="embedded-boundaries">
-<h2>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this headline"></a></h2>
+<h2>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> is EB-agnostic and has no information about the embedded boundary.
 This means that particles remap just as if the EB was not there.
 Interaction with the EB is done via the implicit function or discrete information, as well as modifications in the interpolation and deposition steps.</p>
 <div class="section" id="signed-distance-function">
-<h3>Signed distance function<a class="headerlink" href="#signed-distance-function" title="Permalink to this headline"></a></h3>
+<h3>Signed distance function<a class="headerlink" href="#signed-distance-function" title="Permalink to this heading"></a></h3>
 <p>When signed distance functions are used, one can always query how far a particle is from a boundary:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">List</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span> <span class="n">particles</span><span class="p">;</span>
 <span class="n">BaseIF</span> <span class="n">distanceFunction</span><span class="p">;</span>
@@ -521,7 +521,7 @@ The distance function can also be used to detect collisions between particles an
 </div>
 </div>
 <div class="section" id="particle-depositon">
-<h2>Particle depositon<a class="headerlink" href="#particle-depositon" title="Permalink to this headline"></a></h2>
+<h2>Particle depositon<a class="headerlink" href="#particle-depositon" title="Permalink to this heading"></a></h2>
 <p>To deposit particles on the mesh, the user can call the templated function <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositParticles</span></code> which has a signature</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">P</span><span class="p">,</span> <span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span> <span class="k">const</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span>              <span class="n">a_meshData</span><span class="p">,</span>
@@ -612,7 +612,7 @@ When depositing the mass on the mesh the user will e.g. call</p>
 </div>
 </div>
 <div class="section" id="particle-interpolation">
-<h2>Particle interpolation<a class="headerlink" href="#particle-interpolation" title="Permalink to this headline"></a></h2>
+<h2>Particle interpolation<a class="headerlink" href="#particle-interpolation" title="Permalink to this heading"></a></h2>
 <p>To interpolate a field onto a particle position, the user can call the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> member functions</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">P</span><span class="p">,</span> <span class="n">Real</span><span class="o">&amp;</span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">interpolateParticles</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>      <span class="n">a_particles</span><span class="p">,</span>

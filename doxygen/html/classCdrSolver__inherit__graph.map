@@ -1,6 +1,6 @@
 <map id="CdrSolver" name="CdrSolver">
-<area shape="rect" id="node1" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="73,5,158,32"/>
-<area shape="rect" id="node2" href="$classCdrMultigrid.html" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="64,80,167,107"/>
-<area shape="rect" id="node3" href="$classCdrGodunov.html" title="Godunov implementation for advection." alt="" coords="5,155,108,181"/>
-<area shape="rect" id="node4" href="$classCdrMuscl.html" title="Class that uses MUSCL discretization advection." alt="" coords="133,155,215,181"/>
+<area shape="rect" id="node1" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="53,5,138,32"/>
+<area shape="rect" id="node2" href="$classCdrMultigrid.html" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="44,80,147,107"/>
+<area shape="rect" id="node3" href="$classCdrCTU.html" title="Class that uses a slope limited method for advection, in combination with corner transport upwind (CT..." alt="" coords="5,155,76,181"/>
+<area shape="rect" id="node4" href="$classCdrGodunov.html" title="Godunov implementation for advection." alt="" coords="100,155,203,181"/>
 </map>

@@ -15,12 +15,13 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Code standard" href="CodeStandard.html" />
-    <link rel="prev" title="Convergence testing" href="Convergence.html" /> 
+    <link rel="prev" title="Contributions" href="Contributions.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -77,7 +78,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -99,7 +100,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Continuous integration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#github-actions">GitHub actions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-tests-locally">Running tests locally</a><ul>
@@ -142,22 +142,22 @@
            <div itemprop="articleBody">
              
   <div class="section" id="continuous-integration">
-<span id="chap-ci"></span><h1>Continuous integration<a class="headerlink" href="#continuous-integration" title="Permalink to this headline"></a></h1>
+<span id="chap-ci"></span><h1>Continuous integration<a class="headerlink" href="#continuous-integration" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses continuous integration at GitHub.
 These tests consist of cloning, installing, and running various <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> tests.</p>
 <div class="section" id="github-actions">
-<h2>GitHub actions<a class="headerlink" href="#github-actions" title="Permalink to this headline"></a></h2>
+<h2>GitHub actions<a class="headerlink" href="#github-actions" title="Permalink to this heading"></a></h2>
 <p>The tests defined in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Tests</span></code> are automatically run when opening a pull request.
 In general, all tests must pass before a pull request can be merged.
 The tests status can be observed either in the pull request, or at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge/actions">https://github.com/chombo-discharge/chombo-discharge/actions</a>.
 GitHub actions usually take 1-2 hours to complete.</p>
 </div>
 <div class="section" id="running-tests-locally">
-<h2>Running tests locally<a class="headerlink" href="#running-tests-locally" title="Permalink to this headline"></a></h2>
+<h2>Running tests locally<a class="headerlink" href="#running-tests-locally" title="Permalink to this heading"></a></h2>
 <p>The tests are defined in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Tests</span></code> and can be run using various configurations.
 Generally, it is a good idea to run the tests locally before running them at GitHub (which can be slower).</p>
 <div class="section" id="running-all-tests">
-<h3>Running all tests<a class="headerlink" href="#running-all-tests" title="Permalink to this headline"></a></h3>
+<h3>Running all tests<a class="headerlink" href="#running-all-tests" title="Permalink to this heading"></a></h3>
 <p>To do a clean compile and run of all tests, navigate to <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Tests</span></code> and execute the following:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_compare --parallel -cores X
 </pre></div>
@@ -166,11 +166,11 @@ Generally, it is a good idea to run the tests locally before running them at Git
 If the tests should be run in serial, omit the <code class="docutils literal notranslate"><span class="pre">--parallel</span> <span class="pre">-cores</span> <span class="pre">X</span></code> flag.</p>
 </div>
 <div class="section" id="test-suite-options">
-<h3>Test suite options<a class="headerlink" href="#test-suite-options" title="Permalink to this headline"></a></h3>
+<h3>Test suite options<a class="headerlink" href="#test-suite-options" title="Permalink to this heading"></a></h3>
 <p>The following options are available for running the various tests:</p>
 </div>
 <div class="section" id="using-benchmark-files">
-<h3>Using benchmark files<a class="headerlink" href="#using-benchmark-files" title="Permalink to this headline"></a></h3>
+<h3>Using benchmark files<a class="headerlink" href="#using-benchmark-files" title="Permalink to this heading"></a></h3>
 <p>The test suite can generate benchmark files which can later be compared against new test suite output files.
 This can be a good idea if one wants to ensure that changes the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> code does not affect output files.
 In this case one can run the test suite and generate benchmark files <em>before</em> adding changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
@@ -197,7 +197,7 @@ Once the code development is completed, the benchmark files can later be bit-wis
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Convergence.html" class="btn btn-neutral float-left" title="Convergence testing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Contributions.html" class="btn btn-neutral float-left" title="Contributions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="CodeStandard.html" class="btn btn-neutral float-right" title="Code standard" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -78,6 +78,9 @@ $(function() {
 : <a class="el" href="classItoMerge_1_1Node.html#a2e15ec679440e669833e5c88b7814bca">ItoMerge::Node&lt; T &gt;</a>
 , <a class="el" href="classPointMass.html#a338bf0aaf83b04b7009741e5d62bd69e">PointMass</a>
 </li>
+<li>CdrCTU()
+: <a class="el" href="classCdrCTU.html#a1e7c24bb06c0b66143d7058a534c842a">CdrCTU</a>
+</li>
 <li>CdrDomainBC()
 : <a class="el" href="classCdrDomainBC.html#a68c41fe5a4b85983d9f254f3af1d604c">CdrDomainBC</a>
 </li>
@@ -95,9 +98,6 @@ $(function() {
 </li>
 <li>CdrMultigrid()
 : <a class="el" href="classCdrMultigrid.html#a15f7a374c7303fb7268d37cb1aa1e290">CdrMultigrid</a>
-</li>
-<li>CdrMuscl()
-: <a class="el" href="classCdrMuscl.html#af50555cd07318a8c16c1de678bea55a0">CdrMuscl</a>
 </li>
 <li>CdrPlasmaFieldTagger()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a9b0061e5f8bc04450e8bb3daa65d4896">Physics::CdrPlasma::CdrPlasmaFieldTagger</a>
@@ -227,7 +227,8 @@ $(function() {
 : <a class="el" href="classCdrSolver.html#a080f394c63a7bcb66ca7a35e2cfeba24">CdrSolver</a>
 </li>
 <li>computeAdvectionDt()
-: <a class="el" href="classCdrGodunov.html#ab5a641037882491c2996c0704943ed0d">CdrGodunov</a>
+: <a class="el" href="classCdrCTU.html#a819e4dee2d5c7bf95d4c6d3b0ec29c95">CdrCTU</a>
+, <a class="el" href="classCdrGodunov.html#ab5a641037882491c2996c0704943ed0d">CdrGodunov</a>
 , <a class="el" href="classCdrLayout.html#ae4279e478cbda525d5bf30dab941f463">CdrLayout&lt; T &gt;</a>
 , <a class="el" href="classCdrSolver.html#a40a0d1be9cc5aee9f0573c4f3b75dd6c">CdrSolver</a>
 </li>
@@ -386,7 +387,7 @@ $(function() {
 </li>
 <li>computeDt()
 : <a class="el" href="classItoLayout.html#a170888ebad47acf7773c2117d506a42b">ItoLayout&lt; T &gt;</a>
-, <a class="el" href="classItoSolver.html#ac41787bfa9dd5767989a63e7782e50e9">ItoSolver</a>
+, <a class="el" href="classItoSolver.html#a5fad5fa4823fa70c9722b863ab3e35f5">ItoSolver</a>
 , <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a9062d7dcd6955ff2ba59cbcbbcf702d7">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>
 , <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#ae10097cef460b34f47d766cbc4884d4a">Physics::BrownianWalker::BrownianWalkerStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a43752fa6953531d497cde429351c8277">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
@@ -409,10 +410,10 @@ $(function() {
 : <a class="el" href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">LeastSquares</a>
 </li>
 <li>computeElectricField()
-: <a class="el" href="classFieldSolver.html#a7471249289ccb3e99ab7ea108fb39e86">FieldSolver</a>
-, <a class="el" href="classFieldSolverMultigrid.html#a2a064ed1a63c84c8c9a04e2866b3b52e">FieldSolverMultigrid</a>
+: <a class="el" href="classFieldSolver.html#ab7dc8ec1c7cb543b5c8b465e8a1c7200">FieldSolver</a>
+, <a class="el" href="classFieldSolverMultigrid.html#a6d1b52f36ccb73d28d18756f12085716">FieldSolverMultigrid</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#ac13980ecbd41a9fa0674eb4e53babf02">Physics::CdrPlasma::CdrPlasmaFieldTagger</a>
-, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a9b9da4612b209a3506491f4e11c32607">Physics::CdrPlasma::CdrPlasmaStepper</a>
+, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a2b4d06a56b9b94478309926917351986">Physics::CdrPlasma::CdrPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaFieldTagger.html#a36cab0cdf588c7153fccc87c72037d0b">Physics::ItoPlasma::ItoPlasmaFieldTagger</a>
 </li>
 <li>computeElectricFieldIntoScratch()
@@ -457,14 +458,14 @@ $(function() {
 : <a class="el" href="classAmrMesh.html#a03736c8164011068783b32d6c0342caf">AmrMesh</a>
 </li>
 <li>computeGradSten()
-: <a class="el" href="classLeastSquares.html#a8c61ddfee07d6ca75cf3e84c44f26aa9">LeastSquares</a>
+: <a class="el" href="classLeastSquares.html#a336b80150f892d9e3d7b4fd82d617fdf">LeastSquares</a>
 </li>
 <li>computeHopDt()
 : <a class="el" href="classItoLayout.html#a4d1ed43f584e39ac180a7d8e5b42d770">ItoLayout&lt; T &gt;</a>
 , <a class="el" href="classItoSolver.html#ab053c9b08666c62e4527258f7762793c">ItoSolver</a>
 </li>
 <li>computeInterpolationStencil()
-: <a class="el" href="classLeastSquares.html#a877218ddd82cab33f4b2f6e997862a86">LeastSquares</a>
+: <a class="el" href="classLeastSquares.html#a7a3449fc1633e1796ea87ad9bd09ad7d">LeastSquares</a>
 </li>
 <li>computeInterpStencil1D()
 : <a class="el" href="classLinearStencil.html#ac687313e5557352419e56d033501d6b7">LinearStencil</a>
@@ -516,6 +517,9 @@ $(function() {
 <li>computeNormalDerivative()
 : <a class="el" href="classEBGradient.html#aa60f5bf72719468ae31d99e3601f9395">EBGradient</a>
 </li>
+<li>computeNormalSlopes()
+: <a class="el" href="classCdrCTU.html#a8669c8b4359fd4fb25ae7f37c03a47f7">CdrCTU</a>
+</li>
 <li>computeOhmicInductionCurrent()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a26878437c8c526e1ff81033302ed2ea0">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
@@ -551,17 +555,14 @@ $(function() {
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a4c7ea0342c35898f4173e9bf64e5ca8e">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
 <li>computeRHS()
-: <a class="el" href="classMeshODESolver.html#aeea8a244495f50145d82db821dc54739">MeshODESolver&lt; N &gt;</a>
+: <a class="el" href="classMeshODESolver.html#a87d8532a91975b39f861bc71b0bfa099">MeshODESolver&lt; N &gt;</a>
 , <a class="el" href="classSigmaSolver.html#a5eba3c9e95c14bdc9a69b4e7e0d2fbde">SigmaSolver</a>
 </li>
 <li>computeSigmaFlux()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a90e9cbb2babb99ba2a72021625736f30">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 </li>
 <li>computeSingleLevelStencils()
-: <a class="el" href="classLeastSquares.html#acabcffd0c5e943d427fd5609e5aef9cd">LeastSquares</a>
-</li>
-<li>computeSlopes()
-: <a class="el" href="classCdrMuscl.html#a1f2136721e6867a164246585e9717f8e">CdrMuscl</a>
+: <a class="el" href="classLeastSquares.html#ac8e4c4abdc526b6949725ca033ea45a4">LeastSquares</a>
 </li>
 <li>computeSourceDt()
 : <a class="el" href="classCdrSolver.html#add7bc8d5ac3c1e8fd65956313d6def8b">CdrSolver</a>
@@ -615,7 +616,7 @@ $(function() {
 <li>copy()
 : <a class="el" href="classDataOps.html#a25a4550420d098d1e1bd77fdb88a7182">DataOps</a>
 , <a class="el" href="classDomainFluxIFFAB.html#af5b89308ad7b78effc5449611e734ee7">DomainFluxIFFAB</a>
-, <a class="el" href="classEBAMRData.html#aee9bfe083aedcaf965d3f5af08858c65">EBAMRData&lt; T &gt;</a>
+, <a class="el" href="classEBAMRData.html#aaaa7d0927e8ff954d52070cc3999f94b">EBAMRData&lt; T &gt;</a>
 , <a class="el" href="classMFBaseIVFAB.html#a8aa1046470e967b0c04e220c73420704">MFBaseIVFAB</a>
 </li>
 <li>copyMaskParticles()

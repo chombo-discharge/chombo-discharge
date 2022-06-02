@@ -1,0 +1,5 @@
+<map id="CdrCTU" name="CdrCTU">
+<area shape="rect" id="node1" title="Class that uses a slope limited method for advection, in combination with corner transport upwind (CT..." alt="" coords="21,155,92,181"/>
+<area shape="rect" id="node2" href="$classCdrMultigrid.html" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="5,80,108,107"/>
+<area shape="rect" id="node3" href="$classCdrSolver.html" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="14,5,99,32"/>
+</map>

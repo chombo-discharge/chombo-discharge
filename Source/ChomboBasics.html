@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -90,7 +91,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -112,7 +113,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -146,17 +146,17 @@
            <div itemprop="articleBody">
              
   <div class="section" id="chombo-3-basics">
-<span id="chap-basics"></span><h1><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics<a class="headerlink" href="#chombo-3-basics" title="Permalink to this headline"></a></h1>
+<span id="chap-basics"></span><h1><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics<a class="headerlink" href="#chombo-3-basics" title="Permalink to this heading"></a></h1>
 <p>To fully understand this documentation the user should be familiar with <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
 This documentation uses class names from <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and the most relevant <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> data structures are summarized here.
 What follows is a <em>very</em> brief introduction to these data structures, for in-depth explanations please see the <a class="reference external" href="https://github.com/applied-numerical-algorithms-group-lbnl/Chombo_3.2/tree/master/doc">Chombo manual</a>.</p>
 <div class="section" id="real">
-<h2>Real<a class="headerlink" href="#real" title="Permalink to this headline"></a></h2>
+<h2>Real<a class="headerlink" href="#real" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Real</span></code> is a typedef’ed structure for holding a single floating point number.
 Compiling with double precision will typedef <code class="docutils literal notranslate"><span class="pre">Real</span></code> as <code class="docutils literal notranslate"><span class="pre">double</span></code>, otherwise it is typedef’ed as <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p>
 </div>
 <div class="section" id="realvect">
-<h2>RealVect<a class="headerlink" href="#realvect" title="Permalink to this headline"></a></h2>
+<h2>RealVect<a class="headerlink" href="#realvect" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">RealVect</span></code> is a spatial vector.
 It holds two <code class="docutils literal notranslate"><span class="pre">Real</span></code> components in 2D and three <code class="docutils literal notranslate"><span class="pre">Real</span></code> components in 3D.
 The <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> class has floating point arithmetic, e.g. addition, subtraction, multiplication etc.</p>
@@ -168,12 +168,12 @@ For example</p>
 <p>will expand to <code class="docutils literal notranslate"><span class="pre">RealVect</span> <span class="pre">v(vx,vy)</span></code> in 2D and <code class="docutils literal notranslate"><span class="pre">RealVect</span> <span class="pre">v(vx,</span> <span class="pre">vy,</span> <span class="pre">vz)</span></code> in 3D.</p>
 </div>
 <div class="section" id="intvect">
-<h2>IntVect<a class="headerlink" href="#intvect" title="Permalink to this headline"></a></h2>
+<h2>IntVect<a class="headerlink" href="#intvect" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">IntVect</span></code> is an integer spatial vector, and is used for indexing data structures.
 It works in much the same way as <code class="docutils literal notranslate"><span class="pre">RealVect</span></code>, except that the components are integers.</p>
 </div>
 <div class="section" id="box">
-<h2>Box<a class="headerlink" href="#box" title="Permalink to this headline"></a></h2>
+<h2>Box<a class="headerlink" href="#box" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Box</span></code> object describes a box in Cartesian space.
 The boxes are indexed by the low and high corners, both of which are an <code class="docutils literal notranslate"><span class="pre">IntVect</span></code>.
 The <code class="docutils literal notranslate"><span class="pre">Box</span></code> may be cell-centered or face-centered.
@@ -185,7 +185,7 @@ To turn a cell-centered <code class="docutils literal notranslate"><span class="
 <p>This will increase the box dimensions by one in each coordinate direction.</p>
 </div>
 <div class="section" id="ebcellfab-and-farraybox">
-<h2>EBCellFAB and FArrayBox<a class="headerlink" href="#ebcellfab-and-farraybox" title="Permalink to this headline"></a></h2>
+<h2>EBCellFAB and FArrayBox<a class="headerlink" href="#ebcellfab-and-farraybox" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> object is an array for holding cell-centered data in an embedded boundary context.
 The <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> has two data structures: An <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code> that holds the data on the cell centers, and a additional data structure that holds data in cells that are multiply cut.
 Doing arithmetic with <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> usually requires one to iterate over all the cell in the <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code>, and then to iterate over the <em>irregular cells</em> (i.e. cut-cells) later.
@@ -206,7 +206,7 @@ Usually, code for doing anything with the <code class="docutils literal notransl
 </div>
 </div>
 <div class="section" id="vector">
-<h2>Vector<a class="headerlink" href="#vector" title="Permalink to this headline"></a></h2>
+<h2>Vector<a class="headerlink" href="#vector" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Vector&lt;T&gt;</span></code> is a one-dimensional array with constant-time random access and range checking.
 It uses <code class="docutils literal notranslate"><span class="pre">std::vector</span></code> under the hood and can access the most commonly used <code class="docutils literal notranslate"><span class="pre">std::vector</span></code> functionality through the public member functions.
 E.g. to obtain an element in the vector</p>
@@ -218,7 +218,7 @@ E.g. to obtain an element in the vector</p>
 <p>Likewise, <code class="docutils literal notranslate"><span class="pre">push_back</span></code>, <code class="docutils literal notranslate"><span class="pre">resize</span></code> etc works in much the same way as for <code class="docutils literal notranslate"><span class="pre">std::vector</span></code>.</p>
 </div>
 <div class="section" id="refcountedptr">
-<h2>RefCountedPtr<a class="headerlink" href="#refcountedptr" title="Permalink to this headline"></a></h2>
+<h2>RefCountedPtr<a class="headerlink" href="#refcountedptr" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> is a pointer class in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> with reference counting.
 That is, when objects that hold a reference to some <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> object goes out of scope the reference counter is decremented.
 If the reference counter reaches zero, the object that <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> points to it deallocated.
@@ -226,7 +226,7 @@ Using <code class="docutils literal notranslate"><span class="pre">RefCountedPtr
 <p>In modern C++-speak, <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> can be thought of as a <em>very</em> simple version of <code class="docutils literal notranslate"><span class="pre">std::shared_ptr&lt;T&gt;</span></code>.</p>
 </div>
 <div class="section" id="disjointboxlayout">
-<h2>DisjointBoxLayout<a class="headerlink" href="#disjointboxlayout" title="Permalink to this headline"></a></h2>
+<h2>DisjointBoxLayout<a class="headerlink" href="#disjointboxlayout" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> class describes a grid on an AMR level where all the boxes are <em>disjoint</em>, i.e. they don’t overlap.
 <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> is built upon a union of non-overlapping boxes having the same grid resolution and with unique rank-to-box ownership.
 The constructor is</p>
@@ -257,7 +257,7 @@ Data iterators also exist, and the most common is to use iterators that only ite
 However, trying to use <code class="docutils literal notranslate"><span class="pre">LayoutIterator</span></code> to retrieve data that was allocated locally on a different MPI rank is an error.</p>
 </div>
 <div class="section" id="leveldata">
-<h2>LevelData<a class="headerlink" href="#leveldata" title="Permalink to this headline"></a></h2>
+<h2>LevelData<a class="headerlink" href="#leveldata" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> template structure holds data on all the grid patches of one AMR level.
 The data is distributed with the domain decomposition specified by <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code>, and each patch contains exactly one instance of <code class="docutils literal notranslate"><span class="pre">T</span></code>.
 <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> uses a factory pattern for creating the <code class="docutils literal notranslate"><span class="pre">T</span></code> objects, so if you have new data structures that should fit the in <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> structure you must also implement a factory method for <code class="docutils literal notranslate"><span class="pre">T</span></code>.</p>
@@ -273,7 +273,7 @@ Often, <code class="docutils literal notranslate"><span class="pre">T</span></co
 <p><code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> also includes the concept of ghost cells and exchange operations.</p>
 </div>
 <div class="section" id="ebislayout-and-ebisbox">
-<h2>EBISLayout and EBISBox<a class="headerlink" href="#ebislayout-and-ebisbox" title="Permalink to this headline"></a></h2>
+<h2>EBISLayout and EBISBox<a class="headerlink" href="#ebislayout-and-ebisbox" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> holds the geometric information over one <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> level.
 Typically, the <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> is used for fetching the geometric moments that are required for performing computations near cut-cells.
 <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> can be thought of as an object which provides all EB-related information on a specific grid level.
@@ -317,7 +317,7 @@ One can thus think of the <code class="docutils literal notranslate"><span class
 <p>Here, <code class="docutils literal notranslate"><span class="pre">EBGraph</span></code> is the graph that describes the connectivity of the cut cells.</p>
 </div>
 <div class="section" id="baseif">
-<span id="chap-baseif"></span><h2>BaseIF<a class="headerlink" href="#baseif" title="Permalink to this headline"></a></h2>
+<span id="chap-baseif"></span><h2>BaseIF<a class="headerlink" href="#baseif" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> is a <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> class which encapsulates an implicit function (recall that all SDFs are also implicit functions, see <a class="reference internal" href="SpatialDiscretization.html#chap-geometryrepresentation"><span class="std std-ref">Geometry representation</span></a>).
 <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> is therefore used for fundamentally constructing a geometric object.
 Many examples of <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> are found in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> itself, and <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> includes additional ones.</p>

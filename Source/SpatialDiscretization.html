@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -98,7 +99,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -120,7 +121,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -154,9 +154,9 @@
            <div itemprop="articleBody">
              
   <div class="section" id="spatial-discretization">
-<span id="chap-spatialdiscretization"></span><h1>Spatial discretization<a class="headerlink" href="#spatial-discretization" title="Permalink to this headline"></a></h1>
+<span id="chap-spatialdiscretization"></span><h1>Spatial discretization<a class="headerlink" href="#spatial-discretization" title="Permalink to this heading"></a></h1>
 <div class="section" id="cartesian-amr">
-<h2>Cartesian AMR<a class="headerlink" href="#cartesian-amr" title="Permalink to this headline"></a></h2>
+<h2>Cartesian AMR<a class="headerlink" href="#cartesian-amr" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses patch-based structured adaptive mesh refinement (AMR) provided by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id82" title="P Colella, D T Graves, T J Ligocki, G Miller, D Modiano, P O Schwartz, B Van Straalen, J Pilliod, D Trebotich, M Barad, B Keen, A Nonaka, and C Shen. EBChombo software package for cartesian grid, embedded boundary applications. Technical Report, Lawrence Berkeley National Laboratory, 2004.">4</a>]</span>.
 In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels, see <a class="reference internal" href="#fig-patchbasedamr"><span class="std std-numref">Fig. 2</span></a>.
 With Cartesian AMR each patch is a Cartesian block of grid cells.
@@ -178,7 +178,7 @@ However,</p>
 </div>
 </div>
 <div class="section" id="embedded-boundaries">
-<h2>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this headline"></a></h2>
+<h2>Embedded boundaries<a class="headerlink" href="#embedded-boundaries" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharges</span></code> uses an embedded boundary (EB) formulation for describing complex geometries.
 With EBs, the Cartesian grid is directly intersected by the geometry.
 This is fundamentally different from unstructured grid where one generates a volume mesh that conforms to the surface mesh of the input geometry.
@@ -209,7 +209,7 @@ Right: Coarsened grid.</span><a class="headerlink" href="#id8" title="Permalink 
 </div>
 </div>
 <div class="section" id="geometry-representation">
-<span id="chap-geometryrepresentation"></span><h2>Geometry representation<a class="headerlink" href="#geometry-representation" title="Permalink to this headline"></a></h2>
+<span id="chap-geometryrepresentation"></span><h2>Geometry representation<a class="headerlink" href="#geometry-representation" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses (approximations to) signed distance functions (SDFs) for describing geometries.
 Signed distance fields are functions <span class="math notranslate nohighlight">\(f: \mathbb{R}^3\rightarrow \mathbb{R}\)</span> that describe the distance from the object.
 These functions are also <em>implicit functions</em>, i.e. <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right)=0\)</span> describes the surface of the object, <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &gt; 0\)</span> decribes a point inside the object and <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &lt; 0\)</span> describes a point outside the object.</p>
@@ -229,7 +229,7 @@ d_2\left(\mathbf{x}\right) &amp;= R^2 - \mathbf{x}\cdot\mathbf{x}.
 NURBS geometries are, unfortunately, not supported.
 Fundamentally, all geometric objects are described using <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> objects from <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>, see <a class="reference internal" href="ChomboBasics.html#chap-baseif"><span class="std std-ref">BaseIF</span></a>.</p>
 <div class="section" id="constructive-solid-geometry-csg">
-<h3>Constructive solid geometry (CSG)<a class="headerlink" href="#constructive-solid-geometry-csg" title="Permalink to this headline"></a></h3>
+<h3>Constructive solid geometry (CSG)<a class="headerlink" href="#constructive-solid-geometry-csg" title="Permalink to this heading"></a></h3>
 <p>Constructive solid geometry can be used to generate complex shapes from geometric primitives.
 For example, to describe the union between two SDFs <span class="math notranslate nohighlight">\(d_1\left(\mathbf{x}\right)\)</span> and <span class="math notranslate nohighlight">\(d_2\left(\mathbf{x}\right)\)</span>:</p>
 <div class="math notranslate nohighlight">
@@ -239,7 +239,7 @@ However, the union typically approximates the signed distance field quite well n
 <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> natively supports many ways of performing CSG.</p>
 </div>
 <div class="section" id="ebgeometry">
-<h3>EBGeometry<a class="headerlink" href="#ebgeometry" title="Permalink to this headline"></a></h3>
+<h3>EBGeometry<a class="headerlink" href="#ebgeometry" title="Permalink to this heading"></a></h3>
 <p>While functions like <span class="math notranslate nohighlight">\(R - \left|\mathbf{x}\right|\)</span> are quick to compute, a polygon surface may consist of hundreds of thousands of primitives (e.g., triangles).
 Generating signed distance function from polygon tesselations is quite involved as it requires computing the signed distance to the closest feature, which can be a planar polygon (e.g., a triangle), edge, or a vertex.
 <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports such functions through the <a class="reference external" href="https://github.com/rmrsk/EBGeometry">EBGeometry</a> package.</p>
@@ -260,15 +260,15 @@ Additional details are provided in the <a class="reference external" href="https
 </div>
 </div>
 <div class="section" id="geometry-generation">
-<span id="chap-geometrygeneration"></span><h2>Geometry generation<a class="headerlink" href="#geometry-generation" title="Permalink to this headline"></a></h2>
+<span id="chap-geometrygeneration"></span><h2>Geometry generation<a class="headerlink" href="#geometry-generation" title="Permalink to this heading"></a></h2>
 <div class="section" id="chombo-approach">
-<h3><code class="docutils literal notranslate"><span class="pre">Chombo</span></code> approach<a class="headerlink" href="#chombo-approach" title="Permalink to this headline"></a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">Chombo</span></code> approach<a class="headerlink" href="#chombo-approach" title="Permalink to this heading"></a></h3>
 <p>The default geometry generation method in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> is to locate cut-cells on the finest AMR level first and then generate the coarser levels cells through grid coarsening.
 This will look through all cells on the finest level, so for a domain which is effectively <span class="math notranslate nohighlight">\(N\times N\times N\)</span> cells there are <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^3\right)\)</span> implicit function queries (in 2D, the complexity is <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^2\right)\)</span>).
 Note that as <span class="math notranslate nohighlight">\(N\)</span> becomes large, say <span class="math notranslate nohighlight">\(N=10^5\)</span>, geometric queries of this type become a bottleneck.</p>
 </div>
 <div class="section" id="chombo-discharge-pruning">
-<h3><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> pruning<a class="headerlink" href="#chombo-discharge-pruning" title="Permalink to this headline"></a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> pruning<a class="headerlink" href="#chombo-discharge-pruning" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has made modifications to the geometry generation routines in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>, resolving a few bugs and, most importantly, using the signed distance function for load balancing the geometry generation step.
 This modification to <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> yields a reduction of the original <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^3\right)\)</span> scaling in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> grid generation to an <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^2\right)\)</span> scaling in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 Typically, we find that this makes geometry generation computationally trivial (in the sense that it is very fast compared to the simulation).</p>
@@ -302,7 +302,7 @@ However, implicit functions like <span class="math notranslate nohighlight">\(d\
 </div>
 </div>
 <div class="section" id="mesh-generation">
-<span id="chap-meshgeneration"></span><h2>Mesh generation<a class="headerlink" href="#mesh-generation" title="Permalink to this headline"></a></h2>
+<span id="chap-meshgeneration"></span><h2>Mesh generation<a class="headerlink" href="#mesh-generation" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports two algorithm for AMR grid generation:</p>
 <ol class="arabic simple">
 <li><p>The classical Berger-Rigoutsos algorithm <span id="id3">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">1</a>]</span>.</p></li>
@@ -310,11 +310,11 @@ However, implicit functions like <span class="math notranslate nohighlight">\(d\
 </ol>
 <p>Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags.
 Only <em>properly nested</em> grids are generated, in which case two grid levels <span class="math notranslate nohighlight">\(l-1\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span> are separated by a non-zero number of grid cells on level <span class="math notranslate nohighlight">\(l\)</span>.
-This requirement is specific for patch-based grids; itd dieoes not fundamentally exist for quad- and oct-tree grids.
+This requirement is not fundamentally required for quad- and oct-tree grids, but is nevertheless usually imposed.
 For patch based AMR, the rationale for this requirement is that stencils on level <span class="math notranslate nohighlight">\(l+1\)</span> should should only reach into grid cells on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>.
-For example, ghost cells on level <span class="math notranslate nohighlight">\(l+1\)</span> should be interpolated from data only on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>.</p>
+For example, ghost cells on level <span class="math notranslate nohighlight">\(l+1\)</span> can then be interpolated from data only on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>.</p>
 <div class="section" id="berger-rigoutsos-algorithm">
-<h3>Berger-Rigoutsos algorithm<a class="headerlink" href="#berger-rigoutsos-algorithm" title="Permalink to this headline"></a></h3>
+<h3>Berger-Rigoutsos algorithm<a class="headerlink" href="#berger-rigoutsos-algorithm" title="Permalink to this heading"></a></h3>
 <p>The Berger-Rigoustous grid algorithm is implemented in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and is called by <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 The classical Berger-Rigoustous algorithm is inherently serial in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes, see <span id="id5">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">1</a>]</span> for implementation details.
 Typically, it is not used at large scale in 3D due to its memory consumption.</p>
@@ -324,7 +324,7 @@ Typically, it is not used at large scale in 3D due to its memory consumption.</p
 </div>
 </div>
 <div class="section" id="tiled-mesh-refinement">
-<h3>Tiled mesh refinement<a class="headerlink" href="#tiled-mesh-refinement" title="Permalink to this headline"></a></h3>
+<h3>Tiled mesh refinement<a class="headerlink" href="#tiled-mesh-refinement" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also supports a tiled algorithm where the grid boxes on each block are generated according to a predefined tiled pattern.
 If a tile contains a single tag, the entire tile is flagged for refinement.
 The tiled algorithm produces grids that are visually similar to octrees, but is slightly more general since it also supports refinement factors other than 2 and is not restricted to domain extensions that are an integer factor of 2 (e.g. <span class="math notranslate nohighlight">\(2^{10}\)</span> cells in each direction).
@@ -336,7 +336,7 @@ Moreover, the algorithm is extremely fast and has low memory consumption even at
 </div>
 </div>
 <div class="section" id="cell-refinement-philosophy">
-<span id="chap-refinementphilosophy"></span><h2>Cell refinement philosophy<a class="headerlink" href="#cell-refinement-philosophy" title="Permalink to this headline"></a></h2>
+<span id="chap-refinementphilosophy"></span><h2>Cell refinement philosophy<a class="headerlink" href="#cell-refinement-philosophy" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can flag cells for refinement using various methods:</p>
 <ol class="arabic simple">
 <li><p>Refine all embedded boundaries down to a specified refinement level.</p></li>

@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -82,7 +83,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -104,7 +105,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -138,7 +138,7 @@
            <div itemprop="articleBody">
              
   <div class="section" id="computationalgeometry">
-<span id="chap-computationalgeometry"></span><h1>ComputationalGeometry<a class="headerlink" href="#computationalgeometry" title="Permalink to this headline"></a></h1>
+<span id="chap-computationalgeometry"></span><h1>ComputationalGeometry<a class="headerlink" href="#computationalgeometry" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> is the class that implements geometries in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 The source for for this class is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Geometry/</span></code>.</p>
 <div class="admonition note">
@@ -157,7 +157,7 @@ These are described in detail further down.</p>
 <p>When geometries are created, the <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> class will first create the (approximations to the) signed distance functions that describe two possible material phases (gas and solid).
 Here, the <em>solid</em> phase is the part of the computational domain inside the dielectrics, while the <em>gas phase</em> is the part of the computational domain that is outside the electrodes and dielectrics.</p>
 <div class="section" id="electrode">
-<span id="chap-electrode"></span><h2>Electrode<a class="headerlink" href="#electrode" title="Permalink to this headline"></a></h2>
+<span id="chap-electrode"></span><h2>Electrode<a class="headerlink" href="#electrode" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> class is responsible for describing an electrode and its boundary conditions. Internally, this class is lightweight and consists only of a tuple that holds a level-set function and an associated boolean value that tells whether or not the level-set function has a live potential or not. The constructor for the electrode class is:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Electrode</span><span class="p">(</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span> <span class="n">a_baseif</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">a_live</span><span class="p">,</span> <span class="n">Real</span> <span class="n">a_fraction</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">);</span>
 </pre></div>
@@ -165,7 +165,7 @@ Here, the <em>solid</em> phase is the part of the computational domain inside th
 <p>where the first argument is the level-set function and the second argument is responsible for setting the potential. The third argument is an optional argument that allows the user to set the potential to a specified fraction of the applied potential.</p>
 </div>
 <div class="section" id="dielectric">
-<span id="chap-dielectric"></span><h2>Dielectric<a class="headerlink" href="#dielectric" title="Permalink to this headline"></a></h2>
+<span id="chap-dielectric"></span><h2>Dielectric<a class="headerlink" href="#dielectric" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Dielectric</span></code> class describes a dielectric.
 This class is lightweight and consists only of a tuple that holds a level-set function and the associated permittivity.
 The constructors are</p>
@@ -176,7 +176,7 @@ The constructors are</p>
 <p>where the first argument is the level-set function and the second argument sets a constant permittivity (first constructor) or a variable permittivity (second constructor).</p>
 </div>
 <div class="section" id="retrieving-distance-functions">
-<h2>Retrieving distance functions<a class="headerlink" href="#retrieving-distance-functions" title="Permalink to this headline"></a></h2>
+<h2>Retrieving distance functions<a class="headerlink" href="#retrieving-distance-functions" title="Permalink to this heading"></a></h2>
 <p>It is possible to retrieve the SDFs for each phase, as well as the the electrodes and dielectrics.
 This functionality is provided by:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;&amp;</span> <span class="n">getDielectrics</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>

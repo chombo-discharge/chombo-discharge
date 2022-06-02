@@ -89,10 +89,10 @@ Inheritance diagram for CdrSolver:</div>
 <div class="dyncontent">
 <div class="center"><img src="classCdrSolver__inherit__graph.png" border="0" usemap="#CdrSolver_inherit__map" alt="Inheritance graph"/></div>
 <map name="CdrSolver_inherit__map" id="CdrSolver_inherit__map">
-<area shape="rect" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="73,5,158,32"/>
-<area shape="rect" href="classCdrMultigrid.html" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="64,80,167,107"/>
-<area shape="rect" href="classCdrGodunov.html" title="Godunov implementation for advection." alt="" coords="5,155,108,181"/>
-<area shape="rect" href="classCdrMuscl.html" title="Class that uses MUSCL discretization advection." alt="" coords="133,155,215,181"/>
+<area shape="rect" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="53,5,138,32"/>
+<area shape="rect" href="classCdrMultigrid.html" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="44,80,147,107"/>
+<area shape="rect" href="classCdrCTU.html" title="Class that uses a slope limited method for advection, in combination with corner transport upwind (CT..." alt="" coords="5,155,76,181"/>
+<area shape="rect" href="classCdrGodunov.html" title="Godunov implementation for advection." alt="" coords="100,155,203,181"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
@@ -1030,7 +1030,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classCdrMultigrid.html#a80c584c1c8c83a3c662f61285a764f8e">CdrMultigrid</a>, <a class="el" href="classCdrGodunov.html#ae87cf3d3fd8fd683c5775bff147ab43e">CdrGodunov</a>, and <a class="el" href="classCdrMuscl.html#a8ff2d649b8438832bc711e1b8a3fcd73">CdrMuscl</a>.</p>
+<p>Implemented in <a class="el" href="classCdrMultigrid.html#a80c584c1c8c83a3c662f61285a764f8e">CdrMultigrid</a>, <a class="el" href="classCdrGodunov.html#ae87cf3d3fd8fd683c5775bff147ab43e">CdrGodunov</a>, and <a class="el" href="classCdrCTU.html#aa4437b38dd5063ea6a81ca7fc94afc9f">CdrCTU</a>.</p>
 
 </div>
 </div>
@@ -1338,7 +1338,7 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 <p>This computes dt = dx/sum(|vx| + |vy| + |vz|), minimized over all grid levels and patches. <br  />
  </p><dl class="section note"><dt>Note</dt><dd>This is the appropriate time step routine for explicit advection solvers. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classCdrGodunov.html#ab5a641037882491c2996c0704943ed0d">CdrGodunov</a>.</p>
+<p>Reimplemented in <a class="el" href="classCdrGodunov.html#ab5a641037882491c2996c0704943ed0d">CdrGodunov</a>, and <a class="el" href="classCdrCTU.html#a819e4dee2d5c7bf95d4c6d3b0ec29c95">CdrCTU</a>.</p>
 
 </div>
 </div>

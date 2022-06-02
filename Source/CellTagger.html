@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -83,7 +84,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
@@ -105,7 +106,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -139,14 +139,14 @@
            <div itemprop="articleBody">
              
   <div class="section" id="celltagger">
-<span id="chap-celltagger"></span><h1>CellTagger<a class="headerlink" href="#celltagger" title="Permalink to this headline"></a></h1>
+<span id="chap-celltagger"></span><h1>CellTagger<a class="headerlink" href="#celltagger" title="Permalink to this heading"></a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> class is responsible for flagging grid cells for refinement or coarsening.
 If the user wants to implement a new refinement routine, he will do so by writing a new derived class from <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>.
 The <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> parent class is a stand-alone class - it does not have a view of <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>, <code class="docutils literal notranslate"><span class="pre">Driver</span></code>, or <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
 Since refinement is intended to be quite general, the user is responsible for providing <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> with the appropriate depedencies.
 For example, for streamer simulations we often use the electric field when tagging grid cells, in which case the user should supply either a reference to the electric field, the Poisson solver, or the time stepper.</p>
 <div class="section" id="design">
-<h2>Design<a class="headerlink" href="#design" title="Permalink to this headline"></a></h2>
+<h2>Design<a class="headerlink" href="#design" title="Permalink to this heading"></a></h2>
 <p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, refinement flags live in a data holder called <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> inside of <code class="docutils literal notranslate"><span class="pre">Driver</span></code>.
 This data is typedef’ed as</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">DenseIntVectSet</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">EBAMRTags</span><span class="p">;</span>
@@ -188,7 +188,7 @@ This data is typedef’ed as</p>
 </div>
 </div>
 <div class="section" id="user-interface">
-<h2>User interface<a class="headerlink" href="#user-interface" title="Permalink to this headline"></a></h2>
+<h2>User interface<a class="headerlink" href="#user-interface" title="Permalink to this heading"></a></h2>
 <p>To implement a new <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>, the following functions must be implemented:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span> <span class="kt">void</span> <span class="nf">regrid</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">parseOptions</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
@@ -204,7 +204,7 @@ This data is typedef’ed as</p>
 <p>This is primarily useful for debugging the tracer fields that are used for flagging cells for refinement.</p>
 </div>
 <div class="section" id="restrict-tagging">
-<h2>Restrict tagging<a class="headerlink" href="#restrict-tagging" title="Permalink to this headline"></a></h2>
+<h2>Restrict tagging<a class="headerlink" href="#restrict-tagging" title="Permalink to this heading"></a></h2>
 <p>It is possible to prevent cell tags in certain regions.
 The default is simply to add a number of boxes where refinement and coarsening is allowed by specifying a number of boxes in the options file for the cell tagger:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>MyCellTagger.num_boxes   <span class="o">=</span> <span class="m">0</span>            <span class="c1"># Number of allowed tag boxes (0 = tags allowe everywhere)</span>
@@ -217,7 +217,7 @@ By adding restrictive boxes, tagging will only be allowed inside the specified b
 More boxes can be specified by following the same convention, e.g. <code class="docutils literal notranslate"><span class="pre">box2_lo</span></code> and <code class="docutils literal notranslate"><span class="pre">box2_hi</span></code> etc.</p>
 </div>
 <div class="section" id="adding-a-buffer">
-<h2>Adding a buffer<a class="headerlink" href="#adding-a-buffer" title="Permalink to this headline"></a></h2>
+<h2>Adding a buffer<a class="headerlink" href="#adding-a-buffer" title="Permalink to this heading"></a></h2>
 <p>By default, each MPI rank can only tag grid cells where he owns data.
 This has been done for performance and communication reasons.
 Under the hood, the <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> is an array of boolean values on a patch which is very fast and simple to communicate with MPI.

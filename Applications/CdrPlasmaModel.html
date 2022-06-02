@@ -15,6 +15,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -78,7 +79,7 @@
 <p class="caption" role="heading"><span class="caption-text">Applications</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="ImplementedModels.html">Implemented models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">CDR plasma</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#equations-of-motion">Equations of motion</a></li>
@@ -174,7 +175,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/Convergence.html">Convergence testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
@@ -208,7 +208,7 @@
            <div itemprop="articleBody">
              
   <div class="section" id="cdr-plasma">
-<span id="chap-cdrplasmamodel"></span><h1>CDR plasma<a class="headerlink" href="#cdr-plasma" title="Permalink to this headline"></a></h1>
+<span id="chap-cdrplasmamodel"></span><h1>CDR plasma<a class="headerlink" href="#cdr-plasma" title="Permalink to this heading"></a></h1>
 <p>The CDR plasma model resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma</span></code> and describes plasmas in the drift-diffusion approximation.
 This physics model also includes the following subfolders:</p>
 <ul class="simple">
@@ -218,7 +218,7 @@ This physics model also includes the following subfolders:</p>
 <li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/python</span></code> contains Python source files for quickly setting up new applications.</p></li>
 </ul>
 <div class="section" id="equations-of-motion">
-<h2>Equations of motion<a class="headerlink" href="#equations-of-motion" title="Permalink to this headline"></a></h2>
+<h2>Equations of motion<a class="headerlink" href="#equations-of-motion" title="Permalink to this heading"></a></h2>
 <p>In the CDR plasma model we are solving</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}&amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0},\\
@@ -248,7 +248,7 @@ F =&amp; F(t, \mathbf{x}, \mathbf{E}, n),\end{split}\]</div>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> works by embedding the equations above into an abstract C++ framework (see <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>) that the user must implement or reuse existing pieces of, and then compile into an executable.</p>
 </div>
 <div class="section" id="cdrplasmaphysics">
-<span id="chap-cdrplasmaphysics"></span><h2>CdrPlasmaPhysics<a class="headerlink" href="#cdrplasmaphysics" title="Permalink to this headline"></a></h2>
+<span id="chap-cdrplasmaphysics"></span><h2>CdrPlasmaPhysics<a class="headerlink" href="#cdrplasmaphysics" title="Permalink to this heading"></a></h2>
 <p><a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in <a class="reference internal" href="#equation-cdrplasmacoupling">Eq. 7</a>.
 The source code for the class resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CD_CdrPlasmaPhysics.H</span></code>.
 Note that the entire class is an interface, whose implementations are used by the time integrators that advance the equations.</p>
@@ -268,7 +268,7 @@ Likewise, see <a class="reference internal" href="../Solvers/RTE.html#chap-rtspe
 <p>Implementation of the core functionality is comparatively straightforward, but can lead to boilerplate code.
 For this reason we also provide an implementation layer <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a> that provides a plug-and-play interface for specifying the plasma physics.</p>
 <div class="section" id="api">
-<h3>API<a class="headerlink" href="#api" title="Permalink to this headline"></a></h3>
+<h3>API<a class="headerlink" href="#api" title="Permalink to this heading"></a></h3>
 <p>The API for <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code> is as follows:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span> <span class="n">Real</span> <span class="nf">computeAlpha</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_E</span><span class="p">)</span> <span class="k">const</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
@@ -344,14 +344,14 @@ This is used by the cell tagger.</p></li>
 Note that direct implements like these tend to become boilerplate, we also include an interface which implements these functions with pre-defined rules, see <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a>.</p>
 </div>
 <div class="section" id="initializing-species">
-<h3>Initializing species<a class="headerlink" href="#initializing-species" title="Permalink to this headline"></a></h3>
+<h3>Initializing species<a class="headerlink" href="#initializing-species" title="Permalink to this heading"></a></h3>
 <p>In the constructor, the user should define the advected/diffused species and the radiative transfer species.
 These are stored in vectors <code class="docutils literal notranslate"><span class="pre">Vector&lt;RefCountedPtr&lt;CdrSpecies&gt;</span> <span class="pre">&gt;</span> <span class="pre">m_CdrSpecies</span></code> and <code class="docutils literal notranslate"><span class="pre">Vector&lt;RefCountedPtr&lt;RtSpecies&gt;</span> <span class="pre">&gt;</span> <span class="pre">m_RtSpecies</span></code>.
 Each species in these vectors become a convection-diffusion-reaction solver or a radiative transfer solver.
 See <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a> and <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a> for details on how to implement these.</p>
 </div>
 <div class="section" id="defining-drift-velocities">
-<h3>Defining drift velocities<a class="headerlink" href="#defining-drift-velocities" title="Permalink to this headline"></a></h3>
+<h3>Defining drift velocities<a class="headerlink" href="#defining-drift-velocities" title="Permalink to this heading"></a></h3>
 <p>To set the drift velocities, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDriftVelocities</span></code> – this will set the drift velocity <span class="math notranslate nohighlight">\(\mathbf{v}\)</span> in the CDR equations:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span> <span class="n">computeCdrDriftVelocities</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
                                            <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
@@ -365,7 +365,7 @@ See <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><sp
 For a full plasma simulation, there will also be mobilities involved, which the user is reponsible for obtaining.</p>
 </div>
 <div class="section" id="defining-diffusion-coefficients">
-<h3>Defining diffusion coefficients<a class="headerlink" href="#defining-diffusion-coefficients" title="Permalink to this headline"></a></h3>
+<h3>Defining diffusion coefficients<a class="headerlink" href="#defining-diffusion-coefficients" title="Permalink to this heading"></a></h3>
 <p>To set the diffusion coefficients, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDiffusionCoefficients</span></code> – this will set the diffusion coefficient <span class="math notranslate nohighlight">\(D\)</span> in the CDR equations:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
                                              <span class="k">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
@@ -378,7 +378,7 @@ For a full plasma simulation, there will also be mobilities involved, which the 
 <p>This sets <span class="math notranslate nohighlight">\(D = 1\)</span> for all species involved.</p>
 </div>
 <div class="section" id="defining-chemistry-terms">
-<h3>Defining chemistry terms<a class="headerlink" href="#defining-chemistry-terms" title="Permalink to this headline"></a></h3>
+<h3>Defining chemistry terms<a class="headerlink" href="#defining-chemistry-terms" title="Permalink to this heading"></a></h3>
 <p>To set the source terms <span class="math notranslate nohighlight">\(S\)</span>, implement <code class="docutils literal notranslate"><span class="pre">advanceReactionNetwork</span></code>.
 This routine should set the reaction terms for both the CDR equations <em>and</em> the radiative transfer equations.</p>
 <div class="admonition note">
@@ -410,7 +410,7 @@ This implies that it <em>is</em> possible to define fully implicit integrators d
 For example, if the reactive problem consisted only of <span class="math notranslate nohighlight">\(\partial_t n = -\frac{n}{\tau}\)</span>, one could form a reactive integrator with the implicit Euler rule by first computing <span class="math notranslate nohighlight">\(n^{k+1} = \frac{n^k}{1 + \Delta t/\tau}\)</span> and then linearizing <span class="math notranslate nohighlight">\(S = \frac{n^{k+1} - n^k}{\Delta t}\)</span>.</p>
 </div>
 <div class="section" id="fluxes-at-electrode-boundaries">
-<h3>Fluxes at electrode boundaries<a class="headerlink" href="#fluxes-at-electrode-boundaries" title="Permalink to this headline"></a></h3>
+<h3>Fluxes at electrode boundaries<a class="headerlink" href="#fluxes-at-electrode-boundaries" title="Permalink to this heading"></a></h3>
 <p>To set the fluxes <span class="math notranslate nohighlight">\(F\)</span> on electrode EBs, implement <code class="docutils literal notranslate"><span class="pre">computeCdrElectrodeFluxes</span></code>.
 Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are those occuring in a finite-volume context; i.e. the total injected or extracted mass.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrElectrodeFluxes</span><span class="p">(</span><span class="n">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
@@ -429,7 +429,7 @@ Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are
 <p>The input variable <code class="docutils literal notranslate"><span class="pre">a_extrapCdrFluxes</span></code> are cell-centered fluxes extrapolated to the EBs.</p>
 </div>
 <div class="section" id="fluxes-at-dielectric-boundaries">
-<h3>Fluxes at dielectric boundaries<a class="headerlink" href="#fluxes-at-dielectric-boundaries" title="Permalink to this headline"></a></h3>
+<h3>Fluxes at dielectric boundaries<a class="headerlink" href="#fluxes-at-dielectric-boundaries" title="Permalink to this heading"></a></h3>
 <p>To set the fluxes <span class="math notranslate nohighlight">\(F\)</span> on dielectric EBs, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDielectricFluxes</span></code>.
 Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are those occuring in a finite-volume context; i.e. the total injected or extracted mass.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrDielectricFluxes</span><span class="p">(</span><span class="n">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
@@ -448,7 +448,7 @@ Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are
 <p>The input variable <code class="docutils literal notranslate"><span class="pre">a_extrapCdrFluxes</span></code> are cell-centered fluxes extrapolated to the EBs.</p>
 </div>
 <div class="section" id="fluxes-at-domain-boundaries">
-<h3>Fluxes at domain boundaries<a class="headerlink" href="#fluxes-at-domain-boundaries" title="Permalink to this headline"></a></h3>
+<h3>Fluxes at domain boundaries<a class="headerlink" href="#fluxes-at-domain-boundaries" title="Permalink to this heading"></a></h3>
 <p>To set the fluxes <span class="math notranslate nohighlight">\(F\)</span> on dielectric EBs, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDielectricFluxes</span></code>.
 Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are those occuring in a finite-volume context; i.e. the total injected or extracted mass.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrDomainFluxes</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span>           <span class="n">a_time</span><span class="p">,</span>
@@ -468,7 +468,7 @@ Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are
 <p>The input variable <code class="docutils literal notranslate"><span class="pre">a_extrapCdrFluxes</span></code> are cell-centered fluxes extrapolated to the domain sides.</p>
 </div>
 <div class="section" id="setting-initial-surface-charge">
-<h3>Setting initial surface charge<a class="headerlink" href="#setting-initial-surface-charge" title="Permalink to this headline"></a></h3>
+<h3>Setting initial surface charge<a class="headerlink" href="#setting-initial-surface-charge" title="Permalink to this heading"></a></h3>
 <p>To set the initial surface charge on dielectric boundaries, implement</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_time</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_pos</span><span class="p">)</span> <span class="k">const</span><span class="p">{</span>
    <span class="k">return</span> <span class="mf">0.0</span><span class="p">;</span>
@@ -478,7 +478,7 @@ Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are
 </div>
 </div>
 <div class="section" id="time-discretizations">
-<h2>Time discretizations<a class="headerlink" href="#time-discretizations" title="Permalink to this headline"></a></h2>
+<h2>Time discretizations<a class="headerlink" href="#time-discretizations" title="Permalink to this heading"></a></h2>
 <p>Here, we discuss two discretizations of <code class="xref eq docutils literal notranslate"><span class="pre">CdrPlasmaEquations</span></code>.
 Firstly, note that there are two layers to the time integrators:</p>
 <ol class="arabic simple">
@@ -497,7 +497,7 @@ This integrator is an implicit-explicit.</p></li>
 </ul>
 <p>Briefly put, the Godunov operator is our most stable integrator, while the SDC integrator is our most accurate integrator.</p>
 <div class="section" id="godunov-operator-splitting">
-<span id="chap-godunov"></span><h3>Godunov operator splitting<a class="headerlink" href="#godunov-operator-splitting" title="Permalink to this headline"></a></h3>
+<span id="chap-godunov"></span><h3>Godunov operator splitting<a class="headerlink" href="#godunov-operator-splitting" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper</span></code> implements <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> and defines an operator splitting method between charge transport and plasma chemistry.
 It has a formal order of convergence of one.
 The source code is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma/TimeSteppers/CdrPlasmaGodunovStepper</span></code>.</p>
@@ -533,7 +533,7 @@ The following transport algorithms are available:</p>
 These settings tend to work for most problems.</p>
 </div>
 <div class="section" id="specifying-transport-algorithm">
-<h4>Specifying transport algorithm<a class="headerlink" href="#specifying-transport-algorithm" title="Permalink to this headline"></a></h4>
+<h4>Specifying transport algorithm<a class="headerlink" href="#specifying-transport-algorithm" title="Permalink to this heading"></a></h4>
 <p>To specify the transport algorithm, modify the flag <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper.transport</span></code>, and set it to <code class="docutils literal notranslate"><span class="pre">semi_implicit</span></code> or <code class="docutils literal notranslate"><span class="pre">euler</span></code>.
 Everything else is an error.</p>
 <p>Note that for the Godunov integrator, it is possible to center the advective discretization at the half time step.
@@ -545,7 +545,7 @@ See <span id="id1">Trebotich and Graves [<a class="reference internal" href="../
 Note that the formal order of accuracy is still one, but the accuracy of the advective discretization is increased substantially.</p>
 </div>
 <div class="section" id="specifying-diffusion">
-<h4>Specifying diffusion<a class="headerlink" href="#specifying-diffusion" title="Permalink to this headline"></a></h4>
+<h4>Specifying diffusion<a class="headerlink" href="#specifying-diffusion" title="Permalink to this heading"></a></h4>
 <p>To specify how diffusion is treated, modify the flag <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper.diffusion</span></code>, and set it to <code class="docutils literal notranslate"><span class="pre">auto</span></code>, <code class="docutils literal notranslate"><span class="pre">explicit</span></code>, or <code class="docutils literal notranslate"><span class="pre">implicit</span></code>.
 In addition, the flag <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper.diffusion_thresh</span></code> must be set to a number.</p>
 <p>When diffusion is set to <code class="docutils literal notranslate"><span class="pre">auto</span></code>, the integrator switches to implicit diffusion when</p>
@@ -558,7 +558,7 @@ In addition, the flag <code class="docutils literal notranslate"><span class="pr
 </div>
 </div>
 <div class="section" id="time-step-limitations">
-<h4>Time step limitations<a class="headerlink" href="#time-step-limitations" title="Permalink to this headline"></a></h4>
+<h4>Time step limitations<a class="headerlink" href="#time-step-limitations" title="Permalink to this heading"></a></h4>
 <p>The basic time step limitations for the Godunov integrator are:</p>
 <ul class="simple">
 <li><p>Manually set maximum and minimum time steps</p></li>
@@ -570,11 +570,11 @@ Note when the the semi-implicit scheme is used, it is not necessary to restrict 
 </div>
 </div>
 <div class="section" id="spectral-deferred-corrections">
-<span id="chap-sisdc"></span><h3>Spectral deferred corrections<a class="headerlink" href="#spectral-deferred-corrections" title="Permalink to this headline"></a></h3>
+<span id="chap-sisdc"></span><h3>Spectral deferred corrections<a class="headerlink" href="#spectral-deferred-corrections" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">CdrPlasmaImExSdcStepper</span></code> uses implicit-explicit (ImEx) spectral deferred corrections (SDCs) to advance the equations.
 This integrator implements the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method for <code class="docutils literal notranslate"><span class="pre">CdrPlasmStepper</span></code>, and is a high-order method with implicit diffusion.</p>
 <div class="section" id="sdc-basics">
-<h4>SDC basics<a class="headerlink" href="#sdc-basics" title="Permalink to this headline"></a></h4>
+<h4>SDC basics<a class="headerlink" href="#sdc-basics" title="Permalink to this heading"></a></h4>
 <p>First, we provide a quick introduction to the SDC procedure.
 Given an ordinary differential equation (ODE) as</p>
 <div class="math notranslate nohighlight">
@@ -598,7 +598,7 @@ The user is responsible for specifying the quadrature nodes, as well as setting 
 In general, each correction raises the discretization order by one.</p>
 </div>
 <div class="section" id="id2">
-<h4>Time step limitations<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<h4>Time step limitations<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
 <p>The ImEx SDC integrator is limited by</p>
 <ul class="simple">
 <li><p>The dielectric relaxation time.</p></li>
@@ -609,7 +609,7 @@ In general, each correction raises the discretization order by one.</p>
 </div>
 </div>
 <div class="section" id="json-interface">
-<span id="chap-cdrplasmajson"></span><h2>JSON interface<a class="headerlink" href="#json-interface" title="Permalink to this headline"></a></h2>
+<span id="chap-cdrplasmajson"></span><h2>JSON interface<a class="headerlink" href="#json-interface" title="Permalink to this heading"></a></h2>
 <p>Since implementations of <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> are usually boilerplate, we provide a class <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> which can initialize and parse various types of initial conditions and reactions from a JSON input file.
 This class is defined in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/PlasmaModels/CdrPlasmaJSON</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> is a full implementation of <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code> which supports the definition of various species (neutral, plasma species, and photons) and methods of coupling them.
@@ -619,18 +619,18 @@ It is also comparatively straightforward to extend the class with further requir
 This means that the interpretation of <span class="math notranslate nohighlight">\(\Psi\)</span> is the number of photoionization events during the previous time step.
 This is true for both continuum and discrete radiative transfer models.</p>
 <div class="section" id="usage">
-<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h3>
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h3>
 <p>To use this plasma model, use <code class="docutils literal notranslate"><span class="pre">-physics</span> <span class="pre">CdrPlasmaJSON</span></code> when setting up a new plasma problem (see <a class="reference internal" href="#chap-cdrplasmanewproblem"><span class="std std-ref">Simulation quick start</span></a>).
 When <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> is instantiated, the constructor will parse species, reactions, initial conditions, and boundary conditions from a JSON file that the user provides.
 In addition, users can parse transport data or reaction rates from tabulated ASCII files that they provide.</p>
 <p>To specify the input plasma kinetics file, include</p>
 </div>
 <div class="section" id="specifying-input-file">
-<h3>Specifying input file<a class="headerlink" href="#specifying-input-file" title="Permalink to this headline"></a></h3>
+<h3>Specifying input file<a class="headerlink" href="#specifying-input-file" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> will read a JSON file specified by the input variable <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON.chemistry_file</span></code>.</p>
 </div>
 <div class="section" id="discrete-photons">
-<h3>Discrete photons<a class="headerlink" href="#discrete-photons" title="Permalink to this headline"></a></h3>
+<h3>Discrete photons<a class="headerlink" href="#discrete-photons" title="Permalink to this heading"></a></h3>
 <p>There are two approaches when using discrete photons, and both rely on the user setting up the application with the Monte Carlo photon solver (rather than continuum solvers).
 For an introduction to the particle radiative transfer solver, see <a class="reference internal" href="../Solvers/RTE.html#chap-montecarlorte"><span class="std std-ref">Monte Carlo methods</span></a>.</p>
 <p>The user must use one of the following:</p>
@@ -662,9 +662,9 @@ With the first approach, plotting the radiative transfer solver source terms wil
 In the second approach, the source terms will show the volume photo-generation rate.</p>
 </div>
 <div class="section" id="gas-law-and-neutral-background">
-<h3>Gas law and neutral background<a class="headerlink" href="#gas-law-and-neutral-background" title="Permalink to this headline"></a></h3>
+<h3>Gas law and neutral background<a class="headerlink" href="#gas-law-and-neutral-background" title="Permalink to this heading"></a></h3>
 <div class="section" id="general-functionality">
-<h4>General functionality<a class="headerlink" href="#general-functionality" title="Permalink to this headline"></a></h4>
+<h4>General functionality<a class="headerlink" href="#general-functionality" title="Permalink to this heading"></a></h4>
 <p>To include the gas law and neutral species, include a JSON object <code class="docutils literal notranslate"><span class="pre">gas</span></code> with the the field <code class="docutils literal notranslate"><span class="pre">law</span></code> specified.
 Currently, <code class="docutils literal notranslate"><span class="pre">law</span></code> can be either <code class="docutils literal notranslate"><span class="pre">ideal</span></code>, <code class="docutils literal notranslate"><span class="pre">troposphere</span></code>, or <code class="docutils literal notranslate"><span class="pre">table</span></code>.</p>
 <p>The purpose of the gas law is to set the temperature, pressure, and neutral density of the background gas.
@@ -673,7 +673,7 @@ These species are <em>not</em> stored on the mesh; we only store function pointe
 <p>It is also possible to include a field <code class="docutils literal notranslate"><span class="pre">plot</span></code> which will then include the temperature, pressure, and density in plot files.</p>
 </div>
 <div class="section" id="ideal-gas">
-<h4>Ideal gas<a class="headerlink" href="#ideal-gas" title="Permalink to this headline"></a></h4>
+<h4>Ideal gas<a class="headerlink" href="#ideal-gas" title="Permalink to this heading"></a></h4>
 <p>To specify an ideal gas law, specify ideal gas law as follows:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;gas&quot;</span><span class="p">:</span>
   <span class="p">{</span>
@@ -691,7 +691,7 @@ These species are <em>not</em> stored on the mesh; we only store function pointe
 <p>Note that the input temperature should be specified in Kelvin, and the input pressure in atmospheres.</p>
 </div>
 <div class="section" id="troposphere">
-<h4>Troposphere<a class="headerlink" href="#troposphere" title="Permalink to this headline"></a></h4>
+<h4>Troposphere<a class="headerlink" href="#troposphere" title="Permalink to this heading"></a></h4>
 <p>It is also possible to specify the pressure, temperature, and density to be functions of tropospheric altitude.
 In this case one must specify the extra fields</p>
 <ul class="simple">
@@ -722,7 +722,7 @@ In this case one must specify the extra fields</p>
 </div>
 </div>
 <div class="section" id="tabulated">
-<h4>Tabulated<a class="headerlink" href="#tabulated" title="Permalink to this headline"></a></h4>
+<h4>Tabulated<a class="headerlink" href="#tabulated" title="Permalink to this heading"></a></h4>
 <p>To specify temperature, density, and pressure as function of altitude, set <code class="docutils literal notranslate"><span class="pre">law</span></code> to <code class="docutils literal notranslate"><span class="pre">table</span></code> and incldue the following fields:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> For specifying which file we read the data from.</p></li>
@@ -763,7 +763,7 @@ In this case one must specify the extra fields</p>
 </div>
 </div>
 <div class="section" id="neutral-species-background">
-<h4>Neutral species background<a class="headerlink" href="#neutral-species-background" title="Permalink to this headline"></a></h4>
+<h4>Neutral species background<a class="headerlink" href="#neutral-species-background" title="Permalink to this heading"></a></h4>
 <p>Neutral species are included by an array <code class="docutils literal notranslate"><span class="pre">neutral</span> <span class="pre">species</span></code> in the <code class="docutils literal notranslate"><span class="pre">gas</span></code> object.
 Each neutral species must have the fields</p>
 <ul class="simple">
@@ -802,7 +802,7 @@ See <a class="reference internal" href="#chap-plasmaspeciesjson"><span class="st
 </div>
 </div>
 <div class="section" id="plasma-species">
-<span id="chap-plasmaspeciesjson"></span><h3>Plasma species<a class="headerlink" href="#plasma-species" title="Permalink to this headline"></a></h3>
+<span id="chap-plasmaspeciesjson"></span><h3>Plasma species<a class="headerlink" href="#plasma-species" title="Permalink to this heading"></a></h3>
 <p>The list of plasma species is included by an array <code class="docutils literal notranslate"><span class="pre">plasma</span> <span class="pre">species</span></code>.
 Each entry <em>must</em> have the entries</p>
 <ul class="simple">
@@ -824,7 +824,7 @@ Details are discussed further below.</p>
 </pre></div>
 </div>
 <div class="section" id="initial-data">
-<h4>Initial data<a class="headerlink" href="#initial-data" title="Permalink to this headline"></a></h4>
+<h4>Initial data<a class="headerlink" href="#initial-data" title="Permalink to this heading"></a></h4>
 <p>To provide initial data one include <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">data</span></code> for each species.
 Currently, the following fields are supported:</p>
 <ul>
@@ -926,7 +926,7 @@ Required fields are</p>
 </div>
 </div>
 <div class="section" id="mobilities">
-<span id="chap-cdrplasmajsonmobility"></span><h4>Mobilities<a class="headerlink" href="#mobilities" title="Permalink to this headline"></a></h4>
+<span id="chap-cdrplasmajsonmobility"></span><h4>Mobilities<a class="headerlink" href="#mobilities" title="Permalink to this heading"></a></h4>
 <p>If a species is specified as mobile, the mobility is set from a field <code class="docutils literal notranslate"><span class="pre">mobility</span></code>, and the field <code class="docutils literal notranslate"><span class="pre">lookup</span></code> is used to specify the method for computing it.
 Currently supported are:</p>
 <ul class="simple">
@@ -1022,7 +1022,7 @@ The data must be stored in rows and columns.</p></li>
 For performance reasons, the tables are always resampled, see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">Lookup tables</span></a>.</p>
 </div>
 <div class="section" id="diffusion-coefficients">
-<h4>Diffusion coefficients<a class="headerlink" href="#diffusion-coefficients" title="Permalink to this headline"></a></h4>
+<h4>Diffusion coefficients<a class="headerlink" href="#diffusion-coefficients" title="Permalink to this heading"></a></h4>
 <p>Setting the diffusion coefficient is done <em>exactly</em> in the same was as the mobility.
 If a species is diffusive, one must include the field <code class="docutils literal notranslate"><span class="pre">diffusion</span></code> as well as <code class="docutils literal notranslate"><span class="pre">lookup</span></code>.
 For example, the JSON input for specifying a tabulated diffusion coefficient is done by</p>
@@ -1047,7 +1047,7 @@ For example, the JSON input for specifying a tabulated diffusion coefficient is 
 </div>
 </div>
 <div class="section" id="temperatures">
-<h4>Temperatures<a class="headerlink" href="#temperatures" title="Permalink to this headline"></a></h4>
+<h4>Temperatures<a class="headerlink" href="#temperatures" title="Permalink to this heading"></a></h4>
 <p>Plasma species temperatures can set by including a field <code class="docutils literal notranslate"><span class="pre">temperature</span></code> for the plasma species.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -1118,7 +1118,7 @@ The temperature is then computed as</p>
 </div>
 </div>
 <div class="section" id="photon-species">
-<h3>Photon species<a class="headerlink" href="#photon-species" title="Permalink to this headline"></a></h3>
+<h3>Photon species<a class="headerlink" href="#photon-species" title="Permalink to this heading"></a></h3>
 <p>As for the plasma species, photon species (for including radiative transfer) are included by an array <code class="docutils literal notranslate"><span class="pre">photon</span> <span class="pre">species</span></code>.
 For each species, the required fields are</p>
 <ul class="simple">
@@ -1231,7 +1231,7 @@ For example:</p>
 </div>
 </div>
 <div class="section" id="plasma-reactions">
-<span id="chap-cdrplasmareactionsjson"></span><h3>Plasma reactions<a class="headerlink" href="#plasma-reactions" title="Permalink to this headline"></a></h3>
+<span id="chap-cdrplasmareactionsjson"></span><h3>Plasma reactions<a class="headerlink" href="#plasma-reactions" title="Permalink to this heading"></a></h3>
 <p>Plasma reactions are reactions between charged and neutral species and are written in the form</p>
 <div class="math notranslate nohighlight">
 \[A + B + \ldots \rightarrow C + D + \ldots.\]</div>
@@ -1243,7 +1243,7 @@ However, photon species <em>can</em> appear on the left hand side of the equatio
 \[R = k n_A n_B\ldots\]</div>
 <p>When computing the source term for some species <span class="math notranslate nohighlight">\(X\)</span>, we subtract <span class="math notranslate nohighlight">\(R\)</span> for each time <span class="math notranslate nohighlight">\(X\)</span> appears on the left hand side of the reaction and add <span class="math notranslate nohighlight">\(R\)</span> for each time <span class="math notranslate nohighlight">\(X\)</span> appears on the right-hand side of the reaction.</p>
 <div class="section" id="specifying-reactions">
-<h4>Specifying reactions<a class="headerlink" href="#specifying-reactions" title="Permalink to this headline"></a></h4>
+<h4>Specifying reactions<a class="headerlink" href="#specifying-reactions" title="Permalink to this heading"></a></h4>
 <p>Reactions of the above type are handled by a JSON array <code class="docutils literal notranslate"><span class="pre">plasma</span> <span class="pre">reactions</span></code>, with required fields:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">reaction</span></code> (string) containing the reaction process.</p></li>
@@ -1299,7 +1299,7 @@ For example, if we have a model which tracks the species <span class="math notra
 </div>
 </div>
 <div class="section" id="wildcards">
-<span id="cdrplasma-wildcards"></span><h4>Wildcards<a class="headerlink" href="#wildcards" title="Permalink to this headline"></a></h4>
+<span id="cdrplasma-wildcards"></span><h4>Wildcards<a class="headerlink" href="#wildcards" title="Permalink to this heading"></a></h4>
 <p>Reaction specifiers may include the wildcard <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> which is a placeholder for another species.
 The wildcards must be specified by including a JSON array <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> of the species that the wildcard is replaced by.
 For example:</p>
@@ -1319,7 +1319,7 @@ For example:</p>
 It is not possible to set different reaction rates for the two reactions.</p>
 </div>
 <div class="section" id="plotting-reactions">
-<h4>Plotting reactions<a class="headerlink" href="#plotting-reactions" title="Permalink to this headline"></a></h4>
+<h4>Plotting reactions<a class="headerlink" href="#plotting-reactions" title="Permalink to this heading"></a></h4>
 <p>It is possible to have <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> include the reaction rates in the HDF5 output files by including a field <code class="docutils literal notranslate"><span class="pre">plot</span></code> as follows:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
   <span class="p">[</span>
@@ -1355,7 +1355,7 @@ For example, if we know the rate <span class="math notranslate nohighlight">\(k\
 </div>
 </div>
 <div class="section" id="constant-reaction-rates">
-<h4>Constant reaction rates<a class="headerlink" href="#constant-reaction-rates" title="Permalink to this headline"></a></h4>
+<h4>Constant reaction rates<a class="headerlink" href="#constant-reaction-rates" title="Permalink to this heading"></a></h4>
 <p>To set a constant reaction rate for a reaction, set the field <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">&quot;constant&quot;</span></code> and specify the rate.
 For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
@@ -1371,7 +1371,7 @@ For example:</p>
 </div>
 </div>
 <div class="section" id="function-based-rates">
-<h4>Function based rates<a class="headerlink" href="#function-based-rates" title="Permalink to this headline"></a></h4>
+<h4>Function based rates<a class="headerlink" href="#function-based-rates" title="Permalink to this heading"></a></h4>
 <ul>
 <li><p>To set a rate dependent on two species temperature in the form <span class="math notranslate nohighlight">\(k(T_1, T_2) = c_1\left(T_1/T_2\right)^{c_2}\)</span>, set <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">functionT1T2</span> <span class="pre">A</span></code>.
 The user must specify which temperatures are involved by specifying the fields <code class="docutils literal notranslate"><span class="pre">T1</span></code>, <code class="docutils literal notranslate"><span class="pre">T2</span></code>, as well as the constants through fields <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>.
@@ -1397,7 +1397,7 @@ For example, to include the reaction <span class="math notranslate nohighlight">
 </ul>
 </div>
 <div class="section" id="tabulated-rates">
-<h4>Tabulated rates<a class="headerlink" href="#tabulated-rates" title="Permalink to this headline"></a></h4>
+<h4>Tabulated rates<a class="headerlink" href="#tabulated-rates" title="Permalink to this heading"></a></h4>
 <p>To set a tabulated rate with <span class="math notranslate nohighlight">\(k = k(E,N)\)</span>, set the field <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">E/N</span></code> and specify the file, header, and data format to be used.
 For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
@@ -1428,7 +1428,7 @@ As with the mobilities (see <span class="xref std std-ref">Chap:CdrPlasmaJSONMob
 Finally, the <code class="docutils literal notranslate"><span class="pre">dump</span></code> argument will tell <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> to dump the table to file, which is useful for debugging or quality assurance of the tabulated data.</p>
 </div>
 <div class="section" id="collisional-quenching">
-<h4>Collisional quenching<a class="headerlink" href="#collisional-quenching" title="Permalink to this headline"></a></h4>
+<h4>Collisional quenching<a class="headerlink" href="#collisional-quenching" title="Permalink to this heading"></a></h4>
 <p>To quench a reaction, include a field <code class="docutils literal notranslate"><span class="pre">qenching_pressure</span></code> and specify the <em>quenching pressure</em> (in atmospheres).
 When computing reaction rates, the rate for the reaction will be modified as</p>
 <div class="math notranslate nohighlight">
@@ -1460,7 +1460,7 @@ When computing reaction rates, the rate for the reaction will be modified as</p>
 </div>
 </div>
 <div class="section" id="reaction-efficiencies">
-<h4>Reaction efficiencies<a class="headerlink" href="#reaction-efficiencies" title="Permalink to this headline"></a></h4>
+<h4>Reaction efficiencies<a class="headerlink" href="#reaction-efficiencies" title="Permalink to this heading"></a></h4>
 <p>To modify a reaction efficiency, include a field <code class="docutils literal notranslate"><span class="pre">efficiency</span></code> and specify it.
 This will modify the reaction rate as</p>
 <div class="math notranslate nohighlight">
@@ -1488,12 +1488,12 @@ For example:</p>
 </div>
 </div>
 <div class="section" id="scaling-reactions">
-<h4>Scaling reactions<a class="headerlink" href="#scaling-reactions" title="Permalink to this headline"></a></h4>
+<h4>Scaling reactions<a class="headerlink" href="#scaling-reactions" title="Permalink to this heading"></a></h4>
 <p>Reactions can be scaled by including a <code class="docutils literal notranslate"><span class="pre">scale</span></code> argument to the reaction.
 This works exactly like the <code class="docutils literal notranslate"><span class="pre">efficiency</span></code> field outlined above.</p>
 </div>
 <div class="section" id="energy-correction">
-<h4>Energy correction<a class="headerlink" href="#energy-correction" title="Permalink to this headline"></a></h4>
+<h4>Energy correction<a class="headerlink" href="#energy-correction" title="Permalink to this heading"></a></h4>
 <p>Occasionally, it can be necessary to incorporate an energy correction to models, accounting e.g. for electron energy loss near strong gradients.
 The JSON interface supports the correction in <span id="id5">Soloviev and Krivtsov [<a class="reference internal" href="../ZZReferences.html#id101" title="V R Soloviev and V M Krivtsov. Surface barrier discharge modelling for aerodynamic applications. Journal of Physics D: Applied Physics, 42(12):125208, jun 2009. URL: http://stacks.iop.org/0022-3727/42/i=12/a=125208?key=crossref.6a72c0ae60b829dd552a56b7f9dfa90c, doi:10.1088/0022-3727/42/12/125208.">7</a>]</span>.
 To use it, include an (optional) field <code class="docutils literal notranslate"><span class="pre">soloviev</span></code> and specify <code class="docutils literal notranslate"><span class="pre">correction</span></code> and <code class="docutils literal notranslate"><span class="pre">species</span></code>.
@@ -1534,7 +1534,7 @@ Note that this correction makes sense when rates are dependent only on the elect
 </div>
 </div>
 <div class="section" id="photo-reactions">
-<span id="chap-photoreactionsjson"></span><h3>Photo-reactions<a class="headerlink" href="#photo-reactions" title="Permalink to this headline"></a></h3>
+<span id="chap-photoreactionsjson"></span><h3>Photo-reactions<a class="headerlink" href="#photo-reactions" title="Permalink to this heading"></a></h3>
 <p>Photo-reactions are reactions between charged/neutral and photons in the form</p>
 <div class="math notranslate nohighlight">
 \[A + B + \gamma + \ldots \rightarrow C + D + \ldots.\]</div>
@@ -1543,7 +1543,7 @@ The left hand side can contain only <em>one</em> photon species, and the right-h
 In other words, two-photon absorption is not supported, and photons that are absorbed on the mesh cannot become new photons.
 This is not a fundamental limitation, but a restriction imposed by the JSON interface.</p>
 <div class="section" id="id7">
-<h4>Specifying reactions<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h4>
+<h4>Specifying reactions<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h4>
 <p>Reactions of the above type are handled by a JSON array <code class="docutils literal notranslate"><span class="pre">photo</span> <span class="pre">reactions</span></code>, with required fields:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">reaction</span></code> (string) containing the reaction process.</p></li>
@@ -1561,14 +1561,14 @@ This is not a fundamental limitation, but a restriction imposed by the JSON inte
 Wildcards also apply, see <a class="reference internal" href="#cdrplasma-wildcards"><span class="std std-ref">Wildcards</span></a>.</p>
 </div>
 <div class="section" id="default-behavior">
-<h4>Default behavior<a class="headerlink" href="#default-behavior" title="Permalink to this headline"></a></h4>
+<h4>Default behavior<a class="headerlink" href="#default-behavior" title="Permalink to this heading"></a></h4>
 <p>Since the radiative transfer solvers solve for the number of ionizing photons, the CDR solver source terms are incremented by</p>
 <div class="math notranslate nohighlight">
 \[S \rightarrow S + \frac{\Psi}{\Delta t}.\]</div>
 <p>where <span class="math notranslate nohighlight">\(\Psi\)</span> is the number of ionizing photons per unit volume (i.e., the solution <span class="math notranslate nohighlight">\(\Psi\)</span>).</p>
 </div>
 <div class="section" id="helmholtz-reconstruction">
-<h4>Helmholtz reconstruction<a class="headerlink" href="#helmholtz-reconstruction" title="Permalink to this headline"></a></h4>
+<h4>Helmholtz reconstruction<a class="headerlink" href="#helmholtz-reconstruction" title="Permalink to this heading"></a></h4>
 <p>When performing a Helmholtz reconstruction the photoionization source term is</p>
 <div class="math notranslate nohighlight">
 \[S = \frac{c A p_{\textrm{O}_2}}{\sqrt{3}\lambda}\Psi.\]</div>
@@ -1596,7 +1596,7 @@ This value will also be specified in the photon species, but it is not retrieved
 </div>
 </div>
 <div class="section" id="id8">
-<h4>Scaling reactions<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h4>
+<h4>Scaling reactions<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h4>
 <p>Photo-reactions can be scaled by including a <code class="docutils literal notranslate"><span class="pre">scale</span></code> argument.
 For example, to completely turn off the photoreaction above:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;photo reactions&quot;</span><span class="p">:</span>
@@ -1617,7 +1617,7 @@ For example, to completely turn off the photoreaction above:</p>
 </div>
 </div>
 <div class="section" id="eb-boundary-conditions">
-<h3>EB boundary conditions<a class="headerlink" href="#eb-boundary-conditions" title="Permalink to this headline"></a></h3>
+<h3>EB boundary conditions<a class="headerlink" href="#eb-boundary-conditions" title="Permalink to this heading"></a></h3>
 <p>Boundary conditions on the embedded boundary are included by the fields</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">electrode</span> <span class="pre">reactions</span></code>, for specifying secondary emission on electrodes.</p></li>
@@ -1658,12 +1658,12 @@ The same emission coefficient will be used for both reactions.</p></li>
 </div>
 </div>
 <div class="section" id="domain-boundary-conditions">
-<h3>Domain boundary conditions<a class="headerlink" href="#domain-boundary-conditions" title="Permalink to this headline"></a></h3>
+<h3>Domain boundary conditions<a class="headerlink" href="#domain-boundary-conditions" title="Permalink to this heading"></a></h3>
 <p>TODO.</p>
 </div>
 </div>
 <div class="section" id="simulation-quick-start">
-<span id="chap-cdrplasmanewproblem"></span><h2>Simulation quick start<a class="headerlink" href="#simulation-quick-start" title="Permalink to this headline"></a></h2>
+<span id="chap-cdrplasmanewproblem"></span><h2>Simulation quick start<a class="headerlink" href="#simulation-quick-start" title="Permalink to this heading"></a></h2>
 <p>New problems that use the <code class="docutils literal notranslate"><span class="pre">CdrPlasma</span></code> physics model are best set up by using the Python tools provided with the module.
 Navigate to <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma`</span></code> and set up the problem with.
 To see the list of available options type</p>
