@@ -10,12 +10,73 @@ The electrostatics model solves
    \nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}
 
 subject to the constraints and boundary conditions given in :ref:`Chap:FieldSolver`.
+The implementation is by a class
+
+.. code-block:: c++
+
+   class FieldStepper : public TimeStepper
+
+and is found in :file:`$DISCHARGE_HOME/Physics/Electrostatics`.
+The C++ API is found `here <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1Electrostatics_1_1FieldStepper.html>`_.
+
+Time stepping
+-------------
+
+``FieldStepper`` is a class with only stationary solves.
+This is enforced by making the ``TimeStepper::advance`` method throw an error, while the field solve itself is done in the initialization procedure in ``TimeStepper::postInitialize``.
+
+.. important::
+   To run the solver, one must set ``Driver.max_steps = 0``.
 
 Setting the space charge
 ------------------------
 
+Default behavior
+________________
+
+By default, the initial space charge for this problem is given by Gaussian
+
+.. math::
+
+   \rho\left(\mathbf{x}\right) = \rho_0\exp\left(-\frac{\left|\mathbf{x}-\mathbf{x}_0\right|^2}{2R^2}\right),
+
+where :math:`\rho_0` is an amplitude, :math:`\mathbf{x}_0` is the center and :math:`R` is the Gaussian radius.
+These are set by the input options
+
+.. code-block:: none
+
+   FieldStepper.init_rho     = 1.0  
+   FieldStepper.rho_center   = 0 0 0
+   FieldStepper.rho_radius   = 1.0
+
+
+Custom value
+____________
+
+For a more general way of specifying the space charge, ``FieldStepper`` has a public member function
+
+.. code-block:: c++
+
+   void setRho(const std::function<Real(const RealVect& a_pos)>& a_rho, const phase::which_phase a_phase) noexcept;
+
 Setting the surface charge
 --------------------------
+
+By default, the initial surface charge is set to a constant.
+This constant is given by
+
+.. code-block:: none
+
+   FieldStepper.init_sigma = 1.0
+
+Custom value
+____________
+
+For a more general way of specifying the surface charge, ``FieldStepper`` has a public member function
+
+.. code-block:: c++
+
+   void setSigma(const std::function<Real(const RealVect& a_pos)>& a_sigma) noexcept;   
 
 Setting up a new problem
 ------------------------

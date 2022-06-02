@@ -212,12 +212,23 @@ namespace Physics {
       /*!
 	@brief Perform post-regrid operations -- this will resolve the Poisson equation. 
 	@details This includes all operations to be done AFTER interpolating data to new grids. 
-	@param[in] a_lmin           The coarsest level that changed. 
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
-	@param[in] a_newFinestLevel The finest level after the regrid. 
       */
       void
       postRegrid() override;
+
+      /*!
+	@brief Set space charge
+	@param[in] a_rho Space charge distribution
+      */
+      void
+      setRho(const std::function<Real(const RealVect& a_pos)>& a_rho, const phase::which_phase a_phase) noexcept;
+
+      /*!
+	@brief Set surface charge
+	@param[in] a_sigma Surface charge distribution
+      */
+      void
+      setSigma(const std::function<Real(const RealVect& a_pos)>& a_sigma) noexcept;
 
     protected:
       /*!
@@ -244,6 +255,21 @@ namespace Physics {
 	@brief Realm where the solver lives
       */
       std::string m_realm;
+
+      /*!
+	@brief Space charge inside gas phase.
+      */
+      std::function<Real(const RealVect& a_pos)> m_rhoGas;
+
+      /*!
+	@brief Space charge inside dielectric.
+      */
+      std::function<Real(const RealVect& a_pos)> m_rhoDielectric;
+
+      /*!
+	@brief Surface charge distribution
+      */
+      std::function<Real(const RealVect& a_pos)> m_surfaceChargeDensity;
 
       /*!
 	@brief Internal routine for solving the Poisson equation
