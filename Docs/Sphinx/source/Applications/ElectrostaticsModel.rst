@@ -51,12 +51,35 @@ Spatial convergence tests for this module (and consequently the underlying numer
 All tests operate by computing solutions on grids with resolutions :math:`\Delta x` and :math:`\Delta x/2` and then computing the solution error using the approach outlined in :ref:`Chap:SpatialConvergence`. 
 
 
-C1: Coaxial cable (2D)
-______________________
+C1: Coaxial cable
+_________________
 
-C2: Profiled surface (2D)
-_________________________
+A spatial convergence test is given in :file:`$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C1`.
+Figure :ref:`Fig:ElectrostaticsC1_1` show the field distribution for the coaxial cable geometry convergence test.
+Note that there is a dielectric embedded between the two cylindrical shells. 
 
-C3: Mechanical shaft (3D)
-_________________________
+.. _Fig:ElectrostaticsC1_1:
+.. figure:: /_static/figures/ElectrostaticsC1_1.png
+   :width: 360
+   :align: center
+
+   Field distribution for a coaxial cable geometry on a :math:`512^2` grid. 
+
+The computed convergence rates are given in :ref:`Fig:ElectrostaticsC1_2`.
+We find second order convergence in all three norms. 
+
+.. _Fig:ElectrostaticsC1_2:
+.. figure:: /_static/figures/ElectrostaticsC1_2.png
+   :width: 360px
+   :align: center
+
+   Spatial convergence rates for two-dimensional coaxial cable geometry. 
+
+
+C2: Profiled surface
+____________________
+
+
+C3: Mechanical shaft
+____________________
 
