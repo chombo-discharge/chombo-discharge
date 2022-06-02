@@ -54,8 +54,8 @@ All tests operate by computing solutions on grids with resolutions :math:`\Delta
 C1: Coaxial cable
 _________________
 
-A spatial convergence test is given in :file:`$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C1`.
-Figure :ref:`Fig:ElectrostaticsC1_1` show the field distribution for the coaxial cable geometry convergence test.
+:file:`$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C1` is a spatial convergence test in a coaxial cable geometry. 
+Figure :numref:`Fig:ElectrostaticsC1_1` shows the field distribution.
 Note that there is a dielectric embedded between the two cylindrical shells. 
 
 .. _Fig:ElectrostaticsC1_1:
@@ -65,7 +65,7 @@ Note that there is a dielectric embedded between the two cylindrical shells.
 
    Field distribution for a coaxial cable geometry on a :math:`512^2` grid. 
 
-The computed convergence rates are given in :ref:`Fig:ElectrostaticsC1_2`.
+The computed convergence rates are given in :numref:`Fig:ElectrostaticsC1_2`.
 We find second order convergence in all three norms. 
 
 .. _Fig:ElectrostaticsC1_2:
@@ -78,6 +78,26 @@ We find second order convergence in all three norms.
 
 C2: Profiled surface
 ____________________
+
+:file:`$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C1` is a 2D spatial convergence test for an electrode and a dielectric slab with surface profiles.
+Figure :numref:`Fig:ElectrostaticsC2_1` shows the field distribution.
+
+.. _Fig:ElectrostaticsC2_1:
+.. figure:: /_static/figures/ElectrostaticsC2_1.png
+   :width: 600px
+   :align: center
+
+   Field distribution for a profiled surface geometry on a :math:`2048^2` grid. 
+
+The computed convergence rates are given in :numref:`Fig:ElectrostaticsC2_2`.
+We find second order convergence in all three norms. 
+
+.. _Fig:ElectrostaticsC2_2:
+.. figure:: /_static/figures/ElectrostaticsC2_2.png
+   :width: 360px
+   :align: center
+
+   Spatial convergence rates for two-dimensional dielectric surface profile. 
 
 
 C3: Mechanical shaft
