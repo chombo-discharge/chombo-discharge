@@ -98,6 +98,7 @@ Discretization
    Source/Particles
    Source/Realm
    Source/LinearSolvers
+   Source/VV
 
 
 Design
@@ -144,8 +145,10 @@ Physics models
    Applications/BrownianWalkerModel         
    Applications/CdrPlasmaModel
    Applications/ElectrostaticsModel
-   Applications/GeometryModel      
-   Applications/RadiativeTransferModel      
+   Applications/GeometryModel
+   Applications/MeshODEModel
+   Applications/RadiativeTransferModel
+   Applications/TracerParticleModel
 
 ..   ItoPlasmaModel
 

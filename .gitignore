@@ -45,3 +45,4 @@ Docs/*
 !Docs/Doxyfile
 !Docs/README.md
 Docs/Sphinx/build
+Docs/**/*.dat

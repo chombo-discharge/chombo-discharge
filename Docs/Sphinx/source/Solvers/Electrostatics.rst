@@ -1,7 +1,7 @@
 .. _Chap:Electrostatics:
    
-Electrostatics
-==============
+Electrostatic solver
+====================
 
 Here, we discuss the discretization of the equation
 
@@ -19,6 +19,8 @@ The relative permittivity is :math:`\epsilon_r = \epsilon_r\left(\mathbf{x}\righ
    All current electrostatic field solvers solve for the potential at the cell center (not the cell centroid).
    The code for the electrostatics solver is given in :file:`/Source/Electrostatics` and :file:`/Source/Elliptic`.
 
+.. _Chap:FieldSolver:
+
 FieldSolver
 -----------
 
@@ -26,6 +28,7 @@ FieldSolver
 ``FieldSolver`` can solve over three phases, gas, dielectric, and electrode, and thus it is uses ``MFAMRCellData`` functionality where data is defined over multiple phases (see :ref:`Chap:MeshData`).
 
 Note that in order to separate the electrostatic solver interface from the implementation, ``FieldSolver`` is a pure class without knowledge of numerical discretizations.
+See the `FieldSolver C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classFieldSolver.html>`_ for additional details.
 Currently, our only supported implementation is ``FieldSolverMultigrid`` (see :ref:`Chap:FieldSolverMultigrid`). 
 
 On gas-dielectric interfaces we enforce an extra equation
@@ -35,11 +38,11 @@ On gas-dielectric interfaces we enforce an extra equation
    
    \epsilon_1\partial_{n_1}\Phi + \epsilon_2\partial_{n_2}\Phi = \sigma/\epsilon_0
 
-where :math:`\mathbf{n}_1 = -\mathbf{n}_2` are the normal vectors pointing out of each side of the interface, and :math:`\sigma` is the surface charge density.
+where :math:`\mathbf{n}_1 = -\mathbf{n}_2` are the normal vectors pointing away from interface, and :math:`\sigma` is the surface charge density.
 
 We point out that this equation can be enforced in various formats. 
 The most common case is that :math:`\partial_n\Phi` are free parameters and :math:`\sigma` is a fixed parameter.
-However, we *can* also fix :math:`\partial_n\Phi` on either side of the boundary and have :math:`\sigma` as a free parameter.
+However, we *can* also fix :math:`\partial_n\Phi` on one side of the boundary and let :math:`\sigma` be the free parameter.
 When using ``FieldSolverMultigrid`` (see :ref:`Chap:FieldSolverMultigrid`), users can choose between these two natural boundary conditions, see :ref:`Chap:PoissonEBBC`.
 
 Using FieldSolver
@@ -50,7 +53,7 @@ Creating a solver is usually done by means of a pointer cast:
 
 .. code-block:: c++
 
-   RefCountedPtr<FieldSolver> fieldSolver = RefCountedPtr<FieldSolver> (new FieldSolverMultigrid());
+   auto fieldSolver = RefCountedPtr<FieldSolver> (new FieldSolverMultigrid());
 
 In addition, one must parse run-time options to the class, provide the ``AmrMesh`` and ``ComputationalGeometry`` instances, and set the initial conditions.
 This is done as follows:
@@ -88,18 +91,15 @@ E.g.,
 
    fieldSolver->setVoltage(myVoltage);
 
-
-
-The electrostatic solver ``chombo-discharge`` has a lot of supporting functionality, but essentially relies on only one critical function:
+The electrostatic solver in ``chombo-discharge`` has a lot of supporting functionality, but essentially relies on only one critical function:
 Solving for the potential.
-This is done by the member function
+This is encapsulated by the pure member function
 
 .. code-block:: c++
 
-   bool FieldSolver::solve(MFAMRCellData& phi, const MFAMRCellData& rho, const EBAMRIVData& sigma);
+   bool FieldSolver::solve(MFAMRCellData& phi, const MFAMRCellData& rho, const EBAMRIVData& sigma) = 0;
 
 where ``phi`` is the resulting potential that was computing with the space charge density ``rho`` and surface charge density ``sigma``.
-This function is implemented by :ref:`Chap:FieldSolverMultigrid`. 
 
 .. _Chap:PoissonDomainBC:
 
@@ -119,8 +119,8 @@ For setting general types of Neumann or Dirichlet BCs on the domain sides, one w
 
 .. code-block:: bash
 
-   FieldSolverMultigrid.bc_x_low  = dirichlet_custom
-   FieldSolverMultigrid.bc_x_high = dirichlet_neumann   
+   FieldSolverMultigrid.bc.x.low  = dirichlet_custom
+   FieldSolverMultigrid.bc.x.high = dirichlet_neumann   
 
 Unfortunately, due to the many degrees of freedom in setting domain boundary conditions, the procedure is a bit convoluted.
 We first explain the general procedure. 
@@ -157,8 +157,8 @@ In this case one will use an identifier ``<string> <float>`` in the input script
 
 .. code-block:: bash
 
-   FieldSolverMultigrid.bc_x_low  = neumann   0.0
-   FieldSolverMultigrid.bc_x_high = dirichlet 1.0
+   FieldSolverMultigrid.bc.x.low  = neumann   0.0
+   FieldSolverMultigrid.bc.x.high = dirichlet 1.0
 
 The floating point number has a slightly different interpretation for the two types of BCs.
 Moreover, when using the simplified format the function specified through ``setDomainSideBcFunction`` will be used as a multiplier rather than being parsed directly into the numerical discretization.
@@ -176,24 +176,35 @@ In C++ pseudo-code, this function is in the format
 
    Real dirichletFraction;
    
-   auto func = [&func, ...](const RealVect a_pos, const Real a_time) -> Real {
+   auto f = [&func, ...](const RealVect a_pos, const Real a_time) -> Real {
       return func(a_pos, a_time) * voltage(a_time) * dirichletFraction;
    };
 
 where ``voltage`` is the voltage wave form specified through ``FieldSolver::setVoltage``, and ``dirichletFraction`` is a placeholder for the floating point number specified in the input script, i.e. the floating point number in the input option.
-The function ``func(a_pos, a_time)`` *is* the space-time function set through ``setDomainSideBcFunction``.
+That is, for Dirichlet boundary conditions the solver will always multiply the provided input function by the voltage waveform.
+That is, the function ``func(a_pos, a_time)`` is the space-time function set through ``setDomainSideBcFunction``.
 Recall that, by default, this function is set to one so that the default voltage that is parsed into the numerical discretization is simply the specified voltage multiplied by the specified fraction in the input script.
 For example, using
 
 .. code-block:: bash
 
-   FieldSolverMultigrid.bc_y_low  = dirichlet 0.0
-   FieldSolverMultigrid.bc_y_high = dirichlet 1.0
+   FieldSolverMultigrid.bc.y.low  = dirichlet 0.0
+   FieldSolverMultigrid.bc.y.high = dirichlet 1.0
 
-will the set voltage on the lower y-plane to ground and the voltage on the upper y-plane to a live voltage.
+will the set voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
+Specifically, on the upper y-plane this specification will generate a potential boundary condition function of the type
 
-In order to set the voltage on the domain side to also be spatially dependent, one can either use ``dirichlet_custom`` as an input option, or still ``dirichlet <float>`` and set a different multiplier on the domain edge (face).
-As an example. one can specify ``bc_y_high = dirichlet 1.234`` in the input script AND set the multiplier on the wall as follows:
+.. code-block:: c++
+
+   auto func = [](const RealVect a_pos, const Real a_time) {return 1.0};
+   dirichletFraction = 1.0;
+   
+   auto bc = [func](const RealVect a_pos, const Real a_time) {
+      return func(a_pos, a_time) * voltage(a_time) * dirichletFraction;
+   };
+
+In order to set the voltage on the domain side to also be spatially dependent, one can either use ``dirichlet_custom`` as an input option, or ``dirichlet <float>`` and set a different multiplier on the domain edge (face).
+As an example. by specifying ``bc.y.high = dirichlet 1.234`` in the input script AND setting the multiplier on the wall as follows:
 
 .. code-block:: c++
 
@@ -204,7 +215,7 @@ As an example. one can specify ``bc_y_high = dirichlet 1.234`` in the input scri
    
    fieldSolver->setDomainSideBcFunction(1, Side::Hi, wallFunc);
 
-Note that this will essentially parse a voltage of
+we end up with a voltage of
 
 .. math::
 
@@ -228,7 +239,6 @@ I.e. the boundary condition function that is passed into the numerical discretiz
 
 Note that since ``func`` is initialized to one, the floating point number in the input option directly specifies the value of :math:`\partial_n\Phi`. 
 
-
 .. _Chap:PoissonEBBC:
    
 EB boundary conditions
@@ -249,7 +259,7 @@ This voltage has the form
    V_i = V_i\left(\mathbf{x}, t\right). 
 
 where :math:`V_i` is the voltage on electrode :math:`i`.
-It is possible to interact with this function directly, doing through all electrodes and setting the electrode to be spatially and temporally varying.
+It is possible to interact with this function directly, going through all electrodes and setting the electrode to be spatially and temporally varying.
 The member function that does this is
 
 .. code-block:: c++
@@ -296,33 +306,11 @@ The voltages that are set on the various electrodes are thus in the form:
 
 Thus, the default voltage which is set on an electrode is the voltage *fraction* specified on the electrodes (in ``ComputationalGeometry``) multiplied by a voltage wave form (specified by ``FieldSolver::setVoltage``).
 
-.. _Chap:PoissonDielectricBC:
 
 Dielectrics
 ___________
 
-As mentioned above, on dielectric interfaces the user can choose to specify which "form" of :eq:`GaussBC` to solve.
-If the user wants the natural form in which the surface charge is the free parameter, he can specify
-
-.. code-block:: bash
-
-   FieldSolverMultigrid.which_jump = natural
-
-To use the other format (in which one of the fluxes is specified), use
-
-.. code-block:: bash
-
-   FieldSolverMultigrid.which_jump = saturation_charge
-
-.. note::
-   
-   The ``saturation_charge`` option will set the derivative of :math:`\partial_n\Phi` to zero on the gas side.
-   Support for setting :math:`\partial_n\Phi` to a specified (e.g., non-zero) value on either side is missing, but is straightforward to implement.
-
-
-.. _Chap:ElectrostaticDispersion:
-
-
+On dielectrics, we enforce the jump boundary condition directly.
    
 .. _Chap:FieldSolverMultigrid:   
 
@@ -333,6 +321,7 @@ FieldSolverMultigrid
 
 The discretization used by ``FieldSolverMultigrid`` is described in :ref:`Chap:LinearSolvers`.
 The underlying solver type is a Helmholtz solver, but ``FieldSolverMultigrid`` considers only the Laplacian term.
+For further details on the spatial discretization, see :ref:`Chap:LinearSolvers`.
 
 Solver configuration
 ____________________
@@ -464,6 +453,29 @@ The user may plot the potential, the space charge, the electric, and the GMG res
 
    FieldSolverMultigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 
+.. _Chap:PoissonDielectricBC:   
+
+Saturation charge BC
+____________________
+
+As mentioned above, on dielectric interfaces the user can choose to specify which "form" of :eq:`GaussBC` to solve.
+If the user wants the natural form in which the surface charge is the free parameter, he can specify
+
+.. code-block:: bash
+
+   FieldSolverMultigrid.which_jump = natural
+
+To use the other format (in which one of the fluxes is specified), use
+
+.. code-block:: bash
+
+   FieldSolverMultigrid.which_jump = saturation_charge
+
+.. note::
+   
+   The ``saturation_charge`` option will set the derivative of :math:`\partial_n\Phi` to zero on the gas side.
+   Support for setting :math:`\partial_n\Phi` to a specified (e.g., non-zero) value on either side is missing, but is straightforward to implement.
+
 Frequency dependent permittivity
 --------------------------------
 
@@ -561,7 +573,10 @@ Limitations
    A fix for this is underway.
    In the meantime, a sufficient workaround is simply to displace the dielectric slightly away from the interface (any non-zero displacement will do).
 
-Example application
--------------------
+Example application(s)
+----------------------
 
-An example application of usage of the ``FieldSolver`` is found in :ref:`Chap:ElectrostaticsModel`. 
+Example applications that use the electrostatics capabilities are:
+
+* :ref:`Chap:ElectrostaticsModel`.
+* :ref:`Chap:CdrPlasmaModel`.   
