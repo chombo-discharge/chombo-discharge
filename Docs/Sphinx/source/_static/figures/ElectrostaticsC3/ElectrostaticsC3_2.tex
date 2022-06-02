@@ -25,20 +25,14 @@
   o2/.style={draw=black, thick, thick}
 }
 
-\begin{filecontents*}{convergence_cylinder.dat}
-# cells	Linf error	L1 error	L2 error
-16	0.00309375	0.000680202	0.000951967
-32	0.00169931	0.000338134	0.000470788
-64	0.000501446	6.40076e-05	9.23736e-05
-128	0.000125586	1.94673e-05	2.75388e-05
-\end{filecontents*}
-
 \begin{filecontents*}{convergence.dat}
 # cells	Linf error	L1 error	L2 error
 16	0.00272438	0.000722274	0.000961076
 32	0.00186486	0.000291914	0.000397439
 64	0.00103079	7.44179e-05	0.000115054
 128	0.000392196	2.13647e-05	3.38036e-05
+256	0.000100573	5.26451e-06	7.99004e-06
+512	3.00595e-05	1.338e-06	2.11036e-06
 \end{filecontents*}
 
 \begin{document}
@@ -51,15 +45,15 @@
       xmode=log,
       ymode=log,
       xmin=16,
-      xmax=128,
+      xmax=512,
       log basis x={2}]
 
     \addplot[linf] table[x expr=\thisrowno{0}, y expr=\thisrowno{1}] {convergence.dat};
     \addplot[l1] table[x expr=\thisrowno{0}, y expr=\thisrowno{2}] {convergence.dat};
     \addplot[l2] table[x expr=\thisrowno{0}, y expr=\thisrowno{3}] {convergence.dat};
-    \addplot[o1][domain=16:128] {4/(16*x)};
-    \addplot[o2][domain=16:128] {4/(x*x)};
-    \addplot[o2][domain=16:128] {0.1/(x*x)};    
+    \addplot[o1][domain=16:512] {6/(16*x)};
+    \addplot[o2][domain=16:512] {6/(x*x)};
+    \addplot[o2][domain=16:512] {0.4/(x*x)};    
 
     \addlegendentry{$L_\infty$};
     \addlegendentry{$L_1$};

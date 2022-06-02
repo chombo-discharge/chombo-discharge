@@ -11,6 +11,12 @@ The electrostatics model solves
 
 subject to the constraints and boundary conditions given in :ref:`Chap:FieldSolver`.
 
+Setting the space charge
+------------------------
+
+Setting the surface charge
+--------------------------
+
 Setting up a new problem
 ------------------------
 
@@ -80,7 +86,7 @@ C2: Profiled surface
 ____________________
 
 :file:`$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C2` is a 2D spatial convergence test for an electrode and a dielectric slab with surface profiles.
-Figure :numref:`Fig:ElectrostaticsC2_1` shows the field distribution.
+Figure :numref:`Fig:ElectrostaticsC2_1` shows the field distribution. 
 
 .. _Fig:ElectrostaticsC2_1:
 .. figure:: /_static/figures/ElectrostaticsC2_1.png
@@ -103,7 +109,7 @@ C3: Dielectric shaft
 ____________________
 
 :file:`$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C3` is a 3D spatial convergence test for a dielectric shaft perpendicular to the background field. 
-Figure :numref:`Fig:ElectrostaticsC3_1` shows the field distribution.
+Figure :numref:`Fig:ElectrostaticsC3_1` shows the field distribution for a :math:`256^3` grid. 
 
 .. _Fig:ElectrostaticsC3_1:
 .. figure:: /_static/figures/ElectrostaticsC3_1.png
@@ -114,7 +120,7 @@ Figure :numref:`Fig:ElectrostaticsC3_1` shows the field distribution.
 
 The computed convergence rates are given in :numref:`Fig:ElectrostaticsC3_2`.
 We find second order convergence in :math:`L_1` and :math:`L_2` on all grids, and find second order convergence in the max-norm on sufficiently fine grids.
-The reduced convergence rate on coarser grids is probably due to under-resolution of the geometry. 
+On coarser grids, the reduced convergence rate in the max-norm is probably due to under-resolution of the geometry. 
 
 .. _Fig:ElectrostaticsC3_2:
 .. figure:: /_static/figures/ElectrostaticsC3_2.png
