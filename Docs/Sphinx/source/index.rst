@@ -32,7 +32,7 @@ Welcome to ``chombo-discharge``'s user documentation
 
 Numerical solvers are designed to run either on their own, or as a part of a larger application.
 
-For scalability, ``chombo-discharge`` is built on top of `Chombo 3 <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_, and therefore additionally features
+For scalability, ``chombo-discharge`` is built on top of `Chombo 3 <https://github.com/applied-numerical-algorithms-group-lbnl/Chombo_3.2>`_, and therefore additionally features
 
 * Cut-cell representation of multi-material geometries.
 * Patch based adaptive mesh refinement.
