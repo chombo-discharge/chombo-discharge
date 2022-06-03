@@ -28,6 +28,11 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::StreamerInceptionStepper" << endl;
   }
+
+  // Default alpha
+  m_alpha = [](const Real E) {
+    return exp(-E);
+  };
 }
 
 template <typename P, typename F>
@@ -47,6 +52,12 @@ StreamerInceptionStepper<P, F>::setupSolvers() override
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::~StreamerInceptionStepper" << endl;
   }
+
+  // Instantiate solvers. 
+  m_fieldSolver = RefCountedPtr<F> (new F());
+  m_tracerParticleSolver = RefCountedPtr<TracerParticleSolver<P> > (new TracerParticleSolver<P>());
+
+  // Set up solvers. 
 }
 
 template <typename P, typename F>
@@ -241,6 +252,18 @@ StreamerInceptionStepper<P, F>::postRegrid() override
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::postRegrid" << endl;
   }
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setAlpha");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setAlpha" << endl;
+  }
+
+  m_alpha = a_alpha;
 }
 
 #include <CD_NamespaceFooter.H>

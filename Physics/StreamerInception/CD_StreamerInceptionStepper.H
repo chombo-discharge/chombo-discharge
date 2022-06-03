@@ -221,6 +221,12 @@ namespace Physics {
       virtual void
       postRegrid() override;
 
+      /*!
+	@brief Set the effective ionization coefficient.
+      */
+      virtual void
+      setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept;
+
     protected:
       /*!
 	@brief Integration algorithm
@@ -236,6 +242,11 @@ namespace Physics {
 	@brief Field solver
       */
       RefCountedPtr<F> m_fieldSolver;
+
+      /*!
+	@brief Effective ionization coefficient
+      */
+      std::function<Real(const Real& E)> m_alpha;
 
       /*!
 	@brief Voltage sweeps
