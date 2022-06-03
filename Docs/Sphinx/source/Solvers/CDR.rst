@@ -572,7 +572,10 @@ Here, diffusion code is turned off and the initial data is one everywhere.
       DataOps::incr(phiOld, ransource, a_dt);      // phiOld = phi - dt*divF + dt*sqrt(2D*phi)Z
       solver->advanceEuler(phi, phiOld, dt);       // Backward Euler diffusion solve.
 
-Example application
--------------------
+Example application(s)
+----------------------
 
-An example application of usage of the ``CdrSolver`` is found in :ref:`Chap:AdvectionDiffusionModel`. 
+Example applications that use the ``CdrSolver`` are:
+
+* :ref:`Chap:AdvectionDiffusionModel`.
+* :ref:`Chap:CdrPlasmaModel`.    

@@ -17,5 +17,5 @@ The following models are currently supported:
    Used e.g. for streamer simulations.
 #. :ref:`Chap:ElectrostaticsModel` Implements ``TimeStepper`` for setting up a static calculation that solves the Poisson equation in 2D/3D.   
 #. :ref:`Chap:GeometryModel` Implement ``TimeStepper`` with empty functionality. Often used when setting up new geometries/cases.
-#. :ref:`Chap:RadiativeTransferModel` Implements ``TimeStepper`` for solving radiative transfer problems. Used e.g. for regression testing. 
+#. :ref:`Chap:RadiativeTransferModel` Implements ``TimeStepper`` for solving radiative transfer problems. Used e.g. for regression testing.
 
