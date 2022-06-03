@@ -35,7 +35,7 @@ Thus, :math:`\Phi` does not satisfy a discrete maximum principle.
 
 .. _Fig:HelmholtzFluxes:
 .. figure:: /_static/figures/CutCell.png
-   :width: 360px
+   :width: 40%
    :align: center
 
    Location of fluxes for finite volume discretization.
@@ -80,7 +80,7 @@ If we can not find enough equations, the strategy is to 1) drop order and 2) inc
 
 .. _Fig:GradientReconstruction:
 .. figure:: /_static/figures/GradientReconstruction.png
-   :width: 360px
+   :width: 40%
    :align: center
 
    Examples of neighborhoods (quadrant and half-space) used for gradient reconstruction on the EB. 
@@ -102,7 +102,7 @@ For the same reason, gradient reconstruction near the cut-cells might require in
 
 .. _Fig:StencilRegion:
 .. figure:: /_static/figures/StencilRegion.png
-   :width: 360px
+   :width: 40%
    :align: center
 
    Example of the region of a second order stencil for the Laplacian operator with second order gradient reconstruction on the embedded boundary. 
@@ -147,7 +147,7 @@ These ghost cells are filled using a finite-difference stencil, see :numref:`Fig
 
 .. _Fig:MultigridInterpolation:
 .. figure:: /_static/figures/MultigridInterpolation.png
-   :width: 360px
+   :width: 40%
    :align: center
 
    Standard finite-difference stencil for ghost cell interpolation (open circle).
@@ -169,7 +169,7 @@ For this particular case there are 10 nearby grid cells available, which is suff
    
 .. _Fig:EBMultigridInterpolation:
 .. figure:: /_static/figures/EBMultigridInterpolation.png
-   :width: 360px
+   :width: 40%
    :align: center
 
    Multigrid interpolation for refinement boundaries away from and close to an embedded boundary.
@@ -223,7 +223,7 @@ where :math:`b_1` and :math:`b_2` are the Helmholtz equation coefficients on eac
 
 .. _Fig:JumpCondition:
 .. figure:: /_static/figures/JumpCondition.png
-   :width: 360px
+   :width: 40%
    :align: center
 
    Example of cells and stencils that are involved in discretizing the jump condition. Open and filled circles indicate cells in separate phases.
@@ -243,7 +243,6 @@ This equation can be solved for the boundary value :math:`\Phi_{\textrm{B}}`, wh
 .. note::
 
    For discontinuous coefficients the gradient reconstruction on one side of the EB does not reach into the other (since the solution is not differentiable across the EB).
-
 
 AMRMultiGrid
 ------------

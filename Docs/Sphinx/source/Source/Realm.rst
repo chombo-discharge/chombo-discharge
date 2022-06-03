@@ -20,7 +20,7 @@ The difference lies primarily in the assignment of MPI ranks to grids; i.e. the 
 
 .. _Fig:DualMesh:
 .. figure:: /_static/figures/DualMesh.png
-   :width: 360px
+   :width: 35%
    :align: center
 
    Sketch of dual grid approach.

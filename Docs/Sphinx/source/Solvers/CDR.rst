@@ -87,7 +87,7 @@ where :math:`\kappa` is the volume fraction of a grid cell, :math:`\textrm{DIM}`
 The sum runs over all cell edges (faces in 3D) of the cell where :math:`G_f` is the flux on the edge centroid and :math:`\alpha_f` is the edge (face) aperture.
 
 .. figure:: /_static/figures/CutCell.png
-   :width: 360px
+   :width: 40%
    :align: center
 
    Location of centroid fluxes for cut cells. 
