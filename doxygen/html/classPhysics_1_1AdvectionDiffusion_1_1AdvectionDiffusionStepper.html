@@ -135,9 +135,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae4f90fa447aa9c4b0574c967229c6c9a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#ae4f90fa447aa9c4b0574c967229c6c9a">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const override</td></tr>
 <tr class="memdesc:ae4f90fa447aa9c4b0574c967229c6c9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write solver plot data into data holder.  <a href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#ae4f90fa447aa9c4b0574c967229c6c9a">More...</a><br /></td></tr>
 <tr class="separator:ae4f90fa447aa9c4b0574c967229c6c9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9062d7dcd6955ff2ba59cbcbbcf702d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a9062d7dcd6955ff2ba59cbcbbcf702d7">computeDt</a> (Real &amp;a_dt, <a class="el" href="CD__TimeCode_8H.html#abf13f33dcdbc946c9ea354be1f7a182e">TimeCode</a> &amp;a_timeCode) override</td></tr>
-<tr class="memdesc:a9062d7dcd6955ff2ba59cbcbbcf702d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>.  <a href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a9062d7dcd6955ff2ba59cbcbbcf702d7">More...</a><br /></td></tr>
-<tr class="separator:a9062d7dcd6955ff2ba59cbcbbcf702d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af04df073bf78ca8e1e24747cf6ae69a2"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#af04df073bf78ca8e1e24747cf6ae69a2">computeDt</a> () override</td></tr>
+<tr class="memdesc:af04df073bf78ca8e1e24747cf6ae69a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>.  <a href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#af04df073bf78ca8e1e24747cf6ae69a2">More...</a><br /></td></tr>
+<tr class="separator:af04df073bf78ca8e1e24747cf6ae69a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17880d25bb2c327020fe61ced1417e32"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a17880d25bb2c327020fe61ced1417e32">synchronizeSolverTimes</a> (const int a_step, const Real a_time, const Real a_dt) override</td></tr>
 <tr class="memdesc:a17880d25bb2c327020fe61ced1417e32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronize solver times.  <a href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a17880d25bb2c327020fe61ced1417e32">More...</a><br /></td></tr>
 <tr class="separator:a17880d25bb2c327020fe61ced1417e32"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -286,10 +286,6 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aa4757ed44ffc8a7665ef03d5bb392e35">m_dt</a></td></tr>
 <tr class="memdesc:aa4757ed44ffc8a7665ef03d5bb392e35 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Previous time step size. <br /></td></tr>
 <tr class="separator:aa4757ed44ffc8a7665ef03d5bb392e35 inherit pro_attribs_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a08845ff435d18602bf593abb693355c0 inherit pro_attribs_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="a08845ff435d18602bf593abb693355c0"></a>
-<a class="el" href="CD__TimeCode_8H.html#abf13f33dcdbc946c9ea354be1f7a182e">TimeCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a08845ff435d18602bf593abb693355c0">m_timeCode</a></td></tr>
-<tr class="memdesc:a08845ff435d18602bf593abb693355c0 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time code for. <br /></td></tr>
-<tr class="separator:a08845ff435d18602bf593abb693355c0 inherit pro_attribs_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abb8b1988c11c8a4e257b068f3158f9b3 inherit pro_attribs_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="abb8b1988c11c8a4e257b068f3158f9b3"></a>
 RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#abb8b1988c11c8a4e257b068f3158f9b3">m_amr</a></td></tr>
 <tr class="memdesc:abb8b1988c11c8a4e257b068f3158f9b3 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>. <br /></td></tr>
@@ -458,8 +454,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="a9062d7dcd6955ff2ba59cbcbbcf702d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9062d7dcd6955ff2ba59cbcbbcf702d7">&#9670;&nbsp;</a></span>computeDt()</h2>
+<a id="af04df073bf78ca8e1e24747cf6ae69a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af04df073bf78ca8e1e24747cf6ae69a2">&#9670;&nbsp;</a></span>computeDt()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -468,21 +464,10 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void AdvectionDiffusionStepper::computeDt </td>
+          <td class="memname">Real AdvectionDiffusionStepper::computeDt </td>
           <td>(</td>
-          <td class="paramtype">Real &amp;&#160;</td>
-          <td class="paramname"><em>a_dt</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
-          <td class="paramtype"><a class="el" href="CD__TimeCode_8H.html#abf13f33dcdbc946c9ea354be1f7a182e">TimeCode</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_timeCode</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -493,15 +478,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </div><div class="memdoc">
 
 <p>Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_dt</td><td>Time step to be used. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_timeCode</td><td>Identifier for how the time step was computed. </td></tr>
-  </table>
-  </dd>
-</dl>
 
-<p>Implements <a class="el" href="classTimeStepper.html#a63ca373adb64de3c54a04a90781198d2">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a3b7cf2a18ad3aa6abf1f79098651cc02">TimeStepper</a>.</p>
 
 </div>
 </div>

@@ -144,9 +144,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2b5dc7038e4e5f7a179ad0e311309c89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a2b5dc7038e4e5f7a179ad0e311309c89">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, Vector&lt; std::string &gt; &amp;a_plotVariableNames, int &amp;a_icomp) const override</td></tr>
 <tr class="memdesc:a2b5dc7038e4e5f7a179ad0e311309c89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to file. Only the solver writes plot data so this just calls the solver methods.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a2b5dc7038e4e5f7a179ad0e311309c89">More...</a><br /></td></tr>
 <tr class="separator:a2b5dc7038e4e5f7a179ad0e311309c89"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae10097cef460b34f47d766cbc4884d4a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#ae10097cef460b34f47d766cbc4884d4a">computeDt</a> (Real &amp;a_dt, <a class="el" href="CD__TimeCode_8H.html#abf13f33dcdbc946c9ea354be1f7a182e">TimeCode</a> &amp;a_timeCode) override</td></tr>
-<tr class="memdesc:ae10097cef460b34f47d766cbc4884d4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. This returns m_cfl*ItoSolver::computeDt (i.e. m_cfl is a CFL-like number)  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#ae10097cef460b34f47d766cbc4884d4a">More...</a><br /></td></tr>
-<tr class="separator:ae10097cef460b34f47d766cbc4884d4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3351573a907f6e27521edaa24e01fab"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#af3351573a907f6e27521edaa24e01fab">computeDt</a> () override</td></tr>
+<tr class="memdesc:af3351573a907f6e27521edaa24e01fab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#af3351573a907f6e27521edaa24e01fab">More...</a><br /></td></tr>
+<tr class="separator:af3351573a907f6e27521edaa24e01fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a77a203cb235c048ca2701daa117c105c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a77a203cb235c048ca2701daa117c105c">synchronizeSolverTimes</a> (const int a_step, const Real a_time, const Real a_dt) override</td></tr>
 <tr class="memdesc:a77a203cb235c048ca2701daa117c105c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronize solver times.  <a href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a77a203cb235c048ca2701daa117c105c">More...</a><br /></td></tr>
 <tr class="separator:a77a203cb235c048ca2701daa117c105c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -277,10 +277,6 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aa4757ed44ffc8a7665ef03d5bb392e35">m_dt</a></td></tr>
 <tr class="memdesc:aa4757ed44ffc8a7665ef03d5bb392e35 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Previous time step size. <br /></td></tr>
 <tr class="separator:aa4757ed44ffc8a7665ef03d5bb392e35 inherit pro_attribs_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a08845ff435d18602bf593abb693355c0 inherit pro_attribs_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="a08845ff435d18602bf593abb693355c0"></a>
-<a class="el" href="CD__TimeCode_8H.html#abf13f33dcdbc946c9ea354be1f7a182e">TimeCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a08845ff435d18602bf593abb693355c0">m_timeCode</a></td></tr>
-<tr class="memdesc:a08845ff435d18602bf593abb693355c0 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time code for. <br /></td></tr>
-<tr class="separator:a08845ff435d18602bf593abb693355c0 inherit pro_attribs_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abb8b1988c11c8a4e257b068f3158f9b3 inherit pro_attribs_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="abb8b1988c11c8a4e257b068f3158f9b3"></a>
 RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#abb8b1988c11c8a4e257b068f3158f9b3">m_amr</a></td></tr>
 <tr class="memdesc:abb8b1988c11c8a4e257b068f3158f9b3 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>. <br /></td></tr>
@@ -440,8 +436,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="ae10097cef460b34f47d766cbc4884d4a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae10097cef460b34f47d766cbc4884d4a">&#9670;&nbsp;</a></span>computeDt()</h2>
+<a id="af3351573a907f6e27521edaa24e01fab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3351573a907f6e27521edaa24e01fab">&#9670;&nbsp;</a></span>computeDt()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -450,21 +446,10 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void BrownianWalkerStepper::computeDt </td>
+          <td class="memname">Real BrownianWalkerStepper::computeDt </td>
           <td>(</td>
-          <td class="paramtype">Real &amp;&#160;</td>
-          <td class="paramname"><em>a_dt</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
-          <td class="paramtype"><a class="el" href="CD__TimeCode_8H.html#abf13f33dcdbc946c9ea354be1f7a182e">TimeCode</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_timeCode</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -474,16 +459,10 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </table>
 </div><div class="memdoc">
 
-<p>Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. This returns m_cfl*ItoSolver::computeDt (i.e. m_cfl is a CFL-like number) </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_dt</td><td>Time step to be used. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_timeCode</td><td>Identifier for how the time step was computed. </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. </p>
+<p>This returns m_cfl*ItoSolver::computeDt (i.e. m_cfl is a CFL-like number) </p>
 
-<p>Implements <a class="el" href="classTimeStepper.html#a63ca373adb64de3c54a04a90781198d2">TimeStepper</a>.</p>
+<p>Implements <a class="el" href="classTimeStepper.html#a3b7cf2a18ad3aa6abf1f79098651cc02">TimeStepper</a>.</p>
 
 </div>
 </div>

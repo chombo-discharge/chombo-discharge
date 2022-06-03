@@ -123,9 +123,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>writeConductivity</b>
 <tr class="memitem:a6111df5b12b93fb3e0fe054bbfced4d9"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html#a6111df5b12b93fb3e0fe054bbfced4d9">advance</a> (const Real a_dt) override</td></tr>
 <tr class="memdesc:a6111df5b12b93fb3e0fe054bbfced4d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advancement method. The implementation of this method should advance all equations of motion.  <a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html#a6111df5b12b93fb3e0fe054bbfced4d9">More...</a><br /></td></tr>
 <tr class="separator:a6111df5b12b93fb3e0fe054bbfced4d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a404989dcbaf6fa7aa5317dced4449f62"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html#a404989dcbaf6fa7aa5317dced4449f62">computeDt</a> (Real &amp;a_dt, <a class="el" href="CD__TimeCode_8H.html#abf13f33dcdbc946c9ea354be1f7a182e">TimeCode</a> &amp;a_timeCode) override</td></tr>
-<tr class="memdesc:a404989dcbaf6fa7aa5317dced4449f62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>.  <a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html#a404989dcbaf6fa7aa5317dced4449f62">More...</a><br /></td></tr>
-<tr class="separator:a404989dcbaf6fa7aa5317dced4449f62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a421c774279139ac09f301889919ea69e"><td class="memItemLeft" align="right" valign="top"><a id="a421c774279139ac09f301889919ea69e"></a>
+Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html#a421c774279139ac09f301889919ea69e">computeDt</a> () override</td></tr>
+<tr class="memdesc:a421c774279139ac09f301889919ea69e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. <br /></td></tr>
+<tr class="separator:a421c774279139ac09f301889919ea69e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7da60f34b01aa42845c72bd8769dbe8"><td class="memItemLeft" align="right" valign="top"><a id="aa7da60f34b01aa42845c72bd8769dbe8"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaGodunovStepper.html#aa7da60f34b01aa42845c72bd8769dbe8">allocate</a> () override</td></tr>
 <tr class="memdesc:aa7da60f34b01aa42845c72bd8769dbe8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate data for the time stepper and solvers. <br /></td></tr>
@@ -476,6 +477,23 @@ Protected Types</h2></td></tr>
 <b>AdvectionDiffusion</b>
  }</td></tr>
 <tr class="separator:a10593f476f91e4c4940681557f68adeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_types_classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper"><td colspan="2" onclick="javascript:toggleInherit('pro_types_classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper')"><img src="closed.png" alt="-"/>&#160;Protected Types inherited from <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html">Physics::ItoPlasma::ItoPlasmaStepper</a></td></tr>
+<tr class="memitem:a639044a6d805e8af007d60819d95aa4d inherit pro_types_classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a639044a6d805e8af007d60819d95aa4d">TimeCode</a> { <br />
+&#160;&#160;<b>Advection</b>, 
+<b>Diffusion</b>, 
+<b>AdvectionDiffusion</b>, 
+<b>Source</b>, 
+<br />
+&#160;&#160;<b>RelaxationTime</b>, 
+<b>Restricted</b>, 
+<b>Hardcap</b>, 
+<b>Error</b>, 
+<br />
+&#160;&#160;<b>Physics</b>
+<br />
+ }</td></tr>
+<tr class="memdesc:a639044a6d805e8af007d60819d95aa4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">An enum for encapsulating how time steps were restricted.  <a href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a639044a6d805e8af007d60819d95aa4d">More...</a><br /></td></tr>
+<tr class="separator:a639044a6d805e8af007d60819d95aa4d inherit pro_types_classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -655,6 +673,9 @@ RefCountedPtr&lt; <a class="el" href="classFieldSolver.html">FieldSolver</a> &gt
 <tr class="memitem:adad694d0286b656cae81b4e6dba8db44 inherit pro_attribs_classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper"><td class="memItemLeft" align="right" valign="top"><a id="adad694d0286b656cae81b4e6dba8db44"></a>
 RefCountedPtr&lt; <a class="el" href="classSigmaSolver.html">SigmaSolver</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_sigma</b></td></tr>
 <tr class="separator:adad694d0286b656cae81b4e6dba8db44 inherit pro_attribs_classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80a7b2ea7ff6b965c094217bc4de5d84 inherit pro_attribs_classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper"><td class="memItemLeft" align="right" valign="top"><a id="a80a7b2ea7ff6b965c094217bc4de5d84"></a>
+<a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a639044a6d805e8af007d60819d95aa4d">TimeCode</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_timeCode</b></td></tr>
+<tr class="separator:a80a7b2ea7ff6b965c094217bc4de5d84 inherit pro_attribs_classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7dbb795d83a63772eb6d4d880e3b82e1 inherit pro_attribs_classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper"><td class="memItemLeft" align="right" valign="top"><a id="a7dbb795d83a63772eb6d4d880e3b82e1"></a>
 std::deque&lt; std::tuple&lt; Real, int, int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_filters</b></td></tr>
 <tr class="separator:a7dbb795d83a63772eb6d4d880e3b82e1 inherit pro_attribs_classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -771,10 +792,6 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aa4757ed44ffc8a7665ef03d5bb392e35">m_dt</a></td></tr>
 <tr class="memdesc:aa4757ed44ffc8a7665ef03d5bb392e35 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Previous time step size. <br /></td></tr>
 <tr class="separator:aa4757ed44ffc8a7665ef03d5bb392e35 inherit pro_attribs_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a08845ff435d18602bf593abb693355c0 inherit pro_attribs_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="a08845ff435d18602bf593abb693355c0"></a>
-<a class="el" href="CD__TimeCode_8H.html#abf13f33dcdbc946c9ea354be1f7a182e">TimeCode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a08845ff435d18602bf593abb693355c0">m_timeCode</a></td></tr>
-<tr class="memdesc:a08845ff435d18602bf593abb693355c0 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time code for. <br /></td></tr>
-<tr class="separator:a08845ff435d18602bf593abb693355c0 inherit pro_attribs_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abb8b1988c11c8a4e257b068f3158f9b3 inherit pro_attribs_classTimeStepper"><td class="memItemLeft" align="right" valign="top"><a id="abb8b1988c11c8a4e257b068f3158f9b3"></a>
 RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#abb8b1988c11c8a4e257b068f3158f9b3">m_amr</a></td></tr>
 <tr class="memdesc:abb8b1988c11c8a4e257b068f3158f9b3 inherit pro_attribs_classTimeStepper"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>. <br /></td></tr>
@@ -827,53 +844,6 @@ static Real&#160;</td><td class="memItemRight" valign="bottom"><b>s_constant_one
 <dl class="section note"><dt>Note</dt><dd>The return value does not need to equal a_dt. Adaptive time stepping methods will generally return != a_dt. </dd></dl>
 
 <p>Implements <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a14729a13fc332765a54640f0f04aa8ae">Physics::ItoPlasma::ItoPlasmaStepper</a>.</p>
-
-</div>
-</div>
-<a id="a404989dcbaf6fa7aa5317dced4449f62"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a404989dcbaf6fa7aa5317dced4449f62">&#9670;&nbsp;</a></span>computeDt()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoPlasmaGodunovStepper::computeDt </td>
-          <td>(</td>
-          <td class="paramtype">Real &amp;&#160;</td>
-          <td class="paramname"><em>a_dt</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="CD__TimeCode_8H.html#abf13f33dcdbc946c9ea354be1f7a182e">TimeCode</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_timeCode</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Compute a time step to be used by <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a>. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_dt</td><td>Time step to be used. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_timeCode</td><td>Identifier for how the time step was computed. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p>Reimplemented from <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#ab8bf669846ebf858574d8289eb9cd90a">Physics::ItoPlasma::ItoPlasmaStepper</a>.</p>
 
 </div>
 </div>

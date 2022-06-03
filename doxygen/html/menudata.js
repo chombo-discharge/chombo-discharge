@@ -138,6 +138,7 @@ var menudata={children:[
 {text:"p",url:"functions_enum.html#index_p"},
 {text:"r",url:"functions_enum.html#index_r"},
 {text:"s",url:"functions_enum.html#index_s"},
+{text:"t",url:"functions_enum.html#index_t"},
 {text:"w",url:"functions_enum.html#index_w"}]},
 {text:"Related Functions",url:"functions_rela.html"}]}]},
 {text:"Files",url:"files.html",children:[
