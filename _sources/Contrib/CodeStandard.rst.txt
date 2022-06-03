@@ -40,13 +40,28 @@ Each file shall begin with the following note:
 
 where *<Copyright holder 1>*, *<Copyright holder 2>*, etc. are replaced by the copyright holder.
 
-This file header shall be followed by a brief Doxygen documentation, containing at least ``@file``, ``@brief``, and ``@author``. 
+This file header shall be followed by a brief Doxygen documentation, containing at least ``@file``, ``@brief``, and ``@author``.
+In addition, include header guards identical to the filename, replacing dots by underscores.
+I.e. for a file :file:`CD_MyClass.H` the header guard shall read
+
+.. code-block:: c++
+
+   #ifndef CD_MyClass_H
+   #define CD_MyClass_H
+
+   #endif
+
+File inclusions
+---------------
 
 File inclusions should use the follow standards for C++, ``Chombo``, and ``chombo-discharge``
 
 1. *C++*. Use brackets, e.g. ``#include <memory>``.
 2. ``Chombo``. Use brackets, e.g. ``#include <LevelData.H>``.
 3. ``chombo-discharge``. Use brackets and the file name, e.g. ``#include <CD_FieldSolver.H>``.
+
+Example format
+--------------
 
 Here is a complete example of a header file in ``chombo-discharge``:
 
@@ -96,8 +111,6 @@ Here is a complete example of a header file in ``chombo-discharge``:
 Code syntax
 -----------
 
-Class names, functions, and variables
-_____________________________________
 
 We use the following syntax:
 
@@ -117,16 +130,6 @@ We use the following syntax:
      
    * Global variables are prepended by ``//``.
 
-Code formatting
-_______________
-
-We use ``clang-format`` for formatting the source code.
-Before opening a pull request for review, navigate to :file:`$DISCHARGE_HOME` and format the code using
-
-.. code-block:: bash
-
-   find Source Physics Geometries Exec \( -name "*.H" -o -name "*.cpp" \) -exec clang-format -i {} +
-
 Options files
 -------------
 
@@ -135,10 +138,20 @@ It is the responsibility of ``MyClass`` to parse these variables correctly.
 
 Everything in the options file should be lower-case, with the exception of the class name which should follow the class name syntax.
 If you need a separator for the variable, use an underscore ``_``.
-For variables that should be grouped under a common block, use a dot ``.`` for grouping them. 
+For variables that should be grouped under a common block, one may use a dot ``.`` for grouping them. 
 For a class ``MyClass`` and options file might look something like
 
 .. code-block:: bash
 
    MyClass.input_variable = 1.0
    MyClass.bc.x.lo        = dirichlet 1.0
+
+clang-format
+------------
+
+We use ``clang-format`` for formatting the source code.
+Before opening a pull request for review, navigate to :file:`$DISCHARGE_HOME` and format the code using
+
+.. code-block:: bash
+
+   find Source Physics Geometries Exec \( -name "*.H" -o -name "*.cpp" \) -exec clang-format -i {} +   

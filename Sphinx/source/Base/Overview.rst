@@ -82,7 +82,7 @@ In return, the AMR core will allocate this infrastructure and make it available 
 
 .. _Fig:Design:
 .. figure:: /_static/figures/Design.png
-   :width: 600px
+   :width: 70%
    :align: center
 
    Concept design sketch for ``chombo-discharge``. 

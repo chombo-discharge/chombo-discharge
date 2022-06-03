@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verification and validation &mdash; chombo-discharge  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Driver" href="Driver.html" />
+    <link rel="prev" title="Linear solvers" href="LinearSolvers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> chombo-discharge
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Verification and validation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#spatial-convergence">Spatial convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#temporal-convergence">Temporal convergence</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">chombo-discharge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Verification and validation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Source/VV.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="verification-and-validation">
+<span id="chap-vv"></span><h1>Verification and validation<a class="headerlink" href="#verification-and-validation" title="Permalink to this heading"></a></h1>
+<p>We strive to include convergence testing (verification), and in some cases comparison with various types of experimental (validation).
+Below, we discuss our approach to spatial and temporal convergence testing.
+In all cases the various norms are given by</p>
+<div class="section" id="spatial-convergence">
+<span id="chap-spatialconvergence"></span><h2>Spatial convergence<a class="headerlink" href="#spatial-convergence" title="Permalink to this heading"></a></h2>
+<p>Assume that we have some evolution problem which provides a solution on the mesh as <span class="math notranslate nohighlight">\(\phi_{\mathbf{i}}^k\left(\Delta x, \Delta t\right)\)</span> where <span class="math notranslate nohighlight">\(\Delta x\)</span> is a uniform grid resolution and <span class="math notranslate nohighlight">\(\Delta t\)</span> is the time step used for evolving the state from <span class="math notranslate nohighlight">\(t=0\)</span> to <span class="math notranslate nohighlight">\(t = k\Delta t\)</span>.</p>
+<p>To estimate the spatial order of convergence for the discretization we can use Richardson extrapolation to estimate the error, using the results from a finer grid resolution as the “exact” solution.
+We solve the problem on a grids with resolutions <span class="math notranslate nohighlight">\(\Delta x_c\)</span> and a finer resolution <span class="math notranslate nohighlight">\(\Delta x_f\)</span> and estimate the error in the coarse-grid solution as</p>
+<div class="math notranslate nohighlight">
+\[E_{\mathbf{i}}^k\left(\Delta x_c\right) = \phi_{\mathbf{i}}^k\left(\Delta x_c,\Delta t\right) - \left\{\mathcal{A}_{\Delta x_f\rightarrow \Delta x_c}\left[\phi^k\left(\Delta x_f,\Delta t\right)\right]\right\}_{\mathbf{i}}.\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{A}_{\Delta x_f\rightarrow \Delta x_c}\)</span> is an averaging operator which coarsens the solution from the fine grid (<span class="math notranslate nohighlight">\(\Delta x_f\)</span>) to the coarse grid (<span class="math notranslate nohighlight">\(\Delta x_c\)</span>).
+The error norms are computed from <span class="math notranslate nohighlight">\(E_{\mathbf{i}}^k\left(\Delta x_c; \Delta x_f\right)\)</span>.
+Specifically:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}L_\infty\left[\phi^k\left(\Delta x_c, \Delta t\right)\right] &amp;= \max\left|E_{\mathbf{i}}^k\left(\Delta x_c\right)\right|, \\
+L_1\left[\phi^k\left(\Delta x_c, \Delta t\right)\right] &amp;= \frac{1}{\sum_{\mathbf{i}}}\sum_{\mathbf{i}}\left|E_{\mathbf{i}}^k\left(\Delta x_c\right)\right|, \\
+L_2\left[\phi^k\left(\Delta x_c, \Delta t\right)\right] &amp;= \sqrt{\frac{1}{\sum_{\mathbf{i}}}\sum_{\mathbf{i}}\left|E_{\mathbf{i}}^k\left(\Delta x_c\right)\right|^2}.\end{split}\]</div>
+<p>where the sums run over the grid points.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If one has an exact solution <span class="math notranslate nohighlight">\(\phi_e(\mathbf{x},T)\)</span> available, one can replace <span class="math notranslate nohighlight">\(\phi^k_{\mathbf{i}}\left(\Delta x, \Delta t\right)\)</span> by <span class="math notranslate nohighlight">\(\phi_e\left(\mathbf{i}\Delta x, k\Delta t\right)\)</span>.</p>
+</div>
+</div>
+<div class="section" id="temporal-convergence">
+<span id="chap-temporalconvergence"></span><h2>Temporal convergence<a class="headerlink" href="#temporal-convergence" title="Permalink to this heading"></a></h2>
+<p>For temporal convergence we compute the errors in the same way as for the spatial convergence, replacing <span class="math notranslate nohighlight">\(\Delta t\)</span> and <span class="math notranslate nohighlight">\(\Delta x\)</span> as fixed parameters.
+The solution error is computed as</p>
+<div class="math notranslate nohighlight">
+\[E_{\mathbf{i}}^k\left(\Delta t_c\right) = \phi_{\mathbf{i}}^k\left(\Delta x,\Delta t_c\right) - \phi_{\mathbf{i}}^{k^\prime}\left(\Delta x,\Delta t_f\right),\]</div>
+<p>where <span class="math notranslate nohighlight">\(k\Delta t_c = T\)</span> and <span class="math notranslate nohighlight">\(k^\prime \Delta t_f = T\)</span>.
+Temporal integration errors are computed as</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}L_\infty\left[\phi^k\left(\Delta x, \Delta t_c\right)\right] &amp;= \max\left|E_{\mathbf{i}}^k\left(\Delta t_c\right)\right|, \\
+L_1\left[\phi^k\left(\Delta x, \Delta t_c\right)\right] &amp;= \frac{1}{\sum_{\mathbf{i}}}\sum_{\mathbf{i}}\left|E_{\mathbf{i}}^k\left(\Delta t_c\right)\right|, \\
+L_2\left[\phi^k\left(\Delta x, \Delta t_c\right)\right] &amp;= \sqrt{\frac{1}{\sum_{\mathbf{i}}}\sum_{\mathbf{i}}\left|E_{\mathbf{i}}^k\left(\Delta t_c\right)\right|^2}.\end{split}\]</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If an exact solution as available, one can replace <span class="math notranslate nohighlight">\(\phi^{k^\prime}_{\mathbf{i}}\left(\Delta x, \Delta t_f\right)\)</span> by <span class="math notranslate nohighlight">\(\phi_e\left(\mathbf{i}\Delta x, k^\prime\Delta t_f\right)\)</span>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="LinearSolvers.html" class="btn btn-neutral float-left" title="Linear solvers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Driver.html" class="btn btn-neutral float-right" title="Driver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

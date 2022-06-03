@@ -237,16 +237,16 @@ Some example programs for this module are given in
 * :file:`$DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/DiagonalFlowNoEB`
 * :file:`$DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/PipeFlow`
 
-Convergence testing
--------------------
+Verification
+------------
 
 Spatial and temporal convergence tests for this module (and thus also the underlying solver implementation) are given in
 
 * :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C1`
 * :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C2`  
 
-Spatial convergence
-___________________
+C1: Spatial convergence
+_______________________
 
 A spatial convergence test is given in :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C1`.
 The problem solves for an advected and diffused scalar in a rotational velocity in the presence of an EB:
@@ -257,45 +257,30 @@ The problem solves for an advected and diffused scalar in a rotational velocity 
    :align: center
 
    Final state on a :math:`512^2` uniform grid. 
-	   
 
-To compute the convergence rate we compute two solutions at the same time, :math:`\phi_{\Delta x}` and :math:`\phi_{2\Delta x}`.
-We then compute the error as
-
-.. math::
-
-   E_{\Delta x, 2\Delta x} = \phi_{2\Delta x} - \mathcal{A}\left(\phi_{\Delta x}\right).
-
-where :math:`\mathcal{A}_{\Delta x \rightarrow 2\Delta x}` is an averaging operator which coarsens the solution between the two grid resolutions.
-
+To compute the convergence rate we compute two solutions with grid spacings :math:`\Delta x` and :math:`\Delta x/2`, and estimate the solution error using the approach in :ref:`Chap:SpatialConvergence`. 
 Figure :numref:`Fig:AdvectionDiffusionC1_2` shows the computed convergence rates with various choice of slope limiters.
 We find 2nd order convergence in all three norms for sufficiently fine grid when using slope limiters, and first order convergence when limiters are turned off.
 The reduced convergence rates at coarser grids occur due to 1) insufficient resolution of the initial density profile and 2) under-resolution of the geometry. 
 
 .. _Fig:AdvectionDiffusionC1_2:
 .. figure:: /_static/figures/AdvectionDiffusionC1_2.png
-   :width: 600px
+   :width: 480
    :align: center
 
    Spatial convergence rates with various limiters. 
 
-Temporal convergence
-____________________
+C2: Temporal convergence
+________________________
 
 A temporal convergence test is given in :file:`$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C2`.
-We compute two solutions :math:`\phi_{\Delta t}(T)` and :math:`\phi_{2\Delta t}(T)` where the subscript indicates the time step used.
-The solution error is computed as
-
-.. math::
-
-   E_{\Delta t, 2\Delta t} = \phi_{2\Delta t}(T) - \phi_{\Delta t}(T).
-
+To compute the temporal convergence rate we compute two solutions using time steps :math:`\Delta t` and :math:`\Delta t/2`, and estimate the solution error using the approach in :ref:`Chap:TemporalConvergence`. 
 Figure :numref:`Fig:AdvectionDiffusionC2` shows the computed convergence rates for the second order Runge-Kutta and the IMEX discretization. 
-We find 2nd order convergence for Heun's method and first order convergence for the IMEX discretization. 
+As expected, we find 2nd order convergence for Heun's method and first order convergence for the IMEX discretization. 
 
 .. _Fig:AdvectionDiffusionC2:
 .. figure:: /_static/figures/AdvectionDiffusionC2.png
-   :width: 600px
+   :width: 480px
    :align: center
 
    Temporal convergence rates. 

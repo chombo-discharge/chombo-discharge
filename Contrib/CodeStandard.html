@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
@@ -68,7 +69,7 @@
 <p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
@@ -81,9 +82,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
 <ul>
@@ -106,12 +109,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#namespace">Namespace</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#file-names">File names</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#file-headers">File headers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#code-syntax">Code syntax</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#class-names-functions-and-variables">Class names, functions, and variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#code-formatting">Code formatting</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#file-inclusions">File inclusions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-format">Example format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-syntax">Code syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#options-files">Options files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clang-format">clang-format</a></li>
 </ul>
 </li>
 </ul>
@@ -175,13 +177,27 @@ If your code contains templates or inlined functions, these should be defined in
 </pre></div>
 </div>
 <p>where <em>&lt;Copyright holder 1&gt;</em>, <em>&lt;Copyright holder 2&gt;</em>, etc. are replaced by the copyright holder.</p>
-<p>This file header shall be followed by a brief Doxygen documentation, containing at least <code class="docutils literal notranslate"><span class="pre">&#64;file</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;brief</span></code>, and <code class="docutils literal notranslate"><span class="pre">&#64;author</span></code>.</p>
+<p>This file header shall be followed by a brief Doxygen documentation, containing at least <code class="docutils literal notranslate"><span class="pre">&#64;file</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;brief</span></code>, and <code class="docutils literal notranslate"><span class="pre">&#64;author</span></code>.
+In addition, include header guards identical to the filename, replacing dots by underscores.
+I.e. for a file <code class="file docutils literal notranslate"><span class="pre">CD_MyClass.H</span></code> the header guard shall read</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifndef CD_MyClass_H</span>
+<span class="cp">#define CD_MyClass_H</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="file-inclusions">
+<h2>File inclusions<a class="headerlink" href="#file-inclusions" title="Permalink to this heading"></a></h2>
 <p>File inclusions should use the follow standards for C++, <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>, and <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></p>
 <ol class="arabic simple">
 <li><p><em>C++</em>. Use brackets, e.g. <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;memory&gt;</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Chombo</span></code>. Use brackets, e.g. <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;LevelData.H&gt;</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>. Use brackets and the file name, e.g. <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;CD_FieldSolver.H&gt;</span></code>.</p></li>
 </ol>
+</div>
+<div class="section" id="example-format">
+<h2>Example format<a class="headerlink" href="#example-format" title="Permalink to this heading"></a></h2>
 <p>Here is a complete example of a header file in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/* chombo-discharge</span>
 <span class="cm">* Copyright © &lt;Copyright holder 1&gt;</span>
@@ -228,8 +244,6 @@ If your code contains templates or inlined functions, these should be defined in
 </div>
 <div class="section" id="code-syntax">
 <h2>Code syntax<a class="headerlink" href="#code-syntax" title="Permalink to this heading"></a></h2>
-<div class="section" id="class-names-functions-and-variables">
-<h3>Class names, functions, and variables<a class="headerlink" href="#class-names-functions-and-variables" title="Permalink to this heading"></a></h3>
 <p>We use the following syntax:</p>
 <ol class="arabic simple">
 <li><p>Class names, structs, and namespaces should be in Pascal case where the first letter of every word is capitalized.
@@ -246,25 +260,24 @@ E.g. functions should be named <code class="docutils literal notranslate"><span 
 </li>
 </ol>
 </div>
-<div class="section" id="code-formatting">
-<h3>Code formatting<a class="headerlink" href="#code-formatting" title="Permalink to this heading"></a></h3>
-<p>We use <code class="docutils literal notranslate"><span class="pre">clang-format</span></code> for formatting the source code.
-Before opening a pull request for review, navigate to <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code> and format the code using</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find Source Physics Geometries Exec <span class="se">\(</span> -name <span class="s2">&quot;*.H&quot;</span> -o -name <span class="s2">&quot;*.cpp&quot;</span> <span class="se">\)</span> -exec clang-format -i <span class="o">{}</span> +
-</pre></div>
-</div>
-</div>
-</div>
 <div class="section" id="options-files">
 <h2>Options files<a class="headerlink" href="#options-files" title="Permalink to this heading"></a></h2>
 <p>Options files are named using the same convention as class files, e.g. <code class="docutils literal notranslate"><span class="pre">CD_MyClass.options</span></code>.
 It is the responsibility of <code class="docutils literal notranslate"><span class="pre">MyClass</span></code> to parse these variables correctly.</p>
 <p>Everything in the options file should be lower-case, with the exception of the class name which should follow the class name syntax.
 If you need a separator for the variable, use an underscore <code class="docutils literal notranslate"><span class="pre">_</span></code>.
-For variables that should be grouped under a common block, use a dot <code class="docutils literal notranslate"><span class="pre">.</span></code> for grouping them.
+For variables that should be grouped under a common block, one may use a dot <code class="docutils literal notranslate"><span class="pre">.</span></code> for grouping them.
 For a class <code class="docutils literal notranslate"><span class="pre">MyClass</span></code> and options file might look something like</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>MyClass.input_variable <span class="o">=</span> <span class="m">1</span>.0
 MyClass.bc.x.lo        <span class="o">=</span> dirichlet <span class="m">1</span>.0
+</pre></div>
+</div>
+</div>
+<div class="section" id="clang-format">
+<h2>clang-format<a class="headerlink" href="#clang-format" title="Permalink to this heading"></a></h2>
+<p>We use <code class="docutils literal notranslate"><span class="pre">clang-format</span></code> for formatting the source code.
+Before opening a pull request for review, navigate to <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code> and format the code using</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find Source Physics Geometries Exec <span class="se">\(</span> -name <span class="s2">&quot;*.H&quot;</span> -o -name <span class="s2">&quot;*.cpp&quot;</span> <span class="se">\)</span> -exec clang-format -i <span class="o">{}</span> +
 </pre></div>
 </div>
 </div>

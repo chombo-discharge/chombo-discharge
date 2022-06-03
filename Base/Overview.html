@@ -61,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
@@ -74,7 +75,7 @@
 <p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
@@ -87,9 +88,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
 <ul>
@@ -227,7 +230,7 @@ For example, elliptic solvers need functionality for interpolating ghost cells o
 A consequence of this is that the numerical solvers are literally asked (during their instantiation) to register what type of AMR infrastructure they require.
 In return, the AMR core will allocate this infrastructure and make it available to solver, as illustrated in <a class="reference internal" href="#fig-design"><span class="std std-numref">Fig. 1</span></a>.</p>
 <div class="figure align-center" id="id2">
-<span id="fig-design"></span><a class="reference internal image-reference" href="../_images/Design.png"><img alt="../_images/Design.png" src="../_images/Design.png" style="width: 600px;" /></a>
+<span id="fig-design"></span><a class="reference internal image-reference" href="../_images/Design.png"><img alt="../_images/Design.png" src="../_images/Design.png" style="width: 70%;" /></a>
 <p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">Concept design sketch for <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also uses <em>loosely coupled</em> solvers as a foundation for the code design, where a <em>solver</em> indicates a piece of code for solving an equation.
