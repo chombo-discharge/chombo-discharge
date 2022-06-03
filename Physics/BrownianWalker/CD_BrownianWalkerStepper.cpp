@@ -293,15 +293,15 @@ BrownianWalkerStepper::writePlotData(EBAMRCellData&       a_output,
   m_solver->writePlotData(a_output, a_icomp);
 }
 
-void
-BrownianWalkerStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+Real
+BrownianWalkerStepper::computeDt()
 {
   CH_TIME("BrownianWalkerStepper::computeDt");
   if (m_verbosity > 5) {
     pout() << "BrownianWalkerStepper::computeDt" << endl;
   }
 
-  a_dt = m_cfl * m_solver->computeDt();
+  return m_cfl * m_solver->computeDt();
 }
 
 void

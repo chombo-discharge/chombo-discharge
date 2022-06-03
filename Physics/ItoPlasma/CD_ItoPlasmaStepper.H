@@ -107,8 +107,8 @@ namespace Physics {
       // Advance routines
       virtual Real
       advance(const Real a_dt) = 0;
-      virtual void
-      computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+      virtual Real
+      computeDt() override;
       void
       synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
       void
@@ -458,6 +458,22 @@ namespace Physics {
       computeEdotJSourceNWO2(const Real a_dt);
 
     protected:
+      /*!
+	@brief An enum for encapsulating how time steps were restricted. 
+      */
+      enum class TimeCode
+      {
+        Advection,
+        Diffusion,
+        AdvectionDiffusion,
+        Source,
+        RelaxationTime,
+        Restricted,
+        Hardcap,
+        Error,
+        Physics
+      };
+
       std::string        m_fluid_Realm;   // Realm for Poisson and sigma solver. Defaults to Realm::Primal
       std::string        m_particleRealm; // Realm for particles. Defaults to Realm::Primal
       std::string        m_name;
@@ -470,6 +486,8 @@ namespace Physics {
       RefCountedPtr<RtLayout<McPhoto>>    m_rte;
       RefCountedPtr<FieldSolver>          m_fieldSolver;
       RefCountedPtr<SigmaSolver>          m_sigma;
+
+      TimeCode m_timeCode;
 
       // Filters that can be applied.
       std::deque<std::tuple<Real, int, int>> m_filters;

@@ -250,15 +250,15 @@ MeshODEStepper<N>::getNumberOfPlotVariables() const
 }
 
 template <size_t N>
-void
-MeshODEStepper<N>::computeDt(Real& a_dt, TimeCode& a_timeCode)
+Real
+MeshODEStepper<N>::computeDt()
 {
   CH_TIME("MeshODEStepper::computeDt()");
   if (m_verbosity > 5) {
     pout() << "MeshODEStepper::computeDt()" << endl;
   }
 
-  a_dt = m_dt;
+  return m_dt;
 }
 
 template <size_t N>

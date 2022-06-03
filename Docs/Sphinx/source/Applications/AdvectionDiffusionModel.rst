@@ -260,7 +260,7 @@ The problem solves for an advected and diffused scalar in a rotational velocity 
 
 .. _Fig:AdvectionDiffusionC1_1:
 .. figure:: /_static/figures/AdvectionDiffusionC1_1.png
-   :width: 360px
+   :width: 40%
    :align: center
 
    Final state on a :math:`512^2` uniform grid. 
@@ -272,7 +272,7 @@ The reduced convergence rates at coarser grids occur due to 1) insufficient reso
 
 .. _Fig:AdvectionDiffusionC1_2:
 .. figure:: /_static/figures/AdvectionDiffusionC1_2.png
-   :width: 480
+   :width: 70%
    :align: center
 
    Spatial convergence rates with various limiters. 
@@ -287,7 +287,7 @@ As expected, we find 2nd order convergence for Heun's method and first order con
 
 .. _Fig:AdvectionDiffusionC2:
 .. figure:: /_static/figures/AdvectionDiffusionC2.png
-   :width: 480px
+   :width: 70%
    :align: center
 
    Temporal convergence rates. 

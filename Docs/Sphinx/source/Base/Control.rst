@@ -69,15 +69,15 @@ Generally, these input parameters are fetched from the options file of component
 Simulation options usually consist of a prefix, a suffix, and a configuration value.
 For example, the configuration options that adjusts the number of time steps that will be run in a simulation is
 
-.. code-block:: bash
+.. code-block:: none
 
-		Driver.max_steps = 100
+   Driver.max_steps = 100
 
 Likewise, for controlling how often plot are written:
 
-.. code-block:: bash
+.. code-block:: none
 
-		Driver.plot_interval = 5
+   Driver.plot_interval = 5
 
 You may also pass input parameters through the command line. For example, running
 

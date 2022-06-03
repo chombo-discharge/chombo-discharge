@@ -268,16 +268,15 @@ TracerParticleStepper<P>::getNumberOfPlotVariables() const
 }
 
 template <typename P>
-inline void
-TracerParticleStepper<P>::computeDt(Real& a_dt, TimeCode& a_timeCode)
+inline Real
+TracerParticleStepper<P>::computeDt()
 {
   CH_TIME("TracerParticleStepper::computeDt()");
   if (m_verbosity > 5) {
     pout() << "TracerParticleStepper::computeDt()" << endl;
   }
 
-  a_timeCode = TimeCode::Advection;
-  a_dt       = m_cfl * m_solver->computeDt();
+  return m_cfl * m_solver->computeDt();
 }
 
 template <typename P>

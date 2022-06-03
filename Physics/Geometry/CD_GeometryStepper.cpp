@@ -57,10 +57,10 @@ GeometryStepper::getNumberOfPlotVariables() const
 {
   return 0;
 }
-void
-GeometryStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+Real
+GeometryStepper::computeDt()
 {
-  a_dt = 0.0;
+  return 0.0;
 }
 Real
 GeometryStepper::advance(const Real a_dt)

@@ -116,11 +116,6 @@ protected:
   RefCountedPtr<GeoCoarsener> m_geoCoarsen;
 
   /*!
-    @brief Time code
-  */
-  TimeCode m_timeCode;
-
-  /*!
     @brief Input file
   */
   std::string m_inputFile;

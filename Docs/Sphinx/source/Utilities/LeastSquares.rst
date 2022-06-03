@@ -73,7 +73,7 @@ This path is defined by walking through neighboring grid cells without changing 
 
 .. _MonotonePath:
 .. figure:: /_static/figures/MonotonePath.png
-   :width: 480px
+   :width: 40%
    :align: center
 
    Neighborhood algorithm, only reaching into grid cells that can be reached by a monotone path. The grid cell at the end of the dashed line is excluded (even though it is a neighbor to the starting grid cell) since the path circulates the embedded boundary.
