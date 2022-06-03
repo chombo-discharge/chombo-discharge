@@ -1285,15 +1285,16 @@ CdrPlasmaImExSdcStepper::adaptiveReport(const Real a_first_dt,
   pout() << "\n";
 }
 
-void
-CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+Real
+CdrPlasmaImExSdcStepper::computeDt()
 {
   CH_TIME("CdrPlasmaImExSdcStepper::computeDt");
   if (m_verbosity > 5) {
     pout() << "CdrPlasmaImExSdcStepper::computeDt" << endl;
   }
 
-  Real dt = 1.E99;
+  Real dt   = std::numeric_limits<Real>::max();
+  Real a_dt = std::numeric_limits<Real>::max();
 
   int Nref = 1;
   for (int lvl = 0; lvl < m_amr->getFinestLevel(); lvl++) {
@@ -1308,7 +1309,7 @@ CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
   if (!m_adaptiveDt) {
     if (dt_cfl < dt) {
       dt         = m_cfl * dt_cfl;
-      a_timeCode = TimeCode::Advection;
+      m_timeCode = TimeCode::Advection;
     }
   }
   else {
@@ -1327,7 +1328,7 @@ CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
 
     if (new_dt < dt) {
       dt         = new_dt;
-      a_timeCode = TimeCode::Error;
+      m_timeCode = TimeCode::Error;
     }
   }
 
@@ -1336,29 +1337,31 @@ CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
   const Real dt_relax = m_relaxTime * this->computeRelaxationTime();
   if (dt_relax < dt) {
     dt         = dt_relax;
-    a_timeCode = TimeCode::RelaxationTime;
+    m_timeCode = TimeCode::RelaxationTime;
   }
 
   if (dt < m_minDt) {
     dt         = m_minDt;
-    a_timeCode = TimeCode::Hardcap;
+    m_timeCode = TimeCode::Hardcap;
   }
 
   if (dt > m_maxDt) {
     dt         = m_maxDt;
-    a_timeCode = TimeCode::Hardcap;
+    m_timeCode = TimeCode::Hardcap;
   }
 
   a_dt = dt;
 
   // Copy the time code, it is needed for diagnostics
-  m_timeCode = a_timeCode;
+  m_timeCode = m_timeCode;
 
 #if 0 // Debug
   if(procID() == 0){
     std::cout << "computeDt = " << a_dt << "\t m_newDt = " << m_newDt << std::endl; 
   }
 #endif
+
+  return a_dt;
 }
 
 void

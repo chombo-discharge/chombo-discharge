@@ -108,12 +108,10 @@ namespace Physics {
       writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
 
       /*!
-	@brief Compute a time step to be used by Driver. This sets a_dt = m_dt.
-	@param[out] a_dt       Time step to be used.
-	@param[out] a_timeCode Identifier for how the time step was computed. 
+	@brief Compute a time step to be used by Driver. 
       */
-      void
-      computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+      Real
+      computeDt() override;
 
       /*!
 	@brief Advancement method. Calls the solver function. 

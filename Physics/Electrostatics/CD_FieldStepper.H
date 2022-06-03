@@ -120,14 +120,12 @@ namespace Physics {
 
       /*!
 	@brief Compute time step
-	@details This is a static solver so it returns 0.0 -- calling the advance method is an error. 
-	@param[out] a_dt       Time step
-	@param[out] a_timeCode Time code (for how the step was restricted)
+	@details This is a static solver so it returns 0.0
       */
-      void
-      computeDt(Real& a_dt, TimeCode& a_timeCode) override
+      Real
+      computeDt() override
       {
-        a_dt = 0.0;
+        return 0.0;
       }
 
       /*!

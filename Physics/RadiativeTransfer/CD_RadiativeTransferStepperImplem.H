@@ -172,16 +172,18 @@ RadiativeTransferStepper<T>::writePlotData(EBAMRCellData&       a_output,
 }
 
 template <typename T>
-void
-RadiativeTransferStepper<T>::computeDt(Real& a_dt, TimeCode& a_timeCode)
+Real
+RadiativeTransferStepper<T>::computeDt()
 {
   CH_TIME("RadiativeTransferStepper::computeDt");
 
-  a_dt = m_dt;
+  Real dt = m_dt;
 
   if (m_forceDt > 0.0) {
-    a_dt = m_forceDt;
+    dt = m_forceDt;
   }
+
+  return dt;
 }
 
 template <typename T>
