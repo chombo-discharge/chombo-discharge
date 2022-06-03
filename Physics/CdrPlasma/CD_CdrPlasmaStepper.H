@@ -1246,17 +1246,17 @@ namespace Physics {
 	@brief An enum for encapsulating how time steps were restricted. 
       */
       enum class TimeCode
-	{
-	  Advection,
-	  Diffusion,
-	  AdvectionDiffusion,
-	  Source,
-	  RelaxationTime,
-	  Restricted,
-	  Hardcap,
-	  Error,
-	  Physics	  
-	};
+      {
+        Advection,
+        Diffusion,
+        AdvectionDiffusion,
+        Source,
+        RelaxationTime,
+        Restricted,
+        Hardcap,
+        Error,
+        Physics
+      };
 
       /*!
 	@brief Realm where the time stepper is registered. 

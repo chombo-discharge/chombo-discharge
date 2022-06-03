@@ -1293,8 +1293,8 @@ CdrPlasmaImExSdcStepper::computeDt()
     pout() << "CdrPlasmaImExSdcStepper::computeDt" << endl;
   }
 
-  Real dt = std::numeric_limits<Real>::max();
-  Real a_dt = std::numeric_limits<Real>::max();  
+  Real dt   = std::numeric_limits<Real>::max();
+  Real a_dt = std::numeric_limits<Real>::max();
 
   int Nref = 1;
   for (int lvl = 0; lvl < m_amr->getFinestLevel(); lvl++) {

@@ -1441,7 +1441,7 @@ CdrPlasmaGodunovStepper::computeDt()
     const Real diffusionDt = m_cdr->computeDiffusionDt();
 
     m_dtCFL = std::min(advectionDt, diffusionDt);
-    dt    = m_cfl * m_dtCFL;
+    dt      = m_cfl * m_dtCFL;
 
     if (advectionDt < diffusionDt) {
       m_timeCode = TimeCode::Advection;
@@ -1529,7 +1529,7 @@ CdrPlasmaGodunovStepper::computeDt()
     }
 
     // Finally, we will have found the smallest time step and also figured out which species that implicit/explicit diffusion.
-    dt       = minDt;
+    dt         = minDt;
     m_timeCode = TimeCode::AdvectionDiffusion;
 
     for (const auto& implicit : m_useImplicitDiffusion) {
@@ -1544,19 +1544,19 @@ CdrPlasmaGodunovStepper::computeDt()
   // Next, limit by the relaxation time.
   const Real dtRelax = m_relaxTime * this->computeRelaxationTime();
   if (dtRelax < dt) {
-    dt       = dtRelax;
+    dt         = dtRelax;
     m_timeCode = TimeCode::RelaxationTime;
   }
 
   // Limit by lower hardcap.
   if (dt < m_minDt) {
-    dt       = m_minDt;
+    dt         = m_minDt;
     m_timeCode = TimeCode::Hardcap;
   }
 
   // Limit by upper hardcap.
   if (dt > m_maxDt) {
-    dt       = m_maxDt;
+    dt         = m_maxDt;
     m_timeCode = TimeCode::Hardcap;
   }
 

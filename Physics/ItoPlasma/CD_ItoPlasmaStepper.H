@@ -458,23 +458,22 @@ namespace Physics {
       computeEdotJSourceNWO2(const Real a_dt);
 
     protected:
-
       /*!
 	@brief An enum for encapsulating how time steps were restricted. 
       */
       enum class TimeCode
-	{
-	  Advection,
-	  Diffusion,
-	  AdvectionDiffusion,
-	  Source,
-	  RelaxationTime,
-	  Restricted,
-	  Hardcap,
-	  Error,
-	  Physics	  
-	};      
-      
+      {
+        Advection,
+        Diffusion,
+        AdvectionDiffusion,
+        Source,
+        RelaxationTime,
+        Restricted,
+        Hardcap,
+        Error,
+        Physics
+      };
+
       std::string        m_fluid_Realm;   // Realm for Poisson and sigma solver. Defaults to Realm::Primal
       std::string        m_particleRealm; // Realm for particles. Defaults to Realm::Primal
       std::string        m_name;

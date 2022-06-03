@@ -301,7 +301,7 @@ AdvectionDiffusionStepper::writePlotData(EBAMRCellData&       a_output,
 }
 
 Real
-AdvectionDiffusionStepper::computeDt() 
+AdvectionDiffusionStepper::computeDt()
 {
   CH_TIME("AdvectionDiffusionStepper::computeDt");
   if (m_verbosity > 5) {
@@ -331,7 +331,7 @@ AdvectionDiffusionStepper::computeDt()
   }
   case Integrator::IMEX: {
     dt = cfl * m_solver->computeAdvectionDt();
-    
+
     break;
   }
   default: {
