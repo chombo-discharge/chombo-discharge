@@ -49,8 +49,16 @@ For doing a quick test-build of ``chombo-discharge`` without HDF5 capabilities, 
 
    ```
    cd $DISCHARGE_HOME
-   make -s -j12
+   make -s -j4
    ```
+
+5. Run an example program
+
+   ```
+   cd $DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/DiagonalFlowNoEB
+   make -s -j4
+   ./*.ex example.inputs
+   ```		
 
 
 Contributing
