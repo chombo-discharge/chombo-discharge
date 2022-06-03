@@ -775,16 +775,14 @@ ItoPlasmaStepper::parseFilters()
 }
 
 void
-ItoPlasmaStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+ItoPlasmaStepper::computeDt()
 {
   CH_TIME("ItoPlasmaStepper::computeDt");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::computeDt" << endl;
   }
 
-  a_dt       = m_ito->computeDt();
-  a_dt       = a_dt * m_max_cells_hop;
-  a_timeCode = TimeCode::Advection;
+  return m_max_cells_hop * m_ito->computeDt();
 }
 
 void

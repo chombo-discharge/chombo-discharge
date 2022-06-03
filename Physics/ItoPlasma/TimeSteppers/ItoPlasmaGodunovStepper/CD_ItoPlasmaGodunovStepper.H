@@ -39,8 +39,8 @@ namespace Physics {
       // Advance routines
       Real
       advance(const Real a_dt) override;
-      void
-      computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+      Real
+      computeDt() override;
 
       // Setup routines
       void

@@ -126,11 +126,9 @@ namespace Physics {
 
       /*!
 	@brief Compute the time step -- this will be different for the different supported algorithms. 
-	@param[out] a_dt       Time step to be used.
-	@param[out] a_timeCode Identifier for how the time step was restricted.
       */
-      void
-      computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+      Real
+      computeDt() override;
 
       /*!
 	@brief Run post-checkpoint setup operations. 

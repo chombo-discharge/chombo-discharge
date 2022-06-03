@@ -777,7 +777,7 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
       m_timeStep = 0;
     }
 
-    m_timeStepper->computeDt(m_dt, m_timeCode);
+    m_dt = m_timeStepper->computeDt();
     m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);
 
     bool isLastStep  = false;
@@ -831,7 +831,7 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
 
       // Compute a time step for the TimeStepper::advance(...) method.
       if (!isFirstStep) {
-        m_timeStepper->computeDt(m_dt, m_timeCode);
+        m_dt = m_timeStepper->computeDt();
       }
       else { // In this case we already had one.
         isFirstStep = false;

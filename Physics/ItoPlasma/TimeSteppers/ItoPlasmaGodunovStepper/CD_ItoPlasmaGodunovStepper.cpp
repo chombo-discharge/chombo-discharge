@@ -507,14 +507,14 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
 }
 
 void
-ItoPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+ItoPlasmaGodunovStepper::computeDt()
 {
   CH_TIME("ItoPlasmaGodunovStepper::computeDt");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaGodunovStepper::computeDt" << endl;
   }
 
-  a_dt = 1.E99;
+  Real a_dt = std::numeric_limits<Real>::max();
 
   if (m_whichDt == which_dt::advection) {
     a_dt = m_ito->computeAdvectiveDt();
@@ -558,6 +558,8 @@ ItoPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
 			      << "\t avgCFL = " << m_avg_cfl/(1+m_timeStep)
 			      << std::endl;
 #endif
+
+  return a_dt;
 }
 
 void

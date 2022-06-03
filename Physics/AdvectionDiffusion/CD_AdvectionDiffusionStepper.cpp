@@ -300,8 +300,8 @@ AdvectionDiffusionStepper::writePlotData(EBAMRCellData&       a_output,
   m_solver->writePlotData(a_output, a_icomp);
 }
 
-void
-AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+Real
+AdvectionDiffusionStepper::computeDt() 
 {
   CH_TIME("AdvectionDiffusionStepper::computeDt");
   if (m_verbosity > 5) {
@@ -321,21 +321,17 @@ AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
     cfl = m_cfl;
   }
 
+  Real dt = std::numeric_limits<Real>::max();
+
   switch (m_integrator) {
   case Integrator::Heun: {
-    const Real dt = m_solver->computeAdvectionDiffusionDt();
-
-    a_dt       = cfl * dt;
-    a_timeCode = TimeCode::AdvectionDiffusion;
+    dt = cfl * m_solver->computeAdvectionDiffusionDt();
 
     break;
   }
   case Integrator::IMEX: {
-    const Real dt = m_solver->computeAdvectionDt();
-
-    a_dt       = cfl * dt;
-    a_timeCode = TimeCode::Advection;
-
+    dt = cfl * m_solver->computeAdvectionDt();
+    
     break;
   }
   default: {
@@ -345,8 +341,10 @@ AdvectionDiffusionStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
   }
   }
 
-  a_dt = std::max(a_dt, m_minDt);
-  a_dt = std::min(a_dt, m_maxDt);
+  dt = std::max(dt, m_minDt);
+  dt = std::min(dt, m_maxDt);
+
+  return dt;
 }
 
 Real
