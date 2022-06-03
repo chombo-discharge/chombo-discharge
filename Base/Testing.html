@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code testing &mdash; chombo-discharge  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/my_theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Acknowledgements" href="Acknowledgements.html" />
+    <link rel="prev" title="Examples" href="Examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> chombo-discharge
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Documentation.html">Using this documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Code testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#test-suite">Test suite</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-test-suite">Running the test suite</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-configuration">Advanced configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-benchmark-files">Using benchmark files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#automated-testing">Automated testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#convergence-testing">Convergence testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Acknowledgements.html">Acknowledgements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#creating-a-geometry">Creating a geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/Tutorial.html#setting-up-a-timestepper">Setting up a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">chombo-discharge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Code testing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Base/Testing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="code-testing">
+<span id="chap-testing"></span><h1>Code testing<a class="headerlink" href="#code-testing" title="Permalink to this heading"></a></h1>
+<p>To ensure the integrity of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, we include tests in</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Tests</span></code> for a functional test suite.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence</span></code> for a code verification tests.</p></li>
+</ul>
+<div class="section" id="test-suite">
+<span id="chap-testsuite"></span><h2>Test suite<a class="headerlink" href="#test-suite" title="Permalink to this heading"></a></h2>
+<p>To make sure <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> compiles and runs as expected, we include a test suite that runs functional tests of many <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> components.
+The tests are defined in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Tests</span></code>, and are organized by application type (see <a class="reference internal" href="../Applications/ImplementedModels.html#chap-implementedmodels"><span class="std std-ref">Implemented models</span></a>).</p>
+<div class="section" id="running-the-test-suite">
+<h3>Running the test suite<a class="headerlink" href="#running-the-test-suite" title="Permalink to this heading"></a></h3>
+<p>To do a clean compile and run of all tests, navigate to <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Tests</span></code> and execute the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_compare --parallel -cores X
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">X</span></code> is the number of cores to use when compiling and running.
+If the tests should be run in serial, omit the <code class="docutils literal notranslate"><span class="pre">--parallel</span> <span class="pre">-cores</span> <span class="pre">X</span></code> flag.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Run the test suite with <code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code> to catch assertion errors.</p>
+</div>
+</div>
+<div class="section" id="advanced-configuration">
+<h3>Advanced configuration<a class="headerlink" href="#advanced-configuration" title="Permalink to this heading"></a></h3>
+<p>The following options are available for running the various tests:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--compile</span></code> Re-compile the test.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--clean</span></code> Do a clean recompilation of the test.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--silent</span></code> Turn off unecessary output.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--benchmark</span></code> Generate benchmark files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--no_exec</span></code> Compile, but do not run the test.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--no_compare</span></code> Do not compare with benchmark files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--parallel</span></code> Use MPI or not</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-cores</span> <span class="pre">&lt;number&gt;</span></code> Run with specified number of cores.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-suites</span> <span class="pre">&lt;string&gt;</span></code> Run a specific application test suite.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-tests</span> <span class="pre">&lt;string</span></code> Run a specific test.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-dim</span> <span class="pre">&lt;number&gt;</span></code> Run only the specified 2D or 3D tests.</p></li>
+</ul>
+<p>For example, to only run the two-dimensional radiative transfer tests, without comparison with benchmark files, one would run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_compare --parallel -cores <span class="m">4</span> -suites RadiativeTransfer -dim <span class="m">2</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-benchmark-files">
+<h3>Using benchmark files<a class="headerlink" href="#using-benchmark-files" title="Permalink to this heading"></a></h3>
+<p>The test suite can generate benchmark files which can later be compared against new test suite output files.
+This is often a good idea if one wants to ensure that changes the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> code does not unintentionally change simulations.
+In this case one can run the test suite and generate benchmark files <em>before</em> adding changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
+Once the code development is completed, the benchmark files can later be bit-wise (using <a class="reference external" href="https://support.hdfgroup.org/HDF5/doc/RM/Tools/h5diff.htm">h5diff</a>) compared against the results of a later test suite.</p>
+<p>This consists of the following steps:</p>
+<ol class="arabic">
+<li><p><em>Before</em> making changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, generate benchmark files with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --parallel -cores X --benchmark
+</pre></div>
+</div>
+</li>
+<li><p>Make the required changes to the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> code.</p></li>
+<li><p>Run the test suite again, and compare benchmark and output files as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --parallel -cores X
+</pre></div>
+</div>
+</li>
+</ol>
+<p>When running the tests this way, the output files are bit-wise compared and a warning is issued if the files not exactly match.</p>
+</div>
+</div>
+<div class="section" id="automated-testing">
+<span id="chap-automatedtests"></span><h2>Automated testing<a class="headerlink" href="#automated-testing" title="Permalink to this heading"></a></h2>
+<p>On <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">GitHub</a>, the test suite is integrated with GitHub actions and are automatically run when opening a pull request for review.
+In general, all tests must pass before a pull request can be merged.
+The test status can be observed either in the pull request, or at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge/actions">https://github.com/chombo-discharge/chombo-discharge/actions</a>.
+The automated tests run <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> with <code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code> and <code class="docutils literal notranslate"><span class="pre">OPT=FALSE</span></code> in order to catch assertion errors or other code breaks.
+They usually take 1-2 hours to complete.</p>
+<p>The automated tests will clone, build, and run the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> test suite for various configurations:</p>
+<ul class="simple">
+<li><p>Parallel and serial.</p></li>
+<li><p>With or without HDF5.</p></li>
+<li><p>In 2D and 3D.</p></li>
+</ul>
+<p>The tests are run with the following compiler suites:</p>
+<ul class="simple">
+<li><p>GNU.</p></li>
+<li><p>Intel oneAPI.</p></li>
+</ul>
+</div>
+<div class="section" id="convergence-testing">
+<span id="chap-convergencetests"></span><h2>Convergence testing<a class="headerlink" href="#convergence-testing" title="Permalink to this heading"></a></h2>
+<p>To ensure that the various components in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> converge at desired truncation order, many modules are equipped with their own convergence tests.
+These are located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence</span></code>.
+The tests are too extensive to include in continuous integration, and they must be run locally like a regular <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> application.</p>
+<p>Our approach for convergence testing is found in <a class="reference internal" href="../Source/VV.html#chap-vv"><span class="std std-ref">Verification and validation</span></a>.
+See the individual modules (<a class="reference internal" href="../Applications/ImplementedModels.html#chap-implementedmodels"><span class="std std-ref">Implemented models</span></a>) for various convergence tests.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Acknowledgements.html" class="btn btn-neutral float-right" title="Acknowledgements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

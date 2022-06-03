@@ -261,7 +261,7 @@ There are two reasons why such a functionality is useful:
    It might be useful to keep the kernel on a specific AMR level for a certain number of time step. 
 
 .. figure:: /_static/figures/ParticleValidRegion.png
-   :width: 360px
+   :width: 50%
    :align: center
 
    The ``ParticleValidRegion`` allows particles whose position fall into a fine grid patch to be moved to a coarser level if they are within a specified distance from the refinement boundary.
@@ -392,7 +392,7 @@ This will register a mask which is false everywhere except in coarse-grid cells 
 
 .. _Fig:HaloMask:
 .. figure:: /_static/figures/HaloMask.png
-   :width: 360px
+   :width: 40%
    :align: center
 
    Example of a particle halo mask (shaded green color) surrounding refined grid levels.

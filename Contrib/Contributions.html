@@ -20,7 +20,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Continuous integration" href="CI.html" />
+    <link rel="next" title="Code standard" href="CodeStandard.html" />
     <link rel="prev" title="Least squares" href="../Utilities/LeastSquares.html" /> 
 </head>
 
@@ -46,6 +46,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul>
@@ -102,8 +105,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CI.html">Continuous integration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pull-requests">Pull requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bug-reports">Bug reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#continuous-integration">Continuous integration</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="CodeStandard.html">Code standard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
@@ -139,7 +146,34 @@
 <span id="chap-contributions"></span><h1>Contributions<a class="headerlink" href="#contributions" title="Permalink to this heading"></a></h1>
 <p>We welcome feedback, bug reports, and contributions to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 If you have feedback, questions, or general types of queries, use the issue tracker or discussion tab at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">https://github.com/chombo-discharge</a>.</p>
-<p>If you want to submit code to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, use the pull request system at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">https://github.com/chombo-discharge</a>.</p>
+<div class="section" id="pull-requests">
+<h2>Pull requests<a class="headerlink" href="#pull-requests" title="Permalink to this heading"></a></h2>
+<p>If you want to submit code to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, use the pull request system at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge">https://github.com/chombo-discharge</a>.
+When submitting a pull request, mark it as <em>draft</em> if you believe the pull request is not yet ready for merging.
+Note that when a pull request is submitted, you are asked to provide a brief summary of the changes that are made.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Always squash your git commits into a single commit for the PR as a whole.</p>
+</div>
+</div>
+<div class="section" id="bug-reports">
+<h2>Bug reports<a class="headerlink" href="#bug-reports" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is probably not bug-free.
+If encountering unexpected behavior, do not hesitate to use the issue tracker at <a class="reference external" href="https://github.com/chombo-discharge/chombo-discharge/issues">https://github.com/chombo-discharge/chombo-discharge/issues</a>.</p>
+</div>
+<div class="section" id="continuous-integration">
+<h2>Continuous integration<a class="headerlink" href="#continuous-integration" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses continuous integration (CI) with GitHub actions for:</p>
+<ul class="simple">
+<li><p>Running the test suite (see <a class="reference internal" href="../Base/Testing.html#chap-testing"><span class="std std-ref">Code testing</span></a>).</p></li>
+<li><p>Building HTML, PDF, and doxygen documentation.</p></li>
+<li><p>Ensuring correct code format.</p></li>
+</ul>
+<p>When submitting pull request for review, the above tests will start.
+In general, all the above tests should pass before merging the pull request into the main branch.</p>
+<p>Upon merging with the main branch, the documentation is again rebuilt and deployed to GitHub pages (see <a class="reference external" href="https://pages.github.com/">GitHub pages</a>).
+This ensures that the online documentation (HTML, PDF, and doxygen) is always up-to-date with the latest <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> release.</p>
+</div>
 </div>
 
 
@@ -147,7 +181,7 @@ If you have feedback, questions, or general types of queries, use the issue trac
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../Utilities/LeastSquares.html" class="btn btn-neutral float-left" title="Least squares" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="CI.html" class="btn btn-neutral float-right" title="Continuous integration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="CodeStandard.html" class="btn btn-neutral float-right" title="Code standard" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

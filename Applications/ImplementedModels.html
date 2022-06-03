@@ -46,6 +46,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul>
@@ -103,7 +106,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
@@ -139,19 +141,8 @@
 <span id="chap-implementedmodels"></span><h1>Implemented models<a class="headerlink" href="#implemented-models" title="Permalink to this heading"></a></h1>
 <p>Various models that use the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> solvers and functionality have been implemented and are shipped with <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 These models implement <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> for advancing various types of equations, and have been set up both for unit testing and as building blocks for more complex applications.
-The models reside <code class="file docutils literal notranslate"><span class="pre">$DICHARGE_HOME/Physics</span></code> and are supplemented with Python tools for quickly setting up new applications that use the same code.
-In general, users are encouraged to modify or copy these models and tailor them for their own applications.</p>
-<p>The following models are currently supported:</p>
-<ol class="arabic simple">
-<li><p><a class="reference internal" href="AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a> Used for solving pure advection-diffusion problems in 2D/3D with complex geometries.</p></li>
-<li><p><a class="reference internal" href="BrownianWalkerModel.html#chap-brownianwalkermodel"><span class="std std-ref">Brownian walker</span></a> Used for solving advection-diffusion problems using computational particles.
-This is, essentially, a Particle-In-Cell code that uses classical particles (rather than kinetic ones).</p></li>
-<li><p><a class="reference internal" href="CdrPlasmaModel.html#chap-cdrplasmamodel"><span class="std std-ref">CDR plasma</span></a> Implements <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> for solving low-temperature discharge plasma problems using fluids.
-Used e.g. for streamer simulations.</p></li>
-<li><p><a class="reference internal" href="ElectrostaticsModel.html#chap-electrostaticsmodel"><span class="std std-ref">Electrostatics model</span></a> Implements <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> for setting up a static calculation that solves the Poisson equation in 2D/3D.</p></li>
-<li><p><a class="reference internal" href="GeometryModel.html#chap-geometrymodel"><span class="std std-ref">Geometry</span></a> Implement <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> with empty functionality. Often used when setting up new geometries/cases.</p></li>
-<li><p><a class="reference internal" href="RadiativeTransferModel.html#chap-radiativetransfermodel"><span class="std std-ref">Radiative transfer</span></a> Implements <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> for solving radiative transfer problems. Used e.g. for regression testing.</p></li>
-</ol>
+The models reside in <code class="file docutils literal notranslate"><span class="pre">$DICHARGE_HOME/Physics</span></code> and are supplemented with Python tools for quickly setting up new applications that use the same code.
+In general, users are encouraged to modify these models and tailor them for their own applications.</p>
 </div>
 
 

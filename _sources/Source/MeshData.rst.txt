@@ -10,7 +10,7 @@ The first entry in the Vector is base AMR level and finer levels follow later in
 
 .. _Fig:EBAMRData:
 .. figure:: /_static/figures/PatchBasedAMR.png
-   :width: 480px
+   :width: 60%
    :align: center
 
    Cartesian patch-based refinement showing two grid levels.
@@ -229,7 +229,7 @@ Once this neighborhood of cells is obtained, we compute the gradient using the p
 
 .. _Fig:EBGradient:
 .. figure:: /_static/figures/EBGradient.png
-   :width: 480px
+   :width: 50%
    :align: center
 
    Example of stencils for computing gradients near embedded boundaries.

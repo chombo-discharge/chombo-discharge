@@ -47,6 +47,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul>
@@ -81,6 +84,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="ImplementedModels.html">Implemented models</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Advection-diffusion model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#solvers">Solvers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#time-stepping">Time stepping</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#heun-s-method">Heun’s method</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#imex">IMEX</a></li>
@@ -135,7 +139,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
@@ -181,6 +184,13 @@ The equation of motion is</p>
 </ul>
 <p>The source code for this problem is found in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/AdvectionDiffusion</span></code>.
 See <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html">AdvectionDiffusionStepper</a> for the C++ API for this time stepper.</p>
+<div class="section" id="solvers">
+<h2>Solvers<a class="headerlink" href="#solvers" title="Permalink to this heading"></a></h2>
+<p>This class uses the following solvers:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>.</p></li>
+</ul>
+</div>
 <div class="section" id="time-stepping">
 <h2>Time stepping<a class="headerlink" href="#time-stepping" title="Permalink to this heading"></a></h2>
 <p>Two time stepping algorithms are supported:</p>
@@ -357,7 +367,7 @@ To see available setup options, run</p>
 <p>A spatial convergence test is given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/AdvectionDiffusion/C1</span></code>.
 The problem solves for an advected and diffused scalar in a rotational velocity in the presence of an EB:</p>
 <div class="figure align-center" id="id5">
-<span id="fig-advectiondiffusionc1-1"></span><a class="reference internal image-reference" href="../_images/AdvectionDiffusionC1_1.png"><img alt="../_images/AdvectionDiffusionC1_1.png" src="../_images/AdvectionDiffusionC1_1.png" style="width: 360px;" /></a>
+<span id="fig-advectiondiffusionc1-1"></span><a class="reference internal image-reference" href="../_images/AdvectionDiffusionC1_1.png"><img alt="../_images/AdvectionDiffusionC1_1.png" src="../_images/AdvectionDiffusionC1_1.png" style="width: 40%;" /></a>
 <p class="caption"><span class="caption-number">Fig. 21 </span><span class="caption-text">Final state on a <span class="math notranslate nohighlight">\(512^2\)</span> uniform grid.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </div>
 <p>To compute the convergence rate we compute two solutions with grid spacings <span class="math notranslate nohighlight">\(\Delta x\)</span> and <span class="math notranslate nohighlight">\(\Delta x/2\)</span>, and estimate the solution error using the approach in <a class="reference internal" href="../Source/VV.html#chap-spatialconvergence"><span class="std std-ref">Spatial convergence</span></a>.
@@ -365,7 +375,7 @@ Figure <a class="reference internal" href="#fig-advectiondiffusionc1-2"><span cl
 We find 2nd order convergence in all three norms for sufficiently fine grid when using slope limiters, and first order convergence when limiters are turned off.
 The reduced convergence rates at coarser grids occur due to 1) insufficient resolution of the initial density profile and 2) under-resolution of the geometry.</p>
 <div class="figure align-center" id="id6">
-<span id="fig-advectiondiffusionc1-2"></span><a class="reference internal image-reference" href="../_images/AdvectionDiffusionC1_2.png"><img alt="../_images/AdvectionDiffusionC1_2.png" src="../_images/AdvectionDiffusionC1_2.png" style="width: 480px;" /></a>
+<span id="fig-advectiondiffusionc1-2"></span><a class="reference internal image-reference" href="../_images/AdvectionDiffusionC1_2.png"><img alt="../_images/AdvectionDiffusionC1_2.png" src="../_images/AdvectionDiffusionC1_2.png" style="width: 70%;" /></a>
 <p class="caption"><span class="caption-number">Fig. 22 </span><span class="caption-text">Spatial convergence rates with various limiters.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </div>
 </div>
@@ -376,7 +386,7 @@ To compute the temporal convergence rate we compute two solutions using time ste
 Figure <a class="reference internal" href="#fig-advectiondiffusionc2"><span class="std std-numref">Fig. 23</span></a> shows the computed convergence rates for the second order Runge-Kutta and the IMEX discretization.
 As expected, we find 2nd order convergence for Heun’s method and first order convergence for the IMEX discretization.</p>
 <div class="figure align-center" id="id7">
-<span id="fig-advectiondiffusionc2"></span><a class="reference internal image-reference" href="../_images/AdvectionDiffusionC2.png"><img alt="../_images/AdvectionDiffusionC2.png" src="../_images/AdvectionDiffusionC2.png" style="width: 480px;" /></a>
+<span id="fig-advectiondiffusionc2"></span><a class="reference internal image-reference" href="../_images/AdvectionDiffusionC2.png"><img alt="../_images/AdvectionDiffusionC2.png" src="../_images/AdvectionDiffusionC2.png" style="width: 70%;" /></a>
 <p class="caption"><span class="caption-number">Fig. 23 </span><span class="caption-text">Temporal convergence rates.</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
 </div>
 </div>

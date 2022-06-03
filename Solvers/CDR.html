@@ -47,6 +47,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul>
@@ -132,7 +135,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
@@ -224,7 +226,7 @@ In general, we seek a method-of-lines update <span class="math notranslate nohig
 \[\int_V\nabla\cdot\mathbf{G}dV =\sum_{f\in f(V)}\left(\mathbf{G}_f\cdot \mathbf{n}_f\right)\alpha_f\Delta x^{\textrm{DIM} -1}.\]</div>
 <p>The sum runs over all cell edges (faces in 3D) of the cell where <span class="math notranslate nohighlight">\(G_f\)</span> is the flux on the edge centroid and <span class="math notranslate nohighlight">\(\alpha_f\)</span> is the edge (face) aperture.</p>
 <div class="figure align-center" id="id2">
-<a class="reference internal image-reference" href="../_images/CutCell.png"><img alt="../_images/CutCell.png" src="../_images/CutCell.png" style="width: 360px;" /></a>
+<a class="reference internal image-reference" href="../_images/CutCell.png"><img alt="../_images/CutCell.png" src="../_images/CutCell.png" style="width: 40%;" /></a>
 <p class="caption"><span class="caption-number">Fig. 20 </span><span class="caption-text">Location of centroid fluxes for cut cells.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </div>
 <p>However, taking <span class="math notranslate nohighlight">\([\nabla\cdot\mathbf{G}^k]\)</span> to be this sum leads to a time step constraint proportional to <span class="math notranslate nohighlight">\(\kappa\)</span>, which can be arbitrarily small.

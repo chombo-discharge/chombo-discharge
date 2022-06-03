@@ -47,6 +47,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul class="current">
@@ -114,7 +117,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
@@ -153,7 +155,7 @@ Internally, the data is stored as a <code class="docutils literal notranslate"><
 Here, the <code class="docutils literal notranslate"><span class="pre">Vector</span></code> holds data on each AMR level; the data is allocated with a smart pointer called <code class="docutils literal notranslate"><span class="pre">RefCountedPtr</span></code> which points to a <code class="docutils literal notranslate"><span class="pre">LevelData</span></code> template structure, see <a class="reference internal" href="ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a>.
 The first entry in the Vector is base AMR level and finer levels follow later in the Vector, see e.g. <a class="reference internal" href="#fig-ebamrdata"><span class="std std-numref">Fig. 9</span></a>.</p>
 <div class="figure align-center" id="id3">
-<span id="fig-ebamrdata"></span><a class="reference internal image-reference" href="../_images/PatchBasedAMR.png"><img alt="../_images/PatchBasedAMR.png" src="../_images/PatchBasedAMR.png" style="width: 480px;" /></a>
+<span id="fig-ebamrdata"></span><a class="reference internal image-reference" href="../_images/PatchBasedAMR.png"><img alt="../_images/PatchBasedAMR.png" src="../_images/PatchBasedAMR.png" style="width: 60%;" /></a>
 <p class="caption"><span class="caption-number">Fig. 9 </span><span class="caption-text">Cartesian patch-based refinement showing two grid levels.
 This is encapsulated by <code class="docutils literal notranslate"><span class="pre">EBAMRData</span></code> where the levels are stored in a <code class="docutils literal notranslate"><span class="pre">Vector</span></code> and the grid patches in the <code class="docutils literal notranslate"><span class="pre">LevelData</span></code> object.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
 </div>
@@ -327,7 +329,7 @@ In this case we fetch a sufficiently large neighborhood of cells for computing a
 In order to avoid fetching potentially badly coarsened data, this neighborhood of cells only uses <em>valid</em> grid cells, i.e. the stencil does not reach underneath the fine level at all.
 Once this neighborhood of cells is obtained, we compute the gradient using the procedure in <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a>.</p>
 <div class="figure align-center" id="id4">
-<span id="fig-ebgradient"></span><a class="reference internal image-reference" href="../_images/EBGradient.png"><img alt="../_images/EBGradient.png" src="../_images/EBGradient.png" style="width: 480px;" /></a>
+<span id="fig-ebgradient"></span><a class="reference internal image-reference" href="../_images/EBGradient.png"><img alt="../_images/EBGradient.png" src="../_images/EBGradient.png" style="width: 50%;" /></a>
 <p class="caption"><span class="caption-number">Fig. 10 </span><span class="caption-text">Example of stencils for computing gradients near embedded boundaries.
 The red stencil shows a regular 5-point stencil for computing the gradient on the coarse side of the refinement boundary; it reaches into the coarsened data beneath the fine level.
 The green stencil shows a similar 5-point stencil on the fine side of the refinement boundary; the stencil reaches over the refinement boundary and into one ghost cell.

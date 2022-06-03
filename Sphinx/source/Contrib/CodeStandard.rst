@@ -8,7 +8,7 @@ When submitting new code to ``chombo-discharge``, the following guidelines below
 C++ standard
 ------------
 
-We are currently at ``c++14``. 
+We are currently at ``C++14``. 
 
 Namespace
 ---------

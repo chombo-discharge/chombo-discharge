@@ -45,6 +45,9 @@
 <li class="toctree-l1"><a class="reference internal" href="Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Base/Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Base/Testing.html">Code testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul>
@@ -102,7 +105,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
@@ -136,7 +138,7 @@
              
   <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p><strong>This is an alpha release. Development is still in progress, and various bugs may be present. User interfaces can and will change.</strong></p>
+<p><strong>This is an beta release. Development is still in progress, and various bugs may be present. Minor changes to the user interface can still occur.</strong></p>
 </div>
 <div class="section" id="welcome-to-chombo-discharge-s-user-documentation">
 <h1>Welcome to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>’s user documentation<a class="headerlink" href="#welcome-to-chombo-discharge-s-user-documentation" title="Permalink to this heading"></a></h1>
@@ -159,7 +161,7 @@ The code is hosted at <a class="reference external" href="https://github.com/cho
 <li><p>Various time integration schemes.</p></li>
 </ul>
 <p>Numerical solvers are designed to run either on their own, or as a part of a larger application.</p>
-<p>For scalability, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is built on top of <a class="reference external" href="https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations">Chombo 3</a>, and therefore additionally features</p>
+<p>For scalability, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is built on top of <a class="reference external" href="https://github.com/applied-numerical-algorithms-group-lbnl/Chombo_3.2">Chombo 3</a>, and therefore additionally features</p>
 <ul class="simple">
 <li><p>Cut-cell representation of multi-material geometries.</p></li>
 <li><p>Patch based adaptive mesh refinement.</p></li>

@@ -17,7 +17,7 @@ In other words, grid levels :math:`l-1` and :math:`l+1` are spatially separated 
 
 .. _Fig:PatchBasedAMR:
 .. figure:: /_static/figures/PatchBasedAMR.png
-   :width: 480px
+   :width: 60%
    :align: center
 
    Cartesian patch-based refinement showing two grid levels.
@@ -43,7 +43,7 @@ Figure :numref:`Fig:ComplexPatches` shows an example of patch-based grid refinem
 
 .. _Fig:ComplexPatches:
 .. figure:: /_static/figures/ComplexPatches.png
-   :width: 360px
+   :width: 50%
    :align: center
 
    Patch-based refinement (factor 4 between levels) of a complex surface. Each color shows a patch, which is a rectangular computational unit.
@@ -62,7 +62,7 @@ It would also be extremely difficult to obtain performant geometric multigrid me
 
 .. _Fig:MultiCells:
 .. figure:: /_static/figures/MultiCells.png
-   :width: 360px
+   :width: 50%
    :align: center
 
    Example of how multi-valued cells occur during grid coarsening.
@@ -134,7 +134,7 @@ The process is then recursed downwards until specified recursion criteria are me
 Additional details are provided in the `EBGeometry documentation <https://rmrsk.github.io/EBGeometry/>`_.
 
 .. figure:: /_static/figures/Armadillo.png
-   :width: 360px
+   :width: 50%
    :align: center
 
    Example of an SDF reconstruction and cut-cell grid from a surface tesselation in ``chombo-discharge``.
@@ -182,7 +182,7 @@ Once all the grid patches that contain cut-cells have been found, these patches 
 
 .. _Fig:Pruning:
 .. figure:: /_static/figures/Pruning.png
-   :width: 600px
+   :width: 75%
    :align: center
 
    Pruning cut-cells with the signed distance field.
@@ -220,7 +220,7 @@ Typically, it is not used at large scale in 3D due to its memory consumption.
 
 .. _BRMeshRefine:
 .. figure:: /_static/figures/BRMeshRefine.png
-   :width: 240px
+   :width: 25%
    :align: center
 
    Classical cartoon of patch-based refinement. Bold lines indicate entire grid blocks.
@@ -234,7 +234,7 @@ Moreover, the algorithm is extremely fast and has low memory consumption even at
 
 .. _TiledMeshRefine:
 .. figure:: /_static/figures/TiledMeshRefine.png
-   :width: 240px
+   :width: 25%
    :align: center
 
    Classical cartoon of tiled patch-based refinement. Bold lines indicate entire grid blocks. 

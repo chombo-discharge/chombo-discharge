@@ -47,6 +47,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Visualization.html">Visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul class="current">
@@ -141,7 +144,6 @@
 <p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Contrib/CI.html">Continuous integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
@@ -391,7 +393,7 @@ This mass must be added to the coarse level, which adds algorithmic complexity (
 It might be useful to keep the kernel on a specific AMR level for a certain number of time step.</p></li>
 </ol>
 <div class="figure align-center" id="id1">
-<a class="reference internal image-reference" href="../_images/ParticleValidRegion.png"><img alt="../_images/ParticleValidRegion.png" src="../_images/ParticleValidRegion.png" style="width: 360px;" /></a>
+<a class="reference internal image-reference" href="../_images/ParticleValidRegion.png"><img alt="../_images/ParticleValidRegion.png" src="../_images/ParticleValidRegion.png" style="width: 50%;" /></a>
 <p class="caption"><span class="caption-number">Fig. 11 </span><span class="caption-text">The <code class="docutils literal notranslate"><span class="pre">ParticleValidRegion</span></code> allows particles whose position fall into a fine grid patch to be moved to a coarser level if they are within a specified distance from the refinement boundary.
 In this case, the green particles that overlap with the fine-level grid are remapped to the coarse level.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </div>
@@ -495,7 +497,7 @@ After the user is done with the particles, they should be deleted through the fu
 <p>where <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> must be <code class="docutils literal notranslate"><span class="pre">&quot;s_particle_halo&quot;</span></code>.
 This will register a mask which is false everywhere except in coarse-grid cells that are within a distance a_buffer from the refinement boundary, see <a class="reference internal" href="#fig-halomask"><span class="std std-numref">Fig. 12</span></a>.</p>
 <div class="figure align-center" id="id2">
-<span id="fig-halomask"></span><a class="reference internal image-reference" href="../_images/HaloMask.png"><img alt="../_images/HaloMask.png" src="../_images/HaloMask.png" style="width: 360px;" /></a>
+<span id="fig-halomask"></span><a class="reference internal image-reference" href="../_images/HaloMask.png"><img alt="../_images/HaloMask.png" src="../_images/HaloMask.png" style="width: 40%;" /></a>
 <p class="caption"><span class="caption-number">Fig. 12 </span><span class="caption-text">Example of a particle halo mask (shaded green color) surrounding refined grid levels.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </div>
 </div>
