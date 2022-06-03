@@ -5,7 +5,7 @@
 
 .. important::
 
-   **This is an alpha release. Development is still in progress, and various bugs may be present. User interfaces can and will change.**
+   **This is an beta release. Development is still in progress, and various bugs may be present. Minor changes to the user interface can still occur.**
 
 Welcome to ``chombo-discharge``'s user documentation
 ****************************************************
@@ -83,6 +83,9 @@ Introduction
    Base/Installation
    Base/Visualization
    Base/Control
+   Base/Examples
+   Base/Testing
+   Base/Acknowledgements
 
 Discretization
 **************
@@ -183,7 +186,6 @@ Contributing
    :hidden:	     
 
    Contrib/Contributions
-   Contrib/CI
    Contrib/CodeStandard
 
 .. only:: html

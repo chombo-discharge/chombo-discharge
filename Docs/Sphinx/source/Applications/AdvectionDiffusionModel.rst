@@ -17,7 +17,14 @@ The full implementation for this model consists of the following classes:
 * ``AdvectionDiffusionTagger``, which implements :ref:`Chap:CellTagger` and flags cells for refinement and coarsening.
 
 The source code for this problem is found in :file:`$DISCHARGE_HOME/Physics/AdvectionDiffusion`.
-See `AdvectionDiffusionStepper <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html>`_ for the C++ API for this time stepper.  
+See `AdvectionDiffusionStepper <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html>`_ for the C++ API for this time stepper.
+
+Solvers
+-------
+
+This class uses the following solvers:
+
+* :ref:`Chap:CdrSolver`.
 
 
 Time stepping
