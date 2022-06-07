@@ -9,10 +9,7 @@ This physics model also includes the following subfolders:
 * :file:`/Physics/CdrPlasma/PlasmaModel` which contains various implementation of some plasma models that we have used.
 * :file:`/Physics/CdrPlasma/TimeSteppers` contains various algorithms for advancing the equations of motion. 
 * :file:`/Physics/CdrPlasma/CellTaggers` contains various algorithms for flagging cells for refinement and coarsening. 
-* :file:`/Physics/CdrPlasma/python` contains Python source files for quickly setting up new applications. 
-
-Equations of motion
-===================
+* :file:`/Physics/CdrPlasma/python` contains Python source files for quickly setting up new applications.
 
 In the CDR plasma model we are solving
 
@@ -56,7 +53,17 @@ The coupling that is (currently) available in ``chombo-discharge`` is
 
 where :math:`F` is the boundary flux on insulators or electrodes (which must be separately implemented).
 
-``chombo-discharge`` works by embedding the equations above into an abstract C++ framework (see :ref:`Chap:CdrPlasmaPhysics`) that the user must implement or reuse existing pieces of, and then compile into an executable. 
+``chombo-discharge`` works by embedding the equations above into an abstract C++ framework (see :ref:`Chap:CdrPlasmaPhysics`) that the user must implement or reuse existing pieces of, and then compile into an executable.
+
+Solvers
+=======
+
+This module uses the following solvers:
+
+#. Advection-diffusion-reaction solver, :ref:`Chap:CdrSolver`.
+#. Electrostatics solvers, :ref:`Chap:FieldSolver`.
+#. Radiative transfer solver (either Monte-Carlo or continuum approximation), :ref:`Chap:RtSolver`.
+#. Surface charge solver, :ref:`Chap:SigmaSolver`. 
 
 .. _Chap:CdrPlasmaPhysics:
 
