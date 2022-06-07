@@ -58,8 +58,6 @@
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Realm</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#dual-grid">Dual grid</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#realm-registration">Realm registration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#operator-registration">Operator registration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#interacting-with-realms">Interacting with realms</a></li>
 </ul>
 </li>
@@ -68,6 +66,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
@@ -95,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
@@ -166,50 +166,6 @@ In the top panel the grid patches are load-balanced using the grid patch volume 
 The numbers in each grid patch indicates the MPI rank ownership of the patches.
 In the bottom panel we have introduced computational particles in some of the patches.
 For particles, the computational load is better defined by the number of computational particles assigned to the patch, and so using the number of particles as a proxy for the load yields different rank ownership over the grid patches.</p>
-</div>
-<div class="section" id="realm-registration">
-<h2>Realm registration<a class="headerlink" href="#realm-registration" title="Permalink to this heading"></a></h2>
-<p>To register a <code class="docutils literal notranslate"><span class="pre">Realm</span></code>, users will have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> allocate the desired number of realms in the pure routine <code class="docutils literal notranslate"><span class="pre">registerRealms()</span></code>, as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="n">myTimeStepper</span><span class="o">::</span><span class="n">registerRealms</span><span class="p">(){</span>
-   <span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="n">Realm</span><span class="o">::</span><span class="n">Primal</span><span class="p">);</span>
-   <span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;particleRealm&quot;</span><span class="p">);</span>
-   <span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;otherParticleRealm&quot;</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>Since at least one realm is required, <code class="docutils literal notranslate"><span class="pre">Driver</span></code> will <em>always</em> register the realm <code class="docutils literal notranslate"><span class="pre">&quot;Primal&quot;</span></code>.
-Fundamentally, there is no limitation to the number of realms that can be allocated.</p>
-<p>During regrid, all realms are initially load balanced with the grid patch volume as the load proxy.
-However, users can change load balancing individually for each realm through the load balancing routines in <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.</p>
-</div>
-<div class="section" id="operator-registration">
-<h2>Operator registration<a class="headerlink" href="#operator-registration" title="Permalink to this heading"></a></h2>
-<p>Internally, an instantiation of <code class="docutils literal notranslate"><span class="pre">Realm</span></code> contains the grids and the geometric information (e.g. <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code>), as well as any operators that the user has seen fit to <em>register</em>.
-Various operators are available for e.g. gradient stencils, conservative coarsening, ghost cell interpolation, filling a patch with interpolation data, redistribution, and so on.
-Since operators always incur overhead and not all applications require <em>all</em> operators, they must be <em>registered</em>.
-If a solver needs an operator for, say, piecewise linear ghost cell interpolation, the solver needs to <em>register</em> that operator through the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> public interface:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerOperator</span><span class="p">(</span><span class="n">s_eb_pwl_interp</span><span class="p">,</span> <span class="n">m_realm</span><span class="p">,</span> <span class="n">m_phase</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>Once an operator has been registered, <code class="docutils literal notranslate"><span class="pre">Realm</span></code> will define those operators during initialization e.g. regrids.
-Run-time error messages are issued if an AMR operator is used, but has not been registered.</p>
-<p>More commonly, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> solvers will contain a routine that registers the operators that the solver needs.
-A valid <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> implementation <em>must</em> register all required operators in the function <code class="docutils literal notranslate"><span class="pre">registerOperators()</span></code>.</p>
-<p>Currently available operators are:</p>
-<ol class="arabic simple">
-<li><p>Gradient <code class="docutils literal notranslate"><span class="pre">s_eb_gradient</span></code>.</p></li>
-<li><p>Irregular cell centroid interpolation, <code class="docutils literal notranslate"><span class="pre">s_eb_irreg_interp</span></code>.</p></li>
-<li><p>Coarse grid conservative coarsening, <code class="docutils literal notranslate"><span class="pre">s_eb_coar_ave</span></code>.</p></li>
-<li><p>Piecewise linear interpolation (with slope limiters), <code class="docutils literal notranslate"><span class="pre">s_eb_fill_patch</span></code>.</p></li>
-<li><p>Linear ghost cell interpolation, <code class="docutils literal notranslate"><span class="pre">s_eb_fine_interp</span></code>.</p></li>
-<li><p>Flux registers, <code class="docutils literal notranslate"><span class="pre">s_eb_flux_reg</span></code>.</p></li>
-<li><p>Redistribution registers, <code class="docutils literal notranslate"><span class="pre">s_eb_redist</span></code>.</p></li>
-<li><p>Non-conservative divergence stencils, <code class="docutils literal notranslate"><span class="pre">s_eb_noncons_div</span></code>.</p></li>
-<li><p>Multigrid interpolators, <code class="docutils literal notranslate"><span class="pre">s_eb_multigrid</span></code> (used for multigrid).</p></li>
-<li><p>Signed distance function defined on grid, <code class="docutils literal notranslate"><span class="pre">s_levelset</span></code>.</p></li>
-<li><p>Particle-mesh support, <code class="docutils literal notranslate"><span class="pre">s_eb_particle_mesh</span></code>.</p></li>
-</ol>
-<p>Solvers will typically allocate a subset of these operators, but for multiphysics code that use both fluid and particles, most of these will probably be in use.</p>
 </div>
 <div class="section" id="interacting-with-realms">
 <h2>Interacting with realms<a class="headerlink" href="#interacting-with-realms" title="Permalink to this heading"></a></h2>

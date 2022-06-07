@@ -21,7 +21,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Driver" href="Driver.html" />
+    <link rel="next" title="Overview" href="DesignOverview.html" />
     <link rel="prev" title="Linear solvers" href="LinearSolvers.html" /> 
 </head>
 
@@ -67,6 +67,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
@@ -94,6 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
@@ -145,8 +147,7 @@
   <div class="section" id="verification-and-validation">
 <span id="chap-vv"></span><h1>Verification and validation<a class="headerlink" href="#verification-and-validation" title="Permalink to this heading"></a></h1>
 <p>We strive to include convergence testing (verification), and in some cases comparison with various types of experimental (validation).
-Below, we discuss our approach to spatial and temporal convergence testing.
-In all cases the various norms are given by</p>
+Below, we discuss our approach to spatial and temporal convergence testing.</p>
 <div class="section" id="spatial-convergence">
 <span id="chap-spatialconvergence"></span><h2>Spatial convergence<a class="headerlink" href="#spatial-convergence" title="Permalink to this heading"></a></h2>
 <p>Assume that we have some evolution problem which provides a solution on the mesh as <span class="math notranslate nohighlight">\(\phi_{\mathbf{i}}^k\left(\Delta x, \Delta t\right)\)</span> where <span class="math notranslate nohighlight">\(\Delta x\)</span> is a uniform grid resolution and <span class="math notranslate nohighlight">\(\Delta t\)</span> is the time step used for evolving the state from <span class="math notranslate nohighlight">\(t=0\)</span> to <span class="math notranslate nohighlight">\(t = k\Delta t\)</span>.</p>
@@ -191,7 +192,7 @@ L_2\left[\phi^k\left(\Delta x, \Delta t_c\right)\right] &amp;= \sqrt{\frac{1}{\s
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="LinearSolvers.html" class="btn btn-neutral float-left" title="Linear solvers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Driver.html" class="btn btn-neutral float-right" title="Driver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="DesignOverview.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

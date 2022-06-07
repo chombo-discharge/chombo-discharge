@@ -3,8 +3,13 @@
 GeoCoarsener
 ============
 
-The ``GeoCoarsener`` class can remove refinement flags along a geometric surface.
-To remove these so-called "geometric tags", the user specifies boxes in space where geometric tags will be removed:
+.. warning::
+
+   ``GeoCoarsener`` is a relic of an early version of ``chombo-discharge``.
+   It will be completely removed in a future version. 
+
+The ``GeoCoarsener`` class permits manual removement of refinement flags along a geometric surface.
+To remove these so-called *geometric tags*, the user specifies boxes in space where geometric tags will be removed:
 
 .. code-block:: bash
 		

@@ -63,6 +63,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/DesignOverview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
@@ -86,7 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">CDR plasma</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#equations-of-motion">Equations of motion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solvers">Solvers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cdrplasmaphysics">CdrPlasmaPhysics</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#api">API</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#initializing-species">Initializing species</a></li>
@@ -164,6 +165,7 @@
 <li class="toctree-l1"><a class="reference internal" href="GeometryModel.html">Geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RadiativeTransferModel.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="StreamerInceptionModel.html">Streamer inception</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticleModel.html">Tracer particle model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
@@ -222,8 +224,6 @@ This physics model also includes the following subfolders:</p>
 <li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CellTaggers</span></code> contains various algorithms for flagging cells for refinement and coarsening.</p></li>
 <li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/python</span></code> contains Python source files for quickly setting up new applications.</p></li>
 </ul>
-<div class="section" id="equations-of-motion">
-<h2>Equations of motion<a class="headerlink" href="#equations-of-motion" title="Permalink to this heading"></a></h2>
 <p>In the CDR plasma model we are solving</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}&amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0},\\
@@ -251,6 +251,15 @@ S =&amp; S\left(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi\r
 F =&amp; F(t, \mathbf{x}, \mathbf{E}, n),\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(F\)</span> is the boundary flux on insulators or electrodes (which must be separately implemented).</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> works by embedding the equations above into an abstract C++ framework (see <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>) that the user must implement or reuse existing pieces of, and then compile into an executable.</p>
+<div class="section" id="solvers">
+<h2>Solvers<a class="headerlink" href="#solvers" title="Permalink to this heading"></a></h2>
+<p>This module uses the following solvers:</p>
+<ol class="arabic simple">
+<li><p>Advection-diffusion-reaction solver, <a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>.</p></li>
+<li><p>Electrostatics solvers, <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a>.</p></li>
+<li><p>Radiative transfer solver (either Monte-Carlo or continuum approximation), <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a>.</p></li>
+<li><p>Surface charge solver, <a class="reference internal" href="../Solvers/Sigma.html#chap-sigmasolver"><span class="std std-ref">Surface charge solver</span></a>.</p></li>
+</ol>
 </div>
 <div class="section" id="cdrplasmaphysics">
 <span id="chap-cdrplasmaphysics"></span><h2>CdrPlasmaPhysics<a class="headerlink" href="#cdrplasmaphysics" title="Permalink to this heading"></a></h2>

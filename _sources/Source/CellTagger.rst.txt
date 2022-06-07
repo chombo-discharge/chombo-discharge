@@ -4,58 +4,25 @@ CellTagger
 ===========
 
 The ``CellTagger`` class is responsible for flagging grid cells for refinement or coarsening.
-If the user wants to implement a new refinement routine, he will do so by writing a new derived class from ``CellTagger``.
+If the user wants to implement a new refinement or coarsening routine, he will do so by writing a new derived class from ``CellTagger``.
 The ``CellTagger`` parent class is a stand-alone class - it does not have a view of ``AmrMesh``, ``Driver``, or ``TimeStepper``.
 Since refinement is intended to be quite general, the user is responsible for providing ``CellTagger`` with the appropriate depedencies.
-For example, for streamer simulations we often use the electric field when tagging grid cells, in which case the user should supply either a reference to the electric field, the Poisson solver, or the time stepper.
 
-Design
-------
-In ``chombo-discharge``, refinement flags live in a data holder called ``EBAMRTags`` inside of ``Driver``.
+.. tip::
+
+   `CellTagger C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCellTagger.html>`_
+
+Refinement flags live in a data holder called ``EBAMRTags`` inside of ``Driver``.
 This data is typedef'ed as
 
 .. code-block:: c++
 
    typedef Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > > EBAMRTags;
 
-The ``LayoutData<T>`` structure can be thought of as a ``LevelData<T>`` without possibilities for communication.
-``CellTagger`` is an abstract class that the user *must* overwrite. 
-
-When the regrid routine enters, the ``CellTagger`` will be asked to generate the refinement flags through a function
-
-.. code-block:: c++
-
-   bool tagCells(EBAMRTags& a_tags) = 0;
-
-Typically, code for refinement looks something like:
-
-.. code-block:: c++
-
-   bool myCelltagger::tagCells(EBAMRTags& a_tags){
-
-      for (int l 0; l <= finestLevel; lvl++){
-         const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-	 
-         for (DataIterator dit(dbl); dit.ok(); ++dit){
-	     DenseIntVectSet& boxTags = (*a_tags[lvl])[dit()];
-	     const Box& box           = dbl[dit()];
-
-	     for (BoxIterator bit(box); bit.ok(); ++bit){
-	        const IntVect iv = bit();
-
-		const bool refineThisCell = myRefinementFunction(iv, ...);
-
-		if(refineThisCell){
-		   boxTags(iv) = true;
-		}
-		else{
-		   boxTags(iv) = false;
-		}
-	     }
-	 }
-
-      return true;
-   }
+For performance reasons, ``DenseIntVectSet`` onlys store refinement cells on a per-patch basis.
+It is not possible to add a grid cell to a ``DenseIntVectSet`` if it falls outside the grid patch.
+Furthermore, the ``EBAMRTags`` structure is a distributed data structure which makes sure that each MPI rank is aware of the refinement flags on the corresponding grid patches.
+The flags themselves are owned by :ref:`Chap:Driver`, and they are copied onto the new grids in the regrid step. 
 
 User interface
 --------------
@@ -69,36 +36,77 @@ To implement a new ``CellTagger``, the following functions must be implemented:
   virtual void parseRuntimeOptions();
   virtual bool tagCells(EBAMRTags& a_tags) = 0;
 
-Users can also parse run-time options and have ``CellTagger`` write to file, by implementing
+Users can also parse run-time options and even have ``CellTagger`` write to plot files, by implementing
 
 .. code-block:: c++
 
   virtual int getNumberOfPlotVariables();
   virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp);
 
-This is primarily useful for debugging the tracer fields that are used for flagging cells for refinement. 
-   
+This is primarily useful for debugging the tracer fields that are used for flagging cells for refinement.
+
+tagCells
+________
+
+When the regrid routine enters, the ``CellTagger`` will be asked to generate the refinement flags through a function
+
+.. code-block:: c++
+
+   bool tagCells(EBAMRTags& a_tags) = 0;
+
+This routine should add cells that will be refined, and remove cells that will be coarsened.
+
+regrid
+______
+
+``regrid`` is called by :ref:`Chap:Driver` during regrids.
+The existence of this routine is due to the common usage pattern where ``CellTagger`` holds some auxiliary mesh data that is used when evaluating refinement and coarsening criteria.
+This routine should reallocate such temporary storage during regrids.
+
+parseOptions
+____________
+
+``parseOptions`` is called by :ref:`Chap:Driver` when setting the ``CellTagger``.
+This routine should parse options into the ``CellTagger`` instance.
+
+parseRuntimeOptions
+___________________
+
+``parseRuntimeOptions`` is called by :ref:`Chap:Driver` after each grid step.
+This routine will re-read class options into the ``CellTagger`` instance.
+See :ref:`Chap:RuntimeConfig:` for further details.
+
+getNumberOfPlotVariables
+________________________
+
+``getNumberOfPlotVariables`` will return the number of plot variables that ``CellTagger`` will write to plot files. 
+
+writePlotData
+_____________
+
+``writePlotData`` will write the plot data to the provided data holder.
+The functionality is the same as for :ref:`Chap:TimeStepper`. 
 
 Restrict tagging
 ----------------
 
-It is possible to prevent cell tags in certain regions.
-The default is simply to add a number of boxes where refinement and coarsening is allowed by specifying a number of boxes in the options file for the cell tagger:
+It is possible to prevent ``CellTagger`` from adding refinement flags in specified regions. 
+The default behavior is to add a number of boxes where refinement and coarsening is allowed:
 
 .. code-block:: bash
 
    MyCellTagger.num_boxes   = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
    MyCellTagger.box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
-   MyCellTagger.box1_hi     = 0.0 0.0 0.0  # these two corners
+   MyCellTagger.box1_hi     = 1.0 1.0 1.0  # these two corners
 
-Here, *MyCellTagger* is a placeholder for the name of the class that is used.
+Here, ``MyCellTagger`` is a placeholder for the name of the class that is used.
 By adding restrictive boxes, tagging will only be allowed inside the specified box corners ``box1_lo`` and ``box1_hi``.
 More boxes can be specified by following the same convention, e.g. ``box2_lo`` and ``box2_hi`` etc.
 
 Adding a buffer
 ---------------
 
-By default, each MPI rank can only tag grid cells where he owns data.
+By default, each MPI rank can only tag grid cells where it owns data.
 This has been done for performance and communication reasons.
 Under the hood, the ``DenseIntVectSet`` is an array of boolean values on a patch which is very fast and simple to communicate with MPI. 
 Adding a grid cell for refinement which lies outside the patch will lead to memory corruptions.

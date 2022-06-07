@@ -119,6 +119,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a14729a13fc332765a54640f0f04aa8ae">Physics::ItoPlasma::ItoPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a1a06df878801cf23189547818a26daa3">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a6be891e4077d9946373e3229d1e14a89">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aea3b431fb6d97817c4eda38b9b208c04">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;</a>
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a68b9e786991e93e7cf937648dbf886e9">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classRtLayout.html#af1dcce7b54b4f1f7ddb2077258ae6495">RtLayout&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#afab22f65be49033a88f611ed0d98c8e3">RtSolver</a>
@@ -244,6 +245,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#add0e7d43a32806593356768af8707578">Physics::ItoPlasma::ItoPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7d467b80cd6a1a9db4aa8b1d2dfb595d">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a1252d9617d6a2e44a9eae08c9bc51b4a">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ade94995127b8697052bf75df61fda42c">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;</a>
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a557e207a4231c33c66c32c4ce5562d78">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classTimeStepper.html#aa8b780a17bd0f0dfeeecefdbc7fc67b3">TimeStepper</a>
 , <a class="el" href="classTracerParticleSolver.html#acdd23de1ca19916167cb532cc1c44c15">TracerParticleSolver&lt; P &gt;</a>
@@ -282,7 +284,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaFieldTagger.html#ab5935db8100a809474d05955a725e1e1">Physics::ItoPlasma::ItoPlasmaFieldTagger</a>
 </li>
 <li>AmrMesh()
-: <a class="el" href="classAmrMesh.html#aaf2154348b6e3f8c7691e4aed716961b">AmrMesh</a>
+: <a class="el" href="classAmrMesh.html#ad3dbdbd76308b0f823ac99ba8c96b030">AmrMesh</a>
 </li>
 <li>AMRnewOp()
 : <a class="el" href="classEBHelmholtzOpFactory.html#a7c51c6202e449f98bb34c66b76cedccb">EBHelmholtzOpFactory</a>
@@ -325,7 +327,7 @@ $(function() {
 , <a class="el" href="classMFHelmholtzOp.html#a6c25be0d3ec4b41519df08490f2bbe02">MFHelmholtzOp</a>
 </li>
 <li>apply()
-: <a class="el" href="classIrregAmrStencil.html#a0b08a61580b205de06927a87e1150f40">IrregAmrStencil&lt; IrregSten &gt;</a>
+: <a class="el" href="classIrregAmrStencil.html#a154cec88b5c079f8d27bc4257e2a0623">IrregAmrStencil&lt; IrregSten &gt;</a>
 , <a class="el" href="classIrregStencil.html#ab3bbfcbf857a69e3bbff848c2da1f741">IrregStencil</a>
 </li>
 <li>applyDomainFlux()
@@ -350,7 +352,7 @@ $(function() {
 </li>
 <li>applyOp()
 : <a class="el" href="classEBHelmholtzOp.html#a20a1d053d3e694e220ff38ebda136da4">EBHelmholtzOp</a>
-, <a class="el" href="classMFHelmholtzOp.html#a4a8115491280db3b71ab7a8110b1cad4">MFHelmholtzOp</a>
+, <a class="el" href="classMFHelmholtzOp.html#a77defde9dc79221f5b7295a6469cbe49">MFHelmholtzOp</a>
 </li>
 <li>applyOpIrregular()
 : <a class="el" href="classEBHelmholtzOp.html#a6aee6d047d1f9dec4e4d3642175a01b3">EBHelmholtzOp</a>
@@ -371,22 +373,22 @@ $(function() {
 , <a class="el" href="classMFHelmholtzOp.html#a49b9adf27f573ca72904b53fe882d28d">MFHelmholtzOp</a>
 </li>
 <li>averageCellScalarToFaceScalar()
-: <a class="el" href="classDataOps.html#a64b434b7fed5196f6aab0c09f8a79271">DataOps</a>
+: <a class="el" href="classDataOps.html#a5ed739c02d09870f9b13724bdabdb98e">DataOps</a>
 </li>
 <li>averageCellToFace()
-: <a class="el" href="classDataOps.html#af6e607a3cb21f0528af1d61cc9d29bda">DataOps</a>
+: <a class="el" href="classDataOps.html#acccfdf8df1ff190eb9f50eccefd948c4">DataOps</a>
 </li>
 <li>averageCellVectorToFaceScalar()
-: <a class="el" href="classDataOps.html#a8113496dc1ba10ef1861ea020caf5fe6">DataOps</a>
+: <a class="el" href="classDataOps.html#aef3f9ac8d8318178e671237eba94bbde">DataOps</a>
 </li>
 <li>averageDown()
-: <a class="el" href="classAmrMesh.html#a4a80ee08c4803c32a0428be21358771e">AmrMesh</a>
+: <a class="el" href="classAmrMesh.html#a6d53bb58405ffc2573a4b76263db8d05">AmrMesh</a>
 </li>
 <li>averageFaceData()
 : <a class="el" href="classEbCoarAve.html#a6c0f64c668213870806e42f1a5a97ec2">EbCoarAve</a>
 </li>
 <li>averageFaces()
-: <a class="el" href="classAmrMesh.html#a1b8bafcdcb470b6d4c24952fddad540a">AmrMesh</a>
+: <a class="el" href="classAmrMesh.html#ab0dcd1a343ae2f032fa86131d4fcda2f">AmrMesh</a>
 , <a class="el" href="classEbCoarAve.html#aebbc7f2219360adaef8abf41c6e856a4">EbCoarAve</a>
 </li>
 <li>averageFaceToCell()

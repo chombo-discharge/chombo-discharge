@@ -1,52 +1,52 @@
 <map id="Source/AmrMesh/CD_IrregStencil.H" name="Source/AmrMesh/CD_IrregStencil.H">
-<area shape="rect" id="node1" title="Abstract class for holding cut&#45;cell stencils on an AMR level." alt="" coords="2076,5,2327,32"/>
-<area shape="rect" id="node2" href="$CD__CentroidInterpolationStencil_8H.html" title="Implementation of IrregStencil that interpolates from cell centers to cell centroids." alt="" coords="1713,80,1930,121"/>
-<area shape="rect" id="node45" href="$CD__EbCentroidInterpolationStencil_8H.html" title="Declaration of IrregStencil&#45;derived class that can from cell centers to embedded boundary centroids." alt="" coords="1954,80,2187,121"/>
-<area shape="rect" id="node47" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="2219,80,2437,121"/>
-<area shape="rect" id="node49" href="$CD__NonConservativeDivergenceStencil_8H.html" title="Implementation of IrregStencil that can perform the nonconservative divergence averaging." alt="" coords="2487,80,2761,121"/>
-<area shape="rect" id="node3" href="$CD__CentroidInterpolationStencil_8cpp.html" title="Implementation of CD_CentroidInterpolationStencil.H." alt="" coords="1438,169,1655,211"/>
-<area shape="rect" id="node4" href="$CD__PhaseRealm_8H.html" title="Declaration of the PhaseRealm class." alt="" coords="1937,177,2194,203"/>
-<area shape="rect" id="node5" href="$CD__PhaseRealm_8cpp.html" title="Implementation of CD_PhaseRealm.H." alt="" coords="1867,259,2138,285"/>
-<area shape="rect" id="node6" href="$CD__Realm_8H.html" title="Declaration of the Realm class." alt="" coords="2163,259,2381,285"/>
-<area shape="rect" id="node7" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2383,333,2622,360"/>
-<area shape="rect" id="node44" href="$CD__Realm_8cpp.html" title="Implementation of CD_Realm.H." alt="" coords="2129,333,2359,360"/>
+<area shape="rect" id="node1" title="Abstract class for holding cut&#45;cell stencils on an AMR level." alt="" coords="2227,5,2477,32"/>
+<area shape="rect" id="node2" href="$CD__CentroidInterpolationStencil_8H.html" title="Implementation of IrregStencil that interpolates from cell centers to cell centroids." alt="" coords="1869,80,2086,121"/>
+<area shape="rect" id="node45" href="$CD__EbCentroidInterpolationStencil_8H.html" title="Declaration of IrregStencil&#45;derived class that can from cell centers to embedded boundary centroids." alt="" coords="2110,80,2343,121"/>
+<area shape="rect" id="node47" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="2368,80,2587,121"/>
+<area shape="rect" id="node49" href="$CD__NonConservativeDivergenceStencil_8H.html" title="Implementation of IrregStencil that can perform the nonconservative divergence averaging." alt="" coords="2611,80,2885,121"/>
+<area shape="rect" id="node3" href="$CD__CentroidInterpolationStencil_8cpp.html" title="Implementation of CD_CentroidInterpolationStencil.H." alt="" coords="1661,169,1878,211"/>
+<area shape="rect" id="node4" href="$CD__PhaseRealm_8H.html" title="Declaration of the PhaseRealm class." alt="" coords="2159,177,2417,203"/>
+<area shape="rect" id="node5" href="$CD__PhaseRealm_8cpp.html" title="Implementation of CD_PhaseRealm.H." alt="" coords="1894,259,2165,285"/>
+<area shape="rect" id="node6" href="$CD__Realm_8H.html" title="Declaration of the Realm class." alt="" coords="2189,259,2408,285"/>
+<area shape="rect" id="node7" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2386,333,2625,360"/>
+<area shape="rect" id="node44" href="$CD__Realm_8cpp.html" title="Implementation of CD_Realm.H." alt="" coords="2131,333,2362,360"/>
 <area shape="rect" id="node8" href="$CD__AmrMesh_8cpp.html" title="Implementation of CD_AmrMesh.H." alt="" coords="5,415,256,442"/>
 <area shape="rect" id="node9" href="$CD__AmrMeshImplem_8H.html" title="Implementation of CD_AmrMesh.H." alt="" coords="280,408,504,449"/>
 <area shape="rect" id="node10" href="$CD__CellTagger_8H.html" title="Declaration of a base class for tagging cells across an AMR hierarchy." alt="" coords="882,408,1043,449"/>
 <area shape="rect" id="node12" href="$CD__Driver_8H_source.html" title=" " alt="" coords="495,505,689,531"/>
-<area shape="rect" id="node14" href="$CD__AdvectionDiffusionTagger_8H.html" title="Declaration of a cell tagger class for AdvectionDiffusion physics." alt="" coords="1001,497,1231,539"/>
-<area shape="rect" id="node15" href="$CD__BrownianWalkerTagger_8H.html" title="Class for tagging cells across an AMR hierarchy." alt="" coords="1256,497,1469,539"/>
-<area shape="rect" id="node18" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="1833,408,2034,449"/>
-<area shape="rect" id="node20" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="2660,587,2828,628"/>
-<area shape="rect" id="node21" href="$CD__CdrPlasmaGodunovStepper_8H.html" title="Declaration of the Godunov time stepper method." alt="" coords="2397,676,2635,732"/>
-<area shape="rect" id="node22" href="$CD__CdrPlasmaGodunovStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaGodunovStepper." alt="" coords="3450,780,3689,836"/>
-<area shape="rect" id="node23" href="$CD__CdrPlasmaImExSdcStepper_8H.html" title="Declaration of a semi&#45;implicit spectral deferred correction class for Physics/CdrPlasma." alt="" coords="4541,676,4779,732"/>
-<area shape="rect" id="node24" href="$CD__CdrPlasmaImExSdcStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaImExSdcStepper." alt="" coords="4619,780,4858,836"/>
-<area shape="rect" id="node28" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="3101,415,3337,442"/>
-<area shape="rect" id="node38" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="2887,408,3046,449"/>
-<area shape="rect" id="node39" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2486,408,2631,449"/>
-<area shape="rect" id="node40" href="$CD__MeshODESolver_8H.html" title="Encapsulation of an ODE solver on the mesh." alt="" coords="4263,408,4438,449"/>
-<area shape="rect" id="node41" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="3576,408,3760,449"/>
-<area shape="rect" id="node42" href="$CD__SigmaSolver_8H.html" title="Declaration of a surface charge solver." alt="" coords="2683,408,2835,449"/>
-<area shape="rect" id="node43" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="3905,408,4098,449"/>
+<area shape="rect" id="node14" href="$CD__AdvectionDiffusionTagger_8H.html" title="Declaration of a cell tagger class for AdvectionDiffusion physics." alt="" coords="1238,497,1469,539"/>
+<area shape="rect" id="node15" href="$CD__BrownianWalkerTagger_8H.html" title="Class for tagging cells across an AMR hierarchy." alt="" coords="1000,497,1213,539"/>
+<area shape="rect" id="node18" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="2077,408,2278,449"/>
+<area shape="rect" id="node20" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="2845,587,3013,628"/>
+<area shape="rect" id="node21" href="$CD__CdrPlasmaGodunovStepper_8H.html" title="Declaration of the Godunov time stepper method." alt="" coords="2810,676,3049,732"/>
+<area shape="rect" id="node22" href="$CD__CdrPlasmaGodunovStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaGodunovStepper." alt="" coords="1574,780,1813,836"/>
+<area shape="rect" id="node23" href="$CD__CdrPlasmaImExSdcStepper_8H.html" title="Declaration of a semi&#45;implicit spectral deferred correction class for Physics/CdrPlasma." alt="" coords="4398,676,4637,732"/>
+<area shape="rect" id="node24" href="$CD__CdrPlasmaImExSdcStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaImExSdcStepper." alt="" coords="4477,780,4715,836"/>
+<area shape="rect" id="node28" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="3235,415,3471,442"/>
+<area shape="rect" id="node38" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="2835,408,2994,449"/>
+<area shape="rect" id="node39" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="1530,408,1675,449"/>
+<area shape="rect" id="node40" href="$CD__MeshODESolver_8H.html" title="Encapsulation of an ODE solver on the mesh." alt="" coords="4294,408,4469,449"/>
+<area shape="rect" id="node41" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="3753,408,3937,449"/>
+<area shape="rect" id="node42" href="$CD__SigmaSolver_8H.html" title="Declaration of a surface charge solver." alt="" coords="2631,408,2783,449"/>
+<area shape="rect" id="node43" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="3018,408,3211,449"/>
 <area shape="rect" id="node11" href="$CD__CellTagger_8cpp.html" title="Implementation of CD_CellTagger.H." alt="" coords="713,497,874,539"/>
-<area shape="rect" id="node16" href="$CD__CdrPlasmaTagger_8H.html" title="Declearation of an abstract class for tagging cells in a Physics/CdrPlasma context." alt="" coords="2660,683,2828,725"/>
-<area shape="rect" id="node17" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="1712,587,1875,628"/>
+<area shape="rect" id="node16" href="$CD__CdrPlasmaTagger_8H.html" title="Declearation of an abstract class for tagging cells in a Physics/CdrPlasma context." alt="" coords="1723,683,1891,725"/>
+<area shape="rect" id="node17" href="$CD__ItoPlasmaTagger_8H.html" title="Parent tagger class for ItoPlasma." alt="" coords="1804,587,1967,628"/>
 <area shape="rect" id="node13" href="$CD__Driver_8cpp.html" title="Implementation of CD_Driver.H." alt="" coords="495,594,702,621"/>
-<area shape="rect" id="node19" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="1946,497,2147,539"/>
-<area shape="rect" id="node25" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="1493,497,1696,539"/>
-<area shape="rect" id="node26" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="1721,497,1922,539"/>
-<area shape="rect" id="node27" href="$CD__AdvectionDiffusionStepper_8H.html" title="TimeStepper class for only solving the the advection&#45;diffusion equation." alt="" coords="2171,497,2410,539"/>
-<area shape="rect" id="node29" href="$CD__TimeStepper_8cpp.html" title="Implementation of CD_TimeStepper.H." alt="" coords="3255,505,3505,531"/>
-<area shape="rect" id="node30" href="$CD__BrownianWalkerStepper_8H.html" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="2486,497,2706,539"/>
-<area shape="rect" id="node31" href="$CD__FieldStepper_8H.html" title="TimeStepper class for only solving the Poisson equation (with surface charge)" alt="" coords="3019,497,3181,539"/>
-<area shape="rect" id="node32" href="$CD__GeometryStepper_8H.html" title="Declaration of a TimeStepper class without any solver functionality, i.e. for geometries only." alt="" coords="3529,497,3692,539"/>
-<area shape="rect" id="node33" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="2781,497,2944,539"/>
-<area shape="rect" id="node34" href="$CD__MeshODEStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing an ODE on a mesh." alt="" coords="4270,587,4431,628"/>
-<area shape="rect" id="node35" href="$CD__MeshODEStepperImplem_8H.html" title="Implementation of CD_MeshODEStepper.H." alt="" coords="4247,497,4454,539"/>
-<area shape="rect" id="node36" href="$CD__RadiativeTransferStepper_8H.html" title="TimeStepper class for only evolving radiative transfer modules." alt="" coords="3767,497,3996,539"/>
-<area shape="rect" id="node37" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="4020,497,4223,539"/>
-<area shape="rect" id="node46" href="$CD__EbCentroidInterpolationStencil_8cpp.html" title="Implementation of CD_EbCentroidInterpolationStencil.H." alt="" coords="1679,169,1913,211"/>
-<area shape="rect" id="node48" href="$CD__IrregAmrStencilImplem_8H.html" title="Implementation of CD_IrregAmrStencil.H." alt="" coords="2219,169,2437,211"/>
-<area shape="rect" id="node50" href="$CD__NonConservativeDivergenceStencil_8cpp.html" title="Implementation of CD_NonConservativeDivergenceStencil.H." alt="" coords="2512,169,2787,211"/>
+<area shape="rect" id="node19" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="2190,497,2391,539"/>
+<area shape="rect" id="node25" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="1963,497,2165,539"/>
+<area shape="rect" id="node26" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="1737,497,1938,539"/>
+<area shape="rect" id="node27" href="$CD__AdvectionDiffusionStepper_8H.html" title="TimeStepper class for only solving the the advection&#45;diffusion equation." alt="" coords="2415,497,2654,539"/>
+<area shape="rect" id="node29" href="$CD__TimeStepper_8cpp.html" title="Implementation of CD_TimeStepper.H." alt="" coords="3462,505,3711,531"/>
+<area shape="rect" id="node30" href="$CD__BrownianWalkerStepper_8H.html" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="1493,497,1713,539"/>
+<area shape="rect" id="node31" href="$CD__FieldStepper_8H.html" title="TimeStepper class for only solving the Poisson equation (with surface charge)" alt="" coords="2967,497,3129,539"/>
+<area shape="rect" id="node32" href="$CD__GeometryStepper_8H.html" title="Declaration of a TimeStepper class without any solver functionality, i.e. for geometries only." alt="" coords="3736,497,3899,539"/>
+<area shape="rect" id="node33" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="2729,497,2892,539"/>
+<area shape="rect" id="node34" href="$CD__MeshODEStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing an ODE on a mesh." alt="" coords="4301,587,4462,628"/>
+<area shape="rect" id="node35" href="$CD__MeshODEStepperImplem_8H.html" title="Implementation of CD_MeshODEStepper.H." alt="" coords="4278,497,4485,539"/>
+<area shape="rect" id="node36" href="$CD__RadiativeTransferStepper_8H.html" title="TimeStepper class for only evolving radiative transfer modules." alt="" coords="3973,497,4203,539"/>
+<area shape="rect" id="node37" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="3153,497,3388,539"/>
+<area shape="rect" id="node46" href="$CD__EbCentroidInterpolationStencil_8cpp.html" title="Implementation of CD_EbCentroidInterpolationStencil.H." alt="" coords="1902,169,2135,211"/>
+<area shape="rect" id="node48" href="$CD__IrregAmrStencilImplem_8H.html" title="Implementation of CD_IrregAmrStencil.H." alt="" coords="2492,169,2711,211"/>
+<area shape="rect" id="node50" href="$CD__NonConservativeDivergenceStencil_8cpp.html" title="Implementation of CD_NonConservativeDivergenceStencil.H." alt="" coords="2785,169,3060,211"/>
 </map>

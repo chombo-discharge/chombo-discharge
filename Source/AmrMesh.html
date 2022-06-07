@@ -63,6 +63,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
@@ -95,6 +96,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
@@ -146,12 +148,18 @@
   <div class="section" id="amrmesh">
 <span id="chap-amrmesh"></span><h1>AmrMesh<a class="headerlink" href="#amrmesh" title="Permalink to this heading"></a></h1>
 <p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> handles (almost) all spatial operations in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-Internally, <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> contains a bunch of operators that are useful across classes, such as ghost cell interpolation operators, coarsening operators, and stencils for interpolation and extrapolation near the embedded boundaries. <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> also contains routines for generation and load-balancing of grids based and also contains simple routines for allocation and deallocation of memory.</p>
+Internally, <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> contains a bunch of operators that are useful across classes, such as ghost cell interpolation operators, coarsening operators, and stencils for interpolation and extrapolation near the embedded boundaries.
+<a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> also contains routines for generation and load-balancing of grids based and also contains simple routines for allocation and deallocation of memory.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> only handles spatial <em>operations</em>, it otherwise has limited knowledge of numerical discretizations.</p>
 </div>
-<p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> is an integral part of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, and users will never have the need to modify it unless they are implementing something entirely new. The behavior of <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> is modified through it’s available input parameters, listed below:</p>
+<p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> is an integral part of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, and users will never have the need to modify it unless they are implementing something entirely new.
+The behavior of <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> is modified through its available input parameters.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh C++ API</a></p>
+</div>
 <div class="section" id="main-functionality">
 <h2>Main functionality<a class="headerlink" href="#main-functionality" title="Permalink to this heading"></a></h2>
 <p>There are two main functionalities in <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>:</p>
@@ -183,6 +191,16 @@ E.g.</p>
 These are, for example, coarsening operators, interpolation operators, ghost cell interpolators etc.
 To save some regrid time, we don’t always build every AMR operator that we might ever need, but have solvers <em>register</em> the ones that they specifically need.
 See <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> for details.</p>
+<p>The API of <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> is quite extensive, and it has functionality both for providing grid operators as well as:</p>
+<ul class="simple">
+<li><p>Maintaining overview of grids and operators.</p></li>
+<li><p>Allocating grid and particle data.</p></li>
+<li><p>Interpolating to new grids.</p></li>
+<li><p>Coarsening data.</p></li>
+<li><p>Updating ghost cells.</p></li>
+<li><p>Interpolating data to e.g. EB centroids.</p></li>
+</ul>
+<p>The <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh API</a> is a good place to start for figuring out the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> functionality.</p>
 </div>
 <div class="section" id="class-options">
 <h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this heading"></a></h2>
@@ -213,6 +231,11 @@ Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> means that g
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.ghost_interp</span></code>. Default ghost cell interpolation type. Valid options are <em>pwl</em> or <em>quad</em>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.ebcf</span></code>. Can be set to false if refinement boundaries do not cross the EB. Valid options are <em>true</em> and <em>false</em>.</p></li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> only supports uniform resolution (i.e., cubic grid cells).
+I.e. the user must specify consist domain sizes and resolutions.</p>
+</div>
 </div>
 <div class="section" id="runtime-options">
 <h2>Runtime options<a class="headerlink" href="#runtime-options" title="Permalink to this heading"></a></h2>
@@ -228,11 +251,6 @@ Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> means that g
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_box_size</span></code>.</p></li>
 </ul>
 <p>These options only affect the grid generation method and parameters, and are thus only effective after the next regrid.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> only supports uniform resolution (i.e., cubic grid cells).
-I.e. the user must specify consist domain sizes and resolutions.</p>
-</div>
 </div>
 </div>
 

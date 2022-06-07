@@ -6,12 +6,14 @@
 <area shape="rect" id="node5" href="$CD__MeshODESolverImplem_8H.html" title="Implementation of CD_MeshODESolver.H." alt="" coords="644,102,864,143"/>
 <area shape="rect" id="node9" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="889,102,1073,143"/>
 <area shape="rect" id="node10" href="$CD__TracerParticleSolverImplem_8H.html" title="Implementation of CD_TracerParticleSolver.H." alt="" coords="1097,102,1341,143"/>
-<area shape="rect" id="node14" href="$CD__DischargeIO_8cpp.html" title="Implementation of DischargeIO.H." alt="" coords="1366,102,1510,143"/>
-<area shape="rect" id="node15" href="$CD__CdrPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_CdrPlasmaGodunovStepper.H." alt="" coords="1535,95,1773,151"/>
+<area shape="rect" id="node16" href="$CD__DischargeIO_8cpp.html" title="Implementation of DischargeIO.H." alt="" coords="1366,102,1510,143"/>
+<area shape="rect" id="node17" href="$CD__CdrPlasmaGodunovStepper_8cpp.html" title="Implementation of CD_CdrPlasmaGodunovStepper.H." alt="" coords="1535,95,1773,151"/>
 <area shape="rect" id="node6" href="$CD__MeshODESolver_8H.html" title="Encapsulation of an ODE solver on the mesh." alt="" coords="667,199,841,240"/>
 <area shape="rect" id="node7" href="$CD__MeshODEStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing an ODE on a mesh." alt="" coords="673,377,835,419"/>
 <area shape="rect" id="node8" href="$CD__MeshODEStepperImplem_8H.html" title="Implementation of CD_MeshODEStepper.H." alt="" coords="721,288,928,329"/>
 <area shape="rect" id="node11" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="1123,199,1316,240"/>
-<area shape="rect" id="node12" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="1118,288,1321,329"/>
-<area shape="rect" id="node13" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="1093,377,1346,419"/>
+<area shape="rect" id="node12" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="1027,288,1262,329"/>
+<area shape="rect" id="node14" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="1338,288,1541,329"/>
+<area shape="rect" id="node13" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="1001,377,1288,419"/>
+<area shape="rect" id="node15" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="1313,377,1566,419"/>
 </map>

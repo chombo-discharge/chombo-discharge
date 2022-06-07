@@ -62,6 +62,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
@@ -89,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
@@ -139,8 +141,13 @@
              
   <div class="section" id="geocoarsener">
 <span id="chap-geocoarsener"></span><h1>GeoCoarsener<a class="headerlink" href="#geocoarsener" title="Permalink to this heading"></a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">GeoCoarsener</span></code> class can remove refinement flags along a geometric surface.
-To remove these so-called “geometric tags”, the user specifies boxes in space where geometric tags will be removed:</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">GeoCoarsener</span></code> is a relic of an early version of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
+It will be completely removed in a future version.</p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">GeoCoarsener</span></code> class permits manual removement of refinement flags along a geometric surface.
+To remove these so-called <em>geometric tags</em>, the user specifies boxes in space where geometric tags will be removed:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>GeoCoarsener.num_boxes   <span class="o">=</span> <span class="m">1</span>            <span class="c1"># Number of coarsening boxes (0 = don&#39;t coarsen)</span>
 GeoCoarsener.box1_lo     <span class="o">=</span> -1 -1 -1     <span class="c1"># Lower-left corner</span>
 GeoCoarsener.box1_hi     <span class="o">=</span>  <span class="m">1</span>  <span class="m">1</span>  <span class="m">1</span>     <span class="c1"># Upper-right corner</span>

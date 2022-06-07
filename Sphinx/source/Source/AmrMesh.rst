@@ -4,12 +4,18 @@ AmrMesh
 ========
 
 :ref:`Chap:AmrMesh` handles (almost) all spatial operations in ``chombo-discharge``.
-Internally, :ref:`Chap:AmrMesh` contains a bunch of operators that are useful across classes, such as ghost cell interpolation operators, coarsening operators, and stencils for interpolation and extrapolation near the embedded boundaries. :ref:`Chap:AmrMesh` also contains routines for generation and load-balancing of grids based and also contains simple routines for allocation and deallocation of memory.
+Internally, :ref:`Chap:AmrMesh` contains a bunch of operators that are useful across classes, such as ghost cell interpolation operators, coarsening operators, and stencils for interpolation and extrapolation near the embedded boundaries.
+:ref:`Chap:AmrMesh` also contains routines for generation and load-balancing of grids based and also contains simple routines for allocation and deallocation of memory.
 
 .. note::
    :ref:`Chap:AmrMesh` only handles spatial *operations*, it otherwise has limited knowledge of numerical discretizations. 
 
-:ref:`Chap:AmrMesh` is an integral part of ``chombo-discharge``, and users will never have the need to modify it unless they are implementing something entirely new. The behavior of :ref:`Chap:AmrMesh` is modified through it's available input parameters, listed below:
+:ref:`Chap:AmrMesh` is an integral part of ``chombo-discharge``, and users will never have the need to modify it unless they are implementing something entirely new.
+The behavior of :ref:`Chap:AmrMesh` is modified through its available input parameters.
+
+.. tip::
+
+   `AmrMesh C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_
 
 Main functionality
 ------------------
@@ -49,10 +55,21 @@ These are, for example, coarsening operators, interpolation operators, ghost cel
 To save some regrid time, we don't always build every AMR operator that we might ever need, but have solvers *register* the ones that they specifically need.
 See :ref:`Chap:Realm` for details.
 
+The API of ``AmrMesh`` is quite extensive, and it has functionality both for providing grid operators as well as:
+
+* Maintaining overview of grids and operators.
+* Allocating grid and particle data.
+* Interpolating to new grids.
+* Coarsening data.
+* Updating ghost cells.
+* Interpolating data to e.g. EB centroids.
+
+The `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ is a good place to start for figuring out the ``AmrMesh`` functionality. 
+
 Class options
 -------------
 
-The class options below control ``AmrMesh``: 
+The class options below control ``AmrMesh``:
 
 * ``AmrMesh.lo_corner``. Low corner of problem domain (e.g. 0 0 0)
 * ``AmrMesh.hi_corner``. High corner of problem domain (e.g. 1 1 1). 
@@ -77,7 +94,12 @@ The class options below control ``AmrMesh``:
 * ``AmrMesh.eb_sten``. EB interpolation stencils. 
 * ``AmrMesh.redist_radius``. Redistribution radius. 
 * ``AmrMesh.ghost_interp``. Default ghost cell interpolation type. Valid options are *pwl* or *quad*. 
-* ``AmrMesh.ebcf``. Can be set to false if refinement boundaries do not cross the EB. Valid options are *true* and *false*. 
+* ``AmrMesh.ebcf``. Can be set to false if refinement boundaries do not cross the EB. Valid options are *true* and *false*.
+
+.. warning::
+
+   ``chombo-discharge`` only supports uniform resolution (i.e., cubic grid cells).
+   I.e. the user must specify consist domain sizes and resolutions.   
 
 Runtime options
 ---------------
@@ -95,7 +117,4 @@ The following options are runtime options for ``AmrMesh``:
 
 These options only affect the grid generation method and parameters, and are thus only effective after the next regrid.
 
-.. note::
 
-   ``chombo-discharge`` only supports uniform resolution (i.e., cubic grid cells).
-   I.e. the user must specify consist domain sizes and resolutions. 
