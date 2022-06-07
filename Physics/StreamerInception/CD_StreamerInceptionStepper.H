@@ -37,7 +37,7 @@ namespace Physics {
       @brief Class for volume evaluation of the streamer inception integral. 
       @details P is the tracer particle solver and F is the field solver type. 
     */
-    template <typename P = TracerParticleSolver<TracerParticle<2,0> >, typename F = FieldSolverMultigrid>
+    template <typename P = TracerParticleSolver<TracerParticle<2, 0>>, typename F = FieldSolverMultigrid>
     class StreamerInceptionStepper : public TimeStepper
     {
     public:
@@ -226,6 +226,13 @@ namespace Physics {
       virtual void
       setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept;
 
+      /*!
+	@brief Set voltage for field solver. 
+	@param[in] a_voltage Input voltage. 
+      */
+      virtual void
+      setVoltage(const Real a_voltage) noexcept;
+
     protected:
       /*!
 	@brief Integration algorithm
@@ -251,6 +258,13 @@ namespace Physics {
 	@brief Voltage sweeps
       */
       std::vector<Real> m_voltageSweeps;
+
+      /*!
+	@brief Scale electrostatic solution.
+	@param[in] a_scale Scaling factor for potential and electric field. 
+      */
+      virtual void
+      scaleElectrostatics(const Real& a_scale) noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics
