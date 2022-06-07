@@ -2,8 +2,6 @@
     max-width: 960px !important;
 }
 
-
-
 /* BEGIN Fix the sphinx_rtd misplaced equation label */
 .eqno {
     margin-left: 5px;
@@ -19,3 +17,11 @@
     margin-right: -0.7em;
 }
 /* END Fix the sphinx_rtd misplaced equation label */
+
+.rst-content .api .admonition-title {
+   background: #b99976
+}
+
+.rst-content .api {
+   background: #e5d3b3
+}

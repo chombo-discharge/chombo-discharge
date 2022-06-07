@@ -112,6 +112,7 @@ Design
    :caption: Design
    :hidden:	     
 
+   Source/DesignOverview
    Source/Driver
    Source/ComputationalGeometry
    Source/TimeStepper
@@ -151,6 +152,7 @@ Physics models
    Applications/GeometryModel
    Applications/MeshODEModel
    Applications/RadiativeTransferModel
+   Applications/StreamerInceptionModel
    Applications/TracerParticleModel
 
 ..   ItoPlasmaModel
