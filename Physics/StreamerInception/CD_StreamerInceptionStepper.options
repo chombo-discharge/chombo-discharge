@@ -1,0 +1,8 @@
+# ====================================================================================================
+# StreamerInceptionStepper class options
+# ====================================================================================================
+StreamerInceptionStepper.verbosity     = -1
+StreamerInceptionStepper.integration   = rk2
+StreamerInceptionStepper.voltage_lo    = 1.0
+StreamerInceptionStepper.voltage_hi    = 100.0
+StreamerInceptionStepper.voltage_steps = 10

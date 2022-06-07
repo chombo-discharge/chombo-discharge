@@ -19,6 +19,13 @@ The implementation is by a class
 and is found in :file:`$DISCHARGE_HOME/Physics/Electrostatics`.
 The C++ API is found `here <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1Electrostatics_1_1FieldStepper.html>`_.
 
+Solvers
+-------
+
+This module uses the following solvers:
+
+#. :ref:`Chap:FieldSolver`.
+
 Time stepping
 -------------
 
