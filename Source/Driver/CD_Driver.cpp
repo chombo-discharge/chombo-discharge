@@ -65,7 +65,7 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   m_dt       = 0.0;
 
   // Default is always to do the coarsening
-  m_doCoarsening = true;  
+  m_doCoarsening = true;
 
   // Parse some class options and create the output directories for the simulation.
   this->parseOptions();
@@ -1393,13 +1393,13 @@ Driver::setupGeometryOnly()
   }
 
   const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
-  
+
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
                                            m_amr->getNumberOfEbGhostCells(),
-					   numCoarsenings);
+                                           numCoarsenings);
   const Real t1 = Timer::wallClock();
   if (procID() == 0)
     std::cout << "geotime = " << t1 - t0 << std::endl;
@@ -1481,7 +1481,7 @@ Driver::setupFresh(const int a_initialRegrids)
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
                                            m_amr->getNumberOfEbGhostCells(),
-					   numCoarsenings);
+                                           numCoarsenings);
 
   // Register Realms
   m_timeStepper->setAmr(m_amr);
@@ -1607,15 +1607,15 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartF
       EBIndexSpace::s_useMemoryLoadBalance = false;
     }
   }
-  
+
   const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
-  
+
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
                                            m_amr->getNumberOfEbGhostCells(),
-					   numCoarsenings);
+                                           numCoarsenings);
 
   this->getGeometryTags(); // Get geometric tags.
 

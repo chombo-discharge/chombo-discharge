@@ -30,9 +30,7 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   }
 
   // Default alpha
-  m_alpha = [](const Real E) {
-    return exp(-E);
-  };
+  m_alpha = [](const Real E) { return exp(-E); };
 }
 
 template <typename P, typename F>
@@ -46,23 +44,23 @@ StreamerInceptionStepper<P, F>::~StreamerInceptionStepper()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::setupSolvers() 
+StreamerInceptionStepper<P, F>::setupSolvers()
 {
   CH_TIME("StreamerInceptionStepper::setupSolvers");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::~StreamerInceptionStepper" << endl;
   }
 
-  // Instantiate solvers. 
-  m_fieldSolver    = RefCountedPtr<F> (new F());
-  m_particleSolver = RefCountedPtr<P> (new P());
+  // Instantiate solvers.
+  m_fieldSolver    = RefCountedPtr<F>(new F());
+  m_particleSolver = RefCountedPtr<P>(new P());
 
-  // Set up solvers. 
+  // Set up solvers.
 }
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::allocate() 
+StreamerInceptionStepper<P, F>::allocate()
 {
   CH_TIME("StreamerInceptionStepper::allocate");
   if (m_verbosity > 5) {
@@ -72,7 +70,7 @@ StreamerInceptionStepper<P, F>::allocate()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::initialData() 
+StreamerInceptionStepper<P, F>::initialData()
 {
   CH_TIME("StreamerInceptionStepper::initialData");
   if (m_verbosity > 5) {
@@ -82,7 +80,7 @@ StreamerInceptionStepper<P, F>::initialData()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::postInitialize() 
+StreamerInceptionStepper<P, F>::postInitialize()
 {
   CH_TIME("StreamerInceptionStepper::postInitialize");
   if (m_verbosity > 5) {
@@ -92,7 +90,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::registerRealms() 
+StreamerInceptionStepper<P, F>::registerRealms()
 {
   CH_TIME("StreamerInceptionStepper::registerRealms");
   if (m_verbosity > 5) {
@@ -102,7 +100,7 @@ StreamerInceptionStepper<P, F>::registerRealms()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::registerOperators() 
+StreamerInceptionStepper<P, F>::registerOperators()
 {
   CH_TIME("StreamerInceptionStepper::registerOperators");
   if (m_verbosity > 5) {
@@ -122,7 +120,7 @@ StreamerInceptionStepper<P, F>::parseOptions()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::parseRuntimeOptions() 
+StreamerInceptionStepper<P, F>::parseRuntimeOptions()
 {
   CH_TIME("StreamerInceptionStepper::parseRuntimeOptions");
   if (m_verbosity > 5) {
@@ -133,7 +131,7 @@ StreamerInceptionStepper<P, F>::parseRuntimeOptions()
 #ifdef CH_USE_HDF5
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const 
+StreamerInceptionStepper<P, F>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
 {
   CH_TIME("StreamerInceptionStepper::writeCheckpointData");
   if (m_verbosity > 5) {
@@ -145,7 +143,7 @@ StreamerInceptionStepper<P, F>::writeCheckpointData(HDF5Handle& a_handle, const 
 #ifdef CH_USE_HDF5
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl) 
+StreamerInceptionStepper<P, F>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
 {
   CH_TIME("StreamerInceptionStepper::readCheckpointData");
   if (m_verbosity > 5) {
@@ -158,7 +156,7 @@ template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
                                               Vector<std::string>& a_plotVariableNames,
-                                              int&                 a_icomp) const 
+                                              int&                 a_icomp) const
 {
   CH_TIME("StreamerInceptionStepper::writePlotData");
   if (m_verbosity > 5) {
@@ -168,7 +166,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
 template <typename P, typename F>
 int
-StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const 
+StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
 {
   CH_TIME("StreamerInceptionStepper::getNumberOfPlotVariables");
   if (m_verbosity > 5) {
@@ -180,7 +178,7 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
 
 template <typename P, typename F>
 Real
-StreamerInceptionStepper<P, F>::computeDt() 
+StreamerInceptionStepper<P, F>::computeDt()
 {
   CH_TIME("StreamerInceptionStepper::computeDt");
   if (m_verbosity > 5) {
@@ -192,7 +190,7 @@ StreamerInceptionStepper<P, F>::computeDt()
 
 template <typename P, typename F>
 Real
-StreamerInceptionStepper<P, F>::advance(const Real a_dt) 
+StreamerInceptionStepper<P, F>::advance(const Real a_dt)
 {
   CH_TIME("StreamerInceptionStepper::advance");
   if (m_verbosity > 5) {
@@ -204,7 +202,7 @@ StreamerInceptionStepper<P, F>::advance(const Real a_dt)
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) 
+StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt)
 {
   CH_TIME("StreamerInceptionStepper::synchronizeSolverTimes");
   if (m_verbosity > 5) {
@@ -214,7 +212,7 @@ StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const R
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::printStepReport() 
+StreamerInceptionStepper<P, F>::printStepReport()
 {
   CH_TIME("StreamerInceptionStepper::printStepReport");
   if (m_verbosity > 5) {
@@ -224,7 +222,7 @@ StreamerInceptionStepper<P, F>::printStepReport()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel) 
+StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 {
   CH_TIME("StreamerInceptionStepper::preRegrid");
   if (m_verbosity > 5) {
@@ -234,9 +232,7 @@ StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFines
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::regrid(const int a_lmin,
-                                       const int a_oldFinestLevel,
-                                       const int a_newFinestLevel) 
+StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
 {
   CH_TIME("StreamerInceptionStepper::regrid");
   if (m_verbosity > 5) {
@@ -246,7 +242,7 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin,
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::postRegrid() 
+StreamerInceptionStepper<P, F>::postRegrid()
 {
   CH_TIME("StreamerInceptionStepper::postRegrid");
   if (m_verbosity > 5) {
