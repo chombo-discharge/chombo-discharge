@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_StreamerInceptionStepperImplem.H
-  @brief  Impementation of CD_StreamerInceptionStepper.H
+  @brief  Implementation of CD_StreamerInceptionStepper.H
   @author Robert Marskar
 */
 
@@ -19,6 +19,13 @@
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_NamespaceHeader.H>
 
+// Tasks:
+//
+// 1. Compute inception integral with particle tracing
+// 2. Compute critical volume
+// 3. Compute negative ion drift times to electrode(s). Compute as time/(V * mobility)
+// 4. Evaluate field emission rates.
+// 5. Background ionization rates
 using namespace Physics::StreamerInception;
 
 template <typename P, typename F>
@@ -48,14 +55,12 @@ StreamerInceptionStepper<P, F>::setupSolvers()
 {
   CH_TIME("StreamerInceptionStepper::setupSolvers");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::~StreamerInceptionStepper" << endl;
+    pout() << "StreamerInceptionStepper::setupSolvers" << endl;
   }
 
   // Instantiate solvers.
   m_fieldSolver    = RefCountedPtr<F>(new F());
   m_particleSolver = RefCountedPtr<P>(new P());
-
-  // Set up solvers.
 }
 
 template <typename P, typename F>
@@ -260,6 +265,39 @@ StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)
   }
 
   m_alpha = a_alpha;
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::setVoltage(const Real a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setVoltage");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setVoltage" << endl;
+  }
+
+  CH_assert(!m_fieldSolver.isNull());
+
+  // Give field solver a constant voltage.
+  m_fieldSolver->setVoltage([a_voltage](const Real& a_time) -> Real { return a_voltage; });
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::scaleElectrostatics(const Real& a_scale) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::scaleElectrostatics");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::scaleElectrostatics" << endl;
+  }
+
+  CH_assert(!m_fieldSolver.isNull());
+
+  MFAMRCellData& potential     = m_fieldSolver->getPotential();
+  MFAMRCellData& electricField = m_fieldSolver->getElectricField();
+
+  DataOps::scale(potential, a_scale);
+  DataOps::scale(electricField, a_scale);
 }
 
 #include <CD_NamespaceFooter.H>

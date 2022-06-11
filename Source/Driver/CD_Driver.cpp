@@ -1628,8 +1628,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartF
   m_amr->setBaseImplicitFunction(phase::solid, m_computationalGeometry->getSolidImplicitFunction());
 
   // Read checkpoint file
-  this->readCheckpointFile(
-    a_restartFile); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
+  this->readCheckpointFile(a_restartFile);
 
   // Time stepper does post checkpoint setup
   m_timeStepper->postCheckpointSetup();

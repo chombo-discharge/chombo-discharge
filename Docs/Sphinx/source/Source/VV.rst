@@ -5,7 +5,6 @@ Verification and validation
 
 We strive to include convergence testing (verification), and in some cases comparison with various types of experimental (validation).
 Below, we discuss our approach to spatial and temporal convergence testing.
-In all cases the various norms are given by
 
 .. _Chap:SpatialConvergence:
 
