@@ -47,7 +47,7 @@ public:
               const RealVect a_sphereGap,
               const IntVect  a_numSpheres,
               const bool     a_useFast,
-	      const bool     a_flipInside,
+              const bool     a_flipInside,
               const Real     a_zCoord = 0.0);
 
   /*!
