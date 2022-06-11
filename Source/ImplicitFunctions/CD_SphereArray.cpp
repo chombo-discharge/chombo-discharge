@@ -115,8 +115,9 @@ SphereArray::value(const RealVect& a_point) const
     dist = m_slowUnion->signedDistance(x);
   }
 
+  // Chombo and EBGeometry use opposite sign convetions
   if (!m_flipInside) {
-    dist = -dst;
+    dist = -dist;
   }
 
   return dist;
