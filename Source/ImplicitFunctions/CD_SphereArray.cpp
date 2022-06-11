@@ -30,6 +30,7 @@ SphereArray::SphereArray(const Real     a_radius,
                          const RealVect a_sphereGap,
                          const IntVect  a_numSpheres,
                          const bool     a_useFast,
+			 const bool     a_flipInside,
                          const Real     a_zCoord)
 {
   CH_TIME("SphereArray::SphereArray(full)");
@@ -77,18 +78,20 @@ SphereArray::SphereArray(const Real     a_radius,
   };
 
   // Make the slow and fast unions.
-  m_slowUnion = std::make_shared<EBGeometry::Union<Real>>(spheres, false);
-  m_fastUnion = std::make_shared<EBGeometry::UnionBVH<Real, AABB, SphereArray::K>>(spheres, false, aabbConstructor);
-  m_useFast   = a_useFast;
+  m_slowUnion  = std::make_shared<EBGeometry::Union<Real>>(spheres, false);
+  m_fastUnion  = std::make_shared<EBGeometry::UnionBVH<Real, AABB, SphereArray::K>>(spheres, false, aabbConstructor);
+  m_useFast    = a_useFast;
+  m_flipInside = a_flipInside;
 }
 
 SphereArray::SphereArray(const SphereArray& a_input)
 {
   CH_TIME("SphereArray::SphereArray(other)");
 
-  m_slowUnion = a_input.m_slowUnion;
-  m_fastUnion = a_input.m_fastUnion;
-  m_useFast   = a_input.m_useFast;
+  m_slowUnion  = a_input.m_slowUnion;
+  m_fastUnion  = a_input.m_fastUnion;
+  m_useFast    = a_input.m_useFast;
+  m_flipInside = a_input.m_flipInside;
 }
 
 SphereArray::~SphereArray() { CH_TIME("SphereArray::~SphereArray"); }
@@ -112,6 +115,10 @@ SphereArray::value(const RealVect& a_point) const
     dist = m_slowUnion->signedDistance(x);
   }
 
+  if(!m_flipInside) {
+    dist = -dst;
+  }
+    
   return dist;
 }
 

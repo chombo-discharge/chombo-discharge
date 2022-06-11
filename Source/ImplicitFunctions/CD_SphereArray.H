@@ -39,6 +39,7 @@ public:
     @param[in] a_sphereGap  Distance between spheres
     @param[in] a_numSpheres Number of spheres in each coordinate direction
     @param[in] a_useFast    Use fast union or not
+    @param[in] a_flipInside Make outside to inside
     @param[in] a_zCoord     If 2D, this sets the z-coordinate
   */
   SphereArray(const Real     a_radius,
@@ -46,6 +47,7 @@ public:
               const RealVect a_sphereGap,
               const IntVect  a_numSpheres,
               const bool     a_useFast,
+	      const bool     a_flipInside,
               const Real     a_zCoord = 0.0);
 
   /*!
@@ -81,6 +83,11 @@ protected:
     @brief Switch for using fast or slow union
   */
   bool m_useFast;
+
+  /*!
+    @brief Make inside to outside
+  */
+  bool m_flipInside;
 
   /*!
     @brief Standard union ala Chombo
