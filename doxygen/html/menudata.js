@@ -105,7 +105,8 @@ var menudata={children:[
 {text:"w",url:"functions_func_w.html#index_w"},
 {text:"~",url:"functions_func_~.html#index__7E"}]},
 {text:"Variables",url:"functions_vars.html",children:[
-{text:"m",url:"functions_vars.html#index_m"},
+{text:"k",url:"functions_vars.html#index_k"},
+{text:"m",url:"functions_vars_m.html#index_m"},
 {text:"p",url:"functions_vars_p.html#index_p"},
 {text:"s",url:"functions_vars_s.html#index_s"},
 {text:"t",url:"functions_vars_t.html#index_t"}]},
