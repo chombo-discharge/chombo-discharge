@@ -287,6 +287,11 @@ protected:
   Real m_refineAngle;
 
   /*!
+    @brief Turn on/off geometry coarsening below the base level
+  */
+  bool m_doCoarsening;
+
+  /*!
     @brief Special option for when geometric tags are changed during a simulation. 
     @details This becomes = true in parseGeometryRefinement every time the geometric refinement criteria changed, and it always becomes false after a regrid. 
   */

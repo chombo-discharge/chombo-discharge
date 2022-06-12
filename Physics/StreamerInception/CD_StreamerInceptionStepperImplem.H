@@ -26,7 +26,6 @@
 // 3. Compute negative ion drift times to electrode(s). Compute as time/(V * mobility)
 // 4. Evaluate field emission rates.
 // 5. Background ionization rates
-
 using namespace Physics::StreamerInception;
 
 template <typename P, typename F>
