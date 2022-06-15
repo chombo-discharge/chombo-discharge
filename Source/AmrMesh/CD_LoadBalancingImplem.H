@@ -149,20 +149,29 @@ LoadBalancing::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a
   CH_TIME("LoadBalancing::sort");
 
   switch (a_which) {
-  case BoxSorting::None:
+  case BoxSorting::None: {
     break;
-  case BoxSorting::Std:
+  }
+  case BoxSorting::Std: {
     LoadBalancing::standardSort(a_boxes, a_loads);
+
     break;
-  case BoxSorting::Shuffle:
+  }
+  case BoxSorting::Shuffle: {
     LoadBalancing::shuffleSort(a_boxes, a_loads);
+
     break;
-  case BoxSorting::Morton:
+  }
+  case BoxSorting::Morton: {
     LoadBalancing::mortonSort(a_boxes, a_loads);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Abort("LoadBalancing::sort_boxes - unknown algorithm requested");
+
     break;
+  }
   }
 }
 
@@ -217,7 +226,7 @@ LoadBalancing::mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads)
   std::vector<Box>& b    = a_boxes.stdVector();
   int               bits = maxBits(b.begin(), b.end());
 
-  // Morton sort that motherfucker.
+  // Morton sort.
   std::sort(std::begin(vec), std::end(vec), [bits](const std::pair<Box, T>& v1, const std::pair<Box, T>& v2) -> bool {
     return mortonComparator(bits, v1, v2);
   });
@@ -230,8 +239,6 @@ template <class T>
 bool
 LoadBalancing::mortonComparator(const int a_maxBits, const std::pair<Box, T>& a_lhs, const std::pair<Box, T>& a_rhs)
 {
-  CH_TIME("LoadBalancing::mortonComparator");
-
   const Box& lbox = a_lhs.first;
   const Box& rbox = a_rhs.first;
 
@@ -239,13 +246,17 @@ LoadBalancing::mortonComparator(const int a_maxBits, const std::pair<Box, T>& a_
   const IntVect r = rbox.smallEnd();
 
   for (int i = a_maxBits; i > 0; i--) {
-    const int N = (1 << i); // march from most significant bit to least.
+
+    // March from most significant bit to least.
+    const int N = (1 << i);
 
     for (int dir = CH_SPACEDIM - 1; dir >= 0; dir--) {
-      if ((l[dir] / N) < (r[dir] / N))
+      if ((l[dir] / N) < (r[dir] / N)) {
         return true;
-      else if ((l[dir] / N) > (r[dir] / N))
+      }
+      else if ((l[dir] / N) > (r[dir] / N)) {
         return false;
+      }
     }
   }
 

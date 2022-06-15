@@ -42,6 +42,7 @@ public:
     @param[in] a_probLo        Physical coordinates of the lower-left corner of simulation domain
     @param[in] a_finestDomain  Finest grid level
     @param[in] a_scanLevel     Scan level, i.e. on which level to initiate the load balancing sequence. 
+    @param[in] a_ebGhost       Number of EB ghost cells
     @param[in] a_thsdhVoF      Threshold for GeometryShop
   */
   ScanShop(const BaseIF&       a_geometry,
@@ -50,6 +51,7 @@ public:
            const RealVect      a_probLo,
            const ProblemDomain a_finestDomain,
            const ProblemDomain a_scanLevel,
+           const int           a_ebGhost   = 4,
            const Real          a_thrshdVoF = 1.0e-16);
 
   /*!
