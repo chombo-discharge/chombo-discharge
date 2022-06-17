@@ -423,7 +423,8 @@ EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 
   // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
   // is the displacement from a_probLo and not the physical position.
-  auto getCellIndex = [&dx = a_dx](const RealVect a_rv) -> IntVect {
+  const auto& dx           = a_dx;
+  auto        getCellIndex = [&dx](const RealVect a_rv) -> IntVect {
     return IntVect(D_DECL(std::floor(a_rv[0] / dx[0]), std::floor(a_rv[1] / dx[1]), std::floor(a_rv[2] / dx[2])));
   };
 
@@ -584,7 +585,8 @@ EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 
   // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
   // is the displacement from a_probLo and not the physical position.
-  auto getCellIndex = [&dx = a_dx](const RealVect a_rv) -> IntVect {
+  const auto& dx           = a_dx;
+  auto        getCellIndex = [&dx](const RealVect a_rv) -> IntVect {
     return IntVect(D_DECL(std::floor(a_rv[0] / dx[0]), std::floor(a_rv[1] / dx[1]), std::floor(a_rv[2] / dx[2])));
   };
 
@@ -686,7 +688,8 @@ EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 
   // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
   // is the displacement from a_probLo and not the physical position.
-  auto getCellIndex = [&dx = a_dx](const RealVect a_rv) -> IntVect {
+  const auto& dx           = a_dx;
+  auto        getCellIndex = [&dx](const RealVect a_rv) -> IntVect {
     return IntVect(D_DECL(std::floor(a_rv[0] / dx[0]), std::floor(a_rv[1] / dx[1]), std::floor(a_rv[2] / dx[2])));
   };
 
@@ -784,7 +787,9 @@ EBParticleMesh::interpolateParticle(Real*                a_particleField,
 
   // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
   // is the displacement from a_probLo and not the physical position.
-  auto getCellIndex = [&dx = a_dx](const RealVect a_rv) -> IntVect {
+  const auto& dx = a_dx;
+
+  auto getCellIndex = [&dx](const RealVect a_rv) -> IntVect {
     return IntVect(D_DECL(std::floor(a_rv[0] / dx[0]), std::floor(a_rv[1] / dx[1]), std::floor(a_rv[2] / dx[2])));
   };
 

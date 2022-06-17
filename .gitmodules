@@ -4,9 +4,6 @@
 [submodule "json"]
 	path = Submodules/json
 	url = https://github.com/nlohmann/json
-[submodule "ebgeometry"]
-	path = ebgeometry
-	url = git@github.com:rmrsk/ebgeometry
 [submodule "Submodules/EBGeometry"]
 	path = Submodules/EBGeometry
-	url = git@github.com:rmrsk/ebgeometry
+	url = https://github.com/rmrsk/ebgeometry
