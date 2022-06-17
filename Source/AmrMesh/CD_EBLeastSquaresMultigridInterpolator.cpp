@@ -548,12 +548,18 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     // in the comparators).
     const RealVect x0 = Location::position(a_dataLocation, a_ghostVofFine, a_ebisboxFine, a_dxFine);
 
+    // Things we need to capture
+    const auto& loc         = a_dataLocation;
+    const auto& p           = x0;
+    const auto& ebisBoxFine = a_ebisboxFine;
+    const auto& ebisBoxCoar = a_ebisboxCoar;
+    const auto& dxFine      = a_dxFine;
+    const auto& dxCoar      = a_dxCoar;
+
     // For sorting fine vofs, based on distance to the ghost vof. Shortest distance goes first.
-    auto comparatorFine =
-      [&loc = a_dataLocation, &p = x0, &ebisbox = a_ebisboxFine, &dx = a_dxFine](const VolIndex& v1,
-                                                                                 const VolIndex& v2) -> bool {
-      const RealVect d1 = Location::position(loc, v1, ebisbox, dx) - p;
-      const RealVect d2 = Location::position(loc, v2, ebisbox, dx) - p;
+    auto comparatorFine = [&loc, &p, &ebisBoxFine, &dxFine](const VolIndex& v1, const VolIndex& v2) -> bool {
+      const RealVect d1 = Location::position(loc, v1, ebisBoxFine, dxFine) - p;
+      const RealVect d2 = Location::position(loc, v2, ebisBoxFine, dxFine) - p;
 
       const Real l1 = d1.vectorLength();
       const Real l2 = d2.vectorLength();
@@ -562,11 +568,9 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     };
 
     // For sorting coar vofs, based on distance to the ghost vof. Shortest distance goes first.
-    auto comparatorCoar =
-      [&loc = a_dataLocation, &p = x0, &ebisbox = a_ebisboxCoar, &dx = a_dxCoar](const VolIndex& v1,
-                                                                                 const VolIndex& v2) -> bool {
-      const RealVect d1 = Location::position(loc, v1, ebisbox, dx) - p;
-      const RealVect d2 = Location::position(loc, v2, ebisbox, dx) - p;
+    auto comparatorCoar = [&loc, &p, &ebisBoxCoar, &dxCoar](const VolIndex& v1, const VolIndex& v2) -> bool {
+      const RealVect d1 = Location::position(loc, v1, ebisBoxCoar, dxCoar) - p;
+      const RealVect d2 = Location::position(loc, v2, ebisBoxCoar, dxCoar) - p;
 
       const Real l1 = d1.vectorLength();
       const Real l2 = d2.vectorLength();
