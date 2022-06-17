@@ -81,23 +81,22 @@ TiledMeshRefine::regrid(Vector<Vector<Box>>&       a_newGrids,
   }
 
   // Set the top level to be the finest level which actually has tags. Ranks may disagree on what is the "top level".
-  int myTopLevel = -1;
+  int myTopLevel = 0;
 
-  int isize = a_tags.size();
-  for (int lvl = 0; lvl <= std::min(a_topLevel, isize - 1); lvl++) {
+  for (int lvl = 0; lvl < a_tags.size(); lvl++) {
     if (!a_tags[lvl].isEmpty()) {
       myTopLevel = lvl;
     }
   }
 
-  int topLevel;
 #ifdef CH_MPI
+  int topLevel = -1;
   MPI_Allreduce(&myTopLevel, &topLevel, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
 #else
-  topLevel = a_topLevel;
+  int topLevel = myTopLevel;
 #endif
 
-  int newFinestLevel;
+  int newFinestLevel = 0;
   if (topLevel >= a_baseLevel) { // We have something that can change
     newFinestLevel = 1 + topLevel;
 
@@ -126,8 +125,6 @@ TiledMeshRefine::regrid(Vector<Vector<Box>>&       a_newGrids,
       //      pout() << "making boxes from tiles on level = " << lvl << endl;
       this->makeBoxesFromTiles(a_newGrids[lvl], tiles[lvl], m_vectDomains[lvl]);
     }
-
-    //    std::cout << newFinestLevel << std::endl;
   }
   else { // If we don't have any tags, just return the old boxes
     newFinestLevel = a_baseLevel;
@@ -162,6 +159,7 @@ TiledMeshRefine::makeLevelTiles(IntVectSet&          a_levelTiles,
   coarBox.coarsen(a_refCoar);
   const IntVect probLo       = coarBox.smallEnd();
   IntVectSet    myLevelTiles = IntVectSet();
+
   for (IVSIterator ivsIt(a_coarLevelTags); ivsIt.ok(); ++ivsIt) {
     const IntVect iv = ivsIt();
 
@@ -196,6 +194,7 @@ TiledMeshRefine::makeLevelTiles(IntVectSet&          a_levelTiles,
   }
 
   // 3. Gather tiles globally
+#ifdef CH_MPI
   const int          destProc = uniqueProc(SerialTask::compute);
   Vector<IntVectSet> allTaggedTiles;
   gather(allTaggedTiles, myLevelTiles, destProc);
@@ -206,6 +205,9 @@ TiledMeshRefine::makeLevelTiles(IntVectSet&          a_levelTiles,
     }
   }
   broadcast(a_levelTiles, destProc);
+#else
+  a_levelTiles = myLevelTiles;
+#endif
 
   // 4. Add finer level tiles to this level to ensure proper nesting. We do this by adding all the neighboring tiles to a tile
   //    on the finer level, coarsening all those tiles and adding them to this level
