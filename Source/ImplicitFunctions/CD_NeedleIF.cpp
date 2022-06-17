@@ -38,7 +38,7 @@ NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack
 
   // Build the needle-parts
   Vector<BaseIF*> isects;
-  //isects.push_back(static_cast<BaseIF*> (new CylinderSdf(c, a_centerBack, a_radius, a_fluidInside)));
+  isects.push_back(static_cast<BaseIF*> (new CylinderSdf(c, a_centerBack, a_radius, a_fluidInside)));
   auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, 0.5, a_angle, false);
   std::cout << c << " " <<  tipLength << " " << a_angle << "\n"; 
   cone->rotate(90,0);
