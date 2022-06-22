@@ -13,6 +13,7 @@
 // Chombo includes
 #include <ParmParse.H>
 #include <SmoothUnion.H>
+#include <SmoothIntersection.H>
 
 // Our includes
 #include <CD_RodNeedlePlane.H>
@@ -83,7 +84,8 @@ void RodNeedlePlane::defineRodWNeedle(){
   electrodeParts.push_back((BaseIF*) new RodIF(rodE1, rodE2, rodRadius, false));
   electrodeParts.push_back((BaseIF*) new NeedleIF(needleE1, needleE2, needleRadius, false, tipRadius, angle));
 
-  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new SmoothUnion(electrodeParts, cornerCurve));
+  //RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new SmoothUnion(electrodeParts, cornerCurve));
+  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new SmoothIntersection(electrodeParts, cornerCurve));
 
   m_electrodes.push_back(Electrode(bif, (rodLive&&needleLive)));
 

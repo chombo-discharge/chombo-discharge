@@ -10,10 +10,13 @@
   @author Fanny Skirbekk
 */
 
+// CHombo includes
+#include <UnionIF.H>
+#include <SmoothIntersection.H>
+
 // Our includes
 #include <CD_NeedleIF.H>
 #include <CD_CylinderSdf.H>
-#include <UnionIF.H>
 #include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
@@ -28,24 +31,26 @@ NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack
   const RealVect axisVec = axis/axis.vectorLength(); 
 
   // find new center for where the cylinder and cone should meet.
-  const RealVect c = a_centerTipSide - tipLength*axisVec;
+  const RealVect c = a_centerTipSide + tipLength*axisVec;
 
 #if CH_SPACEDIM==2
-    const Vec3 centerT(0.0, 0.0, 0.0);
+    const Vec3 centerT(a_centerTipSide[0], a_centerTipSide[1], 0.0);
 #else
-    const Vec3 centerT(0.0, 0.0, 0.0);
+    const Vec3 centerT(a_centerTipSide[0], a_centerTipSide[1], a_centerTipSide[2]);
 #endif
 
   // Build the needle-parts
   Vector<BaseIF*> isects;
   isects.push_back(static_cast<BaseIF*> (new CylinderSdf(c, a_centerBack, a_radius, a_fluidInside)));
-  auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, 0.5, a_angle, false);
-  std::cout << c << " " <<  tipLength << " " << a_angle << "\n"; 
+  auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, tipLength+0.1, a_angle, false);
+  std::cout << "axisVec:" << axisVec[0] << "," << axisVec[1] << "," << axisVec[2] << std::endl;
+  std::cout << "centerT:" << centerT[0] << "," << centerT[1] << "," << centerT[2] << std::endl;
+  std::cout << "tiplength:" << tipLength << std::endl;
   cone->rotate(90,0);
-  isects.push_back(static_cast<BaseIF*> (new EBGeometryIF(cone, false)));
+  //isects.push_back(static_cast<BaseIF*> (new EBGeometryIF(cone, false)));
 
   // Build the needle
-  m_baseif = RefCountedPtr<BaseIF>(new UnionIF(isects));
+  m_baseif = RefCountedPtr<BaseIF>(new SmoothIntersection(isects, 0.01));
 
   // Delete everything we have allocated so far
   for(int i = 0; i < isects.size(); ++i){
