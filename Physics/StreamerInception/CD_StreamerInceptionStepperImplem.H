@@ -38,6 +38,8 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 
   // Default alpha
   m_alpha = [](const Real E) { return exp(-E); };
+
+  
 }
 
 template <typename P, typename F>
@@ -58,9 +60,29 @@ StreamerInceptionStepper<P, F>::setupSolvers()
     pout() << "StreamerInceptionStepper::setupSolvers" << endl;
   }
 
-  // Instantiate solvers.
-  m_fieldSolver    = RefCountedPtr<F>(new F());
+  // Define a voltage function to be used in the simulation.
+  auto voltage =  [](const Real a_time) -> Real { return 1.0; };
+  
+  // Instantiate fieldSolver
+  m_fieldSolver = RefCountedPtr<F>(new F());
+  m_fieldSolver->setVerbosity(m_verbosity);
+  m_fieldSolver->parseOptions();
+  m_fieldSolver->setAmr(m_amr);
+  m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
+  m_fieldSolver->setVoltage(voltage);
+  m_fieldSolver->setRealm(m_realm);
+  m_fieldSolver->setTime(0, 0.0, 0.0);
+
+  // Instantiate particleSolver
   m_particleSolver = RefCountedPtr<P>(new P());
+  m_particleSolver->setVerbosity(m_verbosity);
+  m_particleSolver->parseOptions();
+  m_particleSolver->setAmr(m_amr);
+  m_particleSolver->setComputationalGeometry(m_computationalGeometry);
+  m_particleSolver->setVoltage(voltage);
+  m_particleSolver->setRealm(m_realm);
+  m_particleSolver->setTime(0, 0.0, 0.0);
+  
 }
 
 template <typename P, typename F>
@@ -167,6 +189,15 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::writePlotData" << endl;
   }
+
+  // Append plot variable names.
+  a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
+  a_plotVariableNames.append(m_particleSolver->getPlotVariableNames());
+
+  // Write into plot data holder memory.
+  m_fieldSolver->writePlotData(a_output, a_icomp);
+  m_particleSolver->writePlotData(a_output, a_icomp);
+  
 }
 
 template <typename P, typename F>

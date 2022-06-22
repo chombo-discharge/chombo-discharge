@@ -250,6 +250,11 @@ namespace Physics {
       RefCountedPtr<F> m_fieldSolver;
 
       /*!
+	@brief Realm where the solver lives
+      */
+      std::string m_realm;
+
+      /*!
 	@brief Effective ionization coefficient
       */
       std::function<Real(const Real& E)> m_alpha;
