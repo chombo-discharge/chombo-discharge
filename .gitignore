@@ -46,3 +46,5 @@ Docs/*
 !Docs/README.md
 Docs/Sphinx/build
 Docs/**/*.dat
+
+!MyApplications/MyStreamerInception/pout.0
