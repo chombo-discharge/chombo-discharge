@@ -75,11 +75,10 @@ StreamerInceptionStepper<P, F>::setupSolvers()
 
   // Instantiate particleSolver
   m_particleSolver = RefCountedPtr<P>(new P());
-  m_particleSolver->setVerbosity(m_verbosity);
+  //m_particleSolver->setVerbosity(m_verbosity);
   m_particleSolver->parseOptions();
   m_particleSolver->setAmr(m_amr);
   m_particleSolver->setComputationalGeometry(m_computationalGeometry);
-  m_particleSolver->setVoltage(voltage);
   m_particleSolver->setRealm(m_realm);
   m_particleSolver->setTime(0, 0.0, 0.0);
   
