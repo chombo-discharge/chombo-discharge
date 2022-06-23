@@ -208,7 +208,12 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
     pout() << "StreamerInceptionStepper::getNumberOfPlotVariables" << endl;
   }
 
-  return 0;
+  int ncomp = 0;
+
+  ncomp += m_fieldSolver->getNumberOfPlotVariables();
+  ncomp += m_particleSolver->getNumberOfPlotVariables();
+ 
+  return ncomp;
 }
 
 template <typename P, typename F>
