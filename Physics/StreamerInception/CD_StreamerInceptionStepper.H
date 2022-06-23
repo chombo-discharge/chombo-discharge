@@ -255,6 +255,16 @@ namespace Physics {
       std::string m_realm;
 
       /*!
+	@brief Tracer particle velocity field
+      */
+      EBAMRCellData m_velocity;
+
+      /*!
+	@brief Phase (gas/solid) where the solver lives
+      */
+      phase::which_phase m_phase;
+
+      /*!
 	@brief Effective ionization coefficient
       */
       std::function<Real(const Real& E)> m_alpha;

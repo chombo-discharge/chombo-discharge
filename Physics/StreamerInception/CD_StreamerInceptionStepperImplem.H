@@ -36,6 +36,13 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
     pout() << "StreamerInceptionStepper::StreamerInceptionStepper" << endl;
   }
 
+  m_verbosity = -1;
+
+  ParmParse pp("FieldStepper");
+
+  // Read in parameters
+  pp.get("verbosity", m_verbosity);
+
   // Default alpha
   m_alpha = [](const Real E) { return exp(-E); };
 
