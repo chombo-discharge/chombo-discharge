@@ -38,14 +38,35 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 
   m_verbosity = -1;
 
-  ParmParse pp("FieldStepper");
+  ParmParse pp("StreamerInceptionStepper");
+  
+  Real voltageLo = 0.0;
+  Real voltageHi = 0.0;
+  int voltageSteps = 0;
+  std::string str;
+  
 
   // Read in parameters
   pp.get("verbosity", m_verbosity);
+  pp.get("voltage_lo", voltageLo);
+  pp.get("voltage_hi", voltageHi);
+  pp.get("voltage_steps", voltageSteps);
+  pp.get("integration", str);
+  if (str == "euler"){
+    m_integrationAlgorithm = IntegrationAlgorithm::Euler;
+  }
+  else if (str == "rk2"){
+    m_integrationAlgorithm = IntegrationAlgorithm::RK2;
+  }
+  else if (str == "rk4"){
+    m_integrationAlgorithm = IntegrationAlgorithm::RK4;
+  }
+  else{
+    MayDay::Error("StreamerInceptionStepper::StreamerInceptionStepper -- logic bust");
+  }
 
   // Default alpha
   m_alpha = [](const Real E) { return exp(-E); };
-
   
 }
 
