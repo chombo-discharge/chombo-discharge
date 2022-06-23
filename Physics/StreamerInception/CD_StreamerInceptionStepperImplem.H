@@ -75,7 +75,6 @@ StreamerInceptionStepper<P, F>::setupSolvers()
 
   // Instantiate particleSolver
   m_particleSolver = RefCountedPtr<P>(new P());
-  //m_particleSolver->setVerbosity(m_verbosity);
   m_particleSolver->parseOptions();
   m_particleSolver->setAmr(m_amr);
   m_particleSolver->setComputationalGeometry(m_computationalGeometry);
@@ -92,6 +91,11 @@ StreamerInceptionStepper<P, F>::allocate()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::allocate" << endl;
   }
+
+  m_fieldSolver->allocateInternals();
+
+  m_amr->allocate(m_velocity, m_realm, m_phase, SpaceDim);
+  m_particleSolver->allocate();
 }
 
 template <typename P, typename F>
@@ -102,6 +106,14 @@ StreamerInceptionStepper<P, F>::initialData()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::initialData" << endl;
   }
+
+  /*
+  this->setVelocity();
+  this->initialParticles();
+
+  m_particleSolver->setVelocity(m_velocity);
+  m_particleSolver->interpolateVelocities();
+  */
 }
 
 template <typename P, typename F>
@@ -122,6 +134,8 @@ StreamerInceptionStepper<P, F>::registerRealms()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::registerRealms" << endl;
   }
+
+  m_amr->registerRealm(m_realm);
 }
 
 template <typename P, typename F>
@@ -132,6 +146,9 @@ StreamerInceptionStepper<P, F>::registerOperators()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::registerOperators" << endl;
   }
+
+  m_fieldSolver->registerOperators();
+  m_particleSolver->registerOperators();
 }
 
 template <typename P, typename F>
