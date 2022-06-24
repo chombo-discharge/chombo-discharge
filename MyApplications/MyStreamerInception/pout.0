@@ -1,1 +1,231 @@
+AmrMesh::parseVerbosity()
+AmrMesh::parseOptions()
+AmrMesh::parseCoarsestLevelNumCells()
+AmrMesh::parseMaxAmrDepth()
+AmrMesh::parseMaxSimulationDepth()
+AmrMesh::parseRefinementRatios()
+AmrMesh::parseBlockingFactor()
+AmrMesh::parseMaxBoxSize()
+AmrMesh::parseMaxEbisBoxSize()
+AmrMesh::parseGridGeneration()
+AmrMesh::parseBrBufferSize()
+AmrMesh::parseBrFillRatio()
+AmrMesh::parseRedistributionRadius()
+AmrMesh::parseNumGhostCells()
+AmrMesh::parseEbGhostCells()
+AmrMesh::parseProbLoHiCorners()
+AmrMesh::parseCentroidStencils()
+AmrMesh::parseEbCentroidStencils()
+AmrMesh::parseMultigridInterpolator()
+AmrMesh::sanityCheck()
+AmrMesh::buildDomains()
+AmrMesh::setMultifluidIndexSpace(RefCountedPtr<MultifluidIndexSpace>)
+AmrMesh::sanityCheck()
+AmrMesh::buildDomains()
+Driver::parseOptions()
+Driver::parsePlotVariables()
+Driver::parseGeometryGeneration()
+Driver::parseGeometryRefinement()
+Driver::parseIrregTagGrowth()
+AmrMesh::registerRealm(string)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+Driver::setupAndRun(std::string)
+Driver::setup(string, int, bool, string)
+Driver::createOutputDirectories()
+Driver::setupFresh
+Driver::sanityCheck
+AmrMesh::getMaxAmrDepth()
+AmrMesh::getDomains()
+AmrMesh::getNumberOfEbGhostCells()
+AmrMesh::getMaxEbisBoxSize()
+AmrMesh::getFinestDx()
+AmrMesh::getProbLo()
+AmrMesh::getFinestDomain()
+EBIndexSpace::define - From domain
+  Building finest level...
+Entering EBISLevel::EBISLevel called by EBIndexSpace::buildFirstLevel...
+Exiting EBISLevel::EBISLevel called by EBIndexSpace::buildFirstLevel...
+ebis_after_first_level_bui|Mem Usage: OS=    18.242 (vm=   501.449) MT_peak=     0.400 MT_current=     0.211  OSPeakRSS=    18.242 (vm=   503.520) (MB)
+    irreg VoFs    : 422
+    arcs          : 1264
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
 
+  Building level 1...
+    irreg VoFs    : 210
+    arcs          : 628
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 2...
+    irreg VoFs    : 106
+    arcs          : 316
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 3...
+    irreg VoFs    : 54
+    arcs          : 160
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 4...
+    irreg VoFs    : 26
+    arcs          : 76
+    multi VoFs    : 0
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 5...
+    irreg VoFs    : 14
+    arcs          : 40
+    multi VoFs    : 8
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 6...
+    irreg VoFs    : 6
+    arcs          : 16
+    multi VoFs    : 4
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 7...
+    irreg VoFs    : 2
+    arcs          : 4
+    multi VoFs    : 2
+    zero VoFs     : 0
+    zero VoFs arcs: 0
+
+  Building level 8...
+    Empty
+
+       ebis_leaving_define|Mem Usage: OS=    19.281 (vm=   501.758) MT_peak=     0.834 MT_current=     0.524  OSPeakRSS=    19.281 (vm=   503.520) (MB)
+MemoryReport::getMaxMinMemoryUsage:	 Max peak = 0.87422	 Min peak = 0.519861	 Max unfreed = 0.523573	 Min unfreed = 0.280622
+TimeStepper::setAmr(RefCountedPtr<AmrMesh>)
+StreamerInceptionStepper::registerRealms
+AmrMesh::registerRealm(string)
+AmrMesh::queryRealm(string)
+AmrMesh::setBaseImplicitFunction(phase::which_phase, RefCountedPtr<BaseIF>)
+AmrMesh::setBaseImplicitFunction(phase::which_phase, RefCountedPtr<BaseIF>)
+Driver::getGeometryTags()
+AmrMesh::getMaxAmrDepth()
+AmrMesh::regridAmr(Vector<IntVectSet>, int, int)
+AmrMesh::buildGrids(Vector<IntVectSet>, int, int)
+AmrMesh::defineRealms()
+AmrMesh::getFinestLevel()
+Driver::allocateInternals()
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+TimeStepper::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)
+StreamerInceptionStepper::setupSolvers
+FieldSolver::setVerbosity(int)
+FieldSolverMultigrid::parseOptions()
+FieldSolver::parseVerbosity()
+FieldSolver::parseDomainBc()
+FieldSolver::makeBcString(int, Side::LoHiSide)
+FieldSolver::parseBcString(std::string)
+FieldSolver::makeBcString(int, Side::LoHiSide)
+FieldSolver::parseBcString(std::string)
+FieldSolver::makeBcString(int, Side::LoHiSide)
+FieldSolver::parseBcString(std::string)
+FieldSolver::makeBcString(int, Side::LoHiSide)
+FieldSolver::parseBcString(std::string)
+FieldSolver::parsePlotVariables()
+FieldSolverMultigrid::parseMultigridSettings()
+FieldSolverMultigrid::parseKappaSource()
+FieldSolverMultigrid::parseJumpBC()
+FieldSolver::parseRegridSlopes()
+FieldSolver::setAmr(RefCountedPtr<AmrMesh>)
+FieldSolver::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)
+FieldSolver::setDefaultEbBcFunctions()
+FieldSolver::setVoltage(std::function<Real(const Real a_time)>)
+FieldSolver::setRealm(std::string)
+FieldSolver::setTime(int, Real, Real)
+TracerParticleSolver::setAmr(RefCountedPtr<AmrMesh>)
+TracerParticleSolver::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)
+TracerParticleSolver::setRealm(std::string)
+TracerParticleSolver::setTime(int, Real, Real)
+StreamerInceptionStepper::synchronizeSolverTimes
+FieldSolver::setTime(int, Real, Real)
+TracerParticleSolver::setTime(int, Real, Real)
+StreamerInceptionStepper::registerOperators
+FieldSolverMultigrid::registerOperators()
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+TracerParticleSolver::registerOperators()
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerOperator(string, string, phase::which_phase)
+AmrMesh::queryRealm(string)
+AmrMesh::registerMask(string, int, string)
+AmrMesh::queryRealm(string)
+AmrMesh::regridOperators(int)
+StreamerInceptionStepper::allocate
+FieldSolverMultigrid::allocateInternals()
+FieldSolver::allocateInternals()
+AmrMesh::allocate(MFAMRCellData, string, int, int)
+AmrMesh::queryRealm(string)
+AmrMesh::allocate(MFAMRCellData, string, int, int)
+AmrMesh::queryRealm(string)
+AmrMesh::allocate(MFAMRCellData, string, int, int)
+AmrMesh::queryRealm(string)
+AmrMesh::allocate(MFAMRCellData, string, int, int)
+AmrMesh::queryRealm(string)
+AmrMesh::allocate(MFAMRFluxData, string, int, int)
+AmrMesh::queryRealm(string)
+AmrMesh::allocate(MFAMRIVData, string, int, int)
+AmrMesh::queryRealm(string)
+AmrMesh::allocate(MFAMRCellData, string, int, int)
+AmrMesh::queryRealm(string)
+AmrMesh::allocate(EBAMRIVData, string, phase::which_phase, int, int)
+AmrMesh::queryRealm(string)
+FieldSolver::setPermittivities()
+AmrMesh::allocate(MFAMRCellData, string, int, int)
+AmrMesh::queryRealm(string)
+AmrMesh::allocate(MFAMRCellData, string, int, int)
+AmrMesh::queryRealm(string)
+AmrMesh::allocate(EBAMRIVData, string, phase::which_phase, int, int)
+AmrMesh::queryRealm(string)
+AmrMesh::allocate(EBAMRCellData, string, phase::which_phase, int, int)
+AmrMesh::queryRealm(string)
+TracerParticleSolver::allocate()
+AmrMesh::allocate(ParticleContainer<T>, int, string)
+AmrMesh::queryRealm(string)
+StreamerInceptionStepper::initialData
+TracerParticleSolver::interpolateVelocities()
+AmrMesh::getParticleMesh(string, phase::which_phase)
+AmrMesh::queryRealm(string)
