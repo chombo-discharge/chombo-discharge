@@ -331,6 +331,9 @@ StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFines
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::preRegrid" << endl;
   }
+
+  m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
+  m_particleSolver->preRegrid(a_lmin, a_oldFinestLevel);
 }
 
 template <typename P, typename F>
@@ -341,6 +344,14 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::regrid" << endl;
   }
+
+  // Define velocity field on the new mesh.
+  m_amr->reallocate(m_velocity, m_phase, a_lmin);
+  DataOps::setValue(m_velocity, 0.0);
+
+  // Regrid tracer particles and field
+  m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_particleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 }
 
 template <typename P, typename F>
