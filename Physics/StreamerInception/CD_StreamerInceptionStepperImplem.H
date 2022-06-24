@@ -44,7 +44,6 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   Real voltageHi = 0.0;
   int voltageSteps = 0;
   std::string str;
-  
 
   // Read in parameters
   pp.get("verbosity", m_verbosity);
@@ -135,13 +134,12 @@ StreamerInceptionStepper<P, F>::initialData()
     pout() << "StreamerInceptionStepper::initialData" << endl;
   }
 
-  /*
   this->setVelocity();
   this->initialParticles();
 
   m_particleSolver->setVelocity(m_velocity);
   m_particleSolver->interpolateVelocities();
-  */
+  
 }
 
 template <typename P, typename F>
