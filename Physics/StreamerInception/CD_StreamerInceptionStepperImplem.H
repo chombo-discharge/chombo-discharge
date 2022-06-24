@@ -336,6 +336,7 @@ StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFines
   m_particleSolver->preRegrid(a_lmin, a_oldFinestLevel);
 }
 
+// Combined implementation from FieldStepper and TracerParticleStepper
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
@@ -354,6 +355,7 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   m_particleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 }
 
+// TO DO: Don't know what to implement here..
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::postRegrid()
@@ -362,6 +364,7 @@ StreamerInceptionStepper<P, F>::postRegrid()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::postRegrid" << endl;
   }
+  
 }
 
 template <typename P, typename F>
