@@ -134,10 +134,10 @@ StreamerInceptionStepper<P, F>::initialData()
     pout() << "StreamerInceptionStepper::initialData" << endl;
   }
 
-  this->setVelocity();
-  this->initialParticles();
+  //this->setVelocity();
+  //this->initialParticles();
 
-  m_particleSolver->setVelocity(m_velocity);
+  //m_particleSolver->setVelocity(m_velocity);
   m_particleSolver->interpolateVelocities();
   
 }
