@@ -185,6 +185,7 @@ StreamerInceptionStepper<P, F>::registerOperators()
   m_particleSolver->registerOperators();
 }
 
+// TO DO. What to put here?
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::parseOptions()
@@ -195,6 +196,7 @@ StreamerInceptionStepper<P, F>::parseOptions()
   }
 }
 
+// TO DO
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::parseRuntimeOptions()
@@ -267,6 +269,7 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
   return ncomp;
 }
 
+// TO DO: Do something with this one?
 template <typename P, typename F>
 Real
 StreamerInceptionStepper<P, F>::computeDt()
@@ -279,6 +282,7 @@ StreamerInceptionStepper<P, F>::computeDt()
   return std::numeric_limits<Real>::max();
 }
 
+// TO DO: Implement this one like TracerParticleStepper and create advanceParticles functions?
 template <typename P, typename F>
 Real
 StreamerInceptionStepper<P, F>::advance(const Real a_dt)
@@ -299,6 +303,14 @@ StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const R
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::synchronizeSolverTimes" << endl;
   }
+
+  m_timeStep = a_step;
+  m_time     = a_time;
+  m_dt       = a_dt;
+
+  m_fieldSolver->setTime(a_step, a_time, a_dt);
+  m_particleSolver->setTime(a_step, a_time, a_dt);
+  
 }
 
 template <typename P, typename F>
