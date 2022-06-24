@@ -36,6 +36,11 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
     pout() << "StreamerInceptionStepper::StreamerInceptionStepper" << endl;
   }
 
+  m_realm = Realm::Primal;
+  m_phase = phase::gas;
+
+  this->parseOptions();
+
   m_verbosity = -1;
 
   ParmParse pp("StreamerInceptionStepper");
@@ -125,6 +130,8 @@ StreamerInceptionStepper<P, F>::allocate()
   m_particleSolver->allocate();
 }
 
+
+// TO DO: FINISHED?
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::initialData()
@@ -142,6 +149,7 @@ StreamerInceptionStepper<P, F>::initialData()
   
 }
 
+// TO DO
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::postInitialize()
