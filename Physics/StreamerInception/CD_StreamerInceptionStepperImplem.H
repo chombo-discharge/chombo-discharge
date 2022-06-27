@@ -96,7 +96,7 @@ StreamerInceptionStepper<P, F>::setupSolvers()
   auto voltage =  [](const Real a_time) -> Real { return 1.0; };
   
   // Instantiate fieldSolver
-  m_fieldSolver = RefCountedPtr<F>(new F());
+  m_fieldSolver = RefCountedPtr<FieldSolver>(new F());
   m_fieldSolver->setVerbosity(m_verbosity);
   m_fieldSolver->parseOptions();
   m_fieldSolver->setAmr(m_amr);
@@ -111,8 +111,8 @@ StreamerInceptionStepper<P, F>::setupSolvers()
   m_particleSolver->setAmr(m_amr);
   m_particleSolver->setComputationalGeometry(m_computationalGeometry);
   m_particleSolver->setRealm(m_realm);
+  m_particleSolver->setPhase(m_phase);
   m_particleSolver->setTime(0, 0.0, 0.0);
-  
 }
 
 template <typename P, typename F>
@@ -125,9 +125,9 @@ StreamerInceptionStepper<P, F>::allocate()
   }
 
   m_fieldSolver->allocateInternals();
+  m_particleSolver->allocate();
 
   m_amr->allocate(m_velocity, m_realm, m_phase, SpaceDim);
-  m_particleSolver->allocate();
 }
 
 
@@ -140,13 +140,18 @@ StreamerInceptionStepper<P, F>::initialData()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::initialData" << endl;
   }
-
-  //this->setVelocity();
-  //this->initialParticles();
-
-  //m_particleSolver->setVelocity(m_velocity);
-  m_particleSolver->interpolateVelocities();
   
+  // Set rho = sigma = 0 for field solver and then solve the Poisson equation. 
+  m_fieldSolver->setRho(0.0);
+  m_fieldSolver->setSigma(0.0);
+  const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma());
+  if(!converged) {
+    MayDay::Error("StreamerInceptionStepper::initialize -- could not solve Poisson equation. Aborting application.");
+  }
+
+  // Get the gas-side electric field and give it to the particle solvers. 
+  DataOps::copy(m_velocity, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
+  m_particleSolver->setVelocity(m_velocity);  
 }
 
 // TO DO
@@ -158,6 +163,9 @@ StreamerInceptionStepper<P, F>::postInitialize()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::postInitialize" << endl;
   }
+
+  // This is where all the magic happens: Rasmus needs to advect the particles in
+  // this routine. 
 }
 
 template <typename P, typename F>
@@ -249,7 +257,6 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   // Write into plot data holder memory.
   m_fieldSolver->writePlotData(a_output, a_icomp);
   m_particleSolver->writePlotData(a_output, a_icomp);
-  
 }
 
 template <typename P, typename F>
@@ -291,6 +298,8 @@ StreamerInceptionStepper<P, F>::advance(const Real a_dt)
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::advance" << endl;
   }
+
+  MayDay::Error("StreamerInceptionStepper::advance -- this is a static solver. Calling the advance method is an error.");
 
   return a_dt;
 }
@@ -346,13 +355,12 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
     pout() << "StreamerInceptionStepper::regrid" << endl;
   }
 
-  // Define velocity field on the new mesh.
-  m_amr->reallocate(m_velocity, m_phase, a_lmin);
-  DataOps::setValue(m_velocity, 0.0);
-
   // Regrid tracer particles and field
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_particleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+
+  // Regrid velocity field
+  m_amr->reallocate(m_velocity, m_phase, a_lmin);  
 }
 
 // TO DO: Don't know what to implement here..
@@ -364,7 +372,9 @@ StreamerInceptionStepper<P, F>::postRegrid()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::postRegrid" << endl;
   }
-  
+
+  // This can be left empty because initialData is called right after the regrid method and calling
+  // the advance method is an error. 
 }
 
 template <typename P, typename F>
