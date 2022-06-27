@@ -425,6 +425,17 @@ FieldSolver::setRho(const std::function<Real(const RealVect)>& a_rho)
 }
 
 void
+FieldSolver::setSigma(const Real a_sigma)
+{
+  CH_TIME("FieldSolver::setSigma(Real");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolver::setSigma(Real)" << endl;
+  }
+
+  DataOps::setValue(m_sigma, a_sigma);
+}
+
+void
 FieldSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry)
 {
   CH_TIME("FieldSolver::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)");
@@ -1472,6 +1483,17 @@ FieldSolver::getRho()
   }
 
   return m_rho;
+}
+
+EBAMRIVData&
+FieldSolver::getSigma()
+{
+  CH_TIME("FieldSolver::getSigma()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolver::getSigma()" << endl;
+  }
+
+  return m_sigma;
 }
 
 MFAMRCellData&

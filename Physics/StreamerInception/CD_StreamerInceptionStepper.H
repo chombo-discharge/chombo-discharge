@@ -247,17 +247,17 @@ namespace Physics {
       /*!
 	@brief Field solver
       */
-      RefCountedPtr<F> m_fieldSolver;
+      RefCountedPtr<FieldSolver> m_fieldSolver;
+
+      /*!
+	@brief Velocity field for particles. 
+      */
+      EBAMRCellData m_velocity;
 
       /*!
 	@brief Realm where the solver lives
       */
       std::string m_realm;
-
-      /*!
-	@brief Tracer particle velocity field
-      */
-      EBAMRCellData m_velocity;
 
       /*!
 	@brief Phase (gas/solid) where the solver lives
