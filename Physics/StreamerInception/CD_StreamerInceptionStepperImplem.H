@@ -131,7 +131,6 @@ StreamerInceptionStepper<P, F>::allocate()
 }
 
 
-// TO DO: FINISHED?
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::initialData()
@@ -193,7 +192,7 @@ StreamerInceptionStepper<P, F>::registerOperators()
   m_particleSolver->registerOperators();
 }
 
-// TO DO. What to put here?
+// Done in the constructor
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::parseOptions()
@@ -204,7 +203,7 @@ StreamerInceptionStepper<P, F>::parseOptions()
   }
 }
 
-// TO DO
+// Not used in this program
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::parseRuntimeOptions()
@@ -289,7 +288,7 @@ StreamerInceptionStepper<P, F>::computeDt()
   return std::numeric_limits<Real>::max();
 }
 
-// TO DO: Implement this one like TracerParticleStepper and create advanceParticles functions?
+// StreamerInceptionStepper is static. Any call to advance gives an error.
 template <typename P, typename F>
 Real
 StreamerInceptionStepper<P, F>::advance(const Real a_dt)
@@ -363,7 +362,6 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   m_amr->reallocate(m_velocity, m_phase, a_lmin);  
 }
 
-// TO DO: Don't know what to implement here..
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::postRegrid()
