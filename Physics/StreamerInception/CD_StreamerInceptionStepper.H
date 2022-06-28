@@ -92,6 +92,12 @@ namespace Physics {
       initialData() override;
 
       /*!
+	@brief Distribute particles in every grid cell
+      */
+      void
+      initialParticles();
+      
+      /*!
 	@brief Perform any post-initialization steps. 
       */
       void

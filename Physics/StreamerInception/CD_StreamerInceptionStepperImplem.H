@@ -153,6 +153,42 @@ StreamerInceptionStepper<P, F>::initialData()
   m_particleSolver->setVelocity(m_velocity);  
 }
 
+
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::initialParticles()
+{
+  CH_TIME("StreamerInceptionStepper::initialParticles");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::initialParticles" << endl;
+  }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+      
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box box = dbl[dit()];
+
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (BoxIterator bit(box); bit.ok(); ++bit){
+	const IntVect iv = bit();
+
+	const RealVect pos = m_amr->getProbLo() + RealVect(iv)*m_amr->getDx(); // error. getDx() gives vector. Which value to use?
+	
+	particles.add(P(pos)); // set mass=0?
+      }
+    }
+  }							       
+}
+  
+
+
 // TO DO
 template <typename P, typename F>
 void
@@ -164,7 +200,9 @@ StreamerInceptionStepper<P, F>::postInitialize()
   }
 
   // This is where all the magic happens: Rasmus needs to advect the particles in
-  // this routine. 
+  // this routine.
+  
+  
 }
 
 template <typename P, typename F>
