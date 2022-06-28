@@ -154,7 +154,10 @@ StreamerInceptionStepper<P, F>::initialData()
 }
 
 
-
+// TO DO:
+// * Fix dx. getDx() gives a RealVect - which value to use? Find dx in another way?
+// * remove overlapping particles (i.e. remove particles in positions with refined levels above in AMR)
+// * set particles' masses to 1? Don't know the significance of their masses..
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::initialParticles()
@@ -184,7 +187,13 @@ StreamerInceptionStepper<P, F>::initialParticles()
 	particles.add(P(pos)); // set mass=0?
       }
     }
-  }							       
+  }
+
+  // Necessary? Remap akin to TracerParticleStepper
+  m_particleSolver->remap(); 
+
+  // Remove particles inside the EB
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
 }
   
 
