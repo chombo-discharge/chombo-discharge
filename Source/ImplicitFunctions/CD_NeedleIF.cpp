@@ -31,7 +31,7 @@ NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack
   const RealVect axisVec = axis/axis.vectorLength(); 
 
   // find new center for where the cylinder and cone should meet.
-  const RealVect c = a_centerTipSide + tipLength*axisVec;
+  const RealVect c = a_centerTipSide - tipLength*axisVec;
 
 #if CH_SPACEDIM==2
     const Vec3 centerT(a_centerTipSide[0], a_centerTipSide[1], 0.0);
@@ -42,12 +42,17 @@ NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack
   // Build the needle-parts
   Vector<BaseIF*> isects;
   isects.push_back(static_cast<BaseIF*> (new CylinderSdf(c, a_centerBack, a_radius, a_fluidInside)));
-  auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, tipLength+0.1, a_angle, false);
+  //flipinside=true for cone since EBGeometry and Chombo has opposing sign conventions/logic regarding the flipinside..
+  auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, tipLength, a_angle,true);
+  //for debugging..:
+  /*
   std::cout << "axisVec:" << axisVec[0] << "," << axisVec[1] << "," << axisVec[2] << std::endl;
   std::cout << "centerT:" << centerT[0] << "," << centerT[1] << "," << centerT[2] << std::endl;
+  std::cout << "c:" << c[0] << "," << c[1] << "," << c[2] << std::endl;
   std::cout << "tiplength:" << tipLength << std::endl;
+  */
   cone->rotate(90,0);
-  //isects.push_back(static_cast<BaseIF*> (new EBGeometryIF(cone, false)));
+  isects.push_back(static_cast<BaseIF*> (new EBGeometryIF(cone, false)));
 
   // Build the needle
   m_baseif = RefCountedPtr<BaseIF>(new SmoothIntersection(isects, 0.01));
