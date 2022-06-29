@@ -106,7 +106,7 @@ StreamerInceptionStepper<P, F>::setupSolvers()
   m_fieldSolver->setTime(0, 0.0, 0.0);
 
   // Instantiate particleSolver
-  m_particleSolver = RefCountedPtr<P>(new P());
+  m_particleSolver = RefCountedPtr<TracerParticleSolver<P>>(new TracerParticleSolver<P>());
   m_particleSolver->parseOptions();
   m_particleSolver->setAmr(m_amr);
   m_particleSolver->setComputationalGeometry(m_computationalGeometry);
@@ -170,10 +170,12 @@ StreamerInceptionStepper<P, F>::initialParticles() // riktig å ta EBAMRCellData
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-#if 0
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
 
+    const Real dx = m_amr->getDx()[lvl];
+    
     ParticleData<P>& levelParticles = amrParticles[lvl];
       
     for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -184,20 +186,17 @@ StreamerInceptionStepper<P, F>::initialParticles() // riktig å ta EBAMRCellData
       for (BoxIterator bit(box); bit.ok(); ++bit){
 	const IntVect iv = bit();
 
-	const RealVect pos = m_amr->getProbLo() + (0.5*RealVect::Unit + RealVect(iv))*m_amr->getDx()[lvl]; 
-	
+	const RealVect pos = m_amr->getProbLo() + (0.5*RealVect::Unit + RealVect(iv))*dx;
+
 	particles.add(P(pos));
       }
 
       // Set particles' masses to 1
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
 	lit().mass() = 1.0;
-  }      
+      }      
     }
   }
-
-
-
 
     
 
@@ -206,7 +205,6 @@ StreamerInceptionStepper<P, F>::initialParticles() // riktig å ta EBAMRCellData
 
   // // Remove particles inside the EB
   m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
-#endif
 }
   
 

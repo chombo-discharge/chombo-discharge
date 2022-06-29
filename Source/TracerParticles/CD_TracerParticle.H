@@ -46,6 +46,12 @@ public:
   inline TracerParticle(const TracerParticle<M, N>& a_other);
 
   /*!
+    @brief Constructor. Sets position.
+    @param[in] a_position
+  */
+  inline TracerParticle(const RealVect& a_position);
+
+  /*!
     @brief Destructor (deallocates runtime memory storage)
   */
   inline virtual ~TracerParticle();

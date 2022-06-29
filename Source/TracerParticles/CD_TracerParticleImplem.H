@@ -44,6 +44,12 @@ inline TracerParticle<M, N>::TracerParticle(const TracerParticle<M, N>& a_other)
 }
 
 template <size_t M, size_t N>
+inline TracerParticle<M,N>::TracerParticle(const RealVect& a_position) : TracerParticle<M, N>()
+{
+  this->m_position = a_position;
+}
+
+template <size_t M, size_t N>
 inline TracerParticle<M, N>::~TracerParticle()
 {}
 

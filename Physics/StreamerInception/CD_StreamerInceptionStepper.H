@@ -35,9 +35,9 @@ namespace Physics {
 
     /*!
       @brief Class for volume evaluation of the streamer inception integral. 
-      @details P is the tracer particle solver and F is the field solver type. 
+      @details P is the tracer particle type and F is the field solver type. 
     */
-    template <typename P = TracerParticleSolver<TracerParticle<2, 0>>, typename F = FieldSolverMultigrid>
+    template <typename P = TracerParticle<2, 0>, typename F = FieldSolverMultigrid>
     class StreamerInceptionStepper : public TimeStepper
     {
     public:
@@ -248,7 +248,7 @@ namespace Physics {
       /*!
 	@brief Tracer particle solver
       */
-      RefCountedPtr<P> m_particleSolver;
+      RefCountedPtr<TracerParticleSolver<P> > m_particleSolver;
 
       /*!
 	@brief Field solver
