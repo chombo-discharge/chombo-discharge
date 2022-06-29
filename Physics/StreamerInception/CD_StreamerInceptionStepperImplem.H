@@ -150,7 +150,9 @@ StreamerInceptionStepper<P, F>::initialData()
 
   // Get the gas-side electric field and give it to the particle solvers. 
   DataOps::copy(m_velocity, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
-  m_particleSolver->setVelocity(m_velocity);  
+  m_particleSolver->setVelocity(m_velocity);
+
+  this->initialParticles();
 }
 
 
@@ -160,7 +162,7 @@ StreamerInceptionStepper<P, F>::initialData()
 // * set particles' masses to 1? Don't know the significance of their masses..
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::initialParticles()
+StreamerInceptionStepper<P, F>::initialParticles() // riktig å ta EBAMRCellData som argument? deposit() bruker det.
 {
   CH_TIME("StreamerInceptionStepper::initialParticles");
   if (m_verbosity > 5) {
@@ -168,7 +170,7 @@ StreamerInceptionStepper<P, F>::initialParticles()
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
+#if 0
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
 
@@ -182,18 +184,29 @@ StreamerInceptionStepper<P, F>::initialParticles()
       for (BoxIterator bit(box); bit.ok(); ++bit){
 	const IntVect iv = bit();
 
-	const RealVect pos = m_amr->getProbLo() + RealVect(iv)*m_amr->getDx(); // error. getDx() gives vector. Which value to use?
+	const RealVect pos = m_amr->getProbLo() + (0.5*RealVect::Unit + RealVect(iv))*m_amr->getDx()[lvl]; 
 	
-	particles.add(P(pos)); // set mass=0?
+	particles.add(P(pos));
       }
+
+      // Set particles' masses to 1
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+	lit().mass() = 1.0;
+  }      
     }
   }
+
+
+
+
+    
 
   // Necessary? Remap akin to TracerParticleStepper
   m_particleSolver->remap(); 
 
-  // Remove particles inside the EB
+  // // Remove particles inside the EB
   m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+#endif
 }
   
 
