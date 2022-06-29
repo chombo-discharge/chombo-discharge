@@ -19,6 +19,8 @@ AmrMesh::parseEbCentroidStencils()
 AmrMesh::parseMultigridInterpolator()
 AmrMesh::sanityCheck()
 AmrMesh::buildDomains()
+StreamerInceptionStepper::StreamerInceptionStepper
+StreamerInceptionStepper::parseOptions
 AmrMesh::setMultifluidIndexSpace(RefCountedPtr<MultifluidIndexSpace>)
 AmrMesh::sanityCheck()
 AmrMesh::buildDomains()
@@ -47,7 +49,7 @@ EBIndexSpace::define - From domain
   Building finest level...
 Entering EBISLevel::EBISLevel called by EBIndexSpace::buildFirstLevel...
 Exiting EBISLevel::EBISLevel called by EBIndexSpace::buildFirstLevel...
-ebis_after_first_level_bui|Mem Usage: OS=    18.773 (vm=   514.672) MT_peak=     0.739 MT_current=     0.394  OSPeakRSS=    18.773 (vm=   514.672) (MB)
+ebis_after_first_level_bui|Mem Usage: OS=    18.566 (vm=   514.664) MT_peak=     0.739 MT_current=     0.394  OSPeakRSS=    18.566 (vm=   514.664) (MB)
     irreg VoFs    : 1128
     arcs          : 3386
     multi VoFs    : 0
@@ -127,7 +129,7 @@ ebis_after_first_level_bui|Mem Usage: OS=    18.773 (vm=   514.672) MT_peak=    
   Building level 11...
     Empty
 
-       ebis_leaving_define|Mem Usage: OS=    19.812 (vm=   514.945) MT_peak=     1.400 MT_current=     0.929  OSPeakRSS=    19.812 (vm=   514.996) (MB)
+       ebis_leaving_define|Mem Usage: OS=    19.668 (vm=   514.941) MT_peak=     1.400 MT_current=     0.929  OSPeakRSS=    19.668 (vm=   514.988) (MB)
 MemoryReport::getMaxMinMemoryUsage:	 Max peak = 1.41423	 Min peak = 1.21416	 Max unfreed = 0.928549	 Min unfreed = 0.80208
 TimeStepper::setAmr(RefCountedPtr<AmrMesh>)
 StreamerInceptionStepper::registerRealms
@@ -422,6 +424,8 @@ TracerParticleSolver::getParticles()
 AmrMesh::getFinestLevel()
 AmrMesh::getGrids(string)
 AmrMesh::queryRealm(string)
+AmrMesh::getValidCells(string)
+AmrMesh::queryRealm(string)
 AmrMesh::getDx()
 AmrMesh::getProbLo()
 AmrMesh::getProbLo()
@@ -2474,6 +2478,8 @@ AmrMesh::getProbLo()
 AmrMesh::getFinestLevel()
 AmrMesh::getGrids(string)
 AmrMesh::queryRealm(string)
+AmrMesh::getValidCells(string)
+AmrMesh::queryRealm(string)
 AmrMesh::getDx()
 AmrMesh::getProbLo()
 AmrMesh::getProbLo()
@@ -2733,6 +2739,8 @@ AmrMesh::getProbLo()
 AmrMesh::getProbLo()
 AmrMesh::getFinestLevel()
 AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getValidCells(string)
 AmrMesh::queryRealm(string)
 AmrMesh::getDx()
 AmrMesh::getProbLo()
@@ -3249,6 +3257,8 @@ AmrMesh::getProbLo()
 AmrMesh::getProbLo()
 AmrMesh::getFinestLevel()
 AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getValidCells(string)
 AmrMesh::queryRealm(string)
 AmrMesh::getDx()
 AmrMesh::getProbLo()
@@ -3662,10 +3672,9 @@ AmrMesh::allocate(EBAMRCellData, string, phase::which_phase, int, int)
 AmrMesh::queryRealm(string)
 TracerParticleSolver::deposit(EBAMRCellData)
 TracerParticleSolver::depositParticles()
-AmrMesh::getMask(string, int, string)
-AmrMesh::queryRealm(string)
 AmrMesh::getParticleMesh(string, phase::which_phase)
 AmrMesh::queryRealm(string)
+AmrMesh::getDx()
 AmrMesh::getFinestLevel()
 AmrMesh::getFinestLevel()
 AmrMesh::getFinestLevel()
@@ -3744,11 +3753,11 @@ AmrMesh::queryRealm(string)
 | ---------------------------------------------------------------------------------------------------------|
 | Event                    | Loc. (s)| Loc. (%)| Min. (s)| Max. (s)| Avg. (s)| Dev. (s)| Min rank| Max rank| 
 | ---------------------------------------------------------------------------------------------------------|
-| Assemble data            |   0.0040|  40.1907|   0.0040|   0.0040|   0.0040|   0.0018|        6|        7| 
-| Write data               |   0.0059|  59.8093|   0.0059|   0.0060|   0.0059|   0.0017|        4|        3| 
+| Assemble data            |   0.0039|  39.5073|   0.0038|   0.0039|   0.0038|   0.0040|        5|        1| 
+| Write data               |   0.0059|  60.4927|   0.0059|   0.0059|   0.0059|   0.0025|        2|        7| 
 | ---------------------------------------------------------------------------------------------------------|
-| Local elapsed time  = 0.0099 seconds
-| Global elapsed time = 0.0099 seconds
+| Local elapsed time  = 0.0098 seconds
+| Global elapsed time = 0.0098 seconds
 | ---------------------------------------------------------------------------------------------------------|
 Driver::run(Real, Real, int)
 =================================

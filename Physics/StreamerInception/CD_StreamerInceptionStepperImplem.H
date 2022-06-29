@@ -173,6 +173,7 @@ StreamerInceptionStepper<P, F>::initialParticles() // riktig å ta EBAMRCellData
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    const LevelData<BaseFab<bool>>& validCells = *m_amr->getValidCells(m_realm)[lvl];
 
     const Real dx = m_amr->getDx()[lvl];
     
@@ -188,7 +189,9 @@ StreamerInceptionStepper<P, F>::initialParticles() // riktig å ta EBAMRCellData
 
 	const RealVect pos = m_amr->getProbLo() + (0.5*RealVect::Unit + RealVect(iv))*dx;
 
-	particles.add(P(pos));
+	if(validCells[dit()](iv)){
+	  particles.add(P(pos));
+	}
       }
 
       // Set particles' masses to 1
