@@ -190,6 +190,13 @@ StreamerInceptionStepper<P, F>::initialParticles() // riktig å ta EBAMRCellData
 	const RealVect pos = m_amr->getProbLo() + (0.5*RealVect::Unit + RealVect(iv))*dx;
 
 	if(validCells[dit()](iv)){
+	  P p;
+	  p.position() = pos;
+	  p.vect<0>() = pos;
+
+	  // at end of postInit:
+	  // p.position() = p.vect<0>();
+	  
 	  particles.add(P(pos));
 	}
       }
@@ -202,8 +209,7 @@ StreamerInceptionStepper<P, F>::initialParticles() // riktig å ta EBAMRCellData
   }
 
     
-
-  // Necessary? Remap akin to TracerParticleStepper
+  // Remapping
   m_particleSolver->remap(); 
 
   // // Remove particles inside the EB
@@ -224,6 +230,35 @@ StreamerInceptionStepper<P, F>::postInitialize()
 
   // This is where all the magic happens: Rasmus needs to advect the particles in
   // this routine.
+
+  RealVect add(D_DECL(0.4,0,0));
+  bool skip = false;
+  
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+  
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+
+	if (skip==false) {
+	    lit().position() += add;
+	    skip = true;
+        }
+	else{
+	  skip = false;
+	}
+      }
+    }
+  }
+  m_particleSolver->remap();
   
   
 }
