@@ -23,7 +23,7 @@
 using Vec3 = EBGeometry::Vec3T<Real>;
 
 NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, const double& a_angle){
-  m_tipRadius = {0, a_tipRadius, 0}; 
+  m_tipRadius = a_tipRadius; 
   
   constexpr Real pi = 3.14159265358979323846;
   const double tipLength = a_radius/std::tan(a_angle*pi/180);
@@ -70,7 +70,7 @@ NeedleIF::NeedleIF(const NeedleIF& a_inputIF){
 
 Real NeedleIF::value(const RealVect& a_point) const{
   // tried to "round" of the point
-  return m_baseif->value(a_point - m_tipRadius);
+  return m_baseif->value(a_point) - m_tipRadius;
 }
 
 BaseIF* NeedleIF::newImplicitFunction() const{
