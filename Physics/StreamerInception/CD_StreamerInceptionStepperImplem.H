@@ -267,9 +267,16 @@ StreamerInceptionStepper<P, F>::postInitialize()
 	  const RealVect& E = p.velocity();
 	  const Real particleDistanceMoved = f_dx;
 	  const RealVect normalizedVelocity = E/E.vectorLength();
-
-	  const Real Emagnitude = E.vectorLength();
+	  const Real Emagnitude = E.vectorLength();	  
 	  const Real startPointAlpha = m_alpha(Emagnitude);
+
+	  // Check if alpha<0
+	  if (startPointAlpha < 0) {
+	    p.template scalar<2>() = -1;
+	    std::cout << "alpha<0" << endl;
+	    continue;
+	  }
+	  
 	  p.template scalar<0>() = startPointAlpha;
 	  p.template scalar<1>() = particleDistanceMoved;
 
@@ -289,11 +296,12 @@ StreamerInceptionStepper<P, F>::postInitialize()
 	  const Real value = implicitFunction->value(newPosition);
 	  if (value > 0.0){
 	    p.template scalar<2>() = -1;
-	  }
+	    continue;
+	  }	  
 		
 	  // Move particle if inside grid boundaries and outside electrode
 	  if (p.template scalar<2>() > 0){
-	    p.position() = newPosition;
+	    p.position() = newPosition;	    
 	  }
 	}		
       }
@@ -315,7 +323,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
       for (ListIterator<P> lit(particles); lit.ok(); ++lit){
 	P& p = lit();
 
-	// Add integration parts if integration not stopped (i.e. particle outside grid or inside electrode)
+	// Add integration parts if integration criterion not failed (i.e. particle outside grid, inside electrode, or alpha<0)
 	if (p.template scalar<2>() > 0){	 	
 	  const RealVect& E = lit().velocity();
 	  const Real Emagnitude = E.vectorLength();
