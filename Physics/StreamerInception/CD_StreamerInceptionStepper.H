@@ -114,6 +114,14 @@ namespace Physics {
       */
       void
       addIntegration(ParticleContainer<P>& amrParticles);
+
+
+      /*!
+	@brief Move particles back to their original position after integration finished
+	@param[in] amrParticles  Particles of m_particleSolver
+      */
+      void
+      moveParticlesInitialPosition(ParticleContainer<P>& amrParticles);
       
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 

@@ -228,21 +228,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
   m_amr->removeCoveredParticlesIF(amrParticles, m_phase);  
   
   // Move particles back to initial position
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
-    
-    ParticleData<P>& levelParticles = amrParticles[lvl];     
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
-      
-      List<P>& particles = levelParticles[dit()].listItems();
-      
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-	P& p = lit();
-	p.position() = p.template vect<0>();
-      }
-    }
-  }
-  m_particleSolver->remap(); 
+  moveParticlesInitialPosition(amrParticles);
 }
 
 
@@ -348,6 +334,26 @@ StreamerInceptionStepper<P, F>::addIntegration(ParticleContainer<P>& amrParticle
       }
     }
   }
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P>& amrParticles){
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    
+    ParticleData<P>& levelParticles = amrParticles[lvl];     
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      
+      List<P>& particles = levelParticles[dit()].listItems();
+      
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+	P& p = lit();
+	p.position() = p.template vect<0>();
+      }
+    }
+  }
+  m_particleSolver->remap();
 }
 
 
