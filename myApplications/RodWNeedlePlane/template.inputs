@@ -72,27 +72,27 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 # RodNeedlePlane geometry class options
 # ====================================================================================================
-RodNeedlePlane.rod.on			= false			# Use rod or not
-RodNeedlePlane.rod.endpoint1		= 0 0.5 0			# One endpoint
+RodNeedlePlane.rod.on			= true			# Use rod or not
+RodNeedlePlane.rod.endpoint1		= 0 0.6 0		# One endpoint
 RodNeedlePlane.rod.endpoint2		= 0 2 0			# Other endpoint
 RodNeedlePlane.rod.radius		= 0.35
 RodNeedlePlane.rod.live			= true			# Live or not
 
 RodNeedlePlane.needle.on		= true 			# Use needle or not
 RodNeedlePlane.needle.endpointtip	= 0 0 0			# Endpoint with needle tip
-RodNeedlePlane.needle.endpointback	= 0 0.8 0			# Other endpoint (flat)
-RodNeedlePlane.needle.radius		= 0.1		# Needle radius
-RodNeedlePlane.needle.tipRadius		= 0.06		# Needle tip radius (curve radius of the tip)
+RodNeedlePlane.needle.endpointback	= 0 0.8 0		# Other endpoint (flat)
+RodNeedlePlane.needle.radius		= 0.1			# Needle radius
+RodNeedlePlane.needle.tipRadius		= 0.02			# Needle tip radius (curve radius of the tip)
 RodNeedlePlane.needle.angle		= 15			# Opening angle of needle tip (in degrees)
 RodNeedlePlane.needle.cornerCurve	= 0.01			# Corner curve between rod and needle
 RodNeedlePlane.needle.live		= true			# Live or not
 
 RodNeedlePlane.plane.on			= false			# Use plane or not
-RodNeedlePlane.plane.point		= 0 -0.75 0			# Plane point
+RodNeedlePlane.plane.point		= 0 -0.53 0		# Plane point
 RodNeedlePlane.plane.normal		= 0 1 0			# Plane normal vector (outward)
-RodNeedlePlane.plane.radius		= 0.75			# Plane radius
-RodNeedlePlane.plane.thickness		= 0.05			# Plane thickness
-RodNeedlePlane.plane.curve		= 0.025			# Plane curve (edge)
+RodNeedlePlane.plane.radius		= 0.125			# Plane radius
+RodNeedlePlane.plane.thickness		= 0.01			# Plane thickness
+RodNeedlePlane.plane.curve		= 0.005			# Plane curve (edge)
 RodNeedlePlane.plane.live		= true			# Live or not
 
 

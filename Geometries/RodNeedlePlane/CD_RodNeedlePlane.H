@@ -20,15 +20,33 @@
 /*!
   @brief A class that defines a rod electrode with a needle out of the tip, and a plane (electrode) a set distance from the needle tip
 */
-class RodNeedlePlane : public ComputationalGeometry {
+class RodNeedlePlane : public ComputationalGeometry
+{
 public:
   RodNeedlePlane();
   ~RodNeedlePlane();
+
 protected:
-  void defineRodWNeedle();
-  void defineRod();
-  void defineNeedle();
-  void definePlane();
+  /*!
+    @brief Defines a Rod electrode with a needle out of the tip as one electrode
+  */
+  void
+  defineRodWNeedle();
+  /*!
+    @brief Defines a Rod electrode
+  */
+  void
+  defineRod();
+  /*!
+    @brief Defines a Needle electrode
+  */
+  void
+  defineNeedle();
+  /*!
+    @brief Defines a Plane electrode
+  */
+  void
+  definePlane();
 };
 
 #include <CD_NamespaceFooter.H>

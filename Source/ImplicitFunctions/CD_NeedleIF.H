@@ -23,7 +23,8 @@
 /*!
   @brief Cylinder with one pointed end and one flat end
 */
-class NeedleIF : public BaseIF{
+class NeedleIF : public BaseIF
+{
 public:
   /*!
     @brief Constructor
@@ -34,7 +35,12 @@ public:
     @param[in] a_tipRadius     Radius of needle tip curvature           
     @param[in] a_angle         Needle tip (cone) opening angle
   */
-  NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, const Real& a_angle);
+  NeedleIF(const RealVect& a_centerTipSide,
+           const RealVect& a_centerBack,
+           const Real&     a_radius,
+           const bool&     a_fluidInside,
+           const Real&     a_tipRadius,
+           const Real&     a_angle);
 
   /*!
     @brief Copy constructor
@@ -46,17 +52,19 @@ public:
     @brief Value function. Returns distance to object.
     @param[in] a_point Physical position.
   */
-  virtual Real value(const RealVect& a_point) const override;
+  virtual Real
+  value(const RealVect& a_point) const override;
 
   /*!
     @brief IF factory method
   */
-  virtual BaseIF* newImplicitFunction() const override;
+  virtual BaseIF*
+  newImplicitFunction() const override;
 
 protected:
   RefCountedPtr<BaseIF> m_baseif;
 
-  Real m_tipRadius;
+  Real m_tipRadius; //curvature-radius of needle tip
 };
 
 #include <CD_NamespaceFooter.H>
