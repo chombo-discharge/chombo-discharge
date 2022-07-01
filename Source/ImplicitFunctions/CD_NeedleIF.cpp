@@ -48,7 +48,7 @@ NeedleIF::NeedleIF(const RealVect& a_centerTipSide,
 
   // Build the needle-parts:
   Vector<BaseIF*> isects;
-  isects.push_back(static_cast<BaseIF*>(new CylinderSdf(c, a_centerBack, (a_radius - m_tipRadius) / 2, a_fluidInside)));
+  isects.push_back(static_cast<BaseIF*>(new CylinderSdf(c, a_centerBack, (a_radius - m_tipRadius), a_fluidInside)));
 
   //flipinside=true for cone since EBGeometry and Chombo has opposing sign conventions/logic regarding the flipinside..
   auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, tipLength, a_angle, true);
