@@ -237,6 +237,16 @@ namespace Physics {
       virtual void
       setVoltage(const Real a_voltage) noexcept;
 
+      /*!
+	@brief Check if particle is outside grid boundaries
+	@param[in] pos  particle position
+	@param[in] probLo Lower left boundary of grid
+	@param[in] probHi Upper right boundary of grid
+	@param[out]  true if particle outside boundary, false elsewise
+      */
+      bool
+      particleOutsideGrid(const RealVect pos, const RealVect probLo, const RealVect probHi);      
+
     protected:
       /*!
 	@brief Integration algorithm

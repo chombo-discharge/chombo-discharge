@@ -285,11 +285,10 @@ StreamerInceptionStepper<P, F>::postInitialize()
 	  const IntVect particleCellIndex = getCellIndex(newPosition - probLo, dx);	
 
 	  // Check if particle is outside of grid boundaries
-	  for (int dir = 0; dir < SpaceDim; dir++) {
-	    if(newPosition[dir] <= probLo[dir] || newPosition[dir] >= probHi[dir]) {
-	      p.template scalar<2>() = -1;	    
-	    }
-	  }
+	  if (particleOutsideGrid(newPosition, probLo, probHi)){
+	      p.template scalar<2>() = -1;
+	      continue;
+	  }	    
 
 	  // Check if particle is inside electrode
 	  const RefCountedPtr<BaseIF>& implicitFunction = m_amr->getBaseImplicitFunction(m_phase);
@@ -592,6 +591,19 @@ StreamerInceptionStepper<P, F>::setVoltage(const Real a_voltage) noexcept
   // Give field solver a constant voltage.
   m_fieldSolver->setVoltage([a_voltage](const Real& a_time) -> Real { return a_voltage; });
 }
+
+
+template <typename P, typename F>
+bool
+StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect pos, const RealVect probLo, const RealVect probHi){
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if(pos[dir] <= probLo[dir] || pos[dir] >= probHi[dir]) {
+      return true;
+    }
+  }
+  return false;  
+}
+
 
 template <typename P, typename F>
 void
