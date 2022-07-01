@@ -282,7 +282,14 @@ StreamerInceptionStepper<P, F>::postInitialize()
 	  }
 	}
 
-	// Move particle if inside grid boundaries
+	// Check if particle is inside electrode
+	const RefCountedPtr<BaseIF>& implicitFunction = m_amr->getBaseImplicitFunction(m_phase);
+	const Real value = implicitFunction->value(newPosition);
+	if (value > 0.0){
+	  p.template scalar<2>() = -1;
+	}
+		
+	// Move particle if inside grid boundaries and outside electrode
 	if (p.template scalar<2>() > 0){
 	  p.position() = newPosition;	     
 	}		
@@ -291,43 +298,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
   }
   m_particleSolver->remap();
   m_particleSolver->interpolateVelocities();
-
   
-  // Iterate through particles and check if particles are covered or irregular (must be done after previous remap)
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const Real dx = m_amr->getDx()[lvl];
-    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
-    ParticleData<P>& levelParticles = amrParticles[lvl];
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
-      List<P>& particles = levelParticles[dit()].listItems();	
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
-	P& p = lit();
-
-	const IntVect particleCellIndex = getCellIndex(p.position() - probLo, dx);	
-	
-	// Check if particle is covered
-	if (ebisbox.isCovered(particleCellIndex)){
-	  p.template scalar<2>() = -1;
-	  //std::cout << "Particle integration stopped: Particle is in covered cell" << endl;
-	}
-	
-	// Check if particle is irregular
-	else if (ebisbox.isIrregular(particleCellIndex)){
-	  VolIndex vof(particleCellIndex, 0);     
-	  
-	  const RealVect n = ebisbox.normal(vof);
-	  const RealVect xc = ebisbox.bndryCentroid(vof) * dx * probLo;
-
-	  if (n.dotProduct(p.position() - xc) <= 0.0) {
-	    p.template scalar<2>() = -1;	    
-	    std::cout << "Particle Integration stopped: Particle is in covered part of multi-cell" << endl;
-	  }	  
-	}      
-      }
-    }
-  }
 
   // Add integration parts to p.mass()
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
