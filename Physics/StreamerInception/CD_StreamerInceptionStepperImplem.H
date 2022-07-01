@@ -311,13 +311,16 @@ StreamerInceptionStepper<P, F>::postInitialize()
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit){
 	P& p = lit();
-	const RealVect& E = lit().velocity();
-	const Real Emagnitude = E.vectorLength();
-	const Real endPointAlpha = m_alpha(Emagnitude);
-	const Real startPointAlpha = p.template scalar<0>();
-	const Real distanceMoved = p.template scalar<1>();
-		 
-	p.mass() += 0.5*(endPointAlpha + startPointAlpha) * distanceMoved;
+
+	// Add integration parts if integration not stopped (i.e. particle outside grid or inside electrode)
+	if (p.template scalar<2>() > 0){	 	
+	  const RealVect& E = lit().velocity();
+	  const Real Emagnitude = E.vectorLength();
+	  const Real endPointAlpha = m_alpha(Emagnitude);
+	  const Real startPointAlpha = p.template scalar<0>();
+	  const Real distanceMoved = p.template scalar<1>();
+	  p.mass() += 0.5*(endPointAlpha + startPointAlpha) * distanceMoved;
+	}	 	
       }
     }
   }
