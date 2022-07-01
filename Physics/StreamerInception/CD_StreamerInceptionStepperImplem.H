@@ -222,29 +222,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
   moveParticles(amrParticles);
   
   // Add integration parts to p.mass()
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
-
-    ParticleData<P>& levelParticles = amrParticles[lvl];
-    
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
-      List<P>& particles = levelParticles[dit()].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
-	P& p = lit();
-
-	// Add integration parts if contIntegral true
-	if (p.template scalar<2>() > 0){	 	
-	  const RealVect& E = lit().velocity();
-	  const Real Emagnitude = E.vectorLength();
-	  const Real endPointAlpha = m_alpha(Emagnitude);
-	  const Real startPointAlpha = p.template scalar<0>();
-	  const Real distanceMoved = p.template scalar<1>();
-	  p.mass() += 0.5*(endPointAlpha + startPointAlpha) * distanceMoved;
-	}	 	
-      }
-    }
-  }
+  addIntegration(amrParticles);
   
   // Remove particles inside the EB
   m_amr->removeCoveredParticlesIF(amrParticles, m_phase);  
@@ -342,6 +320,34 @@ StreamerInceptionStepper<P, F>::moveParticles(ParticleContainer<P>& amrParticles
   }
   m_particleSolver->remap();
   m_particleSolver->interpolateVelocities();
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::addIntegration(ParticleContainer<P>& amrParticles){
+ for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+    
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+	P& p = lit();
+
+	// Add integration parts if contIntegral true
+	if (p.template scalar<2>() > 0){	 	
+	  const RealVect& E = lit().velocity();
+	  const Real Emagnitude = E.vectorLength();
+	  const Real endPointAlpha = m_alpha(Emagnitude);
+	  const Real startPointAlpha = p.template scalar<0>();
+	  const Real distanceMoved = p.template scalar<1>();
+	  p.mass() += 0.5*(endPointAlpha + startPointAlpha) * distanceMoved;
+	}	 	
+      }
+    }
+  }
 }
 
 

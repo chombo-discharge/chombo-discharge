@@ -107,6 +107,13 @@ namespace Physics {
       */
       void
       moveParticles(ParticleContainer<P>& amrParticles);
+
+      /*!
+	@brief Add integration parts after particles move
+	@param[in] amrParticles  Particles of m_particleSolver
+      */
+      void
+      addIntegration(ParticleContainer<P>& amrParticles);
       
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 
