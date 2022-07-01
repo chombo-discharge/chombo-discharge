@@ -102,6 +102,13 @@ namespace Physics {
       postInitialize() override;
 
       /*!
+	@brief Move particles as long as integration isn't stopped
+	@param[in] amrParticles  Particles of m_particleSolver
+      */
+      void
+      moveParticles(ParticleContainer<P>& amrParticles);
+      
+      /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 
       */
       void
@@ -236,6 +243,9 @@ namespace Physics {
       */
       virtual void
       setVoltage(const Real a_voltage) noexcept;
+
+      /*!
+	@brief 
 
       /*!
 	@brief Check if particle is outside grid boundaries

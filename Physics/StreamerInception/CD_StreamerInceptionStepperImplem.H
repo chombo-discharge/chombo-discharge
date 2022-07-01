@@ -144,23 +144,9 @@ StreamerInceptionStepper<P, F>::initialData()
 
   // Get the gas-side electric field and give it to the particle solvers. 
   DataOps::copy(m_velocity, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
-  // for (int lvl = ....
-  // 	 for (DataIterator dit(...)
-  // 		const Box bx = dbl[dit()];
-  // 		EBCellFAB& velocity = (*m_velocity[lvl])[dit()];
-  // 	      BaseFab<Real>& vFAB = velocity.getSingleValuedFAB();
-	      
-  // 	      for (BoxIterator bit(bx); bit.ok(); ++bit) {
-  // 		const IntVect iv = bit();
-  // 		  RealVect v = RealVect(D_DECL(vFAB(iv,0), vFab(iv,1), vFab(iv,2)));
-  // 		  v = v/v.vectorLength();
-
-  // 		  for (int dir = 0; dir < SpaceDim; dir++) {
-  // 		    vFab(iv,dir) = v[dir];
-  // 		  }
-  // 	      }
+  
   m_particleSolver->setVelocity(m_velocity);
-
+  
   this->initialParticles();
   this->postInitialize();
 }
@@ -200,13 +186,13 @@ StreamerInceptionStepper<P, F>::initialParticles()
 	}
       }
 
-      // Define particles' masses
+      // Define particles' masses (i.e. integration tracker)
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
 	P& p = lit();
 
 	p.mass() = 0.0;
 	p.template vect<0>() = p.position();     
-	p.template scalar<2>() = 1; // criterion for continued integration (set to -1 if alpha<0, particle outside boundary, or particle inside electrode)
+	p.template scalar<2>() = 1; // contIntegral criterion. =1 if integration shall continue, =-1 if not (i.e. alpha<0, particle outside boundaries, or particle inside electrode 
       }      
     }
   }
@@ -219,8 +205,6 @@ StreamerInceptionStepper<P, F>::initialParticles()
 }
   
 
-
-// TO DO
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::postInitialize()
@@ -230,84 +214,13 @@ StreamerInceptionStepper<P, F>::postInitialize()
     pout() << "StreamerInceptionStepper::postInitialize" << endl;
   }
 
-  // Lambda for converting RealVect position to IntVect (lower-left corner). Input vector is displacement from probLo. 
-  auto        getCellIndex = [](const RealVect a_rv, const Real dx) -> IntVect {
-    return IntVect(D_DECL(std::floor(a_rv[0] / dx), std::floor(a_rv[1] / dx), std::floor(a_rv[2] / dx)));
-  };
-
   m_particleSolver->interpolateVelocities();
   
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  // Check contIntegral criteria and move particles if true
+  moveParticles(amrParticles);
   
-  const RealVect probLo = m_amr->getProbLo();
-  const RealVect probHi = m_amr->getProbHi();
-
-  // Use finest resolution as dx for all particles
-  const Real f_dx = -0.1;  //m_amr->getDx()[m_amr->getFinestLevel()];
-  
-  // Move particles
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    
-    const Real dx = m_amr->getDx()[lvl]; // used for getCellPosition, not particleDistanceMoved
-    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    
-    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
-    ParticleData<P>& levelParticles = amrParticles[lvl];
-    
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
-            
-      List<P>& particles = levelParticles[dit()].listItems();
-      
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-	P& p = lit();
-
-	// Move particle and check integral criteria if integral criteria not already failed
-	if (p.template scalar<2>() > 0){
-	  
-	  const RealVect& E = p.velocity();
-	  const Real particleDistanceMoved = f_dx;
-	  const RealVect normalizedVelocity = E/E.vectorLength();
-	  const Real Emagnitude = E.vectorLength();	  
-	  const Real startPointAlpha = m_alpha(Emagnitude);
-
-	  // Check if alpha<0
-	  if (startPointAlpha < 0) {
-	    p.template scalar<2>() = -1;
-	    std::cout << "alpha<0" << endl;
-	    continue;
-	  }
-	  
-	  p.template scalar<0>() = startPointAlpha;
-	  p.template scalar<1>() = particleDistanceMoved;
-
-	  const RealVect newPosition = p.position() + normalizedVelocity * particleDistanceMoved;
-
-	  const IntVect particleCellIndex = getCellIndex(newPosition - probLo, dx);	
-
-	  // Check if particle is outside of grid boundaries
-	  if (particleOutsideGrid(newPosition, probLo, probHi)){
-	      p.template scalar<2>() = -1;
-	      continue;
-	  }	    
-
-	  // Check if particle is inside electrode
-	  if (particleInsideElectrode(newPosition)){
-	    p.template scalar<2>() = -1;
-	    continue;
-	  }
-		
-	  // Move particle if inside grid boundaries and outside electrode
-	  if (p.template scalar<2>() > 0){
-	    p.position() = newPosition;	    
-	  }
-	}		
-      }
-    }
-  }
-  m_particleSolver->remap();
-  m_particleSolver->interpolateVelocities();
-  
-
   // Add integration parts to p.mass()
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
@@ -320,7 +233,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
       for (ListIterator<P> lit(particles); lit.ok(); ++lit){
 	P& p = lit();
 
-	// Add integration parts if integration criterion not failed (i.e. particle outside grid, inside electrode, or alpha<0)
+	// Add integration parts if contIntegral true
 	if (p.template scalar<2>() > 0){	 	
 	  const RealVect& E = lit().velocity();
 	  const Real Emagnitude = E.vectorLength();
@@ -351,9 +264,86 @@ StreamerInceptionStepper<P, F>::postInitialize()
       }
     }
   }
-  m_particleSolver->remap();
-  
+  m_particleSolver->remap(); 
 }
+
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::moveParticles(ParticleContainer<P>& amrParticles){
+
+  // Lambda for converting RealVect position to IntVect (lower-left corner). Input vector is displacement from probLo. 
+  auto        getCellIndex = [](const RealVect a_rv, const Real dx) -> IntVect {
+    return IntVect(D_DECL(std::floor(a_rv[0] / dx), std::floor(a_rv[1] / dx), std::floor(a_rv[2] / dx)));
+  };
+  
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
+
+  // Set distance moved per step f_dx
+  const Real f_dx = -0.1;  //m_amr->getDx()[m_amr->getFinestLevel()];
+  
+  // Move particles
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    
+    const Real dx = m_amr->getDx()[lvl]; // used for getCellPosition, not particleDistanceMoved
+    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+    
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+            
+      List<P>& particles = levelParticles[dit()].listItems();
+      
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+	P& p = lit();
+	
+	// Move particle and check if contIntegral if contIntegral not already false
+	if (p.template scalar<2>() > 0){
+	  
+	  const RealVect& E = p.velocity();
+	  const Real particleDistanceMoved = f_dx;
+	  const RealVect normalizedVelocity = E/E.vectorLength();
+	  const Real Emagnitude = E.vectorLength();	  
+	  const Real startPointAlpha = m_alpha(Emagnitude);
+
+	  // Check if alpha<0
+	  if (startPointAlpha < 0) {
+	    p.template scalar<2>() = -1;
+	    std::cout << "alpha<0" << endl;
+	    continue;
+	  }
+	  
+	  p.template scalar<0>() = startPointAlpha;
+	  p.template scalar<1>() = particleDistanceMoved;
+
+	  const RealVect newPosition = p.position() + normalizedVelocity * particleDistanceMoved;
+
+	  const IntVect particleCellIndex = getCellIndex(newPosition - probLo, dx);	
+
+	  // Check if particle is outside of grid boundaries
+	  if (particleOutsideGrid(newPosition, probLo, probHi)){
+	    p.template scalar<2>() = -1;
+	    continue;
+	  }	    
+
+	  // Check if particle is inside electrode
+	  if (particleInsideElectrode(newPosition)){
+	    p.template scalar<2>() = -1;
+	    continue;
+	  }
+		
+	  // Move particle if contIntegral
+	  p.position() = newPosition;
+	}		
+      }
+    }
+  }
+  m_particleSolver->remap();
+  m_particleSolver->interpolateVelocities();
+}
+
 
 template <typename P, typename F>
 void
