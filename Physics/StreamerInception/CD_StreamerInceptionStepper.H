@@ -115,6 +115,14 @@ namespace Physics {
       void
       addIntegration(ParticleContainer<P>& amrParticles);
 
+      /*!
+	@brief 
+	@param[in] amrParticles  Particles of m_particleSolver
+	@param[out] true if integration shall continue, false if not
+      */
+      bool
+      keepIntegrating(ParticleContainer<P>& amrParticles);
+
 
       /*!
 	@brief Move particles back to their original position after integration finished

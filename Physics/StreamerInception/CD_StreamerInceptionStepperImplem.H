@@ -218,12 +218,14 @@ StreamerInceptionStepper<P, F>::postInitialize()
   
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
-  // Check contIntegral criteria and move particles if true
-  moveParticles(amrParticles);
+  while (keepIntegrating(amrParticles)){
+    // Check contIntegral criteria and move particles if true
+    moveParticles(amrParticles);
   
-  // Add integration parts to p.mass()
-  addIntegration(amrParticles);
-  
+    // Add integration parts to p.mass()
+    addIntegration(amrParticles);  
+  }
+    
   // Remove particles inside the EB
   m_amr->removeCoveredParticlesIF(amrParticles, m_phase);  
   
@@ -335,6 +337,35 @@ StreamerInceptionStepper<P, F>::addIntegration(ParticleContainer<P>& amrParticle
     }
   }
 }
+
+template <typename P, typename F>
+bool
+StreamerInceptionStepper<P, F>::keepIntegrating(ParticleContainer<P>& amrParticles){
+  int myParticlesStopped = 1;
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      List<P>& particles = levelParticles[dit()].listItems();
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+	P& p = lit();
+	if (p.template scalar<2>() > 0){
+	  myParticlesStopped = -1; // at least one particle is not finished
+	  return true;	  
+	}
+      }
+    }
+  }
+  if (ParallelOps::min(myParticlesStopped) > 0){
+    return false;
+  }
+  else{
+    return true;
+  }
+}
+       
+
+
 
 template <typename P, typename F>
 void
