@@ -23,7 +23,8 @@
 using Vec3 = EBGeometry::Vec3T<Real>;
 
 NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack, const Real& a_radius, const bool& a_fluidInside, const Real& a_tipRadius, const double& a_angle){
-
+  m_tipRadius = {0, a_tipRadius, 0}; 
+  
   constexpr Real pi = 3.14159265358979323846;
   const double tipLength = a_radius/std::tan(a_angle*pi/180);
 
@@ -41,7 +42,7 @@ NeedleIF::NeedleIF(const RealVect& a_centerTipSide, const RealVect& a_centerBack
 
   // Build the needle-parts
   Vector<BaseIF*> isects;
-  isects.push_back(static_cast<BaseIF*> (new CylinderSdf(c, a_centerBack, a_radius, a_fluidInside)));
+  isects.push_back(static_cast<BaseIF*> (new CylinderSdf(c, a_centerBack, a_radius/2, a_fluidInside)));
   //flipinside=true for cone since EBGeometry and Chombo has opposing sign conventions/logic regarding the flipinside..
   auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, tipLength, a_angle,true);
   //for debugging..:
@@ -68,7 +69,8 @@ NeedleIF::NeedleIF(const NeedleIF& a_inputIF){
 }
 
 Real NeedleIF::value(const RealVect& a_point) const{
-  return m_baseif->value(a_point);
+  // tried to "round" of the point
+  return m_baseif->value(a_point - m_tipRadius);
 }
 
 BaseIF* NeedleIF::newImplicitFunction() const{

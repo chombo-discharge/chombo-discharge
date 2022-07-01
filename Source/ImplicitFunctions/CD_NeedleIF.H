@@ -55,6 +55,8 @@ public:
 
 protected:
   RefCountedPtr<BaseIF> m_baseif;
+
+  RealVect m_tipRadius;
 };
 
 #include <CD_NamespaceFooter.H>
