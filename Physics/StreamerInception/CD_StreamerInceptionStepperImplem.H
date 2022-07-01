@@ -291,12 +291,10 @@ StreamerInceptionStepper<P, F>::postInitialize()
 	  }	    
 
 	  // Check if particle is inside electrode
-	  const RefCountedPtr<BaseIF>& implicitFunction = m_amr->getBaseImplicitFunction(m_phase);
-	  const Real value = implicitFunction->value(newPosition);
-	  if (value > 0.0){
+	  if (particleInsideElectrode(newPosition)){
 	    p.template scalar<2>() = -1;
 	    continue;
-	  }	  
+	  }
 		
 	  // Move particle if inside grid boundaries and outside electrode
 	  if (p.template scalar<2>() > 0){
@@ -602,6 +600,19 @@ StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect pos, const Re
     }
   }
   return false;  
+}
+
+
+template <typename P, typename F>
+bool
+StreamerInceptionStepper<P, F>::particleInsideElectrode(const RealVect pos){
+   
+  const RefCountedPtr<BaseIF>& implicitFunction = m_amr->getBaseImplicitFunction(m_phase);
+  const Real value = implicitFunction->value(pos);
+  if (value > 0.0){
+    return true;
+  }
+  return false;
 }
 
 

@@ -239,13 +239,21 @@ namespace Physics {
 
       /*!
 	@brief Check if particle is outside grid boundaries
-	@param[in] pos  particle position
+	@param[in] pos  Particle position
 	@param[in] probLo Lower left boundary of grid
 	@param[in] probHi Upper right boundary of grid
 	@param[out]  true if particle outside boundary, false elsewise
       */
       bool
-      particleOutsideGrid(const RealVect pos, const RealVect probLo, const RealVect probHi);      
+      particleOutsideGrid(const RealVect pos, const RealVect probLo, const RealVect probHi);
+
+      /*!
+	@brief Check if particle is inside electrode
+	@param[in] pos  Particle position
+	@param[out] true if particle inside electrode, false elsewise
+      */
+      bool
+      particleInsideElectrode(const RealVect pos);
 
     protected:
       /*!
