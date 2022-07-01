@@ -28,16 +28,14 @@ namespace Physics {
     */
     enum class IntegrationAlgorithm
     {
-      Euler,
-      RK2,
-      RK4
+      Euler
     };
 
     /*!
       @brief Class for volume evaluation of the streamer inception integral. 
       @details P is the tracer particle type and F is the field solver type. 
     */
-    template <typename P = TracerParticle<2, 1>, typename F = FieldSolverMultigrid>
+    template <typename P = TracerParticle<4, 1>, typename F = FieldSolverMultigrid>
     class StreamerInceptionStepper : public TimeStepper
     {
     public:
@@ -279,6 +277,9 @@ namespace Physics {
 	@brief Voltage sweeps
       */
       std::vector<Real> m_voltageSweeps;
+
+      // TEMPORARY ATTEMPT
+      EBISLayout ebisl;
 
       /*!
 	@brief Scale electrostatic solution.

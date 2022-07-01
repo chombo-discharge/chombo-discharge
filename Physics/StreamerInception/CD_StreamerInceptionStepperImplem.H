@@ -59,18 +59,12 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   if (str == "euler"){
     m_integrationAlgorithm = IntegrationAlgorithm::Euler;
   }
-  else if (str == "rk2"){
-    m_integrationAlgorithm = IntegrationAlgorithm::RK2;
-  }
-  else if (str == "rk4"){
-    m_integrationAlgorithm = IntegrationAlgorithm::RK4;
-  }
   else{
     MayDay::Error("StreamerInceptionStepper::StreamerInceptionStepper -- logic bust");
   }
 
   // Default alpha
-  m_alpha = [](const Real E) { return exp(-E); };
+  m_alpha = [](const Real E) { return tanh(E); };
   
 }
 
@@ -150,19 +144,31 @@ StreamerInceptionStepper<P, F>::initialData()
 
   // Get the gas-side electric field and give it to the particle solvers. 
   DataOps::copy(m_velocity, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
+  // for (int lvl = ....
+  // 	 for (DataIterator dit(...)
+  // 		const Box bx = dbl[dit()];
+  // 		EBCellFAB& velocity = (*m_velocity[lvl])[dit()];
+  // 	      BaseFab<Real>& vFAB = velocity.getSingleValuedFAB();
+	      
+  // 	      for (BoxIterator bit(bx); bit.ok(); ++bit) {
+  // 		const IntVect iv = bit();
+  // 		  RealVect v = RealVect(D_DECL(vFAB(iv,0), vFab(iv,1), vFab(iv,2)));
+  // 		  v = v/v.vectorLength();
+
+  // 		  for (int dir = 0; dir < SpaceDim; dir++) {
+  // 		    vFab(iv,dir) = v[dir];
+  // 		  }
+  // 	      }
   m_particleSolver->setVelocity(m_velocity);
 
   this->initialParticles();
+  this->postInitialize();
 }
 
 
-// TO DO:
-// * Fix dx. getDx() gives a RealVect - which value to use? Find dx in another way?
-// * remove overlapping particles (i.e. remove particles in positions with refined levels above in AMR)
-// * set particles' masses to 1? Don't know the significance of their masses..
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::initialParticles() // riktig å ta EBAMRCellData som argument? deposit() bruker det.
+StreamerInceptionStepper<P, F>::initialParticles()
 {
   CH_TIME("StreamerInceptionStepper::initialParticles");
   if (m_verbosity > 5) {
@@ -190,24 +196,20 @@ StreamerInceptionStepper<P, F>::initialParticles() // riktig å ta EBAMRCellData
 	const RealVect pos = m_amr->getProbLo() + (0.5*RealVect::Unit + RealVect(iv))*dx;
 
 	if(validCells[dit()](iv)){
-	  P p;
-	  p.position() = pos;
-	  p.vect<0>() = pos;
-
-	  // at end of postInit:
-	  // p.position() = p.vect<0>();
-	  
 	  particles.add(P(pos));
 	}
       }
 
-      // Set particles' masses to 1
+      // Define particles' masses
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-	lit().mass() = 1.0;
+	P& p = lit();
+
+	p.mass() = 0.0;
+	p.template vect<0>() = p.position();     
+	p.template scalar<2>() = 1; // criterion for continued integration (set to -1 if alpha<0, particle outside boundary, or particle inside electrode)
       }      
     }
   }
-
     
   // Remapping
   m_particleSolver->remap(); 
@@ -228,38 +230,146 @@ StreamerInceptionStepper<P, F>::postInitialize()
     pout() << "StreamerInceptionStepper::postInitialize" << endl;
   }
 
-  // This is where all the magic happens: Rasmus needs to advect the particles in
-  // this routine.
+  // Lambda for converting RealVect position to IntVect (lower-left corner). Input vector is displacement from probLo. 
+  auto        getCellIndex = [](const RealVect a_rv, const Real dx) -> IntVect {
+    return IntVect(D_DECL(std::floor(a_rv[0] / dx), std::floor(a_rv[1] / dx), std::floor(a_rv[2] / dx)));
+  };
 
-  RealVect add(D_DECL(0.4,0,0));
-  bool skip = false;
+  m_particleSolver->interpolateVelocities();
   
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
   
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
-    
-    ParticleData<P>& levelParticles = amrParticles[lvl];
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
 
+  // Use finest resolution as dx for all particles
+  const Real f_dx = -0.1;  //m_amr->getDx()[m_amr->getFinestLevel()];
+  
+  // Move particles
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    
+    const Real dx = m_amr->getDx()[lvl]; // for getCellPosition, not particleDistanceMoved
+    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+    
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       
+      
       List<P>& particles = levelParticles[dit()].listItems();
-
       
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+	const RealVect& E = lit().velocity();
+	const Real particleDistanceMoved = f_dx;
+	const RealVect normalizedVelocity = E/E.vectorLength();
 
-	if (skip==false) {
-	    lit().position() += add;
-	    skip = true;
-        }
-	else{
-	  skip = false;
+	P& p = lit();
+
+	const Real Emagnitude = E.vectorLength();
+	const Real startPointAlpha = m_alpha(Emagnitude);
+	p.template scalar<0>() = startPointAlpha;
+	p.template scalar<1>() = particleDistanceMoved;
+
+	const RealVect newPosition = p.position() + normalizedVelocity * particleDistanceMoved;
+
+	const IntVect particleCellIndex = getCellIndex(newPosition - probLo, dx);	
+
+	// Check if particle is outside of grid boundaries
+	for (int dir = 0; dir < SpaceDim; dir++) {
+	  if(newPosition[dir] <= probLo[dir] || newPosition[dir] >= probHi[dir]) {
+	    p.template scalar<2>() = -1;	    
+	  }
 	}
+
+	// Move particle if inside grid boundaries
+	if (p.template scalar<2>() > 0){
+	  p.position() = newPosition;	     
+	}		
       }
     }
   }
   m_particleSolver->remap();
+  m_particleSolver->interpolateVelocities();
+
   
+  // Iterate through particles and check if particles are covered or irregular (must be done after previous remap)
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const Real dx = m_amr->getDx()[lvl];
+    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      List<P>& particles = levelParticles[dit()].listItems();	
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+	P& p = lit();
+
+	const IntVect particleCellIndex = getCellIndex(p.position() - probLo, dx);	
+	
+	// Check if particle is covered
+	if (ebisbox.isCovered(particleCellIndex)){
+	  p.template scalar<2>() = -1;
+	  //std::cout << "Particle integration stopped: Particle is in covered cell" << endl;
+	}
+	
+	// Check if particle is irregular
+	else if (ebisbox.isIrregular(particleCellIndex)){
+	  VolIndex vof(particleCellIndex, 0);     
+	  
+	  const RealVect n = ebisbox.normal(vof);
+	  const RealVect xc = ebisbox.bndryCentroid(vof) * dx * probLo;
+
+	  if (n.dotProduct(p.position() - xc) <= 0.0) {
+	    p.template scalar<2>() = -1;	    
+	    std::cout << "Particle Integration stopped: Particle is in covered part of multi-cell" << endl;
+	  }	  
+	}      
+      }
+    }
+  }
+
+  // Add integration parts to p.mass()
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+    
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+	P& p = lit();
+	const RealVect& E = lit().velocity();
+	const Real Emagnitude = E.vectorLength();
+	const Real endPointAlpha = m_alpha(Emagnitude);
+	const Real startPointAlpha = p.template scalar<0>();
+	const Real distanceMoved = p.template scalar<1>();
+		 
+	p.mass() += 0.5*(endPointAlpha + startPointAlpha) * distanceMoved;
+      }
+    }
+  }
+  
+  // Remove particles inside the EB
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);  
+  
+  // Move particles back to initial position
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    
+    ParticleData<P>& levelParticles = amrParticles[lvl];     
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      
+      List<P>& particles = levelParticles[dit()].listItems();
+      
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+	P& p = lit();
+	p.position() = p.template vect<0>();
+      }
+    }
+  }
+  m_particleSolver->remap();
   
 }
 
@@ -515,6 +625,7 @@ StreamerInceptionStepper<P, F>::scaleElectrostatics(const Real& a_scale) noexcep
   DataOps::scale(potential, a_scale);
   DataOps::scale(electricField, a_scale);
 }
+
 
 #include <CD_NamespaceFooter.H>
 
