@@ -341,31 +341,31 @@ StreamerInceptionStepper<P, F>::addIntegration(ParticleContainer<P>& amrParticle
 template <typename P, typename F>
 bool
 StreamerInceptionStepper<P, F>::keepIntegrating(ParticleContainer<P>& amrParticles){
+  CH_TIME("StreamerInceptionStepper::keepIntegrating(ParticleContainer)");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::keepIntegrating(ParticleContainer)" << endl;
+  }
+  
   int myParticlesStopped = 1;
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    
     ParticleData<P>& levelParticles = amrParticles[lvl];
+    
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       List<P>& particles = levelParticles[dit()].listItems();
+      
       for (ListIterator<P> lit(particles); lit.ok(); ++lit){
-	P& p = lit();
-	if (p.template scalar<2>() > 0){
-	  myParticlesStopped = -1; // at least one particle is not finished
-	  return true;	  
+	if (lit().template scalar<2>() > 0.0){
+	  myParticlesStopped = -1;
 	}
       }
     }
   }
-  if (ParallelOps::min(myParticlesStopped) > 0){
-    return false;
-  }
-  else{
-    return true;
-  }
+
+  return (ParallelOps::min(myParticlesStopped) > 0.0) ? true : false;
 }
-       
-
-
 
 template <typename P, typename F>
 void

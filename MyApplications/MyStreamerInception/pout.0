@@ -49,7 +49,7 @@ EBIndexSpace::define - From domain
   Building finest level...
 Entering EBISLevel::EBISLevel called by EBIndexSpace::buildFirstLevel...
 Exiting EBISLevel::EBISLevel called by EBIndexSpace::buildFirstLevel...
-ebis_after_first_level_bui|Mem Usage: OS=    18.566 (vm=   514.664) MT_peak=     0.739 MT_current=     0.394  OSPeakRSS=    18.566 (vm=   514.664) (MB)
+ebis_after_first_level_bui|Mem Usage: OS=    18.883 (vm=   514.664) MT_peak=     0.741 MT_current=     0.395  OSPeakRSS=    18.883 (vm=   514.668) (MB)
     irreg VoFs    : 1128
     arcs          : 3386
     multi VoFs    : 0
@@ -129,8 +129,8 @@ ebis_after_first_level_bui|Mem Usage: OS=    18.566 (vm=   514.664) MT_peak=    
   Building level 11...
     Empty
 
-       ebis_leaving_define|Mem Usage: OS=    19.668 (vm=   514.941) MT_peak=     1.400 MT_current=     0.929  OSPeakRSS=    19.668 (vm=   514.988) (MB)
-MemoryReport::getMaxMinMemoryUsage:	 Max peak = 1.41423	 Min peak = 1.21416	 Max unfreed = 0.928549	 Min unfreed = 0.80208
+       ebis_leaving_define|Mem Usage: OS=    19.711 (vm=   514.945) MT_peak=     1.401 MT_current=     0.930  OSPeakRSS=    19.711 (vm=   514.992) (MB)
+MemoryReport::getMaxMinMemoryUsage:	 Max peak = 1.41546	 Min peak = 1.21539	 Max unfreed = 0.929779	 Min unfreed = 0.80331
 TimeStepper::setAmr(RefCountedPtr<AmrMesh>)
 StreamerInceptionStepper::registerRealms
 AmrMesh::registerRealm(string)
@@ -3532,6 +3532,95 @@ AmrMesh::getGrids(string)
 AmrMesh::queryRealm(string)
 AmrMesh::getDx()
 StreamerInceptionStepper::postInitialize
+TracerParticleSolver::interpolateVelocities()
+AmrMesh::getParticleMesh(string, phase::which_phase)
+AmrMesh::queryRealm(string)
+TracerParticleSolver::getParticles()
+StreamerInceptionStepper::keepIntegrating(ParticleContainer)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getDx()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getDx()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getDx()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getDx()
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+TracerParticleSolver::remap()
+StreamerInceptionStepper::postInitialize
+TracerParticleSolver::interpolateVelocities()
+AmrMesh::getParticleMesh(string, phase::which_phase)
+AmrMesh::queryRealm(string)
+TracerParticleSolver::getParticles()
+StreamerInceptionStepper::keepIntegrating(ParticleContainer)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getDx()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getDx()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getDx()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getDx()
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+AmrMesh::getGrids(string)
+AmrMesh::queryRealm(string)
+AmrMesh::getFinestLevel()
+TracerParticleSolver::remap()
 Driver::gridReport()
 
 AmrMesh::getFinestLevel()
@@ -3753,11 +3842,11 @@ AmrMesh::queryRealm(string)
 | ---------------------------------------------------------------------------------------------------------|
 | Event                    | Loc. (s)| Loc. (%)| Min. (s)| Max. (s)| Avg. (s)| Dev. (s)| Min rank| Max rank| 
 | ---------------------------------------------------------------------------------------------------------|
-| Assemble data            |   0.0039|  39.5073|   0.0038|   0.0039|   0.0038|   0.0040|        5|        1| 
-| Write data               |   0.0059|  60.4927|   0.0059|   0.0059|   0.0059|   0.0025|        2|        7| 
+| Assemble data            |   0.0042|  41.8544|   0.0041|   0.0042|   0.0042|   0.0039|        4|        7| 
+| Write data               |   0.0058|  58.1456|   0.0058|   0.0058|   0.0058|   0.0024|        6|        7| 
 | ---------------------------------------------------------------------------------------------------------|
-| Local elapsed time  = 0.0098 seconds
-| Global elapsed time = 0.0098 seconds
+| Local elapsed time  = 0.0099 seconds
+| Global elapsed time = 0.0100 seconds
 | ---------------------------------------------------------------------------------------------------------|
 Driver::run(Real, Real, int)
 =================================
