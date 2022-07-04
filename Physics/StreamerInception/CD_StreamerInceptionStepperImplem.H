@@ -223,7 +223,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
     moveParticles(amrParticles);
   
     // Add integration parts to p.mass()
-    addIntegration(amrParticles);  
+    addIntegration(amrParticles);
   }
     
   // Remove particles inside the EB
@@ -247,7 +247,7 @@ StreamerInceptionStepper<P, F>::moveParticles(ParticleContainer<P>& amrParticles
   const RealVect probHi = m_amr->getProbHi();
 
   // Set distance moved per step f_dx
-  const Real f_dx = -0.1;  //m_amr->getDx()[m_amr->getFinestLevel()];
+  const Real f_dx = 0.01;  //m_amr->getDx()[m_amr->getFinestLevel()];
   
   // Move particles
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -331,7 +331,7 @@ StreamerInceptionStepper<P, F>::addIntegration(ParticleContainer<P>& amrParticle
 	  const Real endPointAlpha = m_alpha(Emagnitude);
 	  const Real startPointAlpha = p.template scalar<0>();
 	  const Real distanceMoved = p.template scalar<1>();
-	  p.mass() += 0.5*(endPointAlpha + startPointAlpha) * distanceMoved;
+	  p.mass() += 0.5*(endPointAlpha + startPointAlpha) * distanceMoved;	
 	}	 	
       }
     }
@@ -364,7 +364,7 @@ StreamerInceptionStepper<P, F>::keepIntegrating(ParticleContainer<P>& amrParticl
     }
   }
 
-  return (ParallelOps::min(myParticlesStopped) > 0.0) ? true : false;
+  return (ParallelOps::min(myParticlesStopped) > 0.0) ? false : true;
 }
 
 template <typename P, typename F>
