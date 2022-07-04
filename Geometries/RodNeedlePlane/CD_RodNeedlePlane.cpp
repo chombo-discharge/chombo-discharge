@@ -75,7 +75,6 @@ RodNeedlePlane::defineRodWNeedle()
   ppRod.get("live", rodLive);
 
   ppNeedle.get("length", length);
-  ppNeedle.get("tipDir", tipDir);
   ppNeedle.get("radius", needleRadius);
   ppNeedle.get("tipRadius", tipRadius);
   ppNeedle.get("angle", angle);
@@ -90,7 +89,7 @@ RodNeedlePlane::defineRodWNeedle()
 
   Vector<BaseIF*> electrodeParts;
   electrodeParts.push_back((BaseIF*)new RodIF(rodE1, rodE2, rodRadius, false));
-  electrodeParts.push_back((BaseIF*)new NeedleIF(length, tipDir, needleRadius, false, tipRadius, angle, cornerCurve));
+  electrodeParts.push_back((BaseIF*)new NeedleIF(length, needleRadius, false, tipRadius, angle, cornerCurve));
 
   RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new SmoothIntersection(electrodeParts, cornerCurve));
 
@@ -139,15 +138,13 @@ RodNeedlePlane::defineNeedle()
   ParmParse pp("RodNeedlePlane.needle");
 
   pp.get("length", length);
-  pp.get("tipDir", tipDir);
   pp.get("radius", radius);
   pp.get("tipRadius", tipRadius);
   pp.get("angle", angle);
   pp.get("cornerCurve", cornerCurve);
   pp.get("live", live);
 
-  RefCountedPtr<BaseIF> bif =
-    RefCountedPtr<BaseIF>(new NeedleIF(length, tipDir, radius, false, tipRadius, angle, cornerCurve));
+  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new NeedleIF(length, radius, false, tipRadius, angle, cornerCurve));
 
   m_electrodes.push_back(Electrode(bif, live));
 }

@@ -29,7 +29,6 @@ public:
   /*!
     @brief Constructor
     @param[in] a_length Needle length
-    @param[in] a_tipDir    Direction of needle tip. The needle is oriented along the y-axis. (1 == 'down', -1 == 'up')
     @param[in] a_radius        Needle radius
     @param[in] a_fluidInside   
     @param[in] a_tipRadius     Radius of needle tip curvature           
@@ -37,7 +36,6 @@ public:
     @param[in] a_cornerCurve        Corner curve between rod and needle
   */
   NeedleIF(const Real&   a_length,
-           const int&    a_tipDir,
            const Real&   a_radius,
            const bool&   a_fluidInside,
            const Real&   a_tipRadius,

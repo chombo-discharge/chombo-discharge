@@ -80,7 +80,6 @@ RodNeedlePlane.rod.live			= true			# Live or not
 
 RodNeedlePlane.needle.on		= true 			# Use needle or not
 RodNeedlePlane.needle.length		= 0.9			# Length of the needle
-RodNeedlePlane.needle.tipDir		= 1			# Direction of needle tip. The needle is oriented along the y-axis. (1 == 'down', -1 == 'up')
 RodNeedlePlane.needle.radius		= 0.0005		# Needle radius
 RodNeedlePlane.needle.tipRadius		= 0.0002		# Needle tip radius (curve radius of the tip)
 RodNeedlePlane.needle.angle		= 30			# Opening angle of needle tip (in degrees) (NB! Opening of "entire" tip)

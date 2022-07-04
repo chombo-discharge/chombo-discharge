@@ -23,7 +23,6 @@
 using Vec3 = EBGeometry::Vec3T<Real>;
 
 NeedleIF::NeedleIF(const Real&   a_length,
-                   const int&    a_tipDir,
                    const Real&   a_radius,
                    const bool&   a_fluidInside,
                    const Real&   a_tipRadius,
@@ -37,8 +36,8 @@ NeedleIF::NeedleIF(const Real&   a_length,
   const double tipLength = (a_radius - m_tipRadius) / std::tan((a_angle / 2) * pi / 180);
 
   RealVect centerFront(CH_SPACEDIM), centerBack(CH_SPACEDIM);
-  centerFront[1] = a_tipDir * tipLength;
-  centerBack[1]  = a_tipDir * a_length;
+  centerFront[1] = tipLength;
+  centerBack[1]  = a_length;
 
   // the center of the needle tip is set to origo in order for the rotation to work more easily
   const Vec3 centerT(0.0, 0.0, 0.0);
@@ -53,7 +52,7 @@ NeedleIF::NeedleIF(const Real&   a_length,
   auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, tipLength, a_angle, true);
 
   // Cone rotation will only work as expected if the cone tip is placed in origo.
-  cone->rotate(a_tipDir * 90, 0);
+  cone->rotate(90, 0);
 
   isects.push_back(static_cast<BaseIF*>(new EBGeometryIF(cone, false)));
 
