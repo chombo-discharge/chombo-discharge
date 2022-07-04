@@ -109,14 +109,22 @@ namespace Physics {
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      moveParticles(ParticleContainer<P>& amrParticles);
+      moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles);
 
+      // TESTING
+      void
+      moveParticlesSimpsons(ParticleContainer<P>& amrParticles);
+      
       /*!
 	@brief Add integration parts after particles move
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles);    
+      addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles);
+
+      // TESTING
+      void
+      addIntegrationSimpsons(ParticleContainer<P>& amrParticles);
       
       /*!
 	@brief 

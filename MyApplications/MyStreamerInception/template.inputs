@@ -114,13 +114,13 @@ Cylinder.permittivity  = 4              # If dielectric, this sets the permittiv
 Cylinder.z_coord       = 0.0            # z-coordinate if doing 2D
 Cylinder.center1       = 0 2 0          # One endpoint. Must have 3 entries
 Cylinder.center2       = 0 0 0          # Other endpoint. Must have 3 entries. 
-Cylinder.radius        = 10000            # Cylinder radius. 
+Cylinder.radius        = 0.1            # Cylinder radius. 
 
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = 20
-StreamerInceptionStepper.integration   = euler
+StreamerInceptionStepper.integration   = simpsons
 StreamerInceptionStepper.voltage_lo    = 1.0
 StreamerInceptionStepper.voltage_hi    = 100.0
 StreamerInceptionStepper.voltage_steps = 10
