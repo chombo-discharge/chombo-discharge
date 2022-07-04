@@ -28,7 +28,10 @@ namespace Physics {
     */
     enum class IntegrationAlgorithm
     {
-      Euler
+      Trapezoidal,
+      Simpsons,
+      Simpsons38,
+      Booles      
     };
 
     /*!
@@ -113,8 +116,8 @@ namespace Physics {
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      addIntegration(ParticleContainer<P>& amrParticles);
-
+      addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles);    
+      
       /*!
 	@brief 
 	@param[in] amrParticles  Particles of m_particleSolver

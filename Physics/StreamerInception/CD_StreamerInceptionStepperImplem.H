@@ -26,6 +26,7 @@
 // 3. Compute negative ion drift times to electrode(s). Compute as time/(V * mobility)
 // 4. Evaluate field emission rates.
 // 5. Background ionization rates
+// ** Add different integration methods: Simpson's, Simpson's 3/8, Boole's. Should create different moveParticles() for each function to compute alpha at different steps.
 using namespace Physics::StreamerInception;
 
 template <typename P, typename F>
@@ -56,17 +57,16 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   pp.get("voltage_hi", voltageHi);
   pp.get("voltage_steps", voltageSteps);
   pp.get("integration", str);
-  if (str == "euler"){
-    m_integrationAlgorithm = IntegrationAlgorithm::Euler;
+  if (str == "trapezoidal"){
+    m_integrationAlgorithm = IntegrationAlgorithm::Trapezoidal;
   }
   else{
     MayDay::Error("StreamerInceptionStepper::StreamerInceptionStepper -- logic bust");
   }
 
   // Default alpha
-  //  m_alpha = [](const Real E) { return tanh(E); };
-  m_alpha = [](const Real E) {return 1;};
-  
+  m_alpha = [](const Real E) { return tanh(E); };  // A*tanh((E-E_0)/B)
+  //m_alpha = [](const Real E) {return 1;};
 }
 
 template <typename P, typename F>
@@ -134,6 +134,8 @@ StreamerInceptionStepper<P, F>::initialData()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::initialData" << endl;
   }
+
+  std::cout << "initData begins" << endl;
   
   // Set rho = sigma = 0 for field solver and then solve the Poisson equation. 
   m_fieldSolver->setRho(0.0);
@@ -147,7 +149,7 @@ StreamerInceptionStepper<P, F>::initialData()
   DataOps::copy(m_velocity, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
   
   m_particleSolver->setVelocity(m_velocity);
-  
+
   this->initialParticles();
   this->postInitialize();
 }
@@ -161,6 +163,8 @@ StreamerInceptionStepper<P, F>::initialParticles()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::initialParticles" << endl;
   }
+
+  std::cout << "initParticles begins" << endl;
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
@@ -224,7 +228,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
     moveParticles(amrParticles);
   
     // Add integration parts to p.mass()
-    addIntegration(amrParticles);
+    addIntegrationTrapezoidal(amrParticles);
   }
     
   // Remove particles inside the EB
@@ -248,7 +252,7 @@ StreamerInceptionStepper<P, F>::moveParticles(ParticleContainer<P>& amrParticles
   const RealVect probHi = m_amr->getProbHi();
 
   // Set distance moved per step f_dx
-  const Real f_dx = 0.01;  //m_amr->getDx()[m_amr->getFinestLevel()];
+  const Real f_dx = 0.1;  //m_amr->getDx()[m_amr->getFinestLevel()];
   
   // Move particles
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -313,7 +317,7 @@ StreamerInceptionStepper<P, F>::moveParticles(ParticleContainer<P>& amrParticles
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::addIntegration(ParticleContainer<P>& amrParticles){
+StreamerInceptionStepper<P, F>::addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles){
  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
 
@@ -332,7 +336,7 @@ StreamerInceptionStepper<P, F>::addIntegration(ParticleContainer<P>& amrParticle
 	  const Real endPointAlpha = m_alpha(Emagnitude);
 	  const Real startPointAlpha = p.template scalar<0>();
 	  const Real distanceMoved = p.template scalar<1>();
-	  p.mass() += 0.5*(endPointAlpha + startPointAlpha) * distanceMoved;	
+	  p.mass() += 0.5*(endPointAlpha + startPointAlpha) * distanceMoved;
 	}	 	
       }
     }
@@ -360,6 +364,7 @@ StreamerInceptionStepper<P, F>::keepIntegrating(ParticleContainer<P>& amrParticl
       for (ListIterator<P> lit(particles); lit.ok(); ++lit){
 	if (lit().template scalar<2>() > 0.0){
 	  myParticlesStopped = -1;
+	  break;
 	}
       }
     }
