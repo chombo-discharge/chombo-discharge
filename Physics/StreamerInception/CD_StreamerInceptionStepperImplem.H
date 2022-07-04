@@ -64,7 +64,8 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   }
 
   // Default alpha
-  m_alpha = [](const Real E) { return tanh(E); };
+  //  m_alpha = [](const Real E) { return tanh(E); };
+  m_alpha = [](const Real E) {return 1;};
   
 }
 
