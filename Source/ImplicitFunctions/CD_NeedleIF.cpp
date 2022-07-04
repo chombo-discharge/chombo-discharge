@@ -22,44 +22,43 @@
 
 using Vec3 = EBGeometry::Vec3T<Real>;
 
-NeedleIF::NeedleIF(const RealVect& a_centerTipSide,
-                   const RealVect& a_centerBack,
-                   const Real&     a_radius,
-                   const bool&     a_fluidInside,
-                   const Real&     a_tipRadius,
-                   const double&   a_angle)
+NeedleIF::NeedleIF(const Real&   a_length,
+                   const int&    a_tipDir,
+                   const Real&   a_radius,
+                   const bool&   a_fluidInside,
+                   const Real&   a_tipRadius,
+                   const double& a_angle,
+                   const Real&   a_cornerCurve)
 {
   m_tipRadius = a_tipRadius;
 
-  constexpr Real pi        = 3.14159265358979323846;
-  const double   tipLength = (a_radius - m_tipRadius) / std::tan(a_angle * pi / 180);
+  constexpr Real pi = 3.14159265358979323846;
+  // a_angle is entire opening angle, dividing by two to get half of the opening angle
+  const double tipLength = (a_radius - m_tipRadius) / std::tan((a_angle / 2) * pi / 180);
 
-  const RealVect axis    = (a_centerTipSide - a_centerBack);
-  const RealVect axisVec = axis / axis.vectorLength();
+  RealVect centerFront(CH_SPACEDIM), centerBack(CH_SPACEDIM);
+  centerFront[1] = a_tipDir * tipLength;
+  centerBack[1]  = a_tipDir * a_length;
 
-  // find new center for where the cylinder and cone should meet.
-  const RealVect c = a_centerTipSide - tipLength * axisVec;
-
-#if CH_SPACEDIM == 2
-  const Vec3 centerT(a_centerTipSide[0], a_centerTipSide[1], 0.0);
-#else
-  const Vec3 centerT(a_centerTipSide[0], a_centerTipSide[1], a_centerTipSide[2]);
-#endif
+  // the center of the needle tip is set to origo in order for the rotation to work more easily
+  const Vec3 centerT(0.0, 0.0, 0.0);
 
   // Build the needle-parts:
   Vector<BaseIF*> isects;
-  isects.push_back(static_cast<BaseIF*>(new CylinderSdf(c, a_centerBack, (a_radius - m_tipRadius), a_fluidInside)));
+  isects.push_back(
+    static_cast<BaseIF*>(new CylinderSdf(centerFront, centerBack, (a_radius - m_tipRadius), a_fluidInside)));
 
   //flipinside=true for cone since EBGeometry and Chombo has opposing sign conventions/logic regarding the flipinside..
+  // the center of the needle tip is set to origo in order for the rotation to work more easily
   auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, tipLength, a_angle, true);
 
   // Cone rotation will only work as expected if the cone tip is placed in origo.
-  cone->rotate(90, 0);
+  cone->rotate(a_tipDir * 90, 0);
 
   isects.push_back(static_cast<BaseIF*>(new EBGeometryIF(cone, false)));
 
   // Build the needle
-  m_baseif = RefCountedPtr<BaseIF>(new SmoothIntersection(isects, 0.01));
+  m_baseif = RefCountedPtr<BaseIF>(new SmoothIntersection(isects, a_cornerCurve));
 
   // Delete everything we have allocated so far
   for (int i = 0; i < isects.size(); ++i) {

@@ -75,16 +75,16 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 RodNeedlePlane.rod.on			= false			# Use rod or not
 RodNeedlePlane.rod.endpoint1		= 0 0.003 0		# One endpoint
 RodNeedlePlane.rod.endpoint2		= 0 2 0			# Other endpoint
-RodNeedlePlane.rod.radius		= 0.035
+RodNeedlePlane.rod.radius		= 0.035			# Rod radius
 RodNeedlePlane.rod.live			= true			# Live or not
 
 RodNeedlePlane.needle.on		= true 			# Use needle or not
-RodNeedlePlane.needle.endpointtip	= 0 0 0			# Endpoint with needle tip
-RodNeedlePlane.needle.endpointback	= 0 0.8 0		# Other endpoint (flat)
-RodNeedlePlane.needle.radius		= 0.0005			# Needle radius
-RodNeedlePlane.needle.tipRadius		= 0.0002			# Needle tip radius (curve radius of the tip)
-RodNeedlePlane.needle.angle		= 15			# Opening angle of needle tip (in degrees)
-RodNeedlePlane.needle.cornerCurve	= 0.00001			# Corner curve between rod and needle
+RodNeedlePlane.needle.length		= 0.9			# Length of the needle
+RodNeedlePlane.needle.tipDir		= 1			# Direction of needle tip. The needle is oriented along the y-axis. (1 == 'down', -1 == 'up')
+RodNeedlePlane.needle.radius		= 0.0005		# Needle radius
+RodNeedlePlane.needle.tipRadius		= 0.0002		# Needle tip radius (curve radius of the tip)
+RodNeedlePlane.needle.angle		= 30			# Opening angle of needle tip (in degrees) (NB! Opening of "entire" tip)
+RodNeedlePlane.needle.cornerCurve	= 0.000001		# Corner curve between rod and needle
 RodNeedlePlane.needle.live		= true			# Live or not
 
 RodNeedlePlane.plane.on			= false			# Use plane or not

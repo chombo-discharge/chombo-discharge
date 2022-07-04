@@ -59,11 +59,12 @@ RodNeedlePlane::defineRodWNeedle()
   RealVect     rodE1, rodE2;
   bool         rodLive;
 
-  Real     needleRadius;
-  Real     tipRadius;
-  Real     angle;
-  RealVect needleE1, needleE2;
-  bool     needleLive;
+  Real length;
+  int  tipDir;
+  Real needleRadius;
+  Real tipRadius;
+  Real angle;
+  bool needleLive;
 
   Real cornerCurve;
 
@@ -73,6 +74,8 @@ RodNeedlePlane::defineRodWNeedle()
   ppRod.get("radius", rodRadius);
   ppRod.get("live", rodLive);
 
+  ppNeedle.get("length", length);
+  ppNeedle.get("tipDir", tipDir);
   ppNeedle.get("radius", needleRadius);
   ppNeedle.get("tipRadius", tipRadius);
   ppNeedle.get("angle", angle);
@@ -85,14 +88,9 @@ RodNeedlePlane::defineRodWNeedle()
   ppRod.getarr("endpoint2", v, 0, SpaceDim);
   rodE2 = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  ppNeedle.getarr("endpointtip", v, 0, SpaceDim);
-  needleE1 = RealVect(D_DECL(v[0], v[1], v[2]));
-  ppNeedle.getarr("endpointback", v, 0, SpaceDim);
-  needleE2 = RealVect(D_DECL(v[0], v[1], v[2]));
-
   Vector<BaseIF*> electrodeParts;
   electrodeParts.push_back((BaseIF*)new RodIF(rodE1, rodE2, rodRadius, false));
-  electrodeParts.push_back((BaseIF*)new NeedleIF(needleE1, needleE2, needleRadius, false, tipRadius, angle));
+  electrodeParts.push_back((BaseIF*)new NeedleIF(length, tipDir, needleRadius, false, tipRadius, angle, cornerCurve));
 
   RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new SmoothIntersection(electrodeParts, cornerCurve));
 
@@ -130,25 +128,26 @@ void
 RodNeedlePlane::defineNeedle()
 {
   Vector<Real> v(SpaceDim);
+  Real         length;
+  int          tipDir;
   Real         radius;
   Real         tipRadius;
   Real         angle;
-  RealVect     e1, e2;
+  Real         cornerCurve;
   bool         live;
 
   ParmParse pp("RodNeedlePlane.needle");
 
+  pp.get("length", length);
+  pp.get("tipDir", tipDir);
   pp.get("radius", radius);
   pp.get("tipRadius", tipRadius);
   pp.get("angle", angle);
+  pp.get("cornerCurve", cornerCurve);
   pp.get("live", live);
 
-  pp.getarr("endpointtip", v, 0, SpaceDim);
-  e1 = RealVect(D_DECL(v[0], v[1], v[2]));
-  pp.getarr("endpointback", v, 0, SpaceDim);
-  e2 = RealVect(D_DECL(v[0], v[1], v[2]));
-
-  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(new NeedleIF(e1, e2, radius, false, tipRadius, angle));
+  RefCountedPtr<BaseIF> bif =
+    RefCountedPtr<BaseIF>(new NeedleIF(length, tipDir, radius, false, tipRadius, angle, cornerCurve));
 
   m_electrodes.push_back(Electrode(bif, live));
 }
