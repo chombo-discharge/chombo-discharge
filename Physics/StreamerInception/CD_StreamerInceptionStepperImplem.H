@@ -67,9 +67,15 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
     MayDay::Error("StreamerInceptionStepper::StreamerInceptionStepper -- logic bust");
   }
 
+  // Define voltages
+  const Real dV = (voltageHi - voltageLo)/voltageSteps;
+  m_voltageSweeps.push_back(voltageLo);
+  for (int i = 0; i < voltageSteps; i++) {
+    m_voltageSweeps.push_back(m_voltageSweeps[i] + dV);
+  }  
+  
   // Default alpha
-  m_alpha = [](const Real E) { return tanh(E); };  // A*tanh((E-E_0)/B)
-  //m_alpha = [](const Real E) {return 1;};
+  m_alpha = [](const Real E) { return tanh(E); }; 
 }
 
 template <typename P, typename F>
@@ -222,39 +228,60 @@ StreamerInceptionStepper<P, F>::postInitialize()
   
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
-  switch (m_integrationAlgorithm){
-  case IntegrationAlgorithm::Trapezoidal:
-    while (keepIntegrating(amrParticles)){
-      // Check contIntegral criteria and move particles if true
-      moveParticlesTrapezoidal(amrParticles);
-  
-      // Add integration parts to p.mass()
-      addIntegrationTrapezoidal(amrParticles);
-    }
-    break;
-  case IntegrationAlgorithm::Simpsons:
-    while (keepIntegrating(amrParticles)){
-      // Check contIntegral criteria and move particles if true
-      moveParticlesTrapezoidal(amrParticles);
-  
-      // Add integration parts to p.mass()
-      addIntegrationTrapezoidal(amrParticles);
-    }
-    break;
-  }
-    
-  // Remove particles inside the EB
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);  
-  
-  // Move particles back to initial position
-  moveParticlesInitialPosition(amrParticles);
-}
+  // Allocate m_Kvalues
+  m_amr->allocate(m_Kvalues, m_realm, m_phase, m_voltageSweeps.size());
+  DataOps::setValue(m_Kvalues, 1.23456789);
 
+  // Declare and allocate temporary EBAMRCelldata for K-values to be stored in m_Kvalues
+  EBAMRCellData curK;
+  m_amr->allocate(curK, m_realm, m_phase, 1);
+
+  // DELETE:
+  DataOps::setValue(curK, 1.2345);
+
+  // Integrate for each voltage
+  for (int i = 0; i < m_voltageSweeps.size(); ++i) {
+    switch (m_integrationAlgorithm){
+    case IntegrationAlgorithm::Trapezoidal:
+      while (keepIntegrating(amrParticles)){
+	// Check contIntegral criteria and move particles if true
+	this->moveParticlesTrapezoidal(amrParticles, m_voltageSweeps[i]);
+  
+	// Add integration parts to p.mass()
+	this->addIntegrationTrapezoidal(amrParticles, m_voltageSweeps[i]);
+      }
+      break;
+    case IntegrationAlgorithm::Simpsons:
+      while (keepIntegrating(amrParticles)){
+	// Check contIntegral criteria and move particles if true
+	this->moveParticlesSimpsons(amrParticles, m_voltageSweeps[i]);
+  
+	// Add integration parts to p.mass()
+	this->addIntegrationSimpsons(amrParticles, m_voltageSweeps[i]);
+      }
+      break;
+    }   
+  
+    // Move particles back to initial position
+    this->moveParticlesInitialPosition(amrParticles);
+    
+    // Deposit and copy K values to m_Kvalues
+    m_particleSolver->deposit(curK);
+    const Interval srcInterval(0, 0);
+    const Interval dstInterval(i, i);
+    for (int lvl = 0; lvl <=  m_amr->getFinestLevel(); lvl++) {
+      curK[lvl]->copyTo(srcInterval, *m_Kvalues[lvl], dstInterval);
+    }    
+    
+    // Set particles' masses to 0 before integrating for next voltage
+    this->resetParticleMass(amrParticles);
+  }
+}
 
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles){
+StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage){
   // Lambda for converting RealVect position to IntVect (lower-left corner). Input vector is displacement from probLo. 
   auto        getCellIndex = [](const RealVect a_rv, const Real dx) -> IntVect {
     return IntVect(D_DECL(std::floor(a_rv[0] / dx), std::floor(a_rv[1] / dx), std::floor(a_rv[2] / dx)));
@@ -285,7 +312,7 @@ StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& a
 	  const RealVect& E = p.velocity();
 	  const Real particleDistanceMoved = dx;
 	  const RealVect normalizedVelocity = E/E.vectorLength();
-	  const Real Emagnitude = E.vectorLength();	  
+	  const Real Emagnitude = voltage * E.vectorLength();	  
 	  const Real startPointAlpha = m_alpha(Emagnitude);
 
 	  // Check if alpha<0
@@ -325,7 +352,7 @@ StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& a
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrParticles){
+StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage){
   // Lambda for converting RealVect position to IntVect (lower-left corner). Input vector is displacement from probLo. 
   auto        getCellIndex = [](const RealVect a_rv, const Real dx) -> IntVect {
     return IntVect(D_DECL(std::floor(a_rv[0] / dx), std::floor(a_rv[1] / dx), std::floor(a_rv[2] / dx)));
@@ -355,7 +382,7 @@ StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrP
 	  const RealVect& E = p.velocity();
 	  const Real particleDistanceMoved = dx;
 	  const RealVect normalizedVelocity = E/E.vectorLength();
-	  const Real Emagnitude = E.vectorLength();	  
+	  const Real Emagnitude = voltage * E.vectorLength();	  
 	  const Real startPointAlpha = m_alpha(Emagnitude);
 
 	  // Check if alpha<0
@@ -410,7 +437,7 @@ StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrP
 	  const RealVect& E = p.velocity();
 	  const Real particleDistanceMoved = dx;
 	  const RealVect normalizedVelocity = E/E.vectorLength();
-	  const Real Emagnitude = E.vectorLength();	  
+	  const Real Emagnitude = voltage * E.vectorLength();	  
 	  const Real midPointAlpha = m_alpha(Emagnitude);
 
 	  // Check if alpha<0
@@ -449,7 +476,7 @@ StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrP
   
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles){
+StreamerInceptionStepper<P, F>::addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage){
  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
 
@@ -464,7 +491,7 @@ StreamerInceptionStepper<P, F>::addIntegrationTrapezoidal(ParticleContainer<P>& 
 	// Add integration parts if contIntegral true
 	if (p.template scalar<0>() > 0){	 	
 	  const RealVect& E = p.velocity();
-	  const Real Emagnitude = E.vectorLength();
+	  const Real Emagnitude = voltage * E.vectorLength();
 	  const Real endPointAlpha = m_alpha(Emagnitude);
 	  const Real startPointAlpha = p.template scalar<2>();
 	  const Real distanceMoved = p.template scalar<1>();
@@ -477,7 +504,7 @@ StreamerInceptionStepper<P, F>::addIntegrationTrapezoidal(ParticleContainer<P>& 
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::addIntegrationSimpsons(ParticleContainer<P>& amrParticles){
+StreamerInceptionStepper<P, F>::addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage){
  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
 
@@ -492,7 +519,7 @@ StreamerInceptionStepper<P, F>::addIntegrationSimpsons(ParticleContainer<P>& amr
 	// Add integration parts if contIntegral true
 	if (p.template scalar<0>() > 0){	 	
 	  const RealVect& E = p.velocity();
-	  const Real Emagnitude = E.vectorLength();
+	  const Real Emagnitude = voltage * E.vectorLength();
 	  const Real endPointAlpha = m_alpha(Emagnitude);
 	  const Real distanceMoved = p.template scalar<1>();
 	  const Real startPointAlpha = p.template scalar<2>();
@@ -552,6 +579,23 @@ StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P
     }
   }
   m_particleSolver->remap();
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::resetParticleMass(ParticleContainer<P>& amrParticles) {
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];    
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+    
+    for (DataIterator dit(dbl); dit.ok(); ++dit){      
+      List<P>& particles = levelParticles[dit()].listItems();      
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+	lit().mass() = 0.0;
+      }
+    }
+  }
 }
 
 
@@ -639,11 +683,26 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
   // Append plot variable names.
   a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
-  a_plotVariableNames.append(m_particleSolver->getPlotVariableNames());
 
   // Write into plot data holder memory.
   m_fieldSolver->writePlotData(a_output, a_icomp);
-  m_particleSolver->writePlotData(a_output, a_icomp);
+
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+    m_Kvalues[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    
+  }
+  a_icomp += m_voltageSweeps.size();
+
+  std::string varName;
+  for (const Real& V : m_voltageSweeps) {
+    varName = "K for ";
+    varName += std::to_string(V);
+    varName += " V";
+    a_plotVariableNames.push_back(varName);
+  }
 }
 
 template <typename P, typename F>
@@ -658,12 +717,13 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
   int ncomp = 0;
 
   ncomp += m_fieldSolver->getNumberOfPlotVariables();
-  ncomp += m_particleSolver->getNumberOfPlotVariables();
+
+  ncomp += m_voltageSweeps.size();
  
   return ncomp;
 }
 
-// TO DO: Do something with this one?
+
 template <typename P, typename F>
 Real
 StreamerInceptionStepper<P, F>::computeDt()

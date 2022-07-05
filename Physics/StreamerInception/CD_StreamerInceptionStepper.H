@@ -109,22 +109,22 @@ namespace Physics {
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles);
+      moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage);
 
       // TESTING
       void
-      moveParticlesSimpsons(ParticleContainer<P>& amrParticles);
+      moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
       
       /*!
 	@brief Add integration parts after particles move
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles);
+      addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage);
 
       // TESTING
       void
-      addIntegrationSimpsons(ParticleContainer<P>& amrParticles);
+      addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
       
       /*!
 	@brief 
@@ -141,6 +141,14 @@ namespace Physics {
       */
       void
       moveParticlesInitialPosition(ParticleContainer<P>& amrParticles);
+
+      /*!
+	@brief Set all particles' masses to 0
+	@param[in] amrParticles  Particles of m_particleSolver
+      */
+      void
+      resetParticleMass(ParticleContainer<P>& amrParticles);
+      
       
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 
@@ -321,6 +329,16 @@ namespace Physics {
       EBAMRCellData m_velocity;
 
       /*!
+	@brief K-values -- > should have input-specified number of components
+      */
+      EBAMRCellData m_Kvalues;
+
+      /*!
+	@brief Drift time
+      */
+      EBAMRCellData m_driftTimes;
+
+      /*!
 	@brief Realm where the solver lives
       */
       std::string m_realm;
@@ -340,8 +358,6 @@ namespace Physics {
       */
       std::vector<Real> m_voltageSweeps;
 
-      // TEMPORARY ATTEMPT
-      EBISLayout ebisl;
 
       /*!
 	@brief Scale electrostatic solution.

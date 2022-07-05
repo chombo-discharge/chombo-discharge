@@ -4,7 +4,7 @@
 AmrMesh.lo_corner        = -1 -1 -1    # Low corner of problem domain
 AmrMesh.hi_corner        =  1  1  1    # High corner of problem domain
 AmrMesh.verbosity        = 20          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 128 128 128 # Number of cells on coarsest domain
+AmrMesh.coarsest_domain  = 32  32  32  # Number of cells on coarsest domain
 AmrMesh.max_amr_depth    = 3           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
@@ -69,8 +69,8 @@ FieldSolverMultigrid.bc.x.lo           = neumann 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.x.hi           = neumann 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.hi           = dirichlet 1.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.z.lo           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.z.hi           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.z.lo           = neumann 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.z.hi           = neumann 0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
@@ -120,7 +120,7 @@ Cylinder.radius        = 0.1            # Cylinder radius.
 # StreamerInceptionStepper class options
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = 20
-StreamerInceptionStepper.integration   = simpsons
+StreamerInceptionStepper.integration   = trapezoidal
 StreamerInceptionStepper.voltage_lo    = 1.0
 StreamerInceptionStepper.voltage_hi    = 100.0
 StreamerInceptionStepper.voltage_steps = 10
