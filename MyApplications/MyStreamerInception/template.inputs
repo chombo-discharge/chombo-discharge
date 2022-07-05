@@ -3,13 +3,13 @@
 # ====================================================================================================
 AmrMesh.lo_corner        = -1 -1 -1    # Low corner of problem domain
 AmrMesh.hi_corner        =  1  1  1    # High corner of problem domain
-AmrMesh.verbosity        = 20          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 32  32  32  # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 3           # Maximum amr depth
+AmrMesh.verbosity        = -1          # Controls verbosity. 
+AmrMesh.coarsest_domain  = 128 128 128 # Number of cells on coarsest domain
+AmrMesh.max_amr_depth    = 0           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
-AmrMesh.grid_algorithm   = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.grid_algorithm   = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting      = morton      # 'none', 'shuffle', 'morton'
 AmrMesh.blocking_factor  = 16          # Blocking factor. 
 AmrMesh.max_box_size     = 16          # Maximum allowed box size
@@ -29,7 +29,7 @@ AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic co
 # ====================================================================================================
 # Driver class options
 # ====================================================================================================
-Driver.verbosity                       = 20                # Engine verbosity
+Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
@@ -42,7 +42,7 @@ Driver.initial_regrids                 = 0                # Number of initial re
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 0              # Maximum number of steps
+Driver.max_steps                       = 100              # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -63,19 +63,19 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # ====================================================================================================
 # FieldSolverMultigrid class options
 # ====================================================================================================
-FieldSolverMultigrid.verbosity         = 20                # Class verbosity
+FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
-FieldSolverMultigrid.bc.x.lo           = neumann 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.x.hi           = neumann 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.lo           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.y.hi           = dirichlet 1.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.z.lo           = neumann 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.z.hi           = neumann 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.y.hi           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.z.lo           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.z.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
 
-FieldSolverMultigrid.gmg_verbosity     = 20                # GMG verbosity
+FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
 FieldSolverMultigrid.gmg_post_smooth   = 12                # Number of relaxations in upsweep
 FieldSolverMultigrid.gmg_bott_smooth   = 12                # Number of at bottom level (before dropping to bottom solver)
@@ -96,11 +96,11 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # ====================================================================================================
 # TracerParticleSolver class options
 # ====================================================================================================
-TracerParticleSolver.verbosity     = 20     # Solver verbosity level. 
-TracerParticleSolver.deposition    = ngp    # Deposition method. Must be 'ngp' or 'cic'
+TracerParticleSolver.verbosity     = -1     # Solver verbosity level. 
+TracerParticleSolver.deposition    = cic    # Deposition method. Must be 'ngp' or 'cic'
 TracerParticleSolver.plot_mass     = true   # Turn on/off plotting of the particle mass.
-TracerParticleSolver.plot_velocity = false  # Turn on/off plotting of the particle velocities.
-TracerParticleSolver.volume_scale  = true   # If true, depositions yield density * volume instead of just volume
+TracerParticleSolver.plot_velocity = true   # Turn on/off plotting of the particle velocities.
+TracerParticleSolver.volume_scale  = false  # If true, depositions yield density * volume instead of just volume
 
 
 # ====================================================================================================
@@ -112,15 +112,15 @@ Cylinder.material      = electrode      # Material type. 'dielectric' or 'electr
 Cylinder.live          = true           # If electrode, this sets the live/grounded voltage
 Cylinder.permittivity  = 4              # If dielectric, this sets the permittivity
 Cylinder.z_coord       = 0.0            # z-coordinate if doing 2D
-Cylinder.center1       = 0 2 0          # One endpoint. Must have 3 entries
-Cylinder.center2       = 0 0 0          # Other endpoint. Must have 3 entries. 
-Cylinder.radius        = 0.1            # Cylinder radius. 
+Cylinder.center1       = -10 -10 0      # One endpoint. Must have 3 entries
+Cylinder.center2       =  10  10 0      # Other endpoint. Must have 3 entries. 
+Cylinder.radius        = 0.25           # Cylinder radius. 
 
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = 20
-StreamerInceptionStepper.integration   = trapezoidal
+StreamerInceptionStepper.verbosity     = -1
+StreamerInceptionStepper.integration   = rk2
 StreamerInceptionStepper.voltage_lo    = 1.0
 StreamerInceptionStepper.voltage_hi    = 100.0
 StreamerInceptionStepper.voltage_steps = 10

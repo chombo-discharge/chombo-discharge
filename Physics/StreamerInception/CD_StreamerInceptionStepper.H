@@ -31,7 +31,7 @@ namespace Physics {
       Trapezoidal,
       Simpsons,
       Simpsons38,
-      Booles      
+      Booles
     };
 
     /*!
@@ -97,7 +97,7 @@ namespace Physics {
       */
       void
       initialParticles();
-      
+
       /*!
 	@brief Perform any post-initialization steps. 
       */
@@ -114,7 +114,7 @@ namespace Physics {
       // TESTING
       void
       moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
-      
+
       /*!
 	@brief Add integration parts after particles move
 	@param[in] amrParticles  Particles of m_particleSolver
@@ -125,15 +125,14 @@ namespace Physics {
       // TESTING
       void
       addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
-      
+
       /*!
 	@brief 
 	@param[in] amrParticles  Particles of m_particleSolver
 	@param[out] true if integration shall continue, false if not
       */
       bool
-      keepIntegrating(ParticleContainer<P>& amrParticles);
-
+      keepIntegrating(ParticleContainer<P>& amrParticles) const;
 
       /*!
 	@brief Move particles back to their original position after integration finished
@@ -148,8 +147,7 @@ namespace Physics {
       */
       void
       resetParticleMass(ParticleContainer<P>& amrParticles);
-      
-      
+
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 
       */
@@ -316,7 +314,7 @@ namespace Physics {
       /*!
 	@brief Tracer particle solver
       */
-      RefCountedPtr<TracerParticleSolver<P> > m_particleSolver;
+      RefCountedPtr<TracerParticleSolver<P>> m_particleSolver;
 
       /*!
 	@brief Field solver
@@ -357,7 +355,6 @@ namespace Physics {
 	@brief Voltage sweeps
       */
       std::vector<Real> m_voltageSweeps;
-
 
       /*!
 	@brief Scale electrostatic solution.
