@@ -370,7 +370,6 @@ StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& a
   }
 
   m_particleSolver->remap();
-
   m_particleSolver->interpolateVelocities();
 
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
@@ -383,6 +382,12 @@ template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage)
 {
+  CH_TIME("StreamerInceptionStepper::moveParticlesSimpsons");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::moveParticlesSimpsons" << endl;
+  }
+  
+  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
 
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
@@ -497,6 +502,11 @@ StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrP
   }
   m_particleSolver->remap();
   m_particleSolver->interpolateVelocities();
+
+  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
+  if (particlesBefore != particlesAfter) {
+    MayDay::Warning("StreamerInceptionStepper::moveParticlesSimpsons -- logic bust, lost some particles");
+  }
 }
 
 template <typename P, typename F>
@@ -537,6 +547,11 @@ template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage)
 {
+  CH_TIME("StreamerInceptionStepper::addIntegrationSimpsons");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::addIntegrationSimpsons" << endl;
+  }
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
 
@@ -598,6 +613,11 @@ template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P>& amrParticles)
 {
+  CH_TIME("StreamerInceptionStepper::moveParticlesInitialPosition");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::moveParticlesInitialPosition" << endl;
+  }
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
 
@@ -621,6 +641,11 @@ template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::resetParticleMass(ParticleContainer<P>& amrParticles)
 {
+  CH_TIME("StreamerInceptionStepper::resetParticleMass");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::resetParticleMass" << endl;
+  }
+  
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl            = m_amr->getGrids(amrParticles.getRealm())[lvl];
     ParticleData<P>&         levelParticles = amrParticles[lvl];
@@ -896,6 +921,11 @@ template <typename P, typename F>
 bool
 StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect pos, const RealVect probLo, const RealVect probHi)
 {
+  CH_TIME("StreamerInceptionStepper::particleOutsideGrid");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::particleOutsideGrid" << endl;
+  }
+  
   bool isOutside = false;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -911,6 +941,11 @@ template <typename P, typename F>
 bool
 StreamerInceptionStepper<P, F>::particleInsideElectrode(const RealVect pos)
 {
+  CH_TIME("StreamerInceptionStepper::particleInsideElectrode");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::particleInsideElectrode" << endl;
+  }
+  
   const RefCountedPtr<BaseIF>& implicitFunction = m_amr->getBaseImplicitFunction(m_phase);
 
   return (implicitFunction->value(pos) >= 0.0) ? true : false;

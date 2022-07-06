@@ -29,7 +29,7 @@ AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic co
 # ====================================================================================================
 # Driver class options
 # ====================================================================================================
-Driver.verbosity                       = 2                # Engine verbosity
+Driver.verbosity                       = 20                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
@@ -63,7 +63,7 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # ====================================================================================================
 # FieldSolverMultigrid class options
 # ====================================================================================================
-FieldSolverMultigrid.verbosity         = -1                # Class verbosity
+FieldSolverMultigrid.verbosity         = 20                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
 FieldSolverMultigrid.bc.x.lo           = neumann 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.x.hi           = neumann 0.0     # Bc type (see docs)
@@ -75,7 +75,7 @@ FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'ph
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
 
-FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity
+FieldSolverMultigrid.gmg_verbosity     = 20                # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
 FieldSolverMultigrid.gmg_post_smooth   = 12                # Number of relaxations in upsweep
 FieldSolverMultigrid.gmg_bott_smooth   = 12                # Number of at bottom level (before dropping to bottom solver)
