@@ -190,11 +190,11 @@ StreamerInceptionStepper<P, F>::initialParticles()
     ParticleData<P>& levelParticles = amrParticles[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box            cellBox    = dbl[dit()];
+
       const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = validCellsLD[dit()];
 
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
 
       List<P>& particles = levelParticles[dit()].listItems();
 
@@ -212,6 +212,10 @@ StreamerInceptionStepper<P, F>::initialParticles()
           particles.add(P(pos));
         }
       };
+
+      
+      const Box            cellBox    = dbl[dit()];      
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];      
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -313,7 +317,7 @@ StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& a
 
   // Set distance moved per step dx
   //  const Real dx = 0.1;  //m_amr->getDx()[m_amr->getFinestLevel()];
-  const Real dx = 0.1 * m_amr->getDx()[m_amr->getFinestLevel()];
+  //  const Real dx = 0.1 * m_amr->getDx()[m_amr->getFinestLevel()];
 
   m_particleSolver->interpolateVelocities();
 
@@ -324,6 +328,9 @@ StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& a
     ParticleData<P>& levelParticles = amrParticles[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+      // Particles move half a cell on this level. 
+      const Real dx = 0.5*m_amr->getDx()[lvl];
 
       List<P>& particles = levelParticles[dit()].listItems();
 
@@ -355,9 +362,6 @@ StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& a
             p.template scalar<0>() = -1.0;
           }
           else {
-            if (this->particleOutsideGrid(newPosition, probLo, probHi)) {
-              MayDay::Error("StreamerInceptionStepper::moveParticlesTrapezoidal - logic bust");
-            }
             p.position() = newPosition;
           }
         }
