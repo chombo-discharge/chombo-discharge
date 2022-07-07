@@ -27,7 +27,6 @@
 // 4. Evaluate field emission rates.
 // 5. Background ionization rates
 // ** Add different integration methods: Simpson's, Simpson's 3/8, Boole's. Should create different moveParticles() for each function to compute alpha at different steps.
-// ** rename moveParticles & addIntegration functions? To separate K and drift time.
 using namespace Physics::StreamerInception;
 
 
@@ -285,10 +284,10 @@ StreamerInceptionStepper<P, F>::solveKValues() {
     case IntegrationAlgorithm::Trapezoidal: {
       while (this->keepGoing(amrParticles)) {
         // Check integration flag and move particles if true
-        this->moveParticlesTrapezoidal(amrParticles, m_voltageSweeps[i]);
+        this->K_moveParticlesTrapezoidal(amrParticles, m_voltageSweeps[i]);
 
         // Add integration parts to p.mass()
-        this->addIntegrationTrapezoidal(amrParticles, m_voltageSweeps[i]);
+        this->K_addIntegrationTrapezoidal(amrParticles, m_voltageSweeps[i]);
       }
       
       break;
@@ -296,10 +295,10 @@ StreamerInceptionStepper<P, F>::solveKValues() {
     case IntegrationAlgorithm::Simpsons: {
       while (this->keepGoing(amrParticles)) {
         // Check integration flag and move particles if true
-        this->moveParticlesSimpsons(amrParticles, m_voltageSweeps[i]);
+        this->K_moveParticlesSimpsons(amrParticles, m_voltageSweeps[i]);
 
         // Add integration parts to p.mass()
-        this->addIntegrationSimpsons(amrParticles, m_voltageSweeps[i]);
+        this->K_addIntegrationSimpsons(amrParticles, m_voltageSweeps[i]);
       }
 
       break;
@@ -329,11 +328,11 @@ StreamerInceptionStepper<P, F>::solveKValues() {
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage)
+StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage)
 {
-  CH_TIME("StreamerInceptionStepper::moveParticlesTrapezoidal");
+  CH_TIME("StreamerInceptionStepper::K_moveParticlesTrapezoidal");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::moveParticlesTrapezoidal" << endl;
+    pout() << "StreamerInceptionStepper::K_moveParticlesTrapezoidal" << endl;
   }
 
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
@@ -392,17 +391,17 @@ StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& a
 
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
-    MayDay::Warning("StreamerInceptionStepper::moveParticlesTrapezoidal -- logic bust, lost some particles");
+    MayDay::Warning("StreamerInceptionStepper::K_moveParticlesTrapezoidal -- logic bust, lost some particles");
   }
 }
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage)
+StreamerInceptionStepper<P, F>::K_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage)
 {
-  CH_TIME("StreamerInceptionStepper::addIntegrationTrapezoidal");
+  CH_TIME("StreamerInceptionStepper::K_addIntegrationTrapezoidal");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::addIntegrationTrapezoidal" << endl;
+    pout() << "StreamerInceptionStepper::K_addIntegrationTrapezoidal" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -432,11 +431,11 @@ StreamerInceptionStepper<P, F>::addIntegrationTrapezoidal(ParticleContainer<P>& 
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage)
+StreamerInceptionStepper<P, F>::K_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage)
 {
-  CH_TIME("StreamerInceptionStepper::moveParticlesSimpsons");
+  CH_TIME("StreamerInceptionStepper::K_moveParticlesSimpsons");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::moveParticlesSimpsons" << endl;
+    pout() << "StreamerInceptionStepper::K_moveParticlesSimpsons" << endl;
   }
   
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
@@ -539,18 +538,18 @@ StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrP
 
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
-    MayDay::Warning("StreamerInceptionStepper::moveParticlesSimpsons -- logic bust, lost some particles");
+    MayDay::Warning("StreamerInceptionStepper::K_moveParticlesSimpsons -- logic bust, lost some particles");
   }
 }
 
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage)
+StreamerInceptionStepper<P, F>::K_addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage)
 {
-  CH_TIME("StreamerInceptionStepper::addIntegrationSimpsons");
+  CH_TIME("StreamerInceptionStepper::K_addIntegrationSimpsons");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::addIntegrationSimpsons" << endl;
+    pout() << "StreamerInceptionStepper::K_addIntegrationSimpsons" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -693,10 +692,10 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
     case IntegrationAlgorithm::Trapezoidal: {
       while (this->keepGoing(amrParticles)) {
 	// Check integration flag and move particles if true
-	this->moveParticlesDriftTimeTrapezoidal(amrParticles, i);
+	this->driftTime_moveParticlesTrapezoidal(amrParticles, i);
 
 	// Add integration parts to p.mass()
-	this->addIntegrationDriftTimeTrapezoidal(amrParticles);
+	this->driftTime_addIntegrationTrapezoidal(amrParticles);
       }
 
       break;
@@ -704,10 +703,10 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
     case IntegrationAlgorithm::Simpsons: {
       while (this->keepGoing(amrParticles)) {
 	// Check integration flag and move particles if true	
-	this->moveParticlesDriftTimeSimpsons(amrParticles, i);
+	this->driftTime_moveParticlesSimpsons(amrParticles, i);
 	
 	// Add integration parts to p.mass()
-	this->addIntegrationDriftTimeSimpsons(amrParticles);
+	this->driftTime_addIntegrationSimpsons(amrParticles);
       }
 
       break;
@@ -731,10 +730,10 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::moveParticlesDriftTimeTrapezoidal(ParticleContainer<P>& amrParticles, const int dxSign) {
-  CH_TIME("StreamerInceptionStepper::moveParticlesDriftTimeTrapezoidal");
+StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const int dxSign) {
+  CH_TIME("StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::moveParticlesDriftTimeTrapezoidal" << endl;
+    pout() << "StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal" << endl;
   }
 
   const RealVect probLo = m_amr->getProbLo();
@@ -769,7 +768,7 @@ StreamerInceptionStepper<P, F>::moveParticlesDriftTimeTrapezoidal(ParticleContai
 	    newPosition = p.position() + normalizedVelocity * (-dx);
 	  }	  
 	  else {
-	    MayDay::Error("StreamerInceptionStepper::moveParticlesDriftTimeTrapezoidal -- logic bust");
+	    MayDay::Error("StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal -- logic bust");
 	  }	 	  
 	  	  
           p.template scalar<2>() = Emagnitude;
@@ -796,10 +795,10 @@ StreamerInceptionStepper<P, F>::moveParticlesDriftTimeTrapezoidal(ParticleContai
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::addIntegrationDriftTimeTrapezoidal(ParticleContainer<P>& amrParticles){
-  CH_TIME("StreamerInceptionStepper:addIntegrationDriftTimeTrapezoidal");
+StreamerInceptionStepper<P, F>::driftTime_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles){
+  CH_TIME("StreamerInceptionStepper:driftTime_addIntegrationTrapezoidal");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::addIntegrationDriftTimeTrapezoidal" << endl;
+    pout() << "StreamerInceptionStepper::driftTime_addIntegrationTrapezoidal" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -828,10 +827,10 @@ StreamerInceptionStepper<P, F>::addIntegrationDriftTimeTrapezoidal(ParticleConta
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::moveParticlesDriftTimeSimpsons(ParticleContainer<P>& amrParticles, const int dxSign) {
-  CH_TIME("StreamerInceptionStepper::moveparticlesDriftTimeSimpsons");
+StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const int dxSign) {
+  CH_TIME("StreamerInceptionStepper::driftTime_moveparticlesSimpsons");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::moveparticlesDriftTimeSimpsons" << endl;
+    pout() << "StreamerInceptionStepper::driftTime_moveparticlesSimpsons" << endl;
   }
 
   const RealVect probLo = m_amr->getProbLo();
@@ -867,7 +866,7 @@ StreamerInceptionStepper<P, F>::moveParticlesDriftTimeSimpsons(ParticleContainer
 	    newPosition = p.position() + normalizedVelocity * 0.5 * (-dx);
 	  }	  
 	  else {
-	    MayDay::Error("StreamerInceptionStepper::moveParticlesDriftTimeTrapezoidal -- logic bust");
+	    MayDay::Error("StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal -- logic bust");
 	  }	 	  
 
           p.template scalar<1>() = dx;	  	  
@@ -920,7 +919,7 @@ StreamerInceptionStepper<P, F>::moveParticlesDriftTimeSimpsons(ParticleContainer
 	    newPosition = p.position() + normalizedVelocity * 0.5 * (-dx);
 	  }	  
 	  else {
-	    MayDay::Error("StreamerInceptionStepper::moveParticlesDriftTimeTrapezoidal -- logic bust");
+	    MayDay::Error("StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal -- logic bust");
 	  }	 	  
 
           p.template scalar<3>() = Emagnitude;
@@ -947,10 +946,10 @@ StreamerInceptionStepper<P, F>::moveParticlesDriftTimeSimpsons(ParticleContainer
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::addIntegrationDriftTimeSimpsons(ParticleContainer<P>& amrParticles) {
-  CH_TIME("StreamerInceptionStepper:addIntegrationDriftTimeSimpsons");
+StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons(ParticleContainer<P>& amrParticles) {
+  CH_TIME("StreamerInceptionStepper:driftTime_addIntegrationSimpsons");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::addIntegrationDriftTimeSimpsons" << endl;
+    pout() << "StreamerInceptionStepper::driftTime_addIntegrationSimpsons" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {

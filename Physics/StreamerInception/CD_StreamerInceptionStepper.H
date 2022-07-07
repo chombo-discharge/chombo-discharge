@@ -115,28 +115,28 @@ namespace Physics {
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage); 
+      K_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage); 
 
       /*!
 	@brief K integral: Add integration parts after particles move
 	@param[in] amrParticles  Particlexs of m_particleSolver
       */
       void
-      addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage);
+      K_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage);
 
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
+      K_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
 
       /*!
 	@brief K integral: Add integration parts after particles move
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
+      K_addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
 
       /*!
 	@brief 
@@ -172,14 +172,14 @@ namespace Physics {
 	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
      */
       void
-      moveParticlesDriftTimeTrapezoidal(ParticleContainer<P>& amrParticles, const int dxSign);
+      driftTime_MoveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const int dxSign);
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add integration parts after particles move
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      addIntegrationDriftTimeTrapezoidal(ParticleContainer<P>& amrParticles);
+      driftTime_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles);
 
       /*!
 	@brief Drift time integral (Simpson's method): Add time step to particles' drift time tracker
@@ -187,14 +187,14 @@ namespace Physics {
 	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
       */
       void
-      moveParticlesDriftTimeSimpsons(ParticleContainer<P>& amrParticles, const int dxSign);
+      driftTime_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const int dxSign);
 
       /*!
 	@brief Drift time integral (Simpson's method): Add integration parts after particles move
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      addIntegrationDriftTimeSimpsons(ParticleContainer<P>& amrParticles);      
+      driftTime_addIntegrationSimpsons(ParticleContainer<P>& amrParticles);      
 
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 
@@ -407,7 +407,7 @@ namespace Physics {
 	@brief Voltage sweeps
       */
       std::vector<Real> m_voltageSweeps;
-
+      
       /*!
 	@brief Scale electrostatic solution.
 	@param[in] a_scale Scaling factor for potential and electric field. 
