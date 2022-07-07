@@ -105,24 +105,36 @@ namespace Physics {
       postInitialize() override;
 
       /*!
-	@brief Move particles as long as integration isn't stopped
+	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_Kvalues. Called in postInitialize().
+      */
+      void
+      solveKValues();
+      
+      /*!
+	@brief K integral: Move particles as long as integration isn't stopped
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage);
-
-      // TESTING
-      void
-      moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
+      moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage); 
 
       /*!
-	@brief Add integration parts after particles move
-	@param[in] amrParticles  Particles of m_particleSolver
+	@brief K integral: Add integration parts after particles move
+	@param[in] amrParticles  Particlexs of m_particleSolver
       */
       void
       addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage);
 
-      // TESTING
+      /*!
+	@brief K integral: Move particles as long as integration isn't stopped
+	@param[in] amrParticles  Particles of m_particleSolver
+      */
+      void
+      moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
+
+      /*!
+	@brief K integral: Add integration parts after particles move
+	@param[in] amrParticles  Particles of m_particleSolver
+      */
       void
       addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
 
@@ -132,7 +144,7 @@ namespace Physics {
 	@param[out] true if integration shall continue, false if not
       */
       bool
-      keepIntegrating(ParticleContainer<P>& amrParticles) const;
+      keepGoing(ParticleContainer<P>& amrParticles) const;
 
       /*!
 	@brief Move particles back to their original position after integration finished
@@ -147,6 +159,42 @@ namespace Physics {
       */
       void
       resetParticleMass(ParticleContainer<P>& amrParticles);
+
+      /*!
+	@brief Calculate particles' drift times until inside electrode or outside grid
+      */
+      void
+      solveDriftTimes();
+
+      /*!
+	@brief Drift time integral (trapezoidal method): Add time step to particles' drift time tracker
+	@param[in] amrParticles  Particles of m_particleSolver
+	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
+     */
+      void
+      moveParticlesDriftTimeTrapezoidal(ParticleContainer<P>& amrParticles, const int dxSign);
+
+      /*!
+	@brief Drift time integral (trapezoidal method): Add integration parts after particles move
+	@param[in] amrParticles  Particles of m_particleSolver
+      */
+      void
+      addIntegrationDriftTimeTrapezoidal(ParticleContainer<P>& amrParticles);
+
+      /*!
+	@brief Drift time integral (Simpson's method): Add time step to particles' drift time tracker
+	@param[in] amrParticles  Particles of m_particleSolver
+	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
+      */
+      void
+      moveParticlesDriftTimeSimpsons(ParticleContainer<P>& amrParticles, const int dxSign);
+
+      /*!
+	@brief Drift time integral (Simpson's method): Add integration parts after particles move
+	@param[in] amrParticles  Particles of m_particleSolver
+      */
+      void
+      addIntegrationDriftTimeSimpsons(ParticleContainer<P>& amrParticles);      
 
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 

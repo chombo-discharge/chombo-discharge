@@ -27,8 +27,11 @@
 // 4. Evaluate field emission rates.
 // 5. Background ionization rates
 // ** Add different integration methods: Simpson's, Simpson's 3/8, Boole's. Should create different moveParticles() for each function to compute alpha at different steps.
+// ** rename moveParticles & addIntegration functions? To separate K and drift time.
 using namespace Physics::StreamerInception;
 
+
+// place read in-parameters in parseOptions() instead
 template <typename P, typename F>
 StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 {
@@ -133,6 +136,7 @@ StreamerInceptionStepper<P, F>::allocate()
 
   m_amr->allocate(m_velocity, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_Kvalues, m_realm, m_phase, m_voltageSweeps.size());
+  m_amr->allocate(m_driftTimes, m_realm, m_phase, 2);
   
   DataOps::setValue(m_Kvalues, 0.0);  
 }
@@ -194,8 +198,6 @@ StreamerInceptionStepper<P, F>::initialParticles()
       const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = validCellsLD[dit()];
 
-
-
       List<P>& particles = levelParticles[dit()].listItems();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -220,13 +222,13 @@ StreamerInceptionStepper<P, F>::initialParticles()
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
 
-      // Define particles' masses (i.e. integration tracker)
+      // Define particles' masses (i.e. integration & drift time tracker) and integration flag
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
 
         p.mass()               = 0.0;
         p.template vect<0>()   = p.position();
-        p.template scalar<0>() = 1.0;
+        p.template scalar<0>() = 1.0;  // flag for keep integrating
       }
     }
   }
@@ -247,6 +249,22 @@ StreamerInceptionStepper<P, F>::postInitialize()
     pout() << "StreamerInceptionStepper::postInitialize" << endl;
   }
 
+  // Solve K integral for each particle in each voltage and store K values in m_Kvalues
+  //this->solveKValues();
+
+  // Solve drift time integral in both directions and store values in m_driftTimes
+  this->solveDriftTimes();
+}
+
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::solveKValues() {
+  CH_TIME("StreamerInceptionStepper::solveKValues");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::solveKValues" << endl;
+  }
+
   // Something transient storage we can deposit into. 
   EBAMRCellData K;
   m_amr->allocate(K, m_realm, m_phase, 1);
@@ -263,19 +281,19 @@ StreamerInceptionStepper<P, F>::postInitialize()
 
     switch (m_integrationAlgorithm) {
     case IntegrationAlgorithm::Trapezoidal: {
-      while (this->keepIntegrating(amrParticles)) {
-        // Check contIntegral criteria and move particles if true
+      while (this->keepGoing(amrParticles)) {
+        // Check integration flag and move particles if true
         this->moveParticlesTrapezoidal(amrParticles, m_voltageSweeps[i]);
 
         // Add integration parts to p.mass()
         this->addIntegrationTrapezoidal(amrParticles, m_voltageSweeps[i]);
       }
-
+      
       break;
     }
     case IntegrationAlgorithm::Simpsons: {
-      while (this->keepIntegrating(amrParticles)) {
-        // Check contIntegral criteria and move particles if true
+      while (this->keepGoing(amrParticles)) {
+        // Check integration flag and move particles if true
         this->moveParticlesSimpsons(amrParticles, m_voltageSweeps[i]);
 
         // Add integration parts to p.mass()
@@ -285,7 +303,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
       break;
     }
     default: {
-      MayDay::Error("StreamerInceptionStepper::postInitialize -- logic bust");
+      MayDay::Error("StreamerInceptionStepper::solveKValues -- logic bust");
     }
     }
 
@@ -313,45 +331,37 @@ StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& a
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
 
   const RealVect probLo = m_amr->getProbLo();
-  const RealVect probHi = m_amr->getProbHi();
-
-  // Set distance moved per step dx
-  //  const Real dx = 0.1;  //m_amr->getDx()[m_amr->getFinestLevel()];
-  //  const Real dx = 0.1 * m_amr->getDx()[m_amr->getFinestLevel()];
-
-  m_particleSolver->interpolateVelocities();
+  const RealVect probHi = m_amr->getProbHi(); 
 
   // Move particles
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    // Particles move half a cell on this level. 
+    const Real dx = 0.5*m_amr->getDx()[lvl];
+    
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
 
     ParticleData<P>& levelParticles = amrParticles[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-
-      // Particles move half a cell on this level. 
-      const Real dx = 0.5*m_amr->getDx()[lvl];
-
       List<P>& particles = levelParticles[dit()].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
 
-        // Move particle and check if contIntegral if contIntegral not already false
+	// If integration flag true, move particle and check integration conditions
         if (p.template scalar<0>() > 0.0) {
 
           const RealVect E                     = p.velocity();
-          const Real     particleDistanceMoved = dx;
           const RealVect normalizedVelocity    = E / E.vectorLength();
           const Real     Emagnitude            = voltage * E.vectorLength();
           const Real     startPointAlpha       = m_alpha(Emagnitude);
 
-          const RealVect newPosition = p.position() + normalizedVelocity * particleDistanceMoved;
+          const RealVect newPosition = p.position() + normalizedVelocity * dx;
 
+          p.template scalar<1>() = dx;	  
           p.template scalar<2>() = startPointAlpha;
-          p.template scalar<1>() = particleDistanceMoved;
 
-          // Check if alpha<0
+          // Check keep integrating criteria. Move particle if fulfilled, flag if not.
           if (startPointAlpha <= 0.0) {
             p.template scalar<0>() = -1.0;
           }
@@ -380,137 +390,6 @@ StreamerInceptionStepper<P, F>::moveParticlesTrapezoidal(ParticleContainer<P>& a
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage)
-{
-  CH_TIME("StreamerInceptionStepper::moveParticlesSimpsons");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::moveParticlesSimpsons" << endl;
-  }
-  
-  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
-
-  const RealVect probLo = m_amr->getProbLo();
-  const RealVect probHi = m_amr->getProbHi();
-
-  // Set distance moved per step dx
-  const Real dx = 0.1; //m_amr->getDx()[m_amr->getFinestLevel()];
-
-  // Move particles dx/2 (1/2)
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const EBISLayout&        ebisl          = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const DisjointBoxLayout& dbl            = m_amr->getGrids(amrParticles.getRealm())[lvl];
-    ParticleData<P>&         levelParticles = amrParticles[lvl];
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = levelParticles[dit()].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        // Move particle and check if contIntegral if contIntegral not already false
-        if (p.template scalar<0>() > 0) {
-
-          const RealVect& E                     = p.velocity();
-          const Real      particleDistanceMoved = dx;
-          const RealVect  normalizedVelocity    = E / E.vectorLength();
-          const Real      Emagnitude            = voltage * E.vectorLength();
-          const Real      startPointAlpha       = m_alpha(Emagnitude);
-
-          // Check if alpha<0
-          if (startPointAlpha < 0) {
-            p.template scalar<0>() = -1;
-            std::cout << "alpha<0" << endl;
-            continue;
-          }
-
-          p.template scalar<1>() = particleDistanceMoved;
-          p.template scalar<2>() = startPointAlpha;
-
-          const RealVect newPosition = p.position() + normalizedVelocity * 0.5 * particleDistanceMoved;
-
-          // Check if particle is outside of grid boundaries
-          if (particleOutsideGrid(newPosition, probLo, probHi)) {
-            p.template scalar<0>() = -1;
-            continue;
-          }
-
-          // Check if particle is inside electrode
-          if (particleInsideElectrode(newPosition)) {
-            p.template scalar<0>() = -1;
-            continue;
-          }
-
-          // Move particle if contIntegral
-          p.position() = newPosition;
-        }
-      }
-    }
-  }
-  m_particleSolver->remap();
-  m_particleSolver->interpolateVelocities();
-
-  // Move particles dx/2 (2/2)
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const EBISLayout&        ebisl          = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const DisjointBoxLayout& dbl            = m_amr->getGrids(amrParticles.getRealm())[lvl];
-    ParticleData<P>&         levelParticles = amrParticles[lvl];
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = levelParticles[dit()].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        // Move particle and check if contIntegral if contIntegral not already false
-        if (p.template scalar<0>() > 0) {
-
-          const RealVect& E                     = p.velocity();
-          const Real      particleDistanceMoved = dx;
-          const RealVect  normalizedVelocity    = E / E.vectorLength();
-          const Real      Emagnitude            = voltage * E.vectorLength();
-          const Real      midPointAlpha         = m_alpha(Emagnitude);
-
-          // Check if alpha<0
-          if (midPointAlpha < 0) {
-            p.template scalar<0>() = -1;
-            std::cout << "alpha<0" << endl;
-            continue;
-          }
-
-          p.template scalar<1>() = particleDistanceMoved;
-          p.template scalar<3>() = midPointAlpha;
-
-          const RealVect newPosition = p.position() + normalizedVelocity * 0.5 * particleDistanceMoved;
-
-          // Check if particle is outside of grid boundaries
-          if (particleOutsideGrid(newPosition, probLo, probHi)) {
-            p.template scalar<0>() = -1;
-            continue;
-          }
-
-          // Check if particle is inside electrode
-          if (particleInsideElectrode(newPosition)) {
-            p.template scalar<0>() = -1;
-            continue;
-          }
-
-          // Move particle if contIntegral
-          p.position() = newPosition;
-        }
-      }
-    }
-  }
-  m_particleSolver->remap();
-  m_particleSolver->interpolateVelocities();
-
-  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
-  if (particlesBefore != particlesAfter) {
-    MayDay::Warning("StreamerInceptionStepper::moveParticlesSimpsons -- logic bust, lost some particles");
-  }
-}
-
-template <typename P, typename F>
-void
 StreamerInceptionStepper<P, F>::addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage)
 {
   CH_TIME("StreamerInceptionStepper::addIntegrationTrapezoidal");
@@ -529,19 +408,133 @@ StreamerInceptionStepper<P, F>::addIntegrationTrapezoidal(ParticleContainer<P>& 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
 
-        // Add integration parts if contIntegral true
+        // Add integration parts if integration flag true
         if (p.template scalar<0>() > 0.0) {
-          const RealVect& E               = p.velocity();
+          const RealVect  E               = p.velocity();
           const Real      Emagnitude      = voltage * E.vectorLength();
           const Real      endPointAlpha   = m_alpha(Emagnitude);
+          const Real      dx              = p.template scalar<1>();	  
           const Real      startPointAlpha = p.template scalar<2>();
-          const Real      distanceMoved   = p.template scalar<1>();
-          p.mass() += 0.5 * (endPointAlpha + startPointAlpha) * distanceMoved;
+          p.mass() += 0.5 * (endPointAlpha + startPointAlpha) * dx;
         }
       }
     }
   }
 }
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage)
+{
+  CH_TIME("StreamerInceptionStepper::moveParticlesSimpsons");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::moveParticlesSimpsons" << endl;
+  }
+  
+  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
+
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
+  
+  // Move particles dx/2 (1/2)
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    // Particles move half a cell on this level. 
+    const Real dx = 0.5*m_amr->getDx()[lvl];
+    
+    const DisjointBoxLayout& dbl            = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    
+    ParticleData<P>&         levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+	// If integration flag true, move particle and check integration conditions
+        if (p.template scalar<0>() > 0.0) {
+          const RealVect  E                     = p.velocity();
+          const RealVect  normalizedVelocity    = E / E.vectorLength();
+          const Real      Emagnitude            = voltage * E.vectorLength();
+          const Real      startPointAlpha       = m_alpha(Emagnitude);
+	  
+          const RealVect newPosition = p.position() + normalizedVelocity * 0.5 * dx;
+	  
+          p.template scalar<1>() = dx;
+          p.template scalar<2>() = startPointAlpha;
+
+	  // Check keep integrating criteria. Move particle if fulfilled, flag if not.
+	  if (startPointAlpha <= 0.0) {
+	    p.template scalar<0>() = -1.0;
+	  }
+	  else if (this->particleOutsideGrid(newPosition, probLo, probHi)) {
+	    p.template scalar<0>() = -1.0;
+	  }
+	  else if (this->particleInsideElectrode(newPosition)) {
+	    p.template scalar<0>() = -1.0;
+	  }
+	  else {
+	    p.position() = newPosition;
+	  }	  
+        }
+      }
+    }
+  }
+  m_particleSolver->remap();
+  m_particleSolver->interpolateVelocities();
+
+  // Move particles dx/2 (2/2)
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    // Particles move half a cell on this level. 
+    const Real dx = 0.5*m_amr->getDx()[lvl];
+    
+    const DisjointBoxLayout& dbl            = m_amr->getGrids(amrParticles.getRealm())[lvl];
+
+    ParticleData<P>&         levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+	// If integration flag true, move particle and check integration conditions
+        if (p.template scalar<0>() > 0) {
+          const RealVect E                     = p.velocity();
+          const RealVect  normalizedVelocity    = E / E.vectorLength();
+          const Real      Emagnitude            = voltage * E.vectorLength();
+          const Real      midPointAlpha         = m_alpha(Emagnitude);
+	  
+          p.template scalar<3>() = midPointAlpha;
+
+          const RealVect newPosition = p.position() + normalizedVelocity * 0.5 * dx;
+
+	  // Check keep integrating criteria. Move particle if fulfilled, flag if not.
+	  if (midPointAlpha <= 0.0) {
+	    p.template scalar<0>() = -1.0;
+	  }
+	  else if (this->particleOutsideGrid(newPosition, probLo, probHi)) {
+	    p.template scalar<0>() = -1.0;
+	  }
+	  else if (this->particleInsideElectrode(newPosition)) {
+	    p.template scalar<0>() = -1.0;
+	  }
+	  else {
+	    p.position() = newPosition;
+	  }
+	}
+      }
+    }
+  }
+  m_particleSolver->remap();
+  m_particleSolver->interpolateVelocities();
+
+  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
+  if (particlesBefore != particlesAfter) {
+    MayDay::Warning("StreamerInceptionStepper::moveParticlesSimpsons -- logic bust, lost some particles");
+  }
+}
+
 
 template <typename P, typename F>
 void
@@ -563,15 +556,15 @@ StreamerInceptionStepper<P, F>::addIntegrationSimpsons(ParticleContainer<P>& amr
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
 
-        // Add integration parts if contIntegral true
+        // Add integration parts if integration flag true
         if (p.template scalar<0>() > 0) {
-          const RealVect& E               = p.velocity();
+          const RealVect  E               = p.velocity();
           const Real      Emagnitude      = voltage * E.vectorLength();
           const Real      endPointAlpha   = m_alpha(Emagnitude);
-          const Real      distanceMoved   = p.template scalar<1>();
+          const Real      dx   = p.template scalar<1>();
           const Real      startPointAlpha = p.template scalar<2>();
           const Real      midPointAlpha   = p.template scalar<3>();
-          p.mass() += (distanceMoved / 6) * (startPointAlpha + 4 * midPointAlpha + endPointAlpha);
+          p.mass() += (dx / 6) * (startPointAlpha + 4 * midPointAlpha + endPointAlpha);
         }
       }
     }
@@ -580,11 +573,11 @@ StreamerInceptionStepper<P, F>::addIntegrationSimpsons(ParticleContainer<P>& amr
 
 template <typename P, typename F>
 bool
-StreamerInceptionStepper<P, F>::keepIntegrating(ParticleContainer<P>& amrParticles) const
+StreamerInceptionStepper<P, F>::keepGoing(ParticleContainer<P>& amrParticles) const
 {
-  CH_TIME("StreamerInceptionStepper::keepIntegrating(ParticleContainer)");
+  CH_TIME("StreamerInceptionStepper::keepGoing(ParticleContainer)");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::keepIntegrating(ParticleContainer)" << endl;
+    pout() << "StreamerInceptionStepper::keepGoing(ParticleContainer)" << endl;
   }
 
   // If keepGoing > 0 then we keep integrating. Otherwise we stop.
@@ -664,6 +657,320 @@ StreamerInceptionStepper<P, F>::resetParticleMass(ParticleContainer<P>& amrParti
     }
   }
 }
+
+// Add different integration methods after Simpson's fix.
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::solveDriftTimes() {
+  CH_TIME("StreamerInceptionStepper::solveDriftTimes");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::solveDriftTimes" << endl;
+  }
+  
+  // Something transient storage we can deposit into. 
+  EBAMRCellData t;
+  m_amr->allocate(t, m_realm, m_phase, 1);
+  
+  // Compute drift time integral twice - once for +dx and once for -dx direction.
+  for (int i = 0; i < 2; i++) {    
+    // Update velocities and starting mass to zero.
+    m_particleSolver->interpolateVelocities();  
+    
+    ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();    
+    
+    this->resetParticleMass(amrParticles);  
+
+    // Compute drift time integrals with input-based algorithm. 
+    switch (m_integrationAlgorithm) {
+    case IntegrationAlgorithm::Trapezoidal: {
+      while (this->keepGoing(amrParticles)) {
+	// Check integration flag and move particles if true
+	this->moveParticlesDriftTimeTrapezoidal(amrParticles, i);
+
+	// Add integration parts to p.mass()
+	this->addIntegrationDriftTimeTrapezoidal(amrParticles);
+      }
+
+      break;
+    }
+    case IntegrationAlgorithm::Simpsons: {
+      while (this->keepGoing(amrParticles)) {
+	// Check integration flag and move particles if true	
+	this->moveParticlesDriftTimeSimpsons(amrParticles, i);
+	
+	// Add integration parts to p.mass()
+	this->addIntegrationDriftTimeSimpsons(amrParticles);
+      }
+
+      break;
+    }
+    default: {
+      MayDay::Error("StreamerInceptionStepper::solveDriftTimes -- logic bust");
+    }
+    }
+    
+    // Move particles back to initial position. This includes remapping.
+    this->moveParticlesInitialPosition(amrParticles);
+  
+    // Deposit and copy t values to m_driftTimes.
+    m_particleSolver->deposit(t);
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      t[lvl]->copyTo(Interval(0,0), *m_driftTimes[lvl], Interval(i,i));
+    }     
+  }    
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::moveParticlesDriftTimeTrapezoidal(ParticleContainer<P>& amrParticles, const int dxSign) {
+  CH_TIME("StreamerInceptionStepper::moveParticlesDriftTimeTrapezoidal");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::moveParticlesDriftTimeTrapezoidal" << endl;
+  }
+
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();  
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    // Particles move half a cell on this level. 
+    const Real dx = 0.5*m_amr->getDx()[lvl];
+
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+	
+	// If integration flag true, move particle and check integration conditions
+	if (p.template scalar<0>() > 0.0) {
+	  const RealVect E                     = p.velocity();
+          const RealVect normalizedVelocity    = E / E.vectorLength();
+          const Real     Emagnitude            = E.vectorLength();
+	  
+	  // Find new position in direction decided by dxSign
+	  RealVect newPosition;	  
+	  if (dxSign == 0) {
+	    newPosition = p.position() + normalizedVelocity * dx;
+	  }
+	  else if (dxSign == 1) {
+	    newPosition = p.position() + normalizedVelocity * (-dx);
+	  }	  
+	  else {
+	    MayDay::Error("StreamerInceptionStepper::moveParticlesDriftTimeTrapezoidal -- logic bust");
+	  }	 	  
+	  	  
+          p.template scalar<2>() = Emagnitude;
+          p.template scalar<1>() = dx;	  
+	  
+	  // Check if particle outside grid or inside electrode. If not, move to new position.
+	  if (this->particleOutsideGrid(newPosition, probLo, probHi)) {
+            p.template scalar<0>() = -1.0;
+          }
+          else if (this->particleInsideElectrode(newPosition)) {
+            p.template scalar<0>() = -1.0;
+          }
+          else {
+            p.position() = newPosition;
+          }	  	  
+	}
+      }
+    }
+  }
+  m_particleSolver->remap();
+  m_particleSolver->interpolateVelocities();  
+}
+
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::addIntegrationDriftTimeTrapezoidal(ParticleContainer<P>& amrParticles){
+  CH_TIME("StreamerInceptionStepper:addIntegrationDriftTimeTrapezoidal");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::addIntegrationDriftTimeTrapezoidal" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+        // Add integration parts if integration flag true
+        if (p.template scalar<0>() > 0.0) {
+          const RealVect  E               = p.velocity();
+          const Real      Emagnitude      = E.vectorLength();
+          const Real      dx   = p.template scalar<1>();	  
+          const Real      startPointEmagnitude = p.template scalar<2>();
+          p.mass() += (dx / 2) * ( (1/startPointEmagnitude) + (1/Emagnitude) );
+        }
+      }
+    }
+  }
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::moveParticlesDriftTimeSimpsons(ParticleContainer<P>& amrParticles, const int dxSign) {
+  CH_TIME("StreamerInceptionStepper::moveparticlesDriftTimeSimpsons");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::moveparticlesDriftTimeSimpsons" << endl;
+  }
+
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();  
+
+  // Move particles dx/2 (1/2)
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    // Particles move half a cell on this level. 
+    const Real dx = 0.5*m_amr->getDx()[lvl];
+
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {      
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+	
+	// If integration flag true, move particle and check integration conditions
+	if (p.template scalar<0>() > 0.0) {
+	  const RealVect E                     = p.velocity();
+          const RealVect normalizedVelocity    = E / E.vectorLength();
+          const Real     Emagnitude            = E.vectorLength();
+	  
+	  // Find new position in direction decided by dxSign
+	  RealVect newPosition;	  
+	  if (dxSign == 0) {
+	    newPosition = p.position() + normalizedVelocity * 0.5 * dx;
+	  }
+	  else if (dxSign == 1) {
+	    newPosition = p.position() + normalizedVelocity * 0.5 * (-dx);
+	  }	  
+	  else {
+	    MayDay::Error("StreamerInceptionStepper::moveParticlesDriftTimeTrapezoidal -- logic bust");
+	  }	 	  
+
+          p.template scalar<1>() = dx;	  	  
+          p.template scalar<2>() = Emagnitude;
+	  
+	  // Check keep integrating criteria. Move particle if fulfilled, flag if not.	  
+	  if (this->particleOutsideGrid(newPosition, probLo, probHi)) {
+            p.template scalar<0>() = -1.0;
+          }
+          else if (this->particleInsideElectrode(newPosition)) {
+            p.template scalar<0>() = -1.0;
+          }
+          else {
+            p.position() = newPosition;
+          }	  	  
+	}
+      }
+    }
+  }
+  m_particleSolver->remap();
+  m_particleSolver->interpolateVelocities();    
+
+  // Move particles dx/2 (2/2)
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    // Particles move half a cell on this level. 
+    const Real dx = 0.5*m_amr->getDx()[lvl];
+
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {      
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+	
+	// If integration flag true, move particle and check integration conditions
+	if (p.template scalar<0>() > 0.0) {
+	  const RealVect E                     = p.velocity();
+          const RealVect normalizedVelocity    = E / E.vectorLength();
+          const Real     Emagnitude            = E.vectorLength();
+	  
+	  // Find new position in direction decided by dxSign
+	  RealVect newPosition;	  
+	  if (dxSign == 0) {
+	    newPosition = p.position() + normalizedVelocity * 0.5 * dx;
+	  }
+	  else if (dxSign == 1) {
+	    newPosition = p.position() + normalizedVelocity * 0.5 * (-dx);
+	  }	  
+	  else {
+	    MayDay::Error("StreamerInceptionStepper::moveParticlesDriftTimeTrapezoidal -- logic bust");
+	  }	 	  
+
+          p.template scalar<3>() = Emagnitude;
+	  
+	  // Check keep integrating criteria. Move particle if fulfilled, flag if not.	  
+	  if (this->particleOutsideGrid(newPosition, probLo, probHi)) {
+            p.template scalar<0>() = -1.0;
+          }
+          else if (this->particleInsideElectrode(newPosition)) {
+            p.template scalar<0>() = -1.0;
+          }
+          else {
+            p.position() = newPosition;
+          }	  	  
+	}
+      }
+    }
+  }
+  m_particleSolver->remap();
+  m_particleSolver->interpolateVelocities();
+
+  // CHECK NUM PARTICLES BEFORE == PARTICLES AFTER?
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::addIntegrationDriftTimeSimpsons(ParticleContainer<P>& amrParticles) {
+  CH_TIME("StreamerInceptionStepper:addIntegrationDriftTimeSimpsons");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::addIntegrationDriftTimeSimpsons" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+        // Add integration parts if integration flag true
+        if (p.template scalar<0>() > 0.0) {
+          const RealVect  E               = p.velocity();
+          const Real      Emagnitude      = E.vectorLength();
+          const Real      dx   = p.template scalar<1>();	  
+          const Real      startPointEmagnitude = p.template scalar<2>();
+	  const Real      midPointEmagnitude = p.template scalar<3>();
+          p.mass() += (dx / 6) * ( (1/startPointEmagnitude) + 4 * (1/midPointEmagnitude) + (1/Emagnitude) );
+        }
+      }
+    }
+  }
+}
+   
+
 
 template <typename P, typename F>
 void
@@ -757,8 +1064,8 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
   // Write our K-values.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Interval srcInterval(0, m_voltageSweeps.size() - 1);
-    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+    const Interval srcInterval(0, m_voltageSweeps.size() - 1); 
+    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1); 
     m_Kvalues[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
   }
   a_icomp += m_voltageSweeps.size();
@@ -770,7 +1077,19 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
     varName += " V";
     a_plotVariableNames.push_back(varName);
   }
+  
+  // Write our drift time values.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Interval srcInterval(0, 1);
+    const Interval dstInterval(a_icomp, a_icomp + 1);
+    m_driftTimes[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+  }
+  a_icomp += 2;
+
+  a_plotVariableNames.push_back("v_d*µV for +E direction");
+  a_plotVariableNames.push_back("v_d*µV for -E direction");  
 }
+  
 
 template <typename P, typename F>
 int
@@ -787,6 +1106,8 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
   ncomp += m_particleSolver->getNumberOfPlotVariables();
 
   ncomp += m_voltageSweeps.size();
+
+  ncomp += 2;  // Drift times (+/- direction)
 
   return ncomp;
 }
