@@ -120,7 +120,8 @@ Cylinder.radius        = 2E-3           # Cylinder radius.
 # StreamerInceptionStepper class options
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = 20
-StreamerInceptionStepper.integration   = simpsons
-StreamerInceptionStepper.voltage_lo    = 1
+StreamerInceptionStepper.integration   = trapezoidal
+StreamerInceptionStepper.voltage_lo    = 40000
 StreamerInceptionStepper.voltage_hi    = 40000
-StreamerInceptionStepper.voltage_steps = 2
+StreamerInceptionStepper.voltage_steps = 0
+StreamerInceptionStepper.K_inception   = 10

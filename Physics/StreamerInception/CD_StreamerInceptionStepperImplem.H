@@ -52,6 +52,7 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   Real        voltageLo    = 0.0;
   Real        voltageHi    = 0.0;
   int         voltageSteps = 0;
+  Real        K_inception = 0.0;
   std::string str;
 
   // Read in parameters
@@ -59,6 +60,7 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   pp.get("voltage_lo", voltageLo);
   pp.get("voltage_hi", voltageHi);
   pp.get("voltage_steps", voltageSteps);
+  pp.get("K_inception", K_inception);
   pp.get("integration", str);
   if (str == "trapezoidal") {
     m_integrationAlgorithm = IntegrationAlgorithm::Trapezoidal;
@@ -253,7 +255,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
   this->solveKValues();
 
   // Solve drift time integral in both directions and store values in m_driftTimes
-  this->solveDriftTimes();
+  //  this->solveDriftTimes();
 }
 
 
