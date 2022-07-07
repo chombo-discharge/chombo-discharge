@@ -377,13 +377,17 @@ namespace Physics {
       /*!
 	@brief K-values -- > should have input-specified number of components
       */
-      EBAMRCellData m_Kvalues;
+      EBAMRCellData m_KValues;
 
       /*!
 	@brief Drift time
       */
       EBAMRCellData m_driftTimes;
 
+      /*! 
+	@brief Max K value for every voltage
+      */
+      std::vector<Real> m_maxKValues;  
       /*!
 	@brief Realm where the solver lives
       */

@@ -135,10 +135,10 @@ StreamerInceptionStepper<P, F>::allocate()
   m_particleSolver->allocate();
 
   m_amr->allocate(m_velocity, m_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_Kvalues, m_realm, m_phase, m_voltageSweeps.size());
+  m_amr->allocate(m_KValues, m_realm, m_phase, m_voltageSweeps.size());
   m_amr->allocate(m_driftTimes, m_realm, m_phase, 2);
   
-  DataOps::setValue(m_Kvalues, 0.0);  
+  DataOps::setValue(m_KValues, 0.0);  
 }
 
 template <typename P, typename F>
@@ -249,8 +249,8 @@ StreamerInceptionStepper<P, F>::postInitialize()
     pout() << "StreamerInceptionStepper::postInitialize" << endl;
   }
 
-  // Solve K integral for each particle in each voltage and store K values in m_Kvalues
-  //this->solveKValues();
+  // Solve K integral for each particle in each voltage and store K values in m_KValues
+  this->solveKValues();
 
   // Solve drift time integral in both directions and store values in m_driftTimes
   this->solveDriftTimes();
@@ -310,11 +310,17 @@ StreamerInceptionStepper<P, F>::solveKValues() {
     // Move particles back to initial position. This includes remapping.
     this->moveParticlesInitialPosition(amrParticles);
 
-    // Deposit and copy K values to m_Kvalues
+    // Deposit and copy K values to m_KValues
     m_particleSolver->deposit(K);
 
+    // Get max K value
+    Real maxK;
+    Real minK;
+    DataOps::getMaxMin(maxK, minK, K, 0);
+    m_maxKValues.push_back(maxK);
+
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      K[lvl]->copyTo(Interval(0,0), *m_Kvalues[lvl], Interval(i,i));
+      K[lvl]->copyTo(Interval(0,0), *m_KValues[lvl], Interval(i,i));
     }
   }
 }
@@ -1066,7 +1072,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Interval srcInterval(0, m_voltageSweeps.size() - 1); 
     const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1); 
-    m_Kvalues[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    m_KValues[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
   }
   a_icomp += m_voltageSweeps.size();
 
