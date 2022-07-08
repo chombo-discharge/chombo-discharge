@@ -172,7 +172,7 @@ namespace Physics {
 	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
      */
       void
-      driftTime_MoveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const int dxSign);
+      driftTime_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const int dxSign);
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add integration parts after particles move

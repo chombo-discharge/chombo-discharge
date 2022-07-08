@@ -30,7 +30,6 @@
 using namespace Physics::StreamerInception;
 
 
-// place read in-parameters in parseOptions() instead
 template <typename P, typename F>
 StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 {
@@ -42,42 +41,10 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   m_realm = Realm::Primal;
   m_phase = phase::gas;
 
-  this->parseOptions();
-
   m_verbosity = -1;
 
-  ParmParse pp("StreamerInceptionStepper");
-
-  Real        voltageLo    = 0.0;
-  Real        voltageHi    = 0.0;
-  int         voltageSteps = 0;
-  Real        K_inception = 0.0;
-  std::string str;
-
-  // Read in parameters
-  pp.get("verbosity", m_verbosity);
-  pp.get("voltage_lo", voltageLo);
-  pp.get("voltage_hi", voltageHi);
-  pp.get("voltage_steps", voltageSteps);
-  pp.get("K_inception", K_inception);
-  pp.get("integration", str);
-  if (str == "trapezoidal") {
-    m_integrationAlgorithm = IntegrationAlgorithm::Trapezoidal;
-  }
-  else if (str == "simpsons") {
-    m_integrationAlgorithm = IntegrationAlgorithm::Simpsons;
-  }
-  else {
-    MayDay::Error("StreamerInceptionStepper::StreamerInceptionStepper -- logic bust");
-  }
-
-  // Define voltages
-  const Real dV = (voltageHi - voltageLo) / voltageSteps;
-  m_voltageSweeps.push_back(voltageLo);
-  for (int i = 0; i < voltageSteps; i++) {
-    m_voltageSweeps.push_back(m_voltageSweeps[i] + dV);
-  }
-
+  this->parseOptions();
+  
   // Default alpha
   m_alpha = [](const Real E) { return tanh(E); };
 }
@@ -169,6 +136,320 @@ StreamerInceptionStepper<P, F>::initialData()
   m_particleSolver->setVelocity(m_velocity);
 
   this->initialParticles();
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::registerRealms()
+{
+  CH_TIME("StreamerInceptionStepper::registerRealms");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::registerRealms" << endl;
+  }
+
+  m_amr->registerRealm(m_realm);
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::registerOperators()
+{
+  CH_TIME("StreamerInceptionStepper::registerOperators");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::registerOperators" << endl;
+  }
+
+  m_fieldSolver->registerOperators();
+  m_particleSolver->registerOperators();
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::parseOptions()
+{
+  CH_TIME("StreamerInceptionStepper::parseOptions");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::parseOptions" << endl;
+  }
+
+  ParmParse pp("StreamerInceptionStepper");
+
+  Real        voltageLo    = 0.0;
+  Real        voltageHi    = 0.0;
+  int         voltageSteps = 0;
+  Real        K_inception  = 0.0;
+  std::string str;
+
+  // Read in parameters
+  pp.get("verbosity", m_verbosity);
+  pp.get("voltage_lo", voltageLo);
+  pp.get("voltage_hi", voltageHi);
+  pp.get("voltage_steps", voltageSteps);
+  pp.get("K_inception", K_inception);
+  pp.get("integration", str);
+  if (str == "trapezoidal") {
+    m_integrationAlgorithm = IntegrationAlgorithm::Trapezoidal;
+  }
+  else if (str == "simpsons") {
+    m_integrationAlgorithm = IntegrationAlgorithm::Simpsons;
+  }
+  else {
+    MayDay::Error("StreamerInceptionStepper::StreamerInceptionStepper -- logic bust");
+  }
+
+  // Define voltages
+  const Real dV = (voltageHi - voltageLo) / voltageSteps;
+  m_voltageSweeps.push_back(voltageLo);
+  for (int i = 0; i < voltageSteps; i++) {
+    m_voltageSweeps.push_back(m_voltageSweeps[i] + dV);
+  }  
+}
+
+// Not used in this program
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::parseRuntimeOptions()
+{
+  CH_TIME("StreamerInceptionStepper::parseRuntimeOptions");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::parseRuntimeOptions" << endl;
+  }
+}
+
+#ifdef CH_USE_HDF5
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
+{
+  CH_TIME("StreamerInceptionStepper::writeCheckpointData");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::writeCheckpointData" << endl;
+  }
+}
+#endif
+
+#ifdef CH_USE_HDF5
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
+{
+  CH_TIME("StreamerInceptionStepper::readCheckpointData");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::readCheckpointData" << endl;
+  }
+}
+#endif
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
+                                              Vector<std::string>& a_plotVariableNames,
+                                              int&                 a_icomp) const
+{
+  CH_TIME("StreamerInceptionStepper::writePlotData");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::writePlotData" << endl;
+  }
+
+  // Append plot variable names.
+  a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
+  a_plotVariableNames.append(m_particleSolver->getPlotVariableNames());
+
+  // Write into plot data holder memory.
+  m_fieldSolver->writePlotData(a_output, a_icomp);
+  m_particleSolver->writePlotData(a_output, a_icomp);
+
+  // Write our K-values.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Interval srcInterval(0, m_voltageSweeps.size() - 1); 
+    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1); 
+    m_KValues[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+  }
+  a_icomp += m_voltageSweeps.size();
+
+  std::string varName;
+  for (const Real& V : m_voltageSweeps) {
+    varName = "K for ";
+    varName += std::to_string(V);
+    varName += " V";
+    a_plotVariableNames.push_back(varName);
+  }
+  
+  // Write our drift time values.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Interval srcInterval(0, 1);
+    const Interval dstInterval(a_icomp, a_icomp + 1);
+    m_driftTimes[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+  }
+  a_icomp += 2;
+
+  a_plotVariableNames.push_back("v_d*µV for +E direction");
+  a_plotVariableNames.push_back("v_d*µV for -E direction");  
+}
+
+template <typename P, typename F>
+int
+StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
+{
+  CH_TIME("StreamerInceptionStepper::getNumberOfPlotVariables");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::getNumberOfPlotVariables" << endl;
+  }
+
+  int ncomp = 0;
+
+  ncomp += m_fieldSolver->getNumberOfPlotVariables();
+  ncomp += m_particleSolver->getNumberOfPlotVariables();
+
+  ncomp += m_voltageSweeps.size();
+
+  ncomp += 2;  // Drift times (+/- direction)
+
+  return ncomp;
+}
+
+template <typename P, typename F>
+Real
+StreamerInceptionStepper<P, F>::computeDt()
+{
+  CH_TIME("StreamerInceptionStepper::computeDt");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeDt" << endl;
+  }
+
+  return std::numeric_limits<Real>::max();
+}
+
+// StreamerInceptionStepper is static. Any call to advance gives an error.
+template <typename P, typename F>
+Real
+StreamerInceptionStepper<P, F>::advance(const Real a_dt)
+{
+  CH_TIME("StreamerInceptionStepper::advance");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::advance" << endl;
+  }
+
+  MayDay::Error(
+    "StreamerInceptionStepper::advance -- this is a static solver. Calling the advance method is an error.");
+
+  return a_dt;
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt)
+{
+  CH_TIME("StreamerInceptionStepper::synchronizeSolverTimes");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::synchronizeSolverTimes" << endl;
+  }
+
+  m_timeStep = a_step;
+  m_time     = a_time;
+  m_dt       = a_dt;
+
+  m_fieldSolver->setTime(a_step, a_time, a_dt);
+  m_particleSolver->setTime(a_step, a_time, a_dt);
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel)
+{
+  CH_TIME("StreamerInceptionStepper::preRegrid");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::preRegrid" << endl;
+  }
+
+  m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
+  m_particleSolver->preRegrid(a_lmin, a_oldFinestLevel);
+}
+
+// Combined implementation from FieldStepper and TracerParticleStepper
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+{
+  CH_TIME("StreamerInceptionStepper::regrid");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::regrid" << endl;
+  }
+
+  // Regrid tracer particles and field
+  m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_particleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+
+  // Regrid velocity field
+  m_amr->reallocate(m_velocity, m_phase, a_lmin);
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::postRegrid()
+{
+  CH_TIME("StreamerInceptionStepper::postRegrid");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::postRegrid" << endl;
+  }
+
+  // This can be left empty because initialData is called right after the regrid method and calling
+  // the advance method is an error.
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setAlpha");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setAlpha" << endl;
+  }
+
+  m_alpha = a_alpha;
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::setVoltage(const Real a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setVoltage");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setVoltage" << endl;
+  }
+
+  CH_assert(!m_fieldSolver.isNull());
+
+  // Give field solver a constant voltage.
+  m_fieldSolver->setVoltage([a_voltage](const Real& a_time) -> Real { return a_voltage; });
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::printStepReport()
+{
+  CH_TIME("StreamerInceptionStepper::printStepReport");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::printStepReport" << endl;
+  }
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::scaleElectrostatics(const Real& a_scale) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::scaleElectrostatics");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::scaleElectrostatics" << endl;
+  }
+
+  CH_assert(!m_fieldSolver.isNull());
+
+  MFAMRCellData& potential     = m_fieldSolver->getPotential();
+  MFAMRCellData& electricField = m_fieldSolver->getElectricField();
+
+  DataOps::scale(potential, a_scale);
+  DataOps::scale(electricField, a_scale);
 }
 
 template <typename P, typename F>
@@ -975,275 +1256,7 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons(ParticleContain
       }
     }
   }
-}
-   
-
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::registerRealms()
-{
-  CH_TIME("StreamerInceptionStepper::registerRealms");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::registerRealms" << endl;
-  }
-
-  m_amr->registerRealm(m_realm);
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::registerOperators()
-{
-  CH_TIME("StreamerInceptionStepper::registerOperators");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::registerOperators" << endl;
-  }
-
-  m_fieldSolver->registerOperators();
-  m_particleSolver->registerOperators();
-}
-
-// Done in the constructor
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::parseOptions()
-{
-  CH_TIME("StreamerInceptionStepper::parseOptions");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::parseOptions" << endl;
-  }
-}
-
-// Not used in this program
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::parseRuntimeOptions()
-{
-  CH_TIME("StreamerInceptionStepper::parseRuntimeOptions");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::parseRuntimeOptions" << endl;
-  }
-}
-
-#ifdef CH_USE_HDF5
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
-{
-  CH_TIME("StreamerInceptionStepper::writeCheckpointData");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writeCheckpointData" << endl;
-  }
-}
-#endif
-
-#ifdef CH_USE_HDF5
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
-{
-  CH_TIME("StreamerInceptionStepper::readCheckpointData");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::readCheckpointData" << endl;
-  }
-}
-#endif
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
-                                              Vector<std::string>& a_plotVariableNames,
-                                              int&                 a_icomp) const
-{
-  CH_TIME("StreamerInceptionStepper::writePlotData");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writePlotData" << endl;
-  }
-
-  // Append plot variable names.
-  a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
-  a_plotVariableNames.append(m_particleSolver->getPlotVariableNames());
-
-  // Write into plot data holder memory.
-  m_fieldSolver->writePlotData(a_output, a_icomp);
-  m_particleSolver->writePlotData(a_output, a_icomp);
-
-  // Write our K-values.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Interval srcInterval(0, m_voltageSweeps.size() - 1); 
-    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1); 
-    m_KValues[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-  }
-  a_icomp += m_voltageSweeps.size();
-
-  std::string varName;
-  for (const Real& V : m_voltageSweeps) {
-    varName = "K for ";
-    varName += std::to_string(V);
-    varName += " V";
-    a_plotVariableNames.push_back(varName);
-  }
-  
-  // Write our drift time values.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Interval srcInterval(0, 1);
-    const Interval dstInterval(a_icomp, a_icomp + 1);
-    m_driftTimes[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-  }
-  a_icomp += 2;
-
-  a_plotVariableNames.push_back("v_d*µV for +E direction");
-  a_plotVariableNames.push_back("v_d*µV for -E direction");  
-}
-  
-
-template <typename P, typename F>
-int
-StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
-{
-  CH_TIME("StreamerInceptionStepper::getNumberOfPlotVariables");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::getNumberOfPlotVariables" << endl;
-  }
-
-  int ncomp = 0;
-
-  ncomp += m_fieldSolver->getNumberOfPlotVariables();
-  ncomp += m_particleSolver->getNumberOfPlotVariables();
-
-  ncomp += m_voltageSweeps.size();
-
-  ncomp += 2;  // Drift times (+/- direction)
-
-  return ncomp;
-}
-
-template <typename P, typename F>
-Real
-StreamerInceptionStepper<P, F>::computeDt()
-{
-  CH_TIME("StreamerInceptionStepper::computeDt");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeDt" << endl;
-  }
-
-  return std::numeric_limits<Real>::max();
-}
-
-// StreamerInceptionStepper is static. Any call to advance gives an error.
-template <typename P, typename F>
-Real
-StreamerInceptionStepper<P, F>::advance(const Real a_dt)
-{
-  CH_TIME("StreamerInceptionStepper::advance");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::advance" << endl;
-  }
-
-  MayDay::Error(
-    "StreamerInceptionStepper::advance -- this is a static solver. Calling the advance method is an error.");
-
-  return a_dt;
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt)
-{
-  CH_TIME("StreamerInceptionStepper::synchronizeSolverTimes");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::synchronizeSolverTimes" << endl;
-  }
-
-  m_timeStep = a_step;
-  m_time     = a_time;
-  m_dt       = a_dt;
-
-  m_fieldSolver->setTime(a_step, a_time, a_dt);
-  m_particleSolver->setTime(a_step, a_time, a_dt);
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::printStepReport()
-{
-  CH_TIME("StreamerInceptionStepper::printStepReport");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::printStepReport" << endl;
-  }
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel)
-{
-  CH_TIME("StreamerInceptionStepper::preRegrid");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::preRegrid" << endl;
-  }
-
-  m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
-  m_particleSolver->preRegrid(a_lmin, a_oldFinestLevel);
-}
-
-// Combined implementation from FieldStepper and TracerParticleStepper
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
-{
-  CH_TIME("StreamerInceptionStepper::regrid");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::regrid" << endl;
-  }
-
-  // Regrid tracer particles and field
-  m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-  m_particleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-
-  // Regrid velocity field
-  m_amr->reallocate(m_velocity, m_phase, a_lmin);
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::postRegrid()
-{
-  CH_TIME("StreamerInceptionStepper::postRegrid");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::postRegrid" << endl;
-  }
-
-  // This can be left empty because initialData is called right after the regrid method and calling
-  // the advance method is an error.
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::setAlpha");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::setAlpha" << endl;
-  }
-
-  m_alpha = a_alpha;
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::setVoltage(const Real a_voltage) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::setVoltage");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::setVoltage" << endl;
-  }
-
-  CH_assert(!m_fieldSolver.isNull());
-
-  // Give field solver a constant voltage.
-  m_fieldSolver->setVoltage([a_voltage](const Real& a_time) -> Real { return a_voltage; });
-}
+} 
 
 template <typename P, typename F>
 bool
@@ -1279,23 +1292,6 @@ StreamerInceptionStepper<P, F>::particleInsideElectrode(const RealVect pos)
   return (implicitFunction->value(pos) >= 0.0) ? true : false;
 }
 
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::scaleElectrostatics(const Real& a_scale) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::scaleElectrostatics");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::scaleElectrostatics" << endl;
-  }
-
-  CH_assert(!m_fieldSolver.isNull());
-
-  MFAMRCellData& potential     = m_fieldSolver->getPotential();
-  MFAMRCellData& electricField = m_fieldSolver->getElectricField();
-
-  DataOps::scale(potential, a_scale);
-  DataOps::scale(electricField, a_scale);
-}
 
 #include <CD_NamespaceFooter.H>
 
