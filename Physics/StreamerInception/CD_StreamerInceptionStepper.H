@@ -119,7 +119,7 @@ namespace Physics {
 
       /*!
 	@brief K integral: Add integration parts after particles move
-	@param[in] amrParticles  Particlexs of m_particleSolver
+	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
       K_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage);
@@ -194,8 +194,14 @@ namespace Physics {
 	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      driftTime_addIntegrationSimpsons(ParticleContainer<P>& amrParticles);      
+      driftTime_addIntegrationSimpsons(ParticleContainer<P>& amrParticles);
 
+      /*!
+	@brief Interpolate between K values to find voltage giving K_inception and store values in m_VInception
+      */
+      void
+      solveVInception();
+      
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 
       */
@@ -378,11 +384,21 @@ namespace Physics {
 	@brief K-values -- > should have input-specified number of components
       */
       EBAMRCellData m_KValues;
-
+      
       /*!
-	@brief Drift time
+	@brief Drift times (t*µV)
       */
       EBAMRCellData m_driftTimes;
+
+      /*!
+	@brief Voltages giving K>K_inception
+      */
+      EBAMRCellData m_VInception;      
+
+      /*!
+	@brief Inception criteria (read from input)
+      */
+      Real m_KInception;
 
       /*! 
 	@brief Max K value for every voltage
