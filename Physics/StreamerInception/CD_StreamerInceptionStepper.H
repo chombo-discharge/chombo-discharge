@@ -154,6 +154,14 @@ namespace Physics {
       moveParticlesInitialPosition(ParticleContainer<P>& amrParticles);
 
       /*!
+	@brief Set negative K values to 0
+	@param[in] K  K values for a specific voltage
+	@param[in] amrParticles  Particles of m_particleSolver
+      */
+      void
+      zeroNegativeKValues(EBAMRCellData& K, ParticleContainer<P>& amrParticles);
+
+      /*!
 	@brief Set all particles' masses to 0
 	@param[in] amrParticles  Particles of m_particleSolver
       */

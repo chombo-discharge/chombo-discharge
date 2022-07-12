@@ -607,6 +607,9 @@ StreamerInceptionStepper<P, F>::solveKValues() {
     // Deposit
     m_particleSolver->deposit(K);
 
+    // Set negative K values to 0
+    this->zeroNegativeKValues(K, amrParticles);              
+	      
     // Get max K value
     Real maxK;
     Real minK;
@@ -930,6 +933,62 @@ StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P
   
   m_particleSolver->remap();
 }
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::zeroNegativeKValues(EBAMRCellData& K, ParticleContainer<P>& amrParticles)
+{
+  CH_TIME("StreamerInceptionStepper::zeroNegativeKValues");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::zeroNegativeKValues" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {      
+    LevelData<EBCellFAB>& levelData = *K[lvl];    
+    const DisjointBoxLayout& dbl = levelData.disjointBoxLayout();
+    
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(amrParticles.getRealm(), m_phase)[lvl];    
+
+    const Real dx = m_amr->getDx()[lvl];
+    
+    ParticleData<P>& levelParticles = amrParticles[lvl]; 
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      const EBISBox&       ebisbox    = ebisl[dit()]; // used in irregularKernel
+      
+      EBCellFAB& patchData = levelData[dit()];  
+      BaseFab<Real>& regularData = patchData.getSingleValuedFAB();
+
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+	if (regularData(iv, 0) < 0) {
+	  if (procID() == 0) {
+	    std::cout << "regularKernel - K < 0" << endl;
+	  }
+	  regularData(iv, 0) = 0.0;
+	}
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+	const IntVect iv = vof.gridIndex();
+	if (regularData(iv, 0) < 0) {
+	  if (procID() == 0) {
+	    std::cout << "irregularKernel - K < 0" << endl;
+	  }
+	  regularData(iv, 0) = 0.0;
+	}
+      };
+
+      const Box cellBox = dbl[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];      
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);      	  
+    }
+  }
+}
+
 
 template <typename P, typename F>
 void
@@ -1288,7 +1347,7 @@ StreamerInceptionStepper<P, F>::solveVInception() {
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-  amrParticles.clearParticles();
+  amrParticles.clearParticles();   
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {      
     LevelData<EBCellFAB>& levelData = *m_KValues[lvl];    
@@ -1301,7 +1360,7 @@ StreamerInceptionStepper<P, F>::solveVInception() {
     ParticleData<P>& levelParticles = amrParticles[lvl]; 
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()];
+      const EBISBox&       ebisbox    = ebisl[dit()]; // used in irregularKernel
       
       EBCellFAB& patchData = levelData[dit()];  
       BaseFab<Real>& regularData = patchData.getSingleValuedFAB();
