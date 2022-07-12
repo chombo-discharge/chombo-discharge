@@ -4,7 +4,7 @@
 AmrMesh.lo_corner        = -0.01 -0.01  -0.01    # Low corner of problem domain
 AmrMesh.hi_corner        =  0.01  0.01   0.01    # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 64 64 64  # Number of cells on coarsest domain
+AmrMesh.coarsest_domain  = 64 64 64   # Number of cells on coarsest domain
 AmrMesh.max_amr_depth    = 3           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
@@ -121,7 +121,7 @@ Cylinder.radius        = 2E-3           # Cylinder radius.
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = 20
 StreamerInceptionStepper.integration   = trapezoidal
-StreamerInceptionStepper.voltage_lo    = 0
-StreamerInceptionStepper.voltage_hi    = 40000
-StreamerInceptionStepper.voltage_steps = 10
+StreamerInceptionStepper.voltage_lo    = 1e3
+StreamerInceptionStepper.voltage_hi    = 5e6
+StreamerInceptionStepper.voltage_steps = 50
 StreamerInceptionStepper.K_inception   = 15

@@ -545,7 +545,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
 
   // Solve drift time integral in both directions and store values in m_driftTimes
   //this->solveDriftTimes();
-
+  
   // Interpolate between K values to find voltage giving K_inception and store values in m_VInception
   this->solveVInception();
 }
@@ -963,9 +963,6 @@ StreamerInceptionStepper<P, F>::zeroNegativeKValues(EBAMRCellData& K, ParticleCo
 
       auto regularKernel = [&](const IntVect& iv) -> void {
 	if (regularData(iv, 0) < 0) {
-	  if (procID() == 0) {
-	    std::cout << "regularKernel - K < 0" << endl;
-	  }
 	  regularData(iv, 0) = 0.0;
 	}
       };
@@ -973,10 +970,7 @@ StreamerInceptionStepper<P, F>::zeroNegativeKValues(EBAMRCellData& K, ParticleCo
       auto irregularKernel = [&](const VolIndex& vof) -> void {
 	const IntVect iv = vof.gridIndex();
 	if (regularData(iv, 0) < 0) {
-	  if (procID() == 0) {
-	    std::cout << "irregularKernel - K < 0" << endl;
-	  }
-	  regularData(iv, 0) = 0.0;
+	  regularData(iv, 0) = 0.0; 
 	}
       };
 
@@ -1346,6 +1340,10 @@ StreamerInceptionStepper<P, F>::solveVInception() {
     return;
   }
 
+  // DELETE AFTER FUNCTION FINISHED
+  int count = 0;
+  int numDiscP = 0;
+
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
   amrParticles.clearParticles();   
   
@@ -1369,9 +1367,16 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 
       auto regularKernel = [&](const IntVect& iv) -> void {
 	Real V_inception = 0.0;
+	bool addP = true;
+       
+	// If largest K < 0.01, don't calculate V_inception and don't draw particle
+	if (abs(regularData(iv, m_voltageSweeps.size()-1)) < 0.01) {
+	  addP = false;
+	  numDiscP++;
+	}
 	
 	// If inception smaller than smallest K value, use slope decided by the two lowest K values
-	if (regularData(iv, 0) >= m_KInception) {
+	else if (regularData(iv, 0) >= m_KInception) {
 	  const Real slope = ( regularData(iv, 1) - regularData(iv, 0) ) / ( m_voltageSweeps[1] - m_voltageSweeps[0] );
 	  const Real K_0 = regularData(iv, 0) - slope * m_voltageSweeps[0];
 	  V_inception = ( m_KInception - K_0 ) / slope;
@@ -1382,6 +1387,10 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	  const Real slope = ( regularData(iv, m_voltageSweeps.size() - 1) - regularData(iv, m_voltageSweeps.size() - 2) ) / ( m_voltageSweeps[m_voltageSweeps.size() - 1] - m_voltageSweeps[m_voltageSweeps.size() - 2] );
 	  const Real K_0 = regularData(iv, m_voltageSweeps.size() - 1) - slope * m_voltageSweeps[m_voltageSweeps.size() - 1];
 	  V_inception = ( m_KInception - K_0 ) / slope;
+
+	  if (V_inception < 0) {
+	    std::cout << "regularKernel greater.\t" << regularData(iv, m_voltageSweeps.size()-1) << "\t" << regularData(iv, m_voltageSweeps.size()-2) << "\t" << m_voltageSweeps[m_voltageSweeps.size()-1] << "\t" << m_voltageSweeps[m_voltageSweeps.size()-2] << "\n\n";
+	  }	  
 	}
 
 	// If inception within voltage interval, iterate through values
@@ -1391,23 +1400,45 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	      const Real slope = ( regularData(iv, val) - regularData(iv, val - 1) ) / ( m_voltageSweeps[val] - m_voltageSweeps[val - 1] );
 	      const Real K_0 = regularData(iv, val - 1) - slope * m_voltageSweeps[val - 1];
 	      V_inception = ( m_KInception - K_0 ) / slope;
+
+	      if (V_inception < 0) {
+		std::cout << "regularKernel within.\t" << regularData(iv, val) << "\t" << regularData(iv, val-1) << "\t" << m_voltageSweeps[val] << "\t" << m_voltageSweeps[val-1] << "\n\n";
+	      }
+	      break;
 	    }
 	  }
 	}
 
-	// Add particle
-	P p;
-	p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-	p.mass() = V_inception;
-	particles.add(p);
+	// Add particle if addP
+	if (addP) {
+	  P p;
+	  p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+	  p.mass() = V_inception;
+	  particles.add(p);
+
+	  if (V_inception < 1) {
+	    std::cout << "V_inception < 1" << endl;
+	  }
+
+	  if (procID() == 0) {
+	    count++;	    
+	  }
+	}
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
 	Real V_inception = 0.0;
 	const IntVect iv = vof.gridIndex(); 
+	bool addP = true;
+	
+	// If largest K < 0.01, don't calculate V_inception and don't draw particle	
+	if (abs(regularData(iv, m_voltageSweeps.size()-1)) < 0.01) {	  
+	  addP = false;
+	  numDiscP++;
+	}
 	
 	// If inception smaller than smallest K value, use slope decided by the two lowest K values
-	if (regularData(iv, 0) >= m_KInception) {
+	else if (regularData(iv, 0) >= m_KInception) {
 	  const Real slope = ( regularData(iv, 1) - regularData(iv, 0) ) / ( m_voltageSweeps[1] - m_voltageSweeps[0] );
 	  const Real K_0 = regularData(iv, 0) - slope * m_voltageSweeps[0];
 	  V_inception = ( m_KInception - K_0 ) / slope;
@@ -1418,6 +1449,10 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	  const Real slope = ( regularData(iv, m_voltageSweeps.size() - 1) - regularData(iv, m_voltageSweeps.size() - 2) ) / ( m_voltageSweeps[m_voltageSweeps.size() - 1] - m_voltageSweeps[m_voltageSweeps.size() - 2] );
 	  const Real K_0 = regularData(iv, m_voltageSweeps.size() - 1) - slope * m_voltageSweeps[m_voltageSweeps.size() - 1];
 	  V_inception = ( m_KInception - K_0 ) / slope;
+
+	  if (V_inception < 0) {
+	    std::cout << "irregularKernel greater.\t" << regularData(iv, m_voltageSweeps.size()-1) << "\t" << regularData(iv, m_voltageSweeps.size()-2) << "\t" << m_voltageSweeps[m_voltageSweeps.size()-1] << "\t" << m_voltageSweeps[m_voltageSweeps.size()-2] << "\n\n";
+	  }	  
 	}
 
 	// If inception within voltage interval, iterate through values
@@ -1427,23 +1462,44 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	      const Real slope = ( regularData(iv, val) - regularData(iv, val - 1) ) / ( m_voltageSweeps[val] - m_voltageSweeps[val - 1] );
 	      const Real K_0 = regularData(iv, val - 1) - slope * m_voltageSweeps[val - 1];
 	      V_inception = ( m_KInception - K_0 ) / slope;
+
+	      if (V_inception < 0) {
+		std::cout << "irregularKernel within.\t" << regularData(iv,val) << "\t" << regularData(iv, val-1) << "\t" << m_voltageSweeps[val] << "\t" << m_voltageSweeps[val-1] << "\n\n";
+	      }
+	      break;
 	    }
 	  }
 	}
 
-	// Add particle
-	P p;
-	p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-	p.mass() = V_inception;
-	particles.add(p);	
-      };
+	// Add particle if addP
+	if (addP) {	  
+	  P p;
+	  p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+	  p.mass() = V_inception;
+	  particles.add(p);
 
+	  if (V_inception < 1) {
+	    std::cout << "V_inception < 1" << endl;
+	  }	  
+
+	  if (procID() == 0) {
+	    count++;	    
+	  }
+	}
+      };
+      
       const Box cellBox = dbl[dit()];      
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];      
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);      
     }
+  }
+
+  // CAN DELETE AFTER FUNCTION FINISHED
+  if (procID() == 0) {
+    std::cout << "Number of particles added: " << count  << endl;
+    std::cout << "Discarded particles: " << numDiscP << endl;
   }
 
   // Remapping
