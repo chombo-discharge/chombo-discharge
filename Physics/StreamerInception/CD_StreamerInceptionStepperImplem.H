@@ -493,9 +493,8 @@ StreamerInceptionStepper<P, F>::initialParticles()
       List<P>& particles = levelParticles[dit()].listItems();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        const RealVect pos = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-
         if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+	  const RealVect pos = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
           particles.add(P(pos));
         }
       };
@@ -563,13 +562,13 @@ StreamerInceptionStepper<P, F>::solveKValues() {
   EBAMRCellData K;
   m_amr->allocate(K, m_realm, m_phase, 1);
 
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();  
+  
   // Integrate for each voltage
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
     // Update velocities and starting mass to zero.
-    m_particleSolver->interpolateVelocities();
-    
-    ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();    
+    m_particleSolver->interpolateVelocities();     
 
     this->resetParticleMass(amrParticles);
 
@@ -915,6 +914,9 @@ StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P
     pout() << "StreamerInceptionStepper::moveParticlesInitialPosition" << endl;
   }
 
+  // DELETE
+  int countP = 0;
+  
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
 
@@ -927,9 +929,14 @@ StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P
         P& p = lit();
 
         p.position() = p.template vect<0>();
+
+	countP++; // DELETE
       }
     }
   }
+
+  // DELETE
+  std::cout << "Number of particles: " << countP << "\n\n";
   
   m_particleSolver->remap();
 }
@@ -1322,8 +1329,15 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons(ParticleContain
       }
     }
   }
-} 
+}
 
+
+
+
+/* ISSUES: 
+   - V_inception on edge of electrode (irregular). Remove? This is also true for K-values.
+   - Visualization: logarithmic scale preferable (if whole volume's values shall be shown), but not allowed by Visit because of 0 values (e.g. electrode)
+*/
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::solveVInception() {
@@ -1340,25 +1354,25 @@ StreamerInceptionStepper<P, F>::solveVInception() {
     return;
   }
 
-  // DELETE AFTER FUNCTION FINISHED
-  int count = 0;
-  int numDiscP = 0;
-
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
   amrParticles.clearParticles();   
-  
+
+  // Iterate through m_KValues data and calculate V_inception at each point
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {      
     LevelData<EBCellFAB>& levelData = *m_KValues[lvl];    
     const DisjointBoxLayout& dbl = levelData.disjointBoxLayout();
     
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(amrParticles.getRealm(), m_phase)[lvl];    
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(amrParticles.getRealm(), m_phase)[lvl];
+
+    const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];    
 
     const Real dx = m_amr->getDx()[lvl];
     
     ParticleData<P>& levelParticles = amrParticles[lvl]; 
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()]; // used in irregularKernel
+      const EBISBox&       ebisbox    = ebisl[dit()]; 
+      const BaseFab<bool>& validCells = validCellsLD[dit()];      
       
       EBCellFAB& patchData = levelData[dit()];  
       BaseFab<Real>& regularData = patchData.getSingleValuedFAB();
@@ -1369,10 +1383,9 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	Real V_inception = 0.0;
 	bool addP = true;
        
-	// If largest K < 0.01, don't calculate V_inception and don't draw particle
-	if (abs(regularData(iv, m_voltageSweeps.size()-1)) < 0.01) {
+	// If largest K < 0.1, don't calculate V_inception and don't draw particle
+	if (abs(regularData(iv, m_voltageSweeps.size()-1)) < 0.1) {
 	  addP = false;
-	  numDiscP++;
 	}
 	
 	// If inception smaller than smallest K value, use slope decided by the two lowest K values
@@ -1410,20 +1423,17 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	}
 
 	// Add particle if addP
-	if (addP) {
+	if (addP && validCells(iv, 0) && ebisbox.isRegular(iv)) {
 	  P p;
 	  p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
 	  p.mass() = V_inception;
 	  particles.add(p);
 
+	  // Warning if V_inception<1 - there's probably something wrong, maybe too few voltage_steps	  
 	  if (V_inception < 1) {
-	    std::cout << "V_inception < 1" << endl;
-	  }
-
-	  if (procID() == 0) {
-	    count++;	    
-	  }
-	}
+	    std::cout << "WARNING: V_inception < 1" << endl;
+	  }	 
+	}	        
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -1431,10 +1441,8 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	const IntVect iv = vof.gridIndex(); 
 	bool addP = true;
 	
-	// If largest K < 0.01, don't calculate V_inception and don't draw particle	
-	if (abs(regularData(iv, m_voltageSweeps.size()-1)) < 0.01) {	  
-	  addP = false;
-	  numDiscP++;
+	// If largest K < 0.1, don't calculate V_inception and don't draw particle	
+	if (abs(regularData(iv, m_voltageSweeps.size()-1)) < 0.1) {	  
 	}
 	
 	// If inception smaller than smallest K value, use slope decided by the two lowest K values
@@ -1472,19 +1480,16 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	}
 
 	// Add particle if addP
-	if (addP) {	  
+	if (addP && validCells(vof.gridIndex())) {	  
 	  P p;
 	  p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 	  p.mass() = V_inception;
 	  particles.add(p);
 
+	  // Warning if V_inception<1 - there's probably something wrong, maybe too few voltage_steps
 	  if (V_inception < 1) {
-	    std::cout << "V_inception < 1" << endl;
+	    std::cout << "WARNING: V_inception < 1" << endl;
 	  }	  
-
-	  if (procID() == 0) {
-	    count++;	    
-	  }
 	}
       };
       
@@ -1494,12 +1499,6 @@ StreamerInceptionStepper<P, F>::solveVInception() {
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);      
     }
-  }
-
-  // CAN DELETE AFTER FUNCTION FINISHED
-  if (procID() == 0) {
-    std::cout << "Number of particles added: " << count  << endl;
-    std::cout << "Discarded particles: " << numDiscP << endl;
   }
 
   // Remapping

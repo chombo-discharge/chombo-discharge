@@ -123,5 +123,5 @@ StreamerInceptionStepper.verbosity     = 20
 StreamerInceptionStepper.integration   = trapezoidal
 StreamerInceptionStepper.voltage_lo    = 1e3
 StreamerInceptionStepper.voltage_hi    = 5e6
-StreamerInceptionStepper.voltage_steps = 50
+StreamerInceptionStepper.voltage_steps = 100
 StreamerInceptionStepper.K_inception   = 15
