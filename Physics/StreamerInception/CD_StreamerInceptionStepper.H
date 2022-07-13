@@ -209,6 +209,12 @@ namespace Physics {
       */
       void
       solveVInception();
+
+      /*!
+	@brief Compute the critical volume of the K values for each voltage
+      */
+      void
+      solveCriticalVolume();
       
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 
@@ -411,7 +417,13 @@ namespace Physics {
       /*! 
 	@brief Max K value for every voltage
       */
-      std::vector<Real> m_maxKValues;  
+      std::vector<Real> m_maxKValues;
+
+      /*!
+	@brief Critical volumes of K values for each voltage
+      */
+      std::vector<Real> m_criticalVolumes;
+      
       /*!
 	@brief Realm where the solver lives
       */

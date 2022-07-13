@@ -546,7 +546,10 @@ StreamerInceptionStepper<P, F>::postInitialize()
   //this->solveDriftTimes();
   
   // Interpolate between K values to find voltage giving K_inception and store values in m_VInception
-  this->solveVInception();
+  //this->solveVInception();
+
+  // Compute critical volume of K values for each voltage
+  this->solveCriticalVolume();
 }
 
 
@@ -913,9 +916,6 @@ StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::moveParticlesInitialPosition" << endl;
   }
-
-  // DELETE
-  int countP = 0;
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
@@ -929,14 +929,9 @@ StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P
         P& p = lit();
 
         p.position() = p.template vect<0>();
-
-	countP++; // DELETE
       }
     }
   }
-
-  // DELETE
-  std::cout << "Number of particles: " << countP << "\n\n";
   
   m_particleSolver->remap();
 }
@@ -1423,7 +1418,7 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	}
 
 	// Add particle if addP
-	if (addP && validCells(iv, 0) && ebisbox.isRegular(iv)) {
+	if ( addP && validCells(iv, 0) && ebisbox.isRegular(iv) ) {
 	  P p;
 	  p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
 	  p.mass() = V_inception;
@@ -1480,7 +1475,7 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	}
 
 	// Add particle if addP
-	if (addP && validCells(vof.gridIndex())) {	  
+	if ( addP && validCells(iv) ) {	  
 	  P p;
 	  p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 	  p.mass() = V_inception;
@@ -1512,6 +1507,68 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 }
 
 
+// QUESTIONS TO ROBERT:
+//   - Telle antall celler med K>K_inception, eller ta høyde for cellenes areal/volum (2d/3d)? Har antatt sistnevnte og bruker dx til å finne areal/volum. 
+//   - validCells(iv, 0) eller validCells(iv, voltInd)? Har antatt førstnevnte.
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::solveCriticalVolume() {
+  CH_TIME("StreamerInceptionStepper::solveCriticalVolume");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::solveCriticalVolume" << endl;
+  }
+  
+  // Solve critical volume of K values for each voltage
+  for (int voltInd = 0; voltInd < m_voltageSweeps.size(); voltInd++) {
+    Real criticalVolume = 0.0;
+    
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
+      LevelData<EBCellFAB>& levelData = *m_KValues[lvl];    
+      const DisjointBoxLayout& dbl = levelData.disjointBoxLayout();
+    
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+      const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];    
+
+      const Real dx = m_amr->getDx()[lvl];
+       
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+	const EBISBox&       ebisbox    = ebisl[dit()]; 
+	const BaseFab<bool>& validCells = validCellsLD[dit()];      
+      
+	EBCellFAB& patchData = levelData[dit()];  
+	BaseFab<Real>& regularData = patchData.getSingleValuedFAB();
+
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  // Check if cell's K value >= m_KInception and if cell is valid
+	  if ( (regularData(iv, voltInd) >= m_KInception) && validCells(iv, 0) && ebisbox.isRegular(iv)) {
+	    // Add cell volume to critical volume
+	    criticalVolume += pow(dx, SpaceDim);
+	  }
+	};
+
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
+	  // Check if cell's K value >= m_KInception and if cell is valid
+	  if ( (regularData(vof.gridIndex(), voltInd) >= m_KInception) && validCells(vof.gridIndex()) ) {
+	    // Add cell volume to critical volume
+	    criticalVolume += pow(dx, SpaceDim);
+	  }
+	};
+
+	const Box cellBox = dbl[dit()];
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+	BoxLoops::loop(cellBox, regularKernel);
+	BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+
+    // Add critical volume to m_criticalVolumes
+    m_criticalVolumes.push_back(ParallelOps::sum(criticalVolume));
+  }
+}
+
+
 template <typename P, typename F>
 bool
 StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect pos, const RealVect probLo, const RealVect probHi)
@@ -1524,7 +1581,7 @@ StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect pos, const Re
   bool isOutside = false;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
-    if (pos[dir] < probLo[dir] || pos[dir] >= probHi[dir]) {
+    if (pos[dir] <= probLo[dir] || pos[dir] >= probHi[dir]) {
       isOutside = true;
     }
   }
