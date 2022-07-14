@@ -473,7 +473,6 @@ StreamerInceptionStepper<P, F>::initialParticles()
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
   amrParticles.clearParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -487,7 +486,6 @@ StreamerInceptionStepper<P, F>::initialParticles()
     ParticleData<P>& levelParticles = amrParticles[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-
       const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = validCellsLD[dit()];
 
@@ -544,10 +542,10 @@ StreamerInceptionStepper<P, F>::postInitialize()
   this->solveKValues();
 
   // Solve drift time integral in both directions and store values in m_driftTimes
-  //this->solveDriftTimes();
+  this->solveDriftTimes();
   
   // Interpolate between K values to find voltage giving K_inception and store values in m_VInception
-  this->solveVInception();
+  //this->solveVInception();
 
   // Compute critical volume of K values for each voltage
   //this->solveCriticalVolume();
@@ -1089,6 +1087,8 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(ParticleConta
     pout() << "StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal" << endl;
   }
 
+  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();  
+
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();  
 
@@ -1142,7 +1142,12 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(ParticleConta
     }
   }
   m_particleSolver->remap();
-  m_particleSolver->interpolateVelocities();  
+  m_particleSolver->interpolateVelocities();
+
+  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
+  if (particlesBefore != particlesAfter) {
+    MayDay::Warning("StreamerInceptionStepper::K_moveParticlesTrapezoidal -- logic bust, lost some particles");
+  }
 }
 
 
@@ -1185,6 +1190,8 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(ParticleContaine
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::driftTime_moveparticlesSimpsons" << endl;
   }
+
+  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();  
 
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();  
@@ -1294,7 +1301,10 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(ParticleContaine
   m_particleSolver->remap();
   m_particleSolver->interpolateVelocities();
 
-  // CHECK NUM PARTICLES BEFORE == PARTICLES AFTER?
+  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
+  if (particlesBefore != particlesAfter) {
+    MayDay::Warning("StreamerInceptionStepper::K_moveParticlesTrapezoidal -- logic bust, lost some particles");
+  }
 }
 
 template <typename P, typename F>
@@ -1354,7 +1364,7 @@ StreamerInceptionStepper<P, F>::solveVInception() {
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-  amrParticles.clearParticles();   
+  amrParticles.clearParticles();
 
   // Iterate through m_KValues data and calculate V_inception at each point
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {      
@@ -1617,7 +1627,7 @@ StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect pos, const Re
   }
   
   bool isOutside = false;
-
+  
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (pos[dir] <= probLo[dir] || pos[dir] >= probHi[dir]) {
       isOutside = true;
