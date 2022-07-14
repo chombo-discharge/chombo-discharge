@@ -126,7 +126,7 @@ StreamerInceptionStepper<P, F>::initialData()
   const bool converged =
     m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma());
   if (!converged) {
-    MayDay::Error("StreamerInceptionStepper::initialize -- could not solve Poisson equation. Aborting application.");
+    MayDay::Error("StreamerInceptionStepper::initialData -- could not solve Poisson equation. Aborting application.");
   }
 
   // Get the gas-side electric field and give it to the particle solvers.
@@ -547,13 +547,13 @@ StreamerInceptionStepper<P, F>::postInitialize()
   //this->solveDriftTimes();
   
   // Interpolate between K values to find voltage giving K_inception and store values in m_VInception
-  //this->solveVInception();
+  this->solveVInception();
 
   // Compute critical volume of K values for each voltage
-  this->solveCriticalVolume();
+  //this->solveCriticalVolume();
 
   // Print voltages, max K values, and critical volumes to terminal
-  this->printToTerminal();
+  //this->printToTerminal();
 }
 
 
@@ -1335,7 +1335,7 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons(ParticleContain
 
 /* ISSUES: 
    - V_inception on edge of electrode (irregular). Remove? This is also true for K-values.
-   - Visualization: logarithmic scale preferable (if whole volume's values shall be shown), but not allowed by Visit because of 0 values (e.g. electrode)
+   - Visualization: logarithmic scale preferable, but not allowed by Visit because of 0 values (e.g. electrode)
 */
 template <typename P, typename F>
 void
@@ -1373,123 +1373,42 @@ StreamerInceptionStepper<P, F>::solveVInception() {
       const EBISBox&       ebisbox    = ebisl[dit()]; 
       const BaseFab<bool>& validCells = validCellsLD[dit()];      
       
-      EBCellFAB& patchData = levelData[dit()];  
-      BaseFab<Real>& regularData = patchData.getSingleValuedFAB();
+      const EBCellFAB& patchData = levelData[dit()];  
+      const BaseFab<Real>& regularData = patchData.getSingleValuedFAB();
 
       List<P>& particles = levelParticles[dit()].listItems();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
 	Real V_inception = 0.0;
-	bool addP = true;
+	bool addP = false;
        
-	// If largest K < 0.1, don't calculate V_inception and don't draw particle
-	if (abs(regularData(iv, m_voltageSweeps.size()-1)) < 0.1) {
-	  addP = false;
+	// Calculate V_inception and draw particle only if largest K > 0.1
+	if (abs(regularData(iv, m_voltageSweeps.size()-1)) > 0.1) {
+	  addP = true;
+	  this->computeVInceptionCell(regularData, iv, V_inception);
 	}
 	
-	// If inception smaller than smallest K value, use slope decided by the two lowest K values
-	else if (regularData(iv, 0) >= m_KInception) {
-	  const Real slope = ( regularData(iv, 1) - regularData(iv, 0) ) / ( m_voltageSweeps[1] - m_voltageSweeps[0] );
-	  const Real K_0 = regularData(iv, 0) - slope * m_voltageSweeps[0];
-	  V_inception = ( m_KInception - K_0 ) / slope;
-	}
-
-	// If inception greater than greatest K value, use slope decided by the two largest K values
-	else if (regularData(iv, m_voltageSweeps.size() - 1) <= m_KInception) {
-	  const Real slope = ( regularData(iv, m_voltageSweeps.size() - 1) - regularData(iv, m_voltageSweeps.size() - 2) ) / ( m_voltageSweeps[m_voltageSweeps.size() - 1] - m_voltageSweeps[m_voltageSweeps.size() - 2] );
-	  const Real K_0 = regularData(iv, m_voltageSweeps.size() - 1) - slope * m_voltageSweeps[m_voltageSweeps.size() - 1];
-	  V_inception = ( m_KInception - K_0 ) / slope;
-
-	  if (V_inception < 0) {
-	    std::cout << "regularKernel greater.\t" << regularData(iv, m_voltageSweeps.size()-1) << "\t" << regularData(iv, m_voltageSweeps.size()-2) << "\t" << m_voltageSweeps[m_voltageSweeps.size()-1] << "\t" << m_voltageSweeps[m_voltageSweeps.size()-2] << "\n\n";
-	  }	  
-	}
-
-	// If inception within voltage interval, iterate through values
-	else {	  
-	  for (int val = 1; val < m_voltageSweeps.size(); val++) {
-	    if (regularData(iv, val) >= m_KInception) {
-	      const Real slope = ( regularData(iv, val) - regularData(iv, val - 1) ) / ( m_voltageSweeps[val] - m_voltageSweeps[val - 1] );
-	      const Real K_0 = regularData(iv, val - 1) - slope * m_voltageSweeps[val - 1];
-	      V_inception = ( m_KInception - K_0 ) / slope;
-
-	      if (V_inception < 0) {
-		std::cout << "regularKernel within.\t" << regularData(iv, val) << "\t" << regularData(iv, val-1) << "\t" << m_voltageSweeps[val] << "\t" << m_voltageSweeps[val-1] << "\n\n";
-	      }
-	      break;
-	    }
-	  }
-	}
-
 	// Add particle if addP
 	if ( addP && validCells(iv, 0) && ebisbox.isRegular(iv) ) {
-	  P p;
-	  p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-	  p.mass() = V_inception;
-	  particles.add(p);
-
-	  // Warning if V_inception<1 - there's probably something wrong, maybe too few voltage_steps	  
-	  if (V_inception < 1) {
-	    std::cout << "WARNING: V_inception < 1" << endl;
-	  }	 
+	  this->addParticleRegular(particles, iv, dx, V_inception);
 	}	        
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
 	Real V_inception = 0.0;
-	const IntVect iv = vof.gridIndex(); 
+	const IntVect iv = vof.gridIndex();
 	bool addP = true;
-	
-	// If largest K < 0.1, don't calculate V_inception and don't draw particle	
-	if (abs(regularData(iv, m_voltageSweeps.size()-1)) < 0.1) {	  
-	}
-	
-	// If inception smaller than smallest K value, use slope decided by the two lowest K values
-	else if (regularData(iv, 0) >= m_KInception) {
-	  const Real slope = ( regularData(iv, 1) - regularData(iv, 0) ) / ( m_voltageSweeps[1] - m_voltageSweeps[0] );
-	  const Real K_0 = regularData(iv, 0) - slope * m_voltageSweeps[0];
-	  V_inception = ( m_KInception - K_0 ) / slope;
-	}
 
-	// If inception greater than greatest K value, use slope decided by the two largest K values
-	else if (regularData(iv, m_voltageSweeps.size() - 1) <= m_KInception) {
-	  const Real slope = ( regularData(iv, m_voltageSweeps.size() - 1) - regularData(iv, m_voltageSweeps.size() - 2) ) / ( m_voltageSweeps[m_voltageSweeps.size() - 1] - m_voltageSweeps[m_voltageSweeps.size() - 2] );
-	  const Real K_0 = regularData(iv, m_voltageSweeps.size() - 1) - slope * m_voltageSweeps[m_voltageSweeps.size() - 1];
-	  V_inception = ( m_KInception - K_0 ) / slope;
-
-	  if (V_inception < 0) {
-	    std::cout << "irregularKernel greater.\t" << regularData(iv, m_voltageSweeps.size()-1) << "\t" << regularData(iv, m_voltageSweeps.size()-2) << "\t" << m_voltageSweeps[m_voltageSweeps.size()-1] << "\t" << m_voltageSweeps[m_voltageSweeps.size()-2] << "\n\n";
-	  }	  
-	}
-
-	// If inception within voltage interval, iterate through values
-	else {	  
-	  for (int val = 1; val < m_voltageSweeps.size(); val++) {
-	    if (regularData(iv, val) >= m_KInception) {
-	      const Real slope = ( regularData(iv, val) - regularData(iv, val - 1) ) / ( m_voltageSweeps[val] - m_voltageSweeps[val - 1] );
-	      const Real K_0 = regularData(iv, val - 1) - slope * m_voltageSweeps[val - 1];
-	      V_inception = ( m_KInception - K_0 ) / slope;
-
-	      if (V_inception < 0) {
-		std::cout << "irregularKernel within.\t" << regularData(iv,val) << "\t" << regularData(iv, val-1) << "\t" << m_voltageSweeps[val] << "\t" << m_voltageSweeps[val-1] << "\n\n";
-	      }
-	      break;
-	    }
-	  }
-	}
+	// Calculate V_inception and draw particle only if largest K > 0.1
+	if (abs(regularData(iv, m_voltageSweeps.size()-1)) > 0.1) {
+	  addP = true;
+	  this->computeVInceptionCell(regularData, iv, V_inception);
+	}	
 
 	// Add particle if addP
 	if ( addP && validCells(iv) ) {	  
-	  P p;
-	  p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-	  p.mass() = V_inception;
-	  particles.add(p);
-
-	  // Warning if V_inception<1 - there's probably something wrong, maybe too few voltage_steps
-	  if (V_inception < 1) {
-	    std::cout << "WARNING: V_inception < 1" << endl;
-	  }	  
-	}
+	  this->addParticleIrregular(particles, vof, ebisbox, dx, V_inception);
+	}	
       };
       
       const Box cellBox = dbl[dit()];      
@@ -1511,8 +1430,93 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 }
 
 
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::computeVInceptionCell(const BaseFab<Real>& regularData, const IntVect& iv, Real& V_inception)
+{
+  CH_TIME("StreamerInceptionStepper::computeVInceptionCell");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeVInceptionCell" << endl;
+  } 
+
+  // If inception smaller than smallest K value, interpolate with the two lowest K values
+  if (regularData(iv, 0) >= m_KInception) {
+    this->interpolate(m_voltageSweeps[0], m_voltageSweeps[1], regularData(iv, 0), regularData(iv, 1), m_KInception, V_inception);
+  }
+
+  // If inception greater than greatest K value, interpolate with the two largets K values
+  else if (regularData(iv, m_voltageSweeps.size() - 1) <= m_KInception) {
+    const int i1 = m_voltageSweeps.size() - 2;
+    const int i2 = m_voltageSweeps.size() - 1;
+    
+    this->interpolate(m_voltageSweeps[i1], m_voltageSweeps[i2], regularData(iv, i1), regularData(iv, i2), m_KInception, V_inception);
+  }
+
+  // If inception within voltage interval, iterate through values until K value greater than m_KInception
+  else {	  
+    for (int val = 1; val < m_voltageSweeps.size(); val++) {
+      if (regularData(iv, val) >= m_KInception) {
+	this->interpolate(m_voltageSweeps[val-1], m_voltageSweeps[val], regularData(iv, val-1), regularData(iv, val), m_KInception, V_inception);
+	break;
+      }
+    }
+  }
+  
+  // Warning if V_inception<1 - there's probably something wrong, maybe too few voltage_steps
+  if (V_inception < 1) {
+    MayDay::Error("StreamerInceptionStepper::computeVInceptionCell -- V_inception < 1. Something's probably wrong.");
+  }
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::interpolate(const Real& x1, const Real& x2, const Real& y1, const Real& y2, const Real& x, Real& y)
+{ 
+  CH_TIME("StreamerInceptionStepper::interpolate");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::interpolate" << endl;
+  }
+
+  const Real b  = (y2 - y1) / (x2 - x1);
+  const Real y0 = y1 - b * x1;
+
+  y = ((x - y0) / b);
+}
+
+ 
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::addParticleRegular(List<P>& particles, const IntVect iv, const Real dx, const Real mass)
+{
+  CH_TIME("StreamerInceptionStepper::addParticleRegular");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::addParticleRegular" << endl;
+  }
+  
+  P p;
+  p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+  p.mass() = mass;
+  particles.add(p);						   
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::addParticleIrregular(List<P>& particles, const VolIndex& vof, const EBISBox& ebisbox, const Real dx, const Real mass)
+{
+  CH_TIME("StreamerInceptionStepper::addParticleIrregular");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::addParticleIrregular" << endl;
+  }
+
+  P p;
+  p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+  p.mass() = mass;
+  particles.add(p);  
+}
+
+  
 // QUESTIONS TO ROBERT:
-//   - Telle antall celler med K>K_inception, eller ta høyde for cellenes areal/volum (2d/3d)? Har antatt sistnevnte og bruker dx til å finne areal/volum. 
 //   - validCells(iv, 0) eller validCells(iv, voltInd)? Har antatt førstnevnte.
 template <typename P, typename F>
 void

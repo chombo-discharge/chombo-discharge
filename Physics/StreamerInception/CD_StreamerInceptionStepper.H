@@ -211,6 +211,48 @@ namespace Physics {
       solveVInception();
 
       /*!
+	@brief Compute V_inception of a single cell
+	@param[in] regularData Patch data containing K values
+	@param[in] iv          Cell position vector
+	@param[out] V_inception of cell
+      */
+      void
+      computeVInceptionCell(const BaseFab<Real>& regularData, const IntVect& iv, Real& V_inception);
+
+      /*!
+	@brief Perform linear interpolation and find interpolated value at x
+	@param[in] y1 y(x_1)
+	@param[in] y2 y(x_2)
+	@param[in] x1 x_1
+	@param[in] x2 x_2
+	@param[in]  x Parameter of outpout value
+	@param[out] y Interpolated value at x
+      */ 
+      void
+      interpolate(const Real& x1, const Real& x2, const Real& y1, const Real& y2, const Real& x, Real& y);
+
+      /*!
+	@brief Add particle (regular kernel)
+	@param[out] particles Particle list
+	@param[in]  iv Cell position vector
+	@param[in]  dx Cell resolution
+	@param[in]  mass Particle mass
+      */
+      void
+      addParticleRegular(List<P>& particles, const IntVect iv, const Real dx, const Real mass);
+
+      /*!
+	@brief Add particle (irregular kernel)
+	@param[out] particles Particle list
+	@param[in]  vof Cell volume index
+	@param[in]  ebisbox EB information of grid patch
+	@param[in]  dx Cell resolution
+	@param[in]  mass Particle mass
+      */      
+      void
+      addParticleIrregular(List<P>& particles, const VolIndex& vof, const EBISBox& ebisbox, const Real dx, const Real mass);
+
+      /*!
 	@brief Compute the critical volume of the K values for each voltage
       */
       void
