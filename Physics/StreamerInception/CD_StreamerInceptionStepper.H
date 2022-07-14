@@ -215,6 +215,12 @@ namespace Physics {
       */
       void
       solveCriticalVolume();
+
+      /*!
+	@brief Print m_voltageSweeps, m_maxKValues, and m_criticalVolumes to terminal
+      */
+      void
+      printToTerminal();
       
       /*!
 	@brief Post checkpoint operations. Not needed for this time stepper. 

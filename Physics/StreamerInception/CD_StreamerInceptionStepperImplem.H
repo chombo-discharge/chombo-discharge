@@ -18,6 +18,7 @@
 // Our includes
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_NamespaceHeader.H>
+#include <iomanip> // for printing to terminal
 
 // Tasks:
 //
@@ -550,6 +551,9 @@ StreamerInceptionStepper<P, F>::postInitialize()
 
   // Compute critical volume of K values for each voltage
   this->solveCriticalVolume();
+
+  // Print voltages, max K values, and critical volumes to terminal
+  this->printToTerminal();
 }
 
 
@@ -1565,6 +1569,36 @@ StreamerInceptionStepper<P, F>::solveCriticalVolume() {
 
     // Add critical volume to m_criticalVolumes
     m_criticalVolumes.push_back(ParallelOps::sum(criticalVolume));
+  }
+}
+
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::printToTerminal() {
+  CH_TIME("StreamerInceptionStepper::printToTerminal");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::printToTerminal" << endl;
+  }
+
+  auto printElement = [](const Real el) -> void {
+    std::cout << left << setw(15) << setfill(' ') << el;
+  };
+
+  if (procID() == 0) {
+    std::cout << left << setw(15) << setfill(' ') << "Voltage";
+    std::cout << left << setw(15) << setfill(' ') << "Max K";
+    std::cout << left << setw(15) << setfill(' ') << "Critical Volume";
+    std::cout << "\n=============================================\n";
+
+    for (int i = 0; i < m_voltageSweeps.size(); i++) {
+      printElement(m_voltageSweeps[i]);
+      printElement(m_maxKValues[i]);
+      printElement(m_criticalVolumes[i]);
+      std::cout << endl;
+    }
+
+    std::cout << "=============================================\n";
   }
 }
 
