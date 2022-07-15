@@ -112,32 +112,44 @@ namespace Physics {
       
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] amrParticles  Particles of m_particleSolver
+	@param[in] amrParticles Particles of m_particleSolver
+	@param[in] voltage Voltage multiplier
       */
       void
       K_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage); 
 
       /*!
 	@brief K integral: Add integration parts after particles move
-	@param[in] amrParticles  Particles of m_particleSolver
+	@param[in] amrParticles Particles of m_particleSolver
+	@param[in] voltage Voltage multiplier
       */
       void
       K_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage);
 
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] amrParticles  Particles of m_particleSolver
+	@param[in] amrParticles Particles of m_particleSolver
+	@param[in] voltage Voltage multiplier
       */
       void
       K_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
 
       /*!
 	@brief K integral: Add integration parts after particles move
-	@param[in] amrParticles  Particles of m_particleSolver
+	@param[in] amrParticles Particles of m_particleSolver
+	@param[in] voltage Voltage multiplier
       */
       void
       K_addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
 
+      /*!
+	@brief K integral: Move particles one step according to m_integrationAlgorithm
+	@param[in] amrParticles Particles of m_particleSolver
+	@param[in] voltage Voltage multiplier
+      */
+      void
+      K_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const Real& voltage);
+      
       /*!
 	@brief 
 	@param[in] amrParticles  Particles of m_particleSolver
