@@ -143,12 +143,13 @@ namespace Physics {
       K_addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
 
       /*!
-	@brief K integral: Move particles one step according to m_integrationAlgorithm
+	@brief K integral: Move particles one step according to the integration algorithm
 	@param[in] amrParticles Particles of m_particleSolver
 	@param[in] voltage Voltage multiplier
+	@param[in] step Step number for Simpsons' (doesn't affect Trapezoidal)
       */
       void
-      K_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const Real& voltage);
+      K_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const Real& voltage,  const int& step);
       
       /*!
 	@brief 
@@ -184,7 +185,7 @@ namespace Physics {
 	@brief Calculate particles' drift times until inside electrode or outside grid
       */
       void
-      solveDriftTimes();
+      solveDriftTimes();  
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add time step to particles' drift time tracker
@@ -192,7 +193,7 @@ namespace Physics {
 	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
      */
       void
-      driftTime_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const int dxSign);
+      driftTime_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const int& dxSign);
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add integration parts after particles move
@@ -207,7 +208,7 @@ namespace Physics {
 	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
       */
       void
-      driftTime_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const int dxSign);
+      driftTime_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const int& dxSign);
 
       /*!
 	@brief Drift time integral (Simpson's method): Add integration parts after particles move
@@ -215,6 +216,15 @@ namespace Physics {
       */
       void
       driftTime_addIntegrationSimpsons(ParticleContainer<P>& amrParticles);
+
+      /*!
+	@brief Drift time integral: Move particles one step according to the integration algorithm
+	@param[in] amrParticles  Particles of m_particleSolver
+	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
+	@param[in] step Step number for Simpsons' (doesn't affect Trapezoidal)
+      */
+      void
+      driftTime_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const int& dxSign, const int& step);
 
       /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_VInception
