@@ -330,17 +330,19 @@ namespace Physics {
 
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] a_voltage Voltage multiplier
+	@param[in] a_particles Particles to move. 
+	@param[in] a_voltage   Voltage multiplier
       */
       virtual void
-      K_moveParticlesTrapezoidal(const Real& a_voltage) noexcept;
+      K_moveParticlesTrapezoidal(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Add integration parts after particles move
-	@param[in] a_voltage Voltage multiplier
+	@param[in] a_particles Particles to move. 
+	@param[in] a_voltage   Voltage multiplier
       */
       virtual void
-      K_addIntegrationTrapezoidal(const Real& a_voltage) noexcept;
+      K_addIntegrationTrapezoidal(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
@@ -435,10 +437,17 @@ namespace Physics {
       driftTime_moveParticlesOneStep(ParticleContainer<P>& a_particles, const int& a_dxSign, const int& a_step) noexcept;
 
       /*!
-	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage
+	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage. 
+	@details This is the volumetric version.
       */
       virtual void
-      computeInceptionVoltage() noexcept;
+      computeInceptionVoltageVolume() noexcept;
+
+      /*!
+	@brief Estimate the inception voltage
+      */
+      virtual Real
+      computeInceptionVoltage() const noexcept;
 
       /*!
 	@brief Compute the critical volume of the K values for each voltage

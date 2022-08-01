@@ -525,7 +525,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
   this->computeDriftTimes();
 
   // Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage
-  this->computeInceptionVoltage();
+  this->computeInceptionVoltageVolume();
 
   // Compute critical volume of K values for each voltage
   this->computeCriticalVolume();
@@ -562,7 +562,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
       while (this->keepIntegrating(particles)) {
 
         // Move particles and add integration contribution for the current step.
-        this->K_moveParticlesTrapezoidal(m_voltageSweeps[i]);
+        this->K_moveParticlesTrapezoidal(particles, m_voltageSweeps[i]);
         this->K_addIntegrationTrapezoidal(particles, m_voltageSweeps[i]);
       }
 
@@ -607,24 +607,22 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::K_moveParticlesTrapezoidal");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::K_moveParticlesTrapezoidal" << endl;
   }
 
-  ParticleContainer<P>& particles = m_particleSolver->getParticles();
-
 #ifndef NDEBUG
-  const size_t particlesBefore = particles.getNumberOfValidParticesGlobal();
+  const size_t particlesBefore = a_particles.getNumberOfValidParticesGlobal();
 #endif
 
   // Move particles
-  this->K_moveParticlesOneStep(particles, a_voltage, 0);
+  this->K_moveParticlesOneStep(a_particles, a_voltage, 0);
   
 #ifndef NDEBUG
-  const size_t particlesAfter = particles.getNumberOfValidParticesGlobal();
+  const size_t particlesAfter = a_particles.getNumberOfValidParticesGlobal();
   
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("StreamerInceptionStepper::K_moveParticlesTrapezoidal -- logic bust, lost some particles");
@@ -634,20 +632,18 @@ StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(const Real& a_voltage
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_addIntegrationTrapezoidal(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F>::K_addIntegrationTrapezoidal(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::K_addIntegrationTrapezoidal");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::K_addIntegrationTrapezoidal" << endl;
   }
 
-  ParticleContainer<P>& particles = m_particleSolver->getParticles();
-
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(a_particles.getRealm())[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = amrParticles[lvl][dit()].listItems();
+      List<P>& particles = a_particles[lvl][dit()].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
@@ -705,7 +701,7 @@ StreamerInceptionStepper<P, F>::K_moveParticlesSimpsons(ParticleContainer<P>& a_
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_addIntegrationSimpsons(ParticleContainer<P>& a_particles, const Real& a_voltage)
+StreamerInceptionStepper<P, F>::K_addIntegrationSimpsons(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::K_addIntegrationSimpsons");
   if (m_verbosity > 5) {
@@ -839,7 +835,7 @@ StreamerInceptionStepper<P, F>::K_moveParticlesOneStep(ParticleContainer<P>& a_p
 
 template <typename P, typename F>
 bool
-StreamerInceptionStepper<P, F>::keepIntegrating(ParticleContainer<P>& a_particles) const
+StreamerInceptionStepper<P, F>::keepIntegrating(ParticleContainer<P>& a_particles) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::keepIntegrating");
   if (m_verbosity > 5) {
@@ -870,7 +866,7 @@ StreamerInceptionStepper<P, F>::keepIntegrating(ParticleContainer<P>& a_particle
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::rewindParticles(ParticleContainer<P>& a_particles)
+StreamerInceptionStepper<P, F>::rewindParticles(ParticleContainer<P>& a_particles) noexcept
 {
   CH_TIME("StreamerInceptionStepper::rewindParticles");
   if (m_verbosity > 5) {
@@ -898,7 +894,7 @@ StreamerInceptionStepper<P, F>::rewindParticles(ParticleContainer<P>& a_particle
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::resetParticleMass(ParticleContainer<P>& a_particles)
+StreamerInceptionStepper<P, F>::resetParticleMass(ParticleContainer<P>& a_particles) noexcept
 {
   CH_TIME("StreamerInceptionStepper::resetParticleMass");
   if (m_verbosity > 5) {
@@ -924,10 +920,9 @@ StreamerInceptionStepper<P, F>::resetParticleMass(ParticleContainer<P>& a_partic
   }
 }
 
-// Add different integration methods after Simpson's fix.
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::computeDriftTimes()
+StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeDriftTimes");
   if (m_verbosity > 5) {
@@ -986,7 +981,7 @@ StreamerInceptionStepper<P, F>::computeDriftTimes()
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(ParticleContainer<P>& a_particles,
-                                                                   const int&            dxSign)
+                                                                   const int&            a_dxSign) noexcept
 {
   CH_TIME("StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal");
   if (m_verbosity > 5) {
@@ -996,7 +991,7 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(ParticleConta
   const size_t particlesBefore = a_particles.getNumberOfValidParticesGlobal();
 
   // Move particles and remap
-  this->driftTime_moveParticlesOneStep(a_particles, dxSign, 0);
+  this->driftTime_moveParticlesOneStep(a_particles, a_dxSign, 0);
 
   const size_t particlesAfter = a_particles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
@@ -1006,7 +1001,7 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(ParticleConta
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_addIntegrationTrapezoidal(ParticleContainer<P>& a_particles)
+StreamerInceptionStepper<P, F>::driftTime_addIntegrationTrapezoidal(ParticleContainer<P>& a_particles) noexcept
 {
   CH_TIME("StreamerInceptionStepper:driftTime_addIntegrationTrapezoidal");
   if (m_verbosity > 5) {
@@ -1039,7 +1034,7 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationTrapezoidal(ParticleCont
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(ParticleContainer<P>& a_particles, const int& dxSign)
+StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(ParticleContainer<P>& a_particles, const int& a_dxSign) noexcept
 {
   CH_TIME("StreamerInceptionStepper::driftTime_moveparticlesSimpsons");
   if (m_verbosity > 5) {
@@ -1049,10 +1044,10 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(ParticleContaine
   const size_t particlesBefore = a_particles.getNumberOfValidParticesGlobal();
 
   // Step 1: Move particles dx/2 and remap
-  this->driftTime_moveParticlesOneStep(a_particles, dxSign, 1);
+  this->driftTime_moveParticlesOneStep(a_particles, a_dxSign, 1);
 
   // Step 2: Move particles dx/2 and remap
-  this->driftTime_moveParticlesOneStep(a_particles, dxSign, 2);
+  this->driftTime_moveParticlesOneStep(a_particles, a_dxSign, 2);
 
   const size_t particlesAfter = a_particles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
@@ -1062,7 +1057,7 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(ParticleContaine
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons(ParticleContainer<P>& a_particles)
+StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons(ParticleContainer<P>& a_particles) noexcept
 {
   CH_TIME("StreamerInceptionStepper:driftTime_addIntegrationSimpsons");
   if (m_verbosity > 5) {
@@ -1097,8 +1092,8 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons(ParticleContain
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(ParticleContainer<P>& a_particles,
-                                                               const int&            dxSign,
-                                                               const int&            step)
+                                                               const int&            a_dxSign,
+                                                               const int&            a_step) noexcept
 {
   CH_TIME("StreamerInceptionStepper::driftTime_moveParticlesOneStep");
   if (m_verbosity > 5) {
@@ -1132,10 +1127,10 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(ParticleContainer
           RealVect newPosition;
           switch (m_integrationAlgorithm) {
           case IntegrationAlgorithm::Trapezoidal: {
-            if (dxSign == 0) {
+            if (a_dxSign == 0) {
               newPosition = p.position() + normalizedVelocity * dx;
             }
-            else if (dxSign == 1) {
+            else if (a_dxSign == 1) {
               newPosition = p.position() + normalizedVelocity * (-dx);
             }
             else {
@@ -1149,10 +1144,10 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(ParticleContainer
             break;
           }
           case IntegrationAlgorithm::Simpsons: {
-            if (dxSign == 0) {
+            if (a_dxSign == 0) {
               newPosition = p.position() + normalizedVelocity * 0.5 * dx;
             }
-            else if (dxSign == 1) {
+            else if (a_dxSign == 1) {
               newPosition = p.position() + normalizedVelocity * 0.5 * (-dx);
             }
             else {
@@ -1160,11 +1155,11 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(ParticleContainer
             }
 
             // Store values to particle for subsequent integration
-            if (step == 1) {
+            if (a_step == 1) {
               p.template scalar<1>() = dx;
               p.template scalar<2>() = Emagnitude;
             }
-            else if (step == 2) {
+            else if (a_step == 2) {
               p.template scalar<3>() = Emagnitude;
             }
             else {
@@ -1199,11 +1194,11 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(ParticleContainer
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::computeInceptionVoltage()
+StreamerInceptionStepper<P, F>::computeInceptionVoltageVolume() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeInceptionVoltage");
+  CH_TIME("StreamerInceptionStepper::computeInceptionVoltageVolume");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeInceptionVoltage" << endl;
+    pout() << "StreamerInceptionStepper::computeInceptionVoltageVolume" << endl;
   }
 
   // TLDR: This routine runs through all the K-values in each cell and estimates the
@@ -1213,7 +1208,7 @@ StreamerInceptionStepper<P, F>::computeInceptionVoltage()
     DataOps::setValue(m_inceptionVoltage, std::numeric_limits<Real>::quiet_NaN());
 
     MayDay::Warning(
-      "StreamerInceptionStepper::computeInceptionVoltage -- not enough voltages for estimating inception voltage");
+      "StreamerInceptionStepper::computeInceptionVoltageVolume -- not enough voltages for estimating inception voltage");
   }
   else {
 
@@ -1281,8 +1276,44 @@ StreamerInceptionStepper<P, F>::computeInceptionVoltage()
 }
 
 template <typename P, typename F>
+Real
+StreamerInceptionStepper<P, F>::computeInceptionVoltage() const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeInceptionVoltage");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeInceptionVoltage" << endl;
+  }
+
+  Real Vinc = std::numeric_limits<Real>::quiet_NaN();
+  
+  if (m_voltageSweeps.size() < 2) {
+    MayDay::Warning(
+      "StreamerInceptionStepper::computeInceptionVoltageVolume -- not enough voltages for estimating inception voltage");
+  }
+  else {
+
+    constexpr int comp = 0;
+
+    auto interpVinc = [&Vinc, &K = this->m_maxKValues, &Kinc = this->m_inceptionK, &V = this->m_voltageSweeps]() -> Real {
+      for (size_t i = 0; i < K.size() - 1; i++) {
+
+        if (K[i] <= Kinc && K[i + 1] > Kinc) {
+          Vinc = V[i] + (Kinc - K[i]) * (V[i + 1] - V[i]) / (K[i + 1] - K[i]);
+
+          break;
+        }
+      }
+    };
+
+    interpVinc();
+  }
+
+  return Vinc;
+}
+
+template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::computeCriticalVolume()
+StreamerInceptionStepper<P, F>::computeCriticalVolume() noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeCriticalVolume");
   if (m_verbosity > 5) {
@@ -1336,7 +1367,7 @@ StreamerInceptionStepper<P, F>::computeCriticalVolume()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::printReport()
+StreamerInceptionStepper<P, F>::printReport() const noexcept
 {
   CH_TIME("StreamerInceptionStepper::printReport");
   if (m_verbosity > 5) {
@@ -1346,6 +1377,22 @@ StreamerInceptionStepper<P, F>::printReport()
   auto printElement = [](const Real el) -> void {
     std::cout << left << setw(15) << setfill(' ') << el;
   };
+
+  // Compute the inception voltage.
+#ifdef CH_MPI
+  if(procID() == 0) {
+#endif
+    const Real Uinc = this->computeInceptionVoltage();      
+    
+    if(std::isnan(Uinc)) {
+      std::cout << "# Could not compute inception voltage\n";
+    }
+    else {
+      std::cout << "# Inception voltage = "<< Uinc << "\n";
+    }
+#ifdef CH_MPI
+  }
+#endif
 
 #ifdef CH_MPI
   if (procID() == 0) {
@@ -1373,12 +1420,14 @@ template <typename P, typename F>
 bool
 StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect& a_pos,
                                                     const RealVect& a_probLo,
-                                                    const RealVect& a_probHi)
+                                                    const RealVect& a_probHi) const noexcept
 {
+#ifndef NDEBUG
   CH_TIME("StreamerInceptionStepper::particleOutsideGrid");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::particleOutsideGrid" << endl;
   }
+#endif
 
   bool isOutside = false;
 
@@ -1393,12 +1442,14 @@ StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect& a_pos,
 
 template <typename P, typename F>
 bool
-StreamerInceptionStepper<P, F>::particleInsideElectrode(const RealVect& a_pos)
+StreamerInceptionStepper<P, F>::particleInsideElectrode(const RealVect& a_pos) const noexcept
 {
+#ifndef NDEBUG  
   CH_TIME("StreamerInceptionStepper::particleInsideElectrode");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::particleInsideElectrode" << endl;
   }
+#endif
 
   const RefCountedPtr<BaseIF>& implicitFunction = m_amr->getBaseImplicitFunction(m_phase);
 
