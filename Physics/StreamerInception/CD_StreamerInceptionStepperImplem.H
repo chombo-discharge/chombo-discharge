@@ -545,13 +545,13 @@ StreamerInceptionStepper<P, F>::postInitialize()
   this->solveDriftTimes();
   
   // Interpolate between K values to find voltage giving K_inception and store values in m_VInception
-  //this->solveVInception();
+  this->solveVInception();
 
   // Compute critical volume of K values for each voltage
-  //this->solveCriticalVolume();
+  this->solveCriticalVolume();
 
   // Print voltages, max K values, and critical volumes to terminal
-  //this->printToTerminal();
+  this->printToTerminal();
 }
 
 
@@ -575,27 +575,27 @@ StreamerInceptionStepper<P, F>::solveKValues() {
     // Update velocities and starting mass to zero.
     m_particleSolver->interpolateVelocities();     
 
-    this->resetParticleMass(amrParticles);
+    this->resetParticleMass();
 
     switch (m_integrationAlgorithm) {
     case IntegrationAlgorithm::Trapezoidal: {
-      while (this->keepGoing(amrParticles)) {
+      while (this->keepGoing()) {
         // Check integration flag and move particles if true
-        this->K_moveParticlesTrapezoidal(amrParticles, m_voltageSweeps[i]);
+        this->K_moveParticlesTrapezoidal(m_voltageSweeps[i]);
 
         // Add integration parts to p.mass()
-        this->K_addIntegrationTrapezoidal(amrParticles, m_voltageSweeps[i]);
+        this->K_addIntegrationTrapezoidal(m_voltageSweeps[i]);
       }
       
       break;
     }
     case IntegrationAlgorithm::Simpsons: {
-      while (this->keepGoing(amrParticles)) {
+      while (this->keepGoing()) {
         // Check integration flag and move particles if true
-        this->K_moveParticlesSimpsons(amrParticles, m_voltageSweeps[i]);
+        this->K_moveParticlesSimpsons(m_voltageSweeps[i]);
 
         // Add integration parts to p.mass()
-        this->K_addIntegrationSimpsons(amrParticles, m_voltageSweeps[i]);
+        this->K_addIntegrationSimpsons(m_voltageSweeps[i]);
       }
 
       break;
@@ -606,13 +606,13 @@ StreamerInceptionStepper<P, F>::solveKValues() {
     }
 
     // Move particles back to initial position. This includes remapping.
-    this->moveParticlesInitialPosition(amrParticles);
+    this->moveParticlesInitialPosition();
 
     // Deposit
     m_particleSolver->deposit(K);
 
     // Set negative K values to 0
-    this->zeroNegativeKValues(K, amrParticles);              
+    this->zeroNegativeKValues(K);              
 	      
     // Get max K value
     Real maxK;
@@ -629,17 +629,19 @@ StreamerInceptionStepper<P, F>::solveKValues() {
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage)
+StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(const Real& voltage)
 {
   CH_TIME("StreamerInceptionStepper::K_moveParticlesTrapezoidal");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::K_moveParticlesTrapezoidal" << endl;
   }
 
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();  
+
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
 
   // Move particles and remap
-  this->K_moveParticlesOneStep(amrParticles, voltage, 0);
+  this->K_moveParticlesOneStep(voltage, 0);
   
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
@@ -649,12 +651,14 @@ StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(ParticleContainer<P>&
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage)
+StreamerInceptionStepper<P, F>::K_addIntegrationTrapezoidal(const Real& voltage)
 {
   CH_TIME("StreamerInceptionStepper::K_addIntegrationTrapezoidal");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::K_addIntegrationTrapezoidal" << endl;
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
@@ -683,20 +687,22 @@ StreamerInceptionStepper<P, F>::K_addIntegrationTrapezoidal(ParticleContainer<P>
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage)
+StreamerInceptionStepper<P, F>::K_moveParticlesSimpsons(const Real& voltage)
 {
   CH_TIME("StreamerInceptionStepper::K_moveParticlesSimpsons");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::K_moveParticlesSimpsons" << endl;
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
   
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
 
   // Step 1: Move particles dx/2 and remap
-  this->K_moveParticlesOneStep(amrParticles, voltage, 1);
+  this->K_moveParticlesOneStep(voltage, 1);
 
   // Step 2: Move particles dx/2 and remap
-  this->K_moveParticlesOneStep(amrParticles, voltage, 2);
+  this->K_moveParticlesOneStep(voltage, 2);
   
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
@@ -707,12 +713,14 @@ StreamerInceptionStepper<P, F>::K_moveParticlesSimpsons(ParticleContainer<P>& am
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage)
+StreamerInceptionStepper<P, F>::K_addIntegrationSimpsons(const Real& voltage)
 {
   CH_TIME("StreamerInceptionStepper::K_addIntegrationSimpsons");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::K_addIntegrationSimpsons" << endl;
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
@@ -742,12 +750,14 @@ StreamerInceptionStepper<P, F>::K_addIntegrationSimpsons(ParticleContainer<P>& a
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const Real& voltage, const int& step)
+StreamerInceptionStepper<P, F>::K_moveParticlesOneStep(const Real& voltage, const int& step)
 {
   CH_TIME("StreamerInceptionStepper::K_moveParticlesOneStep");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::K_moveParticlesOneStep" << endl;
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
   // Get end points of grid
   const RealVect probLo = m_amr->getProbLo();
@@ -834,12 +844,14 @@ StreamerInceptionStepper<P, F>::K_moveParticlesOneStep(ParticleContainer<P>& amr
 
 template <typename P, typename F>
 bool
-StreamerInceptionStepper<P, F>::keepGoing(ParticleContainer<P>& amrParticles) const
+StreamerInceptionStepper<P, F>::keepGoing() const
 {
   CH_TIME("StreamerInceptionStepper::keepGoing");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::keepGoing" << endl;
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
   // If keepGoing > 0 then we keep integrating. Otherwise we stop.
   int keepGoing = -1;
@@ -865,12 +877,14 @@ StreamerInceptionStepper<P, F>::keepGoing(ParticleContainer<P>& amrParticles) co
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P>& amrParticles)
+StreamerInceptionStepper<P, F>::moveParticlesInitialPosition()
 {
   CH_TIME("StreamerInceptionStepper::moveParticlesInitialPosition");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::moveParticlesInitialPosition" << endl;
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
@@ -893,12 +907,14 @@ StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::zeroNegativeKValues(EBAMRCellData& K, ParticleContainer<P>& amrParticles)
+StreamerInceptionStepper<P, F>::zeroNegativeKValues(EBAMRCellData& K)
 {
   CH_TIME("StreamerInceptionStepper::zeroNegativeKValues");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::zeroNegativeKValues" << endl;
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {      
     LevelData<EBCellFAB>& levelData = *K[lvl];    
@@ -943,12 +959,14 @@ StreamerInceptionStepper<P, F>::zeroNegativeKValues(EBAMRCellData& K, ParticleCo
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::resetParticleMass(ParticleContainer<P>& amrParticles)
+StreamerInceptionStepper<P, F>::resetParticleMass()
 {
   CH_TIME("StreamerInceptionStepper::resetParticleMass");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::resetParticleMass" << endl;
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl            = m_amr->getGrids(amrParticles.getRealm())[lvl];
@@ -989,28 +1007,28 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
     
     ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();    
     
-    this->resetParticleMass(amrParticles);  
+    this->resetParticleMass();  
 
     // Compute drift time integrals with input-based algorithm. 
     switch (m_integrationAlgorithm) {
     case IntegrationAlgorithm::Trapezoidal: {
-      while (this->keepGoing(amrParticles)) {
+      while (this->keepGoing()) {
 	// Check integration flag and move particles if true
-	this->driftTime_moveParticlesTrapezoidal(amrParticles, i);
+	this->driftTime_moveParticlesTrapezoidal(i);
 
 	// Add integration parts to p.mass()
-	this->driftTime_addIntegrationTrapezoidal(amrParticles);
+	this->driftTime_addIntegrationTrapezoidal();
       }
 
       break;
     }
     case IntegrationAlgorithm::Simpsons: {
-      while (this->keepGoing(amrParticles)) {
+      while (this->keepGoing()) {
 	// Check integration flag and move particles if true	
-	this->driftTime_moveParticlesSimpsons(amrParticles, i);
+	this->driftTime_moveParticlesSimpsons(i);
 	
 	// Add integration parts to p.mass()
-	this->driftTime_addIntegrationSimpsons(amrParticles);
+	this->driftTime_addIntegrationSimpsons();
       }
 
       break;
@@ -1021,7 +1039,7 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
     }
     
     // Move particles back to initial position. This includes remapping.
-    this->moveParticlesInitialPosition(amrParticles);
+    this->moveParticlesInitialPosition();
   
     // Deposit and copy t values to m_driftTimes.
     m_particleSolver->deposit(t);
@@ -1034,16 +1052,18 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const int& dxSign) {
+StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(const int& dxSign) {
   CH_TIME("StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal" << endl;
   }
 
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();  
 
   // Move particles and remap
-  this->driftTime_moveParticlesOneStep(amrParticles, dxSign, 0);
+  this->driftTime_moveParticlesOneStep(dxSign, 0);
 
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
@@ -1054,11 +1074,14 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(ParticleConta
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles){
+StreamerInceptionStepper<P, F>::driftTime_addIntegrationTrapezoidal()
+{
   CH_TIME("StreamerInceptionStepper:driftTime_addIntegrationTrapezoidal");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::driftTime_addIntegrationTrapezoidal" << endl;
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
@@ -1086,19 +1109,21 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationTrapezoidal(ParticleCont
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const int& dxSign) {
+StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(const int& dxSign) {
   CH_TIME("StreamerInceptionStepper::driftTime_moveparticlesSimpsons");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::driftTime_moveparticlesSimpsons" << endl;
   }
 
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();  
 
   // Step 1: Move particles dx/2 and remap
-  this->driftTime_moveParticlesOneStep(amrParticles, dxSign, 1);
+  this->driftTime_moveParticlesOneStep(dxSign, 1);
 
   // Step 2: Move particles dx/2 and remap
-  this->driftTime_moveParticlesOneStep(amrParticles, dxSign, 2);
+  this->driftTime_moveParticlesOneStep(dxSign, 2);
   
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
@@ -1108,11 +1133,14 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(ParticleContaine
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons(ParticleContainer<P>& amrParticles) {
+StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons()
+{
   CH_TIME("StreamerInceptionStepper:driftTime_addIntegrationSimpsons");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::driftTime_addIntegrationSimpsons" << endl;
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
@@ -1141,12 +1169,14 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons(ParticleContain
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const int& dxSign, const int& step)
+StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(const int& dxSign, const int& step)
 {
   CH_TIME("StreamerInceptionStepper::driftTime_moveParticlesOneStep");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::driftTime_moveParticlesOneStep" << endl;    
   }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();  
@@ -1288,11 +1318,13 @@ StreamerInceptionStepper<P, F>::solveVInception() {
       List<P>& particles = levelParticles[dit()].listItems();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
+	// m_VInception[lvl][dit](iv,0)
+	
 	Real V_inception = 0.0;
 	bool addP = false;
        
 	// Calculate V_inception and draw particle only if largest K > 0.1
-	if (abs(regularData(iv, m_voltageSweeps.size()-1)) > 0.1) {
+	if ( abs(regularData(iv, m_voltageSweeps.size()-1)) > 0.1 ) {
 	  addP = true;
 	  this->computeVInceptionCell(regularData, iv, V_inception);
 	}
@@ -1315,7 +1347,7 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 	}	
 
 	// Add particle if addP
-	if ( addP && validCells(iv) ) {	  
+	if ( addP && validCells(iv) ) {
 	  this->addParticleIrregular(particles, vof, ebisbox, dx, V_inception);
 	}	
       };
@@ -1354,7 +1386,7 @@ StreamerInceptionStepper<P, F>::computeVInceptionCell(const BaseFab<Real>& regul
     this->interpolate(m_voltageSweeps[0], m_voltageSweeps[1], regularData(iv, 0), regularData(iv, 1), m_KInception, V_inception);
   }
 
-  // If inception greater than greatest K value, interpolate with the two largets K values
+  // If inception greater than greatest K value, interpolate with the two largest K values
   else if (regularData(iv, m_voltageSweeps.size() - 1) <= m_KInception) {
     const int i1 = m_voltageSweeps.size() - 2;
     const int i2 = m_voltageSweeps.size() - 1;
@@ -1372,7 +1404,7 @@ StreamerInceptionStepper<P, F>::computeVInceptionCell(const BaseFab<Real>& regul
     }
   }
   
-  // Warning if V_inception<1 - there's probably something wrong, maybe too few voltage_steps
+  // Warning if V_inception<1 - there's probably something wrong, perhaps too few voltage_steps
   if (V_inception < 1) {
     MayDay::Error("StreamerInceptionStepper::computeVInceptionCell -- V_inception < 1. Something's probably wrong.");
   }

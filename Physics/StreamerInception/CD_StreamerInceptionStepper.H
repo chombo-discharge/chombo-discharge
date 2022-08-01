@@ -111,75 +111,66 @@ namespace Physics {
       solveKValues();
       
       /*!
-	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] amrParticles Particles of m_particleSolver
+	@brief K integral: Move particles as long as integration isn't 
 	@param[in] voltage Voltage multiplier
       */
       void
-      K_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage); 
+      K_moveParticlesTrapezoidal(const Real& voltage); 
 
       /*!
 	@brief K integral: Add integration parts after particles move
-	@param[in] amrParticles Particles of m_particleSolver
 	@param[in] voltage Voltage multiplier
       */
       void
-      K_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage);
+      K_addIntegrationTrapezoidal(const Real& voltage);
 
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] amrParticles Particles of m_particleSolver
 	@param[in] voltage Voltage multiplier
       */
       void
-      K_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
+      K_moveParticlesSimpsons(const Real& voltage);
 
       /*!
 	@brief K integral: Add integration parts after particles move
-	@param[in] amrParticles Particles of m_particleSolver
 	@param[in] voltage Voltage multiplier
       */
       void
-      K_addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
+      K_addIntegrationSimpsons(const Real& voltage);
 
       /*!
 	@brief K integral: Move particles one step according to the integration algorithm
-	@param[in] amrParticles Particles of m_particleSolver
 	@param[in] voltage Voltage multiplier
 	@param[in] step Step number for Simpsons' (doesn't affect Trapezoidal)
       */
       void
-      K_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const Real& voltage,  const int& step);
+      K_moveParticlesOneStep(const Real& voltage,  const int& step);
       
       /*!
-	@brief 
-	@param[in] amrParticles  Particles of m_particleSolver
+	@brief Check if integration shall continue by checking all flags for keep integrating
 	@param[out] true if integration shall continue, false if not
       */
       bool
-      keepGoing(ParticleContainer<P>& amrParticles) const;
+      keepGoing() const;
 
       /*!
 	@brief Move particles back to their original position after integration finished
-	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      moveParticlesInitialPosition(ParticleContainer<P>& amrParticles);
+      moveParticlesInitialPosition();
 
       /*!
 	@brief Set negative K values to 0
 	@param[in] K  K values for a specific voltage
-	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      zeroNegativeKValues(EBAMRCellData& K, ParticleContainer<P>& amrParticles);
+      zeroNegativeKValues(EBAMRCellData& K);
 
       /*!
 	@brief Set all particles' masses to 0
-	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      resetParticleMass(ParticleContainer<P>& amrParticles);
+      resetParticleMass();
 
       /*!
 	@brief Calculate particles' drift times until inside electrode or outside grid
@@ -189,42 +180,37 @@ namespace Physics {
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add time step to particles' drift time tracker
-	@param[in] amrParticles  Particles of m_particleSolver
 	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
      */
       void
-      driftTime_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const int& dxSign);
+      driftTime_moveParticlesTrapezoidal(const int& dxSign);
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add integration parts after particles move
-	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      driftTime_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles);
+      driftTime_addIntegrationTrapezoidal();
 
       /*!
 	@brief Drift time integral (Simpson's method): Add time step to particles' drift time tracker
-	@param[in] amrParticles  Particles of m_particleSolver
 	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
       */
       void
-      driftTime_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const int& dxSign);
+      driftTime_moveParticlesSimpsons(const int& dxSign);
 
       /*!
 	@brief Drift time integral (Simpson's method): Add integration parts after particles move
-	@param[in] amrParticles  Particles of m_particleSolver
       */
       void
-      driftTime_addIntegrationSimpsons(ParticleContainer<P>& amrParticles);
+      driftTime_addIntegrationSimpsons();
 
       /*!
 	@brief Drift time integral: Move particles one step according to the integration algorithm
-	@param[in] amrParticles  Particles of m_particleSolver
 	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
 	@param[in] step Step number for Simpsons' (doesn't affect Trapezoidal)
       */
       void
-      driftTime_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const int& dxSign, const int& step);
+      driftTime_moveParticlesOneStep(const int& dxSign, const int& step);
 
       /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_VInception
