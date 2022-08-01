@@ -103,12 +103,12 @@ StreamerInceptionStepper<P, F>::allocate()
   m_fieldSolver->allocateInternals();
   m_particleSolver->allocate();
 
-  m_amr->allocate(m_velocity, m_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_KValues, m_realm, m_phase, m_voltageSweeps.size());
-  m_amr->allocate(m_VInception, m_realm, m_phase, 1);
-  m_amr->allocate(m_driftTimes, m_realm, m_phase, 2);
-  
-  DataOps::setValue(m_KValues, 0.0);  
+  m_amr->allocate(m_velocity,         m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_inceptionIntegral,          m_realm, m_phase, m_voltageSweeps.size());
+  m_amr->allocate(m_inceptionVoltage, m_realm, m_phase, 1);
+  m_amr->allocate(m_driftTimes,       m_realm, m_phase, 2);
+
+  DataOps::setValue(m_inceptionIntegral, 0.0);  
 }
 
 template <typename P, typename F>
@@ -135,9 +135,6 @@ StreamerInceptionStepper<P, F>::initialData()
   m_amr->averageDown(m_velocity, m_realm, m_phase);
   m_amr->interpGhost(m_velocity, m_realm, m_phase);
 
-  m_particleSolver->setVelocity(m_velocity);
-
-  this->initialParticles();
 }
 
 template <typename P, typename F>
@@ -206,7 +203,6 @@ StreamerInceptionStepper<P, F>::parseOptions()
   }  
 }
 
-// Not used in this program
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::parseRuntimeOptions()
@@ -238,6 +234,8 @@ StreamerInceptionStepper<P, F>::readCheckpointData(HDF5Handle& a_handle, const i
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::readCheckpointData" << endl;
   }
+
+  MayDay::Error("StreamerInceptionStepper::writeCheckpointData -- checkpoint-restart not supported. Use Driver.restart=0");  
 }
 #endif
 
@@ -264,7 +262,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Interval srcInterval(0, m_voltageSweeps.size() - 1); 
     const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1); 
-    m_KValues[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    m_inceptionIntegral[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
   }
   a_icomp += m_voltageSweeps.size();
 
@@ -291,7 +289,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Interval srcInterval(0, 0);
     const Interval dstInterval(a_icomp, a_icomp);
-    m_VInception[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    m_inceptionVoltage[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
   }
   a_icomp += 1;
 
@@ -422,45 +420,14 @@ StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::setVoltage(const Real a_voltage) noexcept
+StreamerInceptionStepper<P, F>::setDetachmentRate(const std::function<Real(const Real& E)>& a_detachmentRate) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::setVoltage");
+  CH_TIME("StreamerInceptionStepper::setDetachmentRate");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::setVoltage" << endl;
+    pout() << "StreamerInceptionStepper::setDetachmentRate" << endl;
   }
 
-  CH_assert(!m_fieldSolver.isNull());
-
-  // Give field solver a constant voltage.
-  m_fieldSolver->setVoltage([a_voltage](const Real& a_time) -> Real { return a_voltage; });
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::printStepReport()
-{
-  CH_TIME("StreamerInceptionStepper::printStepReport");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::printStepReport" << endl;
-  }
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::scaleElectrostatics(const Real& a_scale) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::scaleElectrostatics");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::scaleElectrostatics" << endl;
-  }
-
-  CH_assert(!m_fieldSolver.isNull());
-
-  MFAMRCellData& potential     = m_fieldSolver->getPotential();
-  MFAMRCellData& electricField = m_fieldSolver->getElectricField();
-
-  DataOps::scale(potential, a_scale);
-  DataOps::scale(electricField, a_scale);
+  m_detachmentRate = a_detachmentRate;
 }
 
 template <typename P, typename F>
@@ -515,9 +482,12 @@ StreamerInceptionStepper<P, F>::initialParticles()
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
 
+	// Set mass to zero and do a backup of the initial position (we need to rewind particles
+	// back later on). The scalar<0> flag is the flag we use for start-stop criteria for the
+	// particle integration. 
         p.mass()               = 0.0;
         p.template vect<0>()   = p.position();
-        p.template scalar<0>() = 1.0;  // flag for keep integrating
+        p.template scalar<0>() = 1.0;
       }
     }
   }
@@ -538,14 +508,19 @@ StreamerInceptionStepper<P, F>::postInitialize()
     pout() << "StreamerInceptionStepper::postInitialize" << endl;
   }
 
-  // Solve K integral for each particle in each voltage and store K values in m_KValues
-  this->solveKValues();
+  // Initialize the particle solver. 
+  m_particleSolver->setVelocity(m_velocity);
+  
+  this->initialParticles();  
+
+  // Solve K integral for each particle in each voltage and store K values in m_inceptionIntegral
+  this->solveInceptionIntegral();
 
   // Solve drift time integral in both directions and store values in m_driftTimes
   this->solveDriftTimes();
   
-  // Interpolate between K values to find voltage giving K_inception and store values in m_VInception
-  //this->solveVInception();
+  // Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage
+  this->computeInceptionVoltage();
 
   // Compute critical volume of K values for each voltage
   //this->solveCriticalVolume();
@@ -554,13 +529,12 @@ StreamerInceptionStepper<P, F>::postInitialize()
   //this->printToTerminal();
 }
 
-
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::solveKValues() {
-  CH_TIME("StreamerInceptionStepper::solveKValues");
+StreamerInceptionStepper<P, F>::solveInceptionIntegral() {
+  CH_TIME("StreamerInceptionStepper::solveInceptionIntegral");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::solveKValues" << endl;
+    pout() << "StreamerInceptionStepper::solveInceptionIntegral" << endl;
   }
 
   // Something transient storage we can deposit into. 
@@ -580,10 +554,9 @@ StreamerInceptionStepper<P, F>::solveKValues() {
     switch (m_integrationAlgorithm) {
     case IntegrationAlgorithm::Trapezoidal: {
       while (this->keepGoing(amrParticles)) {
-        // Check integration flag and move particles if true
+	
+        // Move particles and add integration contribution for the current step. 
         this->K_moveParticlesTrapezoidal(amrParticles, m_voltageSweeps[i]);
-
-        // Add integration parts to p.mass()
         this->K_addIntegrationTrapezoidal(amrParticles, m_voltageSweeps[i]);
       }
       
@@ -591,38 +564,41 @@ StreamerInceptionStepper<P, F>::solveKValues() {
     }
     case IntegrationAlgorithm::Simpsons: {
       while (this->keepGoing(amrParticles)) {
-        // Check integration flag and move particles if true
-        this->K_moveParticlesSimpsons(amrParticles, m_voltageSweeps[i]);
 
-        // Add integration parts to p.mass()
+        // Move particles and add integration contribution for the current step. 	
+        this->K_moveParticlesSimpsons(amrParticles, m_voltageSweeps[i]);
         this->K_addIntegrationSimpsons(amrParticles, m_voltageSweeps[i]);
       }
 
       break;
     }
     default: {
-      MayDay::Error("StreamerInceptionStepper::solveKValues -- logic bust");
+      MayDay::Error("StreamerInceptionStepper::solveInceptionIntegral -- logic bust");
+
+      break;
     }
     }
 
     // Move particles back to initial position. This includes remapping.
-    this->moveParticlesInitialPosition(amrParticles);
+    this->rewindParticles(amrParticles);
 
-    // Deposit
+    // Deposit particles on the mesh.
     m_particleSolver->deposit(K);
 
-    // Set negative K values to 0
+    // Set negative K values to 0. 
     this->zeroNegativeKValues(K, amrParticles);              
 	      
-    // Get max K value
-    Real maxK;
-    Real minK;
+    // Get max K value. 
+    Real maxK = -std::numeric_limits<Real>::max();
+    Real minK =  std::numeric_limits<Real>::max();
+    
     DataOps::getMaxMin(maxK, minK, K, 0);
+    
     m_maxKValues.push_back(maxK);
 
-    // Copy K values to m_KValues
+    // Copy K values to m_inceptionIntegral so we can plot them later. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      K[lvl]->copyTo(Interval(0,0), *m_KValues[lvl], Interval(i,i));
+      K[lvl]->copyTo(Interval(0,0), *m_inceptionIntegral[lvl], Interval(i,i));
     }
   }
 }
@@ -865,11 +841,11 @@ StreamerInceptionStepper<P, F>::keepGoing(ParticleContainer<P>& amrParticles) co
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::moveParticlesInitialPosition(ParticleContainer<P>& amrParticles)
+StreamerInceptionStepper<P, F>::rewindParticles(ParticleContainer<P>& amrParticles)
 {
-  CH_TIME("StreamerInceptionStepper::moveParticlesInitialPosition");
+  CH_TIME("StreamerInceptionStepper::rewindParticles");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::moveParticlesInitialPosition" << endl;
+    pout() << "StreamerInceptionStepper::rewindParticles" << endl;
   }
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -1021,7 +997,7 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
     }
     
     // Move particles back to initial position. This includes remapping.
-    this->moveParticlesInitialPosition(amrParticles);
+    this->rewindParticles(amrParticles);
   
     // Deposit and copy t values to m_driftTimes.
     m_particleSolver->deposit(t);
@@ -1240,105 +1216,100 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(ParticleContainer
   m_particleSolver->interpolateVelocities();
 }
 
-
-
-/* ISSUES: 
-   - V_inception on edge of electrode (irregular). Remove? This is also true for K-values.
-   - Visualization: logarithmic scale preferable, but not allowed by Visit because of 0 values (e.g. electrode)
-*/
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::solveVInception() {
-  CH_TIME("StreamerInceptionStepper::solveVInception");
+StreamerInceptionStepper<P, F>::computeInceptionVoltage() {
+  CH_TIME("StreamerInceptionStepper::computeInceptionVoltage");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::solveVInception" << endl;
+    pout() << "StreamerInceptionStepper::computeInceptionVoltage" << endl;
   }
 
-  // Only solve if there are at least two voltages in m_voltageSweeps.
+  // TLDR: This routine runs through all the K-values in each cell and estimates the
+  //       inception voltage using linear interpolation. 
+
   if (m_voltageSweeps.size() < 2) {
-    if (procID() == 0) {
-      std::cout << "V_inception not solved -- need at least two voltages" << endl;
-    }
-    return;
+    MayDay::Warning("StreamerInceptionStepper::computeInceptionVoltage -- not enough voltages for estimating inception voltage");
+    
+    DataOps::setValue(m_inceptionVoltage, std::numeric_limits<Real>::quiet_NaN());
   }
+  else {
+    ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+    amrParticles.clearParticles();
 
-  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-  amrParticles.clearParticles();
-
-  // Iterate through m_KValues data and calculate V_inception at each point
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {      
-    LevelData<EBCellFAB>& levelData = *m_KValues[lvl];    
-    const DisjointBoxLayout& dbl = levelData.disjointBoxLayout();
+    // Iterate through m_inceptionIntegral data and calculate V_inception at each point
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {      
+      LevelData<EBCellFAB>& levelData = *m_inceptionIntegral[lvl];    
+      const DisjointBoxLayout& dbl = levelData.disjointBoxLayout();
     
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(amrParticles.getRealm(), m_phase)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(amrParticles.getRealm(), m_phase)[lvl];
 
-    const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];    
+      const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];    
 
-    const Real dx = m_amr->getDx()[lvl];
+      const Real dx = m_amr->getDx()[lvl];
     
-    ParticleData<P>& levelParticles = amrParticles[lvl]; 
+      ParticleData<P>& levelParticles = amrParticles[lvl]; 
     
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()]; 
-      const BaseFab<bool>& validCells = validCellsLD[dit()];      
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+	const EBISBox&       ebisbox    = ebisl[dit()]; 
+	const BaseFab<bool>& validCells = validCellsLD[dit()];      
       
-      const EBCellFAB& patchData = levelData[dit()];  
-      const BaseFab<Real>& regularData = patchData.getSingleValuedFAB();
+	const EBCellFAB& patchData = levelData[dit()];  
+	const BaseFab<Real>& regularData = patchData.getSingleValuedFAB();
 
-      List<P>& particles = levelParticles[dit()].listItems();
+	List<P>& particles = levelParticles[dit()].listItems();
 
-      auto regularKernel = [&](const IntVect& iv) -> void {
-	Real V_inception = 0.0;
-	bool addP = false;
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  Real V_inception = 0.0;
+	  bool addP = false;
        
-	// Calculate V_inception and draw particle only if largest K > 0.1
-	if (abs(regularData(iv, m_voltageSweeps.size()-1)) > 0.1) {
-	  addP = true;
-	  this->computeVInceptionCell(regularData, iv, V_inception);
-	}
+	  // Calculate V_inception and draw particle only if largest K > 0.1
+	  if (abs(regularData(iv, m_voltageSweeps.size()-1)) > 0.1) {
+	    addP = true;
+	    this->computeVInceptionCell(regularData, iv, V_inception);
+	  }
 	
-	// Add particle if addP
-	if ( addP && validCells(iv, 0) && ebisbox.isRegular(iv) ) {
-	  this->addParticleRegular(particles, iv, dx, V_inception);
-	}	        
-      };
+	  // Add particle if addP
+	  if ( addP && validCells(iv, 0) && ebisbox.isRegular(iv) ) {
+	    this->addParticleRegular(particles, iv, dx, V_inception);
+	  }	        
+	};
 
-      auto irregularKernel = [&](const VolIndex& vof) -> void {
-	Real V_inception = 0.0;
-	const IntVect iv = vof.gridIndex();
-	bool addP = true;
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
+	  Real V_inception = 0.0;
+	  const IntVect iv = vof.gridIndex();
+	  bool addP = true;
 
-	// Calculate V_inception and draw particle only if largest K > 0.1
-	if (abs(regularData(iv, m_voltageSweeps.size()-1)) > 0.1) {
-	  addP = true;
-	  this->computeVInceptionCell(regularData, iv, V_inception);
-	}	
+	  // Calculate V_inception and draw particle only if largest K > 0.1
+	  if (abs(regularData(iv, m_voltageSweeps.size()-1)) > 0.1) {
+	    addP = true;
+	    this->computeVInceptionCell(regularData, iv, V_inception);
+	  }	
 
-	// Add particle if addP
-	if ( addP && validCells(iv) ) {	  
-	  this->addParticleIrregular(particles, vof, ebisbox, dx, V_inception);
-	}	
-      };
+	  // Add particle if addP
+	  if ( addP && validCells(iv) ) {	  
+	    this->addParticleIrregular(particles, vof, ebisbox, dx, V_inception);
+	  }	
+	};
       
-      const Box cellBox = dbl[dit()];      
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];      
+	const Box cellBox = dbl[dit()];      
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];      
 
-      BoxLoops::loop(cellBox, regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);      
+	BoxLoops::loop(cellBox, regularKernel);
+	BoxLoops::loop(vofit, irregularKernel);      
+      }
     }
+
+
+    // Remapping
+    m_particleSolver->remap();
+
+    // Remove particles inside the EB
+    m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+
+    // Deposit
+    m_particleSolver->deposit(m_inceptionVoltage);
   }
-
-  // Remapping
-  m_particleSolver->remap();
-
-  // Remove particles inside the EB
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
-
-  // Deposit
-  m_particleSolver->deposit(m_VInception);
 }
-
-
 
 template <typename P, typename F>
 void
@@ -1392,7 +1363,6 @@ StreamerInceptionStepper<P, F>::interpolate(const Real& x1, const Real& x2, cons
 
   y = ((x - y0) / b);
 }
-
  
 template <typename P, typename F>
 void
@@ -1440,7 +1410,7 @@ StreamerInceptionStepper<P, F>::solveCriticalVolume() {
     Real criticalVolume = 0.0;
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
-      LevelData<EBCellFAB>& levelData = *m_KValues[lvl];    
+      LevelData<EBCellFAB>& levelData = *m_inceptionIntegral[lvl];    
       const DisjointBoxLayout& dbl = levelData.disjointBoxLayout();
     
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];

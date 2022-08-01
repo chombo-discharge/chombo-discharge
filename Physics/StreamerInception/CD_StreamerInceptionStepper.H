@@ -35,8 +35,9 @@ namespace Physics {
     };
 
     /*!
-      @brief Class for volume evaluation of the streamer inception integral. 
-      @details P is the tracer particle type and F is the field solver type. 
+      @brief Class for streamer inception integral evaluations. 
+      @details P is the tracer particle type and F is the field solver type. Note that the integration algorithm requires some transient storage
+      on each particle (such as the previous position). This is defined in the TracerParticle template arguments. 
     */
     template <typename P = TracerParticle<4, 1>, typename F = FieldSolverMultigrid>
     class StreamerInceptionStepper : public TimeStepper
@@ -93,23 +94,241 @@ namespace Physics {
       initialData() override;
 
       /*!
-	@brief Distribute particles in every grid cell
-      */
-      void
-      initialParticles();
-
-      /*!
 	@brief Perform any post-initialization steps. 
+	@details This performs the inception integral evaluation and all that. 
       */
       void
       postInitialize() override;
-
+      
       /*!
-	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_Kvalues. Called in postInitialize().
+	@brief Post checkpoint operations. 
+	@note Not needed for this time stepper beacuse checkpoint-restart is not supported. 
       */
       void
-      solveKValues();
+      postCheckpointSetup() override
+      {}
+
+      /*!
+	@brief Register realms. Primal is the only realm we need. 
+      */
+      void
+      registerRealms() override;
+
+      /*!
+	@brief Register operators. 
+	@details Only need the solver's operators.
+      */
+      void
+      registerOperators() override;
+
+      /*!
+	@brief Parse options
+      */
+      void
+      parseOptions();
+
+      /*!
+	@brief Parse runtime options
+      */
+      void
+      parseRuntimeOptions() override;
+
+#ifdef CH_USE_HDF5
+      /*!  
+	@brief Write checkpoint data to file
+	@param[inout] a_handle HDF5 file
+	@param[in]    a_lvl    Grid level
+	@note Module does not support checkpoint-restart and calling this is an error. 
+      */
+      virtual void
+      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+#endif
+
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read checkpoint data from file
+	@param[inout] a_handle HDF5 file
+	@param[in]    a_lvl    Grid level.
+	@note Module does not support checkpoint-restart and calling this is an error. 
+      */
+      virtual void
+      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+#endif
+
+      /*!
+	@brief Write plot data to output holder. 
+	@param[inout] a_output            Output data holder.
+	@param[in]    a_plotVariableNames Plot variable names.
+	@param[inout] a_icomp             Starting component in a_output to begin at. 
+      */
+      virtual void
+      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
+
+      /*!
+	@brief Get the number of plot variables for this time stepper. 
+	@details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
+	@return Returns number of plot variables that will be written during writePlotData
+      */
+      virtual int
+      getNumberOfPlotVariables() const override;
+
+      /*!
+	@brief Compute a time step to be used by Driver. 
+      */
+      virtual Real
+      computeDt() override;
+
+      /*!
+	@brief Advancement method. Swaps between various kernels. 
+	@param[in] a_dt Time step to be used for advancement
+	@return    Returns the time step that was used (equal to a_dt in this case). 
+      */
+      virtual Real
+      advance(const Real a_dt) override;
+
+      /*!
+	@brief Synchronize solver times and time steps
+	@param[in] a_step Time step
+	@param[in] a_time Time (in seconds)
+	@param[in] a_dt   Time step that was used. 
+      */
+      virtual void
+      synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+
+      /*!
+	@brief Print a step report. Not used by this class. 
+      */
+      virtual void
+      printStepReport() override
+      {}
+
+      /*!
+	@brief Perform pre-regrid operations.
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+      */
+      virtual void
+      preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
+
+      /*!
+	@brief Time stepper regrid method. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */
+      virtual void
+      regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+
+      /*!
+	@brief Perform post-regrid operations. 
+	@details This includes all operations to be done AFTER interpolating data to new grids. 
+      */
+      virtual void
+      postRegrid() override;
+
+      /*!
+	@brief Set the effective ionization coefficient.
+	@param[in] a_alpha Effective ionization coefficient. E is the field in SI units. 
+      */
+      virtual void
+      setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept;
+
+      /*!
+	@brief Set the electron detachment rate
+	@param[in] a_detachmentRate Detachment rate (units of 1/s). 
+      */
+      virtual void
+      setDetachmentRate(const std::function<Real(const Real& E)>& a_detachmentRate) noexcept;
+
+    protected:
+      /*!
+	@brief Integration algorithm.
+      */
+      IntegrationAlgorithm m_integrationAlgorithm;
+
+      /*!
+	@brief Tracer particle solver.
+      */
+      RefCountedPtr<TracerParticleSolver<P>> m_particleSolver;
+
+      /*!
+	@brief Field solver.
+      */
+      RefCountedPtr<FieldSolver> m_fieldSolver;
+
+      /*!
+	@brief Velocity field for particles. 
+      */
+      EBAMRCellData m_velocity;
+
+      /*!
+	@brief K-values -- > should have input-specified number of components
+      */
+      EBAMRCellData m_inceptionIntegral;
       
+      /*!
+	@brief Drift times (t*µV)
+      */
+      EBAMRCellData m_driftTimes;
+
+      /*!
+	@brief Voltages giving K>K_inception
+      */
+      EBAMRCellData m_inceptionVoltage;      
+
+      /*!
+	@brief Inception criteria (read from input)
+      */
+      Real m_KInception;
+
+      /*! 
+	@brief Max K value for every voltage
+      */
+      std::vector<Real> m_maxKValues;
+
+      /*!
+	@brief Critical volumes of K values for each voltage
+      */
+      std::vector<Real> m_criticalVolumes;
+      
+      /*!
+	@brief Realm where the solver lives
+      */
+      std::string m_realm;
+
+      /*!
+	@brief Phase (gas/solid) where the solver lives
+      */
+      phase::which_phase m_phase;
+
+      /*!
+	@brief Effective ionization coefficient
+      */
+      std::function<Real(const Real& E)> m_alpha;
+
+      /*!
+	@brief Electron detachment rate
+      */
+      std::function<Real(const Real& E)> m_detachmentRate;
+
+      /*!
+	@brief Voltage sweeps
+      */
+      std::vector<Real> m_voltageSweeps;
+
+      /*!
+	@brief Distribute particles in every grid cell
+      */
+      void
+      initialParticles();      
+
+      /*!
+	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral. 
+	@details This is called by postInitialize().
+      */
+      void
+      solveInceptionIntegral();      
+
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
 	@param[in] amrParticles Particles of m_particleSolver
@@ -160,11 +379,11 @@ namespace Physics {
       keepGoing(ParticleContainer<P>& amrParticles) const;
 
       /*!
-	@brief Move particles back to their original position after integration finished
-	@param[in] amrParticles  Particles of m_particleSolver
+	@brief Move particles back to their original position.
+	@param[in] amrParticles Particles of m_particleSolver
       */
       void
-      moveParticlesInitialPosition(ParticleContainer<P>& amrParticles);
+      rewindParticles(ParticleContainer<P>& amrParticles);
 
       /*!
 	@brief Set negative K values to 0
@@ -227,10 +446,10 @@ namespace Physics {
       driftTime_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const int& dxSign, const int& step);
 
       /*!
-	@brief Interpolate between K values to find voltage giving K_inception and store values in m_VInception
+	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage
       */
       void
-      solveVInception();
+      computeInceptionVoltage();
 
       /*!
 	@brief Compute V_inception of a single cell
@@ -285,145 +504,6 @@ namespace Physics {
       */
       void
       printToTerminal();
-      
-      /*!
-	@brief Post checkpoint operations. Not needed for this time stepper. 
-      */
-      void
-      postCheckpointSetup() override
-      {}
-
-      /*!
-	@brief Register realms. Primal is the only realm we need. 
-      */
-      void
-      registerRealms() override;
-
-      /*!
-	@brief Register operators. 
-	@details Only need the solver's operators.
-      */
-      void
-      registerOperators() override;
-
-      /*!
-	@brief Parse options
-      */
-      void
-      parseOptions();
-
-      /*!
-	@brief Parse runtime options
-      */
-      void
-      parseRuntimeOptions() override;
-
-#ifdef CH_USE_HDF5
-      /*!  
-	@brief Write checkpoint data to file
-	@param[inout] a_handle HDF5 file
-	@param[in]    a_lvl    Grid level
-      */
-      virtual void
-      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
-#endif
-
-#ifdef CH_USE_HDF5
-      /*!
-	@brief Read checkpoint data from file
-	@param[inout] a_handle HDF5 file
-	@param[in]    a_lvl    Grid level
-      */
-      virtual void
-      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
-#endif
-
-      /*!
-	@brief Write plot data to output holder. 
-	@param[inout] a_output            Output data holder.
-	@param[in]    a_plotVariableNames Plot variable names.
-	@param[inout] a_icomp             Starting component in a_output to begin at. 
-      */
-      virtual void
-      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
-
-      /*!
-	@brief Get the number of plot variables for this time stepper. 
-	@details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
-	@return Returns number of plot variables that will be written during writePlotData
-      */
-      virtual int
-      getNumberOfPlotVariables() const override;
-
-      /*!
-	@brief Compute a time step to be used by Driver. 
-      */
-      virtual Real
-      computeDt() override;
-
-      /*!
-	@brief Advancement method. Swaps between various kernels. 
-	@param[in] a_dt Time step to be used for advancement
-	@return    Returns the time step that was used (equal to a_dt in this case). 
-      */
-      virtual Real
-      advance(const Real a_dt) override;
-
-      /*!
-	@brief Synchronize solver times and time steps
-	@param[in] a_step Time step
-	@param[in] a_time Time (in seconds)
-	@param[in] a_dt   Time step that was used. 
-      */
-      virtual void
-      synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
-
-      /*!
-	@brief Print a step report. 
-	@details This is called by Driver after time step. The routine can be used to display use information about the simulation progress. Not used by this class. 
-      */
-      virtual void
-      printStepReport() override;
-
-      /*!
-	@brief Perform pre-regrid operations.
-	@param[in] a_lmin           The coarsest level that changes
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
-      */
-      virtual void
-      preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
-
-      /*!
-	@brief Time stepper regrid method. 
-	@param[in] a_lmin           The coarsest level that changed. 
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
-	@param[in] a_newFinestLevel The finest level after the regrid. 
-      */
-      virtual void
-      regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
-
-      /*!
-	@brief Perform post-regrid operations. 
-	@details This includes all operations to be done AFTER interpolating data to new grids. 
-      */
-      virtual void
-      postRegrid() override;
-
-      /*!
-	@brief Set the effective ionization coefficient.
-      */
-      virtual void
-      setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept;
-
-      /*!
-	@brief Set voltage for field solver. 
-	@param[in] a_voltage Input voltage. 
-      */
-      virtual void
-      setVoltage(const Real a_voltage) noexcept;
-
-      /*!
-	@brief 
 
       /*!
 	@brief Check if particle is outside grid boundaries
@@ -442,84 +522,7 @@ namespace Physics {
       */
       bool
       particleInsideElectrode(const RealVect pos);
-
-    protected:
-      /*!
-	@brief Integration algorithm
-      */
-      IntegrationAlgorithm m_integrationAlgorithm;
-
-      /*!
-	@brief Tracer particle solver
-      */
-      RefCountedPtr<TracerParticleSolver<P>> m_particleSolver;
-
-      /*!
-	@brief Field solver
-      */
-      RefCountedPtr<FieldSolver> m_fieldSolver;
-
-      /*!
-	@brief Velocity field for particles. 
-      */
-      EBAMRCellData m_velocity;
-
-      /*!
-	@brief K-values -- > should have input-specified number of components
-      */
-      EBAMRCellData m_KValues;
       
-      /*!
-	@brief Drift times (t*µV)
-      */
-      EBAMRCellData m_driftTimes;
-
-      /*!
-	@brief Voltages giving K>K_inception
-      */
-      EBAMRCellData m_VInception;      
-
-      /*!
-	@brief Inception criteria (read from input)
-      */
-      Real m_KInception;
-
-      /*! 
-	@brief Max K value for every voltage
-      */
-      std::vector<Real> m_maxKValues;
-
-      /*!
-	@brief Critical volumes of K values for each voltage
-      */
-      std::vector<Real> m_criticalVolumes;
-      
-      /*!
-	@brief Realm where the solver lives
-      */
-      std::string m_realm;
-
-      /*!
-	@brief Phase (gas/solid) where the solver lives
-      */
-      phase::which_phase m_phase;
-
-      /*!
-	@brief Effective ionization coefficient
-      */
-      std::function<Real(const Real& E)> m_alpha;
-
-      /*!
-	@brief Voltage sweeps
-      */
-      std::vector<Real> m_voltageSweeps;
-      
-      /*!
-	@brief Scale electrostatic solution.
-	@param[in] a_scale Scaling factor for potential and electric field. 
-      */
-      virtual void
-      scaleElectrostatics(const Real& a_scale) noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics
