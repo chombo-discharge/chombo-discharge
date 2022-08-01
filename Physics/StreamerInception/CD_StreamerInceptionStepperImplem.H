@@ -562,7 +562,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
       while (this->keepIntegrating(particles)) {
 
         // Move particles and add integration contribution for the current step.
-        this->K_moveParticlesTrapezoidal(particles, m_voltageSweeps[i]);
+        this->K_moveParticlesTrapezoidal(m_voltageSweeps[i]);
         this->K_addIntegrationTrapezoidal(particles, m_voltageSweeps[i]);
       }
 
@@ -607,22 +607,24 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(const Real& a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::K_moveParticlesTrapezoidal");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::K_moveParticlesTrapezoidal" << endl;
   }
 
+  ParticleContainer<P>& particles = m_particleSolver->getParticles();
+
 #ifndef NDEBUG
-  const size_t particlesBefore = a_particles.getNumberOfValidParticesGlobal();
+  const size_t particlesBefore = particles.getNumberOfValidParticesGlobal();
 #endif
 
   // Move particles
-  this->K_moveParticlesOneStep(a_particles, a_voltage, 0);
+  this->K_moveParticlesOneStep(particles, a_voltage, 0);
   
 #ifndef NDEBUG
-  const size_t particlesAfter = a_particles.getNumberOfValidParticesGlobal();
+  const size_t particlesAfter = particles.getNumberOfValidParticesGlobal();
   
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("StreamerInceptionStepper::K_moveParticlesTrapezoidal -- logic bust, lost some particles");
@@ -632,18 +634,20 @@ StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(ParticleContainer<P>&
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_addIntegrationTrapezoidal(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F>::K_addIntegrationTrapezoidal(const Real& a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::K_addIntegrationTrapezoidal");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::K_addIntegrationTrapezoidal" << endl;
   }
 
+  ParticleContainer<P>& particles = m_particleSolver->getParticles();
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(a_particles.getRealm())[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(amrParticles.getRealm())[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = a_particles[lvl][dit()].listItems();
+      List<P>& particles = amrParticles[lvl][dit()].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();

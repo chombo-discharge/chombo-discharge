@@ -330,19 +330,17 @@ namespace Physics {
 
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] a_particles Particles to move. 
-	@param[in] a_voltage   Voltage multiplier
+	@param[in] a_voltage Voltage multiplier
       */
       virtual void
-      K_moveParticlesTrapezoidal(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept;
+      K_moveParticlesTrapezoidal(const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Add integration parts after particles move
-	@param[in] a_particles Particles to move. 
-	@param[in] a_voltage   Voltage multiplier
+	@param[in] a_voltage Voltage multiplier
       */
       virtual void
-      K_addIntegrationTrapezoidal(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept;
+      K_addIntegrationTrapezoidal(const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
@@ -354,11 +352,11 @@ namespace Physics {
 
       /*!
 	@brief K integral: Add integration parts after particles move
-	@param[in] amrParticles Particles of m_particleSolver
-	@param[in] voltage Voltage multiplier
+	@param[in] a_particles Particles of m_particleSolver
+	@param[in] a_voltage   Voltage multiplier
       */
-      void
-      K_addIntegrationSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
+      virtual void
+      K_addIntegrationSimpsons(ParticleContainer<P>& a_particles, const Real& voltage) noexcept;
 
       /*!
 	@brief K integral: Move particles one step according to the integration algorithm
@@ -371,88 +369,88 @@ namespace Physics {
 
       /*!
 	@brief 
-	@param[in] amrParticles  Particles of m_particleSolver
-	@param[out] true if integration shall continue, false if not
+	@param[in] a_particles Particles to evaluate. 
+	@return true if integration shall continue, false if not
       */
-      bool
-      keepIntegrating(ParticleContainer<P>& amrParticles) const;
+      virtual bool
+      keepIntegrating(ParticleContainer<P>& a_particles) const noexcept;
 
       /*!
 	@brief Move particles back to their original position.
-	@param[in] amrParticles Particles of m_particleSolver
+	@param[in] a_particles Particles of m_particleSolver
       */
-      void
-      rewindParticles(ParticleContainer<P>& amrParticles);
+      virtual void
+      rewindParticles(ParticleContainer<P>& a_particles) noexcept;
 
       /*!
 	@brief Set all particles' masses to 0
-	@param[in] amrParticles  Particles of m_particleSolver
+	@param[in] a_particles  Particles of m_particleSolver
       */
-      void
-      resetParticleMass(ParticleContainer<P>& amrParticles);
+      virtual void
+      resetParticleMass(ParticleContainer<P>& a_particles) noexcept;
 
       /*!
 	@brief Calculate particles' drift times until inside electrode or outside grid. 
       */
-      void
-      computeDriftTimes();
+      virtual void
+      computeDriftTimes() noexcept;
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add time step to particles' drift time tracker
-	@param[in] amrParticles  Particles of m_particleSolver
-	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
-     */
-      void
-      driftTime_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const int& dxSign);
+	@param[in] a_particles  Particles of m_particleSolver
+	@param[in] a_dxSign     Sign of dx (0=positive, 1=negative)
+      */
+      virtual void
+      driftTime_moveParticlesTrapezoidal(ParticleContainer<P>& a_particles, const int& a_dxSign) noexcept;
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add integration parts after particles move
-	@param[in] amrParticles  Particles of m_particleSolver
+	@param[in] a_particles Particles of m_particleSolver
       */
-      void
-      driftTime_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles);
+      virtual void
+      driftTime_addIntegrationTrapezoidal(ParticleContainer<P>& a_particles) noexcept;
 
       /*!
 	@brief Drift time integral (Simpson's method): Add time step to particles' drift time tracker
-	@param[in] amrParticles  Particles of m_particleSolver
-	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
+	@param[in] a_particles Particles of m_particleSolver
+	@param[in] a_dxSign    Sign of dx (0=positive, 1=negative)
       */
-      void
-      driftTime_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const int& dxSign);
+      virtual void
+      driftTime_moveParticlesSimpsons(ParticleContainer<P>& a_particles, const int& dxSign) noexcept;
 
       /*!
 	@brief Drift time integral (Simpson's method): Add integration parts after particles move
-	@param[in] amrParticles  Particles of m_particleSolver
+	@param[in] a_particles  Particles of m_particleSolver
       */
-      void
-      driftTime_addIntegrationSimpsons(ParticleContainer<P>& amrParticles);
+      virtual void
+      driftTime_addIntegrationSimpsons(ParticleContainer<P>& a_particles) noexcept;
 
       /*!
 	@brief Drift time integral: Move particles one step according to the integration algorithm
-	@param[in] amrParticles  Particles of m_particleSolver
-	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
-	@param[in] step Step number for Simpsons' (doesn't affect Trapezoidal)
+	@param[in] a_particles Particles of m_particleSolver
+	@param[in] a_dxSign    Sign of dx (0=positive, 1=negative)
+	@param[in] a_step      Step number for Simpsons' (doesn't affect Trapezoidal)
       */
-      void
-      driftTime_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const int& dxSign, const int& step);
+      virtual void
+      driftTime_moveParticlesOneStep(ParticleContainer<P>& a_particles, const int& a_dxSign, const int& a_step) noexcept;
 
       /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage
       */
-      void
-      computeInceptionVoltage();
+      virtual void
+      computeInceptionVoltage() noexcept;
 
       /*!
 	@brief Compute the critical volume of the K values for each voltage
       */
-      void
-      computeCriticalVolume();
+      virtual void
+      computeCriticalVolume() noexcept;
 
       /*!
 	@brief Print m_voltageSweeps, m_maxKValues, and m_criticalVolumes to terminal
       */
-      void
-      printReport();
+      virtual void
+      printReport() const noexcept;
 
       /*!
 	@brief Check if particle is outside grid boundaries
@@ -461,16 +459,16 @@ namespace Physics {
 	@param[in] a_probHi Upper right boundary of grid
 	@return true if particle outside boundary, false elsewise
       */
-      bool
-      particleOutsideGrid(const RealVect& a_pos, const RealVect& a_probLo, const RealVect& a_probHi);
+      inline bool
+      particleOutsideGrid(const RealVect& a_pos, const RealVect& a_probLo, const RealVect& a_probHi) const noexcept;
 
       /*!
 	@brief Check if particle is inside electrode
 	@param[in] a_pos Particle position
 	@return true if particle inside electrode, false elsewise
       */
-      bool
-      particleInsideElectrode(const RealVect& a_pos);
+      inline bool
+      particleInsideElectrode(const RealVect& a_pos) const noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics
