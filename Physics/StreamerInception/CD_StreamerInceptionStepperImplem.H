@@ -1001,7 +1001,7 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
   m_amr->allocate(t, m_realm, m_phase, 1);
   
   // Compute drift time integral twice - once for +dx and once for -dx direction.
-  for (int i = 0; i < 2; i++) {    
+  for (int dxSign = -1; dxSign <= 1; dxSign += 2) {    
     // Update velocities and starting mass to zero.
     m_particleSolver->interpolateVelocities();  
     
@@ -1014,7 +1014,7 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
     case IntegrationAlgorithm::Trapezoidal: {
       while (this->keepGoing()) {
 	// Check integration flag and move particles if true
-	this->driftTime_moveParticlesTrapezoidal(i);
+	this->driftTime_moveParticlesTrapezoidal(dxSign);
 
 	// Add integration parts to p.mass()
 	this->driftTime_addIntegrationTrapezoidal();
@@ -1025,7 +1025,7 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
     case IntegrationAlgorithm::Simpsons: {
       while (this->keepGoing()) {
 	// Check integration flag and move particles if true	
-	this->driftTime_moveParticlesSimpsons(i);
+	this->driftTime_moveParticlesSimpsons(dxSign);
 	
 	// Add integration parts to p.mass()
 	this->driftTime_addIntegrationSimpsons();
@@ -1045,7 +1045,8 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
     m_particleSolver->deposit(t);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      t[lvl]->copyTo(Interval(0,0), *m_driftTimes[lvl], Interval(i,i));
+      int index = (dxSign + 1)/2;
+      t[lvl]->copyTo(Interval(0,0), *m_driftTimes[lvl], Interval(index, index));
     }     
   }    
 }
@@ -1205,15 +1206,7 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(const int& dxSign
 	  RealVect newPosition;
 	  switch (m_integrationAlgorithm) {	    
 	  case IntegrationAlgorithm::Trapezoidal: {
-	    if (dxSign == 0) {
-	      newPosition = p.position() + normalizedVelocity * dx;
-	    }
-	    else if (dxSign == 1) {
-	      newPosition = p.position() + normalizedVelocity * (-dx);
-	    }
-	    else {
-	      MayDay::Error("StreamerInceptionStepper::driftTime_moveParticlesOneStep -- logic bust");
-	    }
+	    newPosition = p.position() + normalizedVelocity * dxSign * dx;
 
 	    // Store values to particle for subsequent integration
 	    p.template scalar<1>() = dx;
@@ -1222,15 +1215,7 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(const int& dxSign
 	    break;
 	  }
 	  case IntegrationAlgorithm::Simpsons: {
-	    if (dxSign == 0) {
-	      newPosition = p.position() + normalizedVelocity * 0.5 * dx;
-	    }
-	    else if (dxSign == 1) {
-	      newPosition = p.position() + normalizedVelocity * 0.5 * (-dx);
-	    }
-	    else {
-	      MayDay::Error("StreamerInceptionStepper::driftTime_moveParticlesOneStep -- logic bust");
-	    }
+	    newPosition = p.position() + normalizedVelocity * 0.5 * dxSign * dx;
 
 	    // Store values to particle for subsequent integration
 	    if (step == 1) {
