@@ -7,6 +7,7 @@
   @file   CD_StreamerInceptionStepper.H
   @brief  TimeStepper class for evaluating the streamer inception criterion.
   @author Robert Marskar
+  @author Rasmus Hoholm
 */
 
 #ifndef CD_StreamerInceptionStepper_H
@@ -29,9 +30,7 @@ namespace Physics {
     enum class IntegrationAlgorithm
     {
       Trapezoidal,
-      Simpsons,
-      Simpsons38,
-      Booles
+      Simpsons
     };
 
     /*!
@@ -99,7 +98,7 @@ namespace Physics {
       */
       void
       postInitialize() override;
-      
+
       /*!
 	@brief Post checkpoint operations. 
 	@note Not needed for this time stepper beacuse checkpoint-restart is not supported. 
@@ -262,24 +261,24 @@ namespace Physics {
       EBAMRCellData m_velocity;
 
       /*!
-	@brief K-values -- > should have input-specified number of components
+	@brief Inception integral values (K-values)
       */
       EBAMRCellData m_inceptionIntegral;
-      
+
       /*!
 	@brief Drift times (t*µV)
       */
       EBAMRCellData m_driftTimes;
 
       /*!
-	@brief Voltages giving K>K_inception
+	@brief Computed inception voltages. 
       */
-      EBAMRCellData m_inceptionVoltage;      
+      EBAMRCellData m_inceptionVoltage;
 
       /*!
 	@brief Inception criteria (read from input)
       */
-      Real m_KInception;
+      Real m_inceptionK;
 
       /*! 
 	@brief Max K value for every voltage
@@ -290,7 +289,7 @@ namespace Physics {
 	@brief Critical volumes of K values for each voltage
       */
       std::vector<Real> m_criticalVolumes;
-      
+
       /*!
 	@brief Realm where the solver lives
       */
@@ -319,39 +318,39 @@ namespace Physics {
       /*!
 	@brief Distribute particles in every grid cell
       */
-      void
-      initialParticles();      
+      virtual void
+      initialParticles() noexcept;
 
       /*!
 	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral. 
-	@details This is called by postInitialize().
+	@details This is called in postInitialize().
       */
-      void
-      solveInceptionIntegral();      
+      virtual void
+      computeInceptionIntegral() noexcept;
 
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] amrParticles Particles of m_particleSolver
-	@param[in] voltage Voltage multiplier
+	@param[in] a_particles Particles to move. 
+	@param[in] a_voltage   Voltage multiplier
       */
-      void
-      K_moveParticlesTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage); 
+      virtual void
+      K_moveParticlesTrapezoidal(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Add integration parts after particles move
-	@param[in] amrParticles Particles of m_particleSolver
-	@param[in] voltage Voltage multiplier
+	@param[in] a_particles Particles to move. 
+	@param[in] a_voltage   Voltage multiplier
       */
-      void
-      K_addIntegrationTrapezoidal(ParticleContainer<P>& amrParticles, const Real& voltage);
+      virtual void
+      K_addIntegrationTrapezoidal(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] amrParticles Particles of m_particleSolver
-	@param[in] voltage Voltage multiplier
+	@param[in] a_particles Particles of m_particleSolver
+	@param[in] a_voltage   Voltage multiplier
       */
-      void
-      K_moveParticlesSimpsons(ParticleContainer<P>& amrParticles, const Real& voltage);
+      virtual void
+      K_moveParticlesSimpsons(ParticleContainer<P>& a_particles, const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Add integration parts after particles move
@@ -363,20 +362,20 @@ namespace Physics {
 
       /*!
 	@brief K integral: Move particles one step according to the integration algorithm
-	@param[in] amrParticles Particles of m_particleSolver
-	@param[in] voltage Voltage multiplier
-	@param[in] step Step number for Simpsons' (doesn't affect Trapezoidal)
+	@param[in] a_particles Particles to move. 
+	@param[in] a_voltage   Voltage multiplier
+	@param[in] a_step      Step number for Simpsons' (doesn't affect Trapezoidal)
       */
-      void
-      K_moveParticlesOneStep(ParticleContainer<P>& amrParticles, const Real& voltage,  const int& step);
-      
+      virtual void
+      K_moveParticlesOneStep(ParticleContainer<P>& a_particles, const Real& a_voltage, const int& a_step) noexcept;
+
       /*!
 	@brief 
 	@param[in] amrParticles  Particles of m_particleSolver
 	@param[out] true if integration shall continue, false if not
       */
       bool
-      keepGoing(ParticleContainer<P>& amrParticles) const;
+      keepIntegrating(ParticleContainer<P>& amrParticles) const;
 
       /*!
 	@brief Move particles back to their original position.
@@ -386,14 +385,6 @@ namespace Physics {
       rewindParticles(ParticleContainer<P>& amrParticles);
 
       /*!
-	@brief Set negative K values to 0
-	@param[in] K  K values for a specific voltage
-	@param[in] amrParticles  Particles of m_particleSolver
-      */
-      void
-      zeroNegativeKValues(EBAMRCellData& K, ParticleContainer<P>& amrParticles);
-
-      /*!
 	@brief Set all particles' masses to 0
 	@param[in] amrParticles  Particles of m_particleSolver
       */
@@ -401,10 +392,10 @@ namespace Physics {
       resetParticleMass(ParticleContainer<P>& amrParticles);
 
       /*!
-	@brief Calculate particles' drift times until inside electrode or outside grid
+	@brief Calculate particles' drift times until inside electrode or outside grid. 
       */
       void
-      solveDriftTimes();  
+      computeDriftTimes();
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add time step to particles' drift time tracker
@@ -452,77 +443,34 @@ namespace Physics {
       computeInceptionVoltage();
 
       /*!
-	@brief Compute V_inception of a single cell
-	@param[in] regularData Patch data containing K values
-	@param[in] iv          Cell position vector
-	@param[out] V_inception of cell
-      */
-      void
-      computeVInceptionCell(const BaseFab<Real>& regularData, const IntVect& iv, Real& V_inception);
-
-      /*!
-	@brief Perform linear interpolation and find interpolated value at x
-	@param[in] y1 y(x_1)
-	@param[in] y2 y(x_2)
-	@param[in] x1 x_1
-	@param[in] x2 x_2
-	@param[in]  x Parameter of outpout value
-	@param[out] y Interpolated value at x
-      */ 
-      void
-      interpolate(const Real& x1, const Real& x2, const Real& y1, const Real& y2, const Real& x, Real& y);
-
-      /*!
-	@brief Add particle (regular kernel)
-	@param[out] particles Particle list
-	@param[in]  iv Cell position vector
-	@param[in]  dx Cell resolution
-	@param[in]  mass Particle mass
-      */
-      void
-      addParticleRegular(List<P>& particles, const IntVect iv, const Real dx, const Real mass);
-
-      /*!
-	@brief Add particle (irregular kernel)
-	@param[out] particles Particle list
-	@param[in]  vof Cell volume index
-	@param[in]  ebisbox EB information of grid patch
-	@param[in]  dx Cell resolution
-	@param[in]  mass Particle mass
-      */      
-      void
-      addParticleIrregular(List<P>& particles, const VolIndex& vof, const EBISBox& ebisbox, const Real dx, const Real mass);
-
-      /*!
 	@brief Compute the critical volume of the K values for each voltage
       */
       void
-      solveCriticalVolume();
+      computeCriticalVolume();
 
       /*!
 	@brief Print m_voltageSweeps, m_maxKValues, and m_criticalVolumes to terminal
       */
       void
-      printToTerminal();
+      printReport();
 
       /*!
 	@brief Check if particle is outside grid boundaries
-	@param[in] pos  Particle position
-	@param[in] probLo Lower left boundary of grid
-	@param[in] probHi Upper right boundary of grid
-	@param[out]  true if particle outside boundary, false elsewise
+	@param[in] a_pos  Particle position
+	@param[in] a_probLo Lower left boundary of grid
+	@param[in] a_probHi Upper right boundary of grid
+	@return true if particle outside boundary, false elsewise
       */
       bool
-      particleOutsideGrid(const RealVect pos, const RealVect probLo, const RealVect probHi);
+      particleOutsideGrid(const RealVect& a_pos, const RealVect& a_probLo, const RealVect& a_probHi);
 
       /*!
 	@brief Check if particle is inside electrode
-	@param[in] pos  Particle position
-	@param[out] true if particle inside electrode, false elsewise
+	@param[in] a_pos Particle position
+	@return true if particle inside electrode, false elsewise
       */
       bool
-      particleInsideElectrode(const RealVect pos);
-      
+      particleInsideElectrode(const RealVect& a_pos);
     };
   } // namespace StreamerInception
 } // namespace Physics
