@@ -173,17 +173,26 @@ namespace Physics {
       resetParticleMass();
 
       /*!
-	@brief Calculate particles' drift times until inside electrode or outside grid
+	@brief Calculate particles' drift times until inside electrode, outside grid, or inside critical volume (negative ions) for positive and negative ions
       */
       void
-      solveDriftTimes();  
+      solveDriftTimes();
+
+      /*!
+	@brief Solve drift time for specified charge and voltage
+	@param[in] dxSign Sign of dx (-1=negative, 1=positive)
+	@param[in] voltInd Voltage index
+      */
+      void
+      solveDriftTime(EBAMRCellData& t, const int& dxSign, const int& voltInd);
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add time step to particles' drift time tracker
-	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
+	@param[in] dxSign Sign of dx (-1=negative, 1=positive)
+	@param[in] voltInd Voltage index
      */
       void
-      driftTime_moveParticlesTrapezoidal(const int& dxSign);
+      driftTime_moveParticlesTrapezoidal(const int& dxSign, const int& voltInd);
 
       /*!
 	@brief Drift time integral (trapezoidal method): Add integration parts after particles move
@@ -193,10 +202,11 @@ namespace Physics {
 
       /*!
 	@brief Drift time integral (Simpson's method): Add time step to particles' drift time tracker
-	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
+	@param[in] dxSign Sign of dx (-1=negative, 1=positive)
+	@param[in] voltInd Voltage index
       */
       void
-      driftTime_moveParticlesSimpsons(const int& dxSign);
+      driftTime_moveParticlesSimpsons(const int& dxSign, const int& voltInd);
 
       /*!
 	@brief Drift time integral (Simpson's method): Add integration parts after particles move
@@ -206,12 +216,20 @@ namespace Physics {
 
       /*!
 	@brief Drift time integral: Move particles one step according to the integration algorithm
-	@param[in] dxSign  Sign of dx (0=positive, 1=negative)
+	@param[in] dxSign Sign of dx (-1=negative, 1=positive)
 	@param[in] step Step number for Simpsons' (doesn't affect Trapezoidal)
+	@param[in] voltInd Voltage index
       */
       void
-      driftTime_moveParticlesOneStep(const int& dxSign, const int& step);
+      driftTime_moveParticlesOneStep(const int& dxSign, const int& step, const int& voltInd);
 
+      /*!
+	@brief Checks if particles are inside the critical volume and flags if they are.
+	@param[in] voltInd Voltage index
+      */
+      void
+      checkParticlesInsideCriticalVolume(const int& voltInd);
+      
       /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_VInception
       */

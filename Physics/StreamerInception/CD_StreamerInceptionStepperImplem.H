@@ -106,7 +106,7 @@ StreamerInceptionStepper<P, F>::allocate()
   m_amr->allocate(m_velocity, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_KValues, m_realm, m_phase, m_voltageSweeps.size());
   m_amr->allocate(m_VInception, m_realm, m_phase, 1);
-  m_amr->allocate(m_driftTimes, m_realm, m_phase, 2);
+  m_amr->allocate(m_driftTimes, m_realm, m_phase, 1 + m_voltageSweeps.size() );
   
   DataOps::setValue(m_KValues, 0.0);  
 }
@@ -270,7 +270,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
   std::string varName;
   for (const Real& V : m_voltageSweeps) {
-    varName = "K for ";
+    varName = "K at ";
     varName += std::to_string(V);
     varName += " V";
     a_plotVariableNames.push_back(varName);
@@ -278,14 +278,19 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   
   // Write our drift time values.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Interval srcInterval(0, 1);
-    const Interval dstInterval(a_icomp, a_icomp + 1);
+    const Interval srcInterval(0, m_voltageSweeps.size());
+    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size());
     m_driftTimes[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
   }
-  a_icomp += 2;
+  a_icomp += 1 + m_voltageSweeps.size();
 
-  a_plotVariableNames.push_back("t*µV for +E direction");
-  a_plotVariableNames.push_back("t*µV for -E direction");
+  a_plotVariableNames.push_back("t*µV for positive charge");
+  for (const Real& V : m_voltageSweeps) {
+    varName = "t*µV for negative charge at ";
+    varName += std::to_string(V);
+    varName += " V";
+    a_plotVariableNames.push_back(varName);
+  }
 
   // Write our inception voltages
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -312,9 +317,11 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
   ncomp += m_fieldSolver->getNumberOfPlotVariables();
   ncomp += m_particleSolver->getNumberOfPlotVariables();
 
-  ncomp += m_voltageSweeps.size();
+  ncomp += m_voltageSweeps.size(); // K values
 
-  ncomp += 3;  // Drift times (+/- direction) and inception voltage
+  ncomp += 1 + m_voltageSweeps.size(); // Drift times
+
+  ncomp += 1; // Inception voltages
 
   return ncomp;
 }
@@ -545,13 +552,13 @@ StreamerInceptionStepper<P, F>::postInitialize()
   this->solveDriftTimes();
   
   // Interpolate between K values to find voltage giving K_inception and store values in m_VInception
-  this->solveVInception();
+  //this->solveVInception();
 
   // Compute critical volume of K values for each voltage
-  this->solveCriticalVolume();
+  //this->solveCriticalVolume();
 
   // Print voltages, max K values, and critical volumes to terminal
-  this->printToTerminal();
+  //this->printToTerminal();
 }
 
 
@@ -987,7 +994,7 @@ StreamerInceptionStepper<P, F>::resetParticleMass()
   }
 }
 
-// Add different integration methods after Simpson's fix.
+
 template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::solveDriftTimes() {
@@ -999,61 +1006,84 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
   // Something transient storage we can deposit into. 
   EBAMRCellData t;
   m_amr->allocate(t, m_realm, m_phase, 1);
-  
-  // Compute drift time integral twice - once for +dx and once for -dx direction.
-  for (int dxSign = -1; dxSign <= 1; dxSign += 2) {    
-    // Update velocities and starting mass to zero.
-    m_particleSolver->interpolateVelocities();  
+
+  // Solve drift time for positive ions
+  solveDriftTime(t, 1, -1);
+
+  // Solve drift time for negative ions for each voltage
+  for (int voltInd = 0; voltInd < m_voltageSweeps.size(); voltInd++) {
+    solveDriftTime(t, -1, voltInd);
+  }
+}
+
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::solveDriftTime(EBAMRCellData& t, const int& dxSign, const int& voltInd)
+{
+  CH_TIME("StreamerInceptionStepper::solveDriftTime");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::solveDriftTime" << endl;
+  }
+
+  // Update velocities and starting mass to zero.
+  m_particleSolver->interpolateVelocities();  
     
-    ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();    
-    
-    this->resetParticleMass();  
+  this->resetParticleMass();  
 
-    // Compute drift time integrals with input-based algorithm. 
-    switch (m_integrationAlgorithm) {
-    case IntegrationAlgorithm::Trapezoidal: {
-      while (this->keepGoing()) {
-	// Check integration flag and move particles if true
-	this->driftTime_moveParticlesTrapezoidal(dxSign);
+  // Compute drift time integrals with input-based algorithm. 
+  switch (m_integrationAlgorithm) {
+  case IntegrationAlgorithm::Trapezoidal: {
+    while (this->keepGoing()) {
+      // Check integration flag and move particles if true
+      this->driftTime_moveParticlesTrapezoidal(dxSign, voltInd);
 
-	// Add integration parts to p.mass()
-	this->driftTime_addIntegrationTrapezoidal();
-      }
-
-      break;
+      // Add integration parts to p.mass()
+      this->driftTime_addIntegrationTrapezoidal();
     }
-    case IntegrationAlgorithm::Simpsons: {
-      while (this->keepGoing()) {
-	// Check integration flag and move particles if true	
-	this->driftTime_moveParticlesSimpsons(dxSign);
+
+    break;
+  }
+  case IntegrationAlgorithm::Simpsons: {
+    while (this->keepGoing()) {
+      // Check integration flag and move particles if true	
+      this->driftTime_moveParticlesSimpsons(dxSign, voltInd);
 	
-	// Add integration parts to p.mass()
-	this->driftTime_addIntegrationSimpsons();
-      }
+      // Add integration parts to p.mass()
+      this->driftTime_addIntegrationSimpsons();
+    }
 
-      break;
-    }
-    default: {
-      MayDay::Error("StreamerInceptionStepper::solveDriftTimes -- logic bust");
-    }
-    }
+    break;
+  }
+  default: {
+    MayDay::Error("StreamerInceptionStepper::solveDriftTimes -- logic bust");
+  }
+  }
     
-    // Move particles back to initial position. This includes remapping.
-    this->moveParticlesInitialPosition();
+  // Move particles back to initial position. This includes remapping.
+  this->moveParticlesInitialPosition();
   
-    // Deposit and copy t values to m_driftTimes.
-    m_particleSolver->deposit(t);
+  // Deposit onto t
+  m_particleSolver->deposit(t);
 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      int index = (dxSign + 1)/2;
-      t[lvl]->copyTo(Interval(0,0), *m_driftTimes[lvl], Interval(index, index));
-    }     
-  }    
+  // Find storage index according to ion charge and voltage
+  int index;
+  if (dxSign == 1) {
+    index = 0;
+  }
+  else if (dxSign == -1) {
+    index = 1 + voltInd;
+  }
+
+  // Copy to m_driftTimes
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    t[lvl]->copyTo(Interval(0,0), *m_driftTimes[lvl], Interval(index, index));
+  }       
 }
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(const int& dxSign) {
+StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(const int& dxSign, const int& voltInd) {
   CH_TIME("StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal" << endl;
@@ -1064,7 +1094,7 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(const int& dx
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();  
 
   // Move particles and remap
-  this->driftTime_moveParticlesOneStep(dxSign, 0);
+  this->driftTime_moveParticlesOneStep(dxSign, 0, voltInd);
 
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
@@ -1110,7 +1140,7 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationTrapezoidal()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(const int& dxSign) {
+StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(const int& dxSign, const int& voltInd) {
   CH_TIME("StreamerInceptionStepper::driftTime_moveparticlesSimpsons");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::driftTime_moveparticlesSimpsons" << endl;
@@ -1121,10 +1151,10 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(const int& dxSig
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();  
 
   // Step 1: Move particles dx/2 and remap
-  this->driftTime_moveParticlesOneStep(dxSign, 1);
+  this->driftTime_moveParticlesOneStep(dxSign, 1, voltInd);
 
   // Step 2: Move particles dx/2 and remap
-  this->driftTime_moveParticlesOneStep(dxSign, 2);
+  this->driftTime_moveParticlesOneStep(dxSign, 2, voltInd);
   
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
@@ -1170,7 +1200,7 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(const int& dxSign, const int& step)
+StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(const int& dxSign, const int& step, const int& voltInd)
 {
   CH_TIME("StreamerInceptionStepper::driftTime_moveParticlesOneStep");
   if (m_verbosity > 5) {
@@ -1253,6 +1283,58 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(const int& dxSign
   
   m_particleSolver->remap();
   m_particleSolver->interpolateVelocities();
+
+  // If negative ion, check if particles are inside critical volume
+  if (dxSign == -1) {
+    this->checkParticlesInsideCriticalVolume(voltInd);
+  }
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::checkParticlesInsideCriticalVolume(const int& voltInd)
+{
+  CH_TIME("StreamerInceptionStepper::checkParticlesInsideCriticalVolume");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::checkParticlesInsideCriticalVolume" << endl;
+  }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  const RealVect probLo = m_amr->getProbLo();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Real dx = 0.5*m_amr->getDx()[lvl];
+
+    const DisjointBoxLayout& dbl            = m_amr->getGrids(amrParticles.getRealm())[lvl];
+    
+    ParticleData<P>&         levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      BaseFab<Real>& cellData = (*m_KValues[lvl])[dit()].getSingleValuedFAB();
+
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+	P& p = lit();
+
+	if (p.template scalar<0>() > 0.0) {
+	  // Find integer spatial vector
+	  RealVect rv = (p.position() - probLo)/dx - 0.5*RealVect::Unit;
+	  IntVect iv;
+	  for (int i = 0; i < SpaceDim; i++) {
+	    iv[i] = round(rv[i]);
+	  }
+
+	  // Get K value of cell and check if greater than m_KInception. If so, flag particle.
+	  Real K = cellData(iv, voltInd);
+	  if (K >= m_KInception) {
+	    p.template scalar<0>() = -1.0;
+	  }
+	}
+      }
+    }
+  }
 }
 
 
@@ -1302,9 +1384,7 @@ StreamerInceptionStepper<P, F>::solveVInception() {
 
       List<P>& particles = levelParticles[dit()].listItems();
 
-      auto regularKernel = [&](const IntVect& iv) -> void {
-	// m_VInception[lvl][dit](iv,0)
-	
+      auto regularKernel = [&](const IntVect& iv) -> void {       
 	Real V_inception = 0.0;
 	bool addP = false;
        
