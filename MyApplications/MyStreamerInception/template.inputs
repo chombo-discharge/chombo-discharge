@@ -119,9 +119,10 @@ Cylinder.radius        = 2E-3           # Cylinder radius.
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = -1
-StreamerInceptionStepper.integration   = simpsons
-StreamerInceptionStepper.voltage_lo    = 10E3
-StreamerInceptionStepper.voltage_hi    = 100E3
-StreamerInceptionStepper.voltage_steps = 100
-StreamerInceptionStepper.K_inception   = 18
+StreamerInceptionStepper.verbosity     = -1             # Chattiness. 
+StreamerInceptionStepper.print_report  = true           # Print report at end of simulation. 
+StreamerInceptionStepper.integration   = trapezoidal    # Particle integration algorithm. 
+StreamerInceptionStepper.voltage_lo    = 20E3           # Low voltage multiplier
+StreamerInceptionStepper.voltage_hi    = 40E3           # Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps = 10             # Number of voltage steps
+StreamerInceptionStepper.K_inception   = 18             # User-specified inception value
