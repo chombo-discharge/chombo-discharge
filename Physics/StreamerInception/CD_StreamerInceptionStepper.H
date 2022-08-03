@@ -237,7 +237,7 @@ namespace Physics {
 	@param[in] a_mobility Ion mobility
       */
       virtual void
-      setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept;      
+      setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept;
 
       /*!
 	@brief Set the background ionization rate (e.g. from detachment, cosmic radiation etc). 
@@ -360,11 +360,11 @@ namespace Physics {
 	@note For negative voltage. 
       */
       std::vector<Real> m_firstElectronMinu;
-      
+
       /*!
 	@brief Voltage sweeps
       */
-      std::vector<Real> m_voltageSweeps;      
+      std::vector<Real> m_voltageSweeps;
 
       /*!
 	@brief Realm where the solver lives

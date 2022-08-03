@@ -704,26 +704,26 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
   // Transient storage we can deposit particles onto.
   EBAMRCellData K;
   EBAMRCellData Kplus;
-  EBAMRCellData Kminu;  
-  
-  m_amr->allocate(K,     m_realm, m_phase, 1);
-  m_amr->allocate(Kplus,     m_realm, m_phase, 1);
-  m_amr->allocate(Kminu,     m_realm, m_phase, 1);
-  
-  DataOps::setValue(K,     0.0);
-  DataOps::setValue(Kplus,     0.0);
-  DataOps::setValue(Kminu,     0.0);    
+  EBAMRCellData Kminu;
+
+  m_amr->allocate(K, m_realm, m_phase, 1);
+  m_amr->allocate(Kplus, m_realm, m_phase, 1);
+  m_amr->allocate(Kminu, m_realm, m_phase, 1);
+
+  DataOps::setValue(K, 0.0);
+  DataOps::setValue(Kplus, 0.0);
+  DataOps::setValue(Kminu, 0.0);
 
   // Integrate for each voltage
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
-    // Polarities. Do the positive polarity first. 
+    // Polarities. Do the positive polarity first.
     std::vector<Real> polarities{1.0, -1.0};
 
     for (const auto& p : polarities) {
 
       this->initialParticles();
-      
+
       // Update velocities and starting mass to zero.
       DataOps::scale(m_electricField, p);
       m_particleSolver->interpolateVelocities();
@@ -732,50 +732,50 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
       switch (m_integrationAlgorithm) {
       case IntegrationAlgorithm::Trapezoidal: {
-	while (this->keepIntegrating()) {
+        while (this->keepIntegrating()) {
 
-	  // Move particles and add integration contribution for the current step.
-	  this->K_moveParticlesTrapezoidal(m_voltageSweeps[i]);
-	  this->K_addIntegrationTrapezoidal(m_voltageSweeps[i]);
-	}
+          // Move particles and add integration contribution for the current step.
+          this->K_moveParticlesTrapezoidal(m_voltageSweeps[i]);
+          this->K_addIntegrationTrapezoidal(m_voltageSweeps[i]);
+        }
 
-	break;
+        break;
       }
       case IntegrationAlgorithm::Simpsons: {
-	while (this->keepIntegrating()) {
+        while (this->keepIntegrating()) {
 
-	  // Move particles and add integration contribution for the current step.
-	  this->K_moveParticlesSimpsons(m_voltageSweeps[i]);
-	  this->K_addIntegrationSimpsons(m_voltageSweeps[i]);
-	}
+          // Move particles and add integration contribution for the current step.
+          this->K_moveParticlesSimpsons(m_voltageSweeps[i]);
+          this->K_addIntegrationSimpsons(m_voltageSweeps[i]);
+        }
 
-	break;
+        break;
       }
       default: {
-	MayDay::Error("StreamerInceptionStepper::computeInceptionIntegral -- logic bust");
+        MayDay::Error("StreamerInceptionStepper::computeInceptionIntegral -- logic bust");
 
-	break;
+        break;
       }
       }
 
       // Move particles back to initial position and deposit them on the mesh.
       this->rewindParticles();
 
-      if(p > 0.0) {
-	m_particleSolver->deposit(Kplus);
+      if (p > 0.0) {
+        m_particleSolver->deposit(Kplus);
       }
-      else{
-	m_particleSolver->deposit(Kminu);
+      else {
+        m_particleSolver->deposit(Kminu);
       }
 
-      DataOps::scale(m_electricField, p);      
+      DataOps::scale(m_electricField, p);
     }
 
     // Make K = max(Kplus, Kminu)
     DataOps::max(K, Kplus, Kminu);
 
     m_amr->averageDown(K, m_realm, m_phase);
-    m_amr->interpGhost(K, m_realm, m_phase);    
+    m_amr->interpGhost(K, m_realm, m_phase);
 
     // Get max K value.
     Real maxK = -std::numeric_limits<Real>::max();
@@ -952,7 +952,7 @@ StreamerInceptionStepper<P, F>::K_moveParticlesOneStep(const Real& a_voltage, co
 
   // Move particles
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    
+
     // Particles move half a cell on this level.
     const Real dx = 0.5 * m_amr->getDx()[lvl];
 
@@ -1702,7 +1702,7 @@ StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
 
   // Total rate.
   std::vector<Real> Rplus(m_voltageSweeps.size(), std::numeric_limits<Real>::min());
-  std::vector<Real> Rminu(m_voltageSweeps.size(), std::numeric_limits<Real>::min());  
+  std::vector<Real> Rminu(m_voltageSweeps.size(), std::numeric_limits<Real>::min());
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -1725,7 +1725,7 @@ StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
 
             // Add background ionization rate.
             Rplus[i] += bgRateReg(iv, i) * vol;
-            Rminu[i] += bgRateReg(iv, i) * vol;	    
+            Rminu[i] += bgRateReg(iv, i) * vol;
           }
         }
       };
@@ -1735,12 +1735,12 @@ StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
         if (validCells(iv) && ebisbox.isIrregular(iv)) {
 
           const Real volFrac = ebisbox.volFrac(vof);
-	  
+
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
 
             // Add background ionization rate.
             Rplus[i] += bgRate(vof, i) * vol * volFrac;
-            Rminu[i] += bgRate(vof, i) * vol * volFrac;	    
+            Rminu[i] += bgRate(vof, i) * vol * volFrac;
           }
         }
       };
@@ -1753,7 +1753,7 @@ StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
       m_firstElectronPlus.push_back(1. / ParallelOps::sum(Rplus[i]));
-      m_firstElectronMinu.push_back(1. / ParallelOps::sum(Rminu[i]));      
+      m_firstElectronMinu.push_back(1. / ParallelOps::sum(Rminu[i]));
     }
   }
 }
@@ -1792,7 +1792,7 @@ StreamerInceptionStepper<P, F>::printReport() const noexcept
     std::cout << left << setw(15) << setfill(' ') << "Max K";
     std::cout << left << setw(20) << setfill(' ') << "Crit. vol (m^3)";
     std::cout << left << setw(20) << setfill(' ') << "Time lag + (s)";
-    std::cout << left << setw(20) << setfill(' ') << "Time lag - (s)" << std::endl;    
+    std::cout << left << setw(20) << setfill(' ') << "Time lag - (s)" << std::endl;
     std::cout << "# ===================================================================\n";
 
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
@@ -1800,7 +1800,7 @@ StreamerInceptionStepper<P, F>::printReport() const noexcept
       std::cout << left << setw(15) << setfill(' ') << m_maxKValues[i];
       std::cout << left << setw(20) << setfill(' ') << m_criticalVolumes[i];
       std::cout << left << setw(20) << setfill(' ') << m_firstElectronPlus[i];
-      std::cout << left << setw(20) << setfill(' ') << m_firstElectronMinu[i];      
+      std::cout << left << setw(20) << setfill(' ') << m_firstElectronMinu[i];
       std::cout << endl;
     }
     std::cout << "# ===================================================================\n";
