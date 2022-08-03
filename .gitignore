@@ -47,4 +47,3 @@ Docs/*
 Docs/Sphinx/build
 Docs/**/*.dat
 
-!MyApplications/MyStreamerInception/pout.0
