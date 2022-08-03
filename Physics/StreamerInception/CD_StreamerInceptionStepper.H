@@ -488,41 +488,6 @@ namespace Physics {
       computeDriftTimes() noexcept;
 
       /*!
-	@brief Drift time integral (trapezoidal method): Add time step to particles' drift time tracker
-	@param[in] a_dxSign     Sign of dx (0=positive, 1=negative)
-      */
-      virtual void
-      driftTime_moveParticlesTrapezoidal(const int& a_dxSign) noexcept;
-
-      /*!
-	@brief Drift time integral (trapezoidal method): Add integration parts after particles move
-      */
-      virtual void
-      driftTime_addIntegrationTrapezoidal() noexcept;
-
-      /*!
-	@brief Drift time integral (Simpson's method): Add time step to particles' drift time tracker
-	@param[in] a_dxSign    Sign of dx (0=positive, 1=negative)
-      */
-      virtual void
-      driftTime_moveParticlesSimpsons(const int& dxSign) noexcept;
-
-      /*!
-	@brief Drift time integral (Simpson's method): Add integration parts after particles move
-	@param[in] a_particles  Particles of m_particleSolver
-      */
-      virtual void
-      driftTime_addIntegrationSimpsons() noexcept;
-
-      /*!
-	@brief Drift time integral: Move particles one step according to the integration algorithm
-	@param[in] a_dxSign    Sign of dx (0=positive, 1=negative)
-	@param[in] a_step      Step number for Simpsons' (doesn't affect Trapezoidal)
-      */
-      virtual void
-      driftTime_moveParticlesOneStep(const int& a_dxSign, const int& a_step) noexcept;
-
-      /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage. 
 	@details This is the volumetric version.
       */

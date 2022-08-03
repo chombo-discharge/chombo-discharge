@@ -758,8 +758,6 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
       DataOps::scale(m_electricField, p);
       m_particleSolver->interpolateVelocities();
 
-      ParticleContainer<P>& particles = m_particleSolver->getParticles();
-
       switch (m_integrationAlgorithm) {
       case IntegrationAlgorithm::Trapezoidal: {
         while (this->keepIntegrating()) {
@@ -1260,287 +1258,80 @@ template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
 {
-#if 0
+
   CH_TIME("StreamerInceptionStepper::computeDriftTimes");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::computeDriftTimes" << endl;
   }
 
   // Something transient storage we can deposit into.
-  EBAMRCellData t;
-  m_amr->allocate(t, m_realm, m_phase, 1);
+  EBAMRCellData driftTime;
+  m_amr->allocate(driftTime, m_realm, m_phase, 1);
+  DataOps::setValue(driftTime, 0.0);
 
-  // Compute drift time integral twice - once for +dx and once for -dx direction.
-  for (int i = 0; i < 2; i++) {
-    // Update velocities and starting mass to zero.
-    m_particleSolver->interpolateVelocities();
+  // Integrate for each voltage
+  for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
-    ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+    // Polarities. Do the positive polarity first.
+    std::vector<Real> polarities{1.0, -1.0};
 
-    this->resetParticleMass();
+    for (const auto& p : polarities) {
 
-    // Compute drift time integrals with input-based algorithm.
-    switch (m_integrationAlgorithm) {
-    case IntegrationAlgorithm::Trapezoidal: {
-      while (this->keepIntegrating()) {
+      this->initialParticles();
 
-        this->driftTime_moveParticlesTrapezoidal(i);
-        this->driftTime_addIntegrationTrapezoidal();
-      }
+      // Update velocities and starting mass to zero.
+      DataOps::scale(m_electricField, p);
+      m_particleSolver->interpolateVelocities();
 
-      break;
-    }
-    case IntegrationAlgorithm::Simpsons: {
-      while (this->keepIntegrating()) {
+      switch (m_integrationAlgorithm) {
+      case IntegrationAlgorithm::Trapezoidal: {
+        while (this->keepIntegrating()) {
 
-        this->driftTime_moveParticlesSimpsons(i);
-        this->driftTime_addIntegrationSimpsons();
-      }
-
-      break;
-    }
-    default: {
-      MayDay::Error("StreamerInceptionStepper::computeDriftTimes -- logic bust");
-    }
-    }
-
-    // Rewind particles and deposit drift times onto the mesh.
-    this->rewindParticles();
-
-    m_particleSolver->deposit(t);
-
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      t[lvl]->copyTo(Interval(0, 0), *m_driftTimes[lvl], Interval(i, i));
-    }
-  }
-#endif
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::driftTime_moveParticlesTrapezoidal(const int& a_dxSign) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal" << endl;
-  }
-
-  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
-  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
-
-  // Move particles and remap
-  this->driftTime_moveParticlesOneStep(a_dxSign, 0);
-
-  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
-  if (particlesBefore != particlesAfter) {
-    MayDay::Warning("StreamerInceptionStepper::driftTime_moveParticlesTrapezoidal -- logic bust, lost some particles");
-  }
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::driftTime_addIntegrationTrapezoidal() noexcept
-{
-  CH_TIME("StreamerInceptionStepper:driftTime_addIntegrationTrapezoidal");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::driftTime_addIntegrationTrapezoidal" << endl;
-  }
-
-  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    ParticleData<P>& levelParticles = amrParticles[lvl];
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = levelParticles[dit()].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        // Add integration parts if integration flag true
-        if (p.template scalar<0>() > 0.0) {
-          const RealVect E                    = p.velocity();
-          const Real     Emagnitude           = E.vectorLength();
-          const Real     dx                   = p.template scalar<1>();
-          const Real     startPointEmagnitude = p.template scalar<2>();
-
-          p.mass() += (dx / 2) * ((1 / startPointEmagnitude) + (1 / Emagnitude));
+          // Move particles and add integration contribution for the current step.
+          this->K_moveParticlesTrapezoidal(m_voltageSweeps[i]);
+          this->K_addIntegrationTrapezoidal(m_voltageSweeps[i]);
         }
+
+        break;
       }
-    }
-  }
-}
+      case IntegrationAlgorithm::Simpsons: {
+        while (this->keepIntegrating()) {
 
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(const int& a_dxSign) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::driftTime_moveparticlesSimpsons");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::driftTime_moveparticlesSimpsons" << endl;
-  }
-
-  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
-#if 1
-  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
-#endif
-
-  // Step 1: Move particles dx/2 and remap
-  this->driftTime_moveParticlesOneStep(a_dxSign, 1);
-
-  // Step 2: Move particles dx/2 and remap
-  this->driftTime_moveParticlesOneStep(a_dxSign, 2);
-
-#if 1
-  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
-  if (particlesBefore != particlesAfter) {
-    MayDay::Warning("StreamerInceptionStepper::driftTime_moveParticlesSimpsons -- logic bust, lost some particles");
-  }
-#endif
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons() noexcept
-{
-  CH_TIME("StreamerInceptionStepper:driftTime_addIntegrationSimpsons");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::driftTime_addIntegrationSimpsons" << endl;
-  }
-
-  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    ParticleData<P>& levelParticles = amrParticles[lvl];
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = levelParticles[dit()].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        // Add integration parts if integration flag true
-        if (p.template scalar<0>() > 0.0) {
-          const RealVect E                    = p.velocity();
-          const Real     Emagnitude           = E.vectorLength();
-          const Real     dx                   = p.template scalar<1>();
-          const Real     startPointEmagnitude = p.template scalar<2>();
-          const Real     midPointEmagnitude   = p.template scalar<3>();
-
-          p.mass() += (dx / 6) * ((1 / startPointEmagnitude) + 4 * (1 / midPointEmagnitude) + (1 / Emagnitude));
+          // Move particles and add integration contribution for the current step.
+          this->K_moveParticlesSimpsons(m_voltageSweeps[i]);
+          this->K_addIntegrationSimpsons(m_voltageSweeps[i]);
         }
+
+        break;
       }
-    }
-  }
-}
+      default: {
+        MayDay::Error("StreamerInceptionStepper::computeDriftTime -- logic bust");
 
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(const int& a_dxSign, const int& a_step) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::driftTime_moveParticlesOneStep");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::driftTime_moveParticlesOneStep" << endl;
-  }
-
-  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
-  const RealVect probLo = m_amr->getProbLo();
-  const RealVect probHi = m_amr->getProbHi();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    // Particles move half a cell on this level.
-    const Real dx = 0.5 * m_amr->getDx()[lvl];
-
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    ParticleData<P>& levelParticles = amrParticles[lvl];
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = levelParticles[dit()].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        // If integration flag true, move particle and check integration conditions
-        if (p.template scalar<0>() > 0.0) {
-          const RealVect E                  = p.velocity();
-          const RealVect normalizedVelocity = E / E.vectorLength();
-          const Real     Emagnitude         = E.vectorLength();
-
-          // Calculate new position based on integration algorithm and direction
-          RealVect newPosition;
-          switch (m_integrationAlgorithm) {
-          case IntegrationAlgorithm::Trapezoidal: {
-            if (a_dxSign == 0) {
-              newPosition = p.position() + normalizedVelocity * dx;
-            }
-            else if (a_dxSign == 1) {
-              newPosition = p.position() + normalizedVelocity * (-dx);
-            }
-            else {
-              MayDay::Error("StreamerInceptionStepper::driftTime_moveParticlesOneStep -- logic bust");
-            }
-
-            // Store values to particle for subsequent integration
-            p.template scalar<1>() = dx;
-            p.template scalar<2>() = Emagnitude;
-
-            break;
-          }
-          case IntegrationAlgorithm::Simpsons: {
-            if (a_dxSign == 0) {
-              newPosition = p.position() + normalizedVelocity * 0.5 * dx;
-            }
-            else if (a_dxSign == 1) {
-              newPosition = p.position() + normalizedVelocity * 0.5 * (-dx);
-            }
-            else {
-              MayDay::Error("StreamerInceptionStepper::driftTime_moveParticlesOneStep -- logic bust");
-            }
-
-            // Store values to particle for subsequent integration
-            if (a_step == 1) {
-              p.template scalar<1>() = dx;
-              p.template scalar<2>() = Emagnitude;
-            }
-            else if (a_step == 2) {
-              p.template scalar<3>() = Emagnitude;
-            }
-            else {
-              MayDay::Error("StreamerInceptionStepper:driftTime_moveParticlesOneStep -- logic bust");
-            }
-
-            break;
-          }
-          default: {
-            MayDay::Error("StreamerInceptionStepper::driftTime_moveParticlesOneStep -- logic bust");
-          }
-          }
-
-          // Check keep integrating criteria. Move particle if fulfilled, flag if not.
-          if (this->particleOutsideGrid(newPosition, probLo, probHi)) {
-            p.template scalar<0>() = -1.0;
-          }
-          else if (this->particleInsideElectrode(newPosition)) {
-            p.template scalar<0>() = -1.0;
-          }
-          else {
-            p.position() = newPosition;
-          }
-        }
+        break;
       }
-    }
-  }
+      }
 
-  m_particleSolver->remap();
-  m_particleSolver->interpolateVelocities();
+      // Move particles back to initial position and deposit them on the mesh.
+      this->rewindParticles();
+
+      m_particleSolver->deposit(driftTime);
+
+      // Copy drift time to solver data holder
+      if(p > 0.0) {
+	for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+	  driftTime[lvl]->localCopyTo(Interval(0, 0), *m_driftTimesPlus[lvl], Interval(i, i));
+	}
+      }
+      else {
+	for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+	  driftTime[lvl]->localCopyTo(Interval(0, 0), *m_driftTimesMinu[lvl], Interval(i, i));
+	}
+      }      
+
+      // Scale field back. 
+      DataOps::scale(m_electricField, p);
+    }
+  }  
 }
 
 template <typename P, typename F>
