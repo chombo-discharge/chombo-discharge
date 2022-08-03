@@ -1285,7 +1285,7 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(const int& dxSign
   m_particleSolver->remap();
   m_particleSolver->interpolateVelocities();
 
-  // Check if particles are inside critical volume
+  // Check if particles are inside the critical volume
   this->checkParticlesInsideCriticalVolume(voltInd);
 }
 
@@ -1309,7 +1309,7 @@ StreamerInceptionStepper<P, F>::checkParticlesInsideCriticalVolume(const int& vo
   const RealVect probLo = m_amr->getProbLo();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Real dx = 0.5*m_amr->getDx()[lvl];
+    const Real dx = m_amr->getDx()[lvl];
 
     const DisjointBoxLayout& dbl            = m_amr->getGrids(amrParticles.getRealm())[lvl];
     
