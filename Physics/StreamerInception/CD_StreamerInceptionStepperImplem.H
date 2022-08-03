@@ -44,9 +44,17 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 
   this->parseOptions();
 
-  // Default alpha.
+  // Default stuff.
   m_alpha = [](const Real E) {
     return 1.0;
+  };
+
+  m_backgroundRate = [](const Real E) {
+    return 1. / E;
+  };
+
+  m_fieldEmission = [](const Real E) {
+    return 1. / E;
   };
 }
 
@@ -105,14 +113,20 @@ StreamerInceptionStepper<P, F>::allocate()
   m_fieldSolver->allocateInternals();
   m_particleSolver->allocate();
 
-  // clang-format off
-  m_amr->allocate(m_velocity,          m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_electricField, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_inceptionIntegral, m_realm, m_phase, m_voltageSweeps.size());
-  m_amr->allocate(m_inceptionVoltage,  m_realm, m_phase, 1);
-  m_amr->allocate(m_driftTimes,        m_realm, m_phase, 2);
-  // clang-format on
+  m_amr->allocate(m_backgroundIonization, m_realm, m_phase, m_voltageSweeps.size());
+  m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
+  m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
+  m_amr->allocate(m_inceptionVoltage, m_realm, m_phase, 1);
+  m_amr->allocate(m_driftTimes, m_realm, m_phase, 2);
 
   DataOps::setValue(m_inceptionIntegral, 0.0);
+  DataOps::setValue(m_backgroundIonization, 0.0);
+  DataOps::setValue(m_emissionRatesPlus, 0.0);
+  DataOps::setValue(m_emissionRatesMinu, 0.0);
+  DataOps::setValue(m_inceptionVoltage, 0.0);
+  DataOps::setValue(m_driftTimes, 0.0);
 }
 
 template <typename P, typename F>
@@ -137,10 +151,10 @@ StreamerInceptionStepper<P, F>::initialData()
   }
 
   // Get the gas-side electric field and give it to the particle solvers.
-  DataOps::setValue(m_velocity, 0.0);
-  DataOps::copy(m_velocity, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
-  m_amr->averageDown(m_velocity, m_realm, m_phase);
-  m_amr->interpGhost(m_velocity, m_realm, m_phase);
+  DataOps::setValue(m_electricField, 0.0);
+  DataOps::copy(m_electricField, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
+  m_amr->averageDown(m_electricField, m_realm, m_phase);
+  m_amr->interpGhost(m_electricField, m_realm, m_phase);
 }
 
 template <typename P, typename F>
@@ -185,6 +199,12 @@ StreamerInceptionStepper<P, F>::parseOptions()
 
   std::string str;
 
+  m_plotInceptionIntegral    = false;
+  m_plotInceptionVoltage     = false;
+  m_plotBackgroundIonization = false;
+  m_plotFieldEmission        = false;
+  m_plotDriftTime            = false;
+
   // Read in parameters
   pp.get("verbosity", m_verbosity);
   pp.get("voltage_lo", voltageLo);
@@ -202,6 +222,31 @@ StreamerInceptionStepper<P, F>::parseOptions()
   }
   else {
     MayDay::Error("StreamerInceptionStepper::StreamerInceptionStepper -- logic bust");
+  }
+
+  // Get plot variables.
+  const int num = pp.countval("plt_vars");
+  if (num > 0) {
+    Vector<std::string> plotVars(num);
+    pp.getarr("plt_vars", plotVars, 0, num);
+
+    for (int i = 0; i < num; i++) {
+      if (plotVars[i] == "K") {
+        m_plotInceptionIntegral = true;
+      }
+      else if (plotVars[i] == "Uinc") {
+        m_plotInceptionVoltage = true;
+      }
+      else if (plotVars[i] == "bg_rate") {
+        m_plotBackgroundIonization = true;
+      }
+      else if (plotVars[i] == "emission") {
+        m_plotFieldEmission = true;
+      }
+      else if (plotVars[i] == "drift") {
+        m_plotDriftTime = true;
+      }
+    }
   }
 
   // Define voltages
@@ -270,41 +315,103 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   m_particleSolver->writePlotData(a_output, a_icomp);
 
   // Write our K values.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Interval srcInterval(0, m_voltageSweeps.size() - 1);
-    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
-    m_inceptionIntegral[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-  }
-  a_icomp += m_voltageSweeps.size();
+  if (m_plotInceptionIntegral) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+      const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+      m_inceptionIntegral[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    }
+    a_icomp += m_voltageSweeps.size();
 
-  std::string varName;
-  for (const Real& V : m_voltageSweeps) {
-    varName = "K for ";
-    varName += std::to_string(V);
-    varName += " V";
-    a_plotVariableNames.push_back(varName);
+    std::string varName;
+    for (const Real& V : m_voltageSweeps) {
+      varName = "K-value, V = ";
+      varName += std::to_string(V);
+      a_plotVariableNames.push_back(varName);
+    }
   }
 
   // Write our drift time values.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Interval srcInterval(0, 1);
-    const Interval dstInterval(a_icomp, a_icomp + 1);
-    m_driftTimes[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-  }
-  a_icomp += 2;
+  if (m_plotDriftTime) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Interval srcInterval(0, 1);
+      const Interval dstInterval(a_icomp, a_icomp + 1);
+      m_driftTimes[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    }
+    a_icomp += 2;
 
-  a_plotVariableNames.push_back("t*µV for +E direction");
-  a_plotVariableNames.push_back("t*µV for -E direction");
+    a_plotVariableNames.push_back("t*µV for +E direction");
+    a_plotVariableNames.push_back("t*µV for -E direction");
+  }
 
   // Write the inception voltage.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Interval srcInterval(0, 0);
-    const Interval dstInterval(a_icomp, a_icomp);
-    m_inceptionVoltage[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-  }
-  a_icomp += 1;
+  if (m_plotInceptionVoltage) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Interval srcInterval(0, 0);
+      const Interval dstInterval(a_icomp, a_icomp);
+      m_inceptionVoltage[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    }
+    a_icomp += 1;
 
-  a_plotVariableNames.push_back("Inception voltage");
+    a_plotVariableNames.push_back("Inception voltage");
+  }
+
+  // Write the detachment rates
+  if (m_plotBackgroundIonization) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+      const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+      m_backgroundIonization[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    }
+    a_icomp += m_voltageSweeps.size();
+
+    std::string varName;
+    for (const Real& V : m_voltageSweeps) {
+      varName = "Detachment rate, V =  ";
+      varName += std::to_string(V);
+      a_plotVariableNames.push_back(varName);
+    }
+  }
+
+  // Write field emission rates
+  if (m_plotFieldEmission) {
+
+    // Positive polarity
+    {
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+        const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+        m_emissionRatesPlus[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+      }
+
+      std::string varName;
+      for (const Real& V : m_voltageSweeps) {
+        varName = "Emission rate, V = +";
+        varName += std::to_string(V);
+        a_plotVariableNames.push_back(varName);
+      }
+
+      a_icomp += m_voltageSweeps.size();
+    }
+
+    // Negative polarity
+    {
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+        const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+        m_emissionRatesMinu[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+      }
+
+      std::string varName;
+      for (const Real& V : m_voltageSweeps) {
+        varName = "Emission rate, V = -";
+        varName += std::to_string(V);
+        a_plotVariableNames.push_back(varName);
+      }
+
+      a_icomp += m_voltageSweeps.size();
+    }
+  }
 }
 
 template <typename P, typename F>
@@ -322,13 +429,29 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
   ncomp += m_particleSolver->getNumberOfPlotVariables();
 
   // K-values
-  ncomp += m_voltageSweeps.size();
+  if (m_plotInceptionIntegral) {
+    ncomp += m_voltageSweeps.size();
+  }
 
   // Drift times (+/-) direction
-  ncomp += 2;
+  if (m_plotDriftTime) {
+    ncomp += 2;
+  }
 
   // Inception voltage.
-  ncomp += 1;
+  if (m_plotInceptionVoltage) {
+    ncomp += 1;
+  }
+
+  // Detachment rates
+  if (m_plotBackgroundIonization) {
+    ncomp += m_voltageSweeps.size();
+  }
+
+  // Field emission rates
+  if (m_plotFieldEmission) {
+    ncomp += 2 * m_voltageSweeps.size();
+  }
 
   return ncomp;
 }
@@ -403,7 +526,7 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   m_particleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   // Regrid velocity field
-  m_amr->reallocate(m_velocity, m_phase, a_lmin);
+  m_amr->reallocate(m_electricField, m_phase, a_lmin);
 }
 
 template <typename P, typename F>
@@ -433,14 +556,27 @@ StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::setDetachmentRate(const std::function<Real(const Real& E)>& a_detachmentRate) noexcept
+StreamerInceptionStepper<P, F>::setBackgroundIonization(
+  const std::function<Real(const Real& E)>& a_backgroundIonization) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setDetachmentRate");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::setDetachmentRate" << endl;
   }
 
-  m_detachmentRate = a_detachmentRate;
+  m_backgroundRate = a_backgroundIonization;
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::setFieldEmission(const std::function<Real(const Real& E)>& a_currentDensity) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setFieldEmission");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setFieldEmission" << endl;
+  }
+
+  m_fieldEmission = a_currentDensity;
 }
 
 template <typename P, typename F>
@@ -520,7 +656,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
   }
 
   // Initialize the particle solver.
-  m_particleSolver->setVelocity(m_velocity);
+  m_particleSolver->setVelocity(m_electricField);
 
   this->initialParticles();
 
@@ -530,11 +666,20 @@ StreamerInceptionStepper<P, F>::postInitialize()
   // Solve drift time integral in both directions and store values in m_driftTimes
   this->computeDriftTimes();
 
+  // Compute detachment rates
+  this->computeBackgroundIonization();
+
+  // Compute field emission rates
+  this->computeFieldEmission();
+
   // Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage
   this->computeInceptionVoltageVolume();
 
   // Compute critical volume of K values for each voltage
   this->computeCriticalVolume();
+
+  // Compute time to first critical electron
+  this->computeFirstElectron();
 
   // Print voltages, max K values, and critical volumes to terminal
   if (m_printReport) {
@@ -944,6 +1089,110 @@ StreamerInceptionStepper<P, F>::resetParticleMass() noexcept
 
 template <typename P, typename F>
 void
+StreamerInceptionStepper<P, F>::computeBackgroundIonization() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeBackgroundIonization");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeBackgroundIonization" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+      EBCellFAB& detach    = (*m_backgroundIonization[lvl])[dit()];
+      FArrayBox& detachReg = detach.getFArrayBox();
+
+      const EBCellFAB& electricField    = (*m_electricField[lvl])[dit()];
+      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        const Real E = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)))
+                         .vectorLength();
+
+        for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+          detachReg(iv, i) = m_backgroundRate(m_voltageSweeps[i] * E);
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const Real E = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)))
+                         .vectorLength();
+
+        for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+          detach(vof, i) = m_backgroundRate(m_voltageSweeps[i] * E);
+        }
+      };
+
+      // Execute kernels
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(dbl[dit()], regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::computeFieldEmission() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeFieldEmission");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeFieldEmission" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const EBISBox& ebisbox = ebisl[dit()];
+
+      // Here, emissionPlus is when we have the standard voltage (V = 1) and
+      // emissionMinu is when the voltage is reverted.
+      EBCellFAB& emissionPlus = (*m_emissionRatesPlus[lvl])[dit()];
+      EBCellFAB& emissionMinu = (*m_emissionRatesMinu[lvl])[dit()];
+
+      emissionPlus.setVal(0.0);
+      emissionMinu.setVal(0.0);
+
+      const EBCellFAB& electricField    = (*m_electricField[lvl])[dit()];
+      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const RealVect E = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+
+        const Real normalE    = E.dotProduct(ebisbox.normal(vof));
+        const Real magnitudeE = E.vectorLength();
+
+        if (normalE > 0.0) {
+          // Field points out of the electrode but for the opposite polarity it will
+          // point into the electrode and the electrons can then escape.
+          for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+            emissionPlus(vof, i) = 0.0;
+            emissionMinu(vof, i) = m_fieldEmission(magnitudeE * m_voltageSweeps[i]);
+          }
+        }
+        else if (normalE < 0.0) {
+          // Opposite case of the above.
+          for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+            emissionPlus(vof, i) = m_fieldEmission(magnitudeE * m_voltageSweeps[i]);
+            emissionMinu(vof, i) = 0.0;
+          }
+        }
+      };
+
+      // Execute kernels
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+}
+
+template <typename P, typename F>
+void
 StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeDriftTimes");
@@ -1050,6 +1299,7 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationTrapezoidal() noexcept
           const Real     Emagnitude           = E.vectorLength();
           const Real     dx                   = p.template scalar<1>();
           const Real     startPointEmagnitude = p.template scalar<2>();
+
           p.mass() += (dx / 2) * ((1 / startPointEmagnitude) + (1 / Emagnitude));
         }
       }
@@ -1078,7 +1328,7 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(const int& a_dxS
   // Step 2: Move particles dx/2 and remap
   this->driftTime_moveParticlesOneStep(a_dxSign, 2);
 
-#ifndef NDEBUG  
+#ifndef NDEBUG
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("StreamerInceptionStepper::driftTime_moveParticlesSimpsons -- logic bust, lost some particles");
@@ -1115,7 +1365,7 @@ StreamerInceptionStepper<P, F>::driftTime_addIntegrationSimpsons() noexcept
           const Real     dx                   = p.template scalar<1>();
           const Real     startPointEmagnitude = p.template scalar<2>();
           const Real     midPointEmagnitude   = p.template scalar<3>();
-	  
+
           p.mass() += (dx / 6) * ((1 / startPointEmagnitude) + 4 * (1 / midPointEmagnitude) + (1 / Emagnitude));
         }
       }
@@ -1402,6 +1652,20 @@ StreamerInceptionStepper<P, F>::computeCriticalVolume() noexcept
 
 template <typename P, typename F>
 void
+StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeFirstElectron");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeFirstElectron" << endl;
+  }
+
+  for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+    m_firstElectron.push_back(0.0);
+  }
+}
+
+template <typename P, typename F>
+void
 StreamerInceptionStepper<P, F>::printReport() const noexcept
 {
   CH_TIME("StreamerInceptionStepper::printReport");
@@ -1436,12 +1700,14 @@ StreamerInceptionStepper<P, F>::printReport() const noexcept
     std::cout << left << setw(15) << setfill(' ') << "# Voltage";
     std::cout << left << setw(15) << setfill(' ') << "Max K";
     std::cout << left << setw(15) << setfill(' ') << "Critical volume\n";
+    std::cout << left << setw(15) << setfill(' ') << "First electron (s)\n";
     std::cout << "# =============================================\n";
 
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
       printElement(m_voltageSweeps[i]);
       printElement(m_maxKValues[i]);
       printElement(m_criticalVolumes[i]);
+      printElement(m_firstElectron[i]);
       std::cout << endl;
     }
 

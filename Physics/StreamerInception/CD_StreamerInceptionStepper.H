@@ -34,6 +34,16 @@ namespace Physics {
     };
 
     /*!
+      @brief Identifier for how the first electron appeared
+    */
+    enum class CriticalElectron
+    {
+      BackgroundIonization,
+      Drift,
+      FieldEmission
+    };
+
+    /*!
       @brief Class for streamer inception integral evaluations. 
       @details P is the tracer particle type and F is the field solver type. Note that the integration algorithm requires some transient storage
       on each particle (such as the previous position). This is defined in the TracerParticle template arguments. 
@@ -233,11 +243,18 @@ namespace Physics {
       setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept;
 
       /*!
-	@brief Set the electron detachment rate
-	@param[in] a_detachmentRate Detachment rate (units of 1/s). 
+	@brief Set the background ionization rate (e.g. from detachment, cosmic radiation etc). 
+	@param[in] a_backgroundRate Background ionization rate (units of 1/s). 
       */
       virtual void
-      setDetachmentRate(const std::function<Real(const Real& E)>& a_detachmentRate) noexcept;
+      setBackgroundIonization(const std::function<Real(const Real& E)>& a_backgroundIonization) noexcept;
+
+      /*!
+	@brief Set the field emission current
+	@param[in] a_fieldEmission Field emission current density. 
+      */
+      virtual void
+      setFieldEmission(const std::function<Real(const Real& E)>& a_currentDensity) noexcept;
 
     protected:
       /*!
@@ -256,9 +273,9 @@ namespace Physics {
       RefCountedPtr<FieldSolver> m_fieldSolver;
 
       /*!
-	@brief Velocity field for particles. 
+	@brief Electric field for particles (with voltage = 1 V)
       */
-      EBAMRCellData m_velocity;
+      EBAMRCellData m_electricField;
 
       /*!
 	@brief Inception integral values (K-values)
@@ -269,6 +286,21 @@ namespace Physics {
 	@brief Drift times (t*µV)
       */
       EBAMRCellData m_driftTimes;
+
+      /*!
+	@brief Background ionization rates
+      */
+      EBAMRCellData m_backgroundIonization;
+
+      /*!
+	@brief Field emission rates for positive voltage
+      */
+      EBAMRCellData m_emissionRatesPlus;
+
+      /*!
+	@brief Field emission rates for negative voltage
+      */
+      EBAMRCellData m_emissionRatesMinu;
 
       /*!
 	@brief Computed inception voltages. 
@@ -285,6 +317,31 @@ namespace Physics {
       */
       bool m_printReport;
 
+      /*!
+	@brief If true, plot the K-values
+      */
+      bool m_plotInceptionIntegral;
+
+      /*!
+	@brief If true, plot the inception voltage
+      */
+      bool m_plotInceptionVoltage;
+
+      /*!
+	@brief If true, plot the drift time
+      */
+      bool m_plotDriftTime;
+
+      /*!
+	@brief If true, plot the background ionization rates
+      */
+      bool m_plotBackgroundIonization;
+
+      /*!
+	@brief If true, plot the field emission.
+      */
+      bool m_plotFieldEmission;
+
       /*! 
 	@brief Max K value for every voltage
       */
@@ -294,6 +351,11 @@ namespace Physics {
 	@brief Critical volumes of K values for each voltage
       */
       std::vector<Real> m_criticalVolumes;
+
+      /*!
+	@brief (Average) time to appearance of first electron (in critical volume)
+      */
+      std::vector<Real> m_firstElectron;
 
       /*!
 	@brief Realm where the solver lives
@@ -311,9 +373,14 @@ namespace Physics {
       std::function<Real(const Real& E)> m_alpha;
 
       /*!
-	@brief Electron detachment rate
+	@brief Background ionization rate expression.
       */
-      std::function<Real(const Real& E)> m_detachmentRate;
+      std::function<Real(const Real& E)> m_backgroundRate;
+
+      /*!
+	@brief Field emission current
+      */
+      std::function<Real(const Real& E)> m_fieldEmission;
 
       /*!
 	@brief Voltage sweeps
@@ -389,6 +456,18 @@ namespace Physics {
       resetParticleMass() noexcept;
 
       /*!
+	@brief Compute the detachment rate for all voltages
+      */
+      virtual void
+      computeBackgroundIonization() noexcept;
+
+      /*!
+	@brief Compute field emission rates
+      */
+      virtual void
+      computeFieldEmission() noexcept;
+
+      /*!
 	@brief Calculate particles' drift times until inside electrode or outside grid. 
       */
       virtual void
@@ -447,6 +526,12 @@ namespace Physics {
       */
       virtual void
       computeCriticalVolume() noexcept;
+
+      /*!
+	@brief Compute time to first critical electron.
+      */
+      virtual void
+      computeFirstElectron() noexcept;
 
       /*!
 	@brief Print m_voltageSweeps, m_maxKValues, and m_criticalVolumes to terminal
