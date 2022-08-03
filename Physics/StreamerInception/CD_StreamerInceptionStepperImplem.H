@@ -763,8 +763,8 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
         while (this->keepIntegrating()) {
 
           // Move particles and add integration contribution for the current step.
-          this->K_moveParticlesTrapezoidal(m_voltageSweeps[i]);
-          this->K_addIntegrationTrapezoidal(m_voltageSweeps[i]);
+          this->inceptionKickTrapezoidal(m_voltageSweeps[i]);
+          this->inceptionIntegrateTrapezoidal(m_voltageSweeps[i]);
         }
 
         break;
@@ -773,8 +773,8 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
         while (this->keepIntegrating()) {
 
           // Move particles and add integration contribution for the current step.
-          this->K_moveParticlesSimpsons(m_voltageSweeps[i]);
-          this->K_addIntegrationSimpsons(m_voltageSweeps[i]);
+          this->inceptionKickSimpsons(m_voltageSweeps[i]);
+          this->inceptionIntegrateSimpsons(m_voltageSweeps[i]);
         }
 
         break;
@@ -822,38 +822,38 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F>::inceptionKickTrapezoidal(const Real& a_voltage) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::K_moveParticlesTrapezoidal");
+  CH_TIME("StreamerInceptionStepper::inceptionKickTrapezoidal");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::K_moveParticlesTrapezoidal" << endl;
+    pout() << "StreamerInceptionStepper::inceptionKickTrapezoidal" << endl;
   }
 
-  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
 #if 1
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+  
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
 #endif
 
   // Move particles
-  this->K_moveParticlesOneStep(a_voltage, 0);
+  this->inceptionKickOneStep(a_voltage, 0);
 
 #if 1
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
 
   if (particlesBefore != particlesAfter) {
-    MayDay::Warning("StreamerInceptionStepper::K_moveParticlesTrapezoidal -- logic bust, lost some particles");
+    MayDay::Warning("StreamerInceptionStepper::inceptionKickTrapezoidal -- logic bust, lost some particles");
   }
 #endif
 }
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_addIntegrationTrapezoidal(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::K_addIntegrationTrapezoidal");
+  CH_TIME("StreamerInceptionStepper::inceptionIntegrateTrapezoidal");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::K_addIntegrationTrapezoidal" << endl;
+    pout() << "StreamerInceptionStepper::inceptionIntegrateTrapezoidal" << endl;
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
@@ -889,11 +889,11 @@ StreamerInceptionStepper<P, F>::K_addIntegrationTrapezoidal(const Real& a_voltag
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_moveParticlesSimpsons(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F>::inceptionKickSimpsons(const Real& a_voltage) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::K_moveParticlesSimpsons");
+  CH_TIME("StreamerInceptionStepper::inceptionKickSimpsons");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::K_moveParticlesSimpsons" << endl;
+    pout() << "StreamerInceptionStepper::inceptionKickSimpsons" << endl;
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
@@ -903,30 +903,30 @@ StreamerInceptionStepper<P, F>::K_moveParticlesSimpsons(const Real& a_voltage) n
 #endif
 
   // Step 1: Move particles dx/2 and remap
-  this->K_moveParticlesOneStep(a_voltage, 1);
+  this->inceptionKickOneStep(a_voltage, 1);
 
 #if 1
   const size_t particlesMiddle = amrParticles.getNumberOfValidParticesGlobal();
 #endif
 
   // Step 2: Move particles dx/2 and remap
-  this->K_moveParticlesOneStep(a_voltage, 2);
+  this->inceptionKickOneStep(a_voltage, 2);
 
 #if 1
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter || particlesBefore != particlesMiddle) {
-    MayDay::Warning("StreamerInceptionStepper::K_moveParticlesSimpsons -- logic bust, lost some particles");
+    MayDay::Warning("StreamerInceptionStepper::inceptionKickSimpsons -- logic bust, lost some particles");
   }
 #endif
 }
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_addIntegrationSimpsons(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F>::inceptionIntegrateSimpsons(const Real& a_voltage) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::K_addIntegrationSimpsons");
+  CH_TIME("StreamerInceptionStepper::inceptionIntegrateSimpsons");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::K_addIntegrationSimpsons" << endl;
+    pout() << "StreamerInceptionStepper::inceptionIntegrateSimpsons" << endl;
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
@@ -965,11 +965,11 @@ StreamerInceptionStepper<P, F>::K_addIntegrationSimpsons(const Real& a_voltage) 
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::K_moveParticlesOneStep(const Real& a_voltage, const int& a_step) noexcept
+StreamerInceptionStepper<P, F>::inceptionKickOneStep(const Real& a_voltage, const int& a_step) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::K_moveParticlesOneStep");
+  CH_TIME("StreamerInceptionStepper::inceptionKickOneStep");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::K_moveParticlesOneStep" << endl;
+    pout() << "StreamerInceptionStepper::inceptionKickOneStep" << endl;
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
@@ -1025,13 +1025,13 @@ StreamerInceptionStepper<P, F>::K_moveParticlesOneStep(const Real& a_voltage, co
               p.template scalar<3>() = currentAlpha;
             }
             else {
-              MayDay::Error("StreamerInceptionStepper::K_moveParticlesOneStep -- logic bust");
+              MayDay::Error("StreamerInceptionStepper::inceptionKickOneStep -- logic bust");
             }
 
             break;
           }
           default: {
-            MayDay::Error("StreamerInceptionStepper::K_moveParticlesOneStep -- logic bust");
+            MayDay::Error("StreamerInceptionStepper::inceptionKickOneStep -- logic bust");
           }
           }
 
@@ -1288,8 +1288,8 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
         while (this->keepIntegrating()) {
 
           // Move particles and add integration contribution for the current step.
-          this->K_moveParticlesTrapezoidal(m_voltageSweeps[i]);
-          this->K_addIntegrationTrapezoidal(m_voltageSweeps[i]);
+          this->inceptionKickTrapezoidal(m_voltageSweeps[i]);
+          this->inceptionIntegrateTrapezoidal(m_voltageSweeps[i]);
         }
 
         break;
@@ -1298,8 +1298,8 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
         while (this->keepIntegrating()) {
 
           // Move particles and add integration contribution for the current step.
-          this->K_moveParticlesSimpsons(m_voltageSweeps[i]);
-          this->K_addIntegrationSimpsons(m_voltageSweeps[i]);
+          this->inceptionKickSimpsons(m_voltageSweeps[i]);
+          this->inceptionIntegrateSimpsons(m_voltageSweeps[i]);
         }
 
         break;

@@ -419,28 +419,28 @@ namespace Physics {
 	@param[in] a_voltage   Voltage multiplier
       */
       virtual void
-      K_moveParticlesTrapezoidal(const Real& a_voltage) noexcept;
+      inceptionKickTrapezoidal(const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Add integration parts after particles move
 	@param[in] a_voltage   Voltage multiplier
       */
       virtual void
-      K_addIntegrationTrapezoidal(const Real& a_voltage) noexcept;
+      inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Move particles as long as integration isn't stopped
 	@param[in] a_voltage   Voltage multiplier
       */
       virtual void
-      K_moveParticlesSimpsons(const Real& a_voltage) noexcept;
+      inceptionKickSimpsons(const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Add integration parts after particles move
 	@param[in] a_voltage   Voltage multiplier
       */
       virtual void
-      K_addIntegrationSimpsons(const Real& voltage) noexcept;
+      inceptionIntegrateSimpsons(const Real& voltage) noexcept;
 
       /*!
 	@brief K integral: Move particles one step according to the integration algorithm
@@ -448,7 +448,7 @@ namespace Physics {
 	@param[in] a_step      Step number for Simpsons' (doesn't affect Trapezoidal)
       */
       virtual void
-      K_moveParticlesOneStep(const Real& a_voltage, const int& a_step) noexcept;
+      inceptionKickOneStep(const Real& a_voltage, const int& a_step) noexcept;
 
       /*!
 	@brief Check if some particles still need to be processed. 
