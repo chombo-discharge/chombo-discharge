@@ -34,16 +34,6 @@ namespace Physics {
     };
 
     /*!
-      @brief Identifier for how the first electron appeared
-    */
-    enum class CriticalElectron
-    {
-      BackgroundIonization,
-      Drift,
-      FieldEmission
-    };
-
-    /*!
       @brief Class for streamer inception integral evaluations. 
       @details P is the tracer particle type and F is the field solver type. Note that the integration algorithm requires some transient storage
       on each particle (such as the previous position). This is defined in the TracerParticle template arguments. 
@@ -243,8 +233,15 @@ namespace Physics {
       setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept;
 
       /*!
+	@brief Set the ion mobility
+	@param[in] a_mobility Ion mobility
+      */
+      virtual void
+      setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept;      
+
+      /*!
 	@brief Set the background ionization rate (e.g. from detachment, cosmic radiation etc). 
-	@param[in] a_backgroundRate Background ionization rate (units of 1/s). 
+	@param[in] a_backgroundRate Background ionization rate (units of 1/m^3 s). 
       */
       virtual void
       setBackgroundIonization(const std::function<Real(const Real& E)>& a_backgroundIonization) noexcept;
@@ -354,8 +351,20 @@ namespace Physics {
 
       /*!
 	@brief (Average) time to appearance of first electron (in critical volume)
+	@note For positive voltage. 
       */
-      std::vector<Real> m_firstElectron;
+      std::vector<Real> m_firstElectronPlus;
+
+      /*!
+	@brief (Average) time to appearance of first electron (in critical volume)
+	@note For negative voltage. 
+      */
+      std::vector<Real> m_firstElectronMinu;
+      
+      /*!
+	@brief Voltage sweeps
+      */
+      std::vector<Real> m_voltageSweeps;      
 
       /*!
 	@brief Realm where the solver lives
@@ -383,9 +392,9 @@ namespace Physics {
       std::function<Real(const Real& E)> m_fieldEmission;
 
       /*!
-	@brief Voltage sweeps
+	@brief Ion mobility
       */
-      std::vector<Real> m_voltageSweeps;
+      std::function<Real(const Real& E)> m_ionMobility;
 
       /*!
 	@brief Distribute particles in every grid cell

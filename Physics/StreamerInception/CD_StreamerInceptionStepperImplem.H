@@ -20,13 +20,6 @@
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_NamespaceHeader.H>
 
-// Tasks:
-//
-// 1. Compute inception integral with particle tracing.
-// 2. Compute critical volume.
-// 3. Compute negative ion drift times to electrode(s). Compute as time/(V * mobility).
-// 4. Background ionization rates
-// 5. Evaluate field emission rates.
 using namespace Physics::StreamerInception;
 
 template <typename P, typename F>
@@ -356,7 +349,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
     a_plotVariableNames.push_back("Inception voltage");
   }
 
-  // Write the detachment rates
+  // Write the background ionization rates
   if (m_plotBackgroundIonization) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Interval srcInterval(0, m_voltageSweeps.size() - 1);
@@ -367,7 +360,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
     std::string varName;
     for (const Real& V : m_voltageSweeps) {
-      varName = "Detachment rate, V =  ";
+      varName = "Background ionization rate, V =  ";
       varName += std::to_string(V);
       a_plotVariableNames.push_back(varName);
     }
@@ -443,7 +436,7 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
     ncomp += 1;
   }
 
-  // Detachment rates
+  // Background ionization rates
   if (m_plotBackgroundIonization) {
     ncomp += m_voltageSweeps.size();
   }
@@ -556,12 +549,24 @@ StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)
 
 template <typename P, typename F>
 void
+StreamerInceptionStepper<P, F>::setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setIonMobility");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setIonMobility" << endl;
+  }
+
+  m_ionMobility = a_mobility;
+}
+
+template <typename P, typename F>
+void
 StreamerInceptionStepper<P, F>::setBackgroundIonization(
   const std::function<Real(const Real& E)>& a_backgroundIonization) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::setDetachmentRate");
+  CH_TIME("StreamerInceptionStepper::setBackgroundIonization");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::setDetachmentRate" << endl;
+    pout() << "StreamerInceptionStepper::setBackgroundIonization" << endl;
   }
 
   m_backgroundRate = a_backgroundIonization;
@@ -1101,8 +1106,8 @@ StreamerInceptionStepper<P, F>::computeBackgroundIonization() noexcept
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
-      EBCellFAB& detach    = (*m_backgroundIonization[lvl])[dit()];
-      FArrayBox& detachReg = detach.getFArrayBox();
+      EBCellFAB& bgIonization    = (*m_backgroundIonization[lvl])[dit()];
+      FArrayBox& bgIonizationReg = bgIonization.getFArrayBox();
 
       const EBCellFAB& electricField    = (*m_electricField[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
@@ -1112,7 +1117,7 @@ StreamerInceptionStepper<P, F>::computeBackgroundIonization() noexcept
                          .vectorLength();
 
         for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-          detachReg(iv, i) = m_backgroundRate(m_voltageSweeps[i] * E);
+          bgIonizationReg(iv, i) = m_backgroundRate(m_voltageSweeps[i] * E);
         }
       };
 
@@ -1121,7 +1126,7 @@ StreamerInceptionStepper<P, F>::computeBackgroundIonization() noexcept
                          .vectorLength();
 
         for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-          detach(vof, i) = m_backgroundRate(m_voltageSweeps[i] * E);
+          bgIonization(vof, i) = m_backgroundRate(m_voltageSweeps[i] * E);
         }
       };
 
@@ -1659,8 +1664,67 @@ StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
     pout() << "StreamerInceptionStepper::computeFirstElectron" << endl;
   }
 
-  for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-    m_firstElectron.push_back(0.0);
+  // TLDR: This routine computes the average time to the appereance of an electron
+  //       anywhere in the critical volume. We do this by assuming that the various
+  //       processes involved are Poisson processes P(r1), P(r2), ..., where r1
+  //       is the rate for the first Poisson process. The total rate is then given
+  //       by R = r1 + r2 + ... and the average time is 1/R.
+
+  // Total rate.
+  std::vector<Real> Rplus(m_voltageSweeps.size(), std::numeric_limits<Real>::min());
+  std::vector<Real> Rminu(m_voltageSweeps.size(), std::numeric_limits<Real>::min());  
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real&              dx    = m_amr->getDx()[lvl];
+
+    const Real vol = std::pow(dx, SpaceDim);
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+      const EBISBox&       ebisbox    = ebisl[dit()];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+
+      const EBCellFAB& bgRate    = (*m_backgroundIonization[lvl])[dit()];
+      const FArrayBox& bgRateReg = bgRate.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv) && ebisbox.isRegular(iv)) {
+          for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+
+            // Add background ionization rate.
+            Rplus[i] += bgRateReg(iv, i) * vol;
+            Rminu[i] += bgRateReg(iv, i) * vol;	    
+          }
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
+        if (validCells(iv) && ebisbox.isIrregular(iv)) {
+
+          const Real volFrac = ebisbox.volFrac(vof);
+	  
+          for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+
+            // Add background ionization rate.
+            Rplus[i] += bgRate(vof, i) * vol * volFrac;
+            Rminu[i] += bgRate(vof, i) * vol * volFrac;	    
+          }
+        }
+      };
+
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(dbl[dit()], regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      m_firstElectronPlus.push_back(1. / ParallelOps::sum(Rplus[i]));
+      m_firstElectronMinu.push_back(1. / ParallelOps::sum(Rminu[i]));      
+    }
   }
 }
 
@@ -1673,16 +1737,13 @@ StreamerInceptionStepper<P, F>::printReport() const noexcept
     pout() << "StreamerInceptionStepper::printReport" << endl;
   }
 
-  auto printElement = [](const Real el) -> void {
-    std::cout << left << setw(15) << setfill(' ') << el;
-  };
-
   // Compute the inception voltage.
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
     const Real Uinc = this->computeInceptionVoltage();
 
+    std::cout << "# ===================================================================\n";
     if (std::isnan(Uinc)) {
       std::cout << "# Could not compute inception voltage\n";
     }
@@ -1696,22 +1757,23 @@ StreamerInceptionStepper<P, F>::printReport() const noexcept
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
-    std::cout << "# =============================================\n";
+    std::cout << "# ===================================================================\n";
     std::cout << left << setw(15) << setfill(' ') << "# Voltage";
     std::cout << left << setw(15) << setfill(' ') << "Max K";
-    std::cout << left << setw(15) << setfill(' ') << "Critical volume\n";
-    std::cout << left << setw(15) << setfill(' ') << "First electron (s)\n";
-    std::cout << "# =============================================\n";
+    std::cout << left << setw(20) << setfill(' ') << "Crit. vol (m^3)";
+    std::cout << left << setw(20) << setfill(' ') << "Time lag + (s)";
+    std::cout << left << setw(20) << setfill(' ') << "Time lag - (s)" << std::endl;    
+    std::cout << "# ===================================================================\n";
 
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
-      printElement(m_voltageSweeps[i]);
-      printElement(m_maxKValues[i]);
-      printElement(m_criticalVolumes[i]);
-      printElement(m_firstElectron[i]);
+      std::cout << left << setw(15) << setfill(' ') << m_voltageSweeps[i];
+      std::cout << left << setw(15) << setfill(' ') << m_maxKValues[i];
+      std::cout << left << setw(20) << setfill(' ') << m_criticalVolumes[i];
+      std::cout << left << setw(20) << setfill(' ') << m_firstElectronPlus[i];
+      std::cout << left << setw(20) << setfill(' ') << m_firstElectronMinu[i];      
       std::cout << endl;
     }
-
-    std::cout << "# =============================================\n";
+    std::cout << "# ===================================================================\n";
 #ifdef CH_MPI
   }
 #endif
