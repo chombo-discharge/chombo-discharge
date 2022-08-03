@@ -703,54 +703,83 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
   // Transient storage we can deposit particles onto.
   EBAMRCellData K;
-  m_amr->allocate(K, m_realm, m_phase, 1);
+  EBAMRCellData Kplus;
+  EBAMRCellData Kminu;  
+  
+  m_amr->allocate(K,     m_realm, m_phase, 1);
+  m_amr->allocate(Kplus,     m_realm, m_phase, 1);
+  m_amr->allocate(Kminu,     m_realm, m_phase, 1);
+  
+  DataOps::setValue(K,     0.0);
+  DataOps::setValue(Kplus,     0.0);
+  DataOps::setValue(Kminu,     0.0);    
 
   // Integrate for each voltage
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
-    // Update velocities and starting mass to zero.
-    m_particleSolver->interpolateVelocities();
+    // Polarities. Do the positive polarity first. 
+    std::vector<Real> polarities{1.0, -1.0};
 
-    ParticleContainer<P>& particles = m_particleSolver->getParticles();
+    for (const auto& p : polarities) {
 
-    this->resetParticleMass();
+      this->initialParticles();
+      
+      // Update velocities and starting mass to zero.
+      DataOps::scale(m_electricField, p);
+      m_particleSolver->interpolateVelocities();
 
-    switch (m_integrationAlgorithm) {
-    case IntegrationAlgorithm::Trapezoidal: {
-      while (this->keepIntegrating()) {
+      ParticleContainer<P>& particles = m_particleSolver->getParticles();
 
-        // Move particles and add integration contribution for the current step.
-        this->K_moveParticlesTrapezoidal(m_voltageSweeps[i]);
-        this->K_addIntegrationTrapezoidal(m_voltageSweeps[i]);
+      switch (m_integrationAlgorithm) {
+      case IntegrationAlgorithm::Trapezoidal: {
+	while (this->keepIntegrating()) {
+
+	  // Move particles and add integration contribution for the current step.
+	  this->K_moveParticlesTrapezoidal(m_voltageSweeps[i]);
+	  this->K_addIntegrationTrapezoidal(m_voltageSweeps[i]);
+	}
+
+	break;
+      }
+      case IntegrationAlgorithm::Simpsons: {
+	while (this->keepIntegrating()) {
+
+	  // Move particles and add integration contribution for the current step.
+	  this->K_moveParticlesSimpsons(m_voltageSweeps[i]);
+	  this->K_addIntegrationSimpsons(m_voltageSweeps[i]);
+	}
+
+	break;
+      }
+      default: {
+	MayDay::Error("StreamerInceptionStepper::computeInceptionIntegral -- logic bust");
+
+	break;
+      }
       }
 
-      break;
-    }
-    case IntegrationAlgorithm::Simpsons: {
-      while (this->keepIntegrating()) {
+      // Move particles back to initial position and deposit them on the mesh.
+      this->rewindParticles();
 
-        // Move particles and add integration contribution for the current step.
-        this->K_moveParticlesSimpsons(m_voltageSweeps[i]);
-        this->K_addIntegrationSimpsons(m_voltageSweeps[i]);
+      if(p > 0.0) {
+	m_particleSolver->deposit(Kplus);
+      }
+      else{
+	m_particleSolver->deposit(Kminu);
       }
 
-      break;
-    }
-    default: {
-      MayDay::Error("StreamerInceptionStepper::computeInceptionIntegral -- logic bust");
-
-      break;
-    }
+      DataOps::scale(m_electricField, p);      
     }
 
-    // Move particles back to initial position and deposit them on the mesh.
-    this->rewindParticles();
+    // Make K = max(Kplus, Kminu)
+    DataOps::max(K, Kplus, Kminu);
 
-    m_particleSolver->deposit(K);
+    m_amr->averageDown(K, m_realm, m_phase);
+    m_amr->interpGhost(K, m_realm, m_phase);    
 
     // Get max K value.
     Real maxK = -std::numeric_limits<Real>::max();
-    Real minK = std::numeric_limits<Real>::max();
+    Real minK = +std::numeric_limits<Real>::max();
 
     DataOps::getMaxMin(maxK, minK, K, 0);
 
@@ -758,7 +787,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
     // Copy K values to m_inceptionIntegral so we can plot them later.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      K[lvl]->copyTo(Interval(0, 0), *m_inceptionIntegral[lvl], Interval(i, i));
+      K[lvl]->localCopyTo(Interval(0, 0), *m_inceptionIntegral[lvl], Interval(i, i));
     }
   }
 }
@@ -774,14 +803,14 @@ StreamerInceptionStepper<P, F>::K_moveParticlesTrapezoidal(const Real& a_voltage
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
-#ifndef NDEBUG
+#if 1
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
 #endif
 
   // Move particles
   this->K_moveParticlesOneStep(a_voltage, 0);
 
-#ifndef NDEBUG
+#if 1
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
 
   if (particlesBefore != particlesAfter) {
@@ -841,21 +870,21 @@ StreamerInceptionStepper<P, F>::K_moveParticlesSimpsons(const Real& a_voltage) n
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
-#ifndef NDEBUG
+#if 1
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
 #endif
 
   // Step 1: Move particles dx/2 and remap
   this->K_moveParticlesOneStep(a_voltage, 1);
 
-#ifndef NDEBUG
+#if 1
   const size_t particlesMiddle = amrParticles.getNumberOfValidParticesGlobal();
 #endif
 
   // Step 2: Move particles dx/2 and remap
   this->K_moveParticlesOneStep(a_voltage, 2);
 
-#ifndef NDEBUG
+#if 1
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter || particlesBefore != particlesMiddle) {
     MayDay::Warning("StreamerInceptionStepper::K_moveParticlesSimpsons -- logic bust, lost some particles");
@@ -923,6 +952,7 @@ StreamerInceptionStepper<P, F>::K_moveParticlesOneStep(const Real& a_voltage, co
 
   // Move particles
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    
     // Particles move half a cell on this level.
     const Real dx = 0.5 * m_amr->getDx()[lvl];
 
@@ -1323,7 +1353,7 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(const int& a_dxS
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
-#ifndef NDEBUG
+#if 1
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
 #endif
 
@@ -1333,7 +1363,7 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesSimpsons(const int& a_dxS
   // Step 2: Move particles dx/2 and remap
   this->driftTime_moveParticlesOneStep(a_dxSign, 2);
 
-#ifndef NDEBUG
+#if 1
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("StreamerInceptionStepper::driftTime_moveParticlesSimpsons -- logic bust, lost some particles");
@@ -1785,7 +1815,7 @@ StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect& a_pos,
                                                     const RealVect& a_probLo,
                                                     const RealVect& a_probHi) const noexcept
 {
-#ifndef NDEBUG
+#if 1
   CH_TIME("StreamerInceptionStepper::particleOutsideGrid");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::particleOutsideGrid" << endl;
@@ -1807,7 +1837,7 @@ template <typename P, typename F>
 bool
 StreamerInceptionStepper<P, F>::particleInsideElectrode(const RealVect& a_pos) const noexcept
 {
-#ifndef NDEBUG
+#if 1
   CH_TIME("StreamerInceptionStepper::particleInsideElectrode");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::particleInsideElectrode" << endl;

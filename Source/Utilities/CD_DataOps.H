@@ -462,6 +462,24 @@ public:
   floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
 
   /*!
+    @brief Make a_data = max(a_data1, a_data2)
+    @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
+    @param[in]  a_data1 Input data holder
+    @param[in]  a_data2 Input data holder
+  */
+  static void
+  max(EBAMRCellData& a_data, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
+
+  /*!
+    @brief Make a_data = max(a_data1, a_data2)
+    @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
+    @param[in]  a_data1 Input data holder
+    @param[in]  a_data2 Input data holder
+  */
+  static void
+  max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
+
+  /*!
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
     @param[out] a_min  Minium value
