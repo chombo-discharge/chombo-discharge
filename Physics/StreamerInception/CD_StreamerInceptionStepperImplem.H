@@ -106,7 +106,7 @@ StreamerInceptionStepper<P, F>::allocate()
   m_amr->allocate(m_velocity, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_KValues, m_realm, m_phase, m_voltageSweeps.size());
   m_amr->allocate(m_VInception, m_realm, m_phase, 1);
-  m_amr->allocate(m_driftTimes, m_realm, m_phase, 1 + m_voltageSweeps.size() );
+  m_amr->allocate(m_driftTimes, m_realm, m_phase, 2 * m_voltageSweeps.size() );
   
   DataOps::setValue(m_KValues, 0.0);  
 }
@@ -278,17 +278,19 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   
   // Write our drift time values.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Interval srcInterval(0, m_voltageSweeps.size());
-    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size());
+    const Interval srcInterval(0, 2 * m_voltageSweeps.size() - 1);
+    const Interval dstInterval(a_icomp, a_icomp + 2 * m_voltageSweeps.size() - 1);
     m_driftTimes[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
   }
-  a_icomp += 1 + m_voltageSweeps.size();
+  a_icomp += 2 * m_voltageSweeps.size();
 
-  a_plotVariableNames.push_back("t*µV for positive charge");
   for (const Real& V : m_voltageSweeps) {
-    varName = "t*µV for negative charge at ";
-    varName += std::to_string(V);
-    varName += " V";
+    std::string voltStr = std::to_string(V) + " V";
+    
+    varName = "t*µV for positive charge at " + voltStr;
+    a_plotVariableNames.push_back(varName);
+
+    varName = "t*µV for negative charge at " + voltStr;
     a_plotVariableNames.push_back(varName);
   }
 
@@ -319,7 +321,7 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
 
   ncomp += m_voltageSweeps.size(); // K values
 
-  ncomp += 1 + m_voltageSweeps.size(); // Drift times
+  ncomp += 2 * m_voltageSweeps.size(); // Drift times
 
   ncomp += 1; // Inception voltages
 
@@ -1007,11 +1009,10 @@ StreamerInceptionStepper<P, F>::solveDriftTimes() {
   EBAMRCellData t;
   m_amr->allocate(t, m_realm, m_phase, 1);
 
-  // Solve drift time for positive ions
-  solveDriftTime(t, 1, -1);
-
   // Solve drift time for negative ions for each voltage
   for (int voltInd = 0; voltInd < m_voltageSweeps.size(); voltInd++) {
+    // Solve drift time for positive and negative charge
+    solveDriftTime(t, 1, voltInd);
     solveDriftTime(t, -1, voltInd);
   }
 }
@@ -1066,13 +1067,13 @@ StreamerInceptionStepper<P, F>::solveDriftTime(EBAMRCellData& t, const int& dxSi
   // Deposit onto t
   m_particleSolver->deposit(t);
 
-  // Find storage index according to ion charge and voltage
+  // Find storage index according to ion charge and voltage index
   int index;
   if (dxSign == 1) {
-    index = 0;
+    index = 2*voltInd;
   }
   else if (dxSign == -1) {
-    index = 1 + voltInd;
+    index = 2*voltInd + 1;
   }
 
   // Copy to m_driftTimes
@@ -1284,10 +1285,8 @@ StreamerInceptionStepper<P, F>::driftTime_moveParticlesOneStep(const int& dxSign
   m_particleSolver->remap();
   m_particleSolver->interpolateVelocities();
 
-  // If negative ion, check if particles are inside critical volume
-  if (dxSign == -1) {
-    this->checkParticlesInsideCriticalVolume(voltInd);
-  }
+  // Check if particles are inside critical volume
+  this->checkParticlesInsideCriticalVolume(voltInd);
 }
 
 template <typename P, typename F>
@@ -1298,6 +1297,12 @@ StreamerInceptionStepper<P, F>::checkParticlesInsideCriticalVolume(const int& vo
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::checkParticlesInsideCriticalVolume" << endl;
   }
+
+  // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
+  // is the displacement from a_probLo and not the physical position.
+  auto        getCellIndex = [](const RealVect a_rv, const Real dx) -> IntVect {       
+    return IntVect(D_DECL(std::floor(a_rv[0] / dx), std::floor(a_rv[1] / dx), std::floor(a_rv[2] / dx)));
+  };
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
@@ -1318,19 +1323,14 @@ StreamerInceptionStepper<P, F>::checkParticlesInsideCriticalVolume(const int& vo
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
 	P& p = lit();
 
-	if (p.template scalar<0>() > 0.0) {
-	  // Find integer spatial vector
-	  RealVect rv = (p.position() - probLo)/dx - 0.5*RealVect::Unit;
-	  IntVect iv;
-	  for (int i = 0; i < SpaceDim; i++) {
-	    iv[i] = round(rv[i]);
-	  }
+	if (p.template scalar<0>() > 0.0) {	  
+	  const IntVect iv = getCellIndex(p.position()-probLo, dx);
 
 	  // Get K value of cell and check if greater than m_KInception. If so, flag particle.
 	  Real K = cellData(iv, voltInd);
 	  if (K >= m_KInception) {
 	    p.template scalar<0>() = -1.0;
-	  }
+	  }	  
 	}
       }
     }
