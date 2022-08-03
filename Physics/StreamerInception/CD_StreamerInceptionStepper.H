@@ -280,9 +280,14 @@ namespace Physics {
       EBAMRCellData m_inceptionIntegral;
 
       /*!
-	@brief Drift times (t*µV)
+	@brief Drift times for positive polarity
       */
-      EBAMRCellData m_driftTimes;
+      EBAMRCellData m_driftTimesPlus;
+
+      /*!
+	@brief Drift times for negative polarity
+      */
+      EBAMRCellData m_driftTimesMinu;      
 
       /*!
 	@brief Background ionization rates

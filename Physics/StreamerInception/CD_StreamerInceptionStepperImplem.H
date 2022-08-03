@@ -49,6 +49,10 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   m_fieldEmission = [](const Real E) {
     return 1. / E;
   };
+
+  m_ionMobility = [](const Real E) {
+    return 1.0;
+  };
 }
 
 template <typename P, typename F>
@@ -112,14 +116,16 @@ StreamerInceptionStepper<P, F>::allocate()
   m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
   m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
   m_amr->allocate(m_inceptionVoltage, m_realm, m_phase, 1);
-  m_amr->allocate(m_driftTimes, m_realm, m_phase, 2);
+  m_amr->allocate(m_driftTimesPlus, m_realm, m_phase, m_voltageSweeps.size());
+  m_amr->allocate(m_driftTimesMinu, m_realm, m_phase, m_voltageSweeps.size());
 
   DataOps::setValue(m_inceptionIntegral, 0.0);
   DataOps::setValue(m_backgroundIonization, 0.0);
   DataOps::setValue(m_emissionRatesPlus, 0.0);
   DataOps::setValue(m_emissionRatesMinu, 0.0);
   DataOps::setValue(m_inceptionVoltage, 0.0);
-  DataOps::setValue(m_driftTimes, 0.0);
+  DataOps::setValue(m_driftTimesPlus, 0.0);
+  DataOps::setValue(m_driftTimesMinu, 0.0);
 }
 
 template <typename P, typename F>
@@ -326,15 +332,40 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
   // Write our drift time values.
   if (m_plotDriftTime) {
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Interval srcInterval(0, 1);
-      const Interval dstInterval(a_icomp, a_icomp + 1);
-      m_driftTimes[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-    }
-    a_icomp += 2;
 
-    a_plotVariableNames.push_back("t*µV for +E direction");
-    a_plotVariableNames.push_back("t*µV for -E direction");
+    // Positive polarity
+    { 
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+	const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+	const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+	m_driftTimesPlus[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+      }
+      a_icomp += m_voltageSweeps.size();
+
+      std::string varName;
+      for (const Real& V : m_voltageSweeps) {
+	varName = "Drift time for V = +";
+	varName += std::to_string(V);
+	a_plotVariableNames.push_back(varName);
+      }      
+    }
+
+    // Negative polarity
+    {
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+	const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+	const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+	m_driftTimesMinu[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+      }
+      a_icomp += m_voltageSweeps.size();
+
+      std::string varName;
+      for (const Real& V : m_voltageSweeps) {
+	varName = "Drift time for V = -";
+	varName += std::to_string(V);
+	a_plotVariableNames.push_back(varName);
+      }      
+    }    
   }
 
   // Write the inception voltage.
@@ -368,9 +399,8 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
   // Write field emission rates
   if (m_plotFieldEmission) {
-
-    // Positive polarity
-    {
+    // Positive polarity    
+    { 
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
         const Interval srcInterval(0, m_voltageSweeps.size() - 1);
         const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
@@ -428,7 +458,7 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
 
   // Drift times (+/-) direction
   if (m_plotDriftTime) {
-    ncomp += 2;
+    ncomp += 2 * m_voltageSweeps.size();
   }
 
   // Inception voltage.
@@ -1230,6 +1260,7 @@ template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
 {
+#if 0
   CH_TIME("StreamerInceptionStepper::computeDriftTimes");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::computeDriftTimes" << endl;
@@ -1282,6 +1313,7 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
       t[lvl]->copyTo(Interval(0, 0), *m_driftTimes[lvl], Interval(i, i));
     }
   }
+#endif
 }
 
 template <typename P, typename F>
