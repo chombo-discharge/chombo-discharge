@@ -1,3 +1,5 @@
+	    // p.template scalar<1>() = dx;
+	    // p.template scalar<2>() = Emagnitude;
 /* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
@@ -30,13 +32,14 @@ namespace Physics {
     enum class IntegrationAlgorithm
     {
       Trapezoidal,
-      Simpsons
+      Simpson
     };
 
     /*!
       @brief Class for streamer inception integral evaluations. 
-      @details P is the tracer particle type and F is the field solver type. Note that the integration algorithm requires some transient storage
-      on each particle (such as the previous position). This is defined in the TracerParticle template arguments. 
+      @details P is the tracer particle type and F is the field solver type. 
+      Note that the integration algorithm requires some transient storage on each particle (such as the previous position). 
+      This is defined in the TracerParticle template arguments. 
     */
     template <typename P = TracerParticle<4, 1>, typename F = FieldSolverMultigrid>
     class StreamerInceptionStepper : public TimeStepper
@@ -226,6 +229,20 @@ namespace Physics {
       postRegrid() override;
 
       /*!
+	@brief Set fixed step size
+	@param[in] a_step Fixed step size (physical dimensions)
+      */
+      virtual void
+      setFixedStep(const Real a_step) noexcept;
+
+      /*!
+	@brief Set relative step size (relative to dx)
+	@param[in] a_step Factor of dx that particles will move
+      */
+      virtual void
+      setRelativeStep(const Real a_step) noexcept;      
+
+      /*!
 	@brief Set the effective ionization coefficient.
 	@param[in] a_alpha Effective ionization coefficient. E is the field in SI units. 
       */
@@ -310,9 +327,24 @@ namespace Physics {
       EBAMRCellData m_inceptionVoltage;
 
       /*!
+	@brief Variable step size (factor of dx)
+      */
+      Real m_relativeStep;
+
+      /*!
+	@brief Fixed step size (physical dimensions)
+      */
+      Real m_fixedStep;
+
+      /*!
 	@brief Inception criteria (read from input)
       */
       Real m_inceptionK;
+
+      /*!
+	@brief If true, used fixed integration step
+      */
+      bool m_useFixedStep;
 
       /*!
 	@brief If true, print a report at the end
@@ -419,7 +451,22 @@ namespace Physics {
 	@param[in] a_voltage   Voltage multiplier
       */
       virtual void
-      inceptionKickTrapezoidal(const Real& a_voltage) noexcept;
+      inceptionMoveTrapezoidal(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief K integral: Move particles as long as integration isn't stopped
+	@param[in] a_voltage   Voltage multiplier
+      */
+      virtual void
+      inceptionMoveSimpson(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief K integral: Move particles one step according to the integration algorithm
+	@param[in] a_voltage   Voltage multiplier
+	@param[in] a_step      Step number for Simpson' (doesn't affect Trapezoidal)
+      */
+      virtual void
+      inceptionMoveOneStep(const Real& a_voltage, const int& a_step) noexcept;      
 
       /*!
 	@brief K integral: Add integration parts after particles move
@@ -429,26 +476,47 @@ namespace Physics {
       inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept;
 
       /*!
-	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] a_voltage   Voltage multiplier
-      */
-      virtual void
-      inceptionKickSimpsons(const Real& a_voltage) noexcept;
-
-      /*!
 	@brief K integral: Add integration parts after particles move
 	@param[in] a_voltage   Voltage multiplier
       */
       virtual void
-      inceptionIntegrateSimpsons(const Real& voltage) noexcept;
+      inceptionIntegrateSimpson(const Real& voltage) noexcept;
 
       /*!
-	@brief K integral: Move particles one step according to the integration algorithm
+	@brief Drift time integral: Move particles as long as integration isn't stopped
 	@param[in] a_voltage   Voltage multiplier
-	@param[in] a_step      Step number for Simpsons' (doesn't affect Trapezoidal)
       */
       virtual void
-      inceptionKickOneStep(const Real& a_voltage, const int& a_step) noexcept;
+      driftMoveTrapezoidal(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Drift time integral: Move particles as long as integration isn't stopped
+	@param[in] a_voltage   Voltage multiplier
+      */
+      virtual void
+      driftMoveSimpson(const Real& a_voltage) noexcept;            
+
+      /*!
+	@brief Drift time integral: Move particles one step according to the integration algorithm
+	@param[in] a_voltage   Voltage multiplier
+	@param[in] a_step      Step number for Simpson' (doesn't affect Trapezoidal)
+      */
+      virtual void
+      driftMoveOneStep(const Real& a_voltage, const int& a_step) noexcept;
+
+      /*!
+	@brief Drift time integral: Add integration parts after particles move
+	@param[in] a_voltage   Voltage multiplier
+      */
+      virtual void
+      driftIntegrateTrapezoidal(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Drift time integral: Add integration parts after particles move
+	@param[in] a_voltage   Voltage multiplier
+      */
+      virtual void
+      driftIntegrateSimpson(const Real& voltage) noexcept;      
 
       /*!
 	@brief Check if some particles still need to be processed. 

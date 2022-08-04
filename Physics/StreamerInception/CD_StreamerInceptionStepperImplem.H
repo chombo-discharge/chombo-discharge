@@ -194,6 +194,7 @@ StreamerInceptionStepper<P, F>::parseOptions()
 
   Real voltageLo    = 0.0;
   Real voltageHi    = 0.0;
+  Real stepSize     = 0.0;
   int  voltageSteps = 0;
 
   std::string str;
@@ -213,11 +214,11 @@ StreamerInceptionStepper<P, F>::parseOptions()
   pp.get("integration", str);
   pp.get("print_report", m_printReport);
 
-  if (str == "trapezoidal") {
+  if (str == "trapz") {
     m_integrationAlgorithm = IntegrationAlgorithm::Trapezoidal;
   }
-  else if (str == "simpsons") {
-    m_integrationAlgorithm = IntegrationAlgorithm::Simpsons;
+  else if (str == "simp") {
+    m_integrationAlgorithm = IntegrationAlgorithm::Simpson;
   }
   else {
     MayDay::Error("StreamerInceptionStepper::StreamerInceptionStepper -- logic bust");
@@ -246,6 +247,16 @@ StreamerInceptionStepper<P, F>::parseOptions()
         m_plotDriftTime = true;
       }
     }
+  }
+
+  // Get step size
+  pp.get("step_size", str, 0);
+  pp.get("step_size", stepSize, 1);
+  if(str == "dx") {
+    this->setRelativeStep(stepSize);
+  }
+  else if(str == "fixed") {
+    this->setFixedStep(stepSize);
   }
 
   // Define voltages
@@ -567,6 +578,32 @@ StreamerInceptionStepper<P, F>::postRegrid()
 
 template <typename P, typename F>
 void
+StreamerInceptionStepper<P, F>::setFixedStep(const Real a_step) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setFixedStep");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setFixedStep" << endl;
+  }
+
+  m_useFixedStep = true;
+  m_fixedStep    = a_step;  
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::setRelativeStep(const Real a_step) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setRelativeStep");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setRelativeStep" << endl;
+  }
+
+  m_useFixedStep = false;
+  m_relativeStep = a_step;
+}
+
+template <typename P, typename F>
+void
 StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setAlpha");
@@ -763,18 +800,18 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
         while (this->keepIntegrating()) {
 
           // Move particles and add integration contribution for the current step.
-          this->inceptionKickTrapezoidal(m_voltageSweeps[i]);
+          this->inceptionMoveTrapezoidal(m_voltageSweeps[i]);
           this->inceptionIntegrateTrapezoidal(m_voltageSweeps[i]);
         }
 
         break;
       }
-      case IntegrationAlgorithm::Simpsons: {
+      case IntegrationAlgorithm::Simpson: {
         while (this->keepIntegrating()) {
 
           // Move particles and add integration contribution for the current step.
-          this->inceptionKickSimpsons(m_voltageSweeps[i]);
-          this->inceptionIntegrateSimpsons(m_voltageSweeps[i]);
+          this->inceptionMoveSimpson(m_voltageSweeps[i]);
+          this->inceptionIntegrateSimpson(m_voltageSweeps[i]);
         }
 
         break;
@@ -822,27 +859,60 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::inceptionKickTrapezoidal(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F>::inceptionMoveTrapezoidal(const Real& a_voltage) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::inceptionKickTrapezoidal");
+  CH_TIME("StreamerInceptionStepper::inceptionMoveTrapezoidal");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::inceptionKickTrapezoidal" << endl;
+    pout() << "StreamerInceptionStepper::inceptionMoveTrapezoidal" << endl;
   }
 
-#if 1
+#ifndef NDEBUG
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
   
   const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
 #endif
 
   // Move particles
-  this->inceptionKickOneStep(a_voltage, 0);
+  this->inceptionMoveOneStep(a_voltage, 0);
 
-#if 1
+#ifndef NDEBUG
   const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
 
   if (particlesBefore != particlesAfter) {
-    MayDay::Warning("StreamerInceptionStepper::inceptionKickTrapezoidal -- logic bust, lost some particles");
+    MayDay::Warning("StreamerInceptionStepper::inceptionMoveTrapezoidal -- logic bust, lost some particles");
+  }
+#endif
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::inceptionMoveSimpson(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::inceptionMoveSimpson");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::inceptionMoveSimpson" << endl;
+  }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+#ifndef NDEBUG
+  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
+#endif
+
+  // Step 1: Move particles dx/2 and remap
+  this->inceptionMoveOneStep(a_voltage, 1);
+
+#ifndef NDEBUG
+  const size_t particlesMiddle = amrParticles.getNumberOfValidParticesGlobal();
+#endif
+
+  // Step 2: Move particles dx/2 and remap
+  this->inceptionMoveOneStep(a_voltage, 2);
+
+#ifndef NDEBUG
+  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
+  if (particlesBefore != particlesAfter || particlesBefore != particlesMiddle) {
+    MayDay::Warning("StreamerInceptionStepper::inceptionMoveSimpson -- logic bust, lost some particles");
   }
 #endif
 }
@@ -889,44 +959,11 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::inceptionKickSimpsons(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F>::inceptionIntegrateSimpson(const Real& a_voltage) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::inceptionKickSimpsons");
+  CH_TIME("StreamerInceptionStepper::inceptionIntegrateSimpson");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::inceptionKickSimpsons" << endl;
-  }
-
-  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
-#if 1
-  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
-#endif
-
-  // Step 1: Move particles dx/2 and remap
-  this->inceptionKickOneStep(a_voltage, 1);
-
-#if 1
-  const size_t particlesMiddle = amrParticles.getNumberOfValidParticesGlobal();
-#endif
-
-  // Step 2: Move particles dx/2 and remap
-  this->inceptionKickOneStep(a_voltage, 2);
-
-#if 1
-  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
-  if (particlesBefore != particlesAfter || particlesBefore != particlesMiddle) {
-    MayDay::Warning("StreamerInceptionStepper::inceptionKickSimpsons -- logic bust, lost some particles");
-  }
-#endif
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::inceptionIntegrateSimpsons(const Real& a_voltage) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::inceptionIntegrateSimpsons");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::inceptionIntegrateSimpsons" << endl;
+    pout() << "StreamerInceptionStepper::inceptionIntegrateSimpson" << endl;
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
@@ -965,11 +1002,11 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateSimpsons(const Real& a_voltage
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::inceptionKickOneStep(const Real& a_voltage, const int& a_step) noexcept
+StreamerInceptionStepper<P, F>::inceptionMoveOneStep(const Real& a_voltage, const int& a_step) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::inceptionKickOneStep");
+  CH_TIME("StreamerInceptionStepper::inceptionMoveOneStep");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::inceptionKickOneStep" << endl;
+    pout() << "StreamerInceptionStepper::inceptionMoveOneStep" << endl;
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
@@ -981,8 +1018,8 @@ StreamerInceptionStepper<P, F>::inceptionKickOneStep(const Real& a_voltage, cons
   // Move particles
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
 
-    // Particles move half a cell on this level.
-    const Real dx = 0.5 * m_amr->getDx()[lvl];
+    // Get the step size.
+    const Real dx = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
 
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
@@ -1013,7 +1050,7 @@ StreamerInceptionStepper<P, F>::inceptionKickOneStep(const Real& a_voltage, cons
 
             break;
           }
-          case IntegrationAlgorithm::Simpsons: {
+          case IntegrationAlgorithm::Simpson: {
             newPosition = p.position() + normalizedVelocity * 0.5 * dx;
 
             // Store values to particle for subsequent integration
@@ -1025,13 +1062,13 @@ StreamerInceptionStepper<P, F>::inceptionKickOneStep(const Real& a_voltage, cons
               p.template scalar<3>() = currentAlpha;
             }
             else {
-              MayDay::Error("StreamerInceptionStepper::inceptionKickOneStep -- logic bust");
+              MayDay::Error("StreamerInceptionStepper::inceptionMoveOneStep -- logic bust");
             }
 
             break;
           }
           default: {
-            MayDay::Error("StreamerInceptionStepper::inceptionKickOneStep -- logic bust");
+            MayDay::Error("StreamerInceptionStepper::inceptionMoveOneStep -- logic bust");
           }
           }
 
@@ -1055,6 +1092,243 @@ StreamerInceptionStepper<P, F>::inceptionKickOneStep(const Real& a_voltage, cons
 
   m_particleSolver->remap();
   m_particleSolver->interpolateVelocities();
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::driftMoveTrapezoidal(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::driftMoveTrapezoidal");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::driftMoveTrapezoidal" << endl;
+  }
+
+#ifndef NDEBUG
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+  
+  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
+#endif
+
+  // Move particles
+  this->driftMoveOneStep(a_voltage, 0);
+
+#ifndef NDEBUG
+  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
+
+  if (particlesBefore != particlesAfter) {
+    MayDay::Warning("StreamerInceptionStepper::inceptionTrapezoidal -- logic bust, lost some particles");
+  }
+#endif
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::driftMoveSimpson(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::driftMoveSimpson");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::driftMoveSimpson" << endl;
+  }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+#ifndef NDEBUG
+  const size_t particlesBefore = amrParticles.getNumberOfValidParticesGlobal();
+#endif
+
+  // Step 1: Move particles dx/2 and remap
+  this->driftMoveOneStep(a_voltage, 1);
+
+#ifndef NDEBUG
+  const size_t particlesMiddle = amrParticles.getNumberOfValidParticesGlobal();
+#endif
+
+  // Step 2: Move particles dx/2 and remap
+  this->driftMoveOneStep(a_voltage, 2);
+
+#ifndef NDEBUG
+  const size_t particlesAfter = amrParticles.getNumberOfValidParticesGlobal();
+  if (particlesBefore != particlesAfter || particlesBefore != particlesMiddle) {
+    MayDay::Warning("StreamerInceptionStepper::inceptionSimpson -- logic bust, lost some particles");
+  }
+#endif
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::driftMoveOneStep(const Real& a_voltage, const int& a_step) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::driftMoveOneStep");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::driftMoveOneStep" << endl;
+  }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  // Get end points of grid
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
+
+  // Move particles
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+
+    // Get the step size.
+    const Real dx = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];    
+
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+        // If integration flag true, move particle and check integration conditions
+        if (p.template scalar<0>() > 0.0) {
+          const RealVect E                  = p.velocity();
+          const RealVect normalizedVelocity = E / E.vectorLength();
+          const Real     Emagnitude         = a_voltage * E.vectorLength();
+          const Real     currentAlpha       = m_alpha(Emagnitude);
+
+          // Calculate new position based on integration algorithm
+          RealVect newPosition;
+          switch (m_integrationAlgorithm) {
+          case IntegrationAlgorithm::Trapezoidal: {
+            newPosition = p.position() + normalizedVelocity * dx;
+
+            // Store values to particle for subsequent integration
+            p.template scalar<1>() = dx;
+            p.template scalar<2>() = Emagnitude;
+
+            break;
+          }
+          case IntegrationAlgorithm::Simpson: {
+            newPosition = p.position() + normalizedVelocity * 0.5 * dx;
+
+            // Store values to particle for subsequent integration
+            if (a_step == 1) {
+              p.template scalar<1>() = dx;
+              p.template scalar<2>() = Emagnitude;
+            }
+            else if (a_step == 2) {
+              p.template scalar<3>() = Emagnitude;
+            }
+            else {
+              MayDay::Error("StreamerInceptionStepper::driftMoveOneStep -- logic bust");
+            }
+
+            break;
+          }
+          default: {
+            MayDay::Error("StreamerInceptionStepper::driftMoveOneStep -- logic bust");
+          }
+          }
+
+          // Check keep integrating criteria. Move particle if fulfilled, flag if not.
+          if (currentAlpha <= 0.0) {
+            p.template scalar<0>() = -1.0;
+          }
+          else if (this->particleOutsideGrid(newPosition, probLo, probHi)) {
+            p.template scalar<0>() = -1.0;
+          }
+          else if (this->particleInsideElectrode(newPosition)) {
+            p.template scalar<0>() = -1.0;
+          }
+          else {
+            p.position() = newPosition;
+          }
+        }
+      }
+    }
+  }
+
+  m_particleSolver->remap();
+  m_particleSolver->interpolateVelocities();
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::driftIntegrateTrapezoidal(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::driftIntegrateTrapezoidal");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::driftIntegrateTrapezoidal" << endl;
+  }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      List<P>& particles = amrParticles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+        // Add integration parts if integration flag true
+        if (p.template scalar<0>() > 0.0) {
+          const RealVect E               = p.velocity();
+          const Real     Emagnitude      = a_voltage * E.vectorLength();
+          const Real     endPointAlpha   = m_alpha(Emagnitude);
+          const Real     dx              = p.template scalar<1>();
+          const Real     startPointAlpha = p.template scalar<2>();
+
+          if (startPointAlpha >= 0.0 && endPointAlpha >= 0.0) {
+            p.mass() += 0.5 * (endPointAlpha + startPointAlpha) * dx;
+          }
+          else {
+            p.template scalar<0>() = -1.0;
+          }
+        }
+      }
+    }
+  }
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::driftIntegrateSimpson(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::driftIntegrateSimpson");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::driftIntegrateSimpson" << endl;
+  }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+        // Add integration parts if integration flag true
+        if (p.template scalar<0>() > 0) {
+          const RealVect E               = p.velocity();
+          const Real     Emagnitude      = a_voltage * E.vectorLength();
+          const Real     endPointAlpha   = m_alpha(Emagnitude);
+          const Real     dx              = p.template scalar<1>();
+          const Real     startPointAlpha = p.template scalar<2>();
+          const Real     midPointAlpha   = p.template scalar<3>();
+
+          if (startPointAlpha >= 0.0 && midPointAlpha >= 0.0 && endPointAlpha >= 0.0) {
+            p.mass() += (dx / 6) * (startPointAlpha + 4 * midPointAlpha + endPointAlpha);
+          }
+          else {
+            p.template scalar<0>() = -1.0;
+          }
+        }
+      }
+    }
+  }
 }
 
 template <typename P, typename F>
@@ -1272,8 +1546,9 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
   // Integrate for each voltage
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
-    // Polarities. Do the positive polarity first.
-    std::vector<Real> polarities{1.0, -1.0};
+    // Polarities. Note that we are dealing with negative ions so
+    // for positive polarity the particles move opposite to the field. 
+    std::vector<Real> polarities{-1.0, 1.0};
 
     for (const auto& p : polarities) {
 
@@ -1288,18 +1563,18 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
         while (this->keepIntegrating()) {
 
           // Move particles and add integration contribution for the current step.
-          this->inceptionKickTrapezoidal(m_voltageSweeps[i]);
-          this->inceptionIntegrateTrapezoidal(m_voltageSweeps[i]);
+          this->driftMoveTrapezoidal(m_voltageSweeps[i]);
+          this->driftIntegrateTrapezoidal(m_voltageSweeps[i]);
         }
 
         break;
       }
-      case IntegrationAlgorithm::Simpsons: {
+      case IntegrationAlgorithm::Simpson: {
         while (this->keepIntegrating()) {
 
           // Move particles and add integration contribution for the current step.
-          this->inceptionKickSimpsons(m_voltageSweeps[i]);
-          this->inceptionIntegrateSimpsons(m_voltageSweeps[i]);
+          this->driftMoveSimpson(m_voltageSweeps[i]);
+          this->driftIntegrateSimpson(m_voltageSweeps[i]);
         }
 
         break;
@@ -1638,7 +1913,7 @@ StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect& a_pos,
                                                     const RealVect& a_probLo,
                                                     const RealVect& a_probHi) const noexcept
 {
-#if 1
+#ifndef NDEBUG
   CH_TIME("StreamerInceptionStepper::particleOutsideGrid");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::particleOutsideGrid" << endl;
@@ -1660,7 +1935,7 @@ template <typename P, typename F>
 bool
 StreamerInceptionStepper<P, F>::particleInsideElectrode(const RealVect& a_pos) const noexcept
 {
-#if 1
+#ifndef NDEBUG
   CH_TIME("StreamerInceptionStepper::particleInsideElectrode");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::particleInsideElectrode" << endl;

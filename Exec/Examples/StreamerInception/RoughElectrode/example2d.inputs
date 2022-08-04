@@ -119,7 +119,8 @@ RoughSphere.noise_reseed      = false        # Reseed noise
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
 StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation. 
-StreamerInceptionStepper.integration   = trapezoidal                   # Particle integration algorithm. 
+StreamerInceptionStepper.integration   = trapz                         # Particle integration algorithm.
+StreamerInceptionStepper.step_size     = dx 1.0                        # Step size. 'dx' or 'fixed' and a size. 
 StreamerInceptionStepper.voltage_lo    = 10E3                          # Low voltage multiplier
 StreamerInceptionStepper.voltage_hi    = 50E3                          # Highest voltage multiplier
 StreamerInceptionStepper.voltage_steps = 10                            # Number of voltage steps
