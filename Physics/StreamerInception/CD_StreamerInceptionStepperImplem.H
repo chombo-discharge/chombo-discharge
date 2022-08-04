@@ -1223,9 +1223,12 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
 
           P& p = lit();
 
-          const RealVect vel     = p.velocity();
-	  const RealVect unitVel = vel/vel.vectorLength();
-          const RealVect newPos  = p.position() + unitVel * step;
+          const RealVect E      = a_voltage * p.velocity();
+	  const Real absE      = E.vectorLength();
+	  const Real mu         = m_ionMobility(absE);
+
+	  const RealVect vel    = (mu * E)/(mu * E).vectorLength();	  
+          const RealVect newPos = p.position() + vel * step;
 
           // Stop integration if particle ends up inside the EB, outside the domain, or if
           // the K-value is less than the inception criterion.
@@ -1245,7 +1248,7 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
           else {
             p.position() = newPos;
 
-            p.template scalar<1>() += step / vel.vectorLength();
+            p.template scalar<1>() += step / (mu * absE);
           }
         }
       }

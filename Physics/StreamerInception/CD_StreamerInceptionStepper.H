@@ -448,6 +448,13 @@ namespace Physics {
       computeInceptionIntegral() noexcept;
 
       /*!
+	@brief Integrate the inception integral using the Euler rule.
+	@param[in] a_voltage Voltage multiplier. 
+      */
+      // virtual void
+      // inceptionIntegrateEuler(const Real& a_voltage) noexcept;
+
+      /*!
 	@brief K integral: Move particles as long as integration isn't stopped
 	@param[in] a_voltage   Voltage multiplier
       */
