@@ -169,6 +169,12 @@ public:
   deposit(EBAMRCellData& a_phi) const;
 
   /*!
+    @brief Interpolate a scalar field onto the particle mass
+  */
+  virtual void
+  interpolateMass(const EBAMRCellData& a_scalar) noexcept;
+
+  /*!
     @brief Interpolate particles velocities.
   */
   virtual void

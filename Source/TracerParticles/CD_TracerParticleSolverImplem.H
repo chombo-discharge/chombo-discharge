@@ -323,6 +323,17 @@ TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const
 }
 
 template <typename P>
+void
+TracerParticleSolver<P>::interpolateMass(const EBAMRCellData& a_scalar) noexcept {
+  CH_TIME("TracerParticleSolver::interpolateMass(EBAMRCellData)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::interpolateMass(EBAMRCellData)" << endl;
+  }
+
+  m_amr->interpolateParticles<P, &P::mass>(m_particles, m_realm, m_phase, a_scalar, m_deposition, false);
+}
+
+template <typename P>
 inline void
 TracerParticleSolver<P>::interpolateVelocities()
 {

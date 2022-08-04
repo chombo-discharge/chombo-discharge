@@ -1,5 +1,5 @@
-	    // p.template scalar<1>() = dx;
-	    // p.template scalar<2>() = Emagnitude;
+// p.template scalar<1>() = dx;
+// p.template scalar<2>() = Emagnitude;
 /* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
@@ -31,6 +31,7 @@ namespace Physics {
     */
     enum class IntegrationAlgorithm
     {
+      Euler,
       Trapezoidal,
       Simpson
     };
@@ -240,7 +241,7 @@ namespace Physics {
 	@param[in] a_step Factor of dx that particles will move
       */
       virtual void
-      setRelativeStep(const Real a_step) noexcept;      
+      setRelativeStep(const Real a_step) noexcept;
 
       /*!
 	@brief Set the effective ionization coefficient.
@@ -304,7 +305,7 @@ namespace Physics {
       /*!
 	@brief Drift times for negative polarity
       */
-      EBAMRCellData m_driftTimesMinu;      
+      EBAMRCellData m_driftTimesMinu;
 
       /*!
 	@brief Background ionization rates
@@ -466,7 +467,7 @@ namespace Physics {
 	@param[in] a_step      Step number for Simpson' (doesn't affect Trapezoidal)
       */
       virtual void
-      inceptionMoveOneStep(const Real& a_voltage, const int& a_step) noexcept;      
+      inceptionMoveOneStep(const Real& a_voltage, const int& a_step) noexcept;
 
       /*!
 	@brief K integral: Add integration parts after particles move
@@ -483,41 +484,12 @@ namespace Physics {
       inceptionIntegrateSimpson(const Real& voltage) noexcept;
 
       /*!
-	@brief Drift time integral: Move particles as long as integration isn't stopped
-	@param[in] a_voltage   Voltage multiplier
+	@brief Compute ion drift time using Euler rule
+	@param[in] a_voltage Voltage multiplier
       */
       virtual void
-      driftMoveTrapezoidal(const Real& a_voltage) noexcept;
-
-      /*!
-	@brief Drift time integral: Move particles as long as integration isn't stopped
-	@param[in] a_voltage   Voltage multiplier
-      */
-      virtual void
-      driftMoveSimpson(const Real& a_voltage) noexcept;            
-
-      /*!
-	@brief Drift time integral: Move particles one step according to the integration algorithm
-	@param[in] a_voltage   Voltage multiplier
-	@param[in] a_step      Step number for Simpson' (doesn't affect Trapezoidal)
-      */
-      virtual void
-      driftMoveOneStep(const Real& a_voltage, const int& a_step) noexcept;
-
-      /*!
-	@brief Drift time integral: Add integration parts after particles move
-	@param[in] a_voltage   Voltage multiplier
-      */
-      virtual void
-      driftIntegrateTrapezoidal(const Real& a_voltage) noexcept;
-
-      /*!
-	@brief Drift time integral: Add integration parts after particles move
-	@param[in] a_voltage   Voltage multiplier
-      */
-      virtual void
-      driftIntegrateSimpson(const Real& voltage) noexcept;      
-
+      driftIntegrateEuler(const EBAMRCellData& a_K, const Real& a_voltage) noexcept;
+      
       /*!
 	@brief Check if some particles still need to be processed. 
 	@return true if integration shall continue, false if not
@@ -530,12 +502,6 @@ namespace Physics {
       */
       virtual void
       rewindParticles() noexcept;
-
-      /*!
-	@brief Set all particles' masses to 0
-      */
-      virtual void
-      resetParticleMass() noexcept;
 
       /*!
 	@brief Compute the detachment rate for all voltages
@@ -602,7 +568,7 @@ namespace Physics {
 	@return true if particle inside electrode, false elsewise
       */
       inline bool
-      particleInsideElectrode(const RealVect& a_pos) const noexcept;
+      particleInsideEB(const RealVect& a_pos) const noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics

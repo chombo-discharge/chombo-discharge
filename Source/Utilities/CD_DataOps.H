@@ -350,6 +350,17 @@ public:
   copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src);
 
   /*!
+    @brief Copy data from one data holder to another. Allows specification of components. 
+    @param[out] a_dst       Destination data holder
+    @param[in ] a_src       Source data holder
+    @param[out] a_dstInterv Destination data component
+    @param[in ] a_srcInterv Source data components
+  */
+  template <typename T>
+  static void
+  copy(EBAMRData<T>& a_dst, const EBAMRData<T>& a_src, const Interval a_dstInterv, const Interval a_srcInterv);
+
+  /*!
     @brief Divide one data holder by another. Does specified components.
     @param[inout] a_lhs Data to be divided
     @param[in]    a_rhs Divisor.
