@@ -451,30 +451,8 @@ namespace Physics {
 	@brief Integrate the inception integral using the Euler rule.
 	@param[in] a_voltage Voltage multiplier. 
       */
-      // virtual void
-      // inceptionIntegrateEuler(const Real& a_voltage) noexcept;
-
-      /*!
-	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] a_voltage   Voltage multiplier
-      */
       virtual void
-      inceptionMoveTrapezoidal(const Real& a_voltage) noexcept;
-
-      /*!
-	@brief K integral: Move particles as long as integration isn't stopped
-	@param[in] a_voltage   Voltage multiplier
-      */
-      virtual void
-      inceptionMoveSimpson(const Real& a_voltage) noexcept;
-
-      /*!
-	@brief K integral: Move particles one step according to the integration algorithm
-	@param[in] a_voltage   Voltage multiplier
-	@param[in] a_step      Step number for Simpson' (doesn't affect Trapezoidal)
-      */
-      virtual void
-      inceptionMoveOneStep(const Real& a_voltage, const int& a_step) noexcept;
+      inceptionIntegrateEuler(const Real& a_voltage) noexcept;
 
       /*!
 	@brief K integral: Add integration parts after particles move
@@ -489,6 +467,12 @@ namespace Physics {
       */
       virtual void
       inceptionIntegrateSimpson(const Real& voltage) noexcept;
+
+      /*!
+	@brief Calculate particles' drift times until inside electrode or outside grid. 
+      */
+      virtual void
+      computeDriftTimes() noexcept;      
 
       /*!
 	@brief Compute ion drift time using Euler rule
@@ -521,12 +505,6 @@ namespace Physics {
       */
       virtual void
       computeFieldEmission() noexcept;
-
-      /*!
-	@brief Calculate particles' drift times until inside electrode or outside grid. 
-      */
-      virtual void
-      computeDriftTimes() noexcept;
 
       /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage. 
@@ -575,7 +553,7 @@ namespace Physics {
 	@return true if particle inside electrode, false elsewise
       */
       inline bool
-      particleInsideEB(const RealVect& a_pos) const noexcept;
+      particleInsideEB(const RealVect a_pos) const noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics
