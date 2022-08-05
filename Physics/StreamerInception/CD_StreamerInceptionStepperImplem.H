@@ -739,7 +739,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
 
   // Solve K integral for each particle in each voltage and store K values in m_inceptionIntegral
   this->computeInceptionIntegral();
-
+#if 0
   // Solve drift time integral in both directions and store values in m_driftTimes
   this->computeDriftTimes();
 
@@ -762,6 +762,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
   if (m_printReport) {
     this->printReport();
   }
+#endif
 }
 
 template <typename P, typename F>
@@ -902,8 +903,13 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
 
+      ParticleData<P>& levelParticles = amrParticles[lvl];
+      
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+
+	List<P>& patchParticles = levelParticles[dit()].listItems();
+	
+        for (ListIterator<P> lit(patchParticles); lit.ok(); ++lit) {
           P& p = lit();
 
           // Process the particle. Stop it if it ends up inside the EB.
@@ -912,19 +918,18 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
             const RealVect E      = a_voltage * p.velocity();
             const RealVect unitV  = v / v.vectorLength();
             const RealVect newPos = p.position() + step * unitV;
-            const Real     alpha  = m_alpha(E.vectorLength());
+            const Real     alpha  = 1.0;//m_alpha(E.vectorLength());
 
             // Stop integration for particles that move into regions alpha < 0.0
             // or outside of the domain (they would be discarded in the remap).
-            const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
-            const bool insideEB    = this->particleInsideEB(newPos);
-
-            if (outsideGrid || alpha < 0.0) {
+            if (this->particleOutsideGrid(newPos, probLo, probHi) || alpha < 0.0) {
               p.template scalar<0>() = -1.0;
             }
             else {
-              p.position() = newPos;
 
+	      // Move the particle. Note that this might move the particle into
+	      // the EB, but we take care of that below. 
+              p.position() = newPos;
               p.mass() += step * alpha;
             }
           }
@@ -937,6 +942,10 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
     // Stop particles that have ended up inside the EB or outside the domain.
     this->stopInvalidParticles<>();    
   }
+
+#if 1
+
+#endif
 }
 
 template <typename P, typename F>

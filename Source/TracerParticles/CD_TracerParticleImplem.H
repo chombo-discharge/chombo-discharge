@@ -131,7 +131,7 @@ template <size_t M, size_t N>
 inline int
 TracerParticle<M, N>::size() const
 {
-  return BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + M * sizeof(m_mass) + N * sizeof(m_velocity);
+  return static_cast<int> (sizeof(m_position) + sizeof(m_mass) + sizeof(m_velocity) + M * sizeof(m_mass) + N * sizeof(m_velocity));
 }
 
 template <size_t M, size_t N>
