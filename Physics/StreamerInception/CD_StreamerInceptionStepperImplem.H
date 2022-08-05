@@ -808,7 +808,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
   // Integrate for each voltage
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
-    // Polarities. Note that we are dealing with electrons ions so
+    // Polarities. Note that we are dealing with electrons so
     // for positive polarity the particles move opposite to the field.
     std::vector<Real> polarities{-1.0, 1.0};
 
@@ -824,7 +824,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
       // the K-value time should be stored on the particle mass.
       switch (m_integrationAlgorithm) {
       case IntegrationAlgorithm::Euler: {
-	this->inceptionIntegrateEuler(m_voltageSweeps[i]);
+        this->inceptionIntegrateEuler(m_voltageSweeps[i]);
 
         break;
       }
@@ -898,48 +898,44 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
 
     m_particleSolver->interpolateVelocities();
 
+    // Euler integration.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
 
-      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-	const EBISBox& ebisbox = ebisl[dit()];
-	
         for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
-
           P& p = lit();
 
-	  if(p.template scalar<0>() > 0.0) {
-	    const RealVect v      = p.velocity();
-	    const RealVect E      = a_voltage * p.velocity();
-	    const RealVect unitV  = v / v.vectorLength();
-	    const RealVect newPos = p.position() + step * unitV;
-	    const Real     alpha  = m_alpha(E.vectorLength());
+          // Process the particle. Stop it if it ends up inside the EB.
+          if (p.template scalar<0>() > 0.0) {
+            const RealVect v      = p.velocity();
+            const RealVect E      = a_voltage * p.velocity();
+            const RealVect unitV  = v / v.vectorLength();
+            const RealVect newPos = p.position() + step * unitV;
+            const Real     alpha  = m_alpha(E.vectorLength());
 
-	    // Stop integration if particle ends up inside the EB or outside the domain, or
-	    // alpha < 0.0.
-	    const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
-	    const bool insideEB    = this->particleInsideEB(newPos);
+            // Stop integration for particles that move into regions alpha < 0.0
+            // or outside of the domain (they would be discarded in the remap).
+            const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
+            const bool insideEB    = this->particleInsideEB(newPos);
 
-	    if (outsideGrid || insideEB || alpha < 0.0) {
-	      p.template scalar<0>() = -1.0;
-	      
-	      p.position() = p.template vect<0>();
-	    }
-	    else {
-	      p.position() = newPos;
+            if (outsideGrid || alpha < 0.0) {
+              p.template scalar<0>() = -1.0;
+            }
+            else {
+              p.position() = newPos;
 
-	      p.mass() += step * alpha;
-	    }
-	  }
-	}
+              p.mass() += step * alpha;
+            }
+          }
+        }
       }
-
     }
 
     amrParticles.remap();
+
+    // Stop particles that have ended up inside the EB or outside the domain.
+    this->stopInvalidParticles<>();    
   }
 }
 
@@ -1089,12 +1085,22 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
+  // Set particle integration flag.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+	lit().template scalar<1>() = 0.0;
+      }
+    }
+  }
+
   while (this->keepIntegrating()) {
 
     // Get K-value and velocity at particle position.
     m_particleSolver->interpolateMass(a_K);
     m_particleSolver->interpolateVelocities();
 
+    // Euler kernel. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
 
@@ -1103,41 +1109,78 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
 
           P& p = lit();
 
-	  if(p.template scalar<0>() > 0.0) {
-	    const RealVect E    = a_voltage * p.velocity();
-	    const Real     absE = E.vectorLength();
-	    const Real     mu   = m_ionMobility(E.vectorLength());
+          if (p.template scalar<0>() > 0.0) {
+            const RealVect E    = a_voltage * p.velocity();
+            const Real     absE = E.vectorLength();
+            const Real     mu   = m_ionMobility(E.vectorLength());
 
-	    const RealVect vel    = E;
-	    const RealVect unitV  = vel/vel.vectorLength();
-	    const RealVect newPos = p.position() + unitV * step;
+            const RealVect vel    = mu * E;
+            const RealVect unitV  = vel / vel.vectorLength();
+            const RealVect newPos = p.position() + unitV * step;
 
-	    // Stop integration if particle ends up inside the EB, outside the domain, or if
-	    // the K-value is less than the inception criterion.
-	    const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
-	    const bool insideEB    = this->particleInsideEB(newPos);
-	    const bool insideCrit  = p.mass() >= m_inceptionK;
+            // Stop integration if particle ends up inside the EB, outside the domain, or if
+            // the K-value is less than the inception criterion.
+            const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
+            const bool insideEB    = this->particleInsideEB(newPos);
+            const bool insideCrit  = (p.mass() >= m_inceptionK);
 
-	    if (insideCrit) {
-	      p.template scalar<0>() = -1.0;
-	    }
-	    else if (outsideGrid || insideEB) {
-	      // Stop integration and discard result because the ion
-	      // did not enter the critical volume.
-	      p.template scalar<0>() = -1.0;
+            if (insideCrit) {
+              p.template scalar<0>() = -1.0;
+            }
+            else if (outsideGrid) {
+              p.template scalar<0>() = -1.0;
 	      p.template scalar<1>() = std::numeric_limits<Real>::quiet_NaN();
-	    }
-	    else {
-	      p.position() = newPos;
+            }
+            else {
+              p.position() = newPos;
 
-	      p.template scalar<1>() += step / (mu * absE);
-	    }
-	  }
-	}
+              p.template scalar<1>() += step / vel.vectorLength();
+            }
+          }
+        }
       }
     }
 
     m_particleSolver->remap();
+
+    // Particles the wound up inside the EB must be flagged accordingly. 
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
+
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+	const EBISBox& ebisbox = ebisl[dit()];
+
+	for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+
+	  P& p = lit();
+
+	  // Check if the particle is inside the EB -- if it is then stop it right here.
+	  const RealVect rv = p.position() - probLo;
+	  const IntVect  iv = IntVect(D_DECL(std::floor(rv[0] / dx), std::floor(rv[1] / dx), std::floor(rv[2] / dx)));
+
+	  if (ebisbox.isIrregular(iv)) {
+	    const RealVect normal   = ebisbox.normal(VolIndex(iv, 0));
+	    const RealVect centroid = probLo
+	      + (RealVect(iv) + 0.5 * RealVect::Unit + ebisbox.bndryCentroid(VolIndex(iv, 0)))
+	      * dx;
+
+	    const bool insideEB = (p.position() - centroid).dotProduct(normal) <= 0.0;
+
+	    if (insideEB) {
+	      p.template scalar<0>() = -1.0;
+	      p.template scalar<1>() = std::numeric_limits<Real>::quiet_NaN();
+	    }
+	  }
+	  else if (ebisbox.isCovered(iv)) {
+	    p.template scalar<0>() = -1.0;
+	    p.template scalar<1>() = std::numeric_limits<Real>::quiet_NaN();
+	  }
+	}
+      }
+    }
   }
 
   // Put the integration variable onto the particle "mass"
@@ -1196,7 +1239,7 @@ StreamerInceptionStepper<P, F>::rewindParticles() noexcept
       for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
         P& p = lit();
 
-	p.position() = p.template vect<0>();
+        p.position() = p.template vect<0>();
       }
     }
   }
@@ -1644,6 +1687,61 @@ StreamerInceptionStepper<P, F>::particleInsideEB(const RealVect a_pos) const noe
   const RefCountedPtr<BaseIF>& implicitFunction = m_amr->getBaseImplicitFunction(m_phase);
 
   return (implicitFunction->value(a_pos) > 0.0) ? true : false;
+}
+
+template <typename P, typename F>
+template <size_t K>
+void
+StreamerInceptionStepper<P, F>::stopInvalidParticles(const Real a_val) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::stopInvalidParticles");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::stopInvalidParticles" << endl;
+  }
+
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx    = m_amr->getDx()[lvl];
+
+    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+      const EBISBox& ebisbox = ebisl[dit()];
+
+      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+
+        P& p = lit();
+
+        // Check if the particle is inside the EB -- if it is then stop it right here.
+        const RealVect rv = p.position() - probLo;
+        const IntVect  iv = IntVect(D_DECL(std::floor(rv[0] / dx), std::floor(rv[1] / dx), std::floor(rv[2] / dx)));
+
+        if (ebisbox.isIrregular(iv)) {
+          const RealVect normal   = ebisbox.normal(VolIndex(iv, 0));
+          const RealVect centroid = probLo
+                                    + (RealVect(iv) + 0.5 * RealVect::Unit + ebisbox.bndryCentroid(VolIndex(iv, 0)))
+                                        * dx;
+
+          const bool insideEB = (p.position() - centroid).dotProduct(normal) < 0.0;
+
+          if (insideEB) {
+            p.template scalar<0>() = a_val;
+          }
+        }
+        else if (ebisbox.isCovered(iv)) {
+          p.template scalar<0>() = a_val;
+        }
+        else if (this->particleOutsideGrid(p.position(), probLo, probHi)) {
+          p.template scalar<0>() = a_val;
+        }
+      }
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>

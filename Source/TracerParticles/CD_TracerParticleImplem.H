@@ -117,7 +117,7 @@ template <size_t M, size_t N>
 inline bool
 TracerParticle<M, N>::operator==(const TracerParticle<M, N>& a_p) const
 {
-  return (this->m_position == a_p.m_position && this->m_mass == a_p.m_mass && this->m_velocity == a_p.m_velocity);
+  return (this->m_position == a_p.m_position) && (this->m_mass == a_p.m_mass) && (this->m_velocity == a_p.m_velocity);
 }
 
 template <size_t M, size_t N>
