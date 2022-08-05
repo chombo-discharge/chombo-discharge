@@ -18,9 +18,6 @@
 #include <cstdio>
 #include <cmath>
 
-// Chombo includes
-#include <BinItem.H>
-
 // Our includes
 #include <CD_NamespaceHeader.H>
 
@@ -31,7 +28,7 @@
   quantities are communicated when remapping particles. 
 */
 template <size_t M, size_t N>
-class TracerParticle : public BinItem
+class TracerParticle
 {
 public:
   /*!
@@ -69,6 +66,34 @@ public:
   */
   inline const Real&
   mass() const;
+
+  /*!
+    @brief Get the particle position. 
+    @return m_position
+  */
+  inline RealVect&
+  position();
+
+  /*!
+    @brief Get the particle position.
+    @return m_position
+  */
+  inline const RealVect&
+  position() const;
+
+  /*!
+    @brief Get the old particle position. 
+    @return m_position
+  */
+  inline RealVect&
+  oldPosition();
+
+  /*!
+    @brief Get the old particle position.
+    @return m_position
+  */
+  inline const RealVect&
+  oldPosition() const;    
 
   /*!
     @brief Get the particle velocity. 
@@ -141,10 +166,18 @@ public:
   operator!=(const TracerParticle<M, N>& a_other) const;
 
   /*!
+    @brief Chombo LevelData stuff
+  */
+  int preAllocatable()
+  {
+    return 1;
+  }  
+
+  /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
   */
   inline virtual int
-  size() const override;
+  size() const;
 
   /*!
     @brief Write a linear binary representation of the internal data. Assumes that
@@ -152,20 +185,30 @@ public:
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearOut(void* a_buffer) const override;
+  linearOut(void* a_buffer) const;
 
   /*!
     @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearIn(void* a_bufer) override;
+  linearIn(void* a_bufer);
 
 protected:
   /*!
     @brief Particle "mass".
   */
   Real m_mass;
+
+  /*!
+    @brief Particle position
+  */
+  RealVect m_position;
+
+  /*!
+    @brief Old particle position
+  */
+  RealVect m_oldPosition;  
 
   /*!
     @brief Particle velocity

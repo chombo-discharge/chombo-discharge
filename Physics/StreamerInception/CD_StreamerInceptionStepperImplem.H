@@ -711,14 +711,15 @@ StreamerInceptionStepper<P, F>::initialParticles() noexcept
         // back later on). The scalar<0> flag is the flag we use for start-stop criteria for the
         // particle integration.
         p.mass()               = 0.0;
-        p.template vect<0>()   = p.position();
-        p.template scalar<0>() = 1.0;
+	p.oldPosition() = p.position();
+        // p.template vect<0>()   = p.position();
+        // p.template scalar<0>() = 1.0;
       }
     }
   }
 
   // Remove particles inside the EB.
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
+  m_amr->removeCoveredParticlesDiscrete(amrParticles, m_phase);
 
   amrParticles.remap();
 }
@@ -825,7 +826,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
       // the K-value time should be stored on the particle mass.
       switch (m_integrationAlgorithm) {
       case IntegrationAlgorithm::Euler: {
-        this->inceptionIntegrateEuler(m_voltageSweeps[i]);
+	this->inceptionIntegrateEuler(m_voltageSweeps[i]);
 
         break;
       }
@@ -862,7 +863,9 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
     // Make K = max(Kplus, Kminu)
     DataOps::max(K, Kplus, Kminu);
+    
 
+    
     m_amr->averageDown(K, m_realm, m_phase);
     m_amr->interpGhost(K, m_realm, m_phase);
 
@@ -875,6 +878,8 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
     m_maxKValues.push_back(maxK);
 
     // Copy K values to m_inceptionIntegral so we can plot them later.
+    DataOps::copy(K, Kplus);
+    DataOps::setCoveredValue(K, 0.0, 0);    
     DataOps::copy(m_inceptionIntegral, K, Interval(i, i), Interval(0, 0));
   }
 
@@ -895,25 +900,39 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
-  while (this->keepIntegrating()) {
+#if 1 // Debug
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
 
-    m_particleSolver->interpolateVelocities();
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+      
+    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+
+      List<P>& patchParticles = levelParticles[dit()].listItems();
+	
+      for (ListIterator<P> lit(patchParticles); lit.ok(); ++lit) {
+	P& p = lit();
+
+	//	p.template scalar<0>() = 1.0;
+	p.mass() = 1.0;
+	p.velocity() = RealVect::Unit;
+      }
+    }
+  }
+#endif
+
+  while (this->keepIntegrating()) {
 
     // Euler integration.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
-
-      ParticleData<P>& levelParticles = amrParticles[lvl];
       
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-
-	List<P>& patchParticles = levelParticles[dit()].listItems();
-	
-        for (ListIterator<P> lit(patchParticles); lit.ok(); ++lit) {
+        for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
           P& p = lit();
 
           // Process the particle. Stop it if it ends up inside the EB.
-          if (p.template scalar<0>() > 0.0) {
+          if (p.mass() > 0.0) {//template scalar<0>() > 0.0) {
             const RealVect v      = p.velocity();
             const RealVect E      = a_voltage * p.velocity();
             const RealVect unitV  = v / v.vectorLength();
@@ -923,14 +942,15 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
             // Stop integration for particles that move into regions alpha < 0.0
             // or outside of the domain (they would be discarded in the remap).
             if (this->particleOutsideGrid(newPos, probLo, probHi) || alpha < 0.0) {
-              p.template scalar<0>() = -1.0;
+	      //              p.template scalar<0>() = -1.0;
+	      p.mass() = -1.0;
             }
             else {
 
 	      // Move the particle. Note that this might move the particle into
 	      // the EB, but we take care of that below. 
               p.position() = newPos;
-              p.mass() += step * alpha;
+              p.mass() += 1.0;//step * alpha;
             }
           }
         }
@@ -943,9 +963,27 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
     this->stopInvalidParticles<>();    
   }
 
-#if 1
+#if 1  // Debug
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
 
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+      
+    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+
+      List<P>& patchParticles = levelParticles[dit()].listItems();
+	
+      for (ListIterator<P> lit(patchParticles); lit.ok(); ++lit) {
+	P& p = lit();
+
+	p.mass() = 1.23456;
+      }
+    }
+  }
 #endif
+
+  m_amr->removeCoveredParticlesDiscrete(amrParticles, m_phase);
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);    
 }
 
 template <typename P, typename F>
@@ -1088,7 +1126,7 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::driftIntegrateEuler" << endl;
   }
-
+#if 0
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
 
@@ -1203,6 +1241,7 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
       }
     }
   }
+#endif
 }
 
 template <typename P, typename F>
@@ -1222,9 +1261,13 @@ StreamerInceptionStepper<P, F>::keepIntegrating() const noexcept
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
       for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+#if 0
         if (lit().template scalar<0>() > 0.0) {
           keepGoing = 1;
         }
+#else
+	if(lit().mass() > 0.0) keepGoing = 1;
+#endif
       }
     }
   }
@@ -1248,7 +1291,8 @@ StreamerInceptionStepper<P, F>::rewindParticles() noexcept
       for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
         P& p = lit();
 
-        p.position() = p.template vect<0>();
+	//        p.position() = p.template vect<0>();
+	p.position() = p.oldPosition();
       }
     }
   }
@@ -1739,14 +1783,17 @@ StreamerInceptionStepper<P, F>::stopInvalidParticles(const Real a_val) noexcept
           const bool insideEB = (p.position() - centroid).dotProduct(normal) < 0.0;
 
           if (insideEB) {
-            p.template scalar<0>() = a_val;
+	    //            p.template scalar<0>() = a_val;
+	    p.mass() = -1.0;
           }
         }
         else if (ebisbox.isCovered(iv)) {
-          p.template scalar<0>() = a_val;
+	  //	  p.template scalar<0>() = a_val;
+	  p.mass() = -1.0;	  
         }
         else if (this->particleOutsideGrid(p.position(), probLo, probHi)) {
-          p.template scalar<0>() = a_val;
+	  //	  p.template scalar<0>() = a_val;
+	  p.mass() = -1.0;	  
         }
       }
     }
