@@ -267,7 +267,7 @@ ParticleContainer<P>::getBufferParticles()
 {
   CH_assert(m_isDefined);
 
-  return m_particles;
+  return m_bufferParticles;
 }
 
 template <class P>
@@ -276,7 +276,7 @@ ParticleContainer<P>::getBufferParticles() const
 {
   CH_assert(m_isDefined);
 
-  return m_particles;
+  return m_bufferParticles;
 }
 
 template <class P>
@@ -836,7 +836,7 @@ ParticleContainer<P>::remap()
   // do collect those, too
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     if (m_particles[lvl]->numOutcast() > 0) {
-      //      if(procID() == 0) std::cout << "ParticleContainer<P>::remap - outcast list not empty" << std::endl;
+      // if(procID() == 0) std::cout << "ParticleContainer<P>::remap - outcast list not empty" << std::endl;
       this->remapLostParticles();
       break;
     }
