@@ -1,6 +1,6 @@
 #include <CD_Driver.H>
 #include <CD_TracerParticleSolver.H>
-#include <CD_RoughSphere.H>
+#include <CD_Cylinder.H>
 #include <CD_FieldSolverMultigrid.H>
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_LookupTable.H>
@@ -30,6 +30,9 @@ int main(int argc, char* argv[]){
 								      "E/N (Td)	Townsend attach. coef. eta/N (m2)",
 								      "");
 
+  ionizationData.setRange(10,2000, 0);
+  attachmentData.setRange(10,2000, 0);
+  
   ionizationData.sort(0);
   attachmentData.sort(0);
   
@@ -49,11 +52,11 @@ int main(int argc, char* argv[]){
     const Real alpha = ionizationData.getEntry<1>(E);
     const Real eta = attachmentData.getEntry<1>(E);
 
-    return alpha - eta;
+    return alpha;// - eta;
   };  
 
   // Set geometry and AMR 
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new RoughSphere());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new Cylinder());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
 
   // Set up time stepper 
