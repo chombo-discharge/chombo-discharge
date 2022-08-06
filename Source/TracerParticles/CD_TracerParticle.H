@@ -82,20 +82,6 @@ public:
   position() const;
 
   /*!
-    @brief Get the old particle position. 
-    @return m_position
-  */
-  inline RealVect&
-  oldPosition();
-
-  /*!
-    @brief Get the old particle position.
-    @return m_position
-  */
-  inline const RealVect&
-  oldPosition() const;    
-
-  /*!
     @brief Get the particle velocity. 
     @return m_velocity
   */
@@ -204,11 +190,6 @@ protected:
     @brief Particle position
   */
   RealVect m_position;
-
-  /*!
-    @brief Old particle position
-  */
-  RealVect m_oldPosition;  
 
   /*!
     @brief Particle velocity
