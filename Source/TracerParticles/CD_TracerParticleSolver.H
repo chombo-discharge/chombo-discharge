@@ -29,7 +29,7 @@
 
   The template requirements on the particle type P are: 
   1) It must contain a function RealVect& position() (derived from BinItem)
-  2) It must contain a function const Real& mass() const.
+  2) It must contain a function const Real& weight() const.
   3) It must contain a function RealVect& velocity().
 */
 template <typename P>
@@ -162,17 +162,17 @@ public:
   remap();
 
   /*!
-    @brief Deposit particle mass on mesh. 
-    @param[out] a_phi Deposited mass. 
+    @brief Deposit particle weight on mesh. 
+    @param[out] a_phi Deposited weight. 
   */
   virtual void
   deposit(EBAMRCellData& a_phi) const;
 
   /*!
-    @brief Interpolate a scalar field onto the particle mass
+    @brief Interpolate a scalar field onto the particle weight
   */
   virtual void
-  interpolateMass(const EBAMRCellData& a_scalar) noexcept;
+  interpolateWeight(const EBAMRCellData& a_scalar) noexcept;
 
   /*!
     @brief Interpolate particles velocities.
@@ -343,9 +343,9 @@ protected:
   int m_haloBuffer;
 
   /*!
-    @brief Hook for adding mass to plot file. 
+    @brief Hook for adding weight to plot file. 
   */
-  bool m_plotMass;
+  bool m_plotWeight;
 
   /*!
     @brief Hook for adding velocity field to plot file.

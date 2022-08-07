@@ -54,18 +54,18 @@ public:
   inline virtual ~TracerParticle();
 
   /*!
-    @brief Get the particle "mass"
-    @return m_mass
+    @brief Get the particle "weight"
+    @return m_weight
   */
   inline Real&
-  mass();
+  weight();
 
   /*!
-    @brief Get the particle "mass"
-    @return m_mass
+    @brief Get the particle "weight"
+    @return m_weight
   */
   inline const Real&
-  mass() const;
+  weight() const;
 
   /*!
     @brief Get the particle position. 
@@ -181,10 +181,6 @@ public:
   linearIn(void* a_bufer);
 
 protected:
-  /*!
-    @brief Particle "mass".
-  */
-  Real m_mass;
 
   /*!
     @brief Particle position
@@ -195,6 +191,11 @@ protected:
     @brief Particle velocity
   */
   RealVect m_velocity;
+  
+  /*!
+    @brief Particle "weight".
+  */
+  Real m_weight;
 
   /*!
     @brief Scalar storage array
