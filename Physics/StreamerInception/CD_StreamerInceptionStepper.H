@@ -495,6 +495,12 @@ namespace Physics {
       rewindParticles() noexcept;
 
       /*!
+	@brief Reset particles. 
+      */
+      virtual void
+      resetParticles() noexcept;      
+
+      /*!
 	@brief Compute the detachment rate for all voltages
       */
       virtual void
@@ -554,15 +560,6 @@ namespace Physics {
       */
       inline bool
       particleInsideEB(const RealVect a_pos) const noexcept;
-
-      /*!
-	@brief Stop integrating particles that have ended up inside the EB.
-	@details The template parameter indicates which transient storage in TracerParticle we are setting. The value sets the value in that variable.
-	@param[in] a_val Value to set. 
-      */
-      template <size_t K = 0>
-      inline void
-      stopInvalidParticles(const Real a_val = -1.0) noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics

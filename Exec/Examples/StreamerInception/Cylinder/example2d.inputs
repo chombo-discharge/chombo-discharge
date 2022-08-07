@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -1E-2 -1E-2 # Low corner of problem domain
 AmrMesh.hi_corner        =  1E-2  1E-2 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 64 64       # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 4          # Maximum amr depth
+AmrMesh.max_amr_depth    = 3          # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -56,7 +56,7 @@ Driver.restart                         = 0                # Restart step (less o
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 100                # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_electrodes               = 0                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 # ====================================================================================================
@@ -118,8 +118,8 @@ StreamerInceptionStepper.verbosity     = 20                            # Chattin
 StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation. 
 StreamerInceptionStepper.integration   = euler                         # Particle integration algorithm.
 StreamerInceptionStepper.step_size     = dx 0.5                        # Step size. 'dx' or 'fixed' and a size. 
-StreamerInceptionStepper.voltage_lo    = 10E3                          # Low voltage multiplier
-StreamerInceptionStepper.voltage_hi    = 50E3                          # Highest voltage multiplier
+StreamerInceptionStepper.voltage_lo    = 15E3                          # Low voltage multiplier
+StreamerInceptionStepper.voltage_hi    = 35E3                          # Highest voltage multiplier
 StreamerInceptionStepper.voltage_steps = 10                            # Number of voltage steps
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
 StreamerInceptionStepper.plt_vars      = K Uinc drift bg_rate emission # Plot variables
