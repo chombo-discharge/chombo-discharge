@@ -891,10 +891,11 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
   const RealVect probHi = m_amr->getProbHi();
   
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  m_particleSolver->remap();
+  m_particleSolver->interpolateVelocities();  
   
   while (this->keepIntegrating()) {
-    
-    m_particleSolver->interpolateVelocities();
 
     // Euler integration.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -904,7 +905,6 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
         for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
           P& p = lit();
 
-          // Process the particle. Stop it if it ends up inside the EB.
           if (p.template scalar<0>() > 0.0) {
             const RealVect v      = p.velocity();
             const RealVect E      = a_voltage * p.velocity();
@@ -921,7 +921,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
 
             if (negativeAlpha || outsideDomain || insideEB) {
 	      p.template scalar<0>() = -1.0;
-	      p.position() = p.template vect<0>();
+	      //	      p.position() = p.template vect<0>();
             }
             else {
               // Move the particle. Note that this might move the particle into
@@ -935,7 +935,8 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
     }
 
     // Remap again. 
-    amrParticles.remap();
+    m_particleSolver->remap();
+    m_particleSolver->interpolateVelocities();      
   }
 }
 
