@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
     const Real alpha = ionizationData.getEntry<1>(E);
     const Real eta = attachmentData.getEntry<1>(E);
 
-    return alpha;// - eta;
+    return alpha - eta;
   };  
 
   // Set geometry and AMR 
