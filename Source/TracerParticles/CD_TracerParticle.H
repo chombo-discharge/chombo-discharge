@@ -156,7 +156,7 @@ public:
   */
   int preAllocatable()
   {
-    return 1;
+    return 0;
   }  
 
   /*!
@@ -178,7 +178,7 @@ public:
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearIn(void* a_bufer);
+  linearIn(void* a_buffer);
 
 protected:
 

@@ -891,8 +891,6 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
   const RealVect probHi = m_amr->getProbHi();
   
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
-  this->initialParticles();
   
   while (this->keepIntegrating()) {
     
@@ -923,10 +921,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
 
             if (negativeAlpha || outsideDomain || insideEB) {
 	      p.template scalar<0>() = -1.0;
-
-#if 0 // Why does this matter...?
 	      p.position() = p.template vect<0>();
-#endif
             }
             else {
               // Move the particle. Note that this might move the particle into
@@ -1167,10 +1162,12 @@ template <typename P, typename F>
 bool
 StreamerInceptionStepper<P, F>::keepIntegrating() const noexcept
 {
+#ifndef NDEBUG
   CH_TIME("StreamerInceptionStepper::keepIntegrating");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::keepIntegrating" << endl;
   }
+#endif
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
