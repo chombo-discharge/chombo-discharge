@@ -703,14 +703,14 @@ StreamerInceptionStepper<P, F>::initialParticles() noexcept
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
 
-      // Define particles' masses (i.e. integration & drift time tracker) and integration flag
+      // Define particles' weights (i.e. integration & drift time tracker) and integration flag
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
 
         // Set mass to zero and do a backup of the initial position (we need to rewind particles
         // back later on). The scalar<0> flag is the flag we use for start-stop criteria for the
         // particle integration.
-        p.mass()               = 0.0;
+        p.weight()             = 0.0;
         p.template scalar<0>() = 1.0;
         p.template vect<0>()   = p.position();
       }
@@ -718,7 +718,7 @@ StreamerInceptionStepper<P, F>::initialParticles() noexcept
   }
 
   // Remove particles inside the EB.
-  m_amr->removeCoveredParticlesDiscrete(amrParticles, m_phase);
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
 
   amrParticles.remap();
 }
@@ -822,7 +822,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
       DataOps::scale(m_electricField, p);
 
       // Switch between various integration algorithms. At the end of this
-      // the K-value time should be stored on the particle mass and the particles
+      // the K-value time should be stored on the particle weight and the particles
       // should be back in their original grid cells. 
       switch (m_integrationAlgorithm) {
       case IntegrationAlgorithm::Euler: {
@@ -891,6 +891,8 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
   const RealVect probHi = m_amr->getProbHi();
   
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  this->initialParticles();
   
   while (this->keepIntegrating()) {
     
@@ -920,9 +922,9 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
             const bool insideEB      = this->particleInsideEB(newPos);
 
             if (negativeAlpha || outsideDomain || insideEB) {
-	      p.template scalar<0>();
+	      p.template scalar<0>() = -1.0;
 
-#if 0 // Somehow this actually does something, but it shouldn't matter! So there's a bug here somewhere! 
+#if 0 // Why does this matter...?
 	      p.position() = p.template vect<0>();
 #endif
             }
@@ -930,21 +932,16 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
               // Move the particle. Note that this might move the particle into
               // the EB, but we take care of that below.
               p.position() = newPos;
-              p.mass() += step * alpha;
+              p.weight()  += step * alpha;
             }
           }
         }
       }
     }
 
-    pout() << "remap" << endl;
+    // Remap again. 
     amrParticles.remap();
-    pout() << "remap done" << endl;    
   }
-
-  pout() << "rewinding particles" << endl;
-  this->rewindParticles();
-  pout() << "done rewinding particles" << endl;  
 }
 
 template <typename P, typename F>
@@ -987,7 +984,7 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
   //          T = int dl/|v| where |v| = mu * E.
   //
   //       The integration runs from the start position of the particle and until it arrives inside the critical
-  //       volume. To figure out the critical volume, we interpolate it onto the particle's "mass". If the particle
+  //       volume. To figure out the critical volume, we interpolate it onto the particle's weight. If the particle
   //       starts out inside the critical volume then T = 0.0, and if it never reaches the critical volume then we
   //       set T = inf.
   //
@@ -1034,7 +1031,7 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
       DataOps::scale(m_electricField, p);
 
       // Switch between various integration algorithms. At the end of this
-      // the drift time should be stored on the particle mass.
+      // the drift time should be stored on the particle weight.
       switch (m_integrationAlgorithm) {
       case IntegrationAlgorithm::Euler: {
 
@@ -1130,12 +1127,12 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
             // the K-value is less than the inception criterion.
             const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
             const bool insideEB    = this->particleInsideEB(newPos);
-            const bool insideCrit  = (p.mass() >= m_inceptionK);
+            const bool insideCrit  = (p.weight() >= m_inceptionK);
 
             if (insideCrit) {
               p.template scalar<0>() = -1.0;
             }
-            else if (outsideGrid) {
+            else if (outsideGrid || insideEB) {
               p.template scalar<0>() = -1.0;
 	      p.template scalar<1>() = std::numeric_limits<Real>::quiet_NaN();
             }
@@ -1150,45 +1147,6 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
     }
 
     m_particleSolver->remap();
-
-    // Particles the wound up inside the EB must be flagged accordingly. 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-
-      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real               dx    = m_amr->getDx()[lvl];
-
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-	const EBISBox& ebisbox = ebisl[dit()];
-
-	for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
-
-	  P& p = lit();
-
-	  // Check if the particle is inside the EB -- if it is then stop it right here.
-	  const RealVect rv = p.position() - probLo;
-	  const IntVect  iv = IntVect(D_DECL(std::floor(rv[0] / dx), std::floor(rv[1] / dx), std::floor(rv[2] / dx)));
-
-	  if (ebisbox.isIrregular(iv)) {
-	    const RealVect normal   = ebisbox.normal(VolIndex(iv, 0));
-	    const RealVect centroid = probLo
-	      + (RealVect(iv) + 0.5 * RealVect::Unit + ebisbox.bndryCentroid(VolIndex(iv, 0)))
-	      * dx;
-
-	    const bool insideEB = (p.position() - centroid).dotProduct(normal) <= 0.0;
-
-	    if (insideEB) {
-	      p.template scalar<0>() = -1.0;
-	      p.template scalar<1>() = std::numeric_limits<Real>::quiet_NaN();
-	    }
-	  }
-	  else if (ebisbox.isCovered(iv)) {
-	    p.template scalar<0>() = -1.0;
-	    p.template scalar<1>() = std::numeric_limits<Real>::quiet_NaN();
-	  }
-	}
-      }
-    }
   }
 
   // Put the integration variable onto the particle "mass"
