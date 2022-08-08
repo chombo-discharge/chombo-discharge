@@ -493,10 +493,11 @@ namespace Physics {
       
       /*!
 	@brief Check if some particles still need to be processed. 
+	@param[in] a_amrParticles Particles
 	@return true if integration shall continue, false if not
       */
       virtual bool
-      keepIntegrating() const noexcept;
+      keepIntegrating(const ParticleContainer<P>& a_amrParticles) const noexcept;
 
       /*!
 	@brief Move particles back to their original position.

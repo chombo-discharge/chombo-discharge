@@ -345,18 +345,39 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
   // Write our K values.
   if (m_plotInceptionIntegral) {
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Interval srcInterval(0, m_voltageSweeps.size() - 1);
-      const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
-      m_inceptionIntegral[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    
+    // Positive polarity
+    {
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+	const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+	const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+	m_inceptionIntegralPlus[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+      }
+      a_icomp += m_voltageSweeps.size();
+    
+      std::string varName;
+      for (const Real& V : m_voltageSweeps) {
+	varName = "K-value/ V = +";
+	varName += std::to_string(V);
+	a_plotVariableNames.push_back(varName);
+      }
     }
-    a_icomp += m_voltageSweeps.size();
 
-    std::string varName;
-    for (const Real& V : m_voltageSweeps) {
-      varName = "K-value/ V = ";
-      varName += std::to_string(V);
-      a_plotVariableNames.push_back(varName);
+    // Negative polarity
+    {
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+	const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+	const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+	m_inceptionIntegralMinu[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+      }    
+      a_icomp += m_voltageSweeps.size();
+
+      std::string varName;
+      for (const Real& V : m_voltageSweeps) {
+	varName = "K-value/ V = -";
+	varName += std::to_string(V);
+	a_plotVariableNames.push_back(varName);
+      }
     }
   }
 
@@ -472,7 +493,7 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
 
   // K-values
   if (m_plotInceptionIntegral) {
-    ncomp += m_voltageSweeps.size();
+    ncomp += 2 * m_voltageSweeps.size();
   }
 
   // Drift times (+/-) direction
@@ -853,7 +874,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
       this->rewindParticles();
 
       // Deposit particles on mesh and copy to relevant data holder. 
-      if (p > 0.0) {
+      if (p < 0.0) {
         m_particleSolver->deposit(Kplus);
 	DataOps::copy(m_inceptionIntegralPlus, Kplus, Interval(i,i), Interval(0,0));
       }
@@ -897,27 +918,41 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
 
+  // Allocate a data holder for holding the processed particles. This
+  // will be faster because then we only have to iterate through the
+  // particles that are actually integrated. 
+  ParticleContainer<P> amrProcessedParticles;
+  m_amr->allocate(amrProcessedParticles, 0, m_realm);
+
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
   m_particleSolver->remap();
-  m_particleSolver->interpolateVelocities();
-
-  while (this->keepIntegrating()) {
+  m_particleSolver->interpolateVelocities();    
+  
+  while (this->keepIntegrating(amrParticles)) {
 
     // Euler integration.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
+      const Real step = m_useFixedStep ? m_fixedStep : (m_relativeStep * m_amr->getDx()[lvl]);
 
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+	List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
+	List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+
+	// Make a copy of the unprocessed particles. 
+	List<P> unprocessedParticles(solverParticles);
+	solverParticles.clear();
+
+        for (ListIterator<P> lit(unprocessedParticles); lit.ok(); ++lit) {
           P& p = lit();
 
           if (p.template scalar<0>() > 0.0) {
             const RealVect v      = p.velocity();
-            const RealVect E      = a_voltage * p.velocity();
-            const RealVect unitV  = v / v.vectorLength();
-            const RealVect newPos = p.position() + step * unitV;
-            const Real     alpha  = m_alpha(E.vectorLength());
+	    const Real     dt     = step /  v.vectorLength();
+            const Real     alpha  = m_alpha(a_voltage * v.vectorLength());
+
+	    // Update particle position
+            const RealVect newPos = p.position() + dt * v;
 
             // Stop integration for particles that move into regions alpha < 0.0,
 	    // inside the EB or outside of the domain. 
@@ -927,10 +962,14 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
 
             if (negativeAlpha || outsideDomain || insideEB) {
               p.template scalar<0>() = -1.0;
+	      
+	      processedParticles.add(p);
             }
             else {
               p.position() = newPos;
               p.weight() += step * alpha;
+
+	      solverParticles.add(p);
             }
           }
         }
@@ -941,6 +980,14 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
     m_particleSolver->remap();
     m_particleSolver->interpolateVelocities();
   }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+      amrParticles[lvl][dit()].listItems() = amrProcessedParticles[lvl][dit()].listItems();
+    }
+  }
+
+  m_particleSolver->remap();
 }
 
 template <typename P, typename F>
@@ -972,7 +1019,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
   m_particleSolver->remap();
   m_particleSolver->interpolateVelocities();
 
-  while (this->keepIntegrating()) {
+  while (this->keepIntegrating(amrParticles)) {
 
     // Euler stage. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -1129,7 +1176,7 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
       DataOps::scale(m_electricField, p);          
 
       // Copy current K-value to the above data holder.
-      if(p > 0.0) {
+      if(p < 0.0) {
 	DataOps::copy(K, m_inceptionIntegralPlus, Interval(0, 0), Interval(i, i));
       }
       else {
@@ -1211,7 +1258,7 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
   m_particleSolver->interpolateWeight(a_K);
   m_particleSolver->interpolateVelocities();  
 
-  while (this->keepIntegrating()) {
+  while (this->keepIntegrating(amrParticles)) {
 
     // Euler kernel. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -1274,7 +1321,7 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
 
 template <typename P, typename F>
 bool
-StreamerInceptionStepper<P, F>::keepIntegrating() const noexcept
+StreamerInceptionStepper<P, F>::keepIntegrating(const ParticleContainer<P>& a_amrParticles) const noexcept
 {
 #ifndef NDEBUG
   CH_TIME("StreamerInceptionStepper::keepIntegrating");
@@ -1283,14 +1330,12 @@ StreamerInceptionStepper<P, F>::keepIntegrating() const noexcept
   }
 #endif
 
-  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
   // If keepGoing > 0 then we keep integrating. Otherwise we stop.
   int keepGoing = -1;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+      for (ListIterator<P> lit(a_amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
         if (lit().template scalar<0>() > 0.0) {
           keepGoing = 1;
         }
