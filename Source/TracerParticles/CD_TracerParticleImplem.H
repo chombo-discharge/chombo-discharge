@@ -143,11 +143,11 @@ TracerParticle<M, N>::operator!=(const TracerParticle<M, N>& a_p) const
 }
 
 template <size_t M, size_t N>
-inline int
+inline size_t
 TracerParticle<M, N>::size() const
 {
   // clang-format off
-  //     position                  weight         velocity                  scalars            vectors
+  //     position..............    weight.....    velocity..............    scalars........    vectors...................
   return SpaceDim * sizeof(Real) + sizeof(Real) + SpaceDim * sizeof(Real) + M * sizeof(Real) + N * SpaceDim * sizeof(Real);
   // clang-format on
 }

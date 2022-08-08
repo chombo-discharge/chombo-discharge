@@ -162,7 +162,7 @@ public:
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
   */
-  inline virtual int
+  inline virtual size_t
   size() const;
 
   /*!
