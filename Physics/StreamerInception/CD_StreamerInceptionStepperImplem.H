@@ -983,6 +983,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
     m_particleSolver->interpolateVelocities();
   }
 
+  // Copy processed particles over to the solver particles. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
       amrParticles[lvl][dit()].listItems() = amrProcessedParticles[lvl][dit()].listItems();
@@ -1258,7 +1259,11 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
   // Get K-value and velocity at particle position.
   m_particleSolver->remap();
   m_particleSolver->interpolateWeight(a_K);
-  m_particleSolver->interpolateVelocities();  
+  m_particleSolver->interpolateVelocities();
+
+  // Make a data holder which will hold all the particles that have stopped. 
+  ParticleContainer<P> amrProcessedParticles;
+  m_amr->allocate(amrProcessedParticles, 0, m_realm);  
 
   while (this->keepIntegrating(amrParticles)) {
 
@@ -1267,18 +1272,24 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
       const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
 
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+	List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
+	List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+
+	// Make a copy of the unprocessed particles.
+	List<P> unprocessedParticles(solverParticles);
+	solverParticles.clear();
+      
+        for (ListIterator<P> lit(unprocessedParticles); lit.ok(); ++lit) {
 
           P& p = lit();
 
           if (p.template scalar<0>() > 0.0) {
-            const RealVect E    = a_voltage * p.velocity();
-            const Real     absE = E.vectorLength();
-            const Real     mu   = m_ionMobility(E.vectorLength());
+	    const RealVect v    = p.velocity();
+	    const Real     dt   = step / v.vectorLength();
+            const Real     mu   = m_ionMobility(a_voltage * v.vectorLength());
 
-            const RealVect vel    = mu * E;
-            const RealVect unitV  = vel / vel.vectorLength();
-            const RealVect newPos = p.position() + unitV * step;
+	    // Update the particle position. 
+            const RealVect newPos = p.position() + dt * v;
 
             // Stop integration if particle ends up inside the EB, outside the domain, or if
             // the K-value is less than the inception criterion.
@@ -1288,15 +1299,21 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
 
             if (insideCrit) {
               p.template scalar<0>() = -1.0;
+
+	      processedParticles.add(p);
             }
             else if (outsideGrid || insideEB) {
               p.template scalar<0>() = -1.0;
 	      p.template scalar<1>() = std::numeric_limits<Real>::quiet_NaN();
+
+	      processedParticles.add(p);
             }
             else {
               p.position() = newPos;
 
-              p.template scalar<1>() += step / vel.vectorLength();
+              p.template scalar<1>() += step / v.vectorLength();
+
+	      solverParticles.add(p);
             }
           }
         }
@@ -1309,16 +1326,22 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
   }
 
   // Put the integration variable onto the particle "mass"
+  // Copy processed particles over to the solver particles. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+      List<P>& solverParticles = amrParticles[lvl][dit()].listItems();
+      
+      solverParticles = amrProcessedParticles[lvl][dit()].listItems();
 
+      for (ListIterator<P> lit(solverParticles); lit.ok(); ++lit) {
         P& p = lit();
 
         p.weight() = p.template scalar<1>();
       }
     }
   }
+
+  m_particleSolver->remap();
 }
 
 template <typename P, typename F>
