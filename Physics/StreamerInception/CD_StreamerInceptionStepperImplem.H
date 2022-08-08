@@ -893,12 +893,8 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
-  m_fieldSolver->writePlotFile();
-
   m_particleSolver->remap();
   m_particleSolver->interpolateVelocities();
-
-  DischargeIO::writeEBHDF5(m_electricField, "field.hdf5");
 
   while (this->keepIntegrating()) {
 
@@ -926,7 +922,6 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
 
             if (negativeAlpha || outsideDomain || insideEB) {
               p.template scalar<0>() = -1.0;
-	      p.position() = p.template vect<0>();
             }
             else {
               // Move the particle. Note that this might move the particle into
