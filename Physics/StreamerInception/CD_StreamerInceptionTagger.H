@@ -80,14 +80,24 @@ namespace Physics {
       const EBAMRCellData* m_electricField;
 
       /*!
+	@brief Tracer field. Will be populated with |grad(E)|*dx/|E|
+      */
+      EBAMRCellData m_tracerField;
+
+      /*!
 	@brief Phase
       */
-      phase::which_phase m_phase;      
+      phase::which_phase m_phase;
+
+      /*!
+	@brief Realm
+      */
+      std::string m_realm;
 
       /*!
 	@brief Curvature refinement factor
       */
-      Real m_curvRefinement;
+      Real m_refCurv;
     };
   }
 }
