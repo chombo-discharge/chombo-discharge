@@ -112,6 +112,8 @@ StreamerInceptionStepper<P, F>::allocate()
 
   m_amr->allocate(m_electricField, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_inceptionIntegral, m_realm, m_phase, m_voltageSweeps.size());
+  m_amr->allocate(m_inceptionIntegralPlus, m_realm, m_phase, m_voltageSweeps.size());
+  m_amr->allocate(m_inceptionIntegralMinu, m_realm, m_phase, m_voltageSweeps.size());    
   m_amr->allocate(m_backgroundIonization, m_realm, m_phase, m_voltageSweeps.size());
   m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
   m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
@@ -120,6 +122,8 @@ StreamerInceptionStepper<P, F>::allocate()
   m_amr->allocate(m_driftTimesMinu, m_realm, m_phase, m_voltageSweeps.size());
 
   DataOps::setValue(m_inceptionIntegral, 0.0);
+  DataOps::setValue(m_inceptionIntegralPlus, 0.0);
+  DataOps::setValue(m_inceptionIntegralMinu, 0.0);    
   DataOps::setValue(m_backgroundIonization, 0.0);
   DataOps::setValue(m_emissionRatesPlus, 0.0);
   DataOps::setValue(m_emissionRatesMinu, 0.0);
@@ -327,6 +331,18 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   m_fieldSolver->writePlotData(a_output, a_icomp);
   m_particleSolver->writePlotData(a_output, a_icomp);
 
+  // Write the inception voltage.
+  if (m_plotInceptionVoltage) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Interval srcInterval(0, 0);
+      const Interval dstInterval(a_icomp, a_icomp);
+      m_inceptionVoltage[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+    }
+    a_icomp += 1;
+
+    a_plotVariableNames.push_back("Inception voltage");
+  }  
+
   // Write our K values.
   if (m_plotInceptionIntegral) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -338,7 +354,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
     std::string varName;
     for (const Real& V : m_voltageSweeps) {
-      varName = "K-value, V = ";
+      varName = "K-value/ V = ";
       varName += std::to_string(V);
       a_plotVariableNames.push_back(varName);
     }
@@ -358,7 +374,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
       std::string varName;
       for (const Real& V : m_voltageSweeps) {
-        varName = "Drift time for V = +";
+        varName = "Drift time by mu/ V = +";
         varName += std::to_string(V);
         a_plotVariableNames.push_back(varName);
       }
@@ -375,24 +391,13 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
       std::string varName;
       for (const Real& V : m_voltageSweeps) {
-        varName = "Drift time for V = -";
+        varName = "Drift time by mu/ V = -";
         varName += std::to_string(V);
         a_plotVariableNames.push_back(varName);
       }
     }
   }
 
-  // Write the inception voltage.
-  if (m_plotInceptionVoltage) {
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Interval srcInterval(0, 0);
-      const Interval dstInterval(a_icomp, a_icomp);
-      m_inceptionVoltage[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-    }
-    a_icomp += 1;
-
-    a_plotVariableNames.push_back("Inception voltage");
-  }
 
   // Write the background ionization rates
   if (m_plotBackgroundIonization) {
@@ -405,7 +410,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
     std::string varName;
     for (const Real& V : m_voltageSweeps) {
-      varName = "Background ionization rate, V =  ";
+      varName = "Background ionization rate/ V =  ";
       varName += std::to_string(V);
       a_plotVariableNames.push_back(varName);
     }
@@ -423,7 +428,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
       std::string varName;
       for (const Real& V : m_voltageSweeps) {
-        varName = "Emission rate, V = +";
+        varName = "Field emission rate/ V = +";
         varName += std::to_string(V);
         a_plotVariableNames.push_back(varName);
       }
@@ -441,7 +446,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
       std::string varName;
       for (const Real& V : m_voltageSweeps) {
-        varName = "Emission rate, V = -";
+        varName = "Field emission rate/ V = -";
         varName += std::to_string(V);
         a_plotVariableNames.push_back(varName);
       }
@@ -848,12 +853,14 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
       this->rewindParticles();
 
-      // Deposit particles on mesh.
+      // Deposit particles on mesh and copy to relevant data holder. 
       if (p > 0.0) {
         m_particleSolver->deposit(Kplus);
+	DataOps::copy(m_inceptionIntegralPlus, Kplus, Interval(i,i), Interval(0,0));
       }
       else {
         m_particleSolver->deposit(Kminu);
+	DataOps::copy(m_inceptionIntegralMinu, Kminu, Interval(i,i), Interval(0,0));	
       }
 
       // Scale field back again.
@@ -924,8 +931,6 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
               p.template scalar<0>() = -1.0;
             }
             else {
-              // Move the particle. Note that this might move the particle into
-              // the EB, but we take care of that below.
               p.position() = newPos;
               p.weight() += step * alpha;
             }
@@ -938,6 +943,18 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
     m_particleSolver->remap();
     m_particleSolver->interpolateVelocities();
   }
+
+#if 0 // Debug code -- loses us particles but why???
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
+
+    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+	lit().weight() = 1.234567;
+      }
+    }
+  }
+#endif
 }
 
 template <typename P, typename F>
@@ -1009,11 +1026,6 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
   // Integrate for each voltage
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
-    // Copy current K-value to the above data holder.
-    DataOps::copy(K, m_inceptionIntegral, Interval(0, 0), Interval(i, i));
-    m_amr->averageDown(K, m_realm, m_phase);
-    m_amr->interpGhost(K, m_realm, m_phase);
-
     // Polarities. Note that we are dealing with negative ions so
     // for positive polarity the particles move opposite to the field.
     std::vector<Real> polarities{-1.0, 1.0};
@@ -1022,6 +1034,14 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
 
       // Draw a new set of particles (negative ions) and update the velocity.
       this->resetParticles();
+
+      // Copy current K-value to the above data holder.
+      if(p > 0.0) {
+	DataOps::copy(K, m_inceptionIntegralPlus, Interval(0, 0), Interval(i, i));
+      }
+      else {
+	DataOps::copy(K, m_inceptionIntegralMinu, Interval(0, 0), Interval(i, i));
+      }
 
       // Scale E-field by +/-
       DataOps::scale(m_electricField, p);
@@ -1096,11 +1116,12 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
     }
   }
 
-  while (this->keepIntegrating()) {
+  // Get K-value and velocity at particle position.
+  m_particleSolver->remap();
+  m_particleSolver->interpolateWeight(a_K);
+  m_particleSolver->interpolateVelocities();  
 
-    // Get K-value and velocity at particle position.
-    m_particleSolver->interpolateWeight(a_K);
-    m_particleSolver->interpolateVelocities();
+  while (this->keepIntegrating()) {
 
     // Euler kernel. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -1144,6 +1165,8 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
     }
 
     m_particleSolver->remap();
+    m_particleSolver->interpolateWeight(a_K);
+    m_particleSolver->interpolateVelocities();
   }
 
   // Put the integration variable onto the particle "mass"

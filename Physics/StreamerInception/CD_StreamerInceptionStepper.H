@@ -298,6 +298,16 @@ namespace Physics {
       EBAMRCellData m_inceptionIntegral;
 
       /*!
+	@brief Inception integral values (positive polarity)
+      */
+      EBAMRCellData m_inceptionIntegralPlus;
+
+      /*!
+	@brief Inception integral values (negative polarity)
+      */
+      EBAMRCellData m_inceptionIntegralMinu;            
+
+      /*!
 	@brief Drift times for positive polarity
       */
       EBAMRCellData m_driftTimesPlus;
