@@ -1339,20 +1339,27 @@ FieldSolver::getNumberOfPlotVariables() const
 
   int numPltVars = 0;
 
-  if (m_plotPotential)
+  if (m_plotPotential) {
     numPltVars = numPltVars + 1;
-  if (m_plotRho)
+  }
+  if (m_plotRho) {
     numPltVars = numPltVars + 1;
-  if (m_plotSigma)
+  }
+  if (m_plotSigma) {
     numPltVars = numPltVars + 1;
-  if (m_plotResidue)
+  }
+  if (m_plotResidue) {
     numPltVars = numPltVars + 1;
-  if (m_plotPermittivity)
+  }
+  if (m_plotPermittivity) {
     numPltVars = numPltVars + 1;
-  if (m_plotElectricField)
+  }
+  if (m_plotElectricField) {
     numPltVars = numPltVars + SpaceDim;
-  if (m_plotElectricFieldSolid)
+  }
+  if (m_plotElectricFieldSolid) {
     numPltVars = numPltVars + SpaceDim;
+  }
 
   return numPltVars;
 }

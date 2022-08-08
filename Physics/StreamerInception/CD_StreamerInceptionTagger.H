@@ -20,12 +20,12 @@ namespace Physics {
   namespace StreamerInception {
 
     /*!
-      @brief Class for tagging cells in the StreamerInceptionModule. 
+      @brief Class for tagging cells in the StreamerInception module. 
+      @details This flags cells for refinement if |grad(|E|)|dx /|E| > threshold. 
     */
     class StreamerInceptionTagger : public CellTagger
     {
     public:
-
 
       // Disallowed constructors. 
       StreamerInceptionTagger() = delete;

@@ -3,6 +3,7 @@
 #include <CD_Cylinder.H>
 #include <CD_FieldSolverMultigrid.H>
 #include <CD_StreamerInceptionStepper.H>
+#include <CD_StreamerInceptionTagger.H>
 #include <CD_LookupTable.H>
 #include <CD_DataParser.H>
 #include <ParmParse.H>
@@ -61,12 +62,13 @@ int main(int argc, char* argv[]){
 
   // Set up time stepper 
   auto timestepper = RefCountedPtr<StreamerInceptionStepper<>> (new StreamerInceptionStepper<>());
+  auto celltagger  = RefCountedPtr<StreamerInceptionTagger> (new StreamerInceptionTagger(amr, timestepper->getElectricField()));
 
   // Set ionization coefficient. 
   timestepper->setAlpha(alphaEff);  
 
   // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr));
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, celltagger));
   engine->setupAndRun(input_file);
 
 #ifdef CH_MPI

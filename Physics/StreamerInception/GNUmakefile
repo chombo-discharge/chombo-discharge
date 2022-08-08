@@ -14,7 +14,7 @@ SrcLib = $(DISCHARGE_HOME)/Lib/lib$(STREAMERINCEPTION_LIB)$(config).a
 # For making the library.
 StreamerInceptionPhysics: $(objects)
 	if test -f $(SrcLib); then $(RM) $(SrcLib); fi
-	ar -cr $(SrcLib) #o/$(config)/*.o <-- Header-only library. 
+	ar -cr $(SrcLib) o/$(config)/*.o
 
 # For cleaning up after ourselves. 
 pristine:

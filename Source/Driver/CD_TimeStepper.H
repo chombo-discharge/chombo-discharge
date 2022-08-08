@@ -81,6 +81,12 @@ public:
   postCheckpointSetup() = 0;
 
   /*!
+    @brief Special routine which is executed at the end of setup routines (both fresh initialization and checkpoint)
+  */
+  virtual void
+  postSetup();
+
+  /*!
     @brief Register realms to be used for the simulation.
   */
   virtual void

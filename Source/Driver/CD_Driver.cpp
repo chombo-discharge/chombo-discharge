@@ -1579,6 +1579,8 @@ Driver::setupFresh(const int a_initialRegrids)
       this->gridReport();
     }
   }
+
+  m_timeStepper->postSetup();
 }
 
 #ifdef CH_USE_HDF5
@@ -1658,6 +1660,9 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartF
       this->gridReport();
     }
   }
+
+
+  m_timeStepper->postSetup();      
 }
 #endif
 

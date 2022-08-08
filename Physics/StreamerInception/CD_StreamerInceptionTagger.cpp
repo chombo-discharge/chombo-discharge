@@ -16,6 +16,7 @@
 // Our includes
 #include <CD_StreamerInceptionTagger.H>
 #include <CD_DataOps.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::StreamerInception;
@@ -69,6 +70,7 @@ StreamerInceptionTagger::regrid()
   m_realm = m_electricField->getRealm();
   
   m_amr->allocate(m_tracerField, m_realm, m_phase, 1);
+  
   DataOps::setValue(m_tracerField, 0.0);
 }
 
@@ -108,27 +110,37 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
 
   DataOps::divideFallback(m_tracerField, magnE, 0.0);
 
-  // Flag cells for refinement.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++ ) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+  int foundTags = -1;
+  
+  const int finestLevel    = m_amr->getFinestLevel();
+  const int maxLevel       = m_amr->getMaxAmrDepth();
+  const int finestTagLevel = (finestLevel == maxLevel) ? maxLevel - 1 : finestLevel;
 
+  for (int lvl = 0; lvl <= finestTagLevel; lvl++) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-
+      const EBISBox& ebisbox = ebisl[dit()];
+      
       DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
+      tags.makeEmptyBits();
 
       const EBCellFAB& tracerField = (*m_tracerField[lvl])[dit()];
       const FArrayBox& tracerFieldReg = tracerField.getFArrayBox();
 
-
-
       auto regularKernel = [&](const IntVect& iv) -> void {
-	if(tracerFieldReg(iv, 0) >= m_refCurv) {
+	if(ebisbox.isRegular(iv) && tracerFieldReg(iv, 0) >= m_refCurv) {
+	  foundTags = 1;
+	  
 	  tags |= iv;
 	}
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
 	if(tracerField(vof, 0) >= m_refCurv) {
+	  foundTags = 1;
+	  
 	  tags |= vof.gridIndex();
 	}
       };
@@ -143,6 +155,8 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
       BoxLoops::loop(vofit, irregularKernel);	
     }
   }
+
+  return (ParallelOps::max(foundTags) > 0) ? true : false;
 }
 
 #include <CD_NamespaceFooter.H>

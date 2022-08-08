@@ -98,10 +98,16 @@ namespace Physics {
 
       /*!
 	@brief Perform any post-initialization steps. 
-	@details This performs the inception integral evaluation and all that. 
       */
       void
       postInitialize() override;
+
+      /*!
+	@brief Post-setup routine. 
+	@details This performs the inception integral evaluation and all that. 
+      */
+      void
+      postSetup() override;      
 
       /*!
 	@brief Post checkpoint operations. 
@@ -166,6 +172,12 @@ namespace Physics {
       */
       virtual void
       writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
+
+      /*!
+	@brief Get the electric field
+      */
+      virtual const EBAMRCellData* const
+      getElectricField() const noexcept;
 
       /*!
 	@brief Get the number of plot variables for this time stepper. 

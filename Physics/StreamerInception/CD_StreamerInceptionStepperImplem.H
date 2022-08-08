@@ -522,6 +522,17 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
 }
 
 template <typename P, typename F>
+const EBAMRCellData* const 
+StreamerInceptionStepper<P, F>::getElectricField() const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::getElectricField");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::getElectricField" << endl;
+  }  
+  return &m_electricField;
+}
+
+template <typename P, typename F>
 Real
 StreamerInceptionStepper<P, F>::computeDt()
 {
@@ -575,6 +586,8 @@ StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFines
 
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_particleSolver->preRegrid(a_lmin, a_oldFinestLevel);
+
+  pout() << "done preregrid" << endl;
 }
 
 template <typename P, typename F>
@@ -587,11 +600,21 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   }
 
   // Regrid tracer particles and field
-  m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);  
   m_particleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   // Regrid velocity field
   m_amr->reallocate(m_electricField, m_phase, a_lmin);
+
+  m_amr->reallocate(m_inceptionIntegral, m_phase, a_lmin);
+  m_amr->reallocate(m_inceptionIntegralPlus, m_phase, a_lmin);
+  m_amr->reallocate(m_inceptionIntegralMinu, m_phase, a_lmin);
+  m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
+  m_amr->reallocate(m_emissionRatesPlus, m_phase, a_lmin);
+  m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
+  m_amr->reallocate(m_inceptionVoltage, m_phase, a_lmin);
+  m_amr->reallocate(m_driftTimesPlus, m_phase, a_lmin);
+  m_amr->reallocate(m_driftTimesMinu, m_phase, a_lmin);
 }
 
 template <typename P, typename F>
@@ -759,7 +782,17 @@ StreamerInceptionStepper<P, F>::postInitialize()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::postInitialize" << endl;
   }
+}
 
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::postSetup()
+{
+  CH_TIME("StreamerInceptionStepper::postSetup");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::postSetup" << endl;
+  }
+  
   // Initialize the particle solver.
   m_particleSolver->setVelocity(m_electricField);
 
