@@ -323,6 +323,8 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
     pout() << "StreamerInceptionStepper::writePlotData" << endl;
   }
 
+  const std::string prefix = "StreamerInceptionStepper/";
+
   // Append plot variable names.
   a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
   a_plotVariableNames.append(m_particleSolver->getPlotVariableNames());
@@ -340,7 +342,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
     }
     a_icomp += 1;
 
-    a_plotVariableNames.push_back("Inception voltage");
+    a_plotVariableNames.push_back(prefix + "Inception voltage");
   }  
 
   // Write our K values.
@@ -357,7 +359,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
     
       std::string varName;
       for (const Real& V : m_voltageSweeps) {
-	varName = "K-value/ V = +";
+	varName = prefix + "K-value/ V = +";
 	varName += std::to_string(V);
 	a_plotVariableNames.push_back(varName);
       }
@@ -374,7 +376,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
       std::string varName;
       for (const Real& V : m_voltageSweeps) {
-	varName = "K-value/ V = -";
+	varName = prefix + "K-value/ V = -";
 	varName += std::to_string(V);
 	a_plotVariableNames.push_back(varName);
       }
@@ -395,7 +397,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
       std::string varName;
       for (const Real& V : m_voltageSweeps) {
-        varName = "Drift time by mu/ V = +";
+        varName = prefix + "Drift time by mu/ V = +";
         varName += std::to_string(V);
         a_plotVariableNames.push_back(varName);
       }
@@ -412,7 +414,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
       std::string varName;
       for (const Real& V : m_voltageSweeps) {
-        varName = "Drift time by mu/ V = -";
+        varName = prefix + "Drift time by mu/ V = -";
         varName += std::to_string(V);
         a_plotVariableNames.push_back(varName);
       }
@@ -431,7 +433,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
     std::string varName;
     for (const Real& V : m_voltageSweeps) {
-      varName = "Background ionization rate/ V =  ";
+      varName = prefix + "Background ionization rate/ V =  ";
       varName += std::to_string(V);
       a_plotVariableNames.push_back(varName);
     }
@@ -449,7 +451,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
       std::string varName;
       for (const Real& V : m_voltageSweeps) {
-        varName = "Field emission rate/ V = +";
+        varName = prefix + "Field emission rate/ V = +";
         varName += std::to_string(V);
         a_plotVariableNames.push_back(varName);
       }
@@ -467,7 +469,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
       std::string varName;
       for (const Real& V : m_voltageSweeps) {
-        varName = "Field emission rate/ V = -";
+        varName = prefix + "Field emission rate/ V = -";
         varName += std::to_string(V);
         a_plotVariableNames.push_back(varName);
       }

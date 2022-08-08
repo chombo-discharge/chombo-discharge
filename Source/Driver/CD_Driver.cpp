@@ -119,20 +119,22 @@ Driver::getPlotVariableNames() const
 
   Vector<std::string> plotVarNames(0);
 
+  const std::string prefix = "Driver/";
+
   if (m_plotTags) {
-    plotVarNames.push_back("cell_tags");
+    plotVarNames.push_back(prefix + "cell_tags");
   }
   if (m_plotRanks) {
     const std::string base = "_rank";
 
     for (const auto& str : m_amr->getRealms()) {
       const std::string id = str + base;
-      plotVarNames.push_back(id);
+      plotVarNames.push_back(prefix + id);
     }
   }
   if (m_plotLevelset) {
-    plotVarNames.push_back("levelset_1");
-    plotVarNames.push_back("levelset_2");
+    plotVarNames.push_back(prefix + "levelset_gas");
+    plotVarNames.push_back(prefix + "levelset_solid");
   }
 
   return plotVarNames;

@@ -1112,20 +1112,27 @@ FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp, const bool a_fo
   const bool doInterp = (m_dataLocation == Location::Cell::Center) && !a_forceNoInterp;
 
   // Add phi to output
-  if (m_plotPotential)
+  if (m_plotPotential) {
     this->writeMultifluidData(a_output, a_comp, m_potential, phase::gas, doInterp);
-  if (m_plotRho)
+  }
+  if (m_plotRho) {
     this->writeMultifluidData(a_output, a_comp, m_rho, phase::gas, false);
-  if (m_plotSigma)
+  }
+  if (m_plotSigma) {
     this->writeSurfaceData(a_output, a_comp, m_sigma);
-  if (m_plotResidue)
+  }
+  if (m_plotResidue) {
     this->writeMultifluidData(a_output, a_comp, m_residue, phase::gas, false);
-  if (m_plotPermittivity)
+  }
+  if (m_plotPermittivity) {
     this->writeMultifluidData(a_output, a_comp, m_permittivityCell, phase::gas, false);
-  if (m_plotElectricField)
+  }
+  if (m_plotElectricField) {
     this->writeMultifluidData(a_output, a_comp, m_electricField, phase::gas, doInterp);
-  if (m_plotElectricFieldSolid)
+  }
+  if (m_plotElectricFieldSolid) {
     this->writeMultifluidData(a_output, a_comp, m_electricField, phase::solid, doInterp);
+  }
 }
 
 void
@@ -1360,30 +1367,37 @@ FieldSolver::getPlotVariableNames() const
 
   Vector<std::string> pltVarNames(0);
 
-  if (m_plotPotential)
-    pltVarNames.push_back("Electrostatic potential");
-  if (m_plotRho)
-    pltVarNames.push_back("Space charge density");
-  if (m_plotSigma)
-    pltVarNames.push_back("Electrostatic sigma");
-  if (m_plotResidue)
-    pltVarNames.push_back("Electrostatic potential_residue");
-  if (m_plotPermittivity)
-    pltVarNames.push_back("Electrostatic permittivity");
+  const std::string prefix = m_className + "/";
+
+  if (m_plotPotential) {
+    pltVarNames.push_back(prefix + "Electrostatic potential");
+  }
+  if (m_plotRho) {
+    pltVarNames.push_back(prefix + "Space charge density");
+  }
+  if (m_plotSigma) {
+    pltVarNames.push_back(prefix + "Electrostatic sigma");
+  }
+  if (m_plotResidue) {
+    pltVarNames.push_back(prefix + "Electrostatic potential_residue");
+  }
+  if (m_plotPermittivity) {
+    pltVarNames.push_back(prefix + "Electrostatic permittivity");
+  }
 
   if (m_plotElectricField) {
-    pltVarNames.push_back("x-Electric field");
-    pltVarNames.push_back("y-Electric field");
+    pltVarNames.push_back(prefix + "x-Electric field");
+    pltVarNames.push_back(prefix + "y-Electric field");
     if (SpaceDim == 3) {
-      pltVarNames.push_back("z-Electric field");
+      pltVarNames.push_back(prefix + "z-Electric field");
     }
   }
 
   if (m_plotElectricFieldSolid) {
-    pltVarNames.push_back("x-Electric field solid");
-    pltVarNames.push_back("y-Electric field solid");
+    pltVarNames.push_back(prefix + "x-Electric field solid");
+    pltVarNames.push_back(prefix + "y-Electric field solid");
     if (SpaceDim == 3) {
-      pltVarNames.push_back("z-Electric field solid");
+      pltVarNames.push_back(prefix + "z-Electric field solid");
     }
   }
 

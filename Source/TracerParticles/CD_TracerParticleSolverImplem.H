@@ -382,17 +382,19 @@ TracerParticleSolver<P>::getPlotVariableNames() const
 
   Vector<std::string> plotVarNames(0);
 
+  const std::string prefix = m_name + "/";
+
   if (m_plotWeight) {
-    plotVarNames.push_back(m_name + " density");
+    plotVarNames.push_back(prefix + "density");
   }
 
   if (m_plotVelocity)
-    plotVarNames.push_back("x-Velocity " + m_name);
+    plotVarNames.push_back(prefix + "x-velocity");
   if (m_plotVelocity)
-    plotVarNames.push_back("y-Velocity " + m_name);
+    plotVarNames.push_back(prefix + "y-velocity");
 #if CH_SPACEDIM == 3
   if (m_plotVelocity)
-    plotVarNames.push_back("z-Velocity " + m_name);
+    plotVarNames.push_back(prefix + "z-velocity");
 #endif
 
   return plotVarNames;
