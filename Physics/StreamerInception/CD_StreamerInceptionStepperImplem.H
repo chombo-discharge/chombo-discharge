@@ -810,20 +810,19 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
   DataOps::setValue(Kplus, 0.0);
   DataOps::setValue(Kminu, 0.0);
 
-  // Integrate for each voltage
-  for (int i = 0; i < m_voltageSweeps.size(); ++i) {
+  // Polarities. Note that we are dealing with electrons so
+  // for positive polarity the particles move opposite to the field.
+  std::vector<Real> polarities{-1.0, 1.0};
 
-    // Polarities. Note that we are dealing with electrons so
-    // for positive polarity the particles move opposite to the field.
-    std::vector<Real> polarities{-1.0, 1.0};
+  for (const auto& p : polarities) {
 
-    for (const auto& p : polarities) {
+    // Scale E-field by +/-
+    DataOps::scale(m_electricField, p);    
 
-      // Set particle weight = 0 and reset the processing flag. 
+    // Integrate for each voltage
+    for (int i = 0; i < m_voltageSweeps.size(); ++i) {
+
       this->resetParticles();
-
-      // Scale E-field by +/-
-      DataOps::scale(m_electricField, p);
 
       // Switch between various integration algorithms. At the end of this
       // the K-value time should be stored on the particle weight and the particles
@@ -862,27 +861,27 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
         m_particleSolver->deposit(Kminu);
 	DataOps::copy(m_inceptionIntegralMinu, Kminu, Interval(i,i), Interval(0,0));	
       }
+      
+      // Make K = max(Kplus, Kminu)
+      DataOps::max(K, Kplus, Kminu);
 
-      // Scale field back again.
-      DataOps::scale(m_electricField, p);
+      m_amr->averageDown(K, m_realm, m_phase);
+      m_amr->interpGhost(K, m_realm, m_phase);
+
+      // Get max K value.
+      Real maxK = -std::numeric_limits<Real>::max();
+      Real minK = +std::numeric_limits<Real>::max();
+
+      DataOps::getMaxMin(maxK, minK, K, 0);
+
+      m_maxKValues.push_back(maxK);
+
+      // Copy K values to m_inceptionIntegral so we can plot them later.
+      DataOps::copy(m_inceptionIntegral, K, Interval(i, i), Interval(0, 0));
     }
 
-    // Make K = max(Kplus, Kminu)
-    DataOps::max(K, Kplus, Kminu);
-
-    m_amr->averageDown(K, m_realm, m_phase);
-    m_amr->interpGhost(K, m_realm, m_phase);
-
-    // Get max K value.
-    Real maxK = -std::numeric_limits<Real>::max();
-    Real minK = +std::numeric_limits<Real>::max();
-
-    DataOps::getMaxMin(maxK, minK, K, 0);
-
-    m_maxKValues.push_back(maxK);
-
-    // Copy K values to m_inceptionIntegral so we can plot them later.
-    DataOps::copy(m_inceptionIntegral, K, Interval(i, i), Interval(0, 0));
+    // Scale field back again.
+    DataOps::scale(m_electricField, p);    
   }
 }
 
@@ -1023,17 +1022,17 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
   DataOps::setValue(T, 0.0);
   DataOps::setValue(K, 0.0);
 
-  // Integrate for each voltage
-  for (int i = 0; i < m_voltageSweeps.size(); ++i) {
+  // Polarities. Note that we are dealing with negative ions so
+  // for positive polarity the particles move opposite to the field.
+  std::vector<Real> polarities{-1.0, 1.0};
 
-    // Polarities. Note that we are dealing with negative ions so
-    // for positive polarity the particles move opposite to the field.
-    std::vector<Real> polarities{-1.0, 1.0};
+  for (const auto& p : polarities) {
 
-    for (const auto& p : polarities) {
+    // Scale E-field by +/-
+    DataOps::scale(m_electricField, p);    
 
-      // Draw a new set of particles (negative ions) and update the velocity.
-      this->resetParticles();
+    // Integrate for each voltage
+    for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
       // Copy current K-value to the above data holder.
       if(p > 0.0) {
@@ -1041,10 +1040,9 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
       }
       else {
 	DataOps::copy(K, m_inceptionIntegralMinu, Interval(0, 0), Interval(i, i));
-      }
-
-      // Scale E-field by +/-
-      DataOps::scale(m_electricField, p);
+      }      
+      
+      this->resetParticles();
 
       // Switch between various integration algorithms. At the end of this
       // the drift time should be stored on the particle weight.
@@ -1086,10 +1084,10 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
       else {
         DataOps::copy(m_driftTimesMinu, T, Interval(i, i), Interval(0, 0));
       }
-
-      // Scale field back.
-      DataOps::scale(m_electricField, p);
     }
+
+    // Scale field back.
+    DataOps::scale(m_electricField, p);    
   }
 }
 
