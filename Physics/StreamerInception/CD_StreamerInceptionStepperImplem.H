@@ -917,7 +917,6 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
             const RealVect E      = a_voltage * p.velocity();
             const RealVect unitV  = v / v.vectorLength();
             const RealVect newPos = p.position() + step * unitV;
-            const Real     absE   = E.vectorLength();
             const Real     alpha  = m_alpha(E.vectorLength());
 
             // Stop integration for particles that move into regions alpha < 0.0,
@@ -942,18 +941,6 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
     m_particleSolver->remap();
     m_particleSolver->interpolateVelocities();
   }
-
-#if 0 // Debug code -- loses us particles but why???
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
-
-    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
-	lit().weight() = 1.234567;
-      }
-    }
-  }
-#endif
 }
 
 template <typename P, typename F>
@@ -964,8 +951,66 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::inceptionIntegrateTrapezoidal" << endl;
   }
+  
+  // TLDR: We move the particle using Heun's method. 
+  //
+  //          p^(k+1) = p^k + 0.5 * dt * [v(p^k) + v(p^l)]
+  //
+  //       where p^l = p^k + dt * v(p^k). We will set dt = d/|v(p^k)|. Once we have the
+  //       particle endpoints we can compute the contribution to the inception integral
+  //       by using the trapezoidal (quadrature) rule
+  //
+  //          T += 0.5 * dx * [alpha(E(p^k)) + alpha(E(p^(k+1)))],
+  //
+  //       where dx = |p^(k+1) - p^k|. 
 
-  MayDay::Abort("CD_StreamerInceptionStepperImplem.H - inceptionIntegrateTrapezoidal -- not implemented");
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  m_particleSolver->remap();
+  m_particleSolver->interpolateVelocities();
+
+  while (this->keepIntegrating()) {
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
+
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+          P& p = lit();
+
+          if (p.template scalar<0>() > 0.0) {
+            const RealVect v      = p.velocity();
+            const RealVect E      = a_voltage * p.velocity();
+            const RealVect unitV  = v / v.vectorLength();
+            const RealVect newPos = p.position() + step * unitV;
+            const Real     absE   = E.vectorLength();
+            const Real     alpha  = m_alpha(E.vectorLength());
+
+            // Stop integration for particles that move into regions alpha < 0.0,
+	    // inside the EB or outside of the domain. 
+            const bool negativeAlpha = (alpha <= 0.0);
+            const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+            const bool insideEB      = this->particleInsideEB(newPos);
+
+            if (negativeAlpha || outsideDomain || insideEB) {
+              p.template scalar<0>() = -1.0;
+            }
+            else {
+              p.position() = newPos;
+              p.template scalar<1>() = alpha;
+            }
+          }
+        }
+      }
+    }
+
+    // Remap. 
+    m_particleSolver->remap();
+    m_particleSolver->interpolateVelocities();
+  }
 }
 
 template <typename P, typename F>
