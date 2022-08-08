@@ -806,21 +806,21 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
   m_amr->allocate(Kplus, m_realm, m_phase, 1);
   m_amr->allocate(Kminu, m_realm, m_phase, 1);
 
-  DataOps::setValue(K, 0.0);
-  DataOps::setValue(Kplus, 0.0);
-  DataOps::setValue(Kminu, 0.0);
+  // Integrate for each voltage
+  for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
-  // Polarities. Note that we are dealing with electrons so
-  // for positive polarity the particles move opposite to the field.
-  std::vector<Real> polarities{-1.0, 1.0};
+    DataOps::setValue(K, 0.0);
+    DataOps::setValue(Kplus, 0.0);
+    DataOps::setValue(Kminu, 0.0);
 
-  for (const auto& p : polarities) {
+    // Polarities. Note that we are dealing with electrons so
+    // for positive polarity the particles move opposite to the field.
+    std::vector<Real> polarities{-1.0, 1.0};
 
-    // Scale E-field by +/-
-    DataOps::scale(m_electricField, p);    
+    for (const auto& p : polarities) {
 
-    // Integrate for each voltage
-    for (int i = 0; i < m_voltageSweeps.size(); ++i) {
+      // Scale E-field by +/-
+      DataOps::scale(m_electricField, p);          	
 
       this->resetParticles();
 
@@ -861,27 +861,27 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
         m_particleSolver->deposit(Kminu);
 	DataOps::copy(m_inceptionIntegralMinu, Kminu, Interval(i,i), Interval(0,0));	
       }
-      
-      // Make K = max(Kplus, Kminu)
-      DataOps::max(K, Kplus, Kminu);
 
-      m_amr->averageDown(K, m_realm, m_phase);
-      m_amr->interpGhost(K, m_realm, m_phase);
-
-      // Get max K value.
-      Real maxK = -std::numeric_limits<Real>::max();
-      Real minK = +std::numeric_limits<Real>::max();
-
-      DataOps::getMaxMin(maxK, minK, K, 0);
-
-      m_maxKValues.push_back(maxK);
-
-      // Copy K values to m_inceptionIntegral so we can plot them later.
-      DataOps::copy(m_inceptionIntegral, K, Interval(i, i), Interval(0, 0));
+      // Scale field back again.
+      DataOps::scale(m_electricField, p);          
     }
 
-    // Scale field back again.
-    DataOps::scale(m_electricField, p);    
+    // Make K = max(Kplus, Kminu)
+    DataOps::max(K, Kplus, Kminu);
+
+    m_amr->averageDown(K, m_realm, m_phase);
+    m_amr->interpGhost(K, m_realm, m_phase);
+
+    // Get max K value.
+    Real maxK = -std::numeric_limits<Real>::max();
+    Real minK = +std::numeric_limits<Real>::max();
+
+    DataOps::getMaxMin(maxK, minK, K, 0);
+
+    m_maxKValues.push_back(maxK);
+
+    // Copy K values to m_inceptionIntegral so we can plot them later.
+    DataOps::copy(m_inceptionIntegral, K, Interval(i, i), Interval(0, 0));    
   }
 }
 
@@ -974,6 +974,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 
   while (this->keepIntegrating()) {
 
+    // Euler stage. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
 
@@ -983,11 +984,16 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 
           if (p.template scalar<0>() > 0.0) {
             const RealVect v      = p.velocity();
-            const RealVect E      = a_voltage * p.velocity();
-            const RealVect unitV  = v / v.vectorLength();
-            const RealVect newPos = p.position() + step * unitV;
-            const Real     absE   = E.vectorLength();
-            const Real     alpha  = m_alpha(E.vectorLength());
+	    const Real     dt     = step / v.vectorLength();
+            const Real     alpha  = m_alpha(a_voltage * v.vectorLength());
+
+	    // Storage alpha(p^k), v(p^k), and the step size. 
+	    p.template scalar<1>() = alpha;
+	    p.template scalar<2>() = dt;
+	    p.template vect<1>() = v;
+
+	    // Update position. 
+            const RealVect newPos = p.position() + v * dt;	    
 
             // Stop integration for particles that move into regions alpha < 0.0,
 	    // inside the EB or outside of the domain. 
@@ -1000,16 +1006,57 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
             }
             else {
               p.position() = newPos;
-              p.template scalar<1>() = alpha;
             }
           }
         }
       }
     }
 
-    // Remap. 
+    // Remap and update velocities. 
     m_particleSolver->remap();
     m_particleSolver->interpolateVelocities();
+
+    // Second stage.
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+          P& p = lit();
+
+          if (p.template scalar<0>() > 0.0) {
+	    const Real     dt     = p.template scalar<2>();	    
+	    const RealVect vk     = p.template vect<1>();	    
+            const RealVect vk1    = p.velocity();
+
+	    // Note the weird subtraction since p.position() was updated
+	    // to p^k + dt * v^k. 
+            const RealVect newPos = p.position() + 0.5 * dt * (vk1 - vk);
+
+	    // Compute new alpha. 
+	    const Real alpha1 = p.template scalar<1>();
+	    const Real alpha2 = m_alpha(a_voltage * vk1.vectorLength());
+	    const Real d      = 0.5 * dt * (vk + vk1).vectorLength();
+
+            // Stop integration for particles that move into regions alpha < 0.0,
+	    // inside the EB or outside of the domain. 
+            const bool negativeAlpha = (alpha1 + alpha2) <= 0.0;
+            const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+            const bool insideEB      = this->particleInsideEB(newPos);
+
+            if (negativeAlpha || outsideDomain || insideEB) {
+              p.template scalar<0>() = -1.0;
+            }
+            else {
+              p.position() = newPos;
+	      p.weight() += 0.5 * d * (alpha1 + alpha2);
+            }
+          }
+        }
+      }
+    }
+
+    // Remap and update velocities. 
+    m_particleSolver->remap();
+    m_particleSolver->interpolateVelocities();    
   }
 }
 
@@ -1067,17 +1114,19 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
   DataOps::setValue(T, 0.0);
   DataOps::setValue(K, 0.0);
 
-  // Polarities. Note that we are dealing with negative ions so
-  // for positive polarity the particles move opposite to the field.
-  std::vector<Real> polarities{-1.0, 1.0};
+  // Integrate for each voltage
+  for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
-  for (const auto& p : polarities) {
+    // Polarities. Note that we are dealing with negative ions so
+    // for positive polarity the particles move opposite to the field.
+    std::vector<Real> polarities{-1.0, 1.0};
 
-    // Scale E-field by +/-
-    DataOps::scale(m_electricField, p);    
+    for (const auto& p : polarities) {
 
-    // Integrate for each voltage
-    for (int i = 0; i < m_voltageSweeps.size(); ++i) {
+      this->resetParticles();      
+
+      // Scale E-field by +/-
+      DataOps::scale(m_electricField, p);          
 
       // Copy current K-value to the above data holder.
       if(p > 0.0) {
@@ -1086,8 +1135,6 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
       else {
 	DataOps::copy(K, m_inceptionIntegralMinu, Interval(0, 0), Interval(i, i));
       }      
-      
-      this->resetParticles();
 
       // Switch between various integration algorithms. At the end of this
       // the drift time should be stored on the particle weight.
@@ -1129,10 +1176,10 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
       else {
         DataOps::copy(m_driftTimesMinu, T, Interval(i, i), Interval(0, 0));
       }
-    }
 
-    // Scale field back.
-    DataOps::scale(m_electricField, p);    
+      // Scale field back.
+      DataOps::scale(m_electricField, p);          
+    }
   }
 }
 
