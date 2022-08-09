@@ -98,7 +98,7 @@ TracerParticle<M, N>::velocity() const
 template <size_t M, size_t N>
 template <size_t K>
 inline Real&
-TracerParticle<M, N>::scalar()
+TracerParticle<M, N>::real()
 {
   return std::get<K>(m_scalars);
 }
@@ -106,7 +106,7 @@ TracerParticle<M, N>::scalar()
 template <size_t M, size_t N>
 template <size_t K>
 inline const Real&
-TracerParticle<M, N>::scalar() const
+TracerParticle<M, N>::real() const
 {
   return std::get<K>(m_scalars);
 }

@@ -103,7 +103,7 @@ public:
   */
   template <size_t K>
   inline Real&
-  scalar();
+  real();
 
   /*!
     @brief Get one of the scalars. 
@@ -113,7 +113,7 @@ public:
   */
   template <size_t K>
   inline const Real&
-  scalar() const;
+  real() const;
 
   /*!
     @brief Get one of the RealVects.

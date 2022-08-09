@@ -3,8 +3,8 @@
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
 StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation. 
-StreamerInceptionStepper.integration   = trapz                         # Integration algorithm. 'trapz' or 'simp'
-StreamerInceptionStepper.step_size     = dx 0.5                        # Step size. 'dx' or 'fixed' and a size. 
+StreamerInceptionStepper.integration   = trapz                         # Integration algorithm. 'euler' or 'trapz'
+StreamerInceptionStepper.step_size     = dx 1.0                        # Step size. 'dx' or 'fixed' and a size. 
 StreamerInceptionStepper.voltage_lo    = 1.0                           # Low voltage multiplier
 StreamerInceptionStepper.voltage_hi    = 10.0                          # Highest voltage multiplier
 StreamerInceptionStepper.voltage_steps = 3                             # Number of voltage steps

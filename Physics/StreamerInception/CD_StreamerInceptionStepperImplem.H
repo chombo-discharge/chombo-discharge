@@ -43,15 +43,11 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   };
 
   m_backgroundRate = [](const Real E) {
-    return 1.0;
+    return 0.0;
   };
 
   m_fieldEmission = [](const Real E) {
-    return 1.0;
-  };
-
-  m_ionMobility = [](const Real E) {
-    return 1.0;
+    return 0.0;
   };
 }
 
@@ -666,18 +662,6 @@ StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::setIonMobility");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::setIonMobility" << endl;
-  }
-
-  m_ionMobility = a_mobility;
-}
-
-template <typename P, typename F>
-void
 StreamerInceptionStepper<P, F>::setBackgroundIonization(
   const std::function<Real(const Real& E)>& a_backgroundIonization) noexcept
 {
@@ -757,9 +741,9 @@ StreamerInceptionStepper<P, F>::initialParticles() noexcept
         // Set mass to zero and do a backup of the initial position (we need to rewind particles
         // back later on). The scalar<0> flag is the flag we use for start-stop criteria for the
         // particle integration.
-        p.weight()             = 0.0;
-        p.template scalar<0>() = 1.0;
-        p.template vect<0>()   = p.position();
+        p.weight()           = 0.0;
+        p.template real<0>() = 1.0;
+        p.template vect<0>() = p.position();
       }
     }
   }
@@ -962,28 +946,28 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-	  const RealVect v     = p.velocity();
-	  const Real     dt    = step / v.vectorLength();
-	  const Real     alpha = m_alpha(a_voltage * v.vectorLength());
+          const RealVect v     = p.velocity();
+          const Real     dt    = step / v.vectorLength();
+          const Real     alpha = m_alpha(a_voltage * v.vectorLength());
 
-	  // Update particle position
-	  const RealVect newPos = p.position() + dt * v;
+          // Update particle position
+          const RealVect newPos = p.position() + dt * v;
 
-	  // Stop integration for particles that move into regions alpha < 0.0,
-	  // inside the EB or outside of the domain.
-	  const bool negativeAlpha = (alpha <= 0.0);
-	  const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
-	  const bool insideEB      = this->particleInsideEB(newPos);
+          // Stop integration for particles that move into regions alpha < 0.0,
+          // inside the EB or outside of the domain.
+          const bool negativeAlpha = (alpha <= 0.0);
+          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB      = this->particleInsideEB(newPos);
 
-	  if (negativeAlpha || outsideDomain || insideEB) {
-	    processedParticles.transfer(lit);
-	  }
-	  else {
-	    p.position() = newPos;
-	    p.weight() += step * alpha;
+          if (negativeAlpha || outsideDomain || insideEB) {
+            processedParticles.transfer(lit);
+          }
+          else {
+            p.position() = newPos;
+            p.weight() += step * alpha;
 
-	    ++lit;
-	  }
+            ++lit;
+          }
         }
       }
     }
@@ -995,7 +979,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
 
   ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
 
-  this->rewindParticles();  
+  this->rewindParticles();
 }
 
 template <typename P, typename F>
@@ -1046,33 +1030,33 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-	  const RealVect v     = p.velocity();
-	  const Real     dt    = step / v.vectorLength();
-	  const Real     alpha = m_alpha(a_voltage * v.vectorLength());
+          const RealVect v     = p.velocity();
+          const Real     dt    = step / v.vectorLength();
+          const Real     alpha = m_alpha(a_voltage * v.vectorLength());
 
-	  // Storage alpha(p^k), v(p^k), and the step size.
-	  p.template scalar<0>() = alpha;
-	  p.template scalar<1>() = dt;
-	  p.template vect<1>()   = v;
+          // Storage alpha(p^k), v(p^k), and the step size.
+          p.template real<0>() = alpha;
+          p.template real<1>() = dt;
+          p.template vect<1>() = v;
 
-	  // Update position.
-	  const RealVect newPos = p.position() + v * dt;
+          // Update position.
+          const RealVect newPos = p.position() + v * dt;
 
-	  // Stop integration for particles that move into regions alpha < 0.0,
-	  // inside the EB or outside of the domain.
-	  const bool negativeAlpha = (alpha <= 0.0);
-	  const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
-	  const bool insideEB      = this->particleInsideEB(newPos);
+          // Stop integration for particles that move into regions alpha < 0.0,
+          // inside the EB or outside of the domain.
+          const bool negativeAlpha = (alpha <= 0.0);
+          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB      = this->particleInsideEB(newPos);
 
-	  if (negativeAlpha || outsideDomain || insideEB) {
-	    processedParticles.transfer(lit);
-	  }
-	  else {
-	    p.position() = newPos;
+          if (negativeAlpha || outsideDomain || insideEB) {
+            processedParticles.transfer(lit);
+          }
+          else {
+            p.position() = newPos;
 
-	    ++lit;
-	  }
-	}
+            ++lit;
+          }
+        }
       }
     }
 
@@ -1090,34 +1074,34 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 
           P& p = lit();
 
-	  const Real     dt  = p.template scalar<1>();
-	  const RealVect vk  = p.template vect<1>();
-	  const RealVect vk1 = p.velocity();
+          const Real     dt  = p.template real<1>();
+          const RealVect vk  = p.template vect<1>();
+          const RealVect vk1 = p.velocity();
 
-	  // Note the weird subtraction since p.position() was updated
-	  // to p^k + dt * v^k.
-	  const RealVect newPos = p.position() + 0.5 * dt * (vk1 - vk);
+          // Note the weird subtraction since p.position() was updated
+          // to p^k + dt * v^k.
+          const RealVect newPos = p.position() + 0.5 * dt * (vk1 - vk);
 
-	  // Compute new alpha.
-	  const Real alpha1 = p.template scalar<0>();
-	  const Real alpha2 = m_alpha(a_voltage * vk1.vectorLength());
-	  const Real d      = 0.5 * dt * (vk + vk1).vectorLength();
+          // Compute new alpha.
+          const Real alpha1 = p.template real<0>();
+          const Real alpha2 = m_alpha(a_voltage * vk1.vectorLength());
+          const Real d      = 0.5 * dt * (vk + vk1).vectorLength();
 
-	  // Stop integration for particles that move into regions alpha < 0.0,
-	  // inside the EB or outside of the domain.
-	  const bool negativeAlpha = (alpha1 + alpha2) <= 0.0;
-	  const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
-	  const bool insideEB      = this->particleInsideEB(newPos);
+          // Stop integration for particles that move into regions alpha < 0.0,
+          // inside the EB or outside of the domain.
+          const bool negativeAlpha = (alpha1 + alpha2) <= 0.0;
+          const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB      = this->particleInsideEB(newPos);
 
-	  if (negativeAlpha || outsideDomain || insideEB) {
-	    processedParticles.transfer(lit);
-	  }
-	  else {
-	    p.position() = newPos;
-	    p.weight() += 0.5 * d * (alpha1 + alpha2);
+          if (negativeAlpha || outsideDomain || insideEB) {
+            processedParticles.transfer(lit);
+          }
+          else {
+            p.position() = newPos;
+            p.weight() += 0.5 * d * (alpha1 + alpha2);
 
-	    ++lit;
-	  }
+            ++lit;
+          }
         }
       }
     }
@@ -1129,7 +1113,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 
   // Copy processed particles over to the solver particles.
   ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
-  
+
   this->rewindParticles();
 }
 
@@ -1204,7 +1188,7 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
       }
       case IntegrationAlgorithm::Trapezoidal: {
 
-        this->driftIntegrateTrapezoidal(K, m_voltageSweeps[i]);	
+        this->driftIntegrateTrapezoidal(K, m_voltageSweeps[i]);
 
         break;
       }
@@ -1247,16 +1231,16 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
   // will be faster because then we only have to iterate through the
   // particles that are actually still moving.
   ParticleContainer<P> amrProcessedParticles;
-  m_amr->allocate(amrProcessedParticles, 0, m_realm);  
+  m_amr->allocate(amrProcessedParticles, 0, m_realm);
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
 
   // Reset transient storage for particle integration. Need to use it because we interpolate
-  // the K-value onto the particle weight, so the integration variable goes here. 
+  // the K-value onto the particle weight, so the integration variable goes here.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
       for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
-        lit().template scalar<0>() = 0.0;
+        lit().template real<0>() = 0.0;
       }
     }
   }
@@ -1276,40 +1260,39 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
         List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
         List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
 
-        for (ListIterator<P> lit(solverParticles); lit.ok(); ) {
+        for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-	  const RealVect v  = p.velocity();
-	  const Real     dt = step / v.vectorLength();
-	  const Real     mu = m_ionMobility(a_voltage * v.vectorLength());
+          const RealVect v  = p.velocity();
+          const Real     dt = step / v.vectorLength();
 
-	  // Update the particle position.
-	  const RealVect newPos = p.position() + dt * v;
+          // Update the particle position.
+          const RealVect newPos = p.position() + dt * v;
 
-	  // Stop integration if particle ends up inside the EB, outside the domain, or if
-	  // the K-value is less than the inception criterion.
-	  const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
-	  const bool insideEB    = this->particleInsideEB(newPos);
-	  const bool insideCrit  = (p.weight() >= m_inceptionK);
+          // Stop integration if particle ends up inside the EB, outside the domain, or if
+          // the K-value is less than the inception criterion.
+          const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB    = this->particleInsideEB(newPos);
+          const bool insideCrit  = (p.weight() >= m_inceptionK);
 
-	  if (insideCrit) {
-	    p.weight() = p.template scalar<0>();
-	    
-	    processedParticles.transfer(lit);	    
-	  }
-	  else if (outsideGrid || insideEB) {
-	    p.weight() = std::numeric_limits<Real>::quiet_NaN();
+          if (insideCrit) {
+            p.weight() = p.template real<0>();
 
-	    processedParticles.transfer(lit);
-	  }
-	  else {
-	    p.position() = newPos;
+            processedParticles.transfer(lit);
+          }
+          else if (outsideGrid || insideEB) {
+            p.weight() = std::numeric_limits<Real>::quiet_NaN();
 
-	    p.template scalar<0>() += step / v.vectorLength();
+            processedParticles.transfer(lit);
+          }
+          else {
+            p.position() = newPos;
 
-	    ++lit;
-	  }
-	}
+            p.template real<0>() += step / v.vectorLength();
+
+            ++lit;
+          }
+        }
       }
     }
 
@@ -1318,7 +1301,7 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
     m_particleSolver->interpolateVelocities();
   }
 
-  ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);  
+  ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
 
   this->rewindParticles();
 }
@@ -1332,6 +1315,18 @@ StreamerInceptionStepper<P, F>::driftIntegrateTrapezoidal(const EBAMRCellData& a
     pout() << "StreamerInceptionStepper::driftIntegrateTrapezoidal" << endl;
   }
 
+  // TLDR: We move the particle using Heun's method.
+  //
+  //          p^(k+1) = p^k + 0.5 * dt * [v(p^k) + v(p^l)]
+  //
+  //       where p^l = p^k + dt * v(p^k). We will set dt = d/|v(p^k)|. Once we have the
+  //       particle endpoints we can compute the contribution to the inception integral
+  //       by using the trapezoidal (quadrature) rule
+  //
+  //          T += 0.5 * dx * [1/|v^k| + 1/|v^(k+)1|]
+  //
+  //       where dx = |p^(k+1) - p^k|.
+
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
 
@@ -1339,28 +1334,28 @@ StreamerInceptionStepper<P, F>::driftIntegrateTrapezoidal(const EBAMRCellData& a
   // will be faster because then we only have to iterate through the
   // particles that are actually still moving.
   ParticleContainer<P> amrProcessedParticles;
-  m_amr->allocate(amrProcessedParticles, 0, m_realm);  
+  m_amr->allocate(amrProcessedParticles, 0, m_realm);
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
-
-  // Reset transient storage for particle integration. Need to use it because we interpolate
-  // the K-value onto the particle weight, so the integration variable goes here. 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
-        lit().template scalar<0>() = 0.0;
-      }
-    }
-  }
 
   // Get K-value and velocity at particle position.
   m_particleSolver->remap();
   m_particleSolver->interpolateWeight(a_K);
   m_particleSolver->interpolateVelocities();
 
+  // Reset transient storage for particle integration. Need to use it because we interpolate
+  // the K-value onto the particle weight, so the integration variable goes here.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+        lit().template real<0>() = 0.0;
+      }
+    }
+  }
+
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
-    // Euler kernel.
+    // Euler stage.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
 
@@ -1368,40 +1363,91 @@ StreamerInceptionStepper<P, F>::driftIntegrateTrapezoidal(const EBAMRCellData& a
         List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
         List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
 
-        for (ListIterator<P> lit(solverParticles); lit.ok(); ) {
+        for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-	  const RealVect v  = p.velocity();
-	  const Real     dt = step / v.vectorLength();
-	  const Real     mu = m_ionMobility(a_voltage * v.vectorLength());
+          const RealVect v  = p.velocity();
+          const Real     dt = step / v.vectorLength();
 
-	  // Update the particle position.
-	  const RealVect newPos = p.position() + dt * v;
+          // Store the above.
+          p.template real<1>() = dt;
+          p.template vect<1>() = v;
 
-	  // Stop integration if particle ends up inside the EB, outside the domain, or if
-	  // the K-value is less than the inception criterion.
-	  const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
-	  const bool insideEB    = this->particleInsideEB(newPos);
-	  const bool insideCrit  = (p.weight() >= m_inceptionK);
+          // Update the particle position.
+          const RealVect newPos = p.position() + dt * v;
 
-	  if (insideCrit) {
-	    p.weight() = p.template scalar<0>();
-	    
-	    processedParticles.transfer(lit);	    
-	  }
-	  else if (outsideGrid || insideEB) {
-	    p.weight() = std::numeric_limits<Real>::quiet_NaN();
+          // Stop integration if particle ends up inside the EB, outside the domain, or if
+          // the K-value is less than the inception criterion.
+          const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB    = this->particleInsideEB(newPos);
+          const bool insideCrit  = (p.weight() >= m_inceptionK);
 
-	    processedParticles.transfer(lit);
-	  }
-	  else {
-	    p.position() = newPos;
+          if (insideCrit) {
+            p.weight() = p.template real<0>();
 
-	    p.template scalar<0>() += step / v.vectorLength();
+            processedParticles.transfer(lit);
+          }
+          else if (outsideGrid || insideEB) {
+            p.weight() = std::numeric_limits<Real>::quiet_NaN();
 
-	    ++lit;
-	  }
-	}
+            processedParticles.transfer(lit);
+          }
+          else {
+            p.position() = newPos;
+
+            ++lit;
+          }
+        }
+      }
+    }
+
+    m_particleSolver->remap();
+    m_particleSolver->interpolateWeight(a_K);
+    m_particleSolver->interpolateVelocities();
+
+    // Second stage.
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+
+        for (ListIterator<P> lit(solverParticles); lit.ok();) {
+          P& p = lit();
+
+          const Real dt = p.template real<1>();
+
+          const RealVect vk  = p.template vect<1>();
+          const RealVect vk1 = p.velocity();
+
+          // Update the particle position and compute distance moved.
+          const RealVect newPos = p.position() + 0.5 * dt * (vk + vk1);
+          const Real     d      = 0.5 * dt * (vk + vk1).vectorLength();
+
+          // Stop integration if particle ends up inside the EB, outside the domain, or if
+          // the K-value is less than the inception criterion.
+          const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
+          const bool insideEB    = this->particleInsideEB(newPos);
+          const bool insideCrit  = (p.weight() >= m_inceptionK);
+
+          if (insideCrit) {
+            p.weight() = p.template real<0>();
+
+            processedParticles.transfer(lit);
+          }
+          else if (outsideGrid || insideEB) {
+            p.weight() = std::numeric_limits<Real>::quiet_NaN();
+
+            processedParticles.transfer(lit);
+          }
+          else {
+            p.position() = newPos;
+
+            p.template real<0>() += 0.5 * d * (1. / vk.vectorLength() + 1. / vk1.vectorLength());
+
+            ++lit;
+          }
+        }
       }
     }
 
@@ -1410,11 +1456,10 @@ StreamerInceptionStepper<P, F>::driftIntegrateTrapezoidal(const EBAMRCellData& a
     m_particleSolver->interpolateVelocities();
   }
 
-  ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);  
+  ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
 
   this->rewindParticles();
 }
-
 
 template <typename P, typename F>
 void
@@ -1451,8 +1496,8 @@ StreamerInceptionStepper<P, F>::resetParticles() noexcept
       for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
         P& p = lit();
 
-        p.weight()             = 0.0;
-        p.template scalar<0>() = 1.0;
+        p.weight()           = 0.0;
+        p.template real<0>() = 1.0;
       }
     }
   }

@@ -1,5 +1,3 @@
-// p.template scalar<1>() = dx;
-// p.template scalar<2>() = Emagnitude;
 /* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
@@ -106,7 +104,7 @@ namespace Physics {
 	@details This performs the inception integral evaluation and all that. 
       */
       void
-      postSetup() override;      
+      postSetup() override;
 
       /*!
 	@brief Post checkpoint operations. 
@@ -262,13 +260,6 @@ namespace Physics {
       setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept;
 
       /*!
-	@brief Set the ion mobility
-	@param[in] a_mobility Ion mobility
-      */
-      virtual void
-      setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept;
-
-      /*!
 	@brief Set the background ionization rate (e.g. from detachment, cosmic radiation etc). 
 	@param[in] a_backgroundRate Background ionization rate (units of 1/m^3 s). 
       */
@@ -316,7 +307,7 @@ namespace Physics {
       /*!
 	@brief Inception integral values (negative polarity)
       */
-      EBAMRCellData m_inceptionIntegralMinu;            
+      EBAMRCellData m_inceptionIntegralMinu;
 
       /*!
 	@brief Drift times for positive polarity
@@ -451,11 +442,6 @@ namespace Physics {
       std::function<Real(const Real& E)> m_fieldEmission;
 
       /*!
-	@brief Ion mobility
-      */
-      std::function<Real(const Real& E)> m_ionMobility;
-
-      /*!
 	@brief Distribute particles in every grid cell
       */
       virtual void
@@ -486,7 +472,7 @@ namespace Physics {
 	@brief Calculate particles' drift times until inside electrode or outside grid. 
       */
       virtual void
-      computeDriftTimes() noexcept;      
+      computeDriftTimes() noexcept;
 
       /*!
 	@brief Compute ion drift time using Euler rule
@@ -500,7 +486,7 @@ namespace Physics {
 	@param[in] a_voltage Voltage multiplier
       */
       virtual void
-      driftIntegrateTrapezoidal(const EBAMRCellData& a_K, const Real& a_voltage) noexcept;      
+      driftIntegrateTrapezoidal(const EBAMRCellData& a_K, const Real& a_voltage) noexcept;
 
       /*!
 	@brief Move particles back to their original position.
@@ -512,7 +498,7 @@ namespace Physics {
 	@brief Reset particles. 
       */
       virtual void
-      resetParticles() noexcept;      
+      resetParticles() noexcept;
 
       /*!
 	@brief Compute the detachment rate for all voltages
