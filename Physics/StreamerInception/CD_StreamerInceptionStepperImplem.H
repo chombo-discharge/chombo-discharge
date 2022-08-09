@@ -224,9 +224,6 @@ StreamerInceptionStepper<P, F>::parseOptions()
   else if (str == "trapz") {
     m_integrationAlgorithm = IntegrationAlgorithm::Trapezoidal;
   }
-  else if (str == "simp") {
-    m_integrationAlgorithm = IntegrationAlgorithm::Simpson;
-  }
   else {
     MayDay::Error("StreamerInceptionStepper::StreamerInceptionStepper -- logic bust");
   }
@@ -847,10 +844,6 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
   //       For the trapezoidal rule we get
   //
   //          T += 0.5 * dx * [alpha(E(x)) + alpha(E(x+dx))]
-  //
-  //       For Simpsons rule we get
-  //
-  //          T += dx / 6 * [alpha(E(x)) + 4 * alpha(E(x+dx/2)) + alpha(E(x+dx))]
 
   // Transient storage we can deposit particles onto.
   EBAMRCellData K;
@@ -893,19 +886,12 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
         break;
       }
-      case IntegrationAlgorithm::Simpson: {
-        this->inceptionIntegrateSimpson(m_voltageSweeps[i]);
-
-        break;
-      }
       default: {
         MayDay::Error("StreamerInceptionStepper::computeInceptionIntegral -- logic bust");
 
         break;
       }
       }
-
-      this->rewindParticles();
 
       // Deposit particles on mesh and copy to relevant data holder.
       if (p < 0.0) {
@@ -1009,7 +995,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
 
   ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
 
-  m_particleSolver->remap();
+  this->rewindParticles();  
 }
 
 template <typename P, typename F>
@@ -1143,20 +1129,8 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 
   // Copy processed particles over to the solver particles.
   ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
-
-  m_particleSolver->remap();  
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::inceptionIntegrateSimpson(const Real& a_voltage) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::inceptionIntegrateSimpson");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::inceptionIntegrateSimpson" << endl;
-  }
-
-  MayDay::Abort("CD_StreamerInceptionStepperImplem.H - inceptionIntegrateSimpson -- not implemented");
+  
+  this->rewindParticles();
 }
 
 template <typename P, typename F>
@@ -1186,10 +1160,6 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
   //       For the trapezoidal rule we get
   //
   //          T += 0.5 * dx /(|v(x)| + |v(x+dx)|)
-  //
-  //       For Simpsons rule we get
-  //
-  //          T += dx /  6 * [1/|v(x)| + 4 / v(x + dx/2) + 1 / v(x+dx)]
 
   // Transient storage we can deposit into.
   EBAMRCellData K;
@@ -1225,9 +1195,6 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
 
       // Switch between various integration algorithms. At the end of this
       // the drift time should be stored on the particle weight.
-#if 1 // debug
-      this->driftIntegrateEuler(K, m_voltageSweeps[i]);
-#else // actual code
       switch (m_integrationAlgorithm) {
       case IntegrationAlgorithm::Euler: {
 
@@ -1237,13 +1204,7 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
       }
       case IntegrationAlgorithm::Trapezoidal: {
 
-        MayDay::Abort("CD_StreamerInceptionStepper::computeDriftTimes -- Trapezoidal not supported");
-
-        break;
-      }
-      case IntegrationAlgorithm::Simpson: {
-
-        MayDay::Abort("CD_StreamerInceptionStepper::computeDriftTimes -- Simpsons not supported");
+        this->driftIntegrateTrapezoidal(K, m_voltageSweeps[i]);	
 
         break;
       }
@@ -1253,10 +1214,6 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
         break;
       }
       }
-#endif
-
-      // Move particles back to initial position and deposit them on the mesh.
-      this->rewindParticles();
 
       m_particleSolver->deposit(T);
 
@@ -1363,8 +1320,101 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
 
   ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);  
 
-  m_particleSolver->remap();
+  this->rewindParticles();
 }
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::driftIntegrateTrapezoidal(const EBAMRCellData& a_K, const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::driftIntegrateTrapezoidal");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::driftIntegrateTrapezoidal" << endl;
+  }
+
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect probHi = m_amr->getProbHi();
+
+  // Allocate a data holder for holding the processed particles. This
+  // will be faster because then we only have to iterate through the
+  // particles that are actually still moving.
+  ParticleContainer<P> amrProcessedParticles;
+  m_amr->allocate(amrProcessedParticles, 0, m_realm);  
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+
+  // Reset transient storage for particle integration. Need to use it because we interpolate
+  // the K-value onto the particle weight, so the integration variable goes here. 
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+      for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
+        lit().template scalar<0>() = 0.0;
+      }
+    }
+  }
+
+  // Get K-value and velocity at particle position.
+  m_particleSolver->remap();
+  m_particleSolver->interpolateWeight(a_K);
+  m_particleSolver->interpolateVelocities();
+
+  while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
+
+    // Euler kernel.
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
+
+      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
+        List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
+        List<P>& processedParticles = amrProcessedParticles[lvl][dit()].listItems();
+
+        for (ListIterator<P> lit(solverParticles); lit.ok(); ) {
+          P& p = lit();
+
+	  const RealVect v  = p.velocity();
+	  const Real     dt = step / v.vectorLength();
+	  const Real     mu = m_ionMobility(a_voltage * v.vectorLength());
+
+	  // Update the particle position.
+	  const RealVect newPos = p.position() + dt * v;
+
+	  // Stop integration if particle ends up inside the EB, outside the domain, or if
+	  // the K-value is less than the inception criterion.
+	  const bool outsideGrid = this->particleOutsideGrid(newPos, probLo, probHi);
+	  const bool insideEB    = this->particleInsideEB(newPos);
+	  const bool insideCrit  = (p.weight() >= m_inceptionK);
+
+	  if (insideCrit) {
+	    p.weight() = p.template scalar<0>();
+	    
+	    processedParticles.transfer(lit);	    
+	  }
+	  else if (outsideGrid || insideEB) {
+	    p.weight() = std::numeric_limits<Real>::quiet_NaN();
+
+	    processedParticles.transfer(lit);
+	  }
+	  else {
+	    p.position() = newPos;
+
+	    p.template scalar<0>() += step / v.vectorLength();
+
+	    ++lit;
+	  }
+	}
+      }
+    }
+
+    m_particleSolver->remap();
+    m_particleSolver->interpolateWeight(a_K);
+    m_particleSolver->interpolateVelocities();
+  }
+
+  ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);  
+
+  this->rewindParticles();
+}
+
 
 template <typename P, typename F>
 void

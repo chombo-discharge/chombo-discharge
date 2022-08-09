@@ -32,8 +32,7 @@ namespace Physics {
     enum class IntegrationAlgorithm
     {
       Euler,
-      Trapezoidal,
-      Simpson
+      Trapezoidal
     };
 
     /*!
@@ -484,13 +483,6 @@ namespace Physics {
       inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept;
 
       /*!
-	@brief K integral: Add integration parts after particles move
-	@param[in] a_voltage   Voltage multiplier
-      */
-      virtual void
-      inceptionIntegrateSimpson(const Real& voltage) noexcept;
-
-      /*!
 	@brief Calculate particles' drift times until inside electrode or outside grid. 
       */
       virtual void
@@ -502,6 +494,13 @@ namespace Physics {
       */
       virtual void
       driftIntegrateEuler(const EBAMRCellData& a_K, const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Compute ion drift time using Euler rule
+	@param[in] a_voltage Voltage multiplier
+      */
+      virtual void
+      driftIntegrateTrapezoidal(const EBAMRCellData& a_K, const Real& a_voltage) noexcept;      
 
       /*!
 	@brief Move particles back to their original position.
