@@ -136,7 +136,7 @@ StreamerInceptionStepper.voltage_lo    = 10E3                          # Low vol
 StreamerInceptionStepper.voltage_hi    = 20E3                          # Highest voltage multiplier
 StreamerInceptionStepper.voltage_steps = 10                            # Number of voltage steps
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
-StreamerInceptionStepper.plt_vars      = K Uinc                        # Plot variables
+StreamerInceptionStepper.plt_vars      = K Uinc drift                  # Plot variables
 
 
 # ====================================================================================================
