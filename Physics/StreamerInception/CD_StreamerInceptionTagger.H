@@ -26,11 +26,10 @@ namespace Physics {
     class StreamerInceptionTagger : public CellTagger
     {
     public:
-
-      // Disallowed constructors. 
-      StreamerInceptionTagger() = delete;
-      StreamerInceptionTagger(const StreamerInceptionTagger&) = delete;
-      StreamerInceptionTagger(const StreamerInceptionTagger&&) = delete;            
+      // Disallowed constructors.
+      StreamerInceptionTagger()                                = delete;
+      StreamerInceptionTagger(const StreamerInceptionTagger&)  = delete;
+      StreamerInceptionTagger(const StreamerInceptionTagger&&) = delete;
 
       /*!
 	@brief Full constructor.
@@ -39,8 +38,8 @@ namespace Physics {
 	@param[in] a_phase         Default phase. 
       */
       StreamerInceptionTagger(const RefCountedPtr<AmrMesh>& a_amrMesh,
-			      const EBAMRCellData* const a_electricField,
-			      const phase::which_phase a_phase = phase::gas);
+                              const EBAMRCellData* const    a_electricField,
+                              const phase::which_phase      a_phase = phase::gas);
 
       /*!
 	@brief Destructor
@@ -65,10 +64,25 @@ namespace Physics {
 	@param[inout] a_tags Tags on grid levels.
       */
       virtual bool
-      tagCells(EBAMRTags& a_tags) override final;      
+      tagCells(EBAMRTags& a_tags) override final;
+
+      /*!
+	@brief Get number of plot variables that will be written to file (by Driver).
+	@return Returns number of plot variables that Driver will write to plot files. 
+      */
+      virtual int
+      getNumberOfPlotVariables() const;
+
+      /*!
+	@brief Write plot data.
+	@param[inout] a_output            Output data holder
+	@param[inout] a_plotVariableNames Plot variable names
+	@param[inout] a_icomp             Starting variable in a_output where we begin appending data.
+      */
+      virtual void
+      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
 
     protected:
-
       /*!
 	@brief AmrMesh reference. 
       */
@@ -98,9 +112,20 @@ namespace Physics {
 	@brief Curvature refinement factor
       */
       Real m_refCurv;
+
+      /*!
+	@brief Plot tracer field or not
+      */
+      bool m_plotTracer;
+
+      /*!
+	@brief Function which computes the tracer field
+      */
+      virtual void
+      computeTracerField() noexcept;
     };
-  }
-}
+  } // namespace StreamerInception
+} // namespace Physics
 
 #include <CD_NamespaceFooter.H>
 
