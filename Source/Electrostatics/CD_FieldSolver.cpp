@@ -1374,37 +1374,35 @@ FieldSolver::getPlotVariableNames() const
 
   Vector<std::string> pltVarNames(0);
 
-  const std::string prefix = m_className + "/";
-
   if (m_plotPotential) {
-    pltVarNames.push_back(prefix + "Electrostatic potential");
+    pltVarNames.push_back("Electrostatic potential");
   }
   if (m_plotRho) {
-    pltVarNames.push_back(prefix + "Space charge density");
+    pltVarNames.push_back("Space charge density");
   }
   if (m_plotSigma) {
-    pltVarNames.push_back(prefix + "Electrostatic sigma");
+    pltVarNames.push_back("Electrostatic sigma");
   }
   if (m_plotResidue) {
-    pltVarNames.push_back(prefix + "Electrostatic potential_residue");
+    pltVarNames.push_back("Electrostatic potential_residue");
   }
   if (m_plotPermittivity) {
-    pltVarNames.push_back(prefix + "Electrostatic permittivity");
+    pltVarNames.push_back("Electrostatic permittivity");
   }
 
   if (m_plotElectricField) {
-    pltVarNames.push_back(prefix + "x-Electric field");
-    pltVarNames.push_back(prefix + "y-Electric field");
+    pltVarNames.push_back("x-Electric field");
+    pltVarNames.push_back("y-Electric field");
     if (SpaceDim == 3) {
-      pltVarNames.push_back(prefix + "z-Electric field");
+      pltVarNames.push_back("z-Electric field");
     }
   }
 
   if (m_plotElectricFieldSolid) {
-    pltVarNames.push_back(prefix + "x-Electric field solid");
-    pltVarNames.push_back(prefix + "y-Electric field solid");
+    pltVarNames.push_back("x-Electric field solid");
+    pltVarNames.push_back("y-Electric field solid");
     if (SpaceDim == 3) {
-      pltVarNames.push_back(prefix + "z-Electric field solid");
+      pltVarNames.push_back("z-Electric field solid");
     }
   }
 

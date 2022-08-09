@@ -377,24 +377,19 @@ TracerParticleSolver<P>::getPlotVariableNames() const
     pout() << m_name + "::getPlotVariableNames()" << endl;
   }
 
-  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux. This
-  //       function returns the associated plot variable names, and will be used in the plot files.
-
   Vector<std::string> plotVarNames(0);
 
-  const std::string prefix = m_name + "/";
-
   if (m_plotWeight) {
-    plotVarNames.push_back(prefix + "density");
+    plotVarNames.push_back("density");
   }
 
   if (m_plotVelocity)
-    plotVarNames.push_back(prefix + "x-velocity");
+    plotVarNames.push_back("x-velocity");
   if (m_plotVelocity)
-    plotVarNames.push_back(prefix + "y-velocity");
+    plotVarNames.push_back("y-velocity");
 #if CH_SPACEDIM == 3
   if (m_plotVelocity)
-    plotVarNames.push_back(prefix + "z-velocity");
+    plotVarNames.push_back("z-velocity");
 #endif
 
   return plotVarNames;
