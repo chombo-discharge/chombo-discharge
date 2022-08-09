@@ -318,11 +318,7 @@ TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const
   this->depositParticles<P, &P::weight>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
 
   if (m_volumeScale) {
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real dx = m_amr->getDx()[lvl];
-      
-      DataOps::scale(*a_phi[lvl], std::pow(dx, SpaceDim));
-    }
+    DataOps::volumeScale(a_phi, m_amr->getDx());
   }
 }
 
