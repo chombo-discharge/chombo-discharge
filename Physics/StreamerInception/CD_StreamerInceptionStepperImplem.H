@@ -777,9 +777,7 @@ StreamerInceptionStepper<P, F>::postSetup()
   this->initialParticles();
 
   // Solve K integral for each particle in each voltage and store K values in m_inceptionIntegral
-  if(m_plotInceptionIntegral) {
-    this->computeInceptionIntegral();
-  }
+  this->computeInceptionIntegral();
 
   // Solve drift time integral in both directions and store values in m_driftTimes
   if(m_plotDriftTime) {
@@ -787,29 +785,19 @@ StreamerInceptionStepper<P, F>::postSetup()
   }
 
   // Compute detachment rates
-  if(m_plotBackgroundIonization) {
-    this->computeBackgroundIonization();
-  }
+  this->computeBackgroundIonization();
 
   // Compute field emission rates
-  if(m_plotFieldEmission) {
-    this->computeFieldEmission();
-  }
+  this->computeFieldEmission();
 
   // Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage
-  if(m_plotInceptionIntegral && m_plotInceptionVoltage) {
-    this->computeInceptionVoltageVolume();
-  }
+  this->computeInceptionVoltageVolume();
 
   // Compute critical volume of K values for each voltage
-  if(m_plotInceptionIntegral) {  
-    this->computeCriticalVolume();
-  }
+  this->computeCriticalVolume();
 
   // Compute time to first critical electron
-#if 0 // Still development code
   this->computeFirstElectron();
-#endif
 
   // Print voltages, max K values, and critical volumes to terminal
   if (m_printReport) {
