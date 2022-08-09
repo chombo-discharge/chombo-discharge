@@ -158,6 +158,8 @@ StreamerInceptionTagger::writePlotData(EBAMRCellData&       a_output,
   }
 
   if (m_plotTracer) {
+    this->computeTracerField();
+    
     DataOps::copy(a_output, m_tracerField, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_plotVariableNames.push_back("Tagging curvature field");
@@ -167,7 +169,7 @@ StreamerInceptionTagger::writePlotData(EBAMRCellData&       a_output,
 }
 
 void
-StreamerInceptionTagger::computeTracerField() noexcept
+StreamerInceptionTagger::computeTracerField() const noexcept
 {
   CH_TIME("StreamerInceptionTagger::computeTracerField()");
   if (m_verbosity > 5) {
@@ -186,7 +188,7 @@ StreamerInceptionTagger::computeTracerField() noexcept
   DataOps::vectorLength(magnE, *m_electricField);
 
   m_amr->averageDown(magnE, m_realm, m_phase);
-  m_amr->interpGhost(magnE, m_realm, m_phase);
+  m_amr->interpGhostMG(magnE, m_realm, m_phase);
 
   // Compute |grad(|E|)| onto m_tracerField
   m_amr->computeGradient(gradE, magnE, m_realm, m_phase);

@@ -578,8 +578,6 @@ StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFines
 
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_particleSolver->preRegrid(a_lmin, a_oldFinestLevel);
-
-  pout() << "done preregrid" << endl;
 }
 
 template <typename P, typename F>
@@ -722,7 +720,7 @@ StreamerInceptionStepper<P, F>::initialParticles() noexcept
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         if (validCells(vof.gridIndex())) {
-          const RealVect pos = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+	  const RealVect pos = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
           particles.add(P(pos));
         }
       };

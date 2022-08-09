@@ -105,3 +105,14 @@ Example programs that use the streamer inception model are given in
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness`.
 * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/Armadillo`.
+
+Caveats
+-------
+
+The model is intended to be used with a nearest-grid-point deposition scheme (which is also volume-weighted).
+When running the model, ensure that the the :ref:`Chap:TracerParticleSolver` flags are set as follows:
+
+.. code-block:: bash
+
+   TracerParticleSolver.deposition   = ngp 
+   TracerParticleSolver.volume_scale = true

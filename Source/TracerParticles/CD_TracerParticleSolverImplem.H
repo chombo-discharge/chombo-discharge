@@ -35,7 +35,7 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
   m_pvrBuffer     = 0;
   m_haloBuffer    = 1;
   m_plotVelocity  = true;
-  m_plotWeight      = true;
+  m_plotWeight    = true;
   m_volumeScale   = false;
   m_deposition    = DepositionType::CIC;
   m_velocityField = nullptr;
@@ -318,7 +318,11 @@ TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const
   this->depositParticles<P, &P::weight>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
 
   if (m_volumeScale) {
-    DataOps::volumeScale(a_phi, m_amr->getDx());
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real dx = m_amr->getDx()[lvl];
+      
+      DataOps::scale(*a_phi[lvl], std::pow(dx, SpaceDim));
+    }
   }
 }
 

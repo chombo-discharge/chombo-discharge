@@ -1,6 +1,6 @@
 #include <CD_Driver.H>
 #include <CD_TracerParticleSolver.H>
-#include <CD_Cylinder.H>
+#include <CD_Vessel.H>
 #include <CD_FieldSolverMultigrid.H>
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_StreamerInceptionTagger.H>
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]){
   };  
 
   // Set geometry and AMR 
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new Cylinder());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new Vessel());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
 
   // Set up time stepper 

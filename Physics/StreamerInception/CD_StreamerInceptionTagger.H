@@ -96,7 +96,7 @@ namespace Physics {
       /*!
 	@brief Tracer field. Will be populated with |grad(E)|*dx/|E|
       */
-      EBAMRCellData m_tracerField;
+      mutable EBAMRCellData m_tracerField;
 
       /*!
 	@brief Phase
@@ -122,7 +122,7 @@ namespace Physics {
 	@brief Function which computes the tracer field
       */
       virtual void
-      computeTracerField() noexcept;
+      computeTracerField() const noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics
