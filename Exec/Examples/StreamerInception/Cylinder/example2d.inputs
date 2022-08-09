@@ -38,7 +38,7 @@ Driver.checkpoint_interval             = 100              # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 1                # Number of initial regrids
+Driver.initial_regrids                 = 4                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -127,6 +127,7 @@ StreamerInceptionStepper.plt_vars      = K Uinc drift bg_rate field_emission # P
 # ====================================================================================================
 # StreamerInceptionTagger class options
 # ====================================================================================================
-StreamerInceptionTagger.verbosity = -1
-StreamerInceptionTagger.buffer    = 4
-StreamerInceptionTagger.ref_curv  = 0.1
+StreamerInceptionTagger.verbosity = -1    # Tagger chattiness. 
+StreamerInceptionTagger.buffer    = 4     # Grown buffer around flagged cells
+StreamerInceptionTagger.ref_curv  = 1.0   # Refinement curvature criterion. Lower => more more
+StreamerInceptionTagger.plot_curv = true  # Plot tagging field or not. 

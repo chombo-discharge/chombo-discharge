@@ -45,6 +45,7 @@ def write_template(args):
     mainf.write("\n")
     mainf.write("  // Set up time stepper \n")
     mainf.write("  auto timestepper = RefCountedPtr<StreamerInceptionStepper<>> (new StreamerInceptionStepper<>());\n")
+    mainf.write("  auto celltagger  = RefCountedPtr<StreamerInceptionTagger> (new StreamerInceptionTagger(amr, timestepper->getElectricField()));\n");
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")

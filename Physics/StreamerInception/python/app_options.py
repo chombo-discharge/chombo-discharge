@@ -13,7 +13,8 @@ def write_template(args):
                      args.discharge_home + "/Source/Electrostatics/CD_" + args.field_solver + ".options",\
                      args.discharge_home + "/Source/TracerParticles/CD_" + args.particle_solver + ".options",\
                      args.discharge_home + "/Geometries/" + args.geometry + "/CD_" + args.geometry + ".options", \
-                     args.discharge_home + "/Physics/StreamerInception/CD_StreamerInceptionStepper.options"]
+                     args.discharge_home + "/Physics/StreamerInception/CD_StreamerInceptionStepper.options",\
+                     args.discharge_home + "/Physics/StreamerInception/CD_" + args.cell_tagger + ".options"]
 
     for opt in options_files:
         if os.path.exists(opt):
