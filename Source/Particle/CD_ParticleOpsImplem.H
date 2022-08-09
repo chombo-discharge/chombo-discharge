@@ -217,6 +217,38 @@ ParticleOps::drawRandomParticles(List<P>&                         a_particles,
   }
 }
 
+template <typename P>
+inline void
+ParticleOps::copy(ParticleContainer<P>& a_dst, const ParticleContainer<P>& a_src) noexcept
+{
+  CH_TIME("ParticleOps::copy(ParticleContainer<P> x2)");
+
+  CH_assert(a_dst.getRealm() == a_src.getRealm());
+  
+  for (int lvl = 0; lvl <= a_dst.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_dst.getGrids()[lvl]); dit.ok(); ++dit) {
+      a_dst[lvl][dit()].listItems() = a_src[lvl][dit()].listItems();
+    }
+  }
+}
+
+template <typename P>
+inline void
+ParticleOps::copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& a_src) noexcept
+{
+  CH_TIME("ParticleOps::copyDestructive(ParticleContainer<P> x2)");
+
+  CH_assert(a_dst.getRealm() == a_src.getRealm());
+  
+  for (int lvl = 0; lvl <= a_dst.getFinestLevel(); lvl++) {
+    for (DataIterator dit(a_dst.getGrids()[lvl]); dit.ok(); ++dit) {
+      a_dst[lvl][dit()].listItems() = a_src[lvl][dit()].listItems();
+
+      a_src[lvl][dit()].listItems().clear();
+    }
+  }
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif
