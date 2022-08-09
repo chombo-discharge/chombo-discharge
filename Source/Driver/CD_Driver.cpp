@@ -1659,7 +1659,6 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartF
     }
   }
 
-
   m_timeStepper->postSetup();      
 }
 #endif
