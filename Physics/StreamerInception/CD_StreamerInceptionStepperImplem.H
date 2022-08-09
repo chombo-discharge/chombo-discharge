@@ -1296,6 +1296,8 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
       }
     }
 
+    amrProcessedParticles.remap();
+
     m_particleSolver->remap();
     m_particleSolver->interpolateWeight(a_K);
     m_particleSolver->interpolateVelocities();
@@ -1401,6 +1403,8 @@ StreamerInceptionStepper<P, F>::driftIntegrateTrapezoidal(const EBAMRCellData& a
       }
     }
 
+    amrProcessedParticles.remap();
+
     m_particleSolver->remap();
     m_particleSolver->interpolateWeight(a_K);
     m_particleSolver->interpolateVelocities();
@@ -1450,6 +1454,8 @@ StreamerInceptionStepper<P, F>::driftIntegrateTrapezoidal(const EBAMRCellData& a
         }
       }
     }
+
+    amrProcessedParticles.remap();    
 
     m_particleSolver->remap();
     m_particleSolver->interpolateWeight(a_K);
