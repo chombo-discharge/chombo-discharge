@@ -1928,13 +1928,13 @@ StreamerInceptionStepper<P, F>::printReport() const noexcept
   if (procID() == 0) {
 #endif
     std::cout << "# ===================================================================\n";
-    std::cout << left << setw(15) << setfill(' ') << "# +/-V";
+    std::cout << left << setw(15) << setfill(' ') << "# +/- Voltage";
     std::cout << left << setw(15) << setfill(' ') << "Max K(+)";
     std::cout << left << setw(15) << setfill(' ') << "Max K(-)";    
-    std::cout << left << setw(20) << setfill(' ') << "Crit. vol(+) (m^3)";
-    std::cout << left << setw(20) << setfill(' ') << "Crit. vol(-) (m^3)";    
-    std::cout << left << setw(20) << setfill(' ') << "Time lag + (s)";
-    std::cout << left << setw(20) << setfill(' ') << "Time lag - (s)" << std::endl;
+    std::cout << left << setw(20) << setfill(' ') << "Crit. vol(+)";
+    std::cout << left << setw(20) << setfill(' ') << "Crit. vol(-)";
+    std::cout << left << setw(20) << setfill(' ') << "First e(+)";
+    std::cout << left << setw(20) << setfill(' ') << "First e(-)" << std::endl;
     std::cout << "# ===================================================================\n";
 
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
