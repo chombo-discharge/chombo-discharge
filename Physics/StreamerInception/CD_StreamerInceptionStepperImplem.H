@@ -1749,7 +1749,7 @@ StreamerInceptionStepper<P, F>::computeInceptionVoltages() const noexcept
 
 
     Vplus = interpVinc(m_maxKPlus);
-    Vminu = interpVinc(m_maxKPlus);    
+    Vminu = interpVinc(m_maxKMinu);    
   }
 
   return std::make_pair(Vplus, Vminu);
