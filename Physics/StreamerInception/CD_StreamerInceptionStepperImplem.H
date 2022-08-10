@@ -113,7 +113,8 @@ StreamerInceptionStepper<P, F>::allocate()
   m_amr->allocate(m_backgroundIonization, m_realm, m_phase, m_voltageSweeps.size());
   m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
   m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
-  m_amr->allocate(m_inceptionVoltage, m_realm, m_phase, 1);
+  m_amr->allocate(m_inceptionVoltagePlus, m_realm, m_phase, 1);
+  m_amr->allocate(m_inceptionVoltageMinu, m_realm, m_phase, 1);  
   m_amr->allocate(m_driftTimesPlus, m_realm, m_phase, m_voltageSweeps.size());
   m_amr->allocate(m_driftTimesMinu, m_realm, m_phase, m_voltageSweeps.size());
 
@@ -123,7 +124,8 @@ StreamerInceptionStepper<P, F>::allocate()
   DataOps::setValue(m_backgroundIonization, 0.0);
   DataOps::setValue(m_emissionRatesPlus, 0.0);
   DataOps::setValue(m_emissionRatesMinu, 0.0);
-  DataOps::setValue(m_inceptionVoltage, 0.0);
+  DataOps::setValue(m_inceptionVoltagePlus, 0.0);
+  DataOps::setValue(m_inceptionVoltageMinu, 0.0);  
   DataOps::setValue(m_driftTimesPlus, 0.0);
   DataOps::setValue(m_driftTimesMinu, 0.0);
 }
@@ -328,14 +330,17 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
   // Write the inception voltage.
   if (m_plotInceptionVoltage) {
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Interval srcInterval(0, 0);
-      const Interval dstInterval(a_icomp, a_icomp);
-      m_inceptionVoltage[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-    }
-    a_icomp += 1;
 
-    a_plotVariableNames.push_back(prefix + "Inception voltage");
+    // Positive polarity
+    DataOps::copy(a_output, m_inceptionVoltagePlus, Interval(a_icomp, a_icomp), Interval(0,0));
+    a_icomp += 1;
+    a_plotVariableNames.push_back(prefix + "Inception voltage (positive)");
+
+    // Negative polarity
+    // Positive polarity
+    DataOps::copy(a_output, m_inceptionVoltageMinu, Interval(a_icomp, a_icomp), Interval(0,0));
+    a_icomp += 1;
+    a_plotVariableNames.push_back(prefix + "Inception voltage (negative)");    
   }
 
   // Write our K values.
@@ -343,11 +348,10 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
     // Positive polarity
     {
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const Interval srcInterval(0, m_voltageSweeps.size() - 1);
-        const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
-        m_inceptionIntegralPlus[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
-      }
+      const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+      const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);      
+      DataOps::copy(a_output, m_inceptionIntegralPlus, dstInterval, srcInterval);
+
       a_icomp += m_voltageSweeps.size();
 
       std::string varName;
@@ -497,7 +501,7 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
 
   // Inception voltage.
   if (m_plotInceptionVoltage) {
-    ncomp += 1;
+    ncomp += 2;
   }
 
   // Background ionization rates
@@ -602,7 +606,8 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
   m_amr->reallocate(m_emissionRatesPlus, m_phase, a_lmin);
   m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
-  m_amr->reallocate(m_inceptionVoltage, m_phase, a_lmin);
+  m_amr->reallocate(m_inceptionVoltagePlus, m_phase, a_lmin);
+  m_amr->reallocate(m_inceptionVoltageMinu, m_phase, a_lmin);
   m_amr->reallocate(m_driftTimesPlus, m_phase, a_lmin);
   m_amr->reallocate(m_driftTimesMinu, m_phase, a_lmin);
 }
@@ -1616,7 +1621,8 @@ StreamerInceptionStepper<P, F>::computeInceptionVoltageVolume() noexcept
   //       inception voltage using linear interpolation.
 
   if (m_voltageSweeps.size() < 2) {
-    DataOps::setValue(m_inceptionVoltage, std::numeric_limits<Real>::quiet_NaN());
+    DataOps::setValue(m_inceptionVoltagePlus, std::numeric_limits<Real>::quiet_NaN());
+    DataOps::setValue(m_inceptionVoltageMinu, std::numeric_limits<Real>::quiet_NaN());    
 
     MayDay::Warning("StreamerInceptionStepper::computeInceptionVoltageVolume -- not enough voltages for estimating "
                     "inception voltage");
@@ -1645,30 +1651,44 @@ StreamerInceptionStepper<P, F>::computeInceptionVoltageVolume() noexcept
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
       for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        EBCellFAB& inceptionVoltage    = (*m_inceptionVoltage[lvl])[dit()];
-        FArrayBox& inceptionVoltageReg = inceptionVoltage.getFArrayBox();
+        EBCellFAB& inceptionVoltagePlus    = (*m_inceptionVoltagePlus[lvl])[dit()];
+        EBCellFAB& inceptionVoltageMinu    = (*m_inceptionVoltageMinu[lvl])[dit()];
+	
+        FArrayBox& inceptionVoltagePlusReg = inceptionVoltagePlus.getFArrayBox();
+        FArrayBox& inceptionVoltageMinuReg = inceptionVoltageMinu.getFArrayBox();	
 
-        const EBCellFAB& inceptionIntegral    = (*m_inceptionIntegral[lvl])[dit()];
-        const FArrayBox& inceptionIntegralReg = inceptionIntegral.getFArrayBox();
+        const EBCellFAB& inceptionIntegralPlus    = (*m_inceptionIntegralPlus[lvl])[dit()];
+        const EBCellFAB& inceptionIntegralMinu    = (*m_inceptionIntegralMinu[lvl])[dit()];
+	
+        const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
+        const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();	
 
         // Regular kernel.
         auto regularKernel = [&](const IntVect& iv) -> void {
-          std::vector<Real> Kvalues;
+          std::vector<Real> Kplus;
+          std::vector<Real> Kminu;
+	  
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-            Kvalues.emplace_back(inceptionIntegralReg(iv, i));
+            Kplus.emplace_back(inceptionIntegralPlusReg(iv, i));
+            Kminu.emplace_back(inceptionIntegralMinuReg(iv, i));	    
           }
 
-          inceptionVoltageReg(iv, comp) = interpVinc(Kvalues);
+          inceptionVoltagePlusReg(iv, comp) = interpVinc(Kplus);
+          inceptionVoltageMinuReg(iv, comp) = interpVinc(Kminu);	  
         };
 
         // Irregular kernel.
         auto irregularKernel = [&](const VolIndex& vof) -> void {
-          std::vector<Real> Kvalues;
+          std::vector<Real> Kplus;
+          std::vector<Real> Kminu;
+	  
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-            Kvalues.emplace_back(inceptionIntegral(vof, i));
+            Kplus.emplace_back(inceptionIntegralPlus(vof, i));
+            Kminu.emplace_back(inceptionIntegralMinu(vof, i));	    
           }
 
-          inceptionVoltage(vof, comp) = interpVinc(Kvalues);
+          inceptionVoltagePlus(vof, comp) = interpVinc(Kplus);
+          inceptionVoltageMinu(vof, comp) = interpVinc(Kminu);	  
         };
 
         // Kernel regions.
@@ -1681,8 +1701,8 @@ StreamerInceptionStepper<P, F>::computeInceptionVoltageVolume() noexcept
     }
 
     // Coarsen data.
-    m_amr->averageDown(m_inceptionVoltage, m_realm, m_phase);
-    m_amr->interpGhost(m_inceptionVoltage, m_realm, m_phase);
+    m_amr->averageDown(m_inceptionVoltagePlus, m_realm, m_phase);
+    m_amr->interpGhost(m_inceptionVoltageMinu, m_realm, m_phase);
   }
 }
 
@@ -1880,7 +1900,7 @@ StreamerInceptionStepper<P, F>::printReport() const noexcept
   if (procID() == 0) {
 #endif
     std::cout << "# ===================================================================\n";
-    std::cout << left << setw(15) << setfill(' ') << "# Voltage";
+    std::cout << left << setw(15) << setfill(' ') << "# +/- Voltage";
     std::cout << left << setw(15) << setfill(' ') << "Max K";
     std::cout << left << setw(20) << setfill(' ') << "Crit. vol (m^3)";
     std::cout << left << setw(20) << setfill(' ') << "Time lag + (s)";

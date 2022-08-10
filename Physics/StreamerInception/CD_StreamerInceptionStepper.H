@@ -328,9 +328,14 @@ namespace Physics {
       EBAMRCellData m_emissionRatesMinu;
 
       /*!
-	@brief Computed inception voltages. 
+	@brief Computed inception voltage for positive polarity. 
       */
-      EBAMRCellData m_inceptionVoltage;
+      EBAMRCellData m_inceptionVoltagePlus;
+
+      /*!
+	@brief Computed inception voltage for negative polarity. 
+      */
+      EBAMRCellData m_inceptionVoltageMinu;      
 
       /*!
 	@brief Variable step size (factor of dx)
