@@ -232,20 +232,6 @@ namespace Physics {
       postRegrid() override;
 
       /*!
-	@brief Set fixed step size
-	@param[in] a_step Fixed step size (physical dimensions)
-      */
-      virtual void
-      setFixedStep(const Real a_step) noexcept;
-
-      /*!
-	@brief Set relative step size (relative to dx)
-	@param[in] a_step Factor of dx that particles will move
-      */
-      virtual void
-      setRelativeStep(const Real a_step) noexcept;
-
-      /*!
 	@brief Set the effective ionization coefficient.
 	@param[in] a_alpha Effective ionization coefficient. E is the field in SI units. 
       */
@@ -267,10 +253,16 @@ namespace Physics {
       setFieldEmission(const std::function<Real(const Real& E)>& a_currentDensity) noexcept;
 
     protected:
+      
       /*!
-	@brief Integration algorithm.
+	@brief Integration algorithm for K-value. 
       */
-      IntegrationAlgorithm m_integrationAlgorithm;
+      IntegrationAlgorithm m_inceptionAlgorithm;
+
+      /*!
+	@brief Integration algorithm for drift integration. 
+      */
+      IntegrationAlgorithm m_driftAlgorithm;
 
       /*!
 	@brief Tracer particle solver.
@@ -333,14 +325,24 @@ namespace Physics {
       EBAMRCellData m_inceptionVoltageMinu;      
 
       /*!
-	@brief Variable step size (factor of dx)
+	@brief Variable step size for K-integration algorithm (factor of dx)
       */
-      Real m_relativeStep;
+      Real m_relativeInceptionStep;
+
+      /*!
+	@brief Variable step size for K-integration algorithm (factor of dx)
+      */
+      Real m_relativeDriftStep;      
 
       /*!
 	@brief Fixed step size (physical dimensions)
       */
-      Real m_fixedStep;
+      Real m_fixedInceptionStep;
+
+      /*!
+	@brief Fixed step size (physical dimensions)
+      */
+      Real m_fixedDriftStep;      
 
       /*!
 	@brief Inception criteria (read from input)
@@ -348,9 +350,14 @@ namespace Physics {
       Real m_inceptionK;
 
       /*!
-	@brief If true, used fixed integration step
+	@brief If true, used fixed integration step for inception integration
       */
-      bool m_useFixedStep;
+      bool m_useFixedInceptionStep;
+
+      /*!
+	@brief If true, used fixed integration step for drift integration
+      */
+      bool m_useFixedDriftStep;      
 
       /*!
 	@brief If true, print a report at the end

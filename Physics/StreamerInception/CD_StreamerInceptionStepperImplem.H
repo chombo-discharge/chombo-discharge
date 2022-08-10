@@ -197,7 +197,8 @@ StreamerInceptionStepper<P, F>::parseOptions()
   Real stepSize     = 0.0;
   int  voltageSteps = 0;
 
-  std::string str;
+  std::string str1;
+  std::string str2;  
 
   m_plotInceptionIntegral    = false;
   m_plotInceptionVoltage     = false;
@@ -211,18 +212,59 @@ StreamerInceptionStepper<P, F>::parseOptions()
   pp.get("voltage_hi", voltageHi);
   pp.get("voltage_steps", voltageSteps);
   pp.get("K_inception", m_inceptionK);
-  pp.get("integration", str);
   pp.get("print_report", m_printReport);
-
-  if (str == "euler") {
-    m_integrationAlgorithm = IntegrationAlgorithm::Euler;
+  
+  // Get the inception algorithm
+  pp.get("inception_alg", str1, 0);
+  pp.get("inception_alg", str2, 1);
+  pp.get("inception_alg", stepSize, 2);    
+  if (str1 == "euler") {
+    m_inceptionAlgorithm = IntegrationAlgorithm::Euler;
   }
-  else if (str == "trapz") {
-    m_integrationAlgorithm = IntegrationAlgorithm::Trapezoidal;
+  else if (str1 == "trapz") {
+    m_inceptionAlgorithm = IntegrationAlgorithm::Trapezoidal;
   }
   else {
-    MayDay::Error("StreamerInceptionStepper::StreamerInceptionStepper -- logic bust");
+    MayDay::Error("Expected 'euler' or 'trapz' for 'StreamerInceptionStepper.inception_alg'");    
   }
+  
+  if(str2 == "dx") {
+    m_useFixedInceptionStep    = false;
+    m_relativeInceptionStep = stepSize;
+  }
+  else if(str2 == "fixed") {
+    m_useFixedInceptionStep    = true;
+    m_fixedInceptionStep    = stepSize;
+  }
+  else {
+    MayDay::Error("Expected 'dx' or 'fixed' for 'StreamerInceptionStepper.inception_alg'");
+  }
+
+  // Get the drift algorithm
+  pp.get("drift_alg", str1, 0);
+  pp.get("drift_alg", str2, 1);
+  pp.get("drift_alg", stepSize, 2);    
+  if (str1 == "euler") {
+    m_driftAlgorithm = IntegrationAlgorithm::Euler;
+  }
+  else if (str1 == "trapz") {
+    m_driftAlgorithm = IntegrationAlgorithm::Trapezoidal;
+  }
+  else {
+    MayDay::Error("Expected 'euler' or 'trapz' for 'StreamerInceptionStepper.drift_alg'");    
+  }
+  
+  if(str2 == "dx") {
+    m_useFixedDriftStep    = false;
+    m_relativeDriftStep = stepSize;
+  }
+  else if(str2 == "fixed") {
+    m_useFixedDriftStep    = true;
+    m_fixedDriftStep    = stepSize;
+  }
+  else {
+    MayDay::Error("Expected 'dx' or 'fixed' for 'StreamerInceptionStepper.drift_alg'");
+  }  
 
   // Get plot variables.
   const int num = pp.countval("plt_vars");
@@ -247,16 +289,6 @@ StreamerInceptionStepper<P, F>::parseOptions()
         m_plotDriftTime = true;
       }
     }
-  }
-
-  // Get step size
-  pp.get("step_size", str, 0);
-  pp.get("step_size", stepSize, 1);
-  if (str == "dx") {
-    this->setRelativeStep(stepSize);
-  }
-  else if (str == "fixed") {
-    this->setFixedStep(stepSize);
   }
 
   // Define voltages
@@ -616,32 +648,6 @@ StreamerInceptionStepper<P, F>::postRegrid()
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::setFixedStep(const Real a_step) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::setFixedStep");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::setFixedStep" << endl;
-  }
-
-  m_useFixedStep = true;
-  m_fixedStep    = a_step;
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::setRelativeStep(const Real a_step) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::setRelativeStep");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::setRelativeStep" << endl;
-  }
-
-  m_useFixedStep = false;
-  m_relativeStep = a_step;
-}
-
-template <typename P, typename F>
-void
 StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setAlpha");
@@ -843,7 +849,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
       // Switch between various integration algorithms. At the end of this
       // the K-value time should be stored on the particle weight and the particles
       // should be back in their original grid cells.
-      switch (m_integrationAlgorithm) {
+      switch (m_inceptionAlgorithm) {
       case IntegrationAlgorithm::Euler: {
         this->inceptionIntegrateEuler(m_voltageSweeps[i]);
 
@@ -928,7 +934,8 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
 
     // Euler integration.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real step = m_useFixedStep ? m_fixedStep : (m_relativeStep * m_amr->getDx()[lvl]);
+      const Real dx   = m_amr->getDx()[lvl];
+      const Real step = m_useFixedInceptionStep ? m_fixedInceptionStep : (m_relativeInceptionStep * dx);
 
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
         List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
@@ -1012,7 +1019,8 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 
     // Euler stage.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
+      const Real dx   = m_amr->getDx()[lvl];
+      const Real step = m_useFixedInceptionStep ? m_fixedInceptionStep : (m_relativeInceptionStep * dx);      
 
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
         List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
@@ -1170,7 +1178,7 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
 
       // Switch between various integration algorithms. At the end of this
       // the drift time should be stored on the particle weight.
-      switch (m_integrationAlgorithm) {
+      switch (m_driftAlgorithm) {
       case IntegrationAlgorithm::Euler: {
 
         this->driftIntegrateEuler(K, m_voltageSweeps[i]);
@@ -1245,7 +1253,8 @@ StreamerInceptionStepper<P, F>::driftIntegrateEuler(const EBAMRCellData& a_K, co
 
     // Euler kernel.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
+      const Real dx   = m_amr->getDx()[lvl];
+      const Real step = m_useFixedDriftStep ? m_fixedDriftStep : (m_relativeDriftStep * dx);            
 
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
         List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
@@ -1350,7 +1359,8 @@ StreamerInceptionStepper<P, F>::driftIntegrateTrapezoidal(const EBAMRCellData& a
 
     // Euler stage.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real step = m_useFixedStep ? m_fixedStep : m_relativeStep * m_amr->getDx()[lvl];
+      const Real dx   = m_amr->getDx()[lvl];
+      const Real step = m_useFixedDriftStep ? m_fixedDriftStep : (m_relativeDriftStep * dx);                  
 
       for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
         List<P>& solverParticles    = amrParticles[lvl][dit()].listItems();
