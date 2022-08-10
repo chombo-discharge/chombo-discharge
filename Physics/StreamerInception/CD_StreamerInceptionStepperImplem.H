@@ -760,16 +760,6 @@ StreamerInceptionStepper<P, F>::postInitialize()
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::postInitialize" << endl;
   }
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::postSetup()
-{
-  CH_TIME("StreamerInceptionStepper::postSetup");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::postSetup" << endl;
-  }
 
   // Initialize the particle solver.
   m_particleSolver->setVelocity(m_electricField);
@@ -802,7 +792,7 @@ StreamerInceptionStepper<P, F>::postSetup()
   // Print voltages, max K values, and critical volumes to terminal
   if (m_printReport) {
     this->printReport();
-  }
+  }  
 }
 
 template <typename P, typename F>

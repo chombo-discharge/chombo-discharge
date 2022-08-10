@@ -78,6 +78,7 @@ MeshODEStepper<N>::initialData()
   }
 
   m_solver->setPhi(m_initialData);
+  m_solver->computeRHS(m_rhsFunction);  
 }
 
 template <size_t N>
@@ -88,8 +89,6 @@ MeshODEStepper<N>::postInitialize()
   if (m_verbosity > 5) {
     pout() << "MeshODEStepper::postInitialize()" << endl;
   }
-
-  m_solver->computeRHS(m_rhsFunction);
 }
 
 template <size_t N>

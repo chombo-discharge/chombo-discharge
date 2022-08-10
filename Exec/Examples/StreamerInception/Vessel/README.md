@@ -11,11 +11,13 @@ In 3D, this example will take a few minutes to complete, and should be used with
 To compile it and run it in 2D/3D, type
 
 > make -s -j<num_proc> OPT=HIGH DIM=2 program
+
 > make -s -j<num_proc> OPT=HIGH DIM=3 program
 
 To run it, type
 
 > mpirun -np <num_proc> program2d.*.ex example2d.inputs
+
 > mpirun -np <num_proc> program3d.*.ex example3d.inputs
 
 The figures below show the field distribution and inception region (3D).

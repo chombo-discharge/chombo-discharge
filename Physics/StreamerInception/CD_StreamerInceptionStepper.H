@@ -100,13 +100,6 @@ namespace Physics {
       postInitialize() override;
 
       /*!
-	@brief Post-setup routine. 
-	@details This performs the inception integral evaluation and all that. 
-      */
-      void
-      postSetup() override;
-
-      /*!
 	@brief Post checkpoint operations. 
 	@note Not needed for this time stepper beacuse checkpoint-restart is not supported. 
       */
