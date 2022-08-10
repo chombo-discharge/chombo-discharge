@@ -288,11 +288,6 @@ namespace Physics {
       EBAMRCellData m_electricField;
 
       /*!
-	@brief Inception integral values (K-values)
-      */
-      EBAMRCellData m_inceptionIntegral;
-
-      /*!
 	@brief Inception integral values (positive polarity)
       */
       EBAMRCellData m_inceptionIntegralPlus;
@@ -388,14 +383,24 @@ namespace Physics {
       bool m_plotFieldEmission;
 
       /*! 
-	@brief Max K value for every voltage
+	@brief Max K value for every voltage (positive polarity)
       */
-      std::vector<Real> m_maxKValues;
+      std::vector<Real> m_maxKPlus;
+
+      /*! 
+	@brief Max K value for every voltage (negative polarity)
+      */
+      std::vector<Real> m_maxKMinu;      
 
       /*!
-	@brief Critical volumes of K values for each voltage
+	@brief Critical volumes of K values for each voltage (positive polarity)
       */
-      std::vector<Real> m_criticalVolumes;
+      std::vector<Real> m_criticalVolumePlus;
+
+      /*!
+	@brief Critical volumes of K values for each voltage (negative polarity)
+      */
+      std::vector<Real> m_criticalVolumeMinu;      
 
       /*!
 	@brief (Average) time to appearance of first electron (in critical volume)
@@ -519,9 +524,11 @@ namespace Physics {
 
       /*!
 	@brief Estimate the inception voltage
+	@details This returns the inception voltage interpolated from the K-integral for positive and negative polarity. These
+	SHOULD have the same value if the calculation is grid converged. 
       */
-      virtual Real
-      computeInceptionVoltage() const noexcept;
+      virtual std::pair<Real, Real>
+      computeInceptionVoltages() const noexcept;
 
       /*!
 	@brief Compute the critical volume of the K values for each voltage
@@ -536,7 +543,7 @@ namespace Physics {
       computeFirstElectron() noexcept;
 
       /*!
-	@brief Print m_voltageSweeps, m_maxKValues, and m_criticalVolumes to terminal
+	@brief Print report to the terminal. 
       */
       virtual void
       printReport() const noexcept;
