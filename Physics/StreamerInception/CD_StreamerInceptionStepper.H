@@ -243,7 +243,7 @@ namespace Physics {
 	@param[in] a_backgroundRate Background ionization rate (units of 1/m^3 s). 
       */
       virtual void
-      setBackgroundIonization(const std::function<Real(const Real& E)>& a_backgroundIonization) noexcept;
+      setBackgroundRate(const std::function<Real(const Real& E)>& a_backgroundRate) noexcept;
 
       /*!
 	@brief Set the field emission current
