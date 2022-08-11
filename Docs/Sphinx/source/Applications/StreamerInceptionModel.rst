@@ -16,10 +16,11 @@ The coefficient runs along electric field lines.
 I.e., the inception integral is evaluated over the entire volume.
 This differs from the conventional approach where the user will first extract electric field lines for post-processing.
 
-In addition to the above, the user can specified a critical threshold value for :math:`K_c` which is used for computing
+In addition to the above, the user can specify a critical threshold value for :math:`K_c` which is used for computing
 
 * The critical volume :math:`V_c = \int_{K>K_c} \textrm{d}V`.
 * The inception voltage :math:`U_c`.
+* The drift times :math: `t_d`.
 
 Solvers
 -------
@@ -31,6 +32,9 @@ The streamer inception model uses
 
 Implementation
 --------------
+
+``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell and is integrated along the electric field lines until the particle exits the domain or the ionization coefficient :math:`\alpha(E)` becomes negative. The integration is executed with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration. 
+
 
 Ionization coefficient
 ----------------------
