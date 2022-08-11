@@ -99,7 +99,7 @@ RadiativeTransferStepper<T>::initialData()
 
   if (m_solver->isStationary()) {
     m_solver->advance(0.0, false);
-  }  
+  }
 }
 
 template <typename T>

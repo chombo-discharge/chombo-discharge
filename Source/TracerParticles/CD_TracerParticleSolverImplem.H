@@ -324,7 +324,8 @@ TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const
 
 template <typename P>
 void
-TracerParticleSolver<P>::interpolateWeight(const EBAMRCellData& a_scalar) noexcept {
+TracerParticleSolver<P>::interpolateWeight(const EBAMRCellData& a_scalar) noexcept
+{
   CH_TIME("TracerParticleSolver::interpolateWeight(EBAMRCellData)");
   if (m_verbosity > 5) {
     pout() << m_name + "::interpolateWeight(EBAMRCellData)" << endl;

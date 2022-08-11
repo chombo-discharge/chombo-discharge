@@ -253,7 +253,6 @@ namespace Physics {
       setFieldEmission(const std::function<Real(const Real& E)>& a_currentDensity) noexcept;
 
     protected:
-      
       /*!
 	@brief Integration algorithm for K-value. 
       */
@@ -322,7 +321,7 @@ namespace Physics {
       /*!
 	@brief Computed inception voltage for negative polarity. 
       */
-      EBAMRCellData m_inceptionVoltageMinu;      
+      EBAMRCellData m_inceptionVoltageMinu;
 
       /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)
@@ -332,7 +331,7 @@ namespace Physics {
       /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)
       */
-      Real m_relativeDriftStep;      
+      Real m_relativeDriftStep;
 
       /*!
 	@brief Fixed step size (physical dimensions)
@@ -342,7 +341,7 @@ namespace Physics {
       /*!
 	@brief Fixed step size (physical dimensions)
       */
-      Real m_fixedDriftStep;      
+      Real m_fixedDriftStep;
 
       /*!
 	@brief Inception criteria (read from input)
@@ -357,7 +356,7 @@ namespace Physics {
       /*!
 	@brief If true, used fixed integration step for drift integration
       */
-      bool m_useFixedDriftStep;      
+      bool m_useFixedDriftStep;
 
       /*!
 	@brief If true, print a report at the end
@@ -397,7 +396,7 @@ namespace Physics {
       /*! 
 	@brief Max K value for every voltage (negative polarity)
       */
-      std::vector<Real> m_maxKMinu;      
+      std::vector<Real> m_maxKMinu;
 
       /*!
 	@brief Critical volumes of K values for each voltage (positive polarity)
@@ -407,7 +406,7 @@ namespace Physics {
       /*!
 	@brief Critical volumes of K values for each voltage (negative polarity)
       */
-      std::vector<Real> m_criticalVolumeMinu;      
+      std::vector<Real> m_criticalVolumeMinu;
 
       /*!
 	@brief (Average) time to appearance of first electron (in critical volume)

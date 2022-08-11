@@ -93,7 +93,7 @@ BrownianWalkerStepper::initialData()
   // Fill initial particles and then make the desired number of superparticles.
   m_solver->initialData();
   this->makeSuperParticles();
-  
+
   // Set advection and diffusion fields.
   this->setAdvectionDiffusion();
 
@@ -101,7 +101,7 @@ BrownianWalkerStepper::initialData()
   m_solver->setParticleDiffusion(m_diffCo);
   m_solver->setParticleMobility(m_mobility);
 
-  m_solver->interpolateVelocities();  
+  m_solver->interpolateVelocities();
 }
 
 void

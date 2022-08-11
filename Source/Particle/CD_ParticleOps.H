@@ -140,7 +140,7 @@ public:
   */
   template <typename P>
   static inline void
-  copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& a_src) noexcept;  
+  copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& a_src) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

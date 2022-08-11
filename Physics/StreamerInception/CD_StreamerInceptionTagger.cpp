@@ -159,7 +159,7 @@ StreamerInceptionTagger::writePlotData(EBAMRCellData&       a_output,
 
   if (m_plotTracer) {
     this->computeTracerField();
-    
+
     DataOps::copy(a_output, m_tracerField, Interval(a_icomp, a_icomp), Interval(0, 0));
 
     a_plotVariableNames.push_back("Tagging curvature field");

@@ -154,10 +154,11 @@ public:
   /*!
     @brief Chombo LevelData stuff
   */
-  int preAllocatable()
+  int
+  preAllocatable()
   {
     return 0;
-  }  
+  }
 
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
@@ -181,7 +182,6 @@ public:
   linearIn(void* a_buffer);
 
 protected:
-
   /*!
     @brief Particle position
   */
@@ -191,7 +191,7 @@ protected:
     @brief Particle velocity
   */
   RealVect m_velocity;
-  
+
   /*!
     @brief Particle "weight".
   */

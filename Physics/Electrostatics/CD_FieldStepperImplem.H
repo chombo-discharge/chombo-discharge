@@ -186,8 +186,8 @@ namespace Physics {
       m_sigma->resetCells(sigma);
       m_fieldSolver->setRho(m_rhoGas);
 
-      // Solve Poisson equation. 
-      this->solvePoisson();      
+      // Solve Poisson equation.
+      this->solvePoisson();
     }
 
     template <class T>

@@ -78,7 +78,7 @@ MeshODEStepper<N>::initialData()
   }
 
   m_solver->setPhi(m_initialData);
-  m_solver->computeRHS(m_rhsFunction);  
+  m_solver->computeRHS(m_rhsFunction);
 }
 
 template <size_t N>

@@ -38,17 +38,11 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   this->parseOptions();
 
   // Default stuff.
-  m_alpha = [](const Real E) {
-    return 0.0;
-  };
+  m_alpha = [](const Real E) { return 0.0; };
 
-  m_backgroundRate = [](const Real E) {
-    return 0.0;
-  };
+  m_backgroundRate = [](const Real E) { return 0.0; };
 
-  m_fieldEmission = [](const Real E) {
-    return 0.0;
-  };
+  m_fieldEmission = [](const Real E) { return 0.0; };
 }
 
 template <typename P, typename F>
@@ -70,9 +64,7 @@ StreamerInceptionStepper<P, F>::setupSolvers()
   }
 
   // Define a voltage function to be used in the simulation.
-  auto voltage = [](const Real a_time) -> Real {
-    return 1.0;
-  };
+  auto voltage = [](const Real a_time) -> Real { return 1.0; };
 
   // Instantiate the field solver.
   m_fieldSolver = RefCountedPtr<FieldSolver>(new F());
@@ -141,9 +133,8 @@ StreamerInceptionStepper<P, F>::initialData()
   m_fieldSolver->setRho(0.0);
   m_fieldSolver->setSigma(0.0);
 
-  const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(),
-                                              m_fieldSolver->getRho(),
-                                              m_fieldSolver->getSigma());
+  const bool converged =
+    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma());
 
   if (!converged) {
     MayDay::Error("StreamerInceptionStepper::initialData -- could not solve Poisson equation. Aborting application.");

@@ -1574,9 +1574,9 @@ Driver::setupFresh(const int a_initialRegrids)
       this->gridReport();
     }
   }
-  
+
   // Do post initialize stuff
-  m_timeStepper->postInitialize();  
+  m_timeStepper->postInitialize();
 }
 
 #ifdef CH_USE_HDF5
