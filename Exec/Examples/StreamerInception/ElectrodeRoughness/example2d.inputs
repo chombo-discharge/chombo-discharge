@@ -126,7 +126,7 @@ StreamerInceptionStepper.drift_alg     = euler dx 1.0                  # Integra
 StreamerInceptionStepper.step_size     = dx 1.0                        # Step size. 'dx' or 'fixed' and a size. 
 StreamerInceptionStepper.voltage_lo    = 40E3                           # Low voltage multiplier
 StreamerInceptionStepper.voltage_hi    = 60E3                          # Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps = 5                             # Number of voltage steps
+StreamerInceptionStepper.voltage_steps = 100                             # Number of voltage steps
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
 StreamerInceptionStepper.plt_vars      = K  Uinc # Plot variables
 
