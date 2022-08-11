@@ -395,7 +395,7 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
     {
       const Interval srcInterval(0, m_voltageSweeps.size() - 1);
       const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
-      DataOps::copy(a_output, m_inceptionIntegralPlus, dstInterval, srcInterval);
+      DataOps::copy(a_output, m_inceptionIntegralMinu, dstInterval, srcInterval);
 
       a_icomp += m_voltageSweeps.size();
 
@@ -886,8 +886,8 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
       else {
         m_particleSolver->deposit(Kminu);
 
-        m_amr->averageDown(Kplus, m_realm, m_phase);
-        m_amr->interpGhost(Kplus, m_realm, m_phase);
+        m_amr->averageDown(Kminu, m_realm, m_phase);
+        m_amr->interpGhost(Kminu, m_realm, m_phase);
 
         DataOps::copy(m_inceptionIntegralMinu, Kminu, Interval(i, i), Interval(0, 0));
 
