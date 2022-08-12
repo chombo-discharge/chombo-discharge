@@ -66,7 +66,7 @@ StreamerInceptionStepper<P, F>::setupSolvers()
     pout() << "StreamerInceptionStepper::setupSolvers" << endl;
   }
 
-  // Define a voltage function to be used in the simulation.
+  // Always solve for the field using a voltage of one (and then scale up/down later on)
   auto voltage = [](const Real a_time) -> Real { return 1.0; };
 
   // Instantiate the field solver.
@@ -101,26 +101,47 @@ StreamerInceptionStepper<P, F>::allocate()
   m_fieldSolver->allocateInternals();
   m_particleSolver->allocate();
 
-  m_amr->allocate(m_electricField, m_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_inceptionIntegralPlus, m_realm, m_phase, m_voltageSweeps.size());
-  m_amr->allocate(m_inceptionIntegralMinu, m_realm, m_phase, m_voltageSweeps.size());
-  m_amr->allocate(m_backgroundIonization, m_realm, m_phase, m_voltageSweeps.size());
-  m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
-  m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
-  m_amr->allocate(m_inceptionVoltagePlus, m_realm, m_phase, 1);
-  m_amr->allocate(m_inceptionVoltageMinu, m_realm, m_phase, 1);
-  m_amr->allocate(m_driftTimesPlus, m_realm, m_phase, m_voltageSweeps.size());
-  m_amr->allocate(m_driftTimesMinu, m_realm, m_phase, m_voltageSweeps.size());
+  // Needed for all modes. 
+  m_amr->allocate(m_electricField, m_realm, m_phase, SpaceDim);  
 
-  DataOps::setValue(m_inceptionIntegralPlus, 0.0);
-  DataOps::setValue(m_inceptionIntegralMinu, 0.0);
-  DataOps::setValue(m_backgroundIonization, 0.0);
-  DataOps::setValue(m_emissionRatesPlus, 0.0);
-  DataOps::setValue(m_emissionRatesMinu, 0.0);
-  DataOps::setValue(m_inceptionVoltagePlus, 0.0);
-  DataOps::setValue(m_inceptionVoltageMinu, 0.0);
-  DataOps::setValue(m_driftTimesPlus, 0.0);
-  DataOps::setValue(m_driftTimesMinu, 0.0);
+  switch(m_mode) {
+  case Mode::Static: {
+    m_amr->allocate(m_inceptionIntegralPlus, m_realm, m_phase, m_voltageSweeps.size());
+    m_amr->allocate(m_inceptionIntegralMinu, m_realm, m_phase, m_voltageSweeps.size());
+    m_amr->allocate(m_backgroundIonization, m_realm, m_phase, m_voltageSweeps.size());
+    m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
+    m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
+    m_amr->allocate(m_inceptionVoltagePlus, m_realm, m_phase, 1);
+    m_amr->allocate(m_inceptionVoltageMinu, m_realm, m_phase, 1);
+
+    DataOps::setValue(m_inceptionIntegralPlus, 0.0);
+    DataOps::setValue(m_inceptionIntegralMinu, 0.0);
+    DataOps::setValue(m_backgroundIonization, 0.0);
+    DataOps::setValue(m_emissionRatesPlus, 0.0);
+    DataOps::setValue(m_emissionRatesMinu, 0.0);
+    DataOps::setValue(m_inceptionVoltagePlus, 0.0);
+    DataOps::setValue(m_inceptionVoltageMinu, 0.0);
+
+    if(m_plotDriftTime) {
+      m_amr->allocate(m_driftTimesPlus, m_realm, m_phase, m_voltageSweeps.size());
+      m_amr->allocate(m_driftTimesMinu, m_realm, m_phase, m_voltageSweeps.size());
+      
+      DataOps::setValue(m_driftTimesPlus, 0.0);
+      DataOps::setValue(m_driftTimesMinu, 0.0);
+    }
+
+    break;
+  }
+  case Mode::Dynamic: {
+    MayDay::Abort("StreamerInceptionStepper::allocate -- dynamic mode not supported yet");
+    
+    break;
+  }
+  default: {
+    break;
+  }
+  }
+
 }
 
 template <typename P, typename F>
@@ -368,6 +389,36 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   m_fieldSolver->writePlotData(a_output, a_icomp);
   m_particleSolver->writePlotData(a_output, a_icomp);
 
+  // Write data -- this differs between the 'static' and 'dynamic' modes
+  switch(m_mode) {
+  case Mode::Static: {
+    this->writePlotDataStatic(a_output, a_plotVariableNames, a_icomp);
+
+    break;
+  }
+  case Mode::Dynamic:
+    this->writePlotDataDynamic(a_output, a_plotVariableNames, a_icomp);
+
+    break;
+  default: {
+    break;
+  }
+  }
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::writePlotDataStatic(EBAMRCellData&       a_output,
+						    Vector<std::string>& a_plotVariableNames,
+						    int&                 a_icomp) const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::writePlotDataStatic");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::writePlotDataStatic" << endl;
+  }
+
+  const std::string prefix = "StreamerInceptionStepper/";
+
   // Write the inception voltage.
   if (m_plotInceptionVoltage) {
 
@@ -508,6 +559,21 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 }
 
 template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::writePlotDataDynamic(EBAMRCellData&       a_output,
+						     Vector<std::string>& a_plotVariableNames,
+						     int&                 a_icomp) const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::writePlotDataDynamic");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::writePlotDataDynamic" << endl;
+  }
+
+
+  MayDay::Error("StreamerInceptionStepper::writePlotDataDynamic -- dynamic mode not supported");
+}
+
+template <typename P, typename F>
 int
 StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
 {
@@ -521,29 +587,43 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
   ncomp += m_fieldSolver->getNumberOfPlotVariables();
   ncomp += m_particleSolver->getNumberOfPlotVariables();
 
-  // K-values
-  if (m_plotInceptionIntegral) {
-    ncomp += 2 * m_voltageSweeps.size();
-  }
+  switch(m_mode) {
+  case Mode::Static: {
+    // K-values
+    if (m_plotInceptionIntegral) {
+      ncomp += 2 * m_voltageSweeps.size();
+    }
 
-  // Drift times (+/-) direction
-  if (m_plotDriftTime) {
-    ncomp += 2 * m_voltageSweeps.size();
-  }
+    // Drift times (+/-) direction
+    if (m_plotDriftTime) {
+      ncomp += 2 * m_voltageSweeps.size();
+    }
 
-  // Inception voltage.
-  if (m_plotInceptionVoltage) {
-    ncomp += 2;
-  }
+    // Inception voltage.
+    if (m_plotInceptionVoltage) {
+      ncomp += 2;
+    }
 
-  // Background ionization rates
-  if (m_plotBackgroundIonization) {
-    ncomp += m_voltageSweeps.size();
-  }
+    // Background ionization rates
+    if (m_plotBackgroundIonization) {
+      ncomp += m_voltageSweeps.size();
+    }
 
-  // Field emission rates
-  if (m_plotFieldEmission) {
-    ncomp += 2 * m_voltageSweeps.size();
+    // Field emission rates
+    if (m_plotFieldEmission) {
+      ncomp += 2 * m_voltageSweeps.size();
+    }
+    
+    break;
+  }
+  case Mode::Dynamic: {
+    MayDay::Error("StreamerInceptionStepper::getNumberOfPlotVariables -- dynamic not supported (yet)");
+
+    break;
+  }
+  default: {
+    break;
+  }
   }
 
   return ncomp;
@@ -557,6 +637,7 @@ StreamerInceptionStepper<P, F>::getElectricField() const noexcept
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::getElectricField" << endl;
   }
+  
   return &m_electricField;
 }
 
@@ -581,7 +662,9 @@ StreamerInceptionStepper<P, F>::advance(const Real a_dt)
     pout() << "StreamerInceptionStepper::advance" << endl;
   }
 
-  MayDay::Error("StreamerInceptionStepper::advance -- logic bust (Use Driver.max_steps = 0)");
+  if(m_mode != Mode::Dynamic) {
+    MayDay::Error("StreamerInceptionStepper::advance -- must have 'StreamerInceptionStepper.mode = dynamic'");
+  }
 
   return a_dt;
 }
@@ -632,15 +715,33 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   // Regrid velocity field
   m_amr->reallocate(m_electricField, m_phase, a_lmin);
 
-  m_amr->reallocate(m_inceptionIntegralPlus, m_phase, a_lmin);
-  m_amr->reallocate(m_inceptionIntegralMinu, m_phase, a_lmin);
-  m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
-  m_amr->reallocate(m_emissionRatesPlus, m_phase, a_lmin);
-  m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
-  m_amr->reallocate(m_inceptionVoltagePlus, m_phase, a_lmin);
-  m_amr->reallocate(m_inceptionVoltageMinu, m_phase, a_lmin);
-  m_amr->reallocate(m_driftTimesPlus, m_phase, a_lmin);
-  m_amr->reallocate(m_driftTimesMinu, m_phase, a_lmin);
+  switch(m_mode) {
+  case Mode::Static: {
+    m_amr->reallocate(m_inceptionIntegralPlus, m_phase, a_lmin);
+    m_amr->reallocate(m_inceptionIntegralMinu, m_phase, a_lmin);
+    m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
+    m_amr->reallocate(m_emissionRatesPlus, m_phase, a_lmin);
+    m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
+    m_amr->reallocate(m_inceptionVoltagePlus, m_phase, a_lmin);
+    m_amr->reallocate(m_inceptionVoltageMinu, m_phase, a_lmin);
+
+    if(m_plotDriftTime) {
+      m_amr->reallocate(m_driftTimesPlus, m_phase, a_lmin);
+      m_amr->reallocate(m_driftTimesMinu, m_phase, a_lmin);
+    }
+
+    break;
+  }
+  case Mode::Dynamic: {
+
+    MayDay::Error("StreamerInceptionStepper::regrid -- dynamic not supported (yet");
+    
+    break;
+  }
+  default: {
+    break;
+  }
+  }
 }
 
 template <typename P, typename F>
@@ -806,26 +907,22 @@ StreamerInceptionStepper<P, F>::postInitialize()
 
   if(m_mode == Mode::Static) {
 
+    // Draw initial particles. 
     this->initialParticles();
 
-    // Solve K integral for each particle in each voltage and store K values in m_inceptionIntegral
+    // Solve K integral for each particle in each voltage and store K values in m_inceptionIntegralPlus/m_inceptionIntegralMinu
     this->computeInceptionIntegral();
 
-    // Solve drift time integral in both directions and store values in m_driftTimes
-    if (m_plotDriftTime) {
-      this->computeDriftTimes();
-    }
-
-    // Compute detachment rates
+    // Compute detachment rates into m_backgroundIonization
     this->computeBackgroundIonization();
 
-    // Compute field emission rates
+    // Compute field emission rates into m_emissionRatesPlus/m_emissionRatesMinu
     this->computeFieldEmission();
 
-    // Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage
+    // Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltagePlus/m_inceptionVoltageMinu
     this->computeInceptionVoltageVolume();
 
-    // Compute critical volume of K values for each voltage
+    // Compute critical volume of K values for each voltage and store in m_criticalVolumePlu and m_criticalVolumeMinu
     this->computeCriticalVolume();
 
     // Compute time to first critical electron

@@ -466,6 +466,11 @@ namespace Physics {
       std::vector<Real> m_voltageSweeps;
 
       /*!
+	@brief Time-dependent voltage
+      */
+      std::function<Real(const Real a_time)> m_voltage;
+
+      /*!
 	@brief Realm where the solver lives
       */
       std::string m_realm;
@@ -598,6 +603,24 @@ namespace Physics {
       */
       virtual void
       printReport() const noexcept;
+
+      /*!
+	@brief Write plot data for the 'static' mode
+	@param[inout] a_output            Output data holder.
+	@param[in]    a_plotVariableNames Plot variable names.
+	@param[inout] a_icomp             Starting component in a_output to begin at. 
+      */
+      virtual void
+      writePlotDataStatic(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const noexcept;
+
+      /*!
+	@brief Write plot data for the 'static' mode
+	@param[inout] a_output            Output data holder.
+	@param[in]    a_plotVariableNames Plot variable names.
+	@param[inout] a_icomp             Starting component in a_output to begin at. 
+      */
+      virtual void
+      writePlotDataDynamic(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const noexcept;      
 
       /*!
 	@brief Check if particle is outside grid boundaries
