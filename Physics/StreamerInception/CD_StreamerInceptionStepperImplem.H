@@ -38,10 +38,11 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 
   this->parseOptions();
 
-  // Default stuff.
   m_alpha = [](const Real E) { return 0.0; };
  
-  m_eta = [](const Real E) { return 0.0; }; 
+  m_eta = [](const Real E) { return 0.0; };
+
+  m_voltageCurve = [](const Real a_time) { return 1.0;};
 
   m_backgroundRate = [](const Real E) { return 0.0; };
 
@@ -133,7 +134,9 @@ StreamerInceptionStepper<P, F>::allocate()
     break;
   }
   case Mode::Dynamic: {
-    MayDay::Abort("StreamerInceptionStepper::allocate -- dynamic mode not supported yet");
+    m_amr->allocate(m_inceptionIntegral, m_realm, m_phase, 1);
+
+    DataOps::setValue(m_inceptionIntegral, 0.0);
     
     break;
   }
@@ -228,6 +231,7 @@ StreamerInceptionStepper<P, F>::parseOptions()
   pp.get("voltage_steps", voltageSteps);
   pp.get("K_inception", m_inceptionK);
   pp.get("print_report", m_printReport);
+  pp.get("dt", m_dt);
 
   pp.get("mode", str1);
   if(str1 == "none") {
@@ -734,7 +738,7 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   }
   case Mode::Dynamic: {
 
-    MayDay::Error("StreamerInceptionStepper::regrid -- dynamic not supported (yet");
+    m_amr->reallocate(m_inceptionIntegral, m_phase, a_lmin);
     
     break;
   }
@@ -755,6 +759,18 @@ StreamerInceptionStepper<P, F>::postRegrid()
 
   // This can be left empty because initialData is called right after the regrid method and calling
   // the advance method is an error.
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::setVoltageCurve(const std::function<Real(const Real& E)>& a_voltageCurve) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setVoltageCurve");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setVoltageCurve" << endl;
+  }
+
+  m_voltageCurve = a_voltageCurve;
 }
 
 template <typename P, typename F>
@@ -905,43 +921,43 @@ StreamerInceptionStepper<P, F>::postInitialize()
   // Initialize the particle solver.
   m_particleSolver->setVelocity(m_electricField);
 
-  if(m_mode == Mode::Static) {
+  switch(m_mode) {
+  case Mode::Static: {
 
-    // Draw initial particles. 
     this->initialParticles();
 
-    // Solve K integral for each particle in each voltage and store K values in m_inceptionIntegralPlus/m_inceptionIntegralMinu
-    this->computeInceptionIntegral();
-
-    // Compute detachment rates into m_backgroundIonization
+    this->computeInceptionIntegralStatic();
     this->computeBackgroundIonization();
-
-    // Compute field emission rates into m_emissionRatesPlus/m_emissionRatesMinu
     this->computeFieldEmission();
-
-    // Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltagePlus/m_inceptionVoltageMinu
     this->computeInceptionVoltageVolume();
-
-    // Compute critical volume of K values for each voltage and store in m_criticalVolumePlu and m_criticalVolumeMinu
     this->computeCriticalVolume();
-
-    // Compute time to first critical electron
     this->computeFirstElectron();
 
     // Print voltages, max K values, and critical volumes to terminal
     if (m_printReport) {
       this->printReport();
     }
+
+    break;
+  }
+  case Mode::Dynamic: {
+    MayDay::Abort("StreamerInceptionStepper::postInitialize -- dynamic mode not supported (yet)");
+
+    break;
+  }
+  default: {
+    break;
+  }
   }
 }
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
+StreamerInceptionStepper<P, F>::computeInceptionIntegralStatic() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeInceptionIntegral");
+  CH_TIME("StreamerInceptionStepper::computeInceptionIntegralStatic");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeInceptionIntegral" << endl;
+    pout() << "StreamerInceptionStepper::computeInceptionIntegralStatic" << endl;
   }
 
   // TLDR: For this integration we compute the value of the inception integral
@@ -1001,7 +1017,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
         break;
       }
       default: {
-        MayDay::Error("StreamerInceptionStepper::computeInceptionIntegral -- logic bust");
+        MayDay::Error("StreamerInceptionStepper::computeInceptionIntegralStatic -- logic bust");
 
         break;
       }

@@ -241,6 +241,13 @@ namespace Physics {
       postRegrid() override;
 
       /*!
+	@brief Set the voltage curve (used for dynamic mode)
+	@param[in] a_voltageCurve Voltage curve
+      */
+      virtual void
+      setVoltageCurve(const std::function<Real(const Real& a_time)>& a_voltageCurve) noexcept;
+
+      /*!
 	@brief Set the ionization coefficient.
 	@param[in] a_alpha Townsend ionization coefficient. E is the field in SI units. 
       */
@@ -319,49 +326,118 @@ namespace Physics {
       EBAMRCellData m_electricField;
 
       /*!
-	@brief Inception integral values (positive polarity)
+	@brief Inception integral values. 
+	@note Dynamic mode. 
+      */
+      EBAMRCellData m_inceptionIntegral;      
+
+      /*!
+	@brief Inception integral values.
+	@note Static mode, positive polarity
       */
       EBAMRCellData m_inceptionIntegralPlus;
 
       /*!
-	@brief Inception integral values (negative polarity)
+	@brief Inception integral values.
+	@note Static mode, negative polarity
       */
       EBAMRCellData m_inceptionIntegralMinu;
 
       /*!
 	@brief Drift times for positive polarity
+	@note Static mode, positive polarity
       */
       EBAMRCellData m_driftTimesPlus;
 
       /*!
-	@brief Drift times for negative polarity
+	@brief Drift times
+	@note Static mode, negative polarity
       */
       EBAMRCellData m_driftTimesMinu;
 
       /*!
 	@brief Background ionization rates
+	@note Both modes. 
       */
       EBAMRCellData m_backgroundIonization;
 
       /*!
-	@brief Field emission rates for positive voltage
+	@brief Field emission rates
+	@note Static mode, positive polarity
       */
       EBAMRCellData m_emissionRatesPlus;
 
       /*!
-	@brief Field emission rates for negative voltage
+	@brief Field emission rates
+	@note Static mode, negative polarity
       */
       EBAMRCellData m_emissionRatesMinu;
 
       /*!
-	@brief Computed inception voltage for positive polarity. 
+	@brief Computed inception voltage
+	@note Static mode, positive polarity
       */
       EBAMRCellData m_inceptionVoltagePlus;
 
       /*!
-	@brief Computed inception voltage for negative polarity. 
+	@brief Computed inception voltage
+	@note Static mode, negative polarity
       */
       EBAMRCellData m_inceptionVoltageMinu;
+
+      /*! 
+	@brief Max K value for every voltage
+	@note Static mode, positive polarity
+      */
+      std::vector<Real> m_maxKPlus;
+
+      /*! 
+	@brief Max K value for every voltage
+	@note Static mode, negative polarity
+      */
+      std::vector<Real> m_maxKMinu;
+
+      /*!
+	@brief Critical volumes of K values for each voltage
+	@note Static mode, positive polarity
+      */
+      std::vector<Real> m_criticalVolumePlus;
+
+      /*!
+	@brief Critical volumes of K values for each voltage
+	@note Static mode, positive polarity
+      */
+      std::vector<Real> m_criticalVolumeMinu;
+
+      /*!
+	@brief (Average) time to appearance of first electron (in critical volume)
+	@note Static mode, positive polarity. 
+      */
+      std::vector<Real> m_firstElectronPlus;
+
+      /*!
+	@brief (Average) time to appearance of first electron (in critical volume)
+	@note Static mode, negative polarity. 
+      */
+      std::vector<Real> m_firstElectronMinu;
+
+      /*!
+	@brief Voltage sweeps
+	@note Static mode
+      */
+      std::vector<Real> m_voltageSweeps;      
+
+      /*!
+	@brief Integral factor for cumulative integration.
+	@details This is the integral_Vcr(dne/dt * (1 - eta/alpha) dV) stored at each time step. 
+	@note Only for dynamic mode. 
+      */
+      std::vector<std::pair<Real, Real> > m_Rdot;
+
+      /*!
+	@brief Time step for dynamic mode
+      */
+      Real m_dt;
 
       /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)
@@ -428,47 +504,10 @@ namespace Physics {
       */
       bool m_plotFieldEmission;
 
-      /*! 
-	@brief Max K value for every voltage (positive polarity)
-      */
-      std::vector<Real> m_maxKPlus;
-
-      /*! 
-	@brief Max K value for every voltage (negative polarity)
-      */
-      std::vector<Real> m_maxKMinu;
-
-      /*!
-	@brief Critical volumes of K values for each voltage (positive polarity)
-      */
-      std::vector<Real> m_criticalVolumePlus;
-
-      /*!
-	@brief Critical volumes of K values for each voltage (negative polarity)
-      */
-      std::vector<Real> m_criticalVolumeMinu;
-
-      /*!
-	@brief (Average) time to appearance of first electron (in critical volume)
-	@note For positive voltage. 
-      */
-      std::vector<Real> m_firstElectronPlus;
-
-      /*!
-	@brief (Average) time to appearance of first electron (in critical volume)
-	@note For negative voltage. 
-      */
-      std::vector<Real> m_firstElectronMinu;
-
-      /*!
-	@brief Voltage sweeps
-      */
-      std::vector<Real> m_voltageSweeps;
-
       /*!
 	@brief Time-dependent voltage
       */
-      std::function<Real(const Real a_time)> m_voltage;
+      std::function<Real(const Real a_time)> m_voltageCurve;
 
       /*!
 	@brief Realm where the solver lives
@@ -511,7 +550,7 @@ namespace Physics {
 	@details This is called in postInitialize().
       */
       virtual void
-      computeInceptionIntegral() noexcept;
+      computeInceptionIntegralStatic() noexcept;
 
       /*!
 	@brief Integrate the inception integral using the Euler rule.
