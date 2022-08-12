@@ -210,11 +210,10 @@ namespace Physics {
       synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
 
       /*!
-	@brief Print a step report. Not used by this class. 
+	@brief Print a step report. Used in dynamic simulations. 
       */
       virtual void
-      printStepReport() override
-      {}
+      printStepReport() override;
 
       /*!
 	@brief Perform pre-regrid operations.
@@ -435,10 +434,16 @@ namespace Physics {
 
       /*!
 	@brief Integral factor for cumulative integration.
-	@details This is the integral_Vcr(dne/dt * (1 - eta/alpha) dV) stored at each time step. 
+	@details This is the integral_Vcr dne/dt * (1 - eta/alpha) dV + integral(j/e*dS)  stored at each time step. 
 	@note Only for dynamic mode. 
       */
       std::vector<std::pair<Real, Real> > m_Rdot;
+
+      /*!
+	@brief Cumulative probability of breakdown by time t.
+	@details First parameter is time, second parameter is breakdown probability. 
+      */
+      std::vector<std::pair<Real, Real> > m_inceptionProbability;
 
       /*!
 	@brief Time step for dynamic mode
@@ -652,6 +657,16 @@ namespace Physics {
       */
       virtual void
       computeFieldEmission(EBAMRCellData& a_emissionRate, const Real& a_voltage) const noexcept;
+
+      /*!
+	@brief Evaluate a function f = f(E) in a volume. 
+	@param[out] a_data    Mesh data
+	@param[in]  a_voltage Voltage multiplier
+	@param[im]  a_func    Function to evaluate
+	@note For plotting the emission rate in dynamic simulations. 
+      */
+      virtual void
+      evaluateFunction(EBAMRCellData& a_emissionRate, const Real& a_voltage, const std::function<Real(const Real E)>& a_func) const noexcept;      
 
       /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage. 

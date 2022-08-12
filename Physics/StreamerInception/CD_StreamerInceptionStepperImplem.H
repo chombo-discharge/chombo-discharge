@@ -43,7 +43,12 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
  
   m_eta = [](const Real E) { return 0.0; };
 
+#if 1 // Debug code
+  m_voltageCurve = [](const Real a_time) { return 50E3;};
+  MayDay::Warning("StreamerInceptionStepperImplem.H -- set voltage curve to 1 later");
+#else
   m_voltageCurve = [](const Real a_time) { return 1.0;};
+#endif
 
   m_backgroundRate = [](const Real E) { return 0.0; };
 
@@ -177,6 +182,8 @@ StreamerInceptionStepper<P, F>::initialData()
   DataOps::copy(m_electricField, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
   m_amr->averageDown(m_electricField, m_realm, m_phase);
   m_amr->interpGhost(m_electricField, m_realm, m_phase);
+
+  m_amr->interpToCentroids(m_electricField, m_realm, m_phase);
 }
 
 template <typename P, typename F>
@@ -573,6 +580,48 @@ StreamerInceptionStepper<P, F>::writePlotDataStatic(EBAMRCellData&       a_outpu
       }
     }
   }
+
+  // Alpha value
+  if(m_plotAlpha) {
+    EBAMRCellData alpha;
+    m_amr->allocate(alpha, m_realm, m_phase, 1);
+
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      this->evaluateFunction(alpha, m_voltageSweeps[i], m_alpha);
+
+      m_amr->averageDown(alpha, m_realm, m_phase);
+      m_amr->interpGhost(alpha, m_realm, m_phase);            
+
+      DataOps::copy(a_output, alpha, Interval(a_icomp, a_icomp), Interval(0,0));
+
+      a_icomp++;
+
+      const std::string varName = prefix + "Alpha coefficient/ V = " + std::to_string(m_voltageSweeps[i]);
+
+      a_plotVariableNames.push_back(varName);
+    }
+  }
+
+  // Eta
+  if(m_plotEta) {
+    EBAMRCellData eta;
+    m_amr->allocate(eta, m_realm, m_phase, 1);
+
+    for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+      this->evaluateFunction(eta, m_voltageSweeps[i], m_alpha);
+
+      m_amr->averageDown(eta, m_realm, m_phase);
+      m_amr->interpGhost(eta, m_realm, m_phase);      
+
+      DataOps::copy(a_output, eta, Interval(a_icomp, a_icomp), Interval(0,0));
+
+      a_icomp++;
+
+      const std::string varName = "Eta coefficient/ V = " + std::to_string(m_voltageSweeps[i]);
+
+      a_plotVariableNames.push_back(varName);
+    }
+  }  
 }
 
 template <typename P, typename F>
@@ -586,8 +635,61 @@ StreamerInceptionStepper<P, F>::writePlotDataDynamic(EBAMRCellData&       a_outp
     pout() << "StreamerInceptionStepper::writePlotDataDynamic" << endl;
   }
 
+  // Add electric field to output
+  {
+    EBAMRCellData E;
+    m_amr->allocate(E, m_realm, m_phase, SpaceDim);
 
-  MayDay::Error("StreamerInceptionStepper::writePlotDataDynamic -- dynamic mode not supported");
+    DataOps::copy(E, m_electricField);
+    DataOps::scale(E, m_voltageCurve(m_time));
+    
+    const Interval srcInterv(0, SpaceDim-1);
+    const Interval dstInterv(a_icomp, a_icomp + SpaceDim-1);  
+    DataOps::copy(a_output, E, dstInterv, srcInterv);
+
+    a_plotVariableNames.push_back("x-E");
+    a_plotVariableNames.push_back("y-E");
+    if(SpaceDim == 3) {
+      a_plotVariableNames.push_back("z-E");
+    }
+
+    a_icomp += SpaceDim;
+  }
+  
+
+  // Alpha value
+  if(m_plotAlpha) {
+    EBAMRCellData alpha;
+    m_amr->allocate(alpha, m_realm, m_phase, 1);
+
+    this->evaluateFunction(alpha, m_voltageCurve(m_time), m_alpha);
+
+    m_amr->averageDown(alpha, m_realm, m_phase);
+    m_amr->interpGhost(alpha, m_realm, m_phase);            
+
+    DataOps::copy(a_output, alpha, Interval(a_icomp, a_icomp), Interval(0,0));
+    
+    a_icomp++;
+
+    a_plotVariableNames.push_back("Townsend alpha coefficient");
+  }
+
+  // Eta
+  if(m_plotEta) {
+    EBAMRCellData eta;
+    m_amr->allocate(eta, m_realm, m_phase, 1);
+
+    this->evaluateFunction(eta, m_voltageCurve(m_time), m_eta);
+
+    m_amr->averageDown(eta, m_realm, m_phase);
+    m_amr->interpGhost(eta, m_realm, m_phase);      
+
+    DataOps::copy(a_output, eta, Interval(a_icomp, a_icomp), Interval(0,0));
+
+    a_icomp++;
+
+    a_plotVariableNames.push_back("Townsend eta coefficient");      
+  }    
 }
 
 template <typename P, typename F>
@@ -630,10 +732,24 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
     if (m_plotFieldEmission) {
       ncomp += 2 * m_voltageSweeps.size();
     }
+
+    // Plotting alpha
+    if (m_plotAlpha) {
+      ncomp += m_voltageSweeps.size();
+    }
+
+    // Plotting eta
+    if (m_plotEta) {
+      ncomp += m_voltageSweeps.size();
+    }    
     
     break;
   }
   case Mode::Dynamic: {
+
+    // Always write the electric field. 
+    ncomp += SpaceDim;
+#if 0
     if(m_plotInceptionIntegral) {
       ncomp += 1;
     }
@@ -642,7 +758,8 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
     }
     if(m_plotFieldEmission) {
       ncomp += 1;
-    }    
+    }
+#endif
     if(m_plotAlpha) {
       ncomp += 1;
     }
@@ -719,6 +836,16 @@ StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const R
 
 template <typename P, typename F>
 void
+StreamerInceptionStepper<P, F>::printStepReport()
+{
+  CH_TIME("StreamerInceptionStepper::printStepReport");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::printStepReport" << endl;
+  }
+}
+
+template <typename P, typename F>
+void
 StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 {
   CH_TIME("StreamerInceptionStepper::preRegrid");
@@ -766,6 +893,8 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   case Mode::Dynamic: {
 
     m_amr->reallocate(m_inceptionIntegral, m_phase, a_lmin);
+    m_amr->reallocate(m_emissionRate, m_phase, a_lmin);
+    m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
     
     break;
   }
@@ -973,6 +1102,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
     this->computeInceptionIntegralDynamic(m_voltageCurve(m_time));
     
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
+    m_inceptionProbability.emplace_back(m_time, 0.0);
 
     break;
   }
@@ -1354,7 +1484,7 @@ Real StreamerInceptionStepper<P, F>::computeRdot(const Real& a_voltage) const no
 
   Real Rdot = 0.0;
   
-  // TLDR: We are computing the integral of dne/dt * (1-eta/alpha) over the critical volume.
+  // TLDR: We are computing the integral of dne/dt * (1-eta/alpha) over the critical volume and integral(j/e * dS) over the "critical surface"
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -1986,6 +2116,65 @@ StreamerInceptionStepper<P, F>::computeFieldEmission(EBAMRCellData& a_emissionRa
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
+}
+
+template <typename P, typename F>
+void
+StreamerInceptionStepper<P, F>::evaluateFunction(EBAMRCellData& a_data, const Real& a_voltage, const std::function<Real(const Real E)>& a_func) const noexcept {
+  CH_TIME("StreamerInceptionStepper::evaluateFunction");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::evaluateFunction" << endl;
+  }
+
+  CH_assert(a_data[0]->nComp() == 1);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const EBISBox& ebisbox = ebisl[dit()];
+
+      // Here, emissionPlus is when we have the standard voltage (V = 1) and
+      // emissionMinu is when the voltage is reverted.
+      EBCellFAB& data = (*a_data[lvl])[dit()];
+      FArrayBox& dataReg = data.getFArrayBox();
+
+      data.setVal(0.0);
+
+      const EBCellFAB& electricField    = (*m_electricField[lvl])[dit()];
+      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+
+	// clang-format off
+        const RealVect E = a_voltage * RealVect(D_DECL(electricFieldReg(iv, 0),
+						       electricFieldReg(iv, 1),
+						       electricFieldReg(iv, 2)));
+	// clang-format on. 
+
+	dataReg(iv, 0) = a_func(E.vectorLength());
+      };      
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+
+	// clang-format off
+        const RealVect E = a_voltage * RealVect(D_DECL(electricField(vof, 0),
+						       electricField(vof, 1),
+						       electricField(vof, 2)));
+	// clang-format on. 
+
+	data(vof, 0) = a_func(E.vectorLength());
+      };
+
+      // Execute kernels
+      Box cellBox = dbl[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);      
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }  
 }
 
 template <typename P, typename F>

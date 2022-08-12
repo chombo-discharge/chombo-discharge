@@ -131,7 +131,7 @@ StreamerInceptionStepper.verbosity     = 10                            # Chattin
 StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation.
 StreamerInceptionStepper.mode          = dynamic                        # Mode (static or dynamic)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
-StreamerInceptionStepper.plt_vars      = K Uinc bg_rate emission       # Plot variables
+StreamerInceptionStepper.plt_vars      = K Uinc alpha eta bg_rate emission       # Plot variables
 
 # Static mode
 StreamerInceptionStepper.voltage_lo    = 35E3                          # Low voltage multiplier
