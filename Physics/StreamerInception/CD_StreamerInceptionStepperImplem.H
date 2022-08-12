@@ -44,7 +44,7 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   m_eta = [](const Real E) { return 0.0; };
 
 #if 1 // Debug code
-  m_voltageCurve = [](const Real a_time) { return 50E3 * a_time;};
+  m_voltageCurve = [](const Real a_time) { return 50E3; };
   MayDay::Warning("StreamerInceptionStepperImplem.H -- set voltage curve to 1 later");
 #else
   m_voltageCurve = [](const Real a_time) { return 1.0;};
@@ -830,7 +830,7 @@ StreamerInceptionStepper<P, F>::computeDt()
     pout() << "StreamerInceptionStepper::computeDt" << endl;
   }
 
-  return std::numeric_limits<Real>::max();
+  return m_dt;
 }
 
 template <typename P, typename F>
@@ -899,9 +899,9 @@ StreamerInceptionStepper<P, F>::printStepReport()
   }
 #endif
 
-  pout() << "                                   Voltage                = " << m_voltageCurve(m_time) << endl;
-  pout() << "                                   Crit. volume           = " << m_criticalVolume.back().second << endl;
-  pout() << "                                   Inception probability  = " << m_inceptionProbability.back().second << endl;
+  pout() << "                                ** Voltage                = " << m_voltageCurve(m_time) << endl;
+  pout() << "                                ** Crit. volume           = " << m_criticalVolume.back().second << endl;
+  pout() << "                                ** Inception probability  = " << m_inceptionProbability.back().second << endl;
 }
 
 template <typename P, typename F>
@@ -1184,7 +1184,8 @@ StreamerInceptionStepper<P, F>::postInitialize()
     this->initialParticles();
 
     // Compute the 'Rdot' value at current time (which is probably t = 0).
-    this->computeInceptionIntegralDynamic(m_voltageCurve(m_time));
+    // Note: -1 because 
+    this->computeInceptionIntegralDynamic(-m_voltageCurve(m_time));
     
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
     m_inceptionProbability.emplace_back(m_time, 0.0);
