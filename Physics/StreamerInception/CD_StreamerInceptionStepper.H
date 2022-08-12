@@ -34,12 +34,21 @@ namespace Physics {
     };
 
     /*!
+      @brief Mode for specifying whether the module is run statically or dynamically
+    */
+    enum class Mode {
+      None,
+      Static,
+      Dynamic
+    };
+
+    /*!
       @brief Class for streamer inception integral evaluations. 
       @details P is the tracer particle type and F is the field solver type. 
       Note that the integration algorithm requires some transient storage on each particle (such as the previous position). 
       This is defined in the TracerParticle template arguments. 
     */
-    template <typename P = TracerParticle<4, 2>, typename F = FieldSolverMultigrid>
+    template <typename P = TracerParticle<2, 2>, typename F = FieldSolverMultigrid>
     class StreamerInceptionStepper : public TimeStepper
     {
     public:
@@ -232,11 +241,30 @@ namespace Physics {
       postRegrid() override;
 
       /*!
-	@brief Set the effective ionization coefficient.
-	@param[in] a_alpha Effective ionization coefficient. E is the field in SI units. 
+	@brief Set the ionization coefficient.
+	@param[in] a_alpha Townsend ionization coefficient. E is the field in SI units. 
       */
       virtual void
       setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept;
+
+      /*!
+	@brief Set the attachment coefficient.
+	@param[in] a_eta Townsend attachment coefficient. E is the field in SI units. 
+      */
+      virtual void
+      setEta(const std::function<Real(const Real& E)>& a_eta) noexcept;
+
+      /*!
+	@brief Get ionization coefficient
+      */
+      virtual const std::function<Real(const Real& E)>&
+      getAlpha() const noexcept;
+
+      /*!
+	@brief Get attachment coefficient
+      */
+      virtual const std::function<Real(const Real& E)>&
+      getEta() const noexcept;      
 
       /*!
 	@brief Set the background ionization rate (e.g. from detachment, cosmic radiation etc). 
@@ -252,7 +280,19 @@ namespace Physics {
       virtual void
       setFieldEmission(const std::function<Real(const Real& E)>& a_currentDensity) noexcept;
 
+      /*!
+	@brief Get the solver mode
+      */
+      virtual Mode
+      getMode() const noexcept;
+
     protected:
+
+      /*!
+	@brief Mode
+      */
+      Mode m_mode;
+      
       /*!
 	@brief Integration algorithm for K-value. 
       */
@@ -436,9 +476,14 @@ namespace Physics {
       phase::which_phase m_phase;
 
       /*!
-	@brief Effective ionization coefficient
+	@brief Ionization coefficient. 
       */
       std::function<Real(const Real& E)> m_alpha;
+
+      /*!
+	@brief Attachment coefficient.
+      */
+      std::function<Real(const Real& E)> m_eta;      
 
       /*!
 	@brief Background ionization rate expression.

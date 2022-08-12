@@ -32,6 +32,7 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 
   m_realm = Realm::Primal;
   m_phase = phase::gas;
+  m_mode  = Mode::Static;
 
   m_verbosity = -1;
 
@@ -39,6 +40,8 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 
   // Default stuff.
   m_alpha = [](const Real E) { return 0.0; };
+ 
+  m_eta = [](const Real E) { return 0.0; }; 
 
   m_backgroundRate = [](const Real E) { return 0.0; };
 
@@ -205,6 +208,20 @@ StreamerInceptionStepper<P, F>::parseOptions()
   pp.get("K_inception", m_inceptionK);
   pp.get("print_report", m_printReport);
 
+  pp.get("mode", str1);
+  if(str1 == "none") {
+    m_mode = Mode::None;
+  }
+  else if(str1 == "static") {
+    m_mode = Mode::Static;
+  }
+  else if(str1 == "dynamic") {
+    m_mode = Mode::Dynamic;
+  }
+  else {
+    MayDay::Error("Expected 'none', 'static', or 'dynamic' for 'StreamerInceptionStepper.mode'");
+  }
+
   // Get the inception algorithm
   pp.get("inception_alg", str1, 0);
   pp.get("inception_alg", str2, 1);
@@ -232,29 +249,31 @@ StreamerInceptionStepper<P, F>::parseOptions()
   }
 
   // Get the drift algorithm
-  pp.get("drift_alg", str1, 0);
-  pp.get("drift_alg", str2, 1);
-  pp.get("drift_alg", stepSize, 2);
-  if (str1 == "euler") {
-    m_driftAlgorithm = IntegrationAlgorithm::Euler;
-  }
-  else if (str1 == "trapz") {
-    m_driftAlgorithm = IntegrationAlgorithm::Trapezoidal;
-  }
-  else {
-    MayDay::Error("Expected 'euler' or 'trapz' for 'StreamerInceptionStepper.drift_alg'");
-  }
+  if(pp.contains("drift_alg")) {
+    pp.get("drift_alg", str1, 0);
+    pp.get("drift_alg", str2, 1);
+    pp.get("drift_alg", stepSize, 2);
+    if (str1 == "euler") {
+      m_driftAlgorithm = IntegrationAlgorithm::Euler;
+    }
+    else if (str1 == "trapz") {
+      m_driftAlgorithm = IntegrationAlgorithm::Trapezoidal;
+    }
+    else {
+      MayDay::Error("Expected 'euler' or 'trapz' for 'StreamerInceptionStepper.drift_alg'");
+    }
 
-  if (str2 == "dx") {
-    m_useFixedDriftStep = false;
-    m_relativeDriftStep = stepSize;
-  }
-  else if (str2 == "fixed") {
-    m_useFixedDriftStep = true;
-    m_fixedDriftStep    = stepSize;
-  }
-  else {
-    MayDay::Error("Expected 'dx' or 'fixed' for 'StreamerInceptionStepper.drift_alg'");
+    if (str2 == "dx") {
+      m_useFixedDriftStep = false;
+      m_relativeDriftStep = stepSize;
+    }
+    else if (str2 == "fixed") {
+      m_useFixedDriftStep = true;
+      m_fixedDriftStep    = stepSize;
+    }
+    else {
+      MayDay::Error("Expected 'dx' or 'fixed' for 'StreamerInceptionStepper.drift_alg'");
+    }
   }
 
   // Get plot variables.
@@ -651,6 +670,30 @@ StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)
 
 template <typename P, typename F>
 void
+StreamerInceptionStepper<P, F>::setEta(const std::function<Real(const Real& E)>& a_eta) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setEta");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setEta" << endl;
+  }
+
+  m_eta = a_eta;
+}
+
+template <typename P, typename F>
+const std::function<Real(const Real& E)>&
+StreamerInceptionStepper<P, F>::getAlpha() const noexcept {
+  return m_alpha;
+}
+
+template <typename P, typename F>
+const std::function<Real(const Real& E)>&
+StreamerInceptionStepper<P, F>::getEta() const noexcept {
+  return m_eta;
+}
+
+template <typename P, typename F>
+void
 StreamerInceptionStepper<P, F>::setBackgroundRate(const std::function<Real(const Real& E)>& a_backgroundRate) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setBackgroundRate");
@@ -671,6 +714,13 @@ StreamerInceptionStepper<P, F>::setFieldEmission(const std::function<Real(const 
   }
 
   m_fieldEmission = a_currentDensity;
+}
+
+template <typename P, typename F>
+Mode
+StreamerInceptionStepper<P, F>::getMode() const noexcept
+{
+  return m_mode;
 }
 
 template <typename P, typename F>
@@ -754,34 +804,37 @@ StreamerInceptionStepper<P, F>::postInitialize()
   // Initialize the particle solver.
   m_particleSolver->setVelocity(m_electricField);
 
-  this->initialParticles();
+  if(m_mode == Mode::Static) {
 
-  // Solve K integral for each particle in each voltage and store K values in m_inceptionIntegral
-  this->computeInceptionIntegral();
+    this->initialParticles();
 
-  // Solve drift time integral in both directions and store values in m_driftTimes
-  if (m_plotDriftTime) {
-    this->computeDriftTimes();
-  }
+    // Solve K integral for each particle in each voltage and store K values in m_inceptionIntegral
+    this->computeInceptionIntegral();
 
-  // Compute detachment rates
-  this->computeBackgroundIonization();
+    // Solve drift time integral in both directions and store values in m_driftTimes
+    if (m_plotDriftTime) {
+      this->computeDriftTimes();
+    }
 
-  // Compute field emission rates
-  this->computeFieldEmission();
+    // Compute detachment rates
+    this->computeBackgroundIonization();
 
-  // Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage
-  this->computeInceptionVoltageVolume();
+    // Compute field emission rates
+    this->computeFieldEmission();
 
-  // Compute critical volume of K values for each voltage
-  this->computeCriticalVolume();
+    // Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage
+    this->computeInceptionVoltageVolume();
 
-  // Compute time to first critical electron
-  this->computeFirstElectron();
+    // Compute critical volume of K values for each voltage
+    this->computeCriticalVolume();
 
-  // Print voltages, max K values, and critical volumes to terminal
-  if (m_printReport) {
-    this->printReport();
+    // Compute time to first critical electron
+    this->computeFirstElectron();
+
+    // Print voltages, max K values, and critical volumes to terminal
+    if (m_printReport) {
+      this->printReport();
+    }
   }
 }
 
@@ -796,18 +849,18 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegral() noexcept
 
   // TLDR: For this integration we compute the value of the inception integral
   //
-  //          K = int alpha(E)dl
+  //          K = int alpha_eff(E)dl
   //
   //       The integration runs from the start position of the particle and along a field line until either the
   //       particle leaves the domain or alpha < 0.0.
   //
   //       For the Euler rule we get
   //
-  //          T += alpha(E(x)) * dx
+  //          T += alpha_eff(E(x)) * dx
   //
   //       For the trapezoidal rule we get
   //
-  //          T += 0.5 * dx * [alpha(E(x)) + alpha(E(x+dx))]
+  //          T += 0.5 * dx * [alpha_eff(E(x)) + alpha_eff(E(x+dx))]
 
   // Transient storage we can deposit particles onto.
   EBAMRCellData K;
@@ -937,13 +990,15 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
           const RealVect v     = p.velocity();
           const Real     dt    = step / v.vectorLength();
           const Real     alpha = m_alpha(a_voltage * v.vectorLength());
+          const Real     eta   = m_eta(a_voltage * v.vectorLength());
+	  const Real     alphaEff = alpha - eta;
 
           // Update particle position
           const RealVect newPos = p.position() + dt * v;
 
           // Stop integration for particles that move into regions alpha < 0.0,
           // inside the EB or outside of the domain.
-          const bool negativeAlpha = (alpha <= 0.0);
+          const bool negativeAlpha = (alphaEff <= 0.0);
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
@@ -952,7 +1007,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
           }
           else {
             p.position() = newPos;
-            p.weight() += step * alpha;
+            p.weight() += step * alphaEff;
 
             ++lit;
           }
@@ -987,7 +1042,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
   //       particle endpoints we can compute the contribution to the inception integral
   //       by using the trapezoidal (quadrature) rule
   //
-  //          T += 0.5 * dx * [alpha(E(p^k)) + alpha(E(p^(k+1)))],
+  //          T += 0.5 * dx * [alpha_eff(E(p^k)) + alpha_eff(E(p^(k+1)))],
   //
   //       where dx = |p^(k+1) - p^k|.
 
@@ -1022,9 +1077,11 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
           const RealVect v     = p.velocity();
           const Real     dt    = step / v.vectorLength();
           const Real     alpha = m_alpha(a_voltage * v.vectorLength());
+          const Real     eta = m_eta(a_voltage * v.vectorLength());
+	  const Real     alphaEff = alpha - eta;
 
           // Storage alpha(p^k), v(p^k), and the step size.
-          p.template real<0>() = alpha;
+          p.template real<0>() = alphaEff;
           p.template real<1>() = dt;
           p.template vect<1>() = v;
 
@@ -1033,7 +1090,7 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 
           // Stop integration for particles that move into regions alpha < 0.0,
           // inside the EB or outside of the domain.
-          const bool negativeAlpha = (alpha <= 0.0);
+          const bool negativeAlpha = (alphaEff <= 0.0);
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
@@ -1073,7 +1130,9 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 
           // Compute new alpha.
           const Real alpha1 = p.template real<0>();
-          const Real alpha2 = m_alpha(a_voltage * vk1.vectorLength());
+          const Real alpha  = m_alpha(a_voltage * vk1.vectorLength());
+          const Real eta =   m_eta(a_voltage * vk1.vectorLength());
+	  const Real alpha2 = alpha - eta;
           const Real d      = 0.5 * dt * (vk + vk1).vectorLength();
 
           // Stop integration for particles that move into regions alpha < 0.0,

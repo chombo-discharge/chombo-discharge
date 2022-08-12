@@ -38,7 +38,7 @@ Driver.checkpoint_interval             = 100              # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 3                # Number of initial regrids
+Driver.initial_regrids                 = 0                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
@@ -123,24 +123,29 @@ Vessel.shroom_curv   = 500E-6            # Mushroom corner curvatures
 Vessel.live_rod      = true           # Rod is live or not
 Vessel.live_shroom   = false          # Mushroom is live or not
 
+
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
+StreamerInceptionStepper.verbosity     = 10                            # Chattiness. 
 StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation.
+StreamerInceptionStepper.mode          = static                        # Mode (static or dynamic)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
-StreamerInceptionStepper.drift_alg     = euler dx 1.0                  # Integration algorithm for drift integral.
+StreamerInceptionStepper.plt_vars      = K Uinc bg_rate emission       # Plot variables
+
+# Static mode
 StreamerInceptionStepper.voltage_lo    = 35E3                          # Low voltage multiplier
 StreamerInceptionStepper.voltage_hi    = 50E3                          # Highest voltage multiplier
 StreamerInceptionStepper.voltage_steps = 10                            # Number of voltage steps
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
-StreamerInceptionStepper.plt_vars      = K Uinc bg_rate emission # Plot variables
 
+# Dynamic mode
+StreamerInceptionStepper.dt            = 1.0                           # Time step for dynamic mode.
 
 # ====================================================================================================
 # StreamerInceptionTagger class options
 # ====================================================================================================
-StreamerInceptionTagger.verbosity = -1    # Tagger chattiness. 
+StreamerInceptionTagger.verbosity = 10    # Tagger chattiness. 
 StreamerInceptionTagger.buffer    = 8     # Grown buffer around flagged cells
 StreamerInceptionTagger.ref_curv  = 0.25  # Refinement curvature criterion. Lower => more more
 StreamerInceptionTagger.plot_curv = true  # Plot tagging field or not. 

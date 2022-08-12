@@ -49,12 +49,13 @@ main(int argc, char* argv[])
   ionizationData.makeUniform(500);
   attachmentData.makeUniform(500);
 
-  auto alphaEff = [&](const Real& E) -> Real {
-    const Real alpha = ionizationData.getEntry<1>(E);
-    const Real eta   = attachmentData.getEntry<1>(E);
-
-    return alpha - eta;
+  auto alpha = [&](const Real& E) -> Real {
+    return ionizationData.getEntry<1>(E);
   };
+
+  auto eta = [&](const Real& E) -> Real {
+    return attachmentData.getEntry<1>(E);
+  };  
 
   // Set geometry and AMR
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new RoughSphere());
@@ -65,7 +66,8 @@ main(int argc, char* argv[])
   auto celltagger =
     RefCountedPtr<StreamerInceptionTagger>(new StreamerInceptionTagger(amr, timestepper->getElectricField()));
 
-  timestepper->setAlpha(alphaEff);
+  timestepper->setAlpha(alpha);
+  timestepper->setEta(eta);  
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr));
