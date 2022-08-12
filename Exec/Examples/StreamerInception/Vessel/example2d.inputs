@@ -38,11 +38,11 @@ Driver.checkpoint_interval             = 100              # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 0                # Number of initial regrids
+Driver.initial_regrids                 = 4                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 0                # Maximum number of steps
+Driver.stop_time                       = 100E-6              # Stop time
+Driver.max_steps                       = 100                # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -140,7 +140,7 @@ StreamerInceptionStepper.voltage_steps = 10                            # Number 
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
 
 # Dynamic mode
-StreamerInceptionStepper.dt            = 1.0                           # Time step for dynamic mode.
+StreamerInceptionStepper.dt            = 10E-6                           # Time step for dynamic mode.
 
 # ====================================================================================================
 # StreamerInceptionTagger class options

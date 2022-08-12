@@ -44,7 +44,7 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   m_eta = [](const Real E) { return 0.0; };
 
 #if 1 // Debug code
-  m_voltageCurve = [](const Real a_time) { return 50E3;};
+  m_voltageCurve = [](const Real a_time) { return 50E3 * a_time;};
   MayDay::Warning("StreamerInceptionStepperImplem.H -- set voltage curve to 1 later");
 #else
   m_voltageCurve = [](const Real a_time) { return 1.0;};
@@ -655,7 +655,40 @@ StreamerInceptionStepper<P, F>::writePlotDataDynamic(EBAMRCellData&       a_outp
 
     a_icomp += SpaceDim;
   }
-  
+
+  // Plot inception integral
+  if(m_plotInceptionIntegral) {
+    DataOps::copy(a_output, m_inceptionIntegral, Interval(a_icomp, a_icomp), Interval(0,0));
+
+    a_icomp++;
+
+    a_plotVariableNames.push_back("Inception integral");
+  }
+
+  if(m_plotBackgroundIonization) {
+    EBAMRCellData bgIonization;
+
+    m_amr->allocate(bgIonization, m_realm, m_phase, 1);
+
+    this->evaluateFunction(bgIonization, m_voltageCurve(m_time), m_backgroundRate);
+
+    m_amr->averageDown(bgIonization, m_realm, m_phase);
+    m_amr->interpGhost(bgIonization, m_realm, m_phase);            
+
+    DataOps::copy(a_output, bgIonization, Interval(a_icomp, a_icomp), Interval(0,0));
+    
+    a_icomp++;
+
+    a_plotVariableNames.push_back("Background rate");
+  }
+
+  if(m_plotFieldEmission) {
+    DataOps::copy(a_output, m_emissionRate, Interval(a_icomp, a_icomp), Interval(0,0));
+    
+    a_icomp++;
+
+    a_plotVariableNames.push_back("Field emission");
+  }  
 
   // Alpha value
   if(m_plotAlpha) {
@@ -749,7 +782,7 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
 
     // Always write the electric field. 
     ncomp += SpaceDim;
-#if 0
+
     if(m_plotInceptionIntegral) {
       ncomp += 1;
     }
@@ -759,7 +792,6 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
     if(m_plotFieldEmission) {
       ncomp += 1;
     }
-#endif
     if(m_plotAlpha) {
       ncomp += 1;
     }
@@ -810,8 +842,30 @@ StreamerInceptionStepper<P, F>::advance(const Real a_dt)
     pout() << "StreamerInceptionStepper::advance" << endl;
   }
 
-  if(m_mode != Mode::Dynamic) {
-    MayDay::Error("StreamerInceptionStepper::advance -- must have 'StreamerInceptionStepper.mode = dynamic'");
+  if(m_mode == Mode::Dynamic) {
+    
+    // Compute the 'Rdot' value at current time
+    this->computeInceptionIntegralDynamic(m_voltageCurve(m_time + a_dt));
+
+    m_criticalVolume.emplace_back(m_time + a_dt, this->computeCriticalVolumeDynamic());
+    m_Rdot.emplace_back(m_time + a_dt, this->computeRdot(m_voltageCurve(m_time + a_dt)));
+
+    // Compute the inception probability using the trapezoidal rule. 
+    if(m_Rdot.size() >= 2) {
+      Real p = 0.0;
+      
+      for (size_t i = 0; i < m_Rdot.size()-1; i++) {
+	const Real dt = m_Rdot[i+1].first - m_Rdot[i].first;
+	
+	p += 0.5 * dt * (m_Rdot[i+1].second - m_Rdot[i].second);
+      }
+
+      m_inceptionProbability.emplace_back(m_time + a_dt, 1.0 - exp(-p));
+    }
+  }
+  else {
+    MayDay::Error("StreamerInceptionStepper::advance -- must have 'StreamerInceptionStepper.mode = dynamic'");    
+
   }
 
   return a_dt;
@@ -839,9 +893,15 @@ void
 StreamerInceptionStepper<P, F>::printStepReport()
 {
   CH_TIME("StreamerInceptionStepper::printStepReport");
+#ifndef NDEBUG
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::printStepReport" << endl;
   }
+#endif
+
+  pout() << "                                   Voltage                = " << m_voltageCurve(m_time) << endl;
+  pout() << "                                   Crit. volume           = " << m_criticalVolume.back().second << endl;
+  pout() << "                                   Inception probability  = " << m_inceptionProbability.back().second << endl;
 }
 
 template <typename P, typename F>
@@ -913,8 +973,31 @@ StreamerInceptionStepper<P, F>::postRegrid()
     pout() << "StreamerInceptionStepper::postRegrid" << endl;
   }
 
-  // This can be left empty because initialData is called right after the regrid method and calling
-  // the advance method is an error.
+  // If we are running in dynamic mode we need to 
+  if(m_timeStep > 0 && m_mode == Mode::Dynamic) {
+
+    // Solve Poisson equation again. 
+    m_fieldSolver->setRho(0.0);
+    m_fieldSolver->setSigma(0.0);
+
+    const bool converged =
+      m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma());
+
+    if (!converged) {
+      MayDay::Error("StreamerInceptionStepper::initialData -- could not solve Poisson equation. Aborting application.");
+    }
+
+    // Get the gas-side electric field and give it to the particle solvers.
+    DataOps::setValue(m_electricField, 0.0);
+    DataOps::copy(m_electricField, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
+    m_amr->averageDown(m_electricField, m_realm, m_phase);
+    m_amr->interpGhost(m_electricField, m_realm, m_phase);
+
+    m_amr->interpToCentroids(m_electricField, m_realm, m_phase);
+
+    // Draw a new set of particles. 
+    this->initialParticles();
+  }
 }
 
 template <typename P, typename F>
@@ -1086,7 +1169,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
     this->computeBackgroundIonizationStatic();
     this->computeFieldEmissionStatic();
     this->computeInceptionVoltageVolume();
-    this->computeCriticalVolume();
+    this->computeCriticalVolumeStatic();
     this->computeFirstElectron();
 
     // Print voltages, max K values, and critical volumes to terminal
@@ -1097,6 +1180,8 @@ StreamerInceptionStepper<P, F>::postInitialize()
     break;
   }
   case Mode::Dynamic: {
+
+    this->initialParticles();
 
     // Compute the 'Rdot' value at current time (which is probably t = 0).
     this->computeInceptionIntegralDynamic(m_voltageCurve(m_time));
@@ -1232,6 +1317,8 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegralDynamic(const Real& a_vo
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::computeInceptionIntegralDynamic" << endl;
   }
+
+  this->resetParticles();
 
   // Compute K-value on each particle using specified algorithm. 
   switch(m_inceptionAlgorithm) {
@@ -2319,11 +2406,11 @@ StreamerInceptionStepper<P, F>::computeInceptionVoltages() const noexcept
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::computeCriticalVolume() noexcept
+StreamerInceptionStepper<P, F>::computeCriticalVolumeStatic() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeCriticalVolume");
+  CH_TIME("StreamerInceptionStepper::computeCriticalVolumeStatic");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeCriticalVolume" << endl;
+    pout() << "StreamerInceptionStepper::computeCriticalVolumeStatic" << endl;
   }
 
   // Solve critical volume of K values for each voltage
@@ -2385,6 +2472,20 @@ StreamerInceptionStepper<P, F>::computeCriticalVolume() noexcept
     m_criticalVolumePlus.push_back(ParallelOps::sum(criticalVolumePlus));
     m_criticalVolumeMinu.push_back(ParallelOps::sum(criticalVolumeMinu));
   }
+}
+
+template <typename P, typename F>
+Real
+StreamerInceptionStepper<P, F>::computeCriticalVolumeDynamic() const noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeCriticalVolumeDynamic");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeCriticalVolumeDynamic" << endl;
+  }
+
+  MayDay::Warning("StreamerInceptionStepper::computeCriticalVolumeDynamic -- not implemented");
+  
+  return 1.23456789;
 }
 
 template <typename P, typename F>

@@ -55,7 +55,11 @@ main(int argc, char* argv[])
 
   auto eta = [&](const Real& E) -> Real {
     return attachmentData.getEntry<1>(E);
-  };  
+  };
+
+  auto detachment = [](const Real& E) -> Real {
+    return 1.E10;
+  };
 
   // Set geometry and AMR
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new Vessel());
@@ -68,7 +72,8 @@ main(int argc, char* argv[])
 
   // Set ionization coefficient.
   timestepper->setAlpha(alpha);
-  timestepper->setEta(eta);  
+  timestepper->setEta(eta);
+  timestepper->setBackgroundRate(detachment);    
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));

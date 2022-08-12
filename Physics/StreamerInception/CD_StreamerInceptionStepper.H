@@ -446,6 +446,12 @@ namespace Physics {
       std::vector<std::pair<Real, Real> > m_inceptionProbability;
 
       /*!
+	@brief Critical volume at various time instances. 
+	@details First parameter is time, second parameter is the critical volume. 
+      */
+      std::vector<std::pair<Real, Real> > m_criticalVolume;      
+
+      /*!
 	@brief Time step for dynamic mode
       */
       Real m_dt;
@@ -685,9 +691,17 @@ namespace Physics {
 
       /*!
 	@brief Compute the critical volume of the K values for each voltage
+	@note For the static method
       */
       virtual void
-      computeCriticalVolume() noexcept;
+      computeCriticalVolumeStatic() noexcept;
+
+      /*!
+	@brief Compute the critical volume of the K values for each voltage
+	@note Dynamic approach. 
+      */
+      virtual Real
+      computeCriticalVolumeDynamic() const noexcept;      
 
       /*!
 	@brief Compute time to first critical electron.
