@@ -374,6 +374,12 @@ namespace Physics {
       EBAMRCellData m_emissionRatesMinu;
 
       /*!
+	@brief Field emission rates
+	@note Used for dynamic mode. 
+      */
+      EBAMRCellData m_emissionRate;
+
+      /*!
 	@brief Computed inception voltage
 	@note Static mode, positive polarity
       */
@@ -505,6 +511,16 @@ namespace Physics {
       bool m_plotFieldEmission;
 
       /*!
+	@brief If true, plot alpha
+      */
+      bool m_plotAlpha;
+
+      /*!
+	@brief If true, plot eta
+      */
+      bool m_plotEta;      
+
+      /*!
 	@brief Time-dependent voltage
       */
       std::function<Real(const Real a_time)> m_voltageCurve;
@@ -547,10 +563,20 @@ namespace Physics {
 
       /*!
 	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral. 
-	@details This is called in postInitialize().
+	@details This is called in postInitialize() only. 
+	@note For static mode only. 
       */
       virtual void
       computeInceptionIntegralStatic() noexcept;
+
+      /*!
+	@brief Solve streamer inception integral 
+	@details Called in postInitialize and the advance method
+	@note Dynamic mode only. 
+	@param[in] a_voltage Voltage multiplier
+      */
+      virtual void
+      computeInceptionIntegralDynamic(const Real& a_voltage) noexcept;      
 
       /*!
 	@brief Integrate the inception integral using the Euler rule.
@@ -565,6 +591,12 @@ namespace Physics {
       */
       virtual void
       inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Compute integral_Vcr(dne/dt * (1 - eta/alpha) dV)
+	@param[in] a_voltage Voltage multiplier. 
+      */
+      virtual Real computeRdot(const Real& a_voltage) const noexcept;
 
       /*!
 	@brief Calculate particles' drift times until inside electrode or outside grid. 
@@ -600,15 +632,26 @@ namespace Physics {
 
       /*!
 	@brief Compute the detachment rate for all voltages
+	@note For static simulations. 
       */
       virtual void
-      computeBackgroundIonization() noexcept;
+      computeBackgroundIonizationStatic() noexcept;
 
       /*!
 	@brief Compute field emission rates
+	@note For static simulations. 
       */
       virtual void
-      computeFieldEmission() noexcept;
+      computeFieldEmissionStatic() noexcept;
+
+      /*!
+	@brief Compute field emission rates
+	@param[out] a_emissionRate Field emission rate. 
+	@param[in]  a_voltage Voltage multiplier
+	@note For plotting the emission rate in dynamic simulations. 
+      */
+      virtual void
+      computeFieldEmission(EBAMRCellData& a_emissionRate, const Real& a_voltage) const noexcept;
 
       /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage. 
@@ -639,9 +682,10 @@ namespace Physics {
 
       /*!
 	@brief Print report to the terminal. 
+	@note For static runs
       */
       virtual void
-      printReport() const noexcept;
+      printReportStatic() const noexcept;
 
       /*!
 	@brief Write plot data for the 'static' mode
