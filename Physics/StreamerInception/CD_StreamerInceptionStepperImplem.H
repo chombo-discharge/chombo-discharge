@@ -46,6 +46,7 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 #if 1 // Debug code
   m_voltageCurve = [](const Real a_time) { return 50E3; };
   MayDay::Warning("StreamerInceptionStepperImplem.H -- set voltage curve to 1 later");
+  MayDay::Warning("StreamerInceptionStepperImplem.H -- beware of polarity change!");
 #else
   m_voltageCurve = [](const Real a_time) { return 1.0;};
 #endif
@@ -245,7 +246,7 @@ StreamerInceptionStepper<P, F>::parseOptions()
   pp.get("voltage_steps", voltageSteps);
   pp.get("K_inception", m_inceptionK);
   pp.get("print_report", m_printReport);
-  pp.get("dt", m_dt);
+  pp.get("dt", m_fixedDt);
 
   pp.get("mode", str1);
   if(str1 == "none") {
@@ -830,7 +831,7 @@ StreamerInceptionStepper<P, F>::computeDt()
     pout() << "StreamerInceptionStepper::computeDt" << endl;
   }
 
-  return m_dt;
+  return m_fixedDt;
 }
 
 template <typename P, typename F>

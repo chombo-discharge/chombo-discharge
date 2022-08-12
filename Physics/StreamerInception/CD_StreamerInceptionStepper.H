@@ -454,7 +454,7 @@ namespace Physics {
       /*!
 	@brief Time step for dynamic mode
       */
-      Real m_dt;
+      Real m_fixedDt;
 
       /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)
