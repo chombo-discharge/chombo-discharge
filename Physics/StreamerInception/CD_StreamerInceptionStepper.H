@@ -717,6 +717,13 @@ namespace Physics {
       printReportStatic() const noexcept;
 
       /*!
+	@brief Print report to the terminal. 
+	@note For dynamic runs. Called in the constructor. 
+      */
+      virtual void
+      printReportDynamic() const noexcept;      
+
+      /*!
 	@brief Write plot data for the 'static' mode
 	@param[inout] a_output            Output data holder.
 	@param[in]    a_plotVariableNames Plot variable names.
