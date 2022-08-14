@@ -1328,6 +1328,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
     this->computeInceptionIntegralDynamic(m_voltageCurve(m_time));
 
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
+    m_criticalVolume.emplace_back(m_time, 0.0);
     m_inceptionProbability.emplace_back(m_time, 0.0);
 
     break;
@@ -2850,9 +2851,19 @@ StreamerInceptionStepper<P, F>::writeReportDynamic() const noexcept
   if (procID() == 0) {
 #endif
     std::ofstream output(m_outputFile, std::ofstream::out);
-  
-    for (const auto& x : m_inceptionProbability) {
-      output << x.first << "\t" << x.second << "\n";
+
+    output << std::left << std::setw(15) << setfill(' ') << "# Time t";
+    output << std::left << std::setw(15) << setfill(' ') << "Rdot(t)";
+    output << std::left << std::setw(15) << setfill(' ') << "Vcr(t)";
+    output << std::left << std::setw(15) << setfill(' ') << "P(t)";
+    output << "\n";
+
+    for (size_t i = 0; i < m_Rdot.size(); i++) {
+      output << std::left << std::setw(15) << m_Rdot[i].first;
+      output << std::left << std::setw(15) << m_Rdot[i].second;
+      output << std::left << std::setw(15) << m_criticalVolume[i].second;
+      output << std::left << std::setw(15) << m_inceptionProbability[i].second;
+      output << "\n";
     }
 
     output.close();
