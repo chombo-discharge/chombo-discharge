@@ -174,6 +174,7 @@ namespace Physics {
 
       /*!
 	@brief Get the electric field
+	@note Returns the CELL-CENTROID centered electric field. 
       */
       virtual const EBAMRCellData* const
       getElectricField() const noexcept;
@@ -320,9 +321,14 @@ namespace Physics {
       RefCountedPtr<FieldSolver> m_fieldSolver;
 
       /*!
-	@brief Electric field for particles (with voltage = 1 V)
+	@brief Electric field.
       */
-      EBAMRCellData m_electricField;
+      EBAMRCellData m_electricFieldPlus;
+
+      /*!
+	@brief Negated electric field (= -E)
+      */
+      EBAMRCellData m_electricFieldMinu;      
 
       /*!
 	@brief Inception integral values. 
@@ -494,7 +500,7 @@ namespace Physics {
       /*!
 	@brief If true, print a report at the end
       */
-      bool m_printReport;
+      bool m_writeReport;
 
       /*!
 	@brief If true, plot the K-values
@@ -542,6 +548,11 @@ namespace Physics {
       std::string m_realm;
 
       /*!
+	@brief Output file
+      */
+      std::string m_outputFile;
+
+      /*!
 	@brief Phase (gas/solid) where the solver lives
       */
       phase::which_phase m_phase;
@@ -571,6 +582,12 @@ namespace Physics {
       */
       virtual void
       initialParticles() noexcept;
+
+      /*!
+	@brief Add particles to every cell where alpha - eta > 0.0
+      */
+      virtual void
+      seedIonizationParticles(const Real& a_voltage) noexcept;
 
       /*!
 	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral. 
@@ -714,14 +731,14 @@ namespace Physics {
 	@note For static runs
       */
       virtual void
-      printReportStatic() const noexcept;
+      writeReportStatic() const noexcept;
 
       /*!
 	@brief Print report to the terminal. 
 	@note For dynamic runs. Called in the constructor. 
       */
       virtual void
-      printReportDynamic() const noexcept;      
+      writeReportDynamic() const noexcept;      
 
       /*!
 	@brief Write plot data for the 'static' mode

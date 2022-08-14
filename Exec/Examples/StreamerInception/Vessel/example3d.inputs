@@ -133,6 +133,7 @@ StreamerInceptionStepper.print_report  = true                          # Print r
 StreamerInceptionStepper.mode          = dynamic                        # Mode (static or dynamic)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.plt_vars      = K Uinc alpha eta bg_rate emission       # Plot variables
+StreamerInceptionStepper.output_file   = report.txt                    # Output file
 
 # Static mode
 StreamerInceptionStepper.voltage_lo    = 35E3                          # Low voltage multiplier
@@ -147,7 +148,7 @@ StreamerInceptionStepper.dt            = 10E-6                           # Time 
 # StreamerInceptionTagger class options
 # ====================================================================================================
 StreamerInceptionTagger.verbosity = -1    # Tagger chattiness. 
-StreamerInceptionTagger.buffer    = 8     # Grown buffer around flagged cells
+StreamerInceptionTagger.buffer    = 0     # Grown buffer around flagged cells
 StreamerInceptionTagger.ref_curv  = 1.0   # Refinement curvature criterion. Lower => more more
 StreamerInceptionTagger.plot_curv = true  # Plot tagging field or not. 
 

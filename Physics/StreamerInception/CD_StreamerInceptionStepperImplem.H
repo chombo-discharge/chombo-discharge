@@ -13,6 +13,10 @@
 #ifndef CD_StreamerInceptionStepperImplem_H
 #define CD_StreamerInceptionStepperImplem_H
 
+// Std includes
+#include <iostream>
+#include <fstream>
+
 // Chombo includes
 #include <CH_Timer.H>
 
@@ -43,17 +47,17 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 
   m_eta = [](const Real E) { return 0.0; };
 
-
 #if 1 // Debug code
-  m_voltageCurve = [](const Real a_time) { return 50E3; };
-  
+  m_voltageCurve = [](const Real a_time) { return 15E3; };
+
   // My todo-list
 #ifdef CH_MPI
-  if(procID() == 0) {
+  if (procID() == 0) {
 #endif
     // clang-format off
     std::cout << "StreamerInceptionStepperImplem.H -- set voltage curve to 1 later\n";
     std::cout << "StreamerInceptionStepperImplem.H -- add alpha-tagging to inception tagger\n";
+    std::cout << "StreamerInceptionStepperImplem.H -- fix curvature tagger\n";    
     std::cout << "StreamerInceptionStepperImplem.H -- allow option to put simulation report in file\n";
     // clang-format on    
 #ifdef CH_MPI    
@@ -76,7 +80,21 @@ StreamerInceptionStepper<P, F>::~StreamerInceptionStepper()
     pout() << "StreamerInceptionStepper::~StreamerInceptionStepper" << endl;
   }
 
-  this->printReportDynamic();
+  switch(m_mode) {
+  case Mode::Static: {
+    this->writeReportStatic();
+    
+    break;
+  }    
+  case Mode::Dynamic: {
+    this->writeReportDynamic();
+    
+    break;
+  }
+  default: {
+    break;
+  }
+  }
 }
 
 template <typename P, typename F>
@@ -124,7 +142,8 @@ StreamerInceptionStepper<P, F>::allocate()
   m_particleSolver->allocate();
 
   // Needed for all modes.
-  m_amr->allocate(m_electricField, m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_electricFieldPlus, m_realm, m_phase, SpaceDim);
+  m_amr->allocate(m_electricFieldMinu, m_realm, m_phase, SpaceDim);  
 
   switch (m_mode) {
   case Mode::Static: {
@@ -185,19 +204,23 @@ StreamerInceptionStepper<P, F>::initialData()
   m_fieldSolver->setSigma(0.0);
 
   const bool converged =
-    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma());
+    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
 
   if (!converged) {
     MayDay::Error("StreamerInceptionStepper::initialData -- could not solve Poisson equation. Aborting application.");
   }
 
   // Get the gas-side electric field and give it to the particle solvers.
-  DataOps::setValue(m_electricField, 0.0);
-  DataOps::copy(m_electricField, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
-  m_amr->averageDown(m_electricField, m_realm, m_phase);
-  m_amr->interpGhost(m_electricField, m_realm, m_phase);
+  DataOps::copy(m_electricFieldPlus, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
+  
+  m_amr->averageDown(m_electricFieldPlus, m_realm, m_phase);
+  m_amr->averageDown(m_electricFieldPlus, m_realm, m_phase);
 
-  m_amr->interpToCentroids(m_electricField, m_realm, m_phase);
+  m_amr->interpToCentroids(m_electricFieldPlus, m_realm, m_phase);
+
+  // Also store -E
+  DataOps::copy(m_electricFieldMinu, m_electricFieldPlus);
+  DataOps::scale(m_electricFieldMinu, -1.0);
 }
 
 template <typename P, typename F>
@@ -260,8 +283,9 @@ StreamerInceptionStepper<P, F>::parseOptions()
   pp.get("voltage_hi", voltageHi);
   pp.get("voltage_steps", voltageSteps);
   pp.get("K_inception", m_inceptionK);
-  pp.get("print_report", m_printReport);
+  pp.get("print_report", m_writeReport);
   pp.get("dt", m_fixedDt);
+  pp.get("output_file", m_outputFile);
 
   pp.get("mode", str1);
   if (str1 == "none") {
@@ -656,7 +680,7 @@ StreamerInceptionStepper<P, F>::writePlotDataDynamic(EBAMRCellData&       a_outp
     EBAMRCellData E;
     m_amr->allocate(E, m_realm, m_phase, SpaceDim);
 
-    DataOps::copy(E, m_electricField);
+    DataOps::copy(E, m_electricFieldPlus);
     DataOps::scale(E, m_voltageCurve(m_time));
 
     const Interval srcInterv(0, SpaceDim - 1);
@@ -834,7 +858,7 @@ StreamerInceptionStepper<P, F>::getElectricField() const noexcept
     pout() << "StreamerInceptionStepper::getElectricField" << endl;
   }
 
-  return &m_electricField;
+  return &m_electricFieldPlus;
 }
 
 template <typename P, typename F>
@@ -859,6 +883,11 @@ StreamerInceptionStepper<P, F>::advance(const Real a_dt)
   }
 
   if (m_mode == Mode::Dynamic) {
+
+    // Seed new particles and set their velocities. 
+    this->seedIonizationParticles(m_voltageCurve(m_time + a_dt));
+    
+    m_particleSolver->setVelocity(m_electricFieldMinu);  
 
     // Compute the 'Rdot' value at current time
     this->computeInceptionIntegralDynamic(m_voltageCurve(m_time + a_dt));
@@ -947,7 +976,8 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   m_particleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   // Regrid velocity field
-  m_amr->reallocate(m_electricField, m_phase, a_lmin);
+  m_amr->reallocate(m_electricFieldPlus, m_phase, a_lmin);
+  m_amr->reallocate(m_electricFieldMinu, m_phase, a_lmin);  
 
   switch (m_mode) {
   case Mode::Static: {
@@ -978,6 +1008,29 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
     break;
   }
   }
+
+  // Solve Poisson equation again.
+  m_fieldSolver->setRho(0.0);
+  m_fieldSolver->setSigma(0.0);
+
+  const bool converged =
+    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma());
+
+  if (!converged) {
+    MayDay::Error("StreamerInceptionStepper::initialData -- could not solve Poisson equation. Aborting application.");
+  }
+
+  // Get the gas-side electric field
+  DataOps::copy(m_electricFieldPlus, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
+  
+  m_amr->averageDown(m_electricFieldPlus, m_realm, m_phase);
+  m_amr->interpGhost(m_electricFieldPlus, m_realm, m_phase);
+
+  //  m_amr->interpToCentroids(m_electricFieldPlus, m_realm, m_phase);
+
+  // Also store -E
+  DataOps::copy(m_electricFieldMinu, m_electricFieldPlus);
+  DataOps::scale(m_electricFieldMinu, -1.0);
 }
 
 template <typename P, typename F>
@@ -987,32 +1040,6 @@ StreamerInceptionStepper<P, F>::postRegrid()
   CH_TIME("StreamerInceptionStepper::postRegrid");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::postRegrid" << endl;
-  }
-
-  // If we are running in dynamic mode we need to
-  if (m_timeStep > 0 && m_mode == Mode::Dynamic) {
-
-    // Solve Poisson equation again.
-    m_fieldSolver->setRho(0.0);
-    m_fieldSolver->setSigma(0.0);
-
-    const bool converged =
-      m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma());
-
-    if (!converged) {
-      MayDay::Error("StreamerInceptionStepper::initialData -- could not solve Poisson equation. Aborting application.");
-    }
-
-    // Get the gas-side electric field and give it to the particle solvers.
-    DataOps::setValue(m_electricField, 0.0);
-    DataOps::copy(m_electricField, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
-    m_amr->averageDown(m_electricField, m_realm, m_phase);
-    m_amr->interpGhost(m_electricField, m_realm, m_phase);
-
-    m_amr->interpToCentroids(m_electricField, m_realm, m_phase);
-
-    // Draw a new set of particles.
-    this->initialParticles();
   }
 }
 
@@ -1168,15 +1195,108 @@ StreamerInceptionStepper<P, F>::initialParticles() noexcept
 
 template <typename P, typename F>
 void
+StreamerInceptionStepper<P, F>::seedIonizationParticles(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::seedIonizationParticles");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::seedIonizationParticles" << endl;
+  }
+
+  ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
+  amrParticles.clearParticles();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+    const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
+
+    const Real dx = m_amr->getDx()[lvl];
+
+    ParticleData<P>& levelParticles = amrParticles[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const EBISBox&       ebisbox    = ebisl[dit()];
+      const BaseFab<bool>& validCells = validCellsLD[dit()];
+
+      List<P>& particles = levelParticles[dit()].listItems();
+
+      const EBCellFAB& electricField = (*m_electricFieldPlus[lvl])[dit()];
+      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+      if(!ebisbox.isAllCovered()) {
+
+	auto regularKernel = [&](const IntVect& iv) -> void {
+			       if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+
+				 // clang-format off
+				 const Real E = a_voltage * RealVect(D_DECL(electricFieldReg(iv, 0),
+									    electricFieldReg(iv, 1),
+									    electricFieldReg(iv, 2))).vectorLength();
+            // clang-format on
+
+            const Real alpha = m_alpha(E);
+            const Real eta   = m_eta(E);
+
+            if (alpha > eta) {
+              const RealVect pos = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+              particles.add(P(pos));
+            }
+          }
+        };
+
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+				 const IntVect iv = vof.gridIndex();
+				 
+				 if (validCells(iv,0) && ebisbox.isIrregular(iv)) {
+
+            // clang-format off
+	    const Real E = a_voltage * RealVect(D_DECL(electricField(vof, 0),
+						       electricField(vof, 1),
+						       electricField(vof, 2))).vectorLength();
+            // clang-format on
+
+            const Real alpha = m_alpha(E);
+            const Real eta   = m_eta(E);
+
+            if (alpha > eta) {
+              const RealVect pos = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+              particles.add(P(pos));
+            }
+          }
+        };
+
+        // Execute kernels over appropriate regions.
+        const Box    cellBox = dbl[dit()];
+        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+
+      // Define particles' weights (i.e. integration & drift time tracker) and integration flag
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        P& p = lit();
+
+        // Set mass to zero and do a backup of the initial position (we need to rewind particles
+        // back later on). The scalar<0> flag is the flag we use for start-stop criteria for the
+        // particle integration.
+        p.weight()           = 0.0;
+        p.template real<0>() = 1.0;
+        p.template vect<0>() = p.position();
+      }
+    }
+  }
+}
+
+template <typename P, typename F>
+void
 StreamerInceptionStepper<P, F>::postInitialize()
 {
   CH_TIME("StreamerInceptionStepper::postInitialize");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::postInitialize" << endl;
   }
-
-  // Initialize the particle solver.
-  m_particleSolver->setVelocity(m_electricField);
 
   switch (m_mode) {
   case Mode::Static: {
@@ -1191,19 +1311,21 @@ StreamerInceptionStepper<P, F>::postInitialize()
     this->computeFirstElectron();
 
     // Print voltages, max K values, and critical volumes to terminal
-    if (m_printReport) {
-      this->printReportStatic();
+    if (m_writeReport) {
+      this->writeReportStatic();
     }
 
     break;
   }
   case Mode::Dynamic: {
 
-    this->initialParticles();
+    // Seed particles and 
+    this->seedIonizationParticles(m_voltageCurve(m_time));
+
+    m_particleSolver->setVelocity(m_electricFieldMinu);
 
     // Compute the 'Rdot' value at current time (which is probably t = 0).
-    // Note: -1 because
-    this->computeInceptionIntegralDynamic(-m_voltageCurve(m_time));
+    this->computeInceptionIntegralDynamic(m_voltageCurve(m_time));
 
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
     m_inceptionProbability.emplace_back(m_time, 0.0);
@@ -1262,8 +1384,12 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegralStatic() noexcept
 
     for (const auto& p : polarities) {
 
-      // Scale E-field by +/-
-      DataOps::scale(m_electricField, p);
+      if(p > 0.0) {
+	m_particleSolver->setVelocity(m_electricFieldMinu);
+      }
+      else {
+	m_particleSolver->setVelocity(m_electricFieldPlus);
+      }
 
       this->resetParticles();
 
@@ -1321,9 +1447,6 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegralStatic() noexcept
 
         m_maxKMinu.push_back(maxK);
       }
-
-      // Scale field back again.
-      DataOps::scale(m_electricField, p);
     }
   }
 }
@@ -1336,11 +1459,6 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegralDynamic(const Real& a_vo
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::computeInceptionIntegralDynamic" << endl;
   }
-
-  this->resetParticles();
-
-  // Recall that the particles move opposite to the electric field.
-  DataOps::scale(m_electricField, -1.0);
 
   // Compute K-value on each particle using specified algorithm.
   switch (m_inceptionAlgorithm) {
@@ -1360,8 +1478,6 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegralDynamic(const Real& a_vo
     break;
   }
   }
-
-  DataOps::scale(m_electricField, 1.0);  
 
   // Deposit the particles onto m_inceptionIntegral
   m_particleSolver->deposit(m_inceptionIntegral);
@@ -1611,7 +1727,7 @@ StreamerInceptionStepper<P, F>::computeRdot(const Real& a_voltage) const noexcep
       const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
 
-      const EBCellFAB& electricField     = (*m_electricField[lvl])[dit()];
+      const EBCellFAB& electricField     = (*m_electricFieldPlus[lvl])[dit()];
       const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
       const EBCellFAB& fieldEmission     = (*m_emissionRate[lvl])[dit()];
 
@@ -1726,8 +1842,12 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
 
       this->resetParticles();
 
-      // Scale E-field by +/-
-      DataOps::scale(m_electricField, p);
+      if(p > 0.0) {
+	m_particleSolver->setVelocity(m_electricFieldMinu);
+      }
+      else {
+	m_particleSolver->setVelocity(m_electricFieldPlus);
+      }      
 
       // Copy current K-value to the above data holder.
       if (p < 0.0) {
@@ -1768,9 +1888,6 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
       else {
         DataOps::copy(m_driftTimesMinu, T, Interval(i, i), Interval(0, 0));
       }
-
-      // Scale field back.
-      DataOps::scale(m_electricField, p);
     }
   }
 }
@@ -2088,7 +2205,7 @@ StreamerInceptionStepper<P, F>::computeBackgroundIonizationStatic() noexcept
       EBCellFAB& bgIonization    = (*m_backgroundIonization[lvl])[dit()];
       FArrayBox& bgIonizationReg = bgIonization.getFArrayBox();
 
-      const EBCellFAB& electricField    = (*m_electricField[lvl])[dit()];
+      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -2148,7 +2265,7 @@ StreamerInceptionStepper<P, F>::computeFieldEmissionStatic() noexcept
       emissionPlus.setVal(0.0);
       emissionMinu.setVal(0.0);
 
-      const EBCellFAB& electricField    = (*m_electricField[lvl])[dit()];
+      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -2206,7 +2323,7 @@ StreamerInceptionStepper<P, F>::computeFieldEmission(EBAMRCellData& a_emissionRa
 
       emission.setVal(0.0);
 
-      const EBCellFAB& electricField    = (*m_electricField[lvl])[dit()];
+      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -2252,7 +2369,7 @@ StreamerInceptionStepper<P, F>::evaluateFunction(EBAMRCellData& a_data, const Re
 
       data.setVal(0.0);
 
-      const EBCellFAB& electricField    = (*m_electricField[lvl])[dit()];
+      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -2663,11 +2780,11 @@ StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::printReportStatic() const noexcept
+StreamerInceptionStepper<P, F>::writeReportStatic() const noexcept
 {
-  CH_TIME("StreamerInceptionStepper::printReport");
+  CH_TIME("StreamerInceptionStepper::writeReport");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::printReport" << endl;
+    pout() << "StreamerInceptionStepper::writeReport" << endl;
   }
 
   // Compute the inception voltage.
@@ -2720,24 +2837,31 @@ StreamerInceptionStepper<P, F>::printReportStatic() const noexcept
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::printReportDynamic() const noexcept
+StreamerInceptionStepper<P, F>::writeReportDynamic() const noexcept
 {
-  CH_TIME("StreamerInceptionStepper::printReportDynamic");
+  CH_TIME("StreamerInceptionStepper::writeReportDynamic");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::printReportDynamic" << endl;
+    pout() << "StreamerInceptionStepper::writeReportDynamic" << endl;
   }
 
-  MayDay::Warning("StreamerInceptionStepper::printReportDynamic -- not implemented");
+  MayDay::Warning("StreamerInceptionStepper::writeReportDynamic -- not implemented");
 
 #ifdef CH_MPI
-  if(procID() == 0) {
+  if (procID() == 0) {
 #endif
+    std::ofstream output(m_outputFile, std::ofstream::out);
+  
     for (const auto& x : m_inceptionProbability) {
-      std::cout << x.first << "\t" << x.second << "\n";
+      output << x.first << "\t" << x.second << "\n";
     }
+
+    output.close();
+    
 #ifdef CH_MPI
   }
 #endif
+
+
 }
 
 template <typename P, typename F>
