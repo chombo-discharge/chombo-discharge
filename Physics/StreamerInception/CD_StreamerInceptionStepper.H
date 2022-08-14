@@ -581,7 +581,7 @@ namespace Physics {
 	@brief Distribute particles in every grid cell
       */
       virtual void
-      initialParticles() noexcept;
+      seedUniformParticles() noexcept;
 
       /*!
 	@brief Add particles to every cell where alpha - eta > 0.0

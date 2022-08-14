@@ -58,7 +58,6 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
     std::cout << "StreamerInceptionStepperImplem.H -- set voltage curve to 1 later\n";
     std::cout << "StreamerInceptionStepperImplem.H -- add alpha-tagging to inception tagger\n";
     std::cout << "StreamerInceptionStepperImplem.H -- fix curvature tagger\n";    
-    std::cout << "StreamerInceptionStepperImplem.H -- allow option to put simulation report in file\n";
     // clang-format on    
 #ifdef CH_MPI    
   }
@@ -80,20 +79,22 @@ StreamerInceptionStepper<P, F>::~StreamerInceptionStepper()
     pout() << "StreamerInceptionStepper::~StreamerInceptionStepper" << endl;
   }
 
-  switch(m_mode) {
-  case Mode::Static: {
-    this->writeReportStatic();
+  if(m_writeReport) {
+    switch(m_mode) {
+    case Mode::Static: {
+      this->writeReportStatic();
     
-    break;
-  }    
-  case Mode::Dynamic: {
-    this->writeReportDynamic();
+      break;
+    }    
+    case Mode::Dynamic: {
+      this->writeReportDynamic();
     
-    break;
-  }
-  default: {
-    break;
-  }
+      break;
+    }
+    default: {
+      break;
+    }
+    }
   }
 }
 
@@ -1026,7 +1027,7 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   m_amr->averageDown(m_electricFieldPlus, m_realm, m_phase);
   m_amr->interpGhost(m_electricFieldPlus, m_realm, m_phase);
 
-  //  m_amr->interpToCentroids(m_electricFieldPlus, m_realm, m_phase);
+  m_amr->interpToCentroids(m_electricFieldPlus, m_realm, m_phase);
 
   // Also store -E
   DataOps::copy(m_electricFieldMinu, m_electricFieldPlus);
@@ -1126,11 +1127,11 @@ StreamerInceptionStepper<P, F>::getMode() const noexcept
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::initialParticles() noexcept
+StreamerInceptionStepper<P, F>::seedUniformParticles() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::initialParticles");
+  CH_TIME("StreamerInceptionStepper::seedUniformParticles");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::initialParticles" << endl;
+    pout() << "StreamerInceptionStepper::seedUniformParticles" << endl;
   }
 
   ParticleContainer<P>& amrParticles = m_particleSolver->getParticles();
@@ -1301,19 +1302,12 @@ StreamerInceptionStepper<P, F>::postInitialize()
   switch (m_mode) {
   case Mode::Static: {
 
-    this->initialParticles();
-
     this->computeInceptionIntegralStatic();
     this->computeBackgroundIonizationStatic();
     this->computeFieldEmissionStatic();
     this->computeInceptionVoltageVolume();
     this->computeCriticalVolumeStatic();
     this->computeFirstElectron();
-
-    // Print voltages, max K values, and critical volumes to terminal
-    if (m_writeReport) {
-      this->writeReportStatic();
-    }
 
     break;
   }
@@ -1381,7 +1375,9 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegralStatic() noexcept
 
     // Polarities. Note that we are dealing with electrons so
     // for positive polarity the particles move opposite to the field.
-    std::vector<Real> polarities{-1.0, 1.0};
+    std::vector<Real> polarities{1.0, -1.0};
+
+    this->seedIonizationParticles(m_voltageSweeps[i]);
 
     for (const auto& p : polarities) {
 
@@ -1416,7 +1412,7 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegralStatic() noexcept
       }
 
       // Deposit particles on mesh and copy to relevant data holder.
-      if (p < 0.0) {
+      if (p > 0.0) {
         m_particleSolver->deposit(Kplus);
 
         m_amr->averageDown(Kplus, m_realm, m_phase);
@@ -1831,6 +1827,8 @@ StreamerInceptionStepper<P, F>::computeDriftTimes() noexcept
 
   DataOps::setValue(T, 0.0);
   DataOps::setValue(K, 0.0);
+
+  this->seedUniformParticles();
 
   // Integrate for each voltage
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
@@ -2783,53 +2781,49 @@ template <typename P, typename F>
 void
 StreamerInceptionStepper<P, F>::writeReportStatic() const noexcept
 {
-  CH_TIME("StreamerInceptionStepper::writeReport");
+  CH_TIME("StreamerInceptionStepper::writeReportStatic");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writeReport" << endl;
+    pout() << "StreamerInceptionStepper::writeReportStatic" << endl;
   }
 
-  // Compute the inception voltage.
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
+
+    std::ofstream output(m_outputFile, std::ofstream::out);
+    
     const std::pair<Real, Real> Uinc = this->computeInceptionVoltages();
 
     // clang-format off
-    std::cout << "# ==================================================================================================================================" << std::endl;
+    output << "# ==================================================================================================================================" << "\n";
     if (std::isnan(Uinc.first) || std::isnan(Uinc.second)) {
-      std::cout << "# Could not compute inception voltage\n";
+      output << "# Could not compute inception voltage\n";
     }
     else {
-      std::cout << "# Inception voltage +/- = " << Uinc.first << "/" << Uinc.second << "\n";
+      output << "# Inception voltage +/- = " << Uinc.first << "/" << Uinc.second << "\n";
     }
-#ifdef CH_MPI
-  }
-#endif
-
-#ifdef CH_MPI
-  if (procID() == 0) {
-#endif
-    std::cout << "# ==================================================================================================================================" << std::endl;    
-    std::cout << left << setw(15) << setfill(' ') << "# +/- Voltage";
-    std::cout << left << setw(15) << setfill(' ') << "Max K(+)";
-    std::cout << left << setw(15) << setfill(' ') << "Max K(-)";
-    std::cout << left << setw(20) << setfill(' ') << "Crit. vol(+)";
-    std::cout << left << setw(20) << setfill(' ') << "Crit. vol(-)";
-    std::cout << left << setw(20) << setfill(' ') << "First e(+)";
-    std::cout << left << setw(20) << setfill(' ') << "First e(-)" << std::endl;
-    std::cout << "# ==================================================================================================================================" << std::endl;        
+    
+    output << "# ==================================================================================================================================" << "\n";    
+    output << left << setw(15) << setfill(' ') << "# +/- Voltage";
+    output << left << setw(15) << setfill(' ') << "Max K(+)";
+    output << left << setw(15) << setfill(' ') << "Max K(-)";
+    output << left << setw(20) << setfill(' ') << "Crit. vol(+)";
+    output << left << setw(20) << setfill(' ') << "Crit. vol(-)";
+    output << left << setw(20) << setfill(' ') << "First e(+)";
+    output << left << setw(20) << setfill(' ') << "First e(-)" << "\n";
+    output << "# ==================================================================================================================================" << "\n";        
 
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
-      std::cout << left << setw(15) << setfill(' ') << m_voltageSweeps[i];
-      std::cout << left << setw(15) << setfill(' ') << m_maxKPlus[i];
-      std::cout << left << setw(15) << setfill(' ') << m_maxKMinu[i];
-      std::cout << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
-      std::cout << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
-      std::cout << left << setw(20) << setfill(' ') << m_firstElectronPlus[i];
-      std::cout << left << setw(20) << setfill(' ') << m_firstElectronMinu[i];
-      std::cout << endl;
+      output << left << setw(15) << setfill(' ') << m_voltageSweeps[i];
+      output << left << setw(15) << setfill(' ') << m_maxKPlus[i];
+      output << left << setw(15) << setfill(' ') << m_maxKMinu[i];
+      output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
+      output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
+      output << left << setw(20) << setfill(' ') << m_firstElectronPlus[i];
+      output << left << setw(20) << setfill(' ') << m_firstElectronMinu[i];
+      output << endl;
     }
-    std::cout << "# ==================================================================================================================================" << std::endl;
+    output << "# ==================================================================================================================================" << "\n";
     // clang-format on
 #ifdef CH_MPI
   }
@@ -2844,8 +2838,6 @@ StreamerInceptionStepper<P, F>::writeReportDynamic() const noexcept
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::writeReportDynamic" << endl;
   }
-
-  MayDay::Warning("StreamerInceptionStepper::writeReportDynamic -- not implemented");
 
 #ifdef CH_MPI
   if (procID() == 0) {
