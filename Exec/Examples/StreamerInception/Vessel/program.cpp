@@ -76,18 +76,20 @@ main(int argc, char* argv[])
   // Define a lightning impulse voltage curve.
   ParmParse vessel("impulse");    
   Real V0 = 1.0;
+  Real t0 = 0.0;
   Real t1 = 1.2E-6;
   Real t2 = 50E-6;
 
   vessel.get("voltage", V0);
+  vessel.get("start", t0);
   vessel.get("t1", t1);
   vessel.get("t2", t2);    
   
-  auto voltageCurve = [V0, t1, t2](const Real a_time) -> Real {
+  auto voltageCurve = [V0, t0, t1, t2](const Real a_time) -> Real {
     constexpr Real alpha = 1.0/50E-6;
     constexpr Real beta  = 1.0/1.2E-6;
 
-    return V0 * (exp(-(a_time + 1E-9)/t1) - exp(-(a_time + 1E-9)/t2));
+    return V0 * (exp(-(a_time + t0)/t1) - exp(-(a_time + t0)/t2));
   };
 
   // Set geometry and AMR

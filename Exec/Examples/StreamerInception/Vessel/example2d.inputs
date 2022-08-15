@@ -95,7 +95,7 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # TracerParticleSolver class options
 # ====================================================================================================
 TracerParticleSolver.verbosity     = -1     # Solver verbosity level. 
-TracerParticleSolver.deposition    = ngp    # Deposition method. Must be 'ngp' or 'cic'
+TracerParticleSolver.deposition    = cic    # Deposition method. Must be 'ngp' or 'cic'
 TracerParticleSolver.interpolation = cic    # Deposition method. Must be 'ngp' or 'cic'
 TracerParticleSolver.plot_weight   = true   # Turn on/off plotting of the particle weight.
 TracerParticleSolver.plot_velocity = true   # Turn on/off plotting of the particle velocities.
@@ -157,5 +157,6 @@ StreamerInceptionTagger.plot_curv = true  # Plot tagging field or not.
 
 # Parameters for lightning impulse (used for dynamic runs)
 impulse.voltage = 50E3
+impulse.start   = 50E-9;
 impulse.t1      = 50E-6
 impulse.t2      = 1.2E-6
