@@ -255,7 +255,10 @@ StreamerInceptionStepper<P, F>::registerOperators()
 
   m_fieldSolver->registerOperators();
   m_tracerParticleSolver->registerOperators();
-  m_negativeIonSolver->registerOperators();  
+
+  if(m_mode == Mode::Dynamic) {
+    m_negativeIonSolver->registerOperators();
+  }
 }
 
 template <typename P, typename F>
@@ -462,19 +465,19 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
     a_plotVariableNames.append(m_tracerParticleSolver->getPlotVariableNames());
   }
 
-  if(m_plotNegativeIons) {
-    m_negativeIonSolver->writePlotData(a_output, a_icomp);
-    a_plotVariableNames.append(m_negativeIonSolver->getPlotVariableNames());
-  }  
+
 
   // Write data -- this differs between the 'static' and 'dynamic' modes
   switch (m_mode) {
   case Mode::Static: {
+
+  
     this->writePlotDataStatic(a_output, a_plotVariableNames, a_icomp);
 
     break;
   }
   case Mode::Dynamic:
+
     this->writePlotDataDynamic(a_output, a_plotVariableNames, a_icomp);
 
     break;
@@ -674,6 +677,12 @@ StreamerInceptionStepper<P, F>::writePlotDataDynamic(EBAMRCellData&       a_outp
     a_icomp += SpaceDim;
   }
 
+  if(m_plotNegativeIons && m_mode == Mode::Dynamic) {
+    m_negativeIonSolver->writePlotData(a_output, a_icomp);
+    a_plotVariableNames.append(m_negativeIonSolver->getPlotVariableNames());
+  }
+      
+
   // Plot inception integral
   if (m_plotInceptionIntegral) {
     DataOps::copy(a_output, m_inceptionIntegral, Interval(a_icomp, a_icomp), Interval(0, 0));
@@ -760,9 +769,7 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
   if(m_plotTracer) {
     ncomp += m_tracerParticleSolver->getNumberOfPlotVariables();
   }
-  if(m_plotNegativeIons) {
-    ncomp += m_negativeIonSolver->getNumberOfPlotVariables();
-  }  
+
 
   switch (m_mode) {
   case Mode::Static: {
@@ -806,6 +813,9 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
     if (m_plotInceptionIntegral) {
       ncomp += 1;
     }
+    if(m_plotNegativeIons) {
+      ncomp += m_negativeIonSolver->getNumberOfPlotVariables();
+    }          
     if (m_plotBackgroundIonization) {
       ncomp += 1;
     }
@@ -939,7 +949,10 @@ StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const R
 
   m_fieldSolver->setTime(a_step, a_time, a_dt);
   m_tracerParticleSolver->setTime(a_step, a_time, a_dt);
-  m_negativeIonSolver->setTime(a_step, a_time, a_dt);  
+
+  if(m_mode == Mode::Dynamic) {
+    m_negativeIonSolver->setTime(a_step, a_time, a_dt);
+  }
 }
 
 template <typename P, typename F>
@@ -970,7 +983,10 @@ StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFines
 
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_tracerParticleSolver->preRegrid(a_lmin, a_oldFinestLevel);
-  m_negativeIonSolver->preRegrid(a_lmin, a_oldFinestLevel);  
+
+  if(m_mode == Mode::Dynamic) {
+    m_negativeIonSolver->preRegrid(a_lmin, a_oldFinestLevel);
+  }
 }
 
 template <typename P, typename F>
@@ -985,7 +1001,10 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   // Regrid tracer particles and field
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_tracerParticleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-  m_negativeIonSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);  
+  
+  if(m_mode == Mode::Dynamic) {  
+    m_negativeIonSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  }
 
   // Regrid velocity field
   m_amr->reallocate(m_electricFieldPlus, m_phase, a_lmin);
