@@ -48,7 +48,7 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   m_eta = [](const Real E) { return 0.0; };
 
 #if 1 // Debug code
-  m_voltageCurve = [](const Real a_time) { return 15E3; };
+  m_voltageCurve = [](const Real a_time) { return 50E3; };
 
   // My todo-list
 #ifdef CH_MPI
@@ -2848,13 +2848,26 @@ StreamerInceptionStepper<P, F>::writeReportDynamic() const noexcept
     output << std::left << std::setw(15) << setfill(' ') << "Rdot(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Vcr(t)";
     output << std::left << std::setw(15) << setfill(' ') << "P(t)";
+    output << std::left << std::setw(15) << setfill(' ') << "dP(t, t+dt)";
     output << "\n";
+
+    // Compute dP(t, t+dt)
+    std::vector<Real> dProb;
+    for (size_t i = 0; i < m_Rdot.size()-1; i++) {
+      const Real dt = m_Rdot[i+1].first-m_Rdot[i].first;
+      const Real prob = m_inceptionProbability[i].second;
+      const Real Rdot = m_Rdot[i].second;
+      
+      dProb.emplace_back((1.0 - prob) * Rdot * dt);
+    }
+    dProb.emplace_back(0.0);
 
     for (size_t i = 0; i < m_Rdot.size(); i++) {
       output << std::left << std::setw(15) << m_Rdot[i].first;
       output << std::left << std::setw(15) << m_Rdot[i].second;
       output << std::left << std::setw(15) << m_criticalVolume[i].second;
       output << std::left << std::setw(15) << m_inceptionProbability[i].second;
+      output << std::left << std::setw(15) << dProb[i];            
       output << "\n";
     }
 
