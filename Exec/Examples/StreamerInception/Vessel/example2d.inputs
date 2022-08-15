@@ -157,6 +157,6 @@ StreamerInceptionTagger.plot_curv = true  # Plot tagging field or not.
 
 # Parameters for lightning impulse (used for dynamic runs)
 impulse.voltage = 50E3
-impulse.start   = 50E-9;
+impulse.start   = 50E-9
 impulse.t1      = 50E-6
 impulse.t2      = 1.2E-6
