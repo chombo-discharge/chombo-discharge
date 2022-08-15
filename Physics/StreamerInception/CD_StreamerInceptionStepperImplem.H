@@ -1375,8 +1375,8 @@ StreamerInceptionStepper<P, F>::seedNegativeIons() noexcept
 	    if(p.weight() > std::numeric_limits<Real>::min()) {
 	      particles.add(p);
 	    }
-          }
-        };
+	  }
+			     };
 
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           const IntVect iv = vof.gridIndex();
@@ -1882,7 +1882,7 @@ void StreamerInceptionStepper<P, F>::advanceNegativeIonsEuler(const Real& a_volt
 	const Real     mu       = m_negativeIonMobility(Eminu);
 
 	p.template vect<0>() = p.position();
-	p.position()         += mu * RealVect::Unit * v.vectorLength() * a_dt;
+	p.position()         += mu * v * a_dt;
       }
     }
   }
@@ -2867,6 +2867,7 @@ StreamerInceptionStepper<P, F>::computeNegativeIonCFL(const Real& a_voltage) con
 	const RealVect v        = a_voltage * p.velocity();
 	const Real     Eminu    = v.vectorLength();
 	const Real     mu       = m_negativeIonMobility(Eminu);
+	const Real     vMax     = mu * std::abs(v.maxDir(true));
 
 	dt = std::min(dt, std::abs(dx/ (mu * Eminu)));
       }
