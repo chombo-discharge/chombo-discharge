@@ -887,7 +887,7 @@ StreamerInceptionStepper<P, F>::advance(const Real a_dt)
     this->computeInceptionIntegralDynamic(curVoltage);
     
     // Move the negative ions. 
-    this->moveNegativeIons(curVoltage, a_dt);
+    this->advanceNegativeIons(curVoltage, a_dt);
 
     // Compute the critical volume and the electron appearance rate.
     const Real Vcr = this->computeCriticalVolumeDynamic();
@@ -1031,7 +1031,7 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   DataOps::copy(m_electricFieldPlus, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
 
   m_amr->averageDown(m_electricFieldPlus, m_realm, m_phase);
-  m_amr->interpGhost(m_electricFieldPlus, m_realm, m_phase);
+  m_amr->interpGhostMG(m_electricFieldPlus, m_realm, m_phase);
 
   m_amr->interpToCentroids(m_electricFieldPlus, m_realm, m_phase);
 
@@ -1826,26 +1826,26 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 }
 
 template <typename P, typename F>
-void StreamerInceptionStepper<P, F>::moveNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept
+void StreamerInceptionStepper<P, F>::advanceNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::moveNegativeIons");
+  CH_TIME("StreamerInceptionStepper::advanceNegativeIons");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::moveNegativeIons" << endl;
+    pout() << "StreamerInceptionStepper::advanceNegativeIons" << endl;
   }
 
   switch(m_inceptionAlgorithm) {
   case IntegrationAlgorithm::Euler: {
-    this->moveNegativeIonsEuler(a_voltage, a_dt);
+    this->advanceNegativeIonsEuler(a_voltage, a_dt);
 
     break;
   };
   case IntegrationAlgorithm::Trapezoidal: {
-    this->moveNegativeIonsTrapezoidal(a_voltage, a_dt);
+    this->advanceNegativeIonsTrapezoidal(a_voltage, a_dt);
 
     break;
   };  
   default: {
-    MayDay::Error("StreamerInceptionStepper::moveNegativeIons - logic bust");
+    MayDay::Error("StreamerInceptionStepper::advanceNegativeIons - logic bust");
 
     break;
   }
@@ -1853,11 +1853,11 @@ void StreamerInceptionStepper<P, F>::moveNegativeIons(const Real& a_voltage, con
 }
 
 template <typename P, typename F>
-void StreamerInceptionStepper<P, F>::moveNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept
+void StreamerInceptionStepper<P, F>::advanceNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::moveNegativeIonsEuler");
+  CH_TIME("StreamerInceptionStepper::advanceNegativeIonsEuler");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::moveNegativeIonsEuler" << endl;
+    pout() << "StreamerInceptionStepper::advanceNegativeIonsEuler" << endl;
   }
 
   m_negativeIonSolver->remap();
@@ -1882,7 +1882,7 @@ void StreamerInceptionStepper<P, F>::moveNegativeIonsEuler(const Real& a_voltage
 	const Real     mu       = m_negativeIonMobility(Eminu);
 
 	p.template vect<0>() = p.position();
-	p.position()         += mu * v * a_dt;
+	p.position()         += mu * RealVect::Unit * v.vectorLength() * a_dt;
       }
     }
   }
@@ -1896,11 +1896,11 @@ void StreamerInceptionStepper<P, F>::moveNegativeIonsEuler(const Real& a_voltage
 }
 
 template <typename P, typename F>
-void StreamerInceptionStepper<P, F>::moveNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept
+void StreamerInceptionStepper<P, F>::advanceNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::moveNegativeIonsTrapezoidal");
+  CH_TIME("StreamerInceptionStepper::advanceNegativeIonsTrapezoidal");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::moveNegativeIonsTrapezoidal" << endl;
+    pout() << "StreamerInceptionStepper::advanceNegativeIonsTrapezoidal" << endl;
   }
 
   m_negativeIonSolver->remap();
@@ -1927,15 +1927,14 @@ void StreamerInceptionStepper<P, F>::moveNegativeIonsTrapezoidal(const Real& a_v
 	p.template vect<0>() = p.position();
 	p.template vect<1>() = mu * v;
 	
-	p.position()        = p.position() + mu * v * a_dt;
+	p.position() += mu * v * a_dt;
       }
     }
   }
 
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);  
   m_negativeIonSolver->remap();
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);    
   m_negativeIonSolver->interpolateVelocities();
-
 
   // Second stage
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {

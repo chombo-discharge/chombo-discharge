@@ -681,7 +681,7 @@ namespace Physics {
 	@param[in] a_dt      Time step. 
 	@note Only for dynamic runs. 
       */
-      virtual void moveNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept;      
+      virtual void advanceNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept;      
 
       /*!
 	@brief Move negative ions using an Euler scheme. 
@@ -689,7 +689,7 @@ namespace Physics {
 	@param[in] a_dt      Time step. 
 	@note Only for dynamic runs. 
       */
-      virtual void moveNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept;
+      virtual void advanceNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept;
 
       /*!
 	@brief Move negative ions using Heun's method. 
@@ -697,7 +697,7 @@ namespace Physics {
 	@param[in] a_dt      Time step. 
 	@note Only for dynamic runs. 
       */
-      virtual void moveNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept;      
+      virtual void advanceNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept;      
 
       /*!
 	@brief Compute integral_Vcr(dne/dt * (1 - eta/alpha) dV)

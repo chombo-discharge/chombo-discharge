@@ -95,8 +95,8 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # TracerParticleSolver class options
 # ====================================================================================================
 TracerParticleSolver.verbosity     = -1     # Solver verbosity level. 
-TracerParticleSolver.deposition    = cic    # Deposition method. Must be 'ngp' or 'cic'
-TracerParticleSolver.interpolation = cic    # Deposition method. Must be 'ngp' or 'cic'
+TracerParticleSolver.deposition    = ngp    # Deposition method. Must be 'ngp' or 'cic'
+TracerParticleSolver.interpolation = ngp    # Deposition method. Must be 'ngp' or 'cic'
 TracerParticleSolver.plot_weight   = true   # Turn on/off plotting of the particle weight.
 TracerParticleSolver.plot_velocity = true   # Turn on/off plotting of the particle velocities.
 TracerParticleSolver.volume_scale  = true   # If true, depositions yield density * volume instead of just volume
@@ -131,7 +131,7 @@ Vessel.live_shroom   = false          # Mushroom is live or not
 StreamerInceptionStepper.verbosity     = 10                            # Chattiness. 
 StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation.
 StreamerInceptionStepper.mode          = dynamic                        # Mode (static or dynamic)
-StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
+StreamerInceptionStepper.inception_alg = euler dx 0.1                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.plt_vars      = K Uinc alpha eta bg_rate emission neg_ions       # Plot variables
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 
@@ -142,9 +142,9 @@ StreamerInceptionStepper.voltage_steps = 10                            # Number 
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
 
 # Dynamic mode
-StreamerInceptionStepper.dt            = cfl 1.0                       # Time step for dynamic mode.
-StreamerInceptionStepper.min_dt        = 50E-9                        # Smallest possible time step
-StreamerInceptionStepper.max_dt        = 1E-6                          # Largest possible time step.
+StreamerInceptionStepper.dt            = cfl 0.5                       # Time step for dynamic mode.
+StreamerInceptionStepper.min_dt        = 25E-9                        # Smallest possible time step
+StreamerInceptionStepper.max_dt        = 25E-9                          # Largest possible time step.
 
 # ====================================================================================================
 # StreamerInceptionTagger class options
