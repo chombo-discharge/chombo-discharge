@@ -65,6 +65,7 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 #if 1 // To-do list.
   std::cout << "StreamerInceptionStepperImplem.H -- add alpha-tagging to inception tagger\n";
   std::cout << "StreamerInceptionStepperImplem.H -- fix curvature tagger\n";
+  std::cout << "StreamerInceptionStepperImplem.H -- fix first electron comp for static mode => compute Rdot\n";  
 #endif  
 }
 
@@ -2891,6 +2892,12 @@ StreamerInceptionStepper<P, F>::computeNegativeIonCFL(const Real& a_voltage) con
 	dt = std::min(dt, std::abs(dx/ (mu * Eminu)));
       }
     }
+  }
+
+  dt = ParallelOps::min(dt);
+
+  if(procID() == 0) {
+    std::cout << m_amr->getDx()[m_amr->getFinestLevel()]*1.E6 << "\t" << dt << std::endl;
   }
 
   return ParallelOps::min(dt);
