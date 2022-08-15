@@ -64,6 +64,7 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # ====================================================================================================
 TracerParticleSolver.verbosity     = -1     # Solver verbosity level. 
 TracerParticleSolver.deposition    = cic    # Deposition method. Must be 'ngp' or 'cic'
+TracerParticleSolver.interpolation = cic    # Interpolation method. Must be 'ngp' or 'cic'
 TracerParticleSolver.plot_weight   = true   # Turn on/off plotting of the particle weight.
 TracerParticleSolver.plot_velocity = true   # Turn on/off plotting of the particle velocities.
 TracerParticleSolver.volume_scale  = false  # If true, depositions yield density * volume instead of just volume
