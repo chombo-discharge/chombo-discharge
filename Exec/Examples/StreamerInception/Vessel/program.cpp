@@ -57,10 +57,21 @@ main(int argc, char* argv[])
     return attachmentData.getEntry<1>(E);
   };
 
-  // Define a detachment rate.
-  auto detachment = [N](const Real& E) -> Real {
+  // Define a background ionization rate.
+  auto bgIonization = [N](const Real& E) -> Real {
     return 2.E6 / (1.17E-4 * exp(2.91E7/E));
   };
+
+  // Define ion mobility and density
+  auto ionMobility = [](const Real& E) -> Real {
+    return 2E-4;
+  };
+
+  auto ionDensity = [](const RealVect& x) -> Real {
+    return 1.E10;
+  };  
+
+  // 
 
   // Define a lightning impulse voltage curve.
   ParmParse vessel("impulse");    
@@ -76,7 +87,7 @@ main(int argc, char* argv[])
     constexpr Real alpha = 1.0/50E-6;
     constexpr Real beta  = 1.0/1.2E-6;
 
-    return V0 * (exp(-a_time/t1) - exp(-a_time/t2));
+    return V0 * (exp(-(a_time + 1E-9)/t1) - exp(-(a_time + 1E-9)/t2));
   };
 
   // Set geometry and AMR
@@ -90,8 +101,10 @@ main(int argc, char* argv[])
   // Set everything. 
   timestepper->setAlpha(alpha);
   timestepper->setEta(eta);
-  timestepper->setBackgroundRate(detachment);
+  timestepper->setBackgroundRate(bgIonization);
   timestepper->setVoltageCurve(voltageCurve);
+  timestepper->setNegativeIonMobility(ionMobility);
+  timestepper->setNegativeIonDensity(ionDensity);  
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));

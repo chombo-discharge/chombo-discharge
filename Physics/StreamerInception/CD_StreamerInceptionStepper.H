@@ -326,11 +326,6 @@ namespace Physics {
       IntegrationAlgorithm m_inceptionAlgorithm;
 
       /*!
-	@brief Integration algorithm for drift integration. 
-      */
-      IntegrationAlgorithm m_driftAlgorithm;
-
-      /*!
 	@brief Tracer particle solver.
       */
       RefCountedPtr<TracerParticleSolver<P>> m_tracerParticleSolver;
@@ -372,18 +367,6 @@ namespace Physics {
 	@note Static mode, negative polarity
       */
       EBAMRCellData m_inceptionIntegralMinu;
-
-      /*!
-	@brief Drift times for positive polarity
-	@note Static mode, positive polarity
-      */
-      EBAMRCellData m_driftTimesPlus;
-
-      /*!
-	@brief Drift times
-	@note Static mode, negative polarity
-      */
-      EBAMRCellData m_driftTimesMinu;
 
       /*!
 	@brief Background ionization rates
@@ -494,24 +477,29 @@ namespace Physics {
       Real m_fixedDt;
 
       /*!
+	@brief CFL-like particle time step for negative ions. 
+      */
+      Real m_cfl;
+
+      /*!
+	@brief Maximum permitted time step
+      */
+      Real m_maxDt;
+
+      /*!
+	@brief Minimum permitted time step
+      */
+      Real m_minDt;      
+
+      /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)
       */
       Real m_relativeInceptionStep;
 
       /*!
-	@brief Variable step size for K-integration algorithm (factor of dx)
-      */
-      Real m_relativeDriftStep;
-
-      /*!
 	@brief Fixed step size (physical dimensions)
       */
       Real m_fixedInceptionStep;
-
-      /*!
-	@brief Fixed step size (physical dimensions)
-      */
-      Real m_fixedDriftStep;
 
       /*!
 	@brief Inception criteria (read from input)
@@ -524,9 +512,9 @@ namespace Physics {
       bool m_useFixedInceptionStep;
 
       /*!
-	@brief If true, used fixed integration step for drift integration
+	@brief Use fixed dt or not
       */
-      bool m_useFixedDriftStep;
+      bool m_useFixedDt;
 
       /*!
 	@brief If true, print a report at the end
@@ -557,11 +545,6 @@ namespace Physics {
 	@brief If true, plot the inception voltage
       */
       bool m_plotInceptionVoltage;
-
-      /*!
-	@brief If true, plot the drift time
-      */
-      bool m_plotDriftTime;
 
       /*!
 	@brief If true, plot the background ionization rates
@@ -656,6 +639,12 @@ namespace Physics {
       seedIonizationParticles(const Real& a_voltage) noexcept;
 
       /*!
+	@brief Create negative ions
+      */
+      virtual void
+      seedNegativeIons() noexcept;
+
+      /*!
 	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral. 
 	@details This is called in postInitialize() only. 
 	@note For static mode only. 
@@ -687,42 +676,46 @@ namespace Physics {
       inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept;
 
       /*!
+	@brief Move negative ions using
+	@param[in] a_voltage Voltage multiplier
+	@param[in] a_dt      Time step. 
+	@note Only for dynamic runs. 
+      */
+      virtual void moveNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept;      
+
+      /*!
+	@brief Move negative ions using an Euler scheme. 
+	@param[in] a_voltage Voltage multiplier
+	@param[in] a_dt      Time step. 
+	@note Only for dynamic runs. 
+      */
+      virtual void moveNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept;
+
+      /*!
+	@brief Move negative ions using Heun's method. 
+	@param[in] a_voltage Voltage multiplier
+	@param[in] a_dt      Time step. 
+	@note Only for dynamic runs. 
+      */
+      virtual void moveNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept;      
+
+      /*!
 	@brief Compute integral_Vcr(dne/dt * (1 - eta/alpha) dV)
 	@param[in] a_voltage Voltage multiplier. 
       */
       virtual Real computeRdot(const Real& a_voltage) const noexcept;
 
       /*!
-	@brief Calculate particles' drift times until inside electrode or outside grid. 
-      */
-      virtual void
-      computeDriftTimes() noexcept;
-
-      /*!
-	@brief Compute ion drift time using Euler rule
-	@param[in] a_voltage Voltage multiplier
-      */
-      virtual void
-      driftIntegrateEuler(const EBAMRCellData& a_K, const Real& a_voltage) noexcept;
-
-      /*!
-	@brief Compute ion drift time using Euler rule
-	@param[in] a_voltage Voltage multiplier
-      */
-      virtual void
-      driftIntegrateTrapezoidal(const EBAMRCellData& a_K, const Real& a_voltage) noexcept;
-
-      /*!
 	@brief Move particles back to their original position.
       */
       virtual void
-      rewindParticles() noexcept;
+      rewindTracerParticles() noexcept;
 
       /*!
 	@brief Reset particles. 
       */
       virtual void
-      resetParticles() noexcept;
+      resetTracerParticles() noexcept;
 
       /*!
 	@brief Compute the background ionization rate for all voltages
@@ -841,6 +834,15 @@ namespace Physics {
       */
       inline bool
       particleInsideEB(const RealVect a_pos) const noexcept;
+
+      /*!
+	@brief Compute time step such that no ions move more than grid cell (on their current level)
+	@param[in] a_voltage Voltage multiplier
+	@return Smallest time step. 
+	@note Particle velocities should be interpolated before calling this routine. 
+      */
+      inline Real
+      computeNegativeIonCFL(const Real& a_voltage) const noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics

@@ -37,6 +37,7 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
   m_plotVelocity  = true;
   m_plotWeight    = true;
   m_volumeScale   = false;
+  m_interpolation = DepositionType::CIC;
   m_deposition    = DepositionType::CIC;
   m_velocityField = nullptr;
 }
@@ -116,6 +117,18 @@ TracerParticleSolver<P>::parseDeposition()
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown deposition method requested.");
   }
+ 
+  // Interpolation type particle-mesh operations
+  pp.get("interpolation", str);
+  if (str == "ngp") {
+    m_interpolation = DepositionType::NGP;
+  }
+  else if (str == "cic") {
+    m_interpolation = DepositionType::CIC;    
+  }
+  else {
+    MayDay::Error("TracerParticleSolver::parseDeposition - unknown interpolation method requested.");
+  } 
 
   pp.get("volume_scale", m_volumeScale);
 }
@@ -180,6 +193,30 @@ TracerParticleSolver<P>::allocate()
 
   // Allocate data for storing the velocity field on the mesh, and storage for the particles.
   m_amr->allocate(m_particles, m_pvrBuffer, m_realm);
+}
+
+template <typename P>
+inline void
+TracerParticleSolver<P>::setName(const std::string& a_name) noexcept
+{
+  CH_TIME("TracerParticleSolver::setName(std::string)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setName(std::string)" << endl;
+  }
+
+  m_name = a_name;
+}
+
+template <typename P>
+inline void
+TracerParticleSolver<P>::setVolumeScale(const bool a_scale) noexcept
+{
+  CH_TIME("TracerParticleSolver::setVolumeScale(bool)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setVolumeScale(bool)" << endl;
+  }
+
+  m_volumeScale = a_scale;
 }
 
 template <typename P>
@@ -331,7 +368,7 @@ TracerParticleSolver<P>::interpolateWeight(const EBAMRCellData& a_scalar) noexce
     pout() << m_name + "::interpolateWeight(EBAMRCellData)" << endl;
   }
 
-  m_amr->interpolateParticles<P, &P::weight>(m_particles, m_realm, m_phase, a_scalar, m_deposition, false);
+  m_amr->interpolateParticles<P, &P::weight>(m_particles, m_realm, m_phase, a_scalar, m_interpolation, false);
 }
 
 template <typename P>
@@ -345,7 +382,7 @@ TracerParticleSolver<P>::interpolateVelocities()
 
   CH_assert(!(m_velocityField == nullptr));
 
-  m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, *m_velocityField, m_deposition, false);
+  m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, *m_velocityField, m_interpolation, false);
 }
 
 template <typename P>
@@ -381,16 +418,16 @@ TracerParticleSolver<P>::getPlotVariableNames() const
   Vector<std::string> plotVarNames(0);
 
   if (m_plotWeight) {
-    plotVarNames.push_back("density");
+    plotVarNames.push_back(m_name + " density");
   }
 
   if (m_plotVelocity)
-    plotVarNames.push_back("x-velocity");
+    plotVarNames.push_back(m_name + " x-velocity");
   if (m_plotVelocity)
-    plotVarNames.push_back("y-velocity");
+    plotVarNames.push_back(m_name + " y-velocity");
 #if CH_SPACEDIM == 3
   if (m_plotVelocity)
-    plotVarNames.push_back("z-velocity");
+    plotVarNames.push_back(m_name + " z-velocity");
 #endif
 
   return plotVarNames;
