@@ -248,6 +248,26 @@ namespace Physics {
       setVoltageCurve(const std::function<Real(const Real& a_time)>& a_voltageCurve) noexcept;
 
       /*!
+	@brief Set space charge distribution
+      */
+      virtual void
+      setRho(const std::function<Real(const RealVect& x)>& a_rho) noexcept;
+
+      /*!
+	@brief Set the negative ion density
+	@param[in] a_density Negative ion density
+      */
+      virtual void
+      setNegativeIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
+
+      /*!
+	@brief Set the negative ion mobility (field-dependent)
+	@param[in] a_mobility Negative ion  mobility
+      */
+      virtual void
+      setNegativeIonMobility(const std::function<Real(const Real E)>& a_mobility) noexcept;
+
+      /*!
 	@brief Set the ionization coefficient.
 	@param[in] a_alpha Townsend ionization coefficient. E is the field in SI units. 
       */
@@ -274,7 +294,7 @@ namespace Physics {
       getEta() const noexcept;      
 
       /*!
-	@brief Set the background ionization rate (e.g. from detachment, cosmic radiation etc). 
+	@brief Set the background ionization rate (e.g. from cosmic radiation etc). 
 	@param[in] a_backgroundRate Background ionization rate (units of 1/m^3 s). 
       */
       virtual void
@@ -313,7 +333,12 @@ namespace Physics {
       /*!
 	@brief Tracer particle solver.
       */
-      RefCountedPtr<TracerParticleSolver<P>> m_particleSolver;
+      RefCountedPtr<TracerParticleSolver<P>> m_tracerParticleSolver;
+
+      /*!
+	@brief Negative ion solver
+      */
+      RefCountedPtr<TracerParticleSolver<P>> m_negativeIonSolver;
 
       /*!
 	@brief Field solver.
@@ -407,6 +432,12 @@ namespace Physics {
 	@note Static mode, negative polarity
       */
       std::vector<Real> m_maxKMinu;
+
+      /*!
+	@brief Max K value for every time step
+	@note For dynamic runs
+      */
+      std::vector<std::pair<Real, Real>> m_maxK;
 
       /*!
 	@brief Critical volumes of K values for each voltage
@@ -503,6 +534,21 @@ namespace Physics {
       bool m_writeReport;
 
       /*!
+	@brief Plot Poisson solver or not.
+      */
+      bool m_plotPoisson;
+
+      /*!
+	@brief Plot tracer particle solver or not. 
+      */
+      bool m_plotTracer;            
+
+      /*!
+	@brief Plot negative ions or not
+      */
+      bool m_plotNegativeIons;      
+
+      /*!
 	@brief If true, plot the K-values
       */
       bool m_plotInceptionIntegral;
@@ -556,6 +602,26 @@ namespace Physics {
 	@brief Phase (gas/solid) where the solver lives
       */
       phase::which_phase m_phase;
+
+      /*!
+	@brief Space charge distribution
+      */
+      std::function<Real(const RealVect& x)> m_rho;
+
+      /*!
+	@brief Negative ion density
+      */
+      std::function<Real(const RealVect& x)> m_negativeIonDensity;
+
+      /*!
+	@brief Negative ion mobility
+      */
+      std::function<Real(const Real& E)> m_negativeIonMobility;
+
+      /*!
+	@brief Detachment probability for negative ion.s
+      */
+      std::function<Real(const Real& E)> m_detachmentProbability;
 
       /*!
 	@brief Ionization coefficient. 
@@ -659,7 +725,7 @@ namespace Physics {
       resetParticles() noexcept;
 
       /*!
-	@brief Compute the detachment rate for all voltages
+	@brief Compute the background ionization rate for all voltages
 	@note For static simulations. 
       */
       virtual void

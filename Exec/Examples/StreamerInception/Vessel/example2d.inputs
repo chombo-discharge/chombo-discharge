@@ -41,7 +41,7 @@ Driver.write_restart_files             = false            # Write restart files 
 Driver.initial_regrids                 = 4                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 100E-6           # Stop time
+Driver.stop_time                       = 50E-6           # Stop time
 Driver.max_steps                       = 100                # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
@@ -152,3 +152,7 @@ StreamerInceptionTagger.ref_curv  = 0.25  # Refinement curvature criterion. Lowe
 StreamerInceptionTagger.plot_curv = true  # Plot tagging field or not. 
 
 
+# Parameters for lightning impulse (used for dynamic runs)
+impulse.voltage = 50E3
+impulse.t1      = 50E-6
+impulse.t2      = 1.2E-6
