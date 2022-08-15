@@ -638,7 +638,7 @@ StreamerInceptionStepper<P, F>::writePlotDataStatic(EBAMRCellData&       a_outpu
 
       a_icomp++;
 
-      const std::string varName = "Eta coefficient/ V = " + std::to_string(m_voltageSweeps[i]);
+      const std::string varName = prefix + "Eta coefficient/ V = " + std::to_string(m_voltageSweeps[i]);
 
       a_plotVariableNames.push_back(varName);
     }

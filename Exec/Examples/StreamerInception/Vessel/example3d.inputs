@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -20E-2 -20E-2 0    # Low corner of problem domain
 AmrMesh.hi_corner        =  20E-2 20E-2 10E-2  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 128 32       # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 3           # Maximum amr depth
+AmrMesh.max_amr_depth    = 6           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -142,7 +142,9 @@ StreamerInceptionStepper.voltage_steps = 5                             # Number 
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
 
 # Dynamic mode
-StreamerInceptionStepper.dt            = 2E-6                           # Time step for dynamic mode.
+StreamerInceptionStepper.dt            = fixed 2E-6                    # Time step for dynamic mode.
+StreamerInceptionStepper.min_dt        = 100E-9                        # Smallest possible time step
+StreamerInceptionStepper.max_dt        = 1E-6                          # Largest possible time step.
 
 # ====================================================================================================
 # StreamerInceptionTagger class options
