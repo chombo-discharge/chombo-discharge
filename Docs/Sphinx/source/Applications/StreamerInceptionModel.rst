@@ -57,8 +57,11 @@ For example:
 
    inceptionStepper.setAlpha(alpha);
 
+Static mode
+------------
+   
 Voltage levels
---------------
+^^^^^^^^^^^^^^^
 
 By default, the streamer inception time stepper will read voltage levels from the input script.
 These are in the format
@@ -72,14 +75,17 @@ These are in the format
 Here, ``voltage_lo`` is the lowest voltage that we solve for, while ``voltage_hi`` is the highest voltage we solve for.
 
 Inception threshold
--------------------
+^^^^^^^^^^^^^^^^^^^^
 
 Use ``StreamerInceptionStepper.K_inception`` for setting the inception threshold.
 For example:
 
 .. code-block:: bash
 
-   StreamerInceptionStepper.K_inception   = 18		
+   StreamerInceptionStepper.K_inception   = 18
+
+Dynamic mode
+-------------
 
 Background ionization rate
 --------------------------
