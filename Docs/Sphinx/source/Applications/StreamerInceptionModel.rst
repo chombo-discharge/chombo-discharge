@@ -57,6 +57,21 @@ For example:
 
    inceptionStepper.setAlpha(alpha);
 
+Inception algorithm
+----------------------
+
+``StreamerInceptionStepper.inception_alg`` sets the inception algorithm parameters. The first
+input is the integration algorithm, either Euler ("euler") or trapezoidal (trapz) integration.
+The second input is the step algorithm, which decides whether the integration steps are relative
+("dx") or fixed ("fixed") compared to the grid resolution. 
+The third input is the integration step size.
+
+For example:
+
+.. code-block:: bash
+
+		StreamerInceptionStepper.inception_alg = trapz fixed 0.2
+
 Static mode
 ------------
    
