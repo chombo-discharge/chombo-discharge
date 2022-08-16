@@ -72,6 +72,17 @@ For example:
 
 		StreamerInceptionStepper.inception_alg = trapz fixed 0.2
 
+Print report
+-------------
+
+Use ``StreamerInceptionStepper.print_report`` to print out values at the end of the simulation.
+For example:
+
+.. code-block:: bash
+
+		StreamerInceptionStepper.print_report = true
+
+		
 Static mode
 ------------
    
