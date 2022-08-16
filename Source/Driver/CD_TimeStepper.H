@@ -69,7 +69,7 @@ public:
   initialData() = 0;
 
   /*!
-    @brief Post-initialize operations to be performed after filling solvers with initialData.
+    @brief Post-initialize operations to be performed at end of setup stage. 
   */
   virtual void
   postInitialize() = 0;
@@ -79,12 +79,6 @@ public:
   */
   virtual void
   postCheckpointSetup() = 0;
-
-  /*!
-    @brief Special routine which is executed at the end of setup routines (both fresh initialization and checkpoint)
-  */
-  virtual void
-  postSetup();
 
   /*!
     @brief Register realms to be used for the simulation.

@@ -11,8 +11,8 @@ AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm   = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting      = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor  = 8          # Blocking factor. 
-AmrMesh.max_box_size     = 8          # Maximum allowed box size
+AmrMesh.blocking_factor  = 16          # Blocking factor. 
+AmrMesh.max_box_size     = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS generation. 
 AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
 AmrMesh.num_ghost        = 2           # Number of ghost cells. 
@@ -34,15 +34,15 @@ Driver.geometry_generation             = chombo-discharge # Grid generation meth
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 Driver.plot_interval                   = 10               # Plot interval
-Driver.checkpoint_interval             = 100              # Checkpoint interval
-Driver.regrid_interval                 = 10               # Regrid interval
+Driver.checkpoint_interval             = -1               # Checkpoint interval
+Driver.regrid_interval                 = -1               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 6                # Number of initial regrids
+Driver.initial_regrids                 = 4                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 0                # Maximum number of steps
+Driver.stop_time                       = 100E-6           # Stop time
+Driver.max_steps                       = 100                # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -96,6 +96,7 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # ====================================================================================================
 TracerParticleSolver.verbosity     = -1     # Solver verbosity level. 
 TracerParticleSolver.deposition    = ngp    # Deposition method. Must be 'ngp' or 'cic'
+TracerParticleSolver.interpolation = ngp    # Deposition method. Must be 'ngp' or 'cic'
 TracerParticleSolver.plot_weight   = true   # Turn on/off plotting of the particle weight.
 TracerParticleSolver.plot_velocity = true   # Turn on/off plotting of the particle velocities.
 TracerParticleSolver.volume_scale  = true   # If true, depositions yield density * volume instead of just volume
@@ -123,26 +124,39 @@ Vessel.shroom_curv   = 500E-6            # Mushroom corner curvatures
 Vessel.live_rod      = true           # Rod is live or not
 Vessel.live_shroom   = false          # Mushroom is live or not
 
+
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
-StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation. 
-StreamerInceptionStepper.integration   = trapz                         # Integration algorithm. 'euler' or 'trapz'
-StreamerInceptionStepper.step_size     = dx 0.5                        # Step size. 'dx' or 'fixed' and a size. 
+StreamerInceptionStepper.verbosity     = 10                            # Chattiness. 
+StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation.
+StreamerInceptionStepper.mode          = dynamic                       # Mode (static or dynamic)
+StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
+StreamerInceptionStepper.plt_vars      = K Uinc alpha eta bg_rate emission neg_ions       # Plot variables
+StreamerInceptionStepper.output_file   = report.txt                    # Output file
+
+# Static mode
 StreamerInceptionStepper.voltage_lo    = 35E3                          # Low voltage multiplier
 StreamerInceptionStepper.voltage_hi    = 50E3                          # Highest voltage multiplier
 StreamerInceptionStepper.voltage_steps = 10                            # Number of voltage steps
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
-StreamerInceptionStepper.plt_vars      = K Uinc drift bg_rate emission # Plot variables
 
+# Dynamic mode
+StreamerInceptionStepper.dt            = cfl 1.0                       # Time step for dynamic mode.
+StreamerInceptionStepper.min_dt        = 0.0                           # Smallest possible time step
+StreamerInceptionStepper.max_dt        = 1E-6                          # Largest possible time step.
 
 # ====================================================================================================
 # StreamerInceptionTagger class options
 # ====================================================================================================
-StreamerInceptionTagger.verbosity = -1    # Tagger chattiness. 
+StreamerInceptionTagger.verbosity = 10    # Tagger chattiness. 
 StreamerInceptionTagger.buffer    = 8     # Grown buffer around flagged cells
-StreamerInceptionTagger.ref_curv  = 0.5   # Refinement curvature criterion. Lower => more more
+StreamerInceptionTagger.ref_curv  = 0.25  # Refinement curvature criterion. Lower => more more
 StreamerInceptionTagger.plot_curv = true  # Plot tagging field or not. 
 
 
+# Parameters for lightning impulse (used for dynamic runs)
+impulse.voltage = 50E3
+impulse.start   = 50E-9
+impulse.t1      = 50E-6
+impulse.t2      = 1.2E-6

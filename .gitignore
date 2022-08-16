@@ -29,6 +29,8 @@
 **/*.a
 **/*.o
 
+Exec/Examples/StreamerInception/Vessel/report.txt
+
 
 pout.*
 time.table.*

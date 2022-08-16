@@ -3,5 +3,5 @@
 # ====================================================================================================
 StreamerInceptionTagger.verbosity = -1    # Tagger chattiness. 
 StreamerInceptionTagger.buffer    = 4     # Grown buffer around flagged cells
-StreamerInceptionTagger.ref_curv  = 5.0   # Refinement curvature criterion. Lower => more more
-StreamerInceptionTagger.plot_curv = true  # Plot tagging field or not. 
+StreamerInceptionTagger.ref_curv  = 5.0   # Refinement curvature criterion. Lower => more mesh
+StreamerInceptionTagger.plot_curv = false # Plot tagging field or not. 

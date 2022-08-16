@@ -26,10 +26,10 @@ main(int argc, char* argv[])
   // Read ionization and attachment coefficients and make them into functions.
   constexpr Real N = 2.45E25;
 
-  // clang-format off
-  LookupTable<2> ionizationData = DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)", "");
-  LookupTable<2> attachmentData = DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend attach. coef. eta/N (m2)", "");
-  // clang-format on
+  LookupTable<2> ionizationData =
+    DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)", "");
+  LookupTable<2> attachmentData =
+    DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend attach. coef. eta/N (m2)", "");
 
   ionizationData.setRange(10, 2000, 0);
   attachmentData.setRange(10, 2000, 0);
@@ -49,47 +49,11 @@ main(int argc, char* argv[])
   ionizationData.makeUniform(500);
   attachmentData.makeUniform(500);
 
-  auto alpha = [&](const Real& E) -> Real {
-    return ionizationData.getEntry<1>(E);
-  };
+  auto alphaEff = [&](const Real& E) -> Real {
+    const Real alpha = ionizationData.getEntry<1>(E);
+    const Real eta   = attachmentData.getEntry<1>(E);
 
-  auto eta = [&](const Real& E) -> Real {
-    return attachmentData.getEntry<1>(E);
-  };
-
-  // Define a background ionization rate.
-  auto bgIonization = [N](const Real& E) -> Real {
-    return 2.E6 / (1.17E-4 * exp(2.91E7/E));
-  };
-
-  // Define ion mobility and density
-  auto ionMobility = [](const Real& E) -> Real {
-    return 2E-4;
-  };
-
-  auto ionDensity = [](const RealVect& x) -> Real {
-    return 1.E10;
-  };  
-
-  // 
-
-  // Define a lightning impulse voltage curve.
-  ParmParse vessel("impulse");    
-  Real V0 = 1.0;
-  Real t0 = 0.0;
-  Real t1 = 1.2E-6;
-  Real t2 = 50E-6;
-
-  vessel.get("voltage", V0);
-  vessel.get("start", t0);
-  vessel.get("t1", t1);
-  vessel.get("t2", t2);    
-  
-  auto voltageCurve = [V0, t0, t1, t2](const Real a_time) -> Real {
-    constexpr Real alpha = 1.0/50E-6;
-    constexpr Real beta  = 1.0/1.2E-6;
-
-    return V0 * (exp(-(a_time + t0)/t1) - exp(-(a_time + t0)/t2));
+    return alpha - eta;
   };
 
   // Set geometry and AMR
@@ -98,15 +62,11 @@ main(int argc, char* argv[])
 
   // Set up time stepper
   auto timestepper = RefCountedPtr<StreamerInceptionStepper<>>(new StreamerInceptionStepper<>());
-  auto celltagger  = RefCountedPtr<StreamerInceptionTagger>(new StreamerInceptionTagger(amr, timestepper->getElectricField()));
+  auto celltagger =
+    RefCountedPtr<StreamerInceptionTagger>(new StreamerInceptionTagger(amr, timestepper->getElectricField()));
 
-  // Set everything. 
-  timestepper->setAlpha(alpha);
-  timestepper->setEta(eta);
-  timestepper->setBackgroundRate(bgIonization);
-  timestepper->setVoltageCurve(voltageCurve);
-  timestepper->setNegativeIonMobility(ionMobility);
-  timestepper->setNegativeIonDensity(ionDensity);  
+  // Set ionization coefficient.
+  timestepper->setAlpha(alphaEff);
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));

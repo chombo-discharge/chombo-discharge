@@ -185,6 +185,9 @@ namespace Physics {
       DataOps::setValue(sigma, m_surfaceChargeDensity, m_amr->getProbLo(), m_amr->getDx(), 0);
       m_sigma->resetCells(sigma);
       m_fieldSolver->setRho(m_rhoGas);
+
+      // Solve Poisson equation.
+      this->solvePoisson();
     }
 
     template <class T>
@@ -220,8 +223,6 @@ namespace Physics {
       if (m_verbosity > 5) {
         pout() << "FieldStepper<T>::postInitialize" << endl;
       }
-
-      this->solvePoisson();
     }
 
     template <class T>

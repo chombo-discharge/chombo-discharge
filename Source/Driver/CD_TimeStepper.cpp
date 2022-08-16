@@ -44,14 +44,6 @@ TimeStepper::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>
   m_computationalGeometry = a_computationalGeometry;
 }
 
-void
-TimeStepper::postSetup() {
-  CH_TIME("TimeStepper::postSetup()");
-  if (m_verbosity > 5) {
-    pout() << "TimeStepper::postSetup()" << endl;
-  }
-}
-
 bool
 TimeStepper::needToRegrid()
 {
