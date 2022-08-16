@@ -435,16 +435,16 @@ namespace Physics {
       std::vector<Real> m_criticalVolumeMinu;
 
       /*!
-	@brief (Average) time to appearance of first electron (in critical volume)
+	@brief Rate of appearance of first electron (in critical volume)
 	@note Static mode, positive polarity. 
       */
-      std::vector<Real> m_firstElectronPlus;
+      std::vector<Real> m_RdotPlus;
 
       /*!
-	@brief (Average) time to appearance of first electron (in critical volume)
+	@brief Rate of appearance of first electron (in critical volume)
 	@note Static mode, negative polarity. 
       */
-      std::vector<Real> m_firstElectronMinu;
+      std::vector<Real> m_RdotMinu;
 
       /*!
 	@brief Voltage sweeps
@@ -783,7 +783,7 @@ namespace Physics {
 	@brief Compute time to first critical electron.
       */
       virtual void
-      computeFirstElectron() noexcept;
+      computeRdotStatic() noexcept;
 
       /*!
 	@brief Print report to the terminal. 

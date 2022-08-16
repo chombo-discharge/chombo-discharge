@@ -43,12 +43,9 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 
   this->parseOptions();
 
-  m_rho = [](const RealVect x) -> Real {
-    return 0.0;
-  };
+  m_rho = [](const RealVect x) -> Real { return 0.0; };
 
-  m_alpha = [](const Real E) -> Real {
-    return 0.0; };
+  m_alpha = [](const Real E) -> Real { return 0.0; };
 
   m_eta = [](const Real E) -> Real { return 0.0; };
 
@@ -58,15 +55,15 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 
   m_fieldEmission = [](const Real E) -> Real { return 0.0; };
 
-  m_negativeIonDensity = [](const RealVect x) -> Real { return 0.0;};
+  m_negativeIonDensity = [](const RealVect x) -> Real { return 0.0; };
 
   m_negativeIonMobility = [](const Real E) -> Real { return 0.0; };
 
 #if 1 // To-do list.
   std::cout << "StreamerInceptionStepperImplem.H -- add alpha-tagging to inception tagger\n";
   std::cout << "StreamerInceptionStepperImplem.H -- fix curvature tagger\n";
-  std::cout << "StreamerInceptionStepperImplem.H -- fix first electron comp for static mode => compute Rdot\n";  
-#endif  
+  std::cout << "StreamerInceptionStepperImplem.H -- fix first electron comp for static mode => compute Rdot\n";
+#endif
 }
 
 template <typename P, typename F>
@@ -118,7 +115,6 @@ StreamerInceptionStepper<P, F>::setupSolvers()
   m_fieldSolver->setRealm(m_realm);
   m_fieldSolver->setTime(0, 0.0, 0.0);
 
-
   // Instantiate the tracer particle solver.
   m_tracerParticleSolver = RefCountedPtr<TracerParticleSolver<P>>(new TracerParticleSolver<P>());
   m_tracerParticleSolver->parseOptions();
@@ -131,7 +127,7 @@ StreamerInceptionStepper<P, F>::setupSolvers()
   m_tracerParticleSolver->setVolumeScale(true);
 
   // This one is needed for the dynamic runs which also track the ions.
-  if(m_mode == Mode::Dynamic) {
+  if (m_mode == Mode::Dynamic) {
     m_negativeIonSolver = RefCountedPtr<TracerParticleSolver<P>>(new TracerParticleSolver<P>());
     m_negativeIonSolver->parseOptions();
     m_negativeIonSolver->setAmr(m_amr);
@@ -165,17 +161,25 @@ StreamerInceptionStepper<P, F>::allocate()
   case Mode::Static: {
     m_amr->allocate(m_inceptionIntegralPlus, m_realm, m_phase, m_voltageSweeps.size());
     m_amr->allocate(m_inceptionIntegralMinu, m_realm, m_phase, m_voltageSweeps.size());
-    m_amr->allocate(m_backgroundIonization, m_realm, m_phase, m_voltageSweeps.size());
-    m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
-    m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
     m_amr->allocate(m_inceptionVoltagePlus, m_realm, m_phase, 1);
     m_amr->allocate(m_inceptionVoltageMinu, m_realm, m_phase, 1);
 
+    if (m_plotFieldEmission) {
+      m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
+      m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
+
+      DataOps::setValue(m_emissionRatesPlus, 0.0);
+      DataOps::setValue(m_emissionRatesMinu, 0.0);
+    }
+
+    if (m_plotBackgroundIonization) {
+      m_amr->allocate(m_backgroundIonization, m_realm, m_phase, m_voltageSweeps.size());
+
+      DataOps::setValue(m_backgroundIonization, 0.0);
+    }
+
     DataOps::setValue(m_inceptionIntegralPlus, 0.0);
     DataOps::setValue(m_inceptionIntegralMinu, 0.0);
-    DataOps::setValue(m_backgroundIonization, 0.0);
-    DataOps::setValue(m_emissionRatesPlus, 0.0);
-    DataOps::setValue(m_emissionRatesMinu, 0.0);
     DataOps::setValue(m_inceptionVoltagePlus, 0.0);
     DataOps::setValue(m_inceptionVoltageMinu, 0.0);
 
@@ -190,7 +194,7 @@ StreamerInceptionStepper<P, F>::allocate()
     DataOps::setValue(m_emissionRate, 0.0);
     DataOps::setValue(m_backgroundIonization, 0.0);
 
-    m_negativeIonSolver->allocate();    
+    m_negativeIonSolver->allocate();
 
     break;
   }
@@ -257,7 +261,7 @@ StreamerInceptionStepper<P, F>::registerOperators()
   m_fieldSolver->registerOperators();
   m_tracerParticleSolver->registerOperators();
 
-  if(m_mode == Mode::Dynamic) {
+  if (m_mode == Mode::Dynamic) {
     m_negativeIonSolver->registerOperators();
   }
 }
@@ -279,8 +283,8 @@ StreamerInceptionStepper<P, F>::parseOptions()
   std::string str2;
 
   m_plotPoisson              = false;
-  m_plotTracer               = false;  
-  m_plotNegativeIons         = false;    
+  m_plotTracer               = false;
+  m_plotNegativeIons         = false;
   m_plotInceptionIntegral    = false;
   m_plotInceptionVoltage     = false;
   m_plotBackgroundIonization = false;
@@ -301,7 +305,7 @@ StreamerInceptionStepper<P, F>::parseOptions()
   pp.get("print_report", m_writeReport);
   pp.get("output_file", m_outputFile);
   pp.get("max_dt", m_maxDt);
-  pp.get("min_dt", m_minDt);    
+  pp.get("min_dt", m_minDt);
 
   pp.get("mode", str1);
   if (str1 == "none") {
@@ -347,7 +351,7 @@ StreamerInceptionStepper<P, F>::parseOptions()
   pp.get("dt", str1, 0);
   if (str1 == "fixed") {
     m_useFixedDt = true;
-    
+
     pp.get("dt", m_fixedDt, 1);
   }
   else if (str1 == "cfl") {
@@ -368,13 +372,13 @@ StreamerInceptionStepper<P, F>::parseOptions()
     for (int i = 0; i < num; i++) {
       if (plotVars[i] == "poisson") {
         m_plotPoisson = true;
-      }      
+      }
       else if (plotVars[i] == "tracer") {
         m_plotTracer = true;
       }
       else if (plotVars[i] == "neg_ions") {
         m_plotNegativeIons = true;
-      }                  
+      }
       else if (plotVars[i] == "K") {
         m_plotInceptionIntegral = true;
       }
@@ -455,24 +459,21 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
 
   const std::string prefix = "StreamerInceptionStepper/";
 
-  // 
-  if(m_plotPoisson) {
+  //
+  if (m_plotPoisson) {
     m_fieldSolver->writePlotData(a_output, a_icomp);
-    a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());    
+    a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
   }
 
-  if(m_plotTracer) {
+  if (m_plotTracer) {
     m_tracerParticleSolver->writePlotData(a_output, a_icomp);
     a_plotVariableNames.append(m_tracerParticleSolver->getPlotVariableNames());
   }
-
-
 
   // Write data -- this differs between the 'static' and 'dynamic' modes
   switch (m_mode) {
   case Mode::Static: {
 
-  
     this->writePlotDataStatic(a_output, a_plotVariableNames, a_icomp);
 
     break;
@@ -678,11 +679,10 @@ StreamerInceptionStepper<P, F>::writePlotDataDynamic(EBAMRCellData&       a_outp
     a_icomp += SpaceDim;
   }
 
-  if(m_plotNegativeIons && m_mode == Mode::Dynamic) {
+  if (m_plotNegativeIons && m_mode == Mode::Dynamic) {
     m_negativeIonSolver->writePlotData(a_output, a_icomp);
     a_plotVariableNames.append(m_negativeIonSolver->getPlotVariableNames());
   }
-      
 
   // Plot inception integral
   if (m_plotInceptionIntegral) {
@@ -764,13 +764,12 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
 
   int ncomp = 0;
 
-  if(m_plotPoisson) {
+  if (m_plotPoisson) {
     ncomp += m_fieldSolver->getNumberOfPlotVariables();
   }
-  if(m_plotTracer) {
+  if (m_plotTracer) {
     ncomp += m_tracerParticleSolver->getNumberOfPlotVariables();
   }
-
 
   switch (m_mode) {
   case Mode::Static: {
@@ -814,9 +813,9 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
     if (m_plotInceptionIntegral) {
       ncomp += 1;
     }
-    if(m_plotNegativeIons) {
+    if (m_plotNegativeIons) {
       ncomp += m_negativeIonSolver->getNumberOfPlotVariables();
-    }          
+    }
     if (m_plotBackgroundIonization) {
       ncomp += 1;
     }
@@ -862,16 +861,18 @@ StreamerInceptionStepper<P, F>::computeDt()
   }
 
   Real dt = std::numeric_limits<Real>::max();
-  
-  if(m_useFixedDt) {
-    dt = m_fixedDt;
-  }
-  else {
-    dt = m_cfl * this->computeNegativeIonCFL(m_voltageCurve(m_time));
-  }
 
-  dt = std::min(m_maxDt, dt);
-  dt = std::max(m_minDt, dt);  
+  if (m_mode == Mode::Dynamic) {
+    if (m_useFixedDt) {
+      dt = m_fixedDt;
+    }
+    else {
+      dt = m_cfl * this->computeNegativeIonCFL(m_voltageCurve(m_time));
+    }
+
+    dt = std::min(m_maxDt, dt);
+    dt = std::max(m_minDt, dt);
+  }
 
   return dt;
 }
@@ -889,19 +890,19 @@ StreamerInceptionStepper<P, F>::advance(const Real a_dt)
 
     const Real curTime    = m_time + a_dt;
     const Real curVoltage = m_voltageCurve(curTime);
-    
-    m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
-    m_negativeIonSolver->setVelocity(m_electricFieldMinu);    
 
-    // Seed new particles and compute the inception integral. 
+    m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
+    m_negativeIonSolver->setVelocity(m_electricFieldMinu);
+
+    // Seed new particles and compute the inception integral.
     this->seedIonizationParticles(curVoltage);
     this->computeInceptionIntegralDynamic(curVoltage);
-    
-    // Move the negative ions. 
+
+    // Move the negative ions.
     this->advanceNegativeIons(curVoltage, a_dt);
 
     // Compute the critical volume and the electron appearance rate.
-    const Real Vcr = this->computeCriticalVolumeDynamic();
+    const Real Vcr  = this->computeCriticalVolumeDynamic();
     const Real Rdot = this->computeRdot(curVoltage);
 
     m_criticalVolume.emplace_back(curTime, Vcr);
@@ -951,7 +952,7 @@ StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const R
   m_fieldSolver->setTime(a_step, a_time, a_dt);
   m_tracerParticleSolver->setTime(a_step, a_time, a_dt);
 
-  if(m_mode == Mode::Dynamic) {
+  if (m_mode == Mode::Dynamic) {
     m_negativeIonSolver->setTime(a_step, a_time, a_dt);
   }
 }
@@ -985,7 +986,7 @@ StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFines
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_tracerParticleSolver->preRegrid(a_lmin, a_oldFinestLevel);
 
-  if(m_mode == Mode::Dynamic) {
+  if (m_mode == Mode::Dynamic) {
     m_negativeIonSolver->preRegrid(a_lmin, a_oldFinestLevel);
   }
 }
@@ -1002,8 +1003,8 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   // Regrid tracer particles and field
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_tracerParticleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-  
-  if(m_mode == Mode::Dynamic) {  
+
+  if (m_mode == Mode::Dynamic) {
     m_negativeIonSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   }
 
@@ -1015,11 +1016,17 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   case Mode::Static: {
     m_amr->reallocate(m_inceptionIntegralPlus, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionIntegralMinu, m_phase, a_lmin);
-    m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
-    m_amr->reallocate(m_emissionRatesPlus, m_phase, a_lmin);
-    m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionVoltagePlus, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionVoltageMinu, m_phase, a_lmin);
+
+    if (m_plotBackgroundIonization) {
+      m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
+    }
+
+    if (m_plotFieldEmission) {
+      m_amr->reallocate(m_emissionRatesPlus, m_phase, a_lmin);
+      m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
+    }
 
     break;
   }
@@ -1084,7 +1091,8 @@ StreamerInceptionStepper<P, F>::setVoltageCurve(const std::function<Real(const R
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::setRho(const std::function<Real(const RealVect& x)>& a_rho) noexcept {
+StreamerInceptionStepper<P, F>::setRho(const std::function<Real(const RealVect& x)>& a_rho) noexcept
+{
   CH_TIME("StreamerInceptionStepper::setRho");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::setRho" << endl;
@@ -1095,7 +1103,8 @@ StreamerInceptionStepper<P, F>::setRho(const std::function<Real(const RealVect& 
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::setNegativeIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept {
+StreamerInceptionStepper<P, F>::setNegativeIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept
+{
   CH_TIME("StreamerInceptionStepper::setNegativeIonDensity");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::setNegativeIonDensity" << endl;
@@ -1106,7 +1115,8 @@ StreamerInceptionStepper<P, F>::setNegativeIonDensity(const std::function<Real(c
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::setNegativeIonMobility(const std::function<Real(const Real x)>& a_mobility) noexcept {
+StreamerInceptionStepper<P, F>::setNegativeIonMobility(const std::function<Real(const Real x)>& a_mobility) noexcept
+{
   CH_TIME("StreamerInceptionStepper::setNegativeIonMobility");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::setNegativeIonMobility" << endl;
@@ -1358,7 +1368,7 @@ StreamerInceptionStepper<P, F>::seedNegativeIons() noexcept
 
   CH_assert(!(m_negativeIonSolver.isNull()));
 
-  if(m_negativeIonSolver.isNull()) {
+  if (m_negativeIonSolver.isNull()) {
     MayDay::Abort("shit");
   }
 
@@ -1385,34 +1395,34 @@ StreamerInceptionStepper<P, F>::seedNegativeIons() noexcept
       if (!ebisbox.isAllCovered()) {
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-	    const RealVect pos = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+            const RealVect pos = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
 
-	    P p;
-	    
-	    p.position() = pos;
-	    p.weight()   = m_negativeIonDensity(pos) * vol;
+            P p;
 
-	    if(p.weight() > std::numeric_limits<Real>::min()) {
-	      particles.add(p);
-	    }
-	  }
-			     };
+            p.position() = pos;
+            p.weight()   = m_negativeIonDensity(pos) * vol;
+
+            if (p.weight() > std::numeric_limits<Real>::min()) {
+              particles.add(p);
+            }
+          }
+        };
 
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           const IntVect iv = vof.gridIndex();
 
           if (validCells(iv, 0) && ebisbox.isIrregular(iv)) {
-	    const RealVect pos = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+            const RealVect pos = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 
-	    P p;
+            P p;
 
-	    p.position() = pos;
-	    p.weight()   = m_negativeIonDensity(pos) * vol * ebisbox.volFrac(vof);
+            p.position() = pos;
+            p.weight()   = m_negativeIonDensity(pos) * vol * ebisbox.volFrac(vof);
 
-	    if(p.weight() > std::numeric_limits<Real>::min()) {	    
-	      particles.add(p);
-	    }
-	  }
+            if (p.weight() > std::numeric_limits<Real>::min()) {
+              particles.add(p);
+            }
+          }
         };
 
         // Execute kernels over appropriate regions.
@@ -1439,11 +1449,18 @@ StreamerInceptionStepper<P, F>::postInitialize()
   case Mode::Static: {
 
     this->computeInceptionIntegralStatic();
-    this->computeBackgroundIonizationStatic();
-    this->computeFieldEmissionStatic();
     this->computeInceptionVoltageVolume();
     this->computeCriticalVolumeStatic();
-    this->computeFirstElectron();
+    this->computeRdotStatic();
+
+    // Compute background ionization and field emission on the mesh. Mostly for plotting.
+    if (m_plotBackgroundIonization) {
+      this->computeBackgroundIonizationStatic();
+    }
+
+    if (m_plotFieldEmission) {
+      this->computeFieldEmissionStatic();
+    }
 
     break;
   }
@@ -1453,7 +1470,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
     this->seedIonizationParticles(m_voltageCurve(m_time));
 
     m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
-    m_negativeIonSolver->setVelocity(m_electricFieldMinu);    
+    m_negativeIonSolver->setVelocity(m_electricFieldMinu);
 
     // Compute the 'Rdot' value at current time (which is probably t = 0).
     this->computeInceptionIntegralDynamic(m_voltageCurve(m_time));
@@ -1462,7 +1479,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
     Real maxK = -std::numeric_limits<Real>::max();
     Real minK = +std::numeric_limits<Real>::max();
 
-    DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);    
+    DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
 
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
     m_criticalVolume.emplace_back(m_time, this->computeCriticalVolumeDynamic());
@@ -1846,14 +1863,15 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
 }
 
 template <typename P, typename F>
-void StreamerInceptionStepper<P, F>::advanceNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept
+void
+StreamerInceptionStepper<P, F>::advanceNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept
 {
   CH_TIME("StreamerInceptionStepper::advanceNegativeIons");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::advanceNegativeIons" << endl;
   }
 
-  switch(m_inceptionAlgorithm) {
+  switch (m_inceptionAlgorithm) {
   case IntegrationAlgorithm::Euler: {
     this->advanceNegativeIonsEuler(a_voltage, a_dt);
 
@@ -1863,7 +1881,7 @@ void StreamerInceptionStepper<P, F>::advanceNegativeIons(const Real& a_voltage, 
     this->advanceNegativeIonsTrapezoidal(a_voltage, a_dt);
 
     break;
-  };  
+  };
   default: {
     MayDay::Error("StreamerInceptionStepper::advanceNegativeIons - logic bust");
 
@@ -1873,7 +1891,8 @@ void StreamerInceptionStepper<P, F>::advanceNegativeIons(const Real& a_voltage, 
 }
 
 template <typename P, typename F>
-void StreamerInceptionStepper<P, F>::advanceNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept
+void
+StreamerInceptionStepper<P, F>::advanceNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept
 {
   CH_TIME("StreamerInceptionStepper::advanceNegativeIonsEuler");
   if (m_verbosity > 5) {
@@ -1883,7 +1902,7 @@ void StreamerInceptionStepper<P, F>::advanceNegativeIonsEuler(const Real& a_volt
   m_negativeIonSolver->remap();
   m_negativeIonSolver->interpolateVelocities();
 
-  ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();  
+  ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();
 
   // Euler integration.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -1892,31 +1911,32 @@ void StreamerInceptionStepper<P, F>::advanceNegativeIonsEuler(const Real& a_volt
       List<P>& ionParticles = amrParticles[lvl][dit()].listItems();
 
       for (ListIterator<P> lit(ionParticles); lit.ok(); ++lit) {
-	P& p = lit();
+        P& p = lit();
 
-	// We have interpolated -E onto the particle position but the actual velocity
-	// must be multiplied by the input voltage (because we solved with a voltage = 1V)
-	// and by the ion mobility.
-	const RealVect v        = a_voltage * p.velocity();
-	const Real     Eminu    = v.vectorLength();
-	const Real     mu       = m_negativeIonMobility(Eminu);
+        // We have interpolated -E onto the particle position but the actual velocity
+        // must be multiplied by the input voltage (because we solved with a voltage = 1V)
+        // and by the ion mobility.
+        const RealVect v     = a_voltage * p.velocity();
+        const Real     Eminu = v.vectorLength();
+        const Real     mu    = m_negativeIonMobility(Eminu);
 
-	p.template vect<0>() = p.position();
-	p.position()         += mu * v * a_dt;
+        p.template vect<0>() = p.position();
+        p.position() += mu * v * a_dt;
       }
     }
   }
 
   // Remove particles that wound up inside the EB. The remap function
   // removes those that left the domain.
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);  
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
 
   m_negativeIonSolver->remap();
   m_negativeIonSolver->interpolateVelocities();
 }
 
 template <typename P, typename F>
-void StreamerInceptionStepper<P, F>::advanceNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept
+void
+StreamerInceptionStepper<P, F>::advanceNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept
 {
   CH_TIME("StreamerInceptionStepper::advanceNegativeIonsTrapezoidal");
   if (m_verbosity > 5) {
@@ -1926,7 +1946,7 @@ void StreamerInceptionStepper<P, F>::advanceNegativeIonsTrapezoidal(const Real& 
   m_negativeIonSolver->remap();
   m_negativeIonSolver->interpolateVelocities();
 
-  ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();  
+  ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();
 
   // Euler stage.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -1935,25 +1955,25 @@ void StreamerInceptionStepper<P, F>::advanceNegativeIonsTrapezoidal(const Real& 
       List<P>& ionParticles = amrParticles[lvl][dit()].listItems();
 
       for (ListIterator<P> lit(ionParticles); lit.ok(); ++lit) {
-	P& p = lit();
+        P& p = lit();
 
-	// We have interpolated -E onto the particle position but the actual velocity
-	// must be multiplied by the input voltage (because we solved with a voltage = 1V)
-	// and by the ion mobility.
-	const RealVect v        = a_voltage * p.velocity();
-	const Real     Eminu    = v.vectorLength();
-	const Real     mu       = m_negativeIonMobility(Eminu);
+        // We have interpolated -E onto the particle position but the actual velocity
+        // must be multiplied by the input voltage (because we solved with a voltage = 1V)
+        // and by the ion mobility.
+        const RealVect v     = a_voltage * p.velocity();
+        const Real     Eminu = v.vectorLength();
+        const Real     mu    = m_negativeIonMobility(Eminu);
 
-	p.template vect<0>() = p.position();
-	p.template vect<1>() = mu * v;
-	
-	p.position() += mu * v * a_dt;
+        p.template vect<0>() = p.position();
+        p.template vect<1>() = mu * v;
+
+        p.position() += mu * v * a_dt;
       }
     }
   }
 
   m_negativeIonSolver->remap();
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);    
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
   m_negativeIonSolver->interpolateVelocities();
 
   // Second stage
@@ -1963,24 +1983,24 @@ void StreamerInceptionStepper<P, F>::advanceNegativeIonsTrapezoidal(const Real& 
       List<P>& ionParticles = amrParticles[lvl][dit()].listItems();
 
       for (ListIterator<P> lit(ionParticles); lit.ok(); ++lit) {
-	P& p = lit();
+        P& p = lit();
 
-	const RealVect v        = a_voltage * p.velocity();
-	const Real     Eminu    = v.vectorLength();
-	const Real     mu       = m_negativeIonMobility(Eminu);
+        const RealVect v     = a_voltage * p.velocity();
+        const Real     Eminu = v.vectorLength();
+        const Real     mu    = m_negativeIonMobility(Eminu);
 
-	const RealVect& xk = p.template vect<0>();	
-	const RealVect& vk = p.template vect<1>();
-	const RealVect  vk1 = mu * v;
-	
-	p.position() = xk + 0.5 * a_dt * (vk + vk1);
+        const RealVect& xk  = p.template vect<0>();
+        const RealVect& vk  = p.template vect<1>();
+        const RealVect  vk1 = mu * v;
+
+        p.position() = xk + 0.5 * a_dt * (vk + vk1);
       }
     }
   }
 
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);  
+  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
   m_negativeIonSolver->remap();
-  m_negativeIonSolver->interpolateVelocities();  
+  m_negativeIonSolver->interpolateVelocities();
 }
 
 template <typename P, typename F>
@@ -2058,7 +2078,7 @@ StreamerInceptionStepper<P, F>::computeRdot(const Real& a_voltage) const noexcep
             const Real dndt     = m_backgroundRate(E);
 
             Rdot += dndt * (1.0 - eta / alpha) * kappa * vol;
-	    //            Rdot += j / Units::Qe * areaFrac * area;
+            //            Rdot += j / Units::Qe * areaFrac * area;
           }
         }
       };
@@ -2107,7 +2127,7 @@ StreamerInceptionStepper<P, F>::resetTracerParticles() noexcept
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::resetTracerParticles" << endl;
   }
-  
+
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -2605,11 +2625,11 @@ StreamerInceptionStepper<P, F>::computeCriticalVolumeDynamic() const noexcept
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
+StreamerInceptionStepper<P, F>::computeRdotStatic() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeFirstElectron");
+  CH_TIME("StreamerInceptionStepper::computeRdotStatic");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeFirstElectron" << endl;
+    pout() << "StreamerInceptionStepper::computeRdotStatic" << endl;
   }
 
   // TLDR: This routine computes the average time to the appereance of an electron
@@ -2629,33 +2649,39 @@ StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
     const Real area = std::pow(dx, SpaceDim - 1);
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-
       const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
 
-      const EBCellFAB& backgroundRate        = (*m_backgroundIonization[lvl])[dit()];
+      const EBCellFAB& electricField         = (*m_electricFieldPlus[lvl])[dit()];
       const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
       const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
 
-      const FArrayBox& backgroundRateReg        = backgroundRate.getFArrayBox();
+      const FArrayBox& electricFieldReg         = electricField.getFArrayBox();      
       const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
       const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
-
-      const EBCellFAB& fieldEmissionPlus = (*m_emissionRatesPlus[lvl])[dit()];
-      const EBCellFAB& fieldEmissionMinu = (*m_emissionRatesMinu[lvl])[dit()];
 
       // Background ionization kernel for regular cells.
       auto backgroundRegularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv) && ebisbox.isRegular(iv)) {
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
 
+	    // clang-format off
+	    const Real E = m_voltageSweeps[i] * RealVect(D_DECL(electricFieldReg(iv, 0),
+								electricFieldReg(iv, 1),
+								electricFieldReg(iv, 2))).vectorLength();
+            // clang-format on
+
+            const Real alpha = m_alpha(E);
+            const Real eta   = m_eta(E);
+            const Real dndt  = m_backgroundRate(E);
+
             // Add background ionization rate.
             if (inceptionIntegralPlusReg(iv, i) >= m_inceptionK) {
-              Rplus[i] += backgroundRateReg(iv, i) * vol;
+              Rplus[i] += dndt * (1.0 - eta / alpha) * vol;
             }
 
             if (inceptionIntegralMinuReg(iv, i) >= m_inceptionK) {
-              Rminu[i] += backgroundRateReg(iv, i) * vol;
+              Rminu[i] += dndt * (1.0 - eta / alpha) * vol;
             }
           }
         }
@@ -2669,12 +2695,22 @@ StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
 
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
 
+            // clang-format off
+	    const Real E = m_voltageSweeps[i] * RealVect(D_DECL(electricField(vof, 0),
+								electricField(vof, 1),
+								electricField(vof, 2))).vectorLength();
+            // clang-format on
+
+            const Real alpha = m_alpha(E);
+            const Real eta   = m_eta(E);
+            const Real dndt  = m_backgroundRate(E);
+
             // Add background ionization rate.
             if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
-              Rplus[i] += backgroundRate(vof, i) * vol * volFrac;
+              Rplus[i] += dndt * (1.0 - eta / alpha) * vol * volFrac;
             }
             if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
-              Rminu[i] += backgroundRate(vof, i) * vol * volFrac;
+              Rminu[i] += dndt * (1.0 - eta / alpha) * vol * volFrac;
             }
           }
         }
@@ -2688,11 +2724,22 @@ StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
           const Real areaFrac = ebisbox.bndryArea(vof);
 
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-            if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
-              Rplus[i] += fieldEmissionPlus(vof, i) * area * areaFrac;
+
+            // clang-format off
+	    const RealVect E = m_voltageSweeps[i] * RealVect(D_DECL(electricField(vof, 0),
+								    electricField(vof, 1),
+								    electricField(vof, 2)));
+            // clang-format on
+
+            if (E.dotProduct(ebisbox.normal(vof)) > 0.0) {
+              if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
+                Rminu[i] += m_fieldEmission(E.vectorLength()) * area * areaFrac;
+              }
             }
-            if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {
-              Rminu[i] += fieldEmissionMinu(vof, i) * area * areaFrac;
+            else if (E.dotProduct(ebisbox.normal(vof)) < 0.0) {
+              if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
+                Rplus[i] += m_fieldEmission(E.vectorLength()) * area * areaFrac;
+              }
             }
           }
         }
@@ -2707,8 +2754,8 @@ StreamerInceptionStepper<P, F>::computeFirstElectron() noexcept
   }
 
   for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-    m_firstElectronPlus.push_back(1. / ParallelOps::sum(Rplus[i]));
-    m_firstElectronMinu.push_back(1. / ParallelOps::sum(Rminu[i]));
+    m_RdotPlus.push_back(ParallelOps::sum(Rplus[i]));
+    m_RdotMinu.push_back(ParallelOps::sum(Rminu[i]));
   }
 }
 
@@ -2726,7 +2773,7 @@ StreamerInceptionStepper<P, F>::writeReportStatic() const noexcept
 #endif
 
     std::ofstream output(m_outputFile, std::ofstream::out);
-    
+
     const std::pair<Real, Real> Uinc = this->computeInceptionVoltages();
 
     // clang-format off
@@ -2744,8 +2791,8 @@ StreamerInceptionStepper<P, F>::writeReportStatic() const noexcept
     output << left << setw(15) << setfill(' ') << "Max K(-)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(+)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(-)";
-    output << left << setw(20) << setfill(' ') << "First e(+)";
-    output << left << setw(20) << setfill(' ') << "First e(-)" << "\n";
+    output << left << setw(20) << setfill(' ') << "Rdot (+)";
+    output << left << setw(20) << setfill(' ') << "Rdot (-)" << "\n";
     output << "# ==================================================================================================================================" << "\n";        
 
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
@@ -2754,8 +2801,8 @@ StreamerInceptionStepper<P, F>::writeReportStatic() const noexcept
       output << left << setw(15) << setfill(' ') << m_maxKMinu[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
-      output << left << setw(20) << setfill(' ') << m_firstElectronPlus[i];
-      output << left << setw(20) << setfill(' ') << m_firstElectronMinu[i];
+      output << left << setw(20) << setfill(' ') << m_RdotPlus[i];
+      output << left << setw(20) << setfill(' ') << m_RdotMinu[i];
       output << endl;
     }
     output << "# ==================================================================================================================================" << "\n";
@@ -2781,9 +2828,9 @@ StreamerInceptionStepper<P, F>::writeReportDynamic() const noexcept
 
     output << std::left << std::setw(15) << setfill(' ') << "# Time t";
     output << std::left << std::setw(15) << setfill(' ') << "V(t)";
-    output << std::left << std::setw(15) << setfill(' ') << "max K(t)";    
+    output << std::left << std::setw(15) << setfill(' ') << "max K(t)";
     output << std::left << std::setw(15) << setfill(' ') << "Vcr(t)";
-    output << std::left << std::setw(15) << setfill(' ') << "Rdot(t)";    
+    output << std::left << std::setw(15) << setfill(' ') << "Rdot(t)";
     output << std::left << std::setw(15) << setfill(' ') << "P(t)";
     output << std::left << std::setw(15) << setfill(' ') << "dP(t, t+dt)";
     output << "\n";
@@ -2803,8 +2850,8 @@ StreamerInceptionStepper<P, F>::writeReportDynamic() const noexcept
       const Real time = m_Rdot[i].first;
       output << std::left << std::setw(15) << time;
       output << std::left << std::setw(15) << m_voltageCurve(time);
-      output << std::left << std::setw(15) << m_maxK[i].second;            
-      output << std::left << std::setw(15) << m_criticalVolume[i].second;      
+      output << std::left << std::setw(15) << m_maxK[i].second;
+      output << std::left << std::setw(15) << m_criticalVolume[i].second;
       output << std::left << std::setw(15) << m_Rdot[i].second;
       output << std::left << std::setw(15) << m_inceptionProbability[i].second;
       output << std::left << std::setw(15) << dProb[i];
@@ -2860,7 +2907,8 @@ StreamerInceptionStepper<P, F>::particleInsideEB(const RealVect a_pos) const noe
 
 template <typename P, typename F>
 Real
-StreamerInceptionStepper<P, F>::computeNegativeIonCFL(const Real& a_voltage) const noexcept {
+StreamerInceptionStepper<P, F>::computeNegativeIonCFL(const Real& a_voltage) const noexcept
+{
   CH_TIME("StreamerInceptionStepper::computeNegativeIonCFL");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::computeNegativeIonCFL" << endl;
@@ -2870,34 +2918,34 @@ StreamerInceptionStepper<P, F>::computeNegativeIonCFL(const Real& a_voltage) con
 
   m_negativeIonSolver->interpolateVelocities();
 
-  ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();  
+  ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Real dx = m_amr->getDx()[lvl];
-    
+
     for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
       List<P>& ionParticles = amrParticles[lvl][dit()].listItems();
 
       for (ListIterator<P> lit(ionParticles); lit.ok(); ++lit) {
-	P& p = lit();
+        P& p = lit();
 
-	// We have interpolated -E onto the particle position but the actual velocity
-	// must be multiplied by the input voltage (because we solved with a voltage = 1V)
-	// and by the ion mobility.
-	const RealVect v        = a_voltage * p.velocity();
-	const Real     Eminu    = v.vectorLength();
-	const Real     mu       = m_negativeIonMobility(Eminu);
-	const Real     vMax     = mu * std::abs(v.maxDir(true));
+        // We have interpolated -E onto the particle position but the actual velocity
+        // must be multiplied by the input voltage (because we solved with a voltage = 1V)
+        // and by the ion mobility.
+        const RealVect v     = a_voltage * p.velocity();
+        const Real     Eminu = v.vectorLength();
+        const Real     mu    = m_negativeIonMobility(Eminu);
+        const Real     vMax  = mu * std::abs(v.maxDir(true));
 
-	dt = std::min(dt, std::abs(dx/ (mu * Eminu)));
+        dt = std::min(dt, std::abs(dx / (mu * Eminu)));
       }
     }
   }
 
   dt = ParallelOps::min(dt);
 
-  if(procID() == 0) {
-    std::cout << m_amr->getDx()[m_amr->getFinestLevel()]*1.E6 << "\t" << dt << std::endl;
+  if (procID() == 0) {
+    std::cout << m_amr->getDx()[m_amr->getFinestLevel()] * 1.E6 << "\t" << dt << std::endl;
   }
 
   return ParallelOps::min(dt);
