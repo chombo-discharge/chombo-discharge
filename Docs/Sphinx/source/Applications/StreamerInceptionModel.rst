@@ -82,6 +82,27 @@ For example:
 
 		StreamerInceptionStepper.print_report = true
 
+Plot variables
+---------------
+
+``StreamerInceptionStepper.plt_vars`` sets which variables are plotted in the simulation.
+The options are:
+
+* "poisson" - electric field
+* "tracer" - particles
+* "neg_ions"
+* "K" - inception integral
+* "Uinc" - inception voltage
+* "bg_rate" - background ionization
+* "emission" - field emission
+* "alpha" - effective ionization coefficient
+* "eta" - eta coefficient
+
+For example:
+
+.. code-block:: bash
+
+		StreamerInceptionStepper.plt_vars = poisson neg_ions K emission Uinc
 		
 Static mode
 ------------
