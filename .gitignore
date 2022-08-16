@@ -29,6 +29,8 @@
 **/*.a
 **/*.o
 
+Exec/Examples/StreamerInception/Vessel/report.txt
+
 
 pout.*
 time.table.*
@@ -47,4 +49,3 @@ Docs/*
 Docs/Sphinx/build
 Docs/**/*.dat
 
-!MyApplications/MyStreamerInception/pout.0

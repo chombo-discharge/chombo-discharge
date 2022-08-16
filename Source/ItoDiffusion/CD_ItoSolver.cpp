@@ -498,10 +498,10 @@ ItoSolver::getNumParticles(const WhichContainer a_whichContainer, const bool a_l
 
   size_t N;
   if (a_localOnly) {
-    N = particles.getNumberOfValidParticesLocal();
+    N = particles.getNumberOfValidParticlesLocal();
   }
   else {
-    N = particles.getNumberOfValidParticesGlobal();
+    N = particles.getNumberOfValidParticlesGlobal();
   }
 
   return N;

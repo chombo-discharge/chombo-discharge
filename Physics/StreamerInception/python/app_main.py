@@ -18,6 +18,7 @@ def write_template(args):
     mainf.write('#include <CD_' + args.geometry + '.H>\n')
     mainf.write('#include <CD_' + args.field_solver + '.H>\n')    
     mainf.write('#include <CD_StreamerInceptionStepper.H>\n')
+    mainf.write('#include <CD_StreamerInceptionTagger.H>\n')    
     mainf.write('#include <ParmParse.H>\n')
     mainf.write("\n")
 
@@ -45,6 +46,7 @@ def write_template(args):
     mainf.write("\n")
     mainf.write("  // Set up time stepper \n")
     mainf.write("  auto timestepper = RefCountedPtr<StreamerInceptionStepper<>> (new StreamerInceptionStepper<>());\n")
+    mainf.write("  auto celltagger  = RefCountedPtr<StreamerInceptionTagger> (new StreamerInceptionTagger(amr, timestepper->getElectricField()));\n");
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")

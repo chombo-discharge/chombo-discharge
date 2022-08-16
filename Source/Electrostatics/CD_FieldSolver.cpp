@@ -1112,20 +1112,27 @@ FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp, const bool a_fo
   const bool doInterp = (m_dataLocation == Location::Cell::Center) && !a_forceNoInterp;
 
   // Add phi to output
-  if (m_plotPotential)
+  if (m_plotPotential) {
     this->writeMultifluidData(a_output, a_comp, m_potential, phase::gas, doInterp);
-  if (m_plotRho)
+  }
+  if (m_plotRho) {
     this->writeMultifluidData(a_output, a_comp, m_rho, phase::gas, false);
-  if (m_plotSigma)
+  }
+  if (m_plotSigma) {
     this->writeSurfaceData(a_output, a_comp, m_sigma);
-  if (m_plotResidue)
+  }
+  if (m_plotResidue) {
     this->writeMultifluidData(a_output, a_comp, m_residue, phase::gas, false);
-  if (m_plotPermittivity)
+  }
+  if (m_plotPermittivity) {
     this->writeMultifluidData(a_output, a_comp, m_permittivityCell, phase::gas, false);
-  if (m_plotElectricField)
+  }
+  if (m_plotElectricField) {
     this->writeMultifluidData(a_output, a_comp, m_electricField, phase::gas, doInterp);
-  if (m_plotElectricFieldSolid)
+  }
+  if (m_plotElectricFieldSolid) {
     this->writeMultifluidData(a_output, a_comp, m_electricField, phase::solid, doInterp);
+  }
 }
 
 void
@@ -1332,20 +1339,27 @@ FieldSolver::getNumberOfPlotVariables() const
 
   int numPltVars = 0;
 
-  if (m_plotPotential)
+  if (m_plotPotential) {
     numPltVars = numPltVars + 1;
-  if (m_plotRho)
+  }
+  if (m_plotRho) {
     numPltVars = numPltVars + 1;
-  if (m_plotSigma)
+  }
+  if (m_plotSigma) {
     numPltVars = numPltVars + 1;
-  if (m_plotResidue)
+  }
+  if (m_plotResidue) {
     numPltVars = numPltVars + 1;
-  if (m_plotPermittivity)
+  }
+  if (m_plotPermittivity) {
     numPltVars = numPltVars + 1;
-  if (m_plotElectricField)
+  }
+  if (m_plotElectricField) {
     numPltVars = numPltVars + SpaceDim;
-  if (m_plotElectricFieldSolid)
+  }
+  if (m_plotElectricFieldSolid) {
     numPltVars = numPltVars + SpaceDim;
+  }
 
   return numPltVars;
 }
@@ -1360,16 +1374,21 @@ FieldSolver::getPlotVariableNames() const
 
   Vector<std::string> pltVarNames(0);
 
-  if (m_plotPotential)
+  if (m_plotPotential) {
     pltVarNames.push_back("Electrostatic potential");
-  if (m_plotRho)
+  }
+  if (m_plotRho) {
     pltVarNames.push_back("Space charge density");
-  if (m_plotSigma)
+  }
+  if (m_plotSigma) {
     pltVarNames.push_back("Electrostatic sigma");
-  if (m_plotResidue)
+  }
+  if (m_plotResidue) {
     pltVarNames.push_back("Electrostatic potential_residue");
-  if (m_plotPermittivity)
+  }
+  if (m_plotPermittivity) {
     pltVarNames.push_back("Electrostatic permittivity");
+  }
 
   if (m_plotElectricField) {
     pltVarNames.push_back("x-Electric field");

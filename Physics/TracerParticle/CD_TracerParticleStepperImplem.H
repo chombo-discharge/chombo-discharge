@@ -420,7 +420,7 @@ TracerParticleStepper<P>::initialParticles()
   //       inside a box.
   //
   //       After creating the distribution we draw the particles (MPI rank distribution being taken care of under the hood) and
-  //       set their mass to one. Finally, we add these particles to the ParticleContainer and remove the particles that lie inside
+  //       set their weight to one. Finally, we add these particles to the ParticleContainer and remove the particles that lie inside
   //       the EB.
 
   // Create a random distribution which draw particles uniformly distributed in the domain.
@@ -437,12 +437,12 @@ TracerParticleStepper<P>::initialParticles()
     return ret;
   };
 
-  // Draw particles using the distribution above. Set their mass to one.
+  // Draw particles using the distribution above. Set their weight to one.
   List<P> initialParticles;
 
   ParticleOps::drawRandomParticles(initialParticles, m_numInitialParticles, uniformDistribution);
   for (ListIterator<P> lit(initialParticles); lit.ok(); ++lit) {
-    lit().mass() = 1.0;
+    lit().weight() = 1.0;
   }
 
   // Put the particles in the solver particle data holder.

@@ -18,7 +18,7 @@ Use various flags for controlling how the applications are run and whether or no
 E.g.,
 
 ```shell
-python3 tests.py --compile --clean --silent --benchmark
+python3 tests.py --compile --clean --silent --no_compare
 ```
 
 will do a clean compile of all tests and generate benchmark files.

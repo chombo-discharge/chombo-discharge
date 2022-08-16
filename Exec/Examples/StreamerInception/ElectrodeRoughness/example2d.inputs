@@ -1,11 +1,11 @@
 # ====================================================================================================
 # AmrMesh class options
 # ====================================================================================================
-AmrMesh.lo_corner        = -0.01 -0.01  -0.01    # Low corner of problem domain
-AmrMesh.hi_corner        =  0.01  0.01   0.01    # High corner of problem domain
+AmrMesh.lo_corner        = -0.01 -0.01 # Low corner of problem domain
+AmrMesh.hi_corner        =  0.01  0.01 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 64 64 64   # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 3           # Maximum amr depth
+AmrMesh.coarsest_domain  = 128 128 128 # Number of cells on coarsest domain
+AmrMesh.max_amr_depth    = 5           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -29,7 +29,7 @@ AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic co
 # ====================================================================================================
 # Driver class options
 # ====================================================================================================
-Driver.verbosity                       = 20                # Engine verbosity
+Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
@@ -42,7 +42,7 @@ Driver.initial_regrids                 = 0                # Number of initial re
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 0              # Maximum number of steps
+Driver.max_steps                       = 0                # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -54,7 +54,7 @@ Driver.num_plot_ghost                  = 1                # Number of ghost cell
 Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
+Driver.grow_geo_tags                   = 8                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes               = 0                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -63,19 +63,17 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # ====================================================================================================
 # FieldSolverMultigrid class options
 # ====================================================================================================
-FieldSolverMultigrid.verbosity         = 20                # Class verbosity
+FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
-FieldSolverMultigrid.bc.x.lo           = neumann 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.x.hi           = neumann 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.lo           = neumann   0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.hi           = neumann   0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.hi           = dirichlet 1.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.z.lo           = neumann 0.0     # Bc type (see docs)
-FieldSolverMultigrid.bc.z.hi           = neumann 0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
 
-FieldSolverMultigrid.gmg_verbosity     = 20                # GMG verbosity
+FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
 FieldSolverMultigrid.gmg_post_smooth   = 12                # Number of relaxations in upsweep
 FieldSolverMultigrid.gmg_bott_smooth   = 12                # Number of at bottom level (before dropping to bottom solver)
@@ -98,30 +96,47 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # ====================================================================================================
 TracerParticleSolver.verbosity     = -1     # Solver verbosity level. 
 TracerParticleSolver.deposition    = ngp    # Deposition method. Must be 'ngp' or 'cic'
-TracerParticleSolver.plot_mass     = true   # Turn on/off plotting of the particle mass.
-TracerParticleSolver.plot_velocity = false  # Turn on/off plotting of the particle velocities.
-TracerParticleSolver.volume_scale  = true   # If true, depositions yield density * volume instead of just volume
+TracerParticleSolver.plot_weight   = true   # Turn on/off plotting of the particle weight.
+TracerParticleSolver.plot_velocity = true   # Turn on/off plotting of the particle velocities.
+TracerParticleSolver.volume_scale  = true  # If true, depositions yield density * volume instead of just volume
 
 
 # ====================================================================================================
-# Cylinder geometry class options
+# RoughSphere geometry class options
 # ====================================================================================================
-Cylinder.turn_off      = false          # Turn on/off geometry
-Cylinder.fluid_outside = true           # Solution region on inside/outside
-Cylinder.material      = electrode      # Material type. 'dielectric' or 'electrode'
-Cylinder.live          = true           # If electrode, this sets the live/grounded voltage
-Cylinder.permittivity  = 4              # If dielectric, this sets the permittivity
-Cylinder.z_coord       = 0.0            # z-coordinate if doing 2D
-Cylinder.center1       = 0 2 0          # One endpoint. Must have 3 entries
-Cylinder.center2       = 0 0 0          # Other endpoint. Must have 3 entries. 
-Cylinder.radius        = 2E-3           # Cylinder radius. 
+RoughSphere.on                = true         # Turn on/off geometry
+RoughSphere.material          = electrode    # 'electrode' or 'dielectric'
+RoughSphere.live              = true         # Live potential or not (for electrode)
+RoughSphere.eps               = 4            # Set permittivity for dielectric
+RoughSphere.radius            = 1E3          # Sphere radius
+RoughSphere.center            = 0 1E3        # Sphere center
+RoughSphere.noise_amplitude   = 2E-3          # Noise amplitude
+RoughSphere.noise_frequency   = 1E3 1E3      # Noise frequency
+RoughSphere.noise_persistence = 0.5          # Noise persistence
+RoughSphere.noise_octaves     = 4            # Noise octaves
+RoughSphere.noise_reseed      = false        # Reseed noise
 
 # ====================================================================================================
 # StreamerInceptionStepper class options
 # ====================================================================================================
-StreamerInceptionStepper.verbosity     = 20
-StreamerInceptionStepper.integration   = trapezoidal
-StreamerInceptionStepper.voltage_lo    = 1e3
-StreamerInceptionStepper.voltage_hi    = 5e4
-StreamerInceptionStepper.voltage_steps = 40
-StreamerInceptionStepper.K_inception   = 15
+StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
+StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation. 
+StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
+StreamerInceptionStepper.drift_alg     = euler dx 1.0                  # Integration algorithm for drift integral.
+StreamerInceptionStepper.step_size     = dx 1.0                        # Step size. 'dx' or 'fixed' and a size. 
+StreamerInceptionStepper.voltage_lo    = 40E3                           # Low voltage multiplier
+StreamerInceptionStepper.voltage_hi    = 60E3                          # Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps = 100                             # Number of voltage steps
+StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
+StreamerInceptionStepper.plt_vars      = K  Uinc # Plot variables
+
+
+# ====================================================================================================
+# StreamerInceptionTagger class options
+# ====================================================================================================
+StreamerInceptionTagger.verbosity = -1    # Tagger chattiness. 
+StreamerInceptionTagger.buffer    = 4     # Grown buffer around flagged cells
+StreamerInceptionTagger.ref_curv  = 1.0   # Refinement curvature criterion. Lower => more mesh
+StreamerInceptionTagger.plot_curv = false # Plot tagging field or not. 
+
+
