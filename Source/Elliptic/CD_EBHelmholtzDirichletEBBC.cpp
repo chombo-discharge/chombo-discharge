@@ -24,9 +24,9 @@ EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC()
 {
   CH_TIME("EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC()");
 
-  m_order  = -1;
-  m_weight = -1;
-  m_domainDropOrder = 0;  
+  m_order           = -1;
+  m_weight          = -1;
+  m_domainDropOrder = 0;
 
   m_useConstant = false;
   m_useFunction = false;
@@ -79,7 +79,8 @@ EBHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect& a_po
 }
 
 void
-EBHelmholtzDirichletEBBC::setDomainDropOrder(const int a_domainSize) {
+EBHelmholtzDirichletEBBC::setDomainDropOrder(const int a_domainSize)
+{
   CH_TIME("EBHelmholtzDirichletEBBC::setDomainDropOrder()");
 
   m_domainDropOrder = a_domainSize;
@@ -101,12 +102,12 @@ EBHelmholtzDirichletEBBC::define()
     MayDay::Error("EBHelmholtzDirichletEBBC - not using constant or function!");
   }
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const ProblemDomain& domain = m_eblg.getDomain();
+  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const ProblemDomain&     domain = m_eblg.getDomain();
 
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
-    if(domain.size()[dir] <= m_domainDropOrder) {
+    if (domain.size()[dir] <= m_domainDropOrder) {
       m_order = 1;
     }
   }

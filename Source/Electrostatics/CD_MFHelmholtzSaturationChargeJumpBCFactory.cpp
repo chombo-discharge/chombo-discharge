@@ -43,10 +43,10 @@ MFHelmholtzSaturationChargeJumpBCFactory::create(const Location::Cell a_dataLoca
 
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
-    if(a_mflg.getDomain().size()[dir] <= m_domainDropOrder) {
+    if (a_mflg.getDomain().size()[dir] <= m_domainDropOrder) {
       order = 1;
     }
-  }  
+  }
 
   return RefCountedPtr<MFHelmholtzJumpBC>(new MFHelmholtzSaturationChargeJumpBC(m_phase,
                                                                                 a_dataLocation,

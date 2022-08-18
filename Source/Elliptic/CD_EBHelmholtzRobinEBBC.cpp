@@ -23,8 +23,8 @@ EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC()
 {
   CH_TIME("EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC()");
 
-  m_order  = -1;
-  m_weight = -1;
+  m_order           = -1;
+  m_weight          = -1;
   m_domainDropOrder = -1;
 
   m_useConstant = false;
@@ -88,7 +88,8 @@ EBHelmholtzRobinEBBC::setWeight(const int a_weight)
 }
 
 void
-EBHelmholtzRobinEBBC::setDomainDropOrder(const int a_domainSize) {
+EBHelmholtzRobinEBBC::setDomainDropOrder(const int a_domainSize)
+{
   CH_TIME("EBHelmholtzRobinEBBC::setDomainDropOrder()");
 
   m_domainDropOrder = a_domainSize;
@@ -136,15 +137,15 @@ EBHelmholtzRobinEBBC::define()
     MayDay::Error("EBHelmholtzRobinEBBC::define() - not using constant or function!");
   }
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const ProblemDomain& domain = m_eblg.getDomain();
+  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const ProblemDomain&     domain = m_eblg.getDomain();
 
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
-    if(domain.size()[dir] <= m_domainDropOrder) {
+    if (domain.size()[dir] <= m_domainDropOrder) {
       m_order = 1;
     }
-  }  
+  }
 
   m_kappaDivFStencils.define(dbl);
 

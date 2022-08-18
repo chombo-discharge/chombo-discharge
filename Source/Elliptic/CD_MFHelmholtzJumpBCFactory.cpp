@@ -48,11 +48,11 @@ MFHelmholtzJumpBCFactory::create(const Location::Cell a_dataLocation,
 
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
-    if(a_mflg.getDomain().size()[dir] <= m_domainDropOrder) {
+    if (a_mflg.getDomain().size()[dir] <= m_domainDropOrder) {
       order = 1;
     }
   }
-  
+
   return RefCountedPtr<MFHelmholtzJumpBC>(
     new MFHelmholtzJumpBC(a_dataLocation, a_mflg, a_Bcoef, a_dx, order, a_weight, a_radius, a_ghostCF));
 }

@@ -76,8 +76,8 @@ public:
   /*!
     @brief Drop BC order if domain size is equal or below this.
   */
-  virtual
-  void setDomainDropOrder(const int a_domainSize);
+  virtual void
+  setDomainDropOrder(const int a_domainSize);
 
   /*!
     @brief Set the spatially varying value on the EB. 

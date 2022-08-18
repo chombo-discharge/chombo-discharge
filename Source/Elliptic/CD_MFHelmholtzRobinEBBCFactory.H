@@ -77,7 +77,7 @@ public:
     @brief Drop BC order if domain size is equal or below this.
   */
   void
-  setDomainDropOrder(const int a_domainSize);  
+  setDomainDropOrder(const int a_domainSize);
 
   /*!
     @brief Set constant Robin BC coefficients
@@ -130,7 +130,7 @@ protected:
   /*!
     @brief Special flag for dropping stencil order when domains become coarser than this.
   */
-  int m_domainDropOrder;  
+  int m_domainDropOrder;
 
   /*!
     @brief Constant A-coefficient

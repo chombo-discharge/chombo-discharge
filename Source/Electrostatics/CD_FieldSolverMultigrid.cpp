@@ -34,8 +34,7 @@ FieldSolverMultigrid::FieldSolverMultigrid() : FieldSolver()
 
   // Default settings
   m_isSolverSetup = false;
-  m_className =
-    "FieldSolverMultigrid";
+  m_className     = "FieldSolverMultigrid";
 }
 
 FieldSolverMultigrid::~FieldSolverMultigrid() { CH_TIME("FieldSolverMultigrid::~FieldSolverMultigrid()"); }
@@ -461,9 +460,9 @@ FieldSolverMultigrid::setupHelmholtzFactory()
 
   // BC factories. Fortunately, MFHelmholtzOp/EBHelmholtzOp have sane interfaces which allowed us to code up
   // boundary condition objects and factories.
-  auto ebbcFactory = RefCountedPtr<MFHelmholtzElectrostaticEBBCFactory>
-    (new MFHelmholtzElectrostaticEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebBc));
-  
+  auto ebbcFactory = RefCountedPtr<MFHelmholtzElectrostaticEBBCFactory>(
+    new MFHelmholtzElectrostaticEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebBc));
+
   auto domainBcFactory =
     RefCountedPtr<MFHelmholtzDomainBCFactory>(new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
 
@@ -472,19 +471,19 @@ FieldSolverMultigrid::setupHelmholtzFactory()
   switch (m_jumpBcType) {
   case JumpBCType::Natural: {
     jumpBcFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>(new MFHelmholtzJumpBCFactory());
-    
+
     break;
   }
   case JumpBCType::SaturationCharge: {
     jumpBcFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>(new MFHelmholtzSaturationChargeJumpBCFactory(phase::gas));
-    
+
     break;
   }
   }
 
   // Drop order stuff for EB stencils -- can facilitate safer GMG relaxations
-  // on deeper multigrid levels. 
-  ebbcFactory->setDomainDropOrder(m_domainDropOrder);  
+  // on deeper multigrid levels.
+  ebbcFactory->setDomainDropOrder(m_domainDropOrder);
   jumpBcFactory->setDomainDropOrder(m_domainDropOrder);
 
   // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to zero

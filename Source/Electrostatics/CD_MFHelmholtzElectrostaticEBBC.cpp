@@ -55,7 +55,8 @@ MFHelmholtzElectrostaticEBBC::setWeight(const int a_weight)
 }
 
 void
-MFHelmholtzElectrostaticEBBC::setDomainDropOrder(const int a_domainSize) {
+MFHelmholtzElectrostaticEBBC::setDomainDropOrder(const int a_domainSize)
+{
   CH_TIME("MFHelmholtzElectrostaticEBBC::setDomainDropOrder()");
 
   m_domainDropOrder = a_domainSize;
@@ -69,15 +70,15 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const ProblemDomain& domain = m_eblg.getDomain();
-  
+  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const ProblemDomain&     domain = m_eblg.getDomain();
+
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
-    if(domain.size()[dir] <= m_domainDropOrder) {
+    if (domain.size()[dir] <= m_domainDropOrder) {
       m_order = 1;
     }
-  }  
+  }
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box         box     = dbl[dit()];

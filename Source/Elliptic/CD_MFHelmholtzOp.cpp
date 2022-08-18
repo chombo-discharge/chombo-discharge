@@ -134,22 +134,22 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     switch (a_relaxType) {
     case MFHelmholtzOp::Smoother::PointJacobi: {
       ebHelmRelax = EBHelmholtzOp::Smoother::PointJacobi;
-      
+
       break;
     }
     case MFHelmholtzOp::Smoother::GauSaiRedBlack: {
       ebHelmRelax = EBHelmholtzOp::Smoother::GauSaiRedBlack;
-      
+
       break;
     }
     case MFHelmholtzOp::Smoother::GauSaiMultiColor: {
       ebHelmRelax = EBHelmholtzOp::Smoother::GauSaiMultiColor;
-      
+
       break;
     }
     default: {
       MayDay::Error("MFHelmholtzOp::MFHelmholtzOp - unsupported relaxation method requested");
-      
+
       break;
     }
     }

@@ -26,9 +26,9 @@ MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory(const int  a_or
   CH_assert(a_order > 0);
   CH_assert(a_weight >= 0);
 
-  m_order  = a_order;
-  m_weight = a_weight;
-  m_domainDropOrder = 0;  
+  m_order           = a_order;
+  m_weight          = a_weight;
+  m_domainDropOrder = 0;
 
   this->setValue(a_value);
 }
@@ -77,7 +77,8 @@ MFHelmholtzDirichletEBBCFactory::setValue(const std::function<Real(const RealVec
 }
 
 void
-MFHelmholtzDirichletEBBCFactory::setDomainDropOrder(const int a_domainSize) {
+MFHelmholtzDirichletEBBCFactory::setDomainDropOrder(const int a_domainSize)
+{
   CH_TIME("MFHelmholtzDirichletEBBCFactory::setDomainDropOrder()");
 
   m_domainDropOrder = a_domainSize;

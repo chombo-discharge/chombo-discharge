@@ -92,8 +92,8 @@ public:
   /*!
     @brief Drop BC order if domain size is equal or below this.
   */
-  virtual
-  void setDomainDropOrder(const int a_domainSize);  
+  virtual void
+  setDomainDropOrder(const int a_domainSize);
 
   /*!
     @brief Factory method
@@ -117,7 +117,7 @@ protected:
   /*!
     @brief Special flag for dropping stencil order when domains become coarser than this.
   */
-  int m_domainDropOrder;  
+  int m_domainDropOrder;
 
   /*!
     @brief Electrostatic boundary conditions

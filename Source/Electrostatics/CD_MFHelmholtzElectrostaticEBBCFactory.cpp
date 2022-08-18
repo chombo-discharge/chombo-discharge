@@ -26,7 +26,7 @@ MFHelmholtzElectrostaticEBBCFactory::MFHelmholtzElectrostaticEBBCFactory(const i
   this->setOrder(a_order);
   this->setWeight(a_weight);
   this->setDomainDropOrder(-1);
-  
+
   m_electrostaticBCs = a_electrostaticBCs;
 }
 
@@ -56,7 +56,8 @@ MFHelmholtzElectrostaticEBBCFactory::setWeight(const int a_weight)
 }
 
 void
-MFHelmholtzElectrostaticEBBCFactory::setDomainDropOrder(const int a_domainSize) {
+MFHelmholtzElectrostaticEBBCFactory::setDomainDropOrder(const int a_domainSize)
+{
   CH_TIME("MFHelmholtzElectrostaticEBBCFactory::setDomainDropOrder()");
 
   m_domainDropOrder = a_domainSize;

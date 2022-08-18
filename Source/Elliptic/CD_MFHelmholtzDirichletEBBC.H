@@ -65,8 +65,8 @@ public:
   /*!
     @brief Drop BC order if domain size is equal or below this.
   */
-  virtual
-  void setDomainDropOrder(const int a_domainSize);    
+  virtual void
+  setDomainDropOrder(const int a_domainSize);
 
 protected:
   /*!
@@ -97,7 +97,7 @@ protected:
   /*!
     @brief Special flag for dropping stencil order when domains become coarser than this.
   */
-  int m_domainDropOrder;    
+  int m_domainDropOrder;
 
   /*!
     @brief Value on the EB. Does not apply to matching cells. 
