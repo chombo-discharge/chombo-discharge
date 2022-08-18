@@ -33,7 +33,11 @@ The streamer inception model uses
 Implementation
 --------------
 
-``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell and integrated along the electric field lines until the particle exits the domain or the effective ionization coefficient :math:`\alpha(E)` becomes negative. The integration is executed with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration. 
+``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell in the grid and integrated along the electric field lines until the particle exits the domain or the effective ionization coefficient :math:`\alpha(E)` becomes negative. The integration is executed with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration. The integral is computed for both polarities (+/-).
+
+The critical volume is calculated by adding the volumes of the cells where :math:`K>K_c`.
+
+The inception voltage is solved by linear interpolation between the :math:`K` values for the different voltage levels. It is computed for every :math:`\mathbf{x}`, i.e. every cell in the grid, where :math:`min(K)<=K_c` and :math:`max(K)>K_c`. Inception voltages are only computed when there are at least two voltage levels, for obvious reasons. 
 
 
 Effective ionization coefficient
