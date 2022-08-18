@@ -87,7 +87,9 @@ Plot variables
 
 ``StreamerInceptionStepper.plt_vars`` sets which variables are plotted in the simulation.
 The options are:
-  
+
+* .. code-block:: bash
+  poisson # Electric field
 * "poisson" - electric field
 * "tracer" - particles
 * "neg_ions"
