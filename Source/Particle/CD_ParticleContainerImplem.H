@@ -566,15 +566,7 @@ ParticleContainer<P>::addParticles(const List<P>& a_particles)
   // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1
   // and onto the outcast list on level lvl. Then, we remap the outcast list
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    constexpr bool flipMask = false;
-
-    collectValidParticles(m_particles[lvl]->outcast(),
-                          *m_particles[lvl - 1],
-                          m_pvr[lvl]->mask(),
-                          m_dx[lvl],
-                          m_refRat[lvl - 1],
-                          flipMask,
-                          m_probLo);
+    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl-1], lvl-1);
 
     m_particles[lvl]->remapOutcast();
   }
@@ -601,15 +593,7 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
   // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1
   // and onto the outcast list on level lvl. Then, we remap the outcast list
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    constexpr bool flipMask = false;
-
-    collectValidParticles(m_particles[lvl]->outcast(),
-                          *m_particles[lvl - 1],
-                          m_pvr[lvl]->mask(),
-                          m_dx[lvl],
-                          m_refRat[lvl - 1],
-                          flipMask,
-                          m_probLo);
+    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl-1], lvl-1);    
 
     m_particles[lvl]->remapOutcast();
   }
@@ -862,19 +846,7 @@ ParticleContainer<P>::remap()
 
     // Collect coarser level particles onto this levels outcast list if they fit in this levels PVR
     if (hasCoar) {
-#if 1 // Test
       this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl-1], lvl-1);
-#else
-      constexpr bool flipMask = false;
-
-      collectValidParticles(m_particles[lvl]->outcast(),
-                            *m_particles[lvl - 1],
-                            m_pvr[lvl]->mask(),
-                            m_dx[lvl],
-                            m_refRat[lvl - 1],
-                            flipMask,
-                            m_probLo);
-#endif
 
       // Remap new outcasts
       m_particles[lvl]->remapOutcast();
@@ -884,24 +856,8 @@ ParticleContainer<P>::remap()
     // transfer the particles to the coarser level. Note that there is a chance that these particles do not belong on the
     // coarse levels PVR either, but that is what remapLostParticles is for.
     if (hasCoar) {
-
-#if 1 // Test
       this->evictInvalidParticles(m_particles[lvl-1]->outcast(), *m_particles[lvl], lvl);
-#else
 
-      constexpr bool flipMask = true;
-      constexpr int  refRat   = 1;
-      
-      // Nifty little piece of code which takes all particles on this level and puts them in the coarse level
-      // outcast list if they fall off this level's PVR.
-      collectValidParticles(m_particles[lvl - 1]->outcast(),
-                            *m_particles[lvl],
-                            m_pvr[lvl]->mask(),
-                            m_dx[lvl],
-                            refRat,
-                            flipMask,
-                            m_probLo);
-#endif
       m_particles[lvl - 1]->gatherOutcast();
       m_particles[lvl - 1]->remapOutcast();
     }
@@ -951,19 +907,7 @@ ParticleContainer<P>::remapLostParticles()
   // Starting from the coarsest level, move the particles into the next finer level. Always respect the PVR, which means that particles on level lvl-1 are
   // transferred to level 'lvl' if the fit in the PVR mask on level 'lvl'.
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-#if 0
-    constexpr bool flipMask = false;
-
-    collectValidParticles(m_particles[lvl]->outcast(),
-                          *m_particles[lvl - 1],
-                          m_pvr[lvl]->mask(),
-                          m_dx[lvl],
-                          m_refRat[lvl - 1],
-                          flipMask,
-                          m_probLo);
-#else
     this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl-1], lvl-1);
-#endif
 
     m_particles[lvl]->remapOutcast();
   }

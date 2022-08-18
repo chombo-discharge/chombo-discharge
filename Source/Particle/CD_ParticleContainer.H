@@ -462,7 +462,16 @@ public:
     @param[in]    a_level            Grid level.
   */
   void
-  evictInvalidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);  
+  evictInvalidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);
+
+  /*!
+    @brief Evict particles if they move out of the valid region.
+    @param[inout] a_evictedParticles List that the particles are moved into.
+    @param[inout] a_particles        Particles.
+    @param[in]    a_level            Grid level.
+  */
+  void
+  admitValidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);    
 
   /*!
     @brief Set the particle member to the input value
@@ -675,7 +684,6 @@ protected:
   */
   void
   remapLostParticles();
-
 };
 
 #include <CD_NamespaceFooter.H>
