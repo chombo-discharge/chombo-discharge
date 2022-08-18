@@ -33,7 +33,8 @@ The streamer inception model uses
 Implementation
 --------------
 
-``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell in the grid and integrated along the electric field lines until the particle exits the domain or the effective ionization coefficient :math:`\alpha(E)` becomes negative. The integration is executed for both polarities (+/-) with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration.
+``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell in the grid and integrated along the electric field lines until the particle exits the domain or the effective ionization coefficient :math:`\alpha(E)` becomes negative. The running integration tracker is stored locally for each particle and is added to for each integration step. When the particle exits the domain or has a negative :math:`\alpha` it is flagged and its integration is finished. 
+The integration is executed for both polarities (+/-) with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration.
 
 The Euler algorithm gives:
 
@@ -51,7 +52,7 @@ The critical volume is calculated by adding the volumes of the cells where :math
 
 The inception voltage is solved by linear interpolation between the :math:`K` values for the different voltage levels. It is computed for every :math:`\mathbf{x}`, i.e. every cell in the grid, where :math:`min(K)<=K_c` and :math:`max(K)>K_c`. Inception voltages are only computed when there are at least two voltage levels, for obvious reasons.
 
-The probability of inception, i.e. that an electron appears within the critical volume in an interval :math:`[t, t + \Delta t]`, is computed assuming the background ionization rate is only affected by field emission and detachment of electrons from negatively charged ions. 
+The probability of inception, i.e. that an electron appears within the critical volume in an interval :math:`[t, t + \Delta t]`, is computed assuming the background ionization rate is only affected by field emission and detachment of electrons from negatively charged ions.
 
 Effective ionization coefficient
 ---------------------------------
@@ -71,8 +72,6 @@ For example:
    const auto alpha = [](const Real E) -> Real {
       return 1/E;
    }
-
-   
 
    inceptionStepper.setAlpha(alpha);
 
@@ -162,6 +161,8 @@ Dynamic mode
 
 Background ionization rate
 --------------------------
+
+The background ionization rate is calculated assuming contributions from detachment of electrons from negative ions and field emission. 
 
 Setting up a new problem
 ------------------------
