@@ -22,8 +22,8 @@ MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int            
 {
   CH_TIME("MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC");
 
-  m_order  = 1;
-  m_weight = 1;
+  m_order  = -1;
+  m_weight = -1;
   
   this->setDomainDropOrder(-1);
 
