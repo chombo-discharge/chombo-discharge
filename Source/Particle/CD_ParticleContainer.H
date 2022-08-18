@@ -456,10 +456,13 @@ public:
   transferParticles(ParticleContainer<P>& a_otherContainer);
 
   /*!
-    @brief Discard particles that are under a PVR level
+    @brief Evict particles if they move out of the valid region.
+    @param[inout] a_evictedParticles List that the particles are moved into.
+    @param[inout] a_particles        Particles.
+    @param[in]    a_level            Grid level.
   */
   void
-  discardInvalidParticles();
+  evictInvalidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);  
 
   /*!
     @brief Set the particle member to the input value
@@ -568,13 +571,15 @@ protected:
   /*!
     @brief Map of valid cells; evaluates to false if a cell is covered by a finer grid. 
   */
-  Vector<ValidMask> m_validRegion;
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validRegion;
 
   /*!
     @brief Refinement valid regions. 
+    @details This is a refinement of the mask on the corresponding level. That is, m_refinedValidRegion[1] contains a refinement
+    of m_validRegion[0]
     @note Used for transferring particles between levels
   */
-  Vector<ValidMask> m_refinedValidRegion;
+  Vector<RefCountedPtr<BoxLayoutData<BaseFab<bool>>>> m_refinedValidRegions;
 
   /*!
     @brief Grown layouts
@@ -650,6 +655,13 @@ protected:
   setupPVR(const int a_base, const int a_finestLevel);
 
   /*!
+    @brief Set up the refined particle valid regions. 
+    @param[in] a_base        Base level
+    @param[in] a_finestLevel Finest AMR level
+  */
+  void setupRefinedValidRegions(const int a_base, const int a_finestLevel);
+
+  /*!
     @brief Setup function for the particle data (m_particles and m_maskParticles)
     @param[in] a_base        Base level
     @param[in] a_finestLevel Finest AMR level
@@ -663,6 +675,7 @@ protected:
   */
   void
   remapLostParticles();
+
 };
 
 #include <CD_NamespaceFooter.H>

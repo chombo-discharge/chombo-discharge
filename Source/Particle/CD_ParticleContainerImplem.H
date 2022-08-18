@@ -147,8 +147,35 @@ ParticleContainer<P>::setupPVR(const int a_base, const int a_finestLevel)
         new ParticleValidRegion(dbl, m_pvr[lvl - 1]->mask(), m_refRat[lvl - 1], m_pvrBuffer));
     }
   }
+}
 
+template <class P>
+void
+ParticleContainer<P>::setupRefinedValidRegions(const int a_base, const int a_finestLevel)
+{
+  CH_TIME("ParticleContainer<P>::setupRefinedValidRegions");
+
+  // TLDR: This routine sets up the ParticleValidRegion. The PVR is used when we want to ensure that particles that live on a specific grid
+  //       level are a specified distance away from the refinement boundary.
+
+  m_refinedValidRegions.resize(1 + a_finestLevel);
   
+  for (int lvl = a_base; lvl < a_finestLevel; lvl++) {
+    if(lvl > 0) {
+      const DisjointBoxLayout& dblCoar = m_grids[lvl-1];
+      
+      BoxLayout dblFiCo;
+      refine(dblFiCo, dblCoar, m_refRat[lvl-1]);
+
+      m_refinedValidRegions[lvl] = RefCountedPtr<BoxLayoutData<BaseFab<bool>>> (new BoxLayoutData<BaseFab<bool>>(dblFiCo, 1));
+
+      for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
+      	(*m_refinedValidRegions[lvl])[dit()].setVal(false);
+      }
+
+      m_validRegion[lvl]->copyTo(*m_refinedValidRegions[lvl]);
+    }
+  }
 }
 
 template <class P>
@@ -773,6 +800,36 @@ ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContainer)
 
 template <class P>
 void
+ParticleContainer<P>::evictInvalidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_level) {
+  CH_TIME("ParticleContainer::evictInvalidParticles");
+
+  const DisjointBoxLayout& dbl = m_grids[a_level];
+  const RealVect dx = m_dx[a_level];
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const BaseFab<bool>& mask = (*m_validRegion[a_level])[dit()];
+    
+    for (ListIterator<P> lit(a_particles[dit()].listItems()); lit.ok(); ) {
+
+
+      const RealVect x = lit().position();
+      const IntVect iv(D_DECL((int)floor((x[0] - m_probLo[0])/dx[0]),
+			      (int)floor((x[1] - m_probLo[1])/dx[1]),
+			      (int)floor((x[2] - m_probLo[2])/dx[2])));
+
+      if(mask(iv)) {
+	++lit;
+      }
+      else {
+	a_evictedParticles.transfer(lit);
+      }
+    }
+  }
+}
+																	  
+
+template <class P>
+void
 ParticleContainer<P>::remap()
 {
   CH_TIME("ParticleContainer<P>::remap");
@@ -805,6 +862,9 @@ ParticleContainer<P>::remap()
 
     // Collect coarser level particles onto this levels outcast list if they fit in this levels PVR
     if (hasCoar) {
+#if 1 // Test
+      this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl-1], lvl-1);
+#else
       constexpr bool flipMask = false;
 
       collectValidParticles(m_particles[lvl]->outcast(),
@@ -814,6 +874,7 @@ ParticleContainer<P>::remap()
                             m_refRat[lvl - 1],
                             flipMask,
                             m_probLo);
+#endif
 
       // Remap new outcasts
       m_particles[lvl]->remapOutcast();
@@ -823,9 +884,14 @@ ParticleContainer<P>::remap()
     // transfer the particles to the coarser level. Note that there is a chance that these particles do not belong on the
     // coarse levels PVR either, but that is what remapLostParticles is for.
     if (hasCoar) {
+
+#if 1 // Test
+      this->evictInvalidParticles(m_particles[lvl-1]->outcast(), *m_particles[lvl], lvl);
+#else
+
       constexpr bool flipMask = true;
       constexpr int  refRat   = 1;
-
+      
       // Nifty little piece of code which takes all particles on this level and puts them in the coarse level
       // outcast list if they fall off this level's PVR.
       collectValidParticles(m_particles[lvl - 1]->outcast(),
@@ -835,7 +901,7 @@ ParticleContainer<P>::remap()
                             refRat,
                             flipMask,
                             m_probLo);
-
+#endif
       m_particles[lvl - 1]->gatherOutcast();
       m_particles[lvl - 1]->remapOutcast();
     }
@@ -885,6 +951,7 @@ ParticleContainer<P>::remapLostParticles()
   // Starting from the coarsest level, move the particles into the next finer level. Always respect the PVR, which means that particles on level lvl-1 are
   // transferred to level 'lvl' if the fit in the PVR mask on level 'lvl'.
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
+#if 0
     constexpr bool flipMask = false;
 
     collectValidParticles(m_particles[lvl]->outcast(),
@@ -894,6 +961,9 @@ ParticleContainer<P>::remapLostParticles()
                           m_refRat[lvl - 1],
                           flipMask,
                           m_probLo);
+#else
+    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl-1], lvl-1);
+#endif
 
     m_particles[lvl]->remapOutcast();
   }
@@ -1044,37 +1114,6 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   this->remap();
 
   m_cacheParticles.resize(0);
-}
-
-template <class P>
-void
-ParticleContainer<P>::discardInvalidParticles()
-{
-  CH_TIME("ParticleContainer<P>::discardInvalidParticles");
-
-  // This routine will discard all particles that lie underneath a PVR level. This means that if particles on level L live underneath the PVR on level L+1,
-  // those particles are completely removed.
-  CH_assert(m_isDefined);
-
-  if (m_isCellSorted) {
-    MayDay::Error("ParticleContainer<P>::discardInvalidParticles - particles are sorted by cell!");
-  }
-
-  // Move particles to the outcast list on the fine level. Then discard that list.
-  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    constexpr bool flipMask = false;
-
-    collectValidParticles(m_particles[lvl]->outcast(),
-                          *m_particles[lvl - 1],
-                          m_pvr[lvl]->mask(),
-                          m_dx[lvl],
-                          m_refRat[lvl - 1],
-                          flipMask,
-                          m_probLo);
-
-    // Get rid of those particles.
-    m_particles[lvl]->outcast().clear();
-  }
 }
 
 template <class P>
