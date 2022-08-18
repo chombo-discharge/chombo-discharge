@@ -53,6 +53,12 @@ public:
   setWeight(const int a_weight);
 
   /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  virtual
+  void setDomainDropOrder(const int a_domainSize);      
+
+  /*!
     @brief Set constant coefficients
     @param[in] a_A A-coefficient
     @param[in] a_B B-coefficient
@@ -92,6 +98,11 @@ protected:
     @brief Stencil weight
   */
   int m_weight;
+  
+  /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;      
 
   /*!
     @brief Constant A-coefficient

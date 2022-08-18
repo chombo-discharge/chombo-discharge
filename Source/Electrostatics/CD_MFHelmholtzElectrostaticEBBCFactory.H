@@ -74,6 +74,28 @@ public:
   virtual ~MFHelmholtzElectrostaticEBBCFactory();
 
   /*!
+    @brief Set BC order
+    @param[in] a_order Approximation order (1 and 2 are accepted)
+    @note For least squares, the order is also the attempted radius of the stencil. 
+  */
+  virtual void
+  setOrder(const int a_order);
+
+  /*!
+    @brief Set BC order
+    @param[in] a_weight Weight for least squares stencils. 
+    @note a_weight = 0 can lead to ill-conditioned least-squares systems. 
+  */
+  virtual void
+  setWeight(const int a_weight);
+
+  /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  virtual
+  void setDomainDropOrder(const int a_domainSize);  
+
+  /*!
     @brief Factory method
     @param[in] a_iphase Phase (0=gas and 1=solid). 
     @param[in] a_jumpBC Jump bc object. 
@@ -91,6 +113,11 @@ protected:
     @brief Stencil weight
   */
   int m_weight;
+
+  /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;  
 
   /*!
     @brief Electrostatic boundary conditions

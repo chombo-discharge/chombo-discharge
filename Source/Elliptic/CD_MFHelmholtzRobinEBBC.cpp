@@ -54,6 +54,13 @@ MFHelmholtzRobinEBBC::setWeight(const int a_weight)
 }
 
 void
+MFHelmholtzRobinEBBC::setDomainDropOrder(const int a_domainSize) {
+  CH_TIME("MFHelmholtzRobinEBBC::setDomainDropOrder()");
+
+  m_domainDropOrder = a_domainSize;
+}
+
+void
 MFHelmholtzRobinEBBC::setCoefficients(const Real a_A, const Real a_B, const Real a_C)
 {
   CH_TIME("MFHelmholtzRobinEBBC::setCoefficients(Real, Real, Real)");
@@ -102,6 +109,14 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
   }
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const ProblemDomain& domain = m_eblg.getDomain();
+  
+  // Drop order if we must
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if(domain.size()[dir] <= m_domainDropOrder) {
+      m_order = 1;
+    }
+  }    
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box      box     = dbl[dit()];

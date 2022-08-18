@@ -23,14 +23,43 @@ MFHelmholtzElectrostaticEBBCFactory::MFHelmholtzElectrostaticEBBCFactory(const i
   CH_assert(a_order > 0);
   CH_assert(a_weight >= 0);
 
-  m_order            = a_order;
-  m_weight           = a_weight;
+  this->setOrder(a_order);
+  this->setWeight(a_weight);
+  this->setDomainDropOrder(-1);
+  
   m_electrostaticBCs = a_electrostaticBCs;
 }
 
 MFHelmholtzElectrostaticEBBCFactory::~MFHelmholtzElectrostaticEBBCFactory()
 {
   CH_TIME("MFHelmholtzElectrostaticEBBCFactory::~MFHelmholtzElectrostaticEBBCFactory()");
+}
+
+void
+MFHelmholtzElectrostaticEBBCFactory::setOrder(const int a_order)
+{
+  CH_TIME("MFHelmholtzElectrostaticEBBCFactory::setOrder(int)");
+
+  CH_assert(a_order > 0);
+
+  m_order = a_order;
+}
+
+void
+MFHelmholtzElectrostaticEBBCFactory::setWeight(const int a_weight)
+{
+  CH_TIME("MFHelmholtzElectrostaticEBBCFactory::setWeight(int)");
+
+  CH_assert(a_weight >= 0);
+
+  m_weight = a_weight;
+}
+
+void
+MFHelmholtzElectrostaticEBBCFactory::setDomainDropOrder(const int a_domainSize) {
+  CH_TIME("MFHelmholtzElectrostaticEBBCFactory::setDomainDropOrder()");
+
+  m_domainDropOrder = a_domainSize;
 }
 
 RefCountedPtr<EBHelmholtzEBBC>
@@ -45,6 +74,7 @@ MFHelmholtzElectrostaticEBBCFactory::create(const int a_iphase, const RefCounted
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);
+  bc->setDomainDropOrder(m_domainDropOrder);
 
   return RefCountedPtr<EBHelmholtzEBBC>(bc);
 }

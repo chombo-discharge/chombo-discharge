@@ -74,6 +74,12 @@ public:
   setValue(const Real a_value);
 
   /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  virtual
+  void setDomainDropOrder(const int a_domainSize);
+
+  /*!
     @brief Set the spatially varying value on the EB. 
     @param[in] a_value Spatially dependent value on EB
   */
@@ -106,6 +112,11 @@ protected:
     @brief Stencil weighting
   */
   int m_weight;
+
+  /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;
 
   /*!
     @brief Value on EB

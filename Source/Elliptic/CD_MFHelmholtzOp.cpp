@@ -65,7 +65,6 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   m_multifluid   = m_numPhases > 1;
   m_hasMGObjects = a_hasMGObjects;
   m_refToCoar    = a_refToCoar;
-  m_refToCoar    = a_refToFine;
   m_smoother     = a_relaxType;
   m_hasCoar      = a_hasCoar;
   m_hasFine      = a_hasFine;
@@ -133,18 +132,26 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     EBHelmholtzOp::Smoother ebHelmRelax;
 
     switch (a_relaxType) {
-    case MFHelmholtzOp::Smoother::PointJacobi:
+    case MFHelmholtzOp::Smoother::PointJacobi: {
       ebHelmRelax = EBHelmholtzOp::Smoother::PointJacobi;
+      
       break;
-    case MFHelmholtzOp::Smoother::GauSaiRedBlack:
+    }
+    case MFHelmholtzOp::Smoother::GauSaiRedBlack: {
       ebHelmRelax = EBHelmholtzOp::Smoother::GauSaiRedBlack;
+      
       break;
-    case MFHelmholtzOp::Smoother::GauSaiMultiColor:
+    }
+    case MFHelmholtzOp::Smoother::GauSaiMultiColor: {
       ebHelmRelax = EBHelmholtzOp::Smoother::GauSaiMultiColor;
+      
       break;
-    default:
+    }
+    default: {
       MayDay::Error("MFHelmholtzOp::MFHelmholtzOp - unsupported relaxation method requested");
+      
       break;
+    }
     }
 
     RefCountedPtr<EBHelmholtzOp> oper = RefCountedPtr<EBHelmholtzOp>(new EBHelmholtzOp(m_dataLocation,

@@ -31,6 +31,7 @@ MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const int  a_order,
   this->setOrder(a_order);
   this->setWeight(a_weight);
   this->setCoefficients(a_A, a_B, a_C);
+  this->setDomainDropOrder(-1);
 }
 
 MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const int                                         a_order,
@@ -47,6 +48,7 @@ MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const int              
   this->setOrder(a_order);
   this->setWeight(a_weight);
   this->setCoefficients(a_A, a_B, a_C);
+  this->setDomainDropOrder(-1);  
 }
 
 MFHelmholtzRobinEBBCFactory::~MFHelmholtzRobinEBBCFactory()
@@ -72,6 +74,13 @@ MFHelmholtzRobinEBBCFactory::setWeight(const int a_weight)
   CH_assert(a_weight > 0);
 
   m_weight = a_weight;
+}
+
+void
+MFHelmholtzRobinEBBC::setDomainDropOrder(const int a_domainSize) {
+  CH_TIME("MFHelmholtzRobinEBBC::setDomainDropOrder()");
+
+  m_domainDropOrder = a_domainSize;
 }
 
 void
@@ -114,6 +123,8 @@ MFHelmholtzRobinEBBCFactory::create(const int a_iphase, const RefCountedPtr<MFHe
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);
+  bc->setDomainDropOrder(m_domainDropOrder);
+  
   if (m_useConstant) {
     bc->setCoefficients(m_constantA, m_constantB, m_constantC);
   }

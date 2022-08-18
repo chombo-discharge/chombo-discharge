@@ -79,6 +79,13 @@ MFHelmholtzDirichletEBBC::setWeight(const int a_weight)
 }
 
 void
+MFHelmholtzDirichletEBBC::setDomainDropOrder(const int a_domainSize) {
+  CH_TIME("MFHelmholtzDirichletEBBC::setDomainDropOrder()");
+
+  m_domainDropOrder = a_domainSize;
+}
+
+void
 MFHelmholtzDirichletEBBC::defineSinglePhase()
 {
   CH_TIME("MFHelmholtzDirichletEBBC::defineSinglePhase()");
@@ -96,8 +103,15 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
   }
 
   // TLDR: We compute the stencil for reconstructing dphi/dn on the boundary. This is done with least squares reconstruction.
-
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const ProblemDomain& domain = m_eblg.getDomain();
+  
+  // Drop order if we must
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if(domain.size()[dir] <= m_domainDropOrder) {
+      m_order = 1;
+    }
+  }  
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box         box     = dbl[dit()];

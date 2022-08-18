@@ -26,6 +26,7 @@ EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC()
 
   m_order  = -1;
   m_weight = -1;
+  m_domainDropOrder = 0;  
 
   m_useConstant = false;
   m_useFunction = false;
@@ -78,6 +79,13 @@ EBHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect& a_po
 }
 
 void
+EBHelmholtzDirichletEBBC::setDomainDropOrder(const int a_domainSize) {
+  CH_TIME("EBHelmholtzDirichletEBBC::setDomainDropOrder()");
+
+  m_domainDropOrder = a_domainSize;
+}
+
+void
 EBHelmholtzDirichletEBBC::define()
 {
   CH_TIME("EBHelmholtzDirichletEBBC::define()");
@@ -86,12 +94,22 @@ EBHelmholtzDirichletEBBC::define()
   CH_assert(m_weight >= 0);
 
   // Also issue runtime error.
-  if (m_order <= 0 || m_weight < 0)
+  if (m_order <= 0 || m_weight < 0) {
     MayDay::Error("EBHelmholtzDirichletEBBC - must have order > 0 and weight >= 0");
-  if (!(m_useConstant || m_useFunction))
+  }
+  if (!(m_useConstant || m_useFunction)) {
     MayDay::Error("EBHelmholtzDirichletEBBC - not using constant or function!");
+  }
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const ProblemDomain& domain = m_eblg.getDomain();
+
+  // Drop order if we must
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if(domain.size()[dir] <= m_domainDropOrder) {
+      m_order = 1;
+    }
+  }
 
   m_boundaryWeights.define(dbl);
   m_kappaDivFStencils.define(dbl);

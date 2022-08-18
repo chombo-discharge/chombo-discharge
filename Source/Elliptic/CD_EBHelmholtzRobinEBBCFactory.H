@@ -96,6 +96,13 @@ public:
                   const std::function<Real(const RealVect& a_pos)>& a_B,
                   const std::function<Real(const RealVect& a_pos)>& a_C);
 
+
+  /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  virtual
+  void setDomainDropOrder(const int a_domainSize);
+
   /*!
     @brief Factory method. 
     @return An EBHelmholtzRobinEBBC object with specified order and coefficients. 
@@ -123,6 +130,11 @@ protected:
     @brief Weight for least squares gradient reconstruction. 
   */
   int m_weight;
+
+  /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;  
 
   /*!
     @brief Constant A-coefficient

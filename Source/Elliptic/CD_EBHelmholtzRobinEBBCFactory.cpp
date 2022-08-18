@@ -20,6 +20,7 @@ EBHelmholtzRobinEBBCFactory::EBHelmholtzRobinEBBCFactory()
 
   m_order       = -1;
   m_weight      = -1;
+  m_domainDropOrder = -1;
   m_useConstant = false;
   m_useFunction = false;
 }
@@ -82,6 +83,13 @@ EBHelmholtzRobinEBBCFactory::setWeight(const int a_weight)
 }
 
 void
+EBHelmholtzRobinEBBCFactory::setDomainDropOrder(const int a_domainSize) {
+  CH_TIME("EBHelmholtzRobinEBBCFactory::setDomainDropOrder()");
+
+  m_domainDropOrder = a_domainSize;
+}
+
+void
 EBHelmholtzRobinEBBCFactory::setCoefficients(const Real a_A, const Real a_B, const Real a_C)
 {
   CH_TIME("EBHelmholtzRobinEBBCFactory::setCoefficients(Real, Real, Real)");
@@ -121,7 +129,8 @@ EBHelmholtzRobinEBBCFactory::create()
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);
-
+  bc->setDomainDropOrder(m_domainDropOrder);
+  
   if (m_useConstant) {
     bc->setCoefficients(m_constantA, m_constantB, m_constantC);
   }
@@ -131,6 +140,8 @@ EBHelmholtzRobinEBBCFactory::create()
   else {
     MayDay::Error("EBHelmholtzRobinEBBCFactory::create - logic bust, you must set the Robin coefficients!");
   }
+
+  
 
   return RefCountedPtr<EBHelmholtzEBBC>(bc);
 }

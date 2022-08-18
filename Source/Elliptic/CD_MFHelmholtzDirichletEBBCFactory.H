@@ -63,6 +63,12 @@ public:
   */
   virtual void
   setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+  
+  /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  virtual
+  void setDomainDropOrder(const int a_domainSize);  
 
   /*!
     @brief Factory method
@@ -96,6 +102,11 @@ protected:
     @brief Stencil weight (for weighted least squares)
   */
   int m_weight;
+
+  /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;  
 
   /*!
     @brief Value on the EB. 

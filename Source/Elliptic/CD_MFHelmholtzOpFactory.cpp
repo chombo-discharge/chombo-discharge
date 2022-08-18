@@ -545,6 +545,8 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   if (foundMgLevel) {
     const Real dx = m_amrResolutions[amrLevel] * std::pow(mgRefRat, a_depth); //
 
+    constexpr int bogusRef = 2;
+
     mgOp = new MFHelmholtzOp(m_dataLocation,
                              MFLevelGrid(),
                              mflg,
@@ -559,8 +561,8 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              m_jumpBcFactory,
                              m_probLo,
                              dx,
-                             1,
-                             1,
+                             bogusRef,
+                             bogusRef,
                              false,
                              false,
                              hasMGObjects,
