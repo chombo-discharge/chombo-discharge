@@ -80,7 +80,7 @@ For example:
 
 .. code-block:: bash
 
-		StreamerInceptionStepper.print_report = true
+   StreamerInceptionStepper.print_report = true
 
 Plot variables
 ---------------
@@ -88,8 +88,19 @@ Plot variables
 ``StreamerInceptionStepper.plt_vars`` sets which variables are plotted in the simulation.
 The options are:
 
-* .. code-block:: bash
-  poisson # Electric field
+.. code-block:: bash
+
+   poisson   # Electric field
+   tracer    # particles
+   neg_ions  #
+   K         # Inception integral
+   Uinc      # Inception voltage
+   bg_rate   # Background ionization rate
+   emission  # Field emission
+   alpha     # Effective ionization coefficient
+   eta       # Eta coefficient
+
+
 * "poisson" - electric field
 * "tracer" - particles
 * "neg_ions"
