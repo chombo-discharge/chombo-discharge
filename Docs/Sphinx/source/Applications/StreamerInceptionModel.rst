@@ -33,12 +33,25 @@ The streamer inception model uses
 Implementation
 --------------
 
-``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell in the grid and integrated along the electric field lines until the particle exits the domain or the effective ionization coefficient :math:`\alpha(E)` becomes negative. The integration is executed with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration. The integral is computed for both polarities (+/-).
+``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell in the grid and integrated along the electric field lines until the particle exits the domain or the effective ionization coefficient :math:`\alpha(E)` becomes negative. The integration is executed for both polarities (+/-) with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration.
+
+The Euler algorithm gives:
+
+.. math::
+
+   K += \alpha(E(x)) * dx,
+
+while the trapezoidal algorithm gives:
+
+.. math::
+
+   K += 0.5 * dx * [\alpha(E(x)) + \alpha(E(x+dx))].
 
 The critical volume is calculated by adding the volumes of the cells where :math:`K>=K_c`.
 
 The inception voltage is solved by linear interpolation between the :math:`K` values for the different voltage levels. It is computed for every :math:`\mathbf{x}`, i.e. every cell in the grid, where :math:`min(K)<=K_c` and :math:`max(K)>K_c`. Inception voltages are only computed when there are at least two voltage levels, for obvious reasons.
 
+SOMETHING ABOUT INCEPTION PROBABILITY HERE?
 
 Effective ionization coefficient
 ---------------------------------
@@ -67,9 +80,9 @@ Inception algorithm
 ----------------------
 
 ``StreamerInceptionStepper.inception_alg`` sets the inception algorithm parameters. The first
-input is the integration algorithm, either Euler ("euler") or trapezoidal (trapz) integration.
+input is the integration algorithm, either Euler (``euler``) or trapezoidal (``trapz``) integration.
 The second input is the step algorithm, which decides whether the integration steps are relative
-("dx") or fixed ("fixed") compared to the grid resolution. 
+(``dx``) or fixed (``fixed``) compared to the grid resolution. 
 The third input is the integration step size.
 
 For example:
@@ -94,8 +107,8 @@ Plot variables
 ``StreamerInceptionStepper.plt_vars`` sets which variables are plotted in the simulation.
 The options are:
 
-* ``poisson``  \t Electric field
-* ``tracer``   \t Particles
+* ``poisson``  - Electric field
+* ``tracer``   - Particles
 * ``neg_ions`` - Negative ions
 * ``K``        - Inception integral
 * ``Uinc``     - Inception voltage
