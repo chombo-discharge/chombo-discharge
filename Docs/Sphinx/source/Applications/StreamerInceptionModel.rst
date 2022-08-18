@@ -94,20 +94,15 @@ Plot variables
 ``StreamerInceptionStepper.plt_vars`` sets which variables are plotted in the simulation.
 The options are:
 
-.. code-block:: bash
-
-   poisson   # Electric field
-   tracer    # Particles
-   neg_ions  #
-   K         # Inception integral
-   Uinc      # Inception voltage
-   bg_rate   # Background ionization rate
-   emission  # Field emission
-   alpha     # Effective ionization coefficient
-   eta       # Eta coefficient
-
-* ``poisson`` - Electric field
-* ``tracer`` - Particles
+* ``poisson``  - Electric field
+* ``tracer``   - Particles
+* ``neg_ions`` - Negative ions
+* ``K``        - Inception integral
+* ``Uinc``     - Inception voltage
+* ``bg_rate``  - Background ionization rate
+* ``emission`` - Field emission
+* ``alpha``    - Effective ionization coefficient
+* ``eta``      - Eta coefficient
 
 For example:
 
