@@ -24,7 +24,7 @@ MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int            
 
   m_order  = -1;
   m_weight = -1;
-  
+
   this->setDomainDropOrder(-1);
 
   m_electrostaticBCs = a_electrostaticBCs;

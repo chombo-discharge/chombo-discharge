@@ -23,8 +23,8 @@ MFHelmholtzElectrostaticEBBCFactory::MFHelmholtzElectrostaticEBBCFactory(const i
   CH_assert(a_order > 0);
   CH_assert(a_weight >= 0);
 
-  m_order = -1;
-  m_weight = -1;  
+  m_order  = -1;
+  m_weight = -1;
 
   this->setDomainDropOrder(-1);
 
