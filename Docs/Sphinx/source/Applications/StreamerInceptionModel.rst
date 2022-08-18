@@ -94,8 +94,8 @@ Plot variables
 ``StreamerInceptionStepper.plt_vars`` sets which variables are plotted in the simulation.
 The options are:
 
-* ``poisson``  - Electric field
-* ``tracer``   - Particles
+* ``poisson``  \t Electric field
+* ``tracer``   \t Particles
 * ``neg_ions`` - Negative ions
 * ``K``        - Inception integral
 * ``Uinc``     - Inception voltage
