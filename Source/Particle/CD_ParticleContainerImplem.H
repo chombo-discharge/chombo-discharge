@@ -84,7 +84,6 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   // Do the define stuff.
   this->setupGrownGrids(base, m_finestLevel);
   this->setupPVR(base, m_finestLevel);
-  this->setupRefinedGrids(base, m_finestLevel);
   this->setupParticleData(base, m_finestLevel);  
 
   m_isDefined    = true;
@@ -101,39 +100,6 @@ ParticleContainer<P>::setupGrownGrids(const int a_base, const int a_finestLevel)
   //       when we want to fetch particles that lie on the coarse grid of a refinement boundary.
 
   m_grownGrids.resize(1 + a_finestLevel);
-
-  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl    = m_grids[lvl];
-    const ProblemDomain&     domain = m_domains[lvl];
-
-    // Grow boxes by refinement factor on the finer levels.
-    Vector<Box> boxes = dbl.boxArray();
-    if (lvl > 0) {
-      for (auto& box : boxes.stdVector()) {
-        box.grow(m_refRat[lvl - 1]);
-        box &= domain;
-      }
-    }
-
-    m_grownGrids[lvl] = BoxLayout(boxes, dbl.procIDs());
-  }
-}
-
-template <class P>
-void
-ParticleContainer<P>::setupRefinedGrids(const int a_base, const int a_finestLevel)
-{
-  CH_TIME("ParticleContainer<P>::setupRefinedGrids");
-
-  // TLDR: To transfer particles from a coarse level to a finer level whenever they fall off a mask, we need to keep a coarsened 
-  // TLDR: This routine sets up the buffer grids which can be used when we need to fetch particles that fall off each levels' grid. This is very useful
-  //       when we want to fetch particles that lie on the coarse grid of a refinement boundary.
-
-  m_grownGrids.resize(1 + a_finestLevel);
-
-  for (int lvl = a_base; lvl < std::max(a_finestLevel, m_finestLevel); lvl++) {
-    BoxL
-  }
 
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl    = m_grids[lvl];
@@ -176,6 +142,34 @@ ParticleContainer<P>::setupPVR(const int a_base, const int a_finestLevel)
     else {
       m_pvr[lvl] = RefCountedPtr<ParticleValidRegion>(
         new ParticleValidRegion(dbl, m_pvr[lvl - 1]->mask(), m_refRat[lvl - 1], m_pvrBuffer));
+    }
+  }
+
+  // TLDR: This sets up the particle masks on each grid; this is basically a bootleg of Chombo's ParticleValidRegion.
+
+  // Set up the "regular" particle valid region. 
+  for (int lvl = a_base; lvl <= a_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+
+    // Initialize with only ghost cells set to false.
+    LevelData<BaseFab<bool> > tmpValid(dbl, 1, IntVect::Unit);
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      tmpValid[dit()].setVal(false);
+      tmpValid[dit()].setVal(true, dbl[dit()], 0);      
+    }
+
+    if(lvl > 0) {
+      DisjointBoxLayout dblCoFi;
+      coarsen(dblCoFi, dbl, m_refRatio[lvl-1]);
+
+      LevelData<BaseFab<bool> > coarsenedValid(dblCoFi, 1);
+      m_validRegion[lvl-1]->copyTo(coarsenedValid);
+      
+      for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
+	for (BoxIterator bit(dblCoFi[dit()]); bit.ok(); ++bit) {
+	  const IntVect coarseCell = coarsen(bit(), m_refRat[lvl-1]);
+	}
+      }
     }
   }
 }

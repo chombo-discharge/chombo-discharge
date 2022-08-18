@@ -616,6 +616,17 @@ protected:
   AMRPVR m_pvr;
 
   /*!
+    @brief Valid particle region on each level.
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool> > > > m_validRegion;
+
+  /*!
+    @brief Refinement of the particle valid region
+    @note Last element not defined. 
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool> > > > m_refinedValidRegion;  
+
+  /*!
     @brief Set up grown grids
     @param[in] a_base        Base level
     @param[in] a_finestLevel Finest AMR level
@@ -638,13 +649,6 @@ protected:
   */
   void
   setupParticleData(const int a_base, const int a_finestLevel);
-
-  /*!
-    @brief Setup function for refined AMR grids. 
-    @param[in] a_base        Base level
-    @param[in] a_finestLevel Finest AMR level
-  */  
-  void setupRefinedGrids(const int a_base, const int a_finestLevel);
 
   /*!
     @brief Special remapping function in case particles have moved across more than one refinement level. Used
