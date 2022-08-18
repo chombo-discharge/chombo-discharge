@@ -71,6 +71,7 @@ $(function() {
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classMFHelmholtzJumpBCFactory-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">MFHelmholtzJumpBCFactory Class Reference</div>  </div>
@@ -111,6 +112,17 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a066e450719c8b66916bc98e038439df0"><td class="memItemLeft" align="right" valign="top">virtual RefCountedPtr&lt; <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#a066e450719c8b66916bc98e038439df0">create</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;a_mflg, const <a class="el" href="classMFHelmholtzJumpBCFactory.html#a6850045e2e7821d844989ef19ce9cf05">BcoefPtr</a> &amp;a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius, const int a_ghostCF)</td></tr>
 <tr class="memdesc:a066e450719c8b66916bc98e038439df0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method for creating <a class="el" href="classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code.">MFHelmholtzJumpBC</a> objects.  <a href="classMFHelmholtzJumpBCFactory.html#a066e450719c8b66916bc98e038439df0">More...</a><br /></td></tr>
 <tr class="separator:a066e450719c8b66916bc98e038439df0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5615c25221efb81f32b78e598089e03"><td class="memItemLeft" align="right" valign="top"><a id="ab5615c25221efb81f32b78e598089e03"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#ab5615c25221efb81f32b78e598089e03">setDomainDropOrder</a> (const int a_domainSize)</td></tr>
+<tr class="memdesc:ab5615c25221efb81f32b78e598089e03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="separator:ab5615c25221efb81f32b78e598089e03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:adb14c0b2025bdd6d02c8ba9a7c776040"><td class="memItemLeft" align="right" valign="top"><a id="adb14c0b2025bdd6d02c8ba9a7c776040"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#adb14c0b2025bdd6d02c8ba9a7c776040">m_domainDropOrder</a></td></tr>
+<tr class="memdesc:adb14c0b2025bdd6d02c8ba9a7c776040"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
+<tr class="separator:adb14c0b2025bdd6d02c8ba9a7c776040"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Factory class for making jump boundary condition objects in a multifluid <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> context. </p>

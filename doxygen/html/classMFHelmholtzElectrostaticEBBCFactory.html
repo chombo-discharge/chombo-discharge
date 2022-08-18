@@ -126,6 +126,16 @@ Public Member Functions</h2></td></tr>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#ab9a1cd4ed2ff3a303c3489134f7b6eec">~MFHelmholtzElectrostaticEBBCFactory</a> ()</td></tr>
 <tr class="memdesc:ab9a1cd4ed2ff3a303c3489134f7b6eec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor (does nothing) <br /></td></tr>
 <tr class="separator:ab9a1cd4ed2ff3a303c3489134f7b6eec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade486f50c9aeaca009b42a7c5a50138e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#ade486f50c9aeaca009b42a7c5a50138e">setOrder</a> (const int a_order)</td></tr>
+<tr class="memdesc:ade486f50c9aeaca009b42a7c5a50138e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set BC order.  <a href="classMFHelmholtzElectrostaticEBBCFactory.html#ade486f50c9aeaca009b42a7c5a50138e">More...</a><br /></td></tr>
+<tr class="separator:ade486f50c9aeaca009b42a7c5a50138e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b704f5b2ee2d3c793bad139ee847951"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a1b704f5b2ee2d3c793bad139ee847951">setWeight</a> (const int a_weight)</td></tr>
+<tr class="memdesc:a1b704f5b2ee2d3c793bad139ee847951"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set BC order.  <a href="classMFHelmholtzElectrostaticEBBCFactory.html#a1b704f5b2ee2d3c793bad139ee847951">More...</a><br /></td></tr>
+<tr class="separator:a1b704f5b2ee2d3c793bad139ee847951"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d5fc427b6b4f845496a24de7168f71c"><td class="memItemLeft" align="right" valign="top"><a id="a9d5fc427b6b4f845496a24de7168f71c"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a9d5fc427b6b4f845496a24de7168f71c">setDomainDropOrder</a> (const int a_domainSize)</td></tr>
+<tr class="memdesc:a9d5fc427b6b4f845496a24de7168f71c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="separator:a9d5fc427b6b4f845496a24de7168f71c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23a2e0c59bd302a591c968a2e04bec33"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a23a2e0c59bd302a591c968a2e04bec33">create</a> (const int a_iphase, const RefCountedPtr&lt; <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &gt; &amp;a_jumpBC) const override</td></tr>
 <tr class="memdesc:a23a2e0c59bd302a591c968a2e04bec33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method.  <a href="classMFHelmholtzElectrostaticEBBCFactory.html#a23a2e0c59bd302a591c968a2e04bec33">More...</a><br /></td></tr>
 <tr class="separator:a23a2e0c59bd302a591c968a2e04bec33"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -149,6 +159,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a73dfda740cdc77576c8bf05fe492b8d5">m_weight</a></td></tr>
 <tr class="memdesc:a73dfda740cdc77576c8bf05fe492b8d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencil weight. <br /></td></tr>
 <tr class="separator:a73dfda740cdc77576c8bf05fe492b8d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2862c0f044796b9abcf93e3981e2919d"><td class="memItemLeft" align="right" valign="top"><a id="a2862c0f044796b9abcf93e3981e2919d"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a2862c0f044796b9abcf93e3981e2919d">m_domainDropOrder</a></td></tr>
+<tr class="memdesc:a2862c0f044796b9abcf93e3981e2919d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
+<tr class="separator:a2862c0f044796b9abcf93e3981e2919d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7db31753dcdef1865b34a88f4e0adc52"><td class="memItemLeft" align="right" valign="top"><a id="a7db31753dcdef1865b34a88f4e0adc52"></a>
 <a class="el" href="classElectrostaticEbBc.html">ElectrostaticEbBc</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a7db31753dcdef1865b34a88f4e0adc52">m_electrostaticBCs</a></td></tr>
 <tr class="memdesc:a7db31753dcdef1865b34a88f4e0adc52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Electrostatic boundary conditions. <br /></td></tr>
@@ -384,6 +398,76 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ade486f50c9aeaca009b42a7c5a50138e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade486f50c9aeaca009b42a7c5a50138e">&#9670;&nbsp;</a></span>setOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MFHelmholtzElectrostaticEBBCFactory::setOrder </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_order</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set BC order. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_order</td><td>Approximation order (1 and 2 are accepted) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>For least squares, the order is also the attempted radius of the stencil. </dd></dl>
+
+</div>
+</div>
+<a id="a1b704f5b2ee2d3c793bad139ee847951"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b704f5b2ee2d3c793bad139ee847951">&#9670;&nbsp;</a></span>setWeight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MFHelmholtzElectrostaticEBBCFactory::setWeight </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_weight</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set BC order. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_weight</td><td>Weight for least squares stencils. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>a_weight = 0 can lead to ill-conditioned least-squares systems. </dd></dl>
 
 </div>
 </div>

@@ -134,6 +134,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#a978d5770c56293d5c81c18900c9ca5fa">~MFHelmholtzJumpBCFactory</a> ()</td></tr>
 <tr class="memdesc:a978d5770c56293d5c81c18900c9ca5fa inherit pub_methods_classMFHelmholtzJumpBCFactory"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. <br /></td></tr>
 <tr class="separator:a978d5770c56293d5c81c18900c9ca5fa inherit pub_methods_classMFHelmholtzJumpBCFactory"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5615c25221efb81f32b78e598089e03 inherit pub_methods_classMFHelmholtzJumpBCFactory"><td class="memItemLeft" align="right" valign="top"><a id="ab5615c25221efb81f32b78e598089e03"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#ab5615c25221efb81f32b78e598089e03">setDomainDropOrder</a> (const int a_domainSize)</td></tr>
+<tr class="memdesc:ab5615c25221efb81f32b78e598089e03 inherit pub_methods_classMFHelmholtzJumpBCFactory"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="separator:ab5615c25221efb81f32b78e598089e03 inherit pub_methods_classMFHelmholtzJumpBCFactory"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -141,6 +145,11 @@ Protected Attributes</h2></td></tr>
 phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzSaturationChargeJumpBCFactory.html#aa963ccd36ce59022bc9e18b69fb3efa6">m_phase</a></td></tr>
 <tr class="memdesc:aa963ccd36ce59022bc9e18b69fb3efa6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which phase the saturation BC is applied on. <br /></td></tr>
 <tr class="separator:aa963ccd36ce59022bc9e18b69fb3efa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_classMFHelmholtzJumpBCFactory"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classMFHelmholtzJumpBCFactory')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classMFHelmholtzJumpBCFactory.html">MFHelmholtzJumpBCFactory</a></td></tr>
+<tr class="memitem:adb14c0b2025bdd6d02c8ba9a7c776040 inherit pro_attribs_classMFHelmholtzJumpBCFactory"><td class="memItemLeft" align="right" valign="top"><a id="adb14c0b2025bdd6d02c8ba9a7c776040"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#adb14c0b2025bdd6d02c8ba9a7c776040">m_domainDropOrder</a></td></tr>
+<tr class="memdesc:adb14c0b2025bdd6d02c8ba9a7c776040 inherit pro_attribs_classMFHelmholtzJumpBCFactory"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
+<tr class="separator:adb14c0b2025bdd6d02c8ba9a7c776040 inherit pro_attribs_classMFHelmholtzJumpBCFactory"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Factory class for making saturation charge jump boundary condition objects in multifluid Helmholtz context. </p>

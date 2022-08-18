@@ -123,6 +123,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:af2f74c2f3a86d6016d471afd4f74410d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBC.html#af2f74c2f3a86d6016d471afd4f74410d">setValue</a> (const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_value)</td></tr>
 <tr class="memdesc:af2f74c2f3a86d6016d471afd4f74410d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the value on the EB.  <a href="classEBHelmholtzDirichletEBBC.html#af2f74c2f3a86d6016d471afd4f74410d">More...</a><br /></td></tr>
 <tr class="separator:af2f74c2f3a86d6016d471afd4f74410d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3948127cd47dc88770c08aab54edecf3"><td class="memItemLeft" align="right" valign="top"><a id="a3948127cd47dc88770c08aab54edecf3"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBC.html#a3948127cd47dc88770c08aab54edecf3">setDomainDropOrder</a> (const int a_domainSize)</td></tr>
+<tr class="memdesc:a3948127cd47dc88770c08aab54edecf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="separator:a3948127cd47dc88770c08aab54edecf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa13933810b49adc5b93d7d87f632e6db"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBC.html#aa13933810b49adc5b93d7d87f632e6db">applyEBFlux</a> (VoFIterator &amp;a_vofit, EBCellFAB &amp;a_Lphi, const EBCellFAB &amp;a_phi, const DataIndex &amp;a_dit, const Real &amp;a_beta, const bool &amp;a_homogeneousPhysBC) const override</td></tr>
 <tr class="memdesc:aa13933810b49adc5b93d7d87f632e6db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the EB flux. This is the version that is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>.  <a href="classEBHelmholtzDirichletEBBC.html#aa13933810b49adc5b93d7d87f632e6db">More...</a><br /></td></tr>
 <tr class="separator:aa13933810b49adc5b93d7d87f632e6db"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -196,6 +200,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBC.html#a7f14e885829622f81d447bc64c7782ac">m_weight</a></td></tr>
 <tr class="memdesc:a7f14e885829622f81d447bc64c7782ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Distance weighting factor for stencils. <br /></td></tr>
 <tr class="separator:a7f14e885829622f81d447bc64c7782ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab22c3958abfab71ccec35c98f2f5cdaa"><td class="memItemLeft" align="right" valign="top"><a id="ab22c3958abfab71ccec35c98f2f5cdaa"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBC.html#ab22c3958abfab71ccec35c98f2f5cdaa">m_domainDropOrder</a></td></tr>
+<tr class="memdesc:ab22c3958abfab71ccec35c98f2f5cdaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
+<tr class="separator:ab22c3958abfab71ccec35c98f2f5cdaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb4942ea31a94ade80a0a7a8f42b74e8"><td class="memItemLeft" align="right" valign="top"><a id="acb4942ea31a94ade80a0a7a8f42b74e8"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBC.html#acb4942ea31a94ade80a0a7a8f42b74e8">m_constantValue</a></td></tr>
 <tr class="memdesc:acb4942ea31a94ade80a0a7a8f42b74e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value on EB. <br /></td></tr>

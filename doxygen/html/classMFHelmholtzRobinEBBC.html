@@ -119,6 +119,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a8dca3522d57a8a83d1afb02161240f73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBC.html#a8dca3522d57a8a83d1afb02161240f73">setWeight</a> (const int a_weight)</td></tr>
 <tr class="memdesc:a8dca3522d57a8a83d1afb02161240f73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set equation weights for least squares reconstruction.  <a href="classMFHelmholtzRobinEBBC.html#a8dca3522d57a8a83d1afb02161240f73">More...</a><br /></td></tr>
 <tr class="separator:a8dca3522d57a8a83d1afb02161240f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f16a53292358013556a7f16a8f61d2e"><td class="memItemLeft" align="right" valign="top"><a id="a0f16a53292358013556a7f16a8f61d2e"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBC.html#a0f16a53292358013556a7f16a8f61d2e">setDomainDropOrder</a> (const int a_domainSize)</td></tr>
+<tr class="memdesc:a0f16a53292358013556a7f16a8f61d2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="separator:a0f16a53292358013556a7f16a8f61d2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42719f825d5ee2237466c417f94118bb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBC.html#a42719f825d5ee2237466c417f94118bb">setCoefficients</a> (const Real a_A, const Real a_B, const Real a_C)</td></tr>
 <tr class="memdesc:a42719f825d5ee2237466c417f94118bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set constant coefficients.  <a href="classMFHelmholtzRobinEBBC.html#a42719f825d5ee2237466c417f94118bb">More...</a><br /></td></tr>
 <tr class="separator:a42719f825d5ee2237466c417f94118bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -226,6 +230,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBC.html#a95861ba91f8cd5600aaa02d38ed2c0e5">m_weight</a></td></tr>
 <tr class="memdesc:a95861ba91f8cd5600aaa02d38ed2c0e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencil weight. <br /></td></tr>
 <tr class="separator:a95861ba91f8cd5600aaa02d38ed2c0e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6335755f530d0ac37447f07736c5c800"><td class="memItemLeft" align="right" valign="top"><a id="a6335755f530d0ac37447f07736c5c800"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBC.html#a6335755f530d0ac37447f07736c5c800">m_domainDropOrder</a></td></tr>
+<tr class="memdesc:a6335755f530d0ac37447f07736c5c800"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
+<tr class="separator:a6335755f530d0ac37447f07736c5c800"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af8a287c094c97a1603a093fb4e8528b3"><td class="memItemLeft" align="right" valign="top"><a id="af8a287c094c97a1603a093fb4e8528b3"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBC.html#af8a287c094c97a1603a093fb4e8528b3">m_constantA</a></td></tr>
 <tr class="memdesc:af8a287c094c97a1603a093fb4e8528b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant A-coefficient. <br /></td></tr>
@@ -588,6 +596,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>Source/Elliptic/<a class="el" href="CD__MFHelmholtzRobinEBBC_8H_source.html">CD_MFHelmholtzRobinEBBC.H</a></li>
 <li>Source/Elliptic/CD_MFHelmholtzRobinEBBC.cpp</li>
+<li>Source/Elliptic/<a class="el" href="CD__MFHelmholtzRobinEBBCFactory_8cpp.html">CD_MFHelmholtzRobinEBBCFactory.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

@@ -124,6 +124,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a99a3367610e84391ad5926cf8a084a95"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBC.html#a99a3367610e84391ad5926cf8a084a95">setWeight</a> (const int a_weight)</td></tr>
 <tr class="memdesc:a99a3367610e84391ad5926cf8a084a95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set stencil weight.  <a href="classMFHelmholtzDirichletEBBC.html#a99a3367610e84391ad5926cf8a084a95">More...</a><br /></td></tr>
 <tr class="separator:a99a3367610e84391ad5926cf8a084a95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a097210cd3c432dd39284cdaa130aa63d"><td class="memItemLeft" align="right" valign="top"><a id="a097210cd3c432dd39284cdaa130aa63d"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBC.html#a097210cd3c432dd39284cdaa130aa63d">setDomainDropOrder</a> (const int a_domainSize)</td></tr>
+<tr class="memdesc:a097210cd3c432dd39284cdaa130aa63d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="separator:a097210cd3c432dd39284cdaa130aa63d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classMFHelmholtzEBBC"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classMFHelmholtzEBBC')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classMFHelmholtzEBBC.html">MFHelmholtzEBBC</a></td></tr>
 <tr class="memitem:af15c1cc5e32ebec39aac32ed717260f1 inherit pub_methods_classMFHelmholtzEBBC"><td class="memItemLeft" align="right" valign="top"><a id="af15c1cc5e32ebec39aac32ed717260f1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzEBBC.html#af15c1cc5e32ebec39aac32ed717260f1">MFHelmholtzEBBC</a> ()=delete</td></tr>
@@ -227,6 +231,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBC.html#a4ee90dbb8d15734f0e1c69834742bdf2">m_weight</a></td></tr>
 <tr class="memdesc:a4ee90dbb8d15734f0e1c69834742bdf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencil weight. <br /></td></tr>
 <tr class="separator:a4ee90dbb8d15734f0e1c69834742bdf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adeccbdbeea0a3ad3a164bdb24e5f93e6"><td class="memItemLeft" align="right" valign="top"><a id="adeccbdbeea0a3ad3a164bdb24e5f93e6"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBC.html#adeccbdbeea0a3ad3a164bdb24e5f93e6">m_domainDropOrder</a></td></tr>
+<tr class="memdesc:adeccbdbeea0a3ad3a164bdb24e5f93e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
+<tr class="separator:adeccbdbeea0a3ad3a164bdb24e5f93e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa6640f981f5ba9ae35eb21f70a94f987"><td class="memItemLeft" align="right" valign="top"><a id="aa6640f981f5ba9ae35eb21f70a94f987"></a>
 std::function&lt; Real(const RealVect &amp;a_pos)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBC.html#aa6640f981f5ba9ae35eb21f70a94f987">m_functionValue</a></td></tr>
 <tr class="memdesc:aa6640f981f5ba9ae35eb21f70a94f987"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value on the EB. Does not apply to matching cells. <br /></td></tr>

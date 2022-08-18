@@ -122,6 +122,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a99af7cf90e10ec4ce050727967a19a3e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#a99af7cf90e10ec4ce050727967a19a3e">setValue</a> (const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_value)</td></tr>
 <tr class="memdesc:a99af7cf90e10ec4ce050727967a19a3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the spatially varying value on the EB.  <a href="classMFHelmholtzDirichletEBBCFactory.html#a99af7cf90e10ec4ce050727967a19a3e">More...</a><br /></td></tr>
 <tr class="separator:a99af7cf90e10ec4ce050727967a19a3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10b2e227ac3042557b3832974f12cb4c"><td class="memItemLeft" align="right" valign="top"><a id="a10b2e227ac3042557b3832974f12cb4c"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#a10b2e227ac3042557b3832974f12cb4c">setDomainDropOrder</a> (const int a_domainSize)</td></tr>
+<tr class="memdesc:a10b2e227ac3042557b3832974f12cb4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="separator:a10b2e227ac3042557b3832974f12cb4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab585b45754be6c5d338b641e0b5e2578"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#ab585b45754be6c5d338b641e0b5e2578">create</a> (const int a_iphase, const RefCountedPtr&lt; <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &gt; &amp;a_jumpBC) const override</td></tr>
 <tr class="memdesc:ab585b45754be6c5d338b641e0b5e2578"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method.  <a href="classMFHelmholtzDirichletEBBCFactory.html#ab585b45754be6c5d338b641e0b5e2578">More...</a><br /></td></tr>
 <tr class="separator:ab585b45754be6c5d338b641e0b5e2578"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -157,6 +161,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#afb14de4034c0a21a2e1007fb73ef478c">m_weight</a></td></tr>
 <tr class="memdesc:afb14de4034c0a21a2e1007fb73ef478c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencil weight (for weighted least squares) <br /></td></tr>
 <tr class="separator:afb14de4034c0a21a2e1007fb73ef478c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac22638ca1667780d603390a29ce2e3cc"><td class="memItemLeft" align="right" valign="top"><a id="ac22638ca1667780d603390a29ce2e3cc"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#ac22638ca1667780d603390a29ce2e3cc">m_domainDropOrder</a></td></tr>
+<tr class="memdesc:ac22638ca1667780d603390a29ce2e3cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
+<tr class="separator:ac22638ca1667780d603390a29ce2e3cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9bf4d80480ea375ea384018e26a7f28"><td class="memItemLeft" align="right" valign="top"><a id="ab9bf4d80480ea375ea384018e26a7f28"></a>
 std::function&lt; Real(const RealVect &amp;a_pos)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#ab9bf4d80480ea375ea384018e26a7f28">m_functionValue</a></td></tr>
 <tr class="memdesc:ab9bf4d80480ea375ea384018e26a7f28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value on the EB. <br /></td></tr>

@@ -122,6 +122,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a552a07a2d53f1178c704f37ec456d908"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBCFactory.html#a552a07a2d53f1178c704f37ec456d908">setWeight</a> (const int a_weight)</td></tr>
 <tr class="memdesc:a552a07a2d53f1178c704f37ec456d908"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set equation weights for least squares reconstruction.  <a href="classMFHelmholtzRobinEBBCFactory.html#a552a07a2d53f1178c704f37ec456d908">More...</a><br /></td></tr>
 <tr class="separator:a552a07a2d53f1178c704f37ec456d908"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cb583c9315a279918e5b1c5d6d16aa6"><td class="memItemLeft" align="right" valign="top"><a id="a5cb583c9315a279918e5b1c5d6d16aa6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBCFactory.html#a5cb583c9315a279918e5b1c5d6d16aa6">setDomainDropOrder</a> (const int a_domainSize)</td></tr>
+<tr class="memdesc:a5cb583c9315a279918e5b1c5d6d16aa6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="separator:a5cb583c9315a279918e5b1c5d6d16aa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ddab59c92a5a1de3cf544d2e3fd86af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBCFactory.html#a1ddab59c92a5a1de3cf544d2e3fd86af">setCoefficients</a> (const Real a_A, const Real a_B, const Real a_C)</td></tr>
 <tr class="memdesc:a1ddab59c92a5a1de3cf544d2e3fd86af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set constant Robin BC coefficients.  <a href="classMFHelmholtzRobinEBBCFactory.html#a1ddab59c92a5a1de3cf544d2e3fd86af">More...</a><br /></td></tr>
 <tr class="separator:a1ddab59c92a5a1de3cf544d2e3fd86af"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -158,6 +162,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBCFactory.html#aebfc52f246522cf523b028e40e307109">m_weight</a></td></tr>
 <tr class="memdesc:aebfc52f246522cf523b028e40e307109"><td class="mdescLeft">&#160;</td><td class="mdescRight">Equation weighting (in least squares reconstruction) <br /></td></tr>
 <tr class="separator:aebfc52f246522cf523b028e40e307109"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae40f6e40d6689319db256c4d3b15d9b1"><td class="memItemLeft" align="right" valign="top"><a id="ae40f6e40d6689319db256c4d3b15d9b1"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBCFactory.html#ae40f6e40d6689319db256c4d3b15d9b1">m_domainDropOrder</a></td></tr>
+<tr class="memdesc:ae40f6e40d6689319db256c4d3b15d9b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
+<tr class="separator:ae40f6e40d6689319db256c4d3b15d9b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a232cb8ac6a26629fee933409bb9cd2e3"><td class="memItemLeft" align="right" valign="top"><a id="a232cb8ac6a26629fee933409bb9cd2e3"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzRobinEBBCFactory.html#a232cb8ac6a26629fee933409bb9cd2e3">m_constantA</a></td></tr>
 <tr class="memdesc:a232cb8ac6a26629fee933409bb9cd2e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant A-coefficient. <br /></td></tr>

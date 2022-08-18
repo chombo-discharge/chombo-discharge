@@ -125,6 +125,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:aaa926ea201ffcbca8890d7bff5b665e7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBCFactory.html#aaa926ea201ffcbca8890d7bff5b665e7">setValue</a> (const Real a_value)</td></tr>
 <tr class="memdesc:aaa926ea201ffcbca8890d7bff5b665e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the value on the EB.  <a href="classEBHelmholtzDirichletEBBCFactory.html#aaa926ea201ffcbca8890d7bff5b665e7">More...</a><br /></td></tr>
 <tr class="separator:aaa926ea201ffcbca8890d7bff5b665e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af100d3dcc4ebd815d46c70c33e52a6dc"><td class="memItemLeft" align="right" valign="top"><a id="af100d3dcc4ebd815d46c70c33e52a6dc"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBCFactory.html#af100d3dcc4ebd815d46c70c33e52a6dc">setDomainDropOrder</a> (const int a_domainSize)</td></tr>
+<tr class="memdesc:af100d3dcc4ebd815d46c70c33e52a6dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
+<tr class="separator:af100d3dcc4ebd815d46c70c33e52a6dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac01e3dcb67493fcd742aa23aa5712eed"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBCFactory.html#ac01e3dcb67493fcd742aa23aa5712eed">setValue</a> (const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_value)</td></tr>
 <tr class="memdesc:ac01e3dcb67493fcd742aa23aa5712eed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the spatially varying value on the EB.  <a href="classEBHelmholtzDirichletEBBCFactory.html#ac01e3dcb67493fcd742aa23aa5712eed">More...</a><br /></td></tr>
 <tr class="separator:ac01e3dcb67493fcd742aa23aa5712eed"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -168,6 +172,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBCFactory.html#a17bcd7bcfa1fe392ac919bd07025caba">m_weight</a></td></tr>
 <tr class="memdesc:a17bcd7bcfa1fe392ac919bd07025caba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencil weighting. <br /></td></tr>
 <tr class="separator:a17bcd7bcfa1fe392ac919bd07025caba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaec2bc63ab055a537c764726789b2f40"><td class="memItemLeft" align="right" valign="top"><a id="aaec2bc63ab055a537c764726789b2f40"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBCFactory.html#aaec2bc63ab055a537c764726789b2f40">m_domainDropOrder</a></td></tr>
+<tr class="memdesc:aaec2bc63ab055a537c764726789b2f40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
+<tr class="separator:aaec2bc63ab055a537c764726789b2f40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83b5eb2dbacb6dc280a4841b5c6391fb"><td class="memItemLeft" align="right" valign="top"><a id="a83b5eb2dbacb6dc280a4841b5c6391fb"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDirichletEBBCFactory.html#a83b5eb2dbacb6dc280a4841b5c6391fb">m_constantValue</a></td></tr>
 <tr class="memdesc:a83b5eb2dbacb6dc280a4841b5c6391fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value on EB. <br /></td></tr>

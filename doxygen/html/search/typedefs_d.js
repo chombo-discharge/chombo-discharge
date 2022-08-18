@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['vec3_5987',['Vec3',['../classSignedDistanceBVH.html#aa5a0ee53400e0a5cb2d997ae03350bb2',1,'SignedDistanceBVH']]]
+  ['vec3_5991',['Vec3',['../classSignedDistanceBVH.html#aa5a0ee53400e0a5cb2d997ae03350bb2',1,'SignedDistanceBVH']]]
 ];
