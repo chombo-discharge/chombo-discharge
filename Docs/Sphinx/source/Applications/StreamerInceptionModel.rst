@@ -51,7 +51,7 @@ The critical volume is calculated by adding the volumes of the cells where :math
 
 The inception voltage is solved by linear interpolation between the :math:`K` values for the different voltage levels. It is computed for every :math:`\mathbf{x}`, i.e. every cell in the grid, where :math:`min(K)<=K_c` and :math:`max(K)>K_c`. Inception voltages are only computed when there are at least two voltage levels, for obvious reasons.
 
-SOMETHING ABOUT INCEPTION PROBABILITY HERE?
+The probability of inception, i.e. that an electron appears within the critical volume in an interval :math:`[t, t + \Delta t]`, is computed assuming the background ionization rate is only affected by field emission and detachment of electrons from negatively charged ions. 
 
 Effective ionization coefficient
 ---------------------------------
@@ -94,7 +94,7 @@ For example:
 Print report
 -------------
 
-Use ``StreamerInceptionStepper.print_report`` to print out values at the end of the simulation.
+Use ``StreamerInceptionStepper.print_report`` to print out values for voltages, maximum :math:`K`, critical volume, and Rdot (time to appearance of electrons within the critical volume)  at the end of the simulation.
 For example:
 
 .. code-block:: bash
