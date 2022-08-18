@@ -89,6 +89,7 @@ FieldSolverMultigrid.gmg_max_iter      = 32        # Maximum number of iteration
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10    # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2       # Solver hang
 FieldSolverMultigrid.gmg_min_cells     = 4         # Bottom drop
+FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2         # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 2         # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2         # Boundary condition order for jump conditions

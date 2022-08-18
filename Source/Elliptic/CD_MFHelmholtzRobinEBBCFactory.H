@@ -74,6 +74,12 @@ public:
   setWeight(const int a_weight);
 
   /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  void
+  setDomainDropOrder(const int a_domainSize);
+
+  /*!
     @brief Set constant Robin BC coefficients
     @param[in] a_A A-coefficient
     @param[in] a_B B-coefficient
@@ -120,6 +126,11 @@ protected:
     @brief Equation weighting (in least squares reconstruction)
   */
   int m_weight;
+
+  /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;
 
   /*!
     @brief Constant A-coefficient
