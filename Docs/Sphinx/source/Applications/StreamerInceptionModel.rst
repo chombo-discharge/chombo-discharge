@@ -3,7 +3,7 @@
 Streamer inception
 ==================
 
-The streamer inception model solves the integral
+The streamer inception model solves the avalanche integral
 
 .. math::
 
@@ -20,7 +20,7 @@ In addition to the above, the user can specify a critical threshold value for :m
 
 * The critical volume :math:`V_c = \int_{K>K_c} \textrm{d}V`.
 * The inception voltage :math:`U_c`.
-* The drift times :math: `t_d`.
+* The drift times :math:`t_d`.
 
 Solvers
 -------
@@ -33,13 +33,13 @@ The streamer inception model uses
 Implementation
 --------------
 
-``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell and is integrated along the electric field lines until the particle exits the domain or the ionization coefficient :math:`\alpha(E)` becomes negative. The integration is executed with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration. 
+``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell and integrated along the electric field lines until the particle exits the domain or the effective ionization coefficient :math:`\alpha(E)` becomes negative. The integration is executed with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration. 
 
 
-Ionization coefficient
+Effective ionization coefficient
 ----------------------
 
-To set the ionization coefficient, use the member function
+To set the effective ionization coefficient, use the member function
 
 .. code-block:: c++
 
@@ -87,7 +87,7 @@ Plot variables
 
 ``StreamerInceptionStepper.plt_vars`` sets which variables are plotted in the simulation.
 The options are:
-
+  
 * "poisson" - electric field
 * "tracer" - particles
 * "neg_ions"
