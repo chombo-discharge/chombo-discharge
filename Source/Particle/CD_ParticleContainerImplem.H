@@ -84,8 +84,8 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   // Do the define stuff.
   this->setupGrownGrids(base, m_finestLevel);
   this->setupPVR(base, m_finestLevel);
-  this->setupParticleData(base, m_finestLevel);
   this->setupRefinedGrids(base, m_finestLevel);
+  this->setupParticleData(base, m_finestLevel);  
 
   m_isDefined    = true;
   m_isCellSorted = false;
@@ -101,6 +101,39 @@ ParticleContainer<P>::setupGrownGrids(const int a_base, const int a_finestLevel)
   //       when we want to fetch particles that lie on the coarse grid of a refinement boundary.
 
   m_grownGrids.resize(1 + a_finestLevel);
+
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl    = m_grids[lvl];
+    const ProblemDomain&     domain = m_domains[lvl];
+
+    // Grow boxes by refinement factor on the finer levels.
+    Vector<Box> boxes = dbl.boxArray();
+    if (lvl > 0) {
+      for (auto& box : boxes.stdVector()) {
+        box.grow(m_refRat[lvl - 1]);
+        box &= domain;
+      }
+    }
+
+    m_grownGrids[lvl] = BoxLayout(boxes, dbl.procIDs());
+  }
+}
+
+template <class P>
+void
+ParticleContainer<P>::setupRefinedGrids(const int a_base, const int a_finestLevel)
+{
+  CH_TIME("ParticleContainer<P>::setupRefinedGrids");
+
+  // TLDR: To transfer particles from a coarse level to a finer level whenever they fall off a mask, we need to keep a coarsened 
+  // TLDR: This routine sets up the buffer grids which can be used when we need to fetch particles that fall off each levels' grid. This is very useful
+  //       when we want to fetch particles that lie on the coarse grid of a refinement boundary.
+
+  m_grownGrids.resize(1 + a_finestLevel);
+
+  for (int lvl = a_base; lvl < std::max(a_finestLevel, m_finestLevel); lvl++) {
+    BoxL
+  }
 
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl    = m_grids[lvl];
@@ -740,6 +773,7 @@ ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContainer)
   CH_TIME("ParticleContainer<P>::transferParticles");
 
   CH_assert(m_isDefined);
+  CH_assert(this->getRealm() == a_otherContainer.getRealm());
 
   if (m_isCellSorted) {
     MayDay::Error("ParticleContainer<P>::transferParticles(ParticleContainer<P>) - particles are sorted by cell!");
@@ -757,11 +791,12 @@ ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContainer)
 
   // Ok, transfer the particles.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    constexpr bool flipMask = false;
-    
-    collectValidParticles(a_otherContainer[lvl], *m_particles[lvl], m_pvr[lvl]->mask(), m_dx[lvl], 1, flipMask, m_probLo);
+    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
+      List<P>& myParticles = (*m_particles[lvl])[dit()].listItems();
+      List<P>& otherParticles = (*m_particles[lvl])[dit()].listItems();
 
-    a_otherContainer[lvl].remapOutcast();
+      myParticles.catenate(otherParticles);
+    }
   }
 }
 

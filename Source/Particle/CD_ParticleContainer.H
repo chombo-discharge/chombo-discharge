@@ -564,12 +564,6 @@ protected:
   Vector<BoxLayout> m_grownGrids;
 
   /*!
-    @brief Refinements of the AMR grids
-    @note Last element not defined!
-  */
-  Vector<BoxLayout> m_refinedGrids;
-
-  /*!
     @brief Resolutions on each grid level
   */
   Vector<RealVect> m_dx;
