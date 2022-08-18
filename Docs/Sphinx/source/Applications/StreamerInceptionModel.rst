@@ -91,15 +91,22 @@ For example:
 
 		StreamerInceptionStepper.inception_alg = trapz fixed 0.2
 
-Print report
--------------
+Print report & output file
+---------------------------
 
-Use ``StreamerInceptionStepper.print_report`` to print out values for voltages, maximum :math:`K`, critical volume, and Rdot (time to appearance of electrons within the critical volume)  at the end of the simulation.
+Use ``StreamerInceptionStepper.print_report`` to save the values for voltages, maximum :math:`K`, critical volume, and Rdot (time to appearance of electrons within the critical volume)  at the end of the simulation.
 For example:
 
 .. code-block:: bash
 
    StreamerInceptionStepper.print_report = true
+
+The report is stored to the file specified by ``StreamerInceptionStepper.output_file``, for example:
+
+.. code-block:: bash
+
+   StreamerInceptionStepper.output_file = report.txt
+
 
 Plot variables
 ---------------
