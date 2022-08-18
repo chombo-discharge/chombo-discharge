@@ -85,6 +85,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   this->setupGrownGrids(base, m_finestLevel);
   this->setupPVR(base, m_finestLevel);
   this->setupParticleData(base, m_finestLevel);
+  this->setupRefinedGrids(base, m_finestLevel);
 
   m_isDefined    = true;
   m_isCellSorted = false;
@@ -576,7 +577,7 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
                           m_pvr[lvl]->mask(),
                           m_dx[lvl],
                           m_refRat[lvl - 1],
-                          false,
+                          flipMask,
                           m_probLo);
 
     m_particles[lvl]->remapOutcast();
@@ -756,7 +757,9 @@ ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContainer)
 
   // Ok, transfer the particles.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    collectValidParticles(a_otherContainer[lvl], *m_particles[lvl], m_pvr[lvl]->mask(), m_dx[lvl], 1, false, m_probLo);
+    constexpr bool flipMask = false;
+    
+    collectValidParticles(a_otherContainer[lvl], *m_particles[lvl], m_pvr[lvl]->mask(), m_dx[lvl], 1, flipMask, m_probLo);
 
     a_otherContainer[lvl].remapOutcast();
   }
