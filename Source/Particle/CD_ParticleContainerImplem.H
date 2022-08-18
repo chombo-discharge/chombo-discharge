@@ -32,6 +32,7 @@ ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids
                                         const Vector<ProblemDomain>&     a_domains,
                                         const Vector<Real>&              a_dx,
                                         const Vector<int>&               a_refRat,
+					const Vector<ValidMask>&         a_validMask,					
                                         const RealVect&                  a_probLo,
                                         const int                        a_blockingFactor,
                                         const int                        a_finestLevel,
@@ -40,7 +41,7 @@ ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids
 {
   CH_TIME("ParticleContainer<P>::ParticleContainer");
 
-  this->define(a_grids, a_domains, a_dx, a_refRat, a_probLo, a_blockingFactor, a_finestLevel, a_pvrBuffer, a_realm);
+  this->define(a_grids, a_domains, a_dx, a_refRat, a_validMask, a_probLo, a_blockingFactor, a_finestLevel, a_pvrBuffer, a_realm);
 }
 
 template <class P>
@@ -55,6 +56,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
                              const Vector<ProblemDomain>&     a_domains,
                              const Vector<Real>&              a_dx,
                              const Vector<int>&               a_refRat,
+			     const Vector<ValidMask>&         a_validMask,			     
                              const RealVect&                  a_probLo,
                              const int                        a_blockingFactor,
                              const int                        a_finestLevel,
@@ -68,6 +70,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   m_grids          = a_grids;
   m_domains        = a_domains;
   m_refRat         = a_refRat;
+  m_validRegion    = a_validMask;
   m_probLo         = a_probLo;
   m_finestLevel    = a_finestLevel;
   m_pvrBuffer      = a_pvrBuffer;
@@ -145,33 +148,7 @@ ParticleContainer<P>::setupPVR(const int a_base, const int a_finestLevel)
     }
   }
 
-  // TLDR: This sets up the particle masks on each grid; this is basically a bootleg of Chombo's ParticleValidRegion.
-
-  // Set up the "regular" particle valid region. 
-  for (int lvl = a_base; lvl <= a_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_grids[lvl];
-
-    // Initialize with only ghost cells set to false.
-    LevelData<BaseFab<bool> > tmpValid(dbl, 1, IntVect::Unit);
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      tmpValid[dit()].setVal(false);
-      tmpValid[dit()].setVal(true, dbl[dit()], 0);      
-    }
-
-    if(lvl > 0) {
-      DisjointBoxLayout dblCoFi;
-      coarsen(dblCoFi, dbl, m_refRatio[lvl-1]);
-
-      LevelData<BaseFab<bool> > coarsenedValid(dblCoFi, 1);
-      m_validRegion[lvl-1]->copyTo(coarsenedValid);
-      
-      for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-	for (BoxIterator bit(dblCoFi[dit()]); bit.ok(); ++bit) {
-	  const IntVect coarseCell = coarsen(bit(), m_refRat[lvl-1]);
-	}
-      }
-    }
-  }
+  
 }
 
 template <class P>

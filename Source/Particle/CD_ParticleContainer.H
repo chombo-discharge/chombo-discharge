@@ -52,6 +52,9 @@ template <class P>
 class ParticleContainer
 {
 public:
+
+  using ValidMask = RefCountedPtr<LevelData<BaseFab<bool>>>;
+  
   /*!
     @brief Default constructor. Leaves object in undefined state. 
   */
@@ -63,6 +66,7 @@ public:
     @param[in] a_domains        AMR domains
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
+    @param[in] a_validMask      Valid cells (false for cells covered by a finer grid)
     @param[in] a_probLo         Lower-left corner of the physical domain
     @param[in] a_blockingFactor Grid blocking factor
     @param[in] a_finestLevel    Finest grid level
@@ -73,6 +77,7 @@ public:
                     const Vector<ProblemDomain>&     a_domains,
                     const Vector<Real>&              a_dx,
                     const Vector<int>&               a_refRat,
+		    const Vector<ValidMask>&         a_validMask,
                     const RealVect&                  a_probLo,
                     const int                        a_blockingFactor,
                     const int                        a_finestLevel,
@@ -90,6 +95,7 @@ public:
     @param[in] a_domains        AMR domains
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
+    @param[in] a_validMask      Valid cells (false for cells covered by a finer grid)
     @param[in] a_probLo         Lower-left corner of the physical domain
     @param[in] a_blockingFactor Grid blocking factor
     @param[in] a_finestLevel    Finest grid level
@@ -101,6 +107,7 @@ public:
          const Vector<ProblemDomain>&     a_domains,
          const Vector<Real>&              a_dx,
          const Vector<int>&               a_refRat,
+	 const Vector<ValidMask>&         a_validMask,	 
          const RealVect&                  a_probLo,
          const int                        a_blockingFactor,
          const int                        a_finestLevel,
@@ -559,6 +566,17 @@ protected:
   Vector<ProblemDomain> m_domains;
 
   /*!
+    @brief Map of valid cells; evaluates to false if a cell is covered by a finer grid. 
+  */
+  Vector<ValidMask> m_validRegion;
+
+  /*!
+    @brief Refinement valid regions. 
+    @note Used for transferring particles between levels
+  */
+  Vector<ValidMask> m_refinedValidRegion;
+
+  /*!
     @brief Grown layouts
   */
   Vector<BoxLayout> m_grownGrids;
@@ -614,17 +632,6 @@ protected:
     @brief Valid region for each AMR level
   */
   AMRPVR m_pvr;
-
-  /*!
-    @brief Valid particle region on each level.
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<bool> > > > m_validRegion;
-
-  /*!
-    @brief Refinement of the particle valid region
-    @note Last element not defined. 
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<bool> > > > m_refinedValidRegion;  
 
   /*!
     @brief Set up grown grids
