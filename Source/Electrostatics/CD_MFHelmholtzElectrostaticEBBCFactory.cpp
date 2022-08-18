@@ -24,7 +24,7 @@ MFHelmholtzElectrostaticEBBCFactory::MFHelmholtzElectrostaticEBBCFactory(const i
   CH_assert(a_weight >= 0);
 
   this->setOrder(a_order);
-  this->setWeight(a_weight);  
+  this->setWeight(a_weight);
   this->setDomainDropOrder(-1);
 
   m_electrostaticBCs = a_electrostaticBCs;
