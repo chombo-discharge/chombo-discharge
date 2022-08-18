@@ -91,7 +91,7 @@ The options are:
 .. code-block:: bash
 
    poisson   # Electric field
-   tracer    # particles
+   tracer    # Particles
    neg_ions  #
    K         # Inception integral
    Uinc      # Inception voltage
@@ -100,16 +100,6 @@ The options are:
    alpha     # Effective ionization coefficient
    eta       # Eta coefficient
 
-
-* "poisson" - electric field
-* "tracer" - particles
-* "neg_ions"
-* "K" - inception integral
-* "Uinc" - inception voltage
-* "bg_rate" - background ionization
-* "emission" - field emission
-* "alpha" - effective ionization coefficient
-* "eta" - eta coefficient
 
 For example:
 
