@@ -20,7 +20,7 @@ In addition to the above, the user can specify a critical threshold value for :m
 
 * The critical volume :math:`V_c = \int_{K>K_c} \textrm{d}V`.
 * The inception voltage :math:`U_c`.
-* The inception probability :math:`dP(t,t+\Delta t) = [1-P(t)] \int_{V_{c}}^{\frac{dn_e}{dt}(1-\frac{\eta}{\alpha}}) dV \Delta t`.
+* The inception probability :math:`dP(t,t+\Delta t) = [1-P(t)] \int_{V_{c}} \frac{dn_e}{dt}(1-\frac{\eta}{\alpha}}) dV \Delta t`.
 
 Solvers
 -------
@@ -38,8 +38,6 @@ Implementation
 The critical volume is calculated by adding the volumes of the cells where :math:`K>=K_c`.
 
 The inception voltage is solved by linear interpolation between the :math:`K` values for the different voltage levels. It is computed for every :math:`\mathbf{x}`, i.e. every cell in the grid, where :math:`min(K)<=K_c` and :math:`max(K)>K_c`. Inception voltages are only computed when there are at least two voltage levels, for obvious reasons.
-
-
 
 
 Effective ionization coefficient
@@ -60,6 +58,8 @@ For example:
    const auto alpha = [](const Real E) -> Real {
       return 1/E;
    }
+
+   
 
    inceptionStepper.setAlpha(alpha);
 
@@ -106,6 +106,8 @@ The options are:
    alpha     # Effective ionization coefficient
    eta       # Eta coefficient
 
+* ``poisson`` - Electric field
+* ``tracer`` - Particles
 
 For example:
 
