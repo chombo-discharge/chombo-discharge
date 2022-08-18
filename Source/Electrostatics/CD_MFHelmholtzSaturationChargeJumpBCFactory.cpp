@@ -39,13 +39,21 @@ MFHelmholtzSaturationChargeJumpBCFactory::create(const Location::Cell a_dataLoca
                                                  const int            a_radius,
                                                  const int            a_ghostCF)
 {
+  int order = a_order;
+
+  // Drop order if we must
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if(a_mflg.getDomain().size()[dir] <= m_domainDropOrder) {
+      order = 1;
+    }
+  }  
 
   return RefCountedPtr<MFHelmholtzJumpBC>(new MFHelmholtzSaturationChargeJumpBC(m_phase,
                                                                                 a_dataLocation,
                                                                                 a_mflg,
                                                                                 a_Bcoef,
                                                                                 a_dx,
-                                                                                a_order,
+                                                                                order,
                                                                                 a_weight,
                                                                                 a_radius,
                                                                                 a_ghostCF));

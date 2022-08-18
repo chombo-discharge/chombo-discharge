@@ -463,9 +463,6 @@ FieldSolverMultigrid::setupHelmholtzFactory()
   // boundary condition objects and factories.
   auto ebbcFactory = RefCountedPtr<MFHelmholtzElectrostaticEBBCFactory>
     (new MFHelmholtzElectrostaticEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebBc));
-
-  ebbcFactory->setDomainDropOrder(m_domainDropOrder);
-
   
   auto domainBcFactory =
     RefCountedPtr<MFHelmholtzDomainBCFactory>(new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
@@ -484,6 +481,11 @@ FieldSolverMultigrid::setupHelmholtzFactory()
     break;
   }
   }
+
+  // Drop order stuff for EB stencils -- can facilitate safer GMG relaxations
+  // on deeper multigrid levels. 
+  ebbcFactory->setDomainDropOrder(m_domainDropOrder);  
+  jumpBcFactory->setDomainDropOrder(m_domainDropOrder);
 
   // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to zero
   // so there is no diagonal term in the operator after all.

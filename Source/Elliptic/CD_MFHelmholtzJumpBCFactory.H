@@ -57,6 +57,19 @@ public:
          const int            a_weight,
          const int            a_radius,
          const int            a_ghostCF);
+
+  /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  virtual
+  void setDomainDropOrder(const int a_domainSize);      
+
+protected:
+  
+  /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;    
 };
 
 #include <CD_NamespaceFooter.H>
