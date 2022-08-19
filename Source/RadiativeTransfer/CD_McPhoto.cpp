@@ -300,7 +300,7 @@ McPhoto::parseDeposition()
     MayDay::Error("McPhoto::parseDeposition - unsupported interpolant requested");
   }
 
-  pp.get("depositon_cf", str);
+  pp.get("deposition_cf", str);
   if (str == "interp") {
     m_coarseFineDeposition = CoarseFineDeposition::Interp;
   }
