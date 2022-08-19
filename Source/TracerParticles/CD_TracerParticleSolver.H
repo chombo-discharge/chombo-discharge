@@ -327,12 +327,8 @@ protected:
   int m_verbosity;
 
   /*!
-    @brief PVR buffer for particle deposition. 
-  */
-  int m_pvrBuffer;
-
-  /*!
     @brief Halo buffer for particle deposition. 
+    @details Used when fetching particles around the refinement boundary. 
   */
   int m_haloBuffer;
 

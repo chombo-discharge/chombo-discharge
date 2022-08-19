@@ -32,12 +32,12 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
   m_className     = "TracerParticleSolver";
   m_realm         = Realm::primal;
   m_phase         = phase::gas;
-  m_pvrBuffer     = 0;
   m_haloBuffer    = 1;
   m_plotVelocity  = true;
   m_plotMass      = true;
   m_volumeScale   = false;
   m_deposition    = DepositionType::CIC;
+  m_coarseFineDeposition = CoarseFineDeposition::Halo;
   m_velocityField = nullptr;
 }
 
@@ -102,20 +102,26 @@ TracerParticleSolver<P>::parseDeposition()
   // Deposition for particle-mesh operations
   pp.get("deposition", str);
   if (str == "ngp") {
-    m_haloBuffer = 0;
-
     m_deposition           = DepositionType::NGP;
-    m_coarseFineDeposition = CoarseFineDeposition::Interp;
   }
   else if (str == "cic") {
-    m_haloBuffer = 1;
-
     m_deposition           = DepositionType::CIC;
     m_coarseFineDeposition = CoarseFineDeposition::Halo;
   }
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown deposition method requested.");
   }
+
+  pp.get("deposition_cf", str);
+  if(str == "interp") {
+    m_coarseFineDeposition = CoarseFineDeposition::Interp;
+  }
+  else if (str == "halo") {
+    m_coarseFineDeposition = CoarseFineDeposition::Halo;
+  }
+  else {
+    MayDay::Error("TracerParticleSolver::parseDeposition - unknown coarse-fine deposition method requested.");
+  }  
 
   pp.get("volume_scale", m_volumeScale);
 }
