@@ -194,8 +194,10 @@ The figure below shows an example of the avalanche integral solved for an |SF6| 
 
 .. |SF6| replace:: SF\ :sub:`6`
 
-.. image:: Exec/Examples/StreamerInception/ElectrodeRoughness/field.png
-   :width: 400
+.. _Fig:field:
+.. figure:: /_static/figures/StreamerInception/field.png
+   :width: 45%
+   :align: center
 
   
 Caveats
