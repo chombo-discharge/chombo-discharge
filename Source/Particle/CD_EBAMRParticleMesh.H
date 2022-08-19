@@ -32,7 +32,7 @@
   well as how to handle coarse-fine boundary conditions and cut-cell deposition. Because of the many degrees of freedom in depositing particles with AMR (and EB), 
   the user must expect to preprocess his particle data before solving. There are thus two "main" ways of handling deposition near refinement boundaries. 
 
-  When specifying CoarseFineDeposition::PVR, the deposition is done by first depositing the data as usual on both levels. On the fine level, there may be mass that
+  When specifying CoarseFineDeposition::Interp, the deposition is done by first depositing the data as usual on both levels. On the fine level, there may be mass that
   hangs over the refinement boundaries; that mass is added to the coarse level. On the coarse level some of the particles will deposit mass into cells that are covered
   by a finer level; that mass is interpolated with piece-wise constant interpolation and added to the fine level. 
 
@@ -40,7 +40,7 @@
   hangs over refinement boundaries is put on the coarse mesh. However, the coarse-level particles are deposited in two separate steps so that the coarse-level particles
   have the same physical widths on the coarse and fine levels. We first deposit ALL the coarse-level particles on the coarse level. Some of these particles (halo particles)
   will have clouds that overlap with the fine level. We take the set of these particles and deposit them directly onto the fine level (via buffers) with 2x or 4x the
-  original particle width (depending on the refinement ratios between the levels). Essentially, this differs CoarseFineDeposition::PVR in the sense that the original 
+  original particle width (depending on the refinement ratios between the levels). Essentially, this differs CoarseFineDeposition::Interp in the sense that the original 
   particle width is maintained on the fine level.
 */
 class EBAMRParticleMesh

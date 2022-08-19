@@ -150,7 +150,7 @@ AmrMesh::allocate(ParticleContainer<T>& a_container, const std::string a_realm) 
                      m_realms[a_realm]->getDomains(),
                      m_realms[a_realm]->getDx(),
                      m_realms[a_realm]->getRefinementRatios(),
-		     m_realms[a_realm]->getValidCells(),
+                     m_realms[a_realm]->getValidCells(),
                      m_probLo,
                      m_blockingFactor,
                      m_finestLevel,

@@ -105,7 +105,7 @@ TracerParticleSolver<P>::parseDeposition()
     m_haloBuffer = 0;
 
     m_deposition           = DepositionType::NGP;
-    m_coarseFineDeposition = CoarseFineDeposition::PVR;
+    m_coarseFineDeposition = CoarseFineDeposition::Interp;
   }
   else if (str == "cic") {
     m_haloBuffer = 1;
@@ -591,13 +591,13 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
   CH_assert(a_phi[0]->nComp() == 1);
 
   switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::PVR: {
+  case CoarseFineDeposition::Interp: {
     m_amr->depositParticles<T, particleScalarFunction>(a_phi,
                                                        m_realm,
                                                        m_phase,
                                                        a_particles,
                                                        a_baseDeposition,
-                                                       CoarseFineDeposition::PVR,
+                                                       CoarseFineDeposition::Interp,
                                                        false);
 
     break;

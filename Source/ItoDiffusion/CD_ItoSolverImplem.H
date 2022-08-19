@@ -202,7 +202,7 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
   // Figure out how to handle the coarse-fine deposition.
   CoarseFineDeposition coarseFineDeposition;
   if (m_pvrBuffer > 0) {
-    coarseFineDeposition = CoarseFineDeposition::PVR;
+    coarseFineDeposition = CoarseFineDeposition::Interp;
   }
   else if (m_haloBuffer > 0) {
     if (m_forceHaloNGP) {
@@ -219,13 +219,13 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
   // Now do the deposition. Recall that when we deposit with "halos", we need to fetch the subset of coarse-level particles that surround the
   // refinement boundary.
   switch (coarseFineDeposition) {
-  case CoarseFineDeposition::PVR:
+  case CoarseFineDeposition::Interp:
     m_amr->depositParticles<P, particleScalarField>(a_phi,
                                                     m_realm,
                                                     m_phase,
                                                     a_particles,
                                                     a_deposition,
-                                                    CoarseFineDeposition::PVR,
+                                                    CoarseFineDeposition::Interp,
                                                     m_forceIrregDepositionNGP);
     break;
   case CoarseFineDeposition::Halo: {
@@ -290,7 +290,7 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
   // Figure out how to handle the coarse-fine deposition.
   CoarseFineDeposition coarseFineDeposition;
   if (m_pvrBuffer > 0) {
-    coarseFineDeposition = CoarseFineDeposition::PVR;
+    coarseFineDeposition = CoarseFineDeposition::Interp;
   }
   else if (m_haloBuffer > 0) {
     if (m_forceHaloNGP) {
@@ -307,13 +307,13 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
   // Now do the deposition. Recall that when we deposit with "halos", we need to fetch the subset of coarse-level particles that surround the
   // refinement boundary.
   switch (coarseFineDeposition) {
-  case CoarseFineDeposition::PVR:
+  case CoarseFineDeposition::Interp:
     m_amr->depositParticles<P, particleScalarField>(a_phi,
                                                     m_realm,
                                                     m_phase,
                                                     a_particles,
                                                     a_deposition,
-                                                    CoarseFineDeposition::PVR,
+                                                    CoarseFineDeposition::Interp,
                                                     m_forceIrregDepositionNGP);
     break;
   case CoarseFineDeposition::Halo: {

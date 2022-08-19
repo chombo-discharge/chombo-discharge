@@ -37,7 +37,7 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   CH_assert(a_meshData[0]->nComp() == 1);
 
   switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::PVR: {
+  case CoarseFineDeposition::Interp: {
     this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
@@ -75,7 +75,7 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   CH_assert(a_meshData[0]->nComp() == 1);
 
   switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::PVR: {
+  case CoarseFineDeposition::Interp: {
     this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
@@ -112,7 +112,7 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
   switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::PVR: {
+  case CoarseFineDeposition::Interp: {
     this->depositPVR<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
@@ -148,7 +148,7 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
   switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::PVR: {
+  case CoarseFineDeposition::Interp: {
     this->depositPVR<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;

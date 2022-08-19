@@ -47,9 +47,8 @@ template <class P>
 class ParticleContainer
 {
 public:
-
   using ValidMask = RefCountedPtr<LevelData<BaseFab<bool>>>;
-  
+
   /*!
     @brief Default constructor. Leaves object in undefined state. 
   */
@@ -71,7 +70,7 @@ public:
                     const Vector<ProblemDomain>&     a_domains,
                     const Vector<Real>&              a_dx,
                     const Vector<int>&               a_refRat,
-		    const Vector<ValidMask>&         a_validMask,
+                    const Vector<ValidMask>&         a_validMask,
                     const RealVect&                  a_probLo,
                     const int                        a_blockingFactor,
                     const int                        a_finestLevel,
@@ -99,7 +98,7 @@ public:
          const Vector<ProblemDomain>&     a_domains,
          const Vector<Real>&              a_dx,
          const Vector<int>&               a_refRat,
-	 const Vector<ValidMask>&         a_validMask,	 
+         const Vector<ValidMask>&         a_validMask,
          const RealVect&                  a_probLo,
          const int                        a_blockingFactor,
          const int                        a_finestLevel,
@@ -456,7 +455,7 @@ public:
     @param[in]    a_level            Grid level.
   */
   void
-  admitValidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);    
+  admitValidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);
 
   /*!
     @brief Set the particle member to the input value

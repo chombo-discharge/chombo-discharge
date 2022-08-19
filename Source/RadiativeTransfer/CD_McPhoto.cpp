@@ -838,7 +838,7 @@ McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellDa
     // on the part of the coarse grid that is covered by a finer grid. This code removes those photons.
     if (hasCoar) {
 
-      a_photons.evictInvalidParticles(photons[lvl]->outcast(), *photons[lvl-1], lvl-1);
+      a_photons.evictInvalidParticles(photons[lvl]->outcast(), *photons[lvl - 1], lvl - 1);
       photons[lvl]->outcast().clear();
     }
 
@@ -1008,7 +1008,7 @@ McPhoto::depositKappaConservative(EBAMRCellData&                   a_phi,
                                                    m_phase,
                                                    a_photons,
                                                    a_deposition,
-                                                   CoarseFineDeposition::PVR,
+                                                   CoarseFineDeposition::Interp,
                                                    false);
   }
   else if (m_pvrBuffer == 0 && m_haloBuffer > 0) {

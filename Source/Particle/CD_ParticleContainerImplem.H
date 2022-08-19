@@ -32,7 +32,7 @@ ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids
                                         const Vector<ProblemDomain>&     a_domains,
                                         const Vector<Real>&              a_dx,
                                         const Vector<int>&               a_refRat,
-					const Vector<ValidMask>&         a_validMask,					
+                                        const Vector<ValidMask>&         a_validMask,
                                         const RealVect&                  a_probLo,
                                         const int                        a_blockingFactor,
                                         const int                        a_finestLevel,
@@ -55,7 +55,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
                              const Vector<ProblemDomain>&     a_domains,
                              const Vector<Real>&              a_dx,
                              const Vector<int>&               a_refRat,
-			     const Vector<ValidMask>&         a_validMask,			     
+                             const Vector<ValidMask>&         a_validMask,
                              const RealVect&                  a_probLo,
                              const int                        a_blockingFactor,
                              const int                        a_finestLevel,
@@ -81,7 +81,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
 
   // Do the define stuff.
   this->setupGrownGrids(base, m_finestLevel);
-  this->setupParticleData(base, m_finestLevel);  
+  this->setupParticleData(base, m_finestLevel);
 
   m_isDefined    = true;
   m_isCellSorted = false;
@@ -494,7 +494,7 @@ ParticleContainer<P>::addParticles(const List<P>& a_particles)
   // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1
   // and onto the outcast list on level lvl. Then, we remap the outcast list
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl-1], lvl-1);
+    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
 
     m_particles[lvl]->remapOutcast();
   }
@@ -521,7 +521,7 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
   // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1
   // and onto the outcast list on level lvl. Then, we remap the outcast list
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl-1], lvl-1);    
+    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
 
     m_particles[lvl]->remapOutcast();
   }
@@ -702,7 +702,7 @@ ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContainer)
   // Ok, transfer the particles.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      List<P>& myParticles = (*m_particles[lvl])[dit()].listItems();
+      List<P>& myParticles    = (*m_particles[lvl])[dit()].listItems();
       List<P>& otherParticles = (*m_particles[lvl])[dit()].listItems();
 
       myParticles.catenate(otherParticles);
@@ -712,33 +712,34 @@ ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContainer)
 
 template <class P>
 void
-ParticleContainer<P>::evictInvalidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_level) {
+ParticleContainer<P>::evictInvalidParticles(List<P>&         a_evictedParticles,
+                                            ParticleData<P>& a_particles,
+                                            const int        a_level)
+{
   CH_TIME("ParticleContainer::evictInvalidParticles");
 
   const DisjointBoxLayout& dbl = m_grids[a_level];
-  const RealVect dx = m_dx[a_level];
+  const RealVect           dx  = m_dx[a_level];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const BaseFab<bool>& mask = (*m_validRegion[a_level])[dit()];
-    
-    for (ListIterator<P> lit(a_particles[dit()].listItems()); lit.ok(); ) {
 
+    for (ListIterator<P> lit(a_particles[dit()].listItems()); lit.ok();) {
 
       const RealVect x = lit().position();
-      const IntVect iv(D_DECL((int)floor((x[0] - m_probLo[0])/dx[0]),
-			      (int)floor((x[1] - m_probLo[1])/dx[1]),
-			      (int)floor((x[2] - m_probLo[2])/dx[2])));
+      const IntVect  iv(D_DECL((int)floor((x[0] - m_probLo[0]) / dx[0]),
+                              (int)floor((x[1] - m_probLo[1]) / dx[1]),
+                              (int)floor((x[2] - m_probLo[2]) / dx[2])));
 
-      if(mask(iv)) {
-	++lit;
+      if (mask(iv)) {
+        ++lit;
       }
       else {
-	a_evictedParticles.transfer(lit);
+        a_evictedParticles.transfer(lit);
       }
     }
   }
 }
-																	  
 
 template <class P>
 void
@@ -774,7 +775,7 @@ ParticleContainer<P>::remap()
 
     // Collect coarser level particles onto this levels outcast list if they fit in this levels PVR
     if (hasCoar) {
-      this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl-1], lvl-1);
+      this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
 
       // Remap new outcasts
       m_particles[lvl]->remapOutcast();
@@ -784,7 +785,7 @@ ParticleContainer<P>::remap()
     // transfer the particles to the coarser level. Note that there is a chance that these particles do not belong on the
     // coarse levels PVR either, but that is what remapLostParticles is for.
     if (hasCoar) {
-      this->evictInvalidParticles(m_particles[lvl-1]->outcast(), *m_particles[lvl], lvl);
+      this->evictInvalidParticles(m_particles[lvl - 1]->outcast(), *m_particles[lvl], lvl);
 
       //      m_particles[lvl - 1]->gatherOutcast();
       m_particles[lvl - 1]->remapOutcast();
@@ -796,7 +797,7 @@ ParticleContainer<P>::remap()
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     if (m_particles[lvl]->numOutcast() > 0) {
       this->remapLostParticles();
-      
+
       break;
     }
   }
@@ -835,7 +836,7 @@ ParticleContainer<P>::remapLostParticles()
   // Starting from the coarsest level, move the particles into the next finer level. Always respect the PVR, which means that particles on level lvl-1 are
   // transferred to level 'lvl' if the fit in the PVR mask on level 'lvl'.
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl-1], lvl-1);
+    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
 
     m_particles[lvl]->remapOutcast();
   }
