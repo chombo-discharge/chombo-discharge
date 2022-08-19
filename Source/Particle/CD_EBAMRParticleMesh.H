@@ -341,10 +341,10 @@ protected:
   */
   template <class P, const Real& (P::*particleScalarField)() const>
   void
-  depositPVR(EBAMRCellData&              a_meshData,
-             const ParticleContainer<P>& a_particles,
-             const DepositionType        a_depositionType,
-             const bool                  a_forceIrregNGP = false);
+  depositInterp(EBAMRCellData&              a_meshData,
+                const ParticleContainer<P>& a_particles,
+                const DepositionType        a_depositionType,
+                const bool                  a_forceIrregNGP = false);
 
   /*!
     @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 
@@ -356,10 +356,10 @@ protected:
   */
   template <class P, Real (P::*particleScalarField)() const>
   void
-  depositPVR(EBAMRCellData&              a_meshData,
-             const ParticleContainer<P>& a_particles,
-             const DepositionType        a_depositionType,
-             const bool                  a_forceIrregNGP = false);
+  depositInterp(EBAMRCellData&              a_meshData,
+                const ParticleContainer<P>& a_particles,
+                const DepositionType        a_depositionType,
+                const bool                  a_forceIrregNGP = false);
 
   /*!
     @brief Just like the deposit function, but forced to use the "Halo" algorithm for handling refinement boundaries. 
@@ -437,10 +437,10 @@ protected:
   */
   template <class P, const RealVect& (P::*particleScalarField)() const>
   void
-  depositPVR(EBAMRCellData&              a_meshData,
-             const ParticleContainer<P>& a_particles,
-             const DepositionType        a_depositionType,
-             const bool                  a_forceIrregNGP = false);
+  depositInterp(EBAMRCellData&              a_meshData,
+                const ParticleContainer<P>& a_particles,
+                const DepositionType        a_depositionType,
+                const bool                  a_forceIrregNGP = false);
 
   /*!
     @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 
@@ -453,10 +453,10 @@ protected:
   */
   template <class P, RealVect (P::*particleScalarField)() const>
   void
-  depositPVR(EBAMRCellData&              a_meshData,
-             const ParticleContainer<P>& a_particles,
-             const DepositionType        a_depositionType,
-             const bool                  a_forceIrregNGP = false);
+  depositInterp(EBAMRCellData&              a_meshData,
+                const ParticleContainer<P>& a_particles,
+                const DepositionType        a_depositionType,
+                const bool                  a_forceIrregNGP = false);
 
   /*!
     @brief Just like the deposit function, but forced to use the "Halo" algorithm for handling refinement boundaries. 

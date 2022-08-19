@@ -38,7 +38,7 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
   switch (a_coarseFineDeposition) {
   case CoarseFineDeposition::Interp: {
-    this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+    this->depositInterp<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
   }
@@ -76,7 +76,7 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
   switch (a_coarseFineDeposition) {
   case CoarseFineDeposition::Interp: {
-    this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+    this->depositInterp<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
   }
@@ -113,7 +113,7 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
   switch (a_coarseFineDeposition) {
   case CoarseFineDeposition::Interp: {
-    this->depositPVR<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+    this->depositInterp<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
   }
@@ -149,7 +149,7 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
   switch (a_coarseFineDeposition) {
   case CoarseFineDeposition::Interp: {
-    this->depositPVR<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+    this->depositInterp<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
   }
@@ -173,12 +173,12 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
 template <class P, const Real& (P::*particleScalarField)() const>
 void
-EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
-                              const ParticleContainer<P>& a_particles,
-                              const DepositionType        a_depositionType,
-                              const bool                  a_forceIrregNGP)
+EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
+                                 const ParticleContainer<P>& a_particles,
+                                 const DepositionType        a_depositionType,
+                                 const bool                  a_forceIrregNGP)
 {
-  CH_TIME("EBAMRParticleMesh::depositPVR");
+  CH_TIME("EBAMRParticleMesh::depositInterp");
 
   CH_assert(a_meshData[0]->nComp() == 1);
 
@@ -224,12 +224,12 @@ EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
 
 template <class P, Real (P::*particleScalarField)() const>
 void
-EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
-                              const ParticleContainer<P>& a_particles,
-                              const DepositionType        a_depositionType,
-                              const bool                  a_forceIrregNGP)
+EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
+                                 const ParticleContainer<P>& a_particles,
+                                 const DepositionType        a_depositionType,
+                                 const bool                  a_forceIrregNGP)
 {
-  CH_TIME("EBAMRParticleMesh::depositPVR");
+  CH_TIME("EBAMRParticleMesh::depositInterp");
 
   CH_assert(a_meshData[0]->nComp() == 1);
 
@@ -640,12 +640,12 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
 
 template <class P, const RealVect& (P::*particleVectorField)() const>
 void
-EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
-                              const ParticleContainer<P>& a_particles,
-                              const DepositionType        a_depositionType,
-                              const bool                  a_forceIrregNGP)
+EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
+                                 const ParticleContainer<P>& a_particles,
+                                 const DepositionType        a_depositionType,
+                                 const bool                  a_forceIrregNGP)
 {
-  CH_TIME("EBAMRParticleMesh::depositPVR");
+  CH_TIME("EBAMRParticleMesh::depositInterp");
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
@@ -695,12 +695,12 @@ EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
 
 template <class P, RealVect (P::*particleVectorField)() const>
 void
-EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
-                              const ParticleContainer<P>& a_particles,
-                              const DepositionType        a_depositionType,
-                              const bool                  a_forceIrregNGP)
+EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
+                                 const ParticleContainer<P>& a_particles,
+                                 const DepositionType        a_depositionType,
+                                 const bool                  a_forceIrregNGP)
 {
-  CH_TIME("EBAMRParticleMesh::depositPVR");
+  CH_TIME("EBAMRParticleMesh::depositInterp");
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
