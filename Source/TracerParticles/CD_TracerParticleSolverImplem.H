@@ -179,7 +179,7 @@ TracerParticleSolver<P>::allocate()
   }
 
   // Allocate data for storing the velocity field on the mesh, and storage for the particles.
-  m_amr->allocate(m_particles, m_pvrBuffer, m_realm);
+  m_amr->allocate(m_particles, m_realm);
 }
 
 template <typename P>
@@ -588,7 +588,6 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
     pout() << m_name + "::depositParticles()" << endl;
   }
 
-  CH_assert(m_haloBuffer == 0 || m_pvrBuffer == 0);
   CH_assert(a_phi[0]->nComp() == 1);
 
   switch (a_coarseFineDeposition) {

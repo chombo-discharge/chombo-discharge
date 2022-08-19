@@ -446,11 +446,11 @@ McPhoto::allocateInternals()
   m_amr->allocate(m_massDiff, m_realm, m_phase, m_nComp);
 
   // Allocate particle data holders
-  m_amr->allocate(m_photons, m_pvrBuffer, m_realm);
-  m_amr->allocate(m_bulkPhotons, m_pvrBuffer, m_realm);
-  m_amr->allocate(m_ebPhotons, m_pvrBuffer, m_realm);
-  m_amr->allocate(m_domainPhotons, m_pvrBuffer, m_realm);
-  m_amr->allocate(m_sourcePhotons, m_pvrBuffer, m_realm);
+  m_amr->allocate(m_photons, m_realm);
+  m_amr->allocate(m_bulkPhotons, m_realm);
+  m_amr->allocate(m_ebPhotons, m_realm);
+  m_amr->allocate(m_domainPhotons, m_realm);
+  m_amr->allocate(m_sourcePhotons, m_realm);
 }
 
 void
@@ -837,16 +837,8 @@ McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellDa
     // because the next section of code iterates through all boxes on all levels. But we don't want to generate photons
     // on the part of the coarse grid that is covered by a finer grid. This code removes those photons.
     if (hasCoar) {
-      const AMRPVR& pvr    = a_photons.getPVR();
-      const int     refRat = m_amr->getRefinementRatios()[lvl - 1];
 
-      collectValidParticles(photons[lvl]->outcast(),
-                            *photons[lvl - 1],
-                            pvr[lvl]->mask(),
-                            dx * RealVect::Unit,
-                            refRat,
-                            false,
-                            probLo);
+      a_photons.evictInvalidParticles(photons[lvl]->outcast(), *photons[lvl-1], lvl-1);
       photons[lvl]->outcast().clear();
     }
 

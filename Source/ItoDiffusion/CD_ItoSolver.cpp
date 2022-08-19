@@ -947,7 +947,7 @@ ItoSolver::allocateInternals()
   m_particleContainers.emplace(WhichContainer::Scratch, ParticleContainer<ItoParticle>());
 
   for (auto& container : m_particleContainers) {
-    m_amr->allocate(container.second, m_pvrBuffer, m_realm);
+    m_amr->allocate(container.second, m_realm);
   }
 }
 
@@ -994,7 +994,7 @@ ItoSolver::writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level
 
   // Set up a particle container with SimpleItoParticle -- this is ItoParticle's low-memory cousin.
   ParticleContainer<SimpleItoParticle> lowMemoryParticles;
-  m_amr->allocate(lowMemoryParticles, m_pvrBuffer, m_realm);
+  m_amr->allocate(lowMemoryParticles, m_realm);
 
   // Handle to the particles that will be checkpointed.
   const ParticleContainer<ItoParticle>& myParticles = this->getParticles(WhichContainer::Bulk);

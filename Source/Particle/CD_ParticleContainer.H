@@ -38,11 +38,6 @@ template <class P>
 using AMRCellParticles = Vector<RefCountedPtr<LayoutData<BinFab<P>>>>;
 
 /*!
-  @brief Alias for ParticleValidRegion in an AMR context. 
-*/
-using AMRPVR = Vector<RefCountedPtr<ParticleValidRegion>>;
-
-/*!
   @brief Templated class for holding particles on an AMR hierarchy with particle remapping. 
   @details The template parameter P should derive from Chombo's BinItem. 
   @note ParticleContainers are, because of Chombo, restricted to square-block grids. This means
@@ -70,7 +65,6 @@ public:
     @param[in] a_probLo         Lower-left corner of the physical domain
     @param[in] a_blockingFactor Grid blocking factor
     @param[in] a_finestLevel    Finest grid level
-    @param[in] a_pvrBuffer      Buffer region on the fine-side of the refinment boundary where particles can't live. 
     @param[in] a_realm          Realm where these particles live. 
   */
   ParticleContainer(const Vector<DisjointBoxLayout>& a_grids,
@@ -81,7 +75,6 @@ public:
                     const RealVect&                  a_probLo,
                     const int                        a_blockingFactor,
                     const int                        a_finestLevel,
-                    const int                        a_pvrBuffer,
                     const std::string                a_realm);
 
   /*!
@@ -99,7 +92,6 @@ public:
     @param[in] a_probLo         Lower-left corner of the physical domain
     @param[in] a_blockingFactor Grid blocking factor
     @param[in] a_finestLevel    Finest grid level
-    @param[in] a_pvrBuffer      Buffer region on the fine-side of the refinment boundary where particles can't live. 
     @param[in] a_realm          Realm where these particles live. 
   */
   void
@@ -111,7 +103,6 @@ public:
          const RealVect&                  a_probLo,
          const int                        a_blockingFactor,
          const int                        a_finestLevel,
-         const int                        a_pvrBuffer,
          const std::string                a_realm);
 
   /*!
@@ -275,12 +266,6 @@ public:
   getNonMaskParticles() const;
 
   /*!
-    @brief Get PVR region. 
-  */
-  const AMRPVR&
-  getPVR() const;
-
-  /*!
     @brief Get the AMR grids
   */
   const Vector<DisjointBoxLayout>&
@@ -435,13 +420,13 @@ public:
   remap();
 
   /*!
-    @brief Do level remaps. This ignores particles moving between levels and moving out of PVRs. 
+    @brief Do level remaps. This ignores particles moving between levels and moving out of valid regions.
   */
   void
   levelRemap();
 
   /*!
-    @brief Do a level remap. This ignores particles moving between levels and moving out of PVRs. 
+    @brief Do a level remap. This ignores particles moving between levels and moving out of valid regions. 
     @param[in] a_level Grid level
   */
   void
@@ -543,11 +528,6 @@ protected:
   int m_blockingFactor;
 
   /*!
-    @brief PVR buffer. 
-  */
-  int m_pvrBuffer;
-
-  /*!
     @brief Finest grid level
   */
   int m_finestLevel;
@@ -635,25 +615,12 @@ protected:
   AMRCellParticles<P> m_cellSortedParticles;
 
   /*!
-    @brief Valid region for each AMR level
-  */
-  AMRPVR m_pvr;
-
-  /*!
     @brief Set up grown grids
     @param[in] a_base        Base level
     @param[in] a_finestLevel Finest AMR level
   */
   void
   setupGrownGrids(const int a_base, const int a_finestLevel);
-
-  /*!
-    @brief Setup function for the particle valid region
-    @param[in] a_base        Base level
-    @param[in] a_finestLevel Finest AMR level
-  */
-  void
-  setupPVR(const int a_base, const int a_finestLevel);
 
   /*!
     @brief Setup function for the particle data (m_particles and m_maskParticles)

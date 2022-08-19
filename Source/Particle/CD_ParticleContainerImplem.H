@@ -36,12 +36,11 @@ ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids
                                         const RealVect&                  a_probLo,
                                         const int                        a_blockingFactor,
                                         const int                        a_finestLevel,
-                                        const int                        a_pvrBuffer,
                                         const std::string                a_realm)
 {
   CH_TIME("ParticleContainer<P>::ParticleContainer");
 
-  this->define(a_grids, a_domains, a_dx, a_refRat, a_validMask, a_probLo, a_blockingFactor, a_finestLevel, a_pvrBuffer, a_realm);
+  this->define(a_grids, a_domains, a_dx, a_refRat, a_validMask, a_probLo, a_blockingFactor, a_finestLevel, a_realm);
 }
 
 template <class P>
@@ -60,12 +59,9 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
                              const RealVect&                  a_probLo,
                              const int                        a_blockingFactor,
                              const int                        a_finestLevel,
-                             const int                        a_pvrBuffer,
                              const std::string                a_realm)
 {
   CH_TIME("ParticleContainer<P>::~ParticleContainer");
-
-  CH_assert(a_pvrBuffer >= 0);
 
   m_grids          = a_grids;
   m_domains        = a_domains;
@@ -73,7 +69,6 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   m_validRegion    = a_validMask;
   m_probLo         = a_probLo;
   m_finestLevel    = a_finestLevel;
-  m_pvrBuffer      = a_pvrBuffer;
   m_realm          = a_realm;
   m_blockingFactor = a_blockingFactor;
 
@@ -86,7 +81,6 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
 
   // Do the define stuff.
   this->setupGrownGrids(base, m_finestLevel);
-  this->setupPVR(base, m_finestLevel);
   this->setupParticleData(base, m_finestLevel);  
 
   m_isDefined    = true;
@@ -118,34 +112,6 @@ ParticleContainer<P>::setupGrownGrids(const int a_base, const int a_finestLevel)
     }
 
     m_grownGrids[lvl] = BoxLayout(boxes, dbl.procIDs());
-  }
-}
-
-template <class P>
-void
-ParticleContainer<P>::setupPVR(const int a_base, const int a_finestLevel)
-{
-  CH_TIME("ParticleContainer<P>::setupPVR");
-
-  // TLDR: This routine sets up the ParticleValidRegion. The PVR is used when we want to ensure that particles that live on a specific grid
-  //       level are a specified distance away from the refinement boundary.
-
-  m_pvr.resize(1 + a_finestLevel);
-  for (int lvl = a_base; lvl <= a_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_grids[lvl];
-
-    const bool hasCoar = (lvl > 0);
-
-    if (!hasCoar) {
-      constexpr int refRat = 1;
-      constexpr int pvrBuf = 0;
-
-      m_pvr[lvl] = RefCountedPtr<ParticleValidRegion>(new ParticleValidRegion(dbl, nullptr, refRat, pvrBuf));
-    }
-    else {
-      m_pvr[lvl] = RefCountedPtr<ParticleValidRegion>(
-        new ParticleValidRegion(dbl, m_pvr[lvl - 1]->mask(), m_refRat[lvl - 1], m_pvrBuffer));
-    }
   }
 }
 
@@ -223,15 +189,6 @@ ParticleContainer<P>::getRealm() const
 }
 
 template <class P>
-const AMRPVR&
-ParticleContainer<P>::getPVR() const
-{
-  CH_assert(m_isDefined);
-
-  return m_pvr;
-}
-
-template <class P>
 const Vector<DisjointBoxLayout>&
 ParticleContainer<P>::getGrids() const
 {
@@ -270,7 +227,7 @@ ParticleContainer<P>::getBufferParticles()
 {
   CH_assert(m_isDefined);
 
-  return m_particles;
+  return m_bufferParticles;
 }
 
 template <class P>
@@ -279,7 +236,7 @@ ParticleContainer<P>::getBufferParticles() const
 {
   CH_assert(m_isDefined);
 
-  return m_particles;
+  return m_bufferParticles;
 }
 
 template <class P>
@@ -979,7 +936,6 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   }
 
   this->setupGrownGrids(a_lmin, m_finestLevel);
-  this->setupPVR(a_lmin, m_finestLevel);
   this->setupParticleData(a_lmin, m_finestLevel);
 
   const int oldFinestLevel = m_cacheParticles.size() - 1;

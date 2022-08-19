@@ -1256,11 +1256,9 @@ CdrSolver::initialDataParticles()
 
   if (initialParticles.length() > 0) {
 
-    constexpr int pvrBuffer = 0; // No PVR buffer means that particles live in their natural grid cells.
-
     // Make a ParticleContainer<T> and redistribute particles over the AMR hierarchy.
     ParticleContainer<Particle> particles;
-    m_amr->allocate(particles, pvrBuffer, m_realm);
+    m_amr->allocate(particles, m_realm);
     particles.addParticles(m_species->getInitialParticles());
 
     // This function will be called BEFORE initialDataFunction, we it is safe to set m_phi to zero
