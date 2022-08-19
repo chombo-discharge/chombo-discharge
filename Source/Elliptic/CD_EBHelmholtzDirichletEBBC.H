@@ -67,6 +67,12 @@ public:
   setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  virtual void
+  setDomainDropOrder(const int a_domainSize);
+
+  /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
     @param[inout] a_vofit             Iterator for cut-cells
     @param[inout] a_Lphi              Operator kappa*L(phi)
@@ -103,6 +109,11 @@ protected:
     @brief Distance weighting factor for stencils.
   */
   int m_weight;
+
+  /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;
 
   /*!
     @brief Value on EB

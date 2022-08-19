@@ -287,6 +287,11 @@ protected:
   int m_minCellsBottom;
 
   /*!
+    @brief Domain drop order
+  */
+  int m_domainDropOrder;
+
+  /*!
     @brief Set bc order 
   */
   int m_multigridBcOrder;

@@ -89,6 +89,12 @@ public:
   void
   setWeight(const int a_weight);
 
+  /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  void
+  setDomainDropOrder(const int a_domainSize);
+
 protected:
   /*!
     @brief Stencil order
@@ -99,6 +105,11 @@ protected:
     @brief Stencil weight
   */
   int m_weight;
+
+  /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;
 
   /*!
     @brief Electrostatic boundary conditions

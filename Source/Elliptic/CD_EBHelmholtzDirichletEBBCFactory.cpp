@@ -21,10 +21,11 @@ EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory()
 {
   CH_TIME("EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory()");
 
-  m_order       = -1;
-  m_weight      = -1;
-  m_useConstant = false;
-  m_useFunction = false;
+  m_order           = -1;
+  m_weight          = -1;
+  m_domainDropOrder = 0;
+  m_useConstant     = false;
+  m_useFunction     = false;
 }
 
 EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(const int  a_order,
@@ -103,6 +104,14 @@ EBHelmholtzDirichletEBBCFactory::setValue(const std::function<Real(const RealVec
   m_functionValue = a_value;
 }
 
+void
+EBHelmholtzDirichletEBBCFactory::setDomainDropOrder(const int a_domainSize)
+{
+  CH_TIME("EBHelmholtzDirichletEBBCFactory::setDomainDropOrder()");
+
+  m_domainDropOrder = a_domainSize;
+}
+
 RefCountedPtr<EBHelmholtzEBBC>
 EBHelmholtzDirichletEBBCFactory::create()
 {
@@ -121,6 +130,7 @@ EBHelmholtzDirichletEBBCFactory::create()
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);
+  bc->setDomainDropOrder(m_domainDropOrder);
   if (m_useConstant) {
     bc->setValue(m_constantValue);
   }
