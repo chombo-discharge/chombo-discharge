@@ -190,6 +190,14 @@ Example programs that use the streamer inception model are given in
 * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness`.
 * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/Armadillo`.
 
+The figure below shows an example of the avalanche integral solved for an |SF6| gas with an irregular electrode surface:
+
+.. |SF6| replace:: SF\ :sub:`6`
+
+.. image:: chombo-discharge/Exec/Examples/StreamerInception/ElectrodeRoughness/field.png
+   :width: 400
+
+  
 Caveats
 -------
 
