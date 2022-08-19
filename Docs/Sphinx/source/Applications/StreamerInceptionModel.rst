@@ -256,12 +256,13 @@ These are in the format
    StreamerInceptionStepper.voltage_hi    = 10.0  # Highest voltage multiplier
    StreamerInceptionStepper.voltage_steps = 3     # Number of voltage steps
 
-Here, ``voltage_lo`` is the lowest voltage that we solve for, while ``voltage_hi`` is the highest voltage we solve for. ``voltage_steps`` is the number of steps from ``voltage_lo`` to ``voltage_hi``, resulting in ``voltage_steps`` :math:`+1` number of voltages. 
+Here, ``voltage_lo`` is the lowest voltage that we solve for, while ``voltage_hi`` is the highest voltage we solve for. ``voltage_steps`` is the number of steps from ``voltage_lo`` to ``voltage_hi``, resulting in ``voltage_steps + 1`` number of voltage levels. 
 
 Inception threshold
 ^^^^^^^^^^^^^^^^^^^^
 
 Use ``StreamerInceptionStepper.K_inception`` for setting the inception threshold.
+
 For example:
 
 .. code-block:: bash
