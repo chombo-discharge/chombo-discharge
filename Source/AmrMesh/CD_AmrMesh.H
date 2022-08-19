@@ -141,7 +141,6 @@ public:
     @brief Template class for generic allocation of particle containers. 
     @param[out] a_container Particle container to be allocated
     @param[out] a_realm     Realm on which the particles will be allocated. 
-    @note Particles that live within a_pvrBuffer on the fine side of the refinement boundary will be mapped to the coarse level. 
   */
   template <typename T>
   void
