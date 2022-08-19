@@ -1213,7 +1213,7 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
     List<P>&       maskParticles = (*m_maskParticles[a_level])[dit()].listItems();
     const List<P>& particles     = (*m_particles[a_level])[dit()].listItems();
 
-    for (ListIterator<P> lit(particles); lit.ok(); ) {
+    for (ListIterator<P> lit(particles); lit.ok();) {
       const RealVect x  = lit().position();
       const IntVect  iv = IntVect(D_DECL(std::floor((x[0] - m_probLo[0]) / dx[0]),
                                         std::floor((x[1] - m_probLo[1]) / dx[1]),
@@ -1226,12 +1226,11 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
         maskParticles.transfer(lit);
       }
       else {
-	++lit;
+        ++lit;
       }
     }
   }
 }
-
 
 template <class P>
 void

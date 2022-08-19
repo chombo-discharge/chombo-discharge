@@ -385,7 +385,7 @@ protected:
   template <typename T, const Real& (T::*particleScalarFunction)() const>
   void
   depositParticles(EBAMRCellData&             a_phi,
-		   ParticleContainer<T>&      a_particles,
+                   ParticleContainer<T>&      a_particles,
                    const DepositionType       a_baseDeposition,
                    const CoarseFineDeposition a_coarseFineDeposition);
 };

@@ -27,18 +27,18 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
   CH_TIME("TracerParticleSolver::TracerParticleSolver()");
 
   // Default settings
-  m_verbosity     = -1;
-  m_name          = "TracerParticleSolver";
-  m_className     = "TracerParticleSolver";
-  m_realm         = Realm::primal;
-  m_phase         = phase::gas;
-  m_haloBuffer    = 1;
-  m_plotVelocity  = true;
-  m_plotMass      = true;
-  m_volumeScale   = false;
-  m_deposition    = DepositionType::CIC;
+  m_verbosity            = -1;
+  m_name                 = "TracerParticleSolver";
+  m_className            = "TracerParticleSolver";
+  m_realm                = Realm::primal;
+  m_phase                = phase::gas;
+  m_haloBuffer           = 1;
+  m_plotVelocity         = true;
+  m_plotMass             = true;
+  m_volumeScale          = false;
+  m_deposition           = DepositionType::CIC;
   m_coarseFineDeposition = CoarseFineDeposition::Halo;
-  m_velocityField = nullptr;
+  m_velocityField        = nullptr;
 }
 
 template <typename P>
@@ -102,17 +102,17 @@ TracerParticleSolver<P>::parseDeposition()
   // Deposition for particle-mesh operations
   pp.get("deposition", str);
   if (str == "ngp") {
-    m_deposition           = DepositionType::NGP;
+    m_deposition = DepositionType::NGP;
   }
   else if (str == "cic") {
-    m_deposition           = DepositionType::CIC;
+    m_deposition = DepositionType::CIC;
   }
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown deposition method requested.");
   }
 
   pp.get("deposition_cf", str);
-  if(str == "interp") {
+  if (str == "interp") {
     m_coarseFineDeposition = CoarseFineDeposition::Interp;
   }
   else if (str == "halo") {
@@ -120,10 +120,10 @@ TracerParticleSolver<P>::parseDeposition()
   }
   else if (str == "halo_ngp") {
     m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
-  }  
+  }
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown coarse-fine deposition method requested.");
-  }  
+  }
 
   pp.get("volume_scale", m_volumeScale);
 }
@@ -173,7 +173,7 @@ TracerParticleSolver<P>::registerOperators() const
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
 
-    // For CIC halo deposition.    
+    // For CIC halo deposition.
     m_amr->registerMask(s_particle_halo, 1, m_realm);
   }
 }
@@ -588,7 +588,7 @@ template <typename P>
 template <typename T, const Real& (T::*particleScalarFunction)() const>
 void
 TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
-					  ParticleContainer<T>&      a_particles,
+                                          ParticleContainer<T>&      a_particles,
                                           const DepositionType       a_baseDeposition,
                                           const CoarseFineDeposition a_coarseFineDeposition)
 {
@@ -613,7 +613,7 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
   }
   case CoarseFineDeposition::Halo: {
 
-    // Copy particles living on the mask. 
+    // Copy particles living on the mask.
     const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
     a_particles.copyMaskParticles(mask);
 
@@ -625,7 +625,7 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
                                                        CoarseFineDeposition::Halo,
                                                        false);
 
-    // Clear out the mask particles. 
+    // Clear out the mask particles.
     a_particles.clearMaskParticles();
 
     break;
@@ -644,12 +644,11 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
                                                        CoarseFineDeposition::HaloNGP,
                                                        false);
 
-
     // Transfer them back.
     a_particles.transferParticles(a_particles.getMaskParticles());
-    
+
     break;
-  }    
+  }
   default: {
     MayDay::Error("TracerParticleSolver::depositParticles -- logic bust due to unsupported coarse-fine deposition");
   }

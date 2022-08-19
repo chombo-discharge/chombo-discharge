@@ -135,14 +135,14 @@ public:
   */
   void
   copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask) const;
-  
+
   /*!
     @brief Copy particles to masked particle data holder. 
     @param[in] a_level Grid level
     @param[in] a_mask  Mask
   */
   void
-  copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask) const;  
+  copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask) const;
 
   /*!
     @brief Copy particles to the mask particle data holder.
@@ -158,7 +158,7 @@ public:
     @param[in] a_mask  Mask
   */
   void
-  transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask);    
+  transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask);
 
   /*!
     @brief Clear all particles
@@ -426,7 +426,7 @@ public:
     @note  The grids MUST be the same for both containers. That is, the containers MUST be defined over the same realm. 
   */
   void
-  transferParticles(AMRParticles<P>& a_otherContainer);  
+  transferParticles(AMRParticles<P>& a_otherContainer);
 
   /*!
     @brief Evict particles if they move out of the valid region.

@@ -321,7 +321,7 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
   }
   case CoarseFineDeposition::HaloNGP: {
 
-    MayDay::Error("CD_ItoSolverImplem.H -- HaloNGP not supported");    
+    MayDay::Error("CD_ItoSolverImplem.H -- HaloNGP not supported");
 
     break;
   }
