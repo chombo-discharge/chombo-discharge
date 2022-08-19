@@ -168,7 +168,8 @@ McPhoto::parsePseudoPhotons()
   Real maxPhotons;
   pp.get("max_photons", maxPhotons);
 
-  if (maxPhotons <= 0.0) { // = -1 => no restriction
+  // = -1 => no restriction
+  if (maxPhotons <= 0.0) {
     m_maxPhotonsGeneratedPerCell = std::numeric_limits<size_t>::max();
   }
   else {
@@ -370,24 +371,36 @@ McPhoto::clear(const WhichContainer& a_which)
   }
 
   switch (a_which) {
-  case WhichContainer::Photons:
+  case WhichContainer::Photons: {
     m_photons.clearParticles();
+
     break;
-  case WhichContainer::Bulk:
+  }
+  case WhichContainer::Bulk: {
     m_bulkPhotons.clearParticles();
+
     break;
-  case WhichContainer::EB:
+  }
+  case WhichContainer::EB: {
     m_ebPhotons.clearParticles();
+
     break;
-  case WhichContainer::Domain:
+  }
+  case WhichContainer::Domain: {
     m_domainPhotons.clearParticles();
+
     break;
-  case WhichContainer::Source:
+  }
+  case WhichContainer::Source: {
     m_sourcePhotons.clearParticles();
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("McPhoto::sortPhotonsByCell -- logic bust");
+
     break;
+  }
   }
 }
 
@@ -471,13 +484,6 @@ McPhoto::deallocateInternals()
   if (m_verbosity > 5) {
     pout() << m_name + "::deallocateInternals" << endl;
   }
-
-  // Don't deallocate, instead, reallocate.
-  // m_amr->deallocate(m_phi);
-  // m_amr->deallocate(m_source);
-  // m_amr->deallocate(m_scratch);
-  // m_amr->deallocate(m_depositionNC);
-  // m_amr->deallocate(m_massDiff);
 }
 
 void
@@ -521,24 +527,36 @@ McPhoto::sortPhotonsByCell(const WhichContainer& a_which)
   }
 
   switch (a_which) {
-  case WhichContainer::Photons:
+  case WhichContainer::Photons: {
     m_photons.sortParticlesByCell();
+
     break;
-  case WhichContainer::Bulk:
+  }
+  case WhichContainer::Bulk: {
     m_bulkPhotons.sortParticlesByCell();
+
     break;
-  case WhichContainer::EB:
+  }
+  case WhichContainer::EB: {
     m_ebPhotons.sortParticlesByCell();
+
     break;
-  case WhichContainer::Domain:
+  }
+  case WhichContainer::Domain: {
     m_domainPhotons.sortParticlesByCell();
+
     break;
-  case WhichContainer::Source:
+  }
+  case WhichContainer::Source: {
     m_sourcePhotons.sortParticlesByCell();
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("McPhoto::sortPhotonsByCell -- logic bust");
+
     break;
+  }
   }
 }
 
@@ -711,20 +729,27 @@ McPhoto::getPlotVariableNames() const
 
   Vector<std::string> plotVarNames(0);
 
-  if (m_plotPhi)
+  if (m_plotPhi) {
     plotVarNames.push_back(m_name + " phi");
-  if (m_plotSource)
+  }
+  if (m_plotSource) {
     plotVarNames.push_back(m_name + " source");
-  if (m_plotPhotons)
-    plotVarNames.push_back(m_name + " Photons");
-  if (m_plotBulkPhotons)
+  }
+  if (m_plotPhotons) {
+    plotVarNames.push_back(m_name + " photons");
+  }
+  if (m_plotBulkPhotons) {
     plotVarNames.push_back(m_name + " bulkPhotons");
-  if (m_plotEBPhotons)
+  }
+  if (m_plotEBPhotons) {
     plotVarNames.push_back(m_name + " ebPhotons");
-  if (m_plotDomainPhotons)
+  }
+  if (m_plotDomainPhotons) {
     plotVarNames.push_back(m_name + " domainPhotons");
-  if (m_plotSourcePhotons)
+  }
+  if (m_plotSourcePhotons) {
     plotVarNames.push_back(m_name + " sourcePhotons");
+  }
 
   return plotVarNames;
 }
@@ -739,20 +764,27 @@ McPhoto::getNumberOfPlotVariables() const
 
   int numPlotVars = 0;
 
-  if (m_plotPhi)
+  if (m_plotPhi) {
     numPlotVars += 1;
-  if (m_plotSource)
+  }
+  if (m_plotSource) {
     numPlotVars += 1;
-  if (m_plotPhotons)
+  }
+  if (m_plotPhotons) {
     numPlotVars += 1;
-  if (m_plotBulkPhotons)
+  }
+  if (m_plotBulkPhotons) {
     numPlotVars += 1;
-  if (m_plotEBPhotons)
+  }
+  if (m_plotEBPhotons) {
     numPlotVars += 1;
-  if (m_plotDomainPhotons)
+  }
+  if (m_plotDomainPhotons) {
     numPlotVars += 1;
-  if (m_plotSourcePhotons)
+  }
+  if (m_plotSourcePhotons) {
     numPlotVars += 1;
+  }
 
   return numPlotVars;
 }
@@ -898,6 +930,7 @@ McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt)
   }
   else {
     factor = 0.0;
+
     MayDay::Error("McPhoto::drawPhotons -- logic bust");
   }
 
@@ -1305,15 +1338,21 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
           }
           if (checkEB) {
             switch (m_intersectionEB) {
-            case IntersectionEB::Raycast:
+            case IntersectionEB::Raycast: {
               contactEB = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3 * dx, sEB);
+
               break;
-            case IntersectionEB::Bisection:
+            }
+            case IntersectionEB::Bisection: {
               contactEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_bisectStep, sEB);
+
               break;
-            default:
+            }
+            default: {
               MayDay::Error("McPhoto::advancePhotonsInstantenous -- logic bust in eb intersection");
+
               break;
+            }
             }
           }
 
@@ -1477,15 +1516,21 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 
         if (checkEB) {
           switch (m_intersectionEB) {
-          case IntersectionEB::Raycast:
+          case IntersectionEB::Raycast: {
             absorbedEB = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3 * dx, sEB);
+
             break;
-          case IntersectionEB::Bisection:
+          }
+          case IntersectionEB::Bisection: {
             absorbedEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_bisectStep, sEB);
+
             break;
-          default:
+          }
+          default: {
             MayDay::Error("McPhoto::advancePhotonsTransient -- logic bust in eb intersection");
+
             break;
+          }
           }
         }
 
