@@ -194,7 +194,7 @@ The figure below shows an example of the avalanche integral solved for an |SF6| 
 
 .. |SF6| replace:: SF\ :sub:`6`
 
-.. image:: chombo-discharge/Exec/Examples/StreamerInception/ElectrodeRoughness/field.png
+.. image:: Exec/Examples/StreamerInception/ElectrodeRoughness/field.png
    :width: 400
 
   
