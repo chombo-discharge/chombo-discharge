@@ -900,6 +900,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
                              const Vector<ProblemDomain>&     a_domains,
                              const Vector<Real>&              a_dx,
                              const Vector<int>&               a_refRat,
+                             const Vector<ValidMask>&         a_validMask,
                              const int                        a_lmin,
                              const int                        a_newFinestLevel)
 {
@@ -918,6 +919,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   m_grids       = a_grids;
   m_domains     = a_domains;
   m_refRat      = a_refRat;
+  m_validRegion = a_validMask;
   m_finestLevel = a_newFinestLevel;
 
   m_dx.resize(1 + m_finestLevel);

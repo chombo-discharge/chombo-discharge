@@ -805,11 +805,12 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   const Vector<ProblemDomain>&     domains = m_amr->getDomains();
   const Vector<Real>&              dx      = m_amr->getDx();
   const Vector<int>&               refRat  = m_amr->getRefinementRatios();
+  const AMRMask&                   mask    = m_amr->getValidCells(m_realm);
 
   for (auto& container : m_particleContainers) {
     ParticleContainer<ItoParticle>& particles = container.second;
 
-    particles.regrid(grids, domains, dx, refRat, a_lmin, a_newFinestLevel);
+    particles.regrid(grids, domains, dx, refRat, mask, a_lmin, a_newFinestLevel);
   }
 }
 

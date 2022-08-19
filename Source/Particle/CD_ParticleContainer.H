@@ -110,6 +110,7 @@ public:
     @param[in] a_domains        AMR domains
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
+    @param[in] a_validMask      Valid cells
     @param[in] a_base           Coarsest grid level that did not change. 
     @param[in] a_newFinestLevel New finest grid level
   */
@@ -118,6 +119,7 @@ public:
          const Vector<ProblemDomain>&     a_domains,
          const Vector<Real>&              a_dx,
          const Vector<int>&               a_refRat,
+         const Vector<ValidMask>&         a_validMask,
          const int                        a_base,
          const int                        a_newFinestLevel);
 

@@ -117,7 +117,7 @@ RodDielectric.sphere.radius             = 0.15          # Radius
 # This class does an expclit AMR advection-diffusion simulation of Brownian walker particles drawn
 # from a Gaussian distribution. 
 # ====================================================================================================
-BrownianWalker.verbosity      = -1      # Verbosity
+BrownianWalker.verbosity      = 10      # Verbosity
 BrownianWalker.realm          = primal  # Realm
 BrownianWalker.diffusion      = true    # Turn on/off diffusion
 BrownianWalker.advection      = true    # Turn on/off advection

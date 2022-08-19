@@ -500,12 +500,13 @@ McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFin
   const Vector<ProblemDomain>&     domains = m_amr->getDomains();
   const Vector<Real>&              dx      = m_amr->getDx();
   const Vector<int>&               ref_rat = m_amr->getRefinementRatios();
+  const AMRMask&                   mask    = m_amr->getValidCells(m_realm);
 
-  m_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_bulkPhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_ebPhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_domainPhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_sourcePhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_photons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
+  m_bulkPhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
+  m_ebPhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
+  m_domainPhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
+  m_sourcePhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
 
   // Deposit
   this->depositPhotons();
