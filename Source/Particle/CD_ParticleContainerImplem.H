@@ -483,7 +483,7 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
   CH_assert(m_isDefined);
 
   if (m_isCellSorted) {
-    MayDay::Error("ParticleContainer<P>::addParticles(List<P>) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer<P>::addParticlesDestructive(List<P>) - particles are sorted by cell!");
   }
 
   // Put the initial particles on the coarsest grid level. When we use catenate then

@@ -34,7 +34,7 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
   m_phase                = phase::gas;
   m_haloBuffer           = 1;
   m_plotVelocity         = true;
-  m_plotMass             = true;
+  m_plotWeight           = true;
   m_volumeScale          = false;
   m_deposition           = DepositionType::CIC;
   m_coarseFineDeposition = CoarseFineDeposition::Halo;
@@ -139,7 +139,7 @@ TracerParticleSolver<P>::parsePlotVariables()
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("plot_mass", m_plotMass);
+  pp.get("plot_weight", m_plotWeight);
   pp.get("plot_velocity", m_plotVelocity);
 }
 
@@ -325,7 +325,7 @@ TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi)
   }
 
   DataOps::setValue(a_phi, 0.0);
-  this->depositParticles<P, &P::mass>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
+  this->depositParticles<P, &P::weight>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
 
   if (m_volumeScale) {
     DataOps::volumeScale(a_phi, m_amr->getDx());
@@ -357,7 +357,7 @@ TracerParticleSolver<P>::getNumberOfPlotVariables() const
 
   int numPlotVars = 0;
 
-  if (m_plotMass)
+  if (m_plotWeight)
     numPlotVars += 1;
   if (m_plotVelocity)
     numPlotVars += SpaceDim;
@@ -379,7 +379,7 @@ TracerParticleSolver<P>::getPlotVariableNames() const
 
   Vector<std::string> plotVarNames(0);
 
-  if (m_plotMass) {
+  if (m_plotWeight) {
     plotVarNames.push_back(m_name + " density");
   }
 
@@ -454,17 +454,17 @@ TracerParticleSolver<P>::writePlotData(EBAMRCellData& a_output, int& a_icomp)
   }
 
   // Write the particle scalars.
-  if (m_plotMass) {
-    EBAMRCellData mass;
-    m_amr->allocate(mass, m_realm, m_phase, 1);
+  if (m_plotWeight) {
+    EBAMRCellData weight;
+    m_amr->allocate(weight, m_realm, m_phase, 1);
 
-    this->deposit(mass);
+    this->deposit(weight);
 
     const Interval srcInterval(0, 0);
     const Interval dstInterval(a_icomp, a_icomp);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      mass[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+      weight[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
     }
 
     a_icomp++;
