@@ -128,9 +128,10 @@ ItoSolver::addParticles(ListBox<ItoParticle>& a_inputParticles,
 
 template <class P, const Real& (P::*particleScalarField)() const>
 void
-ItoSolver::depositParticles(EBAMRCellData&              a_phi,
-                            const ParticleContainer<P>& a_particles,
-                            const DepositionType        a_deposition) const
+ItoSolver::depositParticles(EBAMRCellData&             a_phi,
+                            ParticleContainer<P>&      a_particles,
+                            const DepositionType       a_deposition,
+                            const CoarseFineDeposition a_coarseFineDeposition) const
 {
   CH_TIME("ItoSolver::depositParticles");
   if (m_verbosity > 5) {
@@ -142,11 +143,10 @@ ItoSolver::depositParticles(EBAMRCellData&              a_phi,
 
   // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
   //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate.
+  this->depositKappaConservative<P, particleScalarField>(a_phi, a_particles, a_deposition, a_coarseFineDeposition);
 
-  this->depositKappaConservative<
-    P,
-    particleScalarField>(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
-  this->redistributeAMR(a_phi);                             // Redistribution magic, if you want it.
+  // Redistribution magic.
+  this->redistributeAMR(a_phi);
 
   // Average down and interpolate
   m_amr->averageDown(a_phi, m_realm, m_phase);
@@ -155,9 +155,10 @@ ItoSolver::depositParticles(EBAMRCellData&              a_phi,
 
 template <class P, Real (P::*particleScalarField)() const>
 void
-ItoSolver::depositParticles(EBAMRCellData&              a_phi,
-                            const ParticleContainer<P>& a_particles,
-                            const DepositionType        a_deposition) const
+ItoSolver::depositParticles(EBAMRCellData&             a_phi,
+                            ParticleContainer<P>&      a_particles,
+                            const DepositionType       a_deposition,
+                            const CoarseFineDeposition a_coarseFineDeposition) const
 {
   CH_TIME("ItoSolver::depositParticles");
   if (m_verbosity > 5) {
@@ -169,11 +170,10 @@ ItoSolver::depositParticles(EBAMRCellData&              a_phi,
 
   // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
   //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate.
+  this->depositKappaConservative<P, particleScalarField>(a_phi, a_particles, a_deposition, a_coarseFineDeposition);
 
-  this->depositKappaConservative<
-    P,
-    particleScalarField>(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
-  this->redistributeAMR(a_phi);                             // Redistribution magic, if you want it.
+  // Redistribution magic.
+  this->redistributeAMR(a_phi);
 
   // Average down and interpolate
   m_amr->averageDown(a_phi, m_realm, m_phase);
@@ -182,44 +182,22 @@ ItoSolver::depositParticles(EBAMRCellData&              a_phi,
 
 template <class P, const Real& (P::*particleScalarField)() const>
 void
-ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
-                                    const ParticleContainer<P>& a_particles,
-                                    const DepositionType        a_deposition) const
+ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
+                                    ParticleContainer<P>&      a_particles,
+                                    const DepositionType       a_deposition,
+                                    const CoarseFineDeposition a_coarseFineDeposition) const
 {
   CH_TIME("ItoSolver::depositKappaConservative");
   if (m_verbosity > 5) {
     pout() << m_name + "::depositKappaConservative" << endl;
   }
 
-  CH_assert(m_haloBuffer == 0 || m_pvrBuffer == 0);
   CH_assert(a_phi[0]->nComp() == 1);
-
-  if (m_haloBuffer > 0 && m_pvrBuffer > 0) {
-    MayDay::Error(
-      "ItoSolver::depositKappaConservative - conflicting inputs, halo/pvr buffers both > 0 but one of them must be 0");
-  }
-
-  // Figure out how to handle the coarse-fine deposition.
-  CoarseFineDeposition coarseFineDeposition;
-  if (m_pvrBuffer > 0) {
-    coarseFineDeposition = CoarseFineDeposition::Interp;
-  }
-  else if (m_haloBuffer > 0) {
-    if (m_forceHaloNGP) {
-      coarseFineDeposition = CoarseFineDeposition::HaloNGP;
-    }
-    else {
-      coarseFineDeposition = CoarseFineDeposition::Halo;
-    }
-  }
-  else {
-    MayDay::Error("ItoSolver::depositKappaConservative -- logic bust");
-  }
 
   // Now do the deposition. Recall that when we deposit with "halos", we need to fetch the subset of coarse-level particles that surround the
   // refinement boundary.
-  switch (coarseFineDeposition) {
-  case CoarseFineDeposition::Interp:
+  switch (a_coarseFineDeposition) {
+  case CoarseFineDeposition::Interp: {
     m_amr->depositParticles<P, particleScalarField>(a_phi,
                                                     m_realm,
                                                     m_phase,
@@ -228,7 +206,10 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
                                                     CoarseFineDeposition::Interp,
                                                     m_forceIrregDepositionNGP);
     break;
+  }
   case CoarseFineDeposition::Halo: {
+
+    // Copy the mask particles.
     const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
     a_particles.copyMaskParticles(mask);
 
@@ -246,55 +227,47 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
   }
   case CoarseFineDeposition::HaloNGP: {
 
-    MayDay::Error("CD_ItoSolverImplem.H -- HaloNGP not supported");
+    // Transfer mask particles
+    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    a_particles.transferMaskParticles(mask);
+
+    m_amr->depositParticles<P, particleScalarField>(a_phi,
+                                                    m_realm,
+                                                    m_phase,
+                                                    a_particles,
+                                                    a_deposition,
+                                                    CoarseFineDeposition::HaloNGP,
+                                                    m_forceIrregDepositionNGP);
+
+    a_particles.transferParticles(a_particles.getMaskParticles());
 
     break;
   }
-  default:
+  default: {
     MayDay::Error("ItoSolverImplem.H in function ItoSolver::depositKappaConservative -- logic bust!");
+
     break;
+  }
   }
 }
 template <class P, Real (P::*particleScalarField)() const>
 void
-ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
-                                    const ParticleContainer<P>& a_particles,
-                                    const DepositionType        a_deposition) const
+ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
+                                    ParticleContainer<P>&      a_particles,
+                                    const DepositionType       a_deposition,
+                                    const CoarseFineDeposition a_coarseFineDeposition) const
 {
   CH_TIME("ItoSolver::depositKappaConservative");
   if (m_verbosity > 5) {
     pout() << m_name + "::depositKappaConservative" << endl;
   }
 
-  CH_assert(m_haloBuffer == 0 || m_pvrBuffer == 0);
   CH_assert(a_phi[0]->nComp() == 1);
-
-  if (m_haloBuffer > 0 && m_pvrBuffer > 0) {
-    MayDay::Error(
-      "ItoSolver::depositKappaConservative - conflicting inputs, halo/pvr buffers both > 0 but one of them must be 0");
-  }
-
-  // Figure out how to handle the coarse-fine deposition.
-  CoarseFineDeposition coarseFineDeposition;
-  if (m_pvrBuffer > 0) {
-    coarseFineDeposition = CoarseFineDeposition::Interp;
-  }
-  else if (m_haloBuffer > 0) {
-    if (m_forceHaloNGP) {
-      coarseFineDeposition = CoarseFineDeposition::HaloNGP;
-    }
-    else {
-      coarseFineDeposition = CoarseFineDeposition::Halo;
-    }
-  }
-  else {
-    MayDay::Error("ItoSolver::depositKappaConservative -- logic bust");
-  }
 
   // Now do the deposition. Recall that when we deposit with "halos", we need to fetch the subset of coarse-level particles that surround the
   // refinement boundary.
-  switch (coarseFineDeposition) {
-  case CoarseFineDeposition::Interp:
+  switch (a_coarseFineDeposition) {
+  case CoarseFineDeposition::Interp: {
     m_amr->depositParticles<P, particleScalarField>(a_phi,
                                                     m_realm,
                                                     m_phase,
@@ -303,7 +276,10 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
                                                     CoarseFineDeposition::Interp,
                                                     m_forceIrregDepositionNGP);
     break;
+  }
   case CoarseFineDeposition::Halo: {
+
+    // Copy the mask particles.
     const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
     a_particles.copyMaskParticles(mask);
 
@@ -321,13 +297,27 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
   }
   case CoarseFineDeposition::HaloNGP: {
 
-    MayDay::Error("CD_ItoSolverImplem.H -- HaloNGP not supported");
+    // Transfer mask particles
+    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    a_particles.transferMaskParticles(mask);
+
+    m_amr->depositParticles<P, particleScalarField>(a_phi,
+                                                    m_realm,
+                                                    m_phase,
+                                                    a_particles,
+                                                    a_deposition,
+                                                    CoarseFineDeposition::HaloNGP,
+                                                    m_forceIrregDepositionNGP);
+
+    a_particles.transferParticles(a_particles.getMaskParticles());
 
     break;
   }
-  default:
+  default: {
     MayDay::Error("ItoSolverImplem.H in function ItoSolver::depositKappaConservative -- logic bust!");
+
     break;
+  }
   }
 }
 

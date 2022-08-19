@@ -34,13 +34,17 @@ ItoSolver::ItoSolver()
   CH_TIME("ItoSolver::ItoSolver");
 
   // Default settings
-  m_verbosity      = -1;
-  m_name           = "ItoSolver";
-  m_className      = "ItoSolver";
-  m_realm          = Realm::primal;
-  m_phase          = phase::gas;
-  m_checkpointing  = WhichCheckpoint::Particles;
-  m_mobilityInterp = WhichMobilityInterpolation::Direct;
+  m_verbosity            = -1;
+  m_name                 = "ItoSolver";
+  m_className            = "ItoSolver";
+  m_realm                = Realm::primal;
+  m_phase                = phase::gas;
+  m_haloBuffer           = 1;
+  m_coarseFineDeposition = CoarseFineDeposition::Halo;
+  m_deposition           = DepositionType::CIC;
+  m_plotDeposition       = DepositionType::CIC;
+  m_checkpointing        = WhichCheckpoint::Particles;
+  m_mobilityInterp       = WhichMobilityInterpolation::Direct;
 }
 
 ItoSolver::~ItoSolver() { CH_TIME("ItoSolver::~ItoSolver"); }
@@ -96,7 +100,6 @@ ItoSolver::parseOptions()
   this->parsePlotVariables();
   this->parseDeposition();
   this->parseBisectStep();
-  this->parsePvrBuffer();
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
@@ -229,14 +232,23 @@ ItoSolver::parseDeposition()
   else if (str == "cic") {
     m_deposition = DepositionType::CIC;
   }
-  else if (str == "tsc") {
-    m_deposition = DepositionType::TSC;
-  }
-  else if (str == "w4") {
-    m_deposition = DepositionType::W4;
-  }
   else {
     MayDay::Error("ItoSolver::parseDeposition - unknown deposition method requested");
+  }
+
+  // Parse coarse-fine strategy
+  pp.get("deposition_cf", str);
+  if (str == "interp") {
+    m_coarseFineDeposition = CoarseFineDeposition::Interp;
+  }
+  else if (str == "halo") {
+    m_coarseFineDeposition = CoarseFineDeposition::Halo;
+  }
+  else if (str == "halo_ngp") {
+    m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
+  }
+  else {
+    MayDay::Error("ItoSolver::parseDeposition - unknown coarse-fine deposition method requested.");
   }
 
   // Deposition for plotting only
@@ -247,12 +259,6 @@ ItoSolver::parseDeposition()
   }
   else if (str == "cic") {
     m_plotDeposition = DepositionType::CIC;
-  }
-  else if (str == "tsc") {
-    m_plotDeposition = DepositionType::TSC;
-  }
-  else if (str == "w4") {
-    m_plotDeposition = DepositionType::W4;
   }
   else {
     MayDay::Error("ItoSolver::parseDeposition - unknown deposition method requested");
@@ -284,31 +290,6 @@ ItoSolver::parseBisectStep()
 
   ParmParse pp(m_className.c_str());
   pp.get("bisect_step", m_bisectionStep);
-}
-
-void
-ItoSolver::parsePvrBuffer()
-{
-  CH_TIME("ItoSolver::parsePvrBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::parsePvrBuffer" << endl;
-  }
-
-  ParmParse pp(m_className.c_str());
-  pp.get("pvr_buffer", m_pvrBuffer);
-  pp.get("halo_buffer", m_haloBuffer);
-
-  std::string str;
-  pp.get("halo_deposition", str);
-  if (str == "ngp") {
-    m_forceHaloNGP = true;
-  }
-  else if (str == "native") {
-    m_forceHaloNGP = false;
-  }
-  else {
-    MayDay::Abort("ItoSolver::parsePvrBuffer - unknown argument to 'halo_deposition'");
-  }
 }
 
 void
@@ -436,56 +417,6 @@ ItoSolver::getNumberOfPlotVariables() const
   return numPlotVars;
 }
 
-int
-ItoSolver::getPVRBuffer() const
-{
-  CH_TIME("ItoSolver::getPVRBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getPVRBuffer" << endl;
-  }
-
-  return m_pvrBuffer;
-}
-
-int
-ItoSolver::getHaloBuffer() const
-{
-  CH_TIME("ItoSolver::getHaloBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getHaloBuffer" << endl;
-  }
-
-  return m_haloBuffer;
-}
-
-void
-ItoSolver::setPVRBuffer(const int a_pvrBuffer)
-{
-  CH_TIME("ItoSolver::setPVRBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setPVRBuffer" << endl;
-  }
-
-  CH_assert(a_pvrBuffer >= 0);
-
-  m_pvrBuffer  = a_pvrBuffer;
-  m_haloBuffer = 0;
-}
-
-void
-ItoSolver::setHaloBuffer(const int a_haloBuffer)
-{
-  CH_TIME("ItoSolver::setHaloBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setHaloBuffer" << endl;
-  }
-
-  CH_assert(a_haloBuffer >= 0);
-
-  m_haloBuffer = a_haloBuffer;
-  m_pvrBuffer  = 0;
-}
-
 size_t
 ItoSolver::getNumParticles(const WhichContainer a_whichContainer, const bool a_localOnly) const
 {
@@ -554,12 +485,8 @@ ItoSolver::registerOperators() const
       m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     }
 
-    // Register mask if using halo deposition
-    if (m_haloBuffer > 0) {
-      CH_assert(m_pvrBuffer == 0);
-
-      m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
-    }
+    // Register mask for CIC deposition.
+    m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
   }
 }
 
@@ -619,13 +546,9 @@ ItoSolver::initialData()
 
   constexpr Real tolerance = 0.0;
 
-  // Add particles, remove the ones that are inside the EB, and then depsit
-  this->removeCoveredParticles(bulkParticles,
-                               EbRepresentation::ImplicitFunction,
-                               tolerance); // Remove particles that are less than tolerance away from the EB
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(m_phi,
-                                                          bulkParticles,
-                                                          m_deposition); // Deposit particles on the mesh.
+  // Add particles, remove the ones that are inside the EB, and then deposit
+  this->removeCoveredParticles(bulkParticles, EbRepresentation::ImplicitFunction, tolerance);
+  this->depositParticles<ItoParticle, &ItoParticle::mass>(m_phi, bulkParticles, m_deposition, m_coarseFineDeposition);
 }
 
 void
@@ -1314,7 +1237,7 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
 }
 
 void
-ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp) const
+ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp)
 {
   CH_TIME("ItoSolver::writePlotData");
   if (m_verbosity > 5) {
@@ -1388,33 +1311,46 @@ ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp) const
   if (m_plotParticles) {
     this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch,
                                                             m_particleContainers.at(WhichContainer::Bulk),
-                                                            m_plotDeposition);
+                                                            m_plotDeposition,
+                                                            m_coarseFineDeposition);
+
     this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
   }
   if (m_plotParticlesEB) {
     this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch,
                                                             m_particleContainers.at(WhichContainer::EB),
-                                                            m_plotDeposition);
+                                                            m_plotDeposition,
+                                                            m_coarseFineDeposition);
+
     this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
   }
   if (m_plotParticlesDomain) {
     this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch,
                                                             m_particleContainers.at(WhichContainer::Domain),
-                                                            m_plotDeposition);
+                                                            m_plotDeposition,
+                                                            m_coarseFineDeposition);
+
     this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
   }
   if (m_plotParticlesSource) {
     this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch,
                                                             m_particleContainers.at(WhichContainer::Source),
-                                                            m_plotDeposition);
+                                                            m_plotDeposition,
+                                                            m_coarseFineDeposition);
+
     this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
   }
   if (m_plotEnergyDensity) {
-    this->depositEnergyDensity(m_scratch, m_particleContainers.at(WhichContainer::Bulk), m_plotDeposition);
+    this->depositEnergyDensity(m_scratch,
+                               m_particleContainers.at(WhichContainer::Bulk),
+                               m_plotDeposition,
+                               m_coarseFineDeposition);
+
     this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
   }
   if (m_plotAverageEnergy) {
     this->computeAverageEnergy(m_scratch, m_particleContainers.at(WhichContainer::Bulk));
+
     this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
   }
 }
@@ -1466,7 +1402,7 @@ ItoSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& 
 }
 
 void
-ItoSolver::depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const
+ItoSolver::depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const
 {
   CH_TIME("ItoSolver::depositConductivity(EBAMRCellData, ParticleContainer)");
   if (m_verbosity > 5) {
@@ -1476,13 +1412,14 @@ ItoSolver::depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<Ito
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isCellSorted());
 
-  this->depositConductivity(a_phi, a_particles, m_deposition);
+  this->depositConductivity(a_phi, a_particles, m_deposition, m_coarseFineDeposition);
 }
 
 void
-ItoSolver::depositConductivity(EBAMRCellData&                        a_phi,
-                               const ParticleContainer<ItoParticle>& a_particles,
-                               const DepositionType                  a_deposition) const
+ItoSolver::depositConductivity(EBAMRCellData&                  a_phi,
+                               ParticleContainer<ItoParticle>& a_particles,
+                               const DepositionType            a_deposition,
+                               const CoarseFineDeposition      a_coarseFineDeposition) const
 {
   CH_TIME("ItoSolver::depositConductivity(EBAMRCellData, ParticleContainer, DepositionType)");
   if (m_verbosity > 5) {
@@ -1493,7 +1430,10 @@ ItoSolver::depositConductivity(EBAMRCellData&                        a_phi,
   CH_assert(!a_particles.isCellSorted());
 
   if (m_isMobile) {
-    this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi, a_particles, a_deposition);
+    this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi,
+                                                                    a_particles,
+                                                                    a_deposition,
+                                                                    a_coarseFineDeposition);
   }
   else {
     DataOps::setValue(a_phi, 0.0);
@@ -1501,7 +1441,7 @@ ItoSolver::depositConductivity(EBAMRCellData&                        a_phi,
 }
 
 void
-ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const
+ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const
 {
   CH_TIME("ItoSolver::depositDiffusivity(EBAMRCellData, ParticleContainer)");
   if (m_verbosity > 5) {
@@ -1511,13 +1451,14 @@ ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoP
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isCellSorted());
 
-  this->depositDiffusivity(a_phi, a_particles, m_deposition);
+  this->depositDiffusivity(a_phi, a_particles, m_deposition, m_coarseFineDeposition);
 }
 
 void
-ItoSolver::depositDiffusivity(EBAMRCellData&                        a_phi,
-                              const ParticleContainer<ItoParticle>& a_particles,
-                              const DepositionType                  a_deposition) const
+ItoSolver::depositDiffusivity(EBAMRCellData&                  a_phi,
+                              ParticleContainer<ItoParticle>& a_particles,
+                              const DepositionType            a_deposition,
+                              const CoarseFineDeposition      a_coarseFineDeposition) const
 {
   CH_TIME("ItoSolver::depositDiffusivity(EBAMRCellData, ParticleContainer, DepositionType)");
   if (m_verbosity > 5) {
@@ -1527,11 +1468,14 @@ ItoSolver::depositDiffusivity(EBAMRCellData&                        a_phi,
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isCellSorted());
 
-  this->depositParticles<ItoParticle, &ItoParticle::diffusivity>(a_phi, a_particles, a_deposition);
+  this->depositParticles<ItoParticle, &ItoParticle::diffusivity>(a_phi,
+                                                                 a_particles,
+                                                                 a_deposition,
+                                                                 a_coarseFineDeposition);
 }
 
 void
-ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const
+ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const
 {
   CH_TIME("ItoSolver::depositEnergyDensity(EBAMRCellData, ParticleContainer)");
   if (m_verbosity > 5) {
@@ -1541,13 +1485,14 @@ ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<It
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isCellSorted());
 
-  this->depositEnergyDensity(a_phi, a_particles, m_deposition);
+  this->depositEnergyDensity(a_phi, a_particles, m_deposition, m_coarseFineDeposition);
 }
 
 void
-ItoSolver::depositEnergyDensity(EBAMRCellData&                        a_phi,
-                                const ParticleContainer<ItoParticle>& a_particles,
-                                const DepositionType                  a_deposition) const
+ItoSolver::depositEnergyDensity(EBAMRCellData&                  a_phi,
+                                ParticleContainer<ItoParticle>& a_particles,
+                                const DepositionType            a_deposition,
+                                const CoarseFineDeposition      a_coarseFineDeposition) const
 {
   CH_TIME("ItoSolver::depositEnergyDensity(EBAMRCellData, ParticleContainer, DepositionType)");
   if (m_verbosity > 5) {
@@ -1557,11 +1502,14 @@ ItoSolver::depositEnergyDensity(EBAMRCellData&                        a_phi,
   CH_assert(a_phi[0]->nComp() == 1);
   CH_assert(!a_particles.isCellSorted());
 
-  this->depositParticles<ItoParticle, &ItoParticle::totalEnergy>(a_phi, a_particles, a_deposition);
+  this->depositParticles<ItoParticle, &ItoParticle::totalEnergy>(a_phi,
+                                                                 a_particles,
+                                                                 a_deposition,
+                                                                 a_coarseFineDeposition);
 }
 
 void
-ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const
+ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const
 {
   CH_TIME("ItoSolver::computeAverageMobility(EBAMRCellData, ParticleContainer)");
   if (m_verbosity > 5) {
@@ -1580,8 +1528,12 @@ ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, const ParticleContainer<
   EBAMRCellData mass;
   m_amr->allocate(mass, m_realm, m_phase, m_nComp);
 
-  this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi, a_particles, m_deposition); // Deposit mass*mu
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(mass, a_particles, m_deposition);          // Deposit mass
+  // Deposit mass*mu and mass
+  this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi,
+                                                                  a_particles,
+                                                                  m_deposition,
+                                                                  m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::mass>(mass, a_particles, m_deposition, m_coarseFineDeposition);
 
   // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero.
   constexpr Real zero = 0.0;
@@ -1590,7 +1542,7 @@ ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, const ParticleContainer<
 }
 
 void
-ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const
+ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const
 {
   CH_TIME("ItoSolver::computeAverageDiffusion(EBAMRCellData, ParticleContainer)");
   if (m_verbosity > 5) {
@@ -1609,8 +1561,12 @@ ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, const ParticleContainer
   EBAMRCellData mass;
   m_amr->allocate(mass, m_realm, m_phase, m_nComp);
 
-  this->depositParticles<ItoParticle, &ItoParticle::diffusivity>(a_phi, a_particles, m_deposition); // Deposit mass*D
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(mass, a_particles, m_deposition);         // Deposit mass
+  // Deposit mass*D and mass
+  this->depositParticles<ItoParticle, &ItoParticle::diffusivity>(a_phi,
+                                                                 a_particles,
+                                                                 m_deposition,
+                                                                 m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::mass>(mass, a_particles, m_deposition, m_coarseFineDeposition);
 
   // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero.
   constexpr Real zero = 0.0;
@@ -1619,7 +1575,7 @@ ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, const ParticleContainer
 }
 
 void
-ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const
+ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const
 {
   CH_TIME("ItoSolver::computeAverageEnergy(EBAMRCellData, ParticleContainer)");
   if (m_verbosity > 5) {
@@ -1638,10 +1594,12 @@ ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, const ParticleContainer<It
   EBAMRCellData mass;
   m_amr->allocate(mass, m_realm, m_phase, m_nComp);
 
+  // Deposit mass*energy and mass
   this->depositParticles<ItoParticle, &ItoParticle::totalEnergy>(a_phi,
                                                                  a_particles,
-                                                                 m_deposition);             // Deposit mass*energy
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(mass, a_particles, m_deposition); // Deposit mass
+                                                                 m_deposition,
+                                                                 m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::mass>(mass, a_particles, m_deposition, m_coarseFineDeposition);
 
   // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero.
   constexpr Real zero = 0.0;
@@ -1668,7 +1626,10 @@ ItoSolver::depositParticles(const WhichContainer a_container)
     pout() << m_name + "::depositParticles(container)" << endl;
   }
 
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(m_phi, m_particleContainers.at(a_container), m_deposition);
+  this->depositParticles<ItoParticle, &ItoParticle::mass>(m_phi,
+                                                          m_particleContainers.at(a_container),
+                                                          m_deposition,
+                                                          m_coarseFineDeposition);
 }
 
 void
@@ -1917,7 +1878,8 @@ ItoSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
   // Deposit mass to scratch data holder. Then make sure the number of particles per cell
   this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch,
                                                           this->getParticles(WhichContainer::Bulk),
-                                                          m_deposition);
+                                                          m_deposition,
+                                                          m_coarseFineDeposition);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Real dx = m_amr->getDx()[lvl];
     const Real dV = std::pow(dx, SpaceDim);
