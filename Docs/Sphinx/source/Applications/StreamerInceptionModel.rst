@@ -256,7 +256,7 @@ These are in the format
    StreamerInceptionStepper.voltage_hi    = 10.0  # Highest voltage multiplier
    StreamerInceptionStepper.voltage_steps = 3     # Number of voltage steps
 
-Here, ``voltage_lo`` is the lowest voltage that we solve for, while ``voltage_hi`` is the highest voltage we solve for.
+Here, ``voltage_lo`` is the lowest voltage that we solve for, while ``voltage_hi`` is the highest voltage we solve for. ``voltage_steps`` is the number of steps from ``voltage_lo`` to ``voltage_hi``, resulting in ``voltage_steps`` :math:`+1` number of voltages. 
 
 Inception threshold
 ^^^^^^^^^^^^^^^^^^^^
