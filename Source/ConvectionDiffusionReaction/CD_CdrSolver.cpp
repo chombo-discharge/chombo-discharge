@@ -1252,12 +1252,12 @@ CdrSolver::initialDataParticles()
   //       the particle API to see the details of the ParticleContainer<T> type and
   //       deposition methods.
 
-  const List<Particle>& initialParticles = m_species->getInitialParticles();
+  const List<PointParticle>& initialParticles = m_species->getInitialParticles();
 
   if (initialParticles.length() > 0) {
 
     // Make a ParticleContainer<T> and redistribute particles over the AMR hierarchy.
-    ParticleContainer<Particle> particles;
+    ParticleContainer<PointParticle> particles;
     m_amr->allocate(particles, m_realm);
     particles.addParticles(m_species->getInitialParticles());
 
@@ -1280,10 +1280,10 @@ CdrSolver::initialDataParticles()
         constexpr bool forceIrregNGP = true;
         EBParticleMesh interp(cellBox, ebisbox, dx, probLo);
 
-        interp.deposit<Particle, &Particle::mass>(particles[lvl][dit()].listItems(),
-                                                  (*m_phi[lvl])[dit()],
-                                                  DepositionType::NGP,
-                                                  forceIrregNGP);
+        interp.deposit<PointParticle, &PointParticle::weight>(particles[lvl][dit()].listItems(),
+                                                              (*m_phi[lvl])[dit()],
+                                                              DepositionType::NGP,
+                                                              forceIrregNGP);
       }
 
 #if CH_SPACEDIM == \

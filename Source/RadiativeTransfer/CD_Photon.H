@@ -24,7 +24,6 @@
 
 /*!
   @brief Particle class for usage with Monte Carlo radiative transfer.
-  @deatils This inherits from Chombo's BinItem so it can be used in parallel with our ParticleContainer classes.
 */
 class Photon : public GenericParticle<2, 1>
 {
