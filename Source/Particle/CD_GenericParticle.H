@@ -18,6 +18,9 @@
 #include <cstdio>
 #include <cmath>
 
+// Chombo includes
+#include <RealVect.H>
+
 // Our includes
 #include <CD_NamespaceHeader.H>
 

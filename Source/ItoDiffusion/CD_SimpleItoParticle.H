@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_SimpleItoParticleParticle.H
-  @brief  Declaration of a particle which only holds position, mass, and energy. 
+  @brief  Declaration of a particle which only holds position, weight, and energy. 
   @author Robert Marskar
 */
 
@@ -24,24 +24,24 @@
 
 /*!
   @brief A particle class for reducing HDF5 I/O file sizes when using ItoSolver. 
-  @details This is a computational particle class which only stores the mass, position and energy of a particle. It is used
+  @details This is a computational particle class which only stores the weight, position and energy of a particle. It is used
   with ItoSolver in order to reduce the file size of HDF5 files. 
 */
 class SimpleItoParticle : public GenericParticle<2, 0>
 {
 public:
   /*!
-    @brief Default constructor. Should subsequently set mass/position/energy.
+    @brief Default constructor. Should subsequently set weight/position/energy.
   */
   inline SimpleItoParticle();
 
   /*!
-    @brief Constructor. Sets mass, position, and energy.
-    @param[in] a_mass     Computational mass/weight
+    @brief Constructor. Sets weight, position, and energy.
+    @param[in] a_weight   Computational weight
     @param[in] a_position Position in physical space. 
     @param[in] a_energy   Average particle energy
   */
-  inline SimpleItoParticle(const Real a_mass, const RealVect a_position, const Real a_energy);
+  inline SimpleItoParticle(const Real a_weight, const RealVect a_position, const Real a_energy);
 
   /*!
     @brief Destructor (does nothing)
@@ -49,27 +49,27 @@ public:
   inline virtual ~SimpleItoParticle();
 
   /*!
-    @brief Define function. Sets mass, position, and energy.
-    @param[in] a_mass     Computational mass/weight
+    @brief Define function. Sets weight, position, and energy.
+    @param[in] a_weight   Computational weigth
     @param[in] a_position Position in physical space. 
     @param[in] a_energy   Average particle energy
   */
   inline void
-  define(const Real a_mass, const RealVect a_position, const Real a_energy);
+  define(const Real a_weight, const RealVect a_position, const Real a_energy);
 
   /*!
-    @brief Get mass
-    @return Returns m_mass
+    @brief Get weight
+    @return Returns m_weight
   */
   inline Real&
-  mass();
+  weight();
 
   /*! 
-    @brief Const retrieve mass
-    @return Returns m_mass
+    @brief Const retrieve weight
+    @return Returns m_weight
   */
   inline const Real&
-  mass() const;
+  weight() const;
 
   /*!
     @brief Get energy

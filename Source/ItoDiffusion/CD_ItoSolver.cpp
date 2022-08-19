@@ -557,7 +557,7 @@ ItoSolver::initialData()
 
   // Add particles, remove the ones that are inside the EB, and then deposit
   this->removeCoveredParticles(bulkParticles, EbRepresentation::ImplicitFunction, tolerance);
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(m_phi, bulkParticles, m_deposition, m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::weight>(m_phi, bulkParticles, m_deposition, m_coarseFineDeposition);
 }
 
 void
@@ -943,7 +943,7 @@ ItoSolver::writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level
     simpleParticles.clear();
     for (ListIterator<ItoParticle> lit(myParticles[a_level][dit()].listItems()); lit.ok(); ++lit) {
       const ItoParticle& p = lit();
-      simpleParticles.append(SimpleItoParticle(p.mass(), p.position(), p.energy()));
+      simpleParticles.append(SimpleItoParticle(p.weight(), p.position(), p.energy()));
     }
   }
 
@@ -1002,7 +1002,7 @@ ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) co
       for (ListIterator<ItoParticle> lit(cellParticles); lit.ok(); ++lit) {
         const ItoParticle& p = lit();
 
-        particleNumbersFAB(iv, m_comp) += p.mass();
+        particleNumbersFAB(iv, m_comp) += p.weight();
       }
     };
 
@@ -1051,7 +1051,7 @@ ItoSolver::readCheckpointLevelParticles(HDF5Handle& a_handle, const int a_level)
   }
 
   // TLDR: This function is the one that reads SimpleItoParticles from the checkpoint file and instantiates full ItoParticle's from that. Recalling
-  //       writeCheckpointLevelParticles we only stored the mass, position, and energy of the particles. Here we read that information back in.
+  //       writeCheckpointLevelParticles we only stored the weight, position, and energy of the particles. Here we read that information back in.
 
   // This is the particle container that we will fill.
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
@@ -1075,7 +1075,7 @@ ItoSolver::readCheckpointLevelParticles(HDF5Handle& a_handle, const int a_level)
 
     for (ListIterator<SimpleItoParticle> lit(simpleItoParticles); lit.ok(); ++lit) {
       const SimpleItoParticle& simpleParticle = lit();
-      const ItoParticle        itoParticle    = ItoParticle(simpleParticle.mass(),
+      const ItoParticle        itoParticle    = ItoParticle(simpleParticle.weight(),
                                                   simpleParticle.position(),
                                                   RealVect::Zero,
                                                   0.0,
@@ -1319,34 +1319,34 @@ ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp)
   constexpr bool interpolateToCentroids = false;
 
   if (m_plotParticles) {
-    this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch,
-                                                            m_particleContainers.at(WhichContainer::Bulk),
-                                                            m_plotDeposition,
-                                                            m_coarseFineDeposition);
+    this->depositParticles<ItoParticle, &ItoParticle::weight>(m_scratch,
+                                                              m_particleContainers.at(WhichContainer::Bulk),
+                                                              m_plotDeposition,
+                                                              m_coarseFineDeposition);
 
     this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
   }
   if (m_plotParticlesEB) {
-    this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch,
-                                                            m_particleContainers.at(WhichContainer::EB),
-                                                            m_plotDeposition,
-                                                            m_coarseFineDeposition);
+    this->depositParticles<ItoParticle, &ItoParticle::weight>(m_scratch,
+                                                              m_particleContainers.at(WhichContainer::EB),
+                                                              m_plotDeposition,
+                                                              m_coarseFineDeposition);
 
     this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
   }
   if (m_plotParticlesDomain) {
-    this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch,
-                                                            m_particleContainers.at(WhichContainer::Domain),
-                                                            m_plotDeposition,
-                                                            m_coarseFineDeposition);
+    this->depositParticles<ItoParticle, &ItoParticle::weight>(m_scratch,
+                                                              m_particleContainers.at(WhichContainer::Domain),
+                                                              m_plotDeposition,
+                                                              m_coarseFineDeposition);
 
     this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
   }
   if (m_plotParticlesSource) {
-    this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch,
-                                                            m_particleContainers.at(WhichContainer::Source),
-                                                            m_plotDeposition,
-                                                            m_coarseFineDeposition);
+    this->depositParticles<ItoParticle, &ItoParticle::weight>(m_scratch,
+                                                              m_particleContainers.at(WhichContainer::Source),
+                                                              m_plotDeposition,
+                                                              m_coarseFineDeposition);
 
     this->writeData(a_output, a_comp, m_scratch, interpolateToCentroids);
   }
@@ -1543,7 +1543,7 @@ ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoPar
                                                                   a_particles,
                                                                   m_deposition,
                                                                   m_coarseFineDeposition);
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(mass, a_particles, m_deposition, m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::weight>(mass, a_particles, m_deposition, m_coarseFineDeposition);
 
   // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero.
   constexpr Real zero = 0.0;
@@ -1576,7 +1576,7 @@ ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoPa
                                                                  a_particles,
                                                                  m_deposition,
                                                                  m_coarseFineDeposition);
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(mass, a_particles, m_deposition, m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::weight>(mass, a_particles, m_deposition, m_coarseFineDeposition);
 
   // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero.
   constexpr Real zero = 0.0;
@@ -1609,7 +1609,7 @@ ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParti
                                                                  a_particles,
                                                                  m_deposition,
                                                                  m_coarseFineDeposition);
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(mass, a_particles, m_deposition, m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::weight>(mass, a_particles, m_deposition, m_coarseFineDeposition);
 
   // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero.
   constexpr Real zero = 0.0;
@@ -1636,10 +1636,10 @@ ItoSolver::depositParticles(const WhichContainer a_container)
     pout() << m_name + "::depositParticles(container)" << endl;
   }
 
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(m_phi,
-                                                          m_particleContainers.at(a_container),
-                                                          m_deposition,
-                                                          m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::weight>(m_phi,
+                                                            m_particleContainers.at(a_container),
+                                                            m_deposition,
+                                                            m_coarseFineDeposition);
 }
 
 void
@@ -1886,10 +1886,10 @@ ItoSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
   //       in the regrid step. The second this is that it puts all particle data holders in "regrid" mode.
 
   // Deposit mass to scratch data holder. Then make sure the number of particles per cell
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch,
-                                                          this->getParticles(WhichContainer::Bulk),
-                                                          m_deposition,
-                                                          m_coarseFineDeposition);
+  this->depositParticles<ItoParticle, &ItoParticle::weight>(m_scratch,
+                                                            this->getParticles(WhichContainer::Bulk),
+                                                            m_deposition,
+                                                            m_coarseFineDeposition);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Real dx = m_amr->getDx()[lvl];
     const Real dV = std::pow(dx, SpaceDim);
@@ -2997,7 +2997,7 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
     const ItoParticle& p = lit();
 
-    pointMasses.push_back(PointMass(p.position(), p.mass(), p.energy()));
+    pointMasses.push_back(PointMass(p.position(), p.weight(), p.energy()));
   }
 
   // 2. Build the BVH tree and get the leaves of the tree

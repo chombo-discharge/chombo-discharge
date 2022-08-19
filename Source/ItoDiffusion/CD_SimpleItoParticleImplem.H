@@ -18,29 +18,29 @@
 
 inline SimpleItoParticle::SimpleItoParticle() {}
 
-inline SimpleItoParticle::SimpleItoParticle(const Real a_mass, const RealVect a_position, const Real a_energy)
+inline SimpleItoParticle::SimpleItoParticle(const Real a_weight, const RealVect a_position, const Real a_energy)
 {
-  this->define(a_mass, a_position, a_energy);
+  this->define(a_weight, a_position, a_energy);
 }
 
 inline SimpleItoParticle::~SimpleItoParticle() {}
 
 inline void
-SimpleItoParticle::define(const Real a_mass, const RealVect a_position, const Real a_energy)
+SimpleItoParticle::define(const Real a_weight, const RealVect a_position, const Real a_energy)
 {
-  this->mass()     = a_mass;
+  this->weight()   = a_weight;
   this->position() = a_position;
   this->energy()   = a_energy;
 }
 
 inline Real&
-SimpleItoParticle::mass()
+SimpleItoParticle::weight()
 {
   return this->real<0>();
 }
 
 inline const Real&
-SimpleItoParticle::mass() const
+SimpleItoParticle::weight() const
 {
   return this->real<0>();
 }
