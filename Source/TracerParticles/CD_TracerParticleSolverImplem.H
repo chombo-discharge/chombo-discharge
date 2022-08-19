@@ -171,7 +171,8 @@ TracerParticleSolver<P>::registerOperators() const
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
 
-    m_amr->registerMask(s_particle_halo, 1, m_realm); // For CIC halo deposition.
+    // For CIC halo deposition.    
+    m_amr->registerMask(s_particle_halo, 1, m_realm);
   }
 }
 
