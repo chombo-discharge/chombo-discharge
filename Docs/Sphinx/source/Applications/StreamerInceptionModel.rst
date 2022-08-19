@@ -192,13 +192,30 @@ Example programs that use the streamer inception model are given in
 
 The figure below shows an example of the avalanche integral solved for an |SF6| gas with an irregular electrode surface:
 
-.. |SF6| replace:: SF\ :sub:`6`
-
 .. _Fig:field:
-.. figure:: $DISCHARGE_HOME/Docs/Sphinx/source/_static/figures/StreamerInception/field.png
+.. figure:: /_static/figures/StreamerInception/field.png
    :width: 45%
    :align: center
 
+   Electron avalanche integral :math:`K` for a rough electrode surface and |SF6| gas. POLARIZATION?
+
+.. |SF6| replace:: SF\ :sub:`6`
+
+Underneath is the same example zoomed into one of the electrode crevices, both for positive and negative polarization:
+
+.. _Fig:Kplus:
+.. figure:: /_static/figures/StreamerInception/Kplus.png
+   :width: 45%
+   :align: center
+
+   :math:`K` in the crevice with positive polarization.
+
+.. _Fig:Kminu:
+.. figure:: /_static/figures/StreamerInception/Kminu.png
+   :width: 45%
+   :align: center
+
+   :math:`K` in the crevice with negative polarization. 
   
 Caveats
 -------
