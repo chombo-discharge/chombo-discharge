@@ -106,7 +106,6 @@ TracerParticleSolver<P>::parseDeposition()
   }
   else if (str == "cic") {
     m_deposition           = DepositionType::CIC;
-    m_coarseFineDeposition = CoarseFineDeposition::Halo;
   }
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown deposition method requested.");
@@ -119,6 +118,9 @@ TracerParticleSolver<P>::parseDeposition()
   else if (str == "halo") {
     m_coarseFineDeposition = CoarseFineDeposition::Halo;
   }
+  else if (str == "halo_ngp") {
+    m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
+  }  
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown coarse-fine deposition method requested.");
   }  
@@ -625,6 +627,25 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
 
     break;
   }
+  case CoarseFineDeposition::HaloNGP: {
+    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    
+    a_particles.copyMaskParticles(mask);
+    a_particles.copyNonMaskParticles(mask);    
+
+    m_amr->depositParticles<T, particleScalarFunction>(a_phi,
+                                                       m_realm,
+                                                       m_phase,
+                                                       a_particles,
+                                                       a_baseDeposition,
+                                                       CoarseFineDeposition::HaloNGP,
+                                                       false);
+
+    a_particles.clearMaskParticles();
+    a_particles.clearNonMaskParticles();    
+
+    break;
+  }    
   default: {
     MayDay::Error("TracerParticleSolver::depositParticles -- logic bust due to unsupported coarse-fine deposition");
   }

@@ -487,13 +487,6 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
   CH_assert(a_meshData[0]->nComp() == 1);
 
-  // TLDR: On each level the particles are deposited as usual. This routine permits particles to live right next to the refinement boundary
-  //       so both the coarse-level and fine-level particles have clouds that hang into the fine/coarse level. The way we handle this is as follows:
-  //       The fine-level particles will have deposited into ghost cells that lie around the refinement boundary. This mass is put on the coarse grid.
-  //       On the coarse level the particles have clouds that extend beneath the fine grid. Instead of interpolating this mass to the fine grid we
-  //       run a special deposition procedure which allows us to deposit directly on the fine grid using 2x or 4x the particle width (depending on the
-  //       refinement ratio).
-
   DataOps::setValue(a_meshData, 0.0);
 
   const Interval interv(0, 0);
@@ -540,13 +533,6 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   CH_TIME("EBAMRParticleMesh::depositHaloNGP");
 
   CH_assert(a_meshData[0]->nComp() == 1);
-
-  // TLDR: On each level the particles are deposited as usual. This routine permits particles to live right next to the refinement boundary
-  //       so both the coarse-level and fine-level particles have clouds that hang into the fine/coarse level. The way we handle this is as follows:
-  //       The fine-level particles will have deposited into ghost cells that lie around the refinement boundary. This mass is put on the coarse grid.
-  //       On the coarse level the particles have clouds that extend beneath the fine grid. Instead of interpolating this mass to the fine grid we
-  //       run a special deposition procedure which allows us to deposit directly on the fine grid using 2x or 4x the particle width (depending on the
-  //       refinement ratio).
 
   DataOps::setValue(a_meshData, 0.0);
 
