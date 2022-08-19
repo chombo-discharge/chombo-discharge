@@ -98,11 +98,13 @@ McPhoto::parseOptions()
     pout() << m_name + "::parseOptions" << endl;
   }
 
+  // For registering the CIC deposition mask.
+  m_haloBuffer = 1;
+
   this->parsePseudoPhotons();
   this->parsePhotoGeneration();
   this->parseSourceType();
   this->parseDeposition();
-  this->parseBuffer();
   this->parseIntersectionEB();
   this->parsePlotVariables();
   this->parseInstantaneous();
@@ -121,7 +123,6 @@ McPhoto::parseRuntimeOptions()
   this->parsePhotoGeneration();
   this->parseSourceType();
   this->parseDeposition();
-  this->parseBuffer();
   this->parseIntersectionEB();
   this->parsePlotVariables();
   this->parseInstantaneous();
@@ -279,14 +280,8 @@ McPhoto::parseDeposition()
   else if (str == "cic") {
     m_deposition = DepositionType::CIC;
   }
-  else if (str == "tsc") {
-    m_deposition = DepositionType::TSC;
-  }
-  else if (str == "w4") {
-    m_deposition = DepositionType::W4;
-  }
   else {
-    MayDay::Error("McPhoto::set_deposition_type - unknown interpolant requested");
+    MayDay::Error("McPhoto::parseDeposition - unsupported deposition method requested");
   }
 
   pp.get("plot_deposition", str);
@@ -301,29 +296,23 @@ McPhoto::parseDeposition()
   else if (str == "cic") {
     m_plotDeposition = DepositionType::CIC;
   }
-  else if (str == "tsc") {
-    m_plotDeposition = DepositionType::TSC;
+  else {
+    MayDay::Error("McPhoto::parseDeposition - unsupported interpolant requested");
   }
-  else if (str == "w4") {
-    m_plotDeposition = DepositionType::W4;
+
+  pp.get("depositon_cf", str);
+  if (str == "interp") {
+    m_coarseFineDeposition = CoarseFineDeposition::Interp;
+  }
+  else if (str == "halo") {
+    m_coarseFineDeposition = CoarseFineDeposition::Halo;
+  }
+  else if (str == "halo_ngp") {
+    m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
   }
   else {
-    MayDay::Error("McPhoto::set_deposition_type - unknown interpolant requested");
+    MayDay::Error("McPhoto::parseDeposition - unknown coarse-fine deposition method requested.");
   }
-}
-
-void
-McPhoto::parseBuffer()
-{
-  CH_TIME("McPhoto::parseBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::parseBuffer" << endl;
-  }
-
-  ParmParse pp(m_className.c_str());
-
-  pp.get("pvr_buffer", m_pvrBuffer);
-  pp.get("halo_buffer", m_haloBuffer);
 }
 
 void
@@ -348,20 +337,27 @@ McPhoto::parsePlotVariables()
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++) {
-    if (str[i] == "phi")
+    if (str[i] == "phi") {
       m_plotPhi = true;
-    else if (str[i] == "src")
+    }
+    else if (str[i] == "src") {
       m_plotSource = true;
-    else if (str[i] == "phot")
+    }
+    else if (str[i] == "phot") {
       m_plotPhotons = true;
-    else if (str[i] == "bulk_phot")
+    }
+    else if (str[i] == "bulk_phot") {
       m_plotBulkPhotons = true;
-    else if (str[i] == "eb_phot")
+    }
+    else if (str[i] == "eb_phot") {
       m_plotEBPhotons = true;
-    else if (str[i] == "dom_phot")
+    }
+    else if (str[i] == "dom_phot") {
       m_plotDomainPhotons = true;
-    else if (str[i] == "src_phot")
+    }
+    else if (str[i] == "src_phot") {
       m_plotSourcePhotons = true;
+    }
   }
 }
 
@@ -554,24 +550,36 @@ McPhoto::sortPhotonsByPatch(const WhichContainer& a_which)
   }
 
   switch (a_which) {
-  case WhichContainer::Photons:
+  case WhichContainer::Photons: {
     m_photons.sortParticlesByPatch();
+
     break;
-  case WhichContainer::Bulk:
+  }
+  case WhichContainer::Bulk: {
     m_bulkPhotons.sortParticlesByPatch();
+
     break;
-  case WhichContainer::EB:
+  }
+  case WhichContainer::EB: {
     m_ebPhotons.sortParticlesByPatch();
+
     break;
-  case WhichContainer::Domain:
+  }
+  case WhichContainer::Domain: {
     m_domainPhotons.sortParticlesByPatch();
+
     break;
-  case WhichContainer::Source:
+  }
+  case WhichContainer::Source: {
     m_sourcePhotons.sortParticlesByPatch();
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("McPhoto::sortPhotonsByPatch -- logic bust");
+
     break;
+  }
   }
 }
 
@@ -592,9 +600,8 @@ McPhoto::registerOperators()
     m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
 
-    if (m_haloBuffer > 0) {
-      m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
-    }
+    // For CIC deposition
+    m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
   }
 }
 
@@ -764,52 +771,6 @@ McPhoto::randomExponential(const Real a_mean)
   return Random::get(dist);
 }
 
-int
-McPhoto::getPVRBuffer() const
-{
-  CH_TIME("McPhoto::getPVRBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getPVRBuffer" << endl;
-  }
-
-  return m_pvrBuffer;
-}
-
-int
-McPhoto::getHaloBuffer() const
-{
-  CH_TIME("McPhoto::getHaloBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getHaloBuffer" << endl;
-  }
-
-  return m_haloBuffer;
-}
-
-void
-McPhoto::setPVRBuffer(const int a_buffer)
-{
-  CH_TIME("McPhoto::setPVRBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setPVRBuffer" << endl;
-  }
-
-  m_pvrBuffer  = a_buffer;
-  m_haloBuffer = 0;
-}
-
-void
-McPhoto::setHaloBuffer(const int a_buffer)
-{
-  CH_TIME("McPhoto::setHaloBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setHaloBuffer" << endl;
-  }
-
-  m_haloBuffer = a_buffer;
-  m_pvrBuffer  = 0;
-}
-
 void
 McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt)
 {
@@ -966,21 +927,24 @@ McPhoto::depositPhotons()
 }
 
 void
-McPhoto::depositPhotons(EBAMRCellData&                   a_phi,
-                        const ParticleContainer<Photon>& a_photons,
-                        const DepositionType&            a_deposition)
+McPhoto::depositPhotons(EBAMRCellData& a_phi, ParticleContainer<Photon>& a_photons, const DepositionType& a_deposition)
 {
   CH_TIME("McPhoto::depositPhotons(ParticleContainer)");
   if (m_verbosity > 5) {
     pout() << m_name + "::depositPhotons(ParticleContainer)" << endl;
   }
 
-  this->depositKappaConservative(a_phi,
-                                 a_photons,
-                                 a_deposition);           // a_phi contains only weights, i.e. not divided by kappa
-  this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-  this->depositHybrid(a_phi, m_massDiff, m_depositionNC); // Compute hybrid deposition, including mass differnce
-  this->incrementRedist(m_massDiff);                      // Increment level redistribution register
+  // a_phi contains only weights, i.e. not divided by kappa
+  this->depositKappaConservative(a_phi, a_photons, a_deposition, m_coarseFineDeposition);
+
+  // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+  this->depositNonConservative(m_depositionNC, a_phi);
+
+  // Compute hybrid deposition, including mass differnce
+  this->depositHybrid(a_phi, m_massDiff, m_depositionNC);
+
+  // Increment level redistribution register
+  this->incrementRedist(m_massDiff);
 
   // Do the redistribution magic
   this->coarseFineIncrement(m_massDiff); // Compute C2F, F2C, and C2C mass transfers
@@ -993,40 +957,71 @@ McPhoto::depositPhotons(EBAMRCellData&                   a_phi,
 }
 
 void
-McPhoto::depositKappaConservative(EBAMRCellData&                   a_phi,
-                                  const ParticleContainer<Photon>& a_photons,
-                                  const DepositionType             a_deposition)
+McPhoto::depositKappaConservative(EBAMRCellData&             a_phi,
+                                  ParticleContainer<Photon>& a_particles,
+                                  const DepositionType       a_deposition,
+                                  const CoarseFineDeposition a_coarseFineDeposition)
 {
   CH_TIME("McPhoto::depositKappaConservative");
   if (m_verbosity > 5) {
     pout() << m_name + "::depositKappaConservative" << endl;
   }
 
-  if (m_pvrBuffer > 0 && m_haloBuffer == 0) {
+  CH_assert(a_phi[0]->nComp() == 1);
+
+  switch (a_coarseFineDeposition) {
+  case CoarseFineDeposition::Interp: {
     m_amr->depositParticles<Photon, &Photon::mass>(a_phi,
                                                    m_realm,
                                                    m_phase,
-                                                   a_photons,
+                                                   a_particles,
                                                    a_deposition,
                                                    CoarseFineDeposition::Interp,
                                                    false);
-  }
-  else if (m_pvrBuffer == 0 && m_haloBuffer > 0) {
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
 
-    a_photons.copyMaskParticles(mask);
+    break;
+  }
+  case CoarseFineDeposition::Halo: {
+
+    // Copy particles living on the mask.
+    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    a_particles.copyMaskParticles(mask);
+
     m_amr->depositParticles<Photon, &Photon::mass>(a_phi,
                                                    m_realm,
                                                    m_phase,
-                                                   a_photons,
+                                                   a_particles,
                                                    a_deposition,
                                                    CoarseFineDeposition::Halo,
                                                    false);
-    a_photons.clearMaskParticles();
+
+    // Clear out the mask particles.
+    a_particles.clearMaskParticles();
+
+    break;
   }
-  else {
-    MayDay::Error(
-      "McPhoto::depositKappaConservative -- logic bust, must have either McPhoto.pvr_buffer = 0 or McPhoto.halo_buffer = 0 (this controls deposition)");
+  case CoarseFineDeposition::HaloNGP: {
+    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+
+    // Transfer particles living on the mask.
+    a_particles.transferMaskParticles(mask);
+
+    m_amr->depositParticles<Photon, &Photon::mass>(a_phi,
+                                                   m_realm,
+                                                   m_phase,
+                                                   a_particles,
+                                                   a_deposition,
+                                                   CoarseFineDeposition::HaloNGP,
+                                                   false);
+
+    // Transfer them back.
+    a_particles.transferParticles(a_particles.getMaskParticles());
+
+    break;
+  }
+  default: {
+    MayDay::Error("McPhoto::depositKappaConservative -- logic bust due to unsupported coarse-fine deposition");
+  }
   }
 }
 
