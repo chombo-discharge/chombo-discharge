@@ -33,7 +33,7 @@ The streamer inception model uses
 Implementation
 --------------
 
-``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell in the grid and integrated along the electric field lines until the particle exits the domain or the effective ionization coefficient :math:`\alpha(E)` becomes negative. The running integration tracker is stored locally for each particle and is added to for each integration step. When the particle exits the domain or has a negative :math:`\alpha` it is flagged and its integration is finished. 
+``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell in the grid and integrated along the electric field lines until the particle exits the domain, enters an embedded boundary, or the effective ionization coefficient :math:`\alpha(E)` becomes negative. Every incremental integration part is added to a local integration tracker for each particle. When the particle exits the domain, enters an embedded boundary, or has a negative :math:`\alpha` it is flagged and its integration is finished. The function continues the integration loop until all particles are flagged, before moving the particles back to their initial position for visualization of the resulting :math:`K` values.
 The integration is executed for both polarities (+/-) with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration.
 
 The Euler algorithm gives:
@@ -184,6 +184,7 @@ For example:
    };
 
    inceptionStepper.setVoltageCurve(voltageCurve);
+
 
 
 Inception algorithm
