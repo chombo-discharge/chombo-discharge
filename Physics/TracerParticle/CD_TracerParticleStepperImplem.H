@@ -450,10 +450,6 @@ TracerParticleStepper<P>::initialParticles()
   solverParticles.clearParticles();
   solverParticles.addParticlesDestructive(initialParticles);
 
-  // Solver should remap because it may have a PVR requirement on the particle distribution. This is
-  // not visible to the TimeStepper.
-  m_solver->remap();
-
   // Remove particles inside the EB.
   m_amr->removeCoveredParticlesIF(solverParticles, m_phase);
 }

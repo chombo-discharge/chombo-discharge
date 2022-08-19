@@ -245,21 +245,8 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
     break;
   }
   case CoarseFineDeposition::HaloNGP: {
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
 
-    a_particles.copyMaskParticles(mask);
-    a_particles.copyNonMaskParticles(mask);
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::HaloNGP,
-                                                    m_forceIrregDepositionNGP);
-
-    a_particles.clearMaskParticles();
-    a_particles.clearNonMaskParticles();
+    MayDay::Error("CD_ItoSolverImplem.H -- HaloNGP not supported");
 
     break;
   }
@@ -333,21 +320,8 @@ ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
     break;
   }
   case CoarseFineDeposition::HaloNGP: {
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
 
-    a_particles.copyMaskParticles(mask);
-    a_particles.copyNonMaskParticles(mask);
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::HaloNGP,
-                                                    m_forceIrregDepositionNGP);
-
-    a_particles.clearMaskParticles();
-    a_particles.clearNonMaskParticles();
+    MayDay::Error("CD_ItoSolverImplem.H -- HaloNGP not supported");    
 
     break;
   }

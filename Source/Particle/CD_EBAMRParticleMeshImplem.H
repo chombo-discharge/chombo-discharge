@@ -977,7 +977,7 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   const Interval interv(0, 0);
 
   // nonHaloParticles will get deposited with the 'a_depositionType' scheme and haloParticles with an NGP scheme
-  const AMRParticles<P>& nonHaloParticles = a_particles.getNonMaskParticles();
+  const AMRParticles<P>& nonHaloParticles = a_particles.getParticles();
   const AMRParticles<P>& haloParticles    = a_particles.getMaskParticles();
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -1044,7 +1044,7 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   const Interval interv(0, 0);
 
   // nonHaloParticles will get deposited with the 'a_depositionType' scheme and haloParticles with an NGP scheme
-  const AMRParticles<P>& nonHaloParticles = a_particles.getNonMaskParticles();
+  const AMRParticles<P>& nonHaloParticles = a_particles.getParticles();
   const AMRParticles<P>& haloParticles    = a_particles.getMaskParticles();
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {

@@ -134,16 +134,11 @@ ParticleContainer<P>::setupParticleData(const int a_base, const int a_finestLeve
   //             level to a separate data holder if they lie within a "mask". Typically used for extracting coarse-level that live
   //             just outside the fine grid (i.e. on the coarse side of the refinement boundary).
   //
-  //          4. A data holder for "non-masked particles". This is the same as for the "masked particles", except that it is used for
-  //             the inverse mask. Together, m_maskParticles and m_nonMaskParticles provide an opportunity for segregating particles
-  //             that live on cells where the mask is true/false.
-  //
   //          5. A data holder for storing cell-sorted particles. Very useful when particles need to be sorted by cell rather than patch.
 
   m_particles.resize(1 + a_finestLevel);
   m_bufferParticles.resize(1 + a_finestLevel);
   m_maskParticles.resize(1 + a_finestLevel);
-  m_nonMaskParticles.resize(1 + a_finestLevel);
   m_cellSortedParticles.resize(1 + a_finestLevel);
 
   for (int lvl = a_base; lvl <= a_finestLevel; lvl++) {
@@ -154,9 +149,6 @@ ParticleContainer<P>::setupParticleData(const int a_base, const int a_finestLeve
       new ParticleData<P>(m_grownGrids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
 
     m_maskParticles[lvl] = RefCountedPtr<ParticleData<P>>(
-      new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
-
-    m_nonMaskParticles[lvl] = RefCountedPtr<ParticleData<P>>(
       new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
 
     m_cellSortedParticles[lvl] = RefCountedPtr<LayoutData<BinFab<P>>>(new LayoutData<BinFab<P>>(m_grids[lvl]));
@@ -255,24 +247,6 @@ ParticleContainer<P>::getMaskParticles() const
   CH_assert(m_isDefined);
 
   return m_maskParticles;
-}
-
-template <class P>
-AMRParticles<P>&
-ParticleContainer<P>::getNonMaskParticles()
-{
-  CH_assert(m_isDefined);
-
-  return m_nonMaskParticles;
-}
-
-template <class P>
-const AMRParticles<P>&
-ParticleContainer<P>::getNonMaskParticles() const
-{
-  CH_assert(m_isDefined);
-
-  return m_nonMaskParticles;
 }
 
 template <class P>
@@ -699,11 +673,26 @@ ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContainer)
       "ParticleContainer<P>::transferParticles(ParticleContainer<P>) - other container defined over a different realm");
   }
 
+  this->transferParticles(a_otherContainer.getParticles());
+}
+
+template <class P>
+void
+ParticleContainer<P>::transferParticles(AMRParticles<P>& a_particles)
+{
+  CH_TIME("ParticleContainer<P>::transferParticles(AMRParticles)");
+
+  CH_assert(m_isDefined);
+
+  if (m_isCellSorted) {
+    MayDay::Error("ParticleContainer<P>::transferParticles(ParticleContainer<P>) - particles are sorted by cell!");
+  }
+
   // Ok, transfer the particles.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
       List<P>& myParticles    = (*m_particles[lvl])[dit()].listItems();
-      List<P>& otherParticles = (*m_particles[lvl])[dit()].listItems();
+      List<P>& otherParticles = (*a_particles[lvl])[dit()].listItems();
 
       myParticles.catenate(otherParticles);
     }
@@ -1190,71 +1179,59 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
 
 template <class P>
 void
-ParticleContainer<P>::copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask) const
+ParticleContainer<P>::transferMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask)
 {
-  CH_TIME("ParticleContainer<P>::copyNonMaskParticles(amr)");
+  CH_TIME("ParticleContainer<P>::transferMaskParticles(amr)");
 
   CH_assert(m_isDefined);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     if (!a_mask[lvl].isNull()) {
-      this->copyNonMaskParticles(lvl, *a_mask[lvl]);
-    }
-    else { // Copy all the particles if the input mask had nullptr.
-      m_nonMaskParticles[lvl]->clear();
-
-      for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-        const List<P>& particles = (*m_particles[lvl])[dit()].listItems(); // These are all particles.
-        List<P>&       nonMaskParticles =
-          (*m_nonMaskParticles[lvl])[dit()].listItems(); // Particle data holder we want to copy into.
-
-        for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-          nonMaskParticles.add(lit());
-        }
-      }
+      this->transferMaskParticles(lvl, *a_mask[lvl]);
     }
   }
 }
+
 template <class P>
 void
-ParticleContainer<P>::copyNonMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask) const
+ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask)
 {
-  CH_TIME("ParticleContainer<P>::copyNonMaskParticles(level)");
+  CH_TIME("ParticleContainer<P>::transferMaskParticles(level)");
 
   CH_assert(m_isDefined);
 
-  m_nonMaskParticles[a_level]->clear();
-
   const RealVect dx = m_dx[a_level];
 
-  // 1. Copy particles from m_particles to m_nonMaskParticles if they don't lie in the halo mask
-  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit) {
-    const BaseFab<bool>& mask = a_mask[dit()];
-
-    const Box gridBox = m_grids[a_level][dit()];
-    const Box maskBox = mask.box();
+  // 1. Copy particles from m_particles to m_maskParticles if they lie in the input mask.
+  for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit) {
+    const BaseFab<bool>& mask    = a_mask[dit()];
+    const Box            gridBox = m_grids[a_level][dit()];
+    const Box            maskBox = mask.box();
 
     CH_assert(gridBox == maskBox);
 
-    List<P>&       nonMaskParticles = (*m_nonMaskParticles[a_level])[dit()].listItems();
-    const List<P>& particles        = (*m_particles[a_level])[dit()].listItems();
+    List<P>&       maskParticles = (*m_maskParticles[a_level])[dit()].listItems();
+    const List<P>& particles     = (*m_particles[a_level])[dit()].listItems();
 
-    for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+    for (ListIterator<P> lit(particles); lit.ok(); ) {
       const RealVect x  = lit().position();
       const IntVect  iv = IntVect(D_DECL(std::floor((x[0] - m_probLo[0]) / dx[0]),
                                         std::floor((x[1] - m_probLo[1]) / dx[1]),
                                         std::floor((x[2] - m_probLo[2]) / dx[2])));
-
       if (!(maskBox.contains(iv))) {
-        MayDay::Error("ParticleContainer<P>::copyNonMaskParticles -- logic bust. Particle has fallen off grid");
+        MayDay::Error("ParticleContainer<P>::copyMaskParticles -- logic bust. Particle has fallen off grid");
       }
 
-      if (!mask(iv)) {
-        nonMaskParticles.add(lit());
+      if (mask(iv)) {
+        maskParticles.transfer(lit);
+      }
+      else {
+	++lit;
       }
     }
   }
 }
+
 
 template <class P>
 void
@@ -1281,15 +1258,6 @@ ParticleContainer<P>::clearMaskParticles() const
   CH_assert(m_isDefined);
 
   this->clear(m_maskParticles);
-}
-
-template <class P>
-void
-ParticleContainer<P>::clearNonMaskParticles() const
-{
-  CH_assert(m_isDefined);
-
-  this->clear(m_nonMaskParticles);
 }
 
 template <class P>

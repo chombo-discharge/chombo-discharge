@@ -93,7 +93,7 @@ CoaxialCable.dielectric.eps      = 4
 # ====================================================================================================
 # TracerParticleStepper class options
 # ====================================================================================================
-TracerParticleStepper.initial_particles = 10000  # Number of uniformly distributed initial particles
+TracerParticleStepper.initial_particles = 10000000  # Number of uniformly distributed initial particles
 TracerParticleStepper.integration       = rk4    # 'euler', 'rk2', or 'rk4'
 TracerParticleStepper.verbosity         = -1     # Verbosity level
 TracerParticleStepper.cfl               = 1.0    # "CFL" number. 

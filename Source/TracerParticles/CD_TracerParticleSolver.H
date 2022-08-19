@@ -166,7 +166,7 @@ public:
     @param[out] a_phi Deposited mass. 
   */
   virtual void
-  deposit(EBAMRCellData& a_phi) const;
+  deposit(EBAMRCellData& a_phi);
 
   /*!
     @brief Interpolate particles velocities.
@@ -385,9 +385,9 @@ protected:
   template <typename T, const Real& (T::*particleScalarFunction)() const>
   void
   depositParticles(EBAMRCellData&             a_phi,
-                   const ParticleContainer<T> a_particles,
+		   ParticleContainer<T>&      a_particles,
                    const DepositionType       a_baseDeposition,
-                   const CoarseFineDeposition a_coarseFineDeposition) const;
+                   const CoarseFineDeposition a_coarseFineDeposition);
 };
 
 #include <CD_NamespaceFooter.H>

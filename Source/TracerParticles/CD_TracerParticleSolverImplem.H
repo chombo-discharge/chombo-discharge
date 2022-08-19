@@ -316,7 +316,7 @@ TracerParticleSolver<P>::remap()
 
 template <typename P>
 inline void
-TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const
+TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi)
 {
   CH_TIME("TracerParticleSolver::deposit(EBAMRCellData)");
   if (m_verbosity > 5) {
@@ -588,9 +588,9 @@ template <typename P>
 template <typename T, const Real& (T::*particleScalarFunction)() const>
 void
 TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
-                                          const ParticleContainer<T> a_particles,
+					  ParticleContainer<T>&      a_particles,
                                           const DepositionType       a_baseDeposition,
-                                          const CoarseFineDeposition a_coarseFineDeposition) const
+                                          const CoarseFineDeposition a_coarseFineDeposition)
 {
   CH_TIME("TracerParticleSolver::depositParticles()");
   if (m_verbosity > 5) {
@@ -612,6 +612,8 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
     break;
   }
   case CoarseFineDeposition::Halo: {
+
+    // Copy particles living on the mask. 
     const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
     a_particles.copyMaskParticles(mask);
 
@@ -623,15 +625,16 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
                                                        CoarseFineDeposition::Halo,
                                                        false);
 
+    // Clear out the mask particles. 
     a_particles.clearMaskParticles();
 
     break;
   }
   case CoarseFineDeposition::HaloNGP: {
     const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
-    
-    a_particles.copyMaskParticles(mask);
-    a_particles.copyNonMaskParticles(mask);    
+
+    // Transfer particles living on the mask.
+    a_particles.transferMaskParticles(mask);
 
     m_amr->depositParticles<T, particleScalarFunction>(a_phi,
                                                        m_realm,
@@ -641,9 +644,10 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
                                                        CoarseFineDeposition::HaloNGP,
                                                        false);
 
-    a_particles.clearMaskParticles();
-    a_particles.clearNonMaskParticles();    
 
+    // Transfer them back.
+    a_particles.transferParticles(a_particles.getMaskParticles());
+    
     break;
   }    
   default: {

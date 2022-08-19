@@ -135,29 +135,30 @@ public:
   */
   void
   copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask) const;
-
+  
   /*!
-    @brief Copy particles to non-masked data holder. 
-    @details This is the "inverse" of copyMaskParticles. 
-    @param[in] a_mask Mask
-    @note If the mask is nullptr on any of the levels, all particles on that level will be copied. 
+    @brief Copy particles to masked particle data holder. 
+    @param[in] a_level Grid level
+    @param[in] a_mask  Mask
   */
   void
-  copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask) const;
+  copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask) const;  
+
+  /*!
+    @brief Copy particles to the mask particle data holder.
+    @param[in] a_mask Mask
+    @note If the mask is nullptr on any of the levels, those levels will be ignored. 
+  */
+  void
+  transferMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask);
 
   /*!
     @brief Copy particles to masked particle data holder. 
-    @param[in] a_mask Mask
+    @param[in] a_level Grid level
+    @param[in] a_mask  Mask
   */
   void
-  copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask) const;
-
-  /*!
-    @brief Copy particles that do NOT live in the input mask to the non-masked data holder. 
-    @param[in] a_mask Mask
-  */
-  void
-  copyNonMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask) const;
+  transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask);    
 
   /*!
     @brief Clear all particles
@@ -176,12 +177,6 @@ public:
   */
   void
   clearMaskParticles() const;
-
-  /*!
-    @brief Clear the "non-mask" particles. 
-  */
-  void
-  clearNonMaskParticles() const;
 
   /*!
     @brief Clear particles on input data holder
@@ -249,20 +244,6 @@ public:
   */
   const AMRParticles<P>&
   getMaskParticles() const;
-
-  /*!
-    @brief Get the non-masked particles. 
-    @return m_nonMaskParticles
-  */
-  AMRParticles<P>&
-  getNonMaskParticles();
-
-  /*!
-    @brief Get the non-masked particles. Const version. 
-    @return m_nonMaskParticles
-  */
-  const AMRParticles<P>&
-  getNonMaskParticles() const;
 
   /*!
     @brief Get the AMR grids
@@ -432,12 +413,20 @@ public:
   levelRemap(const int a_level);
 
   /*!
-    @brief Move the particles to a different container. 
+    @brief Move particles into this container. 
     @param[inout] a_otherContainer Other particle container. 
     @note  The grids MUST be the same for both containers. That is, the containers MUST be defined over the same realm. 
   */
   void
   transferParticles(ParticleContainer<P>& a_otherContainer);
+
+  /*!
+    @brief Move particles into this container. 
+    @param[inout] a_otherContainer Other particle container. 
+    @note  The grids MUST be the same for both containers. That is, the containers MUST be defined over the same realm. 
+  */
+  void
+  transferParticles(AMRParticles<P>& a_otherContainer);  
 
   /*!
     @brief Evict particles if they move out of the valid region.
@@ -585,7 +574,7 @@ protected:
   /*!
     @brief The actual particles that this ParticleContainer represents
   */
-  AMRParticles<P> m_particles;
+  mutable AMRParticles<P> m_particles;
 
   /*!
     @brief Special data holder that holds particles on a grown grid layout. 
@@ -601,12 +590,6 @@ protected:
     refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
   */
   mutable AMRParticles<P> m_maskParticles;
-
-  /*!
-    @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
-    refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
-  */
-  mutable AMRParticles<P> m_nonMaskParticles;
 
   /*!
     @brief Cell particles. 
