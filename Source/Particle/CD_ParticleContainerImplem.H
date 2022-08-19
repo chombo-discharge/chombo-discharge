@@ -151,35 +151,6 @@ ParticleContainer<P>::setupPVR(const int a_base, const int a_finestLevel)
 
 template <class P>
 void
-ParticleContainer<P>::setupRefinedValidRegions(const int a_base, const int a_finestLevel)
-{
-  CH_TIME("ParticleContainer<P>::setupRefinedValidRegions");
-
-  // TLDR: This routine sets up the ParticleValidRegion. The PVR is used when we want to ensure that particles that live on a specific grid
-  //       level are a specified distance away from the refinement boundary.
-
-  m_refinedValidRegions.resize(1 + a_finestLevel);
-  
-  for (int lvl = a_base; lvl < a_finestLevel; lvl++) {
-    if(lvl > 0) {
-      const DisjointBoxLayout& dblCoar = m_grids[lvl-1];
-      
-      BoxLayout dblFiCo;
-      refine(dblFiCo, dblCoar, m_refRat[lvl-1]);
-
-      m_refinedValidRegions[lvl] = RefCountedPtr<BoxLayoutData<BaseFab<bool>>> (new BoxLayoutData<BaseFab<bool>>(dblFiCo, 1));
-
-      for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
-      	(*m_refinedValidRegions[lvl])[dit()].setVal(false);
-      }
-
-      m_validRegion[lvl]->copyTo(*m_refinedValidRegions[lvl]);
-    }
-  }
-}
-
-template <class P>
-void
 ParticleContainer<P>::setupParticleData(const int a_base, const int a_finestLevel)
 {
   CH_TIME("ParticleContainer<P>::setupParticleData");
@@ -858,7 +829,7 @@ ParticleContainer<P>::remap()
     if (hasCoar) {
       this->evictInvalidParticles(m_particles[lvl-1]->outcast(), *m_particles[lvl], lvl);
 
-      m_particles[lvl - 1]->gatherOutcast();
+      //      m_particles[lvl - 1]->gatherOutcast();
       m_particles[lvl - 1]->remapOutcast();
     }
   }
@@ -867,8 +838,8 @@ ParticleContainer<P>::remap()
   // do collect those, too
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     if (m_particles[lvl]->numOutcast() > 0) {
-      //      if(procID() == 0) std::cout << "ParticleContainer<P>::remap - outcast list not empty" << std::endl;
       this->remapLostParticles();
+      
       break;
     }
   }

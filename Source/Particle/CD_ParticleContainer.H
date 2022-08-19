@@ -583,14 +583,6 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validRegion;
 
   /*!
-    @brief Refinement valid regions. 
-    @details This is a refinement of the mask on the corresponding level. That is, m_refinedValidRegion[1] contains a refinement
-    of m_validRegion[0]
-    @note Used for transferring particles between levels
-  */
-  Vector<RefCountedPtr<BoxLayoutData<BaseFab<bool>>>> m_refinedValidRegions;
-
-  /*!
     @brief Grown layouts
   */
   Vector<BoxLayout> m_grownGrids;
@@ -662,13 +654,6 @@ protected:
   */
   void
   setupPVR(const int a_base, const int a_finestLevel);
-
-  /*!
-    @brief Set up the refined particle valid regions. 
-    @param[in] a_base        Base level
-    @param[in] a_finestLevel Finest AMR level
-  */
-  void setupRefinedValidRegions(const int a_base, const int a_finestLevel);
 
   /*!
     @brief Setup function for the particle data (m_particles and m_maskParticles)
