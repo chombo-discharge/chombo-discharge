@@ -192,24 +192,33 @@ ItoSolver::parsePlotVariables()
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++) {
-    if (str[i] == "phi")
+    if (str[i] == "phi") {
       m_plotPhi = true;
-    else if (str[i] == "vel")
+    }
+    else if (str[i] == "vel") {
       m_plotVelocity = true;
-    else if (str[i] == "dco")
+    }
+    else if (str[i] == "dco") {
       m_plotDiffCo = true;
-    else if (str[i] == "part")
+    }
+    else if (str[i] == "part") {
       m_plotParticles = true;
-    else if (str[i] == "eb_part")
+    }
+    else if (str[i] == "eb_part") {
       m_plotParticlesEB = true;
-    else if (str[i] == "dom_part")
+    }
+    else if (str[i] == "dom_part") {
       m_plotParticlesDomain = true;
-    else if (str[i] == "src_part")
+    }
+    else if (str[i] == "src_part") {
       m_plotParticlesSource = true;
-    else if (str[i] == "energy_density")
+    }
+    else if (str[i] == "energy_density") {
       m_plotEnergyDensity = true;
-    else if (str[i] == "average_energy")
+    }
+    else if (str[i] == "average_energy") {
       m_plotAverageEnergy = true;
+    }
   }
 }
 

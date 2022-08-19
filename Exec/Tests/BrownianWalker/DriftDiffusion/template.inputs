@@ -61,13 +61,13 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # ====================================================================================================
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
-ItoSolver.pvr_buffer        = 1             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
 ItoSolver.plt_vars          = phi           # Currently available is 'phi' only
 ItoSolver.bisect_step       = 1.E-4         # Bisection step length for intersection tests
 ItoSolver.seed              = 0             # Seed for RNG
 ItoSolver.redistribute        = true          # Turn on/off redistribution. 
 ItoSolver.plot_deposition   = cic           # Cloud-in-cell for plotting particles. 
 ItoSolver.deposition        = cic           # 'ngp' = nearest grid point
+ItoSolver.deposition_cf       = halo          # Coarse-fine deposition. interp, halo, or halo_ngp
                                              # 'cic' = cloud-in-cell
                                              # 'tsc' = triangle-shaped-cloud
                                              # 'w4'  = 3rd order interpolation
