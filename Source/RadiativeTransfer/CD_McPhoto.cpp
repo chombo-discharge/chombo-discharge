@@ -972,13 +972,13 @@ McPhoto::depositKappaConservative(EBAMRCellData&             a_phi,
 
   switch (a_coarseFineDeposition) {
   case CoarseFineDeposition::Interp: {
-    m_amr->depositParticles<Photon, &Photon::mass>(a_phi,
-                                                   m_realm,
-                                                   m_phase,
-                                                   a_particles,
-                                                   a_deposition,
-                                                   CoarseFineDeposition::Interp,
-                                                   false);
+    m_amr->depositParticles<Photon, &Photon::weight>(a_phi,
+                                                     m_realm,
+                                                     m_phase,
+                                                     a_particles,
+                                                     a_deposition,
+                                                     CoarseFineDeposition::Interp,
+                                                     false);
 
     break;
   }
@@ -988,13 +988,13 @@ McPhoto::depositKappaConservative(EBAMRCellData&             a_phi,
     const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
     a_particles.copyMaskParticles(mask);
 
-    m_amr->depositParticles<Photon, &Photon::mass>(a_phi,
-                                                   m_realm,
-                                                   m_phase,
-                                                   a_particles,
-                                                   a_deposition,
-                                                   CoarseFineDeposition::Halo,
-                                                   false);
+    m_amr->depositParticles<Photon, &Photon::weight>(a_phi,
+                                                     m_realm,
+                                                     m_phase,
+                                                     a_particles,
+                                                     a_deposition,
+                                                     CoarseFineDeposition::Halo,
+                                                     false);
 
     // Clear out the mask particles.
     a_particles.clearMaskParticles();
@@ -1007,13 +1007,13 @@ McPhoto::depositKappaConservative(EBAMRCellData&             a_phi,
     // Transfer particles living on the mask.
     a_particles.transferMaskParticles(mask);
 
-    m_amr->depositParticles<Photon, &Photon::mass>(a_phi,
-                                                   m_realm,
-                                                   m_phase,
-                                                   a_particles,
-                                                   a_deposition,
-                                                   CoarseFineDeposition::HaloNGP,
-                                                   false);
+    m_amr->depositParticles<Photon, &Photon::weight>(a_phi,
+                                                     m_realm,
+                                                     m_phase,
+                                                     a_particles,
+                                                     a_deposition,
+                                                     CoarseFineDeposition::HaloNGP,
+                                                     false);
 
     // Transfer them back.
     a_particles.transferParticles(a_particles.getMaskParticles());
