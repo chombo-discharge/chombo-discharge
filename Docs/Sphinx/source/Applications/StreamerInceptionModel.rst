@@ -3,7 +3,7 @@
 Streamer inception
 ==================
 
-The streamer inception model solves the avalanche integral
+The streamer inception model solves the electron avalanche integral
 
 .. math::
 
@@ -71,9 +71,120 @@ For example:
 
    const auto alpha = [](const Real E) -> Real {
       return 1/E;
-   }
+   };
 
    inceptionStepper.setAlpha(alpha);
+
+Eta coefficient
+----------------
+
+To set the eta coefficient, use the member function
+
+.. code-block:: c++
+
+   setEta(const std::function<Real(const Real& E)>& a_eta) noexcept;
+
+For example:
+
+.. code-block:: c++
+
+   StreamerInceptionStepper<> inceptionStepper;
+
+   const auto eta = [](const Real E) -> Real {
+	return 1/(1-E);
+   };
+
+   inceptionStepper.setEta(eta);
+
+Negative ion mobility
+---------------------
+
+To set the negative ion mobility, use the member function
+
+.. code-block:: c++
+
+   setNegativeIonMobility(const std::function<Real(const Real x)>& a_mobility) noexcept;
+
+For example:
+
+.. code-block:: c++
+
+   StreamerInceptionStepper<> inceptionStepper;
+
+   auto ionMobility = [](const Real& E) -> Real {
+	return 2E-4;
+   };
+
+   inceptionStepper.setNegativeIonMobility(ionMobility);
+
+Negative ion density
+---------------------
+
+To set the negative ion density, use the member function
+
+.. code-block:: c++
+
+   setNegativeIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
+
+For example:
+
+.. code-block:: c++
+
+   StreamerInceptionStepper<> inceptionStepper;
+
+   auto ionDensity = [](const RealVect& x) -> Real {
+	return 1.E10;
+   };
+
+   inceptionStepper.setNegativeIonDensity(ionDensity);
+   
+Background ionization rate
+---------------------------
+
+The background ionization rate is calculated assuming contributions from detachment of electrons from negative ions and field emission.
+
+To set the background ionization rate, use the member function
+
+.. code-block:: c++
+
+   setBackgroundRate(const std::function<Real(const Real& E)>& a_backgroundRate) noexcept;
+
+For example:
+
+.. code-block:: c++
+
+   StreamerInceptionStepper<> inceptionStepper;
+
+   auto bgIonization = [N](const Real& E) -> Real {
+	return 2.E6 / (1.17E-4 * exp(2.91E7/E));
+   };
+
+   inceptionStepper.setBackgroundRate(bgIonization);
+
+Voltage curve
+--------------
+
+To set the voltage curve, use the member function
+
+.. code-block:: c++
+
+   setVoltageCurve(const std::function<Real(const Real& E)>& a_voltageCurve) noexcept;
+
+For example:
+
+.. code-block:: c++
+
+   StreamerInceptionStepper<> inceptionStepper;
+
+   auto voltageCurve = [V0, t0, t1, t2](const Real a_time) -> Real {
+	constexpr Real alpha = 1.0/50E-6;
+	constexpr Real beta  = 1.0/1.2E-6;
+
+	return V0 * (exp(-(a_time + t0)/t1) - exp(-(a_time + t0)/t2));
+   };
+
+   inceptionStepper.setVoltageCurve(voltageCurve);
+
 
 Inception algorithm
 ----------------------
@@ -159,11 +270,6 @@ For example:
 Dynamic mode
 -------------
 
-Background ionization rate
---------------------------
-
-The background ionization rate is calculated assuming contributions from detachment of electrons from negative ions and field emission. 
-
 Setting up a new problem
 ------------------------
 
@@ -190,7 +296,7 @@ Example programs that use the streamer inception model are given in
 * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness`.
 * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/Armadillo`.
 
-The figure below shows an example of the avalanche integral solved for an |SF6| gas with an irregular electrode surface:
+The figure below shows an example of the avalanche integral :math:`K` solved for an |SF6| gas with an irregular electrode surface:
 
 .. _Fig:field:
 .. figure:: /_static/figures/StreamerInception/field.png
