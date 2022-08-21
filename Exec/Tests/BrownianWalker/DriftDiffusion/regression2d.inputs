@@ -78,12 +78,8 @@ ItoSolver.irr_ngp_deposition  = false         # Force irregular deposition in cu
 ItoSolver.irr_ngp_interp      = true          # Force irregular interpolation in cut cells or not
 ItoSolver.mobility_interp     = direct        # How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
-ItoSolver.halo_deposition     = native        # Native or NGP (see documentation)
 ItoSolver.deposition          = cic           # 'ngp' = nearest grid point
 ItoSolver.deposition_cf       = halo          # Coarse-fine deposition. interp, halo, or halo_ngp
-                                               # 'cic' = cloud-in-cell
-                                               # 'tsc' = triangle-shaped-cloud
-                                               # 'w4'  = 3rd order interpolation
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
