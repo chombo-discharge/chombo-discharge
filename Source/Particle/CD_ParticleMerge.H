@@ -7,7 +7,6 @@
   @file   CD_ParticleMerge.H
   @brief  Namespace containing various particle merging utilities.
   @author Robert Marskar
-  @todo Node<T>::split should take a polymorphic lambda for the node splitting.
 */
 
 #ifndef CD_ParticleMerge_H
@@ -30,6 +29,100 @@
   into a tree structure. Currently, this tree structure is a kd-tree. 
 */
 namespace ParticleMerge {
+
+  // clang-format off
+  /*!
+    @brief Particle list alias
+  */
+  template <class P>
+  using ParticleList = std::vector<P>;
+
+  /*!
+    @brief Polymorphic function for merging particles. 
+    @details Takes a list of particles and returns a single merged particle.
+  */
+  template <class P>
+  using MergeParticles = std::function<P(ParticleList<P>& a_particles)>;
+
+  /*!
+    @brief Polymorphic function for splitting particles.
+    @details Takes a list of particles and returns a single merged particle.
+  */
+  template <class P>
+  using SplitParticle = std::function<ParticleList<P>(P& a_particle)>;
+
+  /*!
+    @brief Partitioning function for dividing a particle list into two subsets.
+  */
+  template <class P>
+  using Partitioner = std::function<std::pair<ParticleList<P>, ParticleList<P>>(ParticleList<P>& a_particles)>;
+
+  /*!
+    @brief Polymorphic function for ending particle splitting/merging.
+    @details Should return true if we should keep partitioning the particles and false otherwise.
+  */
+  template <class P>
+  using StopFunction = std::function<bool(const ParticleList<P>& a_particles)>;
+  // clang-format on
+
+  /*!
+    @brief Node in a particle-merging KD-tree. This node type is used for partitioning particles. 
+    @details The template argument P is the particle type.
+  */
+  template <class P>
+  class KDNode
+  {
+  public:
+    KDNode()               = delete;
+    KDNode(const KDNode&)  = delete;
+    KDNode(const KDNode&&) = delete;
+
+    KDNode&
+    operator=(const KDNode&) = delete;
+    KDNode&
+    operator=(const KDNode&&) = delete;
+
+    /*!
+      @brief Valid constructor. Takes list of primitives.
+      @param[in] a_primitive List of primitives to partition later. 
+    */
+    KDNode(const ParticleList<P>& a_primitives);
+
+    /*!
+      @brief Destructor. Does nothing.
+    */
+    virtual ~KDNode();
+
+    /*!
+      @brief Top-down partitioning building a KD-tree.
+      @param[in] a_partitionFunction Partitioning function for dividing into subsets.
+      @param[in] a_stopFunction      Stop function for ending particle recursion.
+      @param[in] a_mergeFunction     Merge method for particles.
+      @param[in] a_splitFunction     Split method for particles.
+    */
+    inline void
+    topDownPartition(const Partitioner<P>&    a_partitionFunction,
+                     const StopFunction<P>&   a_stopFunction,
+                     const MergeParticles<P>& a_mergeFunction,
+                     const SplitParticle<P>&  a_splitFunction) noexcept;
+
+  protected:
+    
+    /*!
+      @brief Left KD-node
+    */
+    std::shared_ptr<KDNode> m_left;
+
+    /*!
+      @brief Right KD-node
+    */
+    std::shared_ptr<KDNode> m_right;
+
+    /*!
+      @brief List of primitives
+    */
+    std::vector<P> m_primitives;
+  };
 
   /*!
     @brief Class for describing a single node with two children and one parent. This is used together with ParticleMerge::Tree for particle handling. 
@@ -251,9 +344,7 @@ namespace ParticleMerge {
       @param[in] a_partitioner     Partitioning function. 
     */
     inline void
-    buildTree(const int                 a_firstDir,
-              const int                 a_numTargetLeaves,
-              const NodePartitioner<T>& a_partitioner); // = ParticleMerge::NodePartitionEqualMass<T>);
+    buildTree(const int a_firstDir, const int a_numTargetLeaves, const NodePartitioner<T>& a_partitioner);
 
     /*!
       @brief Get the leaf nodes
