@@ -4,14 +4,14 @@
  */
 
 /*!
-  @file   CD_ItoMerge.H
-  @brief  Namespace containing various merging utilities for ItoSolver particle merging and splitting.
+  @file   CD_ParticleMerge.H
+  @brief  Namespace containing various particle merging utilities.
   @author Robert Marskar
   @todo Node<T>::split should take a polymorphic lambda for the node splitting.
 */
 
-#ifndef CD_ItoMerge_H
-#define CD_ItoMerge_H
+#ifndef CD_ParticleMerge_H
+#define CD_ParticleMerge_H
 
 // Std includes
 #include <memory>
@@ -24,15 +24,15 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Namespace for various merging utilities for ItoSolver. 
-  @details This namespace is just a collection of various utils. In general we tend to use the ItoMerge::Tree for making a hierarchical view of the particles
+  @brief Namespace for various particle merging tools. 
+  @details This namespace is just a collection of various utils. In general we tend to use the ParticleMerge::Tree for making a hierarchical view of the particles
   in a particular grid cell. The user can use that tree structure together with the default (or specified) partitioning function for partitioning the particles
   into a tree structure. Currently, this tree structure is a kd-tree. 
 */
-namespace ItoMerge {
+namespace ParticleMerge {
 
   /*!
-    @brief Class for describing a single node with two children and one parent. This is used together with ItoMerge::Tree for particle handling. 
+    @brief Class for describing a single node with two children and one parent. This is used together with ParticleMerge::Tree for particle handling. 
   */
   template <class T>
   class Node : public std::enable_shared_from_this<Node<T>>
@@ -206,14 +206,14 @@ namespace ItoMerge {
     @brief Partitioner function which splits a Node<T> into left/right child nodes with masses differing by at most one physical particle
     @param[inout] a_node Node to be split
     @param[in]    a_dir  Coordinate to split along
-    @note Implemented in CD_ItoMergeImplem.H
+    @note Implemented in CD_ParticleMergeImplem.H
   */
 
   /*!
-    @brief Class for making a tree structure with ItoMerge::Node<T> in it. 
-    @details This is the main function that is used for partitioning particles ala ItoSolver -- it uses the ItoMerge::Node<T> structure to recursively 
+    @brief Class for making a tree structure with ParticleMerge::Node<T> in it. 
+    @details This is the main function that is used for partitioning particles ala ItoSolver -- it uses the ParticleMerge::Node<T> structure to recursively 
     partition a list of primitives into a new list of primitives. 
-    @note This class should work with any Node<T> -- refer to ItoMerge::Node<T> for requirements on the template parameters. To build the tree the user
+    @note This class should work with any Node<T> -- refer to ParticleMerge::Node<T> for requirements on the template parameters. To build the tree the user
     will just call buildTree() which selects the first splitting plane and number of leaves in the tree. The user can also input his own partitioning function
     which determines how leaf nodes are split. 
   */
@@ -253,7 +253,7 @@ namespace ItoMerge {
     inline void
     buildTree(const int                 a_firstDir,
               const int                 a_numTargetLeaves,
-              const NodePartitioner<T>& a_partitioner); // = ItoMerge::NodePartitionEqualMass<T>);
+              const NodePartitioner<T>& a_partitioner); // = ParticleMerge::NodePartitionEqualMass<T>);
 
     /*!
       @brief Get the leaf nodes
@@ -285,10 +285,10 @@ namespace ItoMerge {
     */
     std::vector<std::shared_ptr<Node<T>>> m_leaves;
   };
-} // namespace ItoMerge
+} // namespace ParticleMerge
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_ItoMergeImplem.H>
+#include <CD_ParticleMergeImplem.H>
 
 #endif

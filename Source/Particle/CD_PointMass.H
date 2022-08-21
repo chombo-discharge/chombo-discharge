@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_PointMass.H
-  @brief  Declaration of a simple class for storing a point with mass 
+  @brief  Declaration of a simple class for storing a point with mass.
   @author Robert Marskar
 */
 
@@ -20,8 +20,7 @@
 
 /*!
   @brief Declaration of a simple class for storing a point with mass. 
-  @details This is not a computational particle -- it is used with ItoSolver in order to merge particles. 
-  @note The position and energy are average quantities. 
+  @details This is not a computational particle.
 */
 class PointMass
 {

@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_ItoMergePartitioners.H
+  @file   CD_ParticleMergePartitioners.H
   @brief  Implementation of various partitioners for superparticle handling of ItoSolver
   @author Robert Marskar
 */
 
-#ifndef CD_ItoMergePartitioners_H
-#define CD_ItoMergePartitioners_H
+#ifndef CD_ParticleMergePartitioners_H
+#define CD_ParticleMergePartitioners_H
 
 // Std includes
 #include <limits>
@@ -19,10 +19,10 @@
 #include <CH_Timer.H>
 
 // Our includes
-#include <CD_ItoMerge.H>
+#include <CD_ParticleMerge.H>
 #include <CD_NamespaceHeader.H>
 
-namespace ItoMerge {
+namespace ParticleMerge {
 
   /*!
     @brief Partitioning function which partitions masses equally in the kd-tree. 
@@ -191,7 +191,7 @@ namespace ItoMerge {
       CH_assert(r.mass() >= std::numeric_limits<Real>::min());
     }
   };
-} // namespace ItoMerge
+} // namespace ParticleMerge
 
 #include <CD_NamespaceFooter.H>
 

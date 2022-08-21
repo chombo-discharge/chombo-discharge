@@ -4,26 +4,26 @@
  */
 
 /*!
-  @file   CD_ItoMergeImplem.H
-  @brief  Implementation of CD_ItoMerge.H
+  @file   CD_ParticleMergeImplem.H
+  @brief  Implementation of CD_ParticleMerge.H
   @author Robert Marskar
   @date   May 2020
 */
 
-#ifndef CD_ItoMergeImplem_H
-#define CD_ItoMergeImplem_H
+#ifndef CD_ParticleMergeImplem_H
+#define CD_ParticleMergeImplem_H
 
 // Chombo includes
 #include <CH_Timer.H>
 
 // Our includes
-#include <CD_ItoMerge.H>
-#include <CD_ItoMergePartitioners.H>
+#include <CD_ParticleMerge.H>
+#include <CD_ParticlePartitioners.H>
 #include <CD_NamespaceHeader.H>
 
-#define ITOMERGE_VECTOR_CAPACITY 2048
+#define ParticleMergeVectorCapacity 2048
 
-namespace ItoMerge {
+namespace ParticleMerge {
 
   template <class T>
   Node<T>::Node()
@@ -32,7 +32,7 @@ namespace ItoMerge {
     m_left   = nullptr;
     m_right  = nullptr;
 
-    m_data.reserve(ITOMERGE_VECTOR_CAPACITY);
+    m_data.reserve(ParticleMergeVectorCapacity);
   }
 
   template <class T>
@@ -227,7 +227,7 @@ namespace ItoMerge {
   inline void
   Tree<T>::buildTree(const int a_firstDir, const int a_numTargetLeaves, const NodePartitioner<T>& a_partitioner)
   {
-    CH_TIME("ItoMerge::Tree<T>::buildTree");
+    CH_TIME("ParticleMerge::Tree<T>::buildTree");
 
     CH_assert(m_isDefined);
     CH_assert(a_numTargetLeaves >= 1);
@@ -311,7 +311,7 @@ namespace ItoMerge {
       splitDir = (splitDir + 1) % SpaceDim;
     }
   }
-} // namespace ItoMerge
+} // namespace ParticleMerge
 
 #include <CD_NamespaceFooter.H>
 
