@@ -26,81 +26,21 @@
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
-inline Real
-ItoSolver::sign(const Real& a) const
-{
-  return (a > 0) - (a < 0);
-}
-
 inline RealVect
 ItoSolver::randomGaussian() const
 {
   // TLDR: We draw a random number from a Gaussian distribution for each coordinate, and truncate the distribution at m_normalDistributionTruncation.
 
+  auto sign = [](const Real& a) -> Real { return (a > 0) - (a < 0); };
+
   RealVect r = RealVect::Zero;
   for (int i = 0; i < SpaceDim; i++) {
     r[i] = Random::getNormal01();
+
     r[i] = sign(r[i]) * std::min(std::abs(r[i]), m_normalDistributionTruncation);
   }
 
   return r;
-}
-
-inline RealVect
-ItoSolver::randomPosition(const RealVect a_cellPos,
-                          const RealVect a_lo,
-                          const RealVect a_hi,
-                          const RealVect a_bndryCentroid,
-                          const RealVect a_bndryNormal,
-                          const Real     a_dx,
-                          const Real     a_kappa) const
-{
-
-  RealVect pos;
-
-  if (a_kappa < 1.0) { // Rejection sampling.
-    pos = this->randomPosition(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
-  }
-  else { // Regular cell. Get a position.
-    pos = this->randomPosition(a_lo, a_hi);
-  }
-
-  // Convert from unit cell coordinates to physical coordinates.
-  pos = a_cellPos + pos * a_dx;
-
-  return pos;
-}
-
-inline RealVect
-ItoSolver::randomPosition(const RealVect a_lo,
-                          const RealVect a_hi,
-                          const RealVect a_bndryCentroid,
-                          const RealVect a_bndryNormal) const
-{
-
-  // Draw a position.
-  RealVect pos   = this->randomPosition(a_lo, a_hi);
-  bool     valid = PolyGeom::dot(pos - a_bndryCentroid, a_bndryNormal) >= 0.0;
-
-  // Rejectino sampling.
-  while (!valid) {
-    pos   = this->randomPosition(a_lo, a_hi);
-    valid = PolyGeom::dot(pos - a_bndryCentroid, a_bndryNormal) >= 0.0;
-  }
-
-  return pos;
-}
-
-inline RealVect
-ItoSolver::randomPosition(const RealVect a_lo, const RealVect a_hi) const
-{
-  RealVect pos;
-
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    pos[dir] = a_lo[dir] + 0.5 * (1.0 + Random::getUniformReal11()) * (a_hi[dir] - a_lo[dir]);
-  }
-
-  return pos;
 }
 
 template <ItoSolver::WhichContainer C>
