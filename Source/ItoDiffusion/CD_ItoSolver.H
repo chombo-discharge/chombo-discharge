@@ -12,11 +12,6 @@
 #ifndef CD_ItoSolver_H
 #define CD_ItoSolver_H
 
-// Chombo includes
-#include <Particle.H>
-#include <ParticleData.H>
-#include <BinItem.H>
-
 // Our includes
 #include <CD_AmrMesh.H>
 #include <CD_ComputationalGeometry.H>
@@ -24,7 +19,7 @@
 #include <CD_ItoParticle.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
-#include <CD_ParticleMerge.H>
+#include <CD_SuperParticles.H>
 #include <CD_PointMass.H>
 #include <CD_EbRepresentation.H>
 #include <CD_EbIntersection.H>
@@ -1024,7 +1019,12 @@ protected:
   /*!
     @brief Boundary volume hierarchy merging tree -- used in mergeBVH. 
   */
-  ParticleMerge::Tree<PointMass> m_mergeTree;
+  SuperParticles::Tree<PointMass> m_mergeTree;
+
+  /*!
+    @brief k-d tree for super particle merging
+  */
+  SuperParticles::KDNode<ItoParticle> m_kdTree;
 
   /*!
     @brief Computational geometry. 

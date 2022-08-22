@@ -1,16 +1,16 @@
 /* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
+ * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
 /*!
-  @file   CD_ParticleMerge.H
+  @file   CD_SuperParticles.H
   @brief  Namespace containing various particle merging utilities.
   @author Robert Marskar
 */
 
-#ifndef CD_ParticleMerge_H
-#define CD_ParticleMerge_H
+#ifndef CD_SuperParticles_H
+#define CD_SuperParticles_H
 
 // Std includes
 #include <memory>
@@ -24,11 +24,8 @@
 
 /*!
   @brief Namespace for various particle merging tools. 
-  @details This namespace is just a collection of various utils. In general we tend to use the ParticleMerge::Tree for making a hierarchical view of the particles
-  in a particular grid cell. The user can use that tree structure together with the default (or specified) partitioning function for partitioning the particles
-  into a tree structure. Currently, this tree structure is a kd-tree. 
 */
-namespace ParticleMerge {
+namespace SuperParticles {
 
   // clang-format off
   /*!
@@ -38,24 +35,10 @@ namespace ParticleMerge {
   using ParticleList = std::vector<P>;
 
   /*!
-    @brief Polymorphic function for merging particles. 
-    @details Takes a list of particles and returns a single merged particle.
-  */
-  template <class P>
-  using MergeParticles = std::function<P(ParticleList<P>& a_particles)>;
-
-  /*!
-    @brief Polymorphic function for splitting particles.
-    @details Takes a list of particles and returns a single merged particle.
-  */
-  template <class P>
-  using SplitParticle = std::function<ParticleList<P>(P& a_particle)>;
-
-  /*!
     @brief Partitioning function for dividing a particle list into two subsets.
   */
   template <class P>
-  using Partitioner = std::function<std::pair<ParticleList<P>, ParticleList<P>>(ParticleList<P>& a_particles)>;
+  using ParticlePartitioner = std::function<std::pair<ParticleList<P>, ParticleList<P>>(ParticleList<P>& a_particles)>;  
 
   /*!
     @brief Polymorphic function for ending particle splitting/merging.
@@ -66,14 +49,15 @@ namespace ParticleMerge {
   // clang-format on
 
   /*!
-    @brief Node in a particle-merging KD-tree. This node type is used for partitioning particles. 
-    @details The template argument P is the particle type.
+    @brief Node in a particle-merging KD-tree. 
+    @details This node type is used for partitioning particles into spatial subsets and merging/splitting them. 
+    @details The template argument P is the particle type - the users decides how to merge/split/partition. 
   */
   template <class P>
   class KDNode
   {
   public:
-    KDNode()               = delete;
+
     KDNode(const KDNode&)  = delete;
     KDNode(const KDNode&&) = delete;
 
@@ -83,8 +67,14 @@ namespace ParticleMerge {
     operator=(const KDNode&&) = delete;
 
     /*!
+      @brief Default constructor
+    */
+    KDNode();
+
+    /*!
       @brief Valid constructor. Takes list of primitives.
       @param[in] a_primitive List of primitives to partition later. 
+      @note The input particle list is modifiable!
     */
     KDNode(const ParticleList<P>& a_primitives);
 
@@ -97,17 +87,44 @@ namespace ParticleMerge {
       @brief Top-down partitioning building a KD-tree.
       @param[in] a_partitionFunction Partitioning function for dividing into subsets.
       @param[in] a_stopFunction      Stop function for ending particle recursion.
-      @param[in] a_mergeFunction     Merge method for particles.
-      @param[in] a_splitFunction     Split method for particles.
     */
     inline void
-    topDownPartition(const Partitioner<P>&    a_partitionFunction,
-                     const StopFunction<P>&   a_stopFunction,
-                     const MergeParticles<P>& a_mergeFunction,
-                     const SplitParticle<P>&  a_splitFunction) noexcept;
+    topDownPartition(const ParticlePartitioner<P>& a_partitionFunction,
+                     const StopFunction<P>&        a_stopFunction) noexcept;
+
+    /*!
+      @brief Get primitives in this node
+    */
+    inline const ParticleList<P>&
+    getPrimitives() const noexcept;
+
+    /*!
+      @brief Is leaf node or not.
+    */
+    inline bool
+    isLeafNode() const noexcept;
+
+    /*!
+      @brief Is leaf node or not.
+    */
+    inline bool
+    isInteriorNode() const noexcept;
+
+    /*!
+      @brief Gather primitives further down in the subtree and return all primitives (in the leaf nodes)
+    */
+    inline ParticleList<P>
+    gatherPrimitives() const noexcept;
+
+    /*!
+      @brief Move the primitives list further down in the subtree into this vector.
+      @note This clears the primitives from the leaf nodes. Use gatherPrimitives if you do not
+      want to change the tree contents. 
+    */
+    inline ParticleList<P>
+    movePrimitives() noexcept;
 
   protected:
-    
     /*!
       @brief Left KD-node
     */
@@ -122,10 +139,26 @@ namespace ParticleMerge {
       @brief List of primitives
     */
     std::vector<P> m_primitives;
+
+    /*!
+      @brief Gather primitives further down in the subtree and return all primitives (in the leaf nodes)
+      @param[inout] a_primitives List of primitives
+    */      
+    inline void
+    gatherPrimitives(ParticleList<P>& a_primitives) const noexcept;
+
+    /*!
+      @brief Move primitives further down in the subtree and return all primitives (in the leaf nodes)
+      @param[inout] a_primitives List of primitives
+      @note This clears the primitives from the leaf nodes. Use gatherPrimitives if you do not
+      want to change the tree contents. 
+    */      
+    inline void
+    movePrimitives(ParticleList<P>& a_primitives) noexcept;        
   };
 
   /*!
-    @brief Class for describing a single node with two children and one parent. This is used together with ParticleMerge::Tree for particle handling. 
+    @brief Class for describing a single node with two children and one parent. This is used together with SuperParticles::Tree for particle handling. 
   */
   template <class T>
   class Node : public std::enable_shared_from_this<Node<T>>
@@ -299,14 +332,14 @@ namespace ParticleMerge {
     @brief Partitioner function which splits a Node<T> into left/right child nodes with masses differing by at most one physical particle
     @param[inout] a_node Node to be split
     @param[in]    a_dir  Coordinate to split along
-    @note Implemented in CD_ParticleMergeImplem.H
+    @note Implemented in CD_SuperParticlesImplem.H
   */
 
   /*!
-    @brief Class for making a tree structure with ParticleMerge::Node<T> in it. 
-    @details This is the main function that is used for partitioning particles ala ItoSolver -- it uses the ParticleMerge::Node<T> structure to recursively 
+    @brief Class for making a tree structure with SuperParticles::Node<T> in it. 
+    @details This is the main function that is used for partitioning particles ala ItoSolver -- it uses the SuperParticles::Node<T> structure to recursively 
     partition a list of primitives into a new list of primitives. 
-    @note This class should work with any Node<T> -- refer to ParticleMerge::Node<T> for requirements on the template parameters. To build the tree the user
+    @note This class should work with any Node<T> -- refer to SuperParticles::Node<T> for requirements on the template parameters. To build the tree the user
     will just call buildTree() which selects the first splitting plane and number of leaves in the tree. The user can also input his own partitioning function
     which determines how leaf nodes are split. 
   */
@@ -376,10 +409,11 @@ namespace ParticleMerge {
     */
     std::vector<std::shared_ptr<Node<T>>> m_leaves;
   };
-} // namespace ParticleMerge
+} // namespace SuperParticles
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_ParticleMergeImplem.H>
+#include <CD_SuperParticlesImplem.H>
+#include <CD_ParticlePartitioners.H>
 
 #endif
