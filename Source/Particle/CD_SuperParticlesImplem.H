@@ -27,112 +27,164 @@
 namespace SuperParticles {
 
   template <class P>
-  inline
-  KDNode<P>::KDNode()
+  inline KDNode<P>::KDNode()
   {
     m_left  = nullptr;
-    m_right = nullptr;    
+    m_right = nullptr;
   }
 
   template <class P>
-  inline
-  KDNode<P>::KDNode(const ParticleList<P>& a_primitives)
+  inline KDNode<P>::KDNode(ParticleList& a_particles)
   {
     m_left  = nullptr;
-    m_right = nullptr;    
+    m_right = nullptr;
+
+    m_particles.reserve(a_particles.size());
+    std::move(a_particles.begin(), a_particles.end(), std::back_inserter(m_particles));
+  }
+
+  template <class P>
+  inline KDNode<P>::~KDNode()
+  {}
+
+  template <class P>
+  inline const typename KDNode<P>::ParticleList&
+  KDNode<P>::getParticles() const noexcept
+  {
+    return m_particles;
+  }
+
+  template <class P>
+  inline typename KDNode<P>::ParticleList&
+  KDNode<P>::getParticles() noexcept
+  {
+    return m_particles;
   }  
 
   template <class P>
-  inline  
-  KDNode<P>::~KDNode()
-  {
-  }
-
-  template <class P>
-  inline const ParticleList<P>&
-  KDNode<P>::getPrimitives() const noexcept {
-    return m_primitives;
-  }
-
-  template <class P>
   inline bool
-  KDNode<P>::isLeafNode() const noexcept {
+  KDNode<P>::isLeafNode() const noexcept
+  {
     return (m_left == nullptr) && (m_right == nullptr);
   }
 
   template <class P>
   inline bool
-  KDNode<P>::isInteriorNode() const noexcept {
-    return (m_left != nullptr) && (m_right != nullptr);
+  KDNode<P>::isInteriorNode() const noexcept
+  {
+    return !(this->isLeafNode());
   }
 
   template <class P>
   inline void
-  KDNode<P>::topDownPartition(const ParticlePartitioner<P>& a_partitionFunction,
-			      const StopFunction<P>&        a_stopFunction) noexcept {
-    MayDay::Abort("KDNode<P>::topDownPartition -- not implemented");
-
-    if(!a_stopFunction(m_primitives)) {
-      const auto& partitions = a_partitionFunction(m_primitives);
-
-      m_left = std::make_shared<KDNode<P>>(partitions.first);
-      m_right = std::make_shared<KDNode<P>>(partitions.second);
-
-      m_left->topDownSortAndPartition(a_partitionFunction, a_stopFunction);
-      m_right->topDownSortAndPartition(a_partitionFunction, a_stopFunction);
-				      
-      m_primitives.resize(0);
+  KDNode<P>::topDownPartition(const Partitioner& a_partitionFunction, const StopFunction& a_stopFunction) noexcept
+  {
+    if (!a_stopFunction(m_particles)) {
+      this->partition(a_partitionFunction);
     }
   }
 
   template <class P>
-  inline ParticleList<P>
-  KDNode<P>::gatherPrimitives() const noexcept {
-    ParticleList<P> primitives;
+  inline void
+  KDNode<P>::partition(const Partitioner& a_partitioner) noexcept
+  {
+    const auto& partitions = a_partitionFunction(m_particles);
 
-    this->gatherPrimitives(primitives);
+    m_left  = std::make_shared<KDNode<P>>(partitions.first);
+    m_right = std::make_shared<KDNode<P>>(partitions.second);
+  }
+
+  template <class P>
+  inline typename KDNode<P>::ParticleList
+  KDNode<P>::gatherParticles() const noexcept
+  {
+    ParticleList primitives;
+
+    this->gatherParticles(primitives);
 
     return primitives;
   }
 
   template <class P>
   inline void
-  KDNode<P>::gatherPrimitives(ParticleList<P>& a_primitives) const noexcept {
-    if(this->isLeafNode()) {
-      a_primitives.reserve(a_primitives.size() + m_primitives.size());
-      a_primitives.insert(a_primitives.end(), m_primitives.begin(), m_primitives.end());
+  KDNode<P>::gatherParticles(ParticleList& a_particles) const noexcept
+  {
+    if (this->isLeafNode()) {
+      a_particles.reserve(a_particles.size() + m_particles.size());
+      a_particles.insert(a_particles.end(), m_particles.begin(), m_particles.end());
     }
     else {
-      m_left->gatherPrimitives(a_primitives);
-      m_right->gatherPrimitives(a_primitives);
+      m_left->gatherParticles(a_particles);
+      m_right->gatherParticles(a_particles);
     }
   }
 
   template <class P>
-  inline ParticleList<P>
-  KDNode<P>::movePrimitives() noexcept {
-    ParticleList<P> primitives;
+  inline typename KDNode<P>::ParticleList
+  KDNode<P>::moveParticles() noexcept
+  {
+    ParticleList primitives;
 
-    this->movePrimitives(primitives);
+    this->moveParticles(primitives);
 
     return primitives;
   }
 
   template <class P>
   inline void
-  KDNode<P>::movePrimitives(ParticleList<P>& a_primitives) noexcept {
-    if(this->isLeafNode()) {
-      a_primitives.reserve(a_primitives.size() + m_primitives.size());
+  KDNode<P>::moveParticles(ParticleList& a_particles) noexcept
+  {
+    if (this->isLeafNode()) {
+      a_particles.reserve(a_particles.size() + m_particles.size());
 
-      std::move(m_primitives.begin(), m_primitives.end(), std::back_inserter(a_primitives));
-
-      m_primitives.clear();
+      std::move(m_particles.begin(), m_particles.end(), std::back_inserter(a_particles));
     }
     else {
-      m_left->movePrimitives(a_primitives);
-      m_right->movePrimitives(a_primitives);
+      m_left->moveParticles(a_particles);
+      m_right->moveParticles(a_particles);
     }
-  }  
+  }
+
+  template <class P>
+  inline std::shared_ptr<KDNode<P>>&
+  KDNode<P>::getLeft() noexcept
+  {
+    return m_left;
+  }
+
+  template <class P>
+  inline std::shared_ptr<KDNode<P>>&
+  KDNode<P>::getRight() noexcept
+  {
+    return m_right;
+  }
+
+  template <class P, const Real& (P::*weight)() const, const RealVect& (P::*position)() const>
+  inline std::pair<P, P>
+  SplitParticleAndBalanceWeights(const P& a_particle) noexcept
+  {
+    const Real&     W = (a_particle.*weight)();
+    const RealVect& x = (a_particle.*position)();
+
+    const unsigned long long N  = llround(W);
+    const unsigned long long N1 = N / 2;
+    const unsigned long long N2 = N - 1;
+
+    P p1;
+    P p2;
+
+    (p1.*weight)() = Real(N1);
+    (p2.*weight)() = Real(N2);
+
+    (p1.*position)() = x;
+    (p2.*position)() = x;
+
+#ifndef NDEBUG
+    CH_assert(std::abs(W - (p1.*weight)() - (p1.*weight)()) <= std::numeric_limits<Real>::min());
+#endif
+
+    return std::make_pair(p1, p2);
+  }    
 
   template <class T>
   Node<T>::Node()
@@ -351,10 +403,9 @@ namespace SuperParticles {
     // TLDR: This function splits the primitives recursively until we either have a_numTargetLeaves leaf nodes OR none of the leaf nodes can be
     //       partitioned further.
 
-    std::vector<std::shared_ptr<Node<T>>> newLeaves;
-
     // Reset leaves and root. I'm just resizing here so I get the capacity
-    // and avoid vector resizing during the splitting process.
+    // and avoid vector resizing during the splitting process.    
+    std::vector<std::shared_ptr<Node<T>>> newLeaves; 
     m_leaves.resize(a_numTargetLeaves, nullptr);
     newLeaves.resize(a_numTargetLeaves, nullptr);
     m_leaves[0] = m_root;
@@ -588,8 +639,6 @@ namespace SuperParticles {
       CH_assert(r.mass() >= std::numeric_limits<Real>::min());
     }
   };
-
-
 
 } // namespace SuperParticles
 

@@ -3012,12 +3012,84 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
 }
 
 void
-ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell)
+ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
 {
   CH_TIME("ItoSolver::mergeBVH");
   if (m_verbosity > 5) {
     pout() << m_name + "::mergeBVH" << endl;
   }
+  
+  { // Development code
+    constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
+
+    using Node         = SuperParticles::KDNode<ItoParticle>;
+    using ParticleList = SuperParticles::KDNode<ItoParticle>::ParticleList;
+    using Partitioner  = SuperParticles::KDNode<ItoParticle>::Partitioner;
+
+    // Define functions for particle-splitting and node-splitting logic. 
+    auto CanSplitParticle = [] (const ItoParticle& p) -> bool {
+      return (p.weight() >= splitThresh) ? true : false;    
+    };
+
+    auto CanSplitNode = [](const Node& node) -> bool {
+      const ParticleList& particles = node.getParticles();
+    
+      Real W = 0.0;
+      for (const auto& p : particles) {
+	W += p.weight();
+      }
+
+      return (W >= splitThresh) ? true : false;        
+    };
+
+    Partitioner EqualWeight = [](ParticleList& a_particles) -> std::pair<ParticleList, ParticleList> {
+      //      return std::pair<ParticleList, ParticleList>();
+    };
+
+
+    // 1. Make the input list into a vector and create the root node. 
+    ParticleList particles;
+    for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
+      particles.emplace_back(lit());
+    }
+
+    // 2. Init the KD tree -- adding necessary capacity to avoid
+    //    potential reallocations throughout. 
+    std::vector<std::shared_ptr<Node>> leaves1;
+    std::vector<std::shared_ptr<Node>> leaves2;
+
+    leaves1.reserve(a_ppc);
+    leaves2.reserve(a_ppc);    
+    
+    leaves1.emplace_back(std::make_shared<Node>(particles));
+
+    // 3. Build the KD-tree; this uses a "width-first" construction which places most leaves
+    //    on the same level (differing by at most one).
+    bool keepGoing    = true;
+    
+    while (keepGoing && leaves1.size() < a_ppc) {
+      keepGoing = false;
+      
+      leaves2 = leaves1;
+      leaves1.resize(0);
+
+      for (const auto& l : leaves2) {
+	if(CanSplitNode(*l)) {
+	  l->partition(EqualWeight(l->getParticles()));
+
+	  leaves1.emplace_back(l->getLeft());
+	  leaves1.emplace_back(l->getRight());
+	  
+	  keepGoing = true;
+	}
+	else {
+	  leaves1.emplace_back(l);
+	}
+      }
+    }
+  }
+
+  // OLD CODE THAT WORKS BUT NEEDS TO BE REFACTORED.
 
   // 1. Make ItoParticle into point masses.
   std::vector<PointMass> pointMasses(0);
@@ -3030,7 +3102,7 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell
   // 2. Build the BVH tree and get the leaves of the tree
   const int firstDir = (m_directionKD < 0) ? Random::get(m_uniformDistribution0d) : m_directionKD;
   m_mergeTree.define(pointMasses);
-  m_mergeTree.buildTree(firstDir, a_particlesPerCell, SuperParticles::NodePartitionEqualMass<PointMass>);
+  m_mergeTree.buildTree(firstDir, a_ppc, SuperParticles::NodePartitionEqualMass<PointMass>);
 
   // 3. Go through the leaves in the tree -- each leaf has a set of PointMass'es that we make into a single
   //    computational particle.

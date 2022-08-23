@@ -18,6 +18,7 @@
 
 // Chombo includes
 #include <RealVect.H>
+#include <List.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -26,28 +27,6 @@
   @brief Namespace for various particle merging tools. 
 */
 namespace SuperParticles {
-
-  // clang-format off
-  /*!
-    @brief Particle list alias
-  */
-  template <class P>
-  using ParticleList = std::vector<P>;
-
-  /*!
-    @brief Partitioning function for dividing a particle list into two subsets.
-  */
-  template <class P>
-  using ParticlePartitioner = std::function<std::pair<ParticleList<P>, ParticleList<P>>(ParticleList<P>& a_particles)>;  
-
-  /*!
-    @brief Polymorphic function for ending particle splitting/merging.
-    @details Should return true if we should keep partitioning the particles and false otherwise.
-  */
-  template <class P>
-  using StopFunction = std::function<bool(const ParticleList<P>& a_particles)>;
-  // clang-format on
-
   /*!
     @brief Node in a particle-merging KD-tree. 
     @details This node type is used for partitioning particles into spatial subsets and merging/splitting them. 
@@ -58,11 +37,41 @@ namespace SuperParticles {
   {
   public:
 
+    /*!
+      @brief List of particles. This is aliased because the KD-tree construction may require both random access
+      and something sortable. 
+    */
+    using ParticleList = std::vector<P>;
+
+    /*!
+      @brief Particle partitioner for KD-tree construction.
+    */
+    using Partitioner = std::function<std::pair<ParticleList, ParticleList>(ParticleList& a_particles)>;
+
+    /*!
+      @brief Stop function for KD-tree construction. 
+    */
+    using StopFunction = std::function<bool(const ParticleList& a_particles)>;    
+
+    /*!
+      @brief Disallowed constructor
+    */
     KDNode(const KDNode&)  = delete;
+
+    /*!
+      @brief Disallowed constructor
+    */    
     KDNode(const KDNode&&) = delete;
 
+    /*!
+      @brief Disallowed assignment
+    */    
     KDNode&
     operator=(const KDNode&) = delete;
+
+    /*!
+      @brief Disallowed assignment
+    */        
     KDNode&
     operator=(const KDNode&&) = delete;
 
@@ -72,11 +81,11 @@ namespace SuperParticles {
     KDNode();
 
     /*!
-      @brief Valid constructor. Takes list of primitives.
-      @param[in] a_primitive List of primitives to partition later. 
-      @note The input particle list is modifiable!
+      @brief Valid constructor. Takes list of particles.
+      @param[inout] a_particles List of particles to be partitioned later. 
+      @note The input particle list is transferred to m_particles. 
     */
-    KDNode(const ParticleList<P>& a_primitives);
+    KDNode(ParticleList& a_particles);
 
     /*!
       @brief Destructor. Does nothing.
@@ -85,18 +94,31 @@ namespace SuperParticles {
 
     /*!
       @brief Top-down partitioning building a KD-tree.
-      @param[in] a_partitionFunction Partitioning function for dividing into subsets.
-      @param[in] a_stopFunction      Stop function for ending particle recursion.
+      @param[in] a_partitioner  Partitioning function for dividing into subsets.
+      @param[in] a_stopFunction Stop function for ending particle recursion.
     */
     inline void
-    topDownPartition(const ParticlePartitioner<P>& a_partitionFunction,
-                     const StopFunction<P>&        a_stopFunction) noexcept;
+    topDownPartition(const Partitioner&  a_partitioner,
+                     const StopFunction& a_stopFunction) noexcept;
 
     /*!
-      @brief Get primitives in this node
+      @brief Partition this node into two new leaf nodes. 
+      @param[in] a_partitioner  Partitioning function for dividing into subsets.
     */
-    inline const ParticleList<P>&
-    getPrimitives() const noexcept;
+    inline void
+    partition(const Partitioner& a_partitioner) noexcept;
+
+    /*!
+      @brief Get particles in this node. 
+    */
+    inline const ParticleList&
+    getParticles() const noexcept;
+
+    /*!
+      @brief Get particles in this node. 
+    */
+    inline ParticleList&
+    getParticles() noexcept;    
 
     /*!
       @brief Is leaf node or not.
@@ -111,18 +133,30 @@ namespace SuperParticles {
     isInteriorNode() const noexcept;
 
     /*!
-      @brief Gather primitives further down in the subtree and return all primitives (in the leaf nodes)
+      @brief Gather particles further down in the subtree and return all particles (in the leaf nodes)
     */
-    inline ParticleList<P>
-    gatherPrimitives() const noexcept;
+    inline ParticleList
+    gatherParticles() const noexcept;
 
     /*!
-      @brief Move the primitives list further down in the subtree into this vector.
-      @note This clears the primitives from the leaf nodes. Use gatherPrimitives if you do not
+      @brief Move the particles list further down in the subtree into this vector.
+      @note This clears the particles from the leaf nodes. Use gatherParticles if you do not
       want to change the tree contents. 
     */
-    inline ParticleList<P>
-    movePrimitives() noexcept;
+    inline ParticleList
+    moveParticles() noexcept;
+
+    /*!
+      @brief Get the left node.
+    */
+    inline std::shared_ptr<KDNode<P>>&
+    getLeft() noexcept;
+
+    /*!
+      @brief Get the right node.
+    */
+    inline std::shared_ptr<KDNode<P>>&
+    getRight() noexcept;    
 
   protected:
     /*!
@@ -136,25 +170,25 @@ namespace SuperParticles {
     std::shared_ptr<KDNode> m_right;
 
     /*!
-      @brief List of primitives
+      @brief List of particles
     */
-    std::vector<P> m_primitives;
+    ParticleList m_particles;
 
     /*!
-      @brief Gather primitives further down in the subtree and return all primitives (in the leaf nodes)
-      @param[inout] a_primitives List of primitives
+      @brief Gather particles further down in the subtree and return all particles (in the leaf nodes)
+      @param[inout] a_particles List of particles
     */      
     inline void
-    gatherPrimitives(ParticleList<P>& a_primitives) const noexcept;
+    gatherParticles(ParticleList& a_particles) const noexcept;
 
     /*!
-      @brief Move primitives further down in the subtree and return all primitives (in the leaf nodes)
-      @param[inout] a_primitives List of primitives
-      @note This clears the primitives from the leaf nodes. Use gatherPrimitives if you do not
+      @brief Move particles further down in the subtree and return all particles (in the leaf nodes)
+      @param[inout] a_particles List of particles
+      @note This clears the particles from the leaf nodes. Use gatherParticles if you do not
       want to change the tree contents. 
     */      
     inline void
-    movePrimitives(ParticleList<P>& a_primitives) noexcept;        
+    moveParticles(ParticleList& a_particles) noexcept;        
   };
 
   /*!
@@ -319,6 +353,19 @@ namespace SuperParticles {
     */
     std::vector<T> m_data;
   };
+
+  /*!
+    @brief Function which splits a particle into two new particles whose weight differs by at most one physical particle. 
+    @details P is the particle type and P::*weight is a pointer to a member function providing const-reference access
+    to the particle weight. Likewise, P::*position should provide const-reference access to the particle position. 
+    @param[in] a_particle Input particle to be split. 
+    @note This function assumes that the particle weight, given by a floating-point number, represents an integer
+    number of physical particles. This routine only takes care of the weight; if there are extra "fields" on the
+    particles that should be initialized, the user needs to do that AFTer exiting this routine. 
+  */
+  template <class P, const Real& (P::*weight)() const, const RealVect& (P::*position)() const>
+  inline std::pair<P, P>
+  SplitParticleAndBalanceWeights(const P& a_particle) noexcept;
 
   /*!
     @brief Declaration of a node partitioner function. 
