@@ -19,6 +19,7 @@
 
 // Our includes
 #include <CD_SimpleItoParticle.H>
+#include <CD_NonCommParticle.H>
 #include <CD_ItoSolver.H>
 #include <CD_Random.H>
 #include <CD_DataOps.H>

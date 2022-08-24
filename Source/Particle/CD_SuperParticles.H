@@ -461,6 +461,5 @@ namespace SuperParticles {
 #include <CD_NamespaceFooter.H>
 
 #include <CD_SuperParticlesImplem.H>
-#include <CD_ParticlePartitioners.H>
 
 #endif
