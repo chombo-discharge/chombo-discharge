@@ -3046,14 +3046,14 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
 
   // 3. Build the KD-tree; this uses a "width-first" construction which places most leaves
   //    on the same level (differing by at most one).
-  bool keepGoing = a_ppc > 1;
+  bool keepGoing = true;
 
   while (keepGoing && leaves1.size() < a_ppc) {
     keepGoing = false;
 
     for (const auto& l : leaves1) {
       if (!(SuperParticles::InsufficientWeightForSplitting<PType, &PType::template real<0>>(l->getParticles()))) {
-        l->partition(SuperParticles::EqualWeightPartition<PType, &PType::template real<0>, &PType::template vect<0>>);
+        l->partition(SuperParticles::PartitionEqualWeight<PType, &PType::template real<0>, &PType::template vect<0>>);
 
         leaves2.emplace_back(l->getLeft());
         leaves2.emplace_back(l->getRight());
@@ -3063,9 +3063,14 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
       else {
         leaves2.emplace_back(l);
       }
+
+      // Break out if we have sufficient leaf nodes. 
+      if(leaves2.size() >= a_ppc) {
+	break;
+      }
     }
 
-    leaves1.swap(leaves2);
+    leaves1 = leaves2;
     leaves2.resize(0);
   }
 

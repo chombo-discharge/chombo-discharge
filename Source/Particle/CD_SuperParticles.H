@@ -198,7 +198,7 @@ namespace SuperParticles {
     fields; note that these fields are simply copied over when the particle is split and are not adjusted. 
   */
   template<class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
-  typename KDNode<P>::Partitioner EqualWeightPartition;
+  typename KDNode<P>::Partitioner PartitionEqualWeight;
 
   /*!
     @brief Stop function which returns true if weight in node < 2

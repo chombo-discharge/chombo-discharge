@@ -155,35 +155,8 @@ namespace SuperParticles {
     return m_right;
   }
 
-  template <class P, const Real& (P::*weight)() const, const RealVect& (P::*position)() const>
-  inline std::pair<P, P>
-  SplitParticleAndBalanceWeights(const P& a_particle) noexcept
-  {
-    const Real&     W = (a_particle.*weight)();
-    const RealVect& x = (a_particle.*position)();
-
-    const unsigned long long N  = llround(W);
-    const unsigned long long N1 = N / 2;
-    const unsigned long long N2 = N - 1;
-
-    P p1;
-    P p2;
-
-    (p1.*weight)() = Real(N1);
-    (p2.*weight)() = Real(N2);
-
-    (p1.*position)() = x;
-    (p2.*position)() = x;
-
-#ifndef NDEBUG
-    CH_assert(std::abs(W - (p1.*weight)() - (p1.*weight)()) <= std::numeric_limits<Real>::min());
-#endif
-
-    return std::make_pair(p1, p2);
-  }
-
   template<class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
-  typename KDNode<P>::Partitioner EqualWeightPartition = [](typename KDNode<P>::ParticleList a_particles) -> std::pair<typename KDNode<P>::ParticleList,
+  typename KDNode<P>::Partitioner PartitionEqualWeight = [](typename KDNode<P>::ParticleList a_particles) -> std::pair<typename KDNode<P>::ParticleList,
 														       typename KDNode<P>::ParticleList>
   {
     constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
@@ -231,7 +204,7 @@ namespace SuperParticles {
       }
     }
 
-    P p = a_particles[id];
+    P& p = a_particles[id];
 
     typename KDNode<P>::ParticleList pl;
     typename KDNode<P>::ParticleList pr;
@@ -239,74 +212,68 @@ namespace SuperParticles {
     std::move(a_particles.begin(), a_particles.begin() + id, std::back_inserter(pl));
     std::move(a_particles.begin() + id + 1, a_particles.end(), std::back_inserter(pr));
 
-    if ((p.*weight)() >= splitThresh) {
-      const Real dw = wr - wl;
+    const Real ww = (p.*weight)();
+    const Real dw = wr - wl;
+    if (ww >= splitThresh && ww >= std::abs(dw)) {
+      Real dwl = dw;
+      Real dwr = 0.0;
+      Real ddw = ww - dw;
 
-      if ((p.*weight)() < std::abs(dw)) {
-        if (wl <= wr) {
-          pl.emplace_back(p);
-        }
-        else {
-          pr.emplace_back(p);
-        }
+      const long long N  = llround(ddw);
+
+      if(N > 0LL) {
+
+	const long long Nr = N / 2;
+	const long long Nl = N - Nr;
+
+	dwl += (ddw / N) * Nl;
+	dwr += (ddw / N) * Nr;
       }
-      else {
-        Real dwl = dw;
-        Real dwr = 0.0;
-        Real ddw = (p.*weight)() - dw;
 
-        const long long N  = llround(ddw);
-
-	if(N > 0LL) {
-	  const long long Nr = N / 2;
-	  const long long Nl = N - Nr;
-
-	  dwl += (ddw / N) * Nl;
-	  dwr += (ddw / N) * Nr;
-	}
-	
+      if(dwl > 0.0) {
 	P il(p);
+	
+	(il.*weight)() = dwl;
+	pl.emplace_back(std::move(il));
+      }
+
+      if(dwr > 0.0) {
 	P ir(p);
-
-	if(dwl > 0.0) {
-	  (il.*weight)() = dwl;
-	  pl.emplace_back(il);
-	}
-
-	if(dwr > 0.0) {
-	  (ir.*weight)() = dwr;
-	  pr.emplace_back(ir);
-	}
+	
+	(ir.*weight)() = dwr;
+	pr.emplace_back(std::move(ir));
       }
     }
     else {
       if (wl <= wr) {
-        pl.emplace_back(p);
+        pl.emplace_back(std::move(p));
       }
       else {
-        pr.emplace_back(p);
+        pr.emplace_back(std::move(p));
       }
     }
 
-#ifndef NDEBUG
-    Real WL = 0.0;
-    Real WR = 0.0;
+    a_particles.resize(0);
 
-    for (auto& l : pl) {
-      CH_assert((l.*weight)() >= 1.0 - std::numeric_limits<Real>::min());
+// #ifndef NDEBUG
+//     Real WL = 0.0;
+//     Real WR = 0.0;
 
-      WL += (l.*weight)();
-    }
+//     for (auto& l : pl) {
+//       CH_assert((l.*weight)() >= 1.0 - std::numeric_limits<Real>::min());
 
-    for (auto& r : pr) {
-      CH_assert((r.*weight)() >= 1.0 - std::numeric_limits<Real>::min());
+//       WL += (l.*weight)();
+//     }
 
-      WR += (r.*weight)();
-    }
+//     for (auto& r : pr) {
+//       CH_assert((r.*weight)() >= 1.0 - std::numeric_limits<Real>::min());
 
-    CH_assert(std::abs(WL - WR) <= 1.0 + std::numeric_limits<Real>::min());
-    CH_assert(std::abs(WL + WR - W) < std::numeric_limits<Real>::min());    
-#endif
+//       WR += (r.*weight)();
+//     }
+
+//     CH_assert(std::abs(WL - WR) <= 1.0 + std::numeric_limits<Real>::min());
+//     CH_assert(std::abs(WL + WR - W) < std::numeric_limits<Real>::min());    
+// #endif
 
     return std::make_pair(pl, pr);    
   };
