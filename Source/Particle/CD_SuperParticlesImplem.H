@@ -27,19 +27,16 @@
 namespace SuperParticles {
 
   template <class P>
-  inline KDNode<P>::KDNode()
+  inline KDNode<P>::KDNode() : m_left(nullptr),
+			       m_right(nullptr)
   {
-    m_left  = nullptr;
-    m_right = nullptr;
   }
 
   template <class P>
-  inline KDNode<P>::KDNode(ParticleList& a_particles)
+  inline KDNode<P>::KDNode(ParticleList& a_particles) : m_left(nullptr),
+							m_right(nullptr),
+							m_particles(std::move(a_particles))
   {
-    m_left  = nullptr;
-    m_right = nullptr;
-    
-    std::move(a_particles.begin(), a_particles.end(), std::back_inserter(m_particles));
   }
 
   template <class P>
@@ -183,7 +180,149 @@ namespace SuperParticles {
 #endif
 
     return std::make_pair(p1, p2);
-  }    
+  }
+
+  template<class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  typename KDNode<P>::Partitioner EqualWeightPartition = [](typename KDNode<P>::ParticleList a_particles) -> std::pair<typename KDNode<P>::ParticleList,
+														       typename KDNode<P>::ParticleList>
+  {
+    constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
+    
+    // A. Figure out which coordinate direction we should partition and sort
+    //    the particles.
+    RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
+    RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
+
+    Real W = 0.0;
+
+    for (auto& p : a_particles) {
+      const RealVect& pos = (p.*position)();
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        loCorner[dir] = std::min(pos[dir], loCorner[dir]);
+        hiCorner[dir] = std::max(pos[dir], hiCorner[dir]);
+      }
+
+      W += (p.*weight)();
+    }
+
+    const int splitDir = (hiCorner - loCorner).maxDir(true);
+    
+    auto sortCrit = [splitDir](const P& p1, const P& p2) -> bool {
+      return (p1.*position)()[splitDir] < (p2.*position)()[splitDir];
+    };
+
+    std::sort(a_particles.begin(), a_particles.end(), sortCrit);
+
+    // B. Determine the "median particle"
+    size_t id = 0;
+    Real   wl = 0.0;
+    Real   wr = W - (a_particles[id].*weight)();
+
+    for (size_t i = 1; i < a_particles.size(); i++) {
+      const Real& w = (a_particles[id].*weight)();
+
+      if (wl + w < wr) {
+        id = i;
+        wl += w;
+        wr = W - wl - (a_particles[id].*weight)();
+      }
+      else {
+        break;
+      }
+    }
+
+    P p = a_particles[id];
+
+    typename KDNode<P>::ParticleList pl;
+    typename KDNode<P>::ParticleList pr;
+
+    std::move(a_particles.begin(), a_particles.begin() + id, std::back_inserter(pl));
+    std::move(a_particles.begin() + id + 1, a_particles.end(), std::back_inserter(pr));
+
+    if ((p.*weight)() >= splitThresh) {
+      const Real dw = wr - wl;
+
+      if ((p.*weight)() < std::abs(dw)) {
+        if (wl <= wr) {
+          pl.emplace_back(p);
+        }
+        else {
+          pr.emplace_back(p);
+        }
+      }
+      else {
+        Real dwl = dw;
+        Real dwr = 0.0;
+        Real ddw = (p.*weight)() - dw;
+
+        const long long N  = llround(ddw);
+
+	if(N > 0LL) {
+	  const long long Nr = N / 2;
+	  const long long Nl = N - Nr;
+
+	  dwl += (ddw / N) * Nl;
+	  dwr += (ddw / N) * Nr;
+	}
+	
+	P il(p);
+	P ir(p);
+
+	if(dwl > 0.0) {
+	  (il.*weight)() = dwl;
+	  pl.emplace_back(il);
+	}
+
+	if(dwr > 0.0) {
+	  (ir.*weight)() = dwr;
+	  pr.emplace_back(ir);
+	}
+      }
+    }
+    else {
+      if (wl <= wr) {
+        pl.emplace_back(p);
+      }
+      else {
+        pr.emplace_back(p);
+      }
+    }
+
+#ifndef NDEBUG
+    Real WL = 0.0;
+    Real WR = 0.0;
+
+    for (auto& l : pl) {
+      CH_assert((l.*weight)() >= 1.0 - std::numeric_limits<Real>::min());
+
+      WL += (l.*weight)();
+    }
+
+    for (auto& r : pr) {
+      CH_assert((r.*weight)() >= 1.0 - std::numeric_limits<Real>::min());
+
+      WR += (r.*weight)();
+    }
+
+    CH_assert(std::abs(WL - WR) <= 1.0 + std::numeric_limits<Real>::min());
+    CH_assert(std::abs(WL + WR - W) < std::numeric_limits<Real>::min());    
+#endif
+
+    return std::make_pair(pl, pr);    
+  };
+
+  template <class P, const Real& (P::*weight)() const>
+  typename KDNode<P>::StopFunction InsufficientWeightForSplitting = [](const typename KDNode<P>::ParticleList& a_particles)
+  {
+    constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
+    
+    Real W = 0.0;
+    for (const auto& p : a_particles) {
+      W += (p.*weight)();
+    }
+
+    return (W < splitThresh) ? true : false;
+  };    
 
   template <class T>
   Node<T>::Node()

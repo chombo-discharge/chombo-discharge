@@ -27,6 +27,7 @@
   @brief Namespace for various particle merging tools. 
 */
 namespace SuperParticles {
+  
   /*!
     @brief Node in a particle-merging KD-tree. 
     @details This node type is used for partitioning particles into spatial subsets and merging/splitting them. 
@@ -51,7 +52,7 @@ namespace SuperParticles {
     /*!
       @brief Stop function for KD-tree construction. 
     */
-    using StopFunction = std::function<bool(const ParticleList&)>;    
+    using StopFunction = std::function<bool(const ParticleList&)>;
 
     /*!
       @brief Disallowed constructor
@@ -190,6 +191,21 @@ namespace SuperParticles {
     inline void
     moveParticles(ParticleList& a_particles) noexcept;        
   };
+
+  /*!
+    @brief Partitioning method for KDNode<P> which equilibriates the weight across the two halves when splitting a node
+    @note This only adjusts the weight of the median particle. The particle class P should have a copy constructor for the other
+    fields; note that these fields are simply copied over when the particle is split and are not adjusted. 
+  */
+  template<class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  typename KDNode<P>::Partitioner EqualWeightPartition;
+
+  /*!
+    @brief Stop function which returns true if weight in node < 2
+    @note The particle type is P and P::*weight is a pointer to a member function providing const-reference access to the particle weight.
+  */
+  template <class P, const Real& (P::*weight)() const>
+  typename KDNode<P>::StopFunction InsufficientWeightForSplitting;
 
   /*!
     @brief Class for describing a single node with two children and one parent. This is used together with SuperParticles::Tree for particle handling. 

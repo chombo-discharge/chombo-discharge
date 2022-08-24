@@ -104,7 +104,6 @@ public:
   operator!=(const NonCommParticle<M, N>& a_other) const;
 
 protected:
-
   /*!
     @brief Scalar storage array
   */
