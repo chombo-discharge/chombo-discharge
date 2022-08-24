@@ -55,7 +55,19 @@ namespace SuperParticles {
   KDNode<P>::getParticles() noexcept
   {
     return m_particles;
-  }  
+  }
+
+  template <class P>
+  inline const Real&
+  KDNode<P>::weight() const noexcept {
+    return m_weight;
+  }
+
+  template <class P>
+  inline Real&
+  KDNode<P>::weight() noexcept {
+    return m_weight;
+  }
 
   template <class P>
   inline bool
@@ -214,6 +226,7 @@ namespace SuperParticles {
 
     const Real ww = (p.*weight)();
     const Real dw = wr - wl;
+    
     if (ww >= splitThresh && ww >= std::abs(dw)) {
       Real dwl = dw;
       Real dwr = 0.0;

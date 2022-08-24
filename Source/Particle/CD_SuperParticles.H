@@ -94,6 +94,18 @@ namespace SuperParticles {
     virtual ~KDNode();
 
     /*!
+      @brief Get the node weight
+    */
+    inline const Real&
+    weight() const noexcept;
+
+    /*!
+      @brief Get the node weight
+    */
+    inline Real&
+    weight() noexcept;    
+
+    /*!
       @brief Top-down partitioning building a KD-tree.
       @param[in] a_partitioner  Partitioning function for dividing into subsets.
       @param[in] a_stopFunction Stop function for ending particle recursion.
@@ -169,6 +181,11 @@ namespace SuperParticles {
       @brief Right KD-node
     */
     std::shared_ptr<KDNode> m_right;
+
+    /*!
+      @brief Node weight
+    */
+    Real m_weight;
 
     /*!
       @brief List of particles
