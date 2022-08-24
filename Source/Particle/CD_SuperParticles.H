@@ -46,12 +46,12 @@ namespace SuperParticles {
     /*!
       @brief Particle partitioner for KD-tree construction.
     */
-    using Partitioner = std::function<std::pair<ParticleList, ParticleList>(ParticleList& a_particles)>;
+    using Partitioner = std::function<std::pair<ParticleList, ParticleList>(ParticleList&)>;
 
     /*!
       @brief Stop function for KD-tree construction. 
     */
-    using StopFunction = std::function<bool(const ParticleList& a_particles)>;    
+    using StopFunction = std::function<bool(const ParticleList&)>;    
 
     /*!
       @brief Disallowed constructor
@@ -86,7 +86,7 @@ namespace SuperParticles {
       @note The input particle list is transferred to m_particles. 
     */
     KDNode(ParticleList& a_particles);
-
+    
     /*!
       @brief Destructor. Does nothing.
     */

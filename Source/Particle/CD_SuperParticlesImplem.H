@@ -38,8 +38,7 @@ namespace SuperParticles {
   {
     m_left  = nullptr;
     m_right = nullptr;
-
-    m_particles.reserve(a_particles.size());
+    
     std::move(a_particles.begin(), a_particles.end(), std::back_inserter(m_particles));
   }
 
@@ -88,7 +87,7 @@ namespace SuperParticles {
   inline void
   KDNode<P>::partition(const Partitioner& a_partitioner) noexcept
   {
-    const auto& partitions = a_partitionFunction(m_particles);
+    std::pair<ParticleList, ParticleList> partitions = a_partitioner(m_particles);
 
     m_left  = std::make_shared<KDNode<P>>(partitions.first);
     m_right = std::make_shared<KDNode<P>>(partitions.second);

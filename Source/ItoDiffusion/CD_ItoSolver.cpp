@@ -3018,76 +3018,223 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
   if (m_verbosity > 5) {
     pout() << m_name + "::mergeBVH" << endl;
   }
-  
-  { // Development code
-    constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
 
-    using Node         = SuperParticles::KDNode<ItoParticle>;
-    using ParticleList = SuperParticles::KDNode<ItoParticle>::ParticleList;
-    using Partitioner  = SuperParticles::KDNode<ItoParticle>::Partitioner;
+#if 1
+  constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
 
-    // Define functions for particle-splitting and node-splitting logic. 
-    auto CanSplitParticle = [] (const ItoParticle& p) -> bool {
-      return (p.weight() >= splitThresh) ? true : false;    
-    };
+  using Node         = SuperParticles::KDNode<ItoParticle>;
+  using ParticleList = SuperParticles::KDNode<ItoParticle>::ParticleList;
+  using Partitioner  = SuperParticles::KDNode<ItoParticle>::Partitioner;
 
-    auto CanSplitNode = [](const Node& node) -> bool {
-      const ParticleList& particles = node.getParticles();
-    
-      Real W = 0.0;
-      for (const auto& p : particles) {
-	W += p.weight();
-      }
+  auto CanSplitNode = [](const Node& node) -> bool {
+    const ParticleList& particles = node.getParticles();
 
-      return (W >= splitThresh) ? true : false;        
-    };
-
-    Partitioner EqualWeight = [](ParticleList& a_particles) -> std::pair<ParticleList, ParticleList> {
-      //      return std::pair<ParticleList, ParticleList>();
-    };
-
-
-    // 1. Make the input list into a vector and create the root node. 
-    ParticleList particles;
-    for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-      particles.emplace_back(lit());
+    Real W = 0.0;
+    for (const auto& p : particles) {
+      W += p.weight();
     }
 
-    // 2. Init the KD tree -- adding necessary capacity to avoid
-    //    potential reallocations throughout. 
-    std::vector<std::shared_ptr<Node>> leaves1;
-    std::vector<std::shared_ptr<Node>> leaves2;
+    return (W >= splitThresh) ? true : false;
+  };
 
-    leaves1.reserve(a_ppc);
-    leaves2.reserve(a_ppc);    
-    
-    leaves1.emplace_back(std::make_shared<Node>(particles));
+  Partitioner EqualWeight = [](ParticleList& a_particles) -> std::pair<ParticleList, ParticleList> {
+    // A. Figure out which coordinate direction we should partition and sort
+    //    the particles.
+    RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
+    RealVect hiCorner = -std::numeric_limits<Real>::max() * RealVect::Unit;
 
-    // 3. Build the KD-tree; this uses a "width-first" construction which places most leaves
-    //    on the same level (differing by at most one).
-    bool keepGoing    = true;
+    Real W = 0.0;
+
+    for (const auto& p : a_particles) {
+      const RealVect pos = p.position();
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        loCorner[dir] = std::min(pos[dir], loCorner[dir]);
+        hiCorner[dir] = std::max(pos[dir], hiCorner[dir]);
+      }
+
+      W += p.weight();
+    }
+
+    const int splitDir = (hiCorner - loCorner).maxDir(true);
+
+    auto sortCrit = [splitDir](const ItoParticle& p1, const ItoParticle& p2) -> bool {
+      return (p1.position()[splitDir] < p2.position()[splitDir]);
+    };
+
+    std::sort(a_particles.begin(), a_particles.end(), sortCrit);
+
+    // B. Determine the "median particle"
+    size_t id = 0;
+    Real   wl = 0.0;
+    Real   wr = W - a_particles[id].weight();
+
+    for (size_t i = 1; i < a_particles.size(); i++) {
+      const Real& w = a_particles[id].weight();
+
+      if (wl + w < wr) {
+        id++;
+        wl += w;
+        wr = W - wl - a_particles[id].weight();
+      }
+      else {
+        break;
+      }
+    }
+
+    const ItoParticle p = a_particles[id];
+
+    ParticleList pl;
+    ParticleList pr;
+
+    std::move(a_particles.begin(), a_particles.begin() + id, std::back_inserter(pl));
+    std::move(a_particles.begin() + id + 1, a_particles.end(), std::back_inserter(pr));
+
+    if (p.weight() >= splitThresh) {
+      const Real dw = wr - wl;
+
+      if (p.weight() < std::abs(dw)) {
+        if (wl <= wr) {
+          pl.emplace_back(p);
+        }
+        else {
+          pr.emplace_back(p);
+        }
+      }
+      else {
+        Real dwl = dw;
+        Real dwr = 0.0;
+        Real ddw = p.weight() - dw;
+
+        const long long N  = llround(ddw);
+
+	if(N > 0LL) {
+	  const long long Nr = N / 2;
+	  const long long Nl = N - Nr;
+
+	  dwl += (ddw / N) * Nl;
+	  dwr += (ddw / N) * Nr;
+	}
+	
+	ItoParticle il(p);
+	ItoParticle ir(p);
+
+	if(dwl > 0.0) {
+	  il.weight() = dwl;
+	  pl.emplace_back(il);
+	}
+
+	if(dwr > 0.0) {
+	  ir.weight() = dwr;
+	  pr.emplace_back(ir);
+	}
+      }
+    }
+    else {
+      if (wl <= wr) {
+        pl.emplace_back(p);
+      }
+      else {
+        pr.emplace_back(p);
+      }
+    }
+
+#if 1 // Dummy check
+    Real WL = 0.0;
+    Real WR = 0.0;
     
-    while (keepGoing && leaves1.size() < a_ppc) {
-      keepGoing = false;
+    for (const auto& l : pl) {
+      if(l.weight() < 1.0 - std::numeric_limits<Real>::min()) {
+	std::cout << l.weight() << std::endl;
+	
+	MayDay::Error("left particle weight too small");
+      }
+      WL += l.weight();
+    }
+    for (const auto& r : pr) {
+      if(r.weight() < 1.0 - std::numeric_limits<Real>::min()) {
+	std::cout << r.weight() << std::endl;
+	
+	MayDay::Error("right particle weight too small");
+      }
+      WR += r.weight();
+    }
+
+    if(std::abs(WL - WR) > 1.0 + std::numeric_limits<Real>::min()) {
+      std::cout << std::abs(WL - WR) << std::endl;
       
-      leaves2 = leaves1;
-      leaves1.resize(0);
+      MayDay::Error("mass difference too big");
+    }
+    if(std::abs(WL + WR - W) > std::numeric_limits<Real>::min()) {
+      MayDay::Error("masses don't add up");
+    }
+#endif
 
-      for (const auto& l : leaves2) {
-	if(CanSplitNode(*l)) {
-	  l->partition(EqualWeight(l->getParticles()));
+    return std::make_pair(pl, pr);
+  };
 
-	  leaves1.emplace_back(l->getLeft());
-	  leaves1.emplace_back(l->getRight());
-	  
-	  keepGoing = true;
-	}
-	else {
-	  leaves1.emplace_back(l);
-	}
+  // 1. Make the input list into a vector and create the root node.
+  ParticleList particles;
+  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
+    particles.emplace_back(lit());
+  }
+
+  // 2. Init the KD tree -- adding necessary capacity to avoid
+  //    potential reallocations throughout.
+  std::vector<std::shared_ptr<Node>> leaves1;
+  std::vector<std::shared_ptr<Node>> leaves2;
+
+  leaves1.reserve(a_ppc);
+  leaves2.reserve(a_ppc);
+
+  leaves1.emplace_back(std::make_shared<Node>(particles));
+
+  // 3. Build the KD-tree; this uses a "width-first" construction which places most leaves
+  //    on the same level (differing by at most one).
+  bool keepGoing = true;
+
+  while (keepGoing && leaves1.size() < a_ppc) {
+    keepGoing = false;
+
+    leaves2 = leaves1;
+    leaves1.resize(0);
+
+    for (const auto& l : leaves2) {
+      if (CanSplitNode(*l)) {
+        l->partition(EqualWeight);
+
+        leaves1.emplace_back(l->getLeft());
+        leaves1.emplace_back(l->getRight());
+
+        keepGoing = true;
+      }
+      else {
+        leaves1.emplace_back(l);
       }
     }
   }
+
+  a_particles.clear();
+
+  for (const auto& l : leaves1) {
+    const ParticleList& particles = l->getParticles();
+
+    Real     w = 0.0;
+    Real     e = 0.0;
+    RealVect x = RealVect::Zero;
+
+    for (const ItoParticle& p : l->getParticles()) {
+      w += p.weight();
+      x += p.weight() * p.position();
+      e += p.weight() * p.energy();
+    }
+
+    x *= 1. / w;
+    e *= 1. / w;
+
+    a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
+  }
+
+#else
 
   // OLD CODE THAT WORKS BUT NEEDS TO BE REFACTORED.
 
@@ -3117,6 +3264,7 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
     ItoParticle p(pointMass.mass(), pointMass.pos(), RealVect::Zero, 0.0, 0.0, pointMass.energy());
     a_particles.add(p);
   }
+#endif
 }
 
 void
