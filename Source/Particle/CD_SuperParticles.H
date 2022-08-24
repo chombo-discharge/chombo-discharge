@@ -45,9 +45,9 @@ namespace SuperParticles {
     using ParticleList = std::vector<P>;
 
     /*!
-      @brief Particle partitioner for KD-tree construction.
+      @brief Node partitioner for KD-tree construction.
     */
-    using Partitioner = std::function<std::pair<ParticleList, ParticleList>(ParticleList&)>;
+    using Partitioner = std::function<void(KDNode&)>;
 
     /*!
       @brief Stop function for KD-tree construction. 
@@ -104,22 +104,6 @@ namespace SuperParticles {
     */
     inline Real&
     weight() noexcept;    
-
-    /*!
-      @brief Top-down partitioning building a KD-tree.
-      @param[in] a_partitioner  Partitioning function for dividing into subsets.
-      @param[in] a_stopFunction Stop function for ending particle recursion.
-    */
-    inline void
-    topDownPartition(const Partitioner&  a_partitioner,
-                     const StopFunction& a_stopFunction) noexcept;
-
-    /*!
-      @brief Partition this node into two new leaf nodes. 
-      @param[in] a_partitioner  Partitioning function for dividing into subsets.
-    */
-    inline void
-    partition(const Partitioner& a_partitioner) noexcept;
 
     /*!
       @brief Get particles in this node. 

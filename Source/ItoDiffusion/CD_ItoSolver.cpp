@@ -3025,7 +3025,8 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
   using Node         = SuperParticles::KDNode<PType>;  
   using ParticleList = SuperParticles::KDNode<PType>::ParticleList;
 
-  // 1. Make the input list into a vector of particles with a smaller memory footprint. 
+  // 1. Make the input list into a vector of particles with a smaller memory footprint.
+  Real W = 0.0;
   ParticleList particles;
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
     PType p;
@@ -3033,6 +3034,8 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
     p.template real<0>() = lit().weight();
     p.template real<1>() = lit().energy();
     p.template vect<0>() = lit().position();
+
+    W += lit().weight();
 
     particles.emplace_back(p);
   }
@@ -3043,6 +3046,7 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
   std::vector<std::shared_ptr<Node>> leaves2;
 
   leaves1.emplace_back(std::make_shared<Node>(particles));
+  leaves1[0]->weight() = W;
 
   // 3. Build the KD-tree; this uses a "width-first" construction which places most leaves
   //    on the same level (differing by at most one).
@@ -3052,8 +3056,8 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
     keepGoing = false;
 
     for (const auto& l : leaves1) {
-      if (!(SuperParticles::InsufficientWeightForSplitting<PType, &PType::template real<0>>(l->getParticles()))) {
-        l->partition(SuperParticles::PartitionEqualWeight<PType, &PType::template real<0>, &PType::template vect<0>>);
+      if (l->weight() > 2.0 - std::numeric_limits<Real>::min()) {
+	SuperParticles::PartitionEqualWeight<PType, &PType::template real<0>, &PType::template vect<0>>(*l);
 
         leaves2.emplace_back(l->getLeft());
         leaves2.emplace_back(l->getRight());
