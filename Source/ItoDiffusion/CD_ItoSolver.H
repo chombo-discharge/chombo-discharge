@@ -20,7 +20,6 @@
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_SuperParticles.H>
-#include <CD_PointMass.H>
 #include <CD_EbRepresentation.H>
 #include <CD_EbIntersection.H>
 #include <CD_NamespaceHeader.H>
@@ -1007,19 +1006,9 @@ protected:
   int m_restartPPC;
 
   /*!
-    @brief Splitting direction. This is used in mergeBVH to select the first direction of the BVH when merging/splitting particles. 
-  */
-  int m_directionKD;
-
-  /*!
     @brief Realm where this solve lives. 
   */
   std::string m_realm;
-
-  /*!
-    @brief Boundary volume hierarchy merging tree -- used in mergeBVH. 
-  */
-  SuperParticles::Tree<PointMass> m_mergeTree;
 
   /*!
     @brief Computational geometry. 
@@ -1232,12 +1221,6 @@ protected:
     @brief Various particle containers with identifiers. 
   */
   std::map<WhichContainer, ParticleContainer<ItoParticle>> m_particleContainers;
-
-  /*!
-    @brief Parse superparticle settings -- this just sets the default direction in which we build the BVH
-  */
-  void
-  parseSuperParticles();
 
   /*!
     @brief Parse RNG options -- this parses the RNG seed and instantiates the distributions. 

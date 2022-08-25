@@ -97,7 +97,6 @@ ItoSolver::parseOptions()
     pout() << m_name + "::parseOptions" << endl;
   }
 
-  this->parseSuperParticles();
   this->parseRNG();
   this->parseTruncation();
   this->parsePlotVariables();
@@ -116,7 +115,6 @@ ItoSolver::parseRuntimeOptions()
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
-  this->parseSuperParticles();
   this->parsePlotVariables();
   this->parseTruncation();
   this->parseDeposition();
@@ -124,20 +122,6 @@ ItoSolver::parseRuntimeOptions()
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
-}
-
-void
-ItoSolver::parseSuperParticles()
-{
-  CH_TIME("ItoSolver::parseSuperParticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::parseSuperParticles" << endl;
-  }
-
-  ParmParse pp(m_className.c_str());
-  pp.get("kd_direction", m_directionKD);
-
-  m_directionKD = std::min(m_directionKD, SpaceDim - 1);
 }
 
 void
@@ -3020,7 +3004,6 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
     pout() << m_name + "::makeSuperparticles" << endl;
   }
 
-#if 1
   using PType        = NonCommParticle<2, 1>;
   using Node         = SuperParticles::KDNode<PType>;
   using ParticleList = SuperParticles::KDNode<PType>::ParticleList;
@@ -3097,38 +3080,6 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
 
     a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
   }
-
-#else
-
-  // OLD CODE THAT WORKS BUT NEEDS TO BE REFACTORED.
-
-  // 1. Make ItoParticle into point masses.
-  std::vector<PointMass> pointMasses(0);
-  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-    const ItoParticle& p = lit();
-
-    pointMasses.push_back(PointMass(p.position(), p.weight(), p.energy()));
-  }
-
-  // 2. Build the BVH tree and get the leaves of the tree
-  const int firstDir = (m_directionKD < 0) ? Random::get(m_uniformDistribution0d) : m_directionKD;
-  m_mergeTree.define(pointMasses);
-  m_mergeTree.buildTree(firstDir, a_ppc, SuperParticles::NodePartitionEqualMass<PointMass>);
-
-  // 3. Go through the leaves in the tree -- each leaf has a set of PointMass'es that we make into a single
-  //    computational particle.
-  a_particles.clear();
-  const auto& leaves = m_mergeTree.getLeaves();
-  for (const auto& leaf : leaves) {
-
-    // Merge all the point-masses in the leaf into a single point mass.
-    const PointMass pointMass(leaf->getData());
-
-    // Make the single point mass into an ItoParticle and add it back in.
-    ItoParticle p(pointMass.mass(), pointMass.pos(), RealVect::Zero, 0.0, 0.0, pointMass.energy());
-    a_particles.add(p);
-  }
-#endif
 }
 
 void
