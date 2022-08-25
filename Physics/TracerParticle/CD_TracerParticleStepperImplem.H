@@ -420,7 +420,7 @@ TracerParticleStepper<P>::initialParticles()
   //       inside a box.
   //
   //       After creating the distribution we draw the particles (MPI rank distribution being taken care of under the hood) and
-  //       set their mass to one. Finally, we add these particles to the ParticleContainer and remove the particles that lie inside
+  //       set their weight to one. Finally, we add these particles to the ParticleContainer and remove the particles that lie inside
   //       the EB.
 
   // Create a random distribution which draw particles uniformly distributed in the domain.
@@ -437,12 +437,12 @@ TracerParticleStepper<P>::initialParticles()
     return ret;
   };
 
-  // Draw particles using the distribution above. Set their mass to one.
+  // Draw particles using the distribution above. Set their weight to one.
   List<P> initialParticles;
 
   ParticleOps::drawRandomParticles(initialParticles, m_numInitialParticles, uniformDistribution);
   for (ListIterator<P> lit(initialParticles); lit.ok(); ++lit) {
-    lit().mass() = 1.0;
+    lit().weight() = 1.0;
   }
 
   // Put the particles in the solver particle data holder.
@@ -450,12 +450,10 @@ TracerParticleStepper<P>::initialParticles()
   solverParticles.clearParticles();
   solverParticles.addParticlesDestructive(initialParticles);
 
-  // Solver should remap because it may have a PVR requirement on the particle distribution. This is
-  // not visible to the TimeStepper.
-  m_solver->remap();
-
   // Remove particles inside the EB.
+  pout() << "removing particles" << endl;
   m_amr->removeCoveredParticlesIF(solverParticles, m_phase);
+  pout() << "done initial particles" << endl;
 }
 
 template <typename P>

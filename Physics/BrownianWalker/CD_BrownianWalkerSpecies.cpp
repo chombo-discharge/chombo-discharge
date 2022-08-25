@@ -71,7 +71,7 @@ BrownianWalkerSpecies::drawInitParticles()
 
   // Set the particle mass to one.
   for (ListIterator<ItoParticle> lit(m_initialParticles); lit.ok(); ++lit) {
-    lit().mass() = 1.0;
+    lit().weight() = 1.0;
   }
 }
 

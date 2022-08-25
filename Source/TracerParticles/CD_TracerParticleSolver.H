@@ -29,7 +29,7 @@
 
   The template requirements on the particle type P are: 
   1) It must contain a function RealVect& position() (derived from BinItem)
-  2) It must contain a function const Real& mass() const.
+  2) It must contain a function const Real& weight() const.
   3) It must contain a function RealVect& velocity().
 */
 template <typename P>
@@ -162,11 +162,11 @@ public:
   remap();
 
   /*!
-    @brief Deposit particle mass on mesh. 
-    @param[out] a_phi Deposited mass. 
+    @brief Deposit particle weight on mesh. 
+    @param[out] a_phi Deposited weight. 
   */
   virtual void
-  deposit(EBAMRCellData& a_phi) const;
+  deposit(EBAMRCellData& a_phi);
 
   /*!
     @brief Interpolate particles velocities.
@@ -327,19 +327,15 @@ protected:
   int m_verbosity;
 
   /*!
-    @brief PVR buffer for particle deposition. 
-  */
-  int m_pvrBuffer;
-
-  /*!
     @brief Halo buffer for particle deposition. 
+    @details Used when fetching particles around the refinement boundary. 
   */
   int m_haloBuffer;
 
   /*!
-    @brief Hook for adding mass to plot file. 
+    @brief Hook for adding weight to plot file. 
   */
-  bool m_plotMass;
+  bool m_plotWeight;
 
   /*!
     @brief Hook for adding velocity field to plot file.
@@ -389,9 +385,9 @@ protected:
   template <typename T, const Real& (T::*particleScalarFunction)() const>
   void
   depositParticles(EBAMRCellData&             a_phi,
-                   const ParticleContainer<T> a_particles,
+                   ParticleContainer<T>&      a_particles,
                    const DepositionType       a_baseDeposition,
-                   const CoarseFineDeposition a_coarseFineDeposition) const;
+                   const CoarseFineDeposition a_coarseFineDeposition);
 };
 
 #include <CD_NamespaceFooter.H>

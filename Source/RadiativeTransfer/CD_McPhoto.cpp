@@ -98,11 +98,13 @@ McPhoto::parseOptions()
     pout() << m_name + "::parseOptions" << endl;
   }
 
+  // For registering the CIC deposition mask.
+  m_haloBuffer = 1;
+
   this->parsePseudoPhotons();
   this->parsePhotoGeneration();
   this->parseSourceType();
   this->parseDeposition();
-  this->parseBuffer();
   this->parseIntersectionEB();
   this->parsePlotVariables();
   this->parseInstantaneous();
@@ -121,7 +123,6 @@ McPhoto::parseRuntimeOptions()
   this->parsePhotoGeneration();
   this->parseSourceType();
   this->parseDeposition();
-  this->parseBuffer();
   this->parseIntersectionEB();
   this->parsePlotVariables();
   this->parseInstantaneous();
@@ -167,7 +168,8 @@ McPhoto::parsePseudoPhotons()
   Real maxPhotons;
   pp.get("max_photons", maxPhotons);
 
-  if (maxPhotons <= 0.0) { // = -1 => no restriction
+  // = -1 => no restriction
+  if (maxPhotons <= 0.0) {
     m_maxPhotonsGeneratedPerCell = std::numeric_limits<size_t>::max();
   }
   else {
@@ -279,14 +281,8 @@ McPhoto::parseDeposition()
   else if (str == "cic") {
     m_deposition = DepositionType::CIC;
   }
-  else if (str == "tsc") {
-    m_deposition = DepositionType::TSC;
-  }
-  else if (str == "w4") {
-    m_deposition = DepositionType::W4;
-  }
   else {
-    MayDay::Error("McPhoto::set_deposition_type - unknown interpolant requested");
+    MayDay::Error("McPhoto::parseDeposition - unsupported deposition method requested");
   }
 
   pp.get("plot_deposition", str);
@@ -301,29 +297,23 @@ McPhoto::parseDeposition()
   else if (str == "cic") {
     m_plotDeposition = DepositionType::CIC;
   }
-  else if (str == "tsc") {
-    m_plotDeposition = DepositionType::TSC;
+  else {
+    MayDay::Error("McPhoto::parseDeposition - unsupported interpolant requested");
   }
-  else if (str == "w4") {
-    m_plotDeposition = DepositionType::W4;
+
+  pp.get("deposition_cf", str);
+  if (str == "interp") {
+    m_coarseFineDeposition = CoarseFineDeposition::Interp;
+  }
+  else if (str == "halo") {
+    m_coarseFineDeposition = CoarseFineDeposition::Halo;
+  }
+  else if (str == "halo_ngp") {
+    m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
   }
   else {
-    MayDay::Error("McPhoto::set_deposition_type - unknown interpolant requested");
+    MayDay::Error("McPhoto::parseDeposition - unknown coarse-fine deposition method requested.");
   }
-}
-
-void
-McPhoto::parseBuffer()
-{
-  CH_TIME("McPhoto::parseBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::parseBuffer" << endl;
-  }
-
-  ParmParse pp(m_className.c_str());
-
-  pp.get("pvr_buffer", m_pvrBuffer);
-  pp.get("halo_buffer", m_haloBuffer);
 }
 
 void
@@ -348,20 +338,27 @@ McPhoto::parsePlotVariables()
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++) {
-    if (str[i] == "phi")
+    if (str[i] == "phi") {
       m_plotPhi = true;
-    else if (str[i] == "src")
+    }
+    else if (str[i] == "src") {
       m_plotSource = true;
-    else if (str[i] == "phot")
+    }
+    else if (str[i] == "phot") {
       m_plotPhotons = true;
-    else if (str[i] == "bulk_phot")
+    }
+    else if (str[i] == "bulk_phot") {
       m_plotBulkPhotons = true;
-    else if (str[i] == "eb_phot")
+    }
+    else if (str[i] == "eb_phot") {
       m_plotEBPhotons = true;
-    else if (str[i] == "dom_phot")
+    }
+    else if (str[i] == "dom_phot") {
       m_plotDomainPhotons = true;
-    else if (str[i] == "src_phot")
+    }
+    else if (str[i] == "src_phot") {
       m_plotSourcePhotons = true;
+    }
   }
 }
 
@@ -374,24 +371,36 @@ McPhoto::clear(const WhichContainer& a_which)
   }
 
   switch (a_which) {
-  case WhichContainer::Photons:
+  case WhichContainer::Photons: {
     m_photons.clearParticles();
+
     break;
-  case WhichContainer::Bulk:
+  }
+  case WhichContainer::Bulk: {
     m_bulkPhotons.clearParticles();
+
     break;
-  case WhichContainer::EB:
+  }
+  case WhichContainer::EB: {
     m_ebPhotons.clearParticles();
+
     break;
-  case WhichContainer::Domain:
+  }
+  case WhichContainer::Domain: {
     m_domainPhotons.clearParticles();
+
     break;
-  case WhichContainer::Source:
+  }
+  case WhichContainer::Source: {
     m_sourcePhotons.clearParticles();
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("McPhoto::sortPhotonsByCell -- logic bust");
+
     break;
+  }
   }
 }
 
@@ -446,11 +455,11 @@ McPhoto::allocateInternals()
   m_amr->allocate(m_massDiff, m_realm, m_phase, m_nComp);
 
   // Allocate particle data holders
-  m_amr->allocate(m_photons, m_pvrBuffer, m_realm);
-  m_amr->allocate(m_bulkPhotons, m_pvrBuffer, m_realm);
-  m_amr->allocate(m_ebPhotons, m_pvrBuffer, m_realm);
-  m_amr->allocate(m_domainPhotons, m_pvrBuffer, m_realm);
-  m_amr->allocate(m_sourcePhotons, m_pvrBuffer, m_realm);
+  m_amr->allocate(m_photons, m_realm);
+  m_amr->allocate(m_bulkPhotons, m_realm);
+  m_amr->allocate(m_ebPhotons, m_realm);
+  m_amr->allocate(m_domainPhotons, m_realm);
+  m_amr->allocate(m_sourcePhotons, m_realm);
 }
 
 void
@@ -475,13 +484,6 @@ McPhoto::deallocateInternals()
   if (m_verbosity > 5) {
     pout() << m_name + "::deallocateInternals" << endl;
   }
-
-  // Don't deallocate, instead, reallocate.
-  // m_amr->deallocate(m_phi);
-  // m_amr->deallocate(m_source);
-  // m_amr->deallocate(m_scratch);
-  // m_amr->deallocate(m_depositionNC);
-  // m_amr->deallocate(m_massDiff);
 }
 
 void
@@ -504,12 +506,13 @@ McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFin
   const Vector<ProblemDomain>&     domains = m_amr->getDomains();
   const Vector<Real>&              dx      = m_amr->getDx();
   const Vector<int>&               ref_rat = m_amr->getRefinementRatios();
+  const AMRMask&                   mask    = m_amr->getValidCells(m_realm);
 
-  m_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_bulkPhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_ebPhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_domainPhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_sourcePhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_photons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
+  m_bulkPhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
+  m_ebPhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
+  m_domainPhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
+  m_sourcePhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
 
   // Deposit
   this->depositPhotons();
@@ -524,24 +527,36 @@ McPhoto::sortPhotonsByCell(const WhichContainer& a_which)
   }
 
   switch (a_which) {
-  case WhichContainer::Photons:
+  case WhichContainer::Photons: {
     m_photons.sortParticlesByCell();
+
     break;
-  case WhichContainer::Bulk:
+  }
+  case WhichContainer::Bulk: {
     m_bulkPhotons.sortParticlesByCell();
+
     break;
-  case WhichContainer::EB:
+  }
+  case WhichContainer::EB: {
     m_ebPhotons.sortParticlesByCell();
+
     break;
-  case WhichContainer::Domain:
+  }
+  case WhichContainer::Domain: {
     m_domainPhotons.sortParticlesByCell();
+
     break;
-  case WhichContainer::Source:
+  }
+  case WhichContainer::Source: {
     m_sourcePhotons.sortParticlesByCell();
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("McPhoto::sortPhotonsByCell -- logic bust");
+
     break;
+  }
   }
 }
 
@@ -554,24 +569,36 @@ McPhoto::sortPhotonsByPatch(const WhichContainer& a_which)
   }
 
   switch (a_which) {
-  case WhichContainer::Photons:
+  case WhichContainer::Photons: {
     m_photons.sortParticlesByPatch();
+
     break;
-  case WhichContainer::Bulk:
+  }
+  case WhichContainer::Bulk: {
     m_bulkPhotons.sortParticlesByPatch();
+
     break;
-  case WhichContainer::EB:
+  }
+  case WhichContainer::EB: {
     m_ebPhotons.sortParticlesByPatch();
+
     break;
-  case WhichContainer::Domain:
+  }
+  case WhichContainer::Domain: {
     m_domainPhotons.sortParticlesByPatch();
+
     break;
-  case WhichContainer::Source:
+  }
+  case WhichContainer::Source: {
     m_sourcePhotons.sortParticlesByPatch();
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("McPhoto::sortPhotonsByPatch -- logic bust");
+
     break;
+  }
   }
 }
 
@@ -592,9 +619,8 @@ McPhoto::registerOperators()
     m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
 
-    if (m_haloBuffer > 0) {
-      m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
-    }
+    // For CIC deposition
+    m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
   }
 }
 
@@ -703,20 +729,27 @@ McPhoto::getPlotVariableNames() const
 
   Vector<std::string> plotVarNames(0);
 
-  if (m_plotPhi)
+  if (m_plotPhi) {
     plotVarNames.push_back(m_name + " phi");
-  if (m_plotSource)
+  }
+  if (m_plotSource) {
     plotVarNames.push_back(m_name + " source");
-  if (m_plotPhotons)
-    plotVarNames.push_back(m_name + " Photons");
-  if (m_plotBulkPhotons)
+  }
+  if (m_plotPhotons) {
+    plotVarNames.push_back(m_name + " photons");
+  }
+  if (m_plotBulkPhotons) {
     plotVarNames.push_back(m_name + " bulkPhotons");
-  if (m_plotEBPhotons)
+  }
+  if (m_plotEBPhotons) {
     plotVarNames.push_back(m_name + " ebPhotons");
-  if (m_plotDomainPhotons)
+  }
+  if (m_plotDomainPhotons) {
     plotVarNames.push_back(m_name + " domainPhotons");
-  if (m_plotSourcePhotons)
+  }
+  if (m_plotSourcePhotons) {
     plotVarNames.push_back(m_name + " sourcePhotons");
+  }
 
   return plotVarNames;
 }
@@ -731,20 +764,27 @@ McPhoto::getNumberOfPlotVariables() const
 
   int numPlotVars = 0;
 
-  if (m_plotPhi)
+  if (m_plotPhi) {
     numPlotVars += 1;
-  if (m_plotSource)
+  }
+  if (m_plotSource) {
     numPlotVars += 1;
-  if (m_plotPhotons)
+  }
+  if (m_plotPhotons) {
     numPlotVars += 1;
-  if (m_plotBulkPhotons)
+  }
+  if (m_plotBulkPhotons) {
     numPlotVars += 1;
-  if (m_plotEBPhotons)
+  }
+  if (m_plotEBPhotons) {
     numPlotVars += 1;
-  if (m_plotDomainPhotons)
+  }
+  if (m_plotDomainPhotons) {
     numPlotVars += 1;
-  if (m_plotSourcePhotons)
+  }
+  if (m_plotSourcePhotons) {
     numPlotVars += 1;
+  }
 
   return numPlotVars;
 }
@@ -762,52 +802,6 @@ McPhoto::randomExponential(const Real a_mean)
 {
   std::exponential_distribution<Real> dist(a_mean);
   return Random::get(dist);
-}
-
-int
-McPhoto::getPVRBuffer() const
-{
-  CH_TIME("McPhoto::getPVRBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getPVRBuffer" << endl;
-  }
-
-  return m_pvrBuffer;
-}
-
-int
-McPhoto::getHaloBuffer() const
-{
-  CH_TIME("McPhoto::getHaloBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::getHaloBuffer" << endl;
-  }
-
-  return m_haloBuffer;
-}
-
-void
-McPhoto::setPVRBuffer(const int a_buffer)
-{
-  CH_TIME("McPhoto::setPVRBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setPVRBuffer" << endl;
-  }
-
-  m_pvrBuffer  = a_buffer;
-  m_haloBuffer = 0;
-}
-
-void
-McPhoto::setHaloBuffer(const int a_buffer)
-{
-  CH_TIME("McPhoto::setHaloBuffer");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setHaloBuffer" << endl;
-  }
-
-  m_haloBuffer = a_buffer;
-  m_pvrBuffer  = 0;
 }
 
 void
@@ -837,16 +831,8 @@ McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellDa
     // because the next section of code iterates through all boxes on all levels. But we don't want to generate photons
     // on the part of the coarse grid that is covered by a finer grid. This code removes those photons.
     if (hasCoar) {
-      const AMRPVR& pvr    = a_photons.getPVR();
-      const int     refRat = m_amr->getRefinementRatios()[lvl - 1];
 
-      collectValidParticles(photons[lvl]->outcast(),
-                            *photons[lvl - 1],
-                            pvr[lvl]->mask(),
-                            dx * RealVect::Unit,
-                            refRat,
-                            false,
-                            probLo);
+      a_photons.evictInvalidParticles(photons[lvl]->outcast(), *photons[lvl - 1], lvl - 1);
       photons[lvl]->outcast().clear();
     }
 
@@ -944,6 +930,7 @@ McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt)
   }
   else {
     factor = 0.0;
+
     MayDay::Error("McPhoto::drawPhotons -- logic bust");
   }
 
@@ -974,21 +961,24 @@ McPhoto::depositPhotons()
 }
 
 void
-McPhoto::depositPhotons(EBAMRCellData&                   a_phi,
-                        const ParticleContainer<Photon>& a_photons,
-                        const DepositionType&            a_deposition)
+McPhoto::depositPhotons(EBAMRCellData& a_phi, ParticleContainer<Photon>& a_photons, const DepositionType& a_deposition)
 {
   CH_TIME("McPhoto::depositPhotons(ParticleContainer)");
   if (m_verbosity > 5) {
     pout() << m_name + "::depositPhotons(ParticleContainer)" << endl;
   }
 
-  this->depositKappaConservative(a_phi,
-                                 a_photons,
-                                 a_deposition);           // a_phi contains only weights, i.e. not divided by kappa
-  this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-  this->depositHybrid(a_phi, m_massDiff, m_depositionNC); // Compute hybrid deposition, including mass differnce
-  this->incrementRedist(m_massDiff);                      // Increment level redistribution register
+  // a_phi contains only weights, i.e. not divided by kappa
+  this->depositKappaConservative(a_phi, a_photons, a_deposition, m_coarseFineDeposition);
+
+  // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+  this->depositNonConservative(m_depositionNC, a_phi);
+
+  // Compute hybrid deposition, including mass differnce
+  this->depositHybrid(a_phi, m_massDiff, m_depositionNC);
+
+  // Increment level redistribution register
+  this->incrementRedist(m_massDiff);
 
   // Do the redistribution magic
   this->coarseFineIncrement(m_massDiff); // Compute C2F, F2C, and C2C mass transfers
@@ -1001,40 +991,71 @@ McPhoto::depositPhotons(EBAMRCellData&                   a_phi,
 }
 
 void
-McPhoto::depositKappaConservative(EBAMRCellData&                   a_phi,
-                                  const ParticleContainer<Photon>& a_photons,
-                                  const DepositionType             a_deposition)
+McPhoto::depositKappaConservative(EBAMRCellData&             a_phi,
+                                  ParticleContainer<Photon>& a_particles,
+                                  const DepositionType       a_deposition,
+                                  const CoarseFineDeposition a_coarseFineDeposition)
 {
   CH_TIME("McPhoto::depositKappaConservative");
   if (m_verbosity > 5) {
     pout() << m_name + "::depositKappaConservative" << endl;
   }
 
-  if (m_pvrBuffer > 0 && m_haloBuffer == 0) {
-    m_amr->depositParticles<Photon, &Photon::mass>(a_phi,
-                                                   m_realm,
-                                                   m_phase,
-                                                   a_photons,
-                                                   a_deposition,
-                                                   CoarseFineDeposition::PVR,
-                                                   false);
+  CH_assert(a_phi[0]->nComp() == 1);
+
+  switch (a_coarseFineDeposition) {
+  case CoarseFineDeposition::Interp: {
+    m_amr->depositParticles<Photon, &Photon::weight>(a_phi,
+                                                     m_realm,
+                                                     m_phase,
+                                                     a_particles,
+                                                     a_deposition,
+                                                     CoarseFineDeposition::Interp,
+                                                     false);
+
+    break;
   }
-  else if (m_pvrBuffer == 0 && m_haloBuffer > 0) {
+  case CoarseFineDeposition::Halo: {
+
+    // Copy particles living on the mask.
+    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    a_particles.copyMaskParticles(mask);
+
+    m_amr->depositParticles<Photon, &Photon::weight>(a_phi,
+                                                     m_realm,
+                                                     m_phase,
+                                                     a_particles,
+                                                     a_deposition,
+                                                     CoarseFineDeposition::Halo,
+                                                     false);
+
+    // Clear out the mask particles.
+    a_particles.clearMaskParticles();
+
+    break;
+  }
+  case CoarseFineDeposition::HaloNGP: {
     const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
 
-    a_photons.copyMaskParticles(mask);
-    m_amr->depositParticles<Photon, &Photon::mass>(a_phi,
-                                                   m_realm,
-                                                   m_phase,
-                                                   a_photons,
-                                                   a_deposition,
-                                                   CoarseFineDeposition::Halo,
-                                                   false);
-    a_photons.clearMaskParticles();
+    // Transfer particles living on the mask.
+    a_particles.transferMaskParticles(mask);
+
+    m_amr->depositParticles<Photon, &Photon::weight>(a_phi,
+                                                     m_realm,
+                                                     m_phase,
+                                                     a_particles,
+                                                     a_deposition,
+                                                     CoarseFineDeposition::HaloNGP,
+                                                     false);
+
+    // Transfer them back.
+    a_particles.transferParticles(a_particles.getMaskParticles());
+
+    break;
   }
-  else {
-    MayDay::Error(
-      "McPhoto::depositKappaConservative -- logic bust, must have either McPhoto.pvr_buffer = 0 or McPhoto.halo_buffer = 0 (this controls deposition)");
+  default: {
+    MayDay::Error("McPhoto::depositKappaConservative -- logic bust due to unsupported coarse-fine deposition");
+  }
   }
 }
 
@@ -1317,15 +1338,21 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
           }
           if (checkEB) {
             switch (m_intersectionEB) {
-            case IntersectionEB::Raycast:
+            case IntersectionEB::Raycast: {
               contactEB = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3 * dx, sEB);
+
               break;
-            case IntersectionEB::Bisection:
+            }
+            case IntersectionEB::Bisection: {
               contactEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_bisectStep, sEB);
+
               break;
-            default:
+            }
+            default: {
               MayDay::Error("McPhoto::advancePhotonsInstantenous -- logic bust in eb intersection");
+
               break;
+            }
             }
           }
 
@@ -1489,15 +1516,21 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 
         if (checkEB) {
           switch (m_intersectionEB) {
-          case IntersectionEB::Raycast:
+          case IntersectionEB::Raycast: {
             absorbedEB = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3 * dx, sEB);
+
             break;
-          case IntersectionEB::Bisection:
+          }
+          case IntersectionEB::Bisection: {
             absorbedEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_bisectStep, sEB);
+
             break;
-          default:
+          }
+          default: {
             MayDay::Error("McPhoto::advancePhotonsTransient -- logic bust in eb intersection");
+
             break;
+          }
           }
         }
 

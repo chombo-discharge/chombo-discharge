@@ -19,16 +19,15 @@
 template <size_t M, size_t N>
 inline TracerParticle<M, N>::TracerParticle()
 {
+  this->m_position = RealVect::Zero;
+  this->m_weight   = 0.0;
+  this->m_velocity = RealVect::Zero;
 
-  m_position = RealVect::Zero;
-  m_mass     = 0.0;
-  m_velocity = RealVect::Zero;
-
-  for (auto& s : m_scalars) {
+  for (auto& s : this->m_scalars) {
     s = 0.0;
   }
 
-  for (auto& v : m_vectors) {
+  for (auto& v : this->m_vectors) {
     v = RealVect::Zero;
   }
 }
@@ -37,7 +36,7 @@ template <size_t M, size_t N>
 inline TracerParticle<M, N>::TracerParticle(const TracerParticle<M, N>& a_other)
 {
   this->m_position = a_other.m_position;
-  this->m_mass     = a_other.m_mass;
+  this->m_weight   = a_other.m_weight;
   this->m_velocity = a_other.m_velocity;
   this->m_scalars  = a_other.m_scalars;
   this->m_vectors  = a_other.m_vectors;
@@ -49,16 +48,16 @@ inline TracerParticle<M, N>::~TracerParticle()
 
 template <size_t M, size_t N>
 inline Real&
-TracerParticle<M, N>::mass()
+TracerParticle<M, N>::weight()
 {
-  return m_mass;
+  return m_weight;
 }
 
 template <size_t M, size_t N>
 inline const Real&
-TracerParticle<M, N>::mass() const
+TracerParticle<M, N>::weight() const
 {
-  return m_mass;
+  return m_weight;
 }
 
 template <size_t M, size_t N>
@@ -76,86 +75,35 @@ TracerParticle<M, N>::velocity() const
 }
 
 template <size_t M, size_t N>
-template <size_t K>
-inline Real&
-TracerParticle<M, N>::scalar()
-{
-  return std::get<K>(m_scalars);
-}
-
-template <size_t M, size_t N>
-template <size_t K>
-inline const Real&
-TracerParticle<M, N>::scalar() const
-{
-  return std::get<K>(m_scalars);
-}
-
-template <size_t M, size_t N>
-template <size_t K>
-inline RealVect&
-TracerParticle<M, N>::vect()
-{
-  return std::get<K>(m_vectors);
-}
-
-template <size_t M, size_t N>
-template <size_t K>
-inline const RealVect&
-TracerParticle<M, N>::vect() const
-{
-  return std::get<K>(m_vectors);
-}
-
-template <size_t M, size_t N>
-inline bool
-TracerParticle<M, N>::operator==(const TracerParticle<M, N>& a_p) const
-{
-  return (this->m_position == a_p.m_position && this->m_mass == a_p.m_mass && this->m_velocity == a_p.m_velocity);
-}
-
-template <size_t M, size_t N>
-inline bool
-TracerParticle<M, N>::operator!=(const TracerParticle<M, N>& a_p) const
-{
-  return !(*this == a_p);
-}
-
-template <size_t M, size_t N>
 inline int
 TracerParticle<M, N>::size() const
 {
-  return BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + M * sizeof(m_mass) + N * sizeof(m_velocity);
+  return (GenericParticle<M, N>::size() + sizeof(Real) + SpaceDim * sizeof(Real));
 }
 
 template <size_t M, size_t N>
 inline void
 TracerParticle<M, N>::linearOut(void* buf) const
 {
+  GenericParticle<M, N>::linearOut(buf);
+
   Real* buffer = (Real*)buf;
 
   // Linearize m_position onto buffer.
-  *buffer++ = m_position[0];
-  *buffer++ = m_position[1];
+  *buffer++ = this->m_position[0];
+  *buffer++ = this->m_position[1];
 #if CH_SPACEDIM == 3
-  *buffer++ = m_position[2];
-#endif
-
-  // Linearize m_velocity onto buffer
-  *buffer++ = m_velocity[0];
-  *buffer++ = m_velocity[1];
-#if CH_SPACEDIM == 3
-  *buffer++ = m_velocity[2];
+  *buffer++ = this->m_position[2];
 #endif
 
   // Linearize m_scalars onto the buffer
   for (size_t i = 0; i < M; i++) {
-    *buffer++ = m_scalars[i];
+    *buffer++ = this->m_scalars[i];
   }
 
   // Linearize vectors onto the buffer
   for (size_t i = 0; i < N; i++) {
-    const RealVect& v = m_vectors[i];
+    const RealVect& v = this->m_vectors[i];
 
     *buffer++ = v[0];
     *buffer++ = v[1];
@@ -164,8 +112,15 @@ TracerParticle<M, N>::linearOut(void* buf) const
 #endif
   }
 
-  // Linearize mass onto buffer
-  *buffer = m_mass;
+  // Linearize m_velocity onto buffer
+  *buffer++ = m_velocity[0];
+  *buffer++ = m_velocity[1];
+#if CH_SPACEDIM == 3
+  *buffer++ = m_velocity[2];
+#endif
+
+  // // Linearize weight onto buffer
+  *buffer = m_weight;
 }
 
 template <size_t M, size_t N>
@@ -174,27 +129,20 @@ TracerParticle<M, N>::linearIn(void* buf)
 {
   Real* buffer = (Real*)buf;
 
-  m_position[0] = *buffer++;
-  m_position[1] = *buffer++;
+  this->m_position[0] = *buffer++;
+  this->m_position[1] = *buffer++;
 #if CH_SPACEDIM == 3
-  m_position[2] = *buffer++;
-#endif
-
-  // Put velocity onto buffer.
-  m_velocity[0] = *buffer++;
-  m_velocity[1] = *buffer++;
-#if CH_SPACEDIM == 3
-  m_velocity[2] = *buffer++;
+  this->m_position[2] = *buffer++;
 #endif
 
   // Linearize buffer onto scalars
   for (size_t i = 0; i < M; i++) {
-    m_scalars[i] = *buffer++;
+    this->m_scalars[i] = *buffer++;
   }
 
   // Linearize buffer onto vectors
   for (size_t i = 0; i < N; i++) {
-    RealVect& v = m_vectors[i];
+    RealVect& v = this->m_vectors[i];
 
     v[0] = *buffer++;
     v[1] = *buffer++;
@@ -203,8 +151,15 @@ TracerParticle<M, N>::linearIn(void* buf)
 #endif
   }
 
-  // Put mass onto buffer
-  m_mass = *buffer;
+  // Put velocity onto buffer.
+  m_velocity[0] = *buffer++;
+  m_velocity[1] = *buffer++;
+#if CH_SPACEDIM == 3
+  m_velocity[2] = *buffer++;
+#endif
+
+  // Put weight onto buffer
+  m_weight = *buffer;
 }
 
 template <size_t M, size_t N>
@@ -215,7 +170,7 @@ operator<<(std::ostream& ostr, const TracerParticle<M, N>& p)
 
   // Print position.
   ostr << "\tPosition  = " << p.position() << "\n";
-  ostr << "\tMass      = " << p.mass() << "\n";
+  ostr << "\tWeight    = " << p.weight() << "\n";
   ostr << "\tVelocity  = " << p.velocity() << "\n";
 
   return ostr;

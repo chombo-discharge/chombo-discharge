@@ -693,7 +693,13 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
   ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
   // Regrid the particles onto the new mesh.
-  particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
+  particles.regrid(a_grids,
+                   m_amr->getDomains(),
+                   m_amr->getDx(),
+                   m_amr->getRefinementRatios(),
+                   m_amr->getValidCells(particles.getRealm()),
+                   a_lmin,
+                   a_finestLevel);
 
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);

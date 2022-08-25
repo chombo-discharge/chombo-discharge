@@ -17,14 +17,14 @@
 
 /*!
   @brief Coarse-fine deposition types (see CD_EBAMRParticleMesh for how these are handled).
-  @details PVR means that the mass on the fine level is put there via interpolation of the coarse level.
+  @details Interp means that the mass on the fine level is put there via interpolation of the coarse level.
   @details Halo means that we deposit the particles on the coarse side of the refinement boundary directly on the fine level, using
            special deposition routines where the particles have the same physical width as on the coarse level. 
   @details HaloNGP means that particles on the coarse side of the refinement boundary are deposited using an NGP scheme. 
 */
 enum class CoarseFineDeposition
 {
-  PVR,
+  Interp,
   Halo,
   HaloNGP
 };

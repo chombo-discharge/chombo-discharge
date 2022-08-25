@@ -18,10 +18,8 @@
 #include <cstdio>
 #include <cmath>
 
-// Chombo includes
-#include <BinItem.H>
-
 // Our includes
+#include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -31,7 +29,7 @@
   quantities are communicated when remapping particles. 
 */
 template <size_t M, size_t N>
-class TracerParticle : public BinItem
+class TracerParticle : public GenericParticle<M, N>
 {
 public:
   /*!
@@ -51,18 +49,18 @@ public:
   inline virtual ~TracerParticle();
 
   /*!
-    @brief Get the particle "mass"
-    @return m_mass
+    @brief Get the particle "weight"
+    @return m_weight
   */
   inline Real&
-  mass();
+  weight();
 
   /*!
-    @brief Get the particle "mass"
-    @return m_mass
+    @brief Get the particle "weight"
+    @return m_weight
   */
   inline const Real&
-  mass() const;
+  weight() const;
 
   /*!
     @brief Get the particle velocity. 
@@ -77,62 +75,6 @@ public:
   */
   inline const RealVect&
   velocity() const;
-
-  /*!
-    @brief Get one of the scalars. 
-    @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
-    compile-time errors if trying to fetch elements out of range. 
-    @return m_scalars[K]
-  */
-  template <size_t K>
-  inline Real&
-  scalar();
-
-  /*!
-    @brief Get one of the scalars. 
-    @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
-    compile-time errors if trying to fetch elements out of range. 
-    @return m_scalars[K]
-  */
-  template <size_t K>
-  inline const Real&
-  scalar() const;
-
-  /*!
-    @brief Get one of the RealVects.
-    @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
-    compile-time errors if trying to fetch elements out of range. 
-    @return m_vectors[K]
-  */
-  template <size_t K>
-  inline RealVect&
-  vect();
-
-  /*!
-    @brief Get one of the RealVects.
-    @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
-    compile-time errors if trying to fetch elements out of range. 
-    @return m_vectors[K]
-  */
-  template <size_t K>
-  inline const RealVect&
-  vect() const;
-
-  /*!
-    @brief Comparison operator with other particle. 
-    @param[in] a_other Other particle
-    @note Does not compare the M and N Reals and RealVects. 
-  */
-  inline bool
-  operator==(const TracerParticle<M, N>& a_other) const;
-
-  /*!
-    @brief Comparison operator with other particle.
-    @param[in] a_other Other particle
-    @note Does not compare the M and N Reals and RealVects. 
-  */
-  inline bool
-  operator!=(const TracerParticle<M, N>& a_other) const;
 
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
@@ -157,24 +99,14 @@ public:
 
 protected:
   /*!
-    @brief Particle "mass".
+    @brief Particle "weight".
   */
-  Real m_mass;
+  Real m_weight;
 
   /*!
     @brief Particle velocity
   */
   RealVect m_velocity;
-
-  /*!
-    @brief Scalar storage array
-  */
-  std::array<Real, M> m_scalars;
-
-  /*!
-    @brief vector storage array
-  */
-  std::array<RealVect, N> m_vectors;
 };
 
 /*!

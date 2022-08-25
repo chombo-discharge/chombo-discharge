@@ -64,7 +64,8 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # ====================================================================================================
 TracerParticleSolver.verbosity     = -1     # Solver verbosity level. 
 TracerParticleSolver.deposition    = cic    # Deposition method. Must be 'ngp' or 'cic'
-TracerParticleSolver.plot_mass     = true   # Turn on/off plotting of the particle mass.
+TracerParticleSolver.deposition_cf = halo   # Coarse-fine deposition. Must be interp or halo
+TracerParticleSolver.plot_weight   = true   # Turn on/off plotting of the particle mass.
 TracerParticleSolver.plot_velocity = true   # Turn on/off plotting of the particle velocities.
 TracerParticleSolver.volume_scale  = false  # If true, depositions yield density * volume instead of just volume
 
@@ -94,7 +95,7 @@ CoaxialCable.dielectric.eps      = 4
 # ====================================================================================================
 TracerParticleStepper.initial_particles = 10000  # Number of uniformly distributed initial particles
 TracerParticleStepper.integration       = rk4    # 'euler', 'rk2', or 'rk4'
-TracerParticleStepper.verbosity         = -1     # Verbosity level
+TracerParticleStepper.verbosity         = 10     # Verbosity level
 TracerParticleStepper.cfl               = 1.0    # "CFL" number. 
 TracerParticleStepper.velocity_field    = 1      # Velocity field to use.
                                                  # 0 => Diagonal translation

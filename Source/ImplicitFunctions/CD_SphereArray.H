@@ -24,6 +24,9 @@ using Vec3   = EBGeometry::Vec3T<Real>;
 using SDF    = EBGeometry::SignedDistanceFunction<Real>;
 using Sphere = EBGeometry::SphereSDF<Real>;
 
+/*!
+  @brief A Cartesian array of spheres. 
+*/
 class SphereArray : public BaseIF
 {
 public:

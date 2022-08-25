@@ -13,11 +13,11 @@
 #define CD_CdrSpecies_H
 
 // Chombo includes
+#include <List.H>
 #include <RealVect.H>
-#include <Particle.H>
-#include <CD_EBParticleMesh.H>
 
 // Our includes
+#include <CD_PointParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -83,13 +83,13 @@ public:
   /*!
     @brief Get initial particles
   */
-  virtual const List<Particle>&
+  virtual const List<PointParticle>&
   getInitialParticles() const;
 
   /*!
     @brief Get initial particles
   */
-  List<Particle>&
+  List<PointParticle>&
   getInitialParticles();
 
 protected:
@@ -116,7 +116,7 @@ protected:
   /*!
     @brief Initial particles
   */
-  List<Particle> m_initialParticles;
+  List<PointParticle> m_initialParticles;
 };
 
 #include <CD_NamespaceFooter.H>

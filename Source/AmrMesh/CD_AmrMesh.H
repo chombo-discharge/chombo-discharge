@@ -140,13 +140,11 @@ public:
   /*!
     @brief Template class for generic allocation of particle containers. 
     @param[out] a_container Particle container to be allocated
-    @param[in]  a_pvrBuffer The particle valid region buffer. 
     @param[out] a_realm     Realm on which the particles will be allocated. 
-    @note Particles that live within a_pvrBuffer on the fine side of the refinement boundary will be mapped to the coarse level. 
   */
   template <typename T>
   void
-  allocate(ParticleContainer<T>& a_container, const int a_pvrBuffer, const std::string a_realm) const;
+  allocate(ParticleContainer<T>& a_container, const std::string a_realm) const;
 
   /*!
     @brief Allocate pointer but not any memory blocks. 

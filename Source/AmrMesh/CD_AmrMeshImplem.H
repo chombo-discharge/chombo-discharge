@@ -128,7 +128,7 @@ AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std
 
 template <typename T>
 void
-AmrMesh::allocate(ParticleContainer<T>& a_container, const int a_buffer, const std::string a_realm) const
+AmrMesh::allocate(ParticleContainer<T>& a_container, const std::string a_realm) const
 {
   CH_TIME("AmrMesh::allocate(ParticleContainer<T>, int, string)");
   if (m_verbosity > 5) {
@@ -150,10 +150,10 @@ AmrMesh::allocate(ParticleContainer<T>& a_container, const int a_buffer, const s
                      m_realms[a_realm]->getDomains(),
                      m_realms[a_realm]->getDx(),
                      m_realms[a_realm]->getRefinementRatios(),
+                     m_realms[a_realm]->getValidCells(),
                      m_probLo,
                      m_blockingFactor,
                      m_finestLevel,
-                     a_buffer,
                      a_realm);
 }
 
