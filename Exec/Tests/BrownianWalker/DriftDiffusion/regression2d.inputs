@@ -67,7 +67,6 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 ItoSolver.plt_vars            = phi vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ItoSolver.seed                = 0             # Seed for RNG
-ItoSolver.kd_direction        = -1            # Kd-tree direction, -1 => random, 0,1,2 => first plane split in this dir
 ItoSolver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
 ItoSolver.normal_max          = 5.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ItoSolver.redistribute        = true          # Turn on/off redistribution. 
