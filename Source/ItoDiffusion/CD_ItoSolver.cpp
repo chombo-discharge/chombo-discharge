@@ -3001,7 +3001,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
     List<ItoParticle>& particles = cellParticles(iv, m_comp);
 
     if (particles.length() > 0) {
-      this->mergeBVH(particles, a_particlesPerCell);
+      this->makeSuperparticles(particles, a_particlesPerCell);
     }
   };
 
@@ -3013,11 +3013,11 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
 }
 
 void
-ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
+ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
 {
-  CH_TIME("ItoSolver::mergeBVH");
+  CH_TIME("ItoSolver::makeSuperparticles");
   if (m_verbosity > 5) {
-    pout() << m_name + "::mergeBVH" << endl;
+    pout() << m_name + "::makeSuperparticles" << endl;
   }
 
 #if 1

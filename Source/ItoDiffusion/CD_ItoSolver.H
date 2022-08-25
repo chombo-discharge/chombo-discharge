@@ -1444,7 +1444,7 @@ protected:
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
   void
-  mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell);
+  makeSuperparticles(List<ItoParticle>& a_particles, const int a_particlesPerCell);
 
   /*!
     @brief Write data to output. Convenience function which just copies data from one data holder to the output data holder. 
