@@ -144,6 +144,11 @@ namespace SuperParticles {
     return m_right;
   }
 
+  /*!
+    @brief Partitioning method for KDNode<P> which equilibriates the weight across the two halves when splitting a node
+    @note This only adjusts the weight of the median particle. The particle class P should have a copy constructor for the other
+    fields; note that these fields are simply copied over when the particle is split and are not adjusted. 
+  */
   template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
   typename KDNode<P>::Partitioner PartitionEqualWeight = [](KDNode<P>& a_node) -> void {
     CH_assert(!(a_node.isInteriorNode()));
@@ -294,6 +299,10 @@ namespace SuperParticles {
 #endif
   };
 
+  /*!
+    @brief Stop function which returns true if weight in node < 2
+    @note The particle type is P and P::*weight is a pointer to a member function providing const-reference access to the particle weight.
+  */
   template <class P, const Real& (P::*weight)() const>
   typename KDNode<P>::StopFunction InsufficientWeightForSplitting =
     [](const typename KDNode<P>::ParticleList& a_particles) {
