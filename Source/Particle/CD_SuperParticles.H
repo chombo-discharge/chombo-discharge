@@ -153,7 +153,7 @@ namespace SuperParticles {
       @brief Get the right node.
     */
     inline std::shared_ptr<KDNode<P>>&
-    getRight() noexcept;    
+    getRight() noexcept;
 
   protected:
     /*!

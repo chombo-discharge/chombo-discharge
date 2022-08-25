@@ -183,7 +183,8 @@ namespace SuperParticles {
 
     std::sort(particles.begin(), particles.end(), sortCrit);
 
-    // B. Determine the "median particle"
+    // B. Determine the "median particle" and start computing the weight in the
+    //    two halves. 
     size_t id = 0;
     Real   wl = 0.0;
     Real   wr = W - (particles[id].*weight)();
@@ -201,7 +202,8 @@ namespace SuperParticles {
       }
     }
 
-    P& p = particles[id];
+    // C. Copy the two particle halves to each subnode.
+    P p = particles[id];
 
     typename KDNode<P>::ParticleList pl;
     typename KDNode<P>::ParticleList pr;
@@ -209,16 +211,19 @@ namespace SuperParticles {
     std::move(particles.begin(), particles.begin() + id, std::back_inserter(pl));
     std::move(particles.begin() + id + 1, particles.end(), std::back_inserter(pr));
 
-    const Real ww = (p.*weight)();
-    const Real dw = wr - wl;
-    
-    if (ww >= splitThresh && ww >= std::abs(dw)) {
+    const Real& pw = (p.*weight)();
+    const Real  dw = wr - wl;
+
+    CH_assert(wl + wr + pw == W);
+
+    // D. Assign the median particle; split the particle if we can.
+    if (pw >= splitThresh && pw >= std::abs(dw)) {
       Real dwl = dw;
       Real dwr = 0.0;
-      Real ddw = ww - dw;
+      Real ddw = pw - dw;
 
       const long long N  = llround(ddw);
-
+      
       if(N > 0LL) {
 
 	const long long Nr = N / 2;
@@ -231,6 +236,8 @@ namespace SuperParticles {
       if(dwl > 0.0) {
 	P il(p);
 
+	CH_assert(dwl >= 1.0);
+
 	wl += dwl;
 	(il.*weight)() = dwl;
 	pl.emplace_back(std::move(il));
@@ -239,6 +246,8 @@ namespace SuperParticles {
       if(dwr > 0.0) {
 	P ir(p);
 
+	CH_assert(dwr >= 1.0);	
+
 	wr += dwr;
 	(ir.*weight)() = dwr;
 	pr.emplace_back(std::move(ir));
@@ -246,44 +255,49 @@ namespace SuperParticles {
     }
     else {
       if (wl <= wr) {
-	wl += ww;
+	wl += pw;
         pl.emplace_back(std::move(p));
       }
       else {
-	wr += ww;
+	wr += pw;
         pr.emplace_back(std::move(p));
       }
     }
 
-    particles.resize(0);
+    // E. If this breaks, weight is not conserved or we broke the median particle splitting; the weight difference
+    //    between the left/right node should be at most one physical particle. 
+    CH_assert(wl + wr == W);
+    CH_assert(std::abs(wl - wr) <= 1.0);
 
+    // F. Instantiate the child nodes.
+    particles.resize(0);
+    
     a_node.getLeft() = std::make_shared<KDNode<P>> (pl);
     a_node.getRight() = std::make_shared<KDNode<P>> (pr);
 
     a_node.getLeft()->weight() = wl;
     a_node.getRight()->weight() = wr;
 
+    // G. Debug code; make sure particle weights make sense
 #ifndef NDEBUG
     Real WL = 0.0;
     Real WR = 0.0;
 
-    for (auto& l : pl) {
-      CH_assert((l.*weight)() >= 1.0 - std::numeric_limits<Real>::min());
+    // Note: Not auto& l/r : pl/pr because the particles were into the child node. 
+    for (auto& l : a_node.getLeft()->getParticles()) {
+      CH_assert((l.*weight)() >= 1.0);
 
       WL += (l.*weight)();
     }
 
-    for (auto& r : pr) {
-      CH_assert((r.*weight)() >= 1.0 - std::numeric_limits<Real>::min());
+    for (auto& r : a_node.getRight()->getParticles()) {
+      CH_assert((r.*weight)() >= 1.0);
 
-      WR += (r.*weight)();
+      WR += (r.*weight)();      
     }
 
-    CH_assert(std::abs(WL - a_node.getLeft()->weight()) < std::numeric_limits<Real>::min());
-    CH_assert(std::abs(WR - a_node.getRight()->weight()) < std::numeric_limits<Real>::min());    
-
-    CH_assert(std::abs(WL - WR) <= 1.0 + std::numeric_limits<Real>::min());
-    CH_assert(std::abs(WL + WR - W) < std::numeric_limits<Real>::min());    
+    CH_assert(WL == wl);
+    CH_assert(WR == wr);
 #endif
   };
 
