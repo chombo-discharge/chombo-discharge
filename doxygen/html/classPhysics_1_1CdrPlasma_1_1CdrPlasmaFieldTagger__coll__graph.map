@@ -1,6 +1,7 @@
 <map id="Physics::CdrPlasma::CdrPlasmaFieldTagger" name="Physics::CdrPlasma::CdrPlasmaFieldTagger">
-<area shape="rect" id="node1" title="Lightweight tagging class which flags cells for refinement/coarsening using the electric field only." alt="" coords="91,215,266,256"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract Class which implements CellTagger for the CDR plasma physics module." alt="" coords="5,81,155,123"/>
+<area shape="rect" id="node1" title="Lightweight tagging class which flags cells for refinement/coarsening using the electric field only." alt="" coords="90,228,265,269"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract Class which implements CellTagger for the CDR plasma physics module." alt="" coords="5,95,155,136"/>
 <area shape="rect" id="node3" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="35,5,125,32"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="179,89,375,115"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="179,102,375,129"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="208,5,347,32"/>
 </map>

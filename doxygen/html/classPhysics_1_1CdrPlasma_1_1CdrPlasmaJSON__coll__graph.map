@@ -1,5 +1,6 @@
 <map id="Physics::CdrPlasma::CdrPlasmaJSON" name="Physics::CdrPlasma::CdrPlasmaJSON">
-<area shape="rect" id="node1" title="Class which implements CdrPlasmaPhysics and parses plasma chemistry from a JSON input file." alt="" coords="89,124,239,165"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html" title="Abstract base class for specifying plasma kinetics. This is the base class used by CdrPlasmaStepper w..." alt="" coords="5,5,155,47"/>
-<area shape="rect" id="node3" href="$classLookupTable.html" title=" " alt="" coords="179,13,319,39"/>
+<area shape="rect" id="node1" title="Class which implements CdrPlasmaPhysics and parses plasma chemistry from a JSON input file." alt="" coords="27,213,176,255"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html" title="Abstract base class for specifying plasma kinetics. This is the base class used by CdrPlasmaStepper w..." alt="" coords="5,95,155,136"/>
+<area shape="rect" id="node3" href="$classLookupTable.html" title=" " alt="" coords="179,102,319,129"/>
+<area shape="rect" id="node4" href="$classLookupTable.html" title="Class for looking up and interpolation (x,y) data." alt="" coords="178,5,321,32"/>
 </map>

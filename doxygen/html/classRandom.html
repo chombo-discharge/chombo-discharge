@@ -131,6 +131,15 @@ static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRandom.html#a8482e1a1b7e3680f334d6e6bc153834b">seed</a> ()</td></tr>
 <tr class="memdesc:a8482e1a1b7e3680f334d6e6bc153834b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seed the RNG. <br /></td></tr>
 <tr class="separator:a8482e1a1b7e3680f334d6e6bc153834b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea9b0d1f1dc1f1a20934d44048b902bb"><td class="memItemLeft" align="right" valign="top">static RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRandom.html#aea9b0d1f1dc1f1a20934d44048b902bb">randomPosition</a> (const RealVect a_lo, const RealVect a_hi) noexcept</td></tr>
+<tr class="memdesc:aea9b0d1f1dc1f1a20934d44048b902bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a random position in the cube (a_lo, a_hi);.  <a href="classRandom.html#aea9b0d1f1dc1f1a20934d44048b902bb">More...</a><br /></td></tr>
+<tr class="separator:aea9b0d1f1dc1f1a20934d44048b902bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fe1f72f179a56f4fde2bd62fc5b5f87"><td class="memItemLeft" align="right" valign="top">static RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRandom.html#a5fe1f72f179a56f4fde2bd62fc5b5f87">randomPosition</a> (const RealVect a_cellPos, const RealVect a_lo, const RealVect a_hi, const RealVect a_bndryCentroid, const RealVect a_normal, const Real a_dx, const Real a_kappa) noexcept</td></tr>
+<tr class="memdesc:a5fe1f72f179a56f4fde2bd62fc5b5f87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a random position physical somewhere in a grid cell.  <a href="classRandom.html#a5fe1f72f179a56f4fde2bd62fc5b5f87">More...</a><br /></td></tr>
+<tr class="separator:a5fe1f72f179a56f4fde2bd62fc5b5f87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12b2a435327db0860af01b206436dc62"><td class="memItemLeft" align="right" valign="top">static RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRandom.html#a12b2a435327db0860af01b206436dc62">randomPosition</a> (const RealVect a_lo, const RealVect a_hi, const RealVect a_bndryCentroid, const RealVect a_normal) noexcept</td></tr>
+<tr class="memdesc:a12b2a435327db0860af01b206436dc62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a random position somewhere in a cut-cell.  <a href="classRandom.html#a12b2a435327db0860af01b206436dc62">More...</a><br /></td></tr>
+<tr class="separator:a12b2a435327db0860af01b206436dc62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for encapsulating random number generation. </p>
@@ -334,6 +343,191 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a5fe1f72f179a56f4fde2bd62fc5b5f87"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fe1f72f179a56f4fde2bd62fc5b5f87">&#9670;&nbsp;</a></span>randomPosition() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RealVect Random::randomPosition </td>
+          <td>(</td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_cellPos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_lo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_hi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_bndryCentroid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_normal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_kappa</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw a random position physical somewhere in a grid cell. </p>
+<p>This is the version that respects cut-cells &ndash; it will draw a position (through rejection sampling) such that the particle ends up on the correct side of the EB. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellPos</td><td>Cell-center position. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lower-left corner of volume that encloses the cut-cell. This is relative to the unit cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Upper-right corner of volume that encloses the cut-cell. This is relative to the unit cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>EB centroid position </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_normal</td><td>EB normal (points into the fluid region) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_kappa</td><td>Cell volume </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aea9b0d1f1dc1f1a20934d44048b902bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea9b0d1f1dc1f1a20934d44048b902bb">&#9670;&nbsp;</a></span>randomPosition() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RealVect Random::randomPosition </td>
+          <td>(</td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_lo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_hi</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return a random position in the cube (a_lo, a_hi);. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lower-left corner </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Upper-right corner </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a12b2a435327db0860af01b206436dc62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12b2a435327db0860af01b206436dc62">&#9670;&nbsp;</a></span>randomPosition() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RealVect Random::randomPosition </td>
+          <td>(</td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_lo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_hi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_bndryCentroid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RealVect&#160;</td>
+          <td class="paramname"><em>a_normal</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draw a random position somewhere in a cut-cell. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lower-left corner of volume that encloses the cut-cell. This is relative to the unit cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Upper-right corner of volume that encloses the cut-cell. This is relative to the unit cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>EB centroid position </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_normal</td><td>EB normal (points into the fluid region) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a position inside the cut-cell and on the correct side of the EB. </dd></dl>
 
 </div>
 </div>

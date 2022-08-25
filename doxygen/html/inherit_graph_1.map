@@ -21,7 +21,7 @@
 <area shape="rect" id="node22" href="$classRoundedCylinderIF.html" title="Cylinder object with rounded edges (no endcaps)" alt="" coords="145,917,290,944"/>
 <area shape="rect" id="node23" href="$classSignedDistanceBVH.html" title="Signed distance function for a DCEL mesh." alt="" coords="136,969,299,1010"/>
 <area shape="rect" id="node24" href="$classSignedDistanceDCEL.html" title="Signed distance function from a DCEL mesh." alt="" coords="120,1035,315,1061"/>
-<area shape="rect" id="node25" href="$classSphereArray.html" title=" " alt="" coords="166,1085,269,1112"/>
+<area shape="rect" id="node25" href="$classSphereArray.html" title="A Cartesian array of spheres." alt="" coords="166,1085,269,1112"/>
 <area shape="rect" id="node26" href="$classSphereSdf.html" title="Signed distance function for sphere." alt="" coords="173,1136,261,1163"/>
 <area shape="rect" id="node27" href="$classTorusSdf.html" title="Signed distance function for a torus (oriented along z)." alt="" coords="179,1187,256,1213"/>
 <area shape="rect" id="node28" href="$classWedgeIF.html" title="Implicit function for a wedge." alt="" coords="178,1237,257,1264"/>

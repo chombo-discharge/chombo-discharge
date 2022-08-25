@@ -130,10 +130,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad7fffb758e5b66b09bed3d194d99d94c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ad7fffb758e5b66b09bed3d194d99d94c">allocate</a> (Vector&lt; RefCountedPtr&lt; ParticleData&lt; T &gt;&gt;&gt; &amp;a_particles, const std::string a_realm) const</td></tr>
 <tr class="memdesc:ad7fffb758e5b66b09bed3d194d99d94c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template class for generic allocation of particle data.  <a href="classAmrMesh.html#ad7fffb758e5b66b09bed3d194d99d94c">More...</a><br /></td></tr>
 <tr class="separator:ad7fffb758e5b66b09bed3d194d99d94c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a565157bc7a4bc3fd9c81372667fe4363"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a565157bc7a4bc3fd9c81372667fe4363"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a565157bc7a4bc3fd9c81372667fe4363">allocate</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; T &gt; &amp;a_container, const int a_pvrBuffer, const std::string a_realm) const</td></tr>
-<tr class="memdesc:a565157bc7a4bc3fd9c81372667fe4363"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template class for generic allocation of particle containers.  <a href="classAmrMesh.html#a565157bc7a4bc3fd9c81372667fe4363">More...</a><br /></td></tr>
-<tr class="separator:a565157bc7a4bc3fd9c81372667fe4363"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14f77ca80a54f034ec88ad6451677757"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a14f77ca80a54f034ec88ad6451677757"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a14f77ca80a54f034ec88ad6451677757">allocate</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; T &gt; &amp;a_container, const std::string a_realm) const</td></tr>
+<tr class="memdesc:a14f77ca80a54f034ec88ad6451677757"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template class for generic allocation of particle containers.  <a href="classAmrMesh.html#a14f77ca80a54f034ec88ad6451677757">More...</a><br /></td></tr>
+<tr class="separator:a14f77ca80a54f034ec88ad6451677757"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4c266b32bccaf75389e17bb093f35e0"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:ac4c266b32bccaf75389e17bb093f35e0"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ac4c266b32bccaf75389e17bb093f35e0">allocatePointer</a> (Vector&lt; RefCountedPtr&lt; T &gt;&gt; &amp;a_data) const</td></tr>
 <tr class="memdesc:ac4c266b32bccaf75389e17bb093f35e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate pointer but not any memory blocks.  <a href="classAmrMesh.html#ac4c266b32bccaf75389e17bb093f35e0">More...</a><br /></td></tr>
@@ -1754,8 +1754,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a565157bc7a4bc3fd9c81372667fe4363"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a565157bc7a4bc3fd9c81372667fe4363">&#9670;&nbsp;</a></span>allocate() <span class="overload">[9/10]</span></h2>
+<a id="a14f77ca80a54f034ec88ad6451677757"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14f77ca80a54f034ec88ad6451677757">&#9670;&nbsp;</a></span>allocate() <span class="overload">[9/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1767,12 +1767,6 @@ template&lt;typename T &gt; </div>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; T &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_container</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_pvrBuffer</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1792,12 +1786,10 @@ template&lt;typename T &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_container</td><td>Particle container to be allocated </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_pvrBuffer</td><td>The particle valid region buffer. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> on which the particles will be allocated. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Particles that live within a_pvrBuffer on the fine side of the refinement boundary will be mapped to the coarse level. </dd></dl>
 
 </div>
 </div>

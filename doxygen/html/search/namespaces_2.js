@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['itomerge_3156',['ItoMerge',['../namespaceItoMerge.html',1,'']]]
+  ['lapackutils_3125',['LaPackUtils',['../namespaceLaPackUtils.html',1,'']]],
+  ['location_3126',['Location',['../namespaceLocation.html',1,'']]]
 ];

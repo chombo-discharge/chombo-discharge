@@ -153,9 +153,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a2173dd281f00cc869d7ed513ddf46eb4">remap</a> ()</td></tr>
 <tr class="memdesc:a2173dd281f00cc869d7ed513ddf46eb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remap particles. <br /></td></tr>
 <tr class="separator:a2173dd281f00cc869d7ed513ddf46eb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e7e1ea870046a837424b1d94be48a95"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a3e7e1ea870046a837424b1d94be48a95">deposit</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi) const</td></tr>
-<tr class="memdesc:a3e7e1ea870046a837424b1d94be48a95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit particle mass on mesh.  <a href="classTracerParticleSolver.html#a3e7e1ea870046a837424b1d94be48a95">More...</a><br /></td></tr>
-<tr class="separator:a3e7e1ea870046a837424b1d94be48a95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55f044d37d2553b89b0fec368507ff63"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a55f044d37d2553b89b0fec368507ff63">deposit</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi)</td></tr>
+<tr class="memdesc:a55f044d37d2553b89b0fec368507ff63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit particle weight on mesh.  <a href="classTracerParticleSolver.html#a55f044d37d2553b89b0fec368507ff63">More...</a><br /></td></tr>
+<tr class="separator:a55f044d37d2553b89b0fec368507ff63"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad904030292233fb75c3b519ea4ad1be2"><td class="memItemLeft" align="right" valign="top"><a id="ad904030292233fb75c3b519ea4ad1be2"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#ad904030292233fb75c3b519ea4ad1be2">interpolateVelocities</a> ()</td></tr>
 <tr class="memdesc:ad904030292233fb75c3b519ea4ad1be2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate particles velocities. <br /></td></tr>
@@ -207,10 +207,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a8e2f428b9bfa8057d08fed245d18c2d5">parseVerbosity</a> ()</td></tr>
 <tr class="memdesc:a8e2f428b9bfa8057d08fed245d18c2d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse solver verbosity. <br /></td></tr>
 <tr class="separator:a8e2f428b9bfa8057d08fed245d18c2d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada3613f8dae1e269985826d29b0eebdc"><td class="memTemplParams" colspan="2">template&lt;typename T , const Real &amp;(T::*)() const particleScalarFunction&gt; </td></tr>
-<tr class="memitem:ada3613f8dae1e269985826d29b0eebdc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#ada3613f8dae1e269985826d29b0eebdc">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; T &gt; a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_baseDeposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const</td></tr>
-<tr class="memdesc:ada3613f8dae1e269985826d29b0eebdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic particle deposition method for putting a scalar field onto the mesh.  <a href="classTracerParticleSolver.html#ada3613f8dae1e269985826d29b0eebdc">More...</a><br /></td></tr>
-<tr class="separator:ada3613f8dae1e269985826d29b0eebdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9a50d7c5b6a39cb6f7a8708516c3a68"><td class="memTemplParams" colspan="2">template&lt;typename T , const Real &amp;(T::*)() const particleScalarFunction&gt; </td></tr>
+<tr class="memitem:af9a50d7c5b6a39cb6f7a8708516c3a68"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#af9a50d7c5b6a39cb6f7a8708516c3a68">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; T &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_baseDeposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition)</td></tr>
+<tr class="memdesc:af9a50d7c5b6a39cb6f7a8708516c3a68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic particle deposition method for putting a scalar field onto the mesh.  <a href="classTracerParticleSolver.html#af9a50d7c5b6a39cb6f7a8708516c3a68">More...</a><br /></td></tr>
+<tr class="separator:af9a50d7c5b6a39cb6f7a8708516c3a68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -262,18 +262,13 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a975546802af0dd0bdfe0837060bdf0d1">m_verbosity</a></td></tr>
 <tr class="memdesc:a975546802af0dd0bdfe0837060bdf0d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verbosity level. <br /></td></tr>
 <tr class="separator:a975546802af0dd0bdfe0837060bdf0d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a999700331393283872cf08a6660f748c"><td class="memItemLeft" align="right" valign="top"><a id="a999700331393283872cf08a6660f748c"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a999700331393283872cf08a6660f748c">m_pvrBuffer</a></td></tr>
-<tr class="memdesc:a999700331393283872cf08a6660f748c"><td class="mdescLeft">&#160;</td><td class="mdescRight">PVR buffer for particle deposition. <br /></td></tr>
-<tr class="separator:a999700331393283872cf08a6660f748c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0597f025f8bafa969e762932720fe221"><td class="memItemLeft" align="right" valign="top"><a id="a0597f025f8bafa969e762932720fe221"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a0597f025f8bafa969e762932720fe221">m_haloBuffer</a></td></tr>
-<tr class="memdesc:a0597f025f8bafa969e762932720fe221"><td class="mdescLeft">&#160;</td><td class="mdescRight">Halo buffer for particle deposition. <br /></td></tr>
+<tr class="memitem:a0597f025f8bafa969e762932720fe221"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a0597f025f8bafa969e762932720fe221">m_haloBuffer</a></td></tr>
+<tr class="memdesc:a0597f025f8bafa969e762932720fe221"><td class="mdescLeft">&#160;</td><td class="mdescRight">Halo buffer for particle deposition.  <a href="classTracerParticleSolver.html#a0597f025f8bafa969e762932720fe221">More...</a><br /></td></tr>
 <tr class="separator:a0597f025f8bafa969e762932720fe221"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae5b835d7646b2779d62f5f8bc0bd51cd"><td class="memItemLeft" align="right" valign="top"><a id="ae5b835d7646b2779d62f5f8bc0bd51cd"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#ae5b835d7646b2779d62f5f8bc0bd51cd">m_plotMass</a></td></tr>
-<tr class="memdesc:ae5b835d7646b2779d62f5f8bc0bd51cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook for adding mass to plot file. <br /></td></tr>
-<tr class="separator:ae5b835d7646b2779d62f5f8bc0bd51cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89a462b1d24459378651daecbd21aa5d"><td class="memItemLeft" align="right" valign="top"><a id="a89a462b1d24459378651daecbd21aa5d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a89a462b1d24459378651daecbd21aa5d">m_plotWeight</a></td></tr>
+<tr class="memdesc:a89a462b1d24459378651daecbd21aa5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook for adding weight to plot file. <br /></td></tr>
+<tr class="separator:a89a462b1d24459378651daecbd21aa5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6115c1cd741887148be3653f614c3b2"><td class="memItemLeft" align="right" valign="top"><a id="ad6115c1cd741887148be3653f614c3b2"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#ad6115c1cd741887148be3653f614c3b2">m_plotVelocity</a></td></tr>
 <tr class="memdesc:ad6115c1cd741887148be3653f614c3b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook for adding velocity field to plot file. <br /></td></tr>
@@ -298,7 +293,7 @@ class TracerParticleSolver&lt; P &gt;</h3>
 <p>Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity field. </p>
 <p>The user can set the velocity field through public member functions. This class is templated so the user can switch tracer particle implementations.</p>
 <p>This is a single-phase solver &ndash; i.e. the particles only live on one of the phases. Extensions to multiphase is certainly possible.</p>
-<p>The template requirements on the particle type P are: 1) It must contain a function RealVect&amp; <a class="el" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710" title="Compute the position (ignoring the &quot;origin) of a Vof.">position()</a> (derived from BinItem) 2) It must contain a function const Real&amp; mass() const. 3) It must contain a function RealVect&amp; velocity(). </p>
+<p>The template requirements on the particle type P are: 1) It must contain a function RealVect&amp; <a class="el" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710" title="Compute the position (ignoring the &quot;origin) of a Vof.">position()</a> (derived from BinItem) 2) It must contain a function const Real&amp; weight() const. 3) It must contain a function RealVect&amp; velocity(). </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ac8ca6ba7aa8cc5ce4e52f20007cabfba"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac8ca6ba7aa8cc5ce4e52f20007cabfba">&#9670;&nbsp;</a></span>TracerParticleSolver() <span class="overload">[1/3]</span></h2>
@@ -460,8 +455,8 @@ template&lt;typename P &gt; </div>
 
 </div>
 </div>
-<a id="a3e7e1ea870046a837424b1d94be48a95"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3e7e1ea870046a837424b1d94be48a95">&#9670;&nbsp;</a></span>deposit()</h2>
+<a id="a55f044d37d2553b89b0fec368507ff63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55f044d37d2553b89b0fec368507ff63">&#9670;&nbsp;</a></span>deposit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -476,7 +471,7 @@ template&lt;typename P &gt; </div>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em></td><td>)</td>
-          <td> const</td>
+          <td></td>
         </tr>
       </table>
   </td>
@@ -486,18 +481,18 @@ template&lt;typename P &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Deposit particle mass on mesh. </p>
+<p>Deposit particle weight on mesh. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Deposited mass. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Deposited weight. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ada3613f8dae1e269985826d29b0eebdc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ada3613f8dae1e269985826d29b0eebdc">&#9670;&nbsp;</a></span>depositParticles()</h2>
+<a id="af9a50d7c5b6a39cb6f7a8708516c3a68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9a50d7c5b6a39cb6f7a8708516c3a68">&#9670;&nbsp;</a></span>depositParticles()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -518,7 +513,7 @@ template&lt;typename T , const Real &amp;(T::*)() const particleScalarFunction&g
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; T &gt;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; T &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
@@ -536,7 +531,7 @@ template&lt;typename T , const Real &amp;(T::*)() const particleScalarFunction&g
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -1181,6 +1176,34 @@ template&lt;typename P &gt; </div>
 
 <p>Write plot file. </p>
 <p>The name of the plot file is m_name.stepXXXXX.DIM.hdf5 </p><dl class="section note"><dt>Note</dt><dd>This calls writePlotData(...) </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a0597f025f8bafa969e762932720fe221"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0597f025f8bafa969e762932720fe221">&#9670;&nbsp;</a></span>m_haloBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="classTracerParticleSolver.html">TracerParticleSolver</a>&lt; P &gt;::m_haloBuffer</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Halo buffer for particle deposition. </p>
+<p>Used when fetching particles around the refinement boundary. </p>
 
 </div>
 </div>

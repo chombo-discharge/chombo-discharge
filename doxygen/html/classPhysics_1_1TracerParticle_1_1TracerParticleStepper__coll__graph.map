@@ -1,5 +1,6 @@
 <map id="Physics::TracerParticle::TracerParticleStepper&lt; P &gt;" name="Physics::TracerParticle::TracerParticleStepper&lt; P &gt;">
-<area shape="rect" id="node1" title="Implementation of TimeStepper for advancing tracer particles in a fixed velocity field." alt="" coords="42,95,247,136"/>
-<area shape="rect" id="node2" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,5,111,32"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="135,5,331,32"/>
+<area shape="rect" id="node1" title="Implementation of TimeStepper for advancing tracer particles in a fixed velocity field." alt="" coords="10,184,215,225"/>
+<area shape="rect" id="node2" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,95,111,121"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="135,95,331,121"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="163,5,302,32"/>
 </map>

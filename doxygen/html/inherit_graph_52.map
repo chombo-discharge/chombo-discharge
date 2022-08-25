@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classItoFactory.html" title="Factory class for making ItoLayout." alt="" coords="5,5,145,32"/>
+<area shape="rect" id="node1" href="$classGenericParticle.html" title=" " alt="" coords="5,5,180,32"/>
+<area shape="rect" id="node2" href="$classItoParticle.html" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="228,5,315,32"/>
 </map>

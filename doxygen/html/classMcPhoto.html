@@ -98,12 +98,14 @@ Collaboration diagram for McPhoto:</div>
 <div class="dyncontent">
 <div class="center"><img src="classMcPhoto__coll__graph.png" border="0" usemap="#McPhoto_coll__map" alt="Collaboration graph"/></div>
 <map name="McPhoto_coll__map" id="McPhoto_coll__map">
-<area shape="rect" title="Radiative tranfer equation solver using Monte&#45;Carlo simulation." alt="" coords="647,158,725,185"/>
-<area shape="rect" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="367,115,444,142"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="13,5,197,47"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="7,178,203,205"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="5,82,204,109"/>
-<area shape="rect" href="classParticleContainer.html" title=" " alt="" coords="333,287,477,328"/>
+<area shape="rect" title="Radiative tranfer equation solver using Monte&#45;Carlo simulation." alt="" coords="996,119,1075,145"/>
+<area shape="rect" href="classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="716,92,793,119"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="362,18,546,59"/>
+<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,113,144,140"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="356,113,552,140"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="355,171,553,197"/>
+<area shape="rect" href="classParticleContainer.html" title=" " alt="" coords="683,230,827,271"/>
+<area shape="rect" href="classParticleContainer.html" title="Templated class for holding particles on an AMR hierarchy with particle remapping." alt="" coords="369,237,539,264"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -173,9 +175,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ab43303c3391364188cf423c8b9e1d4ae"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab43303c3391364188cf423c8b9e1d4ae">depositPhotons</a> ()</td></tr>
 <tr class="memdesc:ab43303c3391364188cf423c8b9e1d4ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit photons on the mesh.  <a href="classMcPhoto.html#ab43303c3391364188cf423c8b9e1d4ae">More...</a><br /></td></tr>
 <tr class="separator:ab43303c3391364188cf423c8b9e1d4ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a273b78f5f41c342b4029b5ad3df47f1f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a273b78f5f41c342b4029b5ad3df47f1f">depositPhotons</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> &amp;a_deposition)</td></tr>
-<tr class="memdesc:a273b78f5f41c342b4029b5ad3df47f1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit photons.  <a href="classMcPhoto.html#a273b78f5f41c342b4029b5ad3df47f1f">More...</a><br /></td></tr>
-<tr class="separator:a273b78f5f41c342b4029b5ad3df47f1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a083a58856a29011750bb7051b313ba66"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a083a58856a29011750bb7051b313ba66">depositPhotons</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> &amp;a_deposition)</td></tr>
+<tr class="memdesc:a083a58856a29011750bb7051b313ba66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit photons.  <a href="classMcPhoto.html#a083a58856a29011750bb7051b313ba66">More...</a><br /></td></tr>
+<tr class="separator:a083a58856a29011750bb7051b313ba66"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada8ed4f1b1f0f9e242d4caa01f45655d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ada8ed4f1b1f0f9e242d4caa01f45655d">sortPhotonsByCell</a> (const <a class="el" href="classMcPhoto.html#a3e74abc2e95a4dd5ff480a4cad3288f6">WhichContainer</a> &amp;a_which)</td></tr>
 <tr class="memdesc:ada8ed4f1b1f0f9e242d4caa01f45655d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sort container by cell.  <a href="classMcPhoto.html#ada8ed4f1b1f0f9e242d4caa01f45655d">More...</a><br /></td></tr>
 <tr class="separator:ada8ed4f1b1f0f9e242d4caa01f45655d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -242,18 +244,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a8b982cfadf26e4b63c241540e5b5a935"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a8b982cfadf26e4b63c241540e5b5a935">getPlotVariableNames</a> () const override</td></tr>
 <tr class="memdesc:a8b982cfadf26e4b63c241540e5b5a935"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write checkpoint data into handle.  <a href="classMcPhoto.html#a8b982cfadf26e4b63c241540e5b5a935">More...</a><br /></td></tr>
 <tr class="separator:a8b982cfadf26e4b63c241540e5b5a935"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a21222f2dd01613c06f8c897aa560dc"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a9a21222f2dd01613c06f8c897aa560dc">getPVRBuffer</a> () const</td></tr>
-<tr class="memdesc:a9a21222f2dd01613c06f8c897aa560dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get PVR buffer.  <a href="classMcPhoto.html#a9a21222f2dd01613c06f8c897aa560dc">More...</a><br /></td></tr>
-<tr class="separator:a9a21222f2dd01613c06f8c897aa560dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a3a12f1ffd39f1cf82404a8d808e3a2"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a4a3a12f1ffd39f1cf82404a8d808e3a2">getHaloBuffer</a> () const</td></tr>
-<tr class="memdesc:a4a3a12f1ffd39f1cf82404a8d808e3a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the halo buffer.  <a href="classMcPhoto.html#a4a3a12f1ffd39f1cf82404a8d808e3a2">More...</a><br /></td></tr>
-<tr class="separator:a4a3a12f1ffd39f1cf82404a8d808e3a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3d96791c2e9c9ec1e33e52feb882dca6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a3d96791c2e9c9ec1e33e52feb882dca6">setPVRBuffer</a> (const int a_buffer)</td></tr>
-<tr class="memdesc:a3d96791c2e9c9ec1e33e52feb882dca6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the PVR buffer.  <a href="classMcPhoto.html#a3d96791c2e9c9ec1e33e52feb882dca6">More...</a><br /></td></tr>
-<tr class="separator:a3d96791c2e9c9ec1e33e52feb882dca6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7164f5c0bc248b1886e8e431ef8fd669"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a7164f5c0bc248b1886e8e431ef8fd669">setHaloBuffer</a> (const int a_buffer)</td></tr>
-<tr class="memdesc:a7164f5c0bc248b1886e8e431ef8fd669"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the halo buffer.  <a href="classMcPhoto.html#a7164f5c0bc248b1886e8e431ef8fd669">More...</a><br /></td></tr>
-<tr class="separator:a7164f5c0bc248b1886e8e431ef8fd669"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af04b800b80296202d8ec2b9131ea6a20"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#af04b800b80296202d8ec2b9131ea6a20">getNumberOfPlotVariables</a> () const</td></tr>
 <tr class="memdesc:af04b800b80296202d8ec2b9131ea6a20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of output variables.  <a href="classMcPhoto.html#af04b800b80296202d8ec2b9131ea6a20">More...</a><br /></td></tr>
 <tr class="separator:af04b800b80296202d8ec2b9131ea6a20"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -402,9 +392,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:af3dc0ad693b7f2b442d25a53616ffe68"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#af3dc0ad693b7f2b442d25a53616ffe68">randomExponential</a> (const Real a_mean)</td></tr>
 <tr class="memdesc:af3dc0ad693b7f2b442d25a53616ffe68"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation.">Random</a> exponential trial.  <a href="classMcPhoto.html#af3dc0ad693b7f2b442d25a53616ffe68">More...</a><br /></td></tr>
 <tr class="separator:af3dc0ad693b7f2b442d25a53616ffe68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59df6d2efeb93b6920fc34f77df9e53b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a59df6d2efeb93b6920fc34f77df9e53b">depositKappaConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition)</td></tr>
-<tr class="memdesc:a59df6d2efeb93b6920fc34f77df9e53b"><td class="mdescLeft">&#160;</td><td class="mdescRight">This computes the "conservative" deposition, multiplied by kappa.  <a href="classMcPhoto.html#a59df6d2efeb93b6920fc34f77df9e53b">More...</a><br /></td></tr>
-<tr class="separator:a59df6d2efeb93b6920fc34f77df9e53b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b11419ab84372dff96030488597c9be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a3b11419ab84372dff96030488597c9be">depositKappaConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition)</td></tr>
+<tr class="memdesc:a3b11419ab84372dff96030488597c9be"><td class="mdescLeft">&#160;</td><td class="mdescRight">This computes the "conservative" deposition, multiplied by kappa.  <a href="classMcPhoto.html#a3b11419ab84372dff96030488597c9be">More...</a><br /></td></tr>
+<tr class="separator:a3b11419ab84372dff96030488597c9be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a627125a2fb3c05f36a0f7d04120390ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a627125a2fb3c05f36a0f7d04120390ed">depositNonConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_depositionNC, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_depositionKappaC)</td></tr>
 <tr class="memdesc:a627125a2fb3c05f36a0f7d04120390ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make the "non-conservative" kappa deposition.  <a href="classMcPhoto.html#a627125a2fb3c05f36a0f7d04120390ed">More...</a><br /></td></tr>
 <tr class="separator:a627125a2fb3c05f36a0f7d04120390ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -455,10 +445,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ab64c1686b4cfa916bbdfc9e1fc5cf10b">parseDeposition</a> ()</td></tr>
 <tr class="memdesc:ab64c1686b4cfa916bbdfc9e1fc5cf10b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse deposition method. <br /></td></tr>
 <tr class="separator:ab64c1686b4cfa916bbdfc9e1fc5cf10b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c71f9983b2c28fd0337862db4baf953"><td class="memItemLeft" align="right" valign="top"><a id="a1c71f9983b2c28fd0337862db4baf953"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a1c71f9983b2c28fd0337862db4baf953">parseBuffer</a> ()</td></tr>
-<tr class="memdesc:a1c71f9983b2c28fd0337862db4baf953"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse PVR buffer. <br /></td></tr>
-<tr class="separator:a1c71f9983b2c28fd0337862db4baf953"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0e8145b5850c2739886793bb6ec36a2"><td class="memItemLeft" align="right" valign="top"><a id="ad0e8145b5850c2739886793bb6ec36a2"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ad0e8145b5850c2739886793bb6ec36a2">parsePlotVariables</a> ()</td></tr>
 <tr class="memdesc:ad0e8145b5850c2739886793bb6ec36a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot variables. <br /></td></tr>
@@ -515,10 +501,6 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ad5cbdbb16e6ee4444c4ebccb96c12286">m_seed</a></td></tr>
 <tr class="memdesc:ad5cbdbb16e6ee4444c4ebccb96c12286"><td class="mdescLeft">&#160;</td><td class="mdescRight">RNG seed. <br /></td></tr>
 <tr class="separator:ad5cbdbb16e6ee4444c4ebccb96c12286"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83d435eda465c71d5f3490e7e71a3d4f"><td class="memItemLeft" align="right" valign="top"><a id="a83d435eda465c71d5f3490e7e71a3d4f"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a83d435eda465c71d5f3490e7e71a3d4f">m_pvrBuffer</a></td></tr>
-<tr class="memdesc:a83d435eda465c71d5f3490e7e71a3d4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">PVR buffer. <br /></td></tr>
-<tr class="separator:a83d435eda465c71d5f3490e7e71a3d4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afefccac8acd5639eb122b83957fc8437"><td class="memItemLeft" align="right" valign="top"><a id="afefccac8acd5639eb122b83957fc8437"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#afefccac8acd5639eb122b83957fc8437">m_haloBuffer</a></td></tr>
 <tr class="memdesc:afefccac8acd5639eb122b83957fc8437"><td class="mdescLeft">&#160;</td><td class="mdescRight">Halo size for particles. <br /></td></tr>
@@ -529,7 +511,7 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="separator:a78c0d9b07c6c51aedc2814ff496d2503"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac7892c714fd5c277552ff7d98c2f3d58"><td class="memItemLeft" align="right" valign="top"><a id="ac7892c714fd5c277552ff7d98c2f3d58"></a>
 <a class="el" href="classMcPhoto.html#aae3fa6a4a0215c0da8e81c496e1deeb8">PhotonGeneration</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#ac7892c714fd5c277552ff7d98c2f3d58">m_photoGenerationMethod</a></td></tr>
-<tr class="memdesc:ac7892c714fd5c277552ff7d98c2f3d58"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer. @deatils This inherits from Chombo&#39;s Bi...">Photon</a> generation type. <br /></td></tr>
+<tr class="memdesc:ac7892c714fd5c277552ff7d98c2f3d58"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer.">Photon</a> generation type. <br /></td></tr>
 <tr class="separator:ac7892c714fd5c277552ff7d98c2f3d58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cd95a7a887f25440c6325332dcd96cb"><td class="memItemLeft" align="right" valign="top"><a id="a1cd95a7a887f25440c6325332dcd96cb"></a>
 <a class="el" href="classMcPhoto.html#aafc14c0be90113c59f60e677bb268150">SourceType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a1cd95a7a887f25440c6325332dcd96cb">m_sourceType</a></td></tr>
@@ -542,6 +524,10 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#a612355eb088e1faf64dd93c487dcab12">m_deposition</a></td></tr>
 <tr class="memdesc:a612355eb088e1faf64dd93c487dcab12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposition type. <br /></td></tr>
 <tr class="separator:a612355eb088e1faf64dd93c487dcab12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab0a91bc1e8343dd91ff07daa52b44ce"><td class="memItemLeft" align="right" valign="top"><a id="aab0a91bc1e8343dd91ff07daa52b44ce"></a>
+<a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aab0a91bc1e8343dd91ff07daa52b44ce">m_coarseFineDeposition</a></td></tr>
+<tr class="memdesc:aab0a91bc1e8343dd91ff07daa52b44ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse-fine deposition strategy. <br /></td></tr>
+<tr class="separator:aab0a91bc1e8343dd91ff07daa52b44ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb94dbecaa58bcf48a62a816c8d104d6"><td class="memItemLeft" align="right" valign="top"><a id="aeb94dbecaa58bcf48a62a816c8d104d6"></a>
 <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMcPhoto.html#aeb94dbecaa58bcf48a62a816c8d104d6">m_plotDeposition</a></td></tr>
 <tr class="memdesc:aeb94dbecaa58bcf48a62a816c8d104d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plot deposition type. <br /></td></tr>
@@ -753,7 +739,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dt</td><td>Time step </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td><a class="el" href="classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer. @deatils This inherits from Chombo&#39;s Bi...">Photon</a> density on the mesh </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td><a class="el" href="classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer.">Photon</a> density on the mesh </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_source</td><td>Source term, i.e. number of photons produced per unit time. The photons will be generated based on what the user specifies in the input parameters for this class. I.e., whether or not a_source will generate stochastic or deterministic photons, and scaled based on what a_source actually contains (number of photons, number/volume, number/second, number/(volume*second)). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_zeroPhi</td><td>Dead parameter not used in this implementation. </td></tr>
   </table>
@@ -1375,8 +1361,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a59df6d2efeb93b6920fc34f77df9e53b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a59df6d2efeb93b6920fc34f77df9e53b">&#9670;&nbsp;</a></span>depositKappaConservative()</h2>
+<a id="a3b11419ab84372dff96030488597c9be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b11419ab84372dff96030488597c9be">&#9670;&nbsp;</a></span>depositKappaConservative()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1393,14 +1379,20 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
-          <td class="paramname"><em>a_deposition</em>&#160;</td>
+          <td class="paramname"><em>a_deposition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_coarseFineDeposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1421,6 +1413,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Mesh density. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles to be deposited </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine deposition strategy. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1500,8 +1493,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a273b78f5f41c342b4029b5ad3df47f1f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a273b78f5f41c342b4029b5ad3df47f1f">&#9670;&nbsp;</a></span>depositPhotons() <span class="overload">[2/2]</span></h2>
+<a id="a083a58856a29011750bb7051b313ba66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a083a58856a29011750bb7051b313ba66">&#9670;&nbsp;</a></span>depositPhotons() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1518,7 +1511,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classPhoton.html">Photon</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
@@ -1544,7 +1537,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Deposited mesh density </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_photons</td><td>Computational photons to be deposited </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_photons</td><td>Computational photons to be deposited </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
   </table>
   </dd>
@@ -1699,9 +1692,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </table>
   </dd>
 </dl>
-<p>This will generate photons and put them in a_particles </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd><p class="startdd">This routine could be implemented using the PVR valid mask rather than remapping, which will be more efficient. </p>
-<p class="enddd">Implementation could use a lambda to avoid the double definition. </p>
-</dd></dl>
+<p>This will generate photons and put them in a_particles </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Implementation could use a lambda to avoid the double definition. </dd></dl>
 
 </div>
 </div>
@@ -1786,34 +1777,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 <p>Get eb Photons, i.e. photons absorbed on the EB. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_ebPhotons </dd></dl>
-
-</div>
-</div>
-<a id="a4a3a12f1ffd39f1cf82404a8d808e3a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4a3a12f1ffd39f1cf82404a8d808e3a2">&#9670;&nbsp;</a></span>getHaloBuffer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int McPhoto::getHaloBuffer </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the halo buffer. </p>
-<p>Returns m_haloBuffer </p>
 
 </div>
 </div>
@@ -1916,34 +1879,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <p>Get output plot names </p><dl class="section return"><dt>Returns</dt><dd>Returns a list of plot variable names. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classRtSolver.html#a804f78527ec2e9d5a1079e5d84b7a19b">RtSolver</a>.</p>
-
-</div>
-</div>
-<a id="a9a21222f2dd01613c06f8c897aa560dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9a21222f2dd01613c06f8c897aa560dc">&#9670;&nbsp;</a></span>getPVRBuffer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int McPhoto::getPVRBuffer </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get PVR buffer. </p>
-<p>Returns m_pvrBuffer. </p>
 
 </div>
 </div>
@@ -2206,74 +2141,6 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_photons</td><td>Computational particles to be remapped. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a7164f5c0bc248b1886e8e431ef8fd669"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7164f5c0bc248b1886e8e431ef8fd669">&#9670;&nbsp;</a></span>setHaloBuffer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void McPhoto::setHaloBuffer </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_buffer</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the halo buffer. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Width of the halo buffer region </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a3d96791c2e9c9ec1e33e52feb882dca6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3d96791c2e9c9ec1e33e52feb882dca6">&#9670;&nbsp;</a></span>setPVRBuffer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void McPhoto::setPVRBuffer </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_buffer</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the PVR buffer. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Width of the PVR buffer region </td></tr>
   </table>
   </dd>
 </dl>

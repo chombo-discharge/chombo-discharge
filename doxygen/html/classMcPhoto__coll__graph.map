@@ -1,8 +1,10 @@
 <map id="McPhoto" name="McPhoto">
-<area shape="rect" id="node1" title="Radiative tranfer equation solver using Monte&#45;Carlo simulation." alt="" coords="647,158,725,185"/>
-<area shape="rect" id="node2" href="$classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="367,115,444,142"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="13,5,197,47"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="7,178,203,205"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="5,82,204,109"/>
-<area shape="rect" id="node6" href="$classParticleContainer.html" title=" " alt="" coords="333,287,477,328"/>
+<area shape="rect" id="node1" title="Radiative tranfer equation solver using Monte&#45;Carlo simulation." alt="" coords="996,119,1075,145"/>
+<area shape="rect" id="node2" href="$classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="716,92,793,119"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="362,18,546,59"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,113,144,140"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="356,113,552,140"/>
+<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="355,171,553,197"/>
+<area shape="rect" id="node7" href="$classParticleContainer.html" title=" " alt="" coords="683,230,827,271"/>
+<area shape="rect" id="node8" href="$classParticleContainer.html" title="Templated class for holding particles on an AMR hierarchy with particle remapping." alt="" coords="369,237,539,264"/>
 </map>

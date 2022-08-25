@@ -96,55 +96,55 @@ $(function() {
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keyword">using</span> SDF    = EBGeometry::SignedDistanceFunction&lt;Real&gt;;</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">using</span> Sphere = EBGeometry::SphereSDF&lt;Real&gt;;</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
-<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="classSphereArray.html">   27</a></span>&#160;<span class="keyword">class </span><a class="code" href="classSphereArray.html">SphereArray</a> : <span class="keyword">public</span> BaseIF</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;{</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  <a class="code" href="classSphereArray.html#a6c3c26c2d34f41fdd46b14a8a9d43e54">SphereArray</a>() = <span class="keyword">delete</span>;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  <a class="code" href="classSphereArray.html#a6c3c26c2d34f41fdd46b14a8a9d43e54">SphereArray</a>(<span class="keyword">const</span> Real     a_radius,</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;              <span class="keyword">const</span> RealVect a_loCenter,</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;              <span class="keyword">const</span> RealVect a_sphereGap,</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;              <span class="keyword">const</span> IntVect  a_numSpheres,</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;              <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_useFast,</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;              <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_flipInside,</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;              <span class="keyword">const</span> Real     a_zCoord = 0.0);</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <a class="code" href="classSphereArray.html#a6c3c26c2d34f41fdd46b14a8a9d43e54">SphereArray</a>(<span class="keyword">const</span> <a class="code" href="classSphereArray.html">SphereArray</a>&amp; a_inputIF);</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classSphereArray.html#a6860e00601b87d0beb90f5952a9ef0a8">~SphereArray</a>();</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  <span class="keyword">virtual</span> Real</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <a class="code" href="classSphereArray.html#a3db323916eb2f4775fa2fd0968fe6353">value</a>(<span class="keyword">const</span> RealVect&amp; a_point) <span class="keyword">const override</span>;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  <span class="keyword">virtual</span> BaseIF*</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  <a class="code" href="classSphereArray.html#ac3d17d8ffbb83c61fde2a170cb2e10bf">newImplicitFunction</a>() <span class="keyword">const override</span>;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00080"></a><span class="lineno"><a class="line" href="classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16">   80</a></span>&#160;  <span class="keyword">static</span> constexpr <span class="keywordtype">size_t</span> <a class="code" href="classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16">K</a> = 4;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
-<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="classSphereArray.html#ab513cac143c4c719c829036c8b04eb8c">   85</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classSphereArray.html#ab513cac143c4c719c829036c8b04eb8c">m_useFast</a>;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
-<div class="line"><a name="l00090"></a><span class="lineno"><a class="line" href="classSphereArray.html#a075efe2b5f2d6c0523be461f2e05b813">   90</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classSphereArray.html#a075efe2b5f2d6c0523be461f2e05b813">m_flipInside</a>;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
-<div class="line"><a name="l00095"></a><span class="lineno"><a class="line" href="classSphereArray.html#ac610cf60e357b20a87f5870a01c5a1e2">   95</a></span>&#160;  std::shared_ptr&lt;EBGeometry::Union&lt;Real&gt;&gt; <a class="code" href="classSphereArray.html#ac610cf60e357b20a87f5870a01c5a1e2">m_slowUnion</a>;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160; </div>
-<div class="line"><a name="l00100"></a><span class="lineno"><a class="line" href="classSphereArray.html#ad8ee6da7581126e5f29ced0ad0b0c5d1">  100</a></span>&#160;  std::shared_ptr&lt;EBGeometry::UnionBVH&lt;Real, AABB, K&gt;&gt; <a class="code" href="classSphereArray.html#ad8ee6da7581126e5f29ced0ad0b0c5d1">m_fastUnion</a>;</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;};</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno"><a class="line" href="classSphereArray.html">   30</a></span>&#160;<span class="keyword">class </span><a class="code" href="classSphereArray.html">SphereArray</a> : <span class="keyword">public</span> BaseIF</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;{</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  <a class="code" href="classSphereArray.html#a6c3c26c2d34f41fdd46b14a8a9d43e54">SphereArray</a>() = <span class="keyword">delete</span>;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <a class="code" href="classSphereArray.html#a6c3c26c2d34f41fdd46b14a8a9d43e54">SphereArray</a>(<span class="keyword">const</span> Real     a_radius,</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;              <span class="keyword">const</span> RealVect a_loCenter,</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;              <span class="keyword">const</span> RealVect a_sphereGap,</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;              <span class="keyword">const</span> IntVect  a_numSpheres,</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;              <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_useFast,</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;              <span class="keyword">const</span> <span class="keywordtype">bool</span>     a_flipInside,</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;              <span class="keyword">const</span> Real     a_zCoord = 0.0);</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <a class="code" href="classSphereArray.html#a6c3c26c2d34f41fdd46b14a8a9d43e54">SphereArray</a>(<span class="keyword">const</span> <a class="code" href="classSphereArray.html">SphereArray</a>&amp; a_inputIF);</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <span class="keyword">virtual</span> <a class="code" href="classSphereArray.html#a6860e00601b87d0beb90f5952a9ef0a8">~SphereArray</a>();</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;  <span class="keyword">virtual</span> Real</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  <a class="code" href="classSphereArray.html#a3db323916eb2f4775fa2fd0968fe6353">value</a>(<span class="keyword">const</span> RealVect&amp; a_point) <span class="keyword">const override</span>;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  <span class="keyword">virtual</span> BaseIF*</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  <a class="code" href="classSphereArray.html#ac3d17d8ffbb83c61fde2a170cb2e10bf">newImplicitFunction</a>() <span class="keyword">const override</span>;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16">   83</a></span>&#160;  <span class="keyword">static</span> constexpr <span class="keywordtype">size_t</span> <a class="code" href="classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16">K</a> = 4;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00088"></a><span class="lineno"><a class="line" href="classSphereArray.html#ab513cac143c4c719c829036c8b04eb8c">   88</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classSphereArray.html#ab513cac143c4c719c829036c8b04eb8c">m_useFast</a>;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
+<div class="line"><a name="l00093"></a><span class="lineno"><a class="line" href="classSphereArray.html#a075efe2b5f2d6c0523be461f2e05b813">   93</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="classSphereArray.html#a075efe2b5f2d6c0523be461f2e05b813">m_flipInside</a>;</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
+<div class="line"><a name="l00098"></a><span class="lineno"><a class="line" href="classSphereArray.html#ac610cf60e357b20a87f5870a01c5a1e2">   98</a></span>&#160;  std::shared_ptr&lt;EBGeometry::Union&lt;Real&gt;&gt; <a class="code" href="classSphereArray.html#ac610cf60e357b20a87f5870a01c5a1e2">m_slowUnion</a>;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
+<div class="line"><a name="l00103"></a><span class="lineno"><a class="line" href="classSphereArray.html#ad8ee6da7581126e5f29ced0ad0b0c5d1">  103</a></span>&#160;  std::shared_ptr&lt;EBGeometry::UnionBVH&lt;Real, AABB, K&gt;&gt; <a class="code" href="classSphereArray.html#ad8ee6da7581126e5f29ced0ad0b0c5d1">m_fastUnion</a>;</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;};</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassSphereArray_html_a6c3c26c2d34f41fdd46b14a8a9d43e54"><div class="ttname"><a href="classSphereArray.html#a6c3c26c2d34f41fdd46b14a8a9d43e54">SphereArray::SphereArray</a></div><div class="ttdeci">SphereArray()=delete</div><div class="ttdoc">Disallowed (for now)</div></div>
 <div class="ttc" id="aclassSphereArray_html_a3db323916eb2f4775fa2fd0968fe6353"><div class="ttname"><a href="classSphereArray.html#a3db323916eb2f4775fa2fd0968fe6353">SphereArray::value</a></div><div class="ttdeci">virtual Real value(const RealVect &amp;a_point) const override</div><div class="ttdoc">Value function.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.cpp:100</div></div>
 <div class="ttc" id="aclassSphereArray_html_ac3d17d8ffbb83c61fde2a170cb2e10bf"><div class="ttname"><a href="classSphereArray.html#ac3d17d8ffbb83c61fde2a170cb2e10bf">SphereArray::newImplicitFunction</a></div><div class="ttdeci">virtual BaseIF * newImplicitFunction() const override</div><div class="ttdoc">Factory method – calls the copy constructor.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.cpp:127</div></div>
 <div class="ttc" id="aclassSphereArray_html_a6860e00601b87d0beb90f5952a9ef0a8"><div class="ttname"><a href="classSphereArray.html#a6860e00601b87d0beb90f5952a9ef0a8">SphereArray::~SphereArray</a></div><div class="ttdeci">virtual ~SphereArray()</div><div class="ttdoc">Destructor (does nothing)</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.cpp:97</div></div>
-<div class="ttc" id="aclassSphereArray_html"><div class="ttname"><a href="classSphereArray.html">SphereArray</a></div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:27</div></div>
-<div class="ttc" id="aclassSphereArray_html_a075efe2b5f2d6c0523be461f2e05b813"><div class="ttname"><a href="classSphereArray.html#a075efe2b5f2d6c0523be461f2e05b813">SphereArray::m_flipInside</a></div><div class="ttdeci">bool m_flipInside</div><div class="ttdoc">Make inside to outside.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:90</div></div>
-<div class="ttc" id="aclassSphereArray_html_ab513cac143c4c719c829036c8b04eb8c"><div class="ttname"><a href="classSphereArray.html#ab513cac143c4c719c829036c8b04eb8c">SphereArray::m_useFast</a></div><div class="ttdeci">bool m_useFast</div><div class="ttdoc">Switch for using fast or slow union.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:85</div></div>
-<div class="ttc" id="aclassSphereArray_html_ad8ee6da7581126e5f29ced0ad0b0c5d1"><div class="ttname"><a href="classSphereArray.html#ad8ee6da7581126e5f29ced0ad0b0c5d1">SphereArray::m_fastUnion</a></div><div class="ttdeci">std::shared_ptr&lt; EBGeometry::UnionBVH&lt; Real, AABB, K &gt; &gt; m_fastUnion</div><div class="ttdoc">Union that uses bounding volume hierarchy acceleration.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:100</div></div>
-<div class="ttc" id="aclassSphereArray_html_acf2a1be1aea8652c52a8bf1693f93e16"><div class="ttname"><a href="classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16">SphereArray::K</a></div><div class="ttdeci">static constexpr size_t K</div><div class="ttdoc">Tree degree for BVH accelerator.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:80</div></div>
-<div class="ttc" id="aclassSphereArray_html_ac610cf60e357b20a87f5870a01c5a1e2"><div class="ttname"><a href="classSphereArray.html#ac610cf60e357b20a87f5870a01c5a1e2">SphereArray::m_slowUnion</a></div><div class="ttdeci">std::shared_ptr&lt; EBGeometry::Union&lt; Real &gt; &gt; m_slowUnion</div><div class="ttdoc">Standard union ala Chombo.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:95</div></div>
+<div class="ttc" id="aclassSphereArray_html"><div class="ttname"><a href="classSphereArray.html">SphereArray</a></div><div class="ttdoc">A Cartesian array of spheres.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:30</div></div>
+<div class="ttc" id="aclassSphereArray_html_a075efe2b5f2d6c0523be461f2e05b813"><div class="ttname"><a href="classSphereArray.html#a075efe2b5f2d6c0523be461f2e05b813">SphereArray::m_flipInside</a></div><div class="ttdeci">bool m_flipInside</div><div class="ttdoc">Make inside to outside.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:93</div></div>
+<div class="ttc" id="aclassSphereArray_html_ab513cac143c4c719c829036c8b04eb8c"><div class="ttname"><a href="classSphereArray.html#ab513cac143c4c719c829036c8b04eb8c">SphereArray::m_useFast</a></div><div class="ttdeci">bool m_useFast</div><div class="ttdoc">Switch for using fast or slow union.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:88</div></div>
+<div class="ttc" id="aclassSphereArray_html_ad8ee6da7581126e5f29ced0ad0b0c5d1"><div class="ttname"><a href="classSphereArray.html#ad8ee6da7581126e5f29ced0ad0b0c5d1">SphereArray::m_fastUnion</a></div><div class="ttdeci">std::shared_ptr&lt; EBGeometry::UnionBVH&lt; Real, AABB, K &gt; &gt; m_fastUnion</div><div class="ttdoc">Union that uses bounding volume hierarchy acceleration.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:103</div></div>
+<div class="ttc" id="aclassSphereArray_html_acf2a1be1aea8652c52a8bf1693f93e16"><div class="ttname"><a href="classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16">SphereArray::K</a></div><div class="ttdeci">static constexpr size_t K</div><div class="ttdoc">Tree degree for BVH accelerator.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:83</div></div>
+<div class="ttc" id="aclassSphereArray_html_ac610cf60e357b20a87f5870a01c5a1e2"><div class="ttname"><a href="classSphereArray.html#ac610cf60e357b20a87f5870a01c5a1e2">SphereArray::m_slowUnion</a></div><div class="ttdeci">std::shared_ptr&lt; EBGeometry::Union&lt; Real &gt; &gt; m_slowUnion</div><div class="ttdoc">Standard union ala Chombo.</div><div class="ttdef"><b>Definition:</b> CD_SphereArray.H:98</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

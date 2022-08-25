@@ -155,7 +155,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a187d926e3e73dcdb6fe988f652cd3a0c"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> { <b>PVR</b>, 
+<tr class="memitem:a187d926e3e73dcdb6fe988f652cd3a0c"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> { <b>Interp</b>, 
 <b>Halo</b>, 
 <b>HaloNGP</b>
  }</td></tr>
@@ -187,7 +187,7 @@ Enumerations</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Coarse-fine deposition types (see CD_EBAMRParticleMesh for how these are handled). </p>
-<p>PVR means that the mass on the fine level is put there via interpolation of the coarse level.</p>
+<p>Interp means that the mass on the fine level is put there via interpolation of the coarse level.</p>
 <p>Halo means that we deposit the particles on the coarse side of the refinement boundary directly on the fine level, using special deposition routines where the particles have the same physical width as on the coarse level.</p>
 <p>HaloNGP means that particles on the coarse side of the refinement boundary are deposited using an NGP scheme. </p>
 

@@ -1,4 +1,5 @@
 <map id="SigmaSolver" name="SigmaSolver">
-<area shape="rect" id="node1" title="Surface charge solver." alt="" coords="45,139,149,165"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,5,189,47"/>
+<area shape="rect" id="node1" title="Surface charge solver." alt="" coords="45,228,149,255"/>
+<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,95,189,136"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="28,5,167,32"/>
 </map>

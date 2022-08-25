@@ -1,4 +1,5 @@
 <map id="MeshODESolver&lt; N &gt;" name="MeshODESolver&lt; N &gt;">
-<area shape="rect" id="node1" title="Class for solving dy/dt = f on an AMR hierarchy." alt="" coords="20,124,187,151"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,5,201,32"/>
+<area shape="rect" id="node1" title="Class for solving dy/dt = f on an AMR hierarchy." alt="" coords="20,213,187,240"/>
+<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,95,201,121"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="34,5,173,32"/>
 </map>

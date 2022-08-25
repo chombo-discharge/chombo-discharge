@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['k_5151',['K',['../classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16',1,'SphereArray']]],
-  ['kb_5152',['kb',['../namespaceUnits.html#a0237c7c446f131e27ea2c9482b7f2a3b',1,'Units']]]
+  ['insufficientweightforsplitting_5095',['InsufficientWeightForSplitting',['../namespaceSuperParticles.html#a4d039a8cce9a45eb3b09ea07add0a9b1',1,'SuperParticles']]]
 ];

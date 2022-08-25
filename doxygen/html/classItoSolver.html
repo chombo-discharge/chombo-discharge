@@ -90,10 +90,10 @@ Collaboration diagram for ItoSolver:</div>
 <div class="dyncontent">
 <div class="center"><img src="classItoSolver__coll__graph.png" border="0" usemap="#ItoSolver_coll__map" alt="Collaboration graph"/></div>
 <map name="ItoSolver_coll__map" id="ItoSolver_coll__map">
-<area shape="rect" title="Base class for Ito diffusion particle models." alt="" coords="294,168,374,195"/>
-<area shape="rect" href="classItoMerge_1_1Tree.html" title=" " alt="" coords="5,13,217,39"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="242,5,426,47"/>
-<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="451,13,647,39"/>
+<area shape="rect" title="Base class for Ito diffusion particle models." alt="" coords="164,257,244,284"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="5,95,189,136"/>
+<area shape="rect" href="classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="135,5,273,32"/>
+<area shape="rect" href="classEBAMRData.html" title=" " alt="" coords="214,102,410,129"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -160,47 +160,47 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a6fee60a86508b6ce121dea757f6a3144"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a6fee60a86508b6ce121dea757f6a3144">clear</a> (<a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
 <tr class="memdesc:a6fee60a86508b6ce121dea757f6a3144"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear particles &ndash; this will deleted all the particles in the input container.  <a href="classItoSolver.html#a6fee60a86508b6ce121dea757f6a3144">More...</a><br /></td></tr>
 <tr class="separator:a6fee60a86508b6ce121dea757f6a3144"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2cfc0f7ef17ef6e11187ea8bee622fdf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a2cfc0f7ef17ef6e11187ea8bee622fdf">depositConductivity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
-<tr class="memdesc:a2cfc0f7ef17ef6e11187ea8bee622fdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit conductivities (i.e. mass*mobility / volume)  <a href="classItoSolver.html#a2cfc0f7ef17ef6e11187ea8bee622fdf">More...</a><br /></td></tr>
-<tr class="separator:a2cfc0f7ef17ef6e11187ea8bee622fdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87309b80ec7dec1b74b1626ca2f4d700"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a87309b80ec7dec1b74b1626ca2f4d700">depositConductivity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition) const</td></tr>
-<tr class="memdesc:a87309b80ec7dec1b74b1626ca2f4d700"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit conductivities (i.e. mass*mobility / volume)  <a href="classItoSolver.html#a87309b80ec7dec1b74b1626ca2f4d700">More...</a><br /></td></tr>
-<tr class="separator:a87309b80ec7dec1b74b1626ca2f4d700"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ce12aab2e784f8ccaf8c316513c7623"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a0ce12aab2e784f8ccaf8c316513c7623">depositDiffusivity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
-<tr class="memdesc:a0ce12aab2e784f8ccaf8c316513c7623"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit diffusivity (i.e. mass*D/volume)  <a href="classItoSolver.html#a0ce12aab2e784f8ccaf8c316513c7623">More...</a><br /></td></tr>
-<tr class="separator:a0ce12aab2e784f8ccaf8c316513c7623"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a13d1a25cbe12b84279f9a86911ab1019"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a13d1a25cbe12b84279f9a86911ab1019">depositDiffusivity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition) const</td></tr>
-<tr class="memdesc:a13d1a25cbe12b84279f9a86911ab1019"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit diffusivity (i.e. mass*D/volume)  <a href="classItoSolver.html#a13d1a25cbe12b84279f9a86911ab1019">More...</a><br /></td></tr>
-<tr class="separator:a13d1a25cbe12b84279f9a86911ab1019"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33cfd08a3c53d5c4104665d8e1646ce3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a33cfd08a3c53d5c4104665d8e1646ce3">depositEnergyDensity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
-<tr class="memdesc:a33cfd08a3c53d5c4104665d8e1646ce3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit energy densities (i.e. mass*energy/volume =&gt; total energy per unit volume)  <a href="classItoSolver.html#a33cfd08a3c53d5c4104665d8e1646ce3">More...</a><br /></td></tr>
-<tr class="separator:a33cfd08a3c53d5c4104665d8e1646ce3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa30867cb13ca546b8729ee29db273ac9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aa30867cb13ca546b8729ee29db273ac9">depositEnergyDensity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition) const</td></tr>
-<tr class="memdesc:aa30867cb13ca546b8729ee29db273ac9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit energy densities (i.e. mass*energy/volume =&gt; total energy per unit volume)  <a href="classItoSolver.html#aa30867cb13ca546b8729ee29db273ac9">More...</a><br /></td></tr>
-<tr class="separator:aa30867cb13ca546b8729ee29db273ac9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a822e0c67d9f19c88a1959d07e8c8b4f2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a822e0c67d9f19c88a1959d07e8c8b4f2">computeAverageMobility</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
-<tr class="memdesc:a822e0c67d9f19c88a1959d07e8c8b4f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute average mobility.  <a href="classItoSolver.html#a822e0c67d9f19c88a1959d07e8c8b4f2">More...</a><br /></td></tr>
-<tr class="separator:a822e0c67d9f19c88a1959d07e8c8b4f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac2d8c9dd1664655f32cf424f5519316"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aac2d8c9dd1664655f32cf424f5519316">computeAverageDiffusion</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
-<tr class="memdesc:aac2d8c9dd1664655f32cf424f5519316"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute average diffusion coefficient.  <a href="classItoSolver.html#aac2d8c9dd1664655f32cf424f5519316">More...</a><br /></td></tr>
-<tr class="separator:aac2d8c9dd1664655f32cf424f5519316"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e4ccc50baf7d8feff3912509de45dff"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a2e4ccc50baf7d8feff3912509de45dff">computeAverageEnergy</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
-<tr class="memdesc:a2e4ccc50baf7d8feff3912509de45dff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute average particle energy..  <a href="classItoSolver.html#a2e4ccc50baf7d8feff3912509de45dff">More...</a><br /></td></tr>
-<tr class="separator:a2e4ccc50baf7d8feff3912509de45dff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55cc85c3c9a7a0327f0a3c6fff256065"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a55cc85c3c9a7a0327f0a3c6fff256065">depositConductivity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
+<tr class="memdesc:a55cc85c3c9a7a0327f0a3c6fff256065"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit conductivities (i.e. mass*mobility / volume)  <a href="classItoSolver.html#a55cc85c3c9a7a0327f0a3c6fff256065">More...</a><br /></td></tr>
+<tr class="separator:a55cc85c3c9a7a0327f0a3c6fff256065"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09b82ab687e57ec23328b9b63927ff95"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a09b82ab687e57ec23328b9b63927ff95">depositConductivity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const</td></tr>
+<tr class="memdesc:a09b82ab687e57ec23328b9b63927ff95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit conductivities (i.e. mass*mobility / volume)  <a href="classItoSolver.html#a09b82ab687e57ec23328b9b63927ff95">More...</a><br /></td></tr>
+<tr class="separator:a09b82ab687e57ec23328b9b63927ff95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92fcaf6625351303b1b856ebc6d4c48d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a92fcaf6625351303b1b856ebc6d4c48d">depositDiffusivity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
+<tr class="memdesc:a92fcaf6625351303b1b856ebc6d4c48d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit diffusivity (i.e. mass*D/volume)  <a href="classItoSolver.html#a92fcaf6625351303b1b856ebc6d4c48d">More...</a><br /></td></tr>
+<tr class="separator:a92fcaf6625351303b1b856ebc6d4c48d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad21a6fcfd7c586497131343aa00efff5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad21a6fcfd7c586497131343aa00efff5">depositDiffusivity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const</td></tr>
+<tr class="memdesc:ad21a6fcfd7c586497131343aa00efff5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit diffusivity (i.e. mass*D/volume)  <a href="classItoSolver.html#ad21a6fcfd7c586497131343aa00efff5">More...</a><br /></td></tr>
+<tr class="separator:ad21a6fcfd7c586497131343aa00efff5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab173a4bede9c8cebe09fc7c2d8ec1dc6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ab173a4bede9c8cebe09fc7c2d8ec1dc6">depositEnergyDensity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
+<tr class="memdesc:ab173a4bede9c8cebe09fc7c2d8ec1dc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit energy densities (i.e. mass*energy/volume =&gt; total energy per unit volume)  <a href="classItoSolver.html#ab173a4bede9c8cebe09fc7c2d8ec1dc6">More...</a><br /></td></tr>
+<tr class="separator:ab173a4bede9c8cebe09fc7c2d8ec1dc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00d57a8de8deee382a29d713bf7331e2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a00d57a8de8deee382a29d713bf7331e2">depositEnergyDensity</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const</td></tr>
+<tr class="memdesc:a00d57a8de8deee382a29d713bf7331e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit energy densities (i.e. mass*energy/volume =&gt; total energy per unit volume)  <a href="classItoSolver.html#a00d57a8de8deee382a29d713bf7331e2">More...</a><br /></td></tr>
+<tr class="separator:a00d57a8de8deee382a29d713bf7331e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65647094a4c039fd19e17dd944297eeb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a65647094a4c039fd19e17dd944297eeb">computeAverageMobility</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
+<tr class="memdesc:a65647094a4c039fd19e17dd944297eeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute average mobility.  <a href="classItoSolver.html#a65647094a4c039fd19e17dd944297eeb">More...</a><br /></td></tr>
+<tr class="separator:a65647094a4c039fd19e17dd944297eeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd134aade2a3035692c1bd26599b157f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#abd134aade2a3035692c1bd26599b157f">computeAverageDiffusion</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
+<tr class="memdesc:abd134aade2a3035692c1bd26599b157f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute average diffusion coefficient.  <a href="classItoSolver.html#abd134aade2a3035692c1bd26599b157f">More...</a><br /></td></tr>
+<tr class="separator:abd134aade2a3035692c1bd26599b157f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0140880d0a497f9c2bf6bd3cbb97f2c0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a0140880d0a497f9c2bf6bd3cbb97f2c0">computeAverageEnergy</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles) const</td></tr>
+<tr class="memdesc:a0140880d0a497f9c2bf6bd3cbb97f2c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute average particle energy..  <a href="classItoSolver.html#a0140880d0a497f9c2bf6bd3cbb97f2c0">More...</a><br /></td></tr>
+<tr class="separator:a0140880d0a497f9c2bf6bd3cbb97f2c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18a43e827b7b8e1776cf9e4572ccf6a0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a18a43e827b7b8e1776cf9e4572ccf6a0">depositParticles</a> ()</td></tr>
 <tr class="memdesc:a18a43e827b7b8e1776cf9e4572ccf6a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit particles onto mesh.  <a href="classItoSolver.html#a18a43e827b7b8e1776cf9e4572ccf6a0">More...</a><br /></td></tr>
 <tr class="separator:a18a43e827b7b8e1776cf9e4572ccf6a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83fa3e39b93d9f4abf3c8ca352c61d02"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a83fa3e39b93d9f4abf3c8ca352c61d02">depositParticles</a> (const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a> a_container)</td></tr>
 <tr class="memdesc:a83fa3e39b93d9f4abf3c8ca352c61d02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit particles on to mesh.  <a href="classItoSolver.html#a83fa3e39b93d9f4abf3c8ca352c61d02">More...</a><br /></td></tr>
 <tr class="separator:a83fa3e39b93d9f4abf3c8ca352c61d02"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28f62e0f408437165ecd79bd061d6612"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </td></tr>
-<tr class="memitem:a28f62e0f408437165ecd79bd061d6612"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a28f62e0f408437165ecd79bd061d6612">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition) const</td></tr>
-<tr class="memdesc:a28f62e0f408437165ecd79bd061d6612"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic deposition function which deposits a particle field onto the mesh using a specified deposition method.  <a href="classItoSolver.html#a28f62e0f408437165ecd79bd061d6612">More...</a><br /></td></tr>
-<tr class="separator:a28f62e0f408437165ecd79bd061d6612"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28f62e0f408437165ecd79bd061d6612"><td class="memTemplParams" colspan="2">template&lt;class P , Real(P::*)() const particleScalarField&gt; </td></tr>
-<tr class="memitem:a28f62e0f408437165ecd79bd061d6612"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a28f62e0f408437165ecd79bd061d6612">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition) const</td></tr>
-<tr class="memdesc:a28f62e0f408437165ecd79bd061d6612"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic deposition function which deposits a particle field onto the mesh using a specified deposition method.  <a href="classItoSolver.html#a28f62e0f408437165ecd79bd061d6612">More...</a><br /></td></tr>
-<tr class="separator:a28f62e0f408437165ecd79bd061d6612"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b813b27a3f4058f6208d2be5e8cba35"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </td></tr>
+<tr class="memitem:a0b813b27a3f4058f6208d2be5e8cba35"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a0b813b27a3f4058f6208d2be5e8cba35">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const</td></tr>
+<tr class="memdesc:a0b813b27a3f4058f6208d2be5e8cba35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic deposition function which deposits a particle field onto the mesh using a specified deposition method.  <a href="classItoSolver.html#a0b813b27a3f4058f6208d2be5e8cba35">More...</a><br /></td></tr>
+<tr class="separator:a0b813b27a3f4058f6208d2be5e8cba35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b813b27a3f4058f6208d2be5e8cba35"><td class="memTemplParams" colspan="2">template&lt;class P , Real(P::*)() const particleScalarField&gt; </td></tr>
+<tr class="memitem:a0b813b27a3f4058f6208d2be5e8cba35"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a0b813b27a3f4058f6208d2be5e8cba35">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const</td></tr>
+<tr class="memdesc:a0b813b27a3f4058f6208d2be5e8cba35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic deposition function which deposits a particle field onto the mesh using a specified deposition method.  <a href="classItoSolver.html#a0b813b27a3f4058f6208d2be5e8cba35">More...</a><br /></td></tr>
+<tr class="separator:a0b813b27a3f4058f6208d2be5e8cba35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1478e53aa80da3b4ef0e4e6c779accf3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1478e53aa80da3b4ef0e4e6c779accf3">removeCoveredParticles</a> (const <a class="el" href="CD__EbRepresentation_8H.html#a07b20010dfee95e53d9c9073ca6a6c2b">EbRepresentation</a> a_representation, const Real a_tol)</td></tr>
 <tr class="memdesc:a1478e53aa80da3b4ef0e4e6c779accf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove particles that are inside the EB.  <a href="classItoSolver.html#a1478e53aa80da3b4ef0e4e6c779accf3">More...</a><br /></td></tr>
 <tr class="separator:a1478e53aa80da3b4ef0e4e6c779accf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -234,18 +234,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ad0938b394aa25ddeac394ecce5d2b474"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad0938b394aa25ddeac394ecce5d2b474">getNumberOfPlotVariables</a> () const</td></tr>
 <tr class="memdesc:ad0938b394aa25ddeac394ecce5d2b474"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of plot variables.  <a href="classItoSolver.html#ad0938b394aa25ddeac394ecce5d2b474">More...</a><br /></td></tr>
 <tr class="separator:ad0938b394aa25ddeac394ecce5d2b474"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a815471c6b6c7e1aeb636aab2ea0e3877"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a815471c6b6c7e1aeb636aab2ea0e3877">getPVRBuffer</a> () const</td></tr>
-<tr class="memdesc:a815471c6b6c7e1aeb636aab2ea0e3877"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get PVR buffer.  <a href="classItoSolver.html#a815471c6b6c7e1aeb636aab2ea0e3877">More...</a><br /></td></tr>
-<tr class="separator:a815471c6b6c7e1aeb636aab2ea0e3877"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f6982f82df0a04d2f325f1e84899a37"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1f6982f82df0a04d2f325f1e84899a37">getHaloBuffer</a> () const</td></tr>
-<tr class="memdesc:a1f6982f82df0a04d2f325f1e84899a37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the halo buffer.  <a href="classItoSolver.html#a1f6982f82df0a04d2f325f1e84899a37">More...</a><br /></td></tr>
-<tr class="separator:a1f6982f82df0a04d2f325f1e84899a37"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd6369581fd075bc1688c1a3838328b6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#afd6369581fd075bc1688c1a3838328b6">setPVRBuffer</a> (const int a_pvrBuffer)</td></tr>
-<tr class="memdesc:afd6369581fd075bc1688c1a3838328b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the PVR buffer.  <a href="classItoSolver.html#afd6369581fd075bc1688c1a3838328b6">More...</a><br /></td></tr>
-<tr class="separator:afd6369581fd075bc1688c1a3838328b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b64ad1b376afd86ef2e3a1f8c7d02f0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a5b64ad1b376afd86ef2e3a1f8c7d02f0">setHaloBuffer</a> (const int a_haloBuffer)</td></tr>
-<tr class="memdesc:a5b64ad1b376afd86ef2e3a1f8c7d02f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the halo buffer.  <a href="classItoSolver.html#a5b64ad1b376afd86ef2e3a1f8c7d02f0">More...</a><br /></td></tr>
-<tr class="separator:a5b64ad1b376afd86ef2e3a1f8c7d02f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0cdb1b9e287c948e6b1c6ad1c0e0709"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#af0cdb1b9e287c948e6b1c6ad1c0e0709">getNumParticles</a> (const <a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c1ffa5">WhichContainer</a> a_container, const bool a_localOnly) const</td></tr>
 <tr class="memdesc:af0cdb1b9e287c948e6b1c6ad1c0e0709"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of particles in a specified particle container.  <a href="classItoSolver.html#af0cdb1b9e287c948e6b1c6ad1c0e0709">More...</a><br /></td></tr>
 <tr class="separator:af0cdb1b9e287c948e6b1c6ad1c0e0709"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -267,9 +255,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a2293d2a6db7b36a451100e2e8400698f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a2293d2a6db7b36a451100e2e8400698f">setTime</a> (const int a_step, const Real a_time, const Real a_dt)</td></tr>
 <tr class="memdesc:a2293d2a6db7b36a451100e2e8400698f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the time for this solver.  <a href="classItoSolver.html#a2293d2a6db7b36a451100e2e8400698f">More...</a><br /></td></tr>
 <tr class="separator:a2293d2a6db7b36a451100e2e8400698f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3a5eb61b52bbec09e4bf33427855484"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ab3a5eb61b52bbec09e4bf33427855484">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp) const</td></tr>
-<tr class="memdesc:ab3a5eb61b52bbec09e4bf33427855484"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classItoSolver.html#ab3a5eb61b52bbec09e4bf33427855484">More...</a><br /></td></tr>
-<tr class="separator:ab3a5eb61b52bbec09e4bf33427855484"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5f69cb37a904c22bf2b3f31d6e67d1a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aa5f69cb37a904c22bf2b3f31d6e67d1a">writePlotData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp)</td></tr>
+<tr class="memdesc:aa5f69cb37a904c22bf2b3f31d6e67d1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data.  <a href="classItoSolver.html#aa5f69cb37a904c22bf2b3f31d6e67d1a">More...</a><br /></td></tr>
+<tr class="separator:aa5f69cb37a904c22bf2b3f31d6e67d1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a134feb52bf6e0fdb4b0b25cd76b4ef91"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a134feb52bf6e0fdb4b0b25cd76b4ef91">setSpecies</a> (const RefCountedPtr&lt; <a class="el" href="classItoSpecies.html">ItoSpecies</a> &gt; &amp;a_species)</td></tr>
 <tr class="memdesc:a134feb52bf6e0fdb4b0b25cd76b4ef91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the species.  <a href="classItoSolver.html#a134feb52bf6e0fdb4b0b25cd76b4ef91">More...</a><br /></td></tr>
 <tr class="separator:a134feb52bf6e0fdb4b0b25cd76b4ef91"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -456,10 +444,6 @@ Protected Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:aceb07ec1c7f2a91d7c26224aee84073f"><td class="memItemLeft" align="right" valign="top"><a id="aceb07ec1c7f2a91d7c26224aee84073f"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aceb07ec1c7f2a91d7c26224aee84073f">parseSuperParticles</a> ()</td></tr>
-<tr class="memdesc:aceb07ec1c7f2a91d7c26224aee84073f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse superparticle settings &ndash; this just sets the default direction in which we build the BVH. <br /></td></tr>
-<tr class="separator:aceb07ec1c7f2a91d7c26224aee84073f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1e8e4881e32bd4b99ad8f272ee9236f"><td class="memItemLeft" align="right" valign="top"><a id="ab1e8e4881e32bd4b99ad8f272ee9236f"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ab1e8e4881e32bd4b99ad8f272ee9236f">parseRNG</a> ()</td></tr>
 <tr class="memdesc:ab1e8e4881e32bd4b99ad8f272ee9236f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse RNG options &ndash; this parses the RNG seed and instantiates the distributions. <br /></td></tr>
@@ -476,10 +460,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac49b1c278811933412ea0c6480ab26da">parseBisectStep</a> ()</td></tr>
 <tr class="memdesc:ac49b1c278811933412ea0c6480ab26da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse bisection step. <br /></td></tr>
 <tr class="separator:ac49b1c278811933412ea0c6480ab26da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0816fef9d4ea05e412f66422add9226a"><td class="memItemLeft" align="right" valign="top"><a id="a0816fef9d4ea05e412f66422add9226a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a0816fef9d4ea05e412f66422add9226a">parsePvrBuffer</a> ()</td></tr>
-<tr class="memdesc:a0816fef9d4ea05e412f66422add9226a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse PVR buffer. <br /></td></tr>
-<tr class="separator:a0816fef9d4ea05e412f66422add9226a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afaf6f91c6ad86c19f26c56962ac7cdcf"><td class="memItemLeft" align="right" valign="top"><a id="afaf6f91c6ad86c19f26c56962ac7cdcf"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#afaf6f91c6ad86c19f26c56962ac7cdcf">parsePlotVariables</a> ()</td></tr>
 <tr class="memdesc:afaf6f91c6ad86c19f26c56962ac7cdcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse plot variables. <br /></td></tr>
@@ -503,14 +483,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a803e769f2adeed3b1a2f2b9d40c2422f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a803e769f2adeed3b1a2f2b9d40c2422f">drawNewParticles</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_particlesPerCell, const int a_level, const int a_newPPC)</td></tr>
 <tr class="memdesc:a803e769f2adeed3b1a2f2b9d40c2422f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restart particles from a specified number of particles in the grid cell.  <a href="classItoSolver.html#a803e769f2adeed3b1a2f2b9d40c2422f">More...</a><br /></td></tr>
 <tr class="separator:a803e769f2adeed3b1a2f2b9d40c2422f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a72bc36aaac4eaff69df185bd8159a4"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </td></tr>
-<tr class="memitem:a1a72bc36aaac4eaff69df185bd8159a4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1a72bc36aaac4eaff69df185bd8159a4">depositKappaConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition) const</td></tr>
-<tr class="memdesc:a1a72bc36aaac4eaff69df185bd8159a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered deposition &ndash; this is the main deposition function.  <a href="classItoSolver.html#a1a72bc36aaac4eaff69df185bd8159a4">More...</a><br /></td></tr>
-<tr class="separator:a1a72bc36aaac4eaff69df185bd8159a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a72bc36aaac4eaff69df185bd8159a4"><td class="memTemplParams" colspan="2">template&lt;class P , Real(P::*)() const particleScalarField&gt; </td></tr>
-<tr class="memitem:a1a72bc36aaac4eaff69df185bd8159a4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1a72bc36aaac4eaff69df185bd8159a4">depositKappaConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition) const</td></tr>
-<tr class="memdesc:a1a72bc36aaac4eaff69df185bd8159a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered deposition &ndash; this is the main deposition function.  <a href="classItoSolver.html#a1a72bc36aaac4eaff69df185bd8159a4">More...</a><br /></td></tr>
-<tr class="separator:a1a72bc36aaac4eaff69df185bd8159a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c0ecc49bb1f0ece27a920c4ea6a1232"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </td></tr>
+<tr class="memitem:a1c0ecc49bb1f0ece27a920c4ea6a1232"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1c0ecc49bb1f0ece27a920c4ea6a1232">depositKappaConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const</td></tr>
+<tr class="memdesc:a1c0ecc49bb1f0ece27a920c4ea6a1232"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered deposition &ndash; this is the main deposition function.  <a href="classItoSolver.html#a1c0ecc49bb1f0ece27a920c4ea6a1232">More...</a><br /></td></tr>
+<tr class="separator:a1c0ecc49bb1f0ece27a920c4ea6a1232"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c0ecc49bb1f0ece27a920c4ea6a1232"><td class="memTemplParams" colspan="2">template&lt;class P , Real(P::*)() const particleScalarField&gt; </td></tr>
+<tr class="memitem:a1c0ecc49bb1f0ece27a920c4ea6a1232"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1c0ecc49bb1f0ece27a920c4ea6a1232">depositKappaConservative</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_deposition, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition) const</td></tr>
+<tr class="memdesc:a1c0ecc49bb1f0ece27a920c4ea6a1232"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the cell-centered deposition &ndash; this is the main deposition function.  <a href="classItoSolver.html#a1c0ecc49bb1f0ece27a920c4ea6a1232">More...</a><br /></td></tr>
+<tr class="separator:a1c0ecc49bb1f0ece27a920c4ea6a1232"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad599086b015754fd8dc25f94ba0b686d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ad599086b015754fd8dc25f94ba0b686d">redistributeAMR</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi) const</td></tr>
 <tr class="memdesc:ad599086b015754fd8dc25f94ba0b686d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redistribute mass in an AMR context.  <a href="classItoSolver.html#ad599086b015754fd8dc25f94ba0b686d">More...</a><br /></td></tr>
 <tr class="separator:ad599086b015754fd8dc25f94ba0b686d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -532,9 +512,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:ac3ac7d9fa5f802806c12d667c1892a5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac3ac7d9fa5f802806c12d667c1892a5d">coarseFineRedistribution</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi) const</td></tr>
 <tr class="memdesc:ac3ac7d9fa5f802806c12d667c1892a5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do coarse-fine mass redistribution.  <a href="classItoSolver.html#ac3ac7d9fa5f802806c12d667c1892a5d">More...</a><br /></td></tr>
 <tr class="separator:ac3ac7d9fa5f802806c12d667c1892a5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53064ecb380ff57c7fc6f666daef30a3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a53064ecb380ff57c7fc6f666daef30a3">mergeBVH</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const int a_particlesPerCell)</td></tr>
-<tr class="memdesc:a53064ecb380ff57c7fc6f666daef30a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superparticle merging with BVH trees.  <a href="classItoSolver.html#a53064ecb380ff57c7fc6f666daef30a3">More...</a><br /></td></tr>
-<tr class="separator:a53064ecb380ff57c7fc6f666daef30a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05f1a0fcf4c8a6cb67745a9a3b21c0a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a05f1a0fcf4c8a6cb67745a9a3b21c0a9">makeSuperparticles</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const int a_particlesPerCell)</td></tr>
+<tr class="memdesc:a05f1a0fcf4c8a6cb67745a9a3b21c0a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superparticle merging with BVH trees.  <a href="classItoSolver.html#a05f1a0fcf4c8a6cb67745a9a3b21c0a9">More...</a><br /></td></tr>
+<tr class="separator:a05f1a0fcf4c8a6cb67745a9a3b21c0a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac04b4155dcf2543bd538e27669e47518"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac04b4155dcf2543bd538e27669e47518">writeData</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_output, int &amp;a_comp, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const bool a_interpToCentroids) const</td></tr>
 <tr class="memdesc:ac04b4155dcf2543bd538e27669e47518"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function which just copies data from one data holder to the output data holder.  <a href="classItoSolver.html#ac04b4155dcf2543bd538e27669e47518">More...</a><br /></td></tr>
 <tr class="separator:ac04b4155dcf2543bd538e27669e47518"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -544,18 +524,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a11980419f7695d872a83885be0f20494"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a11980419f7695d872a83885be0f20494">interpolateMobilitiesVelocity</a> (const int a_level, const DataIndex &amp;a_dit)</td></tr>
 <tr class="memdesc:a11980419f7695d872a83885be0f20494"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate mobilities through the velocity. Interpolates for all particles in the specified grid patch.  <a href="classItoSolver.html#a11980419f7695d872a83885be0f20494">More...</a><br /></td></tr>
 <tr class="separator:a11980419f7695d872a83885be0f20494"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1e0edd943066ee2e871ce6d5962a5b38"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1e0edd943066ee2e871ce6d5962a5b38">sign</a> (const Real &amp;a) const</td></tr>
-<tr class="memdesc:a1e0edd943066ee2e871ce6d5962a5b38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sign function.  <a href="classItoSolver.html#a1e0edd943066ee2e871ce6d5962a5b38">More...</a><br /></td></tr>
-<tr class="separator:a1e0edd943066ee2e871ce6d5962a5b38"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d1685c620081632e849d9dd2bc87ffe"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a8d1685c620081632e849d9dd2bc87ffe">randomPosition</a> (const RealVect a_cellPos, const RealVect a_lo, const RealVect a_hi, const RealVect a_bndryCentroid, const RealVect a_normal, const Real a_dx, const Real a_kappa) const</td></tr>
-<tr class="memdesc:a8d1685c620081632e849d9dd2bc87ffe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a random position physical somewhere in a grid cell.  <a href="classItoSolver.html#a8d1685c620081632e849d9dd2bc87ffe">More...</a><br /></td></tr>
-<tr class="separator:a8d1685c620081632e849d9dd2bc87ffe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a686244537fc296dcaf1ae3cf30563a16"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a686244537fc296dcaf1ae3cf30563a16">randomPosition</a> (const RealVect a_lo, const RealVect a_hi, const RealVect a_bndryCentroid, const RealVect a_normal) const</td></tr>
-<tr class="memdesc:a686244537fc296dcaf1ae3cf30563a16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a random position somewhere in a cut-cell.  <a href="classItoSolver.html#a686244537fc296dcaf1ae3cf30563a16">More...</a><br /></td></tr>
-<tr class="separator:a686244537fc296dcaf1ae3cf30563a16"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f2c856e17b3820aafb09a4ee1737390"><td class="memItemLeft" align="right" valign="top">RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a5f2c856e17b3820aafb09a4ee1737390">randomPosition</a> (const RealVect a_lo, const RealVect a_hi) const</td></tr>
-<tr class="memdesc:a5f2c856e17b3820aafb09a4ee1737390"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a random position in the cube (a_lo, a_hi);.  <a href="classItoSolver.html#a5f2c856e17b3820aafb09a4ee1737390">More...</a><br /></td></tr>
-<tr class="separator:a5f2c856e17b3820aafb09a4ee1737390"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -571,18 +539,10 @@ Protected Attributes</h2></td></tr>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a2ecdbaf1fcff7620202eef2892684dcc">m_restartPPC</a></td></tr>
 <tr class="memdesc:a2ecdbaf1fcff7620202eef2892684dcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of particles used when restarting a simulation &ndash; this is relevant only when restarting from a "fluid" checkpoint file. <br /></td></tr>
 <tr class="separator:a2ecdbaf1fcff7620202eef2892684dcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ca315816cb8204a5164f03539cf6f20"><td class="memItemLeft" align="right" valign="top"><a id="a4ca315816cb8204a5164f03539cf6f20"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a4ca315816cb8204a5164f03539cf6f20">m_directionKD</a></td></tr>
-<tr class="memdesc:a4ca315816cb8204a5164f03539cf6f20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Splitting direction. This is used in mergeBVH to select the first direction of the BVH when merging/splitting particles. <br /></td></tr>
-<tr class="separator:a4ca315816cb8204a5164f03539cf6f20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55a9455e60b33ff6e057b561cca227af"><td class="memItemLeft" align="right" valign="top"><a id="a55a9455e60b33ff6e057b561cca227af"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a55a9455e60b33ff6e057b561cca227af">m_realm</a></td></tr>
 <tr class="memdesc:a55a9455e60b33ff6e057b561cca227af"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where this solve lives. <br /></td></tr>
 <tr class="separator:a55a9455e60b33ff6e057b561cca227af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedef422fac4a38e1360886d35e765c36"><td class="memItemLeft" align="right" valign="top"><a id="aedef422fac4a38e1360886d35e765c36"></a>
-<a class="el" href="classItoMerge_1_1Tree.html">ItoMerge::Tree</a>&lt; <a class="el" href="classPointMass.html">PointMass</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aedef422fac4a38e1360886d35e765c36">m_mergeTree</a></td></tr>
-<tr class="memdesc:aedef422fac4a38e1360886d35e765c36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boundary volume hierarchy merging tree &ndash; used in mergeBVH. <br /></td></tr>
-<tr class="separator:aedef422fac4a38e1360886d35e765c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeadc148a0d39b1c381b4ef83cfe465b9"><td class="memItemLeft" align="right" valign="top"><a id="aeadc148a0d39b1c381b4ef83cfe465b9"></a>
 RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#aeadc148a0d39b1c381b4ef83cfe465b9">m_computationalGeometry</a></td></tr>
 <tr class="memdesc:aeadc148a0d39b1c381b4ef83cfe465b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computational geometry. <br /></td></tr>
@@ -625,10 +585,6 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a4e82d759ba2e48638ad1226c2ccca5e5">m_timeStep</a></td></tr>
 <tr class="memdesc:a4e82d759ba2e48638ad1226c2ccca5e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time step. <br /></td></tr>
 <tr class="separator:a4e82d759ba2e48638ad1226c2ccca5e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3a81f132401599dd015e3e3060528705"><td class="memItemLeft" align="right" valign="top"><a id="a3a81f132401599dd015e3e3060528705"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a3a81f132401599dd015e3e3060528705">m_pvrBuffer</a></td></tr>
-<tr class="memdesc:a3a81f132401599dd015e3e3060528705"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer for PVR. <br /></td></tr>
-<tr class="separator:a3a81f132401599dd015e3e3060528705"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89480b124a54ae732a71d2be4251a1c7"><td class="memItemLeft" align="right" valign="top"><a id="a89480b124a54ae732a71d2be4251a1c7"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a89480b124a54ae732a71d2be4251a1c7">m_haloBuffer</a></td></tr>
 <tr class="memdesc:a89480b124a54ae732a71d2be4251a1c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size of refinement boundary halo. <br /></td></tr>
@@ -713,6 +669,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a61bc4b0940fd002ab82329890fbd3157">m_deposition</a></td></tr>
 <tr class="memdesc:a61bc4b0940fd002ab82329890fbd3157"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposition method when depositing particles to the mesh. <br /></td></tr>
 <tr class="separator:a61bc4b0940fd002ab82329890fbd3157"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c9d7bad8c2c17484b49d3f00be4402c"><td class="memItemLeft" align="right" valign="top"><a id="a0c9d7bad8c2c17484b49d3f00be4402c"></a>
+<a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a0c9d7bad8c2c17484b49d3f00be4402c">m_coarseFineDeposition</a></td></tr>
+<tr class="memdesc:a0c9d7bad8c2c17484b49d3f00be4402c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse-fine deposition strategy. <br /></td></tr>
+<tr class="separator:a0c9d7bad8c2c17484b49d3f00be4402c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7796e2e15a35a118207dbf42741f3cf3"><td class="memItemLeft" align="right" valign="top"><a id="a7796e2e15a35a118207dbf42741f3cf3"></a>
 <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a7796e2e15a35a118207dbf42741f3cf3">m_plotDeposition</a></td></tr>
 <tr class="memdesc:a7796e2e15a35a118207dbf42741f3cf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposition method when depositing particles to mesh during plotting. <br /></td></tr>
@@ -1155,8 +1115,8 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
 
 </div>
 </div>
-<a id="aac2d8c9dd1664655f32cf424f5519316"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aac2d8c9dd1664655f32cf424f5519316">&#9670;&nbsp;</a></span>computeAverageDiffusion()</h2>
+<a id="abd134aade2a3035692c1bd26599b157f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd134aade2a3035692c1bd26599b157f">&#9670;&nbsp;</a></span>computeAverageDiffusion()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1173,7 +1133,7 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>&#160;</td>
         </tr>
         <tr>
@@ -1200,8 +1160,8 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
 
 </div>
 </div>
-<a id="a2e4ccc50baf7d8feff3912509de45dff"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2e4ccc50baf7d8feff3912509de45dff">&#9670;&nbsp;</a></span>computeAverageEnergy()</h2>
+<a id="a0140880d0a497f9c2bf6bd3cbb97f2c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0140880d0a497f9c2bf6bd3cbb97f2c0">&#9670;&nbsp;</a></span>computeAverageEnergy()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1218,7 +1178,7 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>&#160;</td>
         </tr>
         <tr>
@@ -1245,8 +1205,8 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
 
 </div>
 </div>
-<a id="a822e0c67d9f19c88a1959d07e8c8b4f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a822e0c67d9f19c88a1959d07e8c8b4f2">&#9670;&nbsp;</a></span>computeAverageMobility()</h2>
+<a id="a65647094a4c039fd19e17dd944297eeb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65647094a4c039fd19e17dd944297eeb">&#9670;&nbsp;</a></span>computeAverageMobility()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1263,7 +1223,7 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>&#160;</td>
         </tr>
         <tr>
@@ -1595,8 +1555,8 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
 
 </div>
 </div>
-<a id="a2cfc0f7ef17ef6e11187ea8bee622fdf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2cfc0f7ef17ef6e11187ea8bee622fdf">&#9670;&nbsp;</a></span>depositConductivity() <span class="overload">[1/2]</span></h2>
+<a id="a55cc85c3c9a7a0327f0a3c6fff256065"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55cc85c3c9a7a0327f0a3c6fff256065">&#9670;&nbsp;</a></span>depositConductivity() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1613,7 +1573,7 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>&#160;</td>
         </tr>
         <tr>
@@ -1637,12 +1597,11 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Calls the other versions with a_deposition = m_deposition </dd></dl>
 
 </div>
 </div>
-<a id="a87309b80ec7dec1b74b1626ca2f4d700"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a87309b80ec7dec1b74b1626ca2f4d700">&#9670;&nbsp;</a></span>depositConductivity() <span class="overload">[2/2]</span></h2>
+<a id="a09b82ab687e57ec23328b9b63927ff95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09b82ab687e57ec23328b9b63927ff95">&#9670;&nbsp;</a></span>depositConductivity() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1659,14 +1618,20 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
-          <td class="paramname"><em>a_deposition</em>&#160;</td>
+          <td class="paramname"><em>a_deposition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_coarseFineDeposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1687,14 +1652,15 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Mesh data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine deposition method. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a0ce12aab2e784f8ccaf8c316513c7623"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0ce12aab2e784f8ccaf8c316513c7623">&#9670;&nbsp;</a></span>depositDiffusivity() <span class="overload">[1/2]</span></h2>
+<a id="a92fcaf6625351303b1b856ebc6d4c48d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92fcaf6625351303b1b856ebc6d4c48d">&#9670;&nbsp;</a></span>depositDiffusivity() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1711,7 +1677,7 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>&#160;</td>
         </tr>
         <tr>
@@ -1739,8 +1705,8 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
 
 </div>
 </div>
-<a id="a13d1a25cbe12b84279f9a86911ab1019"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a13d1a25cbe12b84279f9a86911ab1019">&#9670;&nbsp;</a></span>depositDiffusivity() <span class="overload">[2/2]</span></h2>
+<a id="ad21a6fcfd7c586497131343aa00efff5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad21a6fcfd7c586497131343aa00efff5">&#9670;&nbsp;</a></span>depositDiffusivity() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1757,14 +1723,20 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
-          <td class="paramname"><em>a_deposition</em>&#160;</td>
+          <td class="paramname"><em>a_deposition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_coarseFineDeposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1785,14 +1757,15 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Mesh data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine deposition method. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a33cfd08a3c53d5c4104665d8e1646ce3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a33cfd08a3c53d5c4104665d8e1646ce3">&#9670;&nbsp;</a></span>depositEnergyDensity() <span class="overload">[1/2]</span></h2>
+<a id="ab173a4bede9c8cebe09fc7c2d8ec1dc6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab173a4bede9c8cebe09fc7c2d8ec1dc6">&#9670;&nbsp;</a></span>depositEnergyDensity() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1809,7 +1782,7 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>&#160;</td>
         </tr>
         <tr>
@@ -1837,8 +1810,8 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
 
 </div>
 </div>
-<a id="aa30867cb13ca546b8729ee29db273ac9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa30867cb13ca546b8729ee29db273ac9">&#9670;&nbsp;</a></span>depositEnergyDensity() <span class="overload">[2/2]</span></h2>
+<a id="a00d57a8de8deee382a29d713bf7331e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00d57a8de8deee382a29d713bf7331e2">&#9670;&nbsp;</a></span>depositEnergyDensity() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1855,14 +1828,20 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
-          <td class="paramname"><em>a_deposition</em>&#160;</td>
+          <td class="paramname"><em>a_deposition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_coarseFineDeposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1883,6 +1862,7 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Mesh data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particle data </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine deposition method. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1941,8 +1921,8 @@ template&lt;ItoSolver::WhichContainer C&gt; </div>
 
 </div>
 </div>
-<a id="a1a72bc36aaac4eaff69df185bd8159a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1a72bc36aaac4eaff69df185bd8159a4">&#9670;&nbsp;</a></span>depositKappaConservative() <span class="overload">[1/2]</span></h2>
+<a id="a1c0ecc49bb1f0ece27a920c4ea6a1232"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c0ecc49bb1f0ece27a920c4ea6a1232">&#9670;&nbsp;</a></span>depositKappaConservative() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1961,14 +1941,20 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
-          <td class="paramname"><em>a_deposition</em>&#160;</td>
+          <td class="paramname"><em>a_deposition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_coarseFineDeposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1989,15 +1975,15 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Cell-centered mesh data. Must have exactly one component. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles to be deposited. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition type </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine deposition strategy </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>The coarse-fine deposition is handled internally in this routine (through parameters m_pvrBuffer and m_haloBuffer) </dd></dl>
 
 </div>
 </div>
-<a id="a1a72bc36aaac4eaff69df185bd8159a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1a72bc36aaac4eaff69df185bd8159a4">&#9670;&nbsp;</a></span>depositKappaConservative() <span class="overload">[2/2]</span></h2>
+<a id="a1c0ecc49bb1f0ece27a920c4ea6a1232"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c0ecc49bb1f0ece27a920c4ea6a1232">&#9670;&nbsp;</a></span>depositKappaConservative() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2016,14 +2002,20 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
-          <td class="paramname"><em>a_deposition</em>&#160;</td>
+          <td class="paramname"><em>a_deposition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_coarseFineDeposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2044,10 +2036,10 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Cell-centered mesh data. Must have exactly one component. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles to be deposited. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition type </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine deposition strategy </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>The coarse-fine deposition is handled internally in this routine (through parameters m_pvrBuffer and m_haloBuffer) </dd></dl>
 
 </div>
 </div>
@@ -2159,8 +2151,8 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a28f62e0f408437165ecd79bd061d6612"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a28f62e0f408437165ecd79bd061d6612">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[3/4]</span></h2>
+<a id="a0b813b27a3f4058f6208d2be5e8cba35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b813b27a3f4058f6208d2be5e8cba35">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2176,14 +2168,20 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
-          <td class="paramname"><em>a_deposition</em>&#160;</td>
+          <td class="paramname"><em>a_deposition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_coarseFineDeposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2199,15 +2197,15 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Mesh data &ndash; must have exactly one component. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles to be deposited </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine deposition strategy </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>The coarse-fine deposition handling is defined by the input parameters in m_pvrBuffer, m_haloBuffer, and m_forceIrregHaloNGP (see the class documentation). </dd></dl>
 
 </div>
 </div>
-<a id="a28f62e0f408437165ecd79bd061d6612"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a28f62e0f408437165ecd79bd061d6612">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[4/4]</span></h2>
+<a id="a0b813b27a3f4058f6208d2be5e8cba35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b813b27a3f4058f6208d2be5e8cba35">&#9670;&nbsp;</a></span>depositParticles() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2223,14 +2221,20 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td>
-          <td class="paramname"><em>a_deposition</em>&#160;</td>
+          <td class="paramname"><em>a_deposition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td>
+          <td class="paramname"><em>a_coarseFineDeposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2246,10 +2250,10 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_phi</td><td>Mesh data &ndash; must have exactly one component. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particles</td><td>Particles to be deposited </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_deposition</td><td>Deposition method </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarseFineDeposition</td><td>Coarse-fine deposition strategy </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>The coarse-fine deposition handling is defined by the input parameters in m_pvrBuffer, m_haloBuffer, and m_forceIrregHaloNGP (see the class documentation). </dd></dl>
 
 </div>
 </div>
@@ -2378,34 +2382,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 <p>Get the diffusion function. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_diffusionFunction </dd></dl>
-
-</div>
-</div>
-<a id="a1f6982f82df0a04d2f325f1e84899a37"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1f6982f82df0a04d2f325f1e84899a37">&#9670;&nbsp;</a></span>getHaloBuffer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int ItoSolver::getHaloBuffer </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the halo buffer. </p>
-<dl class="section return"><dt>Returns</dt><dd>Returns m_haloBuffer </dd></dl>
 
 </div>
 </div>
@@ -2707,34 +2683,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 <p>Get output plot names. </p>
 <dl class="section return"><dt>Returns</dt><dd>Returns a string of all variables that this solver can add to plot files. </dd></dl>
-
-</div>
-</div>
-<a id="a815471c6b6c7e1aeb636aab2ea0e3877"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a815471c6b6c7e1aeb636aab2ea0e3877">&#9670;&nbsp;</a></span>getPVRBuffer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int ItoSolver::getPVRBuffer </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get PVR buffer. </p>
-<dl class="section return"><dt>Returns</dt><dd>Returns m_pvrBuffer </dd></dl>
 
 </div>
 </div>
@@ -3547,7 +3495,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 </div>
 </div>
 <a id="a90e0d074046485949984c3c074d1fe58"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a90e0d074046485949984c3c074d1fe58">&#9670;&nbsp;</a></span>makeSuperparticles() <span class="overload">[1/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a90e0d074046485949984c3c074d1fe58">&#9670;&nbsp;</a></span>makeSuperparticles() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3592,7 +3540,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 </div>
 </div>
 <a id="acc59aabefa256470657b9c0087725c20"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acc59aabefa256470657b9c0087725c20">&#9670;&nbsp;</a></span>makeSuperparticles() <span class="overload">[2/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#acc59aabefa256470657b9c0087725c20">&#9670;&nbsp;</a></span>makeSuperparticles() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3644,7 +3592,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 </div>
 </div>
 <a id="ae0cb1432cb164650e8b71c4c5657fb36"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae0cb1432cb164650e8b71c4c5657fb36">&#9670;&nbsp;</a></span>makeSuperparticles() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0cb1432cb164650e8b71c4c5657fb36">&#9670;&nbsp;</a></span>makeSuperparticles() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3702,8 +3650,8 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a53064ecb380ff57c7fc6f666daef30a3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a53064ecb380ff57c7fc6f666daef30a3">&#9670;&nbsp;</a></span>mergeBVH()</h2>
+<a id="a05f1a0fcf4c8a6cb67745a9a3b21c0a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05f1a0fcf4c8a6cb67745a9a3b21c0a9">&#9670;&nbsp;</a></span>makeSuperparticles() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3712,7 +3660,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void ItoSolver::mergeBVH </td>
+          <td class="memname">void ItoSolver::makeSuperparticles </td>
           <td>(</td>
           <td class="paramtype">List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_particles</em>, </td>
@@ -3846,191 +3794,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 <p>Draw a random N-dimensional Gaussian number from a normal distribution with zero with and unit standard deviation. </p>
 <dl class="section note"><dt>Note</dt><dd>The distribution is truncated at m_normalDistributionTruncation &ndash; values above that threshold will be replaced by m_normalDistributionTruncation. </dd></dl>
-
-</div>
-</div>
-<a id="a8d1685c620081632e849d9dd2bc87ffe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8d1685c620081632e849d9dd2bc87ffe">&#9670;&nbsp;</a></span>randomPosition() <span class="overload">[1/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">RealVect ItoSolver::randomPosition </td>
-          <td>(</td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_cellPos</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_lo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_hi</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_bndryCentroid</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_normal</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_dx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_kappa</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Draw a random position physical somewhere in a grid cell. </p>
-<p>This is the version that respects cut-cells &ndash; it will draw a position (through rejection sampling) such that the particle ends up on the correct side of the EB. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellPos</td><td>Cell-center position. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lower-left corner of volume that encloses the cut-cell. This is relative to the unit cell. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Upper-right corner of volume that encloses the cut-cell. This is relative to the unit cell. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>EB centroid position </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_normal</td><td>EB normal (points into the fluid region) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_kappa</td><td>Cell volume </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a5f2c856e17b3820aafb09a4ee1737390"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f2c856e17b3820aafb09a4ee1737390">&#9670;&nbsp;</a></span>randomPosition() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">RealVect ItoSolver::randomPosition </td>
-          <td>(</td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_lo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_hi</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Return a random position in the cube (a_lo, a_hi);. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lower-left corner </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Upper-right corner </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a686244537fc296dcaf1ae3cf30563a16"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a686244537fc296dcaf1ae3cf30563a16">&#9670;&nbsp;</a></span>randomPosition() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">RealVect ItoSolver::randomPosition </td>
-          <td>(</td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_lo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_hi</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_bndryCentroid</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_normal</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Draw a random position somewhere in a cut-cell. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lo</td><td>Lower-left corner of volume that encloses the cut-cell. This is relative to the unit cell. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_hi</td><td>Upper-right corner of volume that encloses the cut-cell. This is relative to the unit cell. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_bndryCentroid</td><td>EB centroid position </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_normal</td><td>EB normal (points into the fluid region) </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns a position inside the cut-cell and on the correct side of the EB. </dd></dl>
 
 </div>
 </div>
@@ -4427,40 +4190,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="a5b64ad1b376afd86ef2e3a1f8c7d02f0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5b64ad1b376afd86ef2e3a1f8c7d02f0">&#9670;&nbsp;</a></span>setHaloBuffer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoSolver::setHaloBuffer </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_haloBuffer</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the halo buffer. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_haloBuffer</td><td>Halo buffer size </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a79b76fa27520cfcf6b20bc2115cd2c18"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a79b76fa27520cfcf6b20bc2115cd2c18">&#9670;&nbsp;</a></span>setParticleDiffusion()</h2>
 
@@ -4557,40 +4286,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="afd6369581fd075bc1688c1a3838328b6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afd6369581fd075bc1688c1a3838328b6">&#9670;&nbsp;</a></span>setPVRBuffer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoSolver::setPVRBuffer </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_pvrBuffer</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the PVR buffer. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_pvrBuffer</td><td>PVR buffer size </td></tr>
   </table>
   </dd>
 </dl>
@@ -4783,35 +4478,6 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="a1e0edd943066ee2e871ce6d5962a5b38"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1e0edd943066ee2e871ce6d5962a5b38">&#9670;&nbsp;</a></span>sign()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Real ItoSolver::sign </td>
-          <td>(</td>
-          <td class="paramtype">const Real &amp;&#160;</td>
-          <td class="paramname"><em>a</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Sign function. </p>
-<dl class="section return"><dt>Returns</dt><dd>Returns 1.0 if a &gt; 0 and -1 if a &lt; 0. </dd></dl>
 
 </div>
 </div>
@@ -5252,8 +4918,8 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
 
 </div>
 </div>
-<a id="ab3a5eb61b52bbec09e4bf33427855484"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3a5eb61b52bbec09e4bf33427855484">&#9670;&nbsp;</a></span>writePlotData()</h2>
+<a id="aa5f69cb37a904c22bf2b3f31d6e67d1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5f69cb37a904c22bf2b3f31d6e67d1a">&#9670;&nbsp;</a></span>writePlotData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5276,7 +4942,7 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td> const</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>

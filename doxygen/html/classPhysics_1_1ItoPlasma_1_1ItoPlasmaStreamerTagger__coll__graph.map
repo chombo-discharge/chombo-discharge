@@ -1,7 +1,8 @@
 <map id="Physics::ItoPlasma::ItoPlasmaStreamerTagger" name="Physics::ItoPlasma::ItoPlasmaStreamerTagger">
-<area shape="rect" id="node1" title="Refinement class for morrow_stephens plasma model only." alt="" coords="75,305,274,347"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaFieldTagger.html" title="Lightweight tagging class. Only tags cells based on electric field." alt="" coords="90,215,259,256"/>
-<area shape="rect" id="node3" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaTagger.html" title="Abstract class for tagging cells across an AMR hierarchy." alt="" coords="5,81,149,123"/>
+<area shape="rect" id="node1" title="Refinement class for morrow_stephens plasma model only." alt="" coords="74,319,273,360"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaFieldTagger.html" title="Lightweight tagging class. Only tags cells based on electric field." alt="" coords="89,228,258,269"/>
+<area shape="rect" id="node3" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaTagger.html" title="Abstract class for tagging cells across an AMR hierarchy." alt="" coords="5,95,149,136"/>
 <area shape="rect" id="node4" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="32,5,123,32"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="174,89,370,115"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="174,102,370,129"/>
+<area shape="rect" id="node6" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="203,5,341,32"/>
 </map>

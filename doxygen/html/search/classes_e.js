@@ -1,12 +1,23 @@
 var searchData=
 [
-  ['scanshop_3130',['ScanShop',['../classScanShop.html',1,'']]],
-  ['sigmasolver_3131',['SigmaSolver',['../classSigmaSolver.html',1,'']]],
-  ['sigmastorage_3132',['SigmaStorage',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1SigmaStorage.html',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper::SigmaStorage'],['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1SigmaStorage.html',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper::SigmaStorage']]],
-  ['signeddistancebvh_3133',['SignedDistanceBVH',['../classSignedDistanceBVH.html',1,'']]],
-  ['signeddistancedcel_3134',['SignedDistanceDCEL',['../classSignedDistanceDCEL.html',1,'']]],
-  ['simpleitoparticle_3135',['SimpleItoParticle',['../classSimpleItoParticle.html',1,'']]],
-  ['spherearray_3136',['SphereArray',['../classSphereArray.html',1,'']]],
-  ['spheresdf_3137',['SphereSdf',['../classSphereSdf.html',1,'']]],
-  ['streamerinceptionstepper_3138',['StreamerInceptionStepper',['../classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html',1,'Physics::StreamerInception']]]
+  ['radiativetransferspecies_3081',['RadiativeTransferSpecies',['../classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies.html',1,'Physics::RadiativeTransfer']]],
+  ['radiativetransferstepper_3082',['RadiativeTransferStepper',['../classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html',1,'Physics::RadiativeTransfer']]],
+  ['random_3083',['Random',['../classRandom.html',1,'']]],
+  ['realbox_3084',['RealBox',['../classRealBox.html',1,'']]],
+  ['realm_3085',['Realm',['../classRealm.html',1,'']]],
+  ['regulargeometry_3086',['RegularGeometry',['../classRegularGeometry.html',1,'']]],
+  ['roddielectric_3087',['RodDielectric',['../classRodDielectric.html',1,'']]],
+  ['rodif_3088',['RodIF',['../classRodIF.html',1,'']]],
+  ['rodplaneprofile_3089',['RodPlaneProfile',['../classRodPlaneProfile.html',1,'']]],
+  ['roughrod_3090',['RoughRod',['../classRoughRod.html',1,'']]],
+  ['roughsphere_3091',['RoughSphere',['../classRoughSphere.html',1,'']]],
+  ['roundedboxif_3092',['RoundedBoxIF',['../classRoundedBoxIF.html',1,'']]],
+  ['roundedcylinderif_3093',['RoundedCylinderIF',['../classRoundedCylinderIF.html',1,'']]],
+  ['rtespeciesjson_3094',['RteSpeciesJSON',['../classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html',1,'Physics::CdrPlasma']]],
+  ['rtfactory_3095',['RtFactory',['../classRtFactory.html',1,'']]],
+  ['rtiterator_3096',['RtIterator',['../classRtIterator.html',1,'']]],
+  ['rtlayout_3097',['RtLayout',['../classRtLayout.html',1,'']]],
+  ['rtsolver_3098',['RtSolver',['../classRtSolver.html',1,'']]],
+  ['rtspecies_3099',['RtSpecies',['../classRtSpecies.html',1,'']]],
+  ['rtstorage_3100',['RtStorage',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1RtStorage.html',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper::RtStorage'],['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper_1_1RtStorage.html',1,'Physics::CdrPlasma::CdrPlasmaImExSdcStepper::RtStorage']]]
 ];

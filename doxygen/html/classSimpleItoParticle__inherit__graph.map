@@ -1,4 +1,5 @@
 <map id="SimpleItoParticle" name="SimpleItoParticle">
-<area shape="rect" id="node1" title="A particle class for reducing HDF5 I/O file sizes when using ItoSolver." alt="" coords="5,80,137,107"/>
-<area shape="rect" id="node2" title=" " alt="" coords="35,5,108,32"/>
+<area shape="rect" id="node1" title="A particle class for reducing HDF5 I/O file sizes when using ItoSolver." alt="" coords="29,171,161,197"/>
+<area shape="rect" id="node2" href="$classGenericParticle.html" title=" " alt="" coords="8,95,183,121"/>
+<area shape="rect" id="node3" href="$classGenericParticle.html" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,5,185,32"/>
 </map>

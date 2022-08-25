@@ -1,11 +1,13 @@
 <map id="Source/ItoDiffusion/CD_ItoParticle.H" name="Source/ItoDiffusion/CD_ItoParticle.H">
-<area shape="rect" id="node1" title="Declaration of a particle class for Ito diffusion." alt="" coords="333,5,478,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,64,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="89,95,165,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="189,95,251,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="275,95,338,121"/>
-<area shape="rect" id="node6" title=" " alt="" coords="362,95,449,121"/>
-<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="417,169,602,196"/>
-<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="639,169,817,196"/>
-<area shape="rect" id="node9" href="$CD__ItoParticleImplem_8H_source.html" title=" " alt="" coords="525,95,702,121"/>
+<area shape="rect" id="node1" title="Declaration of a particle class for Ito diffusion." alt="" coords="221,5,367,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="47,169,106,196"/>
+<area shape="rect" id="node3" title=" " alt="" coords="181,169,257,196"/>
+<area shape="rect" id="node4" title=" " alt="" coords="282,169,343,196"/>
+<area shape="rect" id="node5" title=" " alt="" coords="368,169,431,196"/>
+<area shape="rect" id="node6" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="433,95,593,121"/>
+<area shape="rect" id="node8" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="648,244,833,271"/>
+<area shape="rect" id="node9" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="247,244,426,271"/>
+<area shape="rect" id="node11" href="$CD__ItoParticleImplem_8H.html" title="Implementation of CD_ItoParticle.H." alt="" coords="55,95,232,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="741,169,834,196"/>
+<area shape="rect" id="node10" href="$CD__GenericParticleImplem_8H.html" title="Implementation of CD_GenericParticle.H." alt="" coords="506,169,717,196"/>
 </map>

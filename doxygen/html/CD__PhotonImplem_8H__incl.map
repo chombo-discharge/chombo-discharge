@@ -1,0 +1,13 @@
+<map id="Source/RadiativeTransfer/CD_PhotonImplem.H" name="Source/RadiativeTransfer/CD_PhotonImplem.H">
+<area shape="rect" id="node1" title="Implementation of CD_Photon.H." alt="" coords="551,5,735,47"/>
+<area shape="rect" id="node2" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="590,95,697,121"/>
+<area shape="rect" id="node9" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,319,191,345"/>
+<area shape="rect" id="node10" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="641,319,819,345"/>
+<area shape="rect" id="node3" title=" " alt="" coords="69,244,127,271"/>
+<area shape="rect" id="node4" title=" " alt="" coords="605,244,681,271"/>
+<area shape="rect" id="node5" title=" " alt="" coords="706,244,767,271"/>
+<area shape="rect" id="node6" title=" " alt="" coords="792,244,855,271"/>
+<area shape="rect" id="node7" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="425,169,585,196"/>
+<area shape="rect" id="node8" title=" " alt="" coords="437,244,530,271"/>
+<area shape="rect" id="node11" href="$CD__GenericParticleImplem_8H.html" title="Implementation of CD_GenericParticle.H." alt="" coords="202,244,413,271"/>
+</map>

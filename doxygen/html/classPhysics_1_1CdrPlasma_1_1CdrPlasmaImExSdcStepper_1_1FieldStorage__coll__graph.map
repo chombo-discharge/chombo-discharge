@@ -1,8 +1,9 @@
 <map id="Physics::CdrPlasma::CdrPlasmaImExSdcStepper::FieldStorage" name="Physics::CdrPlasma::CdrPlasmaImExSdcStepper::FieldStorage">
-<area shape="rect" id="node1" title=" " alt="" coords="380,107,587,163"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="36,5,220,47"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="5,71,251,98"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="29,122,227,149"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="30,173,226,199"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="29,223,227,250"/>
+<area shape="rect" id="node1" title=" " alt="" coords="729,107,936,163"/>
+<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="385,5,569,47"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,122,144,149"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="355,71,600,98"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="378,122,577,149"/>
+<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="379,173,575,199"/>
+<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="378,223,577,250"/>
 </map>

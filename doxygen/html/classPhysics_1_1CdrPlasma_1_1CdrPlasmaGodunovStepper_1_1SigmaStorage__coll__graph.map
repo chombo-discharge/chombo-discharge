@@ -1,4 +1,5 @@
 <map id="Physics::CdrPlasma::CdrPlasmaGodunovStepper::SigmaStorage" name="Physics::CdrPlasma::CdrPlasmaGodunovStepper::SigmaStorage">
-<area shape="rect" id="node1" title="Utility class for memory handling in CdrPlasmaStepper." alt="" coords="5,109,213,165"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="17,5,201,47"/>
+<area shape="rect" id="node1" title="Utility class for memory handling in CdrPlasmaStepper." alt="" coords="5,199,213,255"/>
+<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="17,95,201,136"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="40,5,179,32"/>
 </map>

@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classRandom.html" title="Class for encapsulating random number generation." alt="" coords="5,5,81,32"/>
+<area shape="rect" id="node1" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html" title="Abstract clas for specifying plasma kinetics." alt="" coords="5,39,149,80"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysicsLEA.html" title="Abstract clas for specifying plasma kinetics." alt="" coords="197,5,365,47"/>
+<area shape="rect" id="node4" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysicsLFA.html" title="Middle layer for describing ItoPlasmaPhysics in the LFA." alt="" coords="198,71,365,112"/>
+<area shape="rect" id="node3" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaAir3LEA.html" title="Abstract clas for specifying plasma kinetics." alt="" coords="413,5,559,47"/>
+<area shape="rect" id="node5" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaAir3LFA.html" title="Abstract clas for specifying plasma kinetics." alt="" coords="414,71,558,112"/>
 </map>

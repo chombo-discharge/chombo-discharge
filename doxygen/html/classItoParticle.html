@@ -70,11 +70,7 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
-<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
-<a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
-<a href="#friends">Friends</a> &#124;
 <a href="classItoParticle-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">ItoParticle Class Reference</div>  </div>
@@ -90,8 +86,9 @@ Inheritance diagram for ItoParticle:</div>
 <div class="dyncontent">
 <div class="center"><img src="classItoParticle__inherit__graph.png" border="0" usemap="#ItoParticle_inherit__map" alt="Inheritance graph"/></div>
 <map name="ItoParticle_inherit__map" id="ItoParticle_inherit__map">
-<area shape="rect" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="5,80,92,107"/>
-<area shape="rect" title=" " alt="" coords="12,5,85,32"/>
+<area shape="rect" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="52,171,139,197"/>
+<area shape="rect" href="classGenericParticle.html" title=" " alt="" coords="8,95,183,121"/>
+<area shape="rect" href="classGenericParticle.html" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,5,185,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
@@ -99,8 +96,9 @@ Collaboration diagram for ItoParticle:</div>
 <div class="dyncontent">
 <div class="center"><img src="classItoParticle__coll__graph.png" border="0" usemap="#ItoParticle_coll__map" alt="Collaboration graph"/></div>
 <map name="ItoParticle_coll__map" id="ItoParticle_coll__map">
-<area shape="rect" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="5,80,92,107"/>
-<area shape="rect" title=" " alt="" coords="12,5,85,32"/>
+<area shape="rect" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="52,171,139,197"/>
+<area shape="rect" href="classGenericParticle.html" title=" " alt="" coords="8,95,183,121"/>
+<area shape="rect" href="classGenericParticle.html" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,5,185,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -109,9 +107,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a796cf9c232ca92dfa21353f6d2338a6f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a796cf9c232ca92dfa21353f6d2338a6f">ItoParticle</a> ()</td></tr>
 <tr class="memdesc:a796cf9c232ca92dfa21353f6d2338a6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor &ndash; user should subsequently set the variables or call define.  <a href="classItoParticle.html#a796cf9c232ca92dfa21353f6d2338a6f">More...</a><br /></td></tr>
 <tr class="separator:a796cf9c232ca92dfa21353f6d2338a6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee9d865d3a596f7fbd262dea1a6d38d3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#aee9d865d3a596f7fbd262dea1a6d38d3">ItoParticle</a> (const Real a_mass, const RealVect &amp;a_position, const RealVect &amp;a_velocity=RealVect::Zero, const Real a_diffusion=0.0, const Real a_mobility=1.0, const Real a_averageEnergy=0.0)</td></tr>
-<tr class="memdesc:aee9d865d3a596f7fbd262dea1a6d38d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. This calls the define function.  <a href="classItoParticle.html#aee9d865d3a596f7fbd262dea1a6d38d3">More...</a><br /></td></tr>
-<tr class="separator:aee9d865d3a596f7fbd262dea1a6d38d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfb4fce172f57cbbae3a109d54e8e9b4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#adfb4fce172f57cbbae3a109d54e8e9b4">ItoParticle</a> (const Real a_weight, const RealVect &amp;a_position, const RealVect &amp;a_velocity=RealVect::Zero, const Real a_diffusion=0.0, const Real a_mobility=1.0, const Real a_energy=0.0)</td></tr>
+<tr class="memdesc:adfb4fce172f57cbbae3a109d54e8e9b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. This calls the define function.  <a href="classItoParticle.html#adfb4fce172f57cbbae3a109d54e8e9b4">More...</a><br /></td></tr>
+<tr class="separator:adfb4fce172f57cbbae3a109d54e8e9b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64b7de5390ca0e94b76be932cc70ddc4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a64b7de5390ca0e94b76be932cc70ddc4">ItoParticle</a> (const <a class="el" href="classItoParticle.html">ItoParticle</a> &amp;a_other)</td></tr>
 <tr class="memdesc:a64b7de5390ca0e94b76be932cc70ddc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor. Copies all fields.  <a href="classItoParticle.html#a64b7de5390ca0e94b76be932cc70ddc4">More...</a><br /></td></tr>
 <tr class="separator:a64b7de5390ca0e94b76be932cc70ddc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -119,131 +117,106 @@ Public Member Functions</h2></td></tr>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a6b0b72faf0a62842e4c584bd930796e2">~ItoParticle</a> ()</td></tr>
 <tr class="memdesc:a6b0b72faf0a62842e4c584bd930796e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (deallocates runtime memory storage) <br /></td></tr>
 <tr class="separator:a6b0b72faf0a62842e4c584bd930796e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa050fcefbc2dbab1449c449b497c54d1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#aa050fcefbc2dbab1449c449b497c54d1">define</a> (const Real a_mass, const RealVect &amp;a_position, const RealVect &amp;a_velocity=RealVect::Zero, const Real a_diffusion=0.0, const Real a_mobility=1.0, const Real a_averageEnergy=0.0)</td></tr>
-<tr class="memdesc:aa050fcefbc2dbab1449c449b497c54d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <a href="classItoParticle.html#aa050fcefbc2dbab1449c449b497c54d1">More...</a><br /></td></tr>
-<tr class="separator:aa050fcefbc2dbab1449c449b497c54d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abc686468155319ae1c79323fe0160478"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#abc686468155319ae1c79323fe0160478">setOldPosition</a> (const RealVect a_oldPosition)</td></tr>
-<tr class="memdesc:abc686468155319ae1c79323fe0160478"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the old position.  <a href="classItoParticle.html#abc686468155319ae1c79323fe0160478">More...</a><br /></td></tr>
-<tr class="separator:abc686468155319ae1c79323fe0160478"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a89cfe8343feae1d47fca8e94fe1ef251"><td class="memItemLeft" align="right" valign="top">RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a89cfe8343feae1d47fca8e94fe1ef251">oldPosition</a> ()</td></tr>
-<tr class="memdesc:a89cfe8343feae1d47fca8e94fe1ef251"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the old particle position.  <a href="classItoParticle.html#a89cfe8343feae1d47fca8e94fe1ef251">More...</a><br /></td></tr>
-<tr class="separator:a89cfe8343feae1d47fca8e94fe1ef251"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d192465827b9716d75ce6d62f89f26f"><td class="memItemLeft" align="right" valign="top">const RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a7d192465827b9716d75ce6d62f89f26f">oldPosition</a> () const</td></tr>
-<tr class="memdesc:a7d192465827b9716d75ce6d62f89f26f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the old particle position.  <a href="classItoParticle.html#a7d192465827b9716d75ce6d62f89f26f">More...</a><br /></td></tr>
-<tr class="separator:a7d192465827b9716d75ce6d62f89f26f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5badc7fbc21994ecc9410f43630673d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a5badc7fbc21994ecc9410f43630673d7">setMass</a> (const Real &amp;a_mass)</td></tr>
-<tr class="memdesc:a5badc7fbc21994ecc9410f43630673d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set particle mass.  <a href="classItoParticle.html#a5badc7fbc21994ecc9410f43630673d7">More...</a><br /></td></tr>
-<tr class="separator:a5badc7fbc21994ecc9410f43630673d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a54a62820ccebb885585553c5876f4661"><td class="memItemLeft" align="right" valign="top">Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a54a62820ccebb885585553c5876f4661">mass</a> ()</td></tr>
-<tr class="memdesc:a54a62820ccebb885585553c5876f4661"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get particle mass (i.e., computational weight)  <a href="classItoParticle.html#a54a62820ccebb885585553c5876f4661">More...</a><br /></td></tr>
-<tr class="separator:a54a62820ccebb885585553c5876f4661"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae65c6522b262d95fb37f3298237ad912"><td class="memItemLeft" align="right" valign="top">const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#ae65c6522b262d95fb37f3298237ad912">mass</a> () const</td></tr>
-<tr class="memdesc:ae65c6522b262d95fb37f3298237ad912"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get particle mass (i.e., computational weight)  <a href="classItoParticle.html#ae65c6522b262d95fb37f3298237ad912">More...</a><br /></td></tr>
-<tr class="separator:ae65c6522b262d95fb37f3298237ad912"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27a823fe67b0abe58c01c7308fbb8ff0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a27a823fe67b0abe58c01c7308fbb8ff0">setDiffusion</a> (const Real a_diffusion)</td></tr>
-<tr class="memdesc:a27a823fe67b0abe58c01c7308fbb8ff0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set particle diffusion coefficient.  <a href="classItoParticle.html#a27a823fe67b0abe58c01c7308fbb8ff0">More...</a><br /></td></tr>
-<tr class="separator:a27a823fe67b0abe58c01c7308fbb8ff0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae4ff06942a7139bbc4378f7a977cff9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#aae4ff06942a7139bbc4378f7a977cff9">define</a> (const Real a_weight, const RealVect &amp;a_position, const RealVect &amp;a_velocity=RealVect::Zero, const Real a_diffusion=0.0, const Real a_mobility=1.0, const Real a_energy=0.0)</td></tr>
+<tr class="memdesc:aae4ff06942a7139bbc4378f7a977cff9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <a href="classItoParticle.html#aae4ff06942a7139bbc4378f7a977cff9">More...</a><br /></td></tr>
+<tr class="separator:aae4ff06942a7139bbc4378f7a977cff9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a715a0d95ffb11828b6a751c5cc40450c"><td class="memItemLeft" align="right" valign="top">Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a715a0d95ffb11828b6a751c5cc40450c">weight</a> ()</td></tr>
+<tr class="memdesc:a715a0d95ffb11828b6a751c5cc40450c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get particle weight.  <a href="classItoParticle.html#a715a0d95ffb11828b6a751c5cc40450c">More...</a><br /></td></tr>
+<tr class="separator:a715a0d95ffb11828b6a751c5cc40450c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e06544466a436227dfe1a19ba5ce386"><td class="memItemLeft" align="right" valign="top">const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a5e06544466a436227dfe1a19ba5ce386">weight</a> () const</td></tr>
+<tr class="memdesc:a5e06544466a436227dfe1a19ba5ce386"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get particle weight.  <a href="classItoParticle.html#a5e06544466a436227dfe1a19ba5ce386">More...</a><br /></td></tr>
+<tr class="separator:a5e06544466a436227dfe1a19ba5ce386"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d3208bc7498bcb9bf9def259679b7e6"><td class="memItemLeft" align="right" valign="top">Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a9d3208bc7498bcb9bf9def259679b7e6">diffusion</a> ()</td></tr>
 <tr class="memdesc:a9d3208bc7498bcb9bf9def259679b7e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get particle diffusion coefficient.  <a href="classItoParticle.html#a9d3208bc7498bcb9bf9def259679b7e6">More...</a><br /></td></tr>
 <tr class="separator:a9d3208bc7498bcb9bf9def259679b7e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb9d9a3551d9bdd318566363c426a7a5"><td class="memItemLeft" align="right" valign="top">const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#adb9d9a3551d9bdd318566363c426a7a5">diffusion</a> () const</td></tr>
 <tr class="memdesc:adb9d9a3551d9bdd318566363c426a7a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get particle diffusion coefficient.  <a href="classItoParticle.html#adb9d9a3551d9bdd318566363c426a7a5">More...</a><br /></td></tr>
 <tr class="separator:adb9d9a3551d9bdd318566363c426a7a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a873f5b6b0a11080bb8cdc04dad2f67b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a873f5b6b0a11080bb8cdc04dad2f67b6">setMobility</a> (const Real a_mobility)</td></tr>
-<tr class="memdesc:a873f5b6b0a11080bb8cdc04dad2f67b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set particle mobility.  <a href="classItoParticle.html#a873f5b6b0a11080bb8cdc04dad2f67b6">More...</a><br /></td></tr>
-<tr class="separator:a873f5b6b0a11080bb8cdc04dad2f67b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f414bcb46464d52219fb0ab7ef70617"><td class="memItemLeft" align="right" valign="top">Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a3f414bcb46464d52219fb0ab7ef70617">mobility</a> ()</td></tr>
 <tr class="memdesc:a3f414bcb46464d52219fb0ab7ef70617"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get mobility coefficient.  <a href="classItoParticle.html#a3f414bcb46464d52219fb0ab7ef70617">More...</a><br /></td></tr>
 <tr class="separator:a3f414bcb46464d52219fb0ab7ef70617"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa26a658c575baff1e2c7ae8d71e18580"><td class="memItemLeft" align="right" valign="top">const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#aa26a658c575baff1e2c7ae8d71e18580">mobility</a> () const</td></tr>
 <tr class="memdesc:aa26a658c575baff1e2c7ae8d71e18580"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get mobility coefficient.  <a href="classItoParticle.html#aa26a658c575baff1e2c7ae8d71e18580">More...</a><br /></td></tr>
 <tr class="separator:aa26a658c575baff1e2c7ae8d71e18580"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5923d4232fce9a308496ddc83ea1bb4e"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a5923d4232fce9a308496ddc83ea1bb4e">conductivity</a> () const</td></tr>
-<tr class="memdesc:a5923d4232fce9a308496ddc83ea1bb4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle conductivity.  <a href="classItoParticle.html#a5923d4232fce9a308496ddc83ea1bb4e">More...</a><br /></td></tr>
-<tr class="separator:a5923d4232fce9a308496ddc83ea1bb4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab656aad16ad19b87d5fd0657b53af5a7"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#ab656aad16ad19b87d5fd0657b53af5a7">diffusivity</a> () const</td></tr>
-<tr class="memdesc:ab656aad16ad19b87d5fd0657b53af5a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle diffusivity.  <a href="classItoParticle.html#ab656aad16ad19b87d5fd0657b53af5a7">More...</a><br /></td></tr>
-<tr class="separator:ab656aad16ad19b87d5fd0657b53af5a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10976230b2f61f1e8b9ca121aa94bcad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a10976230b2f61f1e8b9ca121aa94bcad">setEnergy</a> (const Real a_averageEnergy)</td></tr>
-<tr class="memdesc:a10976230b2f61f1e8b9ca121aa94bcad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set average particle energy.  <a href="classItoParticle.html#a10976230b2f61f1e8b9ca121aa94bcad">More...</a><br /></td></tr>
-<tr class="separator:a10976230b2f61f1e8b9ca121aa94bcad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a332a48cca131f91050ddcb9f17457054"><td class="memItemLeft" align="right" valign="top">Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a332a48cca131f91050ddcb9f17457054">energy</a> ()</td></tr>
 <tr class="memdesc:a332a48cca131f91050ddcb9f17457054"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get average particle energy.  <a href="classItoParticle.html#a332a48cca131f91050ddcb9f17457054">More...</a><br /></td></tr>
 <tr class="separator:a332a48cca131f91050ddcb9f17457054"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23e493c509532a5798ecf9d09af96b61"><td class="memItemLeft" align="right" valign="top">const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a23e493c509532a5798ecf9d09af96b61">energy</a> () const</td></tr>
 <tr class="memdesc:a23e493c509532a5798ecf9d09af96b61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get average particle energy.  <a href="classItoParticle.html#a23e493c509532a5798ecf9d09af96b61">More...</a><br /></td></tr>
 <tr class="separator:a23e493c509532a5798ecf9d09af96b61"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acdc135ea05df6eaf4f19ec744352436d"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#acdc135ea05df6eaf4f19ec744352436d">totalEnergy</a> () const</td></tr>
-<tr class="memdesc:acdc135ea05df6eaf4f19ec744352436d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the total energy.  <a href="classItoParticle.html#acdc135ea05df6eaf4f19ec744352436d">More...</a><br /></td></tr>
-<tr class="separator:acdc135ea05df6eaf4f19ec744352436d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace7efae48743570b44e0c03e2f32f507"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#ace7efae48743570b44e0c03e2f32f507">setVelocity</a> (const RealVect &amp;a_velocity)</td></tr>
-<tr class="memdesc:ace7efae48743570b44e0c03e2f32f507"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the particle velocity.  <a href="classItoParticle.html#ace7efae48743570b44e0c03e2f32f507">More...</a><br /></td></tr>
-<tr class="separator:ace7efae48743570b44e0c03e2f32f507"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a340964c38cd1e2de315443a5674ab453"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a340964c38cd1e2de315443a5674ab453">setVelocity</a> (const Real &amp;a_velocity, const int a_dir)</td></tr>
-<tr class="memdesc:a340964c38cd1e2de315443a5674ab453"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the velocity in particular direction.  <a href="classItoParticle.html#a340964c38cd1e2de315443a5674ab453">More...</a><br /></td></tr>
-<tr class="separator:a340964c38cd1e2de315443a5674ab453"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89cfe8343feae1d47fca8e94fe1ef251"><td class="memItemLeft" align="right" valign="top">RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a89cfe8343feae1d47fca8e94fe1ef251">oldPosition</a> ()</td></tr>
+<tr class="memdesc:a89cfe8343feae1d47fca8e94fe1ef251"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the old particle position.  <a href="classItoParticle.html#a89cfe8343feae1d47fca8e94fe1ef251">More...</a><br /></td></tr>
+<tr class="separator:a89cfe8343feae1d47fca8e94fe1ef251"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d192465827b9716d75ce6d62f89f26f"><td class="memItemLeft" align="right" valign="top">const RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a7d192465827b9716d75ce6d62f89f26f">oldPosition</a> () const</td></tr>
+<tr class="memdesc:a7d192465827b9716d75ce6d62f89f26f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the old particle position.  <a href="classItoParticle.html#a7d192465827b9716d75ce6d62f89f26f">More...</a><br /></td></tr>
+<tr class="separator:a7d192465827b9716d75ce6d62f89f26f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9a3270560ec27c47a463bb4c79345d5"><td class="memItemLeft" align="right" valign="top">RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#ab9a3270560ec27c47a463bb4c79345d5">velocity</a> ()</td></tr>
 <tr class="memdesc:ab9a3270560ec27c47a463bb4c79345d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle velocity.  <a href="classItoParticle.html#ab9a3270560ec27c47a463bb4c79345d5">More...</a><br /></td></tr>
 <tr class="separator:ab9a3270560ec27c47a463bb4c79345d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc010c49932779006e10dd17a5f3471e"><td class="memItemLeft" align="right" valign="top">const RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#afc010c49932779006e10dd17a5f3471e">velocity</a> () const</td></tr>
 <tr class="memdesc:afc010c49932779006e10dd17a5f3471e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle velocity.  <a href="classItoParticle.html#afc010c49932779006e10dd17a5f3471e">More...</a><br /></td></tr>
 <tr class="separator:afc010c49932779006e10dd17a5f3471e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a71a0f2a9e941d1eae065c1658a2c8aa3"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a71a0f2a9e941d1eae065c1658a2c8aa3">velocity</a> (const int a_dir) const</td></tr>
-<tr class="memdesc:a71a0f2a9e941d1eae065c1658a2c8aa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle velocity in a particular coordinate direction.  <a href="classItoParticle.html#a71a0f2a9e941d1eae065c1658a2c8aa3">More...</a><br /></td></tr>
-<tr class="separator:a71a0f2a9e941d1eae065c1658a2c8aa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdc135ea05df6eaf4f19ec744352436d"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#acdc135ea05df6eaf4f19ec744352436d">totalEnergy</a> () const</td></tr>
+<tr class="memdesc:acdc135ea05df6eaf4f19ec744352436d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the total energy.  <a href="classItoParticle.html#acdc135ea05df6eaf4f19ec744352436d">More...</a><br /></td></tr>
+<tr class="separator:acdc135ea05df6eaf4f19ec744352436d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5923d4232fce9a308496ddc83ea1bb4e"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a5923d4232fce9a308496ddc83ea1bb4e">conductivity</a> () const</td></tr>
+<tr class="memdesc:a5923d4232fce9a308496ddc83ea1bb4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle conductivity.  <a href="classItoParticle.html#a5923d4232fce9a308496ddc83ea1bb4e">More...</a><br /></td></tr>
+<tr class="separator:a5923d4232fce9a308496ddc83ea1bb4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab656aad16ad19b87d5fd0657b53af5a7"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#ab656aad16ad19b87d5fd0657b53af5a7">diffusivity</a> () const</td></tr>
+<tr class="memdesc:ab656aad16ad19b87d5fd0657b53af5a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle diffusivity.  <a href="classItoParticle.html#ab656aad16ad19b87d5fd0657b53af5a7">More...</a><br /></td></tr>
+<tr class="separator:ab656aad16ad19b87d5fd0657b53af5a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af389e5e67acdf6e93935c2350fedb836"><td class="memItemLeft" align="right" valign="top">Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#af389e5e67acdf6e93935c2350fedb836">tmp</a> ()</td></tr>
 <tr class="memdesc:af389e5e67acdf6e93935c2350fedb836"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get temporary storage.  <a href="classItoParticle.html#af389e5e67acdf6e93935c2350fedb836">More...</a><br /></td></tr>
 <tr class="separator:af389e5e67acdf6e93935c2350fedb836"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adfd0f32066478ad4796d5d34d1a636c6"><td class="memItemLeft" align="right" valign="top">const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#adfd0f32066478ad4796d5d34d1a636c6">tmp</a> () const</td></tr>
 <tr class="memdesc:adfd0f32066478ad4796d5d34d1a636c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get temporary storage.  <a href="classItoParticle.html#adfd0f32066478ad4796d5d34d1a636c6">More...</a><br /></td></tr>
 <tr class="separator:adfd0f32066478ad4796d5d34d1a636c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada5ca38e0186958564b4f8630b33fe2a"><td class="memItemLeft" align="right" valign="top">Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#ada5ca38e0186958564b4f8630b33fe2a">runtimeScalar</a> (const int a_which)</td></tr>
-<tr class="memdesc:ada5ca38e0186958564b4f8630b33fe2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the runtime-defined scalar variable.  <a href="classItoParticle.html#ada5ca38e0186958564b4f8630b33fe2a">More...</a><br /></td></tr>
-<tr class="separator:ada5ca38e0186958564b4f8630b33fe2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0b0b123109cf7cec123175c7cd9cce3"><td class="memItemLeft" align="right" valign="top">const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#ae0b0b123109cf7cec123175c7cd9cce3">runtimeScalar</a> (const int a_which) const</td></tr>
-<tr class="memdesc:ae0b0b123109cf7cec123175c7cd9cce3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the runtime-defined scalar variable.  <a href="classItoParticle.html#ae0b0b123109cf7cec123175c7cd9cce3">More...</a><br /></td></tr>
-<tr class="separator:ae0b0b123109cf7cec123175c7cd9cce3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5768d35c8653e63c39cd35270785dccb"><td class="memItemLeft" align="right" valign="top">RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a5768d35c8653e63c39cd35270785dccb">runtimeVector</a> (const int a_which)</td></tr>
-<tr class="memdesc:a5768d35c8653e63c39cd35270785dccb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the runtime-defined vector variable.  <a href="classItoParticle.html#a5768d35c8653e63c39cd35270785dccb">More...</a><br /></td></tr>
-<tr class="separator:a5768d35c8653e63c39cd35270785dccb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a16dca0c54c974c7882bf07196628b2c9"><td class="memItemLeft" align="right" valign="top">const RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a16dca0c54c974c7882bf07196628b2c9">runtimeVector</a> (const int a_which) const</td></tr>
-<tr class="memdesc:a16dca0c54c974c7882bf07196628b2c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the runtime-defined vector variable.  <a href="classItoParticle.html#a16dca0c54c974c7882bf07196628b2c9">More...</a><br /></td></tr>
-<tr class="separator:a16dca0c54c974c7882bf07196628b2c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6045d3b904fc54b6f7be5daf8bf8c3e6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a6045d3b904fc54b6f7be5daf8bf8c3e6">operator==</a> (const <a class="el" href="classItoParticle.html">ItoParticle</a> &amp;a_other) const</td></tr>
-<tr class="memdesc:a6045d3b904fc54b6f7be5daf8bf8c3e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator with other particle.  <a href="classItoParticle.html#a6045d3b904fc54b6f7be5daf8bf8c3e6">More...</a><br /></td></tr>
-<tr class="separator:a6045d3b904fc54b6f7be5daf8bf8c3e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a08836e156e3a42d868d5c7a67f7fd79c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a08836e156e3a42d868d5c7a67f7fd79c">operator==</a> (const <a class="el" href="classItoParticle.html">ItoParticle</a> *a_other) const</td></tr>
-<tr class="memdesc:a08836e156e3a42d868d5c7a67f7fd79c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator with other particle.  <a href="classItoParticle.html#a08836e156e3a42d868d5c7a67f7fd79c">More...</a><br /></td></tr>
-<tr class="separator:a08836e156e3a42d868d5c7a67f7fd79c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a43fc83340757e8f533ac2e850f60751f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a43fc83340757e8f533ac2e850f60751f">operator!=</a> (const <a class="el" href="classItoParticle.html">ItoParticle</a> &amp;a_other) const</td></tr>
-<tr class="memdesc:a43fc83340757e8f533ac2e850f60751f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator with other particle.  <a href="classItoParticle.html#a43fc83340757e8f533ac2e850f60751f">More...</a><br /></td></tr>
-<tr class="separator:a43fc83340757e8f533ac2e850f60751f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3689e650846aaa1a059caab05b6fb0ac"><td class="memItemLeft" align="right" valign="top"><a id="a3689e650846aaa1a059caab05b6fb0ac"></a>
-virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a3689e650846aaa1a059caab05b6fb0ac">size</a> () const override</td></tr>
-<tr class="memdesc:a3689e650846aaa1a059caab05b6fb0ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the size, in number of bytes, of a flat representation of the data in this object. <br /></td></tr>
-<tr class="separator:a3689e650846aaa1a059caab05b6fb0ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae4616e5e2c3c0e718419f75b77a54bc2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#ae4616e5e2c3c0e718419f75b77a54bc2">linearOut</a> (void *buf) const override</td></tr>
-<tr class="memdesc:ae4616e5e2c3c0e718419f75b77a54bc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a linear binary representation of the internal data. Assumes that sufficient memory for the buffer has already been allocated by the caller.  <a href="classItoParticle.html#ae4616e5e2c3c0e718419f75b77a54bc2">More...</a><br /></td></tr>
-<tr class="separator:ae4616e5e2c3c0e718419f75b77a54bc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abfe2be0c97c301455546862d35a315db"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#abfe2be0c97c301455546862d35a315db">linearIn</a> (void *a_buf)</td></tr>
-<tr class="memdesc:abfe2be0c97c301455546862d35a315db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.  <a href="classItoParticle.html#abfe2be0c97c301455546862d35a315db">More...</a><br /></td></tr>
-<tr class="separator:abfe2be0c97c301455546862d35a315db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aec6f02136d529f56979a34cdb47091c3"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#aec6f02136d529f56979a34cdb47091c3">setNumRuntimeScalars</a> (const int a_numRuntimeScalars)</td></tr>
-<tr class="memdesc:aec6f02136d529f56979a34cdb47091c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the number of run-time defined real variables.  <a href="classItoParticle.html#aec6f02136d529f56979a34cdb47091c3">More...</a><br /></td></tr>
-<tr class="separator:aec6f02136d529f56979a34cdb47091c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba9394a2d3e4cc07573ac13ed65245b5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#aba9394a2d3e4cc07573ac13ed65245b5">setNumRuntimeVectors</a> (const int a_numRuntimeVectors)</td></tr>
-<tr class="memdesc:aba9394a2d3e4cc07573ac13ed65245b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the number of run-time defined RealVect variables.  <a href="classItoParticle.html#aba9394a2d3e4cc07573ac13ed65245b5">More...</a><br /></td></tr>
-<tr class="separator:aba9394a2d3e4cc07573ac13ed65245b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
-Protected Member Functions</h2></td></tr>
-<tr class="memitem:a9f70182db68dcf080f001e449607c976"><td class="memItemLeft" align="right" valign="top"><a id="a9f70182db68dcf080f001e449607c976"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a9f70182db68dcf080f001e449607c976">allocateRuntimeBuffers</a> ()</td></tr>
-<tr class="memdesc:a9f70182db68dcf080f001e449607c976"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate run-time memory blocks. <br /></td></tr>
-<tr class="separator:a9f70182db68dcf080f001e449607c976"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classGenericParticle"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classGenericParticle')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classGenericParticle.html">GenericParticle&lt; 4, 2 &gt;</a></td></tr>
+<tr class="memitem:ae716639f8f7b35d464f4fc2361ce8db4 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="ae716639f8f7b35d464f4fc2361ce8db4"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#ae716639f8f7b35d464f4fc2361ce8db4">GenericParticle</a> ()</td></tr>
+<tr class="memdesc:ae716639f8f7b35d464f4fc2361ce8db4 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor &ndash; initializes everything to zero. <br /></td></tr>
+<tr class="separator:ae716639f8f7b35d464f4fc2361ce8db4 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41c58064e000d6b6211e1909a26a60e2 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a41c58064e000d6b6211e1909a26a60e2">GenericParticle</a> (const <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; M, N &gt; &amp;a_other)</td></tr>
+<tr class="memdesc:a41c58064e000d6b6211e1909a26a60e2 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor. Copies all fields.  <a href="classGenericParticle.html#a41c58064e000d6b6211e1909a26a60e2">More...</a><br /></td></tr>
+<tr class="separator:a41c58064e000d6b6211e1909a26a60e2 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0823ce71cac17ffec0893d6da3c8af2b inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="a0823ce71cac17ffec0893d6da3c8af2b"></a>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a0823ce71cac17ffec0893d6da3c8af2b">~GenericParticle</a> ()</td></tr>
+<tr class="memdesc:a0823ce71cac17ffec0893d6da3c8af2b inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (deallocates runtime memory storage) <br /></td></tr>
+<tr class="separator:a0823ce71cac17ffec0893d6da3c8af2b inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83df86ffcd9181ac7f0999b02f53cb1d inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a83df86ffcd9181ac7f0999b02f53cb1d">position</a> ()</td></tr>
+<tr class="memdesc:a83df86ffcd9181ac7f0999b02f53cb1d inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle position.  <a href="classGenericParticle.html#a83df86ffcd9181ac7f0999b02f53cb1d">More...</a><br /></td></tr>
+<tr class="separator:a83df86ffcd9181ac7f0999b02f53cb1d inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8632b1aebba8fdbb83243a21dbace3d inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">const RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#ac8632b1aebba8fdbb83243a21dbace3d">position</a> () const</td></tr>
+<tr class="memdesc:ac8632b1aebba8fdbb83243a21dbace3d inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle position.  <a href="classGenericParticle.html#ac8632b1aebba8fdbb83243a21dbace3d">More...</a><br /></td></tr>
+<tr class="separator:ac8632b1aebba8fdbb83243a21dbace3d inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4442a7a9cec4995d8753b245e222f332 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a4442a7a9cec4995d8753b245e222f332">real</a> ()</td></tr>
+<tr class="memdesc:a4442a7a9cec4995d8753b245e222f332 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the scalars.  <a href="classGenericParticle.html#a4442a7a9cec4995d8753b245e222f332">More...</a><br /></td></tr>
+<tr class="separator:a4442a7a9cec4995d8753b245e222f332 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e6f3fa0e76a30af4a36930dccc2d0e7 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a9e6f3fa0e76a30af4a36930dccc2d0e7">real</a> () const</td></tr>
+<tr class="memdesc:a9e6f3fa0e76a30af4a36930dccc2d0e7 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the scalars.  <a href="classGenericParticle.html#a9e6f3fa0e76a30af4a36930dccc2d0e7">More...</a><br /></td></tr>
+<tr class="separator:a9e6f3fa0e76a30af4a36930dccc2d0e7 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7fbedcdaf2af27ce35c278638513e222 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a7fbedcdaf2af27ce35c278638513e222">vect</a> ()</td></tr>
+<tr class="memdesc:a7fbedcdaf2af27ce35c278638513e222 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the RealVects.  <a href="classGenericParticle.html#a7fbedcdaf2af27ce35c278638513e222">More...</a><br /></td></tr>
+<tr class="separator:a7fbedcdaf2af27ce35c278638513e222 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e91899daf5e49c487e63240f885da8a inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">const RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a2e91899daf5e49c487e63240f885da8a">vect</a> () const</td></tr>
+<tr class="memdesc:a2e91899daf5e49c487e63240f885da8a inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the RealVects.  <a href="classGenericParticle.html#a2e91899daf5e49c487e63240f885da8a">More...</a><br /></td></tr>
+<tr class="separator:a2e91899daf5e49c487e63240f885da8a inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac43a0fd6d16e4b0514100b7434763ba9 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#ac43a0fd6d16e4b0514100b7434763ba9">operator==</a> (const <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; M, N &gt; &amp;a_other) const</td></tr>
+<tr class="memdesc:ac43a0fd6d16e4b0514100b7434763ba9 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator with other particle.  <a href="classGenericParticle.html#ac43a0fd6d16e4b0514100b7434763ba9">More...</a><br /></td></tr>
+<tr class="separator:ac43a0fd6d16e4b0514100b7434763ba9 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad56c1c3ea07ed4d9fd7bfbda4ab96b91 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#ad56c1c3ea07ed4d9fd7bfbda4ab96b91">operator!=</a> (const <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; M, N &gt; &amp;a_other) const</td></tr>
+<tr class="memdesc:ad56c1c3ea07ed4d9fd7bfbda4ab96b91 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator with other particle.  <a href="classGenericParticle.html#ad56c1c3ea07ed4d9fd7bfbda4ab96b91">More...</a><br /></td></tr>
+<tr class="separator:ad56c1c3ea07ed4d9fd7bfbda4ab96b91 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67caf9ed7ce5bcb0c0a80a1316745a14 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="a67caf9ed7ce5bcb0c0a80a1316745a14"></a>
+virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a67caf9ed7ce5bcb0c0a80a1316745a14">size</a> () const</td></tr>
+<tr class="memdesc:a67caf9ed7ce5bcb0c0a80a1316745a14 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the size, in number of bytes, of a flat representation of the data in this object. <br /></td></tr>
+<tr class="separator:a67caf9ed7ce5bcb0c0a80a1316745a14 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07141e6091f41df1e5bb406f2bdc126c inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a07141e6091f41df1e5bb406f2bdc126c">linearOut</a> (void *a_buffer) const</td></tr>
+<tr class="memdesc:a07141e6091f41df1e5bb406f2bdc126c inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a linear binary representation of the internal data. Assumes that sufficient memory for the buffer has already been allocated by the caller.  <a href="classGenericParticle.html#a07141e6091f41df1e5bb406f2bdc126c">More...</a><br /></td></tr>
+<tr class="separator:a07141e6091f41df1e5bb406f2bdc126c inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cd506ee421f92b4817781832d2d7d3a inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a0cd506ee421f92b4817781832d2d7d3a">linearIn</a> (void *a_bufer)</td></tr>
+<tr class="memdesc:a0cd506ee421f92b4817781832d2d7d3a inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.  <a href="classGenericParticle.html#a0cd506ee421f92b4817781832d2d7d3a">More...</a><br /></td></tr>
+<tr class="separator:a0cd506ee421f92b4817781832d2d7d3a inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -251,65 +224,33 @@ Protected Attributes</h2></td></tr>
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#aedcc15407185866bd5ca2d4cb57d8b2e">m_tmp</a></td></tr>
 <tr class="memdesc:aedcc15407185866bd5ca2d4cb57d8b2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Temporary memory &ndash; this is not communicated. <br /></td></tr>
 <tr class="separator:aedcc15407185866bd5ca2d4cb57d8b2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d9178f756b7eff512c763a11470ba1a"><td class="memItemLeft" align="right" valign="top"><a id="a8d9178f756b7eff512c763a11470ba1a"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a8d9178f756b7eff512c763a11470ba1a">m_mass</a></td></tr>
-<tr class="memdesc:a8d9178f756b7eff512c763a11470ba1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle mass (i.e., computational weight) <br /></td></tr>
-<tr class="separator:a8d9178f756b7eff512c763a11470ba1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d128b20d2169a1ed765b8ffcaf5a477"><td class="memItemLeft" align="right" valign="top"><a id="a6d128b20d2169a1ed765b8ffcaf5a477"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a6d128b20d2169a1ed765b8ffcaf5a477">m_diffusion</a></td></tr>
-<tr class="memdesc:a6d128b20d2169a1ed765b8ffcaf5a477"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle diffusion coefficient. <br /></td></tr>
-<tr class="separator:a6d128b20d2169a1ed765b8ffcaf5a477"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac46c72afc33f60cc154cee832777721d"><td class="memItemLeft" align="right" valign="top"><a id="ac46c72afc33f60cc154cee832777721d"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#ac46c72afc33f60cc154cee832777721d">m_averageEnergy</a></td></tr>
-<tr class="memdesc:ac46c72afc33f60cc154cee832777721d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle average energy. <br /></td></tr>
-<tr class="separator:ac46c72afc33f60cc154cee832777721d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aefb3375190a71b597a59f703c5078dea"><td class="memItemLeft" align="right" valign="top"><a id="aefb3375190a71b597a59f703c5078dea"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#aefb3375190a71b597a59f703c5078dea">m_mobility</a></td></tr>
-<tr class="memdesc:aefb3375190a71b597a59f703c5078dea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle mobility coefficient. <br /></td></tr>
-<tr class="separator:aefb3375190a71b597a59f703c5078dea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a89ef9ccf75fdd0ea0e0ed49e4e12a2cb"><td class="memItemLeft" align="right" valign="top"><a id="a89ef9ccf75fdd0ea0e0ed49e4e12a2cb"></a>
-RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a89ef9ccf75fdd0ea0e0ed49e4e12a2cb">m_velocity</a></td></tr>
-<tr class="memdesc:a89ef9ccf75fdd0ea0e0ed49e4e12a2cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle velocity. <br /></td></tr>
-<tr class="separator:a89ef9ccf75fdd0ea0e0ed49e4e12a2cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afcdadd82fa0168a5b27e3dcb82ae38c8"><td class="memItemLeft" align="right" valign="top"><a id="afcdadd82fa0168a5b27e3dcb82ae38c8"></a>
-RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#afcdadd82fa0168a5b27e3dcb82ae38c8">m_oldPosition</a></td></tr>
-<tr class="memdesc:afcdadd82fa0168a5b27e3dcb82ae38c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Previous particle position. <br /></td></tr>
-<tr class="separator:afcdadd82fa0168a5b27e3dcb82ae38c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a780247b6c3e15a89a2e049a03fd14f10"><td class="memItemLeft" align="right" valign="top"><a id="a780247b6c3e15a89a2e049a03fd14f10"></a>
-Real *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a780247b6c3e15a89a2e049a03fd14f10">m_runtimeScalars</a></td></tr>
-<tr class="memdesc:a780247b6c3e15a89a2e049a03fd14f10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to run-time Real memory allocations. <br /></td></tr>
-<tr class="separator:a780247b6c3e15a89a2e049a03fd14f10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09fea6aa3fd44c3e44b376cffc63ef55"><td class="memItemLeft" align="right" valign="top"><a id="a09fea6aa3fd44c3e44b376cffc63ef55"></a>
-RealVect *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a09fea6aa3fd44c3e44b376cffc63ef55">m_runtimeVectors</a></td></tr>
-<tr class="memdesc:a09fea6aa3fd44c3e44b376cffc63ef55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to run-time RealVect memory allocations. <br /></td></tr>
-<tr class="separator:a09fea6aa3fd44c3e44b376cffc63ef55"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-attribs"></a>
-Static Protected Attributes</h2></td></tr>
-<tr class="memitem:aa325b3dd7f1c5b38f1a9bdc087276ebf"><td class="memItemLeft" align="right" valign="top"><a id="aa325b3dd7f1c5b38f1a9bdc087276ebf"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#aa325b3dd7f1c5b38f1a9bdc087276ebf">s_numRuntimeScalars</a> = 0</td></tr>
-<tr class="memdesc:aa325b3dd7f1c5b38f1a9bdc087276ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static for defining the number of runtime Real components. <br /></td></tr>
-<tr class="separator:aa325b3dd7f1c5b38f1a9bdc087276ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a226e9a251fee8e755132036f3765d4f1"><td class="memItemLeft" align="right" valign="top"><a id="a226e9a251fee8e755132036f3765d4f1"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a226e9a251fee8e755132036f3765d4f1">s_numRuntimeVectors</a> = 0</td></tr>
-<tr class="memdesc:a226e9a251fee8e755132036f3765d4f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static for defining the number of runtime RealVect components. <br /></td></tr>
-<tr class="separator:a226e9a251fee8e755132036f3765d4f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
-Friends</h2></td></tr>
-<tr class="memitem:ac906cbed0c50250b51fe003fb2471355"><td class="memItemLeft" align="right" valign="top">std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#ac906cbed0c50250b51fe003fb2471355">operator&lt;&lt;</a> (std::ostream &amp;ostr, const <a class="el" href="classItoParticle.html">ItoParticle</a> &amp;a_particle)</td></tr>
-<tr class="memdesc:ac906cbed0c50250b51fe003fb2471355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Friend function for letting ostream print the particle.  <a href="classItoParticle.html#ac906cbed0c50250b51fe003fb2471355">More...</a><br /></td></tr>
-<tr class="separator:ac906cbed0c50250b51fe003fb2471355"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_classGenericParticle"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classGenericParticle')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classGenericParticle.html">GenericParticle&lt; 4, 2 &gt;</a></td></tr>
+<tr class="memitem:ae4b8b5e0e0725aeac66a973cbd69ad26 inherit pro_attribs_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="ae4b8b5e0e0725aeac66a973cbd69ad26"></a>
+RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#ae4b8b5e0e0725aeac66a973cbd69ad26">m_position</a></td></tr>
+<tr class="memdesc:ae4b8b5e0e0725aeac66a973cbd69ad26 inherit pro_attribs_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle position. <br /></td></tr>
+<tr class="separator:ae4b8b5e0e0725aeac66a973cbd69ad26 inherit pro_attribs_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af908ea03b226f6aff0535327b6dcbfbe inherit pro_attribs_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="af908ea03b226f6aff0535327b6dcbfbe"></a>
+std::array&lt; Real, M &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#af908ea03b226f6aff0535327b6dcbfbe">m_scalars</a></td></tr>
+<tr class="memdesc:af908ea03b226f6aff0535327b6dcbfbe inherit pro_attribs_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scalar storage array. <br /></td></tr>
+<tr class="separator:af908ea03b226f6aff0535327b6dcbfbe inherit pro_attribs_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb79e9483e015a0ccf4d442becf92ea6 inherit pro_attribs_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="afb79e9483e015a0ccf4d442becf92ea6"></a>
+std::array&lt; RealVect, N &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#afb79e9483e015a0ccf4d442becf92ea6">m_vectors</a></td></tr>
+<tr class="memdesc:afb79e9483e015a0ccf4d442becf92ea6 inherit pro_attribs_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">vector storage array <br /></td></tr>
+<tr class="separator:afb79e9483e015a0ccf4d442becf92ea6 inherit pro_attribs_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A particle class for use with ItoSolvers, i.e. drifting Brownian walkers. </p>
-<p>This class is used to encapsulate the requirements for running an <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a>. This computational particle contains position, mass, velocity, as well as a diffusion coefficient, a mobility, energy, and previous particle position. It also contains a temporary, and users can choose to allocate additional memory at runtime. This memory is added on top of the other particle fields. In total, this class stores 5 + 3*SpaceDim fields. So in 3D this particle class contains 14 Reals =&gt; 112 bytes. </p>
+<p>This class is used to encapsulate the requirements for running an <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a>. This computational particle contains position, weight, velocity, as well as a diffusion coefficient, a mobility, energy, and previous particle position. These are stored as follows:</p>
+<p>m_scalars[0] =&gt; weight m_scalars[1] =&gt; mobility m_scalars[2] =&gt; diffusion m_scalars[3] =&gt; energy m_vectors[0] =&gt; oldPosition m_vectors[1] =&gt; velocity </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a796cf9c232ca92dfa21353f6d2338a6f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a796cf9c232ca92dfa21353f6d2338a6f">&#9670;&nbsp;</a></span>ItoParticle() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">ItoParticle::ItoParticle </td>
@@ -318,6 +259,11 @@ Friends</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Default constructor &ndash; user should subsequently set the variables or call define. </p>
@@ -325,17 +271,20 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a id="aee9d865d3a596f7fbd262dea1a6d38d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aee9d865d3a596f7fbd262dea1a6d38d3">&#9670;&nbsp;</a></span>ItoParticle() <span class="overload">[2/3]</span></h2>
+<a id="adfb4fce172f57cbbae3a109d54e8e9b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfb4fce172f57cbbae3a109d54e8e9b4">&#9670;&nbsp;</a></span>ItoParticle() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">ItoParticle::ItoParticle </td>
           <td>(</td>
           <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_mass</em>, </td>
+          <td class="paramname"><em>a_weight</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -365,7 +314,7 @@ Friends</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_averageEnergy</em> = <code>0.0</code>&#160;</td>
+          <td class="paramname"><em>a_energy</em> = <code>0.0</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -373,17 +322,22 @@ Friends</h2></td></tr>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Constructor. This calls the define function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_mass</td><td>Particle mass (i.e., computational weight) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_weight</td><td>Particle weight </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_position</td><td>Particle position </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_velocity</td><td>Particle velocity </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_diffusion</td><td>Particle diffusion coefficient </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mobility</td><td>Particle mobility coefficient </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_averageEnergy</td><td>Particle average energy </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_energy</td><td>Particle average energy </td></tr>
   </table>
   </dd>
 </dl>
@@ -396,6 +350,9 @@ Friends</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">ItoParticle::ItoParticle </td>
@@ -405,6 +362,11 @@ Friends</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Copy constructor. Copies all fields. </p>
@@ -442,12 +404,12 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the particle conductivity. </p>
-<dl class="section return"><dt>Returns</dt><dd>Returns mobility*mass </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns m_weight * m_mobility </dd></dl>
 
 </div>
 </div>
-<a id="aa050fcefbc2dbab1449c449b497c54d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa050fcefbc2dbab1449c449b497c54d1">&#9670;&nbsp;</a></span>define()</h2>
+<a id="aae4ff06942a7139bbc4378f7a977cff9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae4ff06942a7139bbc4378f7a977cff9">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -459,7 +421,7 @@ Friends</h2></td></tr>
           <td class="memname">void ItoParticle::define </td>
           <td>(</td>
           <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_mass</em>, </td>
+          <td class="paramname"><em>a_weight</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -489,7 +451,7 @@ Friends</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_averageEnergy</em> = <code>0.0</code>&#160;</td>
+          <td class="paramname"><em>a_energy</em> = <code>0.0</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -507,12 +469,12 @@ Friends</h2></td></tr>
 <p>Full define function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_mass</td><td>Particle mass (i.e., computational weight) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_weight</td><td>Particle weight </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_position</td><td>Particle position </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_velocity</td><td>Particle velocity </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_diffusion</td><td>Particle diffusion coefficient </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mobility</td><td>Particle mobility coefficient </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_averageEnergy</td><td>Particle average energy </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_energy</td><td>Particle average energy </td></tr>
   </table>
   </dd>
 </dl>
@@ -599,7 +561,7 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the particle diffusivity. </p>
-<dl class="section return"><dt>Returns</dt><dd>Returns diffusion*mass </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns m_weight * m_diffusion </dd></dl>
 
 </div>
 </div>
@@ -627,7 +589,7 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get average particle energy. </p>
-<dl class="section return"><dt>Returns</dt><dd>m_averageEnergy </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>m_energy </dd></dl>
 
 </div>
 </div>
@@ -655,131 +617,7 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get average particle energy. </p>
-<dl class="section return"><dt>Returns</dt><dd>m_averageEnergy </dd></dl>
-
-</div>
-</div>
-<a id="abfe2be0c97c301455546862d35a315db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abfe2be0c97c301455546862d35a315db">&#9670;&nbsp;</a></span>linearIn()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::linearIn </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>a_buf</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Read a linear binary representation of the internal data. Assumes that the buffer has the correct data. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_buf</td><td>Pointer to memory block </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ae4616e5e2c3c0e718419f75b77a54bc2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae4616e5e2c3c0e718419f75b77a54bc2">&#9670;&nbsp;</a></span>linearOut()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::linearOut </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>buf</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Write a linear binary representation of the internal data. Assumes that sufficient memory for the buffer has already been allocated by the caller. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_buf</td><td>Pointer to memory block </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a54a62820ccebb885585553c5876f4661"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a54a62820ccebb885585553c5876f4661">&#9670;&nbsp;</a></span>mass() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const Real &amp; ItoParticle::mass </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get particle mass (i.e., computational weight) </p>
-<dl class="section return"><dt>Returns</dt><dd>m_mass </dd></dl>
-
-</div>
-</div>
-<a id="ae65c6522b262d95fb37f3298237ad912"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae65c6522b262d95fb37f3298237ad912">&#9670;&nbsp;</a></span>mass() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const Real&amp; ItoParticle::mass </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get particle mass (i.e., computational weight) </p>
-<dl class="section return"><dt>Returns</dt><dd>m_mass </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>m_energy </dd></dl>
 
 </div>
 </div>
@@ -895,537 +733,6 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a id="a43fc83340757e8f533ac2e850f60751f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a43fc83340757e8f533ac2e850f60751f">&#9670;&nbsp;</a></span>operator!=()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ItoParticle::operator!= </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classItoParticle.html">ItoParticle</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_other</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Comparison operator with other particle. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other particle </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a6045d3b904fc54b6f7be5daf8bf8c3e6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6045d3b904fc54b6f7be5daf8bf8c3e6">&#9670;&nbsp;</a></span>operator==() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ItoParticle::operator== </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classItoParticle.html">ItoParticle</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_other</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Comparison operator with other particle. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other particle </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a08836e156e3a42d868d5c7a67f7fd79c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a08836e156e3a42d868d5c7a67f7fd79c">&#9670;&nbsp;</a></span>operator==() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ItoParticle::operator== </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classItoParticle.html">ItoParticle</a> *&#160;</td>
-          <td class="paramname"><em>a_other</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Comparison operator with other particle. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other particle </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ada5ca38e0186958564b4f8630b33fe2a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ada5ca38e0186958564b4f8630b33fe2a">&#9670;&nbsp;</a></span>runtimeScalar() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Real &amp; ItoParticle::runtimeScalar </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_which</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get one of the runtime-defined scalar variable. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_which</td><td>Which run-time scalar to obtain </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ae0b0b123109cf7cec123175c7cd9cce3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae0b0b123109cf7cec123175c7cd9cce3">&#9670;&nbsp;</a></span>runtimeScalar() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const Real &amp; ItoParticle::runtimeScalar </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_which</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get one of the runtime-defined scalar variable. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_which</td><td>Which run-time scalar to obtain </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a5768d35c8653e63c39cd35270785dccb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5768d35c8653e63c39cd35270785dccb">&#9670;&nbsp;</a></span>runtimeVector() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">RealVect &amp; ItoParticle::runtimeVector </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_which</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get one of the runtime-defined vector variable. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_which</td><td>Which run-time vector to obtain </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a16dca0c54c974c7882bf07196628b2c9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a16dca0c54c974c7882bf07196628b2c9">&#9670;&nbsp;</a></span>runtimeVector() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const RealVect &amp; ItoParticle::runtimeVector </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_which</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get one of the runtime-defined vector variable. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_which</td><td>Which run-time vector to obtain </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a27a823fe67b0abe58c01c7308fbb8ff0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a27a823fe67b0abe58c01c7308fbb8ff0">&#9670;&nbsp;</a></span>setDiffusion()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::setDiffusion </td>
-          <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_diffusion</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set particle diffusion coefficient. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_diffusion</td><td>Diffusion coefficient </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a10976230b2f61f1e8b9ca121aa94bcad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a10976230b2f61f1e8b9ca121aa94bcad">&#9670;&nbsp;</a></span>setEnergy()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::setEnergy </td>
-          <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_averageEnergy</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set average particle energy. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_averageEnergy</td><td>Average particle energy. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a5badc7fbc21994ecc9410f43630673d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5badc7fbc21994ecc9410f43630673d7">&#9670;&nbsp;</a></span>setMass()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::setMass </td>
-          <td>(</td>
-          <td class="paramtype">const Real &amp;&#160;</td>
-          <td class="paramname"><em>a_mass</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set particle mass. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_mass</td><td>Particle mass </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a873f5b6b0a11080bb8cdc04dad2f67b6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a873f5b6b0a11080bb8cdc04dad2f67b6">&#9670;&nbsp;</a></span>setMobility()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::setMobility </td>
-          <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_mobility</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set particle mobility. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_mobility</td><td>Mobility coefficient </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="aec6f02136d529f56979a34cdb47091c3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aec6f02136d529f56979a34cdb47091c3">&#9670;&nbsp;</a></span>setNumRuntimeScalars()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::setNumRuntimeScalars </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_numRuntimeScalars</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the number of run-time defined real variables. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_numRuntimeScalars</td><td>Number of run-time scalar variables. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="aba9394a2d3e4cc07573ac13ed65245b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba9394a2d3e4cc07573ac13ed65245b5">&#9670;&nbsp;</a></span>setNumRuntimeVectors()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::setNumRuntimeVectors </td>
-          <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_numRuntimeVectors</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the number of run-time defined RealVect variables. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_numRuntimeVectors</td><td>Number of run-time vector variables. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="abc686468155319ae1c79323fe0160478"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abc686468155319ae1c79323fe0160478">&#9670;&nbsp;</a></span>setOldPosition()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::setOldPosition </td>
-          <td>(</td>
-          <td class="paramtype">const RealVect&#160;</td>
-          <td class="paramname"><em>a_oldPosition</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the old position. </p>
-<p>Set m_oldPosition. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_oldPosition.</td><td></td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a340964c38cd1e2de315443a5674ab453"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a340964c38cd1e2de315443a5674ab453">&#9670;&nbsp;</a></span>setVelocity() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::setVelocity </td>
-          <td>(</td>
-          <td class="paramtype">const Real &amp;&#160;</td>
-          <td class="paramname"><em>a_velocity</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_dir</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the velocity in particular direction. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_velocity</td><td>Velocity component </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ace7efae48743570b44e0c03e2f32f507"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ace7efae48743570b44e0c03e2f32f507">&#9670;&nbsp;</a></span>setVelocity() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ItoParticle::setVelocity </td>
-          <td>(</td>
-          <td class="paramtype">const RealVect &amp;&#160;</td>
-          <td class="paramname"><em>a_velocity</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the particle velocity. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_velocity</td><td>Particle velocity </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="af389e5e67acdf6e93935c2350fedb836"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af389e5e67acdf6e93935c2350fedb836">&#9670;&nbsp;</a></span>tmp() <span class="overload">[1/2]</span></h2>
 
@@ -1506,12 +813,12 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the total energy. </p>
-<dl class="section return"><dt>Returns</dt><dd>Returns m_energy*m_mass </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns m_weight * m_energy </dd></dl>
 
 </div>
 </div>
 <a id="ab9a3270560ec27c47a463bb4c79345d5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab9a3270560ec27c47a463bb4c79345d5">&#9670;&nbsp;</a></span>velocity() <span class="overload">[1/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9a3270560ec27c47a463bb4c79345d5">&#9670;&nbsp;</a></span>velocity() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1539,7 +846,7 @@ Friends</h2></td></tr>
 </div>
 </div>
 <a id="afc010c49932779006e10dd17a5f3471e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afc010c49932779006e10dd17a5f3471e">&#9670;&nbsp;</a></span>velocity() <span class="overload">[2/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#afc010c49932779006e10dd17a5f3471e">&#9670;&nbsp;</a></span>velocity() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1566,8 +873,8 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a id="a71a0f2a9e941d1eae065c1658a2c8aa3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a71a0f2a9e941d1eae065c1658a2c8aa3">&#9670;&nbsp;</a></span>velocity() <span class="overload">[3/3]</span></h2>
+<a id="a715a0d95ffb11828b6a751c5cc40450c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a715a0d95ffb11828b6a751c5cc40450c">&#9670;&nbsp;</a></span>weight() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1576,10 +883,37 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Real ItoParticle::velocity </td>
+          <td class="memname">const Real &amp; ItoParticle::weight </td>
           <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_dir</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get particle weight. </p>
+<dl class="section return"><dt>Returns</dt><dd>m_weight </dd></dl>
+
+</div>
+</div>
+<a id="a5e06544466a436227dfe1a19ba5ce386"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e06544466a436227dfe1a19ba5ce386">&#9670;&nbsp;</a></span>weight() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Real&amp; ItoParticle::weight </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
@@ -1590,66 +924,13 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get the particle velocity in a particular coordinate direction. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>m_velocity[a_dir] </dd></dl>
-
-</div>
-</div>
-<h2 class="groupheader">Friends And Related Function Documentation</h2>
-<a id="ac906cbed0c50250b51fe003fb2471355"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac906cbed0c50250b51fe003fb2471355">&#9670;&nbsp;</a></span>operator&lt;&lt;</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::ostream&amp; operator&lt;&lt; </td>
-          <td>(</td>
-          <td class="paramtype">std::ostream &amp;&#160;</td>
-          <td class="paramname"><em>ostr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classItoParticle.html">ItoParticle</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_particle</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Friend function for letting ostream print the particle. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ostr</td><td>Output stream </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particle</td><td>Particle to output </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Get particle weight. </p>
+<dl class="section return"><dt>Returns</dt><dd>m_weight </dd></dl>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>Source/ItoDiffusion/<a class="el" href="CD__ItoParticle_8H_source.html">CD_ItoParticle.H</a></li>
-<li>Source/ItoDiffusion/<a class="el" href="CD__ItoParticle_8cpp.html">CD_ItoParticle.cpp</a></li>
 <li>Source/ItoDiffusion/<a class="el" href="CD__ItoParticleImplem_8H_source.html">CD_ItoParticleImplem.H</a></li>
 </ul>
 </div><!-- contents -->

@@ -1,0 +1,12 @@
+<map id="GenericParticle&lt; M, N &gt;" name="GenericParticle&lt; M, N &gt;">
+<area shape="rect" id="node1" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,107,185,133"/>
+<area shape="rect" id="node2" href="$classTracerParticle.html" title="A tracer particle class. This is templated for holding extra storage (useful for kernels)." alt="" coords="295,5,464,32"/>
+<area shape="rect" id="node3" href="$classGenericParticle.html" title=" " alt="" coords="292,56,467,83"/>
+<area shape="rect" id="node5" href="$classGenericParticle.html" title=" " alt="" coords="292,107,467,133"/>
+<area shape="rect" id="node7" href="$classGenericParticle.html" title=" " alt="" coords="292,157,467,184"/>
+<area shape="rect" id="node9" href="$classGenericParticle.html" title=" " alt="" coords="292,208,467,235"/>
+<area shape="rect" id="node4" href="$classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer." alt="" coords="549,56,615,83"/>
+<area shape="rect" id="node6" href="$classSimpleItoParticle.html" title="A particle class for reducing HDF5 I/O file sizes when using ItoSolver." alt="" coords="516,107,648,133"/>
+<area shape="rect" id="node8" href="$classPointParticle.html" title="A particle class that only has a position and a weight." alt="" coords="531,157,633,184"/>
+<area shape="rect" id="node10" href="$classItoParticle.html" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="539,208,625,235"/>
+</map>

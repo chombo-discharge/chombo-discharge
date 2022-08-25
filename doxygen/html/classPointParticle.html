@@ -70,14 +70,13 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classPointParticle-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">PointParticle Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>A particle class that only has a position and a mass.  
+<p>A particle class that only has a position and a weight.  
  <a href="classPointParticle.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="CD__PointParticle_8H_source.html">CD_PointParticle.H</a>&gt;</code></p>
@@ -86,8 +85,9 @@ Inheritance diagram for PointParticle:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPointParticle__inherit__graph.png" border="0" usemap="#PointParticle_inherit__map" alt="Inheritance graph"/></div>
 <map name="PointParticle_inherit__map" id="PointParticle_inherit__map">
-<area shape="rect" title="A particle class that only has a position and a mass." alt="" coords="5,80,108,107"/>
-<area shape="rect" title=" " alt="" coords="20,5,93,32"/>
+<area shape="rect" title="A particle class that only has a position and a weight." alt="" coords="44,171,147,197"/>
+<area shape="rect" href="classGenericParticle.html" title=" " alt="" coords="8,95,183,121"/>
+<area shape="rect" href="classGenericParticle.html" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,5,185,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
@@ -95,8 +95,9 @@ Collaboration diagram for PointParticle:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPointParticle__coll__graph.png" border="0" usemap="#PointParticle_coll__map" alt="Collaboration graph"/></div>
 <map name="PointParticle_coll__map" id="PointParticle_coll__map">
-<area shape="rect" title="A particle class that only has a position and a mass." alt="" coords="5,80,108,107"/>
-<area shape="rect" title=" " alt="" coords="20,5,93,32"/>
+<area shape="rect" title="A particle class that only has a position and a weight." alt="" coords="44,171,147,197"/>
+<area shape="rect" href="classGenericParticle.html" title=" " alt="" coords="8,95,183,121"/>
+<area shape="rect" href="classGenericParticle.html" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,5,185,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -104,55 +105,100 @@ Collaboration diagram for PointParticle:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a7997b3b4d18368b4494da4261d8d7861"><td class="memItemLeft" align="right" valign="top"><a id="a7997b3b4d18368b4494da4261d8d7861"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#a7997b3b4d18368b4494da4261d8d7861">PointParticle</a> ()</td></tr>
-<tr class="memdesc:a7997b3b4d18368b4494da4261d8d7861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Sets mass and position to zero. <br /></td></tr>
+<tr class="memdesc:a7997b3b4d18368b4494da4261d8d7861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Sets weight and position to zero. <br /></td></tr>
 <tr class="separator:a7997b3b4d18368b4494da4261d8d7861"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abcf7dfa3a6672bc22e1dc8f9f8cc3824"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#abcf7dfa3a6672bc22e1dc8f9f8cc3824">PointParticle</a> (const RealVect a_position, const Real a_mass)</td></tr>
-<tr class="memdesc:abcf7dfa3a6672bc22e1dc8f9f8cc3824"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Subsequently calls define.  <a href="classPointParticle.html#abcf7dfa3a6672bc22e1dc8f9f8cc3824">More...</a><br /></td></tr>
-<tr class="separator:abcf7dfa3a6672bc22e1dc8f9f8cc3824"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5943d7d7e880db937b2d86cbde18eb0f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#a5943d7d7e880db937b2d86cbde18eb0f">PointParticle</a> (const RealVect a_position, const Real a_weight)</td></tr>
+<tr class="memdesc:a5943d7d7e880db937b2d86cbde18eb0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Subsequently calls define.  <a href="classPointParticle.html#a5943d7d7e880db937b2d86cbde18eb0f">More...</a><br /></td></tr>
+<tr class="separator:a5943d7d7e880db937b2d86cbde18eb0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b2d0e48b6818fa173b2cff1d13c74b1"><td class="memItemLeft" align="right" valign="top"><a id="a8b2d0e48b6818fa173b2cff1d13c74b1"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#a8b2d0e48b6818fa173b2cff1d13c74b1">~PointParticle</a> ()</td></tr>
 <tr class="memdesc:a8b2d0e48b6818fa173b2cff1d13c74b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dtor - does nothing. <br /></td></tr>
 <tr class="separator:a8b2d0e48b6818fa173b2cff1d13c74b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ed9a360d16497d879ba98c65c4b54ac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#a6ed9a360d16497d879ba98c65c4b54ac">define</a> (const RealVect a_position, const Real a_mass)</td></tr>
-<tr class="memdesc:a6ed9a360d16497d879ba98c65c4b54ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <a href="classPointParticle.html#a6ed9a360d16497d879ba98c65c4b54ac">More...</a><br /></td></tr>
-<tr class="separator:a6ed9a360d16497d879ba98c65c4b54ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3cb4db4a95017d847f5f8fce8b58f589"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#a3cb4db4a95017d847f5f8fce8b58f589">setMass</a> (const Real a_mass)</td></tr>
-<tr class="memdesc:a3cb4db4a95017d847f5f8fce8b58f589"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set particle mass.  <a href="classPointParticle.html#a3cb4db4a95017d847f5f8fce8b58f589">More...</a><br /></td></tr>
-<tr class="separator:a3cb4db4a95017d847f5f8fce8b58f589"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a435ef7003ced07cb358b34ce4a9425"><td class="memItemLeft" align="right" valign="top"><a id="a5a435ef7003ced07cb358b34ce4a9425"></a>
-Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#a5a435ef7003ced07cb358b34ce4a9425">mass</a> ()</td></tr>
-<tr class="memdesc:a5a435ef7003ced07cb358b34ce4a9425"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get mass. <br /></td></tr>
-<tr class="separator:a5a435ef7003ced07cb358b34ce4a9425"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa3e8535a05e502ed5a33c952ec0e1c4e"><td class="memItemLeft" align="right" valign="top"><a id="aa3e8535a05e502ed5a33c952ec0e1c4e"></a>
-const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#aa3e8535a05e502ed5a33c952ec0e1c4e">mass</a> () const</td></tr>
-<tr class="memdesc:aa3e8535a05e502ed5a33c952ec0e1c4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Const retrieve mass. <br /></td></tr>
-<tr class="separator:aa3e8535a05e502ed5a33c952ec0e1c4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24ceaeb78577917da1384175272aec18"><td class="memItemLeft" align="right" valign="top"><a id="a24ceaeb78577917da1384175272aec18"></a>
-virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#a24ceaeb78577917da1384175272aec18">size</a> () const</td></tr>
-<tr class="memdesc:a24ceaeb78577917da1384175272aec18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the size, in number of bytes, of a flat representation of the data in this object. <br /></td></tr>
-<tr class="separator:a24ceaeb78577917da1384175272aec18"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7cf153a7a49014d87ab59da4b159d7a5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#a7cf153a7a49014d87ab59da4b159d7a5">linearOut</a> (void *buf) const</td></tr>
-<tr class="memdesc:a7cf153a7a49014d87ab59da4b159d7a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a linear binary representation of the internal data. Assumes that sufficient memory for the buffer has already been allocated by the caller.  <a href="classPointParticle.html#a7cf153a7a49014d87ab59da4b159d7a5">More...</a><br /></td></tr>
-<tr class="separator:a7cf153a7a49014d87ab59da4b159d7a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5990111b77c92806b28366144f39af20"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#a5990111b77c92806b28366144f39af20">linearIn</a> (void *buf)</td></tr>
-<tr class="memdesc:a5990111b77c92806b28366144f39af20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.  <a href="classPointParticle.html#a5990111b77c92806b28366144f39af20">More...</a><br /></td></tr>
-<tr class="separator:a5990111b77c92806b28366144f39af20"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5bbf384522526b5d3f03908c005237b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#ac5bbf384522526b5d3f03908c005237b">define</a> (const RealVect a_position, const Real a_weight)</td></tr>
+<tr class="memdesc:ac5bbf384522526b5d3f03908c005237b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <a href="classPointParticle.html#ac5bbf384522526b5d3f03908c005237b">More...</a><br /></td></tr>
+<tr class="separator:ac5bbf384522526b5d3f03908c005237b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9379d7754bfae635949aba45750a584"><td class="memItemLeft" align="right" valign="top"><a id="ad9379d7754bfae635949aba45750a584"></a>
+Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#ad9379d7754bfae635949aba45750a584">weight</a> ()</td></tr>
+<tr class="memdesc:ad9379d7754bfae635949aba45750a584"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get weight. <br /></td></tr>
+<tr class="separator:ad9379d7754bfae635949aba45750a584"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc9a1fcaa0a70388ec67d6b62d11c0bf"><td class="memItemLeft" align="right" valign="top"><a id="abc9a1fcaa0a70388ec67d6b62d11c0bf"></a>
+const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#abc9a1fcaa0a70388ec67d6b62d11c0bf">weight</a> () const</td></tr>
+<tr class="memdesc:abc9a1fcaa0a70388ec67d6b62d11c0bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Const retrieve weight. <br /></td></tr>
+<tr class="separator:abc9a1fcaa0a70388ec67d6b62d11c0bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classGenericParticle"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classGenericParticle')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classGenericParticle.html">GenericParticle&lt; 1, 0 &gt;</a></td></tr>
+<tr class="memitem:ae716639f8f7b35d464f4fc2361ce8db4 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="ae716639f8f7b35d464f4fc2361ce8db4"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#ae716639f8f7b35d464f4fc2361ce8db4">GenericParticle</a> ()</td></tr>
+<tr class="memdesc:ae716639f8f7b35d464f4fc2361ce8db4 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor &ndash; initializes everything to zero. <br /></td></tr>
+<tr class="separator:ae716639f8f7b35d464f4fc2361ce8db4 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41c58064e000d6b6211e1909a26a60e2 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a41c58064e000d6b6211e1909a26a60e2">GenericParticle</a> (const <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; M, N &gt; &amp;a_other)</td></tr>
+<tr class="memdesc:a41c58064e000d6b6211e1909a26a60e2 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor. Copies all fields.  <a href="classGenericParticle.html#a41c58064e000d6b6211e1909a26a60e2">More...</a><br /></td></tr>
+<tr class="separator:a41c58064e000d6b6211e1909a26a60e2 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0823ce71cac17ffec0893d6da3c8af2b inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="a0823ce71cac17ffec0893d6da3c8af2b"></a>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a0823ce71cac17ffec0893d6da3c8af2b">~GenericParticle</a> ()</td></tr>
+<tr class="memdesc:a0823ce71cac17ffec0893d6da3c8af2b inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (deallocates runtime memory storage) <br /></td></tr>
+<tr class="separator:a0823ce71cac17ffec0893d6da3c8af2b inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83df86ffcd9181ac7f0999b02f53cb1d inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a83df86ffcd9181ac7f0999b02f53cb1d">position</a> ()</td></tr>
+<tr class="memdesc:a83df86ffcd9181ac7f0999b02f53cb1d inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle position.  <a href="classGenericParticle.html#a83df86ffcd9181ac7f0999b02f53cb1d">More...</a><br /></td></tr>
+<tr class="separator:a83df86ffcd9181ac7f0999b02f53cb1d inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8632b1aebba8fdbb83243a21dbace3d inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">const RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#ac8632b1aebba8fdbb83243a21dbace3d">position</a> () const</td></tr>
+<tr class="memdesc:ac8632b1aebba8fdbb83243a21dbace3d inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle position.  <a href="classGenericParticle.html#ac8632b1aebba8fdbb83243a21dbace3d">More...</a><br /></td></tr>
+<tr class="separator:ac8632b1aebba8fdbb83243a21dbace3d inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4442a7a9cec4995d8753b245e222f332 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a4442a7a9cec4995d8753b245e222f332">real</a> ()</td></tr>
+<tr class="memdesc:a4442a7a9cec4995d8753b245e222f332 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the scalars.  <a href="classGenericParticle.html#a4442a7a9cec4995d8753b245e222f332">More...</a><br /></td></tr>
+<tr class="separator:a4442a7a9cec4995d8753b245e222f332 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e6f3fa0e76a30af4a36930dccc2d0e7 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">const Real &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a9e6f3fa0e76a30af4a36930dccc2d0e7">real</a> () const</td></tr>
+<tr class="memdesc:a9e6f3fa0e76a30af4a36930dccc2d0e7 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the scalars.  <a href="classGenericParticle.html#a9e6f3fa0e76a30af4a36930dccc2d0e7">More...</a><br /></td></tr>
+<tr class="separator:a9e6f3fa0e76a30af4a36930dccc2d0e7 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7fbedcdaf2af27ce35c278638513e222 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a7fbedcdaf2af27ce35c278638513e222">vect</a> ()</td></tr>
+<tr class="memdesc:a7fbedcdaf2af27ce35c278638513e222 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the RealVects.  <a href="classGenericParticle.html#a7fbedcdaf2af27ce35c278638513e222">More...</a><br /></td></tr>
+<tr class="separator:a7fbedcdaf2af27ce35c278638513e222 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e91899daf5e49c487e63240f885da8a inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">const RealVect &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a2e91899daf5e49c487e63240f885da8a">vect</a> () const</td></tr>
+<tr class="memdesc:a2e91899daf5e49c487e63240f885da8a inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one of the RealVects.  <a href="classGenericParticle.html#a2e91899daf5e49c487e63240f885da8a">More...</a><br /></td></tr>
+<tr class="separator:a2e91899daf5e49c487e63240f885da8a inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac43a0fd6d16e4b0514100b7434763ba9 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#ac43a0fd6d16e4b0514100b7434763ba9">operator==</a> (const <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; M, N &gt; &amp;a_other) const</td></tr>
+<tr class="memdesc:ac43a0fd6d16e4b0514100b7434763ba9 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator with other particle.  <a href="classGenericParticle.html#ac43a0fd6d16e4b0514100b7434763ba9">More...</a><br /></td></tr>
+<tr class="separator:ac43a0fd6d16e4b0514100b7434763ba9 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad56c1c3ea07ed4d9fd7bfbda4ab96b91 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#ad56c1c3ea07ed4d9fd7bfbda4ab96b91">operator!=</a> (const <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; M, N &gt; &amp;a_other) const</td></tr>
+<tr class="memdesc:ad56c1c3ea07ed4d9fd7bfbda4ab96b91 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator with other particle.  <a href="classGenericParticle.html#ad56c1c3ea07ed4d9fd7bfbda4ab96b91">More...</a><br /></td></tr>
+<tr class="separator:ad56c1c3ea07ed4d9fd7bfbda4ab96b91 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67caf9ed7ce5bcb0c0a80a1316745a14 inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="a67caf9ed7ce5bcb0c0a80a1316745a14"></a>
+virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a67caf9ed7ce5bcb0c0a80a1316745a14">size</a> () const</td></tr>
+<tr class="memdesc:a67caf9ed7ce5bcb0c0a80a1316745a14 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the size, in number of bytes, of a flat representation of the data in this object. <br /></td></tr>
+<tr class="separator:a67caf9ed7ce5bcb0c0a80a1316745a14 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07141e6091f41df1e5bb406f2bdc126c inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a07141e6091f41df1e5bb406f2bdc126c">linearOut</a> (void *a_buffer) const</td></tr>
+<tr class="memdesc:a07141e6091f41df1e5bb406f2bdc126c inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a linear binary representation of the internal data. Assumes that sufficient memory for the buffer has already been allocated by the caller.  <a href="classGenericParticle.html#a07141e6091f41df1e5bb406f2bdc126c">More...</a><br /></td></tr>
+<tr class="separator:a07141e6091f41df1e5bb406f2bdc126c inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cd506ee421f92b4817781832d2d7d3a inherit pub_methods_classGenericParticle"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a0cd506ee421f92b4817781832d2d7d3a">linearIn</a> (void *a_bufer)</td></tr>
+<tr class="memdesc:a0cd506ee421f92b4817781832d2d7d3a inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.  <a href="classGenericParticle.html#a0cd506ee421f92b4817781832d2d7d3a">More...</a><br /></td></tr>
+<tr class="separator:a0cd506ee421f92b4817781832d2d7d3a inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
-Protected Attributes</h2></td></tr>
-<tr class="memitem:a58510e71be27d22e3e3f49ebddf93745"><td class="memItemLeft" align="right" valign="top"><a id="a58510e71be27d22e3e3f49ebddf93745"></a>
-Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPointParticle.html#a58510e71be27d22e3e3f49ebddf93745">m_mass</a></td></tr>
-<tr class="memdesc:a58510e71be27d22e3e3f49ebddf93745"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computational particle mass. <br /></td></tr>
-<tr class="separator:a58510e71be27d22e3e3f49ebddf93745"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_attribs_classGenericParticle"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classGenericParticle')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classGenericParticle.html">GenericParticle&lt; 1, 0 &gt;</a></td></tr>
+<tr class="memitem:ae4b8b5e0e0725aeac66a973cbd69ad26 inherit pro_attribs_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="ae4b8b5e0e0725aeac66a973cbd69ad26"></a>
+RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#ae4b8b5e0e0725aeac66a973cbd69ad26">m_position</a></td></tr>
+<tr class="memdesc:ae4b8b5e0e0725aeac66a973cbd69ad26 inherit pro_attribs_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle position. <br /></td></tr>
+<tr class="separator:ae4b8b5e0e0725aeac66a973cbd69ad26 inherit pro_attribs_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af908ea03b226f6aff0535327b6dcbfbe inherit pro_attribs_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="af908ea03b226f6aff0535327b6dcbfbe"></a>
+std::array&lt; Real, M &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#af908ea03b226f6aff0535327b6dcbfbe">m_scalars</a></td></tr>
+<tr class="memdesc:af908ea03b226f6aff0535327b6dcbfbe inherit pro_attribs_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scalar storage array. <br /></td></tr>
+<tr class="separator:af908ea03b226f6aff0535327b6dcbfbe inherit pro_attribs_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb79e9483e015a0ccf4d442becf92ea6 inherit pro_attribs_classGenericParticle"><td class="memItemLeft" align="right" valign="top"><a id="afb79e9483e015a0ccf4d442becf92ea6"></a>
+std::array&lt; RealVect, N &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#afb79e9483e015a0ccf4d442becf92ea6">m_vectors</a></td></tr>
+<tr class="memdesc:afb79e9483e015a0ccf4d442becf92ea6 inherit pro_attribs_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">vector storage array <br /></td></tr>
+<tr class="separator:afb79e9483e015a0ccf4d442becf92ea6 inherit pro_attribs_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A particle class that only has a position and a mass. </p>
+<div class="textblock"><p>A particle class that only has a position and a weight. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="abcf7dfa3a6672bc22e1dc8f9f8cc3824"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abcf7dfa3a6672bc22e1dc8f9f8cc3824">&#9670;&nbsp;</a></span>PointParticle()</h2>
+<a id="a5943d7d7e880db937b2d86cbde18eb0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5943d7d7e880db937b2d86cbde18eb0f">&#9670;&nbsp;</a></span>PointParticle()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">PointParticle::PointParticle </td>
@@ -164,7 +210,7 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_mass</em>&#160;</td>
+          <td class="paramname"><em>a_weight</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -172,13 +218,18 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Constructor. Subsequently calls define. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_position</td><td>Position (in physical space) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_mass</td><td>Particle mass </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_weight</td><td>Particle weight </td></tr>
   </table>
   </dd>
 </dl>
@@ -186,11 +237,14 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a6ed9a360d16497d879ba98c65c4b54ac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6ed9a360d16497d879ba98c65c4b54ac">&#9670;&nbsp;</a></span>define()</h2>
+<a id="ac5bbf384522526b5d3f03908c005237b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5bbf384522526b5d3f03908c005237b">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void PointParticle::define </td>
@@ -202,7 +256,7 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_mass</em>&#160;</td>
+          <td class="paramname"><em>a_weight</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -210,107 +264,18 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Full define function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_position</td><td>Position (in physical space) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_mass</td><td>Particle mass </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a5990111b77c92806b28366144f39af20"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5990111b77c92806b28366144f39af20">&#9670;&nbsp;</a></span>linearIn()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void PointParticle::linearIn </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>buf</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Read a linear binary representation of the internal data. Assumes that the buffer has the correct data. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">buf</td><td>Other particle. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a7cf153a7a49014d87ab59da4b159d7a5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7cf153a7a49014d87ab59da4b159d7a5">&#9670;&nbsp;</a></span>linearOut()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void PointParticle::linearOut </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>buf</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Write a linear binary representation of the internal data. Assumes that sufficient memory for the buffer has already been allocated by the caller. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>Particle </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a3cb4db4a95017d847f5f8fce8b58f589"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3cb4db4a95017d847f5f8fce8b58f589">&#9670;&nbsp;</a></span>setMass()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void PointParticle::setMass </td>
-          <td>(</td>
-          <td class="paramtype">const Real&#160;</td>
-          <td class="paramname"><em>a_mass</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Set particle mass. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_mass</td><td>Particle mass </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_weight</td><td>Particle weight </td></tr>
   </table>
   </dd>
 </dl>
@@ -319,7 +284,7 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>Source/Particle/<a class="el" href="CD__PointParticle_8H_source.html">CD_PointParticle.H</a></li>
-<li>Source/Particle/<a class="el" href="CD__PointParticle_8cpp.html">CD_PointParticle.cpp</a></li>
+<li>Source/Particle/<a class="el" href="CD__PointParticleImplem_8H_source.html">CD_PointParticleImplem.H</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

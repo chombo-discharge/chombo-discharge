@@ -4,38 +4,38 @@
 To build the doxygen documentation locally, run
 
 ```
-doxygen Doxyfile
+doxygen Docs/Doxyfile
 ```
 
-in this folder. 
-This will install the doxygen documentation in the `doxygen` subfolder. 
+from $DISCHARGE_HOME.
+This will install the doxygen documentation in the `Docs/doxygen` subfolder. 
 
 ## Manual build
 We use Sphinx with reStructured text for building the user documentation. 
 To build the documentation locally, navigate to the Sphinx subfolder and run
 
 ```
-cd Sphinx
+cd $DISCHARGE_HOME/Docs/Sphinx
 make html
 ```
 
 for the HTML documentation and
 
 ```
-cd Sphinx
+cd $DISCHARGE_HOME/Docs/Sphinx
 make latexpdf
 ```
 
-for the LaTeX/PDF documentation.
+for the LaTeX/PDF documentation. 
 
-Source files will end up in `Sphinx/build/html` and `Sphinx/build/latex`, respectively. 
+Source files will end up in `$DICSHARGE_HOME/Sphinx/build/html` and `$DICSHARGE_HOME/Sphinx/build/latex`, respectively. 
 
 ## Adding Sphinx changes. 
 To add changes to the Sphinx documentation, make the changes in the relevant Sphinx/source files.
 To build the documentation, either build it locally as above or put Sphinx in auto-build mode:
 
 ```
-cd Sphinx
+cd $DICSHARGE_HOME/Docs/Sphinx
 sphinx-autobuild source/ build/html
 ```
 

@@ -1,7 +1,7 @@
 <map id="Source/RadiativeTransfer/CD_Photon.H" name="Source/RadiativeTransfer/CD_Photon.H">
 <area shape="rect" id="node1" title="Declaration of a photon class for particle methods." alt="" coords="557,5,741,47"/>
 <area shape="rect" id="node2" href="$CD__McPhoto_8H.html" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="329,95,513,136"/>
-<area shape="rect" id="node14" href="$CD__Photon_8cpp.html" title="Implementation of CD_Photon.H." alt="" coords="557,95,741,136"/>
+<area shape="rect" id="node14" href="$CD__PhotonImplem_8H.html" title="Implementation of CD_Photon.H." alt="" coords="557,95,741,136"/>
 <area shape="rect" id="node15" href="$CD__ItoPlasmaPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="776,95,939,136"/>
 <area shape="rect" id="node3" href="$CD__McPhoto_8cpp.html" title="Implementation of CD_McPhoto.H." alt="" coords="132,184,316,225"/>
 <area shape="rect" id="node4" href="$CD__ItoPlasmaStepper_8H.html" title="Abstract class for integrating the Ito plasma equations." alt="" coords="340,184,503,225"/>

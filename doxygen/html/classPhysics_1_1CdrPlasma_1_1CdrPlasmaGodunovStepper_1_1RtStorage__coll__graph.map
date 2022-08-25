@@ -1,5 +1,6 @@
 <map id="Physics::CdrPlasma::CdrPlasmaGodunovStepper::RtStorage" name="Physics::CdrPlasma::CdrPlasmaGodunovStepper::RtStorage">
-<area shape="rect" id="node1" title="Utility class for memory handling in CdrPlasmaStepper." alt="" coords="112,109,320,165"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,5,189,47"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="213,13,459,39"/>
+<area shape="rect" id="node1" title="Utility class for memory handling in CdrPlasmaStepper." alt="" coords="112,199,320,255"/>
+<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,95,189,136"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="147,5,285,32"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="213,102,459,129"/>
 </map>
