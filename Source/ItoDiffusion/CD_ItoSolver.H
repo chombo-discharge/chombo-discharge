@@ -1022,11 +1022,6 @@ protected:
   SuperParticles::Tree<PointMass> m_mergeTree;
 
   /*!
-    @brief k-d tree for super particle merging
-  */
-  SuperParticles::KDNode<ItoParticle> m_kdTree;
-
-  /*!
     @brief Computational geometry. 
   */
   RefCountedPtr<ComputationalGeometry> m_computationalGeometry;

@@ -27,7 +27,7 @@
   @brief Namespace for various particle merging tools. 
 */
 namespace SuperParticles {
-  
+
   /*!
     @brief Node in a particle-merging KD-tree. 
     @details This node type is used for partitioning particles into spatial subsets and merging/splitting them. 
@@ -37,7 +37,6 @@ namespace SuperParticles {
   class KDNode
   {
   public:
-
     /*!
       @brief List of particles. This is aliased because the KD-tree construction may require both random access
       and something sortable. 
@@ -57,22 +56,22 @@ namespace SuperParticles {
     /*!
       @brief Disallowed constructor
     */
-    KDNode(const KDNode&)  = delete;
+    KDNode(const KDNode&) = delete;
 
     /*!
       @brief Disallowed constructor
-    */    
+    */
     KDNode(const KDNode&&) = delete;
 
     /*!
       @brief Disallowed assignment
-    */    
+    */
     KDNode&
     operator=(const KDNode&) = delete;
 
     /*!
       @brief Disallowed assignment
-    */        
+    */
     KDNode&
     operator=(const KDNode&&) = delete;
 
@@ -87,7 +86,7 @@ namespace SuperParticles {
       @note The input particle list is transferred to m_particles. 
     */
     KDNode(ParticleList& a_particles);
-    
+
     /*!
       @brief Destructor. Does nothing.
     */
@@ -103,7 +102,7 @@ namespace SuperParticles {
       @brief Get the node weight
     */
     inline Real&
-    weight() noexcept;    
+    weight() noexcept;
 
     /*!
       @brief Get particles in this node. 
@@ -115,7 +114,7 @@ namespace SuperParticles {
       @brief Get particles in this node. 
     */
     inline ParticleList&
-    getParticles() noexcept;    
+    getParticles() noexcept;
 
     /*!
       @brief Is leaf node or not.
@@ -179,7 +178,7 @@ namespace SuperParticles {
     /*!
       @brief Gather particles further down in the subtree and return all particles (in the leaf nodes)
       @param[inout] a_particles List of particles
-    */      
+    */
     inline void
     gatherParticles(ParticleList& a_particles) const noexcept;
 
@@ -188,9 +187,9 @@ namespace SuperParticles {
       @param[inout] a_particles List of particles
       @note This clears the particles from the leaf nodes. Use gatherParticles if you do not
       want to change the tree contents. 
-    */      
+    */
     inline void
-    moveParticles(ParticleList& a_particles) noexcept;        
+    moveParticles(ParticleList& a_particles) noexcept;
   };
 
   /*!
@@ -198,7 +197,7 @@ namespace SuperParticles {
     @note This only adjusts the weight of the median particle. The particle class P should have a copy constructor for the other
     fields; note that these fields are simply copied over when the particle is split and are not adjusted. 
   */
-  template<class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
   typename KDNode<P>::Partitioner PartitionEqualWeight;
 
   /*!

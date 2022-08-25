@@ -3021,12 +3021,12 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
   }
 
 #if 1
-  using PType        = NonCommParticle<2,1>;
-  using Node         = SuperParticles::KDNode<PType>;  
+  using PType        = NonCommParticle<2, 1>;
+  using Node         = SuperParticles::KDNode<PType>;
   using ParticleList = SuperParticles::KDNode<PType>::ParticleList;
 
   // 1. Make the input list into a vector of particles with a smaller memory footprint.
-  Real W = 0.0;
+  Real         W = 0.0;
   ParticleList particles;
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
     PType p;
@@ -3057,7 +3057,7 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
 
     for (const auto& l : leaves1) {
       if (l->weight() > 2.0 - std::numeric_limits<Real>::min()) {
-	SuperParticles::PartitionEqualWeight<PType, &PType::template real<0>, &PType::template vect<0>>(*l);
+        SuperParticles::PartitionEqualWeight<PType, &PType::template real<0>, &PType::template vect<0>>(*l);
 
         leaves2.emplace_back(l->getLeft());
         leaves2.emplace_back(l->getRight());
@@ -3068,9 +3068,9 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
         leaves2.emplace_back(l);
       }
 
-      // Break out if we have sufficient leaf nodes. 
-      if(leaves2.size() >= a_ppc) {
-	break;
+      // Break out if we have sufficient leaf nodes.
+      if (leaves2.size() >= a_ppc) {
+        break;
       }
     }
 
@@ -3078,9 +3078,9 @@ ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_ppc)
     leaves2.resize(0);
   }
 
-  // Merge leaves into new particles. 
+  // Merge leaves into new particles.
   a_particles.clear();
-  
+
   for (const auto& l : leaves1) {
     Real     w = 0.0;
     Real     e = 0.0;

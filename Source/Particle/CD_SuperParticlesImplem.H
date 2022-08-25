@@ -27,19 +27,13 @@
 namespace SuperParticles {
 
   template <class P>
-  inline KDNode<P>::KDNode() : m_left(nullptr),
-			       m_right(nullptr),
-			       m_weight(0.0)
-  {
-  }
+  inline KDNode<P>::KDNode() : m_left(nullptr), m_right(nullptr), m_weight(0.0)
+  {}
 
   template <class P>
-  inline KDNode<P>::KDNode(ParticleList& a_particles) : m_left(nullptr),
-							m_right(nullptr),
-							m_weight(0.0),
-							m_particles(std::move(a_particles))
-  {
-  }
+  inline KDNode<P>::KDNode(ParticleList& a_particles)
+    : m_left(nullptr), m_right(nullptr), m_weight(0.0), m_particles(std::move(a_particles))
+  {}
 
   template <class P>
   inline KDNode<P>::~KDNode()
@@ -61,13 +55,15 @@ namespace SuperParticles {
 
   template <class P>
   inline const Real&
-  KDNode<P>::weight() const noexcept {
+  KDNode<P>::weight() const noexcept
+  {
     return m_weight;
   }
 
   template <class P>
   inline Real&
-  KDNode<P>::weight() noexcept {
+  KDNode<P>::weight() noexcept
+  {
     return m_weight;
   }
 
@@ -150,18 +146,17 @@ namespace SuperParticles {
     return m_right;
   }
 
-  template<class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
-  typename KDNode<P>::Partitioner PartitionEqualWeight = [](KDNode<P>& a_node) -> void 
-  {
+  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  typename KDNode<P>::Partitioner PartitionEqualWeight = [](KDNode<P>& a_node) -> void {
     CH_assert(!(a_node.isInteriorNode()));
-    
+
     constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
 
-    // Particles and node weight. 
+    // Particles and node weight.
     typename KDNode<P>::ParticleList& particles = a_node.getParticles();
 
     const Real W = a_node.weight();
-    
+
     // A. Figure out which coordinate direction we should partition and sort
     //    the particles.
     RealVect loCorner = +std::numeric_limits<Real>::max() * RealVect::Unit;
@@ -176,7 +171,7 @@ namespace SuperParticles {
     }
 
     const int splitDir = (hiCorner - loCorner).maxDir(true);
-    
+
     auto sortCrit = [splitDir](const P& p1, const P& p2) -> bool {
       return (p1.*position)()[splitDir] < (p2.*position)()[splitDir];
     };
@@ -184,11 +179,11 @@ namespace SuperParticles {
     std::sort(particles.begin(), particles.end(), sortCrit);
 
     // B. Determine the "median particle" and start computing the weight in the
-    //    two halves. 
+    //    two halves.
     size_t id = 0;
     Real   wl = 0.0;
     Real   wr = W - (particles[id].*weight)();
-    
+
     for (size_t i = 1; i < particles.size(); i++) {
       const Real& w = (particles[id].*weight)();
 
@@ -222,60 +217,60 @@ namespace SuperParticles {
       Real dwr = 0.0;
       Real ddw = pw - dw;
 
-      const long long N  = llround(ddw);
-      
-      if(N > 0LL) {
+      const long long N = llround(ddw);
 
-	const long long Nr = N / 2;
-	const long long Nl = N - Nr;
+      if (N > 0LL) {
 
-	dwl += (ddw / N) * Nl;
-	dwr += (ddw / N) * Nr;
+        const long long Nr = N / 2;
+        const long long Nl = N - Nr;
+
+        dwl += (ddw / N) * Nl;
+        dwr += (ddw / N) * Nr;
       }
 
-      if(dwl > 0.0) {
-	P il(p);
+      if (dwl > 0.0) {
+        P il(p);
 
-	CH_assert(dwl >= 1.0);
+        CH_assert(dwl >= 1.0);
 
-	wl += dwl;
-	(il.*weight)() = dwl;
-	pl.emplace_back(std::move(il));
+        wl += dwl;
+        (il.*weight)() = dwl;
+        pl.emplace_back(std::move(il));
       }
 
-      if(dwr > 0.0) {
-	P ir(p);
+      if (dwr > 0.0) {
+        P ir(p);
 
-	CH_assert(dwr >= 1.0);	
+        CH_assert(dwr >= 1.0);
 
-	wr += dwr;
-	(ir.*weight)() = dwr;
-	pr.emplace_back(std::move(ir));
+        wr += dwr;
+        (ir.*weight)() = dwr;
+        pr.emplace_back(std::move(ir));
       }
     }
     else {
       if (wl <= wr) {
-	wl += pw;
+        wl += pw;
         pl.emplace_back(std::move(p));
       }
       else {
-	wr += pw;
+        wr += pw;
         pr.emplace_back(std::move(p));
       }
     }
 
     // E. If this breaks, weight is not conserved or we broke the median particle splitting; the weight difference
-    //    between the left/right node should be at most one physical particle. 
+    //    between the left/right node should be at most one physical particle.
     CH_assert(wl + wr == W);
     CH_assert(std::abs(wl - wr) <= 1.0);
 
     // F. Instantiate the child nodes.
     particles.resize(0);
-    
-    a_node.getLeft() = std::make_shared<KDNode<P>> (pl);
-    a_node.getRight() = std::make_shared<KDNode<P>> (pr);
 
-    a_node.getLeft()->weight() = wl;
+    a_node.getLeft()  = std::make_shared<KDNode<P>>(pl);
+    a_node.getRight() = std::make_shared<KDNode<P>>(pr);
+
+    a_node.getLeft()->weight()  = wl;
     a_node.getRight()->weight() = wr;
 
     // G. Debug code; make sure particle weights make sense
@@ -283,7 +278,7 @@ namespace SuperParticles {
     Real WL = 0.0;
     Real WR = 0.0;
 
-    // Note: Not auto& l/r : pl/pr because the particles were into the child node. 
+    // Note: Not auto& l/r : pl/pr because the particles were into the child node.
     for (auto& l : a_node.getLeft()->getParticles()) {
       CH_assert((l.*weight)() >= 1.0);
 
@@ -293,7 +288,7 @@ namespace SuperParticles {
     for (auto& r : a_node.getRight()->getParticles()) {
       CH_assert((r.*weight)() >= 1.0);
 
-      WR += (r.*weight)();      
+      WR += (r.*weight)();
     }
 
     CH_assert(WL == wl);
@@ -302,17 +297,17 @@ namespace SuperParticles {
   };
 
   template <class P, const Real& (P::*weight)() const>
-  typename KDNode<P>::StopFunction InsufficientWeightForSplitting = [](const typename KDNode<P>::ParticleList& a_particles)
-  {
-    constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
+  typename KDNode<P>::StopFunction InsufficientWeightForSplitting =
+    [](const typename KDNode<P>::ParticleList& a_particles) {
+      constexpr Real splitThresh = 2.0 - std::numeric_limits<Real>::min();
 
-    Real W = 0.0;
-    for (const auto& p : a_particles) {
-      W += (p.*weight)();
-    }
+      Real W = 0.0;
+      for (const auto& p : a_particles) {
+        W += (p.*weight)();
+      }
 
-    return (W < splitThresh) ? true : false;
-  };    
+      return (W < splitThresh) ? true : false;
+    };
 
   template <class T>
   Node<T>::Node()
@@ -532,8 +527,8 @@ namespace SuperParticles {
     //       partitioned further.
 
     // Reset leaves and root. I'm just resizing here so I get the capacity
-    // and avoid vector resizing during the splitting process.    
-    std::vector<std::shared_ptr<Node<T>>> newLeaves; 
+    // and avoid vector resizing during the splitting process.
+    std::vector<std::shared_ptr<Node<T>>> newLeaves;
     m_leaves.resize(a_numTargetLeaves, nullptr);
     newLeaves.resize(a_numTargetLeaves, nullptr);
     m_leaves[0] = m_root;
