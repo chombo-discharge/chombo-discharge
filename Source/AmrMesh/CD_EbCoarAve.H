@@ -82,22 +82,6 @@ public:
             const int&         a_refRat,
             const int&         a_nComp);
 
-#if 1 // Development code
-  void
-  averageFaceData(LevelData<EBFluxFAB>&       a_coarData,
-                  const LevelData<EBFluxFAB>& a_fineData,
-                  const Interval&             a_variables);
-
-  void
-  conservativeAverage(LevelData<BaseIVFAB<Real>>&       a_coarData,
-                      const LevelData<BaseIVFAB<Real>>& a_fineData,
-                      const Interval&                   a_variables)
-  {
-    this->averageData(a_coarData, a_fineData, a_variables, Average::Conservative);
-  }
-
-#endif
-
   /*!
     @brief Destructor (does nothing)
   */

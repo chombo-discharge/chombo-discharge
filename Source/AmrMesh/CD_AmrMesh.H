@@ -599,8 +599,8 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  harmonicAverage(MFAMRCellData& a_data, const std::string a_realm) const;      
-  
+  harmonicAverage(MFAMRCellData& a_data, const std::string a_realm) const;
+
   /*!
     @brief Conservative coarsening of multifluid data.
     @param[inout] a_data  Data to be coarsened.
@@ -609,7 +609,7 @@ public:
   void
   conservativeAverage(MFAMRCellData& a_data, const std::string a_realm) const;
 
-    /*!
+  /*!
     @brief Average multifluid data over a specified realm
     @param[inout] a_data    Data to be coarsened.
     @param[in]    a_realm   Realm name
@@ -617,7 +617,7 @@ public:
   */
   void
   average(MFAMRFluxData& a_data, const std::string a_realm, const Average& a_average) const;
-  
+
   /*!
     @brief Average multifluid data over a realm. 
     @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
@@ -626,7 +626,7 @@ public:
   */
   void
   arithmeticAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
-  
+
   /*!
     @brief Average multifluid data over a realm. 
     @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
@@ -634,7 +634,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  harmonicAverage(MFAMRFluxData& a_data, const std::string a_realm) const;    
+  harmonicAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
 
   /*!
     @brief Average down multifluid data over a realm. 
@@ -652,7 +652,10 @@ public:
     @param[in]    a_average Averaging method
   */
   void
-  average(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const Average& a_average) const;
+  average(EBAMRCellData&           a_data,
+          const std::string        a_realm,
+          const phase::which_phase a_phase,
+          const Average&           a_average) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -670,7 +673,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  harmonicAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;    
+  harmonicAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -689,7 +692,10 @@ public:
     @param[in]    a_average Averaging method
   */
   void
-  average(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase, const Average& a_average) const;
+  average(EBAMRFluxData&           a_data,
+          const std::string        a_realm,
+          const phase::which_phase a_phase,
+          const Average&           a_average) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -709,7 +715,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  harmonicAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;    
+  harmonicAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -728,7 +734,10 @@ public:
     @param[in]    a_average Averaging method
   */
   void
-  average(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase, const Average& a_average) const;  
+  average(EBAMRIVData&             a_data,
+          const std::string        a_realm,
+          const phase::which_phase a_phase,
+          const Average&           a_average) const;
 
   /*!
     @brief Arithmetic average on specific realm and phase. 
@@ -746,7 +755,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  harmonicAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;  
+  harmonicAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Conservative averaging on specific realm and phase.

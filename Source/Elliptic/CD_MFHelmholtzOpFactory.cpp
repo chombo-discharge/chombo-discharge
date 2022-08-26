@@ -131,7 +131,10 @@ MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale)
   // Average down on AMR levels.
   for (int lvl = m_numAmrLevels - 1; lvl > 0; lvl--) {
     const RefCountedPtr<EbCoarAve>& aveOp = m_amrCoarseners[lvl].getAveOp(m_mainPhase);
-    aveOp->average(*m_amrJump[lvl - 1], *m_amrJump[lvl], Interval(m_comp, m_comp));
+
+    const Average average = Average::Arithmetic;
+
+    aveOp->averageData(*m_amrJump[lvl - 1], *m_amrJump[lvl], Interval(m_comp, m_comp), average);
   }
 
   // Average down on MG levels. I'm not really sure if we need to do this. Also,
@@ -772,9 +775,11 @@ MFHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_coarAc
       MultifluidAlias::aliasMF(fineBco, i, a_fineBcoef);
       MultifluidAlias::aliasMF(fineBcoIrreg, i, a_fineBcoefIrreg);
 
-      aveOp.average(coarAco, fineAco, interv);
-      aveOp.averageFaceData(coarBco, fineBco, interv);
-      aveOp.average(coarBcoIrreg, fineBcoIrreg, interv);
+      const Average average = Average::Conservative;
+
+      aveOp.averageData(coarAco, fineAco, interv, average);
+      aveOp.averageData(coarBco, fineBco, interv, average);
+      aveOp.averageData(coarBcoIrreg, fineBcoIrreg, interv, average);
 
       coarAco.exchange();
       coarBco.exchange();

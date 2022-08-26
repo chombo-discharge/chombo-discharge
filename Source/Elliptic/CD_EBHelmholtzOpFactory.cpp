@@ -363,9 +363,11 @@ EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&             a_co
                         1,
                         a_eblgCoar.getEBIS());
 
-    averageOp.average(a_coarAcoef, a_fineAcoef, interv);
-    averageOp.averageFaceData(a_coarBcoef, a_fineBcoef, interv);
-    averageOp.average(a_coarBcoefIrreg, a_fineBcoefIrreg, interv);
+    const Average average = Average::Conservative;
+
+    averageOp.averageData(a_coarAcoef, a_fineAcoef, interv, average);
+    averageOp.averageData(a_coarBcoef, a_fineBcoef, interv, average);
+    averageOp.averageData(a_coarBcoefIrreg, a_fineBcoefIrreg, interv, average);
 
     a_coarAcoef.exchange();
     a_coarBcoef.exchange();

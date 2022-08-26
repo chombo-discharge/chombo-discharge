@@ -1238,7 +1238,7 @@ AmrMesh::average(MFAMRCellData& a_data, const std::string a_realm, const Average
 
   if (!this->queryRealm(a_realm)) {
     const std::string str = "AmrMesh::average(MFAMRCellData) - could not find realm '" + a_realm + "'";
-    
+
     MayDay::Abort(str.c_str());
   }
 
@@ -1264,8 +1264,8 @@ AmrMesh::average(MFAMRCellData& a_data, const std::string a_realm, const Average
     this->average(aliasGas, a_realm, phase::gas, a_average);
   }
   if (!ebisSol.isNull()) {
-    this->average(aliasGas, a_realm, phase::solid, a_average);
-  }  
+    this->average(aliasSol, a_realm, phase::solid, a_average);
+  }
 }
 
 void
@@ -1311,7 +1311,7 @@ AmrMesh::average(MFAMRFluxData& a_data, const std::string a_realm, const Average
 
   if (!this->queryRealm(a_realm)) {
     std::string str = "AmrMesh::average(MFAMRFluxData, string) - could not find realm '" + a_realm + "'";
-    
+
     MayDay::Abort(str.c_str());
   }
 
@@ -1348,7 +1348,7 @@ AmrMesh::arithmeticAverage(MFAMRFluxData& a_data, const std::string a_realm) con
   if (m_verbosity > 3) {
     pout() << "AmrMesh::arithmeticAverage(MFAMRFluxData, string)" << endl;
   }
-  
+
   this->average(a_data, a_realm, Average::Arithmetic);
 }
 
@@ -1359,7 +1359,7 @@ AmrMesh::harmonicAverage(MFAMRFluxData& a_data, const std::string a_realm) const
   if (m_verbosity > 3) {
     pout() << "AmrMesh::harmonicAverage(MFAMRFluxData, string)" << endl;
   }
-  
+
   this->average(a_data, a_realm, Average::Harmonic);
 }
 
@@ -1370,12 +1370,15 @@ AmrMesh::conservativeAverage(MFAMRFluxData& a_data, const std::string a_realm) c
   if (m_verbosity > 3) {
     pout() << "AmrMesh::conservativeAverage(MFAMRFluxData, string)" << endl;
   }
-  
+
   this->average(a_data, a_realm, Average::Conservative);
 }
 
 void
-AmrMesh::average(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const Average& a_average) const
+AmrMesh::average(EBAMRCellData&           a_data,
+                 const std::string        a_realm,
+                 const phase::which_phase a_phase,
+                 const Average&           a_average) const
 {
   CH_TIME("AmrMesh::average(EBAMRCellData, string, phase::which_phase)");
   if (m_verbosity > 3) {
@@ -1393,9 +1396,7 @@ AmrMesh::average(EBAMRCellData& a_data, const std::string a_realm, const phase::
 
     EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
 
-    aveOp.averageData(*a_data[lvl-1], *a_data[lvl], interv, a_average);
-
-    a_data[lvl]->exchange();    
+    aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], interv, a_average);
   }
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -1437,7 +1438,10 @@ AmrMesh::conservativeAverage(EBAMRCellData& a_data, const std::string a_realm, c
 }
 
 void
-AmrMesh::average(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase, const Average& a_average) const
+AmrMesh::average(EBAMRFluxData&           a_data,
+                 const std::string        a_realm,
+                 const phase::which_phase a_phase,
+                 const Average&           a_average) const
 {
   CH_TIME("AmrMesh::arithmeticAverage(EBAMRFluxData, string, phase::which_phase");
   if (m_verbosity > 3) {
@@ -1445,8 +1449,7 @@ AmrMesh::average(EBAMRFluxData& a_data, const std::string a_realm, const phase::
   }
 
   if (!this->queryRealm(a_realm)) {
-    std::string str =
-      "AmrMesh::average(EBAMRFluxData) - could not find realm '" + a_realm + "'";
+    std::string str = "AmrMesh::average(EBAMRFluxData) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -1455,12 +1458,8 @@ AmrMesh::average(EBAMRFluxData& a_data, const std::string a_realm, const phase::
     const Interval interv(0, nComps - 1);
 
     EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
-    
-    aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], interv, a_average);
-  }
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    a_data[lvl]->exchange();
+    aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], interv, a_average);
   }
 }
 
@@ -1498,7 +1497,10 @@ AmrMesh::conservativeAverage(EBAMRFluxData& a_data, const std::string a_realm, c
 }
 
 void
-AmrMesh::average(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase, const Average& a_average) const
+AmrMesh::average(EBAMRIVData&             a_data,
+                 const std::string        a_realm,
+                 const phase::which_phase a_phase,
+                 const Average&           a_average) const
 {
   CH_TIME("AmrMesh::arithmeticAverage(EBAMRIVData, string, phase::which_phase");
   if (m_verbosity > 3) {
@@ -1506,8 +1508,7 @@ AmrMesh::average(EBAMRIVData& a_data, const std::string a_realm, const phase::wh
   }
 
   if (!this->queryRealm(a_realm)) {
-    std::string str =
-      "AmrMesh::average(EBAMRIVData) - could not find realm '" + a_realm + "'";
+    std::string str = "AmrMesh::average(EBAMRIVData) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -1516,7 +1517,7 @@ AmrMesh::average(EBAMRIVData& a_data, const std::string a_realm, const phase::wh
     const Interval interv(0, nComps - 1);
 
     EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
-    
+
     aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], interv, a_average);
   }
 
