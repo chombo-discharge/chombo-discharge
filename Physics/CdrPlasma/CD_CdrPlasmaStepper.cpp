@@ -4723,7 +4723,7 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 
         fineAlias.exchange();
 
-	m_amr->conservativeAverage(coarAlias, fineAlias, lvl, m_realm, phase::gas);
+        //	m_amr->conservativeAverage(coarAlias, fineAlias, lvl, m_realm, phase::gas);
 
         coarAlias.exchange();
       }

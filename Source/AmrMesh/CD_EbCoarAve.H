@@ -136,65 +136,87 @@ public:
               const Average&                    a_average);
 
 protected:
+
   /*!
-    @brief Do an arithmetic average of cell-centered data when coarsening. 
-    @param[inout] a_coarData Coarse data
-    @param[in]    a_fineData    Fine data
-    @param[in]    a_datInd      Grid index
-    @param[in]    a_fineInterv  Fine interval
-    @param[in]    a_coarInterv  Coarse interval
+    @brief Defined over m_eblgCoFi with one component
   */
-  void
+  LevelData<EBCellFAB> m_cellCoFi;
+
+  /*!
+    @brief Defined over m_eblgCoFi with one component
+  */
+  LevelData<EBFluxFAB> m_fluxCoFi;
+
+  /*!
+    @brief Defined over m_eblgCoFi with one component
+  */
+  LevelData<BaseIVFAB<Real> > m_baseivCoFi;    
+
+  /*!
+    @brief Define buffer storage
+  */
+  virtual
+  void defineBuffers();
+  
+  /*!
+    @brief Arithmetic average of cell-centered data.
+    @param[inout] a_coarData Coarse data
+    @param[in]    a_fineData Fine data
+    @param[in]    a_datInd   Grid index
+    @param[in]    a_coarVar  Coarse variables
+    @param[in]    a_fineVar  Fine variable
+  */
+  virtual void
   arithmeticAverage(EBCellFAB&       a_coarData,
                     const EBCellFAB& a_fineData,
                     const DataIndex& a_datInd,
-                    const Interval&  a_coarInterv,
-                    const Interval&  a_fineInterv);
+                    const int&       a_coarVar,
+                    const int&       a_fineVar);
   /*!
-    @brief Do a harmonic average of cell-centered data when coarsening. 
+    @brief Harmonic average of cell-centered data.
     @param[inout] a_coarData Coarse data
-    @param[in]    a_fineData    Fine data
-    @param[in]    a_datInd      Grid index
-    @param[in]    a_fineInterv  Fine interval
-    @param[in]    a_coarInterv  Coarse interval
+    @param[in]    a_fineData Fine data
+    @param[in]    a_datInd   Grid index
+    @param[in]    a_coarVar  Coarse variables
+    @param[in]    a_fineVar  Fine variable
   */
-  void
+  virtual void
   harmonicAverage(EBCellFAB&       a_coarData,
                   const EBCellFAB& a_fineData,
                   const DataIndex& a_datInd,
-                  const Interval&  a_coarInterv,
-                  const Interval&  a_fineInterv);
+                  const int&       a_coarVar,
+                  const int&       a_fineVar);
 
   /*!
-    @brief Do a conservative average of cell-centered data when coarsening. 
+    @brief Conservative average of cell-centered data.
     @param[inout] a_coarData Coarse data
-    @param[in]    a_fineData    Fine data
-    @param[in]    a_datInd      Grid index
-    @param[in]    a_fineInterv  Fine interval
-    @param[in]    a_coarInterv  Coarse interval
+    @param[in]    a_fineData Fine data
+    @param[in]    a_datInd   Grid index
+    @param[in]    a_coarVar  Coarse variables
+    @param[in]    a_fineVar  Fine variable
   */
-  void
+  virtual void
   conservativeAverage(EBCellFAB&       a_coarData,
                       const EBCellFAB& a_fineData,
                       const DataIndex& a_datInd,
-                      const Interval&  a_coarInterv,
-                      const Interval&  a_fineInterv);
+                      const int&       a_coarVar,
+                      const int&       a_fineVar);
 
   /*!
-    @brief Do an arithmetic average of face-centered data when coarsening. 
+    @brief Arithmetic average of face data. 
     @param[inout] a_coarData Coarse data
-    @param[in]    a_fineData    Fine data
-    @param[in]    a_datInd      Grid index
-    @param[in]    a_fineInterv  Fine interval
-    @param[in]    a_coarInterv  Coarse interval
-    @param[in]    a_dir         Face direction
+    @param[in]    a_fineData Fine data
+    @param[in]    a_datInd   Grid index
+    @param[in]    a_coarVar  Coarse variables
+    @param[in]    a_fineVar  Fine variable
+    @param[in]    a_dir      Face direction
   */
-  void
+  virtual void
   arithmeticAverage(EBFaceFAB&       a_coarData,
                     const EBFaceFAB& a_fineData,
                     const DataIndex& a_datInd,
-                    const Interval&  a_fineInterv,
-                    const Interval&  a_coarInterv,
+                    const int&       a_coarVar,
+                    const int&       a_fineVar,
                     const int&       a_dir);
 
   /*!
@@ -206,7 +228,7 @@ protected:
     @param[in]    a_fineInterv  Fine interval
     @param[in]    a_dir         Face direction
   */
-  void
+  virtual void
   harmonicAverage(EBFaceFAB&       a_coarData,
                   const EBFaceFAB& a_fineData,
                   const DataIndex& a_datInd,
@@ -223,7 +245,7 @@ protected:
     @param[in]    a_fineInterv  Fine interval
     @param[in]    a_dir         Face direction
   */
-  void
+  virtual void
   conservativeAverage(EBFaceFAB&       a_coarData,
                       const EBFaceFAB& a_fineData,
                       const DataIndex& a_datInd,
@@ -239,7 +261,7 @@ protected:
     @param[in]    a_coarInterv Coarse variables
     @param[in]    a_fineInterv Fine variables
   */
-  void
+  virtual void
   arithmeticAverage(BaseIVFAB<Real>&       a_coarData,
                     const BaseIVFAB<Real>& a_fineData,
                     const DataIndex&       a_datInd,
@@ -254,7 +276,7 @@ protected:
     @param[in]    a_coarInterv Coarse variables
     @param[in]    a_fineInterv Fine variables
   */
-  void
+  virtual void
   harmonicAverage(BaseIVFAB<Real>&       a_coarData,
                   const BaseIVFAB<Real>& a_fineData,
                   const DataIndex&       a_datInd,
@@ -269,7 +291,7 @@ protected:
     @param[in]    a_coarInterv Coarse variables
     @param[in]    a_fineInterv Fine variables
   */
-  void
+  virtual void
   conservativeAverage(BaseIVFAB<Real>&       a_coarData,
                       const BaseIVFAB<Real>& a_fineData,
                       const DataIndex&       a_datInd,
