@@ -564,7 +564,7 @@ CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
                       *ebflux,
                       a_conservativeOnly); // General face-centered flux to divergence magic.
 
-    m_amr->averageDown(a_divD, m_realm, m_phase);
+    m_amr->conservativeAverage(a_divD, m_realm, m_phase);
     m_amr->interpGhost(a_divD, m_realm, m_phase);
   }
   else {

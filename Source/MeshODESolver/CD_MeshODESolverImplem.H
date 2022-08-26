@@ -402,7 +402,7 @@ MeshODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const int
 
   m_amr->interpToNewGrids(m_phi, m_cache, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
 
-  m_amr->averageDown(m_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
   m_amr->deallocate(m_cache);
@@ -674,7 +674,7 @@ MeshODESolver<N>::writeData(EBAMRCellData&       a_output,
     m_amr->interpToCentroids(scratch, m_realm, phase::gas);
   }
 
-  m_amr->averageDown(scratch, m_realm, m_phase);
+  m_amr->conservativeAverage(scratch, m_realm, m_phase);
   m_amr->interpGhost(scratch, m_realm, m_phase);
 
   // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and

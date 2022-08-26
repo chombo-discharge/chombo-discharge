@@ -287,7 +287,7 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
   // Compute D = eps*E and then the dot product E*D.
   this->computeDisplacementField(D, a_electricField);
   DataOps::dotProduct(EdotD, D, a_electricField);
-  m_amr->averageDown(EdotD, m_realm);
+  m_amr->conservativeAverage(EdotD, m_realm);
 
   // This defines a lambda which computes the energy in a specified phase
   auto phaseEnergy = [&EdotD, &amr = this->m_amr](const phase::which_phase a_phase) -> Real {
@@ -389,7 +389,7 @@ FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_ne
   m_amr->interpToNewGrids(m_potential, m_cache, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
 
   // Synchronize over levels.
-  m_amr->averageDown(m_potential, m_realm);
+  m_amr->conservativeAverage(m_potential, m_realm);
   m_amr->interpGhost(m_potential, m_realm);
 
   // Recompute E from the new potential.
@@ -1174,11 +1174,11 @@ FieldSolver::writeMultifluidData(EBAMRCellData&           a_output,
 
   // Coarsen data.
   if (reallyMultiPhase) {
-    m_amr->averageDown(scratchGas, m_realm, phase::gas);
-    m_amr->averageDown(scratchSolid, m_realm, phase::solid);
+    m_amr->conservativeAverage(scratchGas, m_realm, phase::gas);
+    m_amr->conservativeAverage(scratchSolid, m_realm, phase::solid);
   }
   else {
-    m_amr->averageDown(scratchGas, m_realm, phase::gas);
+    m_amr->conservativeAverage(scratchGas, m_realm, phase::gas);
   }
 
   // Interpolate ghost cells.

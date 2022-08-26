@@ -194,7 +194,7 @@ CdrCTU::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, 
   m_amr->allocate(phi, m_realm, m_phase, m_nComp);
   DataOps::copy(phi, a_cellPhi);
 
-  m_amr->averageDown(phi, m_realm, m_phase);
+  m_amr->conservativeAverage(phi, m_realm, m_phase);
   m_amr->interpGhostPwl(phi, m_realm, m_phase);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {

@@ -238,7 +238,7 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
     DataOps::incr(m_scratch, m_source, 1.0);
   }
 
-  m_amr->averageDown(m_scratch, m_realm, m_phase);
+  m_amr->conservativeAverage(m_scratch, m_realm, m_phase);
   m_amr->interpGhost(m_scratch, m_realm, m_phase);
 
   // This code extrapolates the cell-centered state to face centers on every grid level, in both space and time.

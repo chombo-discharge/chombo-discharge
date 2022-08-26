@@ -986,7 +986,7 @@ McPhoto::depositPhotons(EBAMRCellData& a_phi, ParticleContainer<Photon>& a_photo
   this->coarseFineRedistribution(a_phi); // Do the coarse-fine redistribution
 
   // Average down and interpolate
-  m_amr->averageDown(a_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 }
 

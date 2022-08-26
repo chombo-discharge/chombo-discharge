@@ -228,7 +228,7 @@ RtSolver::setSource(const EBAMRCellData& a_source)
     a_source[lvl]->localCopyTo(*m_source[lvl]);
   }
 
-  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
@@ -255,7 +255,7 @@ RtSolver::setSource(const Real a_source)
 
   DataOps::setValue(m_source, a_source);
 
-  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
@@ -329,7 +329,7 @@ RtSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a
     m_amr->interpToCentroids(scratch, m_realm, phase::gas);
   }
 
-  m_amr->averageDown(scratch, m_realm, m_phase);
+  m_amr->conservativeAverage(scratch, m_realm, m_phase);
   m_amr->interpGhost(scratch, m_realm, m_phase);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {

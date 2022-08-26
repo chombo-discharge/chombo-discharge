@@ -74,7 +74,7 @@ CdrPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_electricField, EBAMR
   // Now compute grad(|E|).
   m_amr->computeGradient(a_gradElectricField, m_scratch, m_realm, phase::gas);
 
-  m_amr->averageDown(a_gradElectricField, m_realm, m_phase);
+  m_amr->conservativeAverage(a_gradElectricField, m_realm, m_phase);
   m_amr->interpGhost(a_gradElectricField, m_realm, m_phase);
 
   // Interpolate everything to centroids since that is the only place where things make sense.
@@ -205,14 +205,14 @@ CdrPlasmaFieldTagger::computeTracers() const
 
   // Coarsen the data.
   for (int i = 0; i < m_numTracers; i++) {
-    m_amr->averageDown(m_tracers[i], m_realm, m_phase);
+    m_amr->conservativeAverage(m_tracers[i], m_realm, m_phase);
     m_amr->interpGhost(m_tracers[i], m_realm, m_phase);
   }
 
   // Compute gradients.
   for (int i = 0; i < m_numTracers; i++) {
     m_amr->computeGradient(m_gradTracers[i], m_tracers[i], m_realm, phase::gas);
-    m_amr->averageDown(m_gradTracers[i], m_realm, m_phase);
+    m_amr->conservativeAverage(m_gradTracers[i], m_realm, m_phase);
   }
 
   // No need to keep this transient storage lying around so we delete it.

@@ -491,7 +491,7 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
 
   // Interpolate fluxes to centroids and then coarsen them so we have consistent fluxes.
   this->interpolateFluxToFaceCentroids(a_G);
-  m_amr->averageDown(a_G, m_realm, m_phase);
+  m_amr->conservativeAverage(a_G, m_realm, m_phase);
 
   this->conservativeDivergenceNoKappaDivision(a_divG,
                                               a_G,
@@ -992,7 +992,7 @@ CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData&     a_conservati
     a_conservativeDivergence[lvl]->exchange();
   }
 
-  m_amr->averageDown(a_conservativeDivergence, m_realm, m_phase);
+  m_amr->conservativeAverage(a_conservativeDivergence, m_realm, m_phase);
   m_amr->interpGhost(a_conservativeDivergence, m_realm, m_phase);
 }
 
@@ -1213,7 +1213,7 @@ CdrSolver::initialData()
   // why is why initialDataParticles is called first!
   this->initialDataDistribution();
 
-  m_amr->averageDown(m_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 }
 
@@ -1235,7 +1235,7 @@ CdrSolver::initialDataDistribution()
   DataOps::incr(m_phi, m_scratch, 1.0);
   DataOps::setCoveredValue(m_phi, 0, 0.0);
 
-  m_amr->averageDown(m_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 }
 
@@ -1642,10 +1642,10 @@ CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   m_amr->interpToNewGrids(m_source, m_cacheSource, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
 
   // Coarsen data and update ghost cells.
-  m_amr->averageDown(m_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
-  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
 
   // Deallocate the scratch storage.
@@ -1746,8 +1746,8 @@ CdrSolver::setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoefficient,
   m_faceCenteredDiffusionCoefficient.copy(a_diffusionCoefficient);
   m_ebCenteredDiffusionCoefficient.copy(a_ebDiffusionCoefficient);
 
-  m_amr->averageDown(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
-  m_amr->averageDown(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->conservativeAverage(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->conservativeAverage(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
 }
 
 void
@@ -1761,8 +1761,8 @@ CdrSolver::setDiffusionCoefficient(const Real a_diffusionCoefficient)
   DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffusionCoefficient);
   DataOps::setValue(m_ebCenteredDiffusionCoefficient, a_diffusionCoefficient);
 
-  m_amr->averageDown(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
-  m_amr->averageDown(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->conservativeAverage(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->conservativeAverage(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
 }
 
 void
@@ -1842,7 +1842,7 @@ CdrSolver::setSource(const EBAMRCellData& a_source)
 
   m_source.copy(a_source);
 
-  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
@@ -1856,7 +1856,7 @@ CdrSolver::setSource(const Real a_source)
 
   DataOps::setValue(m_source, a_source);
 
-  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
@@ -1870,7 +1870,7 @@ CdrSolver::setSource(const std::function<Real(const RealVect a_position)> a_sour
 
   DataOps::setValue(m_source, a_source, m_amr->getProbLo(), m_amr->getDx(), m_comp);
 
-  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->conservativeAverage(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
@@ -1899,7 +1899,7 @@ CdrSolver::setVelocity(const EBAMRCellData& a_velo)
 
   m_cellVelocity.copy(a_velo);
 
-  m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
+  m_amr->conservativeAverage(m_cellVelocity, m_realm, m_phase);
   m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
 }
 
@@ -1917,7 +1917,7 @@ CdrSolver::setVelocity(const RealVect a_velo)
     }
   }
 
-  m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
+  m_amr->conservativeAverage(m_cellVelocity, m_realm, m_phase);
   m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
 }
 
@@ -2075,7 +2075,7 @@ CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& 
     m_amr->interpToCentroids(scratch, m_realm, phase::gas);
   }
 
-  m_amr->averageDown(scratch, m_realm, m_phase);
+  m_amr->conservativeAverage(scratch, m_realm, m_phase);
   m_amr->interpGhost(scratch, m_realm, m_phase);
 
   // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
@@ -2455,10 +2455,10 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
   }
 
   if (m_isMobile) {
-    m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
+    m_amr->conservativeAverage(m_cellVelocity, m_realm, m_phase);
     m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
 
-    m_amr->averageDown(m_phi, m_realm, m_phase);
+    m_amr->conservativeAverage(m_phi, m_realm, m_phase);
     m_amr->interpGhost(m_phi, m_realm, m_phase);
 
     // Compute velocity on faces and EBs. The data is currently face-centered.
@@ -2598,7 +2598,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
     DataOps::setValue(zero, 0.0);
     DataOps::divideFallback(a_weightedUpwindPhi, m_scratch, zero);
 
-    m_amr->averageDown(a_weightedUpwindPhi, m_realm, m_phase);
+    m_amr->conservativeAverage(a_weightedUpwindPhi, m_realm, m_phase);
     m_amr->interpGhost(a_weightedUpwindPhi, m_realm, m_phase);
   }
   else {
@@ -2627,7 +2627,7 @@ CdrSolver::computeMass(EBAMRCellData& a_phi)
 
   // TLDR: We have conservative coarsening so we just coarsen the solution and compute the mass on the coarsest level only.
 
-  m_amr->averageDown(a_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
 
   const Real dx = m_amr->getDx()[0];
 
@@ -2981,7 +2981,7 @@ CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData&
                       false); // Compute the finite volume approximation and make it into a source term.
 
 #if 0 // Debug, check if we have NaNs/Infs
-    m_amr->averageDown(a_noiseSource, m_realm, m_phase);
+    m_amr->conservativeAverage(a_noiseSource, m_realm, m_phase);
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       if(EBLevelDataOps::checkNANINF(*a_noiseSource[lvl])){
 	MayDay::Abort("CdrSolver::gwnDiffusionSource - something is wrong");

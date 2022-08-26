@@ -1425,7 +1425,7 @@ ItoSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& 
     m_amr->interpToCentroids(scratch, m_realm, phase::gas);
   }
 
-  m_amr->averageDown(scratch, m_realm, m_phase);
+  m_amr->conservativeAverage(scratch, m_realm, m_phase);
   m_amr->interpGhost(scratch, m_realm, m_phase);
 
   // Copy into source data holder.
@@ -2167,7 +2167,7 @@ ItoSolver::interpolateMobilities()
       // Compute |v|
       DataOps::vectorLength(m_scratch, m_velocityFunction);
 
-      m_amr->averageDown(m_scratch, m_realm, m_phase);
+      m_amr->conservativeAverage(m_scratch, m_realm, m_phase);
       m_amr->interpGhostMG(m_scratch, m_realm, m_phase);
 
       break;

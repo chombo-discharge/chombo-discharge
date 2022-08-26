@@ -171,7 +171,7 @@ BrownianWalkerStepper::setVelocity()
   DataOps::setValue(vel, veloFunc, m_amr->getProbLo(), m_amr->getDx());
 
   // Coarsen and update ghost cells.
-  m_amr->averageDown(vel, m_realm, m_phase);
+  m_amr->conservativeAverage(vel, m_realm, m_phase);
   m_amr->interpGhostMG(vel, m_realm, m_phase);
 
   DataOps::setCoveredValue(vel, 0, 0.0);

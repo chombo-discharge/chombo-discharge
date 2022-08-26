@@ -269,9 +269,9 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     DataOps::kappaScale(m_kappaRhoByEps0);
   }
 
-  m_amr->averageDown(a_phi, m_realm);
+  m_amr->conservativeAverage(a_phi, m_realm);
   m_amr->interpGhost(a_phi, m_realm);
-  m_amr->averageDown(m_kappaRhoByEps0, m_realm);
+  m_amr->conservativeAverage(m_kappaRhoByEps0, m_realm);
   m_amr->interpGhost(m_kappaRhoByEps0, m_realm);
 
   // Do the scaled surface charge
@@ -319,7 +319,7 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   m_multigridSolver.revert(phi, rhs, finestLevel, 0);
 
-  m_amr->averageDown(a_phi, m_realm);
+  m_amr->conservativeAverage(a_phi, m_realm);
   m_amr->interpGhostMG(a_phi, m_realm);
 
   this->computeElectricField(m_electricField, a_phi);
@@ -676,7 +676,7 @@ FieldSolverMultigrid::computeElectricField(MFAMRCellData& a_electricField, const
   DataOps::scale(a_electricField, -1.0);
 
   // Coarsen solution and update ghost cells.
-  m_amr->averageDown(a_electricField, m_realm);
+  m_amr->conservativeAverage(a_electricField, m_realm);
   m_amr->interpGhost(a_electricField, m_realm);
 }
 
@@ -735,7 +735,7 @@ FieldSolverMultigrid::computeElectricField(EBAMRCellData&           a_electricFi
   DataOps::scale(a_electricField, -1.0);
 
   // Coarsen solution and update ghost cells.
-  m_amr->averageDown(a_electricField, m_realm, a_phase);
+  m_amr->conservativeAverage(a_electricField, m_realm, a_phase);
   m_amr->interpGhost(a_electricField, m_realm, a_phase);
 }
 

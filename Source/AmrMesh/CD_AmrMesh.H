@@ -581,7 +581,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  averageDown(MFAMRCellData& a_data, const std::string a_realm) const;
+  conservativeAverage(MFAMRCellData& a_data, const std::string a_realm) const;
 
   /*!
     @brief Average down multifluid data over a realm. 
@@ -589,7 +589,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  averageDown(MFAMRFluxData& a_data, const std::string a_realm) const;
+  conservativeAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
 
   /*!
     @brief Average multifluid data over a realm. 
@@ -607,7 +607,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  conservativeAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -618,10 +618,10 @@ public:
     @details This coarsens data from level a_lvl+1 to level a_lvl
   */
   void
-  averageDown(EBAMRCellData&           a_data,
-              const std::string        a_realm,
-              const phase::which_phase a_phase,
-              const int                a_lvl) const;
+  conservativeAverage(EBAMRCellData&           a_data,
+                      const std::string        a_realm,
+                      const phase::which_phase a_phase,
+                      const int                a_lvl) const;
 
   /*!
     @brief Coarsen cells over a realm. This does a specific level. 
@@ -632,11 +632,11 @@ public:
     @param[in]    a_phase    Phase (gas or solid)
   */
   void
-  averageDown(LevelData<EBCellFAB>&       a_coarData,
-              const LevelData<EBCellFAB>& a_fineData,
-              const int                   a_level,
-              const std::string           a_realm,
-              const phase::which_phase    a_phase) const;
+  conservativeAverage(LevelData<EBCellFAB>&       a_coarData,
+                      const LevelData<EBCellFAB>& a_fineData,
+                      const int                   a_level,
+                      const std::string           a_realm,
+                      const phase::which_phase    a_phase) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -645,7 +645,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  averageDown(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  conservativeAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -664,7 +664,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  averageDown(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Do conservative coarsening for data defined on cut-cells. 

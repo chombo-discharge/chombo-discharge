@@ -69,7 +69,7 @@ ItoPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_
   DataOps::vectorLength(m_scratch, a_E);
   m_amr->computeGradient(a_grad_E, m_scratch, m_realm, phase::gas);
 
-  m_amr->averageDown(a_grad_E, m_realm, m_phase);
+  m_amr->conservativeAverage(a_grad_E, m_realm, m_phase);
   m_amr->interpGhost(a_grad_E, m_realm, m_phase);
 
   // Interpolate to centroids
@@ -160,14 +160,14 @@ ItoPlasmaFieldTagger::computeTracers()
   }
 
   for (int i = 0; i < m_num_tracers; i++) {
-    m_amr->averageDown(m_tracer[i], m_realm, m_phase);
+    m_amr->conservativeAverage(m_tracer[i], m_realm, m_phase);
     m_amr->interpGhost(m_tracer[i], m_realm, m_phase);
   }
 
   // Compute gradient of tracers
   for (int i = 0; i < m_num_tracers; i++) {
     m_amr->computeGradient(m_grad_tracer[i], m_tracer[i], m_realm, m_phase);
-    m_amr->averageDown(m_grad_tracer[i], m_realm, m_phase);
+    m_amr->conservativeAverage(m_grad_tracer[i], m_realm, m_phase);
   }
 
   this->deallocateStorage(); // No reason to keep the extra storage lying around...
