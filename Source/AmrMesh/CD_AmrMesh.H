@@ -575,13 +575,66 @@ public:
   */
   void
   reallocate(MFAMRIVData& a_data, const int a_lmin) const;
+
   /*!
-    @brief Average down multifluid data over a realm. 
+    @brief Average multifluid data over a specified realm
+    @param[inout] a_data    Data to be coarsened.
+    @param[in]    a_realm   Realm name
+    @param[in]    a_average Averaging method
+  */
+  void
+  average(MFAMRCellData& a_data, const std::string a_realm, const Average& a_average) const;
+
+  /*!
+    @brief Arithmetic coarsening of multifluid data.
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+  */
+  void
+  arithmeticAverage(MFAMRCellData& a_data, const std::string a_realm) const;
+
+  /*!
+    @brief Harmonic coarsening of multifluid data.
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+  */
+  void
+  harmonicAverage(MFAMRCellData& a_data, const std::string a_realm) const;      
+  
+  /*!
+    @brief Conservative coarsening of multifluid data.
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
   void
   conservativeAverage(MFAMRCellData& a_data, const std::string a_realm) const;
+
+    /*!
+    @brief Average multifluid data over a specified realm
+    @param[inout] a_data    Data to be coarsened.
+    @param[in]    a_realm   Realm name
+    @param[in]    a_average Averaging method
+  */
+  void
+  average(MFAMRFluxData& a_data, const std::string a_realm, const Average& a_average) const;
+  
+  /*!
+    @brief Average multifluid data over a realm. 
+    @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+  */
+  void
+  arithmeticAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
+  
+  /*!
+    @brief Average multifluid data over a realm. 
+    @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+  */
+  void
+  harmonicAverage(MFAMRFluxData& a_data, const std::string a_realm) const;    
 
   /*!
     @brief Average down multifluid data over a realm. 
@@ -592,13 +645,32 @@ public:
   conservativeAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
 
   /*!
-    @brief Average multifluid data over a realm. 
-    @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
+    @brief Average down on specific realm and phase. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+    @param[in]    a_average Averaging method
   */
   void
-  averageFaces(MFAMRFluxData& a_data, const std::string a_realm) const;
+  average(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase, const Average& a_average) const;
+
+  /*!
+    @brief Average down on specific realm and phase. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void
+  arithmeticAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Average down on specific realm and phase. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void
+  harmonicAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;    
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -614,29 +686,30 @@ public:
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
-    @param[in]    a_level The coarse level.
-    @details This coarsens data from level a_lvl+1 to level a_lvl
+    @param[in]    a_average Averaging method
   */
   void
-  conservativeAverage(EBAMRCellData&           a_data,
-                      const std::string        a_realm,
-                      const phase::which_phase a_phase,
-                      const int                a_lvl) const;
+  average(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase, const Average& a_average) const;
 
   /*!
-    @brief Coarsen cells over a realm. This does a specific level. 
-    @param[inout] a_coarData Coarse grid data
-    @param[inout] a_fineData Fine grid data
-    @param[in]    a_level    The grid level corresponding to a_fineData
-    @param[in]    a_realm    Realm name
-    @param[in]    a_phase    Phase (gas or solid)
+    @brief Average down on specific realm and phase. 
+    @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
+    @param[inout] a_data  Data to be average.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
   */
   void
-  conservativeAverage(LevelData<EBCellFAB>&       a_coarData,
-                      const LevelData<EBCellFAB>& a_fineData,
-                      const int                   a_level,
-                      const std::string           a_realm,
-                      const phase::which_phase    a_phase) const;
+  arithmeticAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Average down on specific realm and phase. 
+    @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
+    @param[inout] a_data  Data to be average.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void
+  harmonicAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;    
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -649,31 +722,40 @@ public:
 
   /*!
     @brief Average down on specific realm and phase. 
-    @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
-    @param[inout] a_data  Data to be average.
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+    @param[in]    a_average Averaging method
+  */
+  void
+  average(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase, const Average& a_average) const;  
+
+  /*!
+    @brief Arithmetic average on specific realm and phase. 
+    @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  averageFaces(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  arithmeticAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Average down on specific realm and phase. 
+    @brief Harmonic average on specific realm and phase. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void
+  harmonicAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;  
+
+  /*!
+    @brief Conservative averaging on specific realm and phase.
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
   void
   conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Do conservative coarsening for data defined on cut-cells. 
-    @param[inout] a_data  Data to be coarsened.
-    @param[in]    a_realm Realm name
-    @param[in]    a_phase Phase (gas or solid)
-  */
-  void
-  conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Deposit scalar particle quantities on the mesh. 

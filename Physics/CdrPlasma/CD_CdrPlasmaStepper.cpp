@@ -251,7 +251,7 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
 #endif
 
   // Coarsen coefficients.
-  m_amr->averageFaces(a_conductivityFace, m_realm, phase::gas);
+  m_amr->arithmeticAverage(a_conductivityFace, m_realm, phase::gas);
   m_amr->conservativeAverage(a_conductivityEB, m_realm, phase::gas);
 }
 
@@ -319,7 +319,7 @@ CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFa
   DataOps::incr(permEBGas, a_conductivityEB, a_factor);
 
   // Coarsen coefficients.
-  m_amr->averageFaces(permFaceGas, m_realm, phase::gas);
+  m_amr->arithmeticAverage(permFaceGas, m_realm, phase::gas);
   m_amr->conservativeAverage(permEBGas, m_realm, phase::gas);
 
   // Set up the solver with the new "permittivities".
@@ -4723,7 +4723,7 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 
         fineAlias.exchange();
 
-        m_amr->conservativeAverage(coarAlias, fineAlias, lvl, m_realm, phase::gas);
+	m_amr->conservativeAverage(coarAlias, fineAlias, lvl, m_realm, phase::gas);
 
         coarAlias.exchange();
       }
