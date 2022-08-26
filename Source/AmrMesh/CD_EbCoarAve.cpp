@@ -74,42 +74,38 @@ EbCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
   LevelData<EBCellFAB> coarFiData;
   LevelData<EBCellFAB> fineBuffer;
 
-  // Get input data onto the buffer if we must
-  const int     ncomp = a_variables.end() + 1;
-  EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
-  coarFiData.define(m_eblgCoFi.getDBL(), ncomp, IntVect::Zero, factCoFi);
-  if (m_useFineBuffer) {
-    EBCellFactory factFine(m_eblgFine.getEBISL());
-    fineBuffer.define(m_eblgFine.getDBL(), ncomp, IntVect::Zero, factFine);
-  }
+  const Interval buffInterv = Interval(0, a_variables.size() - 1);
+  const Interval fineInterv = m_useFineBuffer ? buffInterv : a_variables;
 
   if (m_useFineBuffer) {
-    a_fineData.copyTo(a_variables, fineBuffer, a_variables);
+    EBCellFactory factFine(m_eblgFine.getEBISL());
+    fineBuffer.define(m_eblgFine.getDBL(), a_variables.size(), IntVect::Zero, factFine);
+
+    a_fineData.copyTo(a_variables, fineBuffer, buffInterv);
+  }
+  else {
+    EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
+    coarFiData.define(m_eblgCoFi.getDBL(), a_variables.size(), IntVect::Zero, factCoFi);
   }
 
   for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit) {
-    const EBCellFAB* fineFAB = nullptr;
-    if (m_useFineBuffer) {
-      fineFAB = &fineBuffer[dit()];
-    }
-    else {
-      fineFAB = &a_fineData[dit()];
-    }
+    EBCellFAB&       coarData = coarFiData[dit()];
+    const EBCellFAB& fineData = m_useFineBuffer ? fineBuffer[dit()] : a_fineData[dit()];
 
     // Switch between methods.
     switch (a_average) {
     case Average::Arithmetic: {
-      this->arithmeticAverage(coarFiData[dit()], *fineFAB, dit(), a_variables, a_variables);
+      this->arithmeticAverage(coarData, fineData, dit(), buffInterv, fineInterv);
 
       break;
     }
     case Average::Harmonic: {
-      this->harmonicAverage(coarFiData[dit()], *fineFAB, dit(), a_variables, a_variables);
+      this->harmonicAverage(coarData, fineData, dit(), buffInterv, fineInterv);
 
       break;
     }
     case Average::Conservative: {
-      this->conservativeAverage(coarFiData[dit()], *fineFAB, dit(), a_variables, a_variables);
+      this->conservativeAverage(coarData, fineData, dit(), buffInterv, fineInterv);
 
       break;
     }
@@ -121,7 +117,7 @@ EbCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
     }
   }
 
-  coarFiData.copyTo(a_variables, a_coarData, a_variables);
+  coarFiData.copyTo(buffInterv, a_coarData, a_variables);
 }
 
 void
@@ -358,48 +354,43 @@ EbCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
   LevelData<EBFluxFAB> coarFiData;
   LevelData<EBFluxFAB> fineBuffer;
 
-  EBFluxFactory factCoFi(m_eblgCoFi.getEBISL());
-  EBFluxFactory factFine(m_eblgFine.getEBISL());
+  const Interval buffInterv = Interval(0, a_variables.size() - 1);
+  const Interval fineInterv = m_useFineBuffer ? buffInterv : a_variables;
 
-  // Define buffer data.
-  const int numComp = a_variables.end() + 1;
-  coarFiData.define(m_eblgCoFi.getDBL(), numComp, IntVect::Zero, factCoFi);
   if (m_useFineBuffer) {
-    fineBuffer.define(m_eblgFine.getDBL(), numComp, IntVect::Zero, factFine);
-    a_fineData.copyTo(a_variables, fineBuffer, a_variables);
+    EBFluxFactory factFine(m_eblgFine.getEBISL());
+    fineBuffer.define(m_eblgFine.getDBL(), a_variables.size(), IntVect::Zero, factFine);
+
+    a_fineData.copyTo(a_variables, fineBuffer, buffInterv);
+  }
+  else {
+    EBFluxFactory factCoFi(m_eblgCoFi.getEBISL());
+
+    coarFiData.define(m_eblgCoFi.getDBL(), a_variables.size(), IntVect::Zero, factCoFi);
   }
 
   for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit) {
-    const EBFluxFAB* fineFABPtr = nullptr;
-
-    if (m_useFineBuffer) {
-      fineFABPtr = &fineBuffer[dit()];
-    }
-    else {
-      fineFABPtr = &a_fineData[dit()];
-    }
-
-    EBFluxFAB&       cofiFAB = coarFiData[dit()];
-    const EBFluxFAB& fineFAB = *fineFABPtr;
+    EBFluxFAB&       coarData = coarFiData[dit()];
+    const EBFluxFAB& fineData = m_useFineBuffer ? fineBuffer[dit()] : a_fineData[dit()];
 
     switch (a_average) {
     case Average::Arithmetic: {
-      for (int idir = 0; idir < SpaceDim; idir++) {
-        this->arithmeticAverage(cofiFAB[idir], fineFAB[idir], dit(), a_variables, a_variables, idir);
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        this->arithmeticAverage(coarData[dir], fineData[dir], dit(), buffInterv, fineInterv, dir);
       }
 
       break;
     }
     case Average::Harmonic: {
-      for (int idir = 0; idir < SpaceDim; idir++) {
-        this->harmonicAverage(cofiFAB[idir], fineFAB[idir], dit(), a_variables, a_variables, idir);
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        this->harmonicAverage(coarData[dir], fineData[dir], dit(), buffInterv, fineInterv, dir);
       }
 
       break;
     }
     case Average::Conservative: {
-      for (int idir = 0; idir < SpaceDim; idir++) {
-        this->conservativeAverage(cofiFAB[idir], fineFAB[idir], dit(), a_variables, a_variables, idir);
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        this->conservativeAverage(coarData[dir], fineData[dir], dit(), buffInterv, fineInterv, dir);
       }
 
       break;
@@ -413,7 +404,7 @@ EbCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
   }
 
   // Copy back to input data.
-  coarFiData.copyTo(a_variables, a_coarData, a_variables);
+  coarFiData.copyTo(buffInterv, a_coarData, fineInterv);
 }
 
 void
@@ -707,42 +698,38 @@ EbCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
   LevelData<BaseIVFAB<Real>> coarFiData;
   LevelData<BaseIVFAB<Real>> fineBuffer;
 
-  BaseIVFactory<Real> factCoFi(m_eblgCoFi.getEBISL(), m_irregSetsCoFi);
-  coarFiData.define(m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, factCoFi);
-  if (m_useFineBuffer) {
-    BaseIVFactory<Real> factFine(m_eblgFine.getEBISL(), m_irregSetsFine);
-    coarFiData.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, factFine);
-  }
+  const Interval buffInterv = Interval(0, a_variables.size() - 1);
+  const Interval fineInterv = m_useFineBuffer ? buffInterv : a_variables;
 
   if (m_useFineBuffer) {
-    a_fineData.copyTo(a_variables, fineBuffer, a_variables);
+    BaseIVFactory<Real> factFine(m_eblgFine.getEBISL(), m_irregSetsFine);
+    coarFiData.define(m_eblgFine.getDBL(), a_variables.size(), IntVect::Zero, factFine);
+
+    a_fineData.copyTo(a_variables, fineBuffer, buffInterv);
+  }
+  else {
+    BaseIVFactory<Real> factCoFi(m_eblgCoFi.getEBISL(), m_irregSetsCoFi);
+    coarFiData.define(m_eblgCoFi.getDBL(), a_variables.size(), IntVect::Zero, factCoFi);
   }
 
   for (DataIterator dit = m_eblgFine.getDBL().dataIterator(); dit.ok(); ++dit) {
-    const BaseIVFAB<Real>* fineFABPtr = nullptr;
-    if (m_useFineBuffer) {
-      fineFABPtr = &fineBuffer[dit()];
-    }
-    else {
-      fineFABPtr = &a_fineData[dit()];
-    }
-    BaseIVFAB<Real>&       cofiFAB = coarFiData[dit()];
-    const BaseIVFAB<Real>& fineFAB = *fineFABPtr;
+    BaseIVFAB<Real>&       coarData = coarFiData[dit()];
+    const BaseIVFAB<Real>& fineData = m_useFineBuffer ? fineBuffer[dit()] : a_fineData[dit()];
 
     // Switch between averaging methods.
     switch (a_average) {
     case Average::Arithmetic: {
-      this->arithmeticAverage(a_coarData[dit()], a_fineData[dit()], dit(), a_variables, a_variables);
+      this->arithmeticAverage(coarData, a_fineData[dit()], dit(), buffInterv, fineInterv);
 
       break;
     }
     case Average::Harmonic: {
-      this->harmonicAverage(a_coarData[dit()], a_fineData[dit()], dit(), a_variables, a_variables);
+      this->harmonicAverage(coarData, a_fineData[dit()], dit(), buffInterv, fineInterv);
 
       break;
     }
     case Average::Conservative: {
-      this->conservativeAverage(a_coarData[dit()], a_fineData[dit()], dit(), a_variables, a_variables);
+      this->conservativeAverage(coarData, a_fineData[dit()], dit(), buffInterv, fineInterv);
 
       break;
     }
@@ -754,7 +741,7 @@ EbCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
     }
   }
 
-  coarFiData.copyTo(a_variables, a_coarData, a_variables);
+  coarFiData.copyTo(buffInterv, a_coarData, a_variables);
 }
 
 void
@@ -764,7 +751,10 @@ EbCoarAve::arithmeticAverage(BaseIVFAB<Real>&       a_coarData,
                              const Interval&        a_coarInterv,
                              const Interval&        a_fineInterv) const
 {
+  CH_TIME("EBCoarseAverage::arithmeticAverage(BaseIVFAB<Real>)");
+
   CH_assert(isDefined());
+  CH_assert(a_coarInterv.size() == a_fineInterv.size());
 
   const EBISBox& ebisBoxCoar = m_eblgCoFi.getEBISL()[a_datInd];
   const EBISBox& ebisBoxFine = m_eblgFine.getEBISL()[a_datInd];
@@ -809,7 +799,10 @@ EbCoarAve::harmonicAverage(BaseIVFAB<Real>&       a_coarData,
                            const Interval&        a_coarInterv,
                            const Interval&        a_fineInterv) const
 {
+  CH_TIME("EBCoarseAverage::harmonicAverage(BaseIVFAB<Real>)");
+
   CH_assert(isDefined());
+  CH_assert(a_coarInterv.size() == a_fineInterv.size());
 
   const EBISBox& ebisBoxCoar = m_eblgCoFi.getEBISL()[a_datInd];
   const EBISBox& ebisBoxFine = m_eblgFine.getEBISL()[a_datInd];
@@ -853,7 +846,10 @@ EbCoarAve::conservativeAverage(BaseIVFAB<Real>&       a_coarData,
                                const Interval&        a_coarInterv,
                                const Interval&        a_fineInterv) const
 {
+  CH_TIME("EBCoarseAverage::conservativeAverage(BaseIVFAB<Real>)");
+
   CH_assert(isDefined());
+  CH_assert(a_coarInterv.size() == a_fineInterv.size());
 
   const EBISBox& ebisBoxCoar = m_eblgCoFi.getEBISL()[a_datInd];
   const EBISBox& ebisBoxFine = m_eblgFine.getEBISL()[a_datInd];
