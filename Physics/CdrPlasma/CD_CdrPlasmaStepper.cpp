@@ -4723,7 +4723,11 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 
         fineAlias.exchange();
 
-        //	m_amr->conservativeAverage(coarAlias, fineAlias, lvl, m_realm, phase::gas);
+#if 1 // Development code
+	MayDay::Error("CD_CdrPlamaStepper.cpp -- fix the coarsening with the new signatures");
+#else // Original code
+	m_amr->conservativeAverage(coarAlias, fineAlias, lvl, m_realm, phase::gas);
+#endif
 
         coarAlias.exchange();
       }
