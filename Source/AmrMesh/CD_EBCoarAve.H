@@ -32,8 +32,7 @@ enum class Average
 
 /*!
   @brief Class which replaces data at coarse level of refinement with average
-  at fine level of refinement. Just like Chombo's EBCoarseAverage, but with an extra
-  function. 
+  at fine level of refinement. 
 */
 class EBCoarAve
 {

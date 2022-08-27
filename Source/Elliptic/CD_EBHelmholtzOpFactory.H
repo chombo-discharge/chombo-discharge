@@ -16,7 +16,6 @@
 #include <RealVect.H>
 #include <EBLevelGrid.H>
 #include <EBFluxRegister.H>
-#include <EBCoarseAverage.H>
 #include <EBCellFAB.H>
 #include <EBFluxFAB.H>
 #include <BaseIVFAB.H>

@@ -659,6 +659,21 @@ public:
 
   /*!
     @brief Average down on specific realm and phase. 
+    @param[inout] a_data      Data to be coarsened.
+    @param[in]    a_realm     Realm
+    @param[in]    a_phase     Phase (gas or solid)
+    @param[in]    a_variables Variables to average
+    @param[in]    a_average   Averaging method
+  */
+  void
+  average(EBAMRCellData&           a_data,
+          const std::string        a_realm,
+          const phase::which_phase a_phase,
+          const Average&           a_average,
+          const Interval&          a_variables) const;
+
+  /*!
+    @brief Arithmetic average of data. Does all components. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
@@ -667,7 +682,20 @@ public:
   arithmeticAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Average down on specific realm and phase. 
+    @brief Arithmetic average of data. 
+    @param[inout] a_data      Data to be coarsened.
+    @param[in]    a_realm     Realm name
+    @param[in]    a_phase     Phase (gas or solid)
+    @param[in]    a_variables Variables
+  */
+  void
+  arithmeticAverage(EBAMRCellData&           a_data,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase,
+                    const Interval&          a_variables) const;
+
+  /*!
+    @brief Harmonic average of data. Does all components. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
@@ -676,13 +704,39 @@ public:
   harmonicAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Average down on specific realm and phase. 
+    @brief Harmonic average of data. Does all components. 
+    @param[inout] a_data      Data to be coarsened.
+    @param[in]    a_realm     Realm name
+    @param[in]    a_phase     Phase (gas or solid)
+    @param[in]    a_variables Variables
+  */
+  void
+  harmonicAverage(EBAMRCellData&           a_data,
+                  const std::string        a_realm,
+                  const phase::which_phase a_phase,
+                  const Interval&          a_variables) const;
+
+  /*!
+    @brief Conseratively average data. Does all components. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
   void
   conservativeAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Conseratively average data. Does all components. 
+    @param[inout] a_data      Data to be coarsened.
+    @param[in]    a_realm     Realm name
+    @param[in]    a_phase     Phase (gas or solid)
+    @param[in]    a_variables Variables
+  */
+  void
+  conservativeAverage(EBAMRCellData&           a_data,
+                      const std::string        a_realm,
+                      const phase::which_phase a_phase,
+                      const Interval&          a_variables) const;
 
   /*!
     @brief Average down on specific realm and phase. 
