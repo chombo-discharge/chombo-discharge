@@ -27,7 +27,7 @@
 
 // Our includes
 #include <CD_EBAMRData.H>
-#include <CD_EbCoarAve.H>
+#include <CD_EBCoarAve.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_IrregAmrStencil.H>
@@ -1454,7 +1454,7 @@ public:
   /*!
     @brief Get the coarsening utility
   */
-  Vector<RefCountedPtr<EbCoarAve>>&
+  Vector<RefCountedPtr<EBCoarAve>>&
   getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!

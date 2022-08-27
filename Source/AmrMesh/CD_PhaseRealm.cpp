@@ -153,9 +153,9 @@ PhaseRealm::regridOperators(const int a_lmin)
 
     Timer timer("PhaseRealm::regridOperators(int)");
 
-    timer.startEvent("EbCoarAve");
-    this->defineEbCoarAve(a_lmin);
-    timer.stopEvent("EbCoarAve");
+    timer.startEvent("EBCoarAve");
+    this->defineEBCoarAve(a_lmin);
+    timer.stopEvent("EBCoarAve");
 
     timer.startEvent("Ghost interp");
     this->defineFillPatch(a_lmin);
@@ -409,11 +409,11 @@ PhaseRealm::defineLevelSet(const int a_lmin, const int a_numGhost)
 }
 
 void
-PhaseRealm::defineEbCoarAve(const int a_lmin)
+PhaseRealm::defineEBCoarAve(const int a_lmin)
 {
-  CH_TIME("PhaseRealm::defineEbCoarAve");
+  CH_TIME("PhaseRealm::defineEBCoarAve");
   if (m_verbose) {
-    pout() << "PhaseRealm::defineEbCoarAve" << endl;
+    pout() << "PhaseRealm::defineEBCoarAve" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_coar_ave);
@@ -426,8 +426,8 @@ PhaseRealm::defineEbCoarAve(const int a_lmin)
       const bool hasCoar = lvl > 0;
 
       if (hasCoar) {
-        m_coarAve[lvl] = RefCountedPtr<EbCoarAve>(
-          new EbCoarAve(*m_eblg[lvl], *m_eblg[lvl - 1], *m_eblgCoFi[lvl], m_refinementRatios[lvl - 1]));
+        m_coarAve[lvl] = RefCountedPtr<EBCoarAve>(
+          new EBCoarAve(*m_eblg[lvl], *m_eblg[lvl - 1], *m_eblgCoFi[lvl], m_refinementRatios[lvl - 1]));
       }
     }
   }
@@ -952,7 +952,7 @@ PhaseRealm::getNonConservativeDivergenceStencils() const
   return *m_NonConservativeDivergenceStencil;
 }
 
-Vector<RefCountedPtr<EbCoarAve>>&
+Vector<RefCountedPtr<EBCoarAve>>&
 PhaseRealm::getCoarseAverage() const
 {
   if (!this->queryOperator(s_eb_coar_ave)) {

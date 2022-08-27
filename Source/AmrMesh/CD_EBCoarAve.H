@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_EbCoarAve.H
+  @file   CD_EBCoarAve.H
   @brief  Declaration of conservative coarsening utility 
   @author Robert Marskar
 */
 
-#ifndef CD_EbCoarAve_H
-#define CD_EbCoarAve_H
+#ifndef CD_EBCoarAve_H
+#define CD_EBCoarAve_H
 
 // Chombo includes
 #include <EBLevelGrid.H>
@@ -35,18 +35,18 @@ enum class Average
   at fine level of refinement. Just like Chombo's EBCoarseAverage, but with an extra
   function. 
 */
-class EbCoarAve
+class EBCoarAve
 {
 public:
   /*!
     @brief Default constructor. Must call define afterwards. 
   */
-  EbCoarAve();
+  EBCoarAve();
 
   /*!
     @brief Copy constructor not allowed
   */
-  EbCoarAve(const EbCoarAve& a_other) = delete;
+  EBCoarAve(const EBCoarAve& a_other) = delete;
 
   /*!
     @brief Defining constructor.
@@ -59,7 +59,7 @@ public:
     @param[in] a_refRat     Refinement ratio
     @param[in] a_ebisPtr    EBIS pointer.
   */
-  EbCoarAve(const DisjointBoxLayout& a_dblFine,
+  EBCoarAve(const DisjointBoxLayout& a_dblFine,
             const DisjointBoxLayout& a_dblCoar,
             const EBISLayout&        a_ebislFine,
             const EBISLayout&        a_ebislCoar,
@@ -74,7 +74,7 @@ public:
     @param[in] a_eblgCoFi Coarsened fine grids
     @param[in] a_refRat   Refinement ratio between coarse and level
   */
-  EbCoarAve(const EBLevelGrid& a_eblgFine,
+  EBCoarAve(const EBLevelGrid& a_eblgFine,
             const EBLevelGrid& a_eblgCoar,
             const EBLevelGrid& a_eblgCoFi,
             const int&         a_refRat);
@@ -82,7 +82,7 @@ public:
   /*!
     @brief Destructor (does nothing)
   */
-  ~EbCoarAve();
+  ~EBCoarAve();
 
   /*!
     @brief Define function -- puts operator in usable state.
@@ -101,7 +101,7 @@ public:
     @brief Assignement not allowed.
   */
   void
-  operator=(const EbCoarAve& fabin) = delete;
+  operator=(const EBCoarAve& fabin) = delete;
 
   /*!
     @brief Do an average of cell data. 

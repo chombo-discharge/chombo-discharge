@@ -554,7 +554,7 @@ Realm::getNonConservativeDivergenceStencils(const phase::which_phase a_phase) co
   return m_realms[a_phase]->getNonConservativeDivergenceStencils();
 }
 
-Vector<RefCountedPtr<EbCoarAve>>&
+Vector<RefCountedPtr<EBCoarAve>>&
 Realm::getCoarseAverage(const phase::which_phase a_phase)
 {
   return m_realms[a_phase]->getCoarseAverage();

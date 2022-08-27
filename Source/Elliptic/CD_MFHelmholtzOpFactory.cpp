@@ -131,7 +131,7 @@ MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale)
 
   // Average down on AMR levels.
   for (int lvl = m_numAmrLevels - 1; lvl > 0; lvl--) {
-    const RefCountedPtr<EbCoarAve>& aveOp = m_amrCoarseners[lvl].getAveOp(m_mainPhase);
+    const RefCountedPtr<EBCoarAve>& aveOp = m_amrCoarseners[lvl].getAveOp(m_mainPhase);
 
     const Average average = Average::Arithmetic;
 
@@ -258,7 +258,7 @@ MFHelmholtzOpFactory::defineMultigridLevels()
       m_mgBcoef[amrLevel].push_back(m_amrBcoef[amrLevel]);
       m_mgBcoefIrreg[amrLevel].push_back(m_amrBcoefIrreg[amrLevel]);
       m_mgJump[amrLevel].push_back(m_amrJump[amrLevel]);
-      m_mgAveOp[amrLevel].push_back(RefCountedPtr<EbCoarAve>(nullptr));
+      m_mgAveOp[amrLevel].push_back(RefCountedPtr<EBCoarAve>(nullptr));
 
       bool hasCoarser = true;
 
@@ -348,7 +348,7 @@ MFHelmholtzOpFactory::defineMultigridLevels()
           // This is a special object for coarsening jump data between MG levels.
           const EBLevelGrid&       eblgFine = mgMflgFine.getEBLevelGrid(m_mainPhase);
           const EBLevelGrid&       eblgCoar = mgMflgCoar.getEBLevelGrid(m_mainPhase);
-          RefCountedPtr<EbCoarAve> aveOp(new EbCoarAve(eblgFine.getDBL(),
+          RefCountedPtr<EBCoarAve> aveOp(new EBCoarAve(eblgFine.getDBL(),
                                                        eblgCoar.getDBL(),
                                                        eblgFine.getEBISL(),
                                                        eblgCoar.getEBISL(),
@@ -750,7 +750,7 @@ MFHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_coarAc
       const EBLevelGrid& eblgCoar = a_mflgCoar.getEBLevelGrid(i);
       const EBLevelGrid& eblgFine = a_mflgFine.getEBLevelGrid(i);
 
-      EbCoarAve aveOp(eblgFine.getDBL(),
+      EBCoarAve aveOp(eblgFine.getDBL(),
                       eblgCoar.getDBL(),
                       eblgFine.getEBISL(),
                       eblgCoar.getEBISL(),

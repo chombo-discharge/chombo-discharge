@@ -1395,7 +1395,7 @@ AmrMesh::average(EBAMRCellData&           a_data,
     const int      nComps = a_data[lvl]->nComp();
     const Interval interv(0, nComps - 1);
 
-    EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
+    EBCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
 
     aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], interv, a_average);
   }
@@ -1458,7 +1458,7 @@ AmrMesh::average(EBAMRFluxData&           a_data,
     const int      nComps = a_data[lvl]->nComp();
     const Interval interv(0, nComps - 1);
 
-    EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
+    EBCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
 
     aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], interv, a_average);
   }
@@ -1517,7 +1517,7 @@ AmrMesh::average(EBAMRIVData&             a_data,
     const int      nComps = a_data[lvl]->nComp();
     const Interval interv(0, nComps - 1);
 
-    EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
+    EBCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
 
     aveOp.averageData(*a_data[lvl - 1], *a_data[lvl], interv, a_average);
   }
@@ -2701,7 +2701,7 @@ AmrMesh::getParticleMesh(const std::string a_realm, const phase::which_phase a_p
   return m_realms[a_realm]->getParticleMesh(a_phase);
 }
 
-Vector<RefCountedPtr<EbCoarAve>>&
+Vector<RefCountedPtr<EBCoarAve>>&
 AmrMesh::getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::getCoarseAverage(string, phase::which_phase)");

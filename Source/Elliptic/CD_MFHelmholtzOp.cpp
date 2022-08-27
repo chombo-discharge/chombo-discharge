@@ -102,7 +102,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
     RefCountedPtr<EBMultigridInterpolator> interpolator = RefCountedPtr<EBMultigridInterpolator>(nullptr);
     RefCountedPtr<EBFluxRegister>          fluxRegister = RefCountedPtr<EBFluxRegister>(nullptr);
-    RefCountedPtr<EbCoarAve>               coarsener    = RefCountedPtr<EbCoarAve>(nullptr);
+    RefCountedPtr<EBCoarAve>               coarsener    = RefCountedPtr<EBCoarAve>(nullptr);
 
     if (!a_isMGOperator) {
       if (a_hasFine) {

@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CD_EbCoarAve.cpp
-  @brief  Implementation of CD_EbCoarAve.H
+  @file   CD_EBCoarAve.cpp
+  @brief  Implementation of CD_EBCoarAve.H
   @author Robert Marskar
 */
 
@@ -16,15 +16,15 @@
 #include <CH_Timer.H>
 
 // Our includes
-#include <CD_EbCoarAve.H>
+#include <CD_EBCoarAve.H>
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EbCoarAve::EbCoarAve() { m_isDefined = false; }
+EBCoarAve::EBCoarAve() { m_isDefined = false; }
 
-EbCoarAve::~EbCoarAve() {}
+EBCoarAve::~EBCoarAve() {}
 
-EbCoarAve::EbCoarAve(const DisjointBoxLayout& a_dblFine,
+EBCoarAve::EBCoarAve(const DisjointBoxLayout& a_dblFine,
                      const DisjointBoxLayout& a_dblCoar,
                      const EBISLayout&        a_ebislFine,
                      const EBISLayout&        a_ebislCoar,
@@ -32,7 +32,7 @@ EbCoarAve::EbCoarAve(const DisjointBoxLayout& a_dblFine,
                      const int&               a_refRat,
                      const EBIndexSpace*      a_ebisPtr)
 {
-  CH_TIME("EbCoarAve::EbCoarAve(DBL version)");
+  CH_TIME("EBCoarAve::EBCoarAve(DBL version)");
 
   CH_assert(a_ebisPtr->isDefined());
 
@@ -49,12 +49,12 @@ EbCoarAve::EbCoarAve(const DisjointBoxLayout& a_dblFine,
   this->define(eblgFine, eblgCoar, eblgCoFi, a_refRat);
 }
 
-EbCoarAve::EbCoarAve(const EBLevelGrid& a_eblgFine,
+EBCoarAve::EBCoarAve(const EBLevelGrid& a_eblgFine,
                      const EBLevelGrid& a_eblgCoar,
                      const EBLevelGrid& a_eblgCoFi,
                      const int&         a_refRat)
 {
-  CH_TIME("EbCoarAve::EbCoarAve(EBLevelGrid version)");
+  CH_TIME("EBCoarAve::EBCoarAve(EBLevelGrid version)");
 
   m_isDefined = false;
 
@@ -62,12 +62,12 @@ EbCoarAve::EbCoarAve(const EBLevelGrid& a_eblgFine,
 }
 
 void
-EbCoarAve::define(const EBLevelGrid& a_eblgFine,
+EBCoarAve::define(const EBLevelGrid& a_eblgFine,
                   const EBLevelGrid& a_eblgCoar,
                   const EBLevelGrid& a_eblgCoFi,
                   const int&         a_refRat)
 {
-  CH_TIME("EbCoarAve::define");
+  CH_TIME("EBCoarAve::define");
 
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
@@ -84,12 +84,12 @@ EbCoarAve::define(const EBLevelGrid& a_eblgFine,
 }
 
 void
-EbCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
+EBCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
                        const LevelData<EBCellFAB>& a_fineData,
                        const Interval&             a_variables,
                        const Average&              a_average)
 {
-  CH_TIME("EbCoarAve::averageData(LD<EBCellFAB>)");
+  CH_TIME("EBCoarAve::averageData(LD<EBCellFAB>)");
 
   CH_assert(m_isDefined);
 
@@ -124,7 +124,7 @@ EbCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
       break;
     }
     default: {
-      MayDay::Error("EbCoarAve::averageData(LD<EBCellFAB>) - logic bust");
+      MayDay::Error("EBCoarAve::averageData(LD<EBCellFAB>) - logic bust");
 
       break;
     }
@@ -135,13 +135,13 @@ EbCoarAve::averageData(LevelData<EBCellFAB>&       a_coarData,
 }
 
 void
-EbCoarAve::arithmeticAverage(EBCellFAB&       a_coarData,
+EBCoarAve::arithmeticAverage(EBCellFAB&       a_coarData,
                              const EBCellFAB& a_fineData,
                              const DataIndex& a_datInd,
                              const Interval&  a_coarInterv,
                              const Interval&  a_fineInterv)
 {
-  CH_TIME("EbCoarAve::arithmeticAverage(EBCellFAB)");
+  CH_TIME("EBCoarAve::arithmeticAverage(EBCellFAB)");
 
   CH_assert(m_isDefined);
   CH_assert(a_fineInterv.size() == a_coarInterv.size());
@@ -202,14 +202,14 @@ EbCoarAve::arithmeticAverage(EBCellFAB&       a_coarData,
 }
 
 void
-EbCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
+EBCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
                            const EBCellFAB& a_fineData,
                            const DataIndex& a_datInd,
                            const Interval&  a_coarInterv,
                            const Interval&  a_fineInterv)
 
 {
-  CH_TIME("EbCoarAve::arithmeticAverage(EBCellFAB)");
+  CH_TIME("EBCoarAve::arithmeticAverage(EBCellFAB)");
 
   CH_assert(m_isDefined);
   CH_assert(a_fineInterv.size() == a_coarInterv.size());
@@ -270,13 +270,13 @@ EbCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
 }
 
 void
-EbCoarAve::conservativeAverage(EBCellFAB&       a_coarData,
+EBCoarAve::conservativeAverage(EBCellFAB&       a_coarData,
                                const EBCellFAB& a_fineData,
                                const DataIndex& a_datInd,
                                const Interval&  a_coarInterv,
                                const Interval&  a_fineInterv)
 {
-  CH_TIME("EbCoarAve::conservativeAverage(EBCellFAB)");
+  CH_TIME("EBCoarAve::conservativeAverage(EBCellFAB)");
 
   CH_assert(m_isDefined);
   CH_assert(a_fineInterv.size() == a_coarInterv.size());
@@ -352,12 +352,12 @@ EbCoarAve::conservativeAverage(EBCellFAB&       a_coarData,
 }
 
 void
-EbCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
+EBCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
                        const LevelData<EBFluxFAB>& a_fineData,
                        const Interval&             a_variables,
                        const Average&              a_average)
 {
-  CH_TIME("EbCoarAve::averageData(LD<EBFluxFAB>)");
+  CH_TIME("EBCoarAve::averageData(LD<EBFluxFAB>)");
 
   CH_assert(m_isDefined);
 
@@ -395,7 +395,7 @@ EbCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
       break;
     }
     default: {
-      MayDay::Error("EbCoarAve::averageData(LD<EBFluxFAB>) - logic bust");
+      MayDay::Error("EBCoarAve::averageData(LD<EBFluxFAB>) - logic bust");
 
       break;
     }
@@ -407,14 +407,14 @@ EbCoarAve::averageData(LevelData<EBFluxFAB>&       a_coarData,
 }
 
 void
-EbCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
+EBCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
                              const EBFaceFAB& a_fineData,
                              const DataIndex& a_datInd,
                              const Interval&  a_fineInterv,
                              const Interval&  a_coarInterv,
                              const int&       a_dir)
 {
-  CH_TIME("EbCoarAve::arithmeticAverage");
+  CH_TIME("EBCoarAve::arithmeticAverage");
 
   CH_assert(m_isDefined);
   CH_assert(a_fineInterv.size() == a_coarInterv.size());
@@ -489,14 +489,14 @@ EbCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
 }
 
 void
-EbCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
+EBCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
                            const EBFaceFAB& a_fineData,
                            const DataIndex& a_datInd,
                            const Interval&  a_fineInterv,
                            const Interval&  a_coarInterv,
                            const int&       a_dir)
 {
-  CH_TIME("EbCoarAve::harmonicAverage");
+  CH_TIME("EBCoarAve::harmonicAverage");
 
   CH_assert(m_isDefined);
   CH_assert(a_fineInterv.size() == a_coarInterv.size());
@@ -575,14 +575,14 @@ EbCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
 }
 
 void
-EbCoarAve::conservativeAverage(EBFaceFAB&       a_coarData,
+EBCoarAve::conservativeAverage(EBFaceFAB&       a_coarData,
                                const EBFaceFAB& a_fineData,
                                const DataIndex& a_datInd,
                                const Interval&  a_fineInterv,
                                const Interval&  a_coarInterv,
                                const int&       a_dir)
 {
-  CH_TIME("EbCoarAve::conservativeAverage");
+  CH_TIME("EBCoarAve::conservativeAverage");
 
   CH_assert(m_isDefined);
   CH_assert(a_fineInterv.size() == a_coarInterv.size());
@@ -674,12 +674,12 @@ EbCoarAve::conservativeAverage(EBFaceFAB&       a_coarData,
 }
 
 void
-EbCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
+EBCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
                        const LevelData<BaseIVFAB<Real>>& a_fineData,
                        const Interval&                   a_variables,
                        const Average&                    a_average)
 {
-  CH_TIME("EbCoarAve::averageData(LD<BaseIVFAB>)");
+  CH_TIME("EBCoarAve::averageData(LD<BaseIVFAB>)");
 
   CH_assert(m_isDefined);
 
@@ -713,7 +713,7 @@ EbCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
       break;
     }
     default: {
-      MayDay::Error("EbCoarAve::averageData(LD<BaseIVFAB>) - logic bust");
+      MayDay::Error("EBCoarAve::averageData(LD<BaseIVFAB>) - logic bust");
 
       break;
     }
@@ -724,13 +724,13 @@ EbCoarAve::averageData(LevelData<BaseIVFAB<Real>>&       a_coarData,
 }
 
 void
-EbCoarAve::arithmeticAverage(BaseIVFAB<Real>&       a_coarData,
+EBCoarAve::arithmeticAverage(BaseIVFAB<Real>&       a_coarData,
                              const BaseIVFAB<Real>& a_fineData,
                              const DataIndex&       a_datInd,
                              const Interval&        a_coarInterv,
                              const Interval&        a_fineInterv) const
 {
-  CH_TIME("EbCoarAve::arithmeticAverage(BaseIVFAB<Real>)");
+  CH_TIME("EBCoarAve::arithmeticAverage(BaseIVFAB<Real>)");
 
   CH_assert(m_isDefined);
   CH_assert(a_coarInterv.size() == a_fineInterv.size());
@@ -772,13 +772,13 @@ EbCoarAve::arithmeticAverage(BaseIVFAB<Real>&       a_coarData,
 }
 
 void
-EbCoarAve::harmonicAverage(BaseIVFAB<Real>&       a_coarData,
+EBCoarAve::harmonicAverage(BaseIVFAB<Real>&       a_coarData,
                            const BaseIVFAB<Real>& a_fineData,
                            const DataIndex&       a_datInd,
                            const Interval&        a_coarInterv,
                            const Interval&        a_fineInterv) const
 {
-  CH_TIME("EbCoarAve::harmonicAverage(BaseIVFAB<Real>)");
+  CH_TIME("EBCoarAve::harmonicAverage(BaseIVFAB<Real>)");
 
   CH_assert(m_isDefined);
   CH_assert(a_coarInterv.size() == a_fineInterv.size());
@@ -819,13 +819,13 @@ EbCoarAve::harmonicAverage(BaseIVFAB<Real>&       a_coarData,
 }
 
 void
-EbCoarAve::conservativeAverage(BaseIVFAB<Real>&       a_coarData,
+EBCoarAve::conservativeAverage(BaseIVFAB<Real>&       a_coarData,
                                const BaseIVFAB<Real>& a_fineData,
                                const DataIndex&       a_datInd,
                                const Interval&        a_coarInterv,
                                const Interval&        a_fineInterv) const
 {
-  CH_TIME("EbCoarAve::conservativeAverage(BaseIVFAB<Real>)");
+  CH_TIME("EBCoarAve::conservativeAverage(BaseIVFAB<Real>)");
 
   CH_assert(m_isDefined);
   CH_assert(a_coarInterv.size() == a_fineInterv.size());

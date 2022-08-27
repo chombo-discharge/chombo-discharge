@@ -93,7 +93,7 @@ main(int argc, char* argv[])
       fineEBISL = amr->getEBISLayout("primal", phase::gas)[0];
 
       // Coarsen the fine-grid solution onto the coarse-grid layout
-      EbCoarAve aveOp(fineDBL,
+      EBCoarAve aveOp(fineDBL,
                       coarDBL,
                       fineEBISL,
                       coarEBISL,

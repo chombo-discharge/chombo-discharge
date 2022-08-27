@@ -33,7 +33,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const EBLevelGrid&                               a_eblgCoarMG,
                              const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
                              const RefCountedPtr<EBFluxRegister>&             a_fluxReg,
-                             const RefCountedPtr<EbCoarAve>&                  a_coarAve,
+                             const RefCountedPtr<EBCoarAve>&                  a_coarAve,
                              const RefCountedPtr<EBHelmholtzDomainBC>&        a_domainBc,
                              const RefCountedPtr<EBHelmholtzEBBC>&            a_ebBc,
                              const RealVect&                                  a_probLo,

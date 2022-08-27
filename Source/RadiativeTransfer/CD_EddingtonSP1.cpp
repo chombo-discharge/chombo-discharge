@@ -827,7 +827,7 @@ EddingtonSP1::setupHelmholtzFactory()
   }
 
   const Vector<RefCountedPtr<EBLevelGrid>>&             levelGrids = m_amr->getEBLevelGrid(m_realm, m_phase);
-  const Vector<RefCountedPtr<EbCoarAve>>&               coarAve    = m_amr->getCoarseAverage(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBCoarAve>>&               coarAve    = m_amr->getCoarseAverage(m_realm, m_phase);
   const Vector<RefCountedPtr<EBFluxRegister>>&          fluxReg    = m_amr->getFluxRegister(m_realm, m_phase);
   const Vector<RefCountedPtr<EBMultigridInterpolator>>& interpolator =
     m_amr->getMultigridInterpolator(m_realm, m_phase);
