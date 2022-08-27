@@ -13,6 +13,7 @@
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
 #include <LoadBalance.H>
+#include <BaseIVFactory.H>
 #include <CH_Timer.H>
 
 // Our includes
@@ -360,7 +361,6 @@ EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&             a_co
                         a_eblgCoar.getEBISL(),
                         a_eblgCoar.getDomain(),
                         a_refRat,
-                        1,
                         a_eblgCoar.getEBIS());
 
     const Average average = Average::Conservative;

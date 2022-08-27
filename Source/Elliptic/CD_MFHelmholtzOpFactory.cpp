@@ -13,6 +13,7 @@
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
 #include <LoadBalance.H>
+#include <BaseIVFactory.H>
 #include <CH_Timer.H>
 
 // Our includes
@@ -353,7 +354,6 @@ MFHelmholtzOpFactory::defineMultigridLevels()
                                                        eblgCoar.getEBISL(),
                                                        eblgCoar.getDomain(),
                                                        mgRefRatio,
-                                                       m_nComp,
                                                        eblgCoar.getEBIS()));
 
           // Append. Phew.
@@ -756,7 +756,6 @@ MFHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_coarAc
                       eblgCoar.getEBISL(),
                       eblgCoar.getDomain(),
                       a_refRat,
-                      m_nComp,
                       eblgCoar.getEBIS());
 
       LevelData<EBCellFAB>       coarAco;

@@ -1766,7 +1766,7 @@ EBHelmholtzOp::coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& 
 {
   CH_TIME("EBHelmholtzOp::coarsen(LD<EBCellFAB>, LD<EBCellFAB>)");
 
-  m_coarAve->average(a_phi, a_phiFine, m_interval);
+  m_coarAve->averageData(a_phi, a_phiFine, m_interval, Average::Conservative);
 }
 
 #include <CD_NamespaceFooter.H>

@@ -270,6 +270,7 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
   }
 
   m_eblg.resize(1 + m_finestLevel);
+  m_eblgCoFi.resize(1 + m_finestLevel);
   m_ebisl.resize(1 + m_finestLevel);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
@@ -288,6 +289,14 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
     }
 
     m_ebisl[lvl] = m_eblg[lvl]->getEBISL();
+
+    // Define the coarsened grids.
+    if (lvl > 0) {
+      m_eblgCoFi[lvl] = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
+
+      coarsen(*m_eblgCoFi[lvl], *m_eblg[lvl], m_refinementRatios[lvl - 1]);
+      m_eblgCoFi[lvl]->getEBISL().setMaxRefinementRatio(m_refinementRatios[lvl - 1], m_eblg[lvl]->getEBIS());
+    }
   }
 }
 void
@@ -412,22 +421,13 @@ PhaseRealm::defineEbCoarAve(const int a_lmin)
   m_coarAve.resize(1 + m_finestLevel);
 
   if (doThisOperator) {
-
-    const int comps = SpaceDim;
-
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
 
       const bool hasCoar = lvl > 0;
 
       if (hasCoar) {
-        m_coarAve[lvl] = RefCountedPtr<EbCoarAve>(new EbCoarAve(m_grids[lvl],
-                                                                m_grids[lvl - 1],
-                                                                m_ebisl[lvl],
-                                                                m_ebisl[lvl - 1],
-                                                                m_domains[lvl - 1],
-                                                                m_refinementRatios[lvl - 1],
-                                                                comps,
-                                                                &(*m_ebis)));
+        m_coarAve[lvl] = RefCountedPtr<EbCoarAve>(
+          new EbCoarAve(*m_eblg[lvl], *m_eblg[lvl - 1], *m_eblgCoFi[lvl], m_refinementRatios[lvl - 1]));
       }
     }
   }

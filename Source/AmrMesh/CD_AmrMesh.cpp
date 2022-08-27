@@ -17,6 +17,7 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 #include <BaseIFFactory.H>
+#include <BaseIVFactory.H>
 
 // Our includes
 #include <CD_AmrMesh.H>

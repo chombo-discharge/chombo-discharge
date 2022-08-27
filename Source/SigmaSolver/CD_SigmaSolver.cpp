@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <BaseIVFactory.H>
 
 // Our includes
 #include <CD_SigmaSolver.H>

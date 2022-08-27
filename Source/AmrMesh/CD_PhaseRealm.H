@@ -468,6 +468,12 @@ protected:
   Vector<RefCountedPtr<EBLevelGrid>> m_eblg;
 
   /*!
+    @brief Coarsened fine-level EB grids. 
+    @details m_eblgCoFi[1] holds the coarsening of m_eblg[1].
+  */
+  Vector<RefCountedPtr<EBLevelGrid>> m_eblgCoFi;
+
+  /*!
     @brief Weird but true thing that indexces neighboring boxes
   */
   Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>> m_neighbors;
