@@ -774,7 +774,7 @@ MFHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_coarAc
       MultifluidAlias::aliasMF(fineBco, i, a_fineBcoef);
       MultifluidAlias::aliasMF(fineBcoIrreg, i, a_fineBcoefIrreg);
 
-      const Average average = Average::Conservative;
+      const Average average = Average::Arithmetic;
 
       aveOp.averageData(coarAco, fineAco, interv, average);
       aveOp.averageData(coarBco, fineBco, interv, average);
