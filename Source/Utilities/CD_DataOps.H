@@ -71,16 +71,15 @@ public:
                                 const ProblemDomain&        a_domain);
 
   /*!
-    @brief Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face.
-    @param[out] a_faceData Face data. Must have one component. 
-    @param[in]  a_cellData Cell data. Must have one component. 
+    @brief Average all components of the cell-centered data to faces.
+    @details Calls the other version; uses arihtmetic averaging and does not fill ghost faces. 
+    @param[out] a_faceData Face data. 
+    @param[in]  a_cellData Cell data. 
     @param[in]  a_domains  AMR domains.
-    @note This routine also fills one tangential ghost face.
+    @note This does not fill "tangential" ghost faces (unlike averageCellVectorToFaceScalar). 
   */
   static void
-  averageCellScalarToFaceScalar(EBAMRFluxData&               a_faceData,
-                                const EBAMRCellData&         a_cellData,
-                                const Vector<ProblemDomain>& a_domains);
+  averageCellToFace(EBAMRFluxData& a_faceData, const EBAMRCellData& a_cellData, const Vector<ProblemDomain>& a_domains);
 
   /*!
     @brief Routine which averages a cell-centered component to faces. 
@@ -89,8 +88,10 @@ public:
     directions.
     @param[out] a_faceData Face data. 
     @param[in]  a_cellData Cell data. 
-    @param[in]  a_domains  Problem domains
+    @param[in]  a_domain   Problem domain
     @param[in]  a_tanGhost Number of ghost faces to fill
+    @param[in]  a_faceVars Face variables
+    @param[in]  a_cellVars Cell variables
     @param[in]  a_average  Averaging method
   */
   static void
@@ -98,8 +99,8 @@ public:
                     const EBAMRCellData&         a_cellData,
                     const Vector<ProblemDomain>& a_domains,
                     const int                    a_tanGhosts,
-                    const Interval&              a_faceInterval,
-                    const Interval&              a_cellInterval,
+                    const Interval&              a_faceVars,
+                    const Interval&              a_cellVars,
                     const Average&               a_average);
 
   /*!
@@ -111,6 +112,8 @@ public:
     @param[in]  a_cellData Cell data. 
     @param[in]  a_domain   Problem domain
     @param[in]  a_tanGhost Number of ghost faces to fill
+    @param[in]  a_faceVars Face variables
+    @param[in]  a_cellVars Cell variables
     @param[in]  a_average  Averaging method
   */
   static void
@@ -118,43 +121,9 @@ public:
                     const LevelData<EBCellFAB>& a_cellData,
                     const ProblemDomain&        a_domain,
                     const int                   a_tanGhosts,
-                    const Interval&             a_faceInterval,
-                    const Interval&             a_cellInterval,
+                    const Interval&             a_faceVars,
+                    const Interval&             a_cellVars,
                     const Average&              a_average);
-
-  /*!
-    @brief Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face.
-    @param[out] a_faceData Face data. Must have one component. 
-    @param[in]  a_cellData Cell data. Must have one component.
-    @param[in]  a_domain   Problem domain
-    @note This routine also fills one tangential ghost face.
-  */
-  static void
-  averageCellScalarToFaceScalar(LevelData<EBFluxFAB>&       a_faceData,
-                                const LevelData<EBCellFAB>& a_cellData,
-                                const ProblemDomain&        a_domain);
-
-  /*!
-    @brief Average all components of the cell-centered data to faces.
-    @param[out] a_faceData Face data. 
-    @param[in]  a_cellData Cell data. 
-    @param[in]  a_domains  AMR domains.
-    @note This does not fill "tangential" ghost faces (unlike averageCellVectorToFaceScalar). 
-  */
-  static void
-  averageCellToFace(EBAMRFluxData& a_faceData, const EBAMRCellData& a_cellData, const Vector<ProblemDomain>& a_domains);
-
-  /*!
-    @brief Average all components of the cell-centered data to faces.
-    @param[out] a_faceData Face data. 
-    @param[in]  a_cellData Cell data. 
-    @param[in]  a_domain   Domain
-    @note This does not fill "tangential" ghost faces (unlike averageCellVectorToFaceScalar)
-  */
-  static void
-  averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
-                    const LevelData<EBCellFAB>& a_cellData,
-                    const ProblemDomain&        a_domain);
 
   /*!
     @brief Average all components of face centered data to cell centers.
