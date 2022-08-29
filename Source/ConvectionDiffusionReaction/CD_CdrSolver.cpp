@@ -356,7 +356,12 @@ CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCell
 #endif
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    DataOps::averageCellVelocityToFaceVelocity(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
+    const int tanGhosts = 1;
+
+    DataOps::averageCellVelocityToFaceVelocity(*a_faceVelocity[lvl],
+                                               *a_cellVelocity[lvl],
+                                               m_amr->getDomains()[lvl],
+                                               tanGhosts);
   }
 }
 

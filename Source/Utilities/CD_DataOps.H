@@ -49,12 +49,13 @@ public:
     @param[out] a_faceData Face data. Must have one component. 
     @param[in]  a_cellData Cell data. Must have SpaceDim components. 
     @param[in]  a_domains  AMR domains.
-    @note This routine also fills one tangential ghost face.
+    @param[in]  a_tanGhost Number of ghost faces to fill.
   */
   static void
   averageCellVelocityToFaceVelocity(EBAMRFluxData&               a_faceData,
                                     const EBAMRCellData&         a_cellData,
-                                    const Vector<ProblemDomain>& a_domains);
+                                    const Vector<ProblemDomain>& a_domains,
+                                    const int                    a_tanGhosts);
 
   /*!
     @brief Routine which computes the average of a cell-centered quantity on faces for the normal component only.
@@ -62,13 +63,12 @@ public:
     @param[in]  a_cellData Cell data. Must have SpaceDim components. 
     @param[in]  a_domain   Problem domain
     @param[in]  a_tanGhost Number of ghost faces to fill
-    @param[in]  a_average  Averaging method
-    @note This routine also fills one tangential ghost face.
   */
   static void
   averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceData,
                                     const LevelData<EBCellFAB>& a_cellData,
-                                    const ProblemDomain&        a_domain);
+                                    const ProblemDomain&        a_domain,
+                                    const int                   a_tanGhosts);
 
   /*!
     @brief Average all components of the cell-centered data to faces.

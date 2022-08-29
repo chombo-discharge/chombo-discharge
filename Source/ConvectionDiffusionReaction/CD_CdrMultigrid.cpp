@@ -355,22 +355,22 @@ CdrMultigrid::setupMultigrid()
   switch (m_bottomSolverType) {
   case BottomSolverType::Simple: {
     botsolver = &m_simpleSolver;
-    
+
     break;
   }
   case BottomSolverType::BiCGStab: {
     botsolver = &m_bicgstab;
-    
+
     break;
   }
   case BottomSolverType::GMRES: {
-    botsolver           = &m_gmres;
-    
+    botsolver = &m_gmres;
+
     m_gmres.m_verbosity = 0; // Shut up.
   }
   default: {
     MayDay::Error("CdrMultigrid::setupMultigrid() - logic bust in bottom solver setup");
-    
+
     break;
   }
   }
@@ -380,12 +380,12 @@ CdrMultigrid::setupMultigrid()
   switch (m_multigridType) {
   case MultigridType::VCycle: {
     gmgType = 1;
-    
+
     break;
   }
   case MultigridType::WCycle: {
     gmgType = 2;
-    
+
     break;
   }
   default: {
