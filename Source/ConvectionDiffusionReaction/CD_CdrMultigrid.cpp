@@ -353,31 +353,46 @@ CdrMultigrid::setupMultigrid()
   // Select the bottom solver
   LinearSolver<LevelData<EBCellFAB>>* botsolver = NULL;
   switch (m_bottomSolverType) {
-  case BottomSolverType::Simple:
+  case BottomSolverType::Simple: {
     botsolver = &m_simpleSolver;
+    
     break;
-  case BottomSolverType::BiCGStab:
+  }
+  case BottomSolverType::BiCGStab: {
     botsolver = &m_bicgstab;
+    
     break;
-  case BottomSolverType::GMRES:
+  }
+  case BottomSolverType::GMRES: {
     botsolver           = &m_gmres;
+    
     m_gmres.m_verbosity = 0; // Shut up.
-  default:
+  }
+  default: {
     MayDay::Error("CdrMultigrid::setupMultigrid() - logic bust in bottom solver setup");
+    
     break;
+  }
   }
 
   // Make m_multigridType into an int for multigrid
   int gmgType;
   switch (m_multigridType) {
-  case MultigridType::VCycle:
+  case MultigridType::VCycle: {
     gmgType = 1;
+    
     break;
-  case MultigridType::WCycle:
+  }
+  case MultigridType::WCycle: {
     gmgType = 2;
+    
     break;
-  default:
+  }
+  default: {
     MayDay::Error("CdrMultigrid::setupMultigrid() -- logic bust in multigrid type selection");
+
+    break;
+  }
   }
 
   const int           finestLevel    = m_amr->getFinestLevel();
