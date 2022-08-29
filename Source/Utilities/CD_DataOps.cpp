@@ -26,27 +26,27 @@
 #include <CD_NamespaceHeader.H>
 
 void
-DataOps::averageCellVectorToFaceScalar(EBAMRFluxData&               a_faceData,
-                                       const EBAMRCellData&         a_cellData,
-                                       const Vector<ProblemDomain>& a_domains)
+DataOps::averageCellVelocityToFaceVelocity(EBAMRFluxData&               a_faceData,
+                                           const EBAMRCellData&         a_cellData,
+                                           const Vector<ProblemDomain>& a_domains)
 {
-  CH_TIME("DataOps::averageCellVectorToFaceScalar(EBAMRFluxData)");
+  CH_TIME("DataOps::averageCellVelocityToFaceVelocity(EBAMRFluxData)");
 
   for (int lvl = 0; lvl < a_faceData.size(); lvl++) {
 
     CH_assert(a_faceData[lvl]->nComp() == 1);
     CH_assert(a_cellData[lvl]->nComp() == SpaceDim);
 
-    DataOps::averageCellVectorToFaceScalar(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl]);
+    DataOps::averageCellVelocityToFaceVelocity(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl]);
   }
 }
 
 void
-DataOps::averageCellVectorToFaceScalar(LevelData<EBFluxFAB>&       a_faceData,
-                                       const LevelData<EBCellFAB>& a_cellData,
-                                       const ProblemDomain&        a_domain)
+DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceData,
+                                           const LevelData<EBCellFAB>& a_cellData,
+                                           const ProblemDomain&        a_domain)
 {
-  CH_TIME("DataOps::averageCellVectorToFaceScalar");
+  CH_TIME("DataOps::averageCellVelocityToFaceVelocity");
 
   CH_assert(a_faceData.nComp() == 1);
   CH_assert(a_cellData.nComp() == SpaceDim);
