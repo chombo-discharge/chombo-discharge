@@ -1028,16 +1028,20 @@ FieldSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const
   LevelData<EBCellFAB> potentialGas;
   LevelData<EBCellFAB> potentialSol;
 
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     MultifluidAlias::aliasMF(potentialGas, phase::gas, *m_potential[a_level]);
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     MultifluidAlias::aliasMF(potentialSol, phase::solid, *m_potential[a_level]);
+  }
 
   // Write data
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     write(a_handle, potentialGas, "FieldSolver::m_potential(gas)");
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     write(a_handle, potentialSol, "FieldSolver::m_potential(solid)");
+  }
 }
 #endif
 
@@ -1057,26 +1061,30 @@ FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   LevelData<EBCellFAB> potentialGas;
   LevelData<EBCellFAB> potentialSol;
 
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     MultifluidAlias::aliasMF(potentialGas, phase::gas, *m_potential[a_level]);
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     MultifluidAlias::aliasMF(potentialSol, phase::solid, *m_potential[a_level]);
+  }
 
   // Read data
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     read<EBCellFAB>(a_handle,
                     potentialGas,
                     "FieldSolver::m_potential(gas)",
                     m_amr->getGrids(m_realm)[a_level],
                     Interval(0, 0),
                     false);
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     read<EBCellFAB>(a_handle,
                     potentialSol,
                     "FieldSolver::m_potential(solid)",
                     m_amr->getGrids(m_realm)[a_level],
                     Interval(0, 0),
                     false);
+  }
 }
 #endif
 

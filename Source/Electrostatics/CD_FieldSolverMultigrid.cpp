@@ -297,11 +297,14 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   const int coarsestLevel = 0;
   const int finestLevel   = m_amr->getFinestLevel();
 
-  const Real phiResid =
-    m_multigridSolver.computeAMRResidual(phi, rhs, finestLevel, 0); // This is the residue rho - L(phi)
-  const Real zeroResid =
-    m_multigridSolver.computeAMRResidual(zero, rhs, finestLevel, 0); // This is the residue rho - L(phi=0)
-  const Real convergedResid = zeroResid * m_multigridExitTolerance;  // Convergence criterion.
+  // This is the residue rho - L(phi)
+  const Real phiResid = m_multigridSolver.computeAMRResidual(phi, rhs, finestLevel, 0);
+
+  // This is the residue rho - L(phi=0)
+  const Real zeroResid = m_multigridSolver.computeAMRResidual(zero, rhs, finestLevel, 0);
+
+  // Convergence criterion.
+  const Real convergedResid = zeroResid * m_multigridExitTolerance;
 
   // If the residue rho - L(phi) is too large then we must get a new solution.
   if (phiResid > convergedResid) {
@@ -390,6 +393,75 @@ FieldSolverMultigrid::setupSolver()
 }
 
 void
+FieldSolverMultigrid::setPermittivities()
+{
+  CH_TIME("FieldSolverMultigrid::setPermittivities()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverMultigrid::setPermittivities()" << endl;
+  }
+
+  // Parent method fills permittivities over the "valid" region.
+  FieldSolver::setPermittivities();
+
+  // With EBHelmholtzOp/MFHelmholtzOp, the stencils can reach out of grid
+  // patches and into ghost faces when computing the centroid flux on a cut-cell
+  // face. To be on the safe side, we fill ghost cells for the cell-centered
+  // permittivity and average that onto the grid faces. Importantly, we ensure
+  // that we also fill one layer of "ghost faces".
+
+  const Average  average  = Average::Arithmetic;
+  const int      tanGhost = 1;
+  const Interval interv   = Interval(0, 0);
+
+  EBAMRCellData permCellGas;
+  EBAMRCellData permCellSol;
+  EBAMRFluxData permFluxGas;
+  EBAMRFluxData permFluxSol;
+  EBAMRIVData   permEBGas;
+  EBAMRIVData   permEBSol;
+
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+
+  // Do the gas-phase.
+  if (!(ebisGas.isNull())) {
+    permCellGas = m_amr->alias(phase::gas, m_permittivityCell);
+    permFluxGas = m_amr->alias(phase::gas, m_permittivityFace);
+    permEBGas   = m_amr->alias(phase::gas, m_permittivityEB);
+
+    // Coarsen cell and EB data.
+    m_amr->average(permCellGas, m_realm, phase::gas, average);
+    m_amr->average(permEBGas, m_realm, phase::gas, average);
+
+    // Interpolate cell-centered permittivities to ghost cells; then average
+    // cell-centered data to faces, including one ghost face.
+    m_amr->interpGhost(permCellGas, m_realm, phase::gas);
+
+    DataOps::averageCellToFace(permFluxGas, permCellGas, m_amr->getDomains(), tanGhost, interv, interv, average);
+
+    m_amr->average(permFluxGas, m_realm, phase::gas, average);
+  }
+
+  if (!(ebisSol.isNull())) {
+    permCellSol = m_amr->alias(phase::solid, m_permittivityCell);
+    permFluxSol = m_amr->alias(phase::solid, m_permittivityFace);
+    permEBSol   = m_amr->alias(phase::solid, m_permittivityEB);
+
+    // Coarsen cell and EB data.
+    m_amr->average(permCellSol, m_realm, phase::solid, average);
+    m_amr->average(permEBSol, m_realm, phase::solid, average);
+
+    // Interpolate cell-centered permittivities to ghost cells; then average
+    // cell-centered data to faces, including one ghost face.
+    m_amr->interpGhost(permCellSol, m_realm, phase::solid);
+
+    DataOps::averageCellToFace(permFluxSol, permCellSol, m_amr->getDomains(), tanGhost, interv, interv, average);
+
+    m_amr->average(permFluxSol, m_realm, phase::solid, average);
+  }
+}
+
+void
 FieldSolverMultigrid::setupHelmholtzFactory()
 {
   CH_TIME("FieldSolverMultigrid::setupHelmholtzFactory()");
@@ -419,25 +491,33 @@ FieldSolverMultigrid::setupHelmholtzFactory()
     Vector<RefCountedPtr<EBFluxRegister>>          fluxRegPhases(numPhases);
     Vector<RefCountedPtr<EBCoarAve>>               avePhases(numPhases);
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       eblgPhases[phase::gas] = *(m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       eblgPhases[phase::solid] = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
+    }
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       interpPhases[phase::gas] = (m_amr->getMultigridInterpolator(m_realm, phase::gas)[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       interpPhases[phase::solid] = (m_amr->getMultigridInterpolator(m_realm, phase::solid)[lvl]);
+    }
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       fluxRegPhases[phase::gas] = (m_amr->getFluxRegister(m_realm, phase::gas)[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       fluxRegPhases[phase::solid] = (m_amr->getFluxRegister(m_realm, phase::solid)[lvl]);
+    }
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       avePhases[phase::gas] = (m_amr->getCoarseAverage(m_realm, phase::gas)[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       avePhases[phase::solid] = (m_amr->getCoarseAverage(m_realm, phase::solid)[lvl]);
+    }
 
     mflg[lvl].define(m_multifluidIndexSpace, eblgPhases);
     mfInterp[lvl].define(interpPhases);
@@ -529,31 +609,46 @@ FieldSolverMultigrid::setupMultigrid()
   // Select the bottom solver -- the user will have specified this when parseMultigridSettings() was called.
   LinearSolver<LevelData<MFCellFAB>>* bottomSolver = nullptr;
   switch (m_bottomSolverType) {
-  case BottomSolverType::Simple:
+  case BottomSolverType::Simple: {
     bottomSolver = &m_mfsolver;
+
     break;
-  case BottomSolverType::BiCGStab:
+  }
+  case BottomSolverType::BiCGStab: {
     bottomSolver = &m_bicgstab;
+
     break;
-  case BottomSolverType::GMRES:
+  }
+  case BottomSolverType::GMRES: {
     bottomSolver = &m_gmres;
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("FieldSolverMultigrid::setupMultigrid - logic bust in bottom solver");
+
     break;
+  }
   }
 
   // Select the multigrid type. Again, the user will have specified this when parseMultigridSettings was called.
   int gmgType;
   switch (m_multigridType) {
-  case MultigridType::VCycle:
+  case MultigridType::VCycle: {
     gmgType = 1;
+
     break;
-  case MultigridType::WCycle:
+  }
+  case MultigridType::WCycle: {
     gmgType = 2;
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("FieldSolverMultigrid::setupMultigrid - logic bust in multigrid type selection");
+
+    break;
+  }
   }
 
   // AMRMultiGrid requires the finest level and the coarsest domain.
@@ -562,19 +657,20 @@ FieldSolverMultigrid::setupMultigrid()
 
   // Define the Chombo multigrid solver
   m_multigridSolver.define(coarsestDomain, *m_helmholtzOpFactory, bottomSolver, 1 + finestLevel);
-  m_multigridSolver.setSolverParameters(
-    m_multigridPreSmooth,
-    m_multigridPostSmooth,
-    m_multigridBottomSmooth,
-    gmgType,
-    m_multigridMaxIterations,
-    m_multigridExitTolerance,
-    m_multigridExitHang,
-    1.E-99); // This is the termination criterion for the absolute. We disregard since we use a relative tolerance.
+  m_multigridSolver.setSolverParameters(m_multigridPreSmooth,
+                                        m_multigridPostSmooth,
+                                        m_multigridBottomSmooth,
+                                        gmgType,
+                                        m_multigridMaxIterations,
+                                        m_multigridExitTolerance,
+                                        m_multigridExitHang,
+                                        1.E-99);
 
-  m_multigridSolver.m_imin = m_multigridMinIterations; // Minimum number of iterations.
-  m_multigridSolver.m_verbosity =
-    m_multigridVerbosity; // Multigrid verbosity, in case user wants to see convergence rates etc.
+  // Minimum number of iterations.
+  m_multigridSolver.m_imin = m_multigridMinIterations;
+
+  // Multigrid verbosity, in case user wants to see convergence rates etc.
+  m_multigridSolver.m_verbosity = m_multigridVerbosity;
 
   // Create some dummy storage for multigrid initialization. This is needed because
   // AMRMultiGrid must allocate the operators.

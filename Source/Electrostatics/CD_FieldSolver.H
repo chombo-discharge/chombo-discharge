@@ -238,7 +238,7 @@ public:
     @brief Set the permittivities
     @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB.
   */
-  void
+  virtual void
   setPermittivities();
 
   /*!

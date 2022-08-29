@@ -382,6 +382,14 @@ protected:
   parseJumpBC();
 
   /*!
+    @brief Set the permittivities
+    @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB and fills
+    necessary ghost faces/cells. 
+  */
+  virtual void
+  setPermittivities() override;
+
+  /*!
     @brief Set up the multigrid operator factory
   */
   virtual void
