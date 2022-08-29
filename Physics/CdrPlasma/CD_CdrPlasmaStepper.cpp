@@ -213,6 +213,10 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
 
   // Need to scale by electron charge.
   DataOps::scale(a_cellConductivity, Units::Qe);
+
+  // Fill ghost cells.
+  m_amr->conservativeAverage(a_cellConductivity, m_realm, phase::gas);
+  m_amr->interpGhost(a_cellConductivity, m_realm, phase::gas);
 }
 
 void
@@ -236,7 +240,17 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
 #if 1
   // Average the cell-centered conductivity to faces. Note that this includes one "ghost face", which we need
   // because the multigrid solver will interpolate face-centered conductivities to face centroids.
-  DataOps::averageCellScalarToFaceScalar(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
+  const Average  average  = Average::Arithmetic;
+  const int      tanGhost = 1;
+  const Interval interv   = Interval(0, 0);
+
+  DataOps::averageCellToFace(a_conductivityFace,
+                             a_conductivityCell,
+                             m_amr->getDomains(),
+                             tanGhost,
+                             interv,
+                             interv,
+                             average);
 #else
   DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
 #endif
@@ -302,7 +316,8 @@ CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFa
   CH_assert(a_factor >= 0.0);
 
   // First, the field solver must set the permittivities as usual. The "permittivities" that we are after are
-  // eps = epsr + dt*sigma/eps0 (but we only have plasma on the gas phase).
+  // eps = epsr + dt*sigma/eps0 (but we only have plasma on the gas phase). Also note that FieldSolverMultigrid
+  // fills the ghost faces for the b-coefficient here.
   m_fieldSolver->setPermittivities();
 
   // Get the permittivities on the faces.
@@ -1824,7 +1839,17 @@ CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_cdrDco
       m_amr->interpGhostMG(cdrDcoCell[idx], m_realm, m_cdr->getPhase());
 
       // Average to cell faces. Note that this call also includes one ghost face.
-      DataOps::averageCellScalarToFaceScalar(*a_cdrDcoFace[idx], cdrDcoCell[idx], m_amr->getDomains());
+      const int      tanGhost = 1;
+      const Interval interv   = Interval(0, 0);
+      const Average  average  = Average::Arithmetic;
+
+      DataOps::averageCellToFace(*a_cdrDcoFace[idx],
+                                 cdrDcoCell[idx],
+                                 m_amr->getDomains(),
+                                 tanGhost,
+                                 interv,
+                                 interv,
+                                 average);
     }
   }
 }
