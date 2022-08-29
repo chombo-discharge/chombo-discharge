@@ -13,6 +13,7 @@
 #define CD_DataOps_H
 
 // Our includes
+#include <CD_Average.H>
 #include <CD_EBAMRData.H>
 #include <CD_Decorations.H>
 #include <CD_MFInterfaceFAB.H>
@@ -60,6 +61,8 @@ public:
     @param[out] a_faceData Face data. Must have one component. 
     @param[in]  a_cellData Cell data. Must have SpaceDim components. 
     @param[in]  a_domain   Problem domain
+    @param[in]  a_tanGhost Number of ghost faces to fill
+    @param[in]  a_average  Averaging method
     @note This routine also fills one tangential ghost face.
   */
   static void
@@ -78,6 +81,46 @@ public:
   averageCellScalarToFaceScalar(EBAMRFluxData&               a_faceData,
                                 const EBAMRCellData&         a_cellData,
                                 const Vector<ProblemDomain>& a_domains);
+
+  /*!
+    @brief Routine which averages a cell-centered component to faces. 
+    @details User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These
+    faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z-
+    directions.
+    @param[out] a_faceData Face data. 
+    @param[in]  a_cellData Cell data. 
+    @param[in]  a_domains  Problem domains
+    @param[in]  a_tanGhost Number of ghost faces to fill
+    @param[in]  a_average  Averaging method
+  */
+  static void
+  averageCellToFace(EBAMRFluxData&               a_faceData,
+                    const EBAMRCellData&         a_cellData,
+                    const Vector<ProblemDomain>& a_domains,
+                    const int                    a_tanGhosts,
+                    const Interval&              a_faceInterval,
+                    const Interval&              a_cellInterval,
+                    const Average&               a_average);
+
+  /*!
+    @brief Routine which averages a cell-centered component to faces. 
+    @details User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These
+    faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z-
+    directions.
+    @param[out] a_faceData Face data. 
+    @param[in]  a_cellData Cell data. 
+    @param[in]  a_domain   Problem domain
+    @param[in]  a_tanGhost Number of ghost faces to fill
+    @param[in]  a_average  Averaging method
+  */
+  static void
+  averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
+                    const LevelData<EBCellFAB>& a_cellData,
+                    const ProblemDomain&        a_domain,
+                    const int                   a_tanGhosts,
+                    const Interval&             a_faceInterval,
+                    const Interval&             a_cellInterval,
+                    const Average&              a_average);
 
   /*!
     @brief Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face.

@@ -16,19 +16,8 @@
 #include <EBLevelGrid.H>
 
 // Our includes
+#include <CD_Average.H>
 #include <CD_NamespaceHeader.H>
-
-/*!
-  @brief Various averaging methods. 
-  @details 'Arithmetic'/'Harmonic' mean what you think, while 'Conservative' also incorporate volume, face, 
-  and EB face fractions such that the total quantity is conserved. 
-*/
-enum class Average
-{
-  Arithmetic,
-  Harmonic,
-  Conservative
-};
 
 /*!
   @brief Class which replaces data at coarse level of refinement with average
