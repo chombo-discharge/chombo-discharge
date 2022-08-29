@@ -268,12 +268,23 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     CH_assert(bndryHi.cellCentered());
 
     // We need the slopes outside the grid patch so grow the box by 1.
-    const Box compBox = grow(a_cellBox, 1) & domainBox;
-    const Box loBox   = compBox & bndryLo;
-    const Box hiBox   = compBox & bndryHi;
+    const Box grownBox = grow(a_cellBox, 1) & domainBox;
+    const Box loBox    = grownBox & bndryLo;
+    const Box hiBox    = grownBox & bndryHi;
 
-    // Irregular kernel domain -- we go through the same cells as in compBox, but including only cut-cells.
-    const IntVectSet irregIVS = ebisbox.getIrregIVS(compBox);
+    // Computation box for regular kernel; we want to
+    Box compBox = grow(a_cellBox, 1) & domainBox;
+
+    compBox.shift(dir, -1);
+    compBox &= domainBox;
+    compBox.shift(dir, 1);
+
+    compBox.shift(dir, 1);
+    compBox &= domainBox;
+    compBox.shift(dir, -1);
+
+    // Irregular kernel domain -- we go through the same cells as in grownBox, but including only cut-cells.
+    const IntVectSet irregIVS = ebisbox.getIrregIVS(grownBox);
     VoFIterator      vofit(irregIVS, ebgraph);
 
     const IntVect shift = BASISV(dir);
@@ -283,9 +294,14 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     switch (m_limiter) {
     case Limiter::None: {
       regularKernel = [&](const IntVect& iv) -> void { slopesReg(iv, dir) = 0.0; };
+
+      break;
     }
     case Limiter::MinMod: {
       regularKernel = [&](const IntVect& iv) -> void {
+        CH_assert(a_domain.contains(iv + shift));
+        CH_assert(a_domain.contains(iv - shift));
+
         const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
@@ -301,6 +317,9 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     }
     case Limiter::Superbee: {
       regularKernel = [&](const IntVect& iv) -> void {
+        CH_assert(a_domain.contains(iv + shift));
+        CH_assert(a_domain.contains(iv - shift));
+
         const Real dwl = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
@@ -336,7 +355,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     }
     }
 
-    // CUt-cell kernel.
+    // Cut-cell kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const IntVect iv = vof.gridIndex();
 
@@ -414,14 +433,15 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
 
     // Apply the kernels. Beware of corrected slopes near the boundaries.
     BoxLoops::loop(compBox, regularKernel);
-    BoxLoops::loop(vofit, irregularKernel);
 
     if (!loBox.isEmpty()) {
-      BoxLoops::loop(compBox, boundaryKernelLo);
+      BoxLoops::loop(grownBox, boundaryKernelLo);
     }
     if (!hiBox.isEmpty()) {
-      BoxLoops::loop(compBox, boundaryKernelHi);
+      BoxLoops::loop(grownBox, boundaryKernelHi);
     }
+
+    BoxLoops::loop(vofit, irregularKernel);
   }
 }
 
@@ -438,7 +458,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
                const Real&          a_dt)
 {
   CH_TIME("CdrCTU::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)");
-  if (m_verbosity > 99) {
+  if (m_verbosity > 5) {
     pout() << m_name + "::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)" << endl;
   }
 
@@ -454,7 +474,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
 
   const Real dt  = m_useCTU ? a_dt : 0.0;
   const Real dx  = m_amr->getDx()[a_level];
-  const Real dtx = a_dt / dx;
+  const Real dtx = dt / dx;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     EBFaceFAB&       facePhi = a_facePhi[dir];
@@ -471,8 +491,20 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
 
     // Iteration space for the kernels. When upwinding we want to set phi on the faces, so the iteration space is defined
     // by the faces of this box (in direction dir).
-    const Box               faceBox    = surroundingNodes(a_cellBox, dir);
+    //    const Box               faceBox    = surroundingNodes(a_cellBox, dir);
     const Vector<FaceIndex> irregFaces = ebgraph.getIrregFaces(a_cellBox, dir);
+
+    // Clip boundary faces.
+    Box faceBox = a_cellBox;
+    faceBox.shift(dir, -1);
+    faceBox &= a_domain;
+    faceBox.shift(dir, 1);
+
+    faceBox.shift(dir, 1);
+    faceBox &= a_domain;
+    faceBox.shift(dir, -1);
+
+    faceBox.surroundingNodes(dir);
 
     // Regular upwind kernel. Recall that we call this on the faceBox, so the cell on the low side
     // has cell grid index iv - BASISV(dir)
@@ -480,6 +512,9 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
       // Cells that are left/right of the current face.
       const IntVect cellLeft = iv - BASISV(dir);
       const IntVect cellRigh = iv;
+
+      CH_assert(a_domain.contains(cellLeft));
+      CH_assert(a_domain.contains(cellRigh));
 
       // Normal extrapolation.
       Real primLeft = regStates(cellLeft, m_comp) +
@@ -536,84 +571,99 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
         const VolIndex& vofLeft = face.getVoF(Side::Lo);
         const VolIndex& vofRigh = face.getVoF(Side::Hi);
 
+        CH_assert(a_domain.contains(vofLeft.gridIndex()));
+        CH_assert(a_domain.contains(vofRigh.gridIndex()));
+
         Real primLeft = a_cellPhi(vofLeft, m_comp) +
                         0.5 * std::min(1.0, 1.0 - a_cellVel(vofLeft, dir) * dtx) * a_normalSlopes(vofLeft, dir);
         Real primRigh = a_cellPhi(vofRigh, m_comp) -
                         0.5 * std::min(1.0, 1.0 + a_cellVel(vofRigh, dir) * dtx) * a_normalSlopes(vofRigh, dir);
 
         // Compute the transverse (CTU) terms.
-        for (int transverseDir = 0; transverseDir < SpaceDim; transverseDir++) {
+        if (m_useCTU) {
+          for (int transverseDir = 0; transverseDir < SpaceDim; transverseDir++) {
 
-          if (transverseDir != dir) {
-            Real slopeLeft = 0.0;
-            Real slopeRigh = 0.0;
+            if (transverseDir != dir) {
+              Real slopeLeft = 0.0;
+              Real slopeRigh = 0.0;
 
-            // Transverse term in cell to the left.
-            if (a_cellVel(vofLeft, transverseDir) < 0.0) {
-              const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofLeft, transverseDir, Side::Hi);
+              // Availability of cells used for transverse slopes. We turn off the transverse
+              // terms if the required cells are not available.
+              const IntVect ivLeftUp   = vofLeft.gridIndex() + BASISV(transverseDir);
+              const IntVect ivLeftDown = vofLeft.gridIndex() - BASISV(transverseDir);
+              const IntVect ivRighUp   = vofRigh.gridIndex() + BASISV(transverseDir);
+              const IntVect ivRighDown = vofRigh.gridIndex() - BASISV(transverseDir);
 
-              const int nFaces = facesHi.size();
+              // Transverse term in cell to the left.
+              if (a_cellVel(vofLeft, transverseDir) < 0.0 && a_domain.contains(ivLeftUp)) {
+                const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofLeft, transverseDir, Side::Hi);
 
-              if (nFaces > 0) {
-                Real phiUp = 0.0;
-                for (int iface = 0; iface < nFaces; iface++) {
-                  phiUp += a_cellPhi(facesHi[iface].getVoF(Side::Hi), m_comp);
+                const int nFaces = facesHi.size();
+
+                if (nFaces > 0) {
+                  Real phiUp = 0.0;
+                  for (int iface = 0; iface < nFaces; iface++) {
+                    phiUp += a_cellPhi(facesHi[iface].getVoF(Side::Hi), m_comp);
+                  }
+
+                  phiUp /= nFaces;
+
+                  slopeLeft = phiUp - a_cellPhi(vofLeft, m_comp);
                 }
-                phiUp /= nFaces;
-
-                slopeLeft = phiUp - a_cellPhi(vofLeft, m_comp);
               }
-            }
-            else if (a_cellVel(vofLeft, transverseDir) > 0.0) {
-              const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofLeft, transverseDir, Side::Lo);
+              else if (a_cellVel(vofLeft, transverseDir) > 0.0 && a_domain.contains(ivLeftDown)) {
+                const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofLeft, transverseDir, Side::Lo);
 
-              const int nFaces = facesLo.size();
+                const int nFaces = facesLo.size();
 
-              if (nFaces > 0) {
-                Real phiDown = 0.0;
-                for (int iface = 0; iface < nFaces; iface++) {
-                  phiDown += a_cellPhi(facesLo[iface].getVoF(Side::Lo), m_comp);
+                if (nFaces > 0) {
+                  Real phiDown = 0.0;
+                  for (int iface = 0; iface < nFaces; iface++) {
+                    phiDown += a_cellPhi(facesLo[iface].getVoF(Side::Lo), m_comp);
+                  }
+
+                  phiDown /= nFaces;
+
+                  slopeLeft = a_cellPhi(vofLeft, m_comp) - phiDown;
                 }
-                phiDown /= nFaces;
-
-                slopeLeft = a_cellPhi(vofLeft, m_comp) - phiDown;
               }
-            }
 
-            // Transverse term in cell to the right
-            if (a_cellVel(vofRigh, transverseDir) < 0.0) {
-              const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofRigh, transverseDir, Side::Hi);
+              // Transverse term in cell to the right
+              if (a_cellVel(vofRigh, transverseDir) < 0.0 && a_domain.contains(ivRighUp)) {
+                const Vector<FaceIndex>& facesHi = ebisbox.getFaces(vofRigh, transverseDir, Side::Hi);
 
-              const int nFaces = facesHi.size();
+                const int nFaces = facesHi.size();
 
-              if (nFaces > 0) {
-                Real phiUp = 0.0;
-                for (int iface = 0; iface < nFaces; iface++) {
-                  phiUp += a_cellPhi(facesHi[iface].getVoF(Side::Hi), m_comp);
+                if (nFaces > 0) {
+                  Real phiUp = 0.0;
+                  for (int iface = 0; iface < nFaces; iface++) {
+                    phiUp += a_cellPhi(facesHi[iface].getVoF(Side::Hi), m_comp);
+                  }
+                  phiUp /= nFaces;
+
+                  slopeRigh = phiUp - a_cellPhi(vofRigh, m_comp);
                 }
-                phiUp /= nFaces;
-
-                slopeRigh = phiUp - a_cellPhi(vofRigh, m_comp);
               }
-            }
-            else if (a_cellVel(vofRigh, transverseDir) > 0.0) {
-              const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofRigh, transverseDir, Side::Lo);
+              else if (a_cellVel(vofRigh, transverseDir) > 0.0 && a_domain.contains(ivRighDown)) {
+                const Vector<FaceIndex>& facesLo = ebisbox.getFaces(vofRigh, transverseDir, Side::Lo);
 
-              const int nFaces = facesLo.size();
+                const int nFaces = facesLo.size();
 
-              if (nFaces > 0) {
-                Real phiDown = 0.0;
-                for (int iface = 0; iface < nFaces; iface++) {
-                  phiDown += a_cellPhi(facesLo[iface].getVoF(Side::Lo), m_comp);
+                if (nFaces > 0) {
+                  Real phiDown = 0.0;
+                  for (int iface = 0; iface < nFaces; iface++) {
+                    phiDown += a_cellPhi(facesLo[iface].getVoF(Side::Lo), m_comp);
+                  }
+
+                  phiDown /= nFaces;
+
+                  slopeRigh = a_cellPhi(vofRigh, m_comp) - phiDown;
                 }
-                phiDown /= nFaces;
-
-                slopeRigh = a_cellPhi(vofRigh, m_comp) - phiDown;
               }
-            }
 
-            primLeft -= 0.5 * dtx * a_cellVel(vofLeft, transverseDir) * slopeLeft;
-            primRigh -= 0.5 * dtx * a_cellVel(vofRigh, transverseDir) * slopeRigh;
+              primLeft -= 0.5 * dtx * a_cellVel(vofLeft, transverseDir) * slopeLeft;
+              primRigh -= 0.5 * dtx * a_cellVel(vofRigh, transverseDir) * slopeRigh;
+            }
           }
         }
 
