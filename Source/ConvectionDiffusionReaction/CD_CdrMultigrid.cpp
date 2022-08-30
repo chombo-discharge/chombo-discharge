@@ -523,12 +523,15 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     if (m_whichRedistribution == Redistribution::MassWeighted) {
       this->setRedistWeights(a_phi);
     }
-    this->averageVelocityToFaces();                       // Cell-centered velocities become face-centered velocities.
-    this->advectToFaces(m_faceStates, a_phi, a_extrapDt); // Face extrapolation to cell-centered faces
-    this->computeAdvectionFlux(m_scratchFluxOne,
-                               m_faceVelocity,
-                               m_faceStates,
-                               a_domainFlux); // Compute face-centered fluxes
+
+    // Cell-centered velocities become face-centered velocities.
+    this->averageVelocityToFaces();
+
+    // Face extrapolation to cell-centered faces
+    this->advectToFaces(m_faceStates, a_phi, a_extrapDt);
+
+    // Compute face-centered fluxes
+    this->computeAdvectionFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, a_domainFlux);
 
     EBAMRIVData* ebflux;
     if (a_ebFlux) {
@@ -537,6 +540,8 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     else {
       ebflux = &m_ebZero;
     }
+
+    // Compute div(F) -- this includes interpolation to centroids and redistribution.
     this->computeDivG(a_divF, m_scratchFluxOne, *ebflux, a_conservativeOnly);
   }
   else {

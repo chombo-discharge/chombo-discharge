@@ -264,15 +264,9 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     // Computation box for regular kernel; we need slopes outside
     // the grid patch so grow the box by one, but don't include
     // boundary cells.
-    Box interiorCells = grownBox;
-
-    interiorCells.shift(dir, -1);
+    Box interiorCells = grow(a_cellBox, 1);
     interiorCells &= domainBox;
-    interiorCells.shift(dir, 1);
-
-    interiorCells.shift(dir, 1);
-    interiorCells &= domainBox;
-    interiorCells.shift(dir, -1);
+    interiorCells.grow(dir, -1);
 
     // Boundary cells on the low/high sides.
     Box bndryLo = adjCellLo(domainBox, dir, -1);
@@ -503,26 +497,25 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     const Vector<FaceIndex> irregFaces = ebgraph.getIrregFaces(a_cellBox, dir);
 
     // Interior faces.
-    Box interiorFaces = a_cellBox;
-    interiorFaces.shift(dir, -1);
+    Box interiorFaces = grow(a_cellBox, 1);
     interiorFaces &= a_domain;
-    interiorFaces.shift(dir, 1);
-
-    interiorFaces.shift(dir, 1);
-    interiorFaces &= a_domain;
-    interiorFaces.shift(dir, -1);
-
+    interiorFaces.grow(dir, -1);
     interiorFaces.surroundingNodes(dir);
 
-    // Regular upwind kernel. Recall that we call this on the interiorFaces, so the cell on the low side
-    // has cell grid index iv - BASISV(dir)
+    // Bounary faces on lo/high side.
+    Box bndryFacesLo = adjCellLo(domainBox, dir, -1);
+    Box bndryFacesHi = adjCellHi(domainBox, dir, -1);
+
+    bndryFacesLo &= a_cellBox;
+    bndryFacesHi &= a_cellBox;
+
+    // Regular upwind kernel. This also includes the transverse terms; also not that we call this on the
+    // face-centered box so for a grid face with index iv, the cell on the left side of the face has index
+    // iv - BASISV(dir)
     auto regularKernel = [&](const IntVect& iv) -> void {
       // Cells that are left/right of the current face.
       const IntVect cellLeft = iv - BASISV(dir);
       const IntVect cellRigh = iv;
-
-      CH_assert(a_domain.contains(cellLeft));
-      CH_assert(a_domain.contains(cellRigh));
 
       // Normal extrapolation.
       Real primLeft = regStates(cellLeft, m_comp) +
@@ -560,6 +553,57 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
       // Solve the Riemann problem.
       Real&       facePhi = regFacePhi(iv, m_comp);
       const Real& faceVel = regFaceVel(iv, m_comp);
+
+      if (faceVel > 0.0) {
+        facePhi = primLeft;
+      }
+      else if (faceVel < 0.0) {
+        facePhi = primRigh;
+      }
+      else {
+        facePhi = 0.0;
+      }
+    };
+
+    // Kernel for cells abutting the boundaries on the low end. Note that the input box
+    // to this kernel is a cell-centered box, so the input IntVect is the
+    // both the face index and the cell index to the right of the face.
+    auto boundaryKernelLo = [&](const IntVect& iv) -> void {
+      // Normal extrapolation
+      Real primLeft = 0.0;
+      Real primRigh = regStates(iv, m_comp) - 0.5 * std::min(1.0, 1.0 - regCellVel(iv, dir) * dtx) * regSlopes(iv, dir);
+
+      MayDay::Warning("CdrCTU -- missing tranverse term in boundary lo kernel");
+
+      // Solve the Riemann problem.
+      Real&       facePhi = regFacePhi(iv, m_comp);
+      const Real& faceVel = regFaceVel(iv, m_comp);
+
+      if (faceVel > 0.0) {
+        facePhi = primLeft;
+      }
+      else if (faceVel < 0.0) {
+        facePhi = primRigh;
+      }
+      else {
+        facePhi = 0.0;
+      }
+    };
+
+    // Kernel for cells abutting the boundaries on the low end. Note that the input box
+    // to this kernel is a cell-centered box, so the boundary face index is the input
+    // IntVect + BASISV(dir)
+    // both the face index and the cell index to the right of the face.
+    auto boundaryKernelHi = [&](const IntVect& iv) -> void {
+      // Normal extrapolation
+      Real primLeft = regStates(iv, m_comp) + 0.5 * std::min(1.0, 1.0 - regCellVel(iv, dir) * dtx) * regSlopes(iv, dir);
+      Real primRigh = 0.0;
+
+      MayDay::Warning("CdrCTU -- missing tranverse term in boundary hi kernel");
+
+      // Solve the Riemann problem.
+      Real&       facePhi = regFacePhi(iv + BASISV(dir), m_comp);
+      const Real& faceVel = regFaceVel(iv + BASISV(dir), m_comp);
 
       if (faceVel > 0.0) {
         facePhi = primLeft;
@@ -690,6 +734,8 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
 
     // Launch the kernels.
     BoxLoops::loop(interiorFaces, regularKernel);
+    BoxLoops::loop(bndryFacesLo, boundaryKernelLo);
+    BoxLoops::loop(bndryFacesHi, boundaryKernelHi);
     BoxLoops::loop(irregFaces, irregularKernel);
   }
 }

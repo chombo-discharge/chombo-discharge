@@ -7,8 +7,6 @@
   @file   CD_CdrSolver.cpp
   @brief  Implementation of CD_CdrSolver.H
   @author Robert Marskar
-  @todo   Need to implement parseDomainBc
-  @todo   Should computeAdvectionFlux and computeDiffusionFlux be ghosted... filling fluxes on ghost faces...?
 */
 
 // Chombo includes
@@ -135,20 +133,27 @@ CdrSolver::getPlotVariableNames() const
 
   Vector<std::string> plotVarNames(0);
 
-  if (m_plotPhi)
+  if (m_plotPhi) {
     plotVarNames.push_back(m_name + " phi");
-  if (m_plotDiffusionCoefficient && m_isDiffusive)
+  }
+  if (m_plotDiffusionCoefficient && m_isDiffusive) {
     plotVarNames.push_back(m_name + " diffusion_coefficient");
-  if (m_plotSource)
+  }
+  if (m_plotSource) {
     plotVarNames.push_back(m_name + " source");
-  if (m_plotVelocity && m_isMobile)
+  }
+  if (m_plotVelocity && m_isMobile) {
     plotVarNames.push_back("x-Velocity " + m_name);
-  if (m_plotVelocity && m_isMobile)
+  }
+  if (m_plotVelocity && m_isMobile) {
     plotVarNames.push_back("y-Velocity " + m_name);
-  if (m_plotVelocity && m_isMobile && SpaceDim == 3)
+  }
+  if (m_plotVelocity && m_isMobile && SpaceDim == 3) {
     plotVarNames.push_back("z-Velocity " + m_name);
-  if (m_plotEbFlux && (m_isMobile || m_isDiffusive))
+  }
+  if (m_plotEbFlux && (m_isMobile || m_isDiffusive)) {
     plotVarNames.push_back(m_name + " eb_flux");
+  }
 
   return plotVarNames;
 }
@@ -166,16 +171,21 @@ CdrSolver::getNumberOfPlotVariables() const
 
   int numPlotVars = 0;
 
-  if (m_plotPhi)
+  if (m_plotPhi) {
     numPlotVars = numPlotVars + 1;
-  if (m_plotDiffusionCoefficient && m_isDiffusive)
+  }
+  if (m_plotDiffusionCoefficient && m_isDiffusive) {
     numPlotVars = numPlotVars + 1;
-  if (m_plotSource)
+  }
+  if (m_plotSource) {
     numPlotVars = numPlotVars + 1;
-  if (m_plotVelocity && m_isMobile)
+  }
+  if (m_plotVelocity && m_isMobile) {
     numPlotVars = numPlotVars + SpaceDim;
-  if (m_plotEbFlux && m_isMobile)
+  }
+  if (m_plotEbFlux && m_isMobile) {
     numPlotVars = numPlotVars + 1;
+  }
 
   return numPlotVars;
 }
@@ -498,16 +508,16 @@ CdrSolver::computeDivG(EBAMRCellData&     a_divG,
   this->interpolateFluxToFaceCentroids(a_G);
   m_amr->conservativeAverage(a_G, m_realm, m_phase);
 
-  this->conservativeDivergenceNoKappaDivision(a_divG,
-                                              a_G,
-                                              a_ebFlux); // Make the conservative divergence without kappa-division.
+  // Make the conservative divergence without kappa-division.
+  this->conservativeDivergenceNoKappaDivision(a_divG, a_G, a_ebFlux);
 
   // Compute hybrid divergence.
   if (!a_conservativeOnly) {
-    this->nonConservativeDivergence(m_nonConservativeDivG, a_divG); // Compute the non-conservative divergence
-    this->hybridDivergence(a_divG,
-                           m_massDifference,
-                           m_nonConservativeDivG); // a_divG becomes hybrid divergence. Mass diff computed.
+    // Compute the non-conservative divergence
+    this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);
+
+    // a_divG becomes hybrid divergence. Mass diff computed.
+    this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG);
 
     if (m_whichRedistribution != Redistribution::None) {
       // Increment redistribution registers with the mass difference.
@@ -582,16 +592,6 @@ CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
       flux.setVal(0.0, m_comp);
       flux += phi;
       flux *= vel;
-
-      // The stencil we use will interpolate to the face centroids, so we need to correct the fluxes on cell centers, but including tangential ghost faces
-      // around the grid patch.
-      Box grownCellBox = grow(cellBox, 1) & domain;
-
-      // Irregular faces
-      FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
-      auto kernel = [&](const FaceIndex& face) -> void { flux(face, m_comp) = vel(face, m_comp) * phi(face, m_comp); };
-
-      BoxLoops::loop(faceit, kernel);
     }
   }
 }
@@ -740,31 +740,66 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
         const BaseFab<Real>& regVelFace  = velFace.getSingleValuedFAB();
         const BaseFab<Real>& regDcoFace  = dcoFace.getSingleValuedFAB();
 
+        const Box grownBox = grow(cellBox, 1) & domain;
+
+
         // Only want interior faces -- the domain flux will be set to zero (what else would it be...?). Anyways, recall that
         // the cut-cell face centroid fluxes are interpolated between face centers. So, if a face at the edge of a patch is cut
         // by the EB, the interpolant will reach out of the patch. Thus, we must fill the flux for the tangential ghost faces
         // outside the grid patch.
-        Box grownCellBox = cellBox;
-        grownCellBox.grow(1);
-        grownCellBox &= domain;
-        grownCellBox.grow(dir, -1);
+        Box interiorCells = cellBox;
+        interiorCells.grow(1);
+        interiorCells &= domain;
+        interiorCells.grow(dir, -1);
+
+        // Boundary cells on low/high ends
+        Box bndryCellsLo = adjCellLo(domain, dir, -1);
+        Box bndryCellsHi = adjCellHi(domain, dir, -1);
+
+        bndryCellsLo &= grownBox;
+        bndryCellsHi &= grownBox;
 
         // These are the "regions" for the regular and cut-cell kernels.
-        const Box    grownFaceBox = surroundingNodes(grownCellBox, dir);
-        FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
+        const Box    interiorFaces = surroundingNodes(interiorCells, dir);
+        FaceIterator faceit(ebisbox.getIrregIVS(grownBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
         // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
         // iv, and the cell at the low side is at iv - BASISV(dir).
-        auto regularKernel = [&](const IntVect& iv) -> void {
+        auto interiorKernel = [&](const IntVect& iv) -> void {
           regFluxFace(iv, m_comp) =
             regPhiFace(iv, m_comp) * regVelFace(iv, m_comp) -
             idx * regDcoFace(iv, m_comp) * (regPhiCell(iv, m_comp) - regPhiCell(iv - BASISV(dir), m_comp));
         };
 
+        // Kernel for cells abutting the boundaries; note that the input box is a cell-centered
+        // box so that face has grid index iv just like the cell. The diffusion flux is turned
+        // off here.
+        auto boundaryKernelLo = [&](const IntVect& iv) -> void {
+          Real&       faceFlux = regFluxFace(iv, m_comp);
+          const Real& facePhi  = regPhiFace(iv, m_comp);
+          const Real& faceVel  = regVelFace(iv, m_comp);
+
+          faceFlux = facePhi * faceVel;
+        };
+
+        // Kernel for cells abutting the boundaries; note that the input box is a cell-centered
+        // box so that face has grid index iv + BASISV(dir). Diffusion across the domain edge is
+        // turned off here.
+        auto boundaryKernelHi = [&](const IntVect& iv) -> void {
+          Real&       faceFlux = regFluxFace(iv + BASISV(dir), m_comp);
+          const Real& facePhi  = regPhiFace(iv + BASISV(dir), m_comp);
+          const Real& faceVel  = regVelFace(iv + BASISV(dir), m_comp);
+
+          faceFlux = facePhi * faceVel;
+        };
+
         // Cut-cell kernel. Basically the same as the above but we need to explicity get vofs on the low/high side (because
         // we may have multi-cells but the above kernel only does single-valued cells).
         auto irregularKernel = [&](const FaceIndex& face) -> void {
-          if (!face.isBoundary()) {
+          if (face.isBoundary()) {
+            fluxFace(face, m_comp) = phiFace(face, m_comp) * velFace(face, m_comp);
+          }
+          else {
             const VolIndex hiVoF = face.getVoF(Side::Hi);
             const VolIndex loVoF = face.getVoF(Side::Lo);
 
@@ -774,7 +809,9 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
         };
 
         // Execute kernels.
-        BoxLoops::loop(grownFaceBox, regularKernel);
+        BoxLoops::loop(interiorFaces, interiorKernel);
+        BoxLoops::loop(bndryCellsLo, boundaryKernelHi);
+        BoxLoops::loop(bndryCellsHi, boundaryKernelHi);
         BoxLoops::loop(faceit, irregularKernel);
       }
     }
@@ -988,13 +1025,11 @@ CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData&     a_conservati
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     a_flux[lvl]->exchange();
 
-    this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl],
-                                        *a_flux[lvl],
-                                        lvl); // Compute kappa*div(F) in regular cells
-    this->computeDivergenceIrregular(*a_conservativeDivergence[lvl],
-                                     *a_flux[lvl],
-                                     *a_ebFlux[lvl],
-                                     lvl); // Recompute divergence on irregular cells
+    // Compute kappa*div(F) in regular cells
+    this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);
+
+    // Recompute divergence on irregular cells
+    this->computeDivergenceIrregular(*a_conservativeDivergence[lvl], *a_flux[lvl], *a_ebFlux[lvl], lvl);
 
     a_conservativeDivergence[lvl]->exchange();
   }
