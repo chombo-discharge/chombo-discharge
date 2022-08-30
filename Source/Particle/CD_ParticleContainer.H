@@ -474,37 +474,37 @@ public:
     @brief Get local number of particles
   */
   size_t
-  getNumberOfValidParticesLocal() const;
+  getNumberOfValidParticlesLocal() const;
 
   /*!
     @brief Get global number of particles
   */
   size_t
-  getNumberOfValidParticesGlobal() const;
+  getNumberOfValidParticlesGlobal() const;
 
   /*!
     @brief Get local number of particles
   */
   size_t
-  getNumberOfOutcastParticesLocal() const;
+  getNumberOfOutcastParticlesLocal() const;
 
   /*!
     @brief Get global number of particles
   */
   size_t
-  getNumberOfOutcastParticesGlobal() const;
+  getNumberOfOutcastParticlesGlobal() const;
 
   /*!
     @brief Get the number particles in the halo cells. 
   */
   size_t
-  getNumberOfMaskParticesLocal() const;
+  getNumberOfMaskParticlesLocal() const;
 
   /*!
     @brief Get the number particles in the halo cells. 
   */
   size_t
-  getNumberOfMaskParticesGlobal() const;
+  getNumberOfMaskParticlesGlobal() const;
 
 protected:
   /*!

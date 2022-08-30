@@ -131,8 +131,8 @@ Driver::getPlotVariableNames() const
     }
   }
   if (m_plotLevelset) {
-    plotVarNames.push_back("levelset_1");
-    plotVarNames.push_back("levelset_2");
+    plotVarNames.push_back("levelset_gas");
+    plotVarNames.push_back("levelset_solid");
   }
 
   return plotVarNames;
@@ -1550,9 +1550,6 @@ Driver::setupFresh(const int a_initialRegrids)
     m_timeStepper->initialData();            // Need to fill with initial data again.
   }
 
-  // Do post initialize stuff
-  m_timeStepper->postInitialize();
-
   // CellTagger
   if (!m_cellTagger.isNull()) {
     m_cellTagger->regrid();
@@ -1577,6 +1574,9 @@ Driver::setupFresh(const int a_initialRegrids)
       this->gridReport();
     }
   }
+
+  // Do post initialize stuff
+  m_timeStepper->postInitialize();
 }
 
 #ifdef CH_USE_HDF5

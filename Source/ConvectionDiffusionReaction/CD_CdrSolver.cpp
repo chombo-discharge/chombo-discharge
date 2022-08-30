@@ -2923,7 +2923,6 @@ CdrSolver::parsePlotVariables()
     // Set plot variables
     for (int i = 0; i < num; i++) {
       if (str[i] == "phi") {
-
         m_plotPhi = true;
       }
       else if (str[i] == "vel") {

@@ -221,6 +221,12 @@ public:
   setRho(const std::function<Real(const RealVect)>& a_rho);
 
   /*!
+    @brief Set surface charge to specified value
+  */
+  void
+  setSigma(const Real a_sigma);
+
+  /*!
     @brief Set the computational geometry
     @param[in] a_computationalGeometry Computational geometry. 
   */
@@ -456,6 +462,12 @@ public:
   */
   MFAMRIVData&
   getPermittivityEB();
+
+  /*!
+    @brief Get m_sigma
+  */
+  EBAMRIVData&
+  getSigma();
 
   /*!
     @brief Get data location

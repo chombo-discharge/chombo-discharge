@@ -19,6 +19,7 @@
 #include <RealVect.H>
 
 // Our includes
+#include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -122,6 +123,24 @@ public:
   template <typename P, typename T>
   static inline void
   drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution);
+
+  /*!
+    @brief Copy all the particles from the a_src to a_dst
+    @param[out] a_dst Copy of original particles. 
+    @param[out] a_src Source particles
+  */
+  template <typename P>
+  static inline void
+  copy(ParticleContainer<P>& a_dst, const ParticleContainer<P>& a_src) noexcept;
+
+  /*!
+    @brief Copy all the particles from the a_src to a_dst. This destroys the source particles
+    @param[out] a_dst Copy of original particles. 
+    @param[out] a_src Source particles
+  */
+  template <typename P>
+  static inline void
+  copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& a_src) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

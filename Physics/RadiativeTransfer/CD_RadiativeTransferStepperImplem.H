@@ -95,6 +95,11 @@ RadiativeTransferStepper<T>::initialData()
   CH_TIME("RadiativeTransferStepper::initialData");
 
   m_solver->initialData();
+  this->setGaussianSource();
+
+  if (m_solver->isStationary()) {
+    m_solver->advance(0.0, false);
+  }
 }
 
 template <typename T>
@@ -102,12 +107,6 @@ void
 RadiativeTransferStepper<T>::postInitialize()
 {
   CH_TIME("RadiativeTransferStepper::postInitialize");
-
-  this->setGaussianSource();
-
-  if (m_solver->isStationary()) {
-    m_solver->advance(0.0, false);
-  }
 }
 
 template <typename T>

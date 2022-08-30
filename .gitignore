@@ -29,12 +29,14 @@
 **/*.a
 **/*.o
 
+Exec/Examples/StreamerInception/Vessel/report.txt
+
 
 pout.*
 time.table.*
 
-myApplications/**
-MyApplications/**
+myApplications/*
+MyApplications/*
 scripts/**
 Research/**
 
@@ -46,3 +48,4 @@ Docs/*
 !Docs/README.md
 Docs/Sphinx/build
 Docs/**/*.dat
+

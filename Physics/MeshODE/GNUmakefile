@@ -14,7 +14,7 @@ SrcLib = $(DISCHARGE_HOME)/Lib/lib$(MESHODE_LIB)$(config).a
 # For making the library.
 MeshODEPhysics: $(objects)
 	if test -f $(SrcLib); then $(RM) $(SrcLib); fi
-	ar -cr $(SrcLib) #o/$(config)/*.o <-- Header-only library. 
+	ar -cr $(SrcLib) 
 
 # For cleaning up after ourselves. 
 pristine:

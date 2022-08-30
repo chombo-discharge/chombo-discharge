@@ -69,7 +69,7 @@ public:
   initialData() = 0;
 
   /*!
-    @brief Post-initialize operations to be performed after filling solvers with initialData.
+    @brief Post-initialize operations to be performed at end of setup stage. 
   */
   virtual void
   postInitialize() = 0;

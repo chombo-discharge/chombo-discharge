@@ -1025,7 +1025,7 @@ ParticleContainer<P>::setValue(const RealVect a_value)
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfValidParticesLocal() const
+ParticleContainer<P>::getNumberOfValidParticlesLocal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfValidParticlesLocal");
 
@@ -1042,7 +1042,7 @@ ParticleContainer<P>::getNumberOfValidParticesLocal() const
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfValidParticesGlobal() const
+ParticleContainer<P>::getNumberOfValidParticlesGlobal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfValidParticlesGlobal");
 
@@ -1059,7 +1059,7 @@ ParticleContainer<P>::getNumberOfValidParticesGlobal() const
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfOutcastParticesLocal() const
+ParticleContainer<P>::getNumberOfOutcastParticlesLocal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfOutcastParticlesLocal");
 
@@ -1076,7 +1076,7 @@ ParticleContainer<P>::getNumberOfOutcastParticesLocal() const
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfOutcastParticesGlobal() const
+ParticleContainer<P>::getNumberOfOutcastParticlesGlobal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfOutcastParticlesGlobal");
 
@@ -1093,7 +1093,7 @@ ParticleContainer<P>::getNumberOfOutcastParticesGlobal() const
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfMaskParticesLocal() const
+ParticleContainer<P>::getNumberOfMaskParticlesLocal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfMaskparticlesLocal");
 
@@ -1110,9 +1110,9 @@ ParticleContainer<P>::getNumberOfMaskParticesLocal() const
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfMaskParticesGlobal() const
+ParticleContainer<P>::getNumberOfMaskParticlesGlobal() const
 {
-  CH_TIME("ParticleContainer<P>::getNumberOfMaskParticesGlobal");
+  CH_TIME("ParticleContainer<P>::getNumberOfMaskParticlesGlobal");
 
   CH_assert(m_isDefined);
 
