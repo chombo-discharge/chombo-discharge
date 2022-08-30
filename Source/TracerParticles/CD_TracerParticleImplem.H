@@ -85,8 +85,6 @@ template <size_t M, size_t N>
 inline void
 TracerParticle<M, N>::linearOut(void* buf) const
 {
-  GenericParticle<M, N>::linearOut(buf);
-
   Real* buffer = (Real*)buf;
 
   // Linearize m_position onto buffer.
