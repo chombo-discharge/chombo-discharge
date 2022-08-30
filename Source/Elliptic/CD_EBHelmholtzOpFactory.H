@@ -16,7 +16,6 @@
 #include <RealVect.H>
 #include <EBLevelGrid.H>
 #include <EBFluxRegister.H>
-#include <EBCoarseAverage.H>
 #include <EBCellFAB.H>
 #include <EBFluxFAB.H>
 #include <BaseIVFAB.H>
@@ -25,7 +24,7 @@
 
 // Our includes
 #include <CD_Location.H>
-#include <CD_EbCoarAve.H>
+#include <CD_EBCoarAve.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBHelmholtzOp.H>
 #include <CD_EBHelmholtzEBBCFactory.H>
@@ -47,7 +46,7 @@ public:
   using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid>>;
   using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator>>;
   using AmrFluxRegisters = Vector<RefCountedPtr<EBFluxRegister>>;
-  using AmrCoarseners    = Vector<RefCountedPtr<EbCoarAve>>;
+  using AmrCoarseners    = Vector<RefCountedPtr<EBCoarAve>>;
 
   using AmrCellData = Vector<RefCountedPtr<LevelData<EBCellFAB>>>;
   using AmrFluxData = Vector<RefCountedPtr<LevelData<EBFluxFAB>>>;

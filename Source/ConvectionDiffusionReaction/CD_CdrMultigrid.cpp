@@ -286,7 +286,7 @@ CdrMultigrid::setupHelmholtzFactory()
   }
 
   const Vector<RefCountedPtr<EBLevelGrid>>&             levelGrids = m_amr->getEBLevelGrid(m_realm, m_phase);
-  const Vector<RefCountedPtr<EbCoarAve>>&               coarAve    = m_amr->getCoarseAverage(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBCoarAve>>&               coarAve    = m_amr->getCoarseAverage(m_realm, m_phase);
   const Vector<RefCountedPtr<EBFluxRegister>>&          fluxReg    = m_amr->getFluxRegister(m_realm, m_phase);
   const Vector<RefCountedPtr<EBMultigridInterpolator>>& interpolator =
     m_amr->getMultigridInterpolator(m_realm, m_phase);
@@ -353,31 +353,46 @@ CdrMultigrid::setupMultigrid()
   // Select the bottom solver
   LinearSolver<LevelData<EBCellFAB>>* botsolver = NULL;
   switch (m_bottomSolverType) {
-  case BottomSolverType::Simple:
+  case BottomSolverType::Simple: {
     botsolver = &m_simpleSolver;
+
     break;
-  case BottomSolverType::BiCGStab:
+  }
+  case BottomSolverType::BiCGStab: {
     botsolver = &m_bicgstab;
+
     break;
-  case BottomSolverType::GMRES:
-    botsolver           = &m_gmres;
+  }
+  case BottomSolverType::GMRES: {
+    botsolver = &m_gmres;
+
     m_gmres.m_verbosity = 0; // Shut up.
-  default:
+  }
+  default: {
     MayDay::Error("CdrMultigrid::setupMultigrid() - logic bust in bottom solver setup");
+
     break;
+  }
   }
 
   // Make m_multigridType into an int for multigrid
   int gmgType;
   switch (m_multigridType) {
-  case MultigridType::VCycle:
+  case MultigridType::VCycle: {
     gmgType = 1;
+
     break;
-  case MultigridType::WCycle:
+  }
+  case MultigridType::WCycle: {
     gmgType = 2;
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("CdrMultigrid::setupMultigrid() -- logic bust in multigrid type selection");
+
+    break;
+  }
   }
 
   const int           finestLevel    = m_amr->getFinestLevel();
@@ -508,12 +523,15 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     if (m_whichRedistribution == Redistribution::MassWeighted) {
       this->setRedistWeights(a_phi);
     }
-    this->averageVelocityToFaces();                       // Cell-centered velocities become face-centered velocities.
-    this->advectToFaces(m_faceStates, a_phi, a_extrapDt); // Face extrapolation to cell-centered faces
-    this->computeAdvectionFlux(m_scratchFluxOne,
-                               m_faceVelocity,
-                               m_faceStates,
-                               a_domainFlux); // Compute face-centered fluxes
+
+    // Cell-centered velocities become face-centered velocities.
+    this->averageVelocityToFaces();
+
+    // Face extrapolation to cell-centered faces
+    this->advectToFaces(m_faceStates, a_phi, a_extrapDt);
+
+    // Compute face-centered fluxes
+    this->computeAdvectionFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, a_domainFlux);
 
     EBAMRIVData* ebflux;
     if (a_ebFlux) {
@@ -522,6 +540,8 @@ CdrMultigrid::computeDivF(EBAMRCellData& a_divF,
     else {
       ebflux = &m_ebZero;
     }
+
+    // Compute div(F) -- this includes interpolation to centroids and redistribution.
     this->computeDivG(a_divF, m_scratchFluxOne, *ebflux, a_conservativeOnly);
   }
   else {
@@ -564,7 +584,7 @@ CdrMultigrid::computeDivD(EBAMRCellData& a_divD,
                       *ebflux,
                       a_conservativeOnly); // General face-centered flux to divergence magic.
 
-    m_amr->averageDown(a_divD, m_realm, m_phase);
+    m_amr->conservativeAverage(a_divD, m_realm, m_phase);
     m_amr->interpGhost(a_divD, m_realm, m_phase);
   }
   else {

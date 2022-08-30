@@ -437,7 +437,7 @@ AdvectionDiffusionStepper::advance(const Real a_dt)
     break;
   }
 
-  m_amr->averageDown(state, m_realm, m_phase);
+  m_amr->conservativeAverage(state, m_realm, m_phase);
   m_amr->interpGhost(state, m_realm, m_phase);
 
   // Compute final mass.

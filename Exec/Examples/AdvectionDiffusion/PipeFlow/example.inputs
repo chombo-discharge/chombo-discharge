@@ -64,10 +64,10 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # CdrCTU solver settings. 
 # ====================================================================================================
 CdrCTU.seed                 = -1                      # Seed. Random seed with seed < 0
-CdrCTU.bc.x.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.bc.x.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.bc.y.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.bc.y.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.x.lo              = solver                    # 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.x.hi              = solver                    # 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.y.lo              = solver                    # 'data', 'function', 'wall', 'outflow', or 'solver'
+CdrCTU.bc.y.hi              = solver                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.slope_limiter        = minmod                  # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
@@ -153,7 +153,7 @@ AdvectionDiffusion.diffco         = 1.E-1   # Diffusion coefficient
 
 # Time step settings
 # ------------------
-AdvectionDiffusion.cfl            = 0.5     # CFL number
+AdvectionDiffusion.cfl            = 0.8     # CFL number
 AdvectionDiffusion.min_dt         = 0.0     # Smallest acceptable time step
 AdvectionDiffusion.max_dt         = 1.E99   # Largest acceptable time step
 

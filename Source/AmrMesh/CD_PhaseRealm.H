@@ -15,7 +15,7 @@
 // Chombo includes
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
-#include <CD_EbCoarAve.H>
+#include <CD_EBCoarAve.H>
 #include <EBFluxRegister.H>
 #include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
@@ -32,7 +32,7 @@
 #include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
-#include <CD_EbCoarAve.H>
+#include <CD_EBCoarAve.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
@@ -283,7 +283,7 @@ public:
   /*!
     @brief Get coarsening operators
   */
-  Vector<RefCountedPtr<EbCoarAve>>&
+  Vector<RefCountedPtr<EBCoarAve>>&
   getCoarseAverage() const;
 
   /*!
@@ -468,6 +468,12 @@ protected:
   Vector<RefCountedPtr<EBLevelGrid>> m_eblg;
 
   /*!
+    @brief Coarsened fine-level EB grids. 
+    @details m_eblgCoFi[1] holds the coarsening of m_eblg[1].
+  */
+  Vector<RefCountedPtr<EBLevelGrid>> m_eblgCoFi;
+
+  /*!
     @brief Weird but true thing that indexces neighboring boxes
   */
   Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex>>>> m_neighbors;
@@ -485,7 +491,7 @@ protected:
   /*!
     @brief Coarsening operator
   */
-  mutable Vector<RefCountedPtr<EbCoarAve>> m_coarAve;
+  mutable Vector<RefCountedPtr<EBCoarAve>> m_coarAve;
 
   /*!
     @brief Multigrid interpolation utility
@@ -578,7 +584,7 @@ protected:
     @param[in] a_lmin Coarsest grid level that changes
   */
   void
-  defineEbCoarAve(const int a_lmin);
+  defineEBCoarAve(const int a_lmin);
 
   /*!
     @brief Define multigrid interpolation utility

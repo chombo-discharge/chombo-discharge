@@ -540,7 +540,7 @@ EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_n
   m_amr->interpToNewGrids(m_source, m_cacheSrc, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
 
   // Coarsen and update ghost cells.
-  m_amr->averageDown(m_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
   m_isSolverSetup = false;
@@ -653,7 +653,7 @@ EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
     DataOps::copy(a_phi, m_resid);
   }
 
-  m_amr->averageDown(a_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 
   return converged;
@@ -827,7 +827,7 @@ EddingtonSP1::setupHelmholtzFactory()
   }
 
   const Vector<RefCountedPtr<EBLevelGrid>>&             levelGrids = m_amr->getEBLevelGrid(m_realm, m_phase);
-  const Vector<RefCountedPtr<EbCoarAve>>&               coarAve    = m_amr->getCoarseAverage(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBCoarAve>>&               coarAve    = m_amr->getCoarseAverage(m_realm, m_phase);
   const Vector<RefCountedPtr<EBFluxRegister>>&          fluxReg    = m_amr->getFluxRegister(m_realm, m_phase);
   const Vector<RefCountedPtr<EBMultigridInterpolator>>& interpolator =
     m_amr->getMultigridInterpolator(m_realm, m_phase);
@@ -1030,7 +1030,7 @@ EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_
     sten.apply(*a_ebFlux[lvl], *a_phi[lvl], lvl);
   }
 
-  m_amr->averageDown(a_ebFlux, m_realm, m_phase);
+  m_amr->conservativeAverage(a_ebFlux, m_realm, m_phase);
 
   DataOps::scale(a_ebFlux, 0.5 * Units::c);
 }
@@ -1121,7 +1121,7 @@ EddingtonSP1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi)
     DataOps::scale(*a_flux[lvl], -Units::c * Units::c / 3.0); // flux = -c*grad(phi)/3.
   }
 
-  m_amr->averageDown(a_flux, m_realm, m_phase);
+  m_amr->conservativeAverage(a_flux, m_realm, m_phase);
   m_amr->interpGhost(a_flux, m_realm, m_phase);
 }
 

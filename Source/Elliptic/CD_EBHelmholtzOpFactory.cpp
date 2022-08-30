@@ -13,6 +13,7 @@
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
 #include <LoadBalance.H>
+#include <BaseIVFactory.H>
 #include <CH_Timer.H>
 
 // Our includes
@@ -354,18 +355,19 @@ EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&             a_co
     a_fineBcoefIrreg.copyTo(a_coarBcoefIrreg);
   }
   else {
-    EbCoarAve averageOp(a_eblgFine.getDBL(),
+    EBCoarAve averageOp(a_eblgFine.getDBL(),
                         a_eblgCoar.getDBL(),
                         a_eblgFine.getEBISL(),
                         a_eblgCoar.getEBISL(),
                         a_eblgCoar.getDomain(),
                         a_refRat,
-                        1,
                         a_eblgCoar.getEBIS());
 
-    averageOp.average(a_coarAcoef, a_fineAcoef, interv);
-    averageOp.averageFaceData(a_coarBcoef, a_fineBcoef, interv);
-    averageOp.average(a_coarBcoefIrreg, a_fineBcoefIrreg, interv);
+    const Average average = Average::Arithmetic;
+
+    averageOp.averageData(a_coarAcoef, a_fineAcoef, interv, average);
+    averageOp.averageData(a_coarBcoef, a_fineBcoef, interv, average);
+    averageOp.averageData(a_coarBcoefIrreg, a_fineBcoefIrreg, interv, average);
 
     a_coarAcoef.exchange();
     a_coarBcoef.exchange();
@@ -406,7 +408,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
 
   RefCountedPtr<EBMultigridInterpolator> interpolator; // Only if defined on an AMR level
   RefCountedPtr<EBFluxRegister>          fluxReg;      // Only if defined on an AMR level
-  RefCountedPtr<EbCoarAve>               coarsener;    // Only if defined on an AMR level
+  RefCountedPtr<EBCoarAve>               coarsener;    // Only if defined on an AMR level
 
   RefCountedPtr<LevelData<EBCellFAB>>       Acoef;      // Always defined.
   RefCountedPtr<LevelData<EBFluxFAB>>       Bcoef;      // Always defined.

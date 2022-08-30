@@ -699,7 +699,7 @@ CdrPlasmaImExSdcStepper::computeFD0()
         solver->computeDivD(FD_0, phi_0, false, false, false); // Domain fluxes always come in through advection terms.
 
         // Shouldn't be necesary
-        m_amr->averageDown(FD_0, m_realm, m_cdr->getPhase());
+        m_amr->conservativeAverage(FD_0, m_realm, m_cdr->getPhase());
         m_amr->interpGhost(FD_0, m_realm, m_cdr->getPhase());
       }
       else {
@@ -871,7 +871,7 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
       DataOps::incr(phi_m1, src, m_dtm[a_m]); // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
 
       // This shouldn't be necessary
-      m_amr->averageDown(phi_m1, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
 
       if (a_lagged_terms) { // Back up the old slope first, we will need it for the lagged term
@@ -884,7 +884,7 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
       DataOps::scale(FAR_m, 1. / m_dtm[a_m]); // :
 
       // Shouldn't be necessary
-      m_amr->averageDown(FAR_m, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(FAR_m, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(FAR_m, m_realm, m_cdr->getPhase());
     }
 
@@ -966,7 +966,7 @@ CdrPlasmaImExSdcStepper::integrateAdvection(const Real a_dt, const int a_m, cons
       DataOps::copy(phi_m1, phi_m);
       DataOps::incr(phi_m1, scratch, -m_dtm[a_m]);
       DataOps::floor(phi_m1, 0.0);
-      m_amr->averageDown(phi_m1, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
     }
     else {
@@ -1014,7 +1014,7 @@ CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, cons
         const EBAMRCellData& FD_m1k = storage->getFD()[a_m + 1]; // FD_(m+1)^k. Lagged term.
         DataOps::incr(init_soln, FD_m1k, -m_dtm[a_m]);
       }
-      m_amr->averageDown(init_soln, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(init_soln, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(init_soln, m_realm, m_cdr->getPhase());
       DataOps::copy(phi_m1, phi_m);
 
@@ -1025,7 +1025,7 @@ CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, cons
       else {
         solver->advanceEuler(phi_m1, init_soln, source, m_dtm[a_m]); // No source.
       }
-      m_amr->averageDown(phi_m1, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
       DataOps::floor(phi_m1, 0.0);
 
@@ -1036,7 +1036,7 @@ CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, cons
       DataOps::incr(FD_m1k, init_soln, -1.0);
       DataOps::scale(FD_m1k, 1. / m_dtm[a_m]);
 
-      m_amr->averageDown(FD_m1k, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(FD_m1k, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(FD_m1k, m_realm, m_cdr->getPhase());
     }
     else {
@@ -1102,7 +1102,7 @@ CdrPlasmaImExSdcStepper::reconcileIntegrands()
       }
 
       // Shouldn't be necessary
-      m_amr->averageDown(F_m, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(F_m, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(F_m, m_realm, m_cdr->getPhase());
     }
   }
@@ -1513,7 +1513,7 @@ CdrPlasmaImExSdcStepper::computeCdrGradients(const Vector<EBAMRCellData*>& a_phi
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
     EBAMRCellData&             grad    = storage->getGradient();
     m_amr->computeGradient(grad, *a_phis[idx], m_realm, m_cdr->getPhase());
-    //    m_amr->averageDown(grad, m_realm, m_cdr->getPhase());
+    //    m_amr->conservativeAverage(grad, m_realm, m_cdr->getPhase());
     m_amr->interpGhost(grad, m_realm, m_cdr->getPhase());
   }
 }

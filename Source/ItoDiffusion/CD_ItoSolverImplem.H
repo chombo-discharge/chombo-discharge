@@ -89,7 +89,7 @@ ItoSolver::depositParticles(EBAMRCellData&             a_phi,
   this->redistributeAMR(a_phi);
 
   // Average down and interpolate
-  m_amr->averageDown(a_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 }
 
@@ -116,7 +116,7 @@ ItoSolver::depositParticles(EBAMRCellData&             a_phi,
   this->redistributeAMR(a_phi);
 
   // Average down and interpolate
-  m_amr->averageDown(a_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 }
 

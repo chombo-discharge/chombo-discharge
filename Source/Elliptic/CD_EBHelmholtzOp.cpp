@@ -33,7 +33,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const EBLevelGrid&                               a_eblgCoarMG,
                              const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
                              const RefCountedPtr<EBFluxRegister>&             a_fluxReg,
-                             const RefCountedPtr<EbCoarAve>&                  a_coarAve,
+                             const RefCountedPtr<EBCoarAve>&                  a_coarAve,
                              const RefCountedPtr<EBHelmholtzDomainBC>&        a_domainBc,
                              const RefCountedPtr<EBHelmholtzEBBC>&            a_ebBc,
                              const RealVect&                                  a_probLo,
@@ -1766,7 +1766,7 @@ EBHelmholtzOp::coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& 
 {
   CH_TIME("EBHelmholtzOp::coarsen(LD<EBCellFAB>, LD<EBCellFAB>)");
 
-  m_coarAve->average(a_phi, a_phiFine, m_interval);
+  m_coarAve->averageData(a_phi, a_phiFine, m_interval, Average::Conservative);
 }
 
 #include <CD_NamespaceFooter.H>

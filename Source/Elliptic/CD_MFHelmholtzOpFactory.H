@@ -352,7 +352,7 @@ protected:
   /*!
     @brief Coarsneing operator on deeper grids (used for coarsening jump)
   */
-  Vector<Vector<RefCountedPtr<EbCoarAve>>> m_mgAveOp;
+  Vector<Vector<RefCountedPtr<EBCoarAve>>> m_mgAveOp;
 
   /*!
     @brief Function which defines the multigrid levels for this operator factory

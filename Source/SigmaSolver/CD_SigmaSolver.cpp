@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <BaseIVFactory.H>
 
 // Our includes
 #include <CD_SigmaSolver.H>
@@ -483,7 +484,7 @@ SigmaSolver::computeCharge()
   // TLDR: Since we can coarsen conservatively, we compute coarsen the solution
   //       onto the coarsest level and do the integration there.
 
-  m_amr->averageDown(m_phi, m_realm, m_phase);
+  m_amr->conservativeAverage(m_phi, m_realm, m_phase);
 
   Real charge = 0.0;
 

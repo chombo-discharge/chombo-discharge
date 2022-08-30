@@ -1019,7 +1019,7 @@ ItoPlasmaGodunovStepper::compute_cell_conductivity(
         DataOps::setCoveredValue(m_fluid_scratch1, 0.0, 0);
         DataOps::filterSmooth(a_conductivity, m_fluid_scratch1, stride, alpha);
 
-        m_amr->averageDown(a_conductivity, m_fluid_Realm, m_phase);
+        m_amr->conservativeAverage(a_conductivity, m_fluid_Realm, m_phase);
         m_amr->interpGhost(a_conductivity, m_fluid_Realm, m_phase);
       }
     }
@@ -1027,7 +1027,7 @@ ItoPlasmaGodunovStepper::compute_cell_conductivity(
 
   DataOps::scale(a_conductivity, Units::Qe);
 
-  m_amr->averageDown(a_conductivity, m_fluid_Realm, m_phase);
+  m_amr->conservativeAverage(a_conductivity, m_fluid_Realm, m_phase);
   m_amr->interpGhostPwl(a_conductivity, m_fluid_Realm, m_phase);
 
   // See if this helps....
@@ -1093,8 +1093,8 @@ ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt)
   DataOps::incr(bco_gas, m_conduct_face, 1.0);
   DataOps::incr(bco_irr_gas, m_conduct_eb, 1.0);
 
-  m_amr->averageDown(bco_gas, m_fluid_Realm, phase::gas);
-  m_amr->averageDown(bco_irr_gas, m_fluid_Realm, phase::gas);
+  m_amr->conservativeAverage(bco_gas, m_fluid_Realm, phase::gas);
+  m_amr->conservativeAverage(bco_irr_gas, m_fluid_Realm, phase::gas);
 
   // Set up the solver
   m_fieldSolver->setupSolver();

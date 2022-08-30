@@ -26,113 +26,119 @@
 #include <CD_NamespaceHeader.H>
 
 void
-DataOps::averageCellVectorToFaceScalar(EBAMRFluxData&               a_faceData,
-                                       const EBAMRCellData&         a_cellData,
-                                       const Vector<ProblemDomain>& a_domains)
+DataOps::averageCellVelocityToFaceVelocity(EBAMRFluxData&               a_faceData,
+                                           const EBAMRCellData&         a_cellData,
+                                           const Vector<ProblemDomain>& a_domains,
+                                           const int                    a_tanGhosts)
 {
-  CH_TIME("DataOps::averageCellVectorToFaceScalar(EBAMRFluxData)");
+  CH_TIME("DataOps::averageCellVelocityToFaceVelocity(EBAMRFluxData)");
 
   for (int lvl = 0; lvl < a_faceData.size(); lvl++) {
 
     CH_assert(a_faceData[lvl]->nComp() == 1);
     CH_assert(a_cellData[lvl]->nComp() == SpaceDim);
 
-    DataOps::averageCellVectorToFaceScalar(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl]);
+    DataOps::averageCellVelocityToFaceVelocity(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl], a_tanGhosts);
   }
 }
 
 void
-DataOps::averageCellVectorToFaceScalar(LevelData<EBFluxFAB>&       a_faceData,
-                                       const LevelData<EBCellFAB>& a_cellData,
-                                       const ProblemDomain&        a_domain)
+DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceData,
+                                           const LevelData<EBCellFAB>& a_cellData,
+                                           const ProblemDomain&        a_domain,
+                                           const int                   a_tanGhosts)
 {
-  CH_TIME("DataOps::averageCellVectorToFaceScalar");
+  CH_TIME("DataOps::averageCellVelocityToFaceVelocity(LD<EBFluxFAB>)");
 
   CH_assert(a_faceData.nComp() == 1);
   CH_assert(a_cellData.nComp() == SpaceDim);
 
-  // TLDR: This computes the face-centered data from averages of the cell-centered data. Note that a single layer of
-  //       ghost faces are filled (the ones that are "tangential" to the box).
+  const DisjointBoxLayout& dbl = a_cellData.disjointBoxLayout();
 
-  for (DataIterator dit = a_faceData.dataIterator(); dit.ok(); ++dit) {
-    EBFluxFAB&       fluxData = a_faceData[dit()];
-    const EBCellFAB& cellData = a_cellData[dit()];
-    const EBISBox&   ebisbox  = cellData.getEBISBox();
-    const EBGraph&   ebgraph  = ebisbox.getEBGraph();
-    const Box&       box      = a_cellData.disjointBoxLayout().get(dit());
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const EBCellFAB& cellData    = a_cellData[dit()];
+    const FArrayBox& cellDataReg = cellData.getFArrayBox();
 
-    constexpr int numTanGhost = 1;
+    const EBISBox& ebisbox = cellData.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      const int faceDir  = dir;
-      const int cellComp = dir;
-      const int faceComp = 0;
+    for (int faceDir = 0; faceDir < SpaceDim; faceDir++) {
+      EBFaceFAB& faceData    = a_faceData[dit()][faceDir];
+      FArrayBox& faceDataReg = faceData.getFArrayBox();
 
-      EBLevelDataOps::averageCellToFace(fluxData[dir],
-                                        cellData,
-                                        ebgraph,
-                                        box,
-                                        numTanGhost,
-                                        faceDir,
-                                        a_domain,
-                                        cellComp,
-                                        faceComp);
-    }
-  }
-}
+      // Build the computation box, including the ghost faces. We only want interior faces.
+      Box cellBox = dbl[dit()];
+      cellBox.grow(a_tanGhosts);
+      cellBox &= a_domain;
+      cellBox.grow(faceDir, -a_tanGhosts);
 
-void
-DataOps::averageCellScalarToFaceScalar(EBAMRFluxData&               a_faceData,
-                                       const EBAMRCellData&         a_cellData,
-                                       const Vector<ProblemDomain>& a_domains)
-{
-  CH_TIME("DataOps::averageCellScalarToFaceScalar(EBAMRFluxData)");
+      // Dummy check -- make sure boxes make sense in terms of how much ghost data we have
+      // in the input/output data holders.
+      CH_assert(cellData.getRegion().contains(cellBox));
+      CH_assert(faceData.getCellRegion().contains(cellBox));
 
-  for (int lvl = 0; lvl < a_faceData.size(); lvl++) {
+      // Define kernel regions.
+      const Box    faceBox = surroundingNodes(cellBox, faceDir);
+      FaceIterator faceIt(ebisbox.getIrregIVS(cellBox), ebgraph, faceDir, FaceStop::SurroundingNoBoundary);
 
-    CH_assert(a_faceData[lvl]->nComp() == 1);
-    CH_assert(a_cellData[lvl]->nComp() == 1);
+      const IntVect shift = BASISV(faceDir);
 
-    DataOps::averageCellScalarToFaceScalar(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl]);
-  }
-}
+      // Regular kernels.
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        const Real& cellHi = cellDataReg(iv, faceDir);
+        const Real& cellLo = cellDataReg(iv - shift, faceDir);
 
-void
-DataOps::averageCellScalarToFaceScalar(LevelData<EBFluxFAB>&       a_faceData,
-                                       const LevelData<EBCellFAB>& a_cellData,
-                                       const ProblemDomain&        a_domain)
-{
-  CH_TIME("DataOps::averageCellScalarToFaceScalar");
+        faceDataReg(iv, 0) = 0.5 * (cellHi + cellLo);
+      };
 
-  CH_assert(a_faceData.nComp() == 1);
-  CH_assert(a_cellData.nComp() == 1);
+      auto irregularKernel = [&](const FaceIndex& face) -> void {
+        const Real& cellHi = cellData(face.getVoF(Side::Hi), faceDir);
+        const Real& cellLo = cellData(face.getVoF(Side::Lo), faceDir);
 
-  // TLDR: This computes the face-centered data from averages of the cell-centered data. Note that a single layer of
-  //       ghost faces are filled (the ones that are "tangential" to the box).
+        faceData(face, 0) = 0.5 * (cellHi + cellLo);
+      };
 
-  for (DataIterator dit = a_faceData.dataIterator(); dit.ok(); ++dit) {
-    EBFluxFAB&       fluxData = a_faceData[dit()];
-    const EBCellFAB& cellData = a_cellData[dit()];
-    const EBISBox&   ebisbox  = cellData.getEBISBox();
-    const EBGraph&   ebgraph  = ebisbox.getEBGraph();
-    const Box&       box      = a_cellData.disjointBoxLayout().get(dit());
+      // Run kernels
+      BoxLoops::loop(faceBox, regularKernel);
+      BoxLoops::loop(faceIt, irregularKernel);
 
-    constexpr int numTanGhost = 1;
+      // Fix up domain faces
+      for (SideIterator sit; sit.ok(); ++sit) {
+        const Box outsideBox = adjCellBox(dbl[dit()], faceDir, sit(), 1);
 
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      const int faceDir  = dir;
-      const int cellComp = 0;
-      const int faceComp = 0;
+        if (!(a_domain.contains(outsideBox))) {
+          Box insideBox = outsideBox;
 
-      EBLevelDataOps::averageCellToFace(fluxData[dir],
-                                        cellData,
-                                        ebgraph,
-                                        box,
-                                        numTanGhost,
-                                        faceDir,
-                                        a_domain,
-                                        cellComp,
-                                        faceComp);
+          if ((sit() == Side::Lo)) {
+            insideBox.shift(faceDir, 1);
+          }
+          else {
+            insideBox.shift(faceDir, -1);
+          }
+
+          // Regular boundary faces.
+          for (BoxIterator bit(insideBox); bit.ok(); ++bit) {
+            const IntVect ivCell = bit();
+
+            if (sit() == Side::Lo) {
+              faceDataReg(ivCell, 0) = cellDataReg(ivCell, faceDir);
+            }
+            else {
+              faceDataReg(ivCell + BASISV(faceDir), 0) = cellDataReg(ivCell, faceDir);
+            }
+          }
+
+          // Irregular boundary faces.
+          FaceIterator bndryFaces(IntVectSet(insideBox), ebgraph, faceDir, FaceStop::AllBoundaryOnly);
+
+          for (bndryFaces.reset(); bndryFaces.ok(); ++bndryFaces) {
+            const FaceIndex& bndryFace = bndryFaces();
+            const VolIndex&  bndryVoF  = bndryFace.getVoF(flip(sit()));
+
+            faceData(bndryFace, 0) = cellData(bndryVoF, faceDir);
+          }
+        }
+      }
     }
   }
 }
@@ -142,130 +148,210 @@ DataOps::averageCellToFace(EBAMRFluxData&               a_faceData,
                            const EBAMRCellData&         a_cellData,
                            const Vector<ProblemDomain>& a_domains)
 {
-  CH_TIME("DataOps::averageCellToFace(EBAMRFluxData");
+  CH_TIME("DataOps::averageCellToFace(EBAMRFluxData, EBAMRCellData, Vector<ProblemDomain>");
 
   for (int lvl = 0; lvl < a_faceData.size(); lvl++) {
-    DataOps::averageCellToFace(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl]);
+    const int nComps = a_faceData[lvl]->nComp();
+
+    const Average  average  = Average::Arithmetic;
+    const int      tanGhost = 0;
+    const Interval interv   = Interval(0, 0);
+
+    DataOps::averageCellToFace(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl], tanGhost, interv, interv, average);
+  }
+}
+
+void
+DataOps::averageCellToFace(EBAMRFluxData&               a_faceData,
+                           const EBAMRCellData&         a_cellData,
+                           const Vector<ProblemDomain>& a_domains,
+                           const int                    a_tanGhosts,
+                           const Interval&              a_faceInterval,
+                           const Interval&              a_cellInterval,
+                           const Average&               a_average)
+{
+  CH_TIME("DataOps::averageCellToFace(EBAMRFluxFlux, EBAMRCell, Vector<ProblemDomain>, int, Intervalx2, Average)");
+
+  for (int lvl = 0; lvl < a_faceData.size(); lvl++) {
+    DataOps::averageCellToFace(*a_faceData[lvl],
+                               *a_cellData[lvl],
+                               a_domains[lvl],
+                               a_tanGhosts,
+                               a_faceInterval,
+                               a_cellInterval,
+                               a_average);
   }
 }
 
 void
 DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
                            const LevelData<EBCellFAB>& a_cellData,
-                           const ProblemDomain&        a_domain)
+                           const ProblemDomain&        a_domain,
+                           const int                   a_tanGhosts,
+                           const Interval&             a_faceInterval,
+                           const Interval&             a_cellInterval,
+                           const Average&              a_average)
 {
-  CH_TIME("DataOps::averageCellToFace(LD<EBFluxFAB)");
+  CH_TIME("DataOps::averageCellToFace(LD<EBFluxFAB, LD<EBCellFAB>, ....");
 
-  CH_assert(a_faceData.nComp() == a_cellData.nComp());
+  const int numVars   = a_cellInterval.size();
+  const int cellBegin = a_cellInterval.begin();
+  const int faceBegin = a_faceInterval.begin();
 
-  // TLDR: This routine computes face-centered data as an arithmetic average of cell-centered data, including cut-cell faces. The kernels are simple arithmetic averages,
-  //       only modified on domain boundaries. If a domain face is covered, we just set the covered value to the value in the covered cell just inside the domain. Otherwise,
-  //       we iterate through the domain faces and extrapolate (to first order) the cell-centered data to the domain face. If there are not enough cells for extrapolation,
-  //       we set the value on the face equal to the value in the vof just inside the domain.
+  CH_assert(a_faceInterval.size() == a_cellInterval.size());
+  CH_assert(a_faceData.nComp() > a_faceInterval.end());
+  CH_assert(a_cellData.nComp() > a_faceInterval.end());
 
-  const int numComp = a_faceData.nComp();
-
-  const DisjointBoxLayout& dbl = a_faceData.disjointBoxLayout();
+  const DisjointBoxLayout& dbl = a_cellData.disjointBoxLayout();
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const EBCellFAB& cellData = a_cellData[dit()];
-    const EBISBox&   ebisbox  = cellData.getEBISBox();
-    const EBGraph&   ebgraph  = ebisbox.getEBGraph();
-    const Box        cellBox  = dbl[dit()];
+    const EBCellFAB& cellData    = a_cellData[dit()];
+    const FArrayBox& cellDataReg = cellData.getFArrayBox();
 
-    const BaseFab<Real>& regCellData = cellData.getSingleValuedFAB();
+    const EBISBox& ebisbox = cellData.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-    const IntVectSet ivsIrreg = ebisbox.getIrregIVS(cellBox);
+    for (int faceDir = 0; faceDir < SpaceDim; faceDir++) {
+      EBFaceFAB& faceData    = a_faceData[dit()][faceDir];
+      FArrayBox& faceDataReg = faceData.getFArrayBox();
 
-    // Go through faces oriented in direction dir.
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      EBFaceFAB&     faceData    = a_faceData[dit()][dir];
-      BaseFab<Real>& regFaceData = faceData.getSingleValuedFAB();
+      // Build the computation box, including the ghost faces. We only want interior faces.
+      Box cellBox = dbl[dit()];
+      cellBox.grow(a_tanGhosts);
+      cellBox &= a_domain;
+      cellBox.grow(faceDir, -a_tanGhosts);
 
-      // Face-centered box and irregular region. Note that the irregular kernel only does interior faces. We patch up those later.
-      const Box    faceBox = surroundingNodes(cellBox, dir);
-      FaceIterator faceit(ivsIrreg, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+      // Dummy check -- make sure boxes make sense in terms of how much ghost data we have
+      // in the input/output data holders.
+      CH_assert(cellData.getRegion().contains(cellBox));
+      CH_assert(faceData.getCellRegion().contains(cellBox));
 
-      // Do each component. Regular cells are done in Fortran while cut-cell faces
-      for (int comp = 0; comp < numComp; comp++) {
+      // Define kernel regions.
+      const Box    faceBox = surroundingNodes(cellBox, faceDir);
+      FaceIterator faceIt(ebisbox.getIrregIVS(cellBox), ebgraph, faceDir, FaceStop::SurroundingNoBoundary);
 
-        // Regular kernel.
-        auto regularKernel = [&](const IntVect& iv) -> void {
-          regFaceData(iv, comp) = 0.5 * (regCellData(iv, comp) + regCellData(iv - BASISV(dir), comp));
+      const IntVect shift = BASISV(faceDir);
+
+      for (int ioff = 0; ioff < numVars; ioff++) {
+        const int cellVar = cellBegin + ioff;
+        const int faceVar = faceBegin + ioff;
+
+        // Regular kernels.
+        auto arithmeticRegular = [&](const IntVect& iv) -> void {
+          const Real& cellHi = cellDataReg(iv, cellVar);
+          const Real& cellLo = cellDataReg(iv - shift, cellVar);
+
+          faceDataReg(iv, faceVar) = 0.5 * (cellHi + cellLo);
         };
 
-        // Irregular kernel.
-        auto irregularKernel = [&](const FaceIndex& face) -> void {
-          const VolIndex& vofLo = face.getVoF(Side::Lo);
-          const VolIndex& vofHi = face.getVoF(Side::Hi);
+        auto arithmeticIrregular = [&](const FaceIndex& face) -> void {
+          const Real& cellHi = cellData(face.getVoF(Side::Hi), cellVar);
+          const Real& cellLo = cellData(face.getVoF(Side::Lo), cellVar);
 
-          faceData(face, comp) = 0.5 * (cellData(vofLo, comp) + cellData(vofHi, comp));
+          faceData(face, faceVar) = 0.5 * (cellHi + cellLo);
         };
 
-        // Run the kernels.
-        BoxLoops::loop(faceBox, regularKernel);
-        BoxLoops::loop(faceit, irregularKernel);
+        auto harmonicRegular = [&](const IntVect& iv) -> void {
+          const Real& cellHi = cellDataReg(iv, cellVar);
+          const Real& cellLo = cellDataReg(iv - shift, cellVar);
+
+          faceDataReg(iv, faceVar) = 2.0 * (cellHi * cellLo) / (cellHi + cellLo);
+        };
+
+        auto harmonicIrregular = [&](const FaceIndex& face) -> void {
+          const Real& cellHi = cellData(face.getVoF(Side::Hi), cellVar);
+          const Real& cellLo = cellData(face.getVoF(Side::Lo), cellVar);
+
+          faceData(face, faceVar) = 2.0 * (cellHi * cellLo) / (cellHi + cellLo);
+        };
+
+        auto geometricRegular = [&](const IntVect& iv) -> void {
+          const Real& cellHi = cellDataReg(iv, cellVar);
+          const Real& cellLo = cellDataReg(iv - shift, cellVar);
+
+          faceDataReg(iv, faceVar) = sqrt(cellLo * cellHi);
+        };
+
+        auto geometricIrregular = [&](const FaceIndex& face) -> void {
+          const Real& cellHi = cellData(face.getVoF(Side::Hi), cellVar);
+          const Real& cellLo = cellData(face.getVoF(Side::Lo), cellVar);
+
+          faceData(face, faceVar) = sqrt(cellHi * cellLo);
+        };
+
+        // Execute kernels.
+        switch (a_average) {
+        case Average::Arithmetic: {
+          BoxLoops::loop(faceBox, arithmeticRegular);
+          BoxLoops::loop(faceIt, arithmeticIrregular);
+
+          break;
+        }
+        case Average::Harmonic: {
+          BoxLoops::loop(faceBox, harmonicRegular);
+          BoxLoops::loop(faceIt, harmonicIrregular);
+
+          break;
+        }
+        case Average::Geometric: {
+          BoxLoops::loop(faceBox, geometricRegular);
+          BoxLoops::loop(faceIt, geometricIrregular);
+
+          break;
+        }
+        default: {
+          MayDay::Error("DataOps::averageCellToFace -- averaging method not supported");
+
+          break;
+        }
+        }
       }
 
-      // Now fix up domain faces
+      // Fix up domain faces
       for (SideIterator sit; sit.ok(); ++sit) {
+        const Box outsideBox = adjCellBox(dbl[dit()], faceDir, sit(), 1);
 
-        // This box is on the outside of cellBox. I.e. it can also end up being outside of the domain.
-        const Box outsideBox = adjCellBox(cellBox, dir, sit(), 1);
+        if (!(a_domain.contains(outsideBox))) {
+          Box insideBox = outsideBox;
 
-        if (!a_domain.contains(outsideBox)) {
+          if ((sit() == Side::Lo)) {
+            insideBox.shift(faceDir, 1);
+          }
+          else {
+            insideBox.shift(faceDir, -1);
+          }
 
-          // Define kernel regions. This is a box which is the first strip of cells on the inside of the domain.
-          const Box    insideBox = adjCellBox(cellBox, dir, sit(), -1);
-          FaceIterator faceit(IntVectSet(insideBox), ebgraph, dir, FaceStop::AllBoundaryOnly);
+          // Regular boundary faces.
+          for (BoxIterator bit(insideBox); bit.ok(); ++bit) {
+            const IntVect ivCell = bit();
 
-          // Go through cells in that box and set the covered faces to something reasonable.
-          auto regularKernel = [&](const IntVect& iv) -> void {
-            // Find face index corresponding to cell index.
-            IntVect ivFace = iv;
-            if (sit() == Side::Hi) {
-              ivFace.shift(BASISV(dir));
-            }
+            for (int ioff = 0; ioff < numVars; ioff++) {
+              const int cellVar = cellBegin + ioff;
+              const int faceVar = faceBegin + ioff;
 
-            // Put reasonable values in face at domain boundaries.
-            for (int comp = 0; comp < numComp; comp++) {
-              regFaceData(ivFace, comp) = regCellData(iv, comp);
-            }
-          };
-
-          // Irregular kernel.
-          auto irregularKernel = [&](const FaceIndex& face) -> void {
-            // Get the vof just inside the domain on this face.
-            const VolIndex& vof = face.getVoF(flip(sit()));
-
-            const Vector<FaceIndex>& furtherFaces = ebisbox.getFaces(vof, dir, flip(sit()));
-
-            for (int comp = 0; comp < numComp; comp++) {
-
-              // If we have more faces available, extrapolate from inside the domain. Otherwise, set the face value
-              // to the vof just insid ethe domain.
-
-              if (furtherFaces.size() == 0) { // Set the value to be the value immediately inside the face.
-                faceData(face, comp) = cellData(vof, comp);
+              if (sit() == Side::Lo) {
+                faceDataReg(ivCell, faceVar) = cellDataReg(ivCell, cellVar);
               }
-              else { // Extrapolate.
-                const Real valClose = cellData(vof, comp);
-
-                Real valFar = 0.0;
-                for (int i = 0; i < furtherFaces.size(); i++) {
-                  const VolIndex& farVoF = furtherFaces[i].getVoF(flip(sit()));
-                  valFar += cellData(farVoF, comp);
-                }
-                valFar /= furtherFaces.size();
-
-                faceData(face, comp) = 0.5 * (3.0 * valClose - valFar);
+              else {
+                faceDataReg(ivCell + BASISV(faceDir), faceVar) = cellDataReg(ivCell, cellVar);
               }
             }
-          };
+          }
 
-          // Execute the kernels.
-          BoxLoops::loop(insideBox, regularKernel);
-          BoxLoops::loop(faceit, irregularKernel);
+          // Irregular boundary faces.
+          FaceIterator bndryFaces(IntVectSet(insideBox), ebgraph, faceDir, FaceStop::AllBoundaryOnly);
+
+          for (bndryFaces.reset(); bndryFaces.ok(); ++bndryFaces) {
+            const FaceIndex& bndryFace = bndryFaces();
+            const VolIndex&  bndryVoF  = bndryFace.getVoF(flip(sit()));
+
+            for (int ioff = 0; ioff < numVars; ioff++) {
+              const int cellVar = cellBegin + ioff;
+              const int faceVar = faceBegin + ioff;
+
+              faceData(bndryFace, faceVar) = cellData(bndryVoF, cellVar);
+            }
+          }
         }
       }
     }
