@@ -199,7 +199,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a1bc3d0208cbf3ccd782f603db7295c4b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a1bc3d0208cbf3ccd782f603db7295c4b">setAmr</a> (const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;a_amr)</td></tr>
 <tr class="memdesc:a1bc3d0208cbf3ccd782f603db7295c4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the amr object.  <a href="classFieldSolver.html#a1bc3d0208cbf3ccd782f603db7295c4b">More...</a><br /></td></tr>
 <tr class="separator:a1bc3d0208cbf3ccd782f603db7295c4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa8372b83812dada88c651e69c13d823e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#aa8372b83812dada88c651e69c13d823e">setPermittivities</a> ()</td></tr>
+<tr class="memitem:aa8372b83812dada88c651e69c13d823e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#aa8372b83812dada88c651e69c13d823e">setPermittivities</a> ()</td></tr>
 <tr class="memdesc:aa8372b83812dada88c651e69c13d823e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the permittivities.  <a href="classFieldSolver.html#aa8372b83812dada88c651e69c13d823e">More...</a><br /></td></tr>
 <tr class="separator:aa8372b83812dada88c651e69c13d823e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b2386198f31e61c4f04f5b27e6325e4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a4b2386198f31e61c4f04f5b27e6325e4">writePlotFile</a> ()</td></tr>
@@ -1822,6 +1822,9 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void FieldSolver::setPermittivities </td>
@@ -1830,10 +1833,17 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Set the permittivities. </p>
 <p>This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB. </p>
+
+<p>Reimplemented in <a class="el" href="classFieldSolverMultigrid.html#a7a46c76a189f4d11959ac4715d196e31">FieldSolverMultigrid</a>.</p>
 
 </div>
 </div>

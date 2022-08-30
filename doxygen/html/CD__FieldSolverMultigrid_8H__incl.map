@@ -36,7 +36,7 @@
 <area shape="rect" id="node31" title=" " alt="" coords="2127,244,2274,271"/>
 <area shape="rect" id="node32" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="2856,319,2996,345"/>
 <area shape="rect" id="node35" href="$CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="2320,393,2497,420"/>
-<area shape="rect" id="node37" href="$CD__EbCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="2877,393,3009,420"/>
+<area shape="rect" id="node37" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="2877,393,3010,420"/>
 <area shape="rect" id="node38" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="2754,244,2917,271"/>
 <area shape="rect" id="node39" href="$CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="2151,319,2309,345"/>
 <area shape="rect" id="node40" href="$CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="2535,319,2679,345"/>
@@ -45,7 +45,7 @@
 <area shape="rect" id="node36" href="$CD__MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB&lt;Real&gt;" alt="" coords="3237,393,3388,420"/>
 <area shape="rect" id="node45" href="$CD__MFHelmholtzOp_8H.html" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="3509,244,3676,271"/>
 <area shape="rect" id="node46" href="$CD__MFMultigridInterpolator_8H.html" title="Declaration of a wrapper class for holding multifluid EBMultigridInterpolators." alt="" coords="3485,319,3700,345"/>
-<area shape="rect" id="node47" href="$CD__MFCoarAve_8H.html" title="Wrapper class for holding multifluid EbCoarAves." alt="" coords="3071,319,3207,345"/>
+<area shape="rect" id="node47" href="$CD__MFCoarAve_8H.html" title="Wrapper class for holding multifluid EBCoarAves." alt="" coords="3071,319,3207,345"/>
 <area shape="rect" id="node48" href="$CD__MFFluxReg_8H.html" title="Declaration of a class for refluxing in a multiphase context." alt="" coords="3827,319,3961,345"/>
 <area shape="rect" id="node49" href="$CD__MFHelmholtzEBBCFactory_8H.html" title="Declaration of an EB boundary condition factory class for MFHelmholtzOp." alt="" coords="3986,319,4215,345"/>
 <area shape="rect" id="node50" href="$CD__MFHelmholtzJumpBCFactory_8H.html" title="Declaration of a factory class for making MFHelmholtzJumpBC objects for use in a multifluid MFHelmhol..." alt="" coords="4239,319,4485,345"/>

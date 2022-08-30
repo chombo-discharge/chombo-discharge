@@ -1,9 +1,10 @@
 <map id="Source/Multifluid/CD_MFCoarAve.cpp" name="Source/Multifluid/CD_MFCoarAve.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_MFCoarAve.H." alt="" coords="189,5,343,47"/>
-<area shape="rect" id="node2" href="$CD__MFCoarAve_8H.html" title="Wrapper class for holding multifluid EbCoarAves." alt="" coords="198,95,334,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,244,191,271"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="390,244,569,271"/>
-<area shape="rect" id="node3" title=" " alt="" coords="183,169,234,196"/>
-<area shape="rect" id="node4" href="$CD__EbCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="259,169,391,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="215,244,365,271"/>
+<area shape="rect" id="node1" title="Implementation of CD_MFCoarAve.H." alt="" coords="93,5,247,47"/>
+<area shape="rect" id="node2" href="$CD__MFCoarAve_8H.html" title="Wrapper class for holding multifluid EBCoarAves." alt="" coords="102,95,238,121"/>
+<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="11,319,196,345"/>
+<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="306,319,485,345"/>
+<area shape="rect" id="node3" title=" " alt="" coords="87,169,138,196"/>
+<area shape="rect" id="node4" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="162,169,295,196"/>
+<area shape="rect" id="node5" title=" " alt="" coords="29,244,143,271"/>
+<area shape="rect" id="node6" href="$CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="218,244,333,271"/>
 </map>

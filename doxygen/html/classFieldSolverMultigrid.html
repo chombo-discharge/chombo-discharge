@@ -224,9 +224,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a1bc3d0208cbf3ccd782f603db7295c4b inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a1bc3d0208cbf3ccd782f603db7295c4b">setAmr</a> (const RefCountedPtr&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt; &amp;a_amr)</td></tr>
 <tr class="memdesc:a1bc3d0208cbf3ccd782f603db7295c4b inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the amr object.  <a href="classFieldSolver.html#a1bc3d0208cbf3ccd782f603db7295c4b">More...</a><br /></td></tr>
 <tr class="separator:a1bc3d0208cbf3ccd782f603db7295c4b inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa8372b83812dada88c651e69c13d823e inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#aa8372b83812dada88c651e69c13d823e">setPermittivities</a> ()</td></tr>
-<tr class="memdesc:aa8372b83812dada88c651e69c13d823e inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the permittivities.  <a href="classFieldSolver.html#aa8372b83812dada88c651e69c13d823e">More...</a><br /></td></tr>
-<tr class="separator:aa8372b83812dada88c651e69c13d823e inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b2386198f31e61c4f04f5b27e6325e4 inherit pub_methods_classFieldSolver"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a4b2386198f31e61c4f04f5b27e6325e4">writePlotFile</a> ()</td></tr>
 <tr class="memdesc:a4b2386198f31e61c4f04f5b27e6325e4 inherit pub_methods_classFieldSolver"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot file.  <a href="classFieldSolver.html#a4b2386198f31e61c4f04f5b27e6325e4">More...</a><br /></td></tr>
 <tr class="separator:a4b2386198f31e61c4f04f5b27e6325e4 inherit pub_methods_classFieldSolver"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -346,6 +343,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a23823c6f3927d1f15d019a8eedea940b">parseJumpBC</a> ()</td></tr>
 <tr class="memdesc:a23823c6f3927d1f15d019a8eedea940b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse JumpBC type. <br /></td></tr>
 <tr class="separator:a23823c6f3927d1f15d019a8eedea940b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a46c76a189f4d11959ac4715d196e31"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a7a46c76a189f4d11959ac4715d196e31">setPermittivities</a> () override</td></tr>
+<tr class="memdesc:a7a46c76a189f4d11959ac4715d196e31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the permittivities.  <a href="classFieldSolverMultigrid.html#a7a46c76a189f4d11959ac4715d196e31">More...</a><br /></td></tr>
+<tr class="separator:a7a46c76a189f4d11959ac4715d196e31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c179aee2e6e78f22a794ceae9e18404"><td class="memItemLeft" align="right" valign="top"><a id="a1c179aee2e6e78f22a794ceae9e18404"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a1c179aee2e6e78f22a794ceae9e18404">setupHelmholtzFactory</a> ()</td></tr>
 <tr class="memdesc:a1c179aee2e6e78f22a794ceae9e18404"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the multigrid operator factory. <br /></td></tr>
@@ -1144,6 +1144,36 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <p>This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). </p>
 
 <p>Reimplemented from <a class="el" href="classFieldSolver.html#a3dc5a56250e5391f959a67e55e854b97">FieldSolver</a>.</p>
+
+</div>
+</div>
+<a id="a7a46c76a189f4d11959ac4715d196e31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a46c76a189f4d11959ac4715d196e31">&#9670;&nbsp;</a></span>setPermittivities()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FieldSolverMultigrid::setPermittivities </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the permittivities. </p>
+<p>This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB and fills necessary ghost faces/cells. </p>
+
+<p>Reimplemented from <a class="el" href="classFieldSolver.html#aa8372b83812dada88c651e69c13d823e">FieldSolver</a>.</p>
 
 </div>
 </div>

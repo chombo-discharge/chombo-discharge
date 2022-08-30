@@ -17,7 +17,7 @@
 <area shape="rect" id="node11" title=" " alt="" coords="87,572,228,599"/>
 <area shape="rect" id="node12" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="1670,408,1810,435"/>
 <area shape="rect" id="node23" href="$CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="398,490,575,517"/>
-<area shape="rect" id="node28" href="$CD__EbCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="3662,490,3794,517"/>
+<area shape="rect" id="node28" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="3661,490,3795,517"/>
 <area shape="rect" id="node29" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="296,333,517,360"/>
 <area shape="rect" id="node30" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="3024,490,3227,517"/>
 <area shape="rect" id="node31" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="1349,333,1512,360"/>

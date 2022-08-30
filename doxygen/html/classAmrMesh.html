@@ -267,36 +267,78 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a14e98284a18faae8ac933f5cbe469f74"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a14e98284a18faae8ac933f5cbe469f74">reallocate</a> (<a class="el" href="classEBAMRData.html">MFAMRIVData</a> &amp;a_data, const int a_lmin) const</td></tr>
 <tr class="memdesc:a14e98284a18faae8ac933f5cbe469f74"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reallocate data.  <a href="classAmrMesh.html#a14e98284a18faae8ac933f5cbe469f74">More...</a><br /></td></tr>
 <tr class="separator:a14e98284a18faae8ac933f5cbe469f74"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d53bb58405ffc2573a4b76263db8d05"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a6d53bb58405ffc2573a4b76263db8d05">averageDown</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data, const std::string a_realm) const</td></tr>
-<tr class="memdesc:a6d53bb58405ffc2573a4b76263db8d05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down multifluid data over a realm.  <a href="classAmrMesh.html#a6d53bb58405ffc2573a4b76263db8d05">More...</a><br /></td></tr>
-<tr class="separator:a6d53bb58405ffc2573a4b76263db8d05"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ece75fe84bbcdd4ad1074ba001dc3cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a1ece75fe84bbcdd4ad1074ba001dc3cd">averageDown</a> (<a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;a_data, const std::string a_realm) const</td></tr>
-<tr class="memdesc:a1ece75fe84bbcdd4ad1074ba001dc3cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down multifluid data over a realm.  <a href="classAmrMesh.html#a1ece75fe84bbcdd4ad1074ba001dc3cd">More...</a><br /></td></tr>
-<tr class="separator:a1ece75fe84bbcdd4ad1074ba001dc3cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0dcd1a343ae2f032fa86131d4fcda2f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ab0dcd1a343ae2f032fa86131d4fcda2f">averageFaces</a> (<a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;a_data, const std::string a_realm) const</td></tr>
-<tr class="memdesc:ab0dcd1a343ae2f032fa86131d4fcda2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average multifluid data over a realm.  <a href="classAmrMesh.html#ab0dcd1a343ae2f032fa86131d4fcda2f">More...</a><br /></td></tr>
-<tr class="separator:ab0dcd1a343ae2f032fa86131d4fcda2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a80ee08c4803c32a0428be21358771e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a4a80ee08c4803c32a0428be21358771e">averageDown</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a4a80ee08c4803c32a0428be21358771e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#a4a80ee08c4803c32a0428be21358771e">More...</a><br /></td></tr>
-<tr class="separator:a4a80ee08c4803c32a0428be21358771e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a839c07d4508af04bd31ea72e076e7a16"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a839c07d4508af04bd31ea72e076e7a16">averageDown</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const int a_lvl) const</td></tr>
-<tr class="memdesc:a839c07d4508af04bd31ea72e076e7a16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#a839c07d4508af04bd31ea72e076e7a16">More...</a><br /></td></tr>
-<tr class="separator:a839c07d4508af04bd31ea72e076e7a16"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2175d27cd8a8643bac9f9861f64506d3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a2175d27cd8a8643bac9f9861f64506d3">averageDown</a> (LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const int a_level, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a2175d27cd8a8643bac9f9861f64506d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen cells over a realm. This does a specific level.  <a href="classAmrMesh.html#a2175d27cd8a8643bac9f9861f64506d3">More...</a><br /></td></tr>
-<tr class="separator:a2175d27cd8a8643bac9f9861f64506d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a49ad49e64f7edc3258088482ccd3106f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a49ad49e64f7edc3258088482ccd3106f">averageDown</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a49ad49e64f7edc3258088482ccd3106f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#a49ad49e64f7edc3258088482ccd3106f">More...</a><br /></td></tr>
-<tr class="separator:a49ad49e64f7edc3258088482ccd3106f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1b8bafcdcb470b6d4c24952fddad540a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a1b8bafcdcb470b6d4c24952fddad540a">averageFaces</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a1b8bafcdcb470b6d4c24952fddad540a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#a1b8bafcdcb470b6d4c24952fddad540a">More...</a><br /></td></tr>
-<tr class="separator:a1b8bafcdcb470b6d4c24952fddad540a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15483c1dd4b220ba12f2714f63daf783"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a15483c1dd4b220ba12f2714f63daf783">averageDown</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a15483c1dd4b220ba12f2714f63daf783"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#a15483c1dd4b220ba12f2714f63daf783">More...</a><br /></td></tr>
-<tr class="separator:a15483c1dd4b220ba12f2714f63daf783"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a98b8fbe0d89c469fc570eaafe760f84f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a98b8fbe0d89c469fc570eaafe760f84f">conservativeAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase)</td></tr>
-<tr class="memdesc:a98b8fbe0d89c469fc570eaafe760f84f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do conservative coarsening for data defined on cut-cells.  <a href="classAmrMesh.html#a98b8fbe0d89c469fc570eaafe760f84f">More...</a><br /></td></tr>
-<tr class="separator:a98b8fbe0d89c469fc570eaafe760f84f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9db6f208842207e02524d7cc61d0961"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ac9db6f208842207e02524d7cc61d0961">average</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data, const std::string a_realm, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average) const</td></tr>
+<tr class="memdesc:ac9db6f208842207e02524d7cc61d0961"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average multifluid data over a specified realm.  <a href="classAmrMesh.html#ac9db6f208842207e02524d7cc61d0961">More...</a><br /></td></tr>
+<tr class="separator:ac9db6f208842207e02524d7cc61d0961"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41c3e36e18a1b3feefe1bc12e0b59a8d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a41c3e36e18a1b3feefe1bc12e0b59a8d">arithmeticAverage</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data, const std::string a_realm) const</td></tr>
+<tr class="memdesc:a41c3e36e18a1b3feefe1bc12e0b59a8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arithmetic coarsening of multifluid data.  <a href="classAmrMesh.html#a41c3e36e18a1b3feefe1bc12e0b59a8d">More...</a><br /></td></tr>
+<tr class="separator:a41c3e36e18a1b3feefe1bc12e0b59a8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a186c852306b0260ad0637599217ea035"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a186c852306b0260ad0637599217ea035">harmonicAverage</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data, const std::string a_realm) const</td></tr>
+<tr class="memdesc:a186c852306b0260ad0637599217ea035"><td class="mdescLeft">&#160;</td><td class="mdescRight">Harmonic coarsening of multifluid data.  <a href="classAmrMesh.html#a186c852306b0260ad0637599217ea035">More...</a><br /></td></tr>
+<tr class="separator:a186c852306b0260ad0637599217ea035"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53b3f8d395e81592ba629ebc11b9141e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a53b3f8d395e81592ba629ebc11b9141e">conservativeAverage</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data, const std::string a_realm) const</td></tr>
+<tr class="memdesc:a53b3f8d395e81592ba629ebc11b9141e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conservative coarsening of multifluid data.  <a href="classAmrMesh.html#a53b3f8d395e81592ba629ebc11b9141e">More...</a><br /></td></tr>
+<tr class="separator:a53b3f8d395e81592ba629ebc11b9141e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35796165052eb306d772d0471eca391b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a35796165052eb306d772d0471eca391b">average</a> (<a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;a_data, const std::string a_realm, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average) const</td></tr>
+<tr class="memdesc:a35796165052eb306d772d0471eca391b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average multifluid data over a specified realm.  <a href="classAmrMesh.html#a35796165052eb306d772d0471eca391b">More...</a><br /></td></tr>
+<tr class="separator:a35796165052eb306d772d0471eca391b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad64caac626d5f6846785a8ad7a855303"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ad64caac626d5f6846785a8ad7a855303">arithmeticAverage</a> (<a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;a_data, const std::string a_realm) const</td></tr>
+<tr class="memdesc:ad64caac626d5f6846785a8ad7a855303"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average multifluid data over a realm.  <a href="classAmrMesh.html#ad64caac626d5f6846785a8ad7a855303">More...</a><br /></td></tr>
+<tr class="separator:ad64caac626d5f6846785a8ad7a855303"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4e9d87d1e36b48c25847153b44b2db2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ae4e9d87d1e36b48c25847153b44b2db2">harmonicAverage</a> (<a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;a_data, const std::string a_realm) const</td></tr>
+<tr class="memdesc:ae4e9d87d1e36b48c25847153b44b2db2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average multifluid data over a realm.  <a href="classAmrMesh.html#ae4e9d87d1e36b48c25847153b44b2db2">More...</a><br /></td></tr>
+<tr class="separator:ae4e9d87d1e36b48c25847153b44b2db2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabe7ab07b30103513af9784864aba639"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aabe7ab07b30103513af9784864aba639">conservativeAverage</a> (<a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;a_data, const std::string a_realm) const</td></tr>
+<tr class="memdesc:aabe7ab07b30103513af9784864aba639"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down multifluid data over a realm.  <a href="classAmrMesh.html#aabe7ab07b30103513af9784864aba639">More...</a><br /></td></tr>
+<tr class="separator:aabe7ab07b30103513af9784864aba639"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6540dc8db6193a32c989936f8b47da1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#af6540dc8db6193a32c989936f8b47da1">average</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average) const</td></tr>
+<tr class="memdesc:af6540dc8db6193a32c989936f8b47da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#af6540dc8db6193a32c989936f8b47da1">More...</a><br /></td></tr>
+<tr class="separator:af6540dc8db6193a32c989936f8b47da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa07eed6758ee76431667b3832f36b966"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aa07eed6758ee76431667b3832f36b966">average</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average, const Interval &amp;a_variables) const</td></tr>
+<tr class="memdesc:aa07eed6758ee76431667b3832f36b966"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#aa07eed6758ee76431667b3832f36b966">More...</a><br /></td></tr>
+<tr class="separator:aa07eed6758ee76431667b3832f36b966"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6eb5733b4a2fce7c522c37d3c1347ff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#af6eb5733b4a2fce7c522c37d3c1347ff">arithmeticAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:af6eb5733b4a2fce7c522c37d3c1347ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arithmetic average of data. Does all components.  <a href="classAmrMesh.html#af6eb5733b4a2fce7c522c37d3c1347ff">More...</a><br /></td></tr>
+<tr class="separator:af6eb5733b4a2fce7c522c37d3c1347ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57c8382e0e99edfdbf353d60b46d41ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a57c8382e0e99edfdbf353d60b46d41ba">arithmeticAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const Interval &amp;a_variables) const</td></tr>
+<tr class="memdesc:a57c8382e0e99edfdbf353d60b46d41ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arithmetic average of data.  <a href="classAmrMesh.html#a57c8382e0e99edfdbf353d60b46d41ba">More...</a><br /></td></tr>
+<tr class="separator:a57c8382e0e99edfdbf353d60b46d41ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b49e5fa25c6a4bb059a6c3e25b1c078"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a4b49e5fa25c6a4bb059a6c3e25b1c078">harmonicAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:a4b49e5fa25c6a4bb059a6c3e25b1c078"><td class="mdescLeft">&#160;</td><td class="mdescRight">Harmonic average of data. Does all components.  <a href="classAmrMesh.html#a4b49e5fa25c6a4bb059a6c3e25b1c078">More...</a><br /></td></tr>
+<tr class="separator:a4b49e5fa25c6a4bb059a6c3e25b1c078"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb3e29a7ec2d7e88c8ba7410e1fda2ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#adb3e29a7ec2d7e88c8ba7410e1fda2ea">harmonicAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const Interval &amp;a_variables) const</td></tr>
+<tr class="memdesc:adb3e29a7ec2d7e88c8ba7410e1fda2ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Harmonic average of data. Does all components.  <a href="classAmrMesh.html#adb3e29a7ec2d7e88c8ba7410e1fda2ea">More...</a><br /></td></tr>
+<tr class="separator:adb3e29a7ec2d7e88c8ba7410e1fda2ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae69d99efb79d91bbf8ddfa33b61ab0f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aae69d99efb79d91bbf8ddfa33b61ab0f">conservativeAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:aae69d99efb79d91bbf8ddfa33b61ab0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conseratively average data. Does all components.  <a href="classAmrMesh.html#aae69d99efb79d91bbf8ddfa33b61ab0f">More...</a><br /></td></tr>
+<tr class="separator:aae69d99efb79d91bbf8ddfa33b61ab0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0bd84b6a06ba937f38448a89a3f6882b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a0bd84b6a06ba937f38448a89a3f6882b">conservativeAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const Interval &amp;a_variables) const</td></tr>
+<tr class="memdesc:a0bd84b6a06ba937f38448a89a3f6882b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conseratively average data. Does all components.  <a href="classAmrMesh.html#a0bd84b6a06ba937f38448a89a3f6882b">More...</a><br /></td></tr>
+<tr class="separator:a0bd84b6a06ba937f38448a89a3f6882b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1459b80feff30769ea928f10907fcc89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a1459b80feff30769ea928f10907fcc89">average</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average) const</td></tr>
+<tr class="memdesc:a1459b80feff30769ea928f10907fcc89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#a1459b80feff30769ea928f10907fcc89">More...</a><br /></td></tr>
+<tr class="separator:a1459b80feff30769ea928f10907fcc89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdb661908599529bdc686d2de016a16f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#abdb661908599529bdc686d2de016a16f">arithmeticAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:abdb661908599529bdc686d2de016a16f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#abdb661908599529bdc686d2de016a16f">More...</a><br /></td></tr>
+<tr class="separator:abdb661908599529bdc686d2de016a16f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00b2fdcbb8c36d6ccd8e6b836980ab3c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a00b2fdcbb8c36d6ccd8e6b836980ab3c">harmonicAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:a00b2fdcbb8c36d6ccd8e6b836980ab3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#a00b2fdcbb8c36d6ccd8e6b836980ab3c">More...</a><br /></td></tr>
+<tr class="separator:a00b2fdcbb8c36d6ccd8e6b836980ab3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af32fe0c1d230d0a0dadee647d7d2730b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#af32fe0c1d230d0a0dadee647d7d2730b">conservativeAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:af32fe0c1d230d0a0dadee647d7d2730b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#af32fe0c1d230d0a0dadee647d7d2730b">More...</a><br /></td></tr>
+<tr class="separator:af32fe0c1d230d0a0dadee647d7d2730b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc3a4063ef5b08f363743daa70496b45"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#acc3a4063ef5b08f363743daa70496b45">average</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average) const</td></tr>
+<tr class="memdesc:acc3a4063ef5b08f363743daa70496b45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average down on specific realm and phase.  <a href="classAmrMesh.html#acc3a4063ef5b08f363743daa70496b45">More...</a><br /></td></tr>
+<tr class="separator:acc3a4063ef5b08f363743daa70496b45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bbddcd21848988ec71d1525f80076bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a2bbddcd21848988ec71d1525f80076bc">arithmeticAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:a2bbddcd21848988ec71d1525f80076bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arithmetic average on specific realm and phase.  <a href="classAmrMesh.html#a2bbddcd21848988ec71d1525f80076bc">More...</a><br /></td></tr>
+<tr class="separator:a2bbddcd21848988ec71d1525f80076bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a259cb2f2336f091eeb1955b7c525a040"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a259cb2f2336f091eeb1955b7c525a040">harmonicAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:a259cb2f2336f091eeb1955b7c525a040"><td class="mdescLeft">&#160;</td><td class="mdescRight">Harmonic average on specific realm and phase.  <a href="classAmrMesh.html#a259cb2f2336f091eeb1955b7c525a040">More...</a><br /></td></tr>
+<tr class="separator:a259cb2f2336f091eeb1955b7c525a040"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9ebca4c73310fecee761a9f74b8fe01"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ae9ebca4c73310fecee761a9f74b8fe01">conservativeAverage</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:ae9ebca4c73310fecee761a9f74b8fe01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conservative averaging on specific realm and phase.  <a href="classAmrMesh.html#ae9ebca4c73310fecee761a9f74b8fe01">More...</a><br /></td></tr>
+<tr class="separator:ae9ebca4c73310fecee761a9f74b8fe01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5032e0accfccfbc5c77cd8d4e6bbe578"><td class="memTemplParams" colspan="2">template&lt;class P , const Real &amp;(P::*)() const particleScalarField&gt; </td></tr>
 <tr class="memitem:a5032e0accfccfbc5c77cd8d4e6bbe578"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a5032e0accfccfbc5c77cd8d4e6bbe578">depositParticles</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_meshData, const std::string &amp;a_realm, const phase::which_phase &amp;a_phase, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a> a_depositionType, const <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a> a_coarseFineDeposition, const bool a_forceIrregNGP=false)</td></tr>
 <tr class="memdesc:a5032e0accfccfbc5c77cd8d4e6bbe578"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit scalar particle quantities on the mesh.  <a href="classAmrMesh.html#a5032e0accfccfbc5c77cd8d4e6bbe578">More...</a><br /></td></tr>
@@ -513,10 +555,10 @@ const Vector&lt; ProblemDomain &gt; &amp;&#160;</td><td class="memItemRight" val
 <tr class="memitem:ae01ad6d63e8fed8c1615a06a9ccb534a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRParticleMesh.html">EBAMRParticleMesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ae01ad6d63e8fed8c1615a06a9ccb534a">getParticleMesh</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:ae01ad6d63e8fed8c1615a06a9ccb534a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get <a class="el" href="classEBAMRParticleMesh.html" title="Class for handling particle-mesh operations with AMR.">EBAMRParticleMesh</a> operator.  <a href="classAmrMesh.html#ae01ad6d63e8fed8c1615a06a9ccb534a">More...</a><br /></td></tr>
 <tr class="separator:ae01ad6d63e8fed8c1615a06a9ccb534a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c0c20a451cb6a3d3fec8d76b964241c"><td class="memItemLeft" align="right" valign="top"><a id="a9c0c20a451cb6a3d3fec8d76b964241c"></a>
-Vector&lt; RefCountedPtr&lt; <a class="el" href="classEbCoarAve.html">EbCoarAve</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a9c0c20a451cb6a3d3fec8d76b964241c">getCoarseAverage</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
-<tr class="memdesc:a9c0c20a451cb6a3d3fec8d76b964241c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarsening utility. <br /></td></tr>
-<tr class="separator:a9c0c20a451cb6a3d3fec8d76b964241c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab04c32d16bc55edc5fe1147eb32bda67"><td class="memItemLeft" align="right" valign="top"><a id="ab04c32d16bc55edc5fe1147eb32bda67"></a>
+Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBCoarAve.html">EBCoarAve</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#ab04c32d16bc55edc5fe1147eb32bda67">getCoarseAverage</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
+<tr class="memdesc:ab04c32d16bc55edc5fe1147eb32bda67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarsening utility. <br /></td></tr>
+<tr class="separator:ab04c32d16bc55edc5fe1147eb32bda67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28d1aa576ea1b98c23378f127212844e"><td class="memItemLeft" align="right" valign="top">Vector&lt; RefCountedPtr&lt; <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a28d1aa576ea1b98c23378f127212844e">getMultigridInterpolator</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a28d1aa576ea1b98c23378f127212844e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get multigrid interpolation utility.  <a href="classAmrMesh.html#a28d1aa576ea1b98c23378f127212844e">More...</a><br /></td></tr>
 <tr class="separator:a28d1aa576ea1b98c23378f127212844e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1970,14 +2012,14 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a4a80ee08c4803c32a0428be21358771e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4a80ee08c4803c32a0428be21358771e">&#9670;&nbsp;</a></span>averageDown() <span class="overload">[1/7]</span></h2>
+<a id="af6eb5733b4a2fce7c522c37d3c1347ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6eb5733b4a2fce7c522c37d3c1347ff">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[1/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void AmrMesh::averageDown </td>
+          <td class="memname">void AmrMesh::arithmeticAverage </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_data</em>, </td>
@@ -2002,7 +2044,7 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Average down on specific realm and phase. </p>
+<p>Arithmetic average of data. Does all components. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
@@ -2014,14 +2056,14 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a839c07d4508af04bd31ea72e076e7a16"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a839c07d4508af04bd31ea72e076e7a16">&#9670;&nbsp;</a></span>averageDown() <span class="overload">[2/7]</span></h2>
+<a id="a57c8382e0e99edfdbf353d60b46d41ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57c8382e0e99edfdbf353d60b46d41ba">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[2/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void AmrMesh::averageDown </td>
+          <td class="memname">void AmrMesh::arithmeticAverage </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_data</em>, </td>
@@ -2041,8 +2083,8 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_lvl</em>&#160;</td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_variables</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2052,248 +2094,27 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Average down on specific realm and phase. </p>
+<p>Arithmetic average of data. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>The coarse level.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This coarsens data from level a_lvl+1 to level a_lvl </p>
-
-</div>
-</div>
-<a id="a49ad49e64f7edc3258088482ccd3106f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a49ad49e64f7edc3258088482ccd3106f">&#9670;&nbsp;</a></span>averageDown() <span class="overload">[3/7]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void AmrMesh::averageDown </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Average down on specific realm and phase. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a15483c1dd4b220ba12f2714f63daf783"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15483c1dd4b220ba12f2714f63daf783">&#9670;&nbsp;</a></span>averageDown() <span class="overload">[4/7]</span></h2>
+<a id="abdb661908599529bdc686d2de016a16f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdb661908599529bdc686d2de016a16f">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[3/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void AmrMesh::averageDown </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Average down on specific realm and phase. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a2175d27cd8a8643bac9f9861f64506d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2175d27cd8a8643bac9f9861f64506d3">&#9670;&nbsp;</a></span>averageDown() <span class="overload">[5/7]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void AmrMesh::averageDown </td>
-          <td>(</td>
-          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_coarData</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_fineData</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_level</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const phase::which_phase&#160;</td>
-          <td class="paramname"><em>a_phase</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Coarsen cells over a realm. This does a specific level. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_coarData</td><td>Coarse grid data </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_fineData</td><td>Fine grid data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>The grid level corresponding to a_fineData </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a6d53bb58405ffc2573a4b76263db8d05"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d53bb58405ffc2573a4b76263db8d05">&#9670;&nbsp;</a></span>averageDown() <span class="overload">[6/7]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void AmrMesh::averageDown </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Average down multifluid data over a realm. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a1ece75fe84bbcdd4ad1074ba001dc3cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1ece75fe84bbcdd4ad1074ba001dc3cd">&#9670;&nbsp;</a></span>averageDown() <span class="overload">[7/7]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void AmrMesh::averageDown </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string&#160;</td>
-          <td class="paramname"><em>a_realm</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Average down multifluid data over a realm. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a1b8bafcdcb470b6d4c24952fddad540a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1b8bafcdcb470b6d4c24952fddad540a">&#9670;&nbsp;</a></span>averageFaces() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void AmrMesh::averageFaces </td>
+          <td class="memname">void AmrMesh::arithmeticAverage </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_data</em>, </td>
@@ -2330,14 +2151,95 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="ab0dcd1a343ae2f032fa86131d4fcda2f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab0dcd1a343ae2f032fa86131d4fcda2f">&#9670;&nbsp;</a></span>averageFaces() <span class="overload">[2/2]</span></h2>
+<a id="a2bbddcd21848988ec71d1525f80076bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bbddcd21848988ec71d1525f80076bc">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[4/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void AmrMesh::averageFaces </td>
+          <td class="memname">void AmrMesh::arithmeticAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Arithmetic average on specific realm and phase. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a41c3e36e18a1b3feefe1bc12e0b59a8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41c3e36e18a1b3feefe1bc12e0b59a8d">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[5/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::arithmeticAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Arithmetic coarsening of multifluid data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ad64caac626d5f6846785a8ad7a855303"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad64caac626d5f6846785a8ad7a855303">&#9670;&nbsp;</a></span>arithmeticAverage() <span class="overload">[6/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::arithmeticAverage </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_data</em>, </td>
@@ -2361,6 +2263,305 @@ template&lt;typename T &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af6540dc8db6193a32c989936f8b47da1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6540dc8db6193a32c989936f8b47da1">&#9670;&nbsp;</a></span>average() <span class="overload">[1/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::average </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_average</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Average down on specific realm and phase. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_average</td><td>Averaging method </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa07eed6758ee76431667b3832f36b966"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa07eed6758ee76431667b3832f36b966">&#9670;&nbsp;</a></span>average() <span class="overload">[2/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::average </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_average</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_variables</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Average down on specific realm and phase. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables to average </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_average</td><td>Averaging method </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1459b80feff30769ea928f10907fcc89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1459b80feff30769ea928f10907fcc89">&#9670;&nbsp;</a></span>average() <span class="overload">[3/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::average </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_average</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Average down on specific realm and phase. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_average</td><td>Averaging method </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="acc3a4063ef5b08f363743daa70496b45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc3a4063ef5b08f363743daa70496b45">&#9670;&nbsp;</a></span>average() <span class="overload">[4/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::average </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_average</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Average down on specific realm and phase. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_average</td><td>Averaging method </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac9db6f208842207e02524d7cc61d0961"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9db6f208842207e02524d7cc61d0961">&#9670;&nbsp;</a></span>average() <span class="overload">[5/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::average </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_average</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Average multifluid data over a specified realm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_average</td><td>Averaging method </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a35796165052eb306d772d0471eca391b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35796165052eb306d772d0471eca391b">&#9670;&nbsp;</a></span>average() <span class="overload">[6/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::average </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_average</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Average multifluid data over a specified realm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_average</td><td>Averaging method </td></tr>
   </table>
   </dd>
 </dl>
@@ -2681,8 +2882,147 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a98b8fbe0d89c469fc570eaafe760f84f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a98b8fbe0d89c469fc570eaafe760f84f">&#9670;&nbsp;</a></span>conservativeAverage()</h2>
+<a id="aae69d99efb79d91bbf8ddfa33b61ab0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae69d99efb79d91bbf8ddfa33b61ab0f">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[1/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::conservativeAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Conseratively average data. Does all components. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a0bd84b6a06ba937f38448a89a3f6882b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bd84b6a06ba937f38448a89a3f6882b">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[2/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::conservativeAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_variables</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Conseratively average data. Does all components. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af32fe0c1d230d0a0dadee647d7d2730b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af32fe0c1d230d0a0dadee647d7d2730b">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[3/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::conservativeAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Average down on specific realm and phase. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae9ebca4c73310fecee761a9f74b8fe01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9ebca4c73310fecee761a9f74b8fe01">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[4/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2708,17 +3048,91 @@ template&lt;typename T &gt; </div>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Do conservative coarsening for data defined on cut-cells. </p>
+<p>Conservative averaging on specific realm and phase. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a53b3f8d395e81592ba629ebc11b9141e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53b3f8d395e81592ba629ebc11b9141e">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[5/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::conservativeAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Conservative coarsening of multifluid data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aabe7ab07b30103513af9784864aba639"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabe7ab07b30103513af9784864aba639">&#9670;&nbsp;</a></span>conservativeAverage() <span class="overload">[6/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::conservativeAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Average down multifluid data over a realm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
   </table>
   </dd>
 </dl>
@@ -4006,6 +4420,263 @@ template&lt;class P , RealVect(P::*)() const particleVectorField&gt; </div>
 
 <p>Get vof iterators for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase. This has the capability of iterating through cut-cells. </p>
 <p>Not const because we need to reset the vofiterator </p>
+
+</div>
+</div>
+<a id="a4b49e5fa25c6a4bb059a6c3e25b1c078"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b49e5fa25c6a4bb059a6c3e25b1c078">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[1/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::harmonicAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Harmonic average of data. Does all components. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="adb3e29a7ec2d7e88c8ba7410e1fda2ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb3e29a7ec2d7e88c8ba7410e1fda2ea">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[2/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::harmonicAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_variables</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Harmonic average of data. Does all components. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a00b2fdcbb8c36d6ccd8e6b836980ab3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00b2fdcbb8c36d6ccd8e6b836980ab3c">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[3/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::harmonicAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Average down on specific realm and phase. </p>
+<p>This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be average. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a259cb2f2336f091eeb1955b7c525a040"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a259cb2f2336f091eeb1955b7c525a040">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[4/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::harmonicAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const phase::which_phase&#160;</td>
+          <td class="paramname"><em>a_phase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Harmonic average on specific realm and phase. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a186c852306b0260ad0637599217ea035"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a186c852306b0260ad0637599217ea035">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[5/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::harmonicAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Harmonic coarsening of multifluid data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae4e9d87d1e36b48c25847153b44b2db2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4e9d87d1e36b48c25847153b44b2db2">&#9670;&nbsp;</a></span>harmonicAverage() <span class="overload">[6/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::harmonicAverage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Average multifluid data over a realm. </p>
+<p>This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_data</td><td>Data to be coarsened. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

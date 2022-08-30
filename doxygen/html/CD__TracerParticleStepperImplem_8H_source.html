@@ -474,7 +474,7 @@ $(function() {
 <div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160; </div>
 <div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;  <a class="code" href="classDataOps.html#a4429514331ff31eb2f7a0bfb896884e3">DataOps::setValue</a>(m_velocity, velFunc, m_amr-&gt;getProbLo(), m_amr-&gt;getDx());</div>
 <div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160; </div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;  m_amr-&gt;averageDown(m_velocity, m_realm, m_phase);</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;  m_amr-&gt;conservativeAverage(m_velocity, m_realm, m_phase);</div>
 <div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;  m_amr-&gt;interpGhost(m_velocity, m_realm, m_phase);</div>
 <div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;}</div>
 <div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160; </div>

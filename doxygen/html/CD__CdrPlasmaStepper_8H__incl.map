@@ -36,7 +36,7 @@
 <area shape="rect" id="node30" title=" " alt="" coords="2540,319,2687,345"/>
 <area shape="rect" id="node31" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="2522,393,2662,420"/>
 <area shape="rect" id="node32" href="$CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="2109,475,2286,502"/>
-<area shape="rect" id="node33" href="$CD__EbCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="3389,475,3521,502"/>
+<area shape="rect" id="node33" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="3388,475,3521,502"/>
 <area shape="rect" id="node34" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="3041,319,3204,345"/>
 <area shape="rect" id="node35" href="$CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="2989,393,3147,420"/>
 <area shape="rect" id="node36" href="$CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="2303,393,2447,420"/>

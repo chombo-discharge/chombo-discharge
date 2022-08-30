@@ -91,24 +91,21 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a431748ec65eb6252e0c8d5dcd380d858"><td class="memTemplItemLeft" align="right" valign="top">static int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classDataOps.html#a431748ec65eb6252e0c8d5dcd380d858">sgn</a> (const T a_value)</td></tr>
 <tr class="memdesc:a431748ec65eb6252e0c8d5dcd380d858"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sign function. Returns +/- if the value is &gt; 0 or &lt; 0.  <a href="classDataOps.html#a431748ec65eb6252e0c8d5dcd380d858">More...</a><br /></td></tr>
 <tr class="separator:a431748ec65eb6252e0c8d5dcd380d858"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef3f9ac8d8318178e671237eba94bbde"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#aef3f9ac8d8318178e671237eba94bbde">averageCellVectorToFaceScalar</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_faceData, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_cellData, const Vector&lt; ProblemDomain &gt; &amp;a_domains)</td></tr>
-<tr class="memdesc:aef3f9ac8d8318178e671237eba94bbde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine which computes the average of a cell-centered quantity on faces for the normal component only.  <a href="classDataOps.html#aef3f9ac8d8318178e671237eba94bbde">More...</a><br /></td></tr>
-<tr class="separator:aef3f9ac8d8318178e671237eba94bbde"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8113496dc1ba10ef1861ea020caf5fe6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a8113496dc1ba10ef1861ea020caf5fe6">averageCellVectorToFaceScalar</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_faceData, const LevelData&lt; EBCellFAB &gt; &amp;a_cellData, const ProblemDomain &amp;a_domain)</td></tr>
-<tr class="memdesc:a8113496dc1ba10ef1861ea020caf5fe6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine which computes the average of a cell-centered quantity on faces for the normal component only.  <a href="classDataOps.html#a8113496dc1ba10ef1861ea020caf5fe6">More...</a><br /></td></tr>
-<tr class="separator:a8113496dc1ba10ef1861ea020caf5fe6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a64b434b7fed5196f6aab0c09f8a79271"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a64b434b7fed5196f6aab0c09f8a79271">averageCellScalarToFaceScalar</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_faceData, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_cellData, const Vector&lt; ProblemDomain &gt; &amp;a_domains)</td></tr>
-<tr class="memdesc:a64b434b7fed5196f6aab0c09f8a79271"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face.  <a href="classDataOps.html#a64b434b7fed5196f6aab0c09f8a79271">More...</a><br /></td></tr>
-<tr class="separator:a64b434b7fed5196f6aab0c09f8a79271"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ed739c02d09870f9b13724bdabdb98e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a5ed739c02d09870f9b13724bdabdb98e">averageCellScalarToFaceScalar</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_faceData, const LevelData&lt; EBCellFAB &gt; &amp;a_cellData, const ProblemDomain &amp;a_domain)</td></tr>
-<tr class="memdesc:a5ed739c02d09870f9b13724bdabdb98e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face.  <a href="classDataOps.html#a5ed739c02d09870f9b13724bdabdb98e">More...</a><br /></td></tr>
-<tr class="separator:a5ed739c02d09870f9b13724bdabdb98e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0125dcf3865e53b410f74962034ce91f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a0125dcf3865e53b410f74962034ce91f">averageCellVelocityToFaceVelocity</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_faceData, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_cellData, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_tanGhosts)</td></tr>
+<tr class="memdesc:a0125dcf3865e53b410f74962034ce91f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine which computes the average of a cell-centered quantity on faces for the normal component only.  <a href="classDataOps.html#a0125dcf3865e53b410f74962034ce91f">More...</a><br /></td></tr>
+<tr class="separator:a0125dcf3865e53b410f74962034ce91f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0a305958f894d18dedbf15f4a08469f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ad0a305958f894d18dedbf15f4a08469f">averageCellVelocityToFaceVelocity</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_faceData, const LevelData&lt; EBCellFAB &gt; &amp;a_cellData, const ProblemDomain &amp;a_domain, const int a_tanGhosts)</td></tr>
+<tr class="memdesc:ad0a305958f894d18dedbf15f4a08469f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine which computes the average of a cell-centered quantity on faces for the normal component only.  <a href="classDataOps.html#ad0a305958f894d18dedbf15f4a08469f">More...</a><br /></td></tr>
+<tr class="separator:ad0a305958f894d18dedbf15f4a08469f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6e607a3cb21f0528af1d61cc9d29bda"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#af6e607a3cb21f0528af1d61cc9d29bda">averageCellToFace</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_faceData, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_cellData, const Vector&lt; ProblemDomain &gt; &amp;a_domains)</td></tr>
 <tr class="memdesc:af6e607a3cb21f0528af1d61cc9d29bda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average all components of the cell-centered data to faces.  <a href="classDataOps.html#af6e607a3cb21f0528af1d61cc9d29bda">More...</a><br /></td></tr>
 <tr class="separator:af6e607a3cb21f0528af1d61cc9d29bda"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acccfdf8df1ff190eb9f50eccefd948c4"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#acccfdf8df1ff190eb9f50eccefd948c4">averageCellToFace</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_faceData, const LevelData&lt; EBCellFAB &gt; &amp;a_cellData, const ProblemDomain &amp;a_domain)</td></tr>
-<tr class="memdesc:acccfdf8df1ff190eb9f50eccefd948c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average all components of the cell-centered data to faces.  <a href="classDataOps.html#acccfdf8df1ff190eb9f50eccefd948c4">More...</a><br /></td></tr>
-<tr class="separator:acccfdf8df1ff190eb9f50eccefd948c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1b238b21e8f218986e9214a2af25227"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ad1b238b21e8f218986e9214a2af25227">averageCellToFace</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_faceData, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_cellData, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const int a_tanGhosts, const Interval &amp;a_faceVars, const Interval &amp;a_cellVars, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average)</td></tr>
+<tr class="memdesc:ad1b238b21e8f218986e9214a2af25227"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine which averages a cell-centered component to faces.  <a href="classDataOps.html#ad1b238b21e8f218986e9214a2af25227">More...</a><br /></td></tr>
+<tr class="separator:ad1b238b21e8f218986e9214a2af25227"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac639022efff04463bb98209dad057c65"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ac639022efff04463bb98209dad057c65">averageCellToFace</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_faceData, const LevelData&lt; EBCellFAB &gt; &amp;a_cellData, const ProblemDomain &amp;a_domain, const int a_tanGhosts, const Interval &amp;a_faceVars, const Interval &amp;a_cellVars, const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;a_average)</td></tr>
+<tr class="memdesc:ac639022efff04463bb98209dad057c65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine which averages a cell-centered component to faces.  <a href="classDataOps.html#ac639022efff04463bb98209dad057c65">More...</a><br /></td></tr>
+<tr class="separator:ac639022efff04463bb98209dad057c65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c8a8a9e9723b81eb87b5a4a952ca9de"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a0c8a8a9e9723b81eb87b5a4a952ca9de">averageFaceToCell</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_cellData, const <a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_fluxData, const Vector&lt; ProblemDomain &gt; &amp;a_domains)</td></tr>
 <tr class="memdesc:a0c8a8a9e9723b81eb87b5a4a952ca9de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average all components of face centered data to cell centers.  <a href="classDataOps.html#a0c8a8a9e9723b81eb87b5a4a952ca9de">More...</a><br /></td></tr>
 <tr class="separator:a0c8a8a9e9723b81eb87b5a4a952ca9de"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -524,114 +521,8 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a64b434b7fed5196f6aab0c09f8a79271"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a64b434b7fed5196f6aab0c09f8a79271">&#9670;&nbsp;</a></span>averageCellScalarToFaceScalar() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void DataOps::averageCellScalarToFaceScalar </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_faceData</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_cellData</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; ProblemDomain &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_domains</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_faceData</td><td>Face data. Must have one component. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellData</td><td>Cell data. Must have one component. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_domains</td><td>AMR domains. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>This routine also fills one tangential ghost face. </dd></dl>
-
-</div>
-</div>
-<a id="a5ed739c02d09870f9b13724bdabdb98e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5ed739c02d09870f9b13724bdabdb98e">&#9670;&nbsp;</a></span>averageCellScalarToFaceScalar() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void DataOps::averageCellScalarToFaceScalar </td>
-          <td>(</td>
-          <td class="paramtype">LevelData&lt; EBFluxFAB &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_faceData</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_cellData</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
-          <td class="paramname"><em>a_domain</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_faceData</td><td>Face data. Must have one component. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellData</td><td>Cell data. Must have one component. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Problem domain </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>This routine also fills one tangential ghost face. </dd></dl>
-
-</div>
-</div>
 <a id="af6e607a3cb21f0528af1d61cc9d29bda"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af6e607a3cb21f0528af1d61cc9d29bda">&#9670;&nbsp;</a></span>averageCellToFace() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#af6e607a3cb21f0528af1d61cc9d29bda">&#9670;&nbsp;</a></span>averageCellToFace() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -671,7 +562,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Average all components of the cell-centered data to faces. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Calls the other version; uses arihtmetic averaging and does not fill ghost faces. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_faceData</td><td>Face data. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellData</td><td>Cell data. </td></tr>
@@ -679,12 +570,92 @@ Static Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>This does not fill "tangential" ghost faces (unlike averageCellVectorToFaceScalar). </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This does not fill "tangential" ghost faces. </dd></dl>
 
 </div>
 </div>
-<a id="acccfdf8df1ff190eb9f50eccefd948c4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acccfdf8df1ff190eb9f50eccefd948c4">&#9670;&nbsp;</a></span>averageCellToFace() <span class="overload">[2/2]</span></h2>
+<a id="ad1b238b21e8f218986e9214a2af25227"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1b238b21e8f218986e9214a2af25227">&#9670;&nbsp;</a></span>averageCellToFace() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::averageCellToFace </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_faceData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; ProblemDomain &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_domains</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_tanGhosts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_faceVars</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_cellVars</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_average</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Routine which averages a cell-centered component to faces. </p>
+<p>User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z- directions. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_faceData</td><td>Face data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellData</td><td>Cell data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Problem domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tanGhost</td><td>Number of ghost faces to fill </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_faceVars</td><td>Face variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellVars</td><td>Cell variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_average</td><td>Averaging method </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac639022efff04463bb98209dad057c65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac639022efff04463bb98209dad057c65">&#9670;&nbsp;</a></span>averageCellToFace() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -708,7 +679,31 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const ProblemDomain &amp;&#160;</td>
-          <td class="paramname"><em>a_domain</em>&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_tanGhosts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_faceVars</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_cellVars</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__Average_8H.html#ad98181732ac62b1b3b276f48772349c4">Average</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_average</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -723,21 +718,24 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Average all components of the cell-centered data to faces. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Routine which averages a cell-centered component to faces. </p>
+<p>User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z- directions. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_faceData</td><td>Face data. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellData</td><td>Cell data. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Problem domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tanGhost</td><td>Number of ghost faces to fill </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_faceVars</td><td>Face variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellVars</td><td>Cell variables </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_average</td><td>Averaging method </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>This does not fill "tangential" ghost faces (unlike averageCellVectorToFaceScalar) </dd></dl>
 
 </div>
 </div>
-<a id="aef3f9ac8d8318178e671237eba94bbde"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef3f9ac8d8318178e671237eba94bbde">&#9670;&nbsp;</a></span>averageCellVectorToFaceScalar() <span class="overload">[1/2]</span></h2>
+<a id="a0125dcf3865e53b410f74962034ce91f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0125dcf3865e53b410f74962034ce91f">&#9670;&nbsp;</a></span>averageCellVelocityToFaceVelocity() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -746,7 +744,7 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void DataOps::averageCellVectorToFaceScalar </td>
+          <td class="memname">void DataOps::averageCellVelocityToFaceVelocity </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
           <td class="paramname"><em>a_faceData</em>, </td>
@@ -761,7 +759,13 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Vector&lt; ProblemDomain &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_domains</em>&#160;</td>
+          <td class="paramname"><em>a_domains</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_tanGhosts</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -782,15 +786,15 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_faceData</td><td>Face data. Must have one component. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellData</td><td>Cell data. Must have SpaceDim components. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domains</td><td>AMR domains. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tanGhost</td><td>Number of ghost faces to fill. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>This routine also fills one tangential ghost face. </dd></dl>
 
 </div>
 </div>
-<a id="a8113496dc1ba10ef1861ea020caf5fe6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8113496dc1ba10ef1861ea020caf5fe6">&#9670;&nbsp;</a></span>averageCellVectorToFaceScalar() <span class="overload">[2/2]</span></h2>
+<a id="ad0a305958f894d18dedbf15f4a08469f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0a305958f894d18dedbf15f4a08469f">&#9670;&nbsp;</a></span>averageCellVelocityToFaceVelocity() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -799,7 +803,7 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void DataOps::averageCellVectorToFaceScalar </td>
+          <td class="memname">void DataOps::averageCellVelocityToFaceVelocity </td>
           <td>(</td>
           <td class="paramtype">LevelData&lt; EBFluxFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_faceData</em>, </td>
@@ -814,7 +818,13 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const ProblemDomain &amp;&#160;</td>
-          <td class="paramname"><em>a_domain</em>&#160;</td>
+          <td class="paramname"><em>a_domain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_tanGhosts</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -835,10 +845,10 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_faceData</td><td>Face data. Must have one component. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellData</td><td>Cell data. Must have SpaceDim components. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Problem domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_tanGhost</td><td>Number of ghost faces to fill </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>This routine also fills one tangential ghost face. </dd></dl>
 
 </div>
 </div>
