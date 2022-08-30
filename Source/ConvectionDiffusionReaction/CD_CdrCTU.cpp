@@ -258,10 +258,13 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
   // centered slopes on both sides of the faces that we extrapolate to.
   for (int dir = 0; dir < SpaceDim; dir++) {
 
+    // Grown box
+    const Box grownBox = grow(a_cellBox, 1) & domainBox;
+
     // Computation box for regular kernel; we need slopes outside
     // the grid patch so grow the box by one, but don't include
     // boundary cells.
-    Box interiorCells = grow(a_cellBox, 1) & domainBox;
+    Box interiorCells = grownBox;
 
     interiorCells.shift(dir, -1);
     interiorCells &= domainBox;
@@ -272,15 +275,17 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     interiorCells.shift(dir, -1);
 
     // Boundary cells on the low/high sides.
-    const Box bndryLo = grow(a_cellBox, 1) & adjCellLo(domainBox, dir, -1);
-    const Box bndryHi = grow(a_cellBox, 1) & adjCellHi(domainBox, dir, -1);
+    Box bndryLo = adjCellLo(domainBox, dir, -1);
+    Box bndryHi = adjCellHi(domainBox, dir, -1);
+
+    bndryLo &= grownBox;
+    bndryHi &= grownBox;
 
     CH_assert(a_domain.contains(interiorCells));
     CH_assert(a_domain.contains(bndryLo));
     CH_assert(a_domain.contains(bndryHi));
 
     // Irregular kernel domain -- also does boundary cells if they are cut.
-    const Box        grownBox = grow(a_cellBox, 1) & domainBox;
     const IntVectSet irregIVS = ebisbox.getIrregIVS(grownBox);
     VoFIterator      vofit(irregIVS, ebgraph);
 
@@ -355,7 +360,22 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     }
     }
 
-    // Cut-cell kernel.
+    // Kernel for cells abutting the boundaries.
+    auto boundaryKernelLo = [&](const IntVect& iv) -> void {
+      CH_assert(a_domain.contains(iv));
+      CH_assert(a_domain.contains(iv + shift));
+
+      slopesReg(iv, dir) = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
+    };
+
+    auto boundaryKernelHi = [&](const IntVect& iv) -> void {
+      CH_assert(a_domain.contains(iv));
+      CH_assert(a_domain.contains(iv - shift));
+
+      slopesReg(iv, dir) = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
+    };
+
+    // Cut-cell kernel -- also does cut-cells on the boundary.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const IntVect iv = vof.gridIndex();
 
@@ -423,30 +443,10 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
       }
     };
 
-    // Kernel for cells abutting the boundaries.
-    auto boundaryKernelLo = [&](const IntVect& iv) -> void {
-      CH_assert(a_domain.contains(iv));
-      CH_assert(a_domain.contains(iv + shift));
-
-      slopesReg(iv, dir) = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
-    };
-    auto boundaryKernelHi = [&](const IntVect& iv) -> void {
-      CH_assert(a_domain.contains(iv));
-      CH_assert(a_domain.contains(iv - shift));
-
-      slopesReg(iv, dir) = phiReg(iv, m_comp) - phiReg(iv - shift, m_comp);
-    };
-
     // Apply the kernels. Beware of corrected slopes near the boundaries.
     BoxLoops::loop(interiorCells, regularKernel);
-
-    if (!bndryLo.isEmpty()) {
-      BoxLoops::loop(bndryLo, boundaryKernelLo);
-    }
-    if (!bndryLo.isEmpty()) {
-      BoxLoops::loop(bndryHi, boundaryKernelHi);
-    }
-
+    BoxLoops::loop(bndryLo, boundaryKernelLo);
+    BoxLoops::loop(bndryHi, boundaryKernelHi);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
