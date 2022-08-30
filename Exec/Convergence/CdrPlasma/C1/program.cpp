@@ -134,13 +134,8 @@ main(int argc, char* argv[])
       fineEBISL = amr->getEBISLayout("primal", phase::gas)[0];
 
       // Coarsen the fine-grid solution onto the coarse-grid layout
-      EBCoarAve aveOp(fineDBL,
-                      coarDBL,
-                      fineEBISL,
-                      coarEBISL,
-                      coarDomain,
-                      refRat,
-                      &(*(amr->getEBIndexSpace(phase::gas))));
+      EBCoarAve
+        aveOp(fineDBL, coarDBL, fineEBISL, coarEBISL, coarDomain, refRat, &(*(amr->getEBIndexSpace(phase::gas))));
       aveOp.averageData(*finePhi[0], *(*cdr->getPhis()[0])[0], Interval(0, 0), Average::Conservative);
 
       // Compute the error average(phi_fine) - coar_phi
