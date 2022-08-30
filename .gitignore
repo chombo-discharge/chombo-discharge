@@ -30,6 +30,7 @@
 **/*.o
 
 Exec/Examples/StreamerInception/Vessel/report.txt
+Exec/Examples/StreamerInception/ElectrodeRoughness/report.txt
 
 
 pout.*
