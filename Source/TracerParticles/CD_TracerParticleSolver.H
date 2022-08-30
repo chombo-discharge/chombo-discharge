@@ -117,7 +117,7 @@ public:
     @param[in] a_scale Volume scale or not. 
   */
   virtual void
-  setVolumeScale(const bool a_scale) noexcept;  
+  setVolumeScale(const bool a_scale) noexcept;
 
   /*!
     @brief Set the solver realm. 
@@ -304,7 +304,7 @@ protected:
   /*!
     @brief Deposition type when interpolating to particles.
   */
-  DepositionType m_interpolation;  
+  DepositionType m_interpolation;
 
   /*!
     @brief Coarse-fine deposition strategy. 

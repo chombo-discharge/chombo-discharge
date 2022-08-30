@@ -125,18 +125,18 @@ TracerParticleSolver<P>::parseDeposition()
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown coarse-fine deposition method requested.");
   }
- 
+
   // Interpolation type particle-mesh operations
   pp.get("interpolation", str);
   if (str == "ngp") {
     m_interpolation = DepositionType::NGP;
   }
   else if (str == "cic") {
-    m_interpolation = DepositionType::CIC;    
+    m_interpolation = DepositionType::CIC;
   }
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown interpolation method requested.");
-  } 
+  }
 
   pp.get("volume_scale", m_volumeScale);
 }

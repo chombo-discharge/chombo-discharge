@@ -36,7 +36,8 @@ namespace Physics {
     /*!
       @brief Mode for specifying whether the module is run statically or dynamically
     */
-    enum class Mode {
+    enum class Mode
+    {
       None,
       Static,
       Dynamic
@@ -291,7 +292,7 @@ namespace Physics {
 	@brief Get attachment coefficient
       */
       virtual const std::function<Real(const Real& E)>&
-      getEta() const noexcept;      
+      getEta() const noexcept;
 
       /*!
 	@brief Set the background ionization rate (e.g. from cosmic radiation etc). 
@@ -314,12 +315,11 @@ namespace Physics {
       getMode() const noexcept;
 
     protected:
-
       /*!
 	@brief Mode
       */
       Mode m_mode;
-      
+
       /*!
 	@brief Integration algorithm for K-value. 
       */
@@ -348,13 +348,13 @@ namespace Physics {
       /*!
 	@brief Negated electric field (= -E)
       */
-      EBAMRCellData m_electricFieldMinu;      
+      EBAMRCellData m_electricFieldMinu;
 
       /*!
 	@brief Inception integral values. 
 	@note Dynamic mode. 
       */
-      EBAMRCellData m_inceptionIntegral;      
+      EBAMRCellData m_inceptionIntegral;
 
       /*!
 	@brief Inception integral values.
@@ -450,26 +450,26 @@ namespace Physics {
 	@brief Voltage sweeps
 	@note Static mode
       */
-      std::vector<Real> m_voltageSweeps;      
+      std::vector<Real> m_voltageSweeps;
 
       /*!
 	@brief Integral factor for cumulative integration.
 	@details This is the integral_Vcr dne/dt * (1 - eta/alpha) dV + integral(j/e*dS)  stored at each time step. 
 	@note Only for dynamic mode. 
       */
-      std::vector<std::pair<Real, Real> > m_Rdot;
+      std::vector<std::pair<Real, Real>> m_Rdot;
 
       /*!
 	@brief Cumulative probability of breakdown by time t.
 	@details First parameter is time, second parameter is breakdown probability. 
       */
-      std::vector<std::pair<Real, Real> > m_inceptionProbability;
+      std::vector<std::pair<Real, Real>> m_inceptionProbability;
 
       /*!
 	@brief Critical volume at various time instances. 
 	@details First parameter is time, second parameter is the critical volume. 
       */
-      std::vector<std::pair<Real, Real> > m_criticalVolume;      
+      std::vector<std::pair<Real, Real>> m_criticalVolume;
 
       /*!
 	@brief Time step for dynamic mode
@@ -489,7 +489,7 @@ namespace Physics {
       /*!
 	@brief Minimum permitted time step
       */
-      Real m_minDt;      
+      Real m_minDt;
 
       /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)
@@ -529,12 +529,12 @@ namespace Physics {
       /*!
 	@brief Plot tracer particle solver or not. 
       */
-      bool m_plotTracer;            
+      bool m_plotTracer;
 
       /*!
 	@brief Plot negative ions or not
       */
-      bool m_plotNegativeIons;      
+      bool m_plotNegativeIons;
 
       /*!
 	@brief If true, plot the K-values
@@ -564,7 +564,7 @@ namespace Physics {
       /*!
 	@brief If true, plot eta
       */
-      bool m_plotEta;      
+      bool m_plotEta;
 
       /*!
 	@brief Time-dependent voltage
@@ -614,7 +614,7 @@ namespace Physics {
       /*!
 	@brief Attachment coefficient.
       */
-      std::function<Real(const Real& E)> m_eta;      
+      std::function<Real(const Real& E)> m_eta;
 
       /*!
 	@brief Background ionization rate expression.
@@ -659,7 +659,7 @@ namespace Physics {
 	@param[in] a_voltage Voltage multiplier
       */
       virtual void
-      computeInceptionIntegralDynamic(const Real& a_voltage) noexcept;      
+      computeInceptionIntegralDynamic(const Real& a_voltage) noexcept;
 
       /*!
 	@brief Integrate the inception integral using the Euler rule.
@@ -681,7 +681,8 @@ namespace Physics {
 	@param[in] a_dt      Time step. 
 	@note Only for dynamic runs. 
       */
-      virtual void advanceNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept;      
+      virtual void
+      advanceNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept;
 
       /*!
 	@brief Move negative ions using an Euler scheme. 
@@ -689,7 +690,8 @@ namespace Physics {
 	@param[in] a_dt      Time step. 
 	@note Only for dynamic runs. 
       */
-      virtual void advanceNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept;
+      virtual void
+      advanceNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept;
 
       /*!
 	@brief Move negative ions using Heun's method. 
@@ -697,13 +699,15 @@ namespace Physics {
 	@param[in] a_dt      Time step. 
 	@note Only for dynamic runs. 
       */
-      virtual void advanceNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept;      
+      virtual void
+      advanceNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept;
 
       /*!
 	@brief Compute integral_Vcr(dne/dt * (1 - eta/alpha) dV)
 	@param[in] a_voltage Voltage multiplier. 
       */
-      virtual Real computeRdot(const Real& a_voltage) const noexcept;
+      virtual Real
+      computeRdot(const Real& a_voltage) const noexcept;
 
       /*!
 	@brief Move particles back to their original position.
@@ -748,7 +752,9 @@ namespace Physics {
 	@note For plotting the emission rate in dynamic simulations. 
       */
       virtual void
-      evaluateFunction(EBAMRCellData& a_emissionRate, const Real& a_voltage, const std::function<Real(const Real E)>& a_func) const noexcept;      
+      evaluateFunction(EBAMRCellData&                           a_emissionRate,
+                       const Real&                              a_voltage,
+                       const std::function<Real(const Real E)>& a_func) const noexcept;
 
       /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage. 
@@ -777,7 +783,7 @@ namespace Physics {
 	@note Dynamic approach. 
       */
       virtual Real
-      computeCriticalVolumeDynamic() const noexcept;      
+      computeCriticalVolumeDynamic() const noexcept;
 
       /*!
 	@brief Compute time to first critical electron.
@@ -797,7 +803,7 @@ namespace Physics {
 	@note For dynamic runs. Called in the constructor. 
       */
       virtual void
-      writeReportDynamic() const noexcept;      
+      writeReportDynamic() const noexcept;
 
       /*!
 	@brief Write plot data for the 'static' mode
@@ -806,7 +812,9 @@ namespace Physics {
 	@param[inout] a_icomp             Starting component in a_output to begin at. 
       */
       virtual void
-      writePlotDataStatic(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const noexcept;
+      writePlotDataStatic(EBAMRCellData&       a_output,
+                          Vector<std::string>& a_plotVariableNames,
+                          int&                 a_icomp) const noexcept;
 
       /*!
 	@brief Write plot data for the 'static' mode
@@ -815,7 +823,9 @@ namespace Physics {
 	@param[inout] a_icomp             Starting component in a_output to begin at. 
       */
       virtual void
-      writePlotDataDynamic(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const noexcept;      
+      writePlotDataDynamic(EBAMRCellData&       a_output,
+                           Vector<std::string>& a_plotVariableNames,
+                           int&                 a_icomp) const noexcept;
 
       /*!
 	@brief Check if particle is outside grid boundaries

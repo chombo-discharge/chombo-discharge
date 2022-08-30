@@ -49,13 +49,9 @@ main(int argc, char* argv[])
   ionizationData.makeUniform(500);
   attachmentData.makeUniform(500);
 
-  auto alpha = [&](const Real& E) -> Real {
-    return ionizationData.getEntry<1>(E);
-  };
+  auto alpha = [&](const Real& E) -> Real { return ionizationData.getEntry<1>(E); };
 
-  auto eta = [&](const Real& E) -> Real {
-    return attachmentData.getEntry<1>(E);
-  };  
+  auto eta = [&](const Real& E) -> Real { return attachmentData.getEntry<1>(E); };
 
   // Set geometry and AMR
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new RoughSphere());
@@ -67,7 +63,7 @@ main(int argc, char* argv[])
     RefCountedPtr<StreamerInceptionTagger>(new StreamerInceptionTagger(amr, timestepper->getElectricField()));
 
   timestepper->setAlpha(alpha);
-  timestepper->setEta(eta);  
+  timestepper->setEta(eta);
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr));

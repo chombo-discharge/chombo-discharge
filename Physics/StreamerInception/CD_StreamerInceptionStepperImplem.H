@@ -63,7 +63,8 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   std::cout << "StreamerInceptionStepperImplem.H -- add alpha-tagging to inception tagger\n";
   std::cout << "StreamerInceptionStepperImplem.H -- fix curvature tagger\n";
   std::cout << "StreamerInceptionStepperImplem.H -- fix first electron comp for static mode => compute Rdot\n";
-  std::cout << "StreamerInceptionStepperImplem.H -- reports cannot be in destructor (because of Driver.geometry_only)\n";
+  std::cout
+    << "StreamerInceptionStepperImplem.H -- reports cannot be in destructor (because of Driver.geometry_only)\n";
 #endif
 }
 
@@ -1225,18 +1226,18 @@ StreamerInceptionStepper<P, F>::seedUniformParticles() noexcept
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-	  P p;
-	  p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-	  
+          P p;
+          p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+
           particles.add(p);
         }
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         if (validCells(vof.gridIndex())) {
-	  P p;
-	  p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-	  
+          P p;
+          p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+
           particles.add(p);
         }
       };
@@ -1313,9 +1314,9 @@ StreamerInceptionStepper<P, F>::seedIonizationParticles(const Real& a_voltage) n
             const Real eta   = m_eta(E);
 
             if (alpha > eta) {
-	      P p;
-	      p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-	      
+              P p;
+              p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+
               particles.add(p);
             }
           }
@@ -1336,9 +1337,9 @@ StreamerInceptionStepper<P, F>::seedIonizationParticles(const Real& a_voltage) n
             const Real eta   = m_eta(E);
 
             if (alpha > eta) {
-	      P p;
+              P p;
               p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-	      
+
               particles.add(p);
             }
           }
