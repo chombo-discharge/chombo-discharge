@@ -946,8 +946,8 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
             break;
           }
           case CdrDomainBC::BcType::Solver: {
-	    // Don't do anything beacuse the solver will have filled the flux already.
-	    
+            // Don't do anything beacuse the solver will have filled the flux already.
+
             break;
           }
           default: {
