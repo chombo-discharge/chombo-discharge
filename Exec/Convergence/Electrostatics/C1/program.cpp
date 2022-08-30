@@ -99,9 +99,8 @@ main(int argc, char* argv[])
                       coarEBISL,
                       coarDomain,
                       refRat,
-                      nComp,
                       &(*(amr->getEBIndexSpace(phase::gas))));
-      aveOp.average(*finePhi[0], *(amr->alias(phase::gas, timestepper->getPotential()))[0], Interval(0, 0));
+      aveOp.averageData(*finePhi[0], *(amr->alias(phase::gas, timestepper->getPotential()))[0], Interval(0, 0), Average::Conservative);
 
       // Compute the error average(phi_fine) - coar_phi
       DataOps::incr(finePhi, coarPhi, -1.0);
