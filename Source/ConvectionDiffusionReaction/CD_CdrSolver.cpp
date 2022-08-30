@@ -740,78 +740,52 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
         const BaseFab<Real>& regVelFace  = velFace.getSingleValuedFAB();
         const BaseFab<Real>& regDcoFace  = dcoFace.getSingleValuedFAB();
 
+        // Compute advective flux
+        fluxFace.setVal(0.0, m_comp);
+        fluxFace += phiFace;
+        fluxFace *= velFace;
+
         const Box grownBox = grow(cellBox, 1) & domain;
 
-
-        // Only want interior faces -- the domain flux will be set to zero (what else would it be...?). Anyways, recall that
-        // the cut-cell face centroid fluxes are interpolated between face centers. So, if a face at the edge of a patch is cut
-        // by the EB, the interpolant will reach out of the patch. Thus, we must fill the flux for the tangential ghost faces
-        // outside the grid patch.
+        // When setting the diffusion flux we only do the interior faces (no diffusion flux across boundary faces). But
+        // note that we need to fill fluxes also in the "ghost faces" because when computing the divergence we will
+        // interpolate fluxes to centroids.
         Box interiorCells = cellBox;
         interiorCells.grow(1);
         interiorCells &= domain;
         interiorCells.grow(dir, -1);
 
-        // Boundary cells on low/high ends
-        Box bndryCellsLo = adjCellLo(domain, dir, -1);
-        Box bndryCellsHi = adjCellHi(domain, dir, -1);
-
-        bndryCellsLo &= grownBox;
-        bndryCellsHi &= grownBox;
-
         // These are the "regions" for the regular and cut-cell kernels.
-        const Box    interiorFaces = surroundingNodes(interiorCells, dir);
-        FaceIterator faceit(ebisbox.getIrregIVS(grownBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
+        const Box    interiorFaces = surroundingNodes(grownBox, dir);
+        FaceIterator faceit(ebisbox.getIrregIVS(grownBox), ebgraph, dir, FaceStop::SurroundingNoBoundary);
 
         // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
         // iv, and the cell at the low side is at iv - BASISV(dir).
         auto interiorKernel = [&](const IntVect& iv) -> void {
-          regFluxFace(iv, m_comp) =
-            regPhiFace(iv, m_comp) * regVelFace(iv, m_comp) -
-            idx * regDcoFace(iv, m_comp) * (regPhiCell(iv, m_comp) - regPhiCell(iv - BASISV(dir), m_comp));
-        };
+          Real&       faceFlux  = regFluxFace(iv, m_comp);
+          const Real& cellPhiLo = regPhiCell(iv - BASISV(dir), m_comp);
+          const Real& cellPhiHi = regPhiCell(iv, m_comp);
+          const Real& faceDco   = regDcoFace(iv, m_comp);
 
-        // Kernel for cells abutting the boundaries; note that the input box is a cell-centered
-        // box so that face has grid index iv just like the cell. The diffusion flux is turned
-        // off here.
-        auto boundaryKernelLo = [&](const IntVect& iv) -> void {
-          Real&       faceFlux = regFluxFace(iv, m_comp);
-          const Real& facePhi  = regPhiFace(iv, m_comp);
-          const Real& faceVel  = regVelFace(iv, m_comp);
-
-          faceFlux = facePhi * faceVel;
-        };
-
-        // Kernel for cells abutting the boundaries; note that the input box is a cell-centered
-        // box so that face has grid index iv + BASISV(dir). Diffusion across the domain edge is
-        // turned off here.
-        auto boundaryKernelHi = [&](const IntVect& iv) -> void {
-          Real&       faceFlux = regFluxFace(iv + BASISV(dir), m_comp);
-          const Real& facePhi  = regPhiFace(iv + BASISV(dir), m_comp);
-          const Real& faceVel  = regVelFace(iv + BASISV(dir), m_comp);
-
-          faceFlux = facePhi * faceVel;
+          faceFlux -= idx * faceDco * (cellPhiHi - cellPhiLo);
         };
 
         // Cut-cell kernel. Basically the same as the above but we need to explicity get vofs on the low/high side (because
         // we may have multi-cells but the above kernel only does single-valued cells).
         auto irregularKernel = [&](const FaceIndex& face) -> void {
-          if (face.isBoundary()) {
-            fluxFace(face, m_comp) = phiFace(face, m_comp) * velFace(face, m_comp);
-          }
-          else {
-            const VolIndex hiVoF = face.getVoF(Side::Hi);
-            const VolIndex loVoF = face.getVoF(Side::Lo);
+          const VolIndex hiVoF = face.getVoF(Side::Hi);
+          const VolIndex loVoF = face.getVoF(Side::Lo);
 
-            fluxFace(face, m_comp) = phiFace(face, m_comp) * velFace(face, m_comp) -
-                                     idx * dcoFace(face, m_comp) * (phiCell(hiVoF, m_comp) - phiCell(loVoF, m_comp));
-          }
+          Real&       faceFlux  = fluxFace(face, m_comp);
+          const Real& cellPhiLo = phiCell(loVoF, m_comp);
+          const Real& cellPhiHi = phiCell(hiVoF, m_comp);
+          const Real& faceDco   = dcoFace(face, m_comp);
+
+          fluxFace(face, m_comp) -= idx * faceDco * (cellPhiHi - cellPhiLo);
         };
 
         // Execute kernels.
         BoxLoops::loop(interiorFaces, interiorKernel);
-        BoxLoops::loop(bndryCellsLo, boundaryKernelHi);
-        BoxLoops::loop(bndryCellsHi, boundaryKernelHi);
         BoxLoops::loop(faceit, irregularKernel);
       }
     }
