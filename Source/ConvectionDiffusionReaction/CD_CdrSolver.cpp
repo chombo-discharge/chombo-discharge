@@ -747,16 +747,15 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
 
         const Box grownBox = grow(cellBox, 1) & domain;
 
-        // When setting the diffusion flux we only do the interior faces (no diffusion flux across boundary faces). But
+        // When adding the diffusion flux we only do the interior faces (no diffusion flux across boundary faces). But
         // note that we need to fill fluxes also in the "ghost faces" because when computing the divergence we will
         // interpolate fluxes to centroids.
-        Box interiorCells = cellBox;
-        interiorCells.grow(1);
-        interiorCells &= domain;
-        interiorCells.grow(dir, -1);
+        Box interiorFaces = cellBox;
+        interiorFaces.grow(1);
+        interiorFaces &= domain;
+        interiorFaces.grow(dir, -1);
+        interiorFaces.surroundingNodes(dir);
 
-        // These are the "regions" for the regular and cut-cell kernels.
-        const Box    interiorFaces = surroundingNodes(grownBox, dir);
         FaceIterator faceit(ebisbox.getIrregIVS(grownBox), ebgraph, dir, FaceStop::SurroundingNoBoundary);
 
         // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at

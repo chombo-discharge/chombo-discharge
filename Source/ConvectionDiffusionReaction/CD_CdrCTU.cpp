@@ -493,7 +493,6 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
 
     // Iteration space for the kernels. When upwinding we want to set phi on the faces, so the iteration space is defined
     // by the faces of this box (in direction dir).
-    //    const Box               faceBox    = surroundingNodes(a_cellBox, dir);
     const Vector<FaceIndex> irregFaces = ebgraph.getIrregFaces(a_cellBox, dir);
 
     // Interior faces.
@@ -573,8 +572,6 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
       Real primLeft = 0.0;
       Real primRigh = regStates(iv, m_comp) - 0.5 * std::min(1.0, 1.0 - regCellVel(iv, dir) * dtx) * regSlopes(iv, dir);
 
-      MayDay::Warning("CdrCTU -- missing tranverse term in boundary lo kernel");
-
       // Solve the Riemann problem.
       Real&       facePhi = regFacePhi(iv, m_comp);
       const Real& faceVel = regFaceVel(iv, m_comp);
@@ -599,8 +596,6 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
       Real primLeft = regStates(iv, m_comp) + 0.5 * std::min(1.0, 1.0 - regCellVel(iv, dir) * dtx) * regSlopes(iv, dir);
       Real primRigh = 0.0;
 
-      MayDay::Warning("CdrCTU -- missing tranverse term in boundary hi kernel");
-
       // Solve the Riemann problem.
       Real&       facePhi = regFacePhi(iv + BASISV(dir), m_comp);
       const Real& faceVel = regFaceVel(iv + BASISV(dir), m_comp);
@@ -619,10 +614,10 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     // Cut-cell kernel. Same as the above but we need to explicitly ensure that
     // we are getting the correct left/right vofs (cells might be multi-valued).
     auto irregularKernel = [&](const FaceIndex& face) -> void {
-      if (!face.isBoundary()) {
-        const VolIndex& vofLeft = face.getVoF(Side::Lo);
-        const VolIndex& vofRigh = face.getVoF(Side::Hi);
+      const VolIndex& vofLeft = face.getVoF(Side::Lo);
+      const VolIndex& vofRigh = face.getVoF(Side::Hi);
 
+      if (!face.isBoundary()) {
         CH_assert(a_domain.contains(vofLeft.gridIndex()));
         CH_assert(a_domain.contains(vofRigh.gridIndex()));
 
@@ -728,6 +723,18 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
         }
         else {
           facePhi(face, m_comp) = 0.0;
+        }
+      }
+      else {
+        // On the low/high boundary we don't have a characteristic coming into the domain so just set
+        // the flux to whatever. If the domain face is multi-valued then set the outgoing flux equal to
+        // the single-valued face flux.
+        if (a_domain.contains(vofRigh.gridIndex())) {
+          // Lo boundary face.
+          facePhi(face, m_comp) = regFacePhi(vofRigh.gridIndex());
+        }
+        if (a_domain.contains(vofLeft.gridIndex())) {
+          facePhi(face, m_comp) = regFacePhi(vofLeft.gridIndex() + BASISV(dir));
         }
       }
     };
