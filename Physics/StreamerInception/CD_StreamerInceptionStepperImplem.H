@@ -230,7 +230,7 @@ StreamerInceptionStepper<P, F>::initialData()
   DataOps::copy(m_electricFieldPlus, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
 
   m_amr->conservativeAverage(m_electricFieldPlus, m_realm, m_phase);
-  m_amr->conservativeAverage(m_electricFieldPlus, m_realm, m_phase);
+  m_amr->interpGhost(m_electricFieldPlus, m_realm, m_phase);
 
   m_amr->interpToCentroids(m_electricFieldPlus, m_realm, m_phase);
 
@@ -633,7 +633,7 @@ StreamerInceptionStepper<P, F>::writePlotDataStatic(EBAMRCellData&       a_outpu
     m_amr->allocate(eta, m_realm, m_phase, 1);
 
     for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-      this->evaluateFunction(eta, m_voltageSweeps[i], m_alpha);
+      this->evaluateFunction(eta, m_voltageSweeps[i], m_eta);
 
       m_amr->conservativeAverage(eta, m_realm, m_phase);
       m_amr->interpGhost(eta, m_realm, m_phase);
@@ -1256,7 +1256,6 @@ StreamerInceptionStepper<P, F>::seedUniformParticles() noexcept
         // back later on). The scalar<0> flag is the flag we use for start-stop criteria for the
         // particle integration.
         p.weight()           = 0.0;
-        p.template real<0>() = 1.0;
         p.template vect<0>() = p.position();
       }
     }
@@ -1304,17 +1303,16 @@ StreamerInceptionStepper<P, F>::seedIonizationParticles(const Real& a_voltage) n
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
 
-            // clang-format off
-				 const Real E = a_voltage * RealVect(D_DECL(electricFieldReg(iv, 0),
-									    electricFieldReg(iv, 1),
-									    electricFieldReg(iv, 2))).vectorLength();
-            // clang-format on
+            const RealVect EE =
+              RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+            const Real E = a_voltage * EE.vectorLength();
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
 
-            if (alpha > eta) {
+            if (alpha >= eta) {
               P p;
+
               p.position() = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
 
               particles.add(p);
@@ -1327,17 +1325,15 @@ StreamerInceptionStepper<P, F>::seedIonizationParticles(const Real& a_voltage) n
 
           if (validCells(iv, 0) && ebisbox.isIrregular(iv)) {
 
-            // clang-format off
-	    const Real E = a_voltage * RealVect(D_DECL(electricField(vof, 0),
-						       electricField(vof, 1),
-						       electricField(vof, 2))).vectorLength();
-            // clang-format on
+            const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+            const Real     E  = a_voltage * EE.vectorLength();
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
 
             if (alpha > eta) {
               P p;
+
               p.position() = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 
               particles.add(p);
@@ -1356,11 +1352,7 @@ StreamerInceptionStepper<P, F>::seedIonizationParticles(const Real& a_voltage) n
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
 
-        // Set mass to zero and do a backup of the initial position (we need to rewind particles
-        // back later on). The scalar<0> flag is the flag we use for start-stop criteria for the
-        // particle integration.
         p.weight()           = 0.0;
-        p.template real<0>() = 1.0;
         p.template vect<0>() = p.position();
       }
     }
@@ -1680,6 +1672,9 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
   m_tracerParticleSolver->remap();
   m_tracerParticleSolver->interpolateVelocities();
 
+  const size_t outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
+  const size_t particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
+
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
     // Euler integration.
@@ -1694,18 +1689,20 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-          const RealVect v        = p.velocity();
-          const Real     dt       = step / v.vectorLength();
-          const Real     alpha    = m_alpha(a_voltage * v.vectorLength());
-          const Real     eta      = m_eta(a_voltage * v.vectorLength());
+          const RealVect vel      = p.velocity();
+          const Real     v        = vel.vectorLength();
+          const Real     E        = a_voltage * v;
+          const Real     dt       = step / v;
+          const Real     alpha    = m_alpha(E);
+          const Real     eta      = m_eta(E);
           const Real     alphaEff = alpha - eta;
 
           // Update particle position
-          const RealVect newPos = p.position() + dt * v;
+          const RealVect newPos = p.position() + dt * vel;
 
           // Stop integration for particles that move into regions alpha < 0.0,
           // inside the EB or outside of the domain.
-          const bool negativeAlpha = (alphaEff <= 0.0);
+          const bool negativeAlpha = alphaEff < 0.0;
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
@@ -1730,6 +1727,16 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
   ParticleOps::copyDestructive(amrParticles, amrProcessedParticles);
 
   this->rewindTracerParticles();
+
+  const size_t outcastsAfter  = amrParticles.getNumberOfOutcastParticlesGlobal();
+  const size_t particlesAfter = amrParticles.getNumberOfValidParticlesGlobal();
+
+  if (particlesBefore != particlesAfter) {
+    MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - lost/gained particles!");
+  }
+  if (outcastsBefore != outcastsAfter) {
+    MayDay::Error("StreamerInceptionStepper::inceptionIntegrateEuler - lost/gained outcast particles!");
+  }
 }
 
 template <typename P, typename F>
@@ -2051,11 +2058,9 @@ StreamerInceptionStepper<P, F>::computeRdot(const Real& a_voltage) const noexcep
         if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
           if (inceptionIntegralReg(iv, 0) >= m_inceptionK) {
 
-            // clang-format off
-	    const Real E = a_voltage * RealVect(D_DECL(electricFieldReg(iv, 0),
-						       electricFieldReg(iv, 1),
-						       electricFieldReg(iv, 2))).vectorLength();
-            // clang-format on
+            const Real E =
+              a_voltage * RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)))
+                            .vectorLength();
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
@@ -2074,11 +2079,9 @@ StreamerInceptionStepper<P, F>::computeRdot(const Real& a_voltage) const noexcep
         if (ebisbox.isIrregular(iv) && validCells(iv, 0)) {
           if (inceptionIntegral(vof, 0) >= m_inceptionK) {
 
-            // clang-format off
-	    const Real E = a_voltage * RealVect(D_DECL(electricField(vof, 0),
-						       electricField(vof, 1),
-						       electricField(vof, 2))).vectorLength();
-            // clang-format on
+            const Real E =
+              a_voltage *
+              RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2))).vectorLength();
 
             const Real kappa    = ebisbox.volFrac(vof);
             const Real areaFrac = ebisbox.bndryArea(vof);
@@ -2145,8 +2148,7 @@ StreamerInceptionStepper<P, F>::resetTracerParticles() noexcept
       for (ListIterator<P> lit(amrParticles[lvl][dit()].listItems()); lit.ok(); ++lit) {
         P& p = lit();
 
-        p.weight()           = 0.0;
-        p.template real<0>() = 1.0;
+        p.weight() = 0.0;
       }
     }
   }
@@ -2173,11 +2175,8 @@ StreamerInceptionStepper<P, F>::computeBackgroundIonizationStatic() noexcept
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        // clang-format off
-        const Real E = RealVect(D_DECL(electricFieldReg(iv, 0),
-				       electricFieldReg(iv, 1),
-				       electricFieldReg(iv, 2))).vectorLength();
-        // clang-format on
+        const Real E =
+          RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2))).vectorLength();
 
         for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
           bgIonizationReg(iv, i) = m_backgroundRate(m_voltageSweeps[i] * E);
@@ -2185,11 +2184,8 @@ StreamerInceptionStepper<P, F>::computeBackgroundIonizationStatic() noexcept
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-        // clang-format off
-        const Real E = RealVect(D_DECL(electricField(vof, 0),
-				       electricField(vof, 1),
-				       electricField(vof, 2))).vectorLength();
-        // clang-format on
+        const Real E =
+          RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2))).vectorLength();
 
         for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
           bgIonization(vof, i) = m_backgroundRate(m_voltageSweeps[i] * E);
@@ -2291,14 +2287,11 @@ StreamerInceptionStepper<P, F>::computeFieldEmission(EBAMRCellData& a_emissionRa
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-        // clang-format off
-        const RealVect E = a_voltage * RealVect(D_DECL(electricField(vof, 0),
-						       electricField(vof, 1),
-						       electricField(vof, 2)));
-	// clang-format on. 
+        const RealVect E =
+          a_voltage * RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
 
         if (E.dotProduct(ebisbox.normal(vof)) > 0.0) {
-	  emission(vof, 0) = m_fieldEmission(E.vectorLength());
+          emission(vof, 0) = m_fieldEmission(E.vectorLength());
         }
       };
 
@@ -2311,7 +2304,10 @@ StreamerInceptionStepper<P, F>::computeFieldEmission(EBAMRCellData& a_emissionRa
 
 template <typename P, typename F>
 void
-StreamerInceptionStepper<P, F>::evaluateFunction(EBAMRCellData& a_data, const Real& a_voltage, const std::function<Real(const Real E)>& a_func) const noexcept {
+StreamerInceptionStepper<P, F>::evaluateFunction(EBAMRCellData&                           a_data,
+                                                 const Real&                              a_voltage,
+                                                 const std::function<Real(const Real E)>& a_func) const noexcept
+{
   CH_TIME("StreamerInceptionStepper::evaluateFunction");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::evaluateFunction" << endl;
@@ -2328,7 +2324,7 @@ StreamerInceptionStepper<P, F>::evaluateFunction(EBAMRCellData& a_data, const Re
 
       // Here, emissionPlus is when we have the standard voltage (V = 1) and
       // emissionMinu is when the voltage is reverted.
-      EBCellFAB& data = (*a_data[lvl])[dit()];
+      EBCellFAB& data    = (*a_data[lvl])[dit()];
       FArrayBox& dataReg = data.getFArrayBox();
 
       data.setVal(0.0);
@@ -2337,35 +2333,27 @@ StreamerInceptionStepper<P, F>::evaluateFunction(EBAMRCellData& a_data, const Re
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
+        const RealVect E =
+          a_voltage * RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
 
-	// clang-format off
-        const RealVect E = a_voltage * RealVect(D_DECL(electricFieldReg(iv, 0),
-						       electricFieldReg(iv, 1),
-						       electricFieldReg(iv, 2)));
-	// clang-format on. 
-
-	dataReg(iv, 0) = a_func(E.vectorLength());
-      };      
+        dataReg(iv, 0) = a_func(E.vectorLength());
+      };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const RealVect E =
+          a_voltage * RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
 
-	// clang-format off
-        const RealVect E = a_voltage * RealVect(D_DECL(electricField(vof, 0),
-						       electricField(vof, 1),
-						       electricField(vof, 2)));
-	// clang-format on. 
-
-	data(vof, 0) = a_func(E.vectorLength());
+        data(vof, 0) = a_func(E.vectorLength());
       };
 
       // Execute kernels
-      Box cellBox = dbl[dit()];
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      Box          cellBox = dbl[dit()];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
-      BoxLoops::loop(cellBox, regularKernel);      
+      BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
-  }  
+  }
 }
 
 template <typename P, typename F>
@@ -2592,34 +2580,34 @@ StreamerInceptionStepper<P, F>::computeCriticalVolumeDynamic() const noexcept
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    
+
     const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
 
-    const Real dx = m_amr->getDx()[lvl];
+    const Real dx  = m_amr->getDx()[lvl];
     const Real vol = std::pow(dx, SpaceDim);
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
       const EBISBox&       ebisbox    = ebisl[dit()];
       const BaseFab<bool>& validCells = validCellsLD[dit()];
 
-      const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
+      const EBCellFAB& inceptionIntegral    = (*m_inceptionIntegral[lvl])[dit()];
       const FArrayBox& inceptionIntegralReg = inceptionIntegral.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-			     if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-			       if(inceptionIntegralReg(iv, 0) >= m_inceptionK) {
-				 Vcr += vol;
-			       }
-			     }
-			   };
+        if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+          if (inceptionIntegralReg(iv, 0) >= m_inceptionK) {
+            Vcr += vol;
+          }
+        }
+      };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-			       if (validCells(vof.gridIndex())) {
-				 if (inceptionIntegral(vof, 0) >= m_inceptionK) {
-				   Vcr += ebisbox.volFrac(vof) * vol;
-				 }
-			       }
-			     };
+        if (validCells(vof.gridIndex())) {
+          if (inceptionIntegral(vof, 0) >= m_inceptionK) {
+            Vcr += ebisbox.volFrac(vof) * vol;
+          }
+        }
+      };
 
       // Kernel regions.
       const Box    cellBox = dbl[dit()];
@@ -2629,7 +2617,7 @@ StreamerInceptionStepper<P, F>::computeCriticalVolumeDynamic() const noexcept
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
-  
+
   return ParallelOps::sum(Vcr);
 }
 
@@ -2666,7 +2654,7 @@ StreamerInceptionStepper<P, F>::computeRdotStatic() noexcept
       const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
       const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
 
-      const FArrayBox& electricFieldReg         = electricField.getFArrayBox();      
+      const FArrayBox& electricFieldReg         = electricField.getFArrayBox();
       const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
       const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
 
@@ -2675,11 +2663,9 @@ StreamerInceptionStepper<P, F>::computeRdotStatic() noexcept
         if (validCells(iv) && ebisbox.isRegular(iv)) {
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
 
-	    // clang-format off
-	    const Real E = m_voltageSweeps[i] * RealVect(D_DECL(electricFieldReg(iv, 0),
-								electricFieldReg(iv, 1),
-								electricFieldReg(iv, 2))).vectorLength();
-            // clang-format on
+            const Real E = m_voltageSweeps[i] *
+                           RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)))
+                             .vectorLength();
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
@@ -2705,11 +2691,9 @@ StreamerInceptionStepper<P, F>::computeRdotStatic() noexcept
 
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
 
-            // clang-format off
-	    const Real E = m_voltageSweeps[i] * RealVect(D_DECL(electricField(vof, 0),
-								electricField(vof, 1),
-								electricField(vof, 2))).vectorLength();
-            // clang-format on
+            const Real E =
+              m_voltageSweeps[i] *
+              RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2))).vectorLength();
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
@@ -2735,11 +2719,8 @@ StreamerInceptionStepper<P, F>::computeRdotStatic() noexcept
 
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
 
-            // clang-format off
-	    const RealVect E = m_voltageSweeps[i] * RealVect(D_DECL(electricField(vof, 0),
-								    electricField(vof, 1),
-								    electricField(vof, 2)));
-            // clang-format on
+            const RealVect E = m_voltageSweeps[i] *
+                               RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
 
             if (E.dotProduct(ebisbox.normal(vof)) > 0.0) {
               if (inceptionIntegralMinu(vof, i) >= m_inceptionK) {

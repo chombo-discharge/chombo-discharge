@@ -613,13 +613,6 @@ protected:
   */
   void
   setupParticleData(const int a_base, const int a_finestLevel);
-
-  /*!
-    @brief Special remapping function in case particles have moved across more than one refinement level. Used
-    for getting those particles and putting them in the correct data holder. 
-  */
-  void
-  remapLostParticles();
 };
 
 #include <CD_NamespaceFooter.H>
