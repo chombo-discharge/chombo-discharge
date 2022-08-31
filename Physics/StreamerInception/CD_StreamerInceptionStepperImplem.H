@@ -1465,7 +1465,7 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage
 
             const RealVect EE =
               RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-            const Real E = a_voltage * EE.vectorLength();
+            const Real E = std::abs(a_voltage * EE.vectorLength());
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
@@ -1486,7 +1486,7 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage
           if (validCells(iv, 0) && ebisbox.isIrregular(iv)) {
 
             const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-            const Real     E  = a_voltage * EE.vectorLength();
+            const Real     E  = std::abs(a_voltage * EE.vectorLength());
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
@@ -1757,6 +1757,8 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
   const size_t outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
   const size_t particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
 
+  const Real sgn = (a_voltage > 0.0) - (a_voltage < 0.0);
+
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
     // Euler integration.
@@ -1771,9 +1773,9 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-          const RealVect vel      = p.velocity();
+          const RealVect vel      = sgn * p.velocity();
           const Real     v        = vel.vectorLength();
-          const Real     E        = a_voltage * v;
+          const Real     E        = std::abs(a_voltage * v);
           const Real     dt       = step / v;
           const Real     alpha    = m_alpha(E);
           const Real     eta      = m_eta(E);
@@ -1856,6 +1858,8 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
   m_tracerParticleSolver->remap();
   m_tracerParticleSolver->interpolateVelocities();
 
+  const Real sgn = (a_voltage > 0.0) - (a_voltage < 0.0);
+
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
     // Euler stage.
@@ -1870,10 +1874,11 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-          const RealVect v        = p.velocity();
+          const RealVect v        = sgn * p.velocity();
           const Real     dt       = step / v.vectorLength();
-          const Real     alpha    = m_alpha(a_voltage * v.vectorLength());
-          const Real     eta      = m_eta(a_voltage * v.vectorLength());
+          const Real     E        = std::abs(a_voltage * v.vectorLength());
+          const Real     alpha    = m_alpha(E);
+          const Real     eta      = m_eta(E);
           const Real     alphaEff = alpha - eta;
 
           // Storage alpha(p^k), v(p^k), and the step size.
@@ -1917,8 +1922,9 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
           P& p = lit();
 
           const Real     dt  = p.template real<1>();
-          const RealVect vk  = p.template vect<1>();
-          const RealVect vk1 = p.velocity();
+          const RealVect vk  = sgn * p.template vect<1>();
+          const RealVect vk1 = sgn * p.velocity();
+          const Real     E   = std::abs(a_voltage * vk1.vectorLength());
 
           // Note the weird subtraction since p.position() was updated
           // to p^k + dt * v^k.
@@ -1926,8 +1932,8 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
 
           // Compute new alpha.
           const Real alpha1 = p.template real<0>();
-          const Real alpha  = m_alpha(a_voltage * vk1.vectorLength());
-          const Real eta    = m_eta(a_voltage * vk1.vectorLength());
+          const Real alpha  = m_alpha(E);
+          const Real eta    = m_eta(E);
           const Real alpha2 = alpha - eta;
           const Real d      = 0.5 * dt * (vk + vk1).vectorLength();
 
@@ -2003,7 +2009,7 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
 
             const RealVect EE =
               RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-            const Real E = a_voltage * EE.vectorLength();
+            const Real E = std::abs(a_voltage * EE.vectorLength());
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
@@ -2024,7 +2030,7 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
           if (inceptionIntegral(vof, 0) >= m_inceptionK) {
 
             const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-            const Real     E  = a_voltage * EE.vectorLength();
+            const Real     E  = std::abs(a_voltage * EE.vectorLength());
 
             const Real kappa    = ebisbox.volFrac(vof);
             const Real areaFrac = ebisbox.bndryArea(vof);

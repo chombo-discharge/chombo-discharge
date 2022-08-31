@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -10E-2 -10E-2 0    # Low corner of problem domain
 AmrMesh.hi_corner        =  10E-2 10E-2 10E-2  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 64 64 32    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 4           # Maximum amr depth
+AmrMesh.max_amr_depth    = 3           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -163,9 +163,9 @@ Vessel.live_shroom   = false          # Mushroom is live or not
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
 StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation.
-StreamerInceptionStepper.mode          = dynamic                       # Mode (static or dynamic)
-StreamerInceptionStepper.inception_alg = trapz dx 0.25                 # Integration algorithm for inception integral.
-StreamerInceptionStepper.plt_vars      = K Uinc bg_rate emission ions  # Plot variables
+StreamerInceptionStepper.mode          = static                        # Mode (static or dynamic)
+StreamerInceptionStepper.inception_alg = euler dx 0.1                  # Integration algorithm for inception integral.
+StreamerInceptionStepper.plt_vars      = K Uinc bg_rate emission ions tracer # Plot variables
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 
 # Static mode
@@ -191,7 +191,7 @@ StreamerInceptionTagger.ref_alpha   = 5.0   # Refinement curvature criterion. Lo
 StreamerInceptionTagger.plot        = false # Plot tagging field or not. 
 
 # Parameters for lightning impulse (used for dynamic runs)
-impulse.voltage = 50E3
+impulse.voltage = -50E3
 impulse.start   = 1.E-9
 impulse.t1      = 50E-6
 impulse.t2      = 1.2E-6
