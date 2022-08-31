@@ -55,6 +55,8 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
   m_backgroundRate = [](const Real E) -> Real { return 0.0; };
 
+  m_detachmentRate = [](const Real E) -> Real { return 0.0; };
+
   m_fieldEmission = [](const Real E) -> Real { return 0.0; };
 
   m_initialIonDensity = [](const RealVect x) -> Real { return 0.0; };
@@ -63,6 +65,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
 #if 1 // To-do list.
   std::cout << "StreamerInceptionStepperImplem.H -- fix first electron comp for static mode => compute Rdot\n";
+  std::cout << "StreamerInceptionStepperImplem.H -- add ion detachment to rdot for dynamic mode\n";
   std::cout
     << "StreamerInceptionStepperImplem.H -- reports cannot be in destructor (because of Driver.geometry_only)\n";
 #endif
@@ -74,24 +77,6 @@ StreamerInceptionStepper<P, F, C>::~StreamerInceptionStepper()
   CH_TIME("StreamerInceptionStepper::~StreamerInceptionStepper");
   if (m_verbosity > 5) {
     pout() << "StreamerInceptionStepper::~StreamerInceptionStepper" << endl;
-  }
-
-  if (m_writeReport) {
-    switch (m_mode) {
-    case Mode::Static: {
-      this->writeReportStatic();
-
-      break;
-    }
-    case Mode::Dynamic: {
-      this->writeReportDynamic();
-
-      break;
-    }
-    default: {
-      break;
-    }
-    }
   }
 }
 
@@ -128,10 +113,7 @@ StreamerInceptionStepper<P, F, C>::setupSolvers()
   m_tracerParticleSolver->setName("Tracer particle solver");
   m_tracerParticleSolver->setVolumeScale(true);
 
-  // This one is needed for the dynamic runs which also track the ions.
-#if 0
-  if (m_mode == Mode::Dynamic) {
-#endif
+  // Instantiate the ion solver.
   m_ionSolver = RefCountedPtr<CdrSolver>(new C());
 
   m_ionSolver->parseOptions();
@@ -143,9 +125,6 @@ StreamerInceptionStepper<P, F, C>::setupSolvers()
   auto species = RefCountedPtr<CdrSpecies>(new StreamerInceptionSpecies(m_initialIonDensity, true, false));
 
   m_ionSolver->setSpecies(species);
-#if 0
-  }
-#endif
 }
 
 template <typename P, typename F, typename C>
@@ -266,10 +245,7 @@ StreamerInceptionStepper<P, F, C>::registerOperators()
 
   m_fieldSolver->registerOperators();
   m_tracerParticleSolver->registerOperators();
-
-  if (m_mode == Mode::Dynamic) {
-    m_ionSolver->registerOperators();
-  }
+  m_ionSolver->registerOperators();
 }
 
 template <typename P, typename F, typename C>
@@ -924,6 +900,8 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
 
     m_maxK.emplace_back(m_time + a_dt, maxK);
+
+    this->writeReportDynamic();
   }
   else {
     MayDay::Error("StreamerInceptionStepper::advance -- must have 'StreamerInceptionStepper.mode = dynamic'");
@@ -1019,10 +997,7 @@ StreamerInceptionStepper<P, F, C>::synchronizeSolverTimes(const int a_step, cons
 
   m_fieldSolver->setTime(a_step, a_time, a_dt);
   m_tracerParticleSolver->setTime(a_step, a_time, a_dt);
-
-  if (m_mode == Mode::Dynamic) {
-    m_ionSolver->setTime(a_step, a_time, a_dt);
-  }
+  m_ionSolver->setTime(a_step, a_time, a_dt);
 }
 
 template <typename P, typename F, typename C>
@@ -1244,6 +1219,19 @@ StreamerInceptionStepper<P, F, C>::setBackgroundRate(
 
 template <typename P, typename F, typename C>
 void
+StreamerInceptionStepper<P, F, C>::setDetachmentRate(
+  const std::function<Real(const Real& E)>& a_detachmentRate) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setDetachmentRate");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setDetachmentRate" << endl;
+  }
+
+  m_detachmentRate = a_detachmentRate;
+}
+
+template <typename P, typename F, typename C>
+void
 StreamerInceptionStepper<P, F, C>::setFieldEmission(const std::function<Real(const Real& E)>& a_currentDensity) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setFieldEmission");
@@ -1433,6 +1421,10 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     pout() << "StreamerInceptionStepper::postInitialize" << endl;
   }
 
+  // Initialize the negative ion solver
+  m_ionSolver->initialData();
+  this->setIonVelocity(m_voltageCurve(m_time));
+
   switch (m_mode) {
   case Mode::Static: {
 
@@ -1450,6 +1442,8 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
       this->computeFieldEmissionStatic();
     }
 
+    this->writeReportStatic();
+
     break;
   }
   case Mode::Dynamic: {
@@ -1457,10 +1451,6 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     // Seed tracer particles and set velocity
     this->seedIonizationParticles(m_voltageCurve(m_time));
     m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
-
-    // Initialize the negative ion solver
-    m_ionSolver->initialData();
-    this->setIonVelocity(m_voltageCurve(m_time));
 
     // Compute the 'Rdot' value at current time (which is probably t = 0).
     this->computeInceptionIntegralDynamic(m_voltageCurve(m_time));
@@ -1893,9 +1883,11 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
       const EBCellFAB& electricField     = (*m_electricFieldPlus[lvl])[dit()];
       const EBCellFAB& inceptionIntegral = (*m_inceptionIntegral[lvl])[dit()];
       const EBCellFAB& fieldEmission     = (*m_emissionRate[lvl])[dit()];
+      const EBCellFAB& ionDensity        = (*m_ionSolver->getPhi()[lvl])[dit()];
 
       const FArrayBox& electricFieldReg     = electricField.getFArrayBox();
       const FArrayBox& inceptionIntegralReg = inceptionIntegral.getFArrayBox();
+      const FArrayBox& ionDensityReg        = ionDensity.getFArrayBox();
 
       // Add contribution from background ionization in regular cells.
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -1908,7 +1900,8 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
-            const Real dndt  = m_backgroundRate(E);
+            const Real k     = m_detachmentRate(E);
+            const Real dndt  = m_backgroundRate(E) + k * ionDensityReg(iv, 0);
 
             CH_assert(alpha >= eta);
 
@@ -1930,8 +1923,9 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
             const Real areaFrac = ebisbox.bndryArea(vof);
             const Real alpha    = m_alpha(E);
             const Real eta      = m_eta(E);
+            const Real k        = m_detachmentRate(E);
             const Real j        = m_fieldEmission(E);
-            const Real dndt     = m_backgroundRate(E);
+            const Real dndt     = m_backgroundRate(E) + k * ionDensity(vof, 0);
 
             Rdot += dndt * (1.0 - eta / alpha) * kappa * vol;
             Rdot += j / Units::Qe * areaFrac * area;
@@ -2496,13 +2490,15 @@ StreamerInceptionStepper<P, F, C>::computeRdotStatic() noexcept
       const EBCellFAB& electricField         = (*m_electricFieldPlus[lvl])[dit()];
       const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[dit()];
       const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[dit()];
+      const EBCellFAB& ionDensity            = (*m_ionSolver->getPhi()[lvl])[dit()];
 
       const FArrayBox& electricFieldReg         = electricField.getFArrayBox();
       const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
       const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
+      const FArrayBox& ionDensityReg            = ionDensity.getFArrayBox();
 
-      // Background ionization kernel for regular cells.
-      auto backgroundRegularKernel = [&](const IntVect& iv) -> void {
+      // Regular kernel for background ionization plus detachment from negative ions.
+      auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv) && ebisbox.isRegular(iv)) {
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
 
@@ -2512,7 +2508,8 @@ StreamerInceptionStepper<P, F, C>::computeRdotStatic() noexcept
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
-            const Real dndt  = m_backgroundRate(E);
+            const Real k     = m_detachmentRate(E);
+            const Real dndt  = m_backgroundRate(E) + k * ionDensityReg(iv, 0);
 
             // Add background ionization rate.
             if (inceptionIntegralPlusReg(iv, i) >= m_inceptionK) {
@@ -2526,8 +2523,8 @@ StreamerInceptionStepper<P, F, C>::computeRdotStatic() noexcept
         }
       };
 
-      // Background ionization kernel for irregular cells.
-      auto backgroundIrregularKernel = [&](const VolIndex& vof) -> void {
+      // Irregular kernel for background ionization + detachment from negative ions.
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
         const IntVect iv = vof.gridIndex();
         if (validCells(iv, 0)) {
           const Real volFrac = ebisbox.volFrac(vof);
@@ -2540,7 +2537,8 @@ StreamerInceptionStepper<P, F, C>::computeRdotStatic() noexcept
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
-            const Real dndt  = m_backgroundRate(E);
+            const Real k     = m_detachmentRate(E);
+            const Real dndt  = m_backgroundRate(E) + k * ionDensity(vof, 0);
 
             // Add background ionization rate.
             if (inceptionIntegralPlus(vof, i) >= m_inceptionK) {
@@ -2581,8 +2579,8 @@ StreamerInceptionStepper<P, F, C>::computeRdotStatic() noexcept
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
-      BoxLoops::loop(dbl[dit()], backgroundRegularKernel);
-      BoxLoops::loop(vofit, backgroundIrregularKernel);
+      BoxLoops::loop(dbl[dit()], regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
       BoxLoops::loop(vofit, fieldEmissionKernel);
     }
   }

@@ -38,7 +38,7 @@ Driver.checkpoint_interval             = -1               # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 4                # Number of initial regrids
+Driver.initial_regrids                 = 0                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 100E-6           # Stop time
@@ -164,7 +164,7 @@ StreamerInceptionStepper.verbosity     = 10                            # Chattin
 StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation.
 StreamerInceptionStepper.mode          = dynamic                        # Mode (static or dynamic)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
-StreamerInceptionStepper.plt_vars      = K Uinc alpha eta bg_rate emission ions    # Plot variables
+StreamerInceptionStepper.plt_vars      = K Uinc bg_rate emission ions    # Plot variables
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 
 # Static mode
@@ -187,7 +187,7 @@ StreamerInceptionTagger.ref_alpha   = 5.0   # Refinement curvature criterion. Lo
 StreamerInceptionTagger.plot        = false # Plot tagging field or not. 
 
 # Parameters for lightning impulse (used for dynamic runs)
-impulse.voltage = 100E3
+impulse.voltage = 50E3
 impulse.start   = 50E-9
 impulse.t1      = 50E-6
 impulse.t2      = 1.2E-6

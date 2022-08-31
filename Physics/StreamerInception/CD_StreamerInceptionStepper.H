@@ -320,6 +320,14 @@ namespace Physics {
       setBackgroundRate(const std::function<Real(const Real& E)>& a_backgroundRate) noexcept;
 
       /*!
+	@brief Set the detachment rate for negative ions.
+	@details The total detachment rate is dn_e/dt = k*n_ion; this sets the constant k. 
+	@param[in] a_detachmentRate Detachment rate (in units of 1/s). 
+      */
+      virtual void
+      setDetachmentRate(const std::function<Real(const Real& E)>& a_detachmentRate) noexcept;
+
+      /*!
 	@brief Set the field emission current
 	@param[in] a_fieldEmission Field emission current density. 
       */
@@ -605,9 +613,9 @@ namespace Physics {
       std::function<Real(const Real& E)> m_negativeIonMobility;
 
       /*!
-	@brief Detachment probability for negative ion.s
+	@brief Detachment probability for negative ion.
       */
-      std::function<Real(const Real& E)> m_detachmentProbability;
+      std::function<Real(const Real& E)> m_detachmentRate;
 
       /*!
 	@brief Ionization coefficient. 

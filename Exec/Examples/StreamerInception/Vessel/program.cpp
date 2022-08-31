@@ -57,6 +57,8 @@ main(int argc, char* argv[])
 
   auto bgIonization = [](const Real& E) -> Real { return 2.E6 / (1.17E-4 * exp(2.91E7 / E)); };
 
+  auto detachmentRate = [N](const Real& E) -> Real { return ((0.8 * 1.13E-25) + (0.2 * 2.2E-24)) * N; };
+
   auto ionMobility = [](const Real& E) -> Real { return 2E-4; };
 
   auto ionDensity = [](const RealVect& x) -> Real { return 1.E10; };
@@ -93,6 +95,7 @@ main(int argc, char* argv[])
   timestepper->setAlpha(alpha);
   timestepper->setEta(eta);
   timestepper->setBackgroundRate(bgIonization);
+  timestepper->setDetachmentRate(detachmentRate);
   timestepper->setVoltageCurve(voltageCurve);
   timestepper->setNegativeIonMobility(ionMobility);
   timestepper->setNegativeIonDensity(ionDensity);
