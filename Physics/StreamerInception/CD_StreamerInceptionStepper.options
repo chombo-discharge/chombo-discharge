@@ -16,3 +16,5 @@ StreamerInceptionStepper.K_inception   = 18                            # User-sp
 
 # Dynamic mode
 StreamerInceptionStepper.dt            = 1.0                           # Time step for dynamic mode.
+StreamerInceptionStepper.min_dt        = 0.0                           # Smallest possible time step
+StreamerInceptionStepper.max_dt        = 1.0                           # Largest possible time step.
