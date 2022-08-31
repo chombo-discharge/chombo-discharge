@@ -1,7 +1,10 @@
 .. _Chap:StreamerInceptionModel:
 
-Streamer inception
-==================
+Streamer inception model
+========================
+
+Overview
+--------
 
 The streamer inception model solves the electron avalanche integral
 
@@ -28,10 +31,11 @@ Solvers
 The streamer inception model uses
 
 * The :ref:`Chap:FieldSolver` for computing the electric field.
-* The tracer particle module (:ref:`Chap:TracerParticleSolver`) for reconstructing the inception integral.
+* The tracer particle solver (:ref:`Chap:TracerParticleSolver`) for reconstructing the inception integral.
+* The convection diffusion reaction module (:ref:`Chap:CdrSolver`) for modeling negative ion transport. 
 
-Implementation
---------------
+Algorithms
+----------
 
 ``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell in the grid and integrated along the electric field lines until the particle exits the domain, enters an embedded boundary, or the effective ionization coefficient :math:`\alpha(E)` becomes negative. Every incremental integration part is added to a local integration tracker for each particle. When the particle exits the domain, enters an embedded boundary, or has a negative :math:`\alpha` it is flagged and its integration is finished. The function continues the integration loop until all particles are flagged, before moving the particles back to their initial position for visualization of the resulting :math:`K` values.
 The integration is executed for both polarities (+/-) with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration.
@@ -54,8 +58,11 @@ The inception voltage is solved by linear interpolation between the :math:`K` va
 
 The probability of inception, i.e. that an electron appears within the critical volume in an interval :math:`[t, t + \Delta t]`, is computed assuming the background ionization rate is only affected by field emission and detachment of electrons from negatively charged ions.
 
+Setting transport data
+----------------------
+
 Effective ionization coefficient
----------------------------------
+________________________________
 
 To set the effective ionization coefficient, use the member function
 
@@ -76,7 +83,7 @@ For example:
    inceptionStepper.setAlpha(alpha);
 
 Eta coefficient
-----------------
+_______________
 
 To set the eta coefficient, use the member function
 
@@ -97,7 +104,7 @@ For example:
    inceptionStepper.setEta(eta);
 
 Negative ion mobility
----------------------
+_____________________
 
 To set the negative ion mobility, use the member function
 
@@ -118,7 +125,7 @@ For example:
    inceptionStepper.setNegativeIonMobility(ionMobility);
 
 Negative ion density
----------------------
+____________________
 
 To set the negative ion density, use the member function
 
@@ -139,7 +146,7 @@ For example:
    inceptionStepper.setNegativeIonDensity(ionDensity);
    
 Background ionization rate
----------------------------
+__________________________
 
 The background ionization rate is calculated assuming contributions from detachment of electrons from negative ions and field emission.
 
@@ -161,8 +168,60 @@ For example:
 
    inceptionStepper.setBackgroundRate(bgIonization);
 
-Voltage curve
---------------
+Detachment rate
+__________________________
+
+Simulation modes
+----------------
+
+Inception threshold
+___________________
+
+Use ``StreamerInceptionStepper.K_inception`` for setting the inception threshold.
+
+For example:
+
+.. code-block:: bash
+
+   StreamerInceptionStepper.K_inception   = 18
+
+Algorithmic adjustments
+_______________________
+
+``StreamerInceptionStepper.inception_alg`` sets the inception algorithm parameters. The first
+input is the integration algorithm, either Euler (``euler``) or trapezoidal (``trapz``) integration.
+The second input is the step algorithm, which decides whether the integration steps are relative
+(``dx``) or fixed (``fixed``) compared to the grid resolution. 
+The third input is the integration step size.
+
+For example:
+
+.. code-block:: bash
+
+		StreamerInceptionStepper.inception_alg = trapz fixed 0.2
+
+Static
+______
+
+Voltage levels
+^^^^^^^^^^^^^^^
+
+By default, the streamer inception time stepper will read voltage levels from the input script.
+These are in the format
+
+.. code-block:: bash
+
+   StreamerInceptionStepper.voltage_lo    = 1.0   # Low voltage multiplier
+   StreamerInceptionStepper.voltage_hi    = 10.0  # Highest voltage multiplier
+   StreamerInceptionStepper.voltage_steps = 3     # Number of voltage steps
+
+Here, ``voltage_lo`` is the lowest voltage that we solve for, while ``voltage_hi`` is the highest voltage we solve for. ``voltage_steps`` is the number of steps from ``voltage_lo`` to ``voltage_hi``, resulting in ``voltage_steps + 1`` number of voltage levels. 
+
+Dynamic
+_______
+
+Setting the voltage curve
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To set the voltage curve, use the member function
 
@@ -187,23 +246,13 @@ For example:
 
 
 
-Inception algorithm
-----------------------
 
-``StreamerInceptionStepper.inception_alg`` sets the inception algorithm parameters. The first
-input is the integration algorithm, either Euler (``euler``) or trapezoidal (``trapz``) integration.
-The second input is the step algorithm, which decides whether the integration steps are relative
-(``dx``) or fixed (``fixed``) compared to the grid resolution. 
-The third input is the integration step size.
 
-For example:
-
-.. code-block:: bash
-
-		StreamerInceptionStepper.inception_alg = trapz fixed 0.2
+Adjusting output
+----------------
 
 Print report & output file
----------------------------
+__________________________
 
 Use ``StreamerInceptionStepper.print_report`` to save the values for voltages, maximum :math:`K`, critical volume, and Rdot (time to appearance of electrons within the critical volume)  at the end of the simulation.
 For example:
@@ -220,7 +269,7 @@ The report is stored to the file specified by ``StreamerInceptionStepper.output_
 
 
 Plot variables
----------------
+______________
 
 ``StreamerInceptionStepper.plt_vars`` sets which variables are plotted in the simulation.
 The options are:
@@ -241,37 +290,6 @@ For example:
 
 		StreamerInceptionStepper.plt_vars = poisson neg_ions K emission Uinc
 		
-Static mode
-------------
-   
-Voltage levels
-^^^^^^^^^^^^^^^
-
-By default, the streamer inception time stepper will read voltage levels from the input script.
-These are in the format
-
-.. code-block:: bash
-
-   StreamerInceptionStepper.voltage_lo    = 1.0   # Low voltage multiplier
-   StreamerInceptionStepper.voltage_hi    = 10.0  # Highest voltage multiplier
-   StreamerInceptionStepper.voltage_steps = 3     # Number of voltage steps
-
-Here, ``voltage_lo`` is the lowest voltage that we solve for, while ``voltage_hi`` is the highest voltage we solve for. ``voltage_steps`` is the number of steps from ``voltage_lo`` to ``voltage_hi``, resulting in ``voltage_steps + 1`` number of voltage levels. 
-
-Inception threshold
-^^^^^^^^^^^^^^^^^^^^
-
-Use ``StreamerInceptionStepper.K_inception`` for setting the inception threshold.
-
-For example:
-
-.. code-block:: bash
-
-   StreamerInceptionStepper.K_inception   = 18
-
-Dynamic mode
--------------
-
 Setting up a new problem
 ------------------------
 
