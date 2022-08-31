@@ -20,7 +20,7 @@ In addition to the above, the user can specify a critical threshold value for :m
 
 * The critical volume :math:`V_c = \int_{K>K_c} \textrm{d}V`.
 * The inception voltage :math:`U_c`.
-* The inception probability :math:`dP(t,t+\Delta t) = [1-P(t)] \int_{V_{c}} \frac{dn_e}{dt}(1-\frac{\eta}{\alpha}}) dV \Delta t`.
+* The inception probability :math:`dP(t,t+\Delta t) = [1-P(t)] \int_{V_{c}} \frac{dn_e}{dt}(1-\frac{\eta}{\alpha}) dV \Delta t`.
 
 Solvers
 -------
