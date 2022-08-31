@@ -928,12 +928,19 @@ StreamerInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
 
   EBAMRCellData& phi = m_ionSolver->getPhi();
 
+  // Use an outflow BC for advection. Note that extrapolateAdvectiveFluxToEB computes
+  // -n.(phi * v). Since we compute phi^(k+1) = phi^k - dt*sum(fluxes) this means that a negative
+  // flux is an incoming flux.
+  EBAMRIVData& ebFlux = m_ionSolver->getEbFlux();
+  m_ionSolver->extrapolateAdvectiveFluxToEB(ebFlux);
+  DataOps::floor(ebFlux, 0.0);
+
   switch (m_advectionAlgorithm) {
   case AdvectionAlgorithm::Euler: {
     EBAMRCellData divF;
     m_amr->allocate(divF, m_realm, m_phase, 1.0);
 
-    m_ionSolver->computeDivF(divF, phi, 0.0, false, false, false);
+    m_ionSolver->computeDivF(divF, phi, 0.0, false, true, false);
 
     DataOps::incr(phi, divF, -a_dt);
 
@@ -950,12 +957,12 @@ StreamerInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
     m_amr->allocate(k2, m_realm, m_phase, 1);
 
     // Compute k1 coefficient
-    m_ionSolver->computeDivF(k1, phi, 0.0, false, false, false);
+    m_ionSolver->computeDivF(k1, phi, 0.0, false, true, false);
     DataOps::copy(yp, phi);
     DataOps::incr(yp, k1, -a_dt);
 
     // Compute k2 coefficient and final state
-    m_ionSolver->computeDivF(k2, yp, 0.0, false, false, false);
+    m_ionSolver->computeDivF(k2, yp, 0.0, false, true, false);
     DataOps::incr(phi, k1, -0.5 * a_dt);
     DataOps::incr(phi, k2, -0.5 * a_dt);
 
@@ -965,7 +972,7 @@ StreamerInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
     EBAMRCellData divF;
     m_amr->allocate(divF, m_realm, m_phase, 1.0);
 
-    m_ionSolver->computeDivF(divF, phi, a_dt, false, false, false);
+    m_ionSolver->computeDivF(divF, phi, a_dt, false, true, false);
 
     DataOps::incr(phi, divF, -a_dt);
 

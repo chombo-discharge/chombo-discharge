@@ -485,6 +485,42 @@ public:
   floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
 
   /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(EBAMRCellData& a_lhs, const Real a_value);
+
+  /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+
+  /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(EBAMRIVData& a_lhs, const Real a_value);
+
+  /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
+
+  /*!
     @brief Make a_data = max(a_data1, a_data2)
     @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
     @param[in]  a_data1 Input data holder
