@@ -62,13 +62,6 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_initialIonDensity = [](const RealVect x) -> Real { return 0.0; };
 
   m_negativeIonMobility = [](const Real E) -> Real { return 0.0; };
-
-#if 1 // To-do list.
-  std::cout << "StreamerInceptionStepperImplem.H -- fix first electron comp for static mode => compute Rdot\n";
-  std::cout << "StreamerInceptionStepperImplem.H -- add ion detachment to rdot for dynamic mode\n";
-  std::cout
-    << "StreamerInceptionStepperImplem.H -- reports cannot be in destructor (because of Driver.geometry_only)\n";
-#endif
 }
 
 template <typename P, typename F, typename C>
@@ -254,15 +247,200 @@ StreamerInceptionStepper<P, F, C>::parseOptions()
 {
   CH_TIME("StreamerInceptionStepper::parseOptions");
 
+  this->parseVerbosity();
+  this->parseMode();
+  this->parseVoltages();
+  this->parseOutput();
+  this->parsePlotVariables();
+  this->parseInceptionAlgorithm();
+  this->parseAdvectionAlgorithm();
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::parseRuntimeOptions()
+{
+  CH_TIME("StreamerInceptionStepper::parseRuntimeOptions");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::parseRuntimeOptions" << endl;
+  }
+
+  this->parseVerbosity();
+  this->parsePlotVariables();
+  this->parseInceptionAlgorithm();
+  this->parseAdvectionAlgorithm();
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::parseVerbosity() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::parseVerbosity");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::parseVerbosity" << endl;
+  }
+
   ParmParse pp("StreamerInceptionStepper");
+  pp.get("verbosity", m_verbosity);
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::parseMode() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::parseMode");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::parseMode" << endl;
+  }
+
+  ParmParse pp("StreamerInceptionStepper");
+
+  std::string str;
+
+  pp.get("mode", str);
+  if (str == "static") {
+    m_mode = Mode::Static;
+  }
+  else if (str == "dynamic") {
+    m_mode = Mode::Dynamic;
+  }
+  else {
+    MayDay::Error("Expected 'none', 'static', or 'dynamic' for 'StreamerInceptionStepper.mode'");
+  }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::parseVoltages");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::parseVoltages" << endl;
+  }
+
+  ParmParse pp("StreamerInceptionStepper");
+
+  std::string str;
 
   Real voltageLo    = 0.0;
   Real voltageHi    = 0.0;
   Real stepSize     = 0.0;
   int  voltageSteps = 0;
 
-  std::string str1;
-  std::string str2;
+  pp.get("voltage_lo", voltageLo);
+  pp.get("voltage_hi", voltageHi);
+  pp.get("voltage_steps", voltageSteps);
+  pp.get("K_inception", m_inceptionK);
+
+  // Define voltages
+  const Real dV = (voltageHi - voltageLo) / voltageSteps;
+
+  m_voltageSweeps.push_back(voltageLo);
+
+  for (size_t i = 0; i < voltageSteps; i++) {
+    m_voltageSweeps.push_back(m_voltageSweeps[i] + dV);
+  }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::parseOutput() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::parseOutput");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::parseOutput" << endl;
+  }
+
+  ParmParse pp("StreamerInceptionStepper");
+
+  pp.get("output_file", m_outputFile);
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::parseInceptionAlgorithm() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::parseInceptionAlgorithm");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::parseInceptionAlgorithm" << endl;
+  }
+
+  ParmParse pp("StreamerInceptionStepper");
+
+  std::string str;
+
+  // Get the inception algorithm
+  pp.get("inception_alg", str, 0);
+  if (str == "euler") {
+    m_inceptionAlgorithm = IntegrationAlgorithm::Euler;
+  }
+  else if (str == "trapz") {
+    m_inceptionAlgorithm = IntegrationAlgorithm::Trapezoidal;
+  }
+  else {
+    MayDay::Error("Expected 'euler' or 'trapz' for 'StreamerInceptionStepper.inception_alg'");
+  }
+
+  // Get the step size selection
+  Real stepSize;
+  pp.get("inception_alg", str, 1);
+  pp.get("inception_alg", stepSize, 2);
+  if (str == "dx") {
+    m_useFixedInceptionStep = false;
+    m_relativeInceptionStep = stepSize;
+  }
+  else if (str == "fixed") {
+    m_useFixedInceptionStep = true;
+    m_fixedInceptionStep    = stepSize;
+  }
+  else {
+    MayDay::Error("Expected 'dx' or 'fixed' for 'StreamerInceptionStepper.inception_alg'");
+  }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::parseAdvectionAlgorithm() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::parseAdvectionAlgorithm");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::parseAdvectionAlgorithm" << endl;
+  }
+
+  ParmParse pp("StreamerInceptionStepper");
+
+  std::string str;
+
+  pp.get("advection_alg", str);
+  pp.get("advect_ions", m_advectIons);
+  pp.get("cfl", m_cfl);
+  pp.get("max_dt", m_maxDt);
+  pp.get("min_dt", m_minDt);
+
+  m_minDt = std::max(m_minDt, 0.0);
+
+  if (str == "euler") {
+    m_advectionAlgorithm == AdvectionAlgorithm::Euler;
+  }
+  else if (str == "heun") {
+    m_advectionAlgorithm == AdvectionAlgorithm::Heun;
+  }
+  else if (str == "ctu") {
+    m_advectionAlgorithm == AdvectionAlgorithm::CTU;
+  }
+  else {
+    MayDay::Error("Expected 'euler', 'heun', or 'ctu' for 'StreamerInceptionStepper.advection_alg'");
+  }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::parsePlotVariables");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::parsePlotVariables" << endl;
+  }
 
   m_plotPoisson              = false;
   m_plotTracer               = false;
@@ -274,76 +452,7 @@ StreamerInceptionStepper<P, F, C>::parseOptions()
   m_plotAlpha                = false;
   m_plotEta                  = false;
 
-  // Read in parameters
-  pp.get("verbosity", m_verbosity);
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::parseOptions" << endl;
-  }
-
-  pp.get("voltage_lo", voltageLo);
-  pp.get("voltage_hi", voltageHi);
-  pp.get("voltage_steps", voltageSteps);
-  pp.get("K_inception", m_inceptionK);
-  pp.get("print_report", m_writeReport);
-  pp.get("output_file", m_outputFile);
-
-  pp.get("mode", str1);
-  if (str1 == "none") {
-    m_mode = Mode::None;
-  }
-  else if (str1 == "static") {
-    m_mode = Mode::Static;
-  }
-  else if (str1 == "dynamic") {
-    m_mode = Mode::Dynamic;
-  }
-  else {
-    MayDay::Error("Expected 'none', 'static', or 'dynamic' for 'StreamerInceptionStepper.mode'");
-  }
-
-  // Get the inception algorithm
-  pp.get("inception_alg", str1, 0);
-  pp.get("inception_alg", str2, 1);
-  pp.get("inception_alg", stepSize, 2);
-  if (str1 == "euler") {
-    m_inceptionAlgorithm = IntegrationAlgorithm::Euler;
-  }
-  else if (str1 == "trapz") {
-    m_inceptionAlgorithm = IntegrationAlgorithm::Trapezoidal;
-  }
-  else {
-    MayDay::Error("Expected 'euler' or 'trapz' for 'StreamerInceptionStepper.inception_alg'");
-  }
-
-  // Get the advection algorithm
-  pp.get("advection_alg", str1);
-  if (str1 == "euler") {
-    m_advectionAlgorithm == AdvectionAlgorithm::Euler;
-  }
-  else if (str1 == "heun") {
-    m_advectionAlgorithm == AdvectionAlgorithm::Heun;
-  }
-  else if (str1 == "ctu") {
-    m_advectionAlgorithm == AdvectionAlgorithm::CTU;
-  }
-  else {
-    MayDay::Error("Expected 'euler', 'heun', or 'ctu' for 'StreamerInceptionStepper.advection_alg'");
-  }
-
-  if (str2 == "dx") {
-    m_useFixedInceptionStep = false;
-    m_relativeInceptionStep = stepSize;
-  }
-  else if (str2 == "fixed") {
-    m_useFixedInceptionStep = true;
-    m_fixedInceptionStep    = stepSize;
-  }
-  else {
-    MayDay::Error("Expected 'dx' or 'fixed' for 'StreamerInceptionStepper.inception_alg'");
-  }
-
-  // Get the CFL number.
-  pp.get("cfl", m_cfl);
+  ParmParse pp("StreamerInceptionStepper");
 
   // Get plot variables.
   const int num = pp.countval("plt_vars");
@@ -380,25 +489,6 @@ StreamerInceptionStepper<P, F, C>::parseOptions()
         m_plotEta = true;
       }
     }
-  }
-
-  // Define voltages
-  const Real dV = (voltageHi - voltageLo) / voltageSteps;
-
-  m_voltageSweeps.push_back(voltageLo);
-
-  for (size_t i = 0; i < voltageSteps; i++) {
-    m_voltageSweeps.push_back(m_voltageSweeps[i] + dV);
-  }
-}
-
-template <typename P, typename F, typename C>
-void
-StreamerInceptionStepper<P, F, C>::parseRuntimeOptions()
-{
-  CH_TIME("StreamerInceptionStepper::parseRuntimeOptions");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::parseRuntimeOptions" << endl;
   }
 }
 
@@ -844,6 +934,9 @@ StreamerInceptionStepper<P, F, C>::computeDt()
 
   if (m_mode == Mode::Dynamic) {
     dt = m_cfl * m_ionSolver->computeAdvectionDt();
+
+    dt = std::min(dt, m_maxDt);
+    dt = std::max(dt, m_minDt);
   }
 
   return dt;
@@ -863,9 +956,11 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     const Real curTime    = m_time + a_dt;
     const Real curVoltage = m_voltageCurve(curTime);
 
-    // Move the negative ions.
+    // Move the negative ions -- still want this for the time step.
     this->setIonVelocity(curVoltage);
-    this->advanceIons(a_dt);
+    if (m_advectIons) {
+      this->advanceIons(a_dt);
+    }
 
     // Seed new particles and compute the inception integral.
     m_tracerParticleSolver->setVelocity(m_electricFieldMinu);

@@ -15,4 +15,8 @@ StreamerInceptionStepper.voltage_steps = 3                             # Number 
 StreamerInceptionStepper.K_inception   = 18                            # User-specified inception value
 
 # Dynamic mode
-StreamerInceptionStepper.cfl           = 1.0                           # CFL time step for dynamic mode
+StreamerInceptionStepper.advect_ions   = true                          # Turn on/off ion advection
+StreamerInceptionStepper.advection_alg = ctu                           # Advection algorithm. If using CTU, set use_ctu=false
+StreamerInceptionStepper.cfl           = 0.8                           # CFL time step for dynamic mode
+StreamerInceptionStepper.min_dt        = 0.0                           # Minimum permitted time step
+StreamerInceptionStepper.max_dt        = 1E99                          # Maximum permitted time step

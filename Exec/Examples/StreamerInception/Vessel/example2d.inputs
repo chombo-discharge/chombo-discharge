@@ -162,9 +162,9 @@ Vessel.live_shroom   = false          # Mushroom is live or not
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = 10                            # Chattiness. 
 StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation.
-StreamerInceptionStepper.mode          = dynamic                        # Mode (static or dynamic)
+StreamerInceptionStepper.mode          = static                        # Mode (static or dynamic)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
-StreamerInceptionStepper.plt_vars      = K Uinc bg_rate emission ions    # Plot variables
+StreamerInceptionStepper.plt_vars      = K Uinc bg_rate emission ions  # Plot variables
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 
 # Static mode
@@ -174,8 +174,11 @@ StreamerInceptionStepper.voltage_steps = 10                            # Number 
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
 
 # Dynamic mode
+StreamerInceptionStepper.advect_ions   = false                         # Turn on/off ion advection
 StreamerInceptionStepper.advection_alg = ctu                           # Advection algorithm. If using CTU, set use_ctu=false
 StreamerInceptionStepper.cfl           = 0.8                           # CFL
+StreamerInceptionStepper.min_dt        = 0.0                           # Minimum permitted time step
+StreamerInceptionStepper.max_dt        = 250E-9                        # Maximum permitted time step
 
 # ====================================================================================================
 # StreamerInceptionTagger class options
@@ -186,7 +189,9 @@ StreamerInceptionTagger.max_voltage = 50E3  # Maximum applied voltage
 StreamerInceptionTagger.ref_alpha   = 5.0   # Refinement curvature criterion. Lower => more mesh
 StreamerInceptionTagger.plot        = false # Plot tagging field or not. 
 
+# ====================================================================================================
 # Parameters for lightning impulse (used for dynamic runs)
+# ====================================================================================================
 impulse.voltage = 50E3
 impulse.start   = 50E-9
 impulse.t1      = 50E-6

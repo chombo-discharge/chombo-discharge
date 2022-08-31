@@ -50,7 +50,6 @@ namespace Physics {
     */
     enum class Mode
     {
-      None,
       Static,
       Dynamic
     };
@@ -508,6 +507,16 @@ namespace Physics {
       Real m_cfl;
 
       /*!
+	@brief Maximum permitted time step
+      */
+      Real m_maxDt;
+
+      /*!
+	@brief Minimum permitted time step.
+      */
+      Real m_minDt;
+
+      /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)
       */
       Real m_relativeInceptionStep;
@@ -528,9 +537,9 @@ namespace Physics {
       bool m_useFixedInceptionStep;
 
       /*!
-	@brief If true, print a report at the end
+	@brief Ion advection on/off
       */
-      bool m_writeReport;
+      bool m_advectIons;
 
       /*!
 	@brief Plot Poisson solver or not.
@@ -829,6 +838,48 @@ namespace Physics {
       */
       inline void
       setIonVelocity(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Parse simulation mode
+      */
+      inline void
+      parseMode() noexcept;
+
+      /*!
+	@brief Parse voltage levels
+      */
+      inline void
+      parseVoltages() noexcept;
+
+      /*!
+	@brief Parse output settings
+      */
+      inline void
+      parseOutput() noexcept;
+
+      /*!
+	@brief Parse class verbosity
+      */
+      inline void
+      parseVerbosity() noexcept;
+
+      /*!
+	@brief Parse the inception algorithm
+      */
+      inline void
+      parseInceptionAlgorithm() noexcept;
+
+      /*!
+	@brief Parse the advection algorithm
+      */
+      inline void
+      parseAdvectionAlgorithm() noexcept;
+
+      /*!
+	@brief Parse plot variables
+      */
+      inline void
+      parsePlotVariables() noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics
