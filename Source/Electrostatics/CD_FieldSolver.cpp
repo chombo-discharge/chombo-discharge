@@ -1148,7 +1148,7 @@ FieldSolver::writeMultifluidData(EBAMRCellData&           a_output,
                                  int&                     a_comp,
                                  const MFAMRCellData&     a_data,
                                  const phase::which_phase a_phase,
-                                 const bool               a_interp)
+                                 const bool               a_interp) const
 {
   CH_TIME("FieldSolver::writeMultifluidData(EBAMRCellData, int, MFAMRCellData, bool)");
   if (m_verbosity > 5) {

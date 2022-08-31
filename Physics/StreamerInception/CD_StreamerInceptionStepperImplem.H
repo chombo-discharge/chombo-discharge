@@ -529,9 +529,6 @@ StreamerInceptionStepper<P, F, C>::writePlotData(EBAMRCellData&       a_output,
     pout() << "StreamerInceptionStepper::writePlotData" << endl;
   }
 
-  const std::string prefix = "StreamerInceptionStepper/";
-
-  //
   if (m_plotPoisson) {
     m_fieldSolver->writePlotData(a_output, a_icomp);
     a_plotVariableNames.append(m_fieldSolver->getPlotVariableNames());
@@ -735,12 +732,27 @@ StreamerInceptionStepper<P, F, C>::writePlotDataDynamic(EBAMRCellData&       a_o
 
   // Add potential and electric field to output
   {
+    EBAMRCellData potential;
     EBAMRCellData E;
+
+    m_amr->allocate(potential, m_realm, m_phase, 1);
     m_amr->allocate(E, m_realm, m_phase, SpaceDim);
 
-    DataOps::copy(E, m_electricFieldPlus);
+    int comp1 = 0;
+    int comp2 = 0;
+    m_fieldSolver->writeMultifluidData(potential, comp1, m_fieldSolver->getPotential(), phase::gas, true);
+    m_fieldSolver->writeMultifluidData(E, comp2, m_fieldSolver->getElectricField(), phase::gas, true);
+
+    DataOps::scale(potential, m_voltageCurve(m_time));
     DataOps::scale(E, m_voltageCurve(m_time));
 
+    // Copy potential to output data.
+    DataOps::copy(a_output, potential, Interval(a_icomp, a_icomp), Interval(0, 0));
+
+    a_plotVariableNames.push_back("Electric potential");
+    a_icomp += 1;
+
+    // Copy electric field to output data
     const Interval srcInterv(0, SpaceDim - 1);
     const Interval dstInterv(a_icomp, a_icomp + SpaceDim - 1);
     DataOps::copy(a_output, E, dstInterv, srcInterv);
@@ -880,8 +892,8 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
   }
   case Mode::Dynamic: {
 
-    // Always write the electric field.
-    ncomp += SpaceDim;
+    // Always write the electric field and potential.
+    ncomp += SpaceDim + 1;
 
     if (m_plotInceptionIntegral) {
       ncomp += 1;
