@@ -27,8 +27,8 @@
 
 using namespace Physics::StreamerInception;
 
-template <typename P, typename F>
-StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
+template <typename P, typename F, typename C>
+StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 {
   CH_TIME("StreamerInceptionStepper::StreamerInceptionStepper");
   if (m_verbosity > 5) {
@@ -66,8 +66,8 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
 #endif
 }
 
-template <typename P, typename F>
-StreamerInceptionStepper<P, F>::~StreamerInceptionStepper()
+template <typename P, typename F, typename C>
+StreamerInceptionStepper<P, F, C>::~StreamerInceptionStepper()
 {
   CH_TIME("StreamerInceptionStepper::~StreamerInceptionStepper");
   if (m_verbosity > 5) {
@@ -93,9 +93,9 @@ StreamerInceptionStepper<P, F>::~StreamerInceptionStepper()
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::setupSolvers()
+StreamerInceptionStepper<P, F, C>::setupSolvers()
 {
   CH_TIME("StreamerInceptionStepper::setupSolvers");
   if (m_verbosity > 5) {
@@ -128,22 +128,13 @@ StreamerInceptionStepper<P, F>::setupSolvers()
 
   // This one is needed for the dynamic runs which also track the ions.
   if (m_mode == Mode::Dynamic) {
-    m_negativeIonSolver = RefCountedPtr<TracerParticleSolver<P>>(new TracerParticleSolver<P>());
-    m_negativeIonSolver->parseOptions();
-    m_negativeIonSolver->setAmr(m_amr);
-    m_negativeIonSolver->setComputationalGeometry(m_computationalGeometry);
-    m_negativeIonSolver->setRealm(m_realm);
-    m_negativeIonSolver->setPhase(m_phase);
-    m_negativeIonSolver->setTime(0, 0.0, 0.0);
-    m_negativeIonSolver->setName("Negative ion solver");
-
-    m_negativeIonSolver->setVolumeScale(false);
+    m_ionSolver = RefCountedPtr<CdrSolver>(new C());
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::allocate()
+StreamerInceptionStepper<P, F, C>::allocate()
 {
   CH_TIME("StreamerInceptionStepper::allocate");
   if (m_verbosity > 5) {
@@ -194,8 +185,6 @@ StreamerInceptionStepper<P, F>::allocate()
     DataOps::setValue(m_emissionRate, 0.0);
     DataOps::setValue(m_backgroundIonization, 0.0);
 
-    m_negativeIonSolver->allocate();
-
     break;
   }
   default: {
@@ -204,9 +193,9 @@ StreamerInceptionStepper<P, F>::allocate()
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::initialData()
+StreamerInceptionStepper<P, F, C>::initialData()
 {
   CH_TIME("StreamerInceptionStepper::initialData");
   if (m_verbosity > 5) {
@@ -237,9 +226,9 @@ StreamerInceptionStepper<P, F>::initialData()
   DataOps::scale(m_electricFieldMinu, -1.0);
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::registerRealms()
+StreamerInceptionStepper<P, F, C>::registerRealms()
 {
   CH_TIME("StreamerInceptionStepper::registerRealms");
   if (m_verbosity > 5) {
@@ -249,9 +238,9 @@ StreamerInceptionStepper<P, F>::registerRealms()
   m_amr->registerRealm(m_realm);
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::registerOperators()
+StreamerInceptionStepper<P, F, C>::registerOperators()
 {
   CH_TIME("StreamerInceptionStepper::registerOperators");
   if (m_verbosity > 5) {
@@ -262,13 +251,13 @@ StreamerInceptionStepper<P, F>::registerOperators()
   m_tracerParticleSolver->registerOperators();
 
   if (m_mode == Mode::Dynamic) {
-    m_negativeIonSolver->registerOperators();
+    m_ionSolver->registerOperators();
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::parseOptions()
+StreamerInceptionStepper<P, F, C>::parseOptions()
 {
   CH_TIME("StreamerInceptionStepper::parseOptions");
 
@@ -376,9 +365,6 @@ StreamerInceptionStepper<P, F>::parseOptions()
       else if (plotVars[i] == "tracer") {
         m_plotTracer = true;
       }
-      else if (plotVars[i] == "neg_ions") {
-        m_plotNegativeIons = true;
-      }
       else if (plotVars[i] == "K") {
         m_plotInceptionIntegral = true;
       }
@@ -410,9 +396,9 @@ StreamerInceptionStepper<P, F>::parseOptions()
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::parseRuntimeOptions()
+StreamerInceptionStepper<P, F, C>::parseRuntimeOptions()
 {
   CH_TIME("StreamerInceptionStepper::parseRuntimeOptions");
   if (m_verbosity > 5) {
@@ -421,9 +407,9 @@ StreamerInceptionStepper<P, F>::parseRuntimeOptions()
 }
 
 #ifdef CH_USE_HDF5
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
+StreamerInceptionStepper<P, F, C>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const
 {
   CH_TIME("StreamerInceptionStepper::writeCheckpointData");
   if (m_verbosity > 5) {
@@ -433,9 +419,9 @@ StreamerInceptionStepper<P, F>::writeCheckpointData(HDF5Handle& a_handle, const 
 #endif
 
 #ifdef CH_USE_HDF5
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
+StreamerInceptionStepper<P, F, C>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
 {
   CH_TIME("StreamerInceptionStepper::readCheckpointData");
   if (m_verbosity > 5) {
@@ -446,11 +432,11 @@ StreamerInceptionStepper<P, F>::readCheckpointData(HDF5Handle& a_handle, const i
 }
 #endif
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
-                                              Vector<std::string>& a_plotVariableNames,
-                                              int&                 a_icomp) const
+StreamerInceptionStepper<P, F, C>::writePlotData(EBAMRCellData&       a_output,
+                                                 Vector<std::string>& a_plotVariableNames,
+                                                 int&                 a_icomp) const
 {
   CH_TIME("StreamerInceptionStepper::writePlotData");
   if (m_verbosity > 5) {
@@ -489,11 +475,11 @@ StreamerInceptionStepper<P, F>::writePlotData(EBAMRCellData&       a_output,
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::writePlotDataStatic(EBAMRCellData&       a_output,
-                                                    Vector<std::string>& a_plotVariableNames,
-                                                    int&                 a_icomp) const noexcept
+StreamerInceptionStepper<P, F, C>::writePlotDataStatic(EBAMRCellData&       a_output,
+                                                       Vector<std::string>& a_plotVariableNames,
+                                                       int&                 a_icomp) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::writePlotDataStatic");
   if (m_verbosity > 5) {
@@ -647,11 +633,11 @@ StreamerInceptionStepper<P, F>::writePlotDataStatic(EBAMRCellData&       a_outpu
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::writePlotDataDynamic(EBAMRCellData&       a_output,
-                                                     Vector<std::string>& a_plotVariableNames,
-                                                     int&                 a_icomp) const noexcept
+StreamerInceptionStepper<P, F, C>::writePlotDataDynamic(EBAMRCellData&       a_output,
+                                                        Vector<std::string>& a_plotVariableNames,
+                                                        int&                 a_icomp) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::writePlotDataDynamic");
   if (m_verbosity > 5) {
@@ -677,11 +663,6 @@ StreamerInceptionStepper<P, F>::writePlotDataDynamic(EBAMRCellData&       a_outp
     }
 
     a_icomp += SpaceDim;
-  }
-
-  if (m_plotNegativeIons && m_mode == Mode::Dynamic) {
-    m_negativeIonSolver->writePlotData(a_output, a_icomp);
-    a_plotVariableNames.append(m_negativeIonSolver->getPlotVariableNames());
   }
 
   // Plot inception integral
@@ -753,9 +734,9 @@ StreamerInceptionStepper<P, F>::writePlotDataDynamic(EBAMRCellData&       a_outp
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 int
-StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
+StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 {
   CH_TIME("StreamerInceptionStepper::getNumberOfPlotVariables");
   if (m_verbosity > 5) {
@@ -813,9 +794,6 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
     if (m_plotInceptionIntegral) {
       ncomp += 1;
     }
-    if (m_plotNegativeIons) {
-      ncomp += m_negativeIonSolver->getNumberOfPlotVariables();
-    }
     if (m_plotBackgroundIonization) {
       ncomp += 1;
     }
@@ -839,9 +817,9 @@ StreamerInceptionStepper<P, F>::getNumberOfPlotVariables() const
   return ncomp;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 const EBAMRCellData* const
-StreamerInceptionStepper<P, F>::getElectricField() const noexcept
+StreamerInceptionStepper<P, F, C>::getElectricField() const noexcept
 {
   CH_TIME("StreamerInceptionStepper::getElectricField");
   if (m_verbosity > 5) {
@@ -851,9 +829,9 @@ StreamerInceptionStepper<P, F>::getElectricField() const noexcept
   return &m_electricFieldPlus;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 Real
-StreamerInceptionStepper<P, F>::computeDt()
+StreamerInceptionStepper<P, F, C>::computeDt()
 {
   CH_TIME("StreamerInceptionStepper::computeDt");
   if (m_verbosity > 5) {
@@ -867,7 +845,7 @@ StreamerInceptionStepper<P, F>::computeDt()
       dt = m_fixedDt;
     }
     else {
-      dt = m_cfl * this->computeNegativeIonCFL(m_voltageCurve(m_time));
+      MayDay::Error("StreamerInceptionStepper::computeDt -- dynamic mode still a work-in-progress");
     }
 
     dt = std::min(m_maxDt, dt);
@@ -877,9 +855,9 @@ StreamerInceptionStepper<P, F>::computeDt()
   return dt;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 Real
-StreamerInceptionStepper<P, F>::advance(const Real a_dt)
+StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
 {
   CH_TIME("StreamerInceptionStepper::advance");
   if (m_verbosity > 5) {
@@ -892,14 +870,10 @@ StreamerInceptionStepper<P, F>::advance(const Real a_dt)
     const Real curVoltage = m_voltageCurve(curTime);
 
     m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
-    m_negativeIonSolver->setVelocity(m_electricFieldMinu);
 
     // Seed new particles and compute the inception integral.
     this->seedIonizationParticles(curVoltage);
     this->computeInceptionIntegralDynamic(curVoltage);
-
-    // Move the negative ions.
-    this->advanceNegativeIons(curVoltage, a_dt);
 
     // Compute the critical volume and the electron appearance rate.
     const Real Vcr  = this->computeCriticalVolumeDynamic();
@@ -936,9 +910,9 @@ StreamerInceptionStepper<P, F>::advance(const Real a_dt)
   return a_dt;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt)
+StreamerInceptionStepper<P, F, C>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt)
 {
   CH_TIME("StreamerInceptionStepper::synchronizeSolverTimes");
   if (m_verbosity > 5) {
@@ -953,13 +927,13 @@ StreamerInceptionStepper<P, F>::synchronizeSolverTimes(const int a_step, const R
   m_tracerParticleSolver->setTime(a_step, a_time, a_dt);
 
   if (m_mode == Mode::Dynamic) {
-    m_negativeIonSolver->setTime(a_step, a_time, a_dt);
+    m_ionSolver->setTime(a_step, a_time, a_dt);
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::printStepReport()
+StreamerInceptionStepper<P, F, C>::printStepReport()
 {
   CH_TIME("StreamerInceptionStepper::printStepReport");
 #ifndef NDEBUG
@@ -974,9 +948,9 @@ StreamerInceptionStepper<P, F>::printStepReport()
          << endl;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFinestLevel)
+StreamerInceptionStepper<P, F, C>::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 {
   CH_TIME("StreamerInceptionStepper::preRegrid");
   if (m_verbosity > 5) {
@@ -987,13 +961,13 @@ StreamerInceptionStepper<P, F>::preRegrid(const int a_lmin, const int a_oldFines
   m_tracerParticleSolver->preRegrid(a_lmin, a_oldFinestLevel);
 
   if (m_mode == Mode::Dynamic) {
-    m_negativeIonSolver->preRegrid(a_lmin, a_oldFinestLevel);
+    MayDay::Error("StreamerInceptionStepper::preRegrid -- dynamic not implemented (yet)");
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
 {
   CH_TIME("StreamerInceptionStepper::regrid");
   if (m_verbosity > 5) {
@@ -1005,7 +979,7 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   m_tracerParticleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   if (m_mode == Mode::Dynamic) {
-    m_negativeIonSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+    MayDay::Error("StreamerInceptionStepper::regrid -- dynamic mode not supported (yet)");
   }
 
   // Regrid velocity field
@@ -1067,9 +1041,9 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   DataOps::scale(m_electricFieldMinu, -1.0);
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::postRegrid()
+StreamerInceptionStepper<P, F, C>::postRegrid()
 {
   CH_TIME("StreamerInceptionStepper::postRegrid");
   if (m_verbosity > 5) {
@@ -1077,9 +1051,9 @@ StreamerInceptionStepper<P, F>::postRegrid()
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::setVoltageCurve(const std::function<Real(const Real& E)>& a_voltageCurve) noexcept
+StreamerInceptionStepper<P, F, C>::setVoltageCurve(const std::function<Real(const Real& E)>& a_voltageCurve) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setVoltageCurve");
   if (m_verbosity > 5) {
@@ -1089,9 +1063,9 @@ StreamerInceptionStepper<P, F>::setVoltageCurve(const std::function<Real(const R
   m_voltageCurve = a_voltageCurve;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::setRho(const std::function<Real(const RealVect& x)>& a_rho) noexcept
+StreamerInceptionStepper<P, F, C>::setRho(const std::function<Real(const RealVect& x)>& a_rho) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setRho");
   if (m_verbosity > 5) {
@@ -1101,9 +1075,10 @@ StreamerInceptionStepper<P, F>::setRho(const std::function<Real(const RealVect& 
   m_rho = a_rho;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::setNegativeIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept
+StreamerInceptionStepper<P, F, C>::setNegativeIonDensity(
+  const std::function<Real(const RealVect x)>& a_density) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setNegativeIonDensity");
   if (m_verbosity > 5) {
@@ -1113,9 +1088,9 @@ StreamerInceptionStepper<P, F>::setNegativeIonDensity(const std::function<Real(c
   m_negativeIonDensity = a_density;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::setNegativeIonMobility(const std::function<Real(const Real x)>& a_mobility) noexcept
+StreamerInceptionStepper<P, F, C>::setNegativeIonMobility(const std::function<Real(const Real x)>& a_mobility) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setNegativeIonMobility");
   if (m_verbosity > 5) {
@@ -1125,9 +1100,9 @@ StreamerInceptionStepper<P, F>::setNegativeIonMobility(const std::function<Real(
   m_negativeIonMobility = a_mobility;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept
+StreamerInceptionStepper<P, F, C>::setAlpha(const std::function<Real(const Real& E)>& a_alpha) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setAlpha");
   if (m_verbosity > 5) {
@@ -1137,9 +1112,9 @@ StreamerInceptionStepper<P, F>::setAlpha(const std::function<Real(const Real& E)
   m_alpha = a_alpha;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::setEta(const std::function<Real(const Real& E)>& a_eta) noexcept
+StreamerInceptionStepper<P, F, C>::setEta(const std::function<Real(const Real& E)>& a_eta) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setEta");
   if (m_verbosity > 5) {
@@ -1149,23 +1124,24 @@ StreamerInceptionStepper<P, F>::setEta(const std::function<Real(const Real& E)>&
   m_eta = a_eta;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 const std::function<Real(const Real& E)>&
-StreamerInceptionStepper<P, F>::getAlpha() const noexcept
+StreamerInceptionStepper<P, F, C>::getAlpha() const noexcept
 {
   return m_alpha;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 const std::function<Real(const Real& E)>&
-StreamerInceptionStepper<P, F>::getEta() const noexcept
+StreamerInceptionStepper<P, F, C>::getEta() const noexcept
 {
   return m_eta;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::setBackgroundRate(const std::function<Real(const Real& E)>& a_backgroundRate) noexcept
+StreamerInceptionStepper<P, F, C>::setBackgroundRate(
+  const std::function<Real(const Real& E)>& a_backgroundRate) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setBackgroundRate");
   if (m_verbosity > 5) {
@@ -1175,9 +1151,9 @@ StreamerInceptionStepper<P, F>::setBackgroundRate(const std::function<Real(const
   m_backgroundRate = a_backgroundRate;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::setFieldEmission(const std::function<Real(const Real& E)>& a_currentDensity) noexcept
+StreamerInceptionStepper<P, F, C>::setFieldEmission(const std::function<Real(const Real& E)>& a_currentDensity) noexcept
 {
   CH_TIME("StreamerInceptionStepper::setFieldEmission");
   if (m_verbosity > 5) {
@@ -1187,16 +1163,16 @@ StreamerInceptionStepper<P, F>::setFieldEmission(const std::function<Real(const 
   m_fieldEmission = a_currentDensity;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 Mode
-StreamerInceptionStepper<P, F>::getMode() const noexcept
+StreamerInceptionStepper<P, F, C>::getMode() const noexcept
 {
   return m_mode;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::seedUniformParticles() noexcept
+StreamerInceptionStepper<P, F, C>::seedUniformParticles() noexcept
 {
   CH_TIME("StreamerInceptionStepper::seedUniformParticles");
   if (m_verbosity > 5) {
@@ -1265,9 +1241,9 @@ StreamerInceptionStepper<P, F>::seedUniformParticles() noexcept
   amrParticles.remap();
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::seedIonizationParticles(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::seedIonizationParticles");
   if (m_verbosity > 5) {
@@ -1357,84 +1333,9 @@ StreamerInceptionStepper<P, F>::seedIonizationParticles(const Real& a_voltage) n
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::seedNegativeIons() noexcept
-{
-  CH_TIME("StreamerInceptionStepper::seedNegativeIons");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::seedNegativeIons" << endl;
-  }
-
-  CH_assert(!(m_negativeIonSolver.isNull()));
-
-  ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();
-  amrParticles.clearParticles();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-
-    const LevelData<BaseFab<bool>>& validCellsLD = *m_amr->getValidCells(m_realm)[lvl];
-
-    const Real dx  = m_amr->getDx()[lvl];
-    const Real vol = std::pow(dx, SpaceDim);
-
-    ParticleData<P>& levelParticles = amrParticles[lvl];
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = validCellsLD[dit()];
-
-      List<P>& particles = levelParticles[dit()].listItems();
-
-      if (!ebisbox.isAllCovered()) {
-        auto regularKernel = [&](const IntVect& iv) -> void {
-          if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-            const RealVect pos = m_amr->getProbLo() + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-
-            P p;
-
-            p.position() = pos;
-            p.weight()   = m_negativeIonDensity(pos) * vol;
-
-            if (p.weight() > std::numeric_limits<Real>::min()) {
-              particles.add(p);
-            }
-          }
-        };
-
-        auto irregularKernel = [&](const VolIndex& vof) -> void {
-          const IntVect iv = vof.gridIndex();
-
-          if (validCells(iv, 0) && ebisbox.isIrregular(iv)) {
-            const RealVect pos = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-
-            P p;
-
-            p.position() = pos;
-            p.weight()   = m_negativeIonDensity(pos) * vol * ebisbox.volFrac(vof);
-
-            if (p.weight() > std::numeric_limits<Real>::min()) {
-              particles.add(p);
-            }
-          }
-        };
-
-        // Execute kernels over appropriate regions.
-        const Box    cellBox = dbl[dit()];
-        VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-
-        BoxLoops::loop(cellBox, regularKernel);
-        BoxLoops::loop(vofit, irregularKernel);
-      }
-    }
-  }
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::postInitialize()
+StreamerInceptionStepper<P, F, C>::postInitialize()
 {
   CH_TIME("StreamerInceptionStepper::postInitialize");
   if (m_verbosity > 5) {
@@ -1466,7 +1367,7 @@ StreamerInceptionStepper<P, F>::postInitialize()
     this->seedIonizationParticles(m_voltageCurve(m_time));
 
     m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
-    m_negativeIonSolver->setVelocity(m_electricFieldMinu);
+    MayDay::Error("StreamerInceptionStepper<P, F, C>::postInitialize -- dynamic mode not implemented (yet)");
 
     // Compute the 'Rdot' value at current time (which is probably t = 0).
     this->computeInceptionIntegralDynamic(m_voltageCurve(m_time));
@@ -1482,9 +1383,6 @@ StreamerInceptionStepper<P, F>::postInitialize()
     m_inceptionProbability.emplace_back(m_time, 0.0);
     m_maxK.emplace_back(m_time, maxK);
 
-    // Seed the negative ions
-    this->seedNegativeIons();
-
     break;
   }
   default: {
@@ -1493,9 +1391,9 @@ StreamerInceptionStepper<P, F>::postInitialize()
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::computeInceptionIntegralStatic() noexcept
+StreamerInceptionStepper<P, F, C>::computeInceptionIntegralStatic() noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeInceptionIntegralStatic");
   if (m_verbosity > 5) {
@@ -1608,9 +1506,9 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegralStatic() noexcept
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::computeInceptionIntegralDynamic(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F, C>::computeInceptionIntegralDynamic(const Real& a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeInceptionIntegralDynamic");
   if (m_verbosity > 5) {
@@ -1643,9 +1541,9 @@ StreamerInceptionStepper<P, F>::computeInceptionIntegralDynamic(const Real& a_vo
   m_amr->interpGhost(m_inceptionIntegral, m_realm, m_phase);
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::inceptionIntegrateEuler");
   if (m_verbosity > 5) {
@@ -1733,9 +1631,9 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateEuler(const Real& a_voltage) n
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept
 {
   CH_TIME("StreamerInceptionStepper::inceptionIntegrateTrapezoidal");
   if (m_verbosity > 5) {
@@ -1873,150 +1771,9 @@ StreamerInceptionStepper<P, F>::inceptionIntegrateTrapezoidal(const Real& a_volt
   this->rewindTracerParticles();
 }
 
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::advanceNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::advanceNegativeIons");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::advanceNegativeIons" << endl;
-  }
-
-  switch (m_inceptionAlgorithm) {
-  case IntegrationAlgorithm::Euler: {
-    this->advanceNegativeIonsEuler(a_voltage, a_dt);
-
-    break;
-  };
-  case IntegrationAlgorithm::Trapezoidal: {
-    this->advanceNegativeIonsTrapezoidal(a_voltage, a_dt);
-
-    break;
-  };
-  default: {
-    MayDay::Error("StreamerInceptionStepper::advanceNegativeIons - logic bust");
-
-    break;
-  }
-  }
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::advanceNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::advanceNegativeIonsEuler");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::advanceNegativeIonsEuler" << endl;
-  }
-
-  m_negativeIonSolver->remap();
-  m_negativeIonSolver->interpolateVelocities();
-
-  ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();
-
-  // Euler integration.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-
-    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-      List<P>& ionParticles = amrParticles[lvl][dit()].listItems();
-
-      for (ListIterator<P> lit(ionParticles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        // We have interpolated -E onto the particle position but the actual velocity
-        // must be multiplied by the input voltage (because we solved with a voltage = 1V)
-        // and by the ion mobility.
-        const RealVect v     = a_voltage * p.velocity();
-        const Real     Eminu = v.vectorLength();
-        const Real     mu    = m_negativeIonMobility(Eminu);
-
-        p.template vect<0>() = p.position();
-        p.position() += mu * v * a_dt;
-      }
-    }
-  }
-
-  // Remove particles that wound up inside the EB. The remap function
-  // removes those that left the domain.
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
-
-  m_negativeIonSolver->remap();
-  m_negativeIonSolver->interpolateVelocities();
-}
-
-template <typename P, typename F>
-void
-StreamerInceptionStepper<P, F>::advanceNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept
-{
-  CH_TIME("StreamerInceptionStepper::advanceNegativeIonsTrapezoidal");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::advanceNegativeIonsTrapezoidal" << endl;
-  }
-
-  m_negativeIonSolver->remap();
-  m_negativeIonSolver->interpolateVelocities();
-
-  ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();
-
-  // Euler stage.
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-
-    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-      List<P>& ionParticles = amrParticles[lvl][dit()].listItems();
-
-      for (ListIterator<P> lit(ionParticles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        // We have interpolated -E onto the particle position but the actual velocity
-        // must be multiplied by the input voltage (because we solved with a voltage = 1V)
-        // and by the ion mobility.
-        const RealVect v     = a_voltage * p.velocity();
-        const Real     Eminu = v.vectorLength();
-        const Real     mu    = m_negativeIonMobility(Eminu);
-
-        p.template vect<0>() = p.position();
-        p.template vect<1>() = mu * v;
-
-        p.position() += mu * v * a_dt;
-      }
-    }
-  }
-
-  m_negativeIonSolver->remap();
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
-  m_negativeIonSolver->interpolateVelocities();
-
-  // Second stage
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-
-    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-      List<P>& ionParticles = amrParticles[lvl][dit()].listItems();
-
-      for (ListIterator<P> lit(ionParticles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        const RealVect v     = a_voltage * p.velocity();
-        const Real     Eminu = v.vectorLength();
-        const Real     mu    = m_negativeIonMobility(Eminu);
-
-        const RealVect& xk  = p.template vect<0>();
-        const RealVect& vk  = p.template vect<1>();
-        const RealVect  vk1 = mu * v;
-
-        p.position() = xk + 0.5 * a_dt * (vk + vk1);
-      }
-    }
-  }
-
-  m_amr->removeCoveredParticlesIF(amrParticles, m_phase);
-  m_negativeIonSolver->remap();
-  m_negativeIonSolver->interpolateVelocities();
-}
-
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 Real
-StreamerInceptionStepper<P, F>::computeRdot(const Real& a_voltage) const noexcept
+StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeRdot");
   if (m_verbosity > 5) {
@@ -2101,9 +1858,9 @@ StreamerInceptionStepper<P, F>::computeRdot(const Real& a_voltage) const noexcep
   return ParallelOps::sum(Rdot);
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::rewindTracerParticles() noexcept
+StreamerInceptionStepper<P, F, C>::rewindTracerParticles() noexcept
 {
   CH_TIME("StreamerInceptionStepper::rewindTracerParticles");
   if (m_verbosity > 5) {
@@ -2125,9 +1882,9 @@ StreamerInceptionStepper<P, F>::rewindTracerParticles() noexcept
   amrParticles.remap();
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::resetTracerParticles() noexcept
+StreamerInceptionStepper<P, F, C>::resetTracerParticles() noexcept
 {
   CH_TIME("StreamerInceptionStepper::resetTracerParticles");
   if (m_verbosity > 5) {
@@ -2147,9 +1904,9 @@ StreamerInceptionStepper<P, F>::resetTracerParticles() noexcept
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::computeBackgroundIonizationStatic() noexcept
+StreamerInceptionStepper<P, F, C>::computeBackgroundIonizationStatic() noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeBackgroundIonizationStatic");
   if (m_verbosity > 5) {
@@ -2194,9 +1951,9 @@ StreamerInceptionStepper<P, F>::computeBackgroundIonizationStatic() noexcept
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::computeFieldEmissionStatic() noexcept
+StreamerInceptionStepper<P, F, C>::computeFieldEmissionStatic() noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeFieldEmissionStatic");
   if (m_verbosity > 5) {
@@ -2251,10 +2008,10 @@ StreamerInceptionStepper<P, F>::computeFieldEmissionStatic() noexcept
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::computeFieldEmission(EBAMRCellData& a_emissionRate,
-                                                     const Real&    a_voltage) const noexcept
+StreamerInceptionStepper<P, F, C>::computeFieldEmission(EBAMRCellData& a_emissionRate,
+                                                        const Real&    a_voltage) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeFieldEmission");
   if (m_verbosity > 5) {
@@ -2295,11 +2052,11 @@ StreamerInceptionStepper<P, F>::computeFieldEmission(EBAMRCellData& a_emissionRa
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::evaluateFunction(EBAMRCellData&                           a_data,
-                                                 const Real&                              a_voltage,
-                                                 const std::function<Real(const Real E)>& a_func) const noexcept
+StreamerInceptionStepper<P, F, C>::evaluateFunction(EBAMRCellData&                           a_data,
+                                                    const Real&                              a_voltage,
+                                                    const std::function<Real(const Real E)>& a_func) const noexcept
 {
   CH_TIME("StreamerInceptionStepper::evaluateFunction");
   if (m_verbosity > 5) {
@@ -2349,9 +2106,9 @@ StreamerInceptionStepper<P, F>::evaluateFunction(EBAMRCellData&                 
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::computeInceptionVoltageVolume() noexcept
+StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeInceptionVoltageVolume");
   if (m_verbosity > 5) {
@@ -2447,9 +2204,9 @@ StreamerInceptionStepper<P, F>::computeInceptionVoltageVolume() noexcept
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 std::pair<Real, Real>
-StreamerInceptionStepper<P, F>::computeInceptionVoltages() const noexcept
+StreamerInceptionStepper<P, F, C>::computeInceptionVoltages() const noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeInceptionVoltages");
   if (m_verbosity > 5) {
@@ -2489,9 +2246,9 @@ StreamerInceptionStepper<P, F>::computeInceptionVoltages() const noexcept
   return std::make_pair(Vplus, Vminu);
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::computeCriticalVolumeStatic() noexcept
+StreamerInceptionStepper<P, F, C>::computeCriticalVolumeStatic() noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeCriticalVolumeStatic");
   if (m_verbosity > 5) {
@@ -2559,9 +2316,9 @@ StreamerInceptionStepper<P, F>::computeCriticalVolumeStatic() noexcept
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 Real
-StreamerInceptionStepper<P, F>::computeCriticalVolumeDynamic() const noexcept
+StreamerInceptionStepper<P, F, C>::computeCriticalVolumeDynamic() const noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeCriticalVolumeDynamic");
   if (m_verbosity > 5) {
@@ -2614,9 +2371,9 @@ StreamerInceptionStepper<P, F>::computeCriticalVolumeDynamic() const noexcept
   return ParallelOps::sum(Vcr);
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::computeRdotStatic() noexcept
+StreamerInceptionStepper<P, F, C>::computeRdotStatic() noexcept
 {
   CH_TIME("StreamerInceptionStepper::computeRdotStatic");
   if (m_verbosity > 5) {
@@ -2743,9 +2500,9 @@ StreamerInceptionStepper<P, F>::computeRdotStatic() noexcept
   }
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::writeReportStatic() const noexcept
+StreamerInceptionStepper<P, F, C>::writeReportStatic() const noexcept
 {
   CH_TIME("StreamerInceptionStepper::writeReportStatic");
   if (m_verbosity > 5) {
@@ -2796,9 +2553,9 @@ StreamerInceptionStepper<P, F>::writeReportStatic() const noexcept
 #endif
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F>::writeReportDynamic() const noexcept
+StreamerInceptionStepper<P, F, C>::writeReportDynamic() const noexcept
 {
   CH_TIME("StreamerInceptionStepper::writeReportDynamic");
   if (m_verbosity > 5) {
@@ -2849,11 +2606,11 @@ StreamerInceptionStepper<P, F>::writeReportDynamic() const noexcept
 #endif
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 bool
-StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect& a_pos,
-                                                    const RealVect& a_probLo,
-                                                    const RealVect& a_probHi) const noexcept
+StreamerInceptionStepper<P, F, C>::particleOutsideGrid(const RealVect& a_pos,
+                                                       const RealVect& a_probLo,
+                                                       const RealVect& a_probHi) const noexcept
 {
 #ifndef NDEBUG
   CH_TIME("StreamerInceptionStepper::particleOutsideGrid");
@@ -2873,9 +2630,9 @@ StreamerInceptionStepper<P, F>::particleOutsideGrid(const RealVect& a_pos,
   return isOutside;
 }
 
-template <typename P, typename F>
+template <typename P, typename F, typename C>
 bool
-StreamerInceptionStepper<P, F>::particleInsideEB(const RealVect a_pos) const noexcept
+StreamerInceptionStepper<P, F, C>::particleInsideEB(const RealVect a_pos) const noexcept
 {
 #ifndef NDEBUG
   CH_TIME("StreamerInceptionStepper::particleInsideEB");
@@ -2887,46 +2644,6 @@ StreamerInceptionStepper<P, F>::particleInsideEB(const RealVect a_pos) const noe
   const RefCountedPtr<BaseIF>& implicitFunction = m_amr->getBaseImplicitFunction(m_phase);
 
   return (implicitFunction->value(a_pos) >= 0.0) ? true : false;
-}
-
-template <typename P, typename F>
-Real
-StreamerInceptionStepper<P, F>::computeNegativeIonCFL(const Real& a_voltage) const noexcept
-{
-  CH_TIME("StreamerInceptionStepper::computeNegativeIonCFL");
-  if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeNegativeIonCFL" << endl;
-  }
-
-  Real dt = std::numeric_limits<Real>::max();
-
-  m_negativeIonSolver->interpolateVelocities();
-
-  ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Real dx = m_amr->getDx()[lvl];
-
-    for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-      List<P>& ionParticles = amrParticles[lvl][dit()].listItems();
-
-      for (ListIterator<P> lit(ionParticles); lit.ok(); ++lit) {
-        P& p = lit();
-
-        // We have interpolated -E onto the particle position but the actual velocity
-        // must be multiplied by the input voltage (because we solved with a voltage = 1V)
-        // and by the ion mobility.
-        const RealVect v     = a_voltage * p.velocity();
-        const Real     Eminu = v.vectorLength();
-        const Real     mu    = m_negativeIonMobility(Eminu);
-        const Real     vMax  = mu * std::abs(v.maxDir(true));
-
-        dt = std::min(dt, std::abs(dx / (mu * Eminu)));
-      }
-    }
-  }
-
-  return ParallelOps::min(dt);
 }
 
 #include <CD_NamespaceFooter.H>

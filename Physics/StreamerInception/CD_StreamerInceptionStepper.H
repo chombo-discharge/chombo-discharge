@@ -19,6 +19,8 @@
 #include <CD_TracerParticle.H>
 #include <CD_FieldSolver.H>
 #include <CD_FieldSolverMultigrid.H>
+#include <CD_CdrSolver.H>
+#include <CD_CdrCTU.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -45,9 +47,9 @@ namespace Physics {
 
     /*!
       @brief Class for streamer inception integral evaluations. 
-      @details P is the tracer particle type and F is the field solver type. 
-      Note that the integration algorithm requires some transient storage on each particle (such as the previous position). 
-      This is defined in the TracerParticle template arguments. 
+      @details P is the tracer particle type
+               F is the field solver type. 
+               C is the convection-diffusion-reaction solver type. 
     */
     template <typename P = TracerParticle<2, 2>, typename F = FieldSolverMultigrid, typename C = CdrCTU>
     class StreamerInceptionStepper : public TimeStepper
@@ -331,14 +333,14 @@ namespace Physics {
       RefCountedPtr<TracerParticleSolver<P>> m_tracerParticleSolver;
 
       /*!
-	@brief Negative ion solver
-      */
-      RefCountedPtr<TracerParticleSolver<P>> m_negativeIonSolver;
-
-      /*!
 	@brief Field solver.
       */
       RefCountedPtr<FieldSolver> m_fieldSolver;
+
+      /*!
+	@brief Negative ion solver.
+      */
+      RefCountedPtr<CdrSolver> m_ionSolver;
 
       /*!
 	@brief Electric field.
@@ -639,12 +641,6 @@ namespace Physics {
       seedIonizationParticles(const Real& a_voltage) noexcept;
 
       /*!
-	@brief Create negative ions
-      */
-      virtual void
-      seedNegativeIons() noexcept;
-
-      /*!
 	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral. 
 	@details This is called in postInitialize() only. 
 	@note For static mode only. 
@@ -674,33 +670,6 @@ namespace Physics {
       */
       virtual void
       inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept;
-
-      /*!
-	@brief Move negative ions using
-	@param[in] a_voltage Voltage multiplier
-	@param[in] a_dt      Time step. 
-	@note Only for dynamic runs. 
-      */
-      virtual void
-      advanceNegativeIons(const Real& a_voltage, const Real& a_dt) noexcept;
-
-      /*!
-	@brief Move negative ions using an Euler scheme. 
-	@param[in] a_voltage Voltage multiplier
-	@param[in] a_dt      Time step. 
-	@note Only for dynamic runs. 
-      */
-      virtual void
-      advanceNegativeIonsEuler(const Real& a_voltage, const Real& a_dt) noexcept;
-
-      /*!
-	@brief Move negative ions using Heun's method. 
-	@param[in] a_voltage Voltage multiplier
-	@param[in] a_dt      Time step. 
-	@note Only for dynamic runs. 
-      */
-      virtual void
-      advanceNegativeIonsTrapezoidal(const Real& a_voltage, const Real& a_dt) noexcept;
 
       /*!
 	@brief Compute integral_Vcr(dne/dt * (1 - eta/alpha) dV)
@@ -844,15 +813,6 @@ namespace Physics {
       */
       inline bool
       particleInsideEB(const RealVect a_pos) const noexcept;
-
-      /*!
-	@brief Compute time step such that no ions move more than grid cell (on their current level)
-	@param[in] a_voltage Voltage multiplier
-	@return Smallest time step. 
-	@note Particle velocities should be interpolated before calling this routine. 
-      */
-      inline Real
-      computeNegativeIonCFL(const Real& a_voltage) const noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics
