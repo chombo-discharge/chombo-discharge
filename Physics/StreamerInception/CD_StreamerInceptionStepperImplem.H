@@ -60,8 +60,6 @@ StreamerInceptionStepper<P, F>::StreamerInceptionStepper()
   m_negativeIonMobility = [](const Real E) -> Real { return 0.0; };
 
 #if 1 // To-do list.
-  std::cout << "StreamerInceptionStepperImplem.H -- add alpha-tagging to inception tagger\n";
-  std::cout << "StreamerInceptionStepperImplem.H -- fix curvature tagger\n";
   std::cout << "StreamerInceptionStepperImplem.H -- fix first electron comp for static mode => compute Rdot\n";
   std::cout
     << "StreamerInceptionStepperImplem.H -- reports cannot be in destructor (because of Driver.geometry_only)\n";
