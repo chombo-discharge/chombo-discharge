@@ -21,25 +21,38 @@ namespace Physics {
 
     /*!
       @brief Class for tagging cells in the StreamerInception module. 
-      @details This flags cells for refinement if |grad(|E|)|dx /|E| > threshold. 
+      @details This flags cells for refinement if alpha_eff * dx > threshold. User must supply the
+      effective ionization coefficient through the constructor. 
     */
     class StreamerInceptionTagger : public CellTagger
     {
     public:
-      // Disallowed constructors.
-      StreamerInceptionTagger()                                = delete;
-      StreamerInceptionTagger(const StreamerInceptionTagger&)  = delete;
+      /*!
+	@brief Disallowed constructor
+      */
+      StreamerInceptionTagger() = delete;
+
+      /*!
+	@brief Disallowed constructor
+      */
+      StreamerInceptionTagger(const StreamerInceptionTagger&) = delete;
+
+      /*!
+	@brief Disallowed constructor
+      */
       StreamerInceptionTagger(const StreamerInceptionTagger&&) = delete;
 
       /*!
 	@brief Full constructor.
 	@param[in] a_amrMesh       Amr mesh. 
-	@param[in] a_electricField Pointer to electric field. 
+	@param[in] a_electricField Pointer to electric field data.
+	@param[in] a_alphaEff      Ionization coefficient
 	@param[in] a_phase         Default phase. 
       */
-      StreamerInceptionTagger(const RefCountedPtr<AmrMesh>& a_amrMesh,
-                              const EBAMRCellData* const    a_electricField,
-                              const phase::which_phase      a_phase = phase::gas);
+      StreamerInceptionTagger(const RefCountedPtr<AmrMesh>&            a_amrMesh,
+                              const EBAMRCellData* const               a_electricField,
+                              const std::function<Real(const Real E)>& a_alphaEff,
+                              const phase::which_phase                 a_phase = phase::gas);
 
       /*!
 	@brief Destructor
@@ -99,6 +112,11 @@ namespace Physics {
       mutable EBAMRCellData m_tracerField;
 
       /*!
+	@brief Ionization coefficient
+      */
+      std::function<Real(const Real& E)> m_alphaEff;
+
+      /*!
 	@brief Phase
       */
       phase::which_phase m_phase;
@@ -111,15 +129,20 @@ namespace Physics {
       /*!
 	@brief Curvature refinement factor
       */
-      Real m_refCurv;
+      Real m_refAlpha;
+
+      /*!
+	@brief Max voltage
+      */
+      Real m_maxVoltage;
 
       /*!
 	@brief Plot tracer field or not
       */
-      bool m_plotTracer;
+      bool m_plot;
 
       /*!
-	@brief Function which computes the tracer field
+	@brief Compute alpha_eff*dx at max voltage.
       */
       virtual void
       computeTracerField() const noexcept;

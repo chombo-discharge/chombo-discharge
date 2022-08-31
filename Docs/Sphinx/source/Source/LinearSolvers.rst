@@ -142,7 +142,7 @@ Ghost cell interpolation
 ________________________
 
 With AMR, multigrid requires ghost cells on the refinement boundary.
-The interior stencils for the Helmholtz operator are first order and thus only require a single level of ghost cells (and no corner ghost cells).
+The interior stencils for the Helmholtz operator have a radius of one and thus only require a single layer of ghost cells (and no corner ghost cells).
 These ghost cells are filled using a finite-difference stencil, see :numref:`Fig:MultigridInterpolation`.
 
 .. _Fig:MultigridInterpolation:

@@ -21,9 +21,10 @@
 
 using namespace Physics::StreamerInception;
 
-StreamerInceptionTagger::StreamerInceptionTagger(const RefCountedPtr<AmrMesh>& a_amrMesh,
-                                                 const EBAMRCellData* const    a_electricField,
-                                                 const phase::which_phase      a_phase)
+StreamerInceptionTagger::StreamerInceptionTagger(const RefCountedPtr<AmrMesh>&            a_amrMesh,
+                                                 const EBAMRCellData* const               a_electricField,
+                                                 const std::function<Real(const Real E)>& a_alphaEff,
+                                                 const phase::which_phase                 a_phase)
 {
   CH_TIME("StreamerInceptionTagger::StreamerInceptionTagger()");
 
@@ -33,8 +34,9 @@ StreamerInceptionTagger::StreamerInceptionTagger(const RefCountedPtr<AmrMesh>& a
 
   m_amr           = a_amrMesh;
   m_electricField = a_electricField;
+  m_alphaEff      = a_alphaEff;
   m_phase         = a_phase;
-  m_plotTracer    = true;
+  m_plot          = true;
 }
 
 StreamerInceptionTagger::~StreamerInceptionTagger()
@@ -57,8 +59,9 @@ StreamerInceptionTagger::parseOptions()
 
   pp.get("verbosity", m_verbosity);
   pp.get("buffer", m_buffer);
-  pp.get("ref_curv", m_refCurv);
-  pp.get("plot_curv", m_plotTracer);
+  pp.get("ref_alpha", m_refAlpha);
+  pp.get("max_voltage", m_maxVoltage);
+  pp.get("plot", m_plot);
 }
 
 void
@@ -108,7 +111,7 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
       const FArrayBox& tracerFieldReg = tracerField.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
-        if (ebisbox.isRegular(iv) && tracerFieldReg(iv, 0) >= m_refCurv) {
+        if (ebisbox.isRegular(iv) && tracerFieldReg(iv, 0) >= m_refAlpha) {
           foundTags = 1;
 
           tags |= iv;
@@ -116,7 +119,7 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
-        if (tracerField(vof, 0) >= m_refCurv) {
+        if (tracerField(vof, 0) >= m_refAlpha) {
           foundTags = 1;
 
           tags |= vof.gridIndex();
@@ -144,7 +147,7 @@ StreamerInceptionTagger::getNumberOfPlotVariables() const
     pout() << "StreamerInceptionTagger::getNumberOfPlotVariables()" << endl;
   }
 
-  return m_plotTracer ? 1 : 0;
+  return m_plot ? 1 : 0;
 }
 
 void
@@ -157,12 +160,12 @@ StreamerInceptionTagger::writePlotData(EBAMRCellData&       a_output,
     pout() << "StreamerInceptionTagger::writePlotData()" << endl;
   }
 
-  if (m_plotTracer) {
+  if (m_plot) {
     this->computeTracerField();
 
     DataOps::copy(a_output, m_tracerField, Interval(a_icomp, a_icomp), Interval(0, 0));
 
-    a_plotVariableNames.push_back("Tagging curvature field");
+    a_plotVariableNames.push_back(m_name + " alpha-criterion");
 
     a_icomp++;
   }
@@ -178,31 +181,41 @@ StreamerInceptionTagger::computeTracerField() const noexcept
 
   CH_assert(m_electricField != nullptr);
 
-  EBAMRCellData magnE;
-  EBAMRCellData gradE;
-
-  m_amr->allocate(magnE, m_realm, m_phase, 1);
-  m_amr->allocate(gradE, m_realm, m_phase, SpaceDim);
-
-  // Compute |E|
-  DataOps::vectorLength(magnE, *m_electricField);
-
-  m_amr->conservativeAverage(magnE, m_realm, m_phase);
-  m_amr->interpGhostMG(magnE, m_realm, m_phase);
-
-  // Compute |grad(|E|)| onto m_tracerField
-  m_amr->computeGradient(gradE, magnE, m_realm, m_phase);
-
-  DataOps::vectorLength(m_tracerField, gradE);
-
-  // Compute |grad(|E|)| * dx / E
+  // Compute alphaEff * dx on all grid levels.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Real dx = m_amr->getDx()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const Real               dx  = m_amr->getDx()[lvl];
 
-    DataOps::scale(*m_tracerField[lvl], dx);
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const EBCellFAB& electricField    = (*(*m_electricField)[lvl])[dit()];
+      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+      EBCellFAB& tracerField    = (*m_tracerField[lvl])[dit()];
+      FArrayBox& tracerFieldReg = tracerField.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+        const Real     E  = EE.vectorLength();
+
+        tracerFieldReg(iv, 0) = m_alphaEff(m_maxVoltage * E) * dx;
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+        const Real     E  = EE.vectorLength();
+
+        tracerField(vof, 0) = m_alphaEff(m_maxVoltage * E) * dx;
+      };
+
+      Box          cellBox = dbl[dit()];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
   }
 
-  DataOps::divideFallback(m_tracerField, magnE, 0.0);
+  m_amr->conservativeAverage(m_tracerField, m_realm, m_phase);
 }
 
 #include <CD_NamespaceFooter.H>

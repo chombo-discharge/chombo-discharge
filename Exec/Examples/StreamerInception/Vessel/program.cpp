@@ -53,15 +53,13 @@ main(int argc, char* argv[])
 
   auto eta = [&](const Real& E) -> Real { return attachmentData.getEntry<1>(E); };
 
-  // Define a background ionization rate.
-  auto bgIonization = [N](const Real& E) -> Real { return 2.E6 / (1.17E-4 * exp(2.91E7 / E)); };
+  auto alphaEff = [&](const Real& E) -> Real { return alpha(E) - eta(E); };
 
-  // Define ion mobility and density
+  auto bgIonization = [](const Real& E) -> Real { return 2.E6 / (1.17E-4 * exp(2.91E7 / E)); };
+
   auto ionMobility = [](const Real& E) -> Real { return 2E-4; };
 
   auto ionDensity = [](const RealVect& x) -> Real { return 1.E10; };
-
-  //
 
   // Define a lightning impulse voltage curve.
   ParmParse vessel("impulse");
@@ -89,7 +87,7 @@ main(int argc, char* argv[])
   // Set up time stepper
   auto timestepper = RefCountedPtr<StreamerInceptionStepper<>>(new StreamerInceptionStepper<>());
   auto celltagger =
-    RefCountedPtr<StreamerInceptionTagger>(new StreamerInceptionTagger(amr, timestepper->getElectricField()));
+    RefCountedPtr<StreamerInceptionTagger>(new StreamerInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
 
   // Set everything.
   timestepper->setAlpha(alpha);

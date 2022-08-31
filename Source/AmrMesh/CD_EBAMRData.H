@@ -89,6 +89,12 @@ public:
   size() const;
 
   /*!
+    @brief Exchange on all AMR levels
+  */
+  void
+  exchange() noexcept;
+
+  /*!
     @brief Get underlying data. Returns m_data. 
   */
   Vector<RefCountedPtr<LevelData<T>>>&

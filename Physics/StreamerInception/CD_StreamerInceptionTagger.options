@@ -1,7 +1,8 @@
 # ====================================================================================================
 # StreamerInceptionTagger class options
 # ====================================================================================================
-StreamerInceptionTagger.verbosity = -1    # Tagger chattiness. 
-StreamerInceptionTagger.buffer    = 4     # Grown buffer around flagged cells
-StreamerInceptionTagger.ref_curv  = 5.0   # Refinement curvature criterion. Lower => more mesh
-StreamerInceptionTagger.plot_curv = false # Plot tagging field or not. 
+StreamerInceptionTagger.verbosity   = -1    # Tagger chattiness. 
+StreamerInceptionTagger.buffer      = 4     # Grown buffer around flagged cells
+StreamerInceptionTagger.max_voltage = 1.0   # Maximum applied voltage 
+StreamerInceptionTagger.ref_alpha   = 5.0   # Refinement curvature criterion. Lower => more mesh
+StreamerInceptionTagger.plot        = false # Plot tagging field or not. 

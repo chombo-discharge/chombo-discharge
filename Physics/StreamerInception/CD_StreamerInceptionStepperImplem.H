@@ -230,7 +230,7 @@ StreamerInceptionStepper<P, F>::initialData()
   DataOps::copy(m_electricFieldPlus, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
 
   m_amr->conservativeAverage(m_electricFieldPlus, m_realm, m_phase);
-  m_amr->interpGhost(m_electricFieldPlus, m_realm, m_phase);
+  m_amr->interpGhostMG(m_electricFieldPlus, m_realm, m_phase);
 
   m_amr->interpToCentroids(m_electricFieldPlus, m_realm, m_phase);
 
@@ -1059,7 +1059,7 @@ StreamerInceptionStepper<P, F>::regrid(const int a_lmin, const int a_oldFinestLe
   // Get the gas-side electric field
   DataOps::copy(m_electricFieldPlus, m_amr->alias(phase::gas, m_fieldSolver->getElectricField()));
 
-  m_amr->conservativeAverage(m_electricFieldPlus, m_realm, m_phase);
+  m_amr->average(m_electricFieldPlus, m_realm, m_phase, Average::Conservative);
   m_amr->interpGhostMG(m_electricFieldPlus, m_realm, m_phase);
 
   m_amr->interpToCentroids(m_electricFieldPlus, m_realm, m_phase);
@@ -1369,10 +1369,6 @@ StreamerInceptionStepper<P, F>::seedNegativeIons() noexcept
   }
 
   CH_assert(!(m_negativeIonSolver.isNull()));
-
-  if (m_negativeIonSolver.isNull()) {
-    MayDay::Abort("shit");
-  }
 
   ParticleContainer<P>& amrParticles = m_negativeIonSolver->getParticles();
   amrParticles.clearParticles();
@@ -2058,9 +2054,9 @@ StreamerInceptionStepper<P, F>::computeRdot(const Real& a_voltage) const noexcep
         if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
           if (inceptionIntegralReg(iv, 0) >= m_inceptionK) {
 
-            const Real E =
-              a_voltage * RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)))
-                            .vectorLength();
+            const RealVect EE =
+              RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+            const Real E = a_voltage * EE.vectorLength();
 
             const Real alpha = m_alpha(E);
             const Real eta   = m_eta(E);
@@ -2073,15 +2069,14 @@ StreamerInceptionStepper<P, F>::computeRdot(const Real& a_voltage) const noexcep
         }
       };
 
-      // Add contribution from background ionization in cut-cells.
+      // Add contribution from background ionization and field emission in cut-cells.
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const IntVect iv = vof.gridIndex();
         if (ebisbox.isIrregular(iv) && validCells(iv, 0)) {
           if (inceptionIntegral(vof, 0) >= m_inceptionK) {
 
-            const Real E =
-              a_voltage *
-              RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2))).vectorLength();
+            const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+            const Real     E  = a_voltage * EE.vectorLength();
 
             const Real kappa    = ebisbox.volFrac(vof);
             const Real areaFrac = ebisbox.bndryArea(vof);
@@ -2091,7 +2086,7 @@ StreamerInceptionStepper<P, F>::computeRdot(const Real& a_voltage) const noexcep
             const Real dndt     = m_backgroundRate(E);
 
             Rdot += dndt * (1.0 - eta / alpha) * kappa * vol;
-            //            Rdot += j / Units::Qe * areaFrac * area;
+            Rdot += j / Units::Qe * areaFrac * area;
           }
         }
       };
@@ -2931,12 +2926,6 @@ StreamerInceptionStepper<P, F>::computeNegativeIonCFL(const Real& a_voltage) con
         dt = std::min(dt, std::abs(dx / (mu * Eminu)));
       }
     }
-  }
-
-  dt = ParallelOps::min(dt);
-
-  if (procID() == 0) {
-    std::cout << m_amr->getDx()[m_amr->getFinestLevel()] * 1.E6 << "\t" << dt << std::endl;
   }
 
   return ParallelOps::min(dt);
