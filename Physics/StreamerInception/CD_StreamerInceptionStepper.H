@@ -36,6 +36,16 @@ namespace Physics {
     };
 
     /*!
+      @brief Algorithm for negative ion advancement
+    */
+    enum class AdvectionAlgorithm
+    {
+      Euler,
+      Heun,
+      CTU
+    };
+
+    /*!
       @brief Mode for specifying whether the module is run statically or dynamically
     */
     enum class Mode
@@ -205,6 +215,12 @@ namespace Physics {
       advance(const Real a_dt) override;
 
       /*!
+	@brief Advance negative ions
+      */
+      virtual void
+      advanceIons(const Real a_dt) noexcept;
+
+      /*!
 	@brief Synchronize solver times and time steps
 	@param[in] a_step Time step
 	@param[in] a_time Time (in seconds)
@@ -326,6 +342,11 @@ namespace Physics {
 	@brief Integration algorithm for K-value. 
       */
       IntegrationAlgorithm m_inceptionAlgorithm;
+
+      /*!
+	@brief Advection algorithm for advancing negative ions in the dynamic mode
+      */
+      AdvectionAlgorithm m_advectionAlgorithm;
 
       /*!
 	@brief Tracer particle solver.
@@ -474,24 +495,9 @@ namespace Physics {
       std::vector<std::pair<Real, Real>> m_criticalVolume;
 
       /*!
-	@brief Time step for dynamic mode
-      */
-      Real m_fixedDt;
-
-      /*!
-	@brief CFL-like particle time step for negative ions. 
+	@brief CFL-step for negative ions.
       */
       Real m_cfl;
-
-      /*!
-	@brief Maximum permitted time step
-      */
-      Real m_maxDt;
-
-      /*!
-	@brief Minimum permitted time step
-      */
-      Real m_minDt;
 
       /*!
 	@brief Variable step size for K-integration algorithm (factor of dx)
@@ -512,11 +518,6 @@ namespace Physics {
 	@brief If true, used fixed integration step for inception integration
       */
       bool m_useFixedInceptionStep;
-
-      /*!
-	@brief Use fixed dt or not
-      */
-      bool m_useFixedDt;
 
       /*!
 	@brief If true, print a report at the end
@@ -596,7 +597,7 @@ namespace Physics {
       /*!
 	@brief Negative ion density
       */
-      std::function<Real(const RealVect& x)> m_negativeIonDensity;
+      std::function<Real(const RealVect& x)> m_initialIonDensity;
 
       /*!
 	@brief Negative ion mobility
@@ -813,6 +814,13 @@ namespace Physics {
       */
       inline bool
       particleInsideEB(const RealVect a_pos) const noexcept;
+
+      /*!
+	@brief Set the negative ion velocity
+	@param[in] a_voltage Current voltage
+      */
+      inline void
+      setIonVelocity(const Real& a_voltage) noexcept;
     };
   } // namespace StreamerInception
 } // namespace Physics

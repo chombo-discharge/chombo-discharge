@@ -22,6 +22,7 @@
 
 // Our includes
 #include <CD_Units.H>
+#include <CD_StreamerInceptionSpecies.H>
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_NamespaceHeader.H>
 
@@ -36,10 +37,11 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   }
 
   // Default settings.
-  m_verbosity = -1;
-  m_realm     = Realm::Primal;
-  m_phase     = phase::gas;
-  m_mode      = Mode::Static;
+  m_verbosity          = -1;
+  m_realm              = Realm::Primal;
+  m_phase              = phase::gas;
+  m_mode               = Mode::Static;
+  m_advectionAlgorithm = AdvectionAlgorithm::Heun;
 
   this->parseOptions();
 
@@ -55,7 +57,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
   m_fieldEmission = [](const Real E) -> Real { return 0.0; };
 
-  m_negativeIonDensity = [](const RealVect x) -> Real { return 0.0; };
+  m_initialIonDensity = [](const RealVect x) -> Real { return 0.0; };
 
   m_negativeIonMobility = [](const Real E) -> Real { return 0.0; };
 
@@ -127,9 +129,23 @@ StreamerInceptionStepper<P, F, C>::setupSolvers()
   m_tracerParticleSolver->setVolumeScale(true);
 
   // This one is needed for the dynamic runs which also track the ions.
+#if 0
   if (m_mode == Mode::Dynamic) {
-    m_ionSolver = RefCountedPtr<CdrSolver>(new C());
+#endif
+  m_ionSolver = RefCountedPtr<CdrSolver>(new C());
+
+  m_ionSolver->parseOptions();
+  m_ionSolver->setPhase(m_phase);
+  m_ionSolver->setAmr(m_amr);
+  m_ionSolver->setComputationalGeometry(m_computationalGeometry);
+  m_ionSolver->setRealm(m_realm);
+
+  auto species = RefCountedPtr<CdrSpecies>(new StreamerInceptionSpecies(m_initialIonDensity, true, false));
+
+  m_ionSolver->setSpecies(species);
+#if 0
   }
+#endif
 }
 
 template <typename P, typename F, typename C>
@@ -143,6 +159,7 @@ StreamerInceptionStepper<P, F, C>::allocate()
 
   m_fieldSolver->allocateInternals();
   m_tracerParticleSolver->allocate();
+  m_ionSolver->allocateInternals();
 
   // Needed for all modes.
   m_amr->allocate(m_electricFieldPlus, m_realm, m_phase, SpaceDim);
@@ -293,8 +310,6 @@ StreamerInceptionStepper<P, F, C>::parseOptions()
   pp.get("K_inception", m_inceptionK);
   pp.get("print_report", m_writeReport);
   pp.get("output_file", m_outputFile);
-  pp.get("max_dt", m_maxDt);
-  pp.get("min_dt", m_minDt);
 
   pp.get("mode", str1);
   if (str1 == "none") {
@@ -336,21 +351,8 @@ StreamerInceptionStepper<P, F, C>::parseOptions()
     MayDay::Error("Expected 'dx' or 'fixed' for 'StreamerInceptionStepper.inception_alg'");
   }
 
-  // Get the time step.
-  pp.get("dt", str1, 0);
-  if (str1 == "fixed") {
-    m_useFixedDt = true;
-
-    pp.get("dt", m_fixedDt, 1);
-  }
-  else if (str1 == "cfl") {
-    m_useFixedDt = false;
-
-    pp.get("dt", m_cfl, 1);
-  }
-  else {
-    MayDay::Error("Expected 'fixed' or 'cfl' for 'StreamerInceptionStepper.dt'");
-  }
+  // Get the CFL number.
+  pp.get("cfl", m_cfl);
 
   // Get plot variables.
   const int num = pp.countval("plt_vars");
@@ -364,6 +366,9 @@ StreamerInceptionStepper<P, F, C>::parseOptions()
       }
       else if (plotVars[i] == "tracer") {
         m_plotTracer = true;
+      }
+      else if (plotVars[i] == "ions") {
+        m_plotNegativeIons = true;
       }
       else if (plotVars[i] == "K") {
         m_plotInceptionIntegral = true;
@@ -456,16 +461,19 @@ StreamerInceptionStepper<P, F, C>::writePlotData(EBAMRCellData&       a_output,
     a_plotVariableNames.append(m_tracerParticleSolver->getPlotVariableNames());
   }
 
+  if (m_plotNegativeIons) {
+    m_ionSolver->writePlotData(a_output, a_icomp);
+    a_plotVariableNames.append(m_ionSolver->getPlotVariableNames());
+  }
+
   // Write data -- this differs between the 'static' and 'dynamic' modes
   switch (m_mode) {
   case Mode::Static: {
-
     this->writePlotDataStatic(a_output, a_plotVariableNames, a_icomp);
 
     break;
   }
   case Mode::Dynamic:
-
     this->writePlotDataDynamic(a_output, a_plotVariableNames, a_icomp);
 
     break;
@@ -751,6 +759,9 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
   if (m_plotTracer) {
     ncomp += m_tracerParticleSolver->getNumberOfPlotVariables();
   }
+  if (m_plotNegativeIons) {
+    ncomp += m_ionSolver->getNumberOfPlotVariables();
+  }
 
   switch (m_mode) {
   case Mode::Static: {
@@ -841,15 +852,7 @@ StreamerInceptionStepper<P, F, C>::computeDt()
   Real dt = std::numeric_limits<Real>::max();
 
   if (m_mode == Mode::Dynamic) {
-    if (m_useFixedDt) {
-      dt = m_fixedDt;
-    }
-    else {
-      MayDay::Error("StreamerInceptionStepper::computeDt -- dynamic mode still a work-in-progress");
-    }
-
-    dt = std::min(m_maxDt, dt);
-    dt = std::max(m_minDt, dt);
+    dt = m_cfl * m_ionSolver->computeAdvectionDt();
   }
 
   return dt;
@@ -869,9 +872,13 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     const Real curTime    = m_time + a_dt;
     const Real curVoltage = m_voltageCurve(curTime);
 
-    m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
+    // Move the negative ions.
+    this->setIonVelocity(curVoltage);
+    this->advanceIons(a_dt);
 
     // Seed new particles and compute the inception integral.
+    m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
+
     this->seedIonizationParticles(curVoltage);
     this->computeInceptionIntegralDynamic(curVoltage);
 
@@ -908,6 +915,71 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
   }
 
   return a_dt;
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::advanceIons");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::advanceIons" << endl;
+  }
+
+  EBAMRCellData& phi = m_ionSolver->getPhi();
+
+  switch (m_advectionAlgorithm) {
+  case AdvectionAlgorithm::Euler: {
+    EBAMRCellData divF;
+    m_amr->allocate(divF, m_realm, m_phase, 1.0);
+
+    m_ionSolver->computeDivF(divF, phi, 0.0, false, false, false);
+
+    DataOps::incr(phi, divF, -a_dt);
+
+    break;
+  }
+  case AdvectionAlgorithm::Heun: {
+    // Transient storage
+    EBAMRCellData yp;
+    EBAMRCellData k1;
+    EBAMRCellData k2;
+
+    m_amr->allocate(yp, m_realm, m_phase, 1);
+    m_amr->allocate(k1, m_realm, m_phase, 1);
+    m_amr->allocate(k2, m_realm, m_phase, 1);
+
+    // Compute k1 coefficient
+    m_ionSolver->computeDivF(k1, phi, 0.0, false, false, false);
+    DataOps::copy(yp, phi);
+    DataOps::incr(yp, k1, -a_dt);
+
+    // Compute k2 coefficient and final state
+    m_ionSolver->computeDivF(k2, yp, 0.0, false, false, false);
+    DataOps::incr(phi, k1, -0.5 * a_dt);
+    DataOps::incr(phi, k2, -0.5 * a_dt);
+
+    break;
+  }
+  case AdvectionAlgorithm::CTU: {
+    EBAMRCellData divF;
+    m_amr->allocate(divF, m_realm, m_phase, 1.0);
+
+    m_ionSolver->computeDivF(divF, phi, a_dt, false, false, false);
+
+    DataOps::incr(phi, divF, -a_dt);
+
+    break;
+  }
+  default: {
+    MayDay::Error("StreamerInceptionStepper::advanceIons -- logic bust");
+  }
+  }
+
+  DataOps::floor(phi, 0.0);
+
+  m_amr->average(phi, m_realm, m_phase, Average::Conservative);
+  m_amr->interpGhost(phi, m_realm, m_phase);
 }
 
 template <typename P, typename F, typename C>
@@ -959,10 +1031,7 @@ StreamerInceptionStepper<P, F, C>::preRegrid(const int a_lmin, const int a_oldFi
 
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_tracerParticleSolver->preRegrid(a_lmin, a_oldFinestLevel);
-
-  if (m_mode == Mode::Dynamic) {
-    MayDay::Error("StreamerInceptionStepper::preRegrid -- dynamic not implemented (yet)");
-  }
+  m_ionSolver->preRegrid(a_lmin, a_oldFinestLevel);
 }
 
 template <typename P, typename F, typename C>
@@ -977,10 +1046,7 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   // Regrid tracer particles and field
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_tracerParticleSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-
-  if (m_mode == Mode::Dynamic) {
-    MayDay::Error("StreamerInceptionStepper::regrid -- dynamic mode not supported (yet)");
-  }
+  m_ionSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   // Regrid velocity field
   m_amr->reallocate(m_electricFieldPlus, m_phase, a_lmin);
@@ -1085,7 +1151,7 @@ StreamerInceptionStepper<P, F, C>::setNegativeIonDensity(
     pout() << "StreamerInceptionStepper::setNegativeIonDensity" << endl;
   }
 
-  m_negativeIonDensity = a_density;
+  m_initialIonDensity = a_density;
 }
 
 template <typename P, typename F, typename C>
@@ -1363,11 +1429,13 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
   }
   case Mode::Dynamic: {
 
-    // Seed particles and
+    // Seed tracer particles and set velocity
     this->seedIonizationParticles(m_voltageCurve(m_time));
-
     m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
-    MayDay::Error("StreamerInceptionStepper<P, F, C>::postInitialize -- dynamic mode not implemented (yet)");
+
+    // Initialize the negative ion solver
+    m_ionSolver->initialData();
+    this->setIonVelocity(m_voltageCurve(m_time));
 
     // Compute the 'Rdot' value at current time (which is probably t = 0).
     this->computeInceptionIntegralDynamic(m_voltageCurve(m_time));
@@ -2644,6 +2712,67 @@ StreamerInceptionStepper<P, F, C>::particleInsideEB(const RealVect a_pos) const 
   const RefCountedPtr<BaseIF>& implicitFunction = m_amr->getBaseImplicitFunction(m_phase);
 
   return (implicitFunction->value(a_pos) >= 0.0) ? true : false;
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::setIonVelocity(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setIonVelocity");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setIonVelocity" << endl;
+  }
+
+  CH_assert(!(m_ionSolver.isNull()));
+  CH_assert(m_ionSolver->isMobile());
+
+  EBAMRCellData& vel = m_ionSolver->getCellCenteredVelocity();
+
+  // Set v = -E
+  DataOps::copy(vel, m_electricFieldPlus);
+  DataOps::scale(vel, -a_voltage);
+
+  // Allocate mesh data that holds mu and compute it on the mesh.
+  EBAMRCellData mu;
+  m_amr->allocate(mu, m_realm, m_phase, 1);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+      const EBCellFAB& v    = (*vel[lvl])[dit()];
+      const FArrayBox& vReg = v.getFArrayBox();
+
+      EBCellFAB& MU    = (*mu[lvl])[dit()];
+      FArrayBox& MUREG = MU.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        const RealVect EE = RealVect(D_DECL(vReg(iv, 0), vReg(iv, 1), vReg(iv, 2)));
+        const Real     E  = EE.vectorLength();
+
+        MUREG(iv, 0) = m_negativeIonMobility(E);
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const RealVect EE = RealVect(D_DECL(v(vof, 0), v(vof, 1), v(vof, 2)));
+        const Real     E  = EE.vectorLength();
+
+        MU(vof, 0) = m_negativeIonMobility(E);
+      };
+
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      Box          cellBox = dbl[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+
+  DataOps::multiplyScalar(vel, mu);
+
+  m_amr->average(vel, m_realm, m_phase, Average::Conservative);
+  m_amr->interpGhost(vel, m_realm, m_phase);
 }
 
 #include <CD_NamespaceFooter.H>
