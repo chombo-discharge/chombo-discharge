@@ -49,7 +49,7 @@ namespace Physics {
       Note that the integration algorithm requires some transient storage on each particle (such as the previous position). 
       This is defined in the TracerParticle template arguments. 
     */
-    template <typename P = TracerParticle<2, 2>, typename F = FieldSolverMultigrid>
+    template <typename P = TracerParticle<2, 2>, typename F = FieldSolverMultigrid, typename C = CdrCTU>
     class StreamerInceptionStepper : public TimeStepper
     {
     public:

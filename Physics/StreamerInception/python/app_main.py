@@ -14,9 +14,10 @@ def write_template(args):
     main_filename = app_dir + "/program.cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include <CD_Driver.H>\n')
-    mainf.write('#include <CD_' + args.particle_solver + '.H>\n')
+    mainf.write('#include <CD_' + args.particle_type + '.H>\n')
     mainf.write('#include <CD_' + args.geometry + '.H>\n')
-    mainf.write('#include <CD_' + args.field_solver + '.H>\n')    
+    mainf.write('#include <CD_' + args.field_solver + '.H>\n')
+    mainf.write('#include <CD_' + args.cdr_solver + '.H>\n')        
     mainf.write('#include <CD_StreamerInceptionStepper.H>\n')
     mainf.write('#include <CD_StreamerInceptionTagger.H>\n')    
     mainf.write('#include <ParmParse.H>\n')
