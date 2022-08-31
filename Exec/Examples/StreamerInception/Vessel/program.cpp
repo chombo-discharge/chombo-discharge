@@ -26,10 +26,10 @@ main(int argc, char* argv[])
   // Read ionization and attachment coefficients and make them into functions.
   constexpr Real N = 2.45E25;
 
-  // clang-format off
-  LookupTable<2> ionizationData = DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)", "");
-  LookupTable<2> attachmentData = DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend attach. coef. eta/N (m2)", "");
-  // clang-format on
+  LookupTable<2> ionizationData =
+    DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)", "");
+  LookupTable<2> attachmentData =
+    DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend attach. coef. eta/N (m2)", "");
 
   ionizationData.setRange(10, 2000, 0);
   attachmentData.setRange(10, 2000, 0);
@@ -84,12 +84,12 @@ main(int argc, char* argv[])
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new Vessel());
   RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
-  // Set up time stepper
+  // Set up time stepper and cell tagger.
   auto timestepper = RefCountedPtr<StreamerInceptionStepper<>>(new StreamerInceptionStepper<>());
   auto celltagger =
     RefCountedPtr<StreamerInceptionTagger>(new StreamerInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
 
-  // Set everything.
+  // Set data required for the streamer inception time-stepper.
   timestepper->setAlpha(alpha);
   timestepper->setEta(eta);
   timestepper->setBackgroundRate(bgIonization);
@@ -97,7 +97,7 @@ main(int argc, char* argv[])
   timestepper->setNegativeIonMobility(ionMobility);
   timestepper->setNegativeIonDensity(ionDensity);
 
-  // Set up the Driver and run it
+  // Set up Driver and run the simulation.
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));
   engine->setupAndRun(input_file);
 
