@@ -35,7 +35,7 @@ Driver.geometry_scan_level             = 0                # Geometry scan level 
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = -1               # Checkpoint interval
-Driver.regrid_interval                 = -1               # Regrid interval
+Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
 Driver.initial_regrids                 = 4                # Number of initial regrids
@@ -113,8 +113,8 @@ CdrCTU.bc.y.lo              = wall                    # 'data', 'function', 'wal
 CdrCTU.bc.y.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.z.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
-CdrCTU.slope_limiter        = mc                      # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
-CdrCTU.use_ctu              = false                   # If true, use CTU. Otherwise it's DTU.
+CdrCTU.slope_limiter        = none                    # Slope limiter. 'none', 'minmod', 'mc', or 'superbee'
+CdrCTU.use_ctu              = true                    # If true, use CTU. Otherwise it's DTU.
 CdrCTU.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrCTU.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
 CdrCTU.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
@@ -164,7 +164,7 @@ StreamerInceptionStepper.verbosity     = 10                            # Chattin
 StreamerInceptionStepper.print_report  = true                          # Print report at end of simulation.
 StreamerInceptionStepper.mode          = dynamic                        # Mode (static or dynamic)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
-StreamerInceptionStepper.plt_vars      = K Uinc alpha eta bg_rate emission ions poisson tracer       # Plot variables
+StreamerInceptionStepper.plt_vars      = K Uinc alpha eta bg_rate emission ions    # Plot variables
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 
 # Static mode
@@ -174,7 +174,8 @@ StreamerInceptionStepper.voltage_steps = 10                            # Number 
 StreamerInceptionStepper.K_inception   = 15                            # User-specified inception value
 
 # Dynamic mode
-StreamerInceptionStepper.cfl           = 0.8
+StreamerInceptionStepper.advection_alg = ctu                           # Advection algorithm. If using CTU, set use_ctu=false
+StreamerInceptionStepper.cfl           = 0.8                           # CFL
 
 # ====================================================================================================
 # StreamerInceptionTagger class options
@@ -182,11 +183,11 @@ StreamerInceptionStepper.cfl           = 0.8
 StreamerInceptionTagger.verbosity   = -1    # Tagger chattiness. 
 StreamerInceptionTagger.buffer      = 0     # Grown buffer around flagged cells
 StreamerInceptionTagger.max_voltage = 50E3  # Maximum applied voltage 
-StreamerInceptionTagger.ref_alpha   = 2.0   # Refinement curvature criterion. Lower => more mesh
-StreamerInceptionTagger.plot        = true  # Plot tagging field or not. 
+StreamerInceptionTagger.ref_alpha   = 5.0   # Refinement curvature criterion. Lower => more mesh
+StreamerInceptionTagger.plot        = false # Plot tagging field or not. 
 
 # Parameters for lightning impulse (used for dynamic runs)
-impulse.voltage = 50E3
+impulse.voltage = 100E3
 impulse.start   = 50E-9
 impulse.t1      = 50E-6
 impulse.t2      = 1.2E-6

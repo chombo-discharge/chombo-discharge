@@ -41,7 +41,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_realm              = Realm::Primal;
   m_phase              = phase::gas;
   m_mode               = Mode::Static;
-  m_advectionAlgorithm = AdvectionAlgorithm::Heun;
+  m_advectionAlgorithm = AdvectionAlgorithm::CTU;
 
   this->parseOptions();
 
@@ -337,6 +337,21 @@ StreamerInceptionStepper<P, F, C>::parseOptions()
   }
   else {
     MayDay::Error("Expected 'euler' or 'trapz' for 'StreamerInceptionStepper.inception_alg'");
+  }
+
+  // Get the advection algorithm
+  pp.get("advection_alg", str1);
+  if (str1 == "euler") {
+    m_advectionAlgorithm == AdvectionAlgorithm::Euler;
+  }
+  else if (str1 == "heun") {
+    m_advectionAlgorithm == AdvectionAlgorithm::Heun;
+  }
+  else if (str1 == "ctu") {
+    m_advectionAlgorithm == AdvectionAlgorithm::CTU;
+  }
+  else {
+    MayDay::Error("Expected 'euler', 'heun', or 'ctu' for 'StreamerInceptionStepper.advection_alg'");
   }
 
   if (str2 == "dx") {
@@ -1112,6 +1127,9 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   // Also store -E
   DataOps::copy(m_electricFieldMinu, m_electricFieldPlus);
   DataOps::scale(m_electricFieldMinu, -1.0);
+
+  // Re-compute the ion velocity
+  this->setIonVelocity(m_voltageCurve(m_time));
 }
 
 template <typename P, typename F, typename C>
