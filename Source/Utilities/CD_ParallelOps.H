@@ -21,18 +21,17 @@
 namespace ParallelOps {
 
   /*!
+    @brief MPI barrier
+  */
+  inline void
+  barrier();
+
+  /*!
     @brief Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)
     @param[in] a_input Data input. Returns the smallest. 
   */
   inline Real
   min(const Real& a_input);
-
-  /*!
-    @brief Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)
-    @param[in] a_input Data input. 
-  */
-  inline Real
-  max(const Real& a_input);
 
   /*!
     @brief Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)
@@ -42,6 +41,21 @@ namespace ParallelOps {
   min(const int& a_input);
 
   /*!
+    @brief Get the minimum value and the position corresponding to the minimum value of a_val
+    @details This returns the value a_val and position a_pos such that they correspond to the 
+    input variables for the processer which held the smallest value a_val. 
+  */
+  inline std::pair<Real, RealVect>
+  min(const Real& a_val, const RealVect& a_pos) noexcept;
+
+  /*!
+    @brief Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)
+    @param[in] a_input Data input. 
+  */
+  inline Real
+  max(const Real& a_input);
+
+  /*!
     @brief Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)
     @param[in] a_input Data input. 
   */
@@ -49,10 +63,27 @@ namespace ParallelOps {
   max(const int& a_input);
 
   /*!
+    @brief Get the maximum value and the position corresponding to the maximum value of a_val
+    @details This returns the value a_val and position a_pos such that they correspond to the 
+    input variables for the processer which held the largest value a_val. 
+  */
+  inline std::pair<Real, RealVect>
+  max(const Real& a_val, const RealVect& a_pos) noexcept;
+
+  /*!
     @brief Compute the sum across all MPI ranks
   */
   inline Real
   sum(const Real& a_value);
+
+  /*!
+    @brief Perform a summation of all the MPI ranks's input data. 
+    @details This performs a rank-wise summation. If rank 1 has data (1,2,3) and rank 2 has data (3,4,5), the output data
+    on both ranks is (4,6,8).
+    @param[inout] a_data On 
+  */
+  inline void
+  vectorSum(Vector<Real>& a_data);
 
   /*!
     @brief Perform a summation of all the MPI ranks's input data. 

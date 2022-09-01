@@ -46,12 +46,12 @@ namespace Physics {
     };
 
     /*!
-      @brief Mode for specifying whether the module is run statically or dynamically
+      @brief For specifying whether the module is run in stationary or transient mode
     */
     enum class Mode
     {
-      Static,
-      Dynamic
+      Stationary,
+      Transient
     };
 
     /*!
@@ -229,7 +229,7 @@ namespace Physics {
       synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
 
       /*!
-	@brief Print a step report. Used in dynamic simulations. 
+	@brief Print a step report. Used in transient simulations. 
       */
       virtual void
       printStepReport() override;
@@ -259,7 +259,7 @@ namespace Physics {
       postRegrid() override;
 
       /*!
-	@brief Set the voltage curve (used for dynamic mode)
+	@brief Set the voltage curve (used for transient mode)
 	@param[in] a_voltageCurve Voltage curve
       */
       virtual void
@@ -351,7 +351,7 @@ namespace Physics {
       IntegrationAlgorithm m_inceptionAlgorithm;
 
       /*!
-	@brief Advection algorithm for advancing negative ions in the dynamic mode
+	@brief Advection algorithm for advancing negative ions in the transient mode
       */
       AdvectionAlgorithm m_advectionAlgorithm;
 
@@ -382,19 +382,19 @@ namespace Physics {
 
       /*!
 	@brief Inception integral values. 
-	@note Dynamic mode. 
+	@note Transient mode. 
       */
       EBAMRCellData m_inceptionIntegral;
 
       /*!
 	@brief Inception integral values.
-	@note Static mode, positive polarity
+	@note Stationary mode, positive polarity
       */
       EBAMRCellData m_inceptionIntegralPlus;
 
       /*!
 	@brief Inception integral values.
-	@note Static mode, negative polarity
+	@note Stationary mode, negative polarity
       */
       EBAMRCellData m_inceptionIntegralMinu;
 
@@ -406,86 +406,86 @@ namespace Physics {
 
       /*!
 	@brief Field emission rates
-	@note Static mode, positive polarity
+	@note Stationary mode, positive polarity
       */
       EBAMRCellData m_emissionRatesPlus;
 
       /*!
 	@brief Field emission rates
-	@note Static mode, negative polarity
+	@note Stationary mode, negative polarity
       */
       EBAMRCellData m_emissionRatesMinu;
 
       /*!
 	@brief Field emission rates
-	@note Used for dynamic mode. 
+	@note Used for transient mode. 
       */
       EBAMRCellData m_emissionRate;
 
       /*!
 	@brief Computed inception voltage
-	@note Static mode, positive polarity
+	@note Stationary mode, positive polarity
       */
       EBAMRCellData m_inceptionVoltagePlus;
 
       /*!
 	@brief Computed inception voltage
-	@note Static mode, negative polarity
+	@note Stationary mode, negative polarity
       */
       EBAMRCellData m_inceptionVoltageMinu;
 
       /*! 
 	@brief Max K value for every voltage
-	@note Static mode, positive polarity
+	@note Stationary mode, positive polarity
       */
       std::vector<Real> m_maxKPlus;
 
       /*! 
 	@brief Max K value for every voltage
-	@note Static mode, negative polarity
+	@note Stationary mode, negative polarity
       */
       std::vector<Real> m_maxKMinu;
 
       /*!
 	@brief Max K value for every time step
-	@note For dynamic runs
+	@note For transient runs
       */
       std::vector<std::pair<Real, Real>> m_maxK;
 
       /*!
 	@brief Critical volumes of K values for each voltage
-	@note Static mode, positive polarity
+	@note Stationary mode, positive polarity
       */
       std::vector<Real> m_criticalVolumePlus;
 
       /*!
 	@brief Critical volumes of K values for each voltage
-	@note Static mode, positive polarity
+	@note Stationary mode, positive polarity
       */
       std::vector<Real> m_criticalVolumeMinu;
 
       /*!
 	@brief Rate of appearance of first electron (in critical volume)
-	@note Static mode, positive polarity. 
+	@note Stationary mode, positive polarity. 
       */
       std::vector<Real> m_RdotPlus;
 
       /*!
 	@brief Rate of appearance of first electron (in critical volume)
-	@note Static mode, negative polarity. 
+	@note Stationary mode, negative polarity. 
       */
       std::vector<Real> m_RdotMinu;
 
       /*!
 	@brief Voltage sweeps
-	@note Static mode
+	@note Stationary mode
       */
       std::vector<Real> m_voltageSweeps;
 
       /*!
 	@brief Integral factor for cumulative integration.
 	@details This is the integral_Vcr dne/dt * (1 - eta/alpha) dV + integral(j/e*dS)  stored at each time step. 
-	@note Only for dynamic mode. 
+	@note Only for transient mode. 
       */
       std::vector<std::pair<Real, Real>> m_Rdot;
 
@@ -661,19 +661,19 @@ namespace Physics {
       /*!
 	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral. 
 	@details This is called in postInitialize() only. 
-	@note For static mode only. 
+	@note For stationary mode only. 
       */
       virtual void
-      computeInceptionIntegralStatic() noexcept;
+      computeInceptionIntegralStationary() noexcept;
 
       /*!
 	@brief Solve streamer inception integral 
 	@details Called in postInitialize and the advance method
-	@note Dynamic mode only. 
+	@note Transient mode only. 
 	@param[in] a_voltage Voltage multiplier
       */
       virtual void
-      computeInceptionIntegralDynamic(const Real& a_voltage) noexcept;
+      computeInceptionIntegralTransient(const Real& a_voltage) noexcept;
 
       /*!
 	@brief Integrate the inception integral using the Euler rule.
@@ -710,23 +710,23 @@ namespace Physics {
 
       /*!
 	@brief Compute the background ionization rate for all voltages
-	@note For static simulations. 
+	@note For stationary simulations. 
       */
       virtual void
-      computeBackgroundIonizationStatic() noexcept;
+      computeBackgroundIonizationStationary() noexcept;
 
       /*!
 	@brief Compute field emission rates
-	@note For static simulations. 
+	@note For stationary simulations. 
       */
       virtual void
-      computeFieldEmissionStatic() noexcept;
+      computeFieldEmissionStationary() noexcept;
 
       /*!
 	@brief Compute field emission rates
 	@param[out] a_emissionRate Field emission rate. 
 	@param[in]  a_voltage Voltage multiplier
-	@note For plotting the emission rate in dynamic simulations. 
+	@note For plotting the emission rate in transient simulations. 
       */
       virtual void
       computeFieldEmission(EBAMRCellData& a_emissionRate, const Real& a_voltage) const noexcept;
@@ -736,7 +736,7 @@ namespace Physics {
 	@param[out] a_data    Mesh data
 	@param[in]  a_voltage Voltage multiplier
 	@param[im]  a_func    Function to evaluate
-	@note For plotting the emission rate in dynamic simulations. 
+	@note For plotting the emission rate in transient simulations. 
       */
       virtual void
       evaluateFunction(EBAMRCellData&                           a_emissionRate,
@@ -751,68 +751,67 @@ namespace Physics {
       computeInceptionVoltageVolume() noexcept;
 
       /*!
-	@brief Estimate the inception voltage
-	@details This returns the inception voltage interpolated from the K-integral for positive and negative polarity. These
-	SHOULD have the same value if the calculation is grid converged. 
+	@brief Compute the minimum inception voltage and the starting electron position.
+	@param[in] a_Uinc Inception voltage for all starting positions. 
       */
-      virtual std::pair<Real, Real>
-      computeInceptionVoltages() const noexcept;
+      virtual std::pair<Real, RealVect>
+      computeMinimumInceptionVoltage(const EBAMRCellData& a_Uinc) const noexcept;
 
       /*!
 	@brief Compute the critical volume of the K values for each voltage
-	@note For the static method
+	@note For the stationary method
       */
       virtual void
-      computeCriticalVolumeStatic() noexcept;
+      computeCriticalVolumeStationary() noexcept;
 
       /*!
 	@brief Compute the critical volume of the K values for each voltage
-	@note Dynamic approach. 
+	@note Transient approach. 
       */
       virtual Real
-      computeCriticalVolumeDynamic() const noexcept;
+      computeCriticalVolumeTransient() const noexcept;
 
       /*!
 	@brief Compute time to first critical electron.
       */
       virtual void
-      computeRdotStatic() noexcept;
+      computeRdotStationary() noexcept;
 
       /*!
 	@brief Print report to the terminal. 
-	@note For static runs
+	@note For stationary runs
       */
       virtual void
-      writeReportStatic() const noexcept;
+      writeReportStationary() const noexcept;
 
       /*!
 	@brief Print report to the terminal. 
-	@note For dynamic runs. Called in the constructor. 
+	@note For transient runs. Called in the constructor. 
       */
       virtual void
-      writeReportDynamic() const noexcept;
+      writeReportTransient() const noexcept;
 
       /*!
-	@brief Write plot data for the 'static' mode
+	@brief Write plot data for the 'stationary' mode
 	@param[inout] a_output            Output data holder.
 	@param[in]    a_plotVariableNames Plot variable names.
 	@param[inout] a_icomp             Starting component in a_output to begin at. 
       */
       virtual void
-      writePlotDataStatic(EBAMRCellData&       a_output,
-                          Vector<std::string>& a_plotVariableNames,
-                          int&                 a_icomp) const noexcept;
+      writePlotDataStationary(EBAMRCellData&       a_output,
+                              Vector<std::string>& a_plotVariableNames,
+                              int&                 a_icomp) const noexcept;
 
       /*!
-	@brief Write plot data for the 'static' mode
+	@brief Write plot data for the 'stationary' mode
 	@param[inout] a_output            Output data holder.
 	@param[in]    a_plotVariableNames Plot variable names.
 	@param[inout] a_icomp             Starting component in a_output to begin at. 
       */
       virtual void
-      writePlotDataDynamic(EBAMRCellData&       a_output,
-                           Vector<std::string>& a_plotVariableNames,
-                           int&                 a_icomp) const noexcept;
+      writePlotDataTransient(EBAMRCellData&       a_output,
+                             Vector<std::string>& a_plotVariableNames,
+                             int&                 a_icomp) const noexcept;
 
       /*!
 	@brief Check if particle is outside grid boundaries

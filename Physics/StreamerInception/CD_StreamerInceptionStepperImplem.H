@@ -40,7 +40,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_verbosity          = -1;
   m_realm              = Realm::Primal;
   m_phase              = phase::gas;
-  m_mode               = Mode::Static;
+  m_mode               = Mode::Stationary;
   m_advectionAlgorithm = AdvectionAlgorithm::CTU;
 
   this->parseOptions();
@@ -138,7 +138,7 @@ StreamerInceptionStepper<P, F, C>::allocate()
   m_amr->allocate(m_electricFieldMinu, m_realm, m_phase, SpaceDim);
 
   switch (m_mode) {
-  case Mode::Static: {
+  case Mode::Stationary: {
     m_amr->allocate(m_inceptionIntegralPlus, m_realm, m_phase, m_voltageSweeps.size());
     m_amr->allocate(m_inceptionIntegralMinu, m_realm, m_phase, m_voltageSweeps.size());
     m_amr->allocate(m_inceptionVoltagePlus, m_realm, m_phase, 1);
@@ -165,7 +165,7 @@ StreamerInceptionStepper<P, F, C>::allocate()
 
     break;
   }
-  case Mode::Dynamic: {
+  case Mode::Transient: {
     m_amr->allocate(m_inceptionIntegral, m_realm, m_phase, 1);
     m_amr->allocate(m_emissionRate, m_realm, m_phase, 1);
     m_amr->allocate(m_backgroundIonization, m_realm, m_phase, 1);
@@ -298,14 +298,14 @@ StreamerInceptionStepper<P, F, C>::parseMode() noexcept
   std::string str;
 
   pp.get("mode", str);
-  if (str == "static") {
-    m_mode = Mode::Static;
+  if (str == "stationary") {
+    m_mode = Mode::Stationary;
   }
-  else if (str == "dynamic") {
-    m_mode = Mode::Dynamic;
+  else if (str == "transient") {
+    m_mode = Mode::Transient;
   }
   else {
-    MayDay::Error("Expected 'none', 'static', or 'dynamic' for 'StreamerInceptionStepper.mode'");
+    MayDay::Error("Expected 'none', 'stationary', or 'transient' for 'StreamerInceptionStepper.mode'");
   }
 }
 
@@ -333,13 +333,15 @@ StreamerInceptionStepper<P, F, C>::parseVoltages() noexcept
   pp.get("K_inception", m_inceptionK);
 
   // Define voltages
-  const Real dV = (voltageHi - voltageLo) / voltageSteps;
+  const Real dV = (voltageHi - voltageLo) / (1 + voltageSteps);
 
   m_voltageSweeps.push_back(voltageLo);
 
   for (size_t i = 0; i < voltageSteps; i++) {
     m_voltageSweeps.push_back(m_voltageSweeps[i] + dV);
   }
+
+  m_voltageSweeps.push_back(voltageHi);
 }
 
 template <typename P, typename F, typename C>
@@ -544,15 +546,15 @@ StreamerInceptionStepper<P, F, C>::writePlotData(EBAMRCellData&       a_output,
     a_plotVariableNames.append(m_ionSolver->getPlotVariableNames());
   }
 
-  // Write data -- this differs between the 'static' and 'dynamic' modes
+  // Write data -- this differs between the 'stationary' and 'transient' modes
   switch (m_mode) {
-  case Mode::Static: {
-    this->writePlotDataStatic(a_output, a_plotVariableNames, a_icomp);
+  case Mode::Stationary: {
+    this->writePlotDataStationary(a_output, a_plotVariableNames, a_icomp);
 
     break;
   }
-  case Mode::Dynamic:
-    this->writePlotDataDynamic(a_output, a_plotVariableNames, a_icomp);
+  case Mode::Transient:
+    this->writePlotDataTransient(a_output, a_plotVariableNames, a_icomp);
 
     break;
   default: {
@@ -563,13 +565,13 @@ StreamerInceptionStepper<P, F, C>::writePlotData(EBAMRCellData&       a_output,
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::writePlotDataStatic(EBAMRCellData&       a_output,
-                                                       Vector<std::string>& a_plotVariableNames,
-                                                       int&                 a_icomp) const noexcept
+StreamerInceptionStepper<P, F, C>::writePlotDataStationary(EBAMRCellData&       a_output,
+                                                           Vector<std::string>& a_plotVariableNames,
+                                                           int&                 a_icomp) const noexcept
 {
-  CH_TIME("StreamerInceptionStepper::writePlotDataStatic");
+  CH_TIME("StreamerInceptionStepper::writePlotDataStationary");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writePlotDataStatic" << endl;
+    pout() << "StreamerInceptionStepper::writePlotDataStationary" << endl;
   }
 
   const std::string prefix = "StreamerInceptionStepper/";
@@ -721,13 +723,13 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStatic(EBAMRCellData&       a_ou
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::writePlotDataDynamic(EBAMRCellData&       a_output,
-                                                        Vector<std::string>& a_plotVariableNames,
-                                                        int&                 a_icomp) const noexcept
+StreamerInceptionStepper<P, F, C>::writePlotDataTransient(EBAMRCellData&       a_output,
+                                                          Vector<std::string>& a_plotVariableNames,
+                                                          int&                 a_icomp) const noexcept
 {
-  CH_TIME("StreamerInceptionStepper::writePlotDataDynamic");
+  CH_TIME("StreamerInceptionStepper::writePlotDataTransient");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writePlotDataDynamic" << endl;
+    pout() << "StreamerInceptionStepper::writePlotDataTransient" << endl;
   }
 
   // Add potential and electric field to output
@@ -857,7 +859,7 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
   }
 
   switch (m_mode) {
-  case Mode::Static: {
+  case Mode::Stationary: {
     // K-values
     if (m_plotInceptionIntegral) {
       ncomp += 2 * m_voltageSweeps.size();
@@ -890,7 +892,7 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
 
     break;
   }
-  case Mode::Dynamic: {
+  case Mode::Transient: {
 
     // Always write the electric field and potential.
     ncomp += SpaceDim + 1;
@@ -944,7 +946,7 @@ StreamerInceptionStepper<P, F, C>::computeDt()
 
   Real dt = std::numeric_limits<Real>::max();
 
-  if (m_mode == Mode::Dynamic) {
+  if (m_mode == Mode::Transient) {
     dt = m_cfl * m_ionSolver->computeAdvectionDt();
 
     dt = std::min(dt, m_maxDt);
@@ -963,7 +965,7 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     pout() << "StreamerInceptionStepper::advance" << endl;
   }
 
-  if (m_mode == Mode::Dynamic) {
+  if (m_mode == Mode::Transient) {
 
     const Real curTime    = m_time + a_dt;
     const Real curVoltage = m_voltageCurve(curTime);
@@ -978,10 +980,10 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
 
     this->seedIonizationParticles(curVoltage);
-    this->computeInceptionIntegralDynamic(curVoltage);
+    this->computeInceptionIntegralTransient(curVoltage);
 
     // Compute the critical volume and the electron appearance rate.
-    const Real Vcr  = this->computeCriticalVolumeDynamic();
+    const Real Vcr  = this->computeCriticalVolumeTransient();
     const Real Rdot = this->computeRdot(curVoltage);
 
     m_criticalVolume.emplace_back(curTime, Vcr);
@@ -1008,10 +1010,10 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
 
     m_maxK.emplace_back(m_time + a_dt, maxK);
 
-    this->writeReportDynamic();
+    this->writeReportTransient();
   }
   else {
-    MayDay::Error("StreamerInceptionStepper::advance -- must have 'StreamerInceptionStepper.mode = dynamic'");
+    MayDay::Error("StreamerInceptionStepper::advance -- must have 'StreamerInceptionStepper.mode = transient'");
   }
 
   return a_dt;
@@ -1157,7 +1159,7 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   m_amr->reallocate(m_electricFieldMinu, m_phase, a_lmin);
 
   switch (m_mode) {
-  case Mode::Static: {
+  case Mode::Stationary: {
     m_amr->reallocate(m_inceptionIntegralPlus, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionIntegralMinu, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionVoltagePlus, m_phase, a_lmin);
@@ -1174,7 +1176,7 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
 
     break;
   }
-  case Mode::Dynamic: {
+  case Mode::Transient: {
 
     m_amr->reallocate(m_inceptionIntegral, m_phase, a_lmin);
     m_amr->reallocate(m_emissionRate, m_phase, a_lmin);
@@ -1533,34 +1535,34 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
   this->setIonVelocity(m_voltageCurve(m_time));
 
   switch (m_mode) {
-  case Mode::Static: {
+  case Mode::Stationary: {
 
-    this->computeInceptionIntegralStatic();
+    this->computeInceptionIntegralStationary();
     this->computeInceptionVoltageVolume();
-    this->computeCriticalVolumeStatic();
-    this->computeRdotStatic();
+    this->computeCriticalVolumeStationary();
+    this->computeRdotStationary();
 
     // Compute background ionization and field emission on the mesh. Mostly for plotting.
     if (m_plotBackgroundIonization) {
-      this->computeBackgroundIonizationStatic();
+      this->computeBackgroundIonizationStationary();
     }
 
     if (m_plotFieldEmission) {
-      this->computeFieldEmissionStatic();
+      this->computeFieldEmissionStationary();
     }
 
-    this->writeReportStatic();
+    this->writeReportStationary();
 
     break;
   }
-  case Mode::Dynamic: {
+  case Mode::Transient: {
 
     // Seed tracer particles and set velocity
     this->seedIonizationParticles(m_voltageCurve(m_time));
     m_tracerParticleSolver->setVelocity(m_electricFieldMinu);
 
     // Compute the 'Rdot' value at current time (which is probably t = 0).
-    this->computeInceptionIntegralDynamic(m_voltageCurve(m_time));
+    this->computeInceptionIntegralTransient(m_voltageCurve(m_time));
 
     // Get the maximum K-value
     Real maxK = -std::numeric_limits<Real>::max();
@@ -1569,7 +1571,7 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     DataOps::getMaxMin(maxK, minK, m_inceptionIntegral, 0);
 
     m_Rdot.emplace_back(m_time, this->computeRdot(m_voltageCurve(m_time)));
-    m_criticalVolume.emplace_back(m_time, this->computeCriticalVolumeDynamic());
+    m_criticalVolume.emplace_back(m_time, this->computeCriticalVolumeTransient());
     m_inceptionProbability.emplace_back(m_time, 0.0);
     m_maxK.emplace_back(m_time, maxK);
 
@@ -1583,11 +1585,11 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::computeInceptionIntegralStatic() noexcept
+StreamerInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeInceptionIntegralStatic");
+  CH_TIME("StreamerInceptionStepper::computeInceptionIntegralStationary");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeInceptionIntegralStatic" << endl;
+    pout() << "StreamerInceptionStepper::computeInceptionIntegralStationary" << endl;
   }
 
   // TLDR: For this integration we compute the value of the inception integral
@@ -1653,7 +1655,7 @@ StreamerInceptionStepper<P, F, C>::computeInceptionIntegralStatic() noexcept
         break;
       }
       default: {
-        MayDay::Error("StreamerInceptionStepper::computeInceptionIntegralStatic -- logic bust");
+        MayDay::Error("StreamerInceptionStepper::computeInceptionIntegralStationary -- logic bust");
 
         break;
       }
@@ -1698,11 +1700,11 @@ StreamerInceptionStepper<P, F, C>::computeInceptionIntegralStatic() noexcept
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::computeInceptionIntegralDynamic(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F, C>::computeInceptionIntegralTransient(const Real& a_voltage) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeInceptionIntegralDynamic");
+  CH_TIME("StreamerInceptionStepper::computeInceptionIntegralTransient");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeInceptionIntegralDynamic" << endl;
+    pout() << "StreamerInceptionStepper::computeInceptionIntegralTransient" << endl;
   }
 
   // Compute K-value on each particle using specified algorithm.
@@ -1718,7 +1720,7 @@ StreamerInceptionStepper<P, F, C>::computeInceptionIntegralDynamic(const Real& a
     break;
   }
   default: {
-    MayDay::Error("StreamerInceptionStepper::computeInceptionIntegralDynamic - logic bust");
+    MayDay::Error("StreamerInceptionStepper::computeInceptionIntegralTransient - logic bust");
 
     break;
   }
@@ -2106,11 +2108,11 @@ StreamerInceptionStepper<P, F, C>::resetTracerParticles() noexcept
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::computeBackgroundIonizationStatic() noexcept
+StreamerInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeBackgroundIonizationStatic");
+  CH_TIME("StreamerInceptionStepper::computeBackgroundIonizationStationary");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeBackgroundIonizationStatic" << endl;
+    pout() << "StreamerInceptionStepper::computeBackgroundIonizationStationary" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -2153,11 +2155,11 @@ StreamerInceptionStepper<P, F, C>::computeBackgroundIonizationStatic() noexcept
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::computeFieldEmissionStatic() noexcept
+StreamerInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeFieldEmissionStatic");
+  CH_TIME("StreamerInceptionStepper::computeFieldEmissionStationary");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeFieldEmissionStatic" << endl;
+    pout() << "StreamerInceptionStepper::computeFieldEmissionStationary" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -2405,54 +2407,77 @@ StreamerInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
 }
 
 template <typename P, typename F, typename C>
-std::pair<Real, Real>
-StreamerInceptionStepper<P, F, C>::computeInceptionVoltages() const noexcept
+std::pair<Real, RealVect>
+StreamerInceptionStepper<P, F, C>::computeMinimumInceptionVoltage(const EBAMRCellData& a_Uinc) const noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeInceptionVoltages");
+  CH_TIME("StreamerInceptionStepper::computeMinimumInceptionVoltage");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeInceptionVoltages" << endl;
+    pout() << "StreamerInceptionStepper::computeMinimumInceptionVoltage" << endl;
   }
 
-  Real Vplus = std::numeric_limits<Real>::quiet_NaN();
-  Real Vminu = std::numeric_limits<Real>::quiet_NaN();
+  Real     UInc = std::numeric_limits<Real>::infinity();
+  RealVect xInc = RealVect::Zero;
 
-  if (m_voltageSweeps.size() < 2) {
-    MayDay::Warning("StreamerInceptionStepper::computeInceptionVoltageVolume -- not enough voltages for estimating "
-                    "inception voltage");
-  }
-  else {
+  const RealVect probLo = m_amr->getProbLo();
 
-    constexpr int comp = 0;
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real&              dx    = m_amr->getDx()[lvl];
 
-    auto interpVinc = [&Kinc = this->m_inceptionK, &V = this->m_voltageSweeps](const std::vector<Real>& K) -> Real {
-      Real Vinc = std::numeric_limits<Real>::quiet_NaN();
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+      const EBISBox&       ebisBox    = ebisl[dit()];
 
-      for (size_t i = 0; i < K.size() - 1; i++) {
+      const EBCellFAB& voltage    = (*a_Uinc[lvl])[dit()];
+      const FArrayBox& voltageReg = voltage.getFArrayBox();
 
-        if (K[i] <= Kinc && K[i + 1] > Kinc) {
-          Vinc = V[i] + (Kinc - K[i]) * (V[i + 1] - V[i]) / (K[i + 1] - K[i]);
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv, 0) && ebisBox.isRegular(iv)) {
+          const Real& U = voltageReg(iv, 0);
 
-          break;
+          const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
+
+          if (!(std::isnan(U))) {
+            UInc = std::min(UInc, std::abs(U));
+            xInc = pos;
+          }
         }
-      }
+      };
 
-      return Vinc;
-    };
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
+        if (validCells(iv, 0) && ebisBox.isIrregular(iv)) {
+          const Real& U = voltage(vof, 0);
 
-    Vplus = interpVinc(m_maxKPlus);
-    Vminu = interpVinc(m_maxKMinu);
+          const RealVect centroid = ebisBox.centroid(vof);
+          const RealVect pos      = probLo + (0.5 * RealVect::Unit + RealVect(iv) + centroid) * dx;
+
+          if (!(std::isnan(U))) {
+            UInc = std::min(UInc, std::abs(U));
+            xInc = pos;
+          }
+        }
+      };
+
+      Box          cellBox = dbl[dit()];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
   }
 
-  return std::make_pair(Vplus, Vminu);
+  return ParallelOps::min(UInc, xInc);
 }
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::computeCriticalVolumeStatic() noexcept
+StreamerInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeCriticalVolumeStatic");
+  CH_TIME("StreamerInceptionStepper::computeCriticalVolumeStationary");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeCriticalVolumeStatic" << endl;
+    pout() << "StreamerInceptionStepper::computeCriticalVolumeStationary" << endl;
   }
 
   // Solve critical volume of K values for each voltage
@@ -2518,11 +2543,11 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeStatic() noexcept
 
 template <typename P, typename F, typename C>
 Real
-StreamerInceptionStepper<P, F, C>::computeCriticalVolumeDynamic() const noexcept
+StreamerInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeCriticalVolumeDynamic");
+  CH_TIME("StreamerInceptionStepper::computeCriticalVolumeTransient");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeCriticalVolumeDynamic" << endl;
+    pout() << "StreamerInceptionStepper::computeCriticalVolumeTransient" << endl;
   }
 
   Real Vcr = 0.0;
@@ -2573,11 +2598,11 @@ StreamerInceptionStepper<P, F, C>::computeCriticalVolumeDynamic() const noexcept
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::computeRdotStatic() noexcept
+StreamerInceptionStepper<P, F, C>::computeRdotStationary() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::computeRdotStatic");
+  CH_TIME("StreamerInceptionStepper::computeRdotStationary");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::computeRdotStatic" << endl;
+    pout() << "StreamerInceptionStepper::computeRdotStationary" << endl;
   }
 
   // TLDR: This routine computes the average time to the appereance of an electron
@@ -2706,12 +2731,15 @@ StreamerInceptionStepper<P, F, C>::computeRdotStatic() noexcept
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::writeReportStatic() const noexcept
+StreamerInceptionStepper<P, F, C>::writeReportStationary() const noexcept
 {
-  CH_TIME("StreamerInceptionStepper::writeReportStatic");
+  CH_TIME("StreamerInceptionStepper::writeReportStationary");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writeReportStatic" << endl;
+    pout() << "StreamerInceptionStepper::writeReportStationary" << endl;
   }
+
+  const std::pair<Real, RealVect> UIncPlus = this->computeMinimumInceptionVoltage(m_inceptionVoltagePlus);
+  const std::pair<Real, RealVect> UIncMinu = this->computeMinimumInceptionVoltage(m_inceptionVoltageMinu);
 
 #ifdef CH_MPI
   if (procID() == 0) {
@@ -2719,15 +2747,14 @@ StreamerInceptionStepper<P, F, C>::writeReportStatic() const noexcept
 
     std::ofstream output(m_outputFile, std::ofstream::out);
 
-    const std::pair<Real, Real> Uinc = this->computeInceptionVoltages();
-
     // clang-format off
     output << "# ==================================================================================================================================" << "\n";
-    if (std::isnan(Uinc.first) || std::isnan(Uinc.second)) {
+    if (std::isnan(UIncPlus.first) || std::isnan(UIncMinu.first)) {
       output << "# Could not compute inception voltage\n";
     }
     else {
-      output << "# Inception voltage +/- = " << Uinc.first << "/" << Uinc.second << "\n";
+      output << "# Inception voltage + = " << UIncPlus.first << ",\t x = " << UIncPlus.second << "\n";
+      output << "# Inception voltage - = " << UIncMinu.first << ",\t x = " << UIncMinu.second << "\n";      
     }
     
     output << "# ==================================================================================================================================" << "\n";    
@@ -2759,11 +2786,11 @@ StreamerInceptionStepper<P, F, C>::writeReportStatic() const noexcept
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::writeReportDynamic() const noexcept
+StreamerInceptionStepper<P, F, C>::writeReportTransient() const noexcept
 {
-  CH_TIME("StreamerInceptionStepper::writeReportDynamic");
+  CH_TIME("StreamerInceptionStepper::writeReportTransient");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::writeReportDynamic" << endl;
+    pout() << "StreamerInceptionStepper::writeReportTransient" << endl;
   }
 
 #ifdef CH_MPI
