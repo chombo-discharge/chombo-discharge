@@ -401,7 +401,7 @@ and similarly for the surface integral.
 
 
 Simulation control
------------------
+------------------
 
 Here, we discuss simulation controls that are available for the streamer inception model.
 These all appear in the form ``StreamerInceptionStepper.<option>``.

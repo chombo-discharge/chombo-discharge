@@ -53,15 +53,15 @@ main(int argc, char* argv[])
 
   auto eta = [&](const Real& E) -> Real { return attachmentData.getEntry<1>(E); };
 
-  auto alphaEff = [&](const Real& E) -> Real {return alpha(E) - eta(E);};
+  auto alphaEff = [&](const Real& E) -> Real { return alpha(E) - eta(E); };
 
-  auto bgIonization = [](const Real& E) -> Real { return 0.0;};
+  auto bgIonization = [](const Real& E) -> Real { return 0.0; };
 
-  auto detachmentRate = [N](const Real& E) -> Real { return 0.0;};
+  auto detachmentRate = [N](const Real& E) -> Real { return 0.0; };
 
-  auto ionMobility = [](const Real& E) -> Real { return 0.0;};
+  auto ionMobility = [](const Real& E) -> Real { return 0.0; };
 
-  auto ionDensity = [](const RealVect& x) -> Real { return 0.0;};
+  auto ionDensity = [](const RealVect& x) -> Real { return 0.0; };
 
   // Set geometry and AMR
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new RoughSphere());
