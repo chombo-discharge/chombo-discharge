@@ -12,7 +12,7 @@ For estimating the streamer inception, the module the electron avalanche integra
 
 .. math::
 
-   K\left(\mathbf{x}\right) = \int_{\mathbf{x}}^{\alpha_{\text{eff}} \leq 0} \alpha_{\text{eff}}(E)\text{d}l
+   K\left(\mathbf{x}\right) = \int_{\mathbf{x}}^{\text{until }\alpha_{\text{eff}} \leq 0} \alpha_{\text{eff}}(E)\text{d}l
 
 where :math:`E = |\mathbf{E}|` and where :math:`\alpha_{\text{eff}}(E) = \alpha(E) - \eta(E)` is the effective ionization coefficient.
 The integration runs along electric field lines.
@@ -69,7 +69,7 @@ The computation is done for both polarities so that the user obtains:
 Transient mode
 ______________
 
-In the transient mode we reconstruct the :math:`K` value at each time step and recompute the critical volume so that we obtain
+In the transient mode we apply a voltage curve :math:`U = U(t)` reconstruct the :math:`K` value at each time step and recompute the critical volume so that we obtain
 
 .. math::
 
@@ -77,20 +77,38 @@ In the transient mode we reconstruct the :math:`K` value at each time step and r
    
    V_c = V_c(t)
 
-These quantities are then used for computing the probability of streamer inception in time :math:`t` by
+We also assume that ions move as drifting Brownian walkers in the electric field (see :ref:`Chap:ItoDiffusion`).
+This can be written in the fluctuating hydrodynamics limit as an evolution equation for the ion distribution (not density!) as
+
+.. math::
+   
+   \frac{\partial \langle n_-\rangle}{\partial t} = -\nabla\cdot\left(\mathbf{v} \langle n_-\rangle\right) + \nabla\cdot\left(D\nabla \langle n_-\rangle\right) + \sqrt{2D\langle n_-\rangle}\mathbf{Z},
+
+where :math:`\mathbf{Z}` represents uncorrelated Gaussian white noise.
+Note that the above equation is a mere rewrite of the Ito process for a collection of particles; it is not really useful per se since it is a tautology for the original Ito process. 
+
+However, we are interested in the average ion distribution over many experiments, so by taking the ensemble average we obtain a regular advection-diffusion equation for the evolution of the negative ion distribution (note that we redefine :math:`\langle n_-\rangle` to be the ensemble average).
+
+.. math::
+   
+   \frac{\partial \langle n_-\rangle}{\partial t} = -\nabla\cdot\left(\mathbf{v} \langle n_-\rangle\right) + \nabla\cdot\left(D\nabla \langle n_-\rangle\right).
+
+This equation is sensible only when :math:`\langle n_-\rangle` is interpreted as an ion density distribution (over many identical experiments). 
+
+The above quantities are then used for computing the probability of streamer inception in time :math:`t` by
 
 .. math::
    :label: StreamerInceptionProbability
 	   
-   P(t) = 1  - \exp\left[-\int_0^t\left(\int_{V_c(t^\prime)}\frac{dn_e}{dt^\prime}\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\text{d}t^\prime\right].
+   P(t) = 1  - \exp\left[-\int_0^t\left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\text{d}t^\prime\right].
 
-Here, :math:`\frac{d n_{\text{e}}}{dt}` is the electron production rate from both background ionization and electron detachment, i.e.
+Here, :math:`\left\langle\frac{d n_{\text{e}}}{dt}\right\rangle` is the electron production rate from both background ionization and electron detachment, i.e.
 
 .. math::
 
-   \frac{d n_{\text{e}}}{dt} = S_{\text{bg}} + k_d n_-,
+   \left\langle\frac{d n_{\text{e}}}{dt}\right\rangle = S_{\text{bg}} + k_d \left\langle n_-\right\rangle,
 
-where :math:`S_{\text{bg}}` is the background ionization rate set by the user, :math:`k_d` is the negative ion detachment rate, and :math:`n_-` is the negative ion density.
+where :math:`S_{\text{bg}}` is the background ionization rate set by the user, :math:`k_d` is the negative ion detachment rate, and :math:`\left\langle n_-\right\rangle` is the negative ion distribution.
 The second integral is due to electron emission from the cathode and into the critical volume.
 Note that, internally, we always ensure that :math:`j_{\text{e}} dA` evaluates to zero on anode surfaces.
 
@@ -99,7 +117,7 @@ We also compute the probability of a first electron appearing in the time interv
 .. math::
    :label: StreamerInceptionProbability2
    
-   \Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\frac{dn_e}{dt^\prime}\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)
+   \Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)
 
 When running in transient mode the user must set the voltage curve (see :ref:`StreamerInceptionVoltageCurve`) and pay particular caution to setting the initial ion density, mobility, and detachment rates.
 
@@ -116,7 +134,8 @@ The input to the streamer inception model are:
 #. Background ionization rate (e.g., from cosmic radiation).
 #. Electron detachment rate (from negative ions).
 #. Negative ion mobility.
-#. Negative ion density.
+#. Negative ion diffusion coefficient.   
+#. Initial negative ion density.
 #. Voltage curve (for transient simulations).
 
 The input data to the streamer inception model is mostly done by passing in C++-functions to the class.
@@ -189,7 +208,16 @@ To set the negative ion mobility, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setNegativeIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept;
+   StreamerInceptionStepper::setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept;
+
+Negative ion diffusion coefficient
+__________________________________
+
+To set the negative ion diffusion coefficient, use the member function
+
+.. code-block:: c++
+
+   StreamerInceptionStepper::setIonDiffusion(const std::function<Real(const Real& E)>& a_diffCo) noexcept;   
 
 
 Negative ion density
@@ -199,7 +227,7 @@ To set the negative ion density, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setNegativeIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
+   StreamerInceptionStepper::setIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
 
    
 Background ionization rate
@@ -220,9 +248,9 @@ The detachment rate from negative describes the apperance of electrons through t
 
 .. math::
 
-   \frac{dn_{\text{e}}}{dt} = k_d n_-
+   \left\langle\frac{dn_{\text{e}}}{dt}\right\rangle = k_d \left\langle n_-\right\rangle
 
-where :math:`n_-` is the negative ion density (units of :math:`m^{-3}`).
+where :math:`\left\langle n_-\right\rangle` is the negative ion density in units of :math:`m^{-3}` (or strictly speaking the negative ion probability density). 
 This is used when calculating the inception probability, and the user sets the detachment rate :math:`k_d` through
 
 .. code-block:: c++
@@ -391,7 +419,7 @@ The inception probability is given by :eq:`StreamerInceptionProbability` and is 
 
 .. math::
 
-   \int_{V_c}\frac{dn_e}{dt}\left(1-\frac{\eta}{\alpha}\right) \text{d}V \approx \sum_{\mathbf{i}\in K_\mathbf{i} > K_c} \left(\frac{dn_e}{dt}\right)_{\mathbf{i}}\left(1 - \frac{\eta_{\mathbf{i}}}{\alpha_{\mathbf{i}}}\right)\kappa_{\mathbf{i}}\Delta V_{\mathbf{i}},
+   \int_{V_c}\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V \approx \sum_{\mathbf{i}\in K_\mathbf{i} > K_c} \left(\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle\right)_{\mathbf{i}}\left(1 - \frac{\eta_{\mathbf{i}}}{\alpha_{\mathbf{i}}}\right)\kappa_{\mathbf{i}}\Delta V_{\mathbf{i}},
 
 and similarly for the surface integral.
 
@@ -622,39 +650,47 @@ ___________________
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/Vessel`.
   This program is set up in 2D (stationary) and 3D (transient) for streamer inception in atmospheric air.
-  Input data is computed using BOLSIG+.
-
+  The input data is computed using BOLSIG+.
 
 Electrode with surface roughness
 ________________________________
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness`.
+  This program is set up in 2D (stationary) and 3D (transient) for streamer inception on an irregular electrode surface. 
+  We use SF6 transport data as input data, computed using BOLSIG+.  
 
 
-The figure below shows an example of the avalanche integral :math:`K` solved for an |SF6| gas with an irregular electrode surface:
+..
+   Electrode with surface roughness
+   ________________________________
 
-.. _Fig:field:
-.. figure:: /_static/figures/StreamerInception/field.png
-   :width: 45%
-   :align: center
+   * :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness`.
 
-   Electron avalanche integral :math:`K` for a rough electrode surface and |SF6| gas. POLARIZATION?
 
-.. |SF6| replace:: SF\ :sub:`6`
+   The figure below shows an example of the avalanche integral :math:`K` solved for an |SF6| gas with an irregular electrode surface:
 
-Underneath is the same example zoomed into one of the electrode crevices, both for positive and negative polarization:
+   .. _Fig:field:
+   .. figure:: /_static/figures/StreamerInception/field.png
+      :width: 45%
+      :align: center
 
-.. _Fig:Kplus:
-.. figure:: /_static/figures/StreamerInception/Kplus.png
-   :width: 45%
-   :align: center
+      Electron avalanche integral :math:`K` for a rough electrode surface and |SF6| gas. POLARIZATION?
 
-   :math:`K` in the crevice with positive polarization.
+   .. |SF6| replace:: SF\ :sub:`6`
 
-.. _Fig:Kminu:
-.. figure:: /_static/figures/StreamerInception/Kminu.png
-   :width: 45%
-   :align: center
+   Underneath is the same example zoomed into one of the electrode crevices, both for positive and negative polarization:
 
-   :math:`K` in the crevice with negative polarization. 
+   .. _Fig:Kplus:
+   .. figure:: /_static/figures/StreamerInception/Kplus.png
+      :width: 45%
+      :align: center
+
+      :math:`K` in the crevice with positive polarization.
+
+   .. _Fig:Kminu:
+   .. figure:: /_static/figures/StreamerInception/Kminu.png
+      :width: 45%
+      :align: center
+
+      :math:`K` in the crevice with negative polarization. 
 
