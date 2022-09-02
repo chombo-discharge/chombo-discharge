@@ -276,14 +276,14 @@ namespace Physics {
 	@param[in] a_density Negative ion density
       */
       virtual void
-      setNegativeIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
+      setIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
 
       /*!
 	@brief Set the negative ion mobility (field-dependent)
 	@param[in] a_mobility Negative ion  mobility
       */
       virtual void
-      setNegativeIonMobility(const std::function<Real(const Real E)>& a_mobility) noexcept;
+      setIonMobility(const std::function<Real(const Real E)>& a_mobility) noexcept;
 
       /*!
 	@brief Set the ionization coefficient.
@@ -403,6 +403,12 @@ namespace Physics {
 	@note Both modes. 
       */
       EBAMRCellData m_backgroundIonization;
+
+      /*!
+	@brief Detachment rates.
+	@note Both modes. 
+      */
+      EBAMRCellData m_detachment;
 
       /*!
 	@brief Field emission rates
@@ -572,6 +578,11 @@ namespace Physics {
       bool m_plotBackgroundIonization;
 
       /*!
+	@brief If true, plot electron detachment rate, i.e. dne/dt due to detachment from negative ions. 
+      */
+      bool m_plotDetachment;
+
+      /*!
 	@brief If true, plot the field emission.
       */
       bool m_plotFieldEmission;
@@ -714,6 +725,12 @@ namespace Physics {
       */
       virtual void
       computeBackgroundIonizationStationary() noexcept;
+      /*!
+	@brief Compute the detachment ionization rate for all voltages
+	@note For stationary simulations. 
+      */
+      virtual void
+      computeDetachmentStationary() noexcept;
 
       /*!
 	@brief Compute field emission rates

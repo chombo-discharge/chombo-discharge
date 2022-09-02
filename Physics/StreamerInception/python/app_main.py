@@ -14,10 +14,7 @@ def write_template(args):
     main_filename = app_dir + "/program.cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include <CD_Driver.H>\n')
-    mainf.write('#include <CD_' + args.particle_type + '.H>\n')
     mainf.write('#include <CD_' + args.geometry + '.H>\n')
-    mainf.write('#include <CD_' + args.field_solver + '.H>\n')
-    mainf.write('#include <CD_' + args.cdr_solver + '.H>\n')        
     mainf.write('#include <CD_StreamerInceptionStepper.H>\n')
     mainf.write('#include <CD_StreamerInceptionTagger.H>\n')    
     mainf.write('#include <ParmParse.H>\n')
@@ -28,31 +25,60 @@ def write_template(args):
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
+    
     mainf.write("#ifdef CH_MPI\n")
     mainf.write("  MPI_Init(&argc, &argv);\n")
     mainf.write("#endif\n")
     
     mainf.write("\n")
-    mainf.write("  // Build class options from input script and command line options\n")
+    
+    mainf.write("  // Read the input file into the ParmParse table\n")
     mainf.write("  const std::string input_file = argv[1];\n")
-    mainf.write("  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());")
+    mainf.write("  ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());\n")
+    
     mainf.write("\n")
-
-    mainf.write("\n")
+    
     mainf.write("  // Set geometry and AMR \n")
     mainf.write("  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new " + args.geometry + "());\n")
     mainf.write("  RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());\n")
 
-
-    mainf.write("\n")
-    mainf.write("  // Set up time stepper \n")
-    mainf.write("  auto timestepper = RefCountedPtr<StreamerInceptionStepper<>> (new StreamerInceptionStepper<>());\n")
-    mainf.write("  auto celltagger  = RefCountedPtr<StreamerInceptionTagger> (new StreamerInceptionTagger(amr, timestepper->getElectricField()));\n");
     mainf.write("\n")
     
+    mainf.write("  // Define transport data\n")
+    mainf.write("  auto alpha         = [&](const Real& E) -> Real { return 0.0; };\n")
+    mainf.write("  auto eta           = [&](const Real& E) -> Real { return 0.0; };\n")
+    mainf.write("  auto alphaEff      = [&](const Real& E) -> Real { return alpha(E) - eta(E); };\n")
+    mainf.write("  auto bgRate        = [&](const Real& E) -> Real { return 0.0; };\n")
+    mainf.write("  auto detachRate    = [&](const Real& E) -> Real { return 0.0; };\n")
+    mainf.write("  auto fieldEmission = [&](const Real& E) -> Real { return 0.0; };\n")
+    mainf.write("  auto ionMobility   = [&](const Real& E) -> Real { return 0.0; };\n")
+    mainf.write("  auto ionDensity    = [&](const RealVect& x) -> Real { return 0.0; };\n")
+    mainf.write("  auto voltageCurve  = [&](const Real& time) -> Real { return 1.0;};\n")
+    
+    mainf.write("\n")
+
+    mainf.write("  // Set up time stepper \n")
+    mainf.write("  auto timestepper = RefCountedPtr<StreamerInceptionStepper<>> (new StreamerInceptionStepper<>());\n")
+    mainf.write("  auto celltagger  = RefCountedPtr<StreamerInceptionTagger> (new StreamerInceptionTagger(amr, timestepper->getElectricField(), alphaEff));\n");
+    
+    mainf.write("\n")
+
+    mainf.write("  // Set transport data\n")
+    mainf.write("  timestepper->setAlpha(alpha);\n")
+    mainf.write("  timestepper->setEta(eta);\n")
+    mainf.write("  timestepper->setBackgroundRate(bgRate);\n")
+    mainf.write("  timestepper->setDetachmentRate(detachRate);\n")
+    mainf.write("  timestepper->setFieldEmission(fieldEmission);\n")
+    mainf.write("  timestepper->setIonMobility(ionMobility);\n")
+    mainf.write("  timestepper->setIonDensity(ionDensity);\n")
+    mainf.write("  timestepper->setVoltageCurve(voltageCurve);\n")
+
+    mainf.write("\n");
+    
     mainf.write("  // Set up the Driver and run it\n")
-    mainf.write("  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr));\n")
+    mainf.write("  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, celltagger));\n")
     mainf.write("  engine->setupAndRun(input_file);\n");
+    
     mainf.write("\n")
 
     mainf.write("#ifdef CH_MPI\n")

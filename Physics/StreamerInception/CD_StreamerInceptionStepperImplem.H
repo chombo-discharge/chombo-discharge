@@ -158,6 +158,12 @@ StreamerInceptionStepper<P, F, C>::allocate()
       DataOps::setValue(m_backgroundIonization, 0.0);
     }
 
+    if (m_plotDetachment) {
+      m_amr->allocate(m_detachment, m_realm, m_phase, m_voltageSweeps.size());
+
+      DataOps::setValue(m_detachment, 0.0);
+    }
+
     DataOps::setValue(m_inceptionIntegralPlus, 0.0);
     DataOps::setValue(m_inceptionIntegralMinu, 0.0);
     DataOps::setValue(m_inceptionVoltagePlus, 0.0);
@@ -169,6 +175,7 @@ StreamerInceptionStepper<P, F, C>::allocate()
     m_amr->allocate(m_inceptionIntegral, m_realm, m_phase, 1);
     m_amr->allocate(m_emissionRate, m_realm, m_phase, 1);
     m_amr->allocate(m_backgroundIonization, m_realm, m_phase, 1);
+    m_amr->allocate(m_detachment, m_realm, m_phase, 1);
 
     DataOps::setValue(m_inceptionIntegral, 0.0);
     DataOps::setValue(m_emissionRate, 0.0);
@@ -450,6 +457,7 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
   m_plotInceptionIntegral    = false;
   m_plotInceptionVoltage     = false;
   m_plotBackgroundIonization = false;
+  m_plotDetachment           = false;
   m_plotFieldEmission        = false;
   m_plotAlpha                = false;
   m_plotEta                  = false;
@@ -480,6 +488,9 @@ StreamerInceptionStepper<P, F, C>::parsePlotVariables() noexcept
       }
       else if (plotVars[i] == "bg_rate") {
         m_plotBackgroundIonization = true;
+      }
+      else if (plotVars[i] == "detachment") {
+        m_plotDetachment = true;
       }
       else if (plotVars[i] == "emission") {
         m_plotFieldEmission = true;
@@ -642,6 +653,22 @@ StreamerInceptionStepper<P, F, C>::writePlotDataStationary(EBAMRCellData&       
     }
   }
 
+  // Write detachment rates
+  if (m_plotDetachment) {
+    const Interval srcInterval(0, m_voltageSweeps.size() - 1);
+    const Interval dstInterval(a_icomp, a_icomp + m_voltageSweeps.size() - 1);
+    DataOps::copy(a_output, m_detachment, dstInterval, srcInterval);
+
+    a_icomp += m_voltageSweeps.size();
+
+    std::string varName;
+    for (const Real& V : m_voltageSweeps) {
+      varName = prefix + "Detachment rate/ V =  ";
+      varName += std::to_string(V);
+      a_plotVariableNames.push_back(varName);
+    }
+  }
+
   // Write field emission rates
   if (m_plotFieldEmission) {
     // Positive polarity
@@ -777,6 +804,7 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(EBAMRCellData&       a
     a_plotVariableNames.push_back("Inception integral");
   }
 
+  // Plot background ionization rate
   if (m_plotBackgroundIonization) {
     EBAMRCellData bgIonization;
 
@@ -792,6 +820,28 @@ StreamerInceptionStepper<P, F, C>::writePlotDataTransient(EBAMRCellData&       a
     a_icomp++;
 
     a_plotVariableNames.push_back("Background rate");
+  }
+
+  // Plot electron detachment rate
+  if (m_plotDetachment) {
+    EBAMRCellData detachment;
+
+    m_amr->allocate(detachment, m_realm, m_phase, 1);
+
+    this->evaluateFunction(detachment, m_voltageCurve(m_time), m_detachmentRate);
+
+    const EBAMRCellData& phi = m_ionSolver->getPhi();
+
+    DataOps::multiply(detachment, phi);
+
+    m_amr->conservativeAverage(detachment, m_realm, m_phase);
+    m_amr->interpGhost(detachment, m_realm, m_phase);
+
+    DataOps::copy(a_output, detachment, Interval(a_icomp, a_icomp), Interval(0, 0));
+
+    a_icomp++;
+
+    a_plotVariableNames.push_back("Detachment rate");
   }
 
   if (m_plotFieldEmission) {
@@ -875,6 +925,11 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
       ncomp += m_voltageSweeps.size();
     }
 
+    // Detachment rates
+    if (m_plotDetachment) {
+      ncomp += m_voltageSweeps.size();
+    }
+
     // Field emission rates
     if (m_plotFieldEmission) {
       ncomp += 2 * m_voltageSweeps.size();
@@ -901,6 +956,9 @@ StreamerInceptionStepper<P, F, C>::getNumberOfPlotVariables() const
       ncomp += 1;
     }
     if (m_plotBackgroundIonization) {
+      ncomp += 1;
+    }
+    if (m_plotDetachment) {
       ncomp += 1;
     }
     if (m_plotFieldEmission) {
@@ -1169,6 +1227,10 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
       m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
     }
 
+    if (m_plotDetachment) {
+      m_amr->reallocate(m_detachment, m_phase, a_lmin);
+    }
+
     if (m_plotFieldEmission) {
       m_amr->reallocate(m_emissionRatesPlus, m_phase, a_lmin);
       m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
@@ -1252,12 +1314,11 @@ StreamerInceptionStepper<P, F, C>::setRho(const std::function<Real(const RealVec
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::setNegativeIonDensity(
-  const std::function<Real(const RealVect x)>& a_density) noexcept
+StreamerInceptionStepper<P, F, C>::setIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::setNegativeIonDensity");
+  CH_TIME("StreamerInceptionStepper::setIonDensity");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::setNegativeIonDensity" << endl;
+    pout() << "StreamerInceptionStepper::setIonDensity" << endl;
   }
 
   m_initialIonDensity = a_density;
@@ -1265,11 +1326,11 @@ StreamerInceptionStepper<P, F, C>::setNegativeIonDensity(
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::setNegativeIonMobility(const std::function<Real(const Real x)>& a_mobility) noexcept
+StreamerInceptionStepper<P, F, C>::setIonMobility(const std::function<Real(const Real x)>& a_mobility) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::setNegativeIonMobility");
+  CH_TIME("StreamerInceptionStepper::setIonMobility");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::setNegativeIonMobility" << endl;
+    pout() << "StreamerInceptionStepper::setIonMobility" << endl;
   }
 
   m_negativeIonMobility = a_mobility;
@@ -1545,6 +1606,10 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
     // Compute background ionization and field emission on the mesh. Mostly for plotting.
     if (m_plotBackgroundIonization) {
       this->computeBackgroundIonizationStationary();
+    }
+
+    if (m_plotDetachment) {
+      this->computeDetachmentStationary();
     }
 
     if (m_plotFieldEmission) {
@@ -1876,7 +1941,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-          const RealVect v        = sgn * p.velocity();
+          const RealVect v        = p.velocity();
           const Real     dt       = step / v.vectorLength();
           const Real     E        = std::abs(a_voltage * v.vectorLength());
           const Real     alpha    = m_alpha(E);
@@ -1889,7 +1954,7 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
           p.template vect<1>() = v;
 
           // Update position.
-          const RealVect newPos = p.position() + v * dt;
+          const RealVect newPos = p.position() + sgn * v * dt;
 
           // Stop integration for particles that move into regions alpha < 0.0,
           // inside the EB or outside of the domain.
@@ -1924,13 +1989,13 @@ StreamerInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_v
           P& p = lit();
 
           const Real     dt  = p.template real<1>();
-          const RealVect vk  = sgn * p.template vect<1>();
-          const RealVect vk1 = sgn * p.velocity();
+          const RealVect vk  = p.template vect<1>();
+          const RealVect vk1 = p.velocity();
           const Real     E   = std::abs(a_voltage * vk1.vectorLength());
 
           // Note the weird subtraction since p.position() was updated
           // to p^k + dt * v^k.
-          const RealVect newPos = p.position() + 0.5 * dt * (vk1 - vk);
+          const RealVect newPos = p.position() + 0.5 * sgn * dt * (vk1 - vk);
 
           // Compute new alpha.
           const Real alpha1 = p.template real<0>();
@@ -2151,6 +2216,60 @@ StreamerInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noexc
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeDetachmentStationary");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeDetachmentStationary" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+      EBCellFAB& detachment    = (*m_detachment[lvl])[dit()];
+      FArrayBox& detachmentReg = detachment.getFArrayBox();
+
+      const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[dit()];
+      const EBCellFAB& electricField = (*m_electricFieldPlus[lvl])[dit()];
+
+      const FArrayBox& ionDensityReg    = ionDensity.getFArrayBox();
+      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+        const Real     E  = EE.vectorLength();
+        const Real     phi = ionDensityReg(iv, 0);
+
+        for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+          detachmentReg(iv, i) = m_detachmentRate(m_voltageSweeps[i] * E) * phi;
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+        const Real     E   = EE.vectorLength();
+        const Real     phi = ionDensity(vof, 0);
+
+        for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+          detachment(vof, i) = m_detachmentRate(m_voltageSweeps[i] * E) * phi;
+        }
+      };
+
+      // Execute kernels
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+      BoxLoops::loop(dbl[dit()], regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+
+  m_amr->conservativeAverage(m_detachment, m_realm, m_phase);
 }
 
 template <typename P, typename F, typename C>
@@ -2610,8 +2729,8 @@ StreamerInceptionStepper<P, F, C>::computeRdotStationary() noexcept
   //       background ionization rate m_backgroundIonization(E).
 
   // Total rate.
-  std::vector<Real> Rplus(m_voltageSweeps.size(), std::numeric_limits<Real>::min());
-  std::vector<Real> Rminu(m_voltageSweeps.size(), std::numeric_limits<Real>::min());
+  std::vector<Real> Rplus(m_voltageSweeps.size(), 0.0);
+  std::vector<Real> Rminu(m_voltageSweeps.size(), 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];

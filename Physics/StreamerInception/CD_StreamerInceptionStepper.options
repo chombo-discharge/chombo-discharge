@@ -2,7 +2,7 @@
 # StreamerInceptionStepper class options
 # ====================================================================================================
 StreamerInceptionStepper.verbosity     = -1                            # Chattiness. 
-StreamerInceptionStepper.mode          = static                        # Mode (static or dynamic)
+StreamerInceptionStepper.mode          = stationary                    # Mode (stationary or transient)
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 StreamerInceptionStepper.K_inception   = 12                            # User-specified inception value

@@ -1,7 +1,5 @@
 #include <CD_Driver.H>
-#include <CD_TracerParticleSolver.H>
 #include <CD_Vessel.H>
-#include <CD_FieldSolverMultigrid.H>
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_StreamerInceptionTagger.H>
 #include <CD_LookupTable.H>
@@ -19,12 +17,14 @@ main(int argc, char* argv[])
   MPI_Init(&argc, &argv);
 #endif
 
-  // Build class options from input script and command line options
+  // Read the input file into the ParmParse table
   const std::string input_file = argv[1];
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
-  // Read ionization and attachment coefficients and make them into functions.
-  constexpr Real N = 2.45E25;
+  // Read BOLSIG+ data into alpha and eta coefficients
+  constexpr Real N  = 2.45E25;
+  constexpr Real O2 = 0.2;
+  constexpr Real N2 = 0.8;
 
   LookupTable<2> ionizationData =
     DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)", "");
@@ -49,58 +49,49 @@ main(int argc, char* argv[])
   ionizationData.makeUniform(500);
   attachmentData.makeUniform(500);
 
-  auto alpha = [&](const Real& E) -> Real { return ionizationData.getEntry<1>(E); };
+  // Read data for the voltage curve.
+  Real peak = 0.0;
+  Real t0   = 0.0;
+  Real t1   = 0.0;
+  Real t2   = 0.0;
 
-  auto eta = [&](const Real& E) -> Real { return attachmentData.getEntry<1>(E); };
-
-  auto alphaEff = [&](const Real& E) -> Real { return alpha(E) - eta(E); };
-
-  auto bgIonization = [](const Real& E) -> Real { return 2.E6 / (1.17E-4 * exp(2.91E7 / E)); };
-
-  auto detachmentRate = [N](const Real& E) -> Real { return ((0.8 * 1.13E-25) + (0.2 * 2.2E-24)) * N; };
-
-  auto ionMobility = [](const Real& E) -> Real { return 2E-4; };
-
-  auto ionDensity = [](const RealVect& x) -> Real { return 1.E10; };
-
-  // Define a lightning impulse voltage curve.
-  ParmParse vessel("impulse");
-  Real      V0 = 1.0;
-  Real      t0 = 0.0;
-  Real      t1 = 1.2E-6;
-  Real      t2 = 50E-6;
-
-  vessel.get("voltage", V0);
-  vessel.get("start", t0);
-  vessel.get("t1", t1);
-  vessel.get("t2", t2);
-
-  auto voltageCurve = [V0, t0, t1, t2](const Real a_time) -> Real {
-    constexpr Real alpha = 1.0 / 50E-6;
-    constexpr Real beta  = 1.0 / 1.2E-6;
-
-    return V0 * (exp(-(a_time + t0) / t1) - exp(-(a_time + t0) / t2));
-  };
+  ParmParse li("lightning_impulse");
+  li.get("peak", peak);
+  li.get("start", t0);
+  li.get("tail_time", t1);
+  li.get("front_time", t2);
 
   // Set geometry and AMR
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new Vessel());
   RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
-  // Set up time stepper and cell tagger.
+  // Define transport data
+  auto alpha         = [&](const Real& E) -> Real { return ionizationData.getEntry<1>(E); };
+  auto eta           = [&](const Real& E) -> Real { return attachmentData.getEntry<1>(E); };
+  auto alphaEff      = [&](const Real& E) -> Real { return alpha(E) - eta(E); };
+  auto bgRate        = [&](const Real& E) -> Real { return 1.E7; };
+  auto detachRate    = [&](const Real& E) -> Real { return (N2 * 1.13E-25 + O2 * 2.2E-24) * N; };
+  auto fieldEmission = [&](const Real& E) -> Real { return 0.0; };
+  auto ionMobility   = [&](const Real& E) -> Real { return 2E-4; };
+  auto ionDensity    = [&](const RealVect& x) -> Real { return 1.E10; };
+  auto voltageCurve  = [&](const Real& t) -> Real { return peak * (exp(-(t + t0) / t1) - exp(-(t + t0) / t2)); };
+
+  // Set up time stepper
   auto timestepper = RefCountedPtr<StreamerInceptionStepper<>>(new StreamerInceptionStepper<>());
   auto celltagger =
     RefCountedPtr<StreamerInceptionTagger>(new StreamerInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
 
-  // Set data required for the streamer inception time-stepper.
+  // Set transport data
   timestepper->setAlpha(alpha);
   timestepper->setEta(eta);
-  timestepper->setBackgroundRate(bgIonization);
-  timestepper->setDetachmentRate(detachmentRate);
+  timestepper->setBackgroundRate(bgRate);
+  timestepper->setDetachmentRate(detachRate);
+  timestepper->setFieldEmission(fieldEmission);
+  timestepper->setIonMobility(ionMobility);
+  timestepper->setIonDensity(ionDensity);
   timestepper->setVoltageCurve(voltageCurve);
-  timestepper->setNegativeIonMobility(ionMobility);
-  timestepper->setNegativeIonDensity(ionDensity);
 
-  // Set up Driver and run the simulation.
+  // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));
   engine->setupAndRun(input_file);
 
