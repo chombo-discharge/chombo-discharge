@@ -79,11 +79,12 @@ main(int argc, char* argv[])
   auto voltageCurve = [&](const Real& t) -> Real { return peak * (exp(-(t + t0) / t1) - exp(-(t + t0) / t2)); };
 
   auto fieldEmission = [&](const Real& E) -> Real {
-    constexpr Real phi = 4.5;
-    constexpr Real C1  = 1.54E-6 * std::pow(10, 4.52 / sqrt(phi)) / phi;
-    constexpr Real C2  = 2.84E9 * std::pow(phi, 1.5);
+    constexpr Real beta = 1.0; // Field enhancement factor
+    constexpr Real phi  = 4.5;
+    constexpr Real C1   = 1.54E-6 * std::pow(10, 4.52 / sqrt(phi)) / phi;
+    constexpr Real C2   = 2.84E9 * std::pow(phi, 1.5);
 
-    return C1 * (E * E) * exp(-C2 / (E));
+    return C1 * (E * E) * exp(-C2 / (beta * E));
   };
 
   // Set up time stepper
