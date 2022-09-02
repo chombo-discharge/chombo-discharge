@@ -427,6 +427,11 @@ and similarly for the surface integral.
 
    The integration runs over *valid cells*, i.e. grid cells that are not covered by a finer grid.
 
+Advection algorithm
+___________________
+
+The advection algorithm for the negative ion distribution follows the time stepping algorithms described in the advection-diffusion model, see :ref:`Chap:AdvectionDiffusionModel`.
+
 
 Simulation control
 ------------------
@@ -554,8 +559,9 @@ __________________
 
 For the transient mode the following input options must be set:
 
-* ``advect_ions`` For turning on/off ion advection.
-* ``advection_alg`` For controlling the advection algorithm. Valid options are ``euler``, ``heun``, or ``ctu`` (for corner transport upwind).
+* ``ion_transport`` For turning on/off ion transport.
+* ``transport_alg`` For controlling the transport algorithm.
+  Valid options are ``euler``, ``heun``, or ``imex`` (for semi-implicit with corner transport upwind).
 * ``cfl`` Which controls the ion advection time step.
 * ``min_dt`` For setting the minimum time step used.
 * ``max_dt`` For setting the maximum time step used.
@@ -564,8 +570,8 @@ For example,
 
 .. code-block:: text
 		
-   StreamerInceptionStepper.advect_ions   = true 
-   StreamerInceptionStepper.advection_alg = ctu  
+   StreamerInceptionStepper.ion_transport = true 
+   StreamerInceptionStepper.transport_alg = imex  
    StreamerInceptionStepper.cfl           = 0.8  
    StreamerInceptionStepper.min_dt        = 0.0  
    StreamerInceptionStepper.max_dt        = 1E99 
@@ -573,7 +579,7 @@ For example,
 .. warning::
 
    The ``ctu`` option exists because the default advection solver for the streamer inception model is the corner transport upwind solver (see :ref:`Chap:CdrCTU`).
-   Ensure that ``CdrCTU.use_ctu = true`` if using `StreamerInceptionStepper.advection_alg = ctu`` algorithm and set ``CdrCTU.use_ctu = false`` otherwise.
+   Ensure that ``CdrCTU.use_ctu = true`` if using `StreamerInceptionStepper.transport_alg = ctu`` algorithm and set ``CdrCTU.use_ctu = false`` otherwise.
 
   
 Caveats

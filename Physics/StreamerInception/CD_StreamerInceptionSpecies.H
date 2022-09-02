@@ -40,7 +40,7 @@ namespace Physics {
         m_isMobile     = a_mobile;
         m_isDiffusive  = a_diffusive;
         m_chargeNumber = 0;
-        m_name         = "Negative ion";
+        m_name         = "Ion distribution";
       }
 
       /*!

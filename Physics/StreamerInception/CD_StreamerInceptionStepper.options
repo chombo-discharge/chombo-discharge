@@ -14,8 +14,8 @@ StreamerInceptionStepper.voltage_hi    = 10.0                          # Highest
 StreamerInceptionStepper.voltage_steps = 3                             # Number of voltage steps
 
 # Dynamic mode
-StreamerInceptionStepper.advect_ions   = true                          # Turn on/off ion advection
-StreamerInceptionStepper.advection_alg = ctu                           # Advection algorithm. 
+StreamerInceptionStepper.ion_tarnsport = true                          # Turn on/off ion transport
+StreamerInceptionStepper.advection_alg = heun                          # Advection algorithm. 'euler', 'heun' or 'imex'
 StreamerInceptionStepper.cfl           = 0.8                           # CFL time step for dynamic mode
 StreamerInceptionStepper.min_dt        = 0.0                           # Minimum permitted time step
 StreamerInceptionStepper.max_dt        = 1E99                          # Maximum permitted time step

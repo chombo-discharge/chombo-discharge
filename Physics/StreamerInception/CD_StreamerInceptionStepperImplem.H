@@ -41,7 +41,7 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
   m_realm              = Realm::Primal;
   m_phase              = phase::gas;
   m_mode               = Mode::Stationary;
-  m_advectionAlgorithm = AdvectionAlgorithm::CTU;
+  m_transportAlgorithm = TransportAlgorithm::ImExCTU;
 
   this->parseOptions();
 
@@ -61,7 +61,9 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
   m_initialIonDensity = [](const RealVect x) -> Real { return 0.0; };
 
-  m_negativeIonMobility = [](const Real E) -> Real { return 0.0; };
+  m_ionMobility = [](const Real E) -> Real { return 0.0; };
+
+  m_ionDiffusion = [](const Real E) -> Real { return 0.0; };
 }
 
 template <typename P, typename F, typename C>
@@ -115,7 +117,7 @@ StreamerInceptionStepper<P, F, C>::setupSolvers()
   m_ionSolver->setComputationalGeometry(m_computationalGeometry);
   m_ionSolver->setRealm(m_realm);
 
-  auto species = RefCountedPtr<CdrSpecies>(new StreamerInceptionSpecies(m_initialIonDensity, true, false));
+  auto species = RefCountedPtr<CdrSpecies>(new StreamerInceptionSpecies(m_initialIonDensity, true, true));
 
   m_ionSolver->setSpecies(species);
 }
@@ -260,7 +262,7 @@ StreamerInceptionStepper<P, F, C>::parseOptions()
   this->parseOutput();
   this->parsePlotVariables();
   this->parseInceptionAlgorithm();
-  this->parseAdvectionAlgorithm();
+  this->parseTransportAlgorithm();
 }
 
 template <typename P, typename F, typename C>
@@ -275,7 +277,7 @@ StreamerInceptionStepper<P, F, C>::parseRuntimeOptions()
   this->parseVerbosity();
   this->parsePlotVariables();
   this->parseInceptionAlgorithm();
-  this->parseAdvectionAlgorithm();
+  this->parseTransportAlgorithm();
 }
 
 template <typename P, typename F, typename C>
@@ -409,19 +411,19 @@ StreamerInceptionStepper<P, F, C>::parseInceptionAlgorithm() noexcept
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::parseAdvectionAlgorithm() noexcept
+StreamerInceptionStepper<P, F, C>::parseTransportAlgorithm() noexcept
 {
-  CH_TIME("StreamerInceptionStepper::parseAdvectionAlgorithm");
+  CH_TIME("StreamerInceptionStepper::parseTransportAlgorithm");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::parseAdvectionAlgorithm" << endl;
+    pout() << "StreamerInceptionStepper::parseTransportAlgorithm" << endl;
   }
 
   ParmParse pp("StreamerInceptionStepper");
 
   std::string str;
 
-  pp.get("advection_alg", str);
-  pp.get("advect_ions", m_advectIons);
+  pp.get("transport_alg", str);
+  pp.get("ion_transport", m_ionTransport);
   pp.get("cfl", m_cfl);
   pp.get("max_dt", m_maxDt);
   pp.get("min_dt", m_minDt);
@@ -429,16 +431,16 @@ StreamerInceptionStepper<P, F, C>::parseAdvectionAlgorithm() noexcept
   m_minDt = std::max(m_minDt, 0.0);
 
   if (str == "euler") {
-    m_advectionAlgorithm == AdvectionAlgorithm::Euler;
+    m_transportAlgorithm == TransportAlgorithm::Euler;
   }
   else if (str == "heun") {
-    m_advectionAlgorithm == AdvectionAlgorithm::Heun;
+    m_transportAlgorithm == TransportAlgorithm::Heun;
   }
-  else if (str == "ctu") {
-    m_advectionAlgorithm == AdvectionAlgorithm::CTU;
+  else if (str == "imex") {
+    m_transportAlgorithm == TransportAlgorithm::ImExCTU;
   }
   else {
-    MayDay::Error("Expected 'euler', 'heun', or 'ctu' for 'StreamerInceptionStepper.advection_alg'");
+    MayDay::Error("Expected 'euler', 'heun', or 'imex' for 'StreamerInceptionStepper.transport_alg'");
   }
 }
 
@@ -1005,7 +1007,29 @@ StreamerInceptionStepper<P, F, C>::computeDt()
   Real dt = std::numeric_limits<Real>::max();
 
   if (m_mode == Mode::Transient) {
-    dt = m_cfl * m_ionSolver->computeAdvectionDt();
+
+    switch (m_transportAlgorithm) {
+    case TransportAlgorithm::Euler: {
+      dt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+
+      break;
+    }
+    case TransportAlgorithm::Heun: {
+      dt = m_cfl * m_ionSolver->computeAdvectionDiffusionDt();
+
+      break;
+    }
+    case TransportAlgorithm::ImExCTU: {
+      dt = m_cfl * m_ionSolver->computeAdvectionDt();
+
+      break;
+    }
+    default: {
+      MayDay::Error("StreamerInceptionStepper::computDt -- logic bust");
+
+      break;
+    }
+    }
 
     dt = std::min(dt, m_maxDt);
     dt = std::max(dt, m_minDt);
@@ -1029,8 +1053,9 @@ StreamerInceptionStepper<P, F, C>::advance(const Real a_dt)
     const Real curVoltage = m_voltageCurve(curTime);
 
     // Move the negative ions -- still want this for the time step.
-    this->setIonVelocity(curVoltage);
-    if (m_advectIons) {
+    this->computeIonVelocity(curVoltage);
+    if (m_ionTransport) {
+      this->computeIonDiffusion(curVoltage);
       this->advanceIons(a_dt);
     }
 
@@ -1088,25 +1113,25 @@ StreamerInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
 
   EBAMRCellData& phi = m_ionSolver->getPhi();
 
-  // Use an outflow BC for advection. Note that extrapolateAdvectiveFluxToEB computes
+  // Use an outflow BC for transport. Note that extrapolateAdvectiveFluxToEB computes
   // -n.(phi * v). Since we compute phi^(k+1) = phi^k - dt*sum(fluxes) this means that a negative
   // flux is an incoming flux.
   EBAMRIVData& ebFlux = m_ionSolver->getEbFlux();
   m_ionSolver->extrapolateAdvectiveFluxToEB(ebFlux);
   DataOps::floor(ebFlux, 0.0);
 
-  switch (m_advectionAlgorithm) {
-  case AdvectionAlgorithm::Euler: {
-    EBAMRCellData divF;
-    m_amr->allocate(divF, m_realm, m_phase, 1.0);
+  switch (m_transportAlgorithm) {
+  case TransportAlgorithm::Euler: {
+    EBAMRCellData divJ;
+    m_amr->allocate(divJ, m_realm, m_phase, 1.0);
 
-    m_ionSolver->computeDivF(divF, phi, 0.0, false, true, false);
+    m_ionSolver->computeDivJ(divJ, phi, 0.0, false, true, false);
 
-    DataOps::incr(phi, divF, -a_dt);
+    DataOps::incr(phi, divJ, -a_dt);
 
     break;
   }
-  case AdvectionAlgorithm::Heun: {
+  case TransportAlgorithm::Heun: {
     // Transient storage
     EBAMRCellData yp;
     EBAMRCellData k1;
@@ -1117,24 +1142,38 @@ StreamerInceptionStepper<P, F, C>::advanceIons(const Real a_dt) noexcept
     m_amr->allocate(k2, m_realm, m_phase, 1);
 
     // Compute k1 coefficient
-    m_ionSolver->computeDivF(k1, phi, 0.0, false, true, false);
+    m_ionSolver->computeDivJ(k1, phi, 0.0, false, true, false);
     DataOps::copy(yp, phi);
     DataOps::incr(yp, k1, -a_dt);
 
     // Compute k2 coefficient and final state
-    m_ionSolver->computeDivF(k2, yp, 0.0, false, true, false);
+    m_ionSolver->computeDivJ(k2, yp, 0.0, false, true, false);
     DataOps::incr(phi, k1, -0.5 * a_dt);
     DataOps::incr(phi, k2, -0.5 * a_dt);
 
     break;
   }
-  case AdvectionAlgorithm::CTU: {
-    EBAMRCellData divF;
-    m_amr->allocate(divF, m_realm, m_phase, 1.0);
+  case TransportAlgorithm::ImExCTU: {
+    const bool addEbFlux     = true;
+    const bool addDomainFlux = true;
 
-    m_ionSolver->computeDivF(divF, phi, a_dt, false, true, false);
+    // Transient storage
+    EBAMRCellData k1;
+    EBAMRCellData k2;
 
-    DataOps::incr(phi, divF, -a_dt);
+    m_amr->allocate(k1, m_realm, m_phase, 1);
+    m_amr->allocate(k2, m_realm, m_phase, 1);
+
+    m_ionSolver->computeDivF(k1, phi, a_dt, false, true, true);
+
+    DataOps::kappaScale(k1);
+    DataOps::scale(k1, -1.0);
+
+    // Use k1 as the old solution.
+    DataOps::copy(k2, phi);
+
+    // Do the Euler solve.
+    m_ionSolver->advanceCrankNicholson(phi, k2, k1, a_dt);
 
     break;
   }
@@ -1274,8 +1313,9 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   DataOps::copy(m_electricFieldMinu, m_electricFieldPlus);
   DataOps::scale(m_electricFieldMinu, -1.0);
 
-  // Re-compute the ion velocity
-  this->setIonVelocity(m_voltageCurve(m_time));
+  // Re-compute the ion velocity and diffusion coefficients
+  this->computeIonVelocity(m_voltageCurve(m_time));
+  this->computeIonDiffusion(m_voltageCurve(m_time));
 }
 
 template <typename P, typename F, typename C>
@@ -1333,7 +1373,19 @@ StreamerInceptionStepper<P, F, C>::setIonMobility(const std::function<Real(const
     pout() << "StreamerInceptionStepper::setIonMobility" << endl;
   }
 
-  m_negativeIonMobility = a_mobility;
+  m_ionMobility = a_mobility;
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::setIonDiffusion(const std::function<Real(const Real x)>& a_diffCo) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::setIonDiffusion");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::setIonDiffusion" << endl;
+  }
+
+  m_ionDiffusion = a_diffCo;
 }
 
 template <typename P, typename F, typename C>
@@ -1593,7 +1645,8 @@ StreamerInceptionStepper<P, F, C>::postInitialize()
 
   // Initialize the negative ion solver
   m_ionSolver->initialData();
-  this->setIonVelocity(m_voltageCurve(m_time));
+  this->computeIonVelocity(m_voltageCurve(m_time));
+  this->computeIonDiffusion(m_voltageCurve(m_time));
 
   switch (m_mode) {
   case Mode::Stationary: {
@@ -2998,11 +3051,11 @@ StreamerInceptionStepper<P, F, C>::particleInsideEB(const RealVect a_pos) const 
 
 template <typename P, typename F, typename C>
 void
-StreamerInceptionStepper<P, F, C>::setIonVelocity(const Real& a_voltage) noexcept
+StreamerInceptionStepper<P, F, C>::computeIonVelocity(const Real& a_voltage) noexcept
 {
-  CH_TIME("StreamerInceptionStepper::setIonVelocity");
+  CH_TIME("StreamerInceptionStepper::computeIonVelocity");
   if (m_verbosity > 5) {
-    pout() << "StreamerInceptionStepper::setIonVelocity" << endl;
+    pout() << "StreamerInceptionStepper::computeIonVelocity" << endl;
   }
 
   CH_assert(!(m_ionSolver.isNull()));
@@ -3033,14 +3086,14 @@ StreamerInceptionStepper<P, F, C>::setIonVelocity(const Real& a_voltage) noexcep
         const RealVect EE = RealVect(D_DECL(vReg(iv, 0), vReg(iv, 1), vReg(iv, 2)));
         const Real     E  = EE.vectorLength();
 
-        MUREG(iv, 0) = m_negativeIonMobility(E);
+        MUREG(iv, 0) = m_ionMobility(E);
       };
 
       auto irregularKernel = [&](const VolIndex& vof) -> void {
         const RealVect EE = RealVect(D_DECL(v(vof, 0), v(vof, 1), v(vof, 2)));
         const Real     E  = EE.vectorLength();
 
-        MU(vof, 0) = m_negativeIonMobility(E);
+        MU(vof, 0) = m_ionMobility(E);
       };
 
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
@@ -3055,6 +3108,75 @@ StreamerInceptionStepper<P, F, C>::setIonVelocity(const Real& a_voltage) noexcep
 
   m_amr->average(vel, m_realm, m_phase, Average::Conservative);
   m_amr->interpGhost(vel, m_realm, m_phase);
+}
+
+template <typename P, typename F, typename C>
+void
+StreamerInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) noexcept
+{
+  CH_TIME("StreamerInceptionStepper::computeIonDiffusion");
+  if (m_verbosity > 5) {
+    pout() << "StreamerInceptionStepper::computeIonDiffusion" << endl;
+  }
+
+  CH_assert(!(m_ionSolver.isNull()));
+  CH_assert(m_ionSolver->isMobile());
+
+  // Compute the diffusion coefficient on cell centers.
+  EBAMRCellData diffCoCell;
+  m_amr->allocate(diffCoCell, m_realm, m_phase, 1);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+      const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
+      const FArrayBox& electricFieldReg = electricField.getFArrayBox();
+
+      EBCellFAB& dCo    = (*diffCoCell[lvl])[dit()];
+      FArrayBox& dCoReg = dCo.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        const RealVect EE = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+        const Real     E  = EE.vectorLength();
+
+        dCoReg(iv, 0) = m_ionDiffusion(a_voltage * E);
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+        const Real     E  = EE.vectorLength();
+
+        dCo(vof, 0) = m_ionDiffusion(a_voltage * E);
+      };
+
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      Box          cellBox = dbl[dit()];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+
+  // Coarsen and update ghost cells
+  m_amr->average(diffCoCell, m_realm, m_phase, Average::Conservative);
+  m_amr->interpGhost(diffCoCell, m_realm, m_phase);
+
+  // Fetch from solver and average to grid faces.
+  EBAMRFluxData& diffCoFace = m_ionSolver->getFaceCenteredDiffusionCoefficient();
+  EBAMRIVData&   diffCoEB   = m_ionSolver->getEbCenteredDiffusionCoefficient();
+
+  DataOps::setValue(diffCoFace, 0.0);
+  DataOps::setValue(diffCoEB, 0.0); // Neumann BC.
+
+  DataOps::averageCellToFace(diffCoFace,
+                             diffCoCell,
+                             m_amr->getDomains(),
+                             1,
+                             Interval(0, 0),
+                             Interval(0, 0),
+                             Average::Arithmetic);
 }
 
 #include <CD_NamespaceFooter.H>

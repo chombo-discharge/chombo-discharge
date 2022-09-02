@@ -52,6 +52,7 @@ def write_template(args):
     mainf.write("  auto detachRate    = [&](const Real& E) -> Real { return 0.0; };\n")
     mainf.write("  auto fieldEmission = [&](const Real& E) -> Real { return 0.0; };\n")
     mainf.write("  auto ionMobility   = [&](const Real& E) -> Real { return 0.0; };\n")
+    mainf.write("  auto ionDiffusion  = [&](const Real& E) -> Real { return 0.0; };\n")    
     mainf.write("  auto ionDensity    = [&](const RealVect& x) -> Real { return 0.0; };\n")
     mainf.write("  auto voltageCurve  = [&](const Real& time) -> Real { return 1.0;};\n")
     
@@ -70,6 +71,7 @@ def write_template(args):
     mainf.write("  timestepper->setDetachmentRate(detachRate);\n")
     mainf.write("  timestepper->setFieldEmission(fieldEmission);\n")
     mainf.write("  timestepper->setIonMobility(ionMobility);\n")
+    mainf.write("  timestepper->setIonDiffusion(ionDiffusion);\n")    
     mainf.write("  timestepper->setIonDensity(ionDensity);\n")
     mainf.write("  timestepper->setVoltageCurve(voltageCurve);\n")
 

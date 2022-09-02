@@ -173,8 +173,8 @@ StreamerInceptionStepper.voltage_hi    = 100E3                          # Highes
 StreamerInceptionStepper.voltage_steps = 15                             # Number of voltage steps
 
 # Dynamic mode
-StreamerInceptionStepper.advect_ions   = true                          # Turn on/off ion advection
-StreamerInceptionStepper.advection_alg = ctu                           # Advection algorithm. 
+StreamerInceptionStepper.ion_transport = true                          # Turn on/off ion transport
+StreamerInceptionStepper.transport_alg = heun                          # Transport algorithm. 
 StreamerInceptionStepper.cfl           = 0.8                           # CFL time step for dynamic mode
 StreamerInceptionStepper.min_dt        = 0.0                           # Minimum permitted time step
 StreamerInceptionStepper.max_dt        = 1E99                          # Maximum permitted time step
@@ -183,7 +183,7 @@ StreamerInceptionStepper.max_dt        = 1E99                          # Maximum
 # ====================================================================================================
 # StreamerInceptionTagger class options
 # ====================================================================================================
-StreamerInceptionTagger.verbosity   = 10    # Tagger chattiness. 
+StreamerInceptionTagger.verbosity   = -1    # Tagger chattiness. 
 StreamerInceptionTagger.buffer      = 0     # Grown buffer around flagged cells
 StreamerInceptionTagger.max_voltage = 100E3 # Maximum applied voltage 
 StreamerInceptionTagger.ref_alpha   = 2.0   # Refinement curvature criterion. Lower => more mesh

@@ -38,11 +38,11 @@ namespace Physics {
     /*!
       @brief Algorithm for negative ion advancement
     */
-    enum class AdvectionAlgorithm
+    enum class TransportAlgorithm
     {
       Euler,
       Heun,
-      CTU
+      ImExCTU
     };
 
     /*!
@@ -286,6 +286,13 @@ namespace Physics {
       setIonMobility(const std::function<Real(const Real E)>& a_mobility) noexcept;
 
       /*!
+	@brief Set the negative ion diffusion coefficient (field-dependent)
+	@param[in] a_diffCo Negative ion diffusion coefficient
+      */
+      virtual void
+      setIonDiffusion(const std::function<Real(const Real E)>& a_diffCo) noexcept;
+
+      /*!
 	@brief Set the ionization coefficient.
 	@param[in] a_alpha Townsend ionization coefficient. E is the field in SI units. 
       */
@@ -351,9 +358,9 @@ namespace Physics {
       IntegrationAlgorithm m_inceptionAlgorithm;
 
       /*!
-	@brief Advection algorithm for advancing negative ions in the transient mode
+	@brief Transport algorithm for advancing negative ions in the transient mode
       */
-      AdvectionAlgorithm m_advectionAlgorithm;
+      TransportAlgorithm m_transportAlgorithm;
 
       /*!
 	@brief Tracer particle solver.
@@ -543,9 +550,9 @@ namespace Physics {
       bool m_useFixedInceptionStep;
 
       /*!
-	@brief Ion advection on/off
+	@brief Ion transport on/off
       */
-      bool m_advectIons;
+      bool m_ionTransport;
 
       /*!
 	@brief Plot Poisson solver or not.
@@ -630,7 +637,12 @@ namespace Physics {
       /*!
 	@brief Negative ion mobility
       */
-      std::function<Real(const Real& E)> m_negativeIonMobility;
+      std::function<Real(const Real& E)> m_ionMobility;
+
+      /*!
+	@brief Negative ion diffusion coefficient
+      */
+      std::function<Real(const Real& E)> m_ionDiffusion;
 
       /*!
 	@brief Detachment probability for negative ion.
@@ -853,7 +865,14 @@ namespace Physics {
 	@param[in] a_voltage Current voltage
       */
       inline void
-      setIonVelocity(const Real& a_voltage) noexcept;
+      computeIonVelocity(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Set the negative ion diffusion coefficient
+	@param[in] a_voltage Current voltage
+      */
+      inline void
+      computeIonDiffusion(const Real& a_voltage) noexcept;
 
       /*!
 	@brief Parse simulation mode
@@ -886,10 +905,10 @@ namespace Physics {
       parseInceptionAlgorithm() noexcept;
 
       /*!
-	@brief Parse the advection algorithm
+	@brief Parse the transport algorithm
       */
       inline void
-      parseAdvectionAlgorithm() noexcept;
+      parseTransportAlgorithm() noexcept;
 
       /*!
 	@brief Parse plot variables
