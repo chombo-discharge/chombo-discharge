@@ -2244,13 +2244,11 @@ CdrSolver::computeDiffusionDt()
 
           auto regularKernel = [&](const IntVect& iv) -> void {
             if (ebisbox.isRegular(iv)) {
-              Real D = 0.0;
-              for (int dir = 0; dir < SpaceDim; dir++) {
-                D = std::max(D, diffCoReg(iv, m_comp));
-                D = std::max(D, diffCoReg(iv - BASISV(dir), m_comp));
-              }
 
-              minDt = std::min(minDt, dx2 / (2 * SpaceDim * D));
+              const Real loD = diffCoReg(iv, m_comp);
+              const Real hiD = diffCoReg(iv + BASISV(dir), m_comp);
+
+              minDt = std::min(minDt, dx2 / (2 * SpaceDim * std::max(loD, hiD)));
             }
           };
 
@@ -2260,7 +2258,7 @@ CdrSolver::computeDiffusionDt()
 
         // Same kernel as above, but we need to fetch grid faces differently.
         auto irregularKernel = [&](const VolIndex& vof) -> void {
-          Real D = 0.0;
+          Real D = std::numeric_limits<Real>::min();
 
           for (int dir = 0; dir < SpaceDim; dir++) {
             const EBFaceFAB& Dface = diffCoFace[dir];

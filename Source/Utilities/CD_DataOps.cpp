@@ -215,11 +215,14 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
       EBFaceFAB& faceData    = a_faceData[dit()][faceDir];
       FArrayBox& faceDataReg = faceData.getFArrayBox();
 
-      // Build the computation box, including the ghost faces. We only want interior faces.
+      // Build the computation box, including the ghost faces.
       Box cellBox = dbl[dit()];
-      cellBox.grow(a_tanGhosts);
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        if (dir != faceDir) {
+          cellBox.grow(a_tanGhosts);
+        }
+      }
       cellBox &= a_domain;
-      cellBox.grow(faceDir, -a_tanGhosts);
 
       // Dummy check -- make sure boxes make sense in terms of how much ghost data we have
       // in the input/output data holders.
@@ -309,48 +312,35 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
 
       // Fix up domain faces
       for (SideIterator sit; sit.ok(); ++sit) {
-        const Box outsideBox = adjCellBox(dbl[dit()], faceDir, sit(), 1);
 
-        if (!(a_domain.contains(outsideBox))) {
-          Box insideBox = outsideBox;
+        const Box bndryBox = (sit() == Side::Lo) ? adjCellLo(a_domain, faceDir, -1) : adjCellHi(a_domain, faceDir, -1);
+        const Box computeBox = cellBox & bndryBox;
 
-          if ((sit() == Side::Lo)) {
-            insideBox.shift(faceDir, 1);
+        // Regular boundary faces.
+        for (BoxIterator bit(computeBox); bit.ok(); ++bit) {
+          const IntVect ivCell = bit();
+          const IntVect ivFace = (sit() == Side::Lo) ? ivCell : ivCell + BASISV(faceDir);
+
+          for (int ioff = 0; ioff < numVars; ioff++) {
+            const int cellVar = cellBegin + ioff;
+            const int faceVar = faceBegin + ioff;
+
+            faceDataReg(ivFace, faceVar) = cellDataReg(ivCell, cellVar);
           }
-          else {
-            insideBox.shift(faceDir, -1);
-          }
+        }
 
-          // Regular boundary faces.
-          for (BoxIterator bit(insideBox); bit.ok(); ++bit) {
-            const IntVect ivCell = bit();
+        // Irregular boundary faces.
+        FaceIterator bndryFaces(IntVectSet(computeBox), ebgraph, faceDir, FaceStop::AllBoundaryOnly);
 
-            for (int ioff = 0; ioff < numVars; ioff++) {
-              const int cellVar = cellBegin + ioff;
-              const int faceVar = faceBegin + ioff;
+        for (bndryFaces.reset(); bndryFaces.ok(); ++bndryFaces) {
+          const FaceIndex& bndryFace = bndryFaces();
+          const VolIndex&  bndryVoF  = bndryFace.getVoF(flip(sit()));
 
-              if (sit() == Side::Lo) {
-                faceDataReg(ivCell, faceVar) = cellDataReg(ivCell, cellVar);
-              }
-              else {
-                faceDataReg(ivCell + BASISV(faceDir), faceVar) = cellDataReg(ivCell, cellVar);
-              }
-            }
-          }
+          for (int ioff = 0; ioff < numVars; ioff++) {
+            const int cellVar = cellBegin + ioff;
+            const int faceVar = faceBegin + ioff;
 
-          // Irregular boundary faces.
-          FaceIterator bndryFaces(IntVectSet(insideBox), ebgraph, faceDir, FaceStop::AllBoundaryOnly);
-
-          for (bndryFaces.reset(); bndryFaces.ok(); ++bndryFaces) {
-            const FaceIndex& bndryFace = bndryFaces();
-            const VolIndex&  bndryVoF  = bndryFace.getVoF(flip(sit()));
-
-            for (int ioff = 0; ioff < numVars; ioff++) {
-              const int cellVar = cellBegin + ioff;
-              const int faceVar = faceBegin + ioff;
-
-              faceData(bndryFace, faceVar) = cellData(bndryVoF, cellVar);
-            }
+            faceData(bndryFace, faceVar) = cellData(bndryVoF, cellVar);
           }
         }
       }
