@@ -35,7 +35,6 @@ public:
     @param[in] a_clampLo     Low clamped corner. 
     @param[in] a_clampHi     High clamped corner.
     @param[in] a_clampK      K-value for clamping.
-    @param[in] a_inside      Inside or outside
     @param[in] a_noiseAmp    Noise amplitude
     @param[in] a_noiseFreq   Noise frequency
     @param[in] a_persistence Factor for noise octaves. 
@@ -48,7 +47,6 @@ public:
                     const RealVect a_clampLo,
                     const RealVect a_clampHi,
                     const Real     a_clampK,
-                    const bool     a_inside,
                     const Real     a_noiseAmp,
                     const RealVect a_noiseFreq,
                     const Real     a_persistence,
@@ -104,6 +102,11 @@ protected:
     @brief Transition length
   */
   Real m_clampK;
+
+  /*!
+    @brief Maximum noise amplitude
+  */
+  Real m_maxAmp;
 
   /*!
     @brief BaseIF function for a plane without noise

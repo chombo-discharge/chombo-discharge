@@ -32,7 +32,7 @@ NoisePlane::NoisePlane()
 
   if (usePlane) {
 
-  std::string material;    
+    std::string material;
 
     int normal;
     int noiseOctaves;
@@ -60,36 +60,38 @@ NoisePlane::NoisePlane()
     pp.get("live", live);
     pp.get("eps", eps);
     pp.get("normal", normal);
-    pp.get("clamp_k", clampK);
+    pp.get("clamp_dx", clampK);
     pp.get("noise_amplitude", noiseAmp);
     pp.get("noise_persistence", noisePersist);
     pp.get("noise_reseed", reseed);
     pp.get("noise_octaves", noiseOctaves);
-    pp.get("reseed", reseed);
-    pp.get("material", material);    
+    pp.get("noise_reseed", reseed);
+    pp.get("material", material);
 
-    point = get("point");
+    point     = get("point");
     clampLo   = get("clamp_lo");
     clampHi   = get("clamp_hi");
-    noiseFreq = get("noise_freq");
+    noiseFreq = get("noise_frequency");
 
-    RefCountedPtr<BaseIF> plane = RefCountedPtr<BaseIF> (new BoundedNoisePlane(normal,
-									       point,
-									       clampLo,
-									       clampHi,
-									       clampK,
-									       false,
-									       noiseAmp,
-									       noiseFreq,
-									       noisePersist,
-									       noiseOctaves,
-									       reseed));
+    if (std::abs(normal) >= SpaceDim) {
+      MayDay::Error("NoisePlane::NoisePlane -- normal must obey |n| < SpaceDim");
+    }
 
+    RefCountedPtr<BaseIF> plane = RefCountedPtr<BaseIF>(new BoundedNoisePlane(normal,
+                                                                              point,
+                                                                              clampLo,
+                                                                              clampHi,
+                                                                              1.0 / clampK,
+                                                                              noiseAmp,
+                                                                              noiseFreq,
+                                                                              noisePersist,
+                                                                              noiseOctaves,
+                                                                              reseed));
 
-    if(material == "electrode") {
+    if (material == "electrode") {
       m_electrodes.push_back(Electrode(plane, live));
     }
-    else if(material == "dielectric"){
+    else if (material == "dielectric") {
       m_dielectrics.push_back(Dielectric(plane, eps));
     }
     else {

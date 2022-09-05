@@ -21,7 +21,6 @@ BoundedNoisePlane::BoundedNoisePlane(const int      a_normal,
                                      const RealVect a_clampLo,
                                      const RealVect a_clampHi,
                                      const Real     a_clampK,
-                                     const bool     a_inside,
                                      const Real     a_noiseAmp,
                                      const RealVect a_noiseFreq,
                                      const Real     a_persistence,
@@ -30,17 +29,17 @@ BoundedNoisePlane::BoundedNoisePlane(const int      a_normal,
 {
 
   // Maximum amplitude that the Perlin noise function can spit out.
-  Real amp = 0.0;
+  m_maxAmp = 0.0;
   for (int i = 0; i < a_octaves; i++) {
-    amp += a_noiseAmp * pow(a_persistence, i);
+    m_maxAmp += a_noiseAmp * pow(a_persistence, i);
   }
 
   // Perlin noise is on [0,1] but we want the scaling on [-0.5, 0.5]
   m_normal              = a_normal;
   const RealVect normal = BASISREALV(a_normal);
-  m_point               = a_point - 0.5 * normal * amp;
+  m_point               = a_point;
 
-  m_plane  = RefCountedPtr<BaseIF>(new PlaneIF(normal, m_point, a_inside));
+  m_plane  = RefCountedPtr<BaseIF>(new PlaneIF(normal, m_point, false));
   m_perlin = RefCountedPtr<BaseIF>(new PerlinSdf(a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed));
 
   m_clampLo = a_clampLo;
@@ -48,7 +47,18 @@ BoundedNoisePlane::BoundedNoisePlane(const int      a_normal,
   m_clampK  = a_clampK;
 }
 
-BoundedNoisePlane::BoundedNoisePlane(const BoundedNoisePlane& a_inputIF) {}
+BoundedNoisePlane::BoundedNoisePlane(const BoundedNoisePlane& a_inputIF)
+{
+
+  m_normal  = a_inputIF.m_normal;
+  m_maxAmp  = a_inputIF.m_maxAmp;
+  m_point   = a_inputIF.m_point;
+  m_plane   = a_inputIF.m_plane;
+  m_perlin  = a_inputIF.m_perlin;
+  m_clampLo = a_inputIF.m_clampLo;
+  m_clampHi = a_inputIF.m_clampHi;
+  m_clampK  = a_inputIF.m_clampK;
+}
 
 BoundedNoisePlane::~BoundedNoisePlane() {}
 
@@ -68,13 +78,13 @@ BoundedNoisePlane::value(const RealVect& a_pos) const
   Real boxCar = 1.0;
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (dir != m_normal) {
-      const Real& x = a_pos[dir];
+      const Real& x = xp[dir];
 
       boxCar *= h(x - std::min(m_clampLo[dir], m_clampHi[dir])) - h(x - std::max(m_clampLo[dir], m_clampHi[dir]));
     }
   }
 
-  return m_plane->value(a_pos) + m_perlin->value(xp) * boxCar;
+  return (-m_plane->value(a_pos) + (m_perlin->value(xp) - 0.5 * m_maxAmp) * boxCar);
 }
 
 BaseIF*
