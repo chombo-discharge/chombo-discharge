@@ -215,11 +215,11 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
       EBFaceFAB& faceData    = a_faceData[dit()][faceDir];
       FArrayBox& faceDataReg = faceData.getFArrayBox();
 
-      // Build the computation box, including the ghost faces.
+      // Build the computation box, including the ghost faces, but not domain faces.
       Box cellBox = dbl[dit()];
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        if (dir != faceDir) {
-          cellBox.grow(a_tanGhosts);
+      for (int tanDir = 0; tanDir < SpaceDim; tanDir++) {
+        if (tanDir != faceDir) {
+          cellBox.grow(tanDir, a_tanGhosts);
         }
       }
       cellBox &= a_domain;
@@ -229,8 +229,13 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
       CH_assert(cellData.getRegion().contains(cellBox));
       CH_assert(faceData.getCellRegion().contains(cellBox));
 
-      // Define kernel regions.
-      const Box    faceBox = surroundingNodes(cellBox, faceDir);
+      // Define kernel regions -- don't do domain face.s
+      Box faceBox = cellBox;
+      faceBox.grow(faceDir, 1);
+      faceBox &= a_domain;
+      faceBox.grow(faceDir, -1);
+      faceBox.surroundingNodes(faceDir);
+
       FaceIterator faceIt(ebisbox.getIrregIVS(cellBox), ebgraph, faceDir, FaceStop::SurroundingNoBoundary);
 
       const IntVect shift = BASISV(faceDir);
