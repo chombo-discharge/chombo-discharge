@@ -323,7 +323,7 @@ namespace Physics {
 	@param[in] a_backgroundRate Background ionization rate (units of 1/m^3 s). 
       */
       virtual void
-      setBackgroundRate(const std::function<Real(const Real& E)>& a_backgroundRate) noexcept;
+      setBackgroundRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
 
       /*!
 	@brief Set the detachment rate for negative ions.
@@ -331,14 +331,14 @@ namespace Physics {
 	@param[in] a_detachmentRate Detachment rate (in units of 1/s). 
       */
       virtual void
-      setDetachmentRate(const std::function<Real(const Real& E)>& a_detachmentRate) noexcept;
+      setDetachmentRate(const std::function<Real(const Real& E, const RealVect& x)>& a_detachmentRate) noexcept;
 
       /*!
 	@brief Set the field emission current
 	@param[in] a_fieldEmission Field emission current density. 
       */
       virtual void
-      setFieldEmission(const std::function<Real(const Real& E)>& a_currentDensity) noexcept;
+      setFieldEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_currentDensity) noexcept;
 
       /*!
 	@brief Get the solver mode
@@ -645,11 +645,6 @@ namespace Physics {
       std::function<Real(const Real& E)> m_ionDiffusion;
 
       /*!
-	@brief Detachment probability for negative ion.
-      */
-      std::function<Real(const Real& E)> m_detachmentRate;
-
-      /*!
 	@brief Ionization coefficient. 
       */
       std::function<Real(const Real& E)> m_alpha;
@@ -660,14 +655,19 @@ namespace Physics {
       std::function<Real(const Real& E)> m_eta;
 
       /*!
+	@brief Detachment probability for negative ion.
+      */
+      std::function<Real(const Real& E, const RealVect& x)> m_detachmentRate;
+
+      /*!
 	@brief Background ionization rate expression.
       */
-      std::function<Real(const Real& E)> m_backgroundRate;
+      std::function<Real(const Real& E, const RealVect& x)> m_backgroundRate;
 
       /*!
 	@brief Field emission current
       */
-      std::function<Real(const Real& E)> m_fieldEmission;
+      std::function<Real(const Real& E, const RealVect& x)> m_fieldEmission;
 
       /*!
 	@brief Distribute particles in every grid cell
@@ -771,6 +771,19 @@ namespace Physics {
       evaluateFunction(EBAMRCellData&                           a_emissionRate,
                        const Real&                              a_voltage,
                        const std::function<Real(const Real E)>& a_func) const noexcept;
+
+      /*!
+	@brief Evaluate a function f = f(E, x) in a volume. 
+	@param[out] a_data    Mesh data
+	@param[in]  a_voltage Voltage multiplier
+
+	@param[im]  a_func    Function to evaluate
+	@note For plotting the emission rate in transient simulations. 
+      */
+      virtual void
+      evaluateFunction(EBAMRCellData&                                             a_emissionRate,
+                       const Real&                                                a_voltage,
+                       const std::function<Real(const Real E, const RealVect x)>& a_func) const noexcept;
 
       /*!
 	@brief Interpolate between K values to find voltage giving K_inception and store values in m_inceptionVoltage. 

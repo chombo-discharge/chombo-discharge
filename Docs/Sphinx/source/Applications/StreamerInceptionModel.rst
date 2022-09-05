@@ -117,7 +117,7 @@ We also compute the probability of a first electron appearing in the time interv
 .. math::
    :label: StreamerInceptionProbability2
    
-   \Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)
+   \Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\Delta t
 
 When running in transient mode the user must set the voltage curve (see :ref:`StreamerInceptionVoltageCurve`) and pay particular caution to setting the initial ion density, mobility, and detachment rates.
 
@@ -239,7 +239,7 @@ To set the background ionization rate, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setBackgroundRate(const std::function<Real(const Real& E)>& a_backgroundRate) noexcept;
+   StreamerInceptionStepper::setBackgroundRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
 
 Detachment rate
 _______________
@@ -255,7 +255,7 @@ This is used when calculating the inception probability, and the user sets the d
 
 .. code-block:: c++
 		
-   StreamerInceptionStepper::setDetachmentRate(const std::function<Real(const Real& E)>& a_backgroundRate) noexcept;
+   StreamerInceptionStepper::setDetachmentRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
 
 Field emission
 ______________
@@ -264,9 +264,10 @@ To set the field emission current, use the function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setFieldEmission(const std::function<Real(const Real& E)>& a_currentDensity) noexcept;
+   StreamerInceptionStepper::setFieldEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_currentDensity) noexcept;
 
 This will set a field-dependent emission rate from cathodes given by the input function.
+Note that, under the hood, the function indicates a general cathode emission current which can be the sum of several contributions (field emission, photoelectric effect etc.).
 
 .. important::
 
@@ -304,9 +305,6 @@ Algorithms
 
 The streamer inception model uses a combination of electrostatic field solves, Particle-In-Cell, and fluid advection for resolving the necessary dynamics.
 The various algorithms involved are discussed below.
-
-``chombo-discharge`` uses a Particle-In-Cell method to solve the inception integral. A particle is placed within each cell in the grid and integrated along the electric field lines until the particle exits the domain, enters an embedded boundary, or the effective ionization coefficient :math:`\alpha(E)` becomes negative. Every incremental integration part is added to a local integration tracker for each particle. When the particle exits the domain, enters an embedded boundary, or has a negative :math:`\alpha` it is flagged and its integration is finished. The function continues the integration loop until all particles are flagged, before moving the particles back to their initial position for visualization of the resulting :math:`K` values.
-The integration is executed for both polarities (+/-) with time step and integration algorithm specified from user input, the latter either Euler or trapezoidal integration.
 
 Field solve
 ___________
