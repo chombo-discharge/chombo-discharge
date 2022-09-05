@@ -78,7 +78,7 @@ NoisePlane.material          = electrode    # 'electrode' or 'dielectric'
 NoisePlane.live              = true         # Live potential or not (for electrode)
 NoisePlane.eps               = 4            # Set permittivity for dielectric
 
-NoisePlane.normal            = 1            # Normal vector. Must be 0, 1, 2 
+NoisePlane.orientation       = y+
 NoisePlane.point             = 0 0 0        # Point on the plane
 
 NoisePlane.noise_amplitude   = 0.1          # Noise amplitude

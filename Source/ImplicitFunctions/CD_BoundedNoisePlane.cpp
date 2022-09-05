@@ -16,16 +16,16 @@
 #include <CD_BoundedNoisePlane.H>
 #include <CD_NamespaceHeader.H>
 
-BoundedNoisePlane::BoundedNoisePlane(const int      a_normal,
-                                     const RealVect a_point,
-                                     const RealVect a_clampLo,
-                                     const RealVect a_clampHi,
-                                     const Real     a_clampK,
-                                     const Real     a_noiseAmp,
-                                     const RealVect a_noiseFreq,
-                                     const Real     a_persistence,
-                                     const int      a_octaves,
-                                     const bool     a_reseed)
+BoundedNoisePlane::BoundedNoisePlane(const std::string a_orientation,
+                                     const RealVect    a_point,
+                                     const RealVect    a_clampLo,
+                                     const RealVect    a_clampHi,
+                                     const Real        a_clampK,
+                                     const Real        a_noiseAmp,
+                                     const RealVect    a_noiseFreq,
+                                     const Real        a_persistence,
+                                     const int         a_octaves,
+                                     const bool        a_reseed)
 {
 
   // Maximum amplitude that the Perlin noise function can spit out.
@@ -34,12 +34,37 @@ BoundedNoisePlane::BoundedNoisePlane(const int      a_normal,
     m_maxAmp += a_noiseAmp * pow(a_persistence, i);
   }
 
-  // Perlin noise is on [0,1] but we want the scaling on [-0.5, 0.5]
-  m_normal              = a_normal;
-  const RealVect normal = BASISREALV(a_normal);
-  m_point               = a_point;
+  // Set the normal vector
+  if (a_orientation == "x+") {
+    m_normal = std::make_pair(0, 1);
+  }
+  else if (a_orientation == "x-") {
+    m_normal = std::make_pair(0, -1);
+  }
+  else if (a_orientation == "y+") {
+    m_normal = std::make_pair(1, 1);
+  }
+  else if (a_orientation == "y-") {
+    m_normal = std::make_pair(1, -1);
+  }
+#if CH_SPACEDIM == 3
+  else if (a_orientation == "z+") {
+    m_normal = std::make_pair(2, 1);
+  }
+  else if (a_orientation == "z-") {
+    m_normal = std::make_pair(2, -1);
+  }
+#endif
+  else {
+    const std::string err = "BoundedNoisePlane::BoundedNoisePlane a_orientation = " + a_orientation + " not supported";
+    MayDay::Error(err.c_str());
+  }
 
-  m_plane  = RefCountedPtr<BaseIF>(new PlaneIF(normal, m_point, false));
+  const RealVect n = 1.0 * m_normal.second * BASISREALV(m_normal.first);
+
+  m_point = a_point;
+
+  m_plane  = RefCountedPtr<BaseIF>(new PlaneIF(n, m_point, false));
   m_perlin = RefCountedPtr<BaseIF>(new PerlinSdf(a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed));
 
   m_clampLo = a_clampLo;
@@ -68,7 +93,7 @@ BoundedNoisePlane::value(const RealVect& a_pos) const
   // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise function),
   //       clamped with a boxcar function.
 
-  const RealVect n  = BASISREALV(m_normal);
+  const RealVect n  = m_normal.second * BASISREALV(m_normal.first);
   const RealVect x0 = m_point;
   const RealVect x1 = a_pos;
   const RealVect xp = x1 - PolyGeom::dot((x1 - x0), n) * n;
@@ -77,7 +102,7 @@ BoundedNoisePlane::value(const RealVect& a_pos) const
 
   Real boxCar = 1.0;
   for (int dir = 0; dir < SpaceDim; dir++) {
-    if (dir != m_normal) {
+    if (dir != m_normal.first) {
       const Real& x = xp[dir];
 
       boxCar *= h(x - std::min(m_clampLo[dir], m_clampHi[dir])) - h(x - std::max(m_clampLo[dir], m_clampHi[dir]));

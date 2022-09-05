@@ -32,6 +32,7 @@ NoisePlane::NoisePlane()
 
   if (usePlane) {
 
+    std::string orientation;
     std::string material;
 
     int normal;
@@ -59,7 +60,7 @@ NoisePlane::NoisePlane()
 
     pp.get("live", live);
     pp.get("eps", eps);
-    pp.get("normal", normal);
+    pp.get("orientation", orientation);
     pp.get("clamp_dx", clampK);
     pp.get("noise_amplitude", noiseAmp);
     pp.get("noise_persistence", noisePersist);
@@ -73,11 +74,7 @@ NoisePlane::NoisePlane()
     clampHi   = get("clamp_hi");
     noiseFreq = get("noise_frequency");
 
-    if (std::abs(normal) >= SpaceDim) {
-      MayDay::Error("NoisePlane::NoisePlane -- normal must obey |n| < SpaceDim");
-    }
-
-    RefCountedPtr<BaseIF> plane = RefCountedPtr<BaseIF>(new BoundedNoisePlane(normal,
+    RefCountedPtr<BaseIF> plane = RefCountedPtr<BaseIF>(new BoundedNoisePlane(orientation,
                                                                               point,
                                                                               clampLo,
                                                                               clampHi,

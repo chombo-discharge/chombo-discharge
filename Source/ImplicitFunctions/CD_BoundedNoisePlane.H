@@ -30,7 +30,7 @@ class BoundedNoisePlane : public BaseIF
 public:
   /*!
     @brief Full constructor
-    @param[in] a_normal      Plane normal vector
+    @param[in] a_orientation Plane orientation. Must be x+, x-, y+, y-, etc
     @param[in] a_point       Point on the plane
     @param[in] a_clampLo     Low clamped corner. 
     @param[in] a_clampHi     High clamped corner.
@@ -42,16 +42,16 @@ public:
     @param[in] a_reseed      If true, reseed the RNG. Otherwise, the the original Perlin hash table. 
     @note The persistence argument indicates how we add octaves. With 0.5 we use half the amplitude and twice the frequency for the next octave. 
   */
-  BoundedNoisePlane(const int      a_normal,
-                    const RealVect a_point,
-                    const RealVect a_clampLo,
-                    const RealVect a_clampHi,
-                    const Real     a_clampK,
-                    const Real     a_noiseAmp,
-                    const RealVect a_noiseFreq,
-                    const Real     a_persistence,
-                    const int      a_octaves,
-                    const bool     a_reseed = false);
+  BoundedNoisePlane(const std::string a_orientation,
+                    const RealVect    a_point,
+                    const RealVect    a_clampLo,
+                    const RealVect    a_clampHi,
+                    const Real        a_clampK,
+                    const Real        a_noiseAmp,
+                    const RealVect    a_noiseFreq,
+                    const Real        a_persistence,
+                    const int         a_octaves,
+                    const bool        a_reseed = false);
   /*!
     @brief Copy constructor
     @param[in] a_inputIF Other plane
@@ -79,9 +79,9 @@ public:
 
 protected:
   /*!
-    @brief Plane direction
+    @brief Plane normal. This is in the form of a coordinate direction and a sign.
   */
-  int m_normal;
+  std::pair<int, int> m_normal;
 
   /*!
     @brief Plane point
