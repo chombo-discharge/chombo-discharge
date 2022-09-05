@@ -72,7 +72,7 @@ jobs:
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()
         run: |
-          python3 tests.py --no_compare --silent -dim ${{ matrix.dim }}
+          python3 tests.py --no_compare -dim ${{ matrix.dim }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                    
 
   serial-hdf:
