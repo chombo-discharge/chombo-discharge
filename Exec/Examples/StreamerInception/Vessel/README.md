@@ -19,7 +19,7 @@ To run it, type
 
 The two figures below show the inception voltage for a starting electron evolving into a critical avalanche at positive and negative polarity:
 
-<img src="InceptionVoltagePlu.png" alt="Positive polarity" width="400"/>
+<img src="InceptionVoltagePlus.png" alt="Positive polarity" width="400"/>
 <img src="InceptionVoltageMinu.png" alt="Negative polarity" width="400"/>
 
 In 3D, the program is set up to run in transient mode for a lightning impulse. 
