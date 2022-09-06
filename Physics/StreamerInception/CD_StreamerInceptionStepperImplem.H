@@ -208,7 +208,7 @@ StreamerInceptionStepper<P, F, C>::initialData()
     m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma(), false);
 
   if (!converged) {
-    MayDay::Error("StreamerInceptionStepper::initialData -- could not solve Poisson equation. Aborting application.");
+    MayDay::Warning("StreamerInceptionStepper::initialData -- could not solve Poisson equation. ");
   }
 
   // Get the gas-side electric field and give it to the particle solvers.
@@ -2475,8 +2475,6 @@ StreamerInceptionStepper<P, F, C>::evaluateFunction(EBAMRCellData&              
       // emissionMinu is when the voltage is reverted.
       EBCellFAB& data    = (*a_data[lvl])[dit()];
       FArrayBox& dataReg = data.getFArrayBox();
-
-      data.setVal(0.0);
 
       const EBCellFAB& electricField    = (*m_electricFieldPlus[lvl])[dit()];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
