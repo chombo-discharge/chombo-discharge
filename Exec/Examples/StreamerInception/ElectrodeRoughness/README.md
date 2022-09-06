@@ -22,4 +22,4 @@ To run it, type
 The figure below show the field magnitude and inception regions on the electrode surface:
 
 <img src="FieldMagnitude.png" alt="Field magnitude" width="400"/>
-<img src="InceptionVotlage.png" alt="Inception voltage" width="400"/>
+<img src="InceptionVoltage.png" alt="Inception voltage" width="400"/>
