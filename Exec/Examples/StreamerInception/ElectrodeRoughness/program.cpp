@@ -52,8 +52,8 @@ main(int argc, char* argv[])
   attachmentData.makeUniform(500);
 
   // Define transport data
-  auto alpha         = [&](const Real& E) -> Real { return ionizationData.getEntry<1>(E);};
-  auto eta           = [&](const Real& E) -> Real { return attachmentData.getEntry<1>(E);};
+  auto alpha         = [&](const Real& E) -> Real { return ionizationData.getEntry<1>(E); };
+  auto eta           = [&](const Real& E) -> Real { return attachmentData.getEntry<1>(E); };
   auto alphaEff      = [&](const Real& E) -> Real { return alpha(E) - eta(E); };
   auto bgRate        = [&](const Real& E, const RealVect& x) -> Real { return 0.0; };
   auto detachRate    = [&](const Real& E, const RealVect& x) -> Real { return 0.0; };
