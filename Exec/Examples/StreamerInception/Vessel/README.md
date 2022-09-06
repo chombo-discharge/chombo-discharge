@@ -36,6 +36,6 @@ The figure below show the reconstructed K-value (at an arbitrary time step in th
 
 <img src="InceptionProbability.png" alt="Inception probability" width="400"/>
 
-The next figure below show the instantaneous voltage and the corresponding discharge inception probability (which in this program is due to detachment form negative ions). 
+The next figure below show the instantaneous voltage and the corresponding discharge inception probability (which in this program is due to electron detachment from negative ions). 
 
 <img src="InceptionRegion3D.png" alt="Inception region" width="400"/>
