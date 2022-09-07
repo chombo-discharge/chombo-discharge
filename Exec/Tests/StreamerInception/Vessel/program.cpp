@@ -22,10 +22,10 @@ main(int argc, char* argv[])
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // Read BOLSIG+ data into alpha and eta coefficients
-  constexpr Real N  = 2.45E25;
-  constexpr Real O2 = 0.2;
-  constexpr Real N2 = 0.8;
-  constexpr Real T  = 300.0;
+  const Real N  = 2.45E25;
+  const Real O2 = 0.2;
+  const Real N2 = 0.8;
+  const Real T  = 300.0;
 
   LookupTable<2> ionizationData =
     DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)", "");
@@ -79,10 +79,10 @@ main(int argc, char* argv[])
   auto voltageCurve = [&](const Real& t) -> Real { return peak * (exp(-(t + t0) / t1) - exp(-(t + t0) / t2)); };
 
   auto fieldEmission = [&](const Real& E, const RealVect& x) -> Real {
-    constexpr Real beta = 1.0; // Field enhancement factor
-    constexpr Real phi  = 4.5;
-    constexpr Real C1   = 1.54E-6 * std::pow(10, 4.52 / sqrt(phi)) / phi;
-    constexpr Real C2   = 2.84E9 * std::pow(phi, 1.5);
+    const Real beta = 1.0; // Field enhancement factor
+    const Real phi  = 4.5;
+    const Real C1   = 1.54E-6 * std::pow(10, 4.52 / sqrt(phi)) / phi;
+    const Real C2   = 2.84E9 * std::pow(phi, 1.5);
 
     return C1 * (E * E) * exp(-C2 / (beta * E));
   };
