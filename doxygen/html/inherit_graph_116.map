@@ -8,7 +8,7 @@
 <area shape="rect" id="node9" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html" title=" " alt="" coords="237,332,383,373"/>
 <area shape="rect" id="node11" href="$classPhysics_1_1MeshODE_1_1MeshODEStepper.html" title="Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables." alt="" coords="159,398,461,425"/>
 <area shape="rect" id="node12" href="$classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html" title="Implementation of TimeStepper for solving for a single radiative transfer species...." alt="" coords="194,449,426,491"/>
-<area shape="rect" id="node13" href="$classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html" title="Class for volume evaluation of the streamer inception integral." alt="" coords="210,515,410,571"/>
+<area shape="rect" id="node13" href="$classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html" title="Class for streamer inception integral evaluations." alt="" coords="210,515,410,571"/>
 <area shape="rect" id="node14" href="$classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html" title="Implementation of TimeStepper for advancing tracer particles in a fixed velocity field." alt="" coords="207,596,413,637"/>
 <area shape="rect" id="node5" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="509,104,717,145"/>
 <area shape="rect" id="node6" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html" title="Class for evolving plasma equations using implicit&#45;explicit spectral deferred corrections." alt="" coords="510,169,717,211"/>

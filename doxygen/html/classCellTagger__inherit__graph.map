@@ -1,9 +1,10 @@
 <map id="CellTagger" name="CellTagger">
-<area shape="rect" id="node1" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,111,96,138"/>
+<area shape="rect" id="node1" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,143,96,170"/>
 <area shape="rect" id="node2" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html" title="Class for tagging cells in AdvectionDiffusion physics." alt="" coords="144,5,347,47"/>
 <area shape="rect" id="node3" href="$classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html" title="Implementation of CellTagger for tagging cells for Brownian walker physics." alt="" coords="153,71,337,112"/>
 <area shape="rect" id="node4" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract Class which implements CellTagger for the CDR plasma physics module." alt="" coords="171,136,320,177"/>
 <area shape="rect" id="node7" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaTagger.html" title="Abstract class for tagging cells across an AMR hierarchy." alt="" coords="173,201,317,243"/>
+<area shape="rect" id="node10" href="$classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html" title="Class for tagging cells in the StreamerInception module." alt="" coords="146,267,345,308"/>
 <area shape="rect" id="node5" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html" title="Lightweight tagging class which flags cells for refinement/coarsening using the electric field only." alt="" coords="395,136,569,177"/>
 <area shape="rect" id="node6" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html" title="Class which implements CdrPlasmaFieldTagger and refines cells based on the criterion alpha*dx &gt; thres..." alt="" coords="617,136,820,177"/>
 <area shape="rect" id="node8" href="$classPhysics_1_1ItoPlasma_1_1ItoPlasmaFieldTagger.html" title="Lightweight tagging class. Only tags cells based on electric field." alt="" coords="397,201,567,243"/>

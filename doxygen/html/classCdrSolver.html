@@ -330,6 +330,9 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a6520f8f8ef319640e1bc32c7c61a5181"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEBAMRData.html">EBAMRIFData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a6520f8f8ef319640e1bc32c7c61a5181">getDomainFlux</a> ()</td></tr>
 <tr class="memdesc:a6520f8f8ef319640e1bc32c7c61a5181"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the domain flux data holder.  <a href="classCdrSolver.html#a6520f8f8ef319640e1bc32c7c61a5181">More...</a><br /></td></tr>
 <tr class="separator:a6520f8f8ef319640e1bc32c7c61a5181"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8022eea83998f3d752797efd45d372ba"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrSolver.html#a8022eea83998f3d752797efd45d372ba">extrapolateAdvectiveFluxToEB</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_ebFlux) const noexcept</td></tr>
+<tr class="memdesc:a8022eea83998f3d752797efd45d372ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extrapolate advective flux to EB.  <a href="classCdrSolver.html#a8022eea83998f3d752797efd45d372ba">More...</a><br /></td></tr>
+<tr class="separator:a8022eea83998f3d752797efd45d372ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-types"></a>
 Protected Types</h2></td></tr>
@@ -2235,6 +2238,40 @@ Virtual because some solvers might want to do this differently. </dd></dl>
 
 <p>Define stencils for doing face-centered to face-centroid-centered states. </p>
 <dl class="section note"><dt>Note</dt><dd>This computes standard finite-difference stencils for interpolating from face centers to face centroids. </dd></dl>
+
+</div>
+</div>
+<a id="a8022eea83998f3d752797efd45d372ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8022eea83998f3d752797efd45d372ba">&#9670;&nbsp;</a></span>extrapolateAdvectiveFluxToEB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CdrSolver::extrapolateAdvectiveFluxToEB </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_ebFlux</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Extrapolate advective flux to EB. </p>
+<p>This does not use any slope limiting (derived classes might want to redo this routine). The returned flux is equal to -n.(phi * v) where n is the normal vector. This is constructed so that a positive eb flux yields an influx when doing an purely advective advance. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_ebFlux</td><td>Projected flux on the EB. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

@@ -136,26 +136,36 @@ Solvers
    Solvers/TracerParticles
    Solvers/Ito
 
-Physics models
-**************
+Multi-physics applications
+**************************
 
 .. toctree::
    :maxdepth: 3
-   :caption: Applications
+   :caption: Multi-physics applications
    :hidden:	     
 
-   Applications/ImplementedModels
+   Applications/CdrPlasmaModel
+   Applications/StreamerInceptionModel
+..   ItoPlasmaModel   
+
+Single-solver applications
+**************************
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Single-solver applications
+   :hidden:	     
+
    Applications/AdvectionDiffusionModel
    Applications/BrownianWalkerModel         
-   Applications/CdrPlasmaModel
    Applications/ElectrostaticsModel
    Applications/GeometryModel
    Applications/MeshODEModel
    Applications/RadiativeTransferModel
-   Applications/StreamerInceptionModel
    Applications/TracerParticleModel
 
-..   ItoPlasmaModel
+
+
 
 Tutorial
 ********

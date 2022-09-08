@@ -256,6 +256,9 @@ $(function() {
 <li>computeAverageMobility()
 : <a class="el" href="classItoSolver.html#a65647094a4c039fd19e17dd944297eeb">ItoSolver</a>
 </li>
+<li>computeBackgroundIonizationStationary()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a854af80dc81dcd992b8132c9de17cc59">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>computeBoundaryFlux()
 : <a class="el" href="classEddingtonSP1.html#a0df26d11d7a4cfa215add2c78ab55f32">EddingtonSP1</a>
 , <a class="el" href="classMcPhoto.html#a681a513ffc82b1879b6c1c1b1d2a9cf0">McPhoto</a>
@@ -330,10 +333,19 @@ $(function() {
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#acabb5bee46d2c43b2271f2307fccb629">Physics::ItoPlasma::ItoPlasmaPhysics</a>
 , <a class="el" href="classSigmaSolver.html#af98dd0ab04238b3363e053c9a5a1250d">SigmaSolver</a>
 </li>
+<li>computeCriticalVolumeStationary()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a83557390fb3a12d49baf568de60b5785">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>computeCriticalVolumeTransient()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a920850e52d928f7b4c73f84b17fa31d0">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>computeDensity()
 : <a class="el" href="classEddingtonSP1.html#aa7086eebcc6e479cc7cb7873486fe501">EddingtonSP1</a>
 , <a class="el" href="classMcPhoto.html#a448449129511613333d2ae4224f41dd2">McPhoto</a>
 , <a class="el" href="classRtSolver.html#a0d8ae2062ffae73a68e02be1e31085e4">RtSolver</a>
+</li>
+<li>computeDetachmentStationary()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aaa04ad857d50c6c2fdddbc546b0edd9e">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>computeDielectricCurrent()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aa27402ec756f5d5bc3dd988d2aac3522">Physics::CdrPlasma::CdrPlasmaStepper</a>
@@ -395,7 +407,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html#a32e67596355ed8371e54968cde557ad5">Physics::ItoPlasma::ItoPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af2f37a14647f5c455bba6ff096124eee">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#aa1ac5dad6e2e210132062e6c945ed17c">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>
-, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad592f398421a4a7321fbb5ee6f73352e">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad592f398421a4a7321fbb5ee6f73352e">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a381069b83a5f02a85e1333e21c002bfe">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classTimeStepper.html#a3b7cf2a18ad3aa6abf1f79098651cc02">TimeStepper</a>
 , <a class="el" href="classTracerParticleSolver.html#afdb7559e0018020567faa6185a57a2a3">TracerParticleSolver&lt; P &gt;</a>
@@ -404,8 +416,8 @@ $(function() {
 : <a class="el" href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">LeastSquares</a>
 </li>
 <li>computeElectricField()
-: <a class="el" href="classFieldSolver.html#a7c416556bf5360effce49ed0e399a4dc">FieldSolver</a>
-, <a class="el" href="classFieldSolverMultigrid.html#a2a064ed1a63c84c8c9a04e2866b3b52e">FieldSolverMultigrid</a>
+: <a class="el" href="classFieldSolver.html#ab7dc8ec1c7cb543b5c8b465e8a1c7200">FieldSolver</a>
+, <a class="el" href="classFieldSolverMultigrid.html#a0d2adeaf9d09c4704245900d7ae4f3fc">FieldSolverMultigrid</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#ac13980ecbd41a9fa0674eb4e53babf02">Physics::CdrPlasma::CdrPlasmaFieldTagger</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a511b9d4bb7852ea0a35bf4ada98df23b">Physics::CdrPlasma::CdrPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaFieldTagger.html#a36cab0cdf588c7153fccc87c72037d0b">Physics::ItoPlasma::ItoPlasmaFieldTagger</a>
@@ -443,6 +455,12 @@ $(function() {
 <li>computeFaceConductivity()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a066a27496dbb6f4cf31e5cc9403adcfb">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
+<li>computeFieldEmission()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1189f03bf3f5bdc85b31c1c313eb3698">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>computeFieldEmissionStationary()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2781ceead18ae4d416f74c48364c5f60">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>computeFlux()
 : <a class="el" href="classEddingtonSP1.html#a35d252832e553dff62434ada8b4e3f61">EddingtonSP1</a>
 , <a class="el" href="classMcPhoto.html#a16166b0bf3e5d6b2435b53faa6a69a32">McPhoto</a>
@@ -452,20 +470,35 @@ $(function() {
 : <a class="el" href="classAmrMesh.html#a03736c8164011068783b32d6c0342caf">AmrMesh</a>
 </li>
 <li>computeGradSten()
-: <a class="el" href="classLeastSquares.html#a8c61ddfee07d6ca75cf3e84c44f26aa9">LeastSquares</a>
+: <a class="el" href="classLeastSquares.html#a336b80150f892d9e3d7b4fd82d617fdf">LeastSquares</a>
 </li>
 <li>computeHopDt()
 : <a class="el" href="classItoLayout.html#a4d1ed43f584e39ac180a7d8e5b42d770">ItoLayout&lt; T &gt;</a>
-, <a class="el" href="classItoSolver.html#a40f48f81560c8a7d1c3952303187e519">ItoSolver</a>
+, <a class="el" href="classItoSolver.html#ab053c9b08666c62e4527258f7762793c">ItoSolver</a>
+</li>
+<li>computeInceptionIntegralStationary()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aea76490785c5a51b260a73339b63c6a6">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>computeInceptionIntegralTransient()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a0842f1a2f747290c4e76bb9d20012f6e">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>computeInceptionVoltageVolume()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a0e26e868b1c99b949df36dd6beceb664">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>computeInterpolationStencil()
-: <a class="el" href="classLeastSquares.html#a877218ddd82cab33f4b2f6e997862a86">LeastSquares</a>
+: <a class="el" href="classLeastSquares.html#a7a3449fc1633e1796ea87ad9bd09ad7d">LeastSquares</a>
 </li>
 <li>computeInterpStencil1D()
 : <a class="el" href="classLinearStencil.html#ac687313e5557352419e56d033501d6b7">LinearStencil</a>
 </li>
 <li>computeInterpStencil2D()
 : <a class="el" href="classLinearStencil.html#a38fd40f378cdc36bd151c83dad6a312e">LinearStencil</a>
+</li>
+<li>computeIonDiffusion()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a8301a67cc4eef6a762ac13066d9693db">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>computeIonVelocity()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a296f11c8d20b86d9fab01300522930f5">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>computeItoDiffusionLFA()
 : <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaAir3LFA.html#a00856391cb657b84ea33d3b9c3be1ea0">Physics::ItoPlasma::ItoPlasmaAir3LFA</a>
@@ -494,7 +527,7 @@ $(function() {
 , <a class="el" href="classItoSolver.html#ac4dd656605d24d6171dd291bb20ab7d4">ItoSolver</a>
 </li>
 <li>computeMass()
-: <a class="el" href="classCdrSolver.html#ab130ea207184190aeb72bcb7e4f60810">CdrSolver</a>
+: <a class="el" href="classCdrSolver.html#ac7f01b3499d164a753030edb07a506e8">CdrSolver</a>
 </li>
 <li>computeMaxElectricField()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#adff0f9ef21094ba0562d4daf82b194c0">Physics::CdrPlasma::CdrPlasmaStepper</a>
@@ -504,6 +537,9 @@ $(function() {
 </li>
 <li>computeMinDriftDt()
 : <a class="el" href="classItoLayout.html#a97f87aa712b372f7093dd5a886258586">ItoLayout&lt; T &gt;</a>
+</li>
+<li>computeMinimumInceptionVoltage()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a0fde030088b1e57b9e9d9e2dff03cb37">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>computeMinValidBox()
 : <a class="el" href="classDataOps.html#a58f9a265ea9e8feb9ffddbb66d674811">DataOps</a>
@@ -542,6 +578,12 @@ $(function() {
 <li>computePlasmaSpeciesTemperatures()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a136389ab273d4f5a3f00b961287a6b09">Physics::CdrPlasma::CdrPlasmaJSON</a>
 </li>
+<li>computeRdot()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac31fd4a772bae5eab76ccd4ef096eb3f">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>computeRdotStationary()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1bb5ccb23694d1d856dfc95c5fdc2abc">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>computeRelaxationCoefficient()
 : <a class="el" href="classEBHelmholtzOp.html#a6d1aa298b65f2361aac473eb4a485818">EBHelmholtzOp</a>
 </li>
@@ -573,6 +615,9 @@ $(function() {
 <li>computeTotalElapsedTime()
 : <a class="el" href="classTimer.html#ad643e984324b940f39461d9ba605aa36">Timer</a>
 </li>
+<li>computeTracerField()
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a7dc00e47670d6d981285e2f17c24d753">Physics::StreamerInception::StreamerInceptionTagger</a>
+</li>
 <li>computeTracers()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a5f1b320d80501059a4531168b2025e1c">Physics::CdrPlasma::CdrPlasmaFieldTagger</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#a593142249fc8a0e1f0e936d1fc69f63a">Physics::CdrPlasma::CdrPlasmaTagger</a>
@@ -589,8 +634,8 @@ $(function() {
 : <a class="el" href="classVofUtils.html#a9bb6c4c6ff3f5c79ea0175c803681227">VofUtils</a>
 </li>
 <li>conservativeAverage()
-: <a class="el" href="classAmrMesh.html#ae9ebca4c73310fecee761a9f74b8fe01">AmrMesh</a>
-, <a class="el" href="classEBCoarAve.html#a0c9a64d294a38bdf21a7f5b5a49fd376">EBCoarAve</a>
+: <a class="el" href="classAmrMesh.html#a53b3f8d395e81592ba629ebc11b9141e">AmrMesh</a>
+, <a class="el" href="classEBCoarAve.html#acc0d1e0ca7a1d95c80aafa2592c451f1">EBCoarAve</a>
 </li>
 <li>conservativeDivergenceNoKappaDivision()
 : <a class="el" href="classCdrSolver.html#a7bb06d2d9cb8acb7cc9456820b18c3ce">CdrSolver</a>
@@ -609,9 +654,13 @@ $(function() {
 , <a class="el" href="classDomainFluxIFFAB.html#af5b89308ad7b78effc5449611e734ee7">DomainFluxIFFAB</a>
 , <a class="el" href="classEBAMRData.html#aee9bfe083aedcaf965d3f5af08858c65">EBAMRData&lt; T &gt;</a>
 , <a class="el" href="classMFBaseIVFAB.html#a8aa1046470e967b0c04e220c73420704">MFBaseIVFAB</a>
+, <a class="el" href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">ParticleOps</a>
+</li>
+<li>copyDestructive()
+: <a class="el" href="classParticleOps.html#adb8401ec7984ffada29e4c3382abebda">ParticleOps</a>
 </li>
 <li>copyMaskParticles()
-: <a class="el" href="classParticleContainer.html#af1d405c0e5c41ddda1d2a56802e3a6bc">ParticleContainer&lt; P &gt;</a>
+: <a class="el" href="classParticleContainer.html#a09b567c59baf92da2ec003cf50b5757a">ParticleContainer&lt; P &gt;</a>
 </li>
 <li>countOutcast()
 : <a class="el" href="classMcPhoto.html#a16b2b61e407b18a331ceaad31414f2b1">McPhoto</a>
@@ -659,7 +708,7 @@ $(function() {
 : <a class="el" href="classDriver.html#a588b2bd21757e48440a9d1958af64ce1">Driver</a>
 </li>
 <li>CylinderSdf()
-: <a class="el" href="classCylinderSdf.html#a8c45809c4a95be65fc2970718d195065">CylinderSdf</a>
+: <a class="el" href="classCylinderSdf.html#a19a08c3a455abee2c778d0b552f16ac0">CylinderSdf</a>
 </li>
 </ul>
 </div><!-- contents -->

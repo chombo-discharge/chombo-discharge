@@ -103,6 +103,14 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ad3e24a175f858fcc5f108216e5dea5ea"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classParticleOps.html#ad3e24a175f858fcc5f108216e5dea5ea">drawRandomParticles</a> (List&lt; P &gt; &amp;a_particles, const T a_numParticles, const std::function&lt; RealVect()&gt; &amp;a_distribution)</td></tr>
 <tr class="memdesc:ad3e24a175f858fcc5f108216e5dea5ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draw a specified number of random particles distributed according to a predefined distribution.  <a href="classParticleOps.html#ad3e24a175f858fcc5f108216e5dea5ea">More...</a><br /></td></tr>
 <tr class="separator:ad3e24a175f858fcc5f108216e5dea5ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00dce5482fe701bd31fb8730e9059912"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:a00dce5482fe701bd31fb8730e9059912"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">copy</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_dst, const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_src) noexcept</td></tr>
+<tr class="memdesc:a00dce5482fe701bd31fb8730e9059912"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy all the particles from the a_src to a_dst.  <a href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">More...</a><br /></td></tr>
+<tr class="separator:a00dce5482fe701bd31fb8730e9059912"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb8401ec7984ffada29e4c3382abebda"><td class="memTemplParams" colspan="2">template&lt;typename P &gt; </td></tr>
+<tr class="memitem:adb8401ec7984ffada29e4c3382abebda"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classParticleOps.html#adb8401ec7984ffada29e4c3382abebda">copyDestructive</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_dst, <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_src) noexcept</td></tr>
+<tr class="memdesc:adb8401ec7984ffada29e4c3382abebda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy all the particles from the a_src to a_dst. This destroys the source particles.  <a href="classParticleOps.html#adb8401ec7984ffada29e4c3382abebda">More...</a><br /></td></tr>
+<tr class="separator:adb8401ec7984ffada29e4c3382abebda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A shallow static class for doing various kinds of particle-related operations. </p>
@@ -171,6 +179,100 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <p>This takes a specified number of physical particles and "desired" number of computational particles and computes the number of "whole" computational particles and a remainder. So, if we have 10 physical particles but want 3 computational particles we have a_weight = 3, a_num=3, and a_remainder = 1 </p>
+
+</div>
+</div>
+<a id="a00dce5482fe701bd31fb8730e9059912"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00dce5482fe701bd31fb8730e9059912">&#9670;&nbsp;</a></span>copy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleOps::copy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_src</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy all the particles from the a_src to a_dst. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_dst</td><td>Copy of original particles. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_src</td><td>Source particles </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="adb8401ec7984ffada29e4c3382abebda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb8401ec7984ffada29e4c3382abebda">&#9670;&nbsp;</a></span>copyDestructive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ParticleOps::copyDestructive </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_src</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy all the particles from the a_src to a_dst. This destroys the source particles. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_dst</td><td>Copy of original particles. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_src</td><td>Source particles </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

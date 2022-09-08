@@ -1,0 +1,4 @@
+<map id="Physics::StreamerInception::StreamerInceptionSpecies" name="Physics::StreamerInception::StreamerInceptionSpecies">
+<area shape="rect" id="node1" title="Advection and diffused species for StreamerInceptionStepper." alt="" coords="5,80,205,121"/>
+<area shape="rect" id="node2" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="58,5,153,32"/>
+</map>

@@ -104,10 +104,13 @@ $(function() {
 , <a class="el" href="classEddingtonSP1.html#ad1d8ea2095af97ec8fff8ac96d8e5ac3">EddingtonSP1</a>
 , <a class="el" href="classFieldSolverMultigrid.html#aaa7def33331572b1bad92dc0f0e74031">FieldSolverMultigrid</a>
 , <a class="el" href="classMFHelmholtzOpFactory.html#a47e39ca4a6b2b21d31d1595fccafecd3">MFHelmholtzOpFactory</a>
-, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a78c9a2403b90c69b892db35b7cc6d69f">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a22145387b738354c6235110dae0e7533">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_alphaDiagWeight
 : <a class="el" href="classEBHelmholtzOp.html#a609e76459499d34b50477cbdc522ad3d">EBHelmholtzOp</a>
+</li>
+<li>m_alphaEff
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a3726d8d0221b4003ee08346d1e23f55f">Physics::StreamerInception::StreamerInceptionTagger</a>
 </li>
 <li>m_alphaFunctionEN
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a6290994ab30c94d3eb228c45075efcb9">Physics::CdrPlasma::CdrPlasmaJSON</a>
@@ -132,6 +135,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1SigmaStorage.html#aaf7f2102933386295a603fd287bc2e88">Physics::CdrPlasma::CdrPlasmaGodunovStepper::SigmaStorage</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#ab5fbf80287b6d455e3ebdc51d0e3ced3">Physics::CdrPlasma::CdrPlasmaTagger</a>
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaTagger.html#ab1ad52cf84cc930a1f5e117abde97570">Physics::ItoPlasma::ItoPlasmaTagger</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a0e3015ff8042145a0f58edb7de35df31">Physics::StreamerInception::StreamerInceptionTagger</a>
 , <a class="el" href="classRtSolver.html#a4be6481630f7823d6d9c878b70547692">RtSolver</a>
 , <a class="el" href="classSigmaSolver.html#a607e697c48ba14daa4fb0a7c834efb94">SigmaSolver</a>
 , <a class="el" href="classTimeStepper.html#abb8b1988c11c8a4e257b068f3158f9b3">TimeStepper</a>
@@ -187,6 +191,12 @@ $(function() {
 </li>
 <li>m_axis
 : <a class="el" href="classCylinderSdf.html#a37eaf00253ad00abd81040f8c4f2ac50">CylinderSdf</a>
+</li>
+<li>m_backgroundIonization
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aea6795fa24829268ea307e494e2e8721">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_backgroundRate
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a689c8ca2a0fc60b2dd4232ddf7f4270f">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_baseif
 : <a class="el" href="classAmrMesh.html#a93c109ce8345145d8d5373abf9c6280b">AmrMesh</a>
@@ -457,6 +467,7 @@ $(function() {
 : <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a64982925b79e7499491e882359df48a5">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>
 , <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a4b4c0282a3818c570d62a86d7c9c477a">Physics::BrownianWalker::BrownianWalkerStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a8c0b440424d663a43e6707fb8821e429">Physics::CdrPlasma::CdrPlasmaStepper</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a6092f8e960ea165ddbe5d6c1fadf857d">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#ab2f13ebfbfe8e47fc86f574872654795">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 </li>
 <li>m_chargeNumber
@@ -471,6 +482,15 @@ $(function() {
 </li>
 <li>m_chemistryDt
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a82e2015d0068fabb35e20c78fe78ffcd">Physics::CdrPlasma::CdrPlasmaJSON</a>
+</li>
+<li>m_clampHi
+: <a class="el" href="classBoundedNoisePlane.html#a146bc1fdf6f07477ff6e2a2efe000caf">BoundedNoisePlane</a>
+</li>
+<li>m_clampK
+: <a class="el" href="classBoundedNoisePlane.html#abdd9a2d70252697e7bd11c2baad9db4c">BoundedNoisePlane</a>
+</li>
+<li>m_clampLo
+: <a class="el" href="classBoundedNoisePlane.html#add7fae1418f336580256843e1d929836">BoundedNoisePlane</a>
 </li>
 <li>m_className
 : <a class="el" href="classCdrSolver.html#a8a70b05d0a25a38e8bca59579251a12a">CdrSolver</a>
@@ -628,6 +648,15 @@ $(function() {
 <li>m_copierFiCoToFineNoGhosts
 : <a class="el" href="classEBCoarseFineParticleMesh.html#a3b2ae91259ed0805342c094a03fab095">EBCoarseFineParticleMesh</a>
 </li>
+<li>m_criticalVolume
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#af6bcf6691218498cc4508a7d9fe06c53">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_criticalVolumeMinu
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a9ba3af0cd4b7ad59fd2d5f11bb7036ff">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_criticalVolumePlus
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a40f56ecb28665878c5f71894e1b0b81d">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_curIndex
 : <a class="el" href="classMultiIndex.html#a340e3c8afcb2867aae43feba7ca8350e">MultiIndex</a>
 </li>
@@ -686,6 +715,12 @@ $(function() {
 </li>
 <li>m_depositNumber
 : <a class="el" href="classMcPhoto.html#a55de2135296806b3b697d3152893fe0c">McPhoto</a>
+</li>
+<li>m_detachment
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a139b88b1d06ef951c1dfcb2f70e0fac8">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_detachmentRate
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a16af196de05e3e0952d1f3502d4a39d0">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_dielectricExtrapBC
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a771623140f69076dad1cfd0624ede5b5">Physics::CdrPlasma::CdrPlasmaJSON</a>
@@ -1005,6 +1040,7 @@ $(function() {
 <li>m_electricField
 : <a class="el" href="classFieldSolver.html#a23e18cdb00192add18dbfc44247c279b">FieldSolver</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a724be6073c843e7768b1b7b1418d2cc4">Physics::CdrPlasma::CdrPlasmaFieldTagger</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#affb57e737cf9a25e4032dd1b520d8dfd">Physics::StreamerInception::StreamerInceptionTagger</a>
 </li>
 <li>m_electricFieldCell
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1FieldStorage.html#af7357311519e5f50d37a3df5953d3430">Physics::CdrPlasma::CdrPlasmaGodunovStepper::FieldStorage</a>
@@ -1014,6 +1050,12 @@ $(function() {
 </li>
 <li>m_electricFieldEB
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1FieldStorage.html#a1b6e5f37c8ada20f2426db432dc52303">Physics::CdrPlasma::CdrPlasmaGodunovStepper::FieldStorage</a>
+</li>
+<li>m_electricFieldMinu
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a6f9b4dd3a8db1c4bf5442c15a83173fb">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_electricFieldPlus
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3ac150d94bbe94771ac388ee9c3c5144">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_electrodeBcFunctions
 : <a class="el" href="classFieldSolver.html#a8800f0b06190a38a835cf83fbe0ded59">FieldSolver</a>
@@ -1048,6 +1090,15 @@ $(function() {
 , <a class="el" href="classMFHelmholtzElectrostaticEBBC.html#afb193f4cafb09ffe543805c9cb859c8f">MFHelmholtzElectrostaticEBBC</a>
 , <a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a7db31753dcdef1865b34a88f4e0adc52">MFHelmholtzElectrostaticEBBCFactory</a>
 </li>
+<li>m_emissionRate
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aad8d546ba6cd679eff22a876c70d9353">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_emissionRatesMinu
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3fb2be7cb51491c47b6dbc0761a2029d">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_emissionRatesPlus
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aa0c86412ba546419a4e2fcbfb61e0ddc">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_endPoint1
 : <a class="el" href="classCylinderSdf.html#ab6618b5a9e773da347710a8a9a5d1645">CylinderSdf</a>
 </li>
@@ -1062,6 +1113,9 @@ $(function() {
 </li>
 <li>m_errorNorm
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#ad28f94e1a07b39c66620c3834116ef56">Physics::CdrPlasma::CdrPlasmaImExSdcStepper</a>
+</li>
+<li>m_eta
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a45f3c1554d6c2d4cad19de52af65078b">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_etaFunctionEN
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a851536b5293720d62008a11ca05135c1">Physics::CdrPlasma::CdrPlasmaJSON</a>
@@ -1111,6 +1165,9 @@ $(function() {
 <li>m_fieldCoupling
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a4a131bccda64a6fcf235cf8fb67e0245">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 </li>
+<li>m_fieldEmission
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a9ef16115ea2227df3e1066ec22816ed3">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_fieldScratch
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a3f14cdd0324ff77fc2af58bf5ac825d5">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#a9fc79a73c21c337ddfc9ec08aaa4c46c">Physics::CdrPlasma::CdrPlasmaImExSdcStepper</a>
@@ -1118,7 +1175,7 @@ $(function() {
 <li>m_fieldSolver
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a9f809eb4ba02e4253a2ca7a180fb71f9">Physics::CdrPlasma::CdrPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ae4bcccf6f53767a56ff382e8e85f267d">Physics::Electrostatics::FieldStepper&lt; T &gt;</a>
-, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3238d3610e75f664c1fb2b9dfd38e175">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#abf4153e045da1252e2fec2a650f89b90">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_fileName
 : <a class="el" href="classScanShop.html#a3b45dda498749f44c7bbb8c64edd8a43">ScanShop</a>
@@ -1140,6 +1197,9 @@ $(function() {
 </li>
 <li>m_fineToCoarRedist
 : <a class="el" href="classPhaseRealm.html#a8b9e9a7792a6e7529966eb83772979ed">PhaseRealm</a>
+</li>
+<li>m_fixedInceptionStep
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a066fc3d0a965d6c0756e3920fb4a77ab">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_flipInside
 : <a class="el" href="classEBGeometryIF.html#a9a93e32b83f542b94e5d41a67f2d6bfb">EBGeometryIF</a>
@@ -1420,6 +1480,30 @@ $(function() {
 <li>m_implicitFunctionSolid
 : <a class="el" href="classComputationalGeometry.html#afcabd334d9c236194e69f6c2e8ecd16a">ComputationalGeometry</a>
 </li>
+<li>m_inceptionAlgorithm
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2941c536a92d1739e8b36416ee05e58e">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_inceptionIntegral
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ac5d52f87abb8e484ff72b294251a1d34">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_inceptionIntegralMinu
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#abdb692c32171f550cf3a3cdd6dc7953b">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_inceptionIntegralPlus
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ab0de14ae714218edc43e582ce3fdc8b3">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_inceptionK
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a3486da060b5cefbf79acd20720d79298">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_inceptionProbability
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a5db2bf2dfa6c45772546548f0e884041">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_inceptionVoltageMinu
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4721824905e51296b96bd1f0028a0b5b">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_inceptionVoltagePlus
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a02e6ea8d5428d5f363eae5eda377cd9b">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_indices
 : <a class="el" href="classMultiIndex.html#ae58ae85ffd9708e025ea6a3ebe7dbd9f">MultiIndex</a>
 </li>
@@ -1429,6 +1513,10 @@ $(function() {
 <li>m_initialData
 : <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#ad9fe4014b07c3feff42e6030044f2f8e">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>
 , <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a6d8cf4980ab2859db81fe5b283f45526">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionSpecies.html#aca98621cc9f90521737e4a0850492081">Physics::StreamerInception::StreamerInceptionSpecies</a>
+</li>
+<li>m_initialIonDensity
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a55c8f5fd25310179104bb74021d0e123">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_initialParticles
 : <a class="el" href="classCdrSpecies.html#aa93bd28d5d12a01a15d4e5b98cf7064f">CdrSpecies</a>
@@ -1452,14 +1540,14 @@ $(function() {
 <li>m_instantaneous
 : <a class="el" href="classMcPhoto.html#a6cf70cf85ebb75002fad55455ef77957">McPhoto</a>
 </li>
-<li>m_integrationAlgorithm
-: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aaa2fbd549592c2c22cd297b17a3968bd">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;</a>
-</li>
 <li>m_integrator
 : <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a6c9d7b3c19e25611ac4426db8d393982">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>
 </li>
 <li>m_interpolant
 : <a class="el" href="classEBHelmholtzOp.html#ab8fbde9adb894d1c3912530898448de2">EBHelmholtzOp</a>
+</li>
+<li>m_interpolation
+: <a class="el" href="classTracerParticleSolver.html#a87c6884ddd009ae3932bbdf184530bf4">TracerParticleSolver&lt; P &gt;</a>
 </li>
 <li>m_interpolator
 : <a class="el" href="classEBHelmholtzOp.html#a67459fed74ac57daa9ac8f882394ce3d">EBHelmholtzOp</a>
@@ -1479,6 +1567,18 @@ $(function() {
 </li>
 <li>m_inverse
 : <a class="el" href="classGeoCoarsener.html#ae5a7bc7cde61cddb470a3f9b4dd9c438">GeoCoarsener</a>
+</li>
+<li>m_ionDiffusion
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a65216cc21629c77862ff5c7443f66806">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_ionMobility
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a60ae0e2bda03a79d1c122d5f723ae271">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_ionSolver
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a21be2cc73369b0bb258fe388aa04f45a">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_ionTransport
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a5b1a6baf186af8d2478b4365ce5c5b5a">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_irregSetsCoFi
 : <a class="el" href="classEBCoarAve.html#aac8776ce2889f721ce2a5bf735f1caac">EBCoarAve</a>
@@ -1662,6 +1762,9 @@ $(function() {
 <li>m_max_coarsen_level
 : <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStreamerTagger.html#af50ec8f1a03075465ba6d6a72c8712aa">Physics::ItoPlasma::ItoPlasmaStreamerTagger</a>
 </li>
+<li>m_maxAmp
+: <a class="el" href="classBoundedNoisePlane.html#a7a34c94e14c59c770bdc3f5ef0afa335">BoundedNoisePlane</a>
+</li>
 <li>m_maxAmrDepth
 : <a class="el" href="classAmrMesh.html#a82395aa042ef543322cbfee5b05be1d3">AmrMesh</a>
 </li>
@@ -1677,6 +1780,7 @@ $(function() {
 <li>m_maxDt
 : <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#aa0520875f02adb3046cd7f00f5afe574">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a6aeba92d8e95adbbeaacf3a28eeb3b56">Physics::CdrPlasma::CdrPlasmaStepper</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a73ebcd58ea36ef1198bbc25a0abf586c">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_maxDtGrowth
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#a19e5e42b89f06907deee74b92008fe65">Physics::CdrPlasma::CdrPlasmaImExSdcStepper</a>
@@ -1686,6 +1790,15 @@ $(function() {
 </li>
 <li>m_maxGhostEB
 : <a class="el" href="classComputationalGeometry.html#a82cf9e36c17278155e30405cef70d327">ComputationalGeometry</a>
+</li>
+<li>m_maxK
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a7656c601ff5c05bd69c850174a7e46c2">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_maxKMinu
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a84de189724af9b5205d73b773fcb12a8">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_maxKPlus
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2ea534126f4061af7893fb9f447bbc7d">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_maxParticleWidth
 : <a class="el" href="classEBAMRParticleMesh.html#a103990d2c971877e3db80991bcd00cab">EBAMRParticleMesh</a>
@@ -1704,6 +1817,9 @@ $(function() {
 </li>
 <li>m_maxSteps
 : <a class="el" href="classDriver.html#ab2fb103fd7803b79465106ea43b1934d">Driver</a>
+</li>
+<li>m_maxVoltage
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#ad97eaa0c054806ad7a9f211d181736b3">Physics::StreamerInception::StreamerInceptionTagger</a>
 </li>
 <li>m_mesh
 : <a class="el" href="classSignedDistanceDCEL.html#a80f9645da5f0d8316e6ef5fd06111293">SignedDistanceDCEL&lt; T &gt;</a>
@@ -1768,6 +1884,7 @@ $(function() {
 <li>m_minDt
 : <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a6eecd1322aa94650870d48c21f13011e">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab2c19c87d675de6c31f90e2fa5ffe255">Physics::CdrPlasma::CdrPlasmaStepper</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a870a9148cd054c164aa0eef275c18e36">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_minorRadius
 : <a class="el" href="classTorusSdf.html#ad3a8d3f498c34dc3033ace80ded7cdb3">TorusSdf</a>
@@ -1805,6 +1922,7 @@ $(function() {
 <li>m_mode
 : <a class="el" href="classCdrIterator.html#ad02e9db152ff730a84515ff6db5ec3e3">CdrIterator&lt; T &gt;</a>
 , <a class="el" href="classItoIterator.html#ae285e0e5932e8b2ad461dd95ceaeddd4">ItoIterator&lt; T &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aeb7fec2a15d51a078b7ca3471a6e9859">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_molarFraction
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1NeutralSpeciesJSON.html#a66b577f66b162fe90f5bbad972ff7223">Physics::CdrPlasma::NeutralSpeciesJSON</a>
@@ -1995,7 +2113,8 @@ $(function() {
 : <a class="el" href="classCdrSolver.html#a5228df358369ae320bd65349bb4beee8">CdrSolver</a>
 </li>
 <li>m_normal
-: <a class="el" href="classPerlinPlaneSdf.html#a295bd26c423cb494eec9ad9f2562d7a8">PerlinPlaneSdf</a>
+: <a class="el" href="classBoundedNoisePlane.html#a976ef0ffbf37ba5549c0c9b3833bafe6">BoundedNoisePlane</a>
+, <a class="el" href="classPerlinPlaneSdf.html#a295bd26c423cb494eec9ad9f2562d7a8">PerlinPlaneSdf</a>
 </li>
 <li>m_normalDistributionTruncation
 : <a class="el" href="classItoSolver.html#a987806a343072c9ed15231c9a371a16e">ItoSolver</a>
@@ -2097,6 +2216,9 @@ $(function() {
 <li>m_outputDirectory
 : <a class="el" href="classDriver.html#a239ac221c84b9707b63d3db4004c6e17">Driver</a>
 </li>
+<li>m_outputFile
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a9ae9a3def296fcca0592ea9b1dd7f80c">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_outputFileNames
 : <a class="el" href="classDriver.html#a3456149d7978fbf0a4dcdce4c666895c">Driver</a>
 </li>
@@ -2114,11 +2236,9 @@ $(function() {
 , <a class="el" href="classSuperParticles_1_1KDNode.html#a68a3c4a1fd573001fabf863ef0938fa1">SuperParticles::KDNode&lt; P &gt;</a>
 , <a class="el" href="classTracerParticleSolver.html#a1c3ffb400ba2632d8a081c79db7efa16">TracerParticleSolver&lt; P &gt;</a>
 </li>
-<li>m_particleSolver
-: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a7f90324fbe8f3325b52fe8a997cac167">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;</a>
-</li>
 <li>m_perlin
-: <a class="el" href="classPerlinPlaneSdf.html#a3b7cdbdeeb52e73ea3fa0c0e2c793aa8">PerlinPlaneSdf</a>
+: <a class="el" href="classBoundedNoisePlane.html#a398c5cb800d1cbdd5da2fc3aab9a1e2f">BoundedNoisePlane</a>
+, <a class="el" href="classPerlinPlaneSdf.html#a3b7cdbdeeb52e73ea3fa0c0e2c793aa8">PerlinPlaneSdf</a>
 </li>
 <li>m_perlinIF
 : <a class="el" href="classPerlinSphereSdf.html#a1916b59bdc0606e3c4e4c5ec732cd3b3">PerlinSphereSdf</a>
@@ -2158,6 +2278,8 @@ $(function() {
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#af997b49c63541bc56927bd8e5a76e701">Physics::CdrPlasma::CdrPlasmaTagger</a>
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaTagger.html#afa686486f073372a04cd9a3c50920674">Physics::ItoPlasma::ItoPlasmaTagger</a>
 , <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a66ca9862e8b3fa698affd15e3ea299d5">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aa20ef9dfb3c2b36b0e69a79ada19eb0d">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a0a0e495757eba4bba2756b25aaa0d68c">Physics::StreamerInception::StreamerInceptionTagger</a>
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a3c081ce43245058041afd66ca3f2fdc9">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classRtLayout.html#ab8eb7fc7d08560d2c19fedeb2b7981d4">RtLayout&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#a867990a2d576dbac63ebea6025b2ff9b">RtSolver</a>
@@ -2205,7 +2327,8 @@ $(function() {
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaTagger.html#a1d6eebd4b3dcc42e2be30535b03791d3">Physics::ItoPlasma::ItoPlasmaTagger</a>
 </li>
 <li>m_plane
-: <a class="el" href="classPerlinPlaneSdf.html#acd511557ee1b9e43a0b7650ddd125015">PerlinPlaneSdf</a>
+: <a class="el" href="classBoundedNoisePlane.html#a18fad53eeb59860bdecedd0824e478bd">BoundedNoisePlane</a>
+, <a class="el" href="classPerlinPlaneSdf.html#acd511557ee1b9e43a0b7650ddd125015">PerlinPlaneSdf</a>
 </li>
 <li>m_plasmaProducts
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhotoReactionJSON.html#aab02bb3bbfccbd708582d600aebbb2b3">Physics::CdrPlasma::CdrPlasmaPhotoReactionJSON</a>
@@ -2262,11 +2385,18 @@ $(function() {
 <li>m_plasmaReactionTablesEnergy
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a0927a6d5d400046af69a18498f25d9c3">Physics::CdrPlasma::CdrPlasmaJSON</a>
 </li>
+<li>m_plot
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a304ba6582dde80507381eb51b598b175">Physics::StreamerInception::StreamerInceptionTagger</a>
+</li>
 <li>m_plotAlpha
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ac93d994574cabda3ad7365177ace2143">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ae8b702410adb1aa6e17ad7bd41ab8537">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_plotAverageEnergy
 : <a class="el" href="classItoSolver.html#a757dc659ee8ad33e28fae138affb616b">ItoSolver</a>
+</li>
+<li>m_plotBackgroundIonization
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a0eb90dfde4344c2c35727f1525b928f8">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_plotBulkPhotons
 : <a class="el" href="classMcPhoto.html#afa1c7b3ad61fa392c75c07e983ebd26c">McPhoto</a>
@@ -2274,6 +2404,9 @@ $(function() {
 <li>m_plotDeposition
 : <a class="el" href="classItoSolver.html#a7796e2e15a35a118207dbf42741f3cf3">ItoSolver</a>
 , <a class="el" href="classMcPhoto.html#aeb94dbecaa58bcf48a62a816c8d104d6">McPhoto</a>
+</li>
+<li>m_plotDetachment
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a5d867bf1bc8008fb0a5aa529c999ba6b">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_plotDiffCo
 : <a class="el" href="classItoSolver.html#abe9e7bdf7a18548a2f13572e8e2811c7">ItoSolver</a>
@@ -2301,15 +2434,28 @@ $(function() {
 </li>
 <li>m_plotEta
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a4e06df91abfa114d08ac5f419f25f2ff">Physics::CdrPlasma::CdrPlasmaJSON</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a797b760679d5fdf1fc2d7b880ce6b84b">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_plotFieldEmission
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aa3d43a07adfd9bc101c275709cf9f82f">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_plotGas
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aaa947d775a1da8afbb3e74ee20465945">Physics::CdrPlasma::CdrPlasmaJSON</a>
+</li>
+<li>m_plotInceptionIntegral
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a2c363bbc1906324dce4f230414483868">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_plotInceptionVoltage
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a8607416e6e1b91ebb6eff731158ce5fd">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_plotInterval
 : <a class="el" href="classDriver.html#a2a08cd10146755e65eab79cc360ae2ce">Driver</a>
 </li>
 <li>m_plotLevelset
 : <a class="el" href="classDriver.html#a1a20c2f1a521cf7cf3e3df50555ace0d">Driver</a>
+</li>
+<li>m_plotNegativeIons
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#abafcda46ab2dff398b5018736f1bdffd">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_plotNumbers
 : <a class="el" href="classCdrSolver.html#aacf7f04fc081be3d451f1e23b515ac73">CdrSolver</a>
@@ -2342,6 +2488,9 @@ $(function() {
 <li>m_plotPhotons
 : <a class="el" href="classMcPhoto.html#a826d54b9ac20228ed32b027f4790fda2">McPhoto</a>
 </li>
+<li>m_plotPoisson
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aacc9e5027499300ba0863fe50cc8a2f6">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_plotPotential
 : <a class="el" href="classFieldSolver.html#ac2ab69e9b78f08001f0e51196caafa29">FieldSolver</a>
 </li>
@@ -2370,6 +2519,9 @@ $(function() {
 <li>m_plotTags
 : <a class="el" href="classDriver.html#af753497db8d8f6369116f7f0ba34bcc3">Driver</a>
 </li>
+<li>m_plotTracer
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad80e2cc82985c049d8602c9073743a8f">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_plotVelocity
 : <a class="el" href="classCdrSolver.html#a40cd24c5ac6efdbd0528531614115c4f">CdrSolver</a>
 , <a class="el" href="classItoSolver.html#afd69a16d2fe7a28629d5f3a0f83b1ad0">ItoSolver</a>
@@ -2379,7 +2531,8 @@ $(function() {
 : <a class="el" href="classTracerParticleSolver.html#a89a462b1d24459378651daecbd21aa5d">TracerParticleSolver&lt; P &gt;</a>
 </li>
 <li>m_point
-: <a class="el" href="classPerlinPlaneSdf.html#a0a457d39fe54dd5e63f184d7ae684441">PerlinPlaneSdf</a>
+: <a class="el" href="classBoundedNoisePlane.html#a66e628b7ae537acaed04ec681e02a780">BoundedNoisePlane</a>
+, <a class="el" href="classPerlinPlaneSdf.html#a0a457d39fe54dd5e63f184d7ae684441">PerlinPlaneSdf</a>
 </li>
 <li>m_position
 : <a class="el" href="classGenericParticle.html#ae4b8b5e0e0725aeac66a973cbd69ad26">GenericParticle&lt; M, N &gt;</a>
@@ -2453,6 +2606,15 @@ $(function() {
 , <a class="el" href="classRoundedCylinderIF.html#a09172ca8373db741614c7aee3abe9bac">RoundedCylinderIF</a>
 , <a class="el" href="classSphereSdf.html#a9240fbf6e82d3523f391ef55e51efc4e">SphereSdf</a>
 </li>
+<li>m_Rdot
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a269d20a5cb6175ed25b95ea4263f6c46">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_RdotMinu
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aa5b27ba198ef8a30f998eae3937c29d6">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
+<li>m_RdotPlus
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aa11e95f60086e3b015c222b83b957eba">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_reactionIntegrator
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a116d807e6d5019c6a865990e2a2d15da">Physics::CdrPlasma::CdrPlasmaJSON</a>
 </li>
@@ -2479,6 +2641,8 @@ $(function() {
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaTagger.html#a50441ed5d1fc7f996c1895cf1d051e8f">Physics::ItoPlasma::ItoPlasmaTagger</a>
 , <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a79538d89fb345f413d5b37788bd3e4a6">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#aa1fdc8e8178483d6023f67d0396fe515">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#add3e95f8e4a2134bfd62113380b7ee87">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#ad3c92bd0cfce8e6b20242202dd6297df">Physics::StreamerInception::StreamerInceptionTagger</a>
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a0eef74eab0eb878e651dfde33b2e3ae1">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classRtLayout.html#ac545e4ed6b8e1b1b3012590d91803c64">RtLayout&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#a40b737a4f483b7b3303432e217bbd4d7">RtSolver</a>
@@ -2492,6 +2656,9 @@ $(function() {
 <li>m_redistributionRadius
 : <a class="el" href="classAmrMesh.html#aff4be2723b347e649654ab7cb8f84b6f">AmrMesh</a>
 , <a class="el" href="classPhaseRealm.html#af4476b48e16f8ce789e5a3b558f18986">PhaseRealm</a>
+</li>
+<li>m_refAlpha
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a7adfc5533df0c14926eabf1667047051">Physics::StreamerInception::StreamerInceptionTagger</a>
 </li>
 <li>m_refCurv
 : <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html#a8ef497261c2f8794611bd4f27ac9f919">Physics::AdvectionDiffusion::AdvectionDiffusionTagger</a>
@@ -2561,6 +2728,9 @@ $(function() {
 , <a class="el" href="classMeshODESolver.html#a234a2a9267f16cf3453b55665fc15a3d">MeshODESolver&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a5d08f9c63083ecd3da14be66fe50cf75">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 </li>
+<li>m_relativeInceptionStep
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a921c23d8796ba93fbcd28d8c90de8960">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_relaxStencils
 : <a class="el" href="classEBHelmholtzOp.html#a19dcd06b3d6626ea49878eaec6e404d3">EBHelmholtzOp</a>
 </li>
@@ -2590,6 +2760,7 @@ $(function() {
 </li>
 <li>m_rho
 : <a class="el" href="classFieldSolver.html#af8834284632f126751c17aa6344a2ef9">FieldSolver</a>
+, <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a47d94584a2f6ff68c3bde12996b16a53">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_rhoDielectric
 : <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a49b475942d1c1c340202ddf9cbfc9970">Physics::Electrostatics::FieldStepper&lt; T &gt;</a>
@@ -2737,11 +2908,11 @@ $(function() {
 <li>m_shroom_live
 : <a class="el" href="classVessel.html#aa2add00ec06e29cd6482fbc95bdb03a9">Vessel</a>
 </li>
-<li>m_shroom_r
-: <a class="el" href="classVessel.html#adc6b2dd667bb3ab8a90b4b18489ef992">Vessel</a>
-</li>
 <li>m_shroom_R
 : <a class="el" href="classVessel.html#acaa7e92cf60b067ab42ac485d438901d">Vessel</a>
+</li>
+<li>m_shroom_r
+: <a class="el" href="classVessel.html#adc6b2dd667bb3ab8a90b4b18489ef992">Vessel</a>
 </li>
 <li>m_sideBox
 : <a class="el" href="classEBHelmholtzOp.html#ac102826540a335e1087e506e6c87a38d">EBHelmholtzOp</a>
@@ -2942,8 +3113,17 @@ $(function() {
 <li>m_tracer
 : <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaTagger.html#afeb607b66431a833b2fc6eb1b93dd7a3">Physics::ItoPlasma::ItoPlasmaTagger</a>
 </li>
+<li>m_tracerField
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html#a0c7aa86f36fb27024e0562063d0f4457">Physics::StreamerInception::StreamerInceptionTagger</a>
+</li>
+<li>m_tracerParticleSolver
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a67335b76a15628fb07aae7c672581ae0">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_tracers
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#a8a31e21e1e443384ec03a5a18d2d4382">Physics::CdrPlasma::CdrPlasmaTagger</a>
+</li>
+<li>m_transportAlgorithm
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a282dcf83dcf619936d2a2698b0e3dce2">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_turnOffBCs
 : <a class="el" href="classEBHelmholtzOp.html#a16b29f56ff1657f8386cb642089f3553">EBHelmholtzOp</a>
@@ -2978,6 +3158,9 @@ $(function() {
 </li>
 <li>m_useFast
 : <a class="el" href="classSphereArray.html#ab513cac143c4c719c829036c8b04eb8c">SphereArray</a>
+</li>
+<li>m_useFixedInceptionStep
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ada3aaf0c1d19133c8ed3a68f04e729be">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_useFunction
 : <a class="el" href="classEBHelmholtzDirichletDomainBC.html#a7d94ebcdd3867bc2e3b78a632d07da75">EBHelmholtzDirichletDomainBC</a>
@@ -3105,11 +3288,14 @@ $(function() {
 : <a class="el" href="classFieldSolver.html#ad98ede81e227228b8761ed0fa9339200">FieldSolver</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#acc9efff66a85a54e3bd13455c0bf0a8a">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
+<li>m_voltageCurve
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aa42bc3971069a6c51cd0164fc21884c3">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+</li>
 <li>m_voltageFraction
 : <a class="el" href="classElectrode.html#ae7d3a103fc55adc31f3abad5fb7999bf">Electrode</a>
 </li>
 <li>m_voltageSweeps
-: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aec1bb56375675932976a5aac013a819b">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;</a>
+: <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a1037c4ed458a8ef6621f6f88de9fc60d">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>m_volumeScale
 : <a class="el" href="classTracerParticleSolver.html#a6184240f0a0a5c5b6021e18d24e78a19">TracerParticleSolver&lt; P &gt;</a>

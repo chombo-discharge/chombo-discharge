@@ -102,7 +102,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__ParallelOps_8H__dep__incl.png" border="0" usemap="#Source_2Utilities_2CD__ParallelOps_8Hdep" alt=""/></div>
 <map name="Source_2Utilities_2CD__ParallelOps_8Hdep" id="Source_2Utilities_2CD__ParallelOps_8Hdep">
-<area shape="rect" title="Agglomeration of basic MPI reductions." alt="" coords="1035,5,1179,47"/>
+<area shape="rect" title="Agglomeration of basic MPI reductions." alt="" coords="1145,5,1289,47"/>
 <area shape="rect" href="CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="5,95,207,136"/>
 <area shape="rect" href="CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="231,95,445,136"/>
 <area shape="rect" href="CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="469,95,671,136"/>
@@ -113,6 +113,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <area shape="rect" href="CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="1532,95,1765,136"/>
 <area shape="rect" href="CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="1789,95,1964,136"/>
 <area shape="rect" href="CD__CdrPlasmaTagger_8cpp.html" title="Implementation of CD_CdrPlasmaTagger.H." alt="" coords="1989,95,2157,136"/>
+<area shape="rect" href="CD__StreamerInceptionTagger_8cpp.html" title="Implementation of CD_StreamerInceptionTagger.H." alt="" coords="2181,95,2423,136"/>
 <area shape="rect" href="CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="1120,184,1313,225"/>
 <area shape="rect" href="CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="953,273,1187,315"/>
 <area shape="rect" href="CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="1263,273,1466,315"/>
@@ -131,22 +132,35 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:aab33c20f0f436738c5c08b80b0788049"><td class="memItemLeft" align="right" valign="top"><a id="aab33c20f0f436738c5c08b80b0788049"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#aab33c20f0f436738c5c08b80b0788049">ParallelOps::barrier</a> ()</td></tr>
+<tr class="memdesc:aab33c20f0f436738c5c08b80b0788049"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPI barrier. <br /></td></tr>
+<tr class="separator:aab33c20f0f436738c5c08b80b0788049"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf048178fae8e1df88f55d33aca75f84"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#adf048178fae8e1df88f55d33aca75f84">ParallelOps::min</a> (const Real &amp;a_input)</td></tr>
 <tr class="memdesc:adf048178fae8e1df88f55d33aca75f84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)  <a href="namespaceParallelOps.html#adf048178fae8e1df88f55d33aca75f84">More...</a><br /></td></tr>
 <tr class="separator:adf048178fae8e1df88f55d33aca75f84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6fa1753bb707938e41fef66334c6709a"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a6fa1753bb707938e41fef66334c6709a">ParallelOps::max</a> (const Real &amp;a_input)</td></tr>
-<tr class="memdesc:a6fa1753bb707938e41fef66334c6709a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)  <a href="namespaceParallelOps.html#a6fa1753bb707938e41fef66334c6709a">More...</a><br /></td></tr>
-<tr class="separator:a6fa1753bb707938e41fef66334c6709a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e5227b16ba18122f2ead5f7a2bb74a4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a8e5227b16ba18122f2ead5f7a2bb74a4">ParallelOps::min</a> (const int &amp;a_input)</td></tr>
 <tr class="memdesc:a8e5227b16ba18122f2ead5f7a2bb74a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)  <a href="namespaceParallelOps.html#a8e5227b16ba18122f2ead5f7a2bb74a4">More...</a><br /></td></tr>
 <tr class="separator:a8e5227b16ba18122f2ead5f7a2bb74a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afef599d8b79dcc098862c6e90875ff6a"><td class="memItemLeft" align="right" valign="top">std::pair&lt; Real, RealVect &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#afef599d8b79dcc098862c6e90875ff6a">ParallelOps::min</a> (const Real &amp;a_val, const RealVect &amp;a_pos) noexcept</td></tr>
+<tr class="memdesc:afef599d8b79dcc098862c6e90875ff6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum value and the position corresponding to the minimum value of a_val.  <a href="namespaceParallelOps.html#afef599d8b79dcc098862c6e90875ff6a">More...</a><br /></td></tr>
+<tr class="separator:afef599d8b79dcc098862c6e90875ff6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fa1753bb707938e41fef66334c6709a"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a6fa1753bb707938e41fef66334c6709a">ParallelOps::max</a> (const Real &amp;a_input)</td></tr>
+<tr class="memdesc:a6fa1753bb707938e41fef66334c6709a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)  <a href="namespaceParallelOps.html#a6fa1753bb707938e41fef66334c6709a">More...</a><br /></td></tr>
+<tr class="separator:a6fa1753bb707938e41fef66334c6709a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e92b192ee9b5dd88878b3a40ee63b34"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a8e92b192ee9b5dd88878b3a40ee63b34">ParallelOps::max</a> (const int &amp;a_input)</td></tr>
 <tr class="memdesc:a8e92b192ee9b5dd88878b3a40ee63b34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)  <a href="namespaceParallelOps.html#a8e92b192ee9b5dd88878b3a40ee63b34">More...</a><br /></td></tr>
 <tr class="separator:a8e92b192ee9b5dd88878b3a40ee63b34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a706cd1392f38ac81041c6ac16c0d72ea"><td class="memItemLeft" align="right" valign="top">std::pair&lt; Real, RealVect &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#a706cd1392f38ac81041c6ac16c0d72ea">ParallelOps::max</a> (const Real &amp;a_val, const RealVect &amp;a_pos) noexcept</td></tr>
+<tr class="memdesc:a706cd1392f38ac81041c6ac16c0d72ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum value and the position corresponding to the maximum value of a_val.  <a href="namespaceParallelOps.html#a706cd1392f38ac81041c6ac16c0d72ea">More...</a><br /></td></tr>
+<tr class="separator:a706cd1392f38ac81041c6ac16c0d72ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af14409f44386ea5a863bacb45e3ba5e3"><td class="memItemLeft" align="right" valign="top"><a id="af14409f44386ea5a863bacb45e3ba5e3"></a>
 Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#af14409f44386ea5a863bacb45e3ba5e3">ParallelOps::sum</a> (const Real &amp;a_value)</td></tr>
 <tr class="memdesc:af14409f44386ea5a863bacb45e3ba5e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the sum across all MPI ranks. <br /></td></tr>
 <tr class="separator:af14409f44386ea5a863bacb45e3ba5e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7793406834742b2ebdcbb5e60e95089"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ae7793406834742b2ebdcbb5e60e95089">ParallelOps::vectorSum</a> (Vector&lt; Real &gt; &amp;a_data)</td></tr>
+<tr class="memdesc:ae7793406834742b2ebdcbb5e60e95089"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a summation of all the MPI ranks's input data.  <a href="namespaceParallelOps.html#ae7793406834742b2ebdcbb5e60e95089">More...</a><br /></td></tr>
+<tr class="separator:ae7793406834742b2ebdcbb5e60e95089"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab031bf791ff172bf06b3b9d4fa6f4667"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceParallelOps.html#ab031bf791ff172bf06b3b9d4fa6f4667">ParallelOps::vectorSum</a> (Vector&lt; long int &gt; &amp;a_data)</td></tr>
 <tr class="memdesc:ab031bf791ff172bf06b3b9d4fa6f4667"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a summation of all the MPI ranks's input data.  <a href="namespaceParallelOps.html#ab031bf791ff172bf06b3b9d4fa6f4667">More...</a><br /></td></tr>
 <tr class="separator:ab031bf791ff172bf06b3b9d4fa6f4667"><td class="memSeparator" colspan="2">&#160;</td></tr>

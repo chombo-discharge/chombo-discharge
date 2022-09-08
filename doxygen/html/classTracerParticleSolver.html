@@ -131,6 +131,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:ad837327fc21a90c62f18180fd7444c2f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#ad837327fc21a90c62f18180fd7444c2f">setComputationalGeometry</a> (const RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">ComputationalGeometry</a> &gt; &amp;a_compGeom)</td></tr>
 <tr class="memdesc:ad837327fc21a90c62f18180fd7444c2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the computational geometry.  <a href="classTracerParticleSolver.html#ad837327fc21a90c62f18180fd7444c2f">More...</a><br /></td></tr>
 <tr class="separator:ad837327fc21a90c62f18180fd7444c2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ceddbeac4ffc286910d9e1271a652f1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a3ceddbeac4ffc286910d9e1271a652f1">setName</a> (const std::string &amp;a_name) noexcept</td></tr>
+<tr class="memdesc:a3ceddbeac4ffc286910d9e1271a652f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the solver name.  <a href="classTracerParticleSolver.html#a3ceddbeac4ffc286910d9e1271a652f1">More...</a><br /></td></tr>
+<tr class="separator:a3ceddbeac4ffc286910d9e1271a652f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe9b68664bc668e3f6da1910901796ed"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#afe9b68664bc668e3f6da1910901796ed">setVolumeScale</a> (const bool a_scale) noexcept</td></tr>
+<tr class="memdesc:afe9b68664bc668e3f6da1910901796ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on/off volume scaling.  <a href="classTracerParticleSolver.html#afe9b68664bc668e3f6da1910901796ed">More...</a><br /></td></tr>
+<tr class="separator:afe9b68664bc668e3f6da1910901796ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a21e67f7663c130122a890062e6118407"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a21e67f7663c130122a890062e6118407">setRealm</a> (const std::string &amp;a_realm)</td></tr>
 <tr class="memdesc:a21e67f7663c130122a890062e6118407"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the solver realm.  <a href="classTracerParticleSolver.html#a21e67f7663c130122a890062e6118407">More...</a><br /></td></tr>
 <tr class="separator:a21e67f7663c130122a890062e6118407"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -156,6 +162,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a55f044d37d2553b89b0fec368507ff63"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a55f044d37d2553b89b0fec368507ff63">deposit</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi)</td></tr>
 <tr class="memdesc:a55f044d37d2553b89b0fec368507ff63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposit particle weight on mesh.  <a href="classTracerParticleSolver.html#a55f044d37d2553b89b0fec368507ff63">More...</a><br /></td></tr>
 <tr class="separator:a55f044d37d2553b89b0fec368507ff63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2c8be198162807b359a412d84ec3625"><td class="memItemLeft" align="right" valign="top"><a id="af2c8be198162807b359a412d84ec3625"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#af2c8be198162807b359a412d84ec3625">interpolateWeight</a> (const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_scalar) noexcept</td></tr>
+<tr class="memdesc:af2c8be198162807b359a412d84ec3625"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate a scalar field onto the particle weight. <br /></td></tr>
+<tr class="separator:af2c8be198162807b359a412d84ec3625"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad904030292233fb75c3b519ea4ad1be2"><td class="memItemLeft" align="right" valign="top"><a id="ad904030292233fb75c3b519ea4ad1be2"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#ad904030292233fb75c3b519ea4ad1be2">interpolateVelocities</a> ()</td></tr>
 <tr class="memdesc:ad904030292233fb75c3b519ea4ad1be2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate particles velocities. <br /></td></tr>
@@ -226,6 +236,10 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 <a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#aa77d8e47a504302aeac78b7f89294302">m_deposition</a></td></tr>
 <tr class="memdesc:aa77d8e47a504302aeac78b7f89294302"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposition type when depositing particles to grid. <br /></td></tr>
 <tr class="separator:aa77d8e47a504302aeac78b7f89294302"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87c6884ddd009ae3932bbdf184530bf4"><td class="memItemLeft" align="right" valign="top"><a id="a87c6884ddd009ae3932bbdf184530bf4"></a>
+<a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a87c6884ddd009ae3932bbdf184530bf4">m_interpolation</a></td></tr>
+<tr class="memdesc:a87c6884ddd009ae3932bbdf184530bf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deposition type when interpolating to particles. <br /></td></tr>
+<tr class="separator:a87c6884ddd009ae3932bbdf184530bf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5cb566c3939360224620da3a91dd4255"><td class="memItemLeft" align="right" valign="top"><a id="a5cb566c3939360224620da3a91dd4255"></a>
 <a class="el" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTracerParticleSolver.html#a5cb566c3939360224620da3a91dd4255">m_coarseFineDeposition</a></td></tr>
 <tr class="memdesc:a5cb566c3939360224620da3a91dd4255"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse-fine deposition strategy. <br /></td></tr>
@@ -939,6 +953,42 @@ template&lt;typename P &gt; </div>
 
 </div>
 </div>
+<a id="a3ceddbeac4ffc286910d9e1271a652f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ceddbeac4ffc286910d9e1271a652f1">&#9670;&nbsp;</a></span>setName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classTracerParticleSolver.html">TracerParticleSolver</a>&lt; P &gt;::setName </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the solver name. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_name</td><td>Solver name </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ac5ab5d3639b2d5c6d2791f3c51b02bad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac5ab5d3639b2d5c6d2791f3c51b02bad">&#9670;&nbsp;</a></span>setPhase()</h2>
 
@@ -1096,6 +1146,42 @@ template&lt;typename P &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_velocityField</td><td>Velocity field. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="afe9b68664bc668e3f6da1910901796ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe9b68664bc668e3f6da1910901796ed">&#9670;&nbsp;</a></span>setVolumeScale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classTracerParticleSolver.html">TracerParticleSolver</a>&lt; P &gt;::setVolumeScale </td>
+          <td>(</td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>a_scale</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Turn on/off volume scaling. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_scale</td><td>Volume scale or not. </td></tr>
   </table>
   </dd>
 </dl>

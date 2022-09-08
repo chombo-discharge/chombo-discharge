@@ -88,6 +88,8 @@ $(function() {
 <code>#include &lt;<a class="el" href="CD__TracerParticle_8H_source.html">CD_TracerParticle.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__FieldSolver_8H_source.html">CD_FieldSolver.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__FieldSolverMultigrid_8H_source.html">CD_FieldSolverMultigrid.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__CdrSolver_8H_source.html">CD_CdrSolver.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__CdrCTU_8H_source.html">CD_CdrCTU.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__StreamerInceptionStepperImplem_8H_source.html">CD_StreamerInceptionStepperImplem.H</a>&gt;</code><br />
@@ -96,56 +98,56 @@ Include dependency graph for CD_StreamerInceptionStepper.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__StreamerInceptionStepper_8H__incl.png" border="0" usemap="#Physics_2StreamerInception_2CD__StreamerInceptionStepper_8H" alt=""/></div>
 <map name="Physics_2StreamerInception_2CD__StreamerInceptionStepper_8H" id="Physics_2StreamerInception_2CD__StreamerInceptionStepper_8H">
-<area shape="rect" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="3021,5,3256,47"/>
-<area shape="rect" href="CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="1660,184,1804,211"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="3054,483,3239,509"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="977,483,1156,509"/>
-<area shape="rect" href="CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="3044,184,3233,211"/>
-<area shape="rect" href="CD__TracerParticle_8H.html" title="Declaration of a tracer particle class." alt="" coords="3800,333,3949,360"/>
-<area shape="rect" href="CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="743,184,876,211"/>
-<area shape="rect" href="CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="553,102,745,129"/>
-<area shape="rect" href="CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="3461,95,3680,136"/>
-<area shape="rect" href="CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="907,333,1128,360"/>
-<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="1600,408,1803,435"/>
-<area shape="rect" href="CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2162,259,2286,285"/>
-<area shape="rect" title=" " alt="" coords="495,483,574,509"/>
-<area shape="rect" title=" " alt="" coords="1489,483,1620,509"/>
-<area shape="rect" title=" " alt="" coords="1399,483,1460,509"/>
-<area shape="rect" title=" " alt="" coords="1232,483,1325,509"/>
-<area shape="rect" title=" " alt="" coords="2739,408,2880,435"/>
-<area shape="rect" href="CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="473,408,597,435"/>
-<area shape="rect" href="CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="907,408,1029,435"/>
-<area shape="rect" href="CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="1358,408,1474,435"/>
-<area shape="rect" title=" " alt="" coords="261,483,347,509"/>
-<area shape="rect" title=" " alt="" coords="1796,483,1945,509"/>
-<area shape="rect" title=" " alt="" coords="1644,483,1772,509"/>
-<area shape="rect" title=" " alt="" coords="2904,408,3059,435"/>
-<area shape="rect" title=" " alt="" coords="1862,333,1997,360"/>
-<area shape="rect" title=" " alt="" coords="2073,333,2202,360"/>
-<area shape="rect" title=" " alt="" coords="2227,333,2392,360"/>
-<area shape="rect" title=" " alt="" coords="2417,333,2530,360"/>
-<area shape="rect" title=" " alt="" coords="2555,333,2723,360"/>
-<area shape="rect" title=" " alt="" coords="2747,333,2912,360"/>
-<area shape="rect" title=" " alt="" coords="1691,333,1837,360"/>
-<area shape="rect" href="CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="2121,408,2261,435"/>
-<area shape="rect" href="CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="3038,333,3210,360"/>
-<area shape="rect" href="CD__TracerParticleSolverImplem_8H.html" title="Implementation of CD_TracerParticleSolver.H." alt="" coords="3148,259,3388,285"/>
-<area shape="rect" title=" " alt="" coords="4047,483,4105,509"/>
-<area shape="rect" title=" " alt="" coords="4130,483,4206,509"/>
-<area shape="rect" title=" " alt="" coords="4231,483,4292,509"/>
-<area shape="rect" title=" " alt="" coords="3959,483,4022,509"/>
-<area shape="rect" href="CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="3912,408,4072,435"/>
-<area shape="rect" href="CD__TracerParticleImplem_8H.html" title="Implementation of CD_TracerParticle.H." alt="" coords="3639,408,3838,435"/>
-<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="1928,408,2045,435"/>
-<area shape="rect" href="CD__ElectrostaticDomainBc_8H.html" title="Declaration of a class for holding function&#45;based boundary conditions on domain edges." alt="" coords="621,408,832,435"/>
-<area shape="rect" href="CD__ElectrostaticEbBc_8H.html" title="Data holder for holding the voltage at electrodes." alt="" coords="655,333,830,360"/>
-<area shape="rect" href="CD__FieldSolverImplem_8H.html" title="Implementation of CD_FieldSolver.H." alt="" coords="649,259,833,285"/>
-<area shape="rect" title=" " alt="" coords="430,184,557,211"/>
-<area shape="rect" title=" " alt="" coords="581,184,718,211"/>
-<area shape="rect" title=" " alt="" coords="118,184,258,211"/>
-<area shape="rect" title=" " alt="" coords="283,184,405,211"/>
-<area shape="rect" href="CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="1405,333,1617,360"/>
-<area shape="rect" title=" " alt="" coords="3492,184,3591,211"/>
+<area shape="rect" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="2268,5,2503,47"/>
+<area shape="rect" href="CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="1259,319,1403,345"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1682,632,1868,659"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2875,632,3054,659"/>
+<area shape="rect" href="CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="1746,319,1935,345"/>
+<area shape="rect" href="CD__TracerParticle_8H.html" title="Declaration of a tracer particle class." alt="" coords="3979,483,4128,509"/>
+<area shape="rect" href="CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="920,319,1054,345"/>
+<area shape="rect" href="CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="2156,244,2348,271"/>
+<area shape="rect" href="CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="2749,319,2873,345"/>
+<area shape="rect" href="CD__CdrCTU_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="2906,95,3017,121"/>
+<area shape="rect" href="CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="3603,393,3822,435"/>
+<area shape="rect" href="CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="1012,483,1234,509"/>
+<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="1142,557,1344,584"/>
+<area shape="rect" href="CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="1318,401,1442,427"/>
+<area shape="rect" title=" " alt="" coords="149,632,228,659"/>
+<area shape="rect" title=" " alt="" coords="722,632,852,659"/>
+<area shape="rect" title=" " alt="" coords="1056,557,1118,584"/>
+<area shape="rect" title=" " alt="" coords="946,632,1039,659"/>
+<area shape="rect" title=" " alt="" coords="1419,557,1560,584"/>
+<area shape="rect" href="CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="270,557,394,584"/>
+<area shape="rect" title=" " alt="" coords="324,632,410,659"/>
+<area shape="rect" href="CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="1562,483,1734,509"/>
+<area shape="rect" href="CD__TracerParticleSolverImplem_8H.html" title="Implementation of CD_TracerParticleSolver.H." alt="" coords="1720,401,1960,427"/>
+<area shape="rect" title=" " alt="" coords="4060,632,4119,659"/>
+<area shape="rect" title=" " alt="" coords="4144,632,4220,659"/>
+<area shape="rect" title=" " alt="" coords="4244,632,4306,659"/>
+<area shape="rect" title=" " alt="" coords="3973,632,4036,659"/>
+<area shape="rect" href="CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="3926,557,4086,584"/>
+<area shape="rect" href="CD__TracerParticleImplem_8H.html" title="Implementation of CD_TracerParticle.H." alt="" coords="3653,557,3852,584"/>
+<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="2219,557,2336,584"/>
+<area shape="rect" href="CD__ElectrostaticDomainBc_8H.html" title="Declaration of a class for holding function&#45;based boundary conditions on domain edges." alt="" coords="419,557,630,584"/>
+<area shape="rect" href="CD__ElectrostaticEbBc_8H.html" title="Data holder for holding the voltage at electrodes." alt="" coords="654,557,829,584"/>
+<area shape="rect" href="CD__FieldSolverImplem_8H.html" title="Implementation of CD_FieldSolver.H." alt="" coords="806,401,990,427"/>
+<area shape="rect" title=" " alt="" coords="2437,319,2564,345"/>
+<area shape="rect" title=" " alt="" coords="2588,319,2725,345"/>
+<area shape="rect" title=" " alt="" coords="2024,319,2164,345"/>
+<area shape="rect" title=" " alt="" coords="2290,319,2412,345"/>
+<area shape="rect" href="CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="2181,483,2393,509"/>
+<area shape="rect" title=" " alt="" coords="3004,401,3076,427"/>
+<area shape="rect" title=" " alt="" coords="2826,401,2890,427"/>
+<area shape="rect" title=" " alt="" coords="2914,401,2980,427"/>
+<area shape="rect" href="CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="2462,557,2597,584"/>
+<area shape="rect" href="CD__CdrDomainBC_8H.html" title="Declaration of domain boundary condition types for CdrSolver." alt="" coords="1838,557,1992,584"/>
+<area shape="rect" href="CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="2890,244,3033,271"/>
+<area shape="rect" href="CD__CdrGodunov_8H.html" title="Declaration of a class which implements CdrMultigrid using Godunov&#45;type advection." alt="" coords="3046,169,3187,196"/>
+<area shape="rect" title=" " alt="" coords="3654,483,3734,509"/>
+<area shape="rect" title=" " alt="" coords="3758,483,3832,509"/>
+<area shape="rect" title=" " alt="" coords="3856,483,3955,509"/>
+<area shape="rect" href="CD__Units_8H.html" title="Declaration of various useful units." alt="" coords="3128,557,3224,584"/>
+<area shape="rect" href="CD__StreamerInceptionSpecies_8H.html" title="Simple species for StreamerInception test problem." alt="" coords="2568,483,2800,509"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -162,8 +164,8 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class for volume evaluation of the streamer inception integral.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class for streamer inception integral evaluations.  <a href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
@@ -175,15 +177,27 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr class="memitem:a90a70881e4736b29b2eaa4f23e9cab04"><td class="memItemLeft" align="right" valign="top"><a id="a90a70881e4736b29b2eaa4f23e9cab04"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__StreamerInceptionStepper_8H.html#a90a70881e4736b29b2eaa4f23e9cab04">Physics::StreamerInception::IntegrationAlgorithm</a> { <b>Euler</b>, 
-<b>RK2</b>, 
-<b>RK4</b>
+<b>Trapezoidal</b>
  }</td></tr>
 <tr class="memdesc:a90a70881e4736b29b2eaa4f23e9cab04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integration algorithm for the particles. <br /></td></tr>
 <tr class="separator:a90a70881e4736b29b2eaa4f23e9cab04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae5ff942df8c99780044ca5a0b1ecdb7"><td class="memItemLeft" align="right" valign="top"><a id="aae5ff942df8c99780044ca5a0b1ecdb7"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__StreamerInceptionStepper_8H.html#aae5ff942df8c99780044ca5a0b1ecdb7">Physics::StreamerInception::TransportAlgorithm</a> { <b>Euler</b>, 
+<b>Heun</b>, 
+<b>ImExCTU</b>
+ }</td></tr>
+<tr class="memdesc:aae5ff942df8c99780044ca5a0b1ecdb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Algorithm for negative ion advancement. <br /></td></tr>
+<tr class="separator:aae5ff942df8c99780044ca5a0b1ecdb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af655f05a634af7f120b02f162dc8fa8f"><td class="memItemLeft" align="right" valign="top"><a id="af655f05a634af7f120b02f162dc8fa8f"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="CD__StreamerInceptionStepper_8H.html#af655f05a634af7f120b02f162dc8fa8f">Physics::StreamerInception::Mode</a> { <b>Stationary</b>, 
+<b>Transient</b>
+ }</td></tr>
+<tr class="memdesc:af655f05a634af7f120b02f162dc8fa8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">For specifying whether the module is run in stationary or transient mode. <br /></td></tr>
+<tr class="separator:af655f05a634af7f120b02f162dc8fa8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classTimeStepper.html" title="Base class for advancing equations.">TimeStepper</a> class for evaluating the streamer inception criterion. </p>
-<dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd></dl>
+<dl class="section author"><dt>Author</dt><dd>Robert Marskar </dd>
+<dd>
+Rasmus Hoholm </dd></dl>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

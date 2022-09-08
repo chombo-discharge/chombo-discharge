@@ -1,5 +1,5 @@
 <map id="Source/Utilities/CD_ParallelOps.H" name="Source/Utilities/CD_ParallelOps.H">
-<area shape="rect" id="node1" title="Agglomeration of basic MPI reductions." alt="" coords="1035,5,1179,47"/>
+<area shape="rect" id="node1" title="Agglomeration of basic MPI reductions." alt="" coords="1145,5,1289,47"/>
 <area shape="rect" id="node2" href="$CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="5,95,207,136"/>
 <area shape="rect" id="node3" href="$CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="231,95,445,136"/>
 <area shape="rect" id="node4" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="469,95,671,136"/>
@@ -10,6 +10,7 @@
 <area shape="rect" id="node14" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="1532,95,1765,136"/>
 <area shape="rect" id="node15" href="$CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="1789,95,1964,136"/>
 <area shape="rect" id="node16" href="$CD__CdrPlasmaTagger_8cpp.html" title="Implementation of CD_CdrPlasmaTagger.H." alt="" coords="1989,95,2157,136"/>
+<area shape="rect" id="node17" href="$CD__StreamerInceptionTagger_8cpp.html" title="Implementation of CD_StreamerInceptionTagger.H." alt="" coords="2181,95,2423,136"/>
 <area shape="rect" id="node8" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="1120,184,1313,225"/>
 <area shape="rect" id="node9" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="953,273,1187,315"/>
 <area shape="rect" id="node11" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="1263,273,1466,315"/>

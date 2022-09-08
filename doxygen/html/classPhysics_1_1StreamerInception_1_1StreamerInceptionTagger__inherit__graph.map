@@ -1,0 +1,4 @@
+<map id="Physics::StreamerInception::StreamerInceptionTagger" name="Physics::StreamerInception::StreamerInceptionTagger">
+<area shape="rect" id="node1" title="Class for tagging cells in the StreamerInception module." alt="" coords="5,80,204,121"/>
+<area shape="rect" id="node2" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="59,5,150,32"/>
+</map>

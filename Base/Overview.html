@@ -86,17 +86,19 @@
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Applications</span></p>
+<p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/ImplementedModels.html">Implemented models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/BrownianWalkerModel.html">Brownian walker</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/CdrPlasmaModel.html">CDR plasma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/ElectrostaticsModel.html">Electrostatics model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/GeometryModel.html">Geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/RadiativeTransferModel.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Applications/StreamerInceptionModel.html">Streamer inception</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Applications/TracerParticleModel.html">Tracer particle model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
@@ -217,7 +219,7 @@ That is, all the AMR levels are advanced using the same time step.
 This includes much faster grid generation, support for polygon surfaces, and many performance optimizations (in particular to the EB formulation).</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports both fluid and particle methods, and can use multiply parallel distributed grids (see <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>) for individually load balancing particle and fluid kernels.
 Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and still use the embedded boundary formalism, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also provides several physics modules for describing various types of problems.
-See e.g. <a class="reference internal" href="../Applications/ImplementedModels.html#chap-implementedmodels"><span class="std std-ref">Implemented models</span></a>.</p>
+See e.g. <span class="xref std std-ref">Chap:ImplementedModels</span>.</p>
 </div>
 <div class="section" id="design-approach">
 <h2>Design approach<a class="headerlink" href="#design-approach" title="Permalink to this heading"></a></h2>

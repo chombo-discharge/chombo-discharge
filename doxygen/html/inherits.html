@@ -80,36 +80,37 @@ $(function() {
 <area shape="rect" href="classAmrMesh.html" title="Class for handling spatial operations." alt="" coords="5,5,89,32"/>
 </map>
 </td></tr>
-<tr><td><img src="inherit_graph_1.png" border="0" usemap="#BoxSdf" alt=""/>
-<map name="BoxSdf" id="BoxSdf">
-<area shape="rect" title=" " alt="" coords="5,613,72,640"/>
-<area shape="rect" href="classBoxSdf.html" title="Class for defining a two&#45; or three&#45;dimensional box with arbitrary centroid and orientation." alt="" coords="183,5,251,32"/>
-<area shape="rect" href="classCylinderSdf.html" title="Declaration of a cylinder IF class." alt="" coords="169,56,266,83"/>
-<area shape="rect" href="classEBGeometryIF.html" title="Shallow binding of EBGeometry signed distance functions to Chombo." alt="" coords="159,107,275,133"/>
-<area shape="rect" href="classHollowCylinderIF.html" title="This class is used to generate a hollow cylinder with rounded edges." alt="" coords="151,157,284,184"/>
-<area shape="rect" href="classHyperboloidIF.html" title="Declaration of a two&#45;sheet hyperboloid." alt="" coords="161,208,274,235"/>
-<area shape="rect" href="classHyperboloidOneIF.html" title="Declaration of a one&#45;sheet hyperboloid." alt="" coords="148,259,287,285"/>
-<area shape="rect" href="classHyperboloidTwoIF.html" title="Declaration of a two&#45;sheet hyperboloid." alt="" coords="148,309,287,336"/>
-<area shape="rect" href="classMushroomIF.html" title="&quot;Mushroom&quot; implicit function. Consists of a cylinder with a circular plate on top." alt="" coords="166,360,269,387"/>
-<area shape="rect" href="classNewIntersectionIF.html" title="New intersection IF which does not mess up the return value function when there are no implicit funct..." alt="" coords="147,411,287,437"/>
-<area shape="rect" href="classPerlinPlaneSdf.html" title="Infinite plane with surface noise (Perlin noise)." alt="" coords="159,461,275,488"/>
-<area shape="rect" href="classPerlinSdf.html" title="Class that implements the improved Perlin noise function." alt="" coords="177,512,257,539"/>
-<area shape="rect" href="classPerlinSlabSdf.html" title="Implicit function class describing a slab (box) with surface noise on the top." alt="" coords="163,563,271,589"/>
-<area shape="rect" href="classPerlinSphereSdf.html" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="155,613,280,640"/>
-<area shape="rect" href="classPolygonRodIF.html" title="Implicit function class describing a rod with a polygonal cross scetion." alt="" coords="162,664,273,691"/>
-<area shape="rect" href="classProfileCylinderIF.html" title="Implicit function which takes the form of a cylinder with a surface profiles (grooves)." alt="" coords="153,715,282,741"/>
-<area shape="rect" href="classProfilePlaneIF.html" title="Implicit function which represents an infinite half&#45;plane with &quot;holes&quot;." alt="" coords="162,765,273,792"/>
-<area shape="rect" href="classRodIF.html" title="Cylinder with rounded caps at its ends." alt="" coords="188,816,247,843"/>
-<area shape="rect" href="classRoundedBoxIF.html" title="A box with rounded corners and edges." alt="" coords="159,867,275,893"/>
-<area shape="rect" href="classRoundedCylinderIF.html" title="Cylinder object with rounded edges (no endcaps)" alt="" coords="145,917,290,944"/>
-<area shape="rect" href="classSignedDistanceBVH.html" title="Signed distance function for a DCEL mesh." alt="" coords="136,969,299,1010"/>
-<area shape="rect" href="classSignedDistanceDCEL.html" title="Signed distance function from a DCEL mesh." alt="" coords="120,1035,315,1061"/>
-<area shape="rect" href="classSphereArray.html" title="A Cartesian array of spheres." alt="" coords="166,1085,269,1112"/>
-<area shape="rect" href="classSphereSdf.html" title="Signed distance function for sphere." alt="" coords="173,1136,261,1163"/>
-<area shape="rect" href="classTorusSdf.html" title="Signed distance function for a torus (oriented along z)." alt="" coords="179,1187,256,1213"/>
-<area shape="rect" href="classWedgeIF.html" title="Implicit function for a wedge." alt="" coords="178,1237,257,1264"/>
-<area shape="rect" href="classGradedPerlinSphereSdf.html" title="GradedPerlinSphereSdf function." alt="" coords="363,588,535,615"/>
-<area shape="rect" href="classPerlinRodSdf.html" title="A rod geometry, but with noise on one of the end caps." alt="" coords="396,639,501,665"/>
+<tr><td><img src="inherit_graph_1.png" border="0" usemap="#BoundedNoisePlane" alt=""/>
+<map name="BoundedNoisePlane" id="BoundedNoisePlane">
+<area shape="rect" title=" " alt="" coords="5,639,72,665"/>
+<area shape="rect" href="classBoundedNoisePlane.html" title="Infinite plane with spatially bounded surface noise (Perlin noise)." alt="" coords="141,5,293,32"/>
+<area shape="rect" href="classBoxSdf.html" title="Class for defining a two&#45; or three&#45;dimensional box with arbitrary centroid and orientation." alt="" coords="183,56,251,83"/>
+<area shape="rect" href="classCylinderSdf.html" title="Declaration of a cylinder IF class." alt="" coords="169,107,266,133"/>
+<area shape="rect" href="classEBGeometryIF.html" title="Shallow binding of EBGeometry signed distance functions to Chombo." alt="" coords="159,157,275,184"/>
+<area shape="rect" href="classHollowCylinderIF.html" title="This class is used to generate a hollow cylinder with rounded edges." alt="" coords="151,208,284,235"/>
+<area shape="rect" href="classHyperboloidIF.html" title="Declaration of a two&#45;sheet hyperboloid." alt="" coords="161,259,274,285"/>
+<area shape="rect" href="classHyperboloidOneIF.html" title="Declaration of a one&#45;sheet hyperboloid." alt="" coords="148,309,287,336"/>
+<area shape="rect" href="classHyperboloidTwoIF.html" title="Declaration of a two&#45;sheet hyperboloid." alt="" coords="148,360,287,387"/>
+<area shape="rect" href="classMushroomIF.html" title="&quot;Mushroom&quot; implicit function. Consists of a cylinder with a circular plate on top." alt="" coords="166,411,269,437"/>
+<area shape="rect" href="classNewIntersectionIF.html" title="New intersection IF which does not mess up the return value function when there are no implicit funct..." alt="" coords="147,461,287,488"/>
+<area shape="rect" href="classPerlinPlaneSdf.html" title="Infinite plane with surface noise (Perlin noise)." alt="" coords="159,512,275,539"/>
+<area shape="rect" href="classPerlinSdf.html" title="Class that implements the improved Perlin noise function." alt="" coords="177,563,257,589"/>
+<area shape="rect" href="classPerlinSlabSdf.html" title="Implicit function class describing a slab (box) with surface noise on the top." alt="" coords="163,613,271,640"/>
+<area shape="rect" href="classPerlinSphereSdf.html" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="155,664,280,691"/>
+<area shape="rect" href="classPolygonRodIF.html" title="Implicit function class describing a rod with a polygonal cross scetion." alt="" coords="162,715,273,741"/>
+<area shape="rect" href="classProfileCylinderIF.html" title="Implicit function which takes the form of a cylinder with a surface profiles (grooves)." alt="" coords="153,765,282,792"/>
+<area shape="rect" href="classProfilePlaneIF.html" title="Implicit function which represents an infinite half&#45;plane with &quot;holes&quot;." alt="" coords="162,816,273,843"/>
+<area shape="rect" href="classRodIF.html" title="Cylinder with rounded caps at its ends." alt="" coords="188,867,247,893"/>
+<area shape="rect" href="classRoundedBoxIF.html" title="A box with rounded corners and edges." alt="" coords="159,917,275,944"/>
+<area shape="rect" href="classRoundedCylinderIF.html" title="Cylinder object with rounded edges (no endcaps)" alt="" coords="145,968,290,995"/>
+<area shape="rect" href="classSignedDistanceBVH.html" title="Signed distance function for a DCEL mesh." alt="" coords="136,1019,299,1061"/>
+<area shape="rect" href="classSignedDistanceDCEL.html" title="Signed distance function from a DCEL mesh." alt="" coords="120,1085,315,1112"/>
+<area shape="rect" href="classSphereArray.html" title="A Cartesian array of spheres." alt="" coords="166,1136,269,1163"/>
+<area shape="rect" href="classSphereSdf.html" title="Signed distance function for sphere." alt="" coords="173,1187,261,1213"/>
+<area shape="rect" href="classTorusSdf.html" title="Signed distance function for a torus (oriented along z)." alt="" coords="179,1237,256,1264"/>
+<area shape="rect" href="classWedgeIF.html" title="Implicit function for a wedge." alt="" coords="178,1288,257,1315"/>
+<area shape="rect" href="classGradedPerlinSphereSdf.html" title="GradedPerlinSphereSdf function." alt="" coords="363,639,535,665"/>
+<area shape="rect" href="classPerlinRodSdf.html" title="A rod geometry, but with noise on one of the end caps." alt="" coords="396,689,501,716"/>
 </map>
 </td></tr>
 <tr><td><img src="inherit_graph_2.png" border="0" usemap="#CdrDomainBC" alt=""/>
@@ -142,18 +143,20 @@ $(function() {
 </td></tr>
 <tr><td><img src="inherit_graph_7.png" border="0" usemap="#CdrSpecies" alt=""/>
 <map name="CdrSpecies" id="CdrSpecies">
-<area shape="rect" href="classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="5,46,100,73"/>
+<area shape="rect" href="classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="5,78,100,105"/>
 <area shape="rect" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionSpecies.html" title="Advection and diffused species for AdvectionDiffusionStepper." alt="" coords="148,5,351,47"/>
 <area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrSpeciesJSON.html" title="Encapsulation of species settings and initial conditions for CDR species in CdrPlasma." alt="" coords="175,71,324,112"/>
+<area shape="rect" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionSpecies.html" title="Advection and diffused species for StreamerInceptionStepper." alt="" coords="149,136,349,177"/>
 </map>
 </td></tr>
 <tr><td><img src="inherit_graph_8.png" border="0" usemap="#CellTagger" alt=""/>
 <map name="CellTagger" id="CellTagger">
-<area shape="rect" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,111,96,138"/>
+<area shape="rect" href="classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,143,96,170"/>
 <area shape="rect" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html" title="Class for tagging cells in AdvectionDiffusion physics." alt="" coords="144,5,347,47"/>
 <area shape="rect" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html" title="Implementation of CellTagger for tagging cells for Brownian walker physics." alt="" coords="153,71,337,112"/>
 <area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract Class which implements CellTagger for the CDR plasma physics module." alt="" coords="171,136,320,177"/>
 <area shape="rect" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaTagger.html" title="Abstract class for tagging cells across an AMR hierarchy." alt="" coords="173,201,317,243"/>
+<area shape="rect" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionTagger.html" title="Class for tagging cells in the StreamerInception module." alt="" coords="146,267,345,308"/>
 <area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html" title="Lightweight tagging class which flags cells for refinement/coarsening using the electric field only." alt="" coords="395,136,569,177"/>
 <area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html" title="Class which implements CdrPlasmaFieldTagger and refines cells based on the criterion alpha*dx &gt; thres..." alt="" coords="617,136,820,177"/>
 <area shape="rect" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaFieldTagger.html" title="Lightweight tagging class. Only tags cells based on electric field." alt="" coords="397,201,567,243"/>
@@ -162,21 +165,22 @@ $(function() {
 </td></tr>
 <tr><td><img src="inherit_graph_9.png" border="0" usemap="#ComputationalGeometry" alt=""/>
 <map name="ComputationalGeometry" id="ComputationalGeometry">
-<area shape="rect" href="classComputationalGeometry.html" title="Abstract base class for geometries." alt="" coords="5,335,188,361"/>
+<area shape="rect" href="classComputationalGeometry.html" title="Abstract base class for geometries." alt="" coords="5,360,188,387"/>
 <area shape="rect" href="classAerosol.html" title="Simple class for making a bunch of (manually constructored) dielectric sphere." alt="" coords="269,5,340,32"/>
 <area shape="rect" href="classCoaxialCable.html" title="This is a class that defines a coaxial cable geometry." alt="" coords="251,56,359,83"/>
 <area shape="rect" href="classCylinder.html" title="This is a class that defines a cylinder geometry." alt="" coords="267,107,343,133"/>
 <area shape="rect" href="classDoubleRod.html" title="This is a class that defines two dielectric rods." alt="" coords="258,157,351,184"/>
 <area shape="rect" href="classElectrodeArray.html" title="This is a class that defines an array of electrodes." alt="" coords="245,208,364,235"/>
 <area shape="rect" href="classMechanicalShaft.html" title="Mechanical shaft class." alt="" coords="240,259,369,285"/>
-<area shape="rect" href="classRegularGeometry.html" title="This class implements an empty geometry." alt="" coords="236,309,373,336"/>
-<area shape="rect" href="classRodDielectric.html" title="Class that defines an electrode rod and a dielectric (some shapes supported)" alt="" coords="250,360,359,387"/>
-<area shape="rect" href="classRodPlaneProfile.html" title="Geometry class which defines an electrode blade and a dielectric slab with various surface profiles." alt="" coords="243,411,367,437"/>
-<area shape="rect" href="classRoughRod.html" title="Class that describes a rod electrode with surface roughness." alt="" coords="261,461,349,488"/>
-<area shape="rect" href="classRoughSphere.html" title="This is a class that a rough sphere (either electrode or dielectric)" alt="" coords="251,512,359,539"/>
-<area shape="rect" href="classTesselation.html" title="A geometry consisting of a single polygon grid." alt="" coords="257,563,352,589"/>
-<area shape="rect" href="classVessel.html" title="High&#45;voltage vessel geometry." alt="" coords="273,613,337,640"/>
-<area shape="rect" href="classWireWire.html" title="This is a class that defines a wire&#45;wire geometry." alt="" coords="263,664,346,691"/>
+<area shape="rect" href="classNoisePlane.html" title="This is a class that a rough sphere (either electrode or dielectric)" alt="" coords="257,309,352,336"/>
+<area shape="rect" href="classRegularGeometry.html" title="This class implements an empty geometry." alt="" coords="236,360,373,387"/>
+<area shape="rect" href="classRodDielectric.html" title="Class that defines an electrode rod and a dielectric (some shapes supported)" alt="" coords="250,411,359,437"/>
+<area shape="rect" href="classRodPlaneProfile.html" title="Geometry class which defines an electrode blade and a dielectric slab with various surface profiles." alt="" coords="243,461,367,488"/>
+<area shape="rect" href="classRoughRod.html" title="Class that describes a rod electrode with surface roughness." alt="" coords="261,512,349,539"/>
+<area shape="rect" href="classRoughSphere.html" title="This is a class that a rough sphere (either electrode or dielectric)" alt="" coords="251,563,359,589"/>
+<area shape="rect" href="classTesselation.html" title="A geometry consisting of a single polygon grid." alt="" coords="257,613,352,640"/>
+<area shape="rect" href="classVessel.html" title="High&#45;voltage vessel geometry." alt="" coords="273,664,337,691"/>
+<area shape="rect" href="classWireWire.html" title="This is a class that defines a wire&#45;wire geometry." alt="" coords="263,715,346,741"/>
 </map>
 </td></tr>
 <tr><td><img src="inherit_graph_10.png" border="0" usemap="#DataOps" alt=""/>
@@ -795,7 +799,7 @@ $(function() {
 <area shape="rect" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaStepper.html" title=" " alt="" coords="237,332,383,373"/>
 <area shape="rect" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html" title="Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables." alt="" coords="159,398,461,425"/>
 <area shape="rect" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html" title="Implementation of TimeStepper for solving for a single radiative transfer species...." alt="" coords="194,449,426,491"/>
-<area shape="rect" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html" title="Class for volume evaluation of the streamer inception integral." alt="" coords="210,515,410,571"/>
+<area shape="rect" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html" title="Class for streamer inception integral evaluations." alt="" coords="210,515,410,571"/>
 <area shape="rect" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html" title="Implementation of TimeStepper for advancing tracer particles in a fixed velocity field." alt="" coords="207,596,413,637"/>
 <area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="509,104,717,145"/>
 <area shape="rect" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html" title="Class for evolving plasma equations using implicit&#45;explicit spectral deferred corrections." alt="" coords="510,169,717,211"/>

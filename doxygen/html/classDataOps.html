@@ -181,6 +181,10 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a25a4550420d098d1e1bd77fdb88a7182"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a25a4550420d098d1e1bd77fdb88a7182">copy</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_dst, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_src)</td></tr>
 <tr class="memdesc:a25a4550420d098d1e1bd77fdb88a7182"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy data from one data holder to another.  <a href="classDataOps.html#a25a4550420d098d1e1bd77fdb88a7182">More...</a><br /></td></tr>
 <tr class="separator:a25a4550420d098d1e1bd77fdb88a7182"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8098fcedc68a9105187d5e0696b321e"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ad8098fcedc68a9105187d5e0696b321e"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classDataOps.html#ad8098fcedc68a9105187d5e0696b321e">copy</a> (<a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_dst, const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;a_src, const Interval a_dstInterv, const Interval a_srcInterv)</td></tr>
+<tr class="memdesc:ad8098fcedc68a9105187d5e0696b321e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy data from one data holder to another. Allows specification of components.  <a href="classDataOps.html#ad8098fcedc68a9105187d5e0696b321e">More...</a><br /></td></tr>
+<tr class="separator:ad8098fcedc68a9105187d5e0696b321e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a506dc21e62a8c1aeccbc16803b44c284"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a506dc21e62a8c1aeccbc16803b44c284">divide</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_rhs, const int a_lhsComp, const int a_rhsComp)</td></tr>
 <tr class="memdesc:a506dc21e62a8c1aeccbc16803b44c284"><td class="mdescLeft">&#160;</td><td class="mdescRight">Divide one data holder by another. Does specified components.  <a href="classDataOps.html#a506dc21e62a8c1aeccbc16803b44c284">More...</a><br /></td></tr>
 <tr class="separator:a506dc21e62a8c1aeccbc16803b44c284"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -217,10 +221,28 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:aae1a49a9cd876da89e3e3bef4c2bc1b7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#aae1a49a9cd876da89e3e3bef4c2bc1b7">floor</a> (LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_lhs, const Real a_value)</td></tr>
 <tr class="memdesc:aae1a49a9cd876da89e3e3bef4c2bc1b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Floor values in data holder. This sets all values below a_value to a_value.  <a href="classDataOps.html#aae1a49a9cd876da89e3e3bef4c2bc1b7">More...</a><br /></td></tr>
 <tr class="separator:aae1a49a9cd876da89e3e3bef4c2bc1b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5de2e0bae557d084310a1991f183d339"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a5de2e0bae557d084310a1991f183d339">getMaxMin</a> (Real &amp;max, Real &amp;min, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_comp)</td></tr>
+<tr class="memitem:ab9eecb9d5aa052cc3569b09e325909f6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ab9eecb9d5aa052cc3569b09e325909f6">roof</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const Real a_value)</td></tr>
+<tr class="memdesc:ab9eecb9d5aa052cc3569b09e325909f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Roof values in data holder. This sets all values above a_value to a_value.  <a href="classDataOps.html#ab9eecb9d5aa052cc3569b09e325909f6">More...</a><br /></td></tr>
+<tr class="separator:ab9eecb9d5aa052cc3569b09e325909f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01754851bb2502eec69e140d53acacae"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a01754851bb2502eec69e140d53acacae">roof</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const Real a_value)</td></tr>
+<tr class="memdesc:a01754851bb2502eec69e140d53acacae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Roof values in data holder. This sets all values above a_value to a_value.  <a href="classDataOps.html#a01754851bb2502eec69e140d53acacae">More...</a><br /></td></tr>
+<tr class="separator:a01754851bb2502eec69e140d53acacae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd25d01b1be678aea3023ec32631e51d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#afd25d01b1be678aea3023ec32631e51d">roof</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_lhs, const Real a_value)</td></tr>
+<tr class="memdesc:afd25d01b1be678aea3023ec32631e51d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Roof values in data holder. This sets all values above a_value to a_value.  <a href="classDataOps.html#afd25d01b1be678aea3023ec32631e51d">More...</a><br /></td></tr>
+<tr class="separator:afd25d01b1be678aea3023ec32631e51d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44be6edb8a25b5d7c028f2286a2a095d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a44be6edb8a25b5d7c028f2286a2a095d">roof</a> (LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_lhs, const Real a_value)</td></tr>
+<tr class="memdesc:a44be6edb8a25b5d7c028f2286a2a095d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Roof values in data holder. This sets all values above a_value to a_value.  <a href="classDataOps.html#a44be6edb8a25b5d7c028f2286a2a095d">More...</a><br /></td></tr>
+<tr class="separator:a44be6edb8a25b5d7c028f2286a2a095d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55267a7e87eb9baa3306b3a5856553cd"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a55267a7e87eb9baa3306b3a5856553cd">max</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data1, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data2)</td></tr>
+<tr class="memdesc:a55267a7e87eb9baa3306b3a5856553cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make a_data = max(a_data1, a_data2)  <a href="classDataOps.html#a55267a7e87eb9baa3306b3a5856553cd">More...</a><br /></td></tr>
+<tr class="separator:a55267a7e87eb9baa3306b3a5856553cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac08f7f4e51cda580cfa00a7780b00775"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ac08f7f4e51cda580cfa00a7780b00775">max</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data, const LevelData&lt; EBCellFAB &gt; &amp;a_data1, const LevelData&lt; EBCellFAB &gt; &amp;a_data2)</td></tr>
+<tr class="memdesc:ac08f7f4e51cda580cfa00a7780b00775"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make a_data = max(a_data1, a_data2)  <a href="classDataOps.html#ac08f7f4e51cda580cfa00a7780b00775">More...</a><br /></td></tr>
+<tr class="separator:ac08f7f4e51cda580cfa00a7780b00775"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5de2e0bae557d084310a1991f183d339"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a5de2e0bae557d084310a1991f183d339">getMaxMin</a> (Real &amp;<a class="el" href="classDataOps.html#a55267a7e87eb9baa3306b3a5856553cd">max</a>, Real &amp;min, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_comp)</td></tr>
 <tr class="memdesc:a5de2e0bae557d084310a1991f183d339"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum and minimum value of specified component.  <a href="classDataOps.html#a5de2e0bae557d084310a1991f183d339">More...</a><br /></td></tr>
 <tr class="separator:a5de2e0bae557d084310a1991f183d339"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9670a14cbaddb9258b7b7740e152d11"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ac9670a14cbaddb9258b7b7740e152d11">getMaxMin</a> (Real &amp;max, Real &amp;min, LevelData&lt; EBCellFAB &gt; &amp;a_data, const int a_comp)</td></tr>
+<tr class="memitem:ac9670a14cbaddb9258b7b7740e152d11"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ac9670a14cbaddb9258b7b7740e152d11">getMaxMin</a> (Real &amp;<a class="el" href="classDataOps.html#a55267a7e87eb9baa3306b3a5856553cd">max</a>, Real &amp;min, LevelData&lt; EBCellFAB &gt; &amp;a_data, const int a_comp)</td></tr>
 <tr class="memdesc:ac9670a14cbaddb9258b7b7740e152d11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum and minimum value of specified component.  <a href="classDataOps.html#ac9670a14cbaddb9258b7b7740e152d11">More...</a><br /></td></tr>
 <tr class="separator:ac9670a14cbaddb9258b7b7740e152d11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37af20b672ebecacc0bfd111ce11aadb"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a37af20b672ebecacc0bfd111ce11aadb">getMaxMin</a> (Vector&lt; Real &gt; &amp;a_max, Vector&lt; Real &gt; &amp;a_min, Vector&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &gt; &amp;a_data)</td></tr>
@@ -1018,7 +1040,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a id="a5716697fdd8d4f494d8f35cd5ef9777d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5716697fdd8d4f494d8f35cd5ef9777d">&#9670;&nbsp;</a></span>copy() <span class="overload">[1/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5716697fdd8d4f494d8f35cd5ef9777d">&#9670;&nbsp;</a></span>copy() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1062,8 +1084,69 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ad8098fcedc68a9105187d5e0696b321e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8098fcedc68a9105187d5e0696b321e">&#9670;&nbsp;</a></span>copy() <span class="overload">[2/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::copy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRData</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval&#160;</td>
+          <td class="paramname"><em>a_dstInterv</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval&#160;</td>
+          <td class="paramname"><em>a_srcInterv</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy data from one data holder to another. Allows specification of components. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_dst</td><td>Destination data holder </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_src</td><td>Source data holder </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_dstInterv</td><td>Destination data component </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_srcInterv</td><td>Source data components </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a25a4550420d098d1e1bd77fdb88a7182"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a25a4550420d098d1e1bd77fdb88a7182">&#9670;&nbsp;</a></span>copy() <span class="overload">[2/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a25a4550420d098d1e1bd77fdb88a7182">&#9670;&nbsp;</a></span>copy() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1108,7 +1191,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a id="af9695c22d415df5658913bd9de3aade3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af9695c22d415df5658913bd9de3aade3">&#9670;&nbsp;</a></span>copy() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#af9695c22d415df5658913bd9de3aade3">&#9670;&nbsp;</a></span>copy() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3473,6 +3556,110 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a55267a7e87eb9baa3306b3a5856553cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55267a7e87eb9baa3306b3a5856553cd">&#9670;&nbsp;</a></span>max() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::max </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Make a_data = max(a_data1, a_data2) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>Output data. Will be max(a_data1, a_data2) in every cell </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data1</td><td>Input data holder </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data2</td><td>Input data holder </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac08f7f4e51cda580cfa00a7780b00775"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac08f7f4e51cda580cfa00a7780b00775">&#9670;&nbsp;</a></span>max() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::max </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Make a_data = max(a_data1, a_data2) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_data</td><td>Output data. Will be max(a_data1, a_data2) in every cell </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data1</td><td>Input data holder </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data2</td><td>Input data holder </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a72685cbfeebb9d46777890fbf5a0b3e6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a72685cbfeebb9d46777890fbf5a0b3e6">&#9670;&nbsp;</a></span>multiply() <span class="overload">[1/6]</span></h2>
 
@@ -4182,6 +4369,190 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This will add a_lhs(a_dstComp + icomp) += a_rhs(a_srcComp + icomp) for icomp = 0,1,2,..numComp-1. </dd></dl>
+
+</div>
+</div>
+<a id="ab9eecb9d5aa052cc3569b09e325909f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9eecb9d5aa052cc3569b09e325909f6">&#9670;&nbsp;</a></span>roof() <span class="overload">[1/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::roof </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Roof values in data holder. This sets all values above a_value to a_value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Data to be roofed. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Roof value </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Also roofs ghost cells. </dd></dl>
+
+</div>
+</div>
+<a id="afd25d01b1be678aea3023ec32631e51d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd25d01b1be678aea3023ec32631e51d">&#9670;&nbsp;</a></span>roof() <span class="overload">[2/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::roof </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Roof values in data holder. This sets all values above a_value to a_value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Data to be roofed. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Roof value </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Also roofs ghost cells. </dd></dl>
+
+</div>
+</div>
+<a id="a44be6edb8a25b5d7c028f2286a2a095d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44be6edb8a25b5d7c028f2286a2a095d">&#9670;&nbsp;</a></span>roof() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::roof </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Roof values in data holder. This sets all values above a_value to a_value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Data to be roofed. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Roof value </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Also roofs ghost cells. </dd></dl>
+
+</div>
+</div>
+<a id="a01754851bb2502eec69e140d53acacae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01754851bb2502eec69e140d53acacae">&#9670;&nbsp;</a></span>roof() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::roof </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Roof values in data holder. This sets all values above a_value to a_value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Data to be roofed. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Roof value </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Also roofs ghost cells. </dd></dl>
 
 </div>
 </div>

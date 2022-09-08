@@ -1,4 +1,4 @@
-<map id="Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;" name="Physics::StreamerInception::StreamerInceptionStepper&lt; P, F &gt;">
-<area shape="rect" id="node1" title="Class for volume evaluation of the streamer inception integral." alt="" coords="5,80,205,136"/>
+<map id="Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;" name="Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;">
+<area shape="rect" id="node1" title="Class for streamer inception integral evaluations." alt="" coords="5,80,205,136"/>
 <area shape="rect" id="node2" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="53,5,158,32"/>
 </map>
