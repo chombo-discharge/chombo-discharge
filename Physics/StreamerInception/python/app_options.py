@@ -10,9 +10,12 @@ def write_template(args):
     # Write plasma kinetics options
     options_files = [args.discharge_home + "/Source/AmrMesh/CD_AmrMesh.options", \
                      args.discharge_home + "/Source/Driver/CD_Driver.options", \
-                     args.discharge_home + "/Source/TracerParticles/CD_" + args.particle_solver + ".options",\
+                     args.discharge_home + "/Source/TracerParticles/CD_TracerParticleSolver.options", \
+                     args.discharge_home + "/Source/Electrostatics/CD_FieldSolverMultigrid.options", \
+                     args.discharge_home + "/Source/ConvectionDiffusionReaction/CD_CdrCTU.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/CD_" + args.geometry + ".options", \
-                     args.discharge_home + "/Physics/StreamerInception/CD_StreamerInceptionStepper.options"]
+                     args.discharge_home + "/Physics/StreamerInception/CD_StreamerInceptionStepper.options",\
+                     args.discharge_home + "/Physics/StreamerInception/CD_StreamerInceptionTagger.options"]
 
     for opt in options_files:
         if os.path.exists(opt):

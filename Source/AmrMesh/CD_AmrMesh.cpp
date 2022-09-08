@@ -1665,6 +1665,8 @@ AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
 
     fillpatch.interpolate(a_fineData, a_coarData, a_coarData, 0.0, 0.0, 0.0, interv);
   }
+
+  a_fineData.exchange();
 }
 
 void
@@ -1691,16 +1693,20 @@ AmrMesh::interpGhost(MFAMRCellData& a_data, const std::string a_realm) const
     aliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
     aliasSol[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas, *a_data[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
+    }
   }
 
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     this->interpGhost(aliasGas, a_realm, phase::gas);
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     this->interpGhost(aliasSol, a_realm, phase::solid);
+  }
 }
 
 void
@@ -1733,10 +1739,12 @@ AmrMesh::interpGhostPwl(MFAMRCellData& a_data, const std::string a_realm) const
       MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
   }
 
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     this->interpGhostPwl(aliasGas, a_realm, phase::gas);
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     this->interpGhostPwl(aliasSol, a_realm, phase::solid);
+  }
 }
 
 void
@@ -1761,9 +1769,7 @@ AmrMesh::interpGhostPwl(EBAMRCellData& a_data, const std::string a_realm, const 
     fillpatch.interpolate(*a_data[lvl], *a_data[lvl - 1], *a_data[lvl - 1], 0.0, 0.0, 0.0, interv);
   }
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    a_data[lvl]->exchange();
-  }
+  a_data.exchange();
 }
 
 void
@@ -1790,16 +1796,20 @@ AmrMesh::interpGhostMG(MFAMRCellData& a_data, const std::string a_realm) const
     aliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
     aliasSol[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas, *a_data[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
+    }
   }
 
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     this->interpGhostMG(aliasGas, a_realm, phase::gas);
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     this->interpGhostMG(aliasSol, a_realm, phase::solid);
+  }
 }
 
 void
@@ -1822,6 +1832,8 @@ AmrMesh::interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const p
 
     interpolator->coarseFineInterp(*a_data[lvl], *a_data[lvl - 1], Interval(0, nComps - 1));
   }
+
+  a_data.exchange();
 }
 
 void

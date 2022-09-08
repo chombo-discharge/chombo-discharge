@@ -474,37 +474,37 @@ public:
     @brief Get local number of particles
   */
   size_t
-  getNumberOfValidParticesLocal() const;
+  getNumberOfValidParticlesLocal() const;
 
   /*!
     @brief Get global number of particles
   */
   size_t
-  getNumberOfValidParticesGlobal() const;
+  getNumberOfValidParticlesGlobal() const;
 
   /*!
     @brief Get local number of particles
   */
   size_t
-  getNumberOfOutcastParticesLocal() const;
+  getNumberOfOutcastParticlesLocal() const;
 
   /*!
     @brief Get global number of particles
   */
   size_t
-  getNumberOfOutcastParticesGlobal() const;
+  getNumberOfOutcastParticlesGlobal() const;
 
   /*!
     @brief Get the number particles in the halo cells. 
   */
   size_t
-  getNumberOfMaskParticesLocal() const;
+  getNumberOfMaskParticlesLocal() const;
 
   /*!
     @brief Get the number particles in the halo cells. 
   */
   size_t
-  getNumberOfMaskParticesGlobal() const;
+  getNumberOfMaskParticlesGlobal() const;
 
 protected:
   /*!
@@ -613,13 +613,6 @@ protected:
   */
   void
   setupParticleData(const int a_base, const int a_finestLevel);
-
-  /*!
-    @brief Special remapping function in case particles have moved across more than one refinement level. Used
-    for getting those particles and putting them in the correct data holder. 
-  */
-  void
-  remapLostParticles();
 };
 
 #include <CD_NamespaceFooter.H>

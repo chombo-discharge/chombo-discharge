@@ -2788,12 +2788,72 @@ CdrSolver::getDomainFlux()
   return m_domainFlux;
 }
 
+void
+CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
+{
+  CH_TIME("CdrSolver::extrapolateAdvectiveFluxToEB");
+  if (m_verbosity > 5) {
+    pout() << "ExtrapolateAdvectiveFluxToEB" << endl;
+  }
+
+  DataOps::setValue(a_ebFlux, 0.0);
+
+  if (m_isMobile) {
+
+    // Compute v * phi on cell centers.
+    EBAMRCellData flux;
+    EBAMRIVData   fluxEB;
+
+    m_amr->allocate(flux, m_realm, m_phase, SpaceDim);
+    m_amr->allocate(fluxEB, m_realm, m_phase, SpaceDim);
+
+    DataOps::copy(flux, m_cellVelocity);
+    DataOps::multiplyScalar(flux, m_phi);
+
+    m_amr->conservativeAverage(flux, m_realm, m_phase);
+    m_amr->interpGhost(flux, m_realm, m_phase);
+
+    // Extrapolate to the EB.
+    const auto& interpStencils = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase);
+
+    interpStencils.apply(fluxEB, flux);
+
+    // Project along normal vector.
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+
+      CH_assert(a_ebFlux[lvl]->nComp() == 1);
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        const Box      cellBox = dbl[dit()];
+        const EBISBox& ebisBox = ebisl[dit()];
+
+        BaseIVFAB<Real>&       scalarFlux = (*a_ebFlux[lvl])[dit()];
+        const BaseIVFAB<Real>& vectorFlux = (*fluxEB[lvl])[dit()];
+
+        auto irregularKernel = [&](const VolIndex& vof) {
+          const RealVect& normal = ebisBox.normal(vof);
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            scalarFlux(vof, 0) -= vectorFlux(vof, dir) * normal[dir];
+          }
+        };
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+  }
+}
+
 std::string
 CdrSolver::makeBcString(const int a_dir, const Side::LoHiSide a_side) const
 {
-  CH_TIME("FieldSolver::makeBcString(int, Side::LoHiSide)");
+  CH_TIME("CdrSolver::makeBcString(int, Side::LoHiSide)");
   if (m_verbosity > 5) {
-    pout() << "FieldSolver::makeBcString(int, Side::LoHiSide)" << endl;
+    pout() << "CdrSolver::makeBcString(int, Side::LoHiSide)" << endl;
   }
 
   std::string strDir;
@@ -2921,7 +2981,6 @@ CdrSolver::parsePlotVariables()
     // Set plot variables
     for (int i = 0; i < num; i++) {
       if (str[i] == "phi") {
-
         m_plotPhi = true;
       }
       else if (str[i] == "vel") {

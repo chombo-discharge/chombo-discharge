@@ -106,6 +106,7 @@ template <size_t M, size_t N>
 inline int
 GenericParticle<M, N>::size() const
 {
+  // Size is the position plus M Reals and N RealVects
   return SpaceDim * sizeof(Real) + M * sizeof(Real) + N * SpaceDim * sizeof(Real);
 }
 

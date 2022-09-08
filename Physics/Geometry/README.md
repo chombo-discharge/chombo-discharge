@@ -17,4 +17,4 @@ To set up a new problem, use the Python script. For example:
 The application will be installed to $DISCHARGE_HOME/MyApplications/myGeometry.
 
 ## Modifying the application
-Users are free to modify this application. 
+Users are free to modify this application.

@@ -106,6 +106,20 @@ public:
   setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_compGeom);
 
   /*!
+    @brief Set the solver name
+    @param[in] a_name Solver name
+  */
+  virtual void
+  setName(const std::string& a_name) noexcept;
+
+  /*!
+    @brief Turn on/off volume scaling. 
+    @param[in] a_scale Volume scale or not. 
+  */
+  virtual void
+  setVolumeScale(const bool a_scale) noexcept;
+
+  /*!
     @brief Set the solver realm. 
     @param[in] a_realm Realm name. 
   */
@@ -167,6 +181,12 @@ public:
   */
   virtual void
   deposit(EBAMRCellData& a_phi);
+
+  /*!
+    @brief Interpolate a scalar field onto the particle weight
+  */
+  virtual void
+  interpolateWeight(const EBAMRCellData& a_scalar) noexcept;
 
   /*!
     @brief Interpolate particles velocities.
@@ -277,9 +297,14 @@ protected:
   RefCountedPtr<ComputationalGeometry> m_computationalGeometry;
 
   /*!
-    @brief Deposition type when depositing particles to grid
+    @brief Deposition type when depositing particles to grid.
   */
   DepositionType m_deposition;
+
+  /*!
+    @brief Deposition type when interpolating to particles.
+  */
+  DepositionType m_interpolation;
 
   /*!
     @brief Coarse-fine deposition strategy. 

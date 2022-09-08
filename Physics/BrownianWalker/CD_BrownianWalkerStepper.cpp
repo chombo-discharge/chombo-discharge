@@ -93,15 +93,6 @@ BrownianWalkerStepper::initialData()
   // Fill initial particles and then make the desired number of superparticles.
   m_solver->initialData();
   this->makeSuperParticles();
-}
-
-void
-BrownianWalkerStepper::postInitialize()
-{
-  CH_TIME("BrownianWalkerStepper::postInitialize");
-  if (m_verbosity > 5) {
-    pout() << "BrownianWalkerStepper::postInitialize" << endl;
-  }
 
   // Set advection and diffusion fields.
   this->setAdvectionDiffusion();
@@ -111,6 +102,15 @@ BrownianWalkerStepper::postInitialize()
   m_solver->setParticleMobility(m_mobility);
 
   m_solver->interpolateVelocities();
+}
+
+void
+BrownianWalkerStepper::postInitialize()
+{
+  CH_TIME("BrownianWalkerStepper::postInitialize");
+  if (m_verbosity > 5) {
+    pout() << "BrownianWalkerStepper::postInitialize" << endl;
+  }
 }
 
 void
@@ -204,15 +204,21 @@ BrownianWalkerStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs
   CH_assert(m_loadBalance && a_realm == m_realm);
 
   switch (m_whichLoadBalance) {
-  case LoadBalancingMethod::Mesh:
+  case LoadBalancingMethod::Mesh: {
     this->loadBalanceBoxesMesh(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
+
     break;
-  case LoadBalancingMethod::Particle:
+  }
+  case LoadBalancingMethod::Particle: {
     this->loadBalanceBoxesParticles(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("BrownianWalkerStepper::loadBalanceBoxes - logic bust");
+
     break;
+  }
   }
 }
 

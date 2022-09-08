@@ -1139,6 +1139,142 @@ DataOps::floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
 }
 
 void
+DataOps::roof(EBAMRCellData& a_lhs, const Real a_value)
+{
+  CH_TIME("DataOps::roof(EBAMRCellData)");
+
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
+    DataOps::roof(*a_lhs[lvl], a_value);
+  }
+}
+
+void
+DataOps::roof(LevelData<EBCellFAB>& a_lhs, const Real a_value)
+{
+  CH_TIME("DataOps::roof(LD<EBCelLFAB>)");
+
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
+    EBCellFAB&     lhs     = a_lhs[dit()];
+    const Box      box     = lhs.getRegion(); // Note:: All cells are roofed (ghosts also)
+    const EBISBox& ebisbox = lhs.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const int      numComp = a_lhs.nComp();
+
+    // Hook to single-valued data.
+    BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
+
+    // Irregular kernel region
+    VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph);
+
+    // Components loop -- we do all components.
+    for (int comp = 0; comp < numComp; comp++) {
+
+      // Regular kernel.
+      auto regularKernel = [&](const IntVect& iv) -> void { lhs_reg(iv, comp) = std::min(a_value, lhs_reg(iv, comp)); };
+
+      // Irregular kernel
+      auto irregularKernel = [&](const VolIndex& vof) -> void { lhs(vof, comp) = std::min(a_value, lhs(vof, comp)); };
+
+      // Execute the kernels.
+      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+}
+
+void
+DataOps::roof(EBAMRIVData& a_lhs, const Real a_value)
+{
+  CH_TIME("DataOps::roof(EBAMRIVData)");
+
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++) {
+    DataOps::roof(*a_lhs[lvl], a_value);
+  }
+}
+
+void
+DataOps::roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
+{
+  CH_TIME("DataOps::roof(LD<BaseIVFAB<Real> >)");
+
+  const int numComp = a_lhs.nComp();
+
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {
+    BaseIVFAB<Real>& lhs = a_lhs[dit()];
+
+    // Irregular kernel region.
+    VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph());
+
+    // Do all components.
+    for (int comp = 0; comp < numComp; comp++) {
+
+      // Irregular kernel.
+      auto irregularKernel = [&](const VolIndex& vof) -> void { lhs(vof, comp) = std::min(a_value, lhs(vof, comp)); };
+
+      // Run kernel
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+}
+
+void
+DataOps::max(EBAMRCellData& a_data, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2)
+{
+  CH_TIME("DataOps::max(EBAMRCellData x3)");
+
+  for (int lvl = 0; lvl < a_data.size(); lvl++) {
+    DataOps::max(*a_data[lvl], *a_data1[lvl], *a_data2[lvl]);
+  }
+}
+
+void
+DataOps::max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2)
+{
+  CH_TIME("DataOps::max(LD<EBCellFAB> x3)");
+
+  const int numComp = a_data.nComp();
+
+  CH_assert(a_data1.nComp() == numComp);
+  CH_assert(a_data2.nComp() == numComp);
+
+  const DisjointBoxLayout& dbl = a_data.disjointBoxLayout();
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+    EBCellFAB&       data  = a_data[dit()];
+    const EBCellFAB& data1 = a_data1[dit()];
+    const EBCellFAB& data2 = a_data2[dit()];
+
+    FArrayBox&       dataReg  = data.getFArrayBox();
+    const FArrayBox& data1Reg = data1.getFArrayBox();
+    const FArrayBox& data2Reg = data2.getFArrayBox();
+
+    auto regularKernel = [&](const IntVect& iv) -> void {
+      for (int comp = 0; comp < numComp; comp++) {
+        dataReg(iv, comp) = std::max(data1Reg(iv, comp), data2Reg(iv, comp));
+      }
+    };
+
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      for (int comp = 0; comp < numComp; comp++) {
+        data(vof, comp) = std::max(data1(vof, comp), data2(vof, comp));
+      }
+    };
+
+    // Regions for the kernels.
+    const Box&        cellBox = dbl[dit()];
+    const EBISBox&    ebisbox = data.getEBISBox();
+    const EBGraph&    ebgraph = ebisbox.getEBGraph();
+    const IntVectSet& ivs     = ebisbox.getIrregIVS(cellBox);
+    VoFIterator       vofit(ivs, ebgraph);
+
+    // Run kernels
+    BoxLoops::loop(cellBox, regularKernel);
+    BoxLoops::loop(vofit, irregularKernel);
+  }
+}
+
+void
 DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRCellData& a_data, const int a_comp)
 {
   CH_TIME("DataOps::getMaxMin(EBAMRCellData)");

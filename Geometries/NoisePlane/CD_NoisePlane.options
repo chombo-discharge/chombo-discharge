@@ -1,0 +1,21 @@
+# ====================================================================================================
+# NoisePlane geometry class options
+# ====================================================================================================
+NoisePlane.use_plane         = true         # Turn on/off plane
+NoisePlane.material          = electrode    # 'electrode' or 'dielectric'
+
+NoisePlane.live              = true         # Live potential or not (for electrode)
+NoisePlane.eps               = 4            # Set permittivity for dielectric
+
+NoisePlane.orientation       = y+           # Plane orientation. Must be x+, x-, y+, y-, ...
+NoisePlane.point             = 0 0 0        # Point on the plane
+
+NoisePlane.noise_amplitude   = 0.1          # Noise amplitude
+NoisePlane.noise_frequency   = 5 5 5        # Noise frequency
+NoisePlane.noise_persistence = 0.5          # Noise persistence
+NoisePlane.noise_octaves     = 1            # Noise octaves
+NoisePlane.noise_reseed      = false        # Reseed noise
+
+NoisePlane.clamp_lo          = -1 -1 -1     # Noise clamp low
+NoisePlane.clamp_hi          =  1  1  1     # Noise clamp high
+NoisePlane.clamp_dx          = 0.1          # Noise clamp falloff

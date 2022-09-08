@@ -362,6 +362,17 @@ public:
   copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src);
 
   /*!
+    @brief Copy data from one data holder to another. Allows specification of components. 
+    @param[out] a_dst       Destination data holder
+    @param[in ] a_src       Source data holder
+    @param[out] a_dstInterv Destination data component
+    @param[in ] a_srcInterv Source data components
+  */
+  template <typename T>
+  static void
+  copy(EBAMRData<T>& a_dst, const EBAMRData<T>& a_src, const Interval a_dstInterv, const Interval a_srcInterv);
+
+  /*!
     @brief Divide one data holder by another. Does specified components.
     @param[inout] a_lhs Data to be divided
     @param[in]    a_rhs Divisor.
@@ -472,6 +483,60 @@ public:
   */
   static void
   floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
+
+  /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(EBAMRCellData& a_lhs, const Real a_value);
+
+  /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+
+  /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(EBAMRIVData& a_lhs, const Real a_value);
+
+  /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
+
+  /*!
+    @brief Make a_data = max(a_data1, a_data2)
+    @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
+    @param[in]  a_data1 Input data holder
+    @param[in]  a_data2 Input data holder
+  */
+  static void
+  max(EBAMRCellData& a_data, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
+
+  /*!
+    @brief Make a_data = max(a_data1, a_data2)
+    @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
+    @param[in]  a_data1 Input data holder
+    @param[in]  a_data2 Input data holder
+  */
+  static void
+  max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
 
   /*!
     @brief Get maximum and minimum value of specified component

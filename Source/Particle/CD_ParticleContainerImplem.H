@@ -716,9 +716,11 @@ ParticleContainer<P>::evictInvalidParticles(List<P>&         a_evictedParticles,
     for (ListIterator<P> lit(a_particles[dit()].listItems()); lit.ok();) {
 
       const RealVect x = lit().position();
-      const IntVect  iv(D_DECL((int)floor((x[0] - m_probLo[0]) / dx[0]),
-                              (int)floor((x[1] - m_probLo[1]) / dx[1]),
-                              (int)floor((x[2] - m_probLo[2]) / dx[2])));
+      const IntVect  iv(D_DECL((int)std::floor((x[0] - m_probLo[0]) / dx[0]),
+                              (int)std::floor((x[1] - m_probLo[1]) / dx[1]),
+                              (int)std::floor((x[2] - m_probLo[2]) / dx[2])));
+
+      CH_assert(mask.box().contains(iv));
 
       if (mask(iv)) {
         ++lit;
@@ -736,19 +738,6 @@ ParticleContainer<P>::remap()
 {
   CH_TIME("ParticleContainer<P>::remap");
 
-  // TLDR: This routine does an AMR remap of all particles. Starting from the coarse level, we first remap particles on the level. For the AMR levels
-  //       we additionally perform the follow steps:
-  //
-  //          1. Check if particles on the coarse level (lvl-1) fits on the current level's PVR. If they do, transfer the particles from the coarse level
-  //             to this level.
-  //
-  //          2. Check if any of the particles on this level do not belong on this level's PVR. If they don't, try to transfer them to the coarser level.
-  //
-  //       The above steps are completely sufficient if particles were originally mapped to a correct levels and did not move entirely out of the grids. I.e. it
-  //       will be sufficient if the particles that live on level lvl move into the PVR on level lvl-1. If it moves all the way to lvl-2 (or even coarser) then
-  //       this two-level mapping is not sufficient. In that case we run a post-processing step where we collect all the particles that moved completely out of their
-  //       grids and remap them again (in remapLostParticles).
-
   CH_assert(m_isDefined);
 
   if (m_isCellSorted) {
@@ -758,77 +747,39 @@ ParticleContainer<P>::remap()
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const bool hasCoar = (lvl > 0);
 
-    // Rebin this level
+    // Gather coarse-level particles onto this level if they lie on this level.
+    if (hasCoar) {
+      this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
+    }
+
+    // Rebin this level.
     m_particles[lvl]->gatherOutcast();
     m_particles[lvl]->remapOutcast();
 
-    // Collect coarser level particles onto this levels outcast list if they fit in this levels PVR
+    // Some particles might have moved over the refinement boundary to the coarse level. Try to remap
+    // them on the coarse level; note that they may also have moved across that level too, in which case
+    // they just lie dormant on the coarse-grid outcast list.
+    // and remap again.
     if (hasCoar) {
-      this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
+      List<P>& outcastCoar = m_particles[lvl - 1]->outcast();
+      List<P>& outcastFine = m_particles[lvl]->outcast();
 
-      // Remap new outcasts
-      m_particles[lvl]->remapOutcast();
-    }
+      outcastCoar.catenate(outcastFine);
 
-    // We may have particles on this level which do not live on this level's PVR. If that is the case then
-    // transfer the particles to the coarser level. Note that there is a chance that these particles do not belong on the
-    // coarse levels PVR either, but that is what remapLostParticles is for.
-    if (hasCoar) {
-      this->evictInvalidParticles(m_particles[lvl - 1]->outcast(), *m_particles[lvl], lvl);
-
-      //      m_particles[lvl - 1]->gatherOutcast();
       m_particles[lvl - 1]->remapOutcast();
     }
   }
 
-  // If outcasts lists are not empty (particles could have moved entirely out of the grid through the PVR), we need
-  // do collect those, too
+  // If there are still outcast particles, which happens if particles moved across more than one
+  // refinement boundary, we can no longer move them between neighboring levels. Instead, gather
+  // all the remaining outcasts and call addParticlesDestructive. This puts all the remaining outcasts
+  // on the coarse level first, following by eviction-remapping towards the finest grid level.
+  List<P> particles;
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    if (m_particles[lvl]->numOutcast() > 0) {
-      this->remapLostParticles();
-
-      break;
-    }
-  }
-}
-
-template <class P>
-void
-ParticleContainer<P>::remapLostParticles()
-{
-  CH_TIME("ParticleContainer<P>::remapLostParticles");
-
-  CH_assert(m_isDefined);
-
-  if (m_isCellSorted) {
-    MayDay::Abort("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
+    particles.catenate(m_particles[lvl]->outcast());
   }
 
-  // TLDR: This routine is called because there is a chance that particles might hop across more than one refinement boundary,
-  //       and the remap routine only performs two-level operations. This piece of code is responsible for gathering
-  //       "lost particles" which were not successfully remapped through two-level operations
-
-  // Gather all "lost" outcasts on the coarsest level
-  constexpr int coarsestLevel = 0;
-
-  List<P>& coarsestOutcast = m_particles[coarsestLevel]->outcast();
-  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    coarsestOutcast.catenate(m_particles[lvl]->outcast());
-    m_particles[lvl]->outcast().clear();
-  }
-
-  // Remap the coarsest level and discard particles that don't fit in the coarsest level (these have left the ProblemDomain on the coarsest level)
-  // and so we don't care about them any longer.
-  m_particles[0]->remapOutcast();
-  m_particles[0]->outcast().clear();
-
-  // Starting from the coarsest level, move the particles into the next finer level. Always respect the PVR, which means that particles on level lvl-1 are
-  // transferred to level 'lvl' if the fit in the PVR mask on level 'lvl'.
-  for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
-    this->evictInvalidParticles(m_particles[lvl]->outcast(), *m_particles[lvl - 1], lvl - 1);
-
-    m_particles[lvl]->remapOutcast();
-  }
+  this->addParticlesDestructive(particles);
 }
 
 template <class P>
@@ -1025,7 +976,7 @@ ParticleContainer<P>::setValue(const RealVect a_value)
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfValidParticesLocal() const
+ParticleContainer<P>::getNumberOfValidParticlesLocal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfValidParticlesLocal");
 
@@ -1042,7 +993,7 @@ ParticleContainer<P>::getNumberOfValidParticesLocal() const
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfValidParticesGlobal() const
+ParticleContainer<P>::getNumberOfValidParticlesGlobal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfValidParticlesGlobal");
 
@@ -1059,7 +1010,7 @@ ParticleContainer<P>::getNumberOfValidParticesGlobal() const
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfOutcastParticesLocal() const
+ParticleContainer<P>::getNumberOfOutcastParticlesLocal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfOutcastParticlesLocal");
 
@@ -1076,7 +1027,7 @@ ParticleContainer<P>::getNumberOfOutcastParticesLocal() const
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfOutcastParticesGlobal() const
+ParticleContainer<P>::getNumberOfOutcastParticlesGlobal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfOutcastParticlesGlobal");
 
@@ -1093,7 +1044,7 @@ ParticleContainer<P>::getNumberOfOutcastParticesGlobal() const
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfMaskParticesLocal() const
+ParticleContainer<P>::getNumberOfMaskParticlesLocal() const
 {
   CH_TIME("ParticleContainer<P>::getNumberOfMaskparticlesLocal");
 
@@ -1110,9 +1061,9 @@ ParticleContainer<P>::getNumberOfMaskParticesLocal() const
 
 template <class P>
 size_t
-ParticleContainer<P>::getNumberOfMaskParticesGlobal() const
+ParticleContainer<P>::getNumberOfMaskParticlesGlobal() const
 {
-  CH_TIME("ParticleContainer<P>::getNumberOfMaskParticesGlobal");
+  CH_TIME("ParticleContainer<P>::getNumberOfMaskParticlesGlobal");
 
   CH_assert(m_isDefined);
 
