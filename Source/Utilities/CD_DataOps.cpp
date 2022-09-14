@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <limits>
+
 // Chombo includes
 #include <CH_Timer.H>
 #include <EBArith.H>
