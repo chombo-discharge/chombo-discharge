@@ -78,8 +78,12 @@ SphereArray::SphereArray(const Real     a_radius,
   };
 
   // Make the slow and fast unions.
-  m_slowUnion  = std::make_shared<EBGeometry::Union<Real>>(spheres, false);
-  m_fastUnion  = std::make_shared<EBGeometry::UnionBVH<Real, AABB, SphereArray::K>>(spheres, false, aabbConstructor);
+  const auto& constSpheres = m_slowUnion =
+    std::make_shared<EBGeometry::Union<Real, Sphere>>((const std::vector<std::shared_ptr<Sphere>>&)spheres, false);
+  m_fastUnion = std::make_shared<
+    EBGeometry::UnionBVH<Real, Sphere, AABB, SphereArray::K>>((const std::vector<std::shared_ptr<Sphere>>&)spheres,
+                                                              false,
+                                                              aabbConstructor);
   m_useFast    = a_useFast;
   m_flipInside = a_flipInside;
 }
@@ -109,10 +113,10 @@ SphereArray::value(const RealVect& a_point) const
 
   Real dist = 0.0;
   if (m_useFast) {
-    dist = m_fastUnion->signedDistance(x);
+    dist = m_fastUnion->value(x);
   }
   else {
-    dist = m_slowUnion->signedDistance(x);
+    dist = m_slowUnion->value(x);
   }
 
   // Chombo and EBGeometry use opposite sign convetions
