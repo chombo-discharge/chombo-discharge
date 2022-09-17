@@ -161,10 +161,18 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
 
       // Apply the coarse stencil
       constexpr int numComp = 1;
-      m_aggCoarStencils[dit()]
-        ->apply(dstFine, srcCoar, m_comp, icomp, numComp, false); // true/false => increment/not increment
-      m_aggFineStencils[dit()]
-        ->apply(dstFine, srcFine, icomp, icomp, numComp, true); // true/false => increment/not increment
+      m_aggCoarStencils[dit()]->apply(dstFine,
+                                      srcCoar,
+                                      m_comp,
+                                      icomp,
+                                      numComp,
+                                      false); // true/false => increment/not increment
+      m_aggFineStencils[dit()]->apply(dstFine,
+                                      srcFine,
+                                      icomp,
+                                      icomp,
+                                      numComp,
+                                      true); // true/false => increment/not increment
     }
   }
 }

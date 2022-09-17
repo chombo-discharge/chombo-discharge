@@ -52,7 +52,9 @@ CdrSolver::setDefaultDomainBC()
   // TLDR: This sets the domain boundary condition to be a wall BC (no incoming/outgoing mass).
 
   // Lambda function for wall bc -- mostly left in place so I can remind myself how to do this.
-  auto zero = [](const RealVect a_position, const Real a_time) -> Real { return 0.0; };
+  auto zero = [](const RealVect a_position, const Real a_time) -> Real {
+    return 0.0;
+  };
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {
@@ -835,10 +837,14 @@ CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux)
 
           // Regular kernel -- note the shift to make sure that cell indices map to face indices. I am doing this because
           // if we were to convert the box to a face-centered box we would do another layer of faces. So shift directly.
-          auto regularKernel = [&](const IntVect& iv) -> void { regFlux(iv + shift, m_comp) = zero; };
+          auto regularKernel = [&](const IntVect& iv) -> void {
+            regFlux(iv + shift, m_comp) = zero;
+          };
 
           // Irregular kernel. Same as the above really.
-          auto irregularKernel = [&](const FaceIndex& face) -> void { flux(face, m_comp) = 0.0; };
+          auto irregularKernel = [&](const FaceIndex& face) -> void {
+            flux(face, m_comp) = 0.0;
+          };
 
           // Execute kernels
           BoxLoops::loop(boundaryCellBox, regularKernel);
@@ -1119,7 +1125,9 @@ CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>&       a_divJ,
     // Reset irregular grid cells. These will be computed in a different way.
     VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
 
-    auto irregularKernel = [&](const VolIndex& vof) -> void { divJ(vof, m_comp) = 0.0; };
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      divJ(vof, m_comp) = 0.0;
+    };
 
     BoxLoops::loop(vofit, irregularKernel);
   }
@@ -1243,7 +1251,9 @@ CdrSolver::initialDataDistribution()
   // TLDR: We just run through every cell in the grid and increment by m_species->initialData
 
   // Expose the initial data function to something DataOps can use.
-  auto initFunc = [&](const RealVect& pos) -> Real { return m_species->initialData(pos, m_time); };
+  auto initFunc = [&](const RealVect& pos) -> Real {
+    return m_species->initialData(pos, m_time);
+  };
 
   // Call the initial data function and stored on m_scratch. Increment, then synchronize and set covered to zero.
   DataOps::setValue(m_scratch, initFunc, m_amr->getProbLo(), m_amr->getDx(), m_comp);
@@ -1578,8 +1588,12 @@ CdrSolver::incrementFluxRegister(const EBAMRFluxData& a_flux)
 
         if (hasCoar) {
           for (SideIterator sit; sit.ok(); ++sit) {
-            fluxReg[lvl - 1]
-              ->incrementFineBoth(flux, scale, dit(), interv, dir, sit()); // Register between lvl-1 and lvl.
+            fluxReg[lvl - 1]->incrementFineBoth(flux,
+                                                scale,
+                                                dit(),
+                                                interv,
+                                                dir,
+                                                sit()); // Register between lvl-1 and lvl.
           }
         }
       }
@@ -1685,7 +1699,8 @@ CdrSolver::reflux(EBAMRCellData& a_phi)
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     if (lvl < finestLevel) {
       RefCountedPtr<EBFluxRegister>& fluxReg =
-        m_amr->getFluxRegister(m_realm, m_phase)[lvl]; // Flux matching between lvl and lvl-1 lives on lvl-1
+        m_amr->getFluxRegister(m_realm,
+                               m_phase)[lvl]; // Flux matching between lvl and lvl-1 lives on lvl-1
 
       const Real dx    = m_amr->getDx()[lvl];
       const Real scale = 1.0 / dx;
@@ -3233,7 +3248,9 @@ CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma)
         FaceIterator faceit(irreg, ebgraph, dir, FaceStop::SurroundingNoBoundary);
 
         // Regular kernel
-        auto regularKernel = [&](const IntVect& iv) -> void { noiseReg(iv, m_comp) = Random::get(whiteNoise) * ivol; };
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          noiseReg(iv, m_comp) = Random::get(whiteNoise) * ivol;
+        };
 
         // Irregular kernel
         auto irregularKernel = [&](const FaceIndex& face) -> void {

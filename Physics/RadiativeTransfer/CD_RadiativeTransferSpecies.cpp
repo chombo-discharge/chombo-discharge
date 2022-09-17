@@ -33,7 +33,9 @@ RadiativeTransferSpecies::RadiativeTransferSpecies()
   pp.get("kappa", kappa);
 
   // Set the spatially varying absorption coefficient to a constant.
-  m_kappa = [kappa](const RealVect a_pos) -> Real { return kappa; };
+  m_kappa = [kappa](const RealVect a_pos) -> Real {
+    return kappa;
+  };
 }
 
 RadiativeTransferSpecies::~RadiativeTransferSpecies()

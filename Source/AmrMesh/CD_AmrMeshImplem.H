@@ -796,7 +796,8 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
             }
             else { // Crashed with domain "first".
               const Real sSafety =
-                std::max(0.0, sDomain - safety); // To prevent particles falling off the high side of the domain
+                std::max(0.0,
+                         sDomain - safety); // To prevent particles falling off the high side of the domain
 
               particle.position() = oldPos + sSafety * path;
 
@@ -931,7 +932,8 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
             }
             else { // Crashed with domain "first".
               const Real sSafety =
-                std::max(0.0, sDomain - safety); // To prevent particles falling off the high side of the domain
+                std::max(0.0,
+                         sDomain - safety); // To prevent particles falling off the high side of the domain
 
               particle.position() = oldPos + sSafety * path;
 

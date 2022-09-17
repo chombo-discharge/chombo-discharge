@@ -63,7 +63,9 @@ EBHelmholtzDomainBC::multiplyByBcoef(BaseFab<Real>&       a_flux,
   }
 
   // Kernel -- this just multiplies.
-  auto kernel = [&](const IntVect& iv) { a_flux(iv, m_comp) *= a_bco(iv, m_comp); };
+  auto kernel = [&](const IntVect& iv) {
+    a_flux(iv, m_comp) *= a_bco(iv, m_comp);
+  };
 
   // Execute kernel.
   BoxLoops::loop(a_flux.box(), kernel);

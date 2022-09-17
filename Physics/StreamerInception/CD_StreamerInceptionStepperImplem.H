@@ -45,25 +45,45 @@ StreamerInceptionStepper<P, F, C>::StreamerInceptionStepper()
 
   this->parseOptions();
 
-  m_rho = [](const RealVect x) -> Real { return 0.0; };
+  m_rho = [](const RealVect x) -> Real {
+    return 0.0;
+  };
 
-  m_alpha = [](const Real E) -> Real { return 0.0; };
+  m_alpha = [](const Real E) -> Real {
+    return 0.0;
+  };
 
-  m_eta = [](const Real E) -> Real { return 0.0; };
+  m_eta = [](const Real E) -> Real {
+    return 0.0;
+  };
 
-  m_voltageCurve = [](const Real a_time) -> Real { return 1.0; };
+  m_voltageCurve = [](const Real a_time) -> Real {
+    return 1.0;
+  };
 
-  m_backgroundRate = [](const Real E, const RealVect x) -> Real { return 0.0; };
+  m_backgroundRate = [](const Real E, const RealVect x) -> Real {
+    return 0.0;
+  };
 
-  m_detachmentRate = [](const Real E, const RealVect x) -> Real { return 0.0; };
+  m_detachmentRate = [](const Real E, const RealVect x) -> Real {
+    return 0.0;
+  };
 
-  m_fieldEmission = [](const Real E, const RealVect x) -> Real { return 0.0; };
+  m_fieldEmission = [](const Real E, const RealVect x) -> Real {
+    return 0.0;
+  };
 
-  m_initialIonDensity = [](const RealVect x) -> Real { return 0.0; };
+  m_initialIonDensity = [](const RealVect x) -> Real {
+    return 0.0;
+  };
 
-  m_ionMobility = [](const Real E) -> Real { return 0.0; };
+  m_ionMobility = [](const Real E) -> Real {
+    return 0.0;
+  };
 
-  m_ionDiffusion = [](const Real E) -> Real { return 0.0; };
+  m_ionDiffusion = [](const Real E) -> Real {
+    return 0.0;
+  };
 }
 
 template <typename P, typename F, typename C>
@@ -85,7 +105,9 @@ StreamerInceptionStepper<P, F, C>::setupSolvers()
   }
 
   // Always solve for the field using a voltage of one (and then scale up/down later on)
-  auto voltage = [](const Real a_time) -> Real { return 1.0; };
+  auto voltage = [](const Real a_time) -> Real {
+    return 1.0;
+  };
 
   // Instantiate the field solver.
   m_fieldSolver = RefCountedPtr<FieldSolver>(new F());

@@ -123,7 +123,9 @@ ParticleOps::ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
   bool ret = false;
 
   // Absolute distance to EB.
-  auto dist = [&](const RealVect& x) -> Real { return std::abs(a_impFunc->value(x)); };
+  auto dist = [&](const RealVect& x) -> Real {
+    return std::abs(a_impFunc->value(x));
+  };
 
   const Real D  = (a_newPos - a_oldPos).vectorLength(); // Total particle path length
   const Real D0 = dist(a_oldPos);                       // Distance to EB from starting position

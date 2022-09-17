@@ -4130,7 +4130,8 @@ CdrPlasmaStepper::computeElectrodeCurrent()
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real& bndryFrac = ebisBox.bndryArea(vof);
       const Real& flux =
-        patchCurrent(vof, comp); // Recall -- this holds the normal component of the current density on the EB surface.
+        patchCurrent(vof,
+                     comp); // Recall -- this holds the normal component of the current density on the EB surface.
 
       current += flux * bndryFrac;
     };
@@ -4211,7 +4212,8 @@ CdrPlasmaStepper::computeDielectricCurrent()
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real& bndryFrac = ebisBox.bndryArea(vof);
       const Real& flux =
-        patchCurrent(vof, comp); // Recall -- this holds the normal component of the current density on the EB surface.
+        patchCurrent(vof,
+                     comp); // Recall -- this holds the normal component of the current density on the EB surface.
 
       current += flux * bndryFrac;
     };
@@ -4286,7 +4288,9 @@ CdrPlasmaStepper::computeDomainCurrent()
         const int s = sign(sit());
 
         // This is our kernel.
-        auto kernel = [&](const FaceIndex& face) -> void { current += s * fluxdir(face, comp); };
+        auto kernel = [&](const FaceIndex& face) -> void {
+          current += s * fluxdir(face, comp);
+        };
 
         // Kernel region. We only do boundary faces and no ghost faces.
         FaceStop::WhichFaces stopcrit = FaceStop::AllBoundaryOnly;

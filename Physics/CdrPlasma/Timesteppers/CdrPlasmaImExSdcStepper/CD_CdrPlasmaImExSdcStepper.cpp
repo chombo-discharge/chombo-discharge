@@ -733,7 +733,9 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
     // Update source terms every time we go through this
     CdrPlasmaImExSdcStepper::computeElectricFieldIntoScratch();
     CdrPlasmaImExSdcStepper::
-      computeReactionNetwork(m, a_time, m_dtm[m]); // Ppdate the CDR and RTE source terms using the correct step size
+      computeReactionNetwork(m,
+                             a_time,
+                             m_dtm[m]); // Ppdate the CDR and RTE source terms using the correct step size
 
     // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
     // which is what we need to do at the start of the time step. In principle, these things do not change
