@@ -148,8 +148,8 @@ CdrPlasmaFieldTagger::computeTracers() const
 
         // Reconstruct the electric field and gradient of the electric field.
         const RealVect E = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-        const RealVect gradE =
-          RealVect(D_DECL(gradElectricFieldReg(iv, 0), gradElectricFieldReg(iv, 1), gradElectricFieldReg(iv, 2)));
+        const RealVect gradE = RealVect(
+          D_DECL(gradElectricFieldReg(iv, 0), gradElectricFieldReg(iv, 1), gradElectricFieldReg(iv, 2)));
 
         // Call the per-point tracer function. This is a pure function.
         const Vector<Real> tracers = this->tracer(pos,
@@ -173,9 +173,9 @@ CdrPlasmaFieldTagger::computeTracers() const
         const RealVect pos = probLo + Location::position(Location::Cell::Center, vof, ebisbox, dx);
 
         // Reconstruct the electric field and gradient of the electric field.
-        const RealVect E = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
-        const RealVect gradE =
-          RealVect(D_DECL(gradElectricField(vof, 0), gradElectricField(vof, 1), gradElectricField(vof, 2)));
+        const RealVect E     = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
+        const RealVect gradE = RealVect(
+          D_DECL(gradElectricField(vof, 0), gradElectricField(vof, 1), gradElectricField(vof, 2)));
 
         // Call the per-point tracer function. Again, it's a pure function.
         const Vector<Real> tracers = this->tracer(pos,

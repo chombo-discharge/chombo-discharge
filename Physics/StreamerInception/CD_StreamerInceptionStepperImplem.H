@@ -1316,8 +1316,9 @@ StreamerInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFines
   m_fieldSolver->setRho(m_rho);
   m_fieldSolver->setSigma(0.0);
 
-  const bool converged =
-    m_fieldSolver->solve(m_fieldSolver->getPotential(), m_fieldSolver->getRho(), m_fieldSolver->getSigma());
+  const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(),
+                                              m_fieldSolver->getRho(),
+                                              m_fieldSolver->getSigma());
 
   if (!converged) {
     MayDay::Error("StreamerInceptionStepper::initialData -- could not solve Poisson equation. Aborting application.");
@@ -1601,8 +1602,8 @@ StreamerInceptionStepper<P, F, C>::seedIonizationParticles(const Real& a_voltage
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
 
-            const RealVect EE =
-              RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+            const RealVect EE = RealVect(
+              D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
             const Real E = std::abs(a_voltage * EE.vectorLength());
 
             const Real alpha = m_alpha(E);
@@ -2152,8 +2153,8 @@ StreamerInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noex
         if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
           if (inceptionIntegralReg(iv, 0) >= m_inceptionK) {
             const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-            const RealVect EE =
-              RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+            const RealVect EE  = RealVect(
+              D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
             const Real E = std::abs(a_voltage * EE.vectorLength());
 
             const Real alpha = m_alpha(E);
@@ -2918,8 +2919,8 @@ StreamerInceptionStepper<P, F, C>::computeRdotStationary() noexcept
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv) && ebisbox.isRegular(iv)) {
           const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * dx;
-          const RealVect EE =
-            RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+          const RealVect EE  = RealVect(
+            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
 
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
 

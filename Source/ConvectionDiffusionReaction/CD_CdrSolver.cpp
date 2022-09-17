@@ -1155,8 +1155,8 @@ CdrSolver::defineInterpolationStencils()
       const ProblemDomain&     domain = m_amr->getDomains()[lvl];
       const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-      m_interpStencils[dir][lvl] =
-        RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil>>>(new LayoutData<BaseIFFAB<FaceStencil>>(dbl));
+      m_interpStencils[dir][lvl] = RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil>>>(
+        new LayoutData<BaseIFFAB<FaceStencil>>(dbl));
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
         BaseIFFAB<FaceStencil>& sten     = (*m_interpStencils[dir][lvl])[dit()];

@@ -28,10 +28,12 @@ main(int argc, char* argv[])
   // Read ionization and attachment coefficients and make them into functions.
   constexpr Real N = 2.45E25;
 
-  LookupTable<2> ionizationData =
-    DataParser::fractionalFileReadASCII("sf6.dat", "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)", "");
-  LookupTable<2> attachmentData =
-    DataParser::fractionalFileReadASCII("sf6.dat", "E/N (Td)	Townsend attach. coef. eta/N (m2)", "");
+  LookupTable<2> ionizationData = DataParser::fractionalFileReadASCII("sf6.dat",
+                                                                      "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)",
+                                                                      "");
+  LookupTable<2> attachmentData = DataParser::fractionalFileReadASCII("sf6.dat",
+                                                                      "E/N (Td)	Townsend attach. coef. eta/N (m2)",
+                                                                      "");
 
   ionizationData.setRange(10, 4000, 0);
   attachmentData.setRange(10, 4000, 0);
@@ -85,8 +87,8 @@ main(int argc, char* argv[])
 
   // Set up time stepper
   auto timestepper = RefCountedPtr<StreamerInceptionStepper<>>(new StreamerInceptionStepper<>());
-  auto celltagger =
-    RefCountedPtr<StreamerInceptionTagger>(new StreamerInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
+  auto celltagger  = RefCountedPtr<StreamerInceptionTagger>(
+    new StreamerInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
 
   // Set transport data
   timestepper->setAlpha(alpha);

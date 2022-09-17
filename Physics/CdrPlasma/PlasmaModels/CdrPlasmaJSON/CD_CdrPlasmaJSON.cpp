@@ -3792,9 +3792,9 @@ CdrPlasmaJSON::parseDomainReactions()
         // Add this reaction to all the specified sides.
         for (std::string curSide : sides) {
           // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactions-map
-          curSide = this->trim(curSide);
-          std::pair<int, Side::LoHiSide> curPair =
-            std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2, 2)));
+          curSide                                = this->trim(curSide);
+          std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)),
+                                                                  m_sideStringToSide.at(curSide.substr(2, 2)));
 
           std::vector<CdrPlasmaSurfaceReactionJSON>& reactions = m_domainReactions.at(curPair);
           reactions.insert(std::end(reactions), std::begin(domainReactionsVec), std::end(domainReactionsVec));
@@ -3837,9 +3837,9 @@ CdrPlasmaJSON::parseDomainReactionRate(const int                       a_reactio
 
     for (std::string curSide : a_sides) {
       // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactionLookup- and m_domainReactionConstants-map
-      curSide = this->trim(curSide);
-      std::pair<int, Side::LoHiSide> curPair =
-        std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2, 2)));
+      curSide                                = this->trim(curSide);
+      std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)),
+                                                              m_sideStringToSide.at(curSide.substr(2, 2)));
 
       // Duplicated inputs are not handled here (they are handled in CdrPlasmaJSON::parseDomainReactions() )
       // Add the constant reaction rate to the appropriate container
@@ -3875,9 +3875,9 @@ CdrPlasmaJSON::parseDomainReactionScaling(const int                       a_reac
 
   for (std::string curSide : a_sides) {
     // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactionLookup- and m_domainReactionConstants-map
-    curSide = this->trim(curSide);
-    std::pair<int, Side::LoHiSide> curPair =
-      std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2, 2)));
+    curSide                                = this->trim(curSide);
+    std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)),
+                                                            m_sideStringToSide.at(curSide.substr(2, 2)));
 
     // Duplicated inputs are not handled here (they are handled in CdrPlasmaJSON::parseDomainReactions() )
     // Add to the pile

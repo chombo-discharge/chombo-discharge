@@ -362,8 +362,8 @@ EBHelmholtzOp::defineStencils()
           VoFStencil loKappaDivFSten = fluxSten;
           VoFStencil hiKappaDivFSten = fluxSten;
 
-          loKappaDivFSten *=
-            ebisbox.areaFrac(face) / m_dx; // Sign explanation. For vofLo, faceIt() is the face on the "high" side and
+          loKappaDivFSten *= ebisbox.areaFrac(face) /
+                             m_dx; // Sign explanation. For vofLo, faceIt() is the face on the "high" side and
           hiKappaDivFSten *= -ebisbox.areaFrac(face) / m_dx; // vice versa for vofHi.
 
           // 4. Note that we prune storage here.
@@ -1434,8 +1434,8 @@ EBHelmholtzOp::computeRelaxationCoefficient()
 
     // Do the same for the irregular cells
     auto irregularKernel = [&](const VolIndex& vof) -> void {
-      const Real alphaWeight =
-        m_alpha * m_alphaDiagWeight[dit()](vof, m_comp); // Recall, m_alphaDiagWeight holds kappa * A
+      const Real alphaWeight = m_alpha *
+                               m_alphaDiagWeight[dit()](vof, m_comp); // Recall, m_alphaDiagWeight holds kappa * A
       const Real betaWeight =
         m_beta *
         m_betaDiagWeight

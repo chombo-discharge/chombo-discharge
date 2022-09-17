@@ -87,9 +87,9 @@ RodPlaneProfile::RodPlaneProfile()
   }
   if (has_plane) {
     m_dielectrics.resize(1);
-    BaseIF*               func = this->getBaseIF();
-    RefCountedPtr<BaseIF> plane =
-      RefCountedPtr<BaseIF>(new ProfilePlaneIF(point, width, func, numl, numr, dist, xshift, yshift, curv, false));
+    BaseIF*               func  = this->getBaseIF();
+    RefCountedPtr<BaseIF> plane = RefCountedPtr<BaseIF>(
+      new ProfilePlaneIF(point, width, func, numl, numr, dist, xshift, yshift, curv, false));
     m_dielectrics[0].define(plane, eps);
   }
 

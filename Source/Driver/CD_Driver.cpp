@@ -812,8 +812,8 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
           // on levels (l-1);
           const int lmin =
             0; // Coarsest grid level that can change. Base level can also change (due to run-time parameters or load balancing).
-          const int lmax =
-            m_amr->getFinestLevel() + 1; // This means that if we refine, we can only add one level at a time.
+          const int lmax = m_amr->getFinestLevel() +
+                           1; // This means that if we refine, we can only add one level at a time.
 
           if (m_writeRegridFiles) {
             this->writePreRegridFile();

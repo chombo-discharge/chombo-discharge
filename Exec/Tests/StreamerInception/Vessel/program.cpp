@@ -27,10 +27,12 @@ main(int argc, char* argv[])
   const Real N2 = 0.8;
   const Real T  = 300.0;
 
-  LookupTable<2> ionizationData =
-    DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)", "");
-  LookupTable<2> attachmentData =
-    DataParser::fractionalFileReadASCII("transport_data.txt", "E/N (Td)	Townsend attach. coef. eta/N (m2)", "");
+  LookupTable<2> ionizationData = DataParser::fractionalFileReadASCII("transport_data.txt",
+                                                                      "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)",
+                                                                      "");
+  LookupTable<2> attachmentData = DataParser::fractionalFileReadASCII("transport_data.txt",
+                                                                      "E/N (Td)	Townsend attach. coef. eta/N (m2)",
+                                                                      "");
 
   ionizationData.setRange(10, 2000, 0);
   attachmentData.setRange(10, 2000, 0);
@@ -107,8 +109,8 @@ main(int argc, char* argv[])
 
   // Set up time stepper
   auto timestepper = RefCountedPtr<StreamerInceptionStepper<>>(new StreamerInceptionStepper<>());
-  auto celltagger =
-    RefCountedPtr<StreamerInceptionTagger>(new StreamerInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
+  auto celltagger  = RefCountedPtr<StreamerInceptionTagger>(
+    new StreamerInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
 
   // Set transport data
   timestepper->setAlpha(alpha);

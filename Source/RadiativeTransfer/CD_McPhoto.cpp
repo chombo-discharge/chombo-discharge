@@ -863,8 +863,9 @@ McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellDa
 
             // Make superPhotons if we have to
             if (numPhysPhotons > 0) {
-              const size_t numComputationalPhotons =
-                (numPhysPhotons <= m_maxPhotonsGeneratedPerCell) ? numPhysPhotons : m_maxPhotonsGeneratedPerCell;
+              const size_t numComputationalPhotons = (numPhysPhotons <= m_maxPhotonsGeneratedPerCell)
+                                                       ? numPhysPhotons
+                                                       : m_maxPhotonsGeneratedPerCell;
               const Real weight = (1.0 * numPhysPhotons) / numComputationalPhotons;
 
               for (size_t i = 0; i < numComputationalPhotons; i++) {
@@ -881,8 +882,9 @@ McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellDa
           const size_t   numPhysPhotons = this->drawPhotons(source(vof, srcComp), vol, a_dt);
 
           if (numPhysPhotons > 0) {
-            const size_t numComputationalPhotons =
-              (numPhysPhotons <= m_maxPhotonsGeneratedPerCell) ? numPhysPhotons : m_maxPhotonsGeneratedPerCell;
+            const size_t numComputationalPhotons = (numPhysPhotons <= m_maxPhotonsGeneratedPerCell)
+                                                     ? numPhysPhotons
+                                                     : m_maxPhotonsGeneratedPerCell;
             const Real weight = (1.0 * numPhysPhotons) / numComputationalPhotons;
 
             // Generate computational Photons

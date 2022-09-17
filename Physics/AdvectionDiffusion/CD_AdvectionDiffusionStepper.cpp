@@ -145,8 +145,8 @@ AdvectionDiffusionStepper::setupSolvers()
   CH_assert(!m_solver.isNull());
 
   // Instantiate the species.
-  m_species =
-    RefCountedPtr<AdvectionDiffusionSpecies>(new AdvectionDiffusionSpecies(m_initialData, m_mobile, m_diffusive));
+  m_species = RefCountedPtr<AdvectionDiffusionSpecies>(
+    new AdvectionDiffusionSpecies(m_initialData, m_mobile, m_diffusive));
 
   // Prep the solver.
   m_solver->setVerbosity(m_verbosity);

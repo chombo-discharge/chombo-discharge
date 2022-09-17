@@ -221,8 +221,8 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
     a_geoserver = static_cast<GeometryService*>(scanShop);
   }
   else { // Chombo geometry generation
-    a_geoserver =
-      static_cast<GeometryService*>(new GeometryShop(*m_implicitFunctionGas, 0, a_finestDx * RealVect::Unit, s_thresh));
+    a_geoserver = static_cast<GeometryService*>(
+      new GeometryShop(*m_implicitFunctionGas, 0, a_finestDx * RealVect::Unit, s_thresh));
   }
 }
 
@@ -256,12 +256,12 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
   else {
     Vector<BaseIF*> parts;
 
-    RefCountedPtr<BaseIF> dielBaseIF =
-      RefCountedPtr<BaseIF>(new NewIntersectionIF(dielectricParts)); // This gives the region outside the dielectrics.
-    RefCountedPtr<BaseIF> elecBaseIF =
-      RefCountedPtr<BaseIF>(new NewIntersectionIF(electrodeParts)); // This is the region outside the the electrodes.
-    RefCountedPtr<BaseIF> dielCompIF =
-      RefCountedPtr<BaseIF>(new ComplementIF(*dielBaseIF)); // This is the region inside the dielectrics.
+    RefCountedPtr<BaseIF> dielBaseIF = RefCountedPtr<BaseIF>(
+      new NewIntersectionIF(dielectricParts)); // This gives the region outside the dielectrics.
+    RefCountedPtr<BaseIF> elecBaseIF = RefCountedPtr<BaseIF>(
+      new NewIntersectionIF(electrodeParts)); // This is the region outside the the electrodes.
+    RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF>(
+      new ComplementIF(*dielBaseIF)); // This is the region inside the dielectrics.
 
     // We want the function which is the region inside the dielectrics and outside the electrodes, i.e. the intersection of the region "inside"
     // dielectrics and outside the electrods.

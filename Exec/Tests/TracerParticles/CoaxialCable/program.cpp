@@ -24,8 +24,8 @@ main(int argc, char* argv[])
   RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
   // Set up basic tracer particle physics
-  RefCountedPtr<TimeStepper> timestepper =
-    RefCountedPtr<TimeStepper>(new TracerParticleStepper<TracerParticle<0, 4>>());
+  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper>(
+    new TracerParticleStepper<TracerParticle<0, 4>>());
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr));
