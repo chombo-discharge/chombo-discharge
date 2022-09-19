@@ -208,8 +208,8 @@ EddingtonSP1::parseDomainBC()
       std::string str;
 
       EddingtonSP1DomainBc::BcType      bcType; // Will be set based on what comes in through the input script
-      EddingtonSP1DomainBc::BcFunction& bcFunc =
-        m_domainBcFunctions.at(domainSide); // Will be set based on what comes in through the input script
+      EddingtonSP1DomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(
+        domainSide); // Will be set based on what comes in through the input script
 
       std::function<Real(const RealVect, const Real)> curFunc;
 
@@ -826,11 +826,11 @@ EddingtonSP1::setupHelmholtzFactory()
     pout() << m_name + "::setupHelmholtzFactory" << endl;
   }
 
-  const Vector<RefCountedPtr<EBLevelGrid>>&             levelGrids = m_amr->getEBLevelGrid(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBCoarAve>>&               coarAve    = m_amr->getCoarseAverage(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBFluxRegister>>&          fluxReg    = m_amr->getFluxRegister(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBMultigridInterpolator>>& interpolator =
-    m_amr->getMultigridInterpolator(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBLevelGrid>>&             levelGrids   = m_amr->getEBLevelGrid(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBCoarAve>>&               coarAve      = m_amr->getCoarseAverage(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBFluxRegister>>&          fluxReg      = m_amr->getFluxRegister(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBMultigridInterpolator>>& interpolator = m_amr->getMultigridInterpolator(m_realm,
+                                                                                                       m_phase);
 
   // Coarsest domain used for multigrid. The user specifies the minimum number of cells in any
   // coordinate direction, and we coarsen until we have a domain which satisfies that constraint.
@@ -982,13 +982,13 @@ EddingtonSP1::setupTGA()
   const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
   const Vector<int>   refRat         = m_amr->getRefinementRatios();
 
-  m_tgaSolver =
-    RefCountedPtr<AMRTGA<LevelData<EBCellFAB>>>(new AMRTGA<LevelData<EBCellFAB>>(m_multigridSolver,
-                                                                                 *m_helmholtzOpFactory,
-                                                                                 coarsestDomain,
-                                                                                 refRat,
-                                                                                 1 + finestLevel,
-                                                                                 m_multigridSolver->m_verbosity));
+  m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB>>>(
+    new AMRTGA<LevelData<EBCellFAB>>(m_multigridSolver,
+                                     *m_helmholtzOpFactory,
+                                     coarsestDomain,
+                                     refRat,
+                                     1 + finestLevel,
+                                     m_multigridSolver->m_verbosity));
 }
 
 void
@@ -1024,8 +1024,8 @@ EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_
 
   const int finestLevel = m_amr->getFinestLevel();
 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& sten =
-    m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& sten = m_amr->getEbCentroidInterpolationStencils(m_realm,
+                                                                                                          m_phase);
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     sten.apply(*a_ebFlux[lvl], *a_phi[lvl], lvl);
   }
@@ -1189,8 +1189,8 @@ EddingtonSP1::writePlotFile()
   }
 
   // Transform to centroid-centered
-  const IrregAmrStencil<CentroidInterpolationStencil>& sten =
-    m_amr->getCentroidInterpolationStencils(m_realm, phase::gas);
+  const IrregAmrStencil<CentroidInterpolationStencil>& sten = m_amr->getCentroidInterpolationStencils(m_realm,
+                                                                                                      phase::gas);
   sten.apply(output);
 
   // Alias this stuff

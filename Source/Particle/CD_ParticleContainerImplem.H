@@ -436,7 +436,9 @@ ParticleContainer<P>::sortParticlesByPatch()
         BinFab<P>&  cellParticles  = (*m_cellSortedParticles[lvl])[dit()];
 
         // Kernel which adds moves particles from the cell container to the patch container.
-        auto kernel = [&](const IntVect& iv) -> void { patchParticles.addItemsDestructive(cellParticles(iv, comp)); };
+        auto kernel = [&](const IntVect& iv) -> void {
+          patchParticles.addItemsDestructive(cellParticles(iv, comp));
+        };
 
         BoxLoops::loop(dbl[dit()], kernel);
 

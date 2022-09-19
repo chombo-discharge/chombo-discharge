@@ -98,7 +98,9 @@ BoundedNoisePlane::value(const RealVect& a_pos) const
   const RealVect x1 = a_pos;
   const RealVect xp = x1 - PolyGeom::dot((x1 - x0), n) * n;
 
-  auto h = [k = m_clampK](const Real x) { return 1.0 / (1.0 + exp(-2 * k * x)); };
+  auto h = [k = m_clampK](const Real x) {
+    return 1.0 / (1.0 + exp(-2 * k * x));
+  };
 
   Real boxCar = 1.0;
   for (int dir = 0; dir < SpaceDim; dir++) {

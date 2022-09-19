@@ -204,8 +204,8 @@ MFHelmholtzOpFactory::defineJump()
     }
 
     BaseIVFactory<Real> fact(ebisl, irregCells);
-    m_amrJump[lvl] =
-      RefCountedPtr<LevelData<BaseIVFAB<Real>>>(new LevelData<BaseIVFAB<Real>>(dbl, m_nComp, IntVect::Zero, fact));
+    m_amrJump[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
+      new LevelData<BaseIVFAB<Real>>(dbl, m_nComp, IntVect::Zero, fact));
   }
 }
 
@@ -461,8 +461,8 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
     return mgOp;
   }
 
-  const int amrLevel =
-    this->findAmrLevel(a_fineDomain); // Run-time abort if a_fineDomain is not found in anhy amr level.
+  const int amrLevel = this->findAmrLevel(
+    a_fineDomain); // Run-time abort if a_fineDomain is not found in anhy amr level.
 
   const int mgRefRat = 2;
 

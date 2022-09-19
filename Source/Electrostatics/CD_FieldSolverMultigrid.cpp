@@ -543,8 +543,8 @@ FieldSolverMultigrid::setupHelmholtzFactory()
   auto ebbcFactory = RefCountedPtr<MFHelmholtzElectrostaticEBBCFactory>(
     new MFHelmholtzElectrostaticEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebBc));
 
-  auto domainBcFactory =
-    RefCountedPtr<MFHelmholtzDomainBCFactory>(new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
+  auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>(
+    new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
 
   // Set the BC jump factory. This is either the "natural" factory or the saturation charge BC.
   RefCountedPtr<MFHelmholtzJumpBCFactory> jumpBcFactory;

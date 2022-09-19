@@ -809,8 +809,8 @@ CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>&       a
       const Real phi = (*a_cdrDensities[idx])(iv, comp);
 
       cdrDensities[idx] = std::max(zero, phi);
-      cdrGradients[idx] =
-        RealVect(D_DECL((*a_cdrGradients[idx])(iv, 0), (*a_cdrGradients[idx])(iv, 1), (*a_cdrGradients[idx])(iv, 2)));
+      cdrGradients[idx] = RealVect(
+        D_DECL((*a_cdrGradients[idx])(iv, 0), (*a_cdrGradients[idx])(iv, 1), (*a_cdrGradients[idx])(iv, 2)));
     }
 
     // Get the cell-centered radiative transfer densities.
@@ -1646,8 +1646,8 @@ CdrPlasmaStepper::computeCdrDiffusionCellRegular(Vector<FArrayBox*>&       a_cdr
   auto regularKernel = [&](const IntVect iv) -> void {
     // Physical position and electric field.
     const RealVect pos = probLo + (0.5 * RealVect::Unit + RealVect(iv)) * a_dx;
-    const RealVect E =
-      RealVect(D_DECL(a_electricFieldCell(iv, 0), a_electricFieldCell(iv, 1), a_electricFieldCell(iv, 2)));
+    const RealVect E   = RealVect(
+      D_DECL(a_electricFieldCell(iv, 0), a_electricFieldCell(iv, 1), a_electricFieldCell(iv, 2)));
 
     // Get the CDR densities in the current cell.
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -1945,8 +1945,8 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       // Physical coordinates and electric field.
       const RealVect pos = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);
-      const RealVect E =
-        RealVect(D_DECL(electricFieldPatchEB(vof, 0), electricFieldPatchEB(vof, 1), electricFieldPatchEB(vof, 2)));
+      const RealVect E   = RealVect(
+        D_DECL(electricFieldPatchEB(vof, 0), electricFieldPatchEB(vof, 1), electricFieldPatchEB(vof, 2)));
 
       // Construct the CDR densities on the EB -- it needs to be in a form understandable by CdrPlasmaPhysics
       for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -3245,8 +3245,8 @@ CdrPlasmaStepper::extrapolateToEb(LevelData<BaseIVFAB<Real>>& a_ebData,
   CH_assert(a_ebData.nComp() == a_cellData.nComp());
 
   // Get the stencil for movign cell-centered data to the EB.
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils =
-    m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencils(m_realm,
+                                                                                                              a_phase);
 
   // Apply it.
   stencils.apply(a_ebData, a_cellData, a_lvl);
@@ -4130,14 +4130,15 @@ CdrPlasmaStepper::computeElectrodeCurrent()
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real& bndryFrac = ebisBox.bndryArea(vof);
       const Real& flux =
-        patchCurrent(vof, comp); // Recall -- this holds the normal component of the current density on the EB surface.
+        patchCurrent(vof,
+                     comp); // Recall -- this holds the normal component of the current density on the EB surface.
 
       current += flux * bndryFrac;
     };
 
     // Kernel region.
-    const IntVectSet ivs =
-      patchCurrent.getIVS() & cellBox; // Integration restricted to cellBox because I don't want to include ghost cells.
+    const IntVectSet ivs = patchCurrent.getIVS() &
+                           cellBox; // Integration restricted to cellBox because I don't want to include ghost cells.
     VoFIterator vofit(ivs, patchCurrent.getEBGraph());
 
     // Launch kernel.
@@ -4211,14 +4212,15 @@ CdrPlasmaStepper::computeDielectricCurrent()
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const Real& bndryFrac = ebisBox.bndryArea(vof);
       const Real& flux =
-        patchCurrent(vof, comp); // Recall -- this holds the normal component of the current density on the EB surface.
+        patchCurrent(vof,
+                     comp); // Recall -- this holds the normal component of the current density on the EB surface.
 
       current += flux * bndryFrac;
     };
 
     // Kernel region.
-    const IntVectSet ivs =
-      patchCurrent.getIVS() & cellBox; // Integration restricted to cellBox because I don't want to include ghost cells.
+    const IntVectSet ivs = patchCurrent.getIVS() &
+                           cellBox; // Integration restricted to cellBox because I don't want to include ghost cells.
     VoFIterator vofit(ivs, patchCurrent.getEBGraph());
 
     // Launch kernel.
@@ -4286,7 +4288,9 @@ CdrPlasmaStepper::computeDomainCurrent()
         const int s = sign(sit());
 
         // This is our kernel.
-        auto kernel = [&](const FaceIndex& face) -> void { current += s * fluxdir(face, comp); };
+        auto kernel = [&](const FaceIndex& face) -> void {
+          current += s * fluxdir(face, comp);
+        };
 
         // Kernel region. We only do boundary faces and no ghost faces.
         FaceStop::WhichFaces stopcrit = FaceStop::AllBoundaryOnly;
@@ -4693,8 +4697,8 @@ CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           const RealVect position = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisBox, dx);
-          const RealVect localE =
-            RealVect(D_DECL((*E[lvl])[dit()](vof, 0), (*E[lvl])[dit()](vof, 1), (*E[lvl])[dit()](vof, 2)));
+          const RealVect localE   = RealVect(
+            D_DECL((*E[lvl])[dit()](vof, 0), (*E[lvl])[dit()](vof, 1), (*E[lvl])[dit()](vof, 2)));
 
           for (int i = 0; i < cdrDensities.size(); i++) {
             localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[dit()](vof, 0);

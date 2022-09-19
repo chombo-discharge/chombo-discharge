@@ -52,8 +52,8 @@ main(int argc, char* argv[])
   // Set up physics
   RefCountedPtr<CdrPlasmaPhysics> physics     = RefCountedPtr<CdrPlasmaPhysics>(new CdrPlasmaJSON());
   RefCountedPtr<CdrPlasmaStepper> timestepper = RefCountedPtr<CdrPlasmaStepper>(new CdrPlasmaGodunovStepper(physics));
-  RefCountedPtr<CellTagger>       tagger =
-    RefCountedPtr<CellTagger>(new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
+  RefCountedPtr<CellTagger>       tagger      = RefCountedPtr<CellTagger>(
+    new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();

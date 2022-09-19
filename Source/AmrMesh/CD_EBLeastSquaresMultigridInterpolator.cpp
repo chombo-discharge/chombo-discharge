@@ -63,8 +63,8 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
 
   timer.startEvent("Define QuadCFInterp");
   //  QuadCFInterp::define(gridsFine, &gridsCoar, 1.0, a_refRat, 1, a_eblgFine.getDomain());
-  m_scalarInterpolator =
-    RefCountedPtr<QuadCFInterp>(new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, 1, a_eblgFine.getDomain()));
+  m_scalarInterpolator = RefCountedPtr<QuadCFInterp>(
+    new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, 1, a_eblgFine.getDomain()));
   m_vectorInterpolator = RefCountedPtr<QuadCFInterp>(
     new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, SpaceDim, a_eblgFine.getDomain()));
   timer.stopEvent("Define QuadCFInterp");
@@ -161,10 +161,18 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
 
       // Apply the coarse stencil
       constexpr int numComp = 1;
-      m_aggCoarStencils[dit()]
-        ->apply(dstFine, srcCoar, m_comp, icomp, numComp, false); // true/false => increment/not increment
-      m_aggFineStencils[dit()]
-        ->apply(dstFine, srcFine, icomp, icomp, numComp, true); // true/false => increment/not increment
+      m_aggCoarStencils[dit()]->apply(dstFine,
+                                      srcCoar,
+                                      m_comp,
+                                      icomp,
+                                      numComp,
+                                      false); // true/false => increment/not increment
+      m_aggFineStencils[dit()]->apply(dstFine,
+                                      srcFine,
+                                      icomp,
+                                      icomp,
+                                      numComp,
+                                      true); // true/false => increment/not increment
     }
   }
 }
@@ -619,15 +627,8 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     IntVectSet knownTerms      = IntVectSet();
 
     //timer.startEvent("stencil");
-    std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils =
-      LeastSquares::computeDualLevelStencils<float>(derivs,
-                                                    knownTerms,
-                                                    fineVofs,
-                                                    coarVofs,
-                                                    fineDisplacements,
-                                                    coarDisplacements,
-                                                    a_weight,
-                                                    a_order);
+    std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils = LeastSquares::computeDualLevelStencils<
+      float>(derivs, knownTerms, fineVofs, coarVofs, fineDisplacements, coarDisplacements, a_weight, a_order);
 
     a_stencilFine = stencils.at(interpStenIndex).first;
     a_stencilCoar = stencils.at(interpStenIndex).second;

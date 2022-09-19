@@ -55,8 +55,8 @@ RoughSphere::RoughSphere()
     pp.getarr("center", v, 0, SpaceDim);
     c = RealVect(D_DECL(v[0], v[1], v[2]));
 
-    RefCountedPtr<BaseIF> sph =
-      RefCountedPtr<BaseIF>(new PerlinSphereSdf(r, c, false, amp, f, persist, octaves, reseed));
+    RefCountedPtr<BaseIF> sph = RefCountedPtr<BaseIF>(
+      new PerlinSphereSdf(r, c, false, amp, f, persist, octaves, reseed));
 
     if (whichMaterial == "electrode")
       m_electrodes.push_back(Electrode(sph, live));

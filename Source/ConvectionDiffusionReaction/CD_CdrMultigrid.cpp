@@ -285,11 +285,11 @@ CdrMultigrid::setupHelmholtzFactory()
     pout() << m_name + "::setupHelmholtzFactory()" << endl;
   }
 
-  const Vector<RefCountedPtr<EBLevelGrid>>&             levelGrids = m_amr->getEBLevelGrid(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBCoarAve>>&               coarAve    = m_amr->getCoarseAverage(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBFluxRegister>>&          fluxReg    = m_amr->getFluxRegister(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBMultigridInterpolator>>& interpolator =
-    m_amr->getMultigridInterpolator(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBLevelGrid>>&             levelGrids   = m_amr->getEBLevelGrid(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBCoarAve>>&               coarAve      = m_amr->getCoarseAverage(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBFluxRegister>>&          fluxReg      = m_amr->getFluxRegister(m_realm, m_phase);
+  const Vector<RefCountedPtr<EBMultigridInterpolator>>& interpolator = m_amr->getMultigridInterpolator(m_realm,
+                                                                                                       m_phase);
 
   // Coarsest domain used for multigrid. The user specifies the minimum number of cells in any
   // coordinate direction, and we coarsen until we have a domain which satisfies that constraint.
@@ -319,27 +319,27 @@ CdrMultigrid::setupHelmholtzFactory()
   DataOps::setValue(m_helmAcoef, 1.0);
 
   // Set up the operator
-  m_helmholtzOpFactory =
-    RefCountedPtr<EBHelmholtzOpFactory>(new EBHelmholtzOpFactory(Location::Cell::Center,
-                                                                 alpha,
-                                                                 beta,
-                                                                 m_amr->getProbLo(),
-                                                                 levelGrids,
-                                                                 interpolator,
-                                                                 fluxReg,
-                                                                 coarAve,
-                                                                 m_amr->getRefinementRatios(),
-                                                                 m_amr->getDx(),
-                                                                 m_helmAcoef.getData(),
-                                                                 m_faceCenteredDiffusionCoefficient.getData(),
-                                                                 m_ebCenteredDiffusionCoefficient.getData(),
-                                                                 domainBcFactory,
-                                                                 ebbcFactory,
-                                                                 ghostPhi,
-                                                                 ghostRhs,
-                                                                 m_smoother,
-                                                                 bottomDomain,
-                                                                 m_amr->getMaxBoxSize()));
+  m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory>(
+    new EBHelmholtzOpFactory(Location::Cell::Center,
+                             alpha,
+                             beta,
+                             m_amr->getProbLo(),
+                             levelGrids,
+                             interpolator,
+                             fluxReg,
+                             coarAve,
+                             m_amr->getRefinementRatios(),
+                             m_amr->getDx(),
+                             m_helmAcoef.getData(),
+                             m_faceCenteredDiffusionCoefficient.getData(),
+                             m_ebCenteredDiffusionCoefficient.getData(),
+                             domainBcFactory,
+                             ebbcFactory,
+                             ghostPhi,
+                             ghostRhs,
+                             m_smoother,
+                             bottomDomain,
+                             m_amr->getMaxBoxSize()));
 }
 
 void

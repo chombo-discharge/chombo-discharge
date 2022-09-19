@@ -54,8 +54,8 @@ CylinderSdf::value(const RealVect& a_point) const
   const Real     orthoComp = orthoVec.vectorLength();
 
   const Real f = orthoComp - m_radius; // Distance from cylinder wall.    Inside = Negative, Outside = Positive
-  const Real g =
-    abs(paraComp) - 0.5 * m_length; // Distance from cylinder end cap. Inside = Negative, Outside = Positive
+  const Real g = abs(paraComp) -
+                 0.5 * m_length; // Distance from cylinder end cap. Inside = Negative, Outside = Positive
 
   // This sets retval to be negative inside the cylinder, and positive outside.
   Real retval = 0.0;

@@ -384,7 +384,9 @@ TracerParticleStepper<P>::setVelocity()
 
   switch (m_velocityField) {
   case VelocityField::Diagonal: {
-    velFunc = [](const RealVect& a_position) -> RealVect { return RealVect::Unit; };
+    velFunc = [](const RealVect& a_position) -> RealVect {
+      return RealVect::Unit;
+    };
 
     break;
   }

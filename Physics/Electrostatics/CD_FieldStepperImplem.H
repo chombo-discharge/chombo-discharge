@@ -62,7 +62,9 @@ namespace Physics {
       };
 
       m_rhoDielectric        = m_rhoGas;
-      m_surfaceChargeDensity = [s = sigma0](const RealVect& x) -> Real { return s; };
+      m_surfaceChargeDensity = [s = sigma0](const RealVect& x) -> Real {
+        return s;
+      };
 
       if (str == "none") {
         m_boxSort = BoxSorting::None;
@@ -97,7 +99,9 @@ namespace Physics {
       }
 
       // Define a voltage function to be used in the simulation.
-      auto voltage = [](const Real a_time) -> Real { return 1.0; };
+      auto voltage = [](const Real a_time) -> Real {
+        return 1.0;
+      };
 
       // Instantiate the FieldSolver and set it up.
       m_fieldSolver = RefCountedPtr<FieldSolver>(new T());

@@ -95,7 +95,9 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   // we have the dphi/dn = (phi-bc_value)/(dx/2) on the low side and (bc_value - phi)/(dx/2) on the high side. So make a switch between homogeneous/inhomogeneous
   // and constant/non-constant values.
   if (a_useHomogeneous) {
-    kernel = [&](const IntVect& iv) -> void { a_faceFlux(iv, m_comp) = -sign * ihdx * a_phi(iv, m_comp); };
+    kernel = [&](const IntVect& iv) -> void {
+      a_faceFlux(iv, m_comp) = -sign * ihdx * a_phi(iv, m_comp);
+    };
   }
   else {                 // Physical BCs, select whether or not we use a constant value of spatially varying value.
     if (m_useConstant) { // Constant value.

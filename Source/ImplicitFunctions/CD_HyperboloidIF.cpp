@@ -45,8 +45,8 @@ HyperboloidIF::value(const RealVect& a_point) const
     retval += m_sign[dir] * cur * cur / m_radii2[dir];
   }
 
-  retval =
-    (a_point[SpaceDim - 1] - m_center[SpaceDim - 1] + m_radii[SpaceDim - 1]) - m_radii[SpaceDim - 1] * sqrt(retval);
+  retval = (a_point[SpaceDim - 1] - m_center[SpaceDim - 1] + m_radii[SpaceDim - 1]) -
+           m_radii[SpaceDim - 1] * sqrt(retval);
 
   // Change sign if outside
   if (m_inside) {

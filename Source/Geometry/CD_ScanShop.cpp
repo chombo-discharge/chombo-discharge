@@ -378,8 +378,8 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   m_grids[a_level] = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
   m_timer.stopEvent("Define grids");
   m_timer.startEvent("Define map");
-  m_boxMap[a_level] =
-    RefCountedPtr<LayoutData<GeometryService::InOut>>(new LayoutData<GeometryService::InOut>(m_grids[a_level]));
+  m_boxMap[a_level] = RefCountedPtr<LayoutData<GeometryService::InOut>>(
+    new LayoutData<GeometryService::InOut>(m_grids[a_level]));
   m_timer.stopEvent("Define map");
 
   m_timer.startEvent("Set box types");

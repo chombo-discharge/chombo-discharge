@@ -298,10 +298,10 @@ EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   //       of the solution. The user will input the desired neighborhood and order of that interpolation. By default, the radius of the stencil is
   //       the same as the order.
 
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const bool     useStartVof =
-    !(m_weight >
-      0); // If we use unweighted least squares we can, in fact, include the cut-cell itself in the interpolation.
+  const EBISBox& ebisbox     = m_eblg.getEBISL()[a_dit];
+  const bool     useStartVof = !(
+    m_weight >
+    0); // If we use unweighted least squares we can, in fact, include the cut-cell itself in the interpolation.
   const int radius = a_order;
 
   // Get the vofs around the cut-cell. Note that if m_weight = 0 we enable the cut-cell itself in the interpolation.

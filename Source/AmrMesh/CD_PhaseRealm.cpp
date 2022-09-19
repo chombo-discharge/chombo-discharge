@@ -274,8 +274,8 @@ PhaseRealm::defineEBLevelGrid(const int a_lmin)
   m_ebisl.resize(1 + m_finestLevel);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
-    m_eblg[lvl] =
-      RefCountedPtr<EBLevelGrid>(new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_numEbGhostsCells, &(*m_ebis)));
+    m_eblg[lvl] = RefCountedPtr<EBLevelGrid>(
+      new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_numEbGhostsCells, &(*m_ebis)));
 
     const bool hasCoar = lvl > 0;
     const bool hasFine = lvl < m_finestLevel;
@@ -337,8 +337,8 @@ PhaseRealm::defineNeighbors(const int a_lmin)
   m_neighbors.resize(1 + m_finestLevel);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
-    m_neighbors[lvl] =
-      RefCountedPtr<LayoutData<Vector<LayoutIndex>>>(new LayoutData<Vector<LayoutIndex>>(m_grids[lvl]));
+    m_neighbors[lvl] = RefCountedPtr<LayoutData<Vector<LayoutIndex>>>(
+      new LayoutData<Vector<LayoutIndex>>(m_grids[lvl]));
 
     const DisjointBoxLayout& dbl = m_grids[lvl];
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
@@ -384,8 +384,8 @@ PhaseRealm::defineLevelSet(const int a_lmin, const int a_numGhost)
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++) {
       const Real dx = m_dx[lvl];
 
-      m_levelset[lvl] =
-        RefCountedPtr<LevelData<FArrayBox>>(new LevelData<FArrayBox>(m_grids[lvl], ncomp, a_numGhost * IntVect::Unit));
+      m_levelset[lvl] = RefCountedPtr<LevelData<FArrayBox>>(
+        new LevelData<FArrayBox>(m_grids[lvl], ncomp, a_numGhost * IntVect::Unit));
 
       for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
         FArrayBox& fab = (*m_levelset[lvl])[dit()];
@@ -644,8 +644,8 @@ PhaseRealm::defineFineToCoarRedistOper(const int a_lmin, const int a_regsize)
           //       need to update this if lvl >= a_lmin
           if (lvl >= a_lmin) {
 
-            RefCountedPtr<EbFastFineToCoarRedist> redist =
-              RefCountedPtr<EbFastFineToCoarRedist>(new EbFastFineToCoarRedist());
+            RefCountedPtr<EbFastFineToCoarRedist> redist = RefCountedPtr<EbFastFineToCoarRedist>(
+              new EbFastFineToCoarRedist());
             redist->fastDefine(*m_eblg[lvl],
                                *m_eblg[lvl - 1],
                                m_refinementRatios[lvl - 1],
@@ -689,8 +689,8 @@ PhaseRealm::defineCoarToFineRedistOper(const int a_lmin, const int a_regsize)
           //       if lvl >= a_lmin-1
           if (lvl >= a_lmin - 1) {
 
-            RefCountedPtr<EbFastCoarToFineRedist> redist =
-              RefCountedPtr<EbFastCoarToFineRedist>(new EbFastCoarToFineRedist());
+            RefCountedPtr<EbFastCoarToFineRedist> redist = RefCountedPtr<EbFastCoarToFineRedist>(
+              new EbFastCoarToFineRedist());
             redist->fastDefine(*m_eblg[lvl + 1],
                                *m_eblg[lvl],
                                m_refinementRatios[lvl],

@@ -44,8 +44,8 @@ main(int argc, char* argv[])
   RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
 
   // Set up the time stepper.
-  auto timestepper =
-    RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(new RadiativeTransferStepper<EddingtonSP1>());
+  auto timestepper = RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(
+    new RadiativeTransferStepper<EddingtonSP1>());
 
   // Storage for the error.
   EBAMRCellData error;
