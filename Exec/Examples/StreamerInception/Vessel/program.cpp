@@ -99,10 +99,10 @@ main(int argc, char* argv[])
   };
 
   auto fieldEmission = [&](const Real& E, const RealVect& x) -> Real {
-    const Real    beta = 1.0; // Field enhancement factor
-    const Real    phi  = 4.5;
-    const Real    C1   = 1.54E-6 * std::pow(10, 4.52 / sqrt(phi)) / phi;
-    const Real    C2   = 2.84E9 * std::pow(phi, 1.5);
+    const Real beta = 1.0; // Field enhancement factor
+    const Real phi  = 4.5;
+    const Real C1   = 1.54E-6 * std::pow(10, 4.52 / sqrt(phi)) / phi;
+    const Real C2   = 2.84E9 * std::pow(phi, 1.5);
 
     return C1 * (E * E) * exp(-C2 / (beta * E));
   };
