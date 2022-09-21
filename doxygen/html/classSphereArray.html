@@ -136,14 +136,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSphereArray.html#a075efe2b5f2d6c0523be461f2e05b813">m_flipInside</a></td></tr>
 <tr class="memdesc:a075efe2b5f2d6c0523be461f2e05b813"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make inside to outside. <br /></td></tr>
 <tr class="separator:a075efe2b5f2d6c0523be461f2e05b813"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac610cf60e357b20a87f5870a01c5a1e2"><td class="memItemLeft" align="right" valign="top"><a id="ac610cf60e357b20a87f5870a01c5a1e2"></a>
-std::shared_ptr&lt; EBGeometry::Union&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSphereArray.html#ac610cf60e357b20a87f5870a01c5a1e2">m_slowUnion</a></td></tr>
-<tr class="memdesc:ac610cf60e357b20a87f5870a01c5a1e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Standard union ala Chombo. <br /></td></tr>
-<tr class="separator:ac610cf60e357b20a87f5870a01c5a1e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad8ee6da7581126e5f29ced0ad0b0c5d1"><td class="memItemLeft" align="right" valign="top"><a id="ad8ee6da7581126e5f29ced0ad0b0c5d1"></a>
-std::shared_ptr&lt; EBGeometry::UnionBVH&lt; Real, AABB, <a class="el" href="classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16">K</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSphereArray.html#ad8ee6da7581126e5f29ced0ad0b0c5d1">m_fastUnion</a></td></tr>
-<tr class="memdesc:ad8ee6da7581126e5f29ced0ad0b0c5d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Union that uses bounding volume hierarchy acceleration. <br /></td></tr>
-<tr class="separator:ad8ee6da7581126e5f29ced0ad0b0c5d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b4bf968ff64b1957d239ebf3b0ab364"><td class="memItemLeft" align="right" valign="top"><a id="a8b4bf968ff64b1957d239ebf3b0ab364"></a>
+std::shared_ptr&lt; EBGeometry::Union&lt; Real, Sphere &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSphereArray.html#a8b4bf968ff64b1957d239ebf3b0ab364">m_slowUnion</a></td></tr>
+<tr class="memdesc:a8b4bf968ff64b1957d239ebf3b0ab364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Standard union ala Chombo. <br /></td></tr>
+<tr class="separator:a8b4bf968ff64b1957d239ebf3b0ab364"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a760537cce6c01e0c5743bb5a8e4b44aa"><td class="memItemLeft" align="right" valign="top"><a id="a760537cce6c01e0c5743bb5a8e4b44aa"></a>
+std::shared_ptr&lt; EBGeometry::UnionBVH&lt; Real, Sphere, AABB, <a class="el" href="classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16">K</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSphereArray.html#a760537cce6c01e0c5743bb5a8e4b44aa">m_fastUnion</a></td></tr>
+<tr class="memdesc:a760537cce6c01e0c5743bb5a8e4b44aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Union that uses bounding volume hierarchy acceleration. <br /></td></tr>
+<tr class="separator:a760537cce6c01e0c5743bb5a8e4b44aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
