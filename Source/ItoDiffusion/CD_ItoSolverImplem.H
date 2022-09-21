@@ -31,7 +31,9 @@ ItoSolver::randomGaussian() const
 {
   // TLDR: We draw a random number from a Gaussian distribution for each coordinate, and truncate the distribution at m_normalDistributionTruncation.
 
-  auto sign = [](const Real& a) -> Real { return (a > 0) - (a < 0); };
+  auto sign = [](const Real& a) -> Real {
+    return (a > 0) - (a < 0);
+  };
 
   RealVect r = RealVect::Zero;
   for (int i = 0; i < SpaceDim; i++) {

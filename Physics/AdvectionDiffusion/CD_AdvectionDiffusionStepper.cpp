@@ -65,7 +65,9 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
     return RealVect(D_DECL(-r * omega * sin(theta), r * omega * cos(theta), 0.));
   };
 
-  m_diffCo = [diffCo](const RealVect& pos) -> Real { return diffCo; };
+  m_diffCo = [diffCo](const RealVect& pos) -> Real {
+    return diffCo;
+  };
 
   m_initialData = [r = blobRadius, a = blobAmplitude, c = blobCenter](const RealVect& x) -> Real {
     const Real d = (x - c).dotProduct(x - c);
@@ -143,8 +145,8 @@ AdvectionDiffusionStepper::setupSolvers()
   CH_assert(!m_solver.isNull());
 
   // Instantiate the species.
-  m_species =
-    RefCountedPtr<AdvectionDiffusionSpecies>(new AdvectionDiffusionSpecies(m_initialData, m_mobile, m_diffusive));
+  m_species = RefCountedPtr<AdvectionDiffusionSpecies>(
+    new AdvectionDiffusionSpecies(m_initialData, m_mobile, m_diffusive));
 
   // Prep the solver.
   m_solver->setVerbosity(m_verbosity);
@@ -216,7 +218,9 @@ AdvectionDiffusionStepper::initialData()
   }
 
   // Set flux functions
-  auto fluxFunc = [](const RealVect a_pos, const Real a_time) { return 0.0; };
+  auto fluxFunc = [](const RealVect a_pos, const Real a_time) {
+    return 0.0;
+  };
 
   //  m_solver->setDomainFlux(fluxFunc);
 }
@@ -266,7 +270,9 @@ AdvectionDiffusionStepper::postCheckpointSetup()
   }
 
   // Set flux functions
-  auto fluxFunc = [](const RealVect a_pos, const Real a_time) { return 0.0; };
+  auto fluxFunc = [](const RealVect a_pos, const Real a_time) {
+    return 0.0;
+  };
 
   //  m_solver->setDomainFlux(fluxFunc);
 }

@@ -121,8 +121,8 @@ AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std
 
     const Real dx = m_dx[lvl];
 
-    a_particles[lvl] =
-      RefCountedPtr<ParticleData<T>>(new ParticleData<T>(dbl, domain, m_blockingFactor, dx * RealVect::Unit, m_probLo));
+    a_particles[lvl] = RefCountedPtr<ParticleData<T>>(
+      new ParticleData<T>(dbl, domain, m_blockingFactor, dx * RealVect::Unit, m_probLo));
   }
 }
 
@@ -136,8 +136,8 @@ AmrMesh::allocate(ParticleContainer<T>& a_container, const std::string a_realm) 
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::allocate(ParticleContainer<T>, int, string) - could not find Realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::allocate(ParticleContainer<T>, int, string) - could not find Realm '" + a_realm +
+                            "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -795,8 +795,9 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
               }
             }
             else { // Crashed with domain "first".
-              const Real sSafety =
-                std::max(0.0, sDomain - safety); // To prevent particles falling off the high side of the domain
+              const Real sSafety = std::max(0.0,
+                                            sDomain -
+                                              safety); // To prevent particles falling off the high side of the domain
 
               particle.position() = oldPos + sSafety * path;
 
@@ -930,8 +931,9 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
               }
             }
             else { // Crashed with domain "first".
-              const Real sSafety =
-                std::max(0.0, sDomain - safety); // To prevent particles falling off the high side of the domain
+              const Real sSafety = std::max(0.0,
+                                            sDomain -
+                                              safety); // To prevent particles falling off the high side of the domain
 
               particle.position() = oldPos + sSafety * path;
 

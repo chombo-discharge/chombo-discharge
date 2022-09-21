@@ -73,8 +73,8 @@ main(int argc, char* argv[])
   RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
 
   // Set up the radiative transfer time stepper.
-  auto timestepper =
-    RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(new RadiativeTransferStepper<EddingtonSP1>());
+  auto timestepper = RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(
+    new RadiativeTransferStepper<EddingtonSP1>());
 
   // Run simulations at various resolutions.
   for (const auto& cells : nCells) {

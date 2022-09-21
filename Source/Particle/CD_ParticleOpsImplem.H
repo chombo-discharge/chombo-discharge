@@ -42,8 +42,9 @@ ParticleOps::domainIntersection(const RealVect& a_oldPos,
     for (SideIterator sit; sit.ok(); ++sit) {
       const Side::LoHiSide side      = sit();
       const RealVect       wallPoint = (side == Side::Lo) ? a_probLo : a_probHi; // A point on the domain side
-      const RealVect       n0 =
-        sign(side) * RealVect(BASISV(dir)); // Normal vector pointing OUT of the domain on side sit and direction dir.
+      const RealVect       n0        = sign(side) *
+                          RealVect(
+                            BASISV(dir)); // Normal vector pointing OUT of the domain on side sit and direction dir.
       const Real normPath = PolyGeom::dot(n0, path); // Component of the path that is normal to the domain edge/face.
 
       // If normPath > 0 then the particle trajectory points towards the domain edge/face and we can have an intersection.
@@ -89,8 +90,8 @@ ParticleOps::ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impFunc,
   RealVect curPos = a_oldPos;
   for (int istep = 0; istep < nsteps; istep++) {
     const Real fa = a_impFunc->value(curPos); // Value of the implicit function at the start of the bisection interval
-    const Real fb =
-      a_impFunc->value(curPos + dxStep); // Value of the implicit function at the end of the bisection interval
+    const Real fb = a_impFunc->value(curPos +
+                                     dxStep); // Value of the implicit function at the end of the bisection interval
 
     if (fa * fb <= 0.0) {
 
@@ -123,7 +124,9 @@ ParticleOps::ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
   bool ret = false;
 
   // Absolute distance to EB.
-  auto dist = [&](const RealVect& x) -> Real { return std::abs(a_impFunc->value(x)); };
+  auto dist = [&](const RealVect& x) -> Real {
+    return std::abs(a_impFunc->value(x));
+  };
 
   const Real D  = (a_newPos - a_oldPos).vectorLength(); // Total particle path length
   const Real D0 = dist(a_oldPos);                       // Distance to EB from starting position

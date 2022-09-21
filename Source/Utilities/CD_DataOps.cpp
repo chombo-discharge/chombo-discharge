@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <limits>
+
 // Chombo includes
 #include <CH_Timer.H>
 #include <EBArith.H>
@@ -1091,10 +1094,14 @@ DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value)
     for (int comp = 0; comp < numComp; comp++) {
 
       // Regular kernel.
-      auto regularKernel = [&](const IntVect& iv) -> void { lhs_reg(iv, comp) = std::max(a_value, lhs_reg(iv, comp)); };
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        lhs_reg(iv, comp) = std::max(a_value, lhs_reg(iv, comp));
+      };
 
       // Irregular kernel
-      auto irregularKernel = [&](const VolIndex& vof) -> void { lhs(vof, comp) = std::max(a_value, lhs(vof, comp)); };
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        lhs(vof, comp) = std::max(a_value, lhs(vof, comp));
+      };
 
       // Execute the kernels.
       BoxLoops::loop(box, regularKernel);
@@ -1130,7 +1137,9 @@ DataOps::floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
     for (int comp = 0; comp < numComp; comp++) {
 
       // Irregular kernel.
-      auto irregularKernel = [&](const VolIndex& vof) -> void { lhs(vof, comp) = std::max(a_value, lhs(vof, comp)); };
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        lhs(vof, comp) = std::max(a_value, lhs(vof, comp));
+      };
 
       // Run kernel
       BoxLoops::loop(vofit, irregularKernel);
@@ -1170,10 +1179,14 @@ DataOps::roof(LevelData<EBCellFAB>& a_lhs, const Real a_value)
     for (int comp = 0; comp < numComp; comp++) {
 
       // Regular kernel.
-      auto regularKernel = [&](const IntVect& iv) -> void { lhs_reg(iv, comp) = std::min(a_value, lhs_reg(iv, comp)); };
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        lhs_reg(iv, comp) = std::min(a_value, lhs_reg(iv, comp));
+      };
 
       // Irregular kernel
-      auto irregularKernel = [&](const VolIndex& vof) -> void { lhs(vof, comp) = std::min(a_value, lhs(vof, comp)); };
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        lhs(vof, comp) = std::min(a_value, lhs(vof, comp));
+      };
 
       // Execute the kernels.
       BoxLoops::loop(box, regularKernel);
@@ -1209,7 +1222,9 @@ DataOps::roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
     for (int comp = 0; comp < numComp; comp++) {
 
       // Irregular kernel.
-      auto irregularKernel = [&](const VolIndex& vof) -> void { lhs(vof, comp) = std::min(a_value, lhs(vof, comp)); };
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        lhs(vof, comp) = std::min(a_value, lhs(vof, comp));
+      };
 
       // Run kernel
       BoxLoops::loop(vofit, irregularKernel);
@@ -1501,10 +1516,14 @@ DataOps::invert(LevelData<EBFluxFAB>& a_data)
       for (int comp = 0; comp < numComp; comp++) {
 
         // Regular kernel.
-        auto regularKernel = [&](const IntVect& iv) -> void { dataReg(iv, comp) = 1. / dataReg(iv, comp); };
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          dataReg(iv, comp) = 1. / dataReg(iv, comp);
+        };
 
         // Irregular kernel.
-        auto irregularKernel = [&](const FaceIndex& face) -> void { data(face, comp) = 1. / data(face, comp); };
+        auto irregularKernel = [&](const FaceIndex& face) -> void {
+          data(face, comp) = 1. / data(face, comp);
+        };
 
         // Run the kernels.
         BoxLoops::loop(facebox, regularKernel);
@@ -1536,7 +1555,9 @@ DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs)
 
     VoFIterator vofit(ivs, ebgraph);
 
-    auto kernel = [&](const VolIndex& vof) -> void { mass += ebisbox.volFrac(vof) * lhs(vof, comp); };
+    auto kernel = [&](const VolIndex& vof) -> void {
+      mass += ebisbox.volFrac(vof) * lhs(vof, comp);
+    };
 
     BoxLoops::loop(vofit, kernel);
   }
@@ -1936,7 +1957,9 @@ DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, cons
           for (int comp = 0; comp < nComp; comp++) {
 
             // Kernel called for all cells.
-            auto regularKernel = [&](const IntVect& iv) -> void { coarFAB(iv, comp) = a_value; };
+            auto regularKernel = [&](const IntVect& iv) -> void {
+              coarFAB(iv, comp) = a_value;
+            };
 
             // Kernel called for irregular cells.
             auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -2460,11 +2483,15 @@ DataOps::squareRoot(LevelData<EBFluxFAB>& a_lhs)
       for (int comp = 0; comp < lhs.nComp(); comp++) {
 
         // Regular kernel.
-        auto regularKernel = [&](const IntVect& iv) -> void { lhs_reg(iv, comp) = sqrt(lhs_reg(iv, comp)); };
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          lhs_reg(iv, comp) = sqrt(lhs_reg(iv, comp));
+        };
 
         // Irregular kernel. Reaches into the cpy data holder because the regular kernel will have messed
         // with the data.
-        auto irregularKernel = [&](const FaceIndex& face) -> void { lhs(face, comp) = sqrt(cpy(face, comp)); };
+        auto irregularKernel = [&](const FaceIndex& face) -> void {
+          lhs(face, comp) = sqrt(cpy(face, comp));
+        };
 
         // Execute the kernels.
         BoxLoops::loop(facebox, regularKernel);

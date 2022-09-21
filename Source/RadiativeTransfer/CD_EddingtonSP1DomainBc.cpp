@@ -17,7 +17,9 @@ EddingtonSP1DomainBc::EddingtonSP1DomainBc()
 {
   m_bcFunctions.clear();
 
-  auto zero = [](const RealVect a_pos, const Real a_time) { return 0.0; };
+  auto zero = [](const RealVect a_pos, const Real a_time) {
+    return 0.0;
+  };
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {

@@ -336,7 +336,9 @@ EBHelmholtzOp::defineStencils()
     VoFIterator&           vofitStenc = m_vofIterStenc[dit()];
     VoFIterator&           vofitIrreg = m_vofIterIrreg[dit()];
 
-    BoxLoops::loop(vofitStenc, [&](const VolIndex& vof) -> void { opStencil(vof, m_comp).clear(); });
+    BoxLoops::loop(vofitStenc, [&](const VolIndex& vof) -> void {
+      opStencil(vof, m_comp).clear();
+    });
 
     for (int dir = 0; dir < SpaceDim; dir++) {
       m_centroidFluxStencil[dir][dit()].define(stencIVS, ebgraph, dir, m_nComp);
@@ -360,8 +362,8 @@ EBHelmholtzOp::defineStencils()
           VoFStencil loKappaDivFSten = fluxSten;
           VoFStencil hiKappaDivFSten = fluxSten;
 
-          loKappaDivFSten *=
-            ebisbox.areaFrac(face) / m_dx; // Sign explanation. For vofLo, faceIt() is the face on the "high" side and
+          loKappaDivFSten *= ebisbox.areaFrac(face) /
+                             m_dx; // Sign explanation. For vofLo, faceIt() is the face on the "high" side and
           hiKappaDivFSten *= -ebisbox.areaFrac(face) / m_dx; // vice versa for vofHi.
 
           // 4. Note that we prune storage here.
@@ -376,8 +378,9 @@ EBHelmholtzOp::defineStencils()
     }
 
     // 5. Add contributions to the operator from the EB faces.
-    BoxLoops::loop(vofitIrreg,
-                   [&](const VolIndex& vof) -> void { opStencil(vof, m_comp) += ebFluxStencil[dit()](vof, m_comp); });
+    BoxLoops::loop(vofitIrreg, [&](const VolIndex& vof) -> void {
+      opStencil(vof, m_comp) += ebFluxStencil[dit()](vof, m_comp);
+    });
 
     // Compute relaxation factor. Adjust the weight with domain boundary faces.
     auto relaxFactorKernel = [&](const VolIndex& vof) -> void {
@@ -1424,13 +1427,15 @@ EBHelmholtzOp::computeRelaxationCoefficient()
     }
 
     // At this point we have computed kappa*diag(L), but we need to invert it.
-    auto inversionKernel = [&](const IntVect& iv) -> void { regRel(iv, m_comp) = 1. / regRel(iv, m_comp); };
+    auto inversionKernel = [&](const IntVect& iv) -> void {
+      regRel(iv, m_comp) = 1. / regRel(iv, m_comp);
+    };
     BoxLoops::loop(cellBox, inversionKernel);
 
     // Do the same for the irregular cells
     auto irregularKernel = [&](const VolIndex& vof) -> void {
-      const Real alphaWeight =
-        m_alpha * m_alphaDiagWeight[dit()](vof, m_comp); // Recall, m_alphaDiagWeight holds kappa * A
+      const Real alphaWeight = m_alpha *
+                               m_alphaDiagWeight[dit()](vof, m_comp); // Recall, m_alphaDiagWeight holds kappa * A
       const Real betaWeight =
         m_beta *
         m_betaDiagWeight

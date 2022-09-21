@@ -103,7 +103,9 @@ EBHelmholtzNeumannEBBC::define()
     // Iteration space for kernel
     VoFIterator vofit(ivs, ebgraph);
 
-    auto kernel = [&](const VolIndex& vof) -> void { stencils(vof, m_comp).clear(); };
+    auto kernel = [&](const VolIndex& vof) -> void {
+      stencils(vof, m_comp).clear();
+    };
 
     BoxLoops::loop(vofit, kernel);
   }

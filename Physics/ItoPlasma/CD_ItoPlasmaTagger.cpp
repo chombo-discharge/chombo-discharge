@@ -285,8 +285,8 @@ ItoPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refined_tags,
       Vector<RealVect> gt(m_num_tracers);
       for (int i = 0; i < m_num_tracers; i++) {
         tr[i] = (*a_tracers[i])(vof, 0);
-        gt[i] =
-          RealVect(D_DECL((*a_grad_tracers[i])(vof, 0), (*a_grad_tracers[i])(vof, 1), (*a_grad_tracers[i])(vof, 2)));
+        gt[i] = RealVect(
+          D_DECL((*a_grad_tracers[i])(vof, 0), (*a_grad_tracers[i])(vof, 1), (*a_grad_tracers[i])(vof, 2)));
       }
 
       // Check if this cell should be refined
@@ -368,8 +368,8 @@ ItoPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsened_tags,
       Vector<RealVect> gt(m_num_tracers);
       for (int i = 0; i < m_num_tracers; i++) {
         tr[i] = (*a_tracers[i])(vof, 0);
-        gt[i] =
-          RealVect(D_DECL((*a_grad_tracers[i])(vof, 0), (*a_grad_tracers[i])(vof, 1), (*a_grad_tracers[i])(vof, 2)));
+        gt[i] = RealVect(
+          D_DECL((*a_grad_tracers[i])(vof, 0), (*a_grad_tracers[i])(vof, 1), (*a_grad_tracers[i])(vof, 2)));
       }
 
       // Check if this cell should be refined

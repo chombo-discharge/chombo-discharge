@@ -42,7 +42,9 @@ EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpeci
   m_r1      = a_r1;
   m_r2      = a_r2;
 
-  m_source = [](const RealVect& a_position) { return 0.0; };
+  m_source = [](const RealVect& a_position) {
+    return 0.0;
+  };
 
   this->setRobinFunctions();
 }
@@ -78,7 +80,9 @@ EBHelmholtzLarsenDomainBC::setRobinFunctions()
 
   // This is the right-hand side of the Robin BC, i.e. the source function. Time is a dummy parameter, and the user should
   // have captured some external time (e.g., RtSolver::m_time) by reference in the function that was passed into the full constructor.
-  m_functionC = [source = this->m_source](const RealVect& a_position) { return source(a_position); };
+  m_functionC = [source = this->m_source](const RealVect& a_position) {
+    return source(a_position);
+  };
 
   m_useFunction = true;
 }

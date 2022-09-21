@@ -339,7 +339,9 @@ FieldSolver::computeCapacitance()
 
   // Do a backup of the voltage.
   auto voltageBackup = m_voltage;
-  auto voltageOne    = [](const Real a_time) -> Real { return 100.0; };
+  auto voltageOne    = [](const Real a_time) -> Real {
+    return 100.0;
+  };
 
   // Set the voltage to one and use that to compute the potential/E-field
   this->setVoltage(voltageOne);
@@ -666,7 +668,9 @@ FieldSolver::setDefaultDomainBcFunctions()
   }
 
   // Default space/time dependency of domain BCs.
-  auto defaultDomainBcFunction = [](const RealVect a_position, const Real a_time) -> Real { return 1.0; };
+  auto defaultDomainBcFunction = [](const RealVect a_position, const Real a_time) -> Real {
+    return 1.0;
+  };
 
   m_domainBcFunctions.clear();
   for (int dir = 0; dir < SpaceDim; dir++) {

@@ -23,7 +23,9 @@ ElectrostaticDomainBc::ElectrostaticDomainBc()
   m_bcFunctions.clear();
 
   // Make a lambda which returns zero everywhere.
-  auto zero = [](const RealVect a_pos, const Real a_time) { return 0.0; };
+  auto zero = [](const RealVect a_pos, const Real a_time) {
+    return 0.0;
+  };
 
   // Set the boundary condition functions on each side to be homogeneous Neumann boundary conditions.
   for (int dir = 0; dir < SpaceDim; dir++) {

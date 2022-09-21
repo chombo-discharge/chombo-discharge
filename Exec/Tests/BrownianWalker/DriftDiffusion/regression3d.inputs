@@ -118,7 +118,7 @@ RodDielectric.sphere.radius             = 0.15          # Radius
 # ====================================================================================================
 BrownianWalker.verbosity      = -1       # Verbosity
 BrownianWalker.realm          = primal # Realm
-BrownianWalker.diffusion      = true     # Turn on/off diffusion
+BrownianWalker.diffusion      = false    # Turn on/off diffusion
 BrownianWalker.advection      = true     # Turn on/off advection
 BrownianWalker.blob_amplitude = 1.0      # Blob amplitude
 BrownianWalker.blob_radius    = 0.5      # Blob radius

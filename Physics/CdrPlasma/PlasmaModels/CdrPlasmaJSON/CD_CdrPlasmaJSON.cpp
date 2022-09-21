@@ -394,9 +394,15 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     const Real P    = P0 * Units::atm2pascal;
     const Real Rho0 = (P * Units::Na) / (T0 * Units::R);
 
-    m_gasTemperature = [T0](const RealVect a_position) -> Real { return T0; };
-    m_gasPressure    = [P](const RealVect a_position) -> Real { return P; };
-    m_gasDensity     = [Rho0](const RealVect a_position) -> Real { return Rho0; };
+    m_gasTemperature = [T0](const RealVect a_position) -> Real {
+      return T0;
+    };
+    m_gasPressure = [P](const RealVect a_position) -> Real {
+      return P;
+    };
+    m_gasDensity = [Rho0](const RealVect a_position) -> Real {
+      return Rho0;
+    };
   }
   else if (gasLaw == "troposphere") {
 
@@ -421,7 +427,9 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     const Real P    = P0 * Units::atm2pascal;
 
     // Temperature is T = T0 - L*(z-h0)
-    m_gasTemperature = [T0, L](const RealVect a_position) -> Real { return T0 - L * a_position[SpaceDim - 1]; };
+    m_gasTemperature = [T0, L](const RealVect a_position) -> Real {
+      return T0 - L * a_position[SpaceDim - 1];
+    };
 
     // Pressure is p = p0 * (1 - L*h/T0)^(g*M/(R*L)
     m_gasPressure = [T0, P, L, gMRL](const RealVect a_position) -> Real {
@@ -551,8 +559,10 @@ CdrPlasmaJSON::initializeNeutralSpecies()
       this->throwParserError(baseError + " -- Neutral species '" + speciesName + "' was defined more than once");
 
     // Set the species density function.
-    const std::function<Real(const RealVect)> speciesDensity =
-      [f = speciesFraction, &N = this->m_gasDensity](const RealVect a_position) { return f * N(a_position); };
+    const std::function<Real(const RealVect)> speciesDensity = [f  = speciesFraction,
+                                                                &N = this->m_gasDensity](const RealVect a_position) {
+      return f * N(a_position);
+    };
 
     // Add the species. Make sure the maps are consist.
     const int idx = m_neutralSpecies.size();
@@ -730,7 +740,9 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
   const std::string baseError = "CdrPlasmaJSON::parsePlasmaSpeciesInitialData for species '" + species + "' ";
 
   // This is the returned data function.
-  InitialDataFunction initFunc = [](const RealVect a_position, const Real a_time) { return 0.0; };
+  InitialDataFunction initFunc = [](const RealVect a_position, const Real a_time) {
+    return 0.0;
+  };
 
   // JSON object for the initial data field.
   json initData;
@@ -970,7 +982,9 @@ CdrPlasmaJSON::initializePhotonSpecies()
 
       const Real value = species["value"].get<Real>();
 
-      kappaFunction = [value](const RealVect a_position) { return value; };
+      kappaFunction = [value](const RealVect a_position) {
+        return value;
+      };
     }
     else if (kappa == "helmholtz") {
       // For the Bourdon model the translation between the Eddington and Bourdon model is
@@ -1083,13 +1097,17 @@ CdrPlasmaJSON::initializeSigma()
     pout() << "CdrPlasmaJSON::initializeSigma()" << endl;
   }
 
-  m_initialSigma = [](const RealVect a_pos, const Real a_time) -> Real { return 0.0; };
+  m_initialSigma = [](const RealVect a_pos, const Real a_time) -> Real {
+    return 0.0;
+  };
 
   if (m_json.contains("sigma")) {
     if (m_json["sigma"].contains("initial density")) {
       const Real sigma = m_json["sigma"]["initial density"].get<Real>();
 
-      m_initialSigma = [sigma](const RealVect a_position, const Real a_time) -> Real { return sigma; };
+      m_initialSigma = [sigma](const RealVect a_position, const Real a_time) -> Real {
+        return sigma;
+      };
     }
   }
 }
@@ -1604,7 +1622,9 @@ CdrPlasmaJSON::parseMobilities()
         const Real B = mobilityJSON["c2"].get<Real>();
         const Real C = mobilityJSON["c3"].get<Real>();
 
-        func = [A, B, C](const Real a_E, const Real a_N) -> Real { return A * std::pow(a_E, B) / std::pow(a_N, C); };
+        func = [A, B, C](const Real a_E, const Real a_N) -> Real {
+          return A * std::pow(a_E, B) / std::pow(a_N, C);
+        };
 
         m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEN));
         m_mobilityFunctionsEN.emplace(std::make_pair(idx, func));
@@ -1920,7 +1940,9 @@ CdrPlasmaJSON::parseDiffusion()
         const Real B = diffusionJSON["c2"].get<Real>();
         const Real C = diffusionJSON["c3"].get<Real>();
 
-        func = [A, B, C](const Real a_E, const Real a_N) -> Real { return A * std::pow(a_E, B) / std::pow(a_N, C); };
+        func = [A, B, C](const Real a_E, const Real a_N) -> Real {
+          return A * std::pow(a_E, B) / std::pow(a_N, C);
+        };
 
         m_diffusionLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEN));
         m_diffusionFunctionsEN.emplace(std::make_pair(idx, func));
@@ -2013,7 +2035,9 @@ CdrPlasmaJSON::parseTemperatures()
 
         // Create a function which returns a constant value everywhere.
         m_temperatureLookup.emplace(idx, LookupMethod::FunctionX);
-        m_temperatureConstants.emplace(idx, [value](const RealVect a_psition) -> Real { return value; });
+        m_temperatureConstants.emplace(idx, [value](const RealVect a_psition) -> Real {
+          return value;
+        });
       }
       else if (lookup == "table E/N") {
         if (!(S.contains("file")))
@@ -2506,7 +2530,9 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const Real c1 = a_R["c1"].get<Real>();
     const Real c2 = a_R["c2"].get<Real>();
 
-    FunctionTT functionT1T2 = [=](const Real a_T1, const Real a_T2) -> Real { return c1 * std::pow(a_T1 / a_T2, c2); };
+    FunctionTT functionT1T2 = [=](const Real a_T1, const Real a_T2) -> Real {
+      return c1 * std::pow(a_T1 / a_T2, c2);
+    };
 
     m_plasmaReactionFunctionsTT.emplace(a_reactionIndex, std::make_tuple(firstIndex, secondIndex, functionT1T2));
     m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::FunctionTT);
@@ -2800,7 +2826,9 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
     this->throwParserError(baseError + "- cannot specify both 'photoionization' and 'quenching pressure'");
   }
   else if (doPressureQuenching && !doPhotoIonization) {
-    func = [scale, pq, p = this->m_gasPressure](const Real E, const RealVect x) { return scale * pq / (pq + p(x)); };
+    func = [scale, pq, p = this->m_gasPressure](const Real E, const RealVect x) {
+      return scale * pq / (pq + p(x));
+    };
   }
   else if (!doPressureQuenching && doPhotoIonization) {
     func = [scale, kr, kp, kqN, photoiEff, exciteEff, &N = this->m_gasDensity](const Real E, const RealVect x) -> Real {
@@ -2810,7 +2838,9 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
     };
   }
   else {
-    func = [scale](const Real E, const RealVect x) -> Real { return scale; };
+    func = [scale](const Real E, const RealVect x) -> Real {
+      return scale;
+    };
   }
 
   // Add it to the pile.
@@ -3150,7 +3180,9 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
     };
   }
   else {
-    func = [scale](const Real E, const RealVect x) { return scale; };
+    func = [scale](const Real E, const RealVect x) {
+      return scale;
+    };
   }
 
   m_photoReactionEfficiencies.emplace(a_reactionIndex, func);
@@ -3381,7 +3413,9 @@ CdrPlasmaJSON::parseElectrodeReactionScaling(const int a_reactionIndex, const js
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real E, const RealVect x) -> Real { return scale; };
+  auto func = [scale](const Real E, const RealVect x) -> Real {
+    return scale;
+  };
 
   // Add it to the pile.
   m_electrodeReactionEfficiencies.emplace(a_reactionIndex, func);
@@ -3611,7 +3645,9 @@ CdrPlasmaJSON::parseDielectricReactionScaling(const int a_reactionIndex, const j
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real E, const RealVect x) -> Real { return scale; };
+  auto func = [scale](const Real E, const RealVect x) -> Real {
+    return scale;
+  };
 
   // Add it to the pile.
   m_dielectricReactionEfficiencies.emplace(a_reactionIndex, func);
@@ -3756,9 +3792,9 @@ CdrPlasmaJSON::parseDomainReactions()
         // Add this reaction to all the specified sides.
         for (std::string curSide : sides) {
           // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactions-map
-          curSide = this->trim(curSide);
-          std::pair<int, Side::LoHiSide> curPair =
-            std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2, 2)));
+          curSide                                = this->trim(curSide);
+          std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)),
+                                                                  m_sideStringToSide.at(curSide.substr(2, 2)));
 
           std::vector<CdrPlasmaSurfaceReactionJSON>& reactions = m_domainReactions.at(curPair);
           reactions.insert(std::end(reactions), std::begin(domainReactionsVec), std::end(domainReactionsVec));
@@ -3801,9 +3837,9 @@ CdrPlasmaJSON::parseDomainReactionRate(const int                       a_reactio
 
     for (std::string curSide : a_sides) {
       // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactionLookup- and m_domainReactionConstants-map
-      curSide = this->trim(curSide);
-      std::pair<int, Side::LoHiSide> curPair =
-        std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2, 2)));
+      curSide                                = this->trim(curSide);
+      std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)),
+                                                              m_sideStringToSide.at(curSide.substr(2, 2)));
 
       // Duplicated inputs are not handled here (they are handled in CdrPlasmaJSON::parseDomainReactions() )
       // Add the constant reaction rate to the appropriate container
@@ -3833,13 +3869,15 @@ CdrPlasmaJSON::parseDomainReactionScaling(const int                       a_reac
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real E, const RealVect x) -> Real { return scale; };
+  auto func = [scale](const Real E, const RealVect x) -> Real {
+    return scale;
+  };
 
   for (std::string curSide : a_sides) {
     // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactionLookup- and m_domainReactionConstants-map
-    curSide = this->trim(curSide);
-    std::pair<int, Side::LoHiSide> curPair =
-      std::make_pair(m_dirCharToInt.at(curSide.at(0)), m_sideStringToSide.at(curSide.substr(2, 2)));
+    curSide                                = this->trim(curSide);
+    std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)),
+                                                            m_sideStringToSide.at(curSide.substr(2, 2)));
 
     // Duplicated inputs are not handled here (they are handled in CdrPlasmaJSON::parseDomainReactions() )
     // Add to the pile

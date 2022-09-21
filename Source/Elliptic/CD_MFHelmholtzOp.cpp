@@ -122,8 +122,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     // Alias the multifluid-coefficients onto a single phase.
     RefCountedPtr<LevelData<EBCellFAB>>       Acoef = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
     RefCountedPtr<LevelData<EBFluxFAB>>       Bcoef = RefCountedPtr<LevelData<EBFluxFAB>>(new LevelData<EBFluxFAB>());
-    RefCountedPtr<LevelData<BaseIVFAB<Real>>> BcoefIrreg =
-      RefCountedPtr<LevelData<BaseIVFAB<Real>>>(new LevelData<BaseIVFAB<Real>>());
+    RefCountedPtr<LevelData<BaseIVFAB<Real>>> BcoefIrreg = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
+      new LevelData<BaseIVFAB<Real>>());
 
     MultifluidAlias::aliasMF(*Acoef, iphase, *a_Acoef);
     MultifluidAlias::aliasMF(*Bcoef, iphase, *a_Bcoef);

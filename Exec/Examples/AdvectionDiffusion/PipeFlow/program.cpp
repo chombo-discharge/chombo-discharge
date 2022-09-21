@@ -31,7 +31,9 @@ main(int argc, char* argv[])
   auto tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
 
   // Set up velocity along the cylinder
-  timestepper->setVelocity([](const RealVect& a_position) { return RealVect(D_DECL(1.0, 1.0, 0.0)); });
+  timestepper->setVelocity([](const RealVect& a_position) {
+    return RealVect(D_DECL(1.0, 1.0, 0.0));
+  });
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
