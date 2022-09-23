@@ -293,9 +293,7 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
   auto phaseEnergy = [&EdotD, &amr = this->m_amr](const phase::which_phase a_phase) -> Real {
     const EBAMRCellData phaseEdotD = amr->alias(a_phase, EdotD);
 
-    Real energy;
-
-    DataOps::norm(energy, *phaseEdotD[0], amr->getDomains()[0], 1);
+    const Real energy = DataOps::norm(*phaseEdotD[0], 1);
 
     return energy;
   };

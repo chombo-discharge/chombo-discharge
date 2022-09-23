@@ -167,12 +167,12 @@ StreamerInceptionStepper.mode          = transient                     # Mode (s
 StreamerInceptionStepper.inception_alg = trapz dx 0.1                  # Integration algorithm for inception integral.
 StreamerInceptionStepper.output_file   = report.txt                    # Output file
 StreamerInceptionStepper.K_inception   = 10                            # User-specified inception value
-StreamerInceptionStepper.plt_vars      = K ions Uinc bg_rate detachment alpha eta # Plot variables
+StreamerInceptionStepper.plt_vars      = K ions Uinc bg_rate detachment poisson alpha eta # Plot variables
 
 # Static mode
-StreamerInceptionStepper.voltage_lo    = 30E3                           # Low voltage multiplier
-StreamerInceptionStepper.voltage_hi    = 40E3                          # Highest voltage multiplier
-StreamerInceptionStepper.voltage_steps = 3                             # Number of voltage steps
+StreamerInceptionStepper.voltage_lo    = 10E3                          # Low voltage multiplier
+StreamerInceptionStepper.voltage_hi    = 30E3                          # Highest voltage multiplier
+StreamerInceptionStepper.voltage_steps = 10                            # Number of voltage steps
 
 # Dynamic mode
 StreamerInceptionStepper.ion_transport = true                          # Turn on/off ion transport
