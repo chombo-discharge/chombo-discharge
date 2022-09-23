@@ -1173,8 +1173,8 @@ CdrPlasmaImExSdcStepper::finalizeErrors()
       // Compute norms. Only coarsest level
       Real      Lerr, Lphi;
       const int lvl = 0;
-      Lerr = DataOps::norm(*error[lvl], m_errorNorm);
-      Lphi = DataOps::norm(*phi_p[lvl], m_errorNorm);
+      Lerr          = DataOps::norm(*error[lvl], m_errorNorm);
+      Lphi          = DataOps::norm(*phi_p[lvl], m_errorNorm);
 
       if (Lphi > 0.0) {
         m_cdrError[idx] = Lerr / Lphi;
