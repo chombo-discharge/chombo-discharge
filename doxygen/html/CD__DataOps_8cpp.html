@@ -81,15 +81,10 @@ $(function() {
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;limits&gt;</code><br />
 <code>#include &lt;CH_Timer.H&gt;</code><br />
-<code>#include &lt;EBArith.H&gt;</code><br />
-<code>#include &lt;EBLevelDataOps.H&gt;</code><br />
-<code>#include &lt;MFLevelDataOps.H&gt;</code><br />
-<code>#include &lt;CCProjectorF_F.H&gt;</code><br />
-<code>#include &lt;EBLevelDataOpsF_F.H&gt;</code><br />
-<code>#include &lt;PolyGeom.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__DataOps_8H_source.html">CD_DataOps.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__BoxLoops_8H_source.html">CD_BoxLoops.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__ParallelOps_8H_source.html">CD_ParallelOps.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__Location_8H_source.html">CD_Location.H</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__MultifluidAlias_8H_source.html">CD_MultifluidAlias.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
@@ -98,56 +93,56 @@ Include dependency graph for CD_DataOps.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__DataOps_8cpp__incl.png" border="0" usemap="#Source_2Utilities_2CD__DataOps_8cpp" alt=""/></div>
 <map name="Source_2Utilities_2CD__DataOps_8cpp" id="Source_2Utilities_2CD__DataOps_8cpp">
-<area shape="rect" title="Implementation of CD_DataOps.H." alt="" coords="833,5,977,47"/>
-<area shape="rect" title=" " alt="" coords="5,95,64,121"/>
-<area shape="rect" title=" " alt="" coords="73,244,172,271"/>
-<area shape="rect" title=" " alt="" coords="139,95,223,121"/>
-<area shape="rect" title=" " alt="" coords="248,95,392,121"/>
-<area shape="rect" title=" " alt="" coords="416,95,563,121"/>
-<area shape="rect" title=" " alt="" coords="587,95,720,121"/>
-<area shape="rect" title=" " alt="" coords="744,95,909,121"/>
-<area shape="rect" title=" " alt="" coords="934,95,1037,121"/>
-<area shape="rect" href="CD__DataOps_8H.html" title="Agglomeration of useful data operations." alt="" coords="2327,95,2446,121"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2294,393,2479,420"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2719,393,2897,420"/>
-<area shape="rect" href="CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="4020,244,4145,271"/>
-<area shape="rect" href="CD__ParallelOps_8H.html" title="Agglomeration of basic MPI reductions." alt="" coords="3535,244,3670,271"/>
-<area shape="rect" href="CD__MultifluidAlias_8H.html" title="Declaration of factories that allow aliasing of LevelData&lt;MFFluxFAB&gt; and LevelData&lt;MFBaseIVFAB&gt;" alt="" coords="771,244,925,271"/>
-<area shape="rect" href="CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="2401,319,2516,345"/>
-<area shape="rect" href="CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="1465,244,1605,271"/>
-<area shape="rect" href="CD__Decorations_8H_source.html" title=" " alt="" coords="3173,319,3313,345"/>
-<area shape="rect" href="CD__MFInterfaceFAB_8H.html" title="Declaration of a class that allocates irregular data holders over the interface between two phases." alt="" coords="2573,169,2737,196"/>
-<area shape="rect" href="CD__DataOpsImplem_8H.html" title="Implementation of CD_DataOps.H." alt="" coords="1591,169,1759,196"/>
-<area shape="rect" title=" " alt="" coords="1203,319,1306,345"/>
-<area shape="rect" title=" " alt="" coords="1330,319,1459,345"/>
-<area shape="rect" title=" " alt="" coords="1483,319,1586,345"/>
-<area shape="rect" title=" " alt="" coords="1610,319,1715,345"/>
-<area shape="rect" title=" " alt="" coords="1740,319,1847,345"/>
-<area shape="rect" title=" " alt="" coords="346,393,451,420"/>
-<area shape="rect" title=" " alt="" coords="885,393,989,420"/>
-<area shape="rect" title=" " alt="" coords="441,319,546,345"/>
-<area shape="rect" title=" " alt="" coords="309,319,417,345"/>
-<area shape="rect" title=" " alt="" coords="1871,319,1958,345"/>
-<area shape="rect" href="CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="849,319,1026,345"/>
-<area shape="rect" href="CD__MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB&lt;Real&gt;" alt="" coords="622,319,773,345"/>
-<area shape="rect" href="CD__EBAMRDataImplem_8H.html" title="Implementation of EBAMRData.H." alt="" coords="2034,319,2225,345"/>
-<area shape="rect" title=" " alt="" coords="1013,393,1155,420"/>
-<area shape="rect" title=" " alt="" coords="752,393,861,420"/>
-<area shape="rect" title=" " alt="" coords="475,393,611,420"/>
-<area shape="rect" title=" " alt="" coords="3913,393,4015,420"/>
-<area shape="rect" title=" " alt="" coords="635,393,727,420"/>
-<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="2895,319,3097,345"/>
-<area shape="rect" href="CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="2787,244,2931,271"/>
-<area shape="rect" href="CD__MFInterfaceFABImplem_8H.html" title="Implementation of CD_MFInterfaceFAB.H." alt="" coords="2547,244,2762,271"/>
-<area shape="rect" title=" " alt="" coords="2921,393,3071,420"/>
-<area shape="rect" title=" " alt="" coords="4052,319,4113,345"/>
-<area shape="rect" title=" " alt="" coords="4138,319,4281,345"/>
-<area shape="rect" title=" " alt="" coords="4305,319,4412,345"/>
-<area shape="rect" title=" " alt="" coords="4436,319,4548,345"/>
-<area shape="rect" title=" " alt="" coords="4573,319,4649,345"/>
-<area shape="rect" href="CD__BoxLoopsImplem_8H.html" title="Implementation of CD_BoxLoops.H." alt="" coords="3439,319,3614,345"/>
-<area shape="rect" href="CD__ParallelOpsImplem_8H.html" title="Implementation of CD_ParallelOps.H." alt="" coords="3690,319,3875,345"/>
-<area shape="rect" title=" " alt="" coords="3745,393,3820,420"/>
+<area shape="rect" title="Implementation of CD_DataOps.H." alt="" coords="2867,5,3011,47"/>
+<area shape="rect" title=" " alt="" coords="2060,95,2119,121"/>
+<area shape="rect" title=" " alt="" coords="2804,244,2903,271"/>
+<area shape="rect" href="CD__DataOps_8H.html" title="Agglomeration of useful data operations." alt="" coords="2879,95,2998,121"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="3075,393,3261,420"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2463,393,2641,420"/>
+<area shape="rect" href="CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="3361,244,3487,271"/>
+<area shape="rect" href="CD__ParallelOps_8H.html" title="Agglomeration of basic MPI reductions." alt="" coords="4705,244,4839,271"/>
+<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="4271,244,4388,271"/>
+<area shape="rect" href="CD__MultifluidAlias_8H.html" title="Declaration of factories that allow aliasing of LevelData&lt;MFFluxFAB&gt; and LevelData&lt;MFBaseIVFAB&gt;" alt="" coords="2008,244,2163,271"/>
+<area shape="rect" href="CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="2817,319,2932,345"/>
+<area shape="rect" href="CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="962,244,1102,271"/>
+<area shape="rect" href="CD__Decorations_8H_source.html" title=" " alt="" coords="3007,319,3147,345"/>
+<area shape="rect" href="CD__MFInterfaceFAB_8H.html" title="Declaration of a class that allocates irregular data holders over the interface between two phases." alt="" coords="2339,169,2503,196"/>
+<area shape="rect" href="CD__DataOpsImplem_8H.html" title="Implementation of CD_DataOps.H." alt="" coords="2855,169,3023,196"/>
+<area shape="rect" title=" " alt="" coords="999,319,1102,345"/>
+<area shape="rect" title=" " alt="" coords="297,319,426,345"/>
+<area shape="rect" title=" " alt="" coords="450,319,553,345"/>
+<area shape="rect" title=" " alt="" coords="577,319,682,345"/>
+<area shape="rect" title=" " alt="" coords="707,319,813,345"/>
+<area shape="rect" title=" " alt="" coords="789,393,894,420"/>
+<area shape="rect" title=" " alt="" coords="5,393,109,420"/>
+<area shape="rect" title=" " alt="" coords="1897,319,2002,345"/>
+<area shape="rect" title=" " alt="" coords="2026,319,2134,345"/>
+<area shape="rect" title=" " alt="" coords="889,319,975,345"/>
+<area shape="rect" href="CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="95,319,273,345"/>
+<area shape="rect" href="CD__MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB&lt;Real&gt;" alt="" coords="1455,319,1606,345"/>
+<area shape="rect" href="CD__EBAMRDataImplem_8H.html" title="Implementation of EBAMRData.H." alt="" coords="1682,319,1873,345"/>
+<area shape="rect" title=" " alt="" coords="133,393,275,420"/>
+<area shape="rect" title=" " alt="" coords="472,393,581,420"/>
+<area shape="rect" title=" " alt="" coords="1515,393,1651,420"/>
+<area shape="rect" title=" " alt="" coords="2222,393,2325,420"/>
+<area shape="rect" title=" " alt="" coords="1675,393,1767,420"/>
+<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="1177,319,1380,345"/>
+<area shape="rect" href="CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="2295,244,2439,271"/>
+<area shape="rect" href="CD__MFInterfaceFABImplem_8H.html" title="Implementation of CD_MFInterfaceFAB.H." alt="" coords="2514,244,2729,271"/>
+<area shape="rect" title=" " alt="" coords="917,393,1067,420"/>
+<area shape="rect" title=" " alt="" coords="1091,393,1219,420"/>
+<area shape="rect" title=" " alt="" coords="1243,393,1336,420"/>
+<area shape="rect" title=" " alt="" coords="1360,393,1491,420"/>
+<area shape="rect" title=" " alt="" coords="3739,319,3800,345"/>
+<area shape="rect" title=" " alt="" coords="3825,319,3967,345"/>
+<area shape="rect" title=" " alt="" coords="3371,319,3477,345"/>
+<area shape="rect" title=" " alt="" coords="3501,319,3613,345"/>
+<area shape="rect" title=" " alt="" coords="3638,319,3714,345"/>
+<area shape="rect" href="CD__BoxLoopsImplem_8H.html" title="Implementation of CD_BoxLoops.H." alt="" coords="3171,319,3346,345"/>
+<area shape="rect" href="CD__ParallelOpsImplem_8H.html" title="Implementation of CD_ParallelOps.H." alt="" coords="4755,319,4941,345"/>
+<area shape="rect" title=" " alt="" coords="4811,393,4885,420"/>
+<area shape="rect" title=" " alt="" coords="4437,319,4528,345"/>
+<area shape="rect" href="CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="4246,319,4413,345"/>
 </map>
 </div>
 </div><a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>

@@ -269,9 +269,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a7efeac6bdd32a2b7de5e1be30c7dab88"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a7efeac6bdd32a2b7de5e1be30c7dab88">invert</a> (EBFluxFAB &amp;a_data)</td></tr>
 <tr class="memdesc:a7efeac6bdd32a2b7de5e1be30c7dab88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Invert data.  <a href="classDataOps.html#a7efeac6bdd32a2b7de5e1be30c7dab88">More...</a><br /></td></tr>
 <tr class="separator:a7efeac6bdd32a2b7de5e1be30c7dab88"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2910bb89859c7dc25a3a8ec2a597fc98"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a2910bb89859c7dc25a3a8ec2a597fc98">kappaSum</a> (Real &amp;a_mass, const LevelData&lt; EBCellFAB &gt; &amp;a_lhs)</td></tr>
-<tr class="memdesc:a2910bb89859c7dc25a3a8ec2a597fc98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the kappa-weighted sum of the input data. Assumes one component.  <a href="classDataOps.html#a2910bb89859c7dc25a3a8ec2a597fc98">More...</a><br /></td></tr>
-<tr class="separator:a2910bb89859c7dc25a3a8ec2a597fc98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4261230f2d9ceb036ad1294b8f947d0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ae4261230f2d9ceb036ad1294b8f947d0">kappaSum</a> (Real &amp;a_mass, const LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const int a_comp=0)</td></tr>
+<tr class="memdesc:ae4261230f2d9ceb036ad1294b8f947d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the kappa-weighted sum of the input data. Assumes one component.  <a href="classDataOps.html#ae4261230f2d9ceb036ad1294b8f947d0">More...</a><br /></td></tr>
+<tr class="separator:ae4261230f2d9ceb036ad1294b8f947d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1139f7cd961f218905b627acc8a19e2e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a1139f7cd961f218905b627acc8a19e2e">kappaScale</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data)</td></tr>
 <tr class="memdesc:a1139f7cd961f218905b627acc8a19e2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by volume fraction.  <a href="classDataOps.html#a1139f7cd961f218905b627acc8a19e2e">More...</a><br /></td></tr>
 <tr class="separator:a1139f7cd961f218905b627acc8a19e2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -317,12 +317,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:acb637ca465e480d7bad3130d4f2f8b8d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#acb637ca465e480d7bad3130d4f2f8b8d">multiplyScalar</a> (LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_lhs, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_rhs)</td></tr>
 <tr class="memdesc:acb637ca465e480d7bad3130d4f2f8b8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multiply data holder by another data holder.  <a href="classDataOps.html#acb637ca465e480d7bad3130d4f2f8b8d">More...</a><br /></td></tr>
 <tr class="separator:acb637ca465e480d7bad3130d4f2f8b8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ec246d3dbaad26ca35950cd379b32d9"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a4ec246d3dbaad26ca35950cd379b32d9">norm</a> (Real &amp;a_norm, const LevelData&lt; EBCellFAB &gt; &amp;a_data, const ProblemDomain &amp;a_domain, const int a_p)</td></tr>
-<tr class="memdesc:a4ec246d3dbaad26ca35950cd379b32d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute specified norm of data. Calls EBLevelDataOps.  <a href="classDataOps.html#a4ec246d3dbaad26ca35950cd379b32d9">More...</a><br /></td></tr>
-<tr class="separator:a4ec246d3dbaad26ca35950cd379b32d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25d765cca6b744be729e51f9c229d29c"><td class="memItemLeft" align="right" valign="top">static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a25d765cca6b744be729e51f9c229d29c">norm</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_data, const ProblemDomain &amp;a_domain, const int a_p, const bool a_regOnly)</td></tr>
-<tr class="memdesc:a25d765cca6b744be729e51f9c229d29c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute specified norm of data.  <a href="classDataOps.html#a25d765cca6b744be729e51f9c229d29c">More...</a><br /></td></tr>
-<tr class="separator:a25d765cca6b744be729e51f9c229d29c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad39cbfb09b48df4994c78f07b22c2a8e"><td class="memItemLeft" align="right" valign="top">static Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ad39cbfb09b48df4994c78f07b22c2a8e">norm</a> (const LevelData&lt; EBCellFAB &gt; &amp;a_data, const int a_p, const int a_comp=0)</td></tr>
+<tr class="memdesc:ad39cbfb09b48df4994c78f07b22c2a8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute specified norm of data.  <a href="classDataOps.html#ad39cbfb09b48df4994c78f07b22c2a8e">More...</a><br /></td></tr>
+<tr class="separator:ad39cbfb09b48df4994c78f07b22c2a8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae30f972ce853e2ffafba4cce6d27f40d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ae30f972ce853e2ffafba4cce6d27f40d">plus</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp)</td></tr>
 <tr class="memdesc:ae30f972ce853e2ffafba4cce6d27f40d"><td class="mdescLeft">&#160;</td><td class="mdescRight">General addition operator for adding together data. The user can choose which components to add.  <a href="classDataOps.html#ae30f972ce853e2ffafba4cce6d27f40d">More...</a><br /></td></tr>
 <tr class="separator:ae30f972ce853e2ffafba4cce6d27f40d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -353,6 +350,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a21800fc80d4cf5cc8e0813ba33d91bfe"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a21800fc80d4cf5cc8e0813ba33d91bfe">scale</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_lhs, const Real a_scale)</td></tr>
 <tr class="memdesc:a21800fc80d4cf5cc8e0813ba33d91bfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#a21800fc80d4cf5cc8e0813ba33d91bfe">More...</a><br /></td></tr>
 <tr class="separator:a21800fc80d4cf5cc8e0813ba33d91bfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab0d0d7c6509da37eb18bbee323bfbc6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#aab0d0d7c6509da37eb18bbee323bfbc6">scale</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_lhs, const Real a_scale)</td></tr>
+<tr class="memdesc:aab0d0d7c6509da37eb18bbee323bfbc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#aab0d0d7c6509da37eb18bbee323bfbc6">More...</a><br /></td></tr>
+<tr class="separator:aab0d0d7c6509da37eb18bbee323bfbc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f39ac1b0ea74aaffccd68f1d9004b1a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a2f39ac1b0ea74aaffccd68f1d9004b1a">scale</a> (LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_lhs, const Real &amp;a_scale)</td></tr>
 <tr class="memdesc:a2f39ac1b0ea74aaffccd68f1d9004b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#a2f39ac1b0ea74aaffccd68f1d9004b1a">More...</a><br /></td></tr>
 <tr class="separator:a2f39ac1b0ea74aaffccd68f1d9004b1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -3511,8 +3511,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a2910bb89859c7dc25a3a8ec2a597fc98"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2910bb89859c7dc25a3a8ec2a597fc98">&#9670;&nbsp;</a></span>kappaSum()</h2>
+<a id="ae4261230f2d9ceb036ad1294b8f947d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4261230f2d9ceb036ad1294b8f947d0">&#9670;&nbsp;</a></span>kappaSum()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3530,7 +3530,13 @@ template&lt;typename T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_lhs</em>&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_comp</em> = <code>0</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -3550,6 +3556,7 @@ template&lt;typename T &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_mass</td><td>Total mass, computed as kappa * lhs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lhs</td><td>Cell data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component </td></tr>
   </table>
   </dd>
 </dl>
@@ -4120,8 +4127,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a25d765cca6b744be729e51f9c229d29c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a25d765cca6b744be729e51f9c229d29c">&#9670;&nbsp;</a></span>norm() <span class="overload">[1/2]</span></h2>
+<a id="ad39cbfb09b48df4994c78f07b22c2a8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad39cbfb09b48df4994c78f07b22c2a8e">&#9670;&nbsp;</a></span>norm()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4138,20 +4145,14 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
-          <td class="paramname"><em>a_domain</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_p</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const bool&#160;</td>
-          <td class="paramname"><em>a_regOnly</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_comp</em> = <code>0</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -4170,71 +4171,12 @@ template&lt;typename T &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to compute the norm of </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Norm factor, e.g. a_p = 2 =&gt; squared norm. 0 =&gt; inf norm </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_regOnly</td><td>If true, only include regular cells in norm computation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_p</td><td>Norm factor, e.g. a_p = 2 =&gt; squared norm. 0 =&gt; inf norm </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component </td></tr>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="a4ec246d3dbaad26ca35950cd379b32d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4ec246d3dbaad26ca35950cd379b32d9">&#9670;&nbsp;</a></span>norm() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void DataOps::norm </td>
-          <td>(</td>
-          <td class="paramtype">Real &amp;&#160;</td>
-          <td class="paramname"><em>a_norm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const ProblemDomain &amp;&#160;</td>
-          <td class="paramname"><em>a_domain</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_p</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Compute specified norm of data. Calls EBLevelDataOps. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_norm</td><td>Norm </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Data to compute the norm of </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_domain</td><td>Domain </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Norm factor, e.g. a_p = 2 =&gt; squared norm. 0 =&gt; inf norm </td></tr>
-  </table>
-  </dd>
-</dl>
+<dl class="section note"><dt>Note</dt><dd>Does not do kappa-weighting; if user needs </dd></dl>
 
 </div>
 </div>
@@ -4557,7 +4499,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a73881aa89a4288cd0120292991a005f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a73881aa89a4288cd0120292991a005f2">&#9670;&nbsp;</a></span>scale() <span class="overload">[1/9]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a73881aa89a4288cd0120292991a005f2">&#9670;&nbsp;</a></span>scale() <span class="overload">[1/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4602,7 +4544,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a21800fc80d4cf5cc8e0813ba33d91bfe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a21800fc80d4cf5cc8e0813ba33d91bfe">&#9670;&nbsp;</a></span>scale() <span class="overload">[2/9]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a21800fc80d4cf5cc8e0813ba33d91bfe">&#9670;&nbsp;</a></span>scale() <span class="overload">[2/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4647,7 +4589,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a4379faf3a9701f15c0ed16f549d048a0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4379faf3a9701f15c0ed16f549d048a0">&#9670;&nbsp;</a></span>scale() <span class="overload">[3/9]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a4379faf3a9701f15c0ed16f549d048a0">&#9670;&nbsp;</a></span>scale() <span class="overload">[3/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4692,7 +4634,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a2f39ac1b0ea74aaffccd68f1d9004b1a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f39ac1b0ea74aaffccd68f1d9004b1a">&#9670;&nbsp;</a></span>scale() <span class="overload">[4/9]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f39ac1b0ea74aaffccd68f1d9004b1a">&#9670;&nbsp;</a></span>scale() <span class="overload">[4/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4737,7 +4679,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="afddaf35e97f5d99bdbeea6312944e91b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afddaf35e97f5d99bdbeea6312944e91b">&#9670;&nbsp;</a></span>scale() <span class="overload">[5/9]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#afddaf35e97f5d99bdbeea6312944e91b">&#9670;&nbsp;</a></span>scale() <span class="overload">[5/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4781,8 +4723,53 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a id="aab0d0d7c6509da37eb18bbee323bfbc6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab0d0d7c6509da37eb18bbee323bfbc6">&#9670;&nbsp;</a></span>scale() <span class="overload">[6/10]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::scale </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBFluxFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Scale data by factor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Data to be scaled </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_scale</td><td>Scaling factor </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ae60cd8dc87c3127c81c5ec99aca333a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae60cd8dc87c3127c81c5ec99aca333a8">&#9670;&nbsp;</a></span>scale() <span class="overload">[6/9]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae60cd8dc87c3127c81c5ec99aca333a8">&#9670;&nbsp;</a></span>scale() <span class="overload">[7/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4827,7 +4814,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="ad8e6d037941dfb563e19c392d70b2d1c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad8e6d037941dfb563e19c392d70b2d1c">&#9670;&nbsp;</a></span>scale() <span class="overload">[7/9]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8e6d037941dfb563e19c392d70b2d1c">&#9670;&nbsp;</a></span>scale() <span class="overload">[8/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4872,7 +4859,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="accd8d88fb7786769bbdd16c39ee6637a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#accd8d88fb7786769bbdd16c39ee6637a">&#9670;&nbsp;</a></span>scale() <span class="overload">[8/9]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#accd8d88fb7786769bbdd16c39ee6637a">&#9670;&nbsp;</a></span>scale() <span class="overload">[9/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4917,7 +4904,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a6605122661a344974cd6b0b540c50d96"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6605122661a344974cd6b0b540c50d96">&#9670;&nbsp;</a></span>scale() <span class="overload">[9/9]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6605122661a344974cd6b0b540c50d96">&#9670;&nbsp;</a></span>scale() <span class="overload">[10/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
