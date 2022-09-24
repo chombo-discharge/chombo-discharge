@@ -160,8 +160,12 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                          m_ghostPhi);
   }
 
-  // Define data holders and stencils
+  // Define stencils and compute relaxation terms. 
   this->defineStencils();
+
+  this->computeAlphaWeight();
+  this->computeRelaxationCoefficient();
+  this->makeAggStencil();  
 }
 
 EBHelmholtzOp::~EBHelmholtzOp() { CH_TIME("EBHelmholtzOp::~EBHelmholtzOp()"); }
@@ -199,8 +203,8 @@ EBHelmholtzOp::defineStencils()
   EBCellFactory cellFact(m_eblg.getEBISL());
   EBFluxFactory fluxFact(m_eblg.getEBISL());
 
-  m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, cellFact); // Don't need ghost cells for this one.
-  m_flux.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, fluxFact);    // Don't need ghost cells here either.
+  m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, cellFact);
+  m_flux.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, fluxFact);   
 
   m_vofIterIrreg.define(m_eblg.getDBL());
   m_vofIterMulti.define(m_eblg.getDBL());
@@ -362,15 +366,18 @@ EBHelmholtzOp::defineStencils()
           VoFStencil loKappaDivFSten = fluxSten;
           VoFStencil hiKappaDivFSten = fluxSten;
 
-          loKappaDivFSten *= ebisbox.areaFrac(face) /
-                             m_dx; // Sign explanation. For vofLo, faceIt() is the face on the "high" side and
-          hiKappaDivFSten *= -ebisbox.areaFrac(face) / m_dx; // vice versa for vofHi.
+          // Sign explanation. For vofLo, faceIt() is the face on the "high" side and
+          // vice versa for vofHi
+          loKappaDivFSten *= ebisbox.areaFrac(face) / m_dx;
+          hiKappaDivFSten *= -ebisbox.areaFrac(face) / m_dx;
 
           // 4. Note that we prune storage here.
-          if (stencIVS.contains(vofLo.gridIndex()))
+          if (stencIVS.contains(vofLo.gridIndex())) {
             opStencil(vofLo, m_comp) += loKappaDivFSten;
-          if (stencIVS.contains(vofHi.gridIndex()))
+	  }
+          if (stencIVS.contains(vofHi.gridIndex())) {
             opStencil(vofHi, m_comp) += hiKappaDivFSten;
+	  }
         }
       };
 
@@ -410,10 +417,6 @@ EBHelmholtzOp::defineStencils()
     BoxLoops::loop(vofitStenc, relaxFactorKernel);
   }
 
-  // Compute the alpha-weight and relaxation coefficient.
-  this->computeAlphaWeight();
-  this->computeRelaxationCoefficient();
-  this->makeAggStencil();
 }
 
 void
@@ -523,14 +526,12 @@ EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order)
     const EBISBox&   ebisbox = rhs.getEBISBox();
     const Box        box     = a_rhs.disjointBoxLayout()[dit()];
 
-    // Do the regular cells. We can replace this with a Fortran kernel if we have to, but this won't be performance-critical, I think.
     auto regularKernel = [&](const IntVect& iv) -> void {
       if (ebisbox.isRegular(iv)) {
         maxNorm = std::max(maxNorm, std::abs(regRhs(iv, m_comp)));
       }
     };
 
-    // Irregular cells.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       maxNorm = std::max(maxNorm, std::abs(rhs(vof, m_comp)));
     };
@@ -752,12 +753,12 @@ EBHelmholtzOp::AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 
   LevelData<EBCellFAB> lcorr;
   this->create(lcorr, a_correction);
-  this->applyOp(lcorr,
-                a_correction,
-                &a_coarseCorrection,
-                homogeneousPhysBC,
-                homogeneousCFBC);      // lcorr = L(phi, phiCoar)
-  this->incr(a_residual, lcorr, -1.0); // a_residual = a_residual - L(phi)
+
+  // lcorr = L(phi, phiCoar)
+  this->applyOp(lcorr, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC);
+
+  // a_residual = a_residual - L(phi)
+  this->incr(a_residual, lcorr, -1.0);
 }
 
 void
@@ -967,8 +968,12 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
   VoFIterator& vofit = m_vofIterStenc[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof     = vofit();
-    const VoFStencil& stenc = m_relaxStencils[a_dit](vof, m_comp);                // = Finite volume stencil representation of Int[B*grad(phi)]dA
-    const Real& alphaDiag   = m_alpha * m_alphaDiagWeight[a_dit](vof, m_comp); // = kappa * alpha * aco (m_alphaDiagWeight holds kappa* aco)
+
+    // Finite volume stencil representation of Int[B*grad(phi)]dA    
+    const VoFStencil& stenc = m_relaxStencils[a_dit](vof, m_comp);
+
+    // kappa * alpha * aco (m_alphaDiagWeight holds kappa* aco)    
+    const Real& alphaDiag   = m_alpha * m_alphaDiagWeight[a_dit](vof, m_comp); 
     
     a_Lphi(vof, m_comp) = alphaDiag * a_phi(vof, m_comp);
 
@@ -1127,20 +1132,30 @@ EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellF
   // This function performs relaxation steps on the correction. User can switch between different kernels.
 
   switch (m_smoother) {
-  case Smoother::NoRelax: // Don't know why you would do this.
+  case Smoother::NoRelax: {
     break;
-  case Smoother::PointJacobi:
+  }
+  case Smoother::PointJacobi: {
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
+    
     break;
-  case Smoother::GauSaiRedBlack:
+  }
+  case Smoother::GauSaiRedBlack: {
     this->relaxGSRedBlack(a_correction, a_residual, a_iterations);
+    
     break;
-  case Smoother::GauSaiMultiColor:
+  }
+  case Smoother::GauSaiMultiColor: {
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
+    
     break;
-  default:
+  }
+  default: {
     MayDay::Error("EBHelmholtzOp::relax - bogus relaxation method requested");
-  };
+    
+    break;
+  }
+  }
 }
 
 void
@@ -1434,13 +1449,11 @@ EBHelmholtzOp::computeRelaxationCoefficient()
 
     // Do the same for the irregular cells
     auto irregularKernel = [&](const VolIndex& vof) -> void {
-      const Real alphaWeight = m_alpha *
-                               m_alphaDiagWeight[dit()](vof, m_comp); // Recall, m_alphaDiagWeight holds kappa * A
-      const Real betaWeight =
-        m_beta *
-        m_betaDiagWeight
-          [dit()](vof,
-                  m_comp); // Recall, m_betaWeight holds the diagonal part of kappa*div(b*grad(phi)) in the cut-cells.
+      // m_alphaDiagWeight holds kappa * A
+      const Real alphaWeight = m_alpha * m_alphaDiagWeight[dit()](vof, m_comp);
+
+      // m_betaWeight holds the diagonal part of kappa*div(b*grad(phi)) in the cut-cells.
+      const Real betaWeight = m_beta * m_betaDiagWeight[dit()](vof, m_comp);
 
       m_relCoef[dit()](vof, m_comp) = 1. / (alphaWeight + betaWeight);
     };
@@ -1496,7 +1509,8 @@ EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex
   //       that the data is cell-centered).
   VoFStencil fluxStencil;
 
-  if (!a_face.isBoundary()) { // BC handles the boundary fluxes.
+  // BC handles the boundary fluxes.  
+  if (!a_face.isBoundary()) { 
     fluxStencil.add(a_face.getVoF(Side::Hi), 1.0 / m_dx);
     fluxStencil.add(a_face.getVoF(Side::Lo), -1.0 / m_dx);
     fluxStencil *= (*m_Bcoef)[a_dit][a_face.direction()](a_face, m_comp);
