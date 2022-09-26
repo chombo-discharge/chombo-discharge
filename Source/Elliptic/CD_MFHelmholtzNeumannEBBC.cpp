@@ -114,7 +114,7 @@ MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePh
       // beta is not.
       const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
       const Real     areaFrac  = ebisbox.bndryArea(vof);
-      const Real     B         = m_multByBco ? (*m_Bcoef)[a_dit](vof, m_comp) : 1;
+      const Real     B         = m_multByBco ? a_Bcoef(vof, m_comp) : 1;
       const Real     kappaDivF = a_beta * B * value * areaFrac / m_dx;
 
       a_Lphi(vof, m_comp) += kappaDivF;

@@ -131,7 +131,6 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
-      const Real helmBco  = (*m_Bcoef)[dit()](vof, m_comp);
 
       weights(vof, m_comp) = 0.0;
 
@@ -189,7 +188,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
         // The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
         // kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
         if (std::abs(B) > 0.0) {
-          fluxStencil *= A * areaFrac * helmBco / (B * m_dx);
+          fluxStencil *= A * areaFrac / (B * m_dx);
         }
         else {
           fluxStencil.clear();
@@ -239,7 +238,7 @@ MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhas
 
       const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
       const Real     areaFrac  = ebisbox.bndryArea(vof);
-      const Real     helmBco   = (*m_Bcoef)[a_dit](vof, m_comp);
+      const Real     helmBco   = a_Bcoef(vof, m_comp);
       const Real     kappaDivF = -a_beta * helmBco * areaFrac * C / (m_dx * B);
 
       if (std::abs(B) > 0.0) {

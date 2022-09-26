@@ -89,13 +89,10 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
     BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
-    const BaseIVFAB<Real>& Bcoef = (*m_Bcoef)[dit()];
-
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
 
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
-      const Real B        = Bcoef(vof, m_comp);
 
       int                         order;
       bool                        foundStencil = false;
@@ -140,8 +137,8 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
         stencils(vof, m_comp) = pairSten.second;
 
         // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the area fraction.
-        weights(vof, m_comp) *= B * areaFrac / m_dx;
-        stencils(vof, m_comp) *= B * areaFrac / m_dx;
+        weights(vof, m_comp) *= areaFrac / m_dx;
+        stencils(vof, m_comp) *= areaFrac / m_dx;
       }
       else {
         // Dead cell. No flux.
@@ -174,6 +171,7 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
     auto kernel = [&](const VolIndex& vof) -> void {
       const RealVect pos   = this->getBoundaryPosition(vof, a_dit);
       const Real     value = this->getElectrodePotential(pos);
+      const Real     Bcoef = a_Bcoef(vof, m_comp);
 
       a_Lphi(vof, m_comp) += a_beta * value * m_boundaryWeights[a_dit](vof, m_comp);
     };

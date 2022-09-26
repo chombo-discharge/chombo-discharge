@@ -160,10 +160,10 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                          m_ghostPhi);
   }
 
-  // Define BC objects. 
+  // Define BC objects.
   const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
   m_domainBc->define(m_dataLocation, m_eblg, m_Bcoef, m_probLo, m_dx);
-  m_ebBc->define(m_dataLocation, m_eblg, m_BcoefIrreg, m_probLo, m_dx, ghostCF);  
+  m_ebBc->define(m_dataLocation, m_eblg, m_BcoefIrreg, m_probLo, m_dx, ghostCF);
 
   // Define stencils and compute relaxation terms.
   this->defineStencils();
@@ -176,6 +176,8 @@ EBHelmholtzOp::updateStencils(const RefCountedPtr<LevelData<EBCellFAB>>&       a
 {
   CH_TIME("EBHelmholtzOp::updateStencils()");
 
+  // Set new coefficients and then run defineStencils which will update all the stencils
+  // and relaxation weights.
   m_Acoef      = a_Acoef;
   m_Bcoef      = a_Bcoef;
   m_BcoefIrreg = a_BcoefIrreg;
@@ -395,14 +397,18 @@ EBHelmholtzOp::defineStencils()
 
     // 5. Add contributions to the operator from the EB faces.
     BoxLoops::loop(vofitIrreg, [&](const VolIndex& vof) -> void {
-      opStencil(vof, m_comp) += m_BcoefIrreg[dit()](vof, m_comp) * ebFluxStencil[dit()](vof, m_comp);
+      VoFStencil ebSten = ebFluxStencil[dit()](vof, m_comp);
+
+      ebSten *= (*m_BcoefIrreg)[dit()](vof, m_comp);
+
+      opStencil(vof, m_comp) += ebSten;
     });
   }
 
-  // Compute relaxation weights. 
+  // Compute relaxation weights.
   this->computeDiagWeight();
   this->computeRelaxationCoefficient();
-  this->makeAggStencil();  
+  this->makeAggStencil();
 }
 
 void
