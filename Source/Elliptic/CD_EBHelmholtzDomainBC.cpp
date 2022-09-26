@@ -25,11 +25,10 @@ EBHelmholtzDomainBC::EBHelmholtzDomainBC() { CH_TIME("EBHelmholtzDomainBC::EBHel
 EBHelmholtzDomainBC::~EBHelmholtzDomainBC() { CH_TIME("EBHelmholtzDomainBC::~EBHelmholtzDomainBC()"); }
 
 void
-EBHelmholtzDomainBC::define(const Location::Cell                       a_dataLocation,
-                            const EBLevelGrid&                         a_eblg,
-                            const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
-                            const RealVect&                            a_probLo,
-                            const Real                                 a_dx)
+EBHelmholtzDomainBC::define(const Location::Cell a_dataLocation,
+                            const EBLevelGrid&   a_eblg,
+                            const RealVect&      a_probLo,
+                            const Real           a_dx)
 {
   CH_TIME("EBHelmholtzDomainBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<EBFluxFAB> >, RealVect, Real)");
 
@@ -37,7 +36,6 @@ EBHelmholtzDomainBC::define(const Location::Cell                       a_dataLoc
 
   m_dataLocation = a_dataLocation;
   m_eblg         = a_eblg;
-  m_Bcoef        = a_Bcoef;
   m_probLo       = a_probLo;
   m_dx           = a_dx;
 }

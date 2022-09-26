@@ -63,17 +63,12 @@ public:
   /*!
     @brief Define function
     @param[in] a_eblg   Level grids
-    @param[in] a_Bcoef  B-coefficient in the Helmholtz equation
     @param[in] a_probLo Lower-left corner of computational domain
     @param[in] a_dx     Grid resolution
     @note This sets the internals for the BC object. This is called by EBHelmholtzOp when it defines stencils. 
   */
   virtual void
-  define(const Location::Cell                       a_dataLocation,
-         const EBLevelGrid&                         a_eblg,
-         const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
-         const RealVect&                            a_probLo,
-         const Real                                 a_dx);
+  define(const Location::Cell a_dataLocation, const EBLevelGrid& a_eblg, const RealVect& a_probLo, const Real a_dx);
 
   /*!
     @brief Get face flux. This is for regular cells. 
@@ -144,11 +139,6 @@ protected:
     @brief Level grid
   */
   EBLevelGrid m_eblg;
-
-  /*!
-    @brief B-coefficent. 
-  */
-  RefCountedPtr<LevelData<EBFluxFAB>> m_Bcoef;
 
   /*!
     @brief Returns the cell-centered position at the boundary. 

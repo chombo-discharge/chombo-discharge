@@ -73,11 +73,10 @@ EBHelmholtzElectrostaticDomainBC::~EBHelmholtzElectrostaticDomainBC()
 }
 
 void
-EBHelmholtzElectrostaticDomainBC::define(const Location::Cell                       a_dataLocation,
-                                         const EBLevelGrid&                         a_eblg,
-                                         const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
-                                         const RealVect&                            a_probLo,
-                                         const Real                                 a_dx)
+EBHelmholtzElectrostaticDomainBC::define(const Location::Cell a_dataLocation,
+                                         const EBLevelGrid&   a_eblg,
+                                         const RealVect&      a_probLo,
+                                         const Real           a_dx)
 {
   CH_TIME(
     "EBHelmholtzElectrostaticDomainBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<EBFluxFAB> >, RealVect, Real)");
@@ -90,7 +89,7 @@ EBHelmholtzElectrostaticDomainBC::define(const Location::Cell                   
     for (SideIterator sit; sit.ok(); ++sit) {
       auto& bcPtr = m_bcObjects.at(std::make_pair(dir, sit()));
 
-      bcPtr->define(a_dataLocation, a_eblg, a_Bcoef, a_probLo, a_dx);
+      bcPtr->define(a_dataLocation, a_eblg, a_probLo, a_dx);
     }
   }
 }

@@ -107,8 +107,7 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   CH_assert(a_faceFlux.nComp() == 1);
   CH_assert(a_phi.nComp() == 1);
 
-  const BaseFab<Real>& Bco   = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
-  const int            isign = (a_side == Side::Lo) ? -1 : 1;
+  const int isign = (a_side == Side::Lo) ? -1 : 1;
 
   if (a_useHomogeneous) {
     a_faceFlux.setVal(0.0);
@@ -135,7 +134,7 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
     // Multiply by B-coefficient. We always do this unless the user specifically called setBxDphiDn in which case the input value
     // is already multiplied by the B-coefficient.
     if (m_multByBco) {
-      this->multiplyByBcoef(a_faceFlux, Bco, a_dir, a_side);
+      this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
     }
   }
 }
@@ -191,7 +190,7 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
 
         // Multiply by b-coefficient and aperture.
         const FaceIndex& bndryFace = faces[0];
-        const Real       Bco       = m_multByBco ? (*m_Bcoef)[a_dit][a_dir](bndryFace, m_comp) : 1.0;
+        const Real       Bco       = m_multByBco ? a_Bcoef(bndryFace, m_comp) : 1.0;
         const Real       area      = ebisbox.areaFrac(bndryFace);
 
         centroidFlux *= -isign * area * Bco;

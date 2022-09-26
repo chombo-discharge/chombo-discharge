@@ -75,17 +75,15 @@ public:
     @brief Define function
     @param[in] a_dataLocation Data location (either Location::Cell::Center or Location::Cell::Centroid). 
     @param[in] a_eblg         Level grids
-    @param[in] a_Bcoef        B-coefficient for Helmholtz equation
     @param[in] a_probLo       Lower-left corner of computational domain
     @param[in] a_dx           Grid resolution
     @note This overrides EBHelmholtzDomainBC because EBHelmholtzElectrostaticDomainBC is just a wrapper class for Dirichlet/Neumann, and those objects need defining. 
   */
   void
-  define(const Location::Cell                       a_dataLocation,
-         const EBLevelGrid&                         a_eblg,
-         const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
-         const RealVect&                            a_probLo,
-         const Real                                 a_dx) override final;
+  define(const Location::Cell a_dataLocation,
+         const EBLevelGrid&   a_eblg,
+         const RealVect&      a_probLo,
+         const Real           a_dx) override final;
 
   /*!
     @brief Get face flux. This is for regular cells. 

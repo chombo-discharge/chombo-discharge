@@ -162,7 +162,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
   // Define BC objects.
   const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
-  m_domainBc->define(m_dataLocation, m_eblg, m_Bcoef, m_probLo, m_dx);
+  m_domainBc->define(m_dataLocation, m_eblg, m_probLo, m_dx);
   m_ebBc->define(m_dataLocation, m_eblg, m_probLo, m_dx, ghostCF);
 
   // Define stencils and compute relaxation terms.

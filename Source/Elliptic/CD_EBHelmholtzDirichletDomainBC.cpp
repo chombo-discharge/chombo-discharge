@@ -122,8 +122,7 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   BoxLoops::loop(a_faceFlux.box(), kernel);
 
   // Multiplies by B-coefficient so that a_faceFlux = B*dphi/dn.
-  const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
-  this->multiplyByBcoef(a_faceFlux, Bco, a_dir, a_side);
+  this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
 }
 
 Real
@@ -184,7 +183,7 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
 
       // Multiply by b-coefficient and aperture.
       const FaceIndex& bndryFace = faces[0];
-      const Real       Bco       = (*m_Bcoef)[a_dit][a_dir](bndryFace, m_comp);
+      const Real       Bco       = a_Bcoef(bndryFace, m_comp);
       const Real       area      = ebisbox.areaFrac(bndryFace);
 
       centroidFlux *= Bco * area;
