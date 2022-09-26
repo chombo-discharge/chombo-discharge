@@ -53,18 +53,16 @@ public:
     @brief Define function that is called by EBHelmholtzOp
     @param[in] a_dataLocation Specification of data centering
     @param[in] a_eblg         Grid where this object is defined. 
-    @param[in] a_Bcoef        B-coefficient. You will need this for the flux stencil. 
     @param[in] a_probLo       Lower-left corner of computational domain. Required if BC objects needs physical position. 
     @param[in] a_dx           Grid resolution. 
     @param[in] a_ghostCF      Number of ghost cells that are filled across CF interface. 
   */
   void
-  define(const Location::Cell                             a_dataLocation,
-         const EBLevelGrid&                               a_eblg,
-         const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_Bcoef,
-         const RealVect&                                  a_probLo,
-         const Real&                                      a_dx,
-         const int                                        a_ghostCF);
+  define(const Location::Cell a_dataLocation,
+         const EBLevelGrid&   a_eblg,
+         const RealVect&      a_probLo,
+         const Real&          a_dx,
+         const int            a_ghostCF);
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
@@ -130,11 +128,6 @@ protected:
     @brief Level grid
   */
   EBLevelGrid m_eblg;
-
-  /*!
-    @brief B-coefficent. 
-  */
-  RefCountedPtr<LevelData<BaseIVFAB<Real>>> m_Bcoef;
 
   /*!
     @brief Stencils for computing the flux on a single level. This is a single-level object. 
