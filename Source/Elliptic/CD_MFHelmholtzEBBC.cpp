@@ -55,7 +55,7 @@ MFHelmholtzEBBC::defineMultiPhase()
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
   m_boundaryWeights.define(dbl);
-  m_kappaDivFStencils.define(dbl);
+  m_gradPhiStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box              box     = dbl[dit()];
@@ -66,10 +66,10 @@ MFHelmholtzEBBC::defineMultiPhase()
 
     // These are used to reconstruct gradients at the EB. They are left undefined for single-phase cells.
     m_boundaryWeights[dit()].define(ivs, ebgraph, m_nComp);
-    m_kappaDivFStencils[dit()].define(ivs, ebgraph, m_nComp);
+    m_gradPhiStencils[dit()].define(ivs, ebgraph, m_nComp);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     VoFIterator& multiPhaseVofs = m_jumpBC->getMultiPhaseVofs(m_phase, dit());
 
@@ -137,12 +137,13 @@ MFHelmholtzEBBC::defineMultiPhase()
 }
 
 void
-MFHelmholtzEBBC::applyEBFlux(VoFIterator&     a_vofit,
-                             EBCellFAB&       a_Lphi,
-                             const EBCellFAB& a_phi,
-                             const DataIndex& a_dit,
-                             const Real&      a_beta,
-                             const bool&      a_homogeneousPhysBC) const
+MFHelmholtzEBBC::applyEBFlux(VoFIterator&           a_vofit,
+                             EBCellFAB&             a_Lphi,
+                             const EBCellFAB&       a_phi,
+                             const BaseIVFAB<Real>& a_Bcoef,
+                             const DataIndex&       a_dit,
+                             const Real&            a_beta,
+                             const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME("MFHelmholtzEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
@@ -151,17 +152,18 @@ MFHelmholtzEBBC::applyEBFlux(VoFIterator&     a_vofit,
   VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, a_dit);
   VoFIterator& multiPhaseVofs  = m_jumpBC->getMultiPhaseVofs(m_phase, a_dit);
 
-  this->applyEBFluxSinglePhase(singlePhaseVofs, a_Lphi, a_phi, a_dit, a_beta, a_homogeneousPhysBC);
-  this->applyEBFluxMultiPhase(multiPhaseVofs, a_Lphi, a_phi, a_dit, a_beta, a_homogeneousPhysBC);
+  this->applyEBFluxSinglePhase(singlePhaseVofs, a_Lphi, a_phi, a_Bcoef, a_dit, a_beta, a_homogeneousPhysBC);
+  this->applyEBFluxMultiPhase(multiPhaseVofs, a_Lphi, a_phi, a_Bcoef, a_dit, a_beta, a_homogeneousPhysBC);
 }
 
 void
-MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&     a_multiPhaseVofs,
-                                       EBCellFAB&       a_Lphi,
-                                       const EBCellFAB& a_phi,
-                                       const DataIndex& a_dit,
-                                       const Real&      a_beta,
-                                       const bool&      a_homogeneousPhysBC) const
+MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&           a_multiPhaseVofs,
+                                       EBCellFAB&             a_Lphi,
+                                       const EBCellFAB&       a_phi,
+                                       const BaseIVFAB<Real>& a_Bcoef,
+                                       const DataIndex&       a_dit,
+                                       const Real&            a_beta,
+                                       const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME("MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 

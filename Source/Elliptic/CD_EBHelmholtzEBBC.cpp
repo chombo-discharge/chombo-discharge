@@ -50,11 +50,11 @@ EBHelmholtzEBBC::define(const Location::Cell                             a_dataL
 }
 
 const LayoutData<BaseIVFAB<VoFStencil>>&
-EBHelmholtzEBBC::getKappaDivFStencils() const
+EBHelmholtzEBBC::getGradPhiStencils() const
 {
-  CH_TIME("EBHelmholtzEBBC::getKappaDivFStencils()");
+  CH_TIME("EBHelmholtzEBBC::getGradPhiStencils()");
 
-  return m_kappaDivFStencils;
+  return m_gradPhiStencils;
 }
 
 #include <CD_NamespaceFooter.H>

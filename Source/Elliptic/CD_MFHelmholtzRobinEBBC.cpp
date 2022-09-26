@@ -124,7 +124,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     // Build interpolation stencils.
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
@@ -205,12 +205,13 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
-                                             EBCellFAB&       a_Lphi,
-                                             const EBCellFAB& a_phi,
-                                             const DataIndex& a_dit,
-                                             const Real&      a_beta,
-                                             const bool&      a_homogeneousPhysBC) const
+MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                                             EBCellFAB&             a_Lphi,
+                                             const EBCellFAB&       a_phi,
+                                             const BaseIVFAB<Real>& a_Bcoef,
+                                             const DataIndex&       a_dit,
+                                             const Real&            a_beta,
+                                             const bool&            a_homogeneousPhysBC) const
 {
 
   // TLDR: For Robin, the flux is b*dphi/dn = beta*b*A*phi/B - beta*b*C/B and we have stored

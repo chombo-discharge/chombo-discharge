@@ -113,7 +113,7 @@ EBHelmholtzDirichletEBBC::define()
   }
 
   m_boundaryWeights.define(dbl);
-  m_kappaDivFStencils.define(dbl);
+  m_gradPhiStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box         box     = dbl[dit()];
@@ -122,7 +122,7 @@ EBHelmholtzDirichletEBBC::define()
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     const BaseIVFAB<Real>& Bcoef = (*m_Bcoef)[dit()];
 
@@ -185,12 +185,13 @@ EBHelmholtzDirichletEBBC::define()
 }
 
 void
-EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&     a_vofit,
-                                      EBCellFAB&       a_Lphi,
-                                      const EBCellFAB& a_phi,
-                                      const DataIndex& a_dit,
-                                      const Real&      a_beta,
-                                      const bool&      a_homogeneousPhysBC) const
+EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
+                                      EBCellFAB&             a_Lphi,
+                                      const EBCellFAB&       a_phi,
+                                      const BaseIVFAB<Real>& a_Bcoef,
+                                      const DataIndex&       a_dit,
+                                      const Real&            a_beta,
+                                      const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME("EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 

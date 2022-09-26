@@ -160,12 +160,12 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                          m_ghostPhi);
   }
 
-  // Define stencils and compute relaxation terms. 
+  // Define stencils and compute relaxation terms.
   this->defineStencils();
 
   this->computeAlphaWeight();
   this->computeRelaxationCoefficient();
-  this->makeAggStencil();  
+  this->makeAggStencil();
 }
 
 EBHelmholtzOp::~EBHelmholtzOp() { CH_TIME("EBHelmholtzOp::~EBHelmholtzOp()"); }
@@ -204,7 +204,7 @@ EBHelmholtzOp::defineStencils()
   EBFluxFactory fluxFact(m_eblg.getEBISL());
 
   m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, cellFact);
-  m_flux.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, fluxFact);   
+  m_flux.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, fluxFact);
 
   m_vofIterIrreg.define(m_eblg.getDBL());
   m_vofIterMulti.define(m_eblg.getDBL());
@@ -239,7 +239,7 @@ EBHelmholtzOp::defineStencils()
   m_ebBc->define(m_dataLocation, m_eblg, m_BcoefIrreg, m_probLo, m_dx, ghostCF);
 
   // This contains the part of the eb flux that contains interior cells.
-  const LayoutData<BaseIVFAB<VoFStencil>>& ebFluxStencil = m_ebBc->getKappaDivFStencils();
+  const LayoutData<BaseIVFAB<VoFStencil>>& ebFluxStencil = m_ebBc->getGradPhiStencils();
 
   // Define everything
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit) {
@@ -374,10 +374,10 @@ EBHelmholtzOp::defineStencils()
           // 4. Note that we prune storage here.
           if (stencIVS.contains(vofLo.gridIndex())) {
             opStencil(vofLo, m_comp) += loKappaDivFSten;
-	  }
+          }
           if (stencIVS.contains(vofHi.gridIndex())) {
             opStencil(vofHi, m_comp) += hiKappaDivFSten;
-	  }
+          }
         }
       };
 
@@ -416,7 +416,6 @@ EBHelmholtzOp::defineStencils()
 
     BoxLoops::loop(vofitStenc, relaxFactorKernel);
   }
-
 }
 
 void
@@ -985,12 +984,12 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
       a_Lphi(vof, m_comp) += m_beta * iweight * a_phi(ivof, m_comp); // Note that bco is a part of the stencil weight. 
     }
   }
-  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_dit, m_beta, a_homogeneousPhysBC);
+  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, (*m_BcoefIrreg)[a_dit], a_phi, a_dit, m_beta, a_homogeneousPhysBC);
 #else // New code that uses AggStencil.
   constexpr bool incrementOnly = false;
 
   m_aggRelaxStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, m_comp, incrementOnly);
-  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_dit, m_beta, a_homogeneousPhysBC);
+  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, (*m_BcoefIrreg)[a_dit], a_dit, m_beta, a_homogeneousPhysBC);
 #endif
 
   // Do irregular faces on domain sides. This was not included in the stencils above. m_domainBc should give the centroid-centered flux so we don't do interpolations here.
@@ -1137,22 +1136,22 @@ EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellF
   }
   case Smoother::PointJacobi: {
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
-    
+
     break;
   }
   case Smoother::GauSaiRedBlack: {
     this->relaxGSRedBlack(a_correction, a_residual, a_iterations);
-    
+
     break;
   }
   case Smoother::GauSaiMultiColor: {
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
-    
+
     break;
   }
   default: {
     MayDay::Error("EBHelmholtzOp::relax - bogus relaxation method requested");
-    
+
     break;
   }
   }
@@ -1509,8 +1508,8 @@ EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex
   //       that the data is cell-centered).
   VoFStencil fluxStencil;
 
-  // BC handles the boundary fluxes.  
-  if (!a_face.isBoundary()) { 
+  // BC handles the boundary fluxes.
+  if (!a_face.isBoundary()) {
     fluxStencil.add(a_face.getVoF(Side::Hi), 1.0 / m_dx);
     fluxStencil.add(a_face.getVoF(Side::Lo), -1.0 / m_dx);
     fluxStencil *= (*m_Bcoef)[a_dit][a_face.direction()](a_face, m_comp);

@@ -89,14 +89,14 @@ EBHelmholtzNeumannEBBC::define()
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
   // Reset the stencil everywhere.
-  m_kappaDivFStencils.define(dbl);
+  m_gradPhiStencils.define(dbl);
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box         box     = dbl[dit()];
     const EBISBox&    ebisbox = m_eblg.getEBISL()[dit()];
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
-    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     stencils.define(ivs, ebgraph, m_nComp);
 
@@ -112,12 +112,13 @@ EBHelmholtzNeumannEBBC::define()
 }
 
 void
-EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&     a_vofit,
-                                    EBCellFAB&       a_Lphi,
-                                    const EBCellFAB& a_phi,
-                                    const DataIndex& a_dit,
-                                    const Real&      a_beta,
-                                    const bool&      a_homogeneousPhysBC) const
+EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&           a_vofit,
+                                    EBCellFAB&             a_Lphi,
+                                    const EBCellFAB&       a_phi,
+                                    const BaseIVFAB<Real>& a_Bcoef,
+                                    const DataIndex&       a_dit,
+                                    const Real&            a_beta,
+                                    const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME("EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 

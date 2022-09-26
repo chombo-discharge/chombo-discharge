@@ -87,7 +87,7 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     const BaseIVFAB<Real>& Bcoef = (*m_Bcoef)[dit()];
 
@@ -155,12 +155,13 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
-                                                     EBCellFAB&       a_Lphi,
-                                                     const EBCellFAB& a_phi,
-                                                     const DataIndex& a_dit,
-                                                     const Real&      a_beta,
-                                                     const bool&      a_homogeneousPhysBC) const
+MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                                                     EBCellFAB&             a_Lphi,
+                                                     const EBCellFAB&       a_phi,
+                                                     const BaseIVFAB<Real>& a_Bcoef,
+                                                     const DataIndex&       a_dit,
+                                                     const Real&            a_beta,
+                                                     const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME(
     "MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
