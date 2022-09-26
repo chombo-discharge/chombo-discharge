@@ -193,6 +193,34 @@ MFHelmholtzOp::~MFHelmholtzOp()
 }
 
 void
+MFHelmholtzOp::setAcoAndBco(const RefCountedPtr<LevelData<MFCellFAB>>&   a_Acoef,
+                            const RefCountedPtr<LevelData<MFFluxFAB>>&   a_Bcoef,
+                            const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_BcoefIrreg)
+{
+  CH_TIME("MFHelmholtzOp::udpateStencils");
+
+  // Make the operators on eachphase.
+  for (int iphase = 0; iphase < m_numPhases; iphase++) {
+
+    // Alias the multifluid-coefficients onto a single phase.
+    RefCountedPtr<LevelData<EBCellFAB>>       Acoef = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
+    RefCountedPtr<LevelData<EBFluxFAB>>       Bcoef = RefCountedPtr<LevelData<EBFluxFAB>>(new LevelData<EBFluxFAB>());
+    RefCountedPtr<LevelData<BaseIVFAB<Real>>> BcoefIrreg = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
+      new LevelData<BaseIVFAB<Real>>());
+
+    MultifluidAlias::aliasMF(*Acoef, iphase, *a_Acoef);
+    MultifluidAlias::aliasMF(*Bcoef, iphase, *a_Bcoef);
+    MultifluidAlias::aliasMF(*BcoefIrreg, iphase, *a_BcoefIrreg);
+
+    m_helmOps.at(iphase)->setAcoAndBco(Acoef, Bcoef, BcoefIrreg);
+  }
+
+
+  // Jump BC object also needs to update coefficients.
+  MayDay::Abort("MFHelmholtzOp -- jump bc has not updated coefficients");
+}
+
+void
 MFHelmholtzOp::setJump(RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_jump)
 {
   CH_TIME("MFHelmholtzOp::setJump(RefCountedPtr<BaseIVFAB<Real> >)");

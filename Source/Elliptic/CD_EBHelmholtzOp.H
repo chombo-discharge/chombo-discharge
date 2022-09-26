@@ -156,16 +156,16 @@ public:
   turnOnBCs();
 
   /*!
-    @brief Update stencils with new A and B coefficients.
+    @brief Update with new A and B coefficients.
     @note This will call defineStencils but will not recompute the stencils from the BC objects. 
     @param[in] a_Acoef         Operator A-coefficient
     @param[in] a_Bcoef         Operator B-coefficient
     @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
   */
   void
-  updateStencils(const RefCountedPtr<LevelData<EBCellFAB>>&       a_Acoef,
-                 const RefCountedPtr<LevelData<EBFluxFAB>>&       a_Bcoef,
-                 const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoefIrreg);
+  setAcoAndBco(const RefCountedPtr<LevelData<EBCellFAB>>&       a_Acoef,
+               const RefCountedPtr<LevelData<EBFluxFAB>>&       a_Bcoef,
+               const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoefIrreg);
 
   /*!
     @brief Coarsen data from fine to coar level

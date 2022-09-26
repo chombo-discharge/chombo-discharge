@@ -170,11 +170,11 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 }
 
 void
-EBHelmholtzOp::updateStencils(const RefCountedPtr<LevelData<EBCellFAB>>&       a_Acoef,
-                              const RefCountedPtr<LevelData<EBFluxFAB>>&       a_Bcoef,
-                              const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoefIrreg)
+EBHelmholtzOp::setAcoAndBco(const RefCountedPtr<LevelData<EBCellFAB>>&       a_Acoef,
+                            const RefCountedPtr<LevelData<EBFluxFAB>>&       a_Bcoef,
+                            const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoefIrreg)
 {
-  CH_TIME("EBHelmholtzOp::updateStencils()");
+  CH_TIME("EBHelmholtzOp::setAcoAndBco()");
 
   // Set new coefficients and then run defineStencils which will update all the stencils
   // and relaxation weights.

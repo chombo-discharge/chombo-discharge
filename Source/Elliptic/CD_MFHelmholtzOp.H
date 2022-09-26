@@ -148,6 +148,17 @@ public:
   operator=(const MFHelmholtzOp&& a_oper) = delete;
 
   /*!
+    @brief Update operators with new coefficients.
+    @param[in] a_Acoef         Operator A-coefficient
+    @param[in] a_Bcoef         Operator B-coefficient
+    @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
+  */
+  void
+  setAcoAndBco(const RefCountedPtr<LevelData<MFCellFAB>>&   a_Acoef,
+               const RefCountedPtr<LevelData<MFFluxFAB>>&   a_Bcoef,
+               const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_BcoefIrreg);
+
+  /*!
     @brief Set the jump boundary condition
   */
   void
