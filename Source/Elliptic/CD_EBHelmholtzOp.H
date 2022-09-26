@@ -156,7 +156,8 @@ public:
   turnOnBCs();
 
   /*!
-    @brief Update stencils with new A and B coefficients
+    @brief Update stencils with new A and B coefficients.
+    @note This will call defineStencils but will not recompute the stencils from the BC objects. 
     @param[in] a_Acoef         Operator A-coefficient
     @param[in] a_Bcoef         Operator B-coefficient
     @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
@@ -959,7 +960,7 @@ protected:
     @brief Calculate the weight of the diagonal term
   */
   void
-  computeAlphaWeight();
+  computeDiagWeight();
 
   /*!
     @brief Calculate relaxation coefficient

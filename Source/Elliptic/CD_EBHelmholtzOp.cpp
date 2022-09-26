@@ -160,12 +160,13 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                          m_ghostPhi);
   }
 
+  // Define BC objects. 
+  const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
+  m_domainBc->define(m_dataLocation, m_eblg, m_Bcoef, m_probLo, m_dx);
+  m_ebBc->define(m_dataLocation, m_eblg, m_BcoefIrreg, m_probLo, m_dx, ghostCF);  
+
   // Define stencils and compute relaxation terms.
   this->defineStencils();
-
-  this->computeAlphaWeight();
-  this->computeRelaxationCoefficient();
-  this->makeAggStencil();    
 }
 
 void
@@ -179,9 +180,7 @@ EBHelmholtzOp::updateStencils(const RefCountedPtr<LevelData<EBCellFAB>>&       a
   m_Bcoef      = a_Bcoef;
   m_BcoefIrreg = a_BcoefIrreg;
 
-  this->computeAlphaWeight();
-  this->computeRelaxationCoefficient();
-  this->makeAggStencil();    
+  this->defineStencils();
 }
 
 EBHelmholtzOp::~EBHelmholtzOp() { CH_TIME("EBHelmholtzOp::~EBHelmholtzOp()"); }
@@ -247,12 +246,6 @@ EBHelmholtzOp::defineStencils()
       m_sideBox.emplace(std::make_pair(dir, sit()), sidebox);
     }
   }
-
-  // Define BC objects. Can't do this in the factory because the BC objects will need the b-coefficient,
-  // but the factories won't know about that.
-  const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
-  m_domainBc->define(m_dataLocation, m_eblg, m_Bcoef, m_probLo, m_dx);
-  m_ebBc->define(m_dataLocation, m_eblg, m_BcoefIrreg, m_probLo, m_dx, ghostCF);
 
   // This contains the part of the eb flux that contains interior cells.
   const LayoutData<BaseIVFAB<VoFStencil>>& ebFluxStencil = m_ebBc->getGradPhiStencils();
@@ -402,38 +395,14 @@ EBHelmholtzOp::defineStencils()
 
     // 5. Add contributions to the operator from the EB faces.
     BoxLoops::loop(vofitIrreg, [&](const VolIndex& vof) -> void {
-      opStencil(vof, m_comp) += ebFluxStencil[dit()](vof, m_comp);
+      opStencil(vof, m_comp) += m_BcoefIrreg[dit()](vof, m_comp) * ebFluxStencil[dit()](vof, m_comp);
     });
-
-    // Compute relaxation factor. Adjust the weight with domain boundary faces.
-    auto relaxFactorKernel = [&](const VolIndex& vof) -> void {
-      const IntVect iv = vof.gridIndex();
-
-      VoFStencil& curStencil = opStencil(vof, m_comp);
-
-      Real betaWeight = EBArith::getDiagWeight(curStencil, vof);
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        for (SideIterator sit; sit.ok(); ++sit) {
-          const Box sidebox = m_sideBox.at(std::make_pair(dir, sit()));
-
-          if (sidebox.contains(iv)) {
-            Real              weightedAreaFrac = 0.0;
-            Vector<FaceIndex> faces            = ebisbox.getFaces(vof, dir, sit());
-            for (auto& f : faces.stdVector()) {
-              weightedAreaFrac += ebisbox.areaFrac(f) * (*m_Bcoef)[dit()][dir](f, m_comp) / (m_dx * m_dx);
-            }
-            betaWeight += -weightedAreaFrac;
-          }
-        }
-      }
-
-      m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
-    };
-
-    BoxLoops::loop(vofitStenc, relaxFactorKernel);
   }
 
-
+  // Compute relaxation weights. 
+  this->computeDiagWeight();
+  this->computeRelaxationCoefficient();
+  this->makeAggStencil();  
 }
 
 void
@@ -445,7 +414,7 @@ EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta)
   m_beta  = a_beta;
 
   // When we change alpha and beta we need to recompute relaxation coefficients...
-  this->computeAlphaWeight();
+  this->computeDiagWeight();
   this->computeRelaxationCoefficient();
   this->makeAggStencil();
 }
@@ -1408,22 +1377,50 @@ EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&       a_Lcorr,
 }
 
 void
-EBHelmholtzOp::computeAlphaWeight()
+EBHelmholtzOp::computeDiagWeight()
 {
-  CH_TIME("EBHelmholtzOp::computeAlphaWeight()");
+  CH_TIME("EBHelmholtzOp::computeDiagWeight()");
 
   // Compute the diagonal term in the kappa-weighted operator. We put the result into m_alphaDiagWeight = kappa * A;
   for (DataIterator dit(m_eblg.getDBL().dataIterator()); dit.ok(); ++dit) {
+    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+
     VoFIterator& vofit = m_vofIterStenc[dit()];
 
-    auto kernel = [&](const VolIndex& vof) -> void {
+    auto alphaKernel = [&](const VolIndex& vof) -> void {
       const Real volFrac = m_eblg.getEBISL()[dit()].volFrac(vof);
       const Real Aco     = (*m_Acoef)[dit()](vof, m_comp);
 
       m_alphaDiagWeight[dit()](vof, m_comp) = volFrac * Aco;
     };
 
-    BoxLoops::loop(vofit, kernel);
+    // Compute relaxation factor. Adjust the weight with domain boundary faces.
+    auto betaKernel = [&](const VolIndex& vof) -> void {
+      const IntVect iv = vof.gridIndex();
+
+      VoFStencil& curStencil = m_relaxStencils[dit()](vof, m_comp);
+
+      Real betaWeight = EBArith::getDiagWeight(curStencil, vof);
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        for (SideIterator sit; sit.ok(); ++sit) {
+          const Box sidebox = m_sideBox.at(std::make_pair(dir, sit()));
+
+          if (sidebox.contains(iv)) {
+            Real              weightedAreaFrac = 0.0;
+            Vector<FaceIndex> faces            = ebisbox.getFaces(vof, dir, sit());
+            for (auto& f : faces.stdVector()) {
+              weightedAreaFrac += ebisbox.areaFrac(f) * (*m_Bcoef)[dit()][dir](f, m_comp) / (m_dx * m_dx);
+            }
+            betaWeight += -weightedAreaFrac;
+          }
+        }
+      }
+
+      m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
+    };
+
+    BoxLoops::loop(vofit, alphaKernel);
+    BoxLoops::loop(vofit, betaKernel);
   }
 }
 
