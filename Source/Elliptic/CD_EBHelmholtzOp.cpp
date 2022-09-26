@@ -165,7 +165,23 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
   this->computeAlphaWeight();
   this->computeRelaxationCoefficient();
-  this->makeAggStencil();
+  this->makeAggStencil();    
+}
+
+void
+EBHelmholtzOp::updateStencils(const RefCountedPtr<LevelData<EBCellFAB>>&       a_Acoef,
+                              const RefCountedPtr<LevelData<EBFluxFAB>>&       a_Bcoef,
+                              const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoefIrreg)
+{
+  CH_TIME("EBHelmholtzOp::updateStencils()");
+
+  m_Acoef      = a_Acoef;
+  m_Bcoef      = a_Bcoef;
+  m_BcoefIrreg = a_BcoefIrreg;
+
+  this->computeAlphaWeight();
+  this->computeRelaxationCoefficient();
+  this->makeAggStencil();    
 }
 
 EBHelmholtzOp::~EBHelmholtzOp() { CH_TIME("EBHelmholtzOp::~EBHelmholtzOp()"); }
@@ -416,6 +432,8 @@ EBHelmholtzOp::defineStencils()
 
     BoxLoops::loop(vofitStenc, relaxFactorKernel);
   }
+
+
 }
 
 void

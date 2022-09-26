@@ -156,6 +156,17 @@ public:
   turnOnBCs();
 
   /*!
+    @brief Update stencils with new A and B coefficients
+    @param[in] a_Acoef         Operator A-coefficient
+    @param[in] a_Bcoef         Operator B-coefficient
+    @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
+  */
+  void
+  updateStencils(const RefCountedPtr<LevelData<EBCellFAB>>&       a_Acoef,
+                 const RefCountedPtr<LevelData<EBFluxFAB>>&       a_Bcoef,
+                 const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoefIrreg);
+
+  /*!
     @brief Coarsen data from fine to coar level
     @param[in] a_phi     Data on this level
     @param[in] a_phiFine Data on finer level
