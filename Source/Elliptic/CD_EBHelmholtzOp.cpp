@@ -886,7 +886,7 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
       // Fill the domain flux. This might look weird, and we are actually putting the flux in a cell-centered data holder. By this, we implicitly
       // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking.
       FArrayBox faceFlux(loBox, m_nComp);
-      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), dir, Side::Lo, a_dit, a_homogeneousPhysBC);
+      m_domainBc->getFaceFlux(faceFlux, phiFAB, bco, dir, Side::Lo, a_dit, a_homogeneousPhysBC);
 
       // The EBArith loBox is cell-centered interior box abutting the domain side. We want the box immediately outside the domain.
       Box ghostBox = loBox;
@@ -915,7 +915,7 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
       // Fill the domain flux. This might look weird, and we are actually putting the flux in a cell-centered data holder. By this, we implicitly
       // understand that the flux that is stored in the box is the flux that comes in through the hi side in the coordinate direction we are looking.
       FArrayBox faceFlux(hiBox, m_nComp);
-      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), dir, Side::Hi, a_dit, a_homogeneousPhysBC);
+      m_domainBc->getFaceFlux(faceFlux, phiFAB, bco, dir, Side::Hi, a_dit, a_homogeneousPhysBC);
 
       // The EBArith hiBox is cell-centered interior box abutting the domain side. We want the box immediately outside the domain.
       Box ghostBox = hiBox;
@@ -992,14 +992,16 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
     VoFIterator& vofitLo = m_vofIterDomLo[dir][a_dit];
     VoFIterator& vofitHi = m_vofIterDomHi[dir][a_dit];
 
+    const EBFaceFAB& Bcoef = (*m_Bcoef)[a_dit][dir];
+
     // Kernels for high and low sides.
     auto kernelLo = [&](const VolIndex& vof) -> void {
-      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Lo, a_dit, a_homogeneousPhysBC);
+      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, Bcoef, dir, Side::Lo, a_dit, a_homogeneousPhysBC);
       a_Lphi(vof, m_comp) -= flux * m_beta / m_dx;
     };
 
     auto kernelHi = [&](const VolIndex& vof) -> void {
-      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Hi, a_dit, a_homogeneousPhysBC);
+      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, Bcoef, dir, Side::Hi, a_dit, a_homogeneousPhysBC);
       a_Lphi(vof, m_comp) += flux * m_beta / m_dx;
     };
 

@@ -70,6 +70,7 @@ EBHelmholtzDirichletDomainBC::setValue(const std::function<Real(const RealVect& 
 void
 EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                           const BaseFab<Real>&  a_phi,
+                                          const BaseFab<Real>&  a_Bcoef,
                                           const int&            a_dir,
                                           const Side::LoHiSide& a_side,
                                           const DataIndex&      a_dit,
@@ -84,9 +85,8 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 
   // TLDR: This fill the regular flux on the domain edge/face.
 
-  const Real ihdx =
-    2.0 /
-    m_dx; // Spatial step is dx/2 because the finite difference goes between cell center and domain edge (so half a cell).
+  // Spatial step is dx/2 because the finite difference goes between cell center and domain edge (so half a cell).
+  const Real ihdx = 2.0 / m_dx;
   const Real sign = (a_side == Side::Lo) ? -1 : 1; // For getting the direction of the derivative correctly.
 
   std::function<void(const IntVect&)> kernel;
@@ -129,6 +129,7 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 Real
 EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
                                           const EBCellFAB&      a_phi,
+                                          const EBFaceFAB&      a_Bcoef,
                                           const int&            a_dir,
                                           const Side::LoHiSide& a_side,
                                           const DataIndex&      a_dit,

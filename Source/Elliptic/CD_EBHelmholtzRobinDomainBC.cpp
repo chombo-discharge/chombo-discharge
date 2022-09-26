@@ -62,6 +62,7 @@ EBHelmholtzRobinDomainBC::setCoefficients(const std::function<Real(const RealVec
 void
 EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                       const BaseFab<Real>&  a_phi,
+                                      const BaseFab<Real>&  a_Bcoef,
                                       const int&            a_dir,
                                       const Side::LoHiSide& a_side,
                                       const DataIndex&      a_dit,
@@ -132,6 +133,7 @@ EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 Real
 EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
                                       const EBCellFAB&      a_phi,
+                                      const EBFaceFAB&      a_Bcoef,
                                       const int&            a_dir,
                                       const Side::LoHiSide& a_side,
                                       const DataIndex&      a_dit,

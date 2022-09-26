@@ -96,6 +96,7 @@ EBHelmholtzNeumannDomainBC::setBxDphiDn(const std::function<Real(const RealVect&
 void
 EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                         const BaseFab<Real>&  a_phi,
+                                        const BaseFab<Real>&  a_Bcoef,
                                         const int&            a_dir,
                                         const Side::LoHiSide& a_side,
                                         const DataIndex&      a_dit,
@@ -142,6 +143,7 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 Real
 EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
                                         const EBCellFAB&      a_phi,
+                                        const EBFaceFAB&      a_Bcoef,
                                         const int&            a_dir,
                                         const Side::LoHiSide& a_side,
                                         const DataIndex&      a_dit,

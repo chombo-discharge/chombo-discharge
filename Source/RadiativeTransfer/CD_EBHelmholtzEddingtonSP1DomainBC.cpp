@@ -56,18 +56,27 @@ EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC(const Eddington
 
       // Create either a Dirichlet or Neumann boundary condition object for the current domain edge (face in 3D).
       switch (bcType) {
-      case EddingtonSP1DomainBc::BcType::Dirichlet:
+      case EddingtonSP1DomainBc::BcType::Dirichlet: {
         m_bcObjects.emplace(domainSide, std::make_shared<EBHelmholtzDirichletDomainBC>(func));
+
         break;
-      case EddingtonSP1DomainBc::BcType::Neumann:
+      }
+      case EddingtonSP1DomainBc::BcType::Neumann: {
         m_bcObjects.emplace(domainSide, std::make_shared<EBHelmholtzNeumannDomainBC>(func));
+
         break;
-      case EddingtonSP1DomainBc::BcType::Larsen:
+      }
+      case EddingtonSP1DomainBc::BcType::Larsen: {
         m_bcObjects.emplace(domainSide, std::make_shared<EBHelmholtzLarsenDomainBC>(m_species, m_r1, m_r2, func));
+
         break;
-      default:
+      }
+      default: {
         MayDay::Error(
           "EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC - unsupported boundary condition passed into constructor!");
+
+        break;
+      }
       }
     }
   }
@@ -99,6 +108,7 @@ EBHelmholtzEddingtonSP1DomainBC::define(const Location::Cell                    
 void
 EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                              const BaseFab<Real>&  a_phi,
+                                             const BaseFab<Real>&  a_Bcoef,
                                              const int&            a_dir,
                                              const Side::LoHiSide& a_side,
                                              const DataIndex&      a_dit,
@@ -108,12 +118,13 @@ EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
-  bcPtr->getFaceFlux(a_faceFlux, a_phi, a_dir, a_side, a_dit, a_useHomogeneous);
+  bcPtr->getFaceFlux(a_faceFlux, a_phi, a_Bcoef, a_dir, a_side, a_dit, a_useHomogeneous);
 }
 
 Real
 EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(const VolIndex&       a_vof,
                                              const EBCellFAB&      a_phi,
+                                             const EBFaceFAB&      a_Bcoef,
                                              const int&            a_dir,
                                              const Side::LoHiSide& a_side,
                                              const DataIndex&      a_dit,
@@ -123,7 +134,7 @@ EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(const VolIndex&       a_vof,
 
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
-  return bcPtr->getFaceFlux(a_vof, a_phi, a_dir, a_side, a_dit, a_useHomogeneous);
+  return bcPtr->getFaceFlux(a_vof, a_phi, a_Bcoef, a_dir, a_side, a_dit, a_useHomogeneous);
 }
 
 #include <CD_NamespaceFooter.H>
