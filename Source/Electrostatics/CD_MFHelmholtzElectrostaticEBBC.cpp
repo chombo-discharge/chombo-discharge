@@ -173,7 +173,7 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
       const Real     value = this->getElectrodePotential(pos);
       const Real     Bcoef = a_Bcoef(vof, m_comp);
 
-      a_Lphi(vof, m_comp) += a_beta * value * m_boundaryWeights[a_dit](vof, m_comp);
+      a_Lphi(vof, m_comp) += a_beta * Bcoef * value * m_boundaryWeights[a_dit](vof, m_comp);
     };
 
     BoxLoops::loop(a_singlePhaseVofs, kernel);
