@@ -393,6 +393,22 @@ FieldSolverMultigrid::setupSolver()
 }
 
 void
+FieldSolverMultigrid::setSolverPermittivities(const MFAMRFluxData& a_permittivityFace,
+                                              const MFAMRIVData&   a_permittivityEB)
+{
+  CH_TIME("FieldSolverMultigrid::setSolverPermittivities()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverMultigrid::setSolverPermittivities()" << endl;
+  }
+
+  if (!m_isSolverSetup) {
+    MayDay::Error("FieldSolverMultigrid::setSolverPermittivities -- must set up solver first!");
+  }
+
+  MayDay::Abort("FieldSolverMultigrid::setSolverPermittivities -- not implemented");
+}
+
+void
 FieldSolverMultigrid::setPermittivities()
 {
   CH_TIME("FieldSolverMultigrid::setPermittivities()");
