@@ -17,6 +17,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -166,7 +167,7 @@ Since refinement is intended to be quite general, the user is responsible for pr
 </div>
 <p>Refinement flags live in a data holder called <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> inside of <code class="docutils literal notranslate"><span class="pre">Driver</span></code>.
 This data is typedef’ed as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">DenseIntVectSet</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">EBAMRTags</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">DenseIntVectSet</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">EBAMRTags</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>For performance reasons, <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> onlys store refinement cells on a per-patch basis.
@@ -176,22 +177,22 @@ The flags themselves are owned by <a class="reference internal" href="Driver.htm
 <div class="section" id="user-interface">
 <h2>User interface<a class="headerlink" href="#user-interface" title="Permalink to this heading"></a></h2>
 <p>To implement a new <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>, the following functions must be implemented:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span> <span class="kt">void</span> <span class="nf">regrid</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span> <span class="kt">void</span> <span class="nf">parseOptions</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span> <span class="kt">void</span> <span class="nf">parseRuntimeOptions</span><span class="p">();</span>
-<span class="k">virtual</span> <span class="kt">bool</span> <span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span> <span class="n">a_tags</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">regrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseOptions</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseRuntimeOptions</span><span class="p">();</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Users can also parse run-time options and even have <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> write to plot files, by implementing</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span> <span class="kt">int</span> <span class="nf">getNumberOfPlotVariables</span><span class="p">();</span>
-<span class="k">virtual</span> <span class="kt">void</span> <span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span> <span class="n">a_output</span><span class="p">,</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span> <span class="n">a_plotvar_names</span><span class="p">,</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">a_icomp</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getNumberOfPlotVariables</span><span class="p">();</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_plotvar_names</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This is primarily useful for debugging the tracer fields that are used for flagging cells for refinement.</p>
 <div class="section" id="tagcells">
 <h3>tagCells<a class="headerlink" href="#tagcells" title="Permalink to this heading"></a></h3>
 <p>When the regrid routine enters, the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> will be asked to generate the refinement flags through a function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span> <span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span> <span class="n">a_tags</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This routine should add cells that will be refined, and remove cells that will be coarsened.</p>

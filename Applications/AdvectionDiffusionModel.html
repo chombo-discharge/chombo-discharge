@@ -17,6 +17,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -289,7 +290,7 @@ I.e. the flow field is a circulation around the Cartesian grid origin.</p>
 <div class="section" id="id2">
 <h3>Custom value<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>For a more general way of setting a user-specified velocity, <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">setVelocity</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_velocity</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_velocity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
@@ -308,7 +309,7 @@ To adjust it,  <span class="math notranslate nohighlight">\(\omega\)</span>, set
 <div class="section" id="id4">
 <h3>Custom value<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
 <p>For a more general way of setting the diffusion coefficient, <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">setDiffusionCoefficient</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_diffusion</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setDiffusionCoefficient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffusion</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>

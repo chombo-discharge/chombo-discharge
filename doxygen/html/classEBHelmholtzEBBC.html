@@ -118,15 +118,15 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a4144a128cc67fb1088371a129209c117">operator=</a> (const <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &amp;a_other)=delete</td></tr>
 <tr class="memdesc:a4144a128cc67fb1088371a129209c117"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed - don't see why you would need it. <br /></td></tr>
 <tr class="separator:a4144a128cc67fb1088371a129209c117"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82c0a8e4d5b442f9730113a35dda8b13"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a82c0a8e4d5b442f9730113a35dda8b13">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt;&gt;&gt; &amp;a_Bcoef, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int a_ghostCF)</td></tr>
-<tr class="memdesc:a82c0a8e4d5b442f9730113a35dda8b13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function that is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>.  <a href="classEBHelmholtzEBBC.html#a82c0a8e4d5b442f9730113a35dda8b13">More...</a><br /></td></tr>
-<tr class="separator:a82c0a8e4d5b442f9730113a35dda8b13"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7ee7e79ab9e793de2ede6dd23c70eb2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#aa7ee7e79ab9e793de2ede6dd23c70eb2">applyEBFlux</a> (VoFIterator &amp;a_vofit, EBCellFAB &amp;a_Lphi, const EBCellFAB &amp;a_phi, const DataIndex &amp;a_dit, const Real &amp;a_beta, const bool &amp;a_homogeneousPhysBC) const =0</td></tr>
-<tr class="memdesc:aa7ee7e79ab9e793de2ede6dd23c70eb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the EB flux. This is the version that is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>.  <a href="classEBHelmholtzEBBC.html#aa7ee7e79ab9e793de2ede6dd23c70eb2">More...</a><br /></td></tr>
-<tr class="separator:aa7ee7e79ab9e793de2ede6dd23c70eb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa596c345d2d9135830970ea22d54c487"><td class="memItemLeft" align="right" valign="top">const LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#aa596c345d2d9135830970ea22d54c487">getKappaDivFStencils</a> () const</td></tr>
-<tr class="memdesc:aa596c345d2d9135830970ea22d54c487"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the stencil for computing the finite-volume approximation to kappa*Div(F).  <a href="classEBHelmholtzEBBC.html#aa596c345d2d9135830970ea22d54c487">More...</a><br /></td></tr>
-<tr class="separator:aa596c345d2d9135830970ea22d54c487"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a454165be7a031f5019772e24c2afc62f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a454165be7a031f5019772e24c2afc62f">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RealVect &amp;a_probLo, const Real &amp;a_dx, const int a_ghostCF)</td></tr>
+<tr class="memdesc:a454165be7a031f5019772e24c2afc62f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function that is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>.  <a href="classEBHelmholtzEBBC.html#a454165be7a031f5019772e24c2afc62f">More...</a><br /></td></tr>
+<tr class="separator:a454165be7a031f5019772e24c2afc62f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3f55b2429be5befedf87aa0aa3ccbcf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#ac3f55b2429be5befedf87aa0aa3ccbcf">applyEBFlux</a> (VoFIterator &amp;a_vofit, EBCellFAB &amp;a_Lphi, const EBCellFAB &amp;a_phi, const BaseIVFAB&lt; Real &gt; &amp;a_Bcoef, const DataIndex &amp;a_dit, const Real &amp;a_beta, const bool &amp;a_homogeneousPhysBC) const =0</td></tr>
+<tr class="memdesc:ac3f55b2429be5befedf87aa0aa3ccbcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the EB flux. This is the version that is called by <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>.  <a href="classEBHelmholtzEBBC.html#ac3f55b2429be5befedf87aa0aa3ccbcf">More...</a><br /></td></tr>
+<tr class="separator:ac3f55b2429be5befedf87aa0aa3ccbcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2df076344f7a145857f026f0bbd921de"><td class="memItemLeft" align="right" valign="top">const LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a2df076344f7a145857f026f0bbd921de">getGradPhiStencils</a> () const</td></tr>
+<tr class="memdesc:a2df076344f7a145857f026f0bbd921de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the stencil for computing the finite-volume approximation to kappa*Div(F).  <a href="classEBHelmholtzEBBC.html#a2df076344f7a145857f026f0bbd921de">More...</a><br /></td></tr>
+<tr class="separator:a2df076344f7a145857f026f0bbd921de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -168,14 +168,10 @@ RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a404a4ae303ca9f928972c699470f978c">m_eblg</a></td></tr>
 <tr class="memdesc:a404a4ae303ca9f928972c699470f978c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level grid. <br /></td></tr>
 <tr class="separator:a404a4ae303ca9f928972c699470f978c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2c1ee0371cbc8c6daf506d29fabd8581"><td class="memItemLeft" align="right" valign="top"><a id="a2c1ee0371cbc8c6daf506d29fabd8581"></a>
-RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a2c1ee0371cbc8c6daf506d29fabd8581">m_Bcoef</a></td></tr>
-<tr class="memdesc:a2c1ee0371cbc8c6daf506d29fabd8581"><td class="mdescLeft">&#160;</td><td class="mdescRight">B-coefficent. <br /></td></tr>
-<tr class="separator:a2c1ee0371cbc8c6daf506d29fabd8581"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad3d06c20653443f7f067bc3d3ba6763"><td class="memItemLeft" align="right" valign="top"><a id="aad3d06c20653443f7f067bc3d3ba6763"></a>
-LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#aad3d06c20653443f7f067bc3d3ba6763">m_kappaDivFStencils</a></td></tr>
-<tr class="memdesc:aad3d06c20653443f7f067bc3d3ba6763"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for computing the flux on a single level. This is a single-level object. <br /></td></tr>
-<tr class="separator:aad3d06c20653443f7f067bc3d3ba6763"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8709bd3e46c8550ee8388d125a37254d"><td class="memItemLeft" align="right" valign="top"><a id="a8709bd3e46c8550ee8388d125a37254d"></a>
+LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzEBBC.html#a8709bd3e46c8550ee8388d125a37254d">m_gradPhiStencils</a></td></tr>
+<tr class="memdesc:a8709bd3e46c8550ee8388d125a37254d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stencils for computing the flux on a single level. This is a single-level object. <br /></td></tr>
+<tr class="separator:a8709bd3e46c8550ee8388d125a37254d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
@@ -191,8 +187,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class for passing EB boundary conditions into <a class="el" href="classEBHelmholtzOp.html" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho.">EBHelmholtzOp</a>. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="aa7ee7e79ab9e793de2ede6dd23c70eb2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa7ee7e79ab9e793de2ede6dd23c70eb2">&#9670;&nbsp;</a></span>applyEBFlux()</h2>
+<a id="ac3f55b2429be5befedf87aa0aa3ccbcf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3f55b2429be5befedf87aa0aa3ccbcf">&#9670;&nbsp;</a></span>applyEBFlux()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -217,6 +213,12 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td>
           <td class="paramtype">const EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -255,6 +257,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_vofit</td><td>Iterator for cut-cells </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_Lphi</td><td>Operator kappa*L(phi) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Phi, cell-centered. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>EB-centered B-coefficient </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index <br  />
  </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_beta</td><td>Beta. Passed in from operator. </td></tr>
@@ -263,12 +266,12 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classMFHelmholtzEBBC.html#aa3e39bb63840f6541a142e930b0bddfe">MFHelmholtzEBBC</a>, <a class="el" href="classEBHelmholtzRobinEBBC.html#aba41f0a068657f048a14f8167d398057">EBHelmholtzRobinEBBC</a>, <a class="el" href="classEBHelmholtzDirichletEBBC.html#aa13933810b49adc5b93d7d87f632e6db">EBHelmholtzDirichletEBBC</a>, and <a class="el" href="classEBHelmholtzNeumannEBBC.html#a504e455e8396afb507a7a5046612f7e0">EBHelmholtzNeumannEBBC</a>.</p>
+<p>Implemented in <a class="el" href="classEBHelmholtzRobinEBBC.html#ac530a58627841eef02d4778c038d81f9">EBHelmholtzRobinEBBC</a>, <a class="el" href="classEBHelmholtzDirichletEBBC.html#a54664fcd958454b85f03156b5b58333e">EBHelmholtzDirichletEBBC</a>, <a class="el" href="classEBHelmholtzNeumannEBBC.html#a265b10f1392e4cf0909677c08987f4aa">EBHelmholtzNeumannEBBC</a>, and <a class="el" href="classMFHelmholtzEBBC.html#ae8f3c0fe95fac1bc65937ed79bf14f99">MFHelmholtzEBBC</a>.</p>
 
 </div>
 </div>
-<a id="a82c0a8e4d5b442f9730113a35dda8b13"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a82c0a8e4d5b442f9730113a35dda8b13">&#9670;&nbsp;</a></span>define()</h2>
+<a id="a454165be7a031f5019772e24c2afc62f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a454165be7a031f5019772e24c2afc62f">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -284,12 +287,6 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td>
           <td class="paramtype">const EBLevelGrid &amp;&#160;</td>
           <td class="paramname"><em>a_eblg</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt;&gt;&gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_Bcoef</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -322,7 +319,6 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dataLocation</td><td>Specification of data centering </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_eblg</td><td>Grid where this object is defined. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>B-coefficient. You will need this for the flux stencil. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of computational domain. Required if BC objects needs physical position. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ghostCF</td><td>Number of ghost cells that are filled across CF interface. </td></tr>
@@ -332,14 +328,14 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="aa596c345d2d9135830970ea22d54c487"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa596c345d2d9135830970ea22d54c487">&#9670;&nbsp;</a></span>getKappaDivFStencils()</h2>
+<a id="a2df076344f7a145857f026f0bbd921de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2df076344f7a145857f026f0bbd921de">&#9670;&nbsp;</a></span>getGradPhiStencils()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt; &amp; EBHelmholtzEBBC::getKappaDivFStencils </td>
+          <td class="memname">const LayoutData&lt; BaseIVFAB&lt; VoFStencil &gt; &gt; &amp; EBHelmholtzEBBC::getGradPhiStencils </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>

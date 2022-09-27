@@ -116,6 +116,10 @@ $(function() {
 <li>seedUniformParticles()
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#ad522ca71e5f5f340bb7e34da63215404">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
+<li>setAcoAndBco()
+: <a class="el" href="classEBHelmholtzOp.html#a0cdbaa4d871750098c48a369aa2c8355">EBHelmholtzOp</a>
+, <a class="el" href="classMFHelmholtzOp.html#aa5181c8beedf6ed241fa9daa545c381e">MFHelmholtzOp</a>
+</li>
 <li>setAdvectionDiffusion()
 : <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#afce1f531398aebbd191f8a4eb49b3a67">Physics::BrownianWalker::BrownianWalkerStepper</a>
 </li>
@@ -153,6 +157,9 @@ $(function() {
 <li>setBcFunction()
 : <a class="el" href="classCdrDomainBC.html#a4de1362252e67fe83c2582a332dd8dc9">CdrDomainBC</a>
 </li>
+<li>setBco()
+: <a class="el" href="classMFHelmholtzJumpBC.html#a9dfdadb393f28750e43025011bacecb3">MFHelmholtzJumpBC</a>
+</li>
 <li>setBcType()
 : <a class="el" href="classCdrDomainBC.html#ab131708f26048cb9dafee70ac2b5833a">CdrDomainBC</a>
 </li>
@@ -160,7 +167,7 @@ $(function() {
 : <a class="el" href="classEBHelmholtzNeumannDomainBC.html#a571dc592d9ff77c14098c742fee17a69">EBHelmholtzNeumannDomainBC</a>
 , <a class="el" href="classEBHelmholtzNeumannDomainBCFactory.html#a71b6df585d15281631c5a7ab189ac5e6">EBHelmholtzNeumannDomainBCFactory</a>
 , <a class="el" href="classEBHelmholtzNeumannEBBC.html#a71a269bee82b1fa578821bb58ef8bec3">EBHelmholtzNeumannEBBC</a>
-, <a class="el" href="classEBHelmholtzNeumannEBBCFactory.html#a1207d55b4f09e64cb244396b2ba338d1">EBHelmholtzNeumannEBBCFactory</a>
+, <a class="el" href="classEBHelmholtzNeumannEBBCFactory.html#a2dc8facf04d1f97094580eb57542f291">EBHelmholtzNeumannEBBCFactory</a>
 , <a class="el" href="classMFHelmholtzNeumannDomainBCFactory.html#a08909e197e1db5994b192afe91d88491">MFHelmholtzNeumannDomainBCFactory</a>
 , <a class="el" href="classMFHelmholtzNeumannEBBC.html#aab19b59dbde90eccaaeef5f94e3b7b17">MFHelmholtzNeumannEBBC</a>
 , <a class="el" href="classMFHelmholtzNeumannEBBCFactory.html#ac72938da424676a3f3dc6505552c3b19">MFHelmholtzNeumannEBBCFactory</a>
@@ -452,6 +459,10 @@ $(function() {
 , <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6951c397632139bf575665086fd321d6">Physics::Electrostatics::FieldStepper&lt; T &gt;</a>
 , <a class="el" href="classSigmaSolver.html#a3231df31992f7336770dba1e0d12d63d">SigmaSolver</a>
 </li>
+<li>setSolverPermittivities()
+: <a class="el" href="classFieldSolver.html#a73190bc31e96ed450982d9747b2c0b1d">FieldSolver</a>
+, <a class="el" href="classFieldSolverMultigrid.html#a5f236c23030a758bc4ee54520e346c19">FieldSolverMultigrid</a>
+</li>
 <li>setSolverVerbosity()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a1872a4dd4b78e3dd7cb9b8fe547bb977">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
@@ -565,15 +576,15 @@ $(function() {
 , <a class="el" href="classMFInterfaceFAB.html#a74bcb6319629ac447f826093f9a1e835">MFInterfaceFAB&lt; T &gt;</a>
 </li>
 <li>setValue()
-: <a class="el" href="classDataOps.html#a22b0187a50e5163bb0c25e21e18ccda5">DataOps</a>
+: <a class="el" href="classDataOps.html#ad84a475f273ba9cb34375581bebe5e9f">DataOps</a>
 , <a class="el" href="classEBHelmholtzDirichletDomainBC.html#aa9b7ae79506a21633ddf098add638fb3">EBHelmholtzDirichletDomainBC</a>
 , <a class="el" href="classEBHelmholtzDirichletDomainBCFactory.html#a69c327c5de6e48b2796d6a4863d15223">EBHelmholtzDirichletDomainBCFactory</a>
-, <a class="el" href="classEBHelmholtzDirichletEBBC.html#a23692e7da61f387882fa56e871c81374">EBHelmholtzDirichletEBBC</a>
+, <a class="el" href="classEBHelmholtzDirichletEBBC.html#af2f74c2f3a86d6016d471afd4f74410d">EBHelmholtzDirichletEBBC</a>
 , <a class="el" href="classEBHelmholtzDirichletEBBCFactory.html#aaa926ea201ffcbca8890d7bff5b665e7">EBHelmholtzDirichletEBBCFactory</a>
 , <a class="el" href="classMFHelmholtzDirichletDomainBCFactory.html#ae0546de10bfad264ddc645f55c76f550">MFHelmholtzDirichletDomainBCFactory</a>
 , <a class="el" href="classMFHelmholtzDirichletEBBC.html#a84702101799c963a7d9bec2dddd1ebd6">MFHelmholtzDirichletEBBC</a>
-, <a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#a9a2198fd00f2b9ed7ad96224becbfd8e">MFHelmholtzDirichletEBBCFactory</a>
-, <a class="el" href="classParticleContainer.html#a3a369b198c12820492a97bc384f0dd10">ParticleContainer&lt; P &gt;</a>
+, <a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#a99af7cf90e10ec4ce050727967a19a3e">MFHelmholtzDirichletEBBCFactory</a>
+, <a class="el" href="classParticleContainer.html#af3e0619cf9b7ebb03beb890081ecd4b2">ParticleContainer&lt; P &gt;</a>
 </li>
 <li>setVelocity()
 : <a class="el" href="classCdrSolver.html#ae378699f575d0bf248d737e655c58768">CdrSolver</a>
@@ -633,13 +644,13 @@ $(function() {
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1SigmaStorage.html#ad2d8d5dbb6c95e9b4917166f5467cca6">Physics::CdrPlasma::CdrPlasmaGodunovStepper::SigmaStorage</a>
 </li>
 <li>SignedDistanceBVH()
-: <a class="el" href="classSignedDistanceBVH.html#a53a166bcf22f134a4d35f7c97c442414">SignedDistanceBVH&lt; T, BV, K &gt;</a>
+: <a class="el" href="classSignedDistanceBVH.html#ad042a7cf6207fb44fcc36c2b2ef2f0bc">SignedDistanceBVH&lt; T, BV, K &gt;</a>
 </li>
 <li>SignedDistanceDCEL()
 : <a class="el" href="classSignedDistanceDCEL.html#ad455097887192ba467809a55e635a0ed">SignedDistanceDCEL&lt; T &gt;</a>
 </li>
 <li>SimpleItoParticle()
-: <a class="el" href="classSimpleItoParticle.html#ac25978f5559dcbb1d6bfb1e554600493">SimpleItoParticle</a>
+: <a class="el" href="classSimpleItoParticle.html#a9a8351cd906c21b655a1f0783277239a">SimpleItoParticle</a>
 </li>
 <li>size()
 : <a class="el" href="classDomainFluxIFFAB.html#a888a8f93740b6ba1c9901c75ec7a8bad">DomainFluxIFFAB</a>
@@ -667,7 +678,7 @@ $(function() {
 , <a class="el" href="classFieldSolverMultigrid.html#ad7afdd05f87b20fbf69dfe9faaf382df">FieldSolverMultigrid</a>
 </li>
 <li>solvePoisson()
-: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a550ff1857209ccb3cab76f6d26ae5fc9">Physics::CdrPlasma::CdrPlasmaStepper</a>
+: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#adec6b97c13365a4f1038262524576ec7">Physics::CdrPlasma::CdrPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6db1ef2d30ca64c2563546414a150a8f">Physics::Electrostatics::FieldStepper&lt; T &gt;</a>
 </li>
 <li>solveRadiativeTransfer()
@@ -680,7 +691,7 @@ $(function() {
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#ab311f7ff6200e7d7492d652439a27386">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>
 </li>
 <li>sort()
-: <a class="el" href="classLoadBalancing.html#a676452d025189fb8d6d7004180916b60">LoadBalancing</a>
+: <a class="el" href="classLoadBalancing.html#a704ca1a8c6c621d5d6a010ce09344881">LoadBalancing</a>
 , <a class="el" href="classLookupTable.html#a0acc033d4e39927a63ddba103cd284e9">LookupTable&lt; N &gt;</a>
 </li>
 <li>sortParticlesByCell()
@@ -717,13 +728,13 @@ $(function() {
 , <a class="el" href="classItoIterator.html#afb0a904899fd33c81278a80cd71cddf3">ItoIterator&lt; T &gt;</a>
 </li>
 <li>SphereArray()
-: <a class="el" href="classSphereArray.html#a7439b9327225e2d4fcfff0ade243e9e5">SphereArray</a>
+: <a class="el" href="classSphereArray.html#a6c3c26c2d34f41fdd46b14a8a9d43e54">SphereArray</a>
 </li>
 <li>SphereSdf()
-: <a class="el" href="classSphereSdf.html#ab055927d0d1110b59d00a51bdc0c4223">SphereSdf</a>
+: <a class="el" href="classSphereSdf.html#a8dd84297190599eb0ffb5b7f8fef029f">SphereSdf</a>
 </li>
 <li>squareRoot()
-: <a class="el" href="classDataOps.html#a26000910520cee19d4e09c75eeb2a23b">DataOps</a>
+: <a class="el" href="classDataOps.html#a41975c91646bbb7ecd30af180167897f">DataOps</a>
 </li>
 <li>standardSort()
 : <a class="el" href="classLoadBalancing.html#a71c9944ddc058f84c2a093b78360a2c1">LoadBalancing</a>
@@ -744,10 +755,10 @@ $(function() {
 : <a class="el" href="classDriver.html#a32eecb9a56648cff29e56ba2e787c06e">Driver</a>
 </li>
 <li>stepSSA()
-: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a68daf051f9019e65fde7b05bbc95f293">Physics::ItoPlasma::ItoPlasmaPhysics</a>
+: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a8868766f037122c34b035deec7ee42b7">Physics::ItoPlasma::ItoPlasmaPhysics</a>
 </li>
 <li>stepTau()
-: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a4417f9384a5c019ec60ab971fe9975b9">Physics::ItoPlasma::ItoPlasmaPhysics</a>
+: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#ac30cbcde3345fd249c3a9f7617d92bfe">Physics::ItoPlasma::ItoPlasmaPhysics</a>
 </li>
 <li>stopEvent()
 : <a class="el" href="classTimer.html#a0476d670daf00d245dd740726903ea2c">Timer</a>

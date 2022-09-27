@@ -17,6 +17,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -229,8 +230,8 @@ This “range of voltages” can be a series of discrete values, or a voltage cu
 <div class="section" id="implementation">
 <h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h3>
 <p>The streamer inception model is implemented in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/StreamerInception</span></code> as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">P</span><span class="p">,</span> <span class="k">typename</span> <span class="n">F</span><span class="p">,</span> <span class="k">typename</span> <span class="n">C</span><span class="o">&gt;</span>
-<span class="k">class</span> <span class="nc">StreamerInceptionStepper</span> <span class="o">:</span> <span class="k">public</span> <span class="n">TimeStepper</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">C</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StreamerInceptionStepper</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimeStepper</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The template complexity is due to flexibility in what solver implementations we use.
@@ -296,22 +297,22 @@ Note that, internally, we always ensure that <span class="math notranslate nohig
 </ol>
 <p>The input data to the streamer inception model is mostly done by passing in C++-functions to the class.
 These functions are mainly in the form</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span> <span class="n">E</span><span class="p">)</span><span class="o">&gt;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The user can specify analytic fields or use tabulated data, and pass these in through a C++ lambda function.
 For defining an analytic function:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span> <span class="n">alphaCoeff</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="n">Real</span> <span class="n">E</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
-   <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="n">E</span><span class="p">.</span>
-<span class="p">};</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">alphaCoeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="o">/</span><span class="n">E</span><span class="p">.</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Tabulated data (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">Lookup tables</span></a>) can also be used.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span> <span class="n">tableData</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tableData</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">auto</span> <span class="n">alphaCoeff</span> <span class="o">=</span> <span class="p">[</span><span class="n">tableData</span><span class="p">](</span><span class="k">const</span> <span class="n">Real</span> <span class="n">E</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">void</span> <span class="p">{</span>
-   <span class="k">return</span> <span class="n">tableData</span><span class="p">.</span><span class="n">getEntry</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">E</span><span class="p">);</span>
-<span class="p">};</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">alphaCoeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">tableData</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">tableData</span><span class="p">.</span><span class="n">getEntry</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">E</span><span class="p">);</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -330,35 +331,35 @@ The remaining transport data is used for calculating the inception probability (
 <div class="section" id="townsend-ionization-coefficient">
 <h3>Townsend ionization coefficient<a class="headerlink" href="#townsend-ionization-coefficient" title="Permalink to this heading"></a></h3>
 <p>To set the Townsend ionization coefficient, use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setAlpha</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_alpha</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_alpha</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="townsend-attachment-coefficient">
 <h3>Townsend attachment coefficient<a class="headerlink" href="#townsend-attachment-coefficient" title="Permalink to this heading"></a></h3>
 <p>To set the Townsend attachment coefficient, use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setEta</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span> <span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_eta</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_eta</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="negative-ion-mobility">
 <h3>Negative ion mobility<a class="headerlink" href="#negative-ion-mobility" title="Permalink to this heading"></a></h3>
 <p>To set the negative ion mobility, use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setIonMobility</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span> <span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_mobility</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setIonMobility</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_mobility</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="negative-ion-diffusion-coefficient">
 <h3>Negative ion diffusion coefficient<a class="headerlink" href="#negative-ion-diffusion-coefficient" title="Permalink to this heading"></a></h3>
 <p>To set the negative ion diffusion coefficient, use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setIonDiffusion</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span> <span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_diffCo</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setIonDiffusion</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffCo</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="negative-ion-density">
 <h3>Negative ion density<a class="headerlink" href="#negative-ion-density" title="Permalink to this heading"></a></h3>
 <p>To set the negative ion density, use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setIonDensity</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_density</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setIonDensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_density</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
@@ -366,7 +367,7 @@ The remaining transport data is used for calculating the inception probability (
 <h3>Background ionization rate<a class="headerlink" href="#background-ionization-rate" title="Permalink to this heading"></a></h3>
 <p>The background ionization rate describes the appearance of a first electron from a background contribution, e.g. through cosmic radiation, decay of radioactive isotopes, etc.</p>
 <p>To set the background ionization rate, use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setBackgroundRate</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span> <span class="n">E</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_backgroundRate</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setBackgroundRate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_backgroundRate</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
@@ -377,14 +378,14 @@ The remaining transport data is used for calculating the inception probability (
 \[\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle = k_d \left\langle n_-\right\rangle\]</div>
 <p>where <span class="math notranslate nohighlight">\(\left\langle n_-\right\rangle\)</span> is the negative ion density in units of <span class="math notranslate nohighlight">\(m^{-3}\)</span> (or strictly speaking the negative ion probability density).
 This is used when calculating the inception probability, and the user sets the detachment rate <span class="math notranslate nohighlight">\(k_d\)</span> through</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setDetachmentRate</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span> <span class="n">E</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_backgroundRate</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setDetachmentRate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_backgroundRate</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="field-emission">
 <h3>Field emission<a class="headerlink" href="#field-emission" title="Permalink to this heading"></a></h3>
 <p>To set the field emission current, use the function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setFieldEmission</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span> <span class="n">E</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_currentDensity</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionStepper</span><span class="o">::</span><span class="n">setFieldEmission</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_currentDensity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This will set a field-dependent emission rate from cathodes given by the input function.
@@ -407,7 +408,7 @@ StreamerInceptionStepper.voltage_steps = 3     # Number of voltage steps
 <div class="section" id="voltage-curve">
 <span id="chap-streamerinceptionvoltagecurve"></span><h3>Voltage curve<a class="headerlink" href="#voltage-curve" title="Permalink to this heading"></a></h3>
 <p>To set the voltage curve, use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionSteppersetVoltageCurve</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span><span class="o">&amp;</span> <span class="n">time</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_voltageCurve</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">StreamerInceptionSteppersetVoltageCurve</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">time</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_voltageCurve</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This is relevant only when running a transient simulation.</p>
@@ -639,7 +640,7 @@ When running the model, ensure that the <a class="reference internal" href="../S
 \[\alpha_{\text{eff}}\left(\left|\mathbf{E}\right|\right)\Delta x &gt; \lambda,\]</div>
 <p>where <span class="math notranslate nohighlight">\(\lambda\)</span> is a user-specified refinement criterion.</p>
 <p>This is implemented in a class</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">StreamerInceptionTagger</span> <span class="o">:</span> <span class="k">public</span> <span class="n">CellTagger</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">StreamerInceptionTagger</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">CellTagger</span><span class="w"></span>
 </pre></div>
 </div>
 <p>and is automatically included in simulations when setting up the application through the Python setup tools (see <a class="reference internal" href="#chap-streamerinceptionsetup"><span class="std std-ref">Setting up a new problem</span></a>).

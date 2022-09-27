@@ -146,6 +146,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a0d947bd259b32e3dacf0c5f7284be373">turnOnBCs</a> ()</td></tr>
 <tr class="memdesc:a0d947bd259b32e3dacf0c5f7284be373"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn on BCs. <br /></td></tr>
 <tr class="separator:a0d947bd259b32e3dacf0c5f7284be373"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cdbaa4d871750098c48a369aa2c8355"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a0cdbaa4d871750098c48a369aa2c8355">setAcoAndBco</a> (const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt;&gt; &amp;a_Acoef, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt;&gt; &amp;a_Bcoef, const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt;&gt;&gt; &amp;a_BcoefIrreg)</td></tr>
+<tr class="memdesc:a0cdbaa4d871750098c48a369aa2c8355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update with new A and B coefficients.  <a href="classEBHelmholtzOp.html#a0cdbaa4d871750098c48a369aa2c8355">More...</a><br /></td></tr>
+<tr class="separator:a0cdbaa4d871750098c48a369aa2c8355"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac57225143774c072002c4f8f7914d9d8"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ac57225143774c072002c4f8f7914d9d8">getAcoef</a> ()</td></tr>
+<tr class="memdesc:ac57225143774c072002c4f8f7914d9d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the Helmholtz A-coefficient on cell centers.  <a href="classEBHelmholtzOp.html#ac57225143774c072002c4f8f7914d9d8">More...</a><br /></td></tr>
+<tr class="separator:ac57225143774c072002c4f8f7914d9d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0b4f43b2a98a900ef9ebca6888f3b0b"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ad0b4f43b2a98a900ef9ebca6888f3b0b">getBcoef</a> ()</td></tr>
+<tr class="memdesc:ad0b4f43b2a98a900ef9ebca6888f3b0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the Helmholtz B-coefficient on faces.  <a href="classEBHelmholtzOp.html#ad0b4f43b2a98a900ef9ebca6888f3b0b">More...</a><br /></td></tr>
+<tr class="separator:ad0b4f43b2a98a900ef9ebca6888f3b0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16a1e2ba2e60c4eee89fbed6668e7067"><td class="memItemLeft" align="right" valign="top">const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a16a1e2ba2e60c4eee89fbed6668e7067">getBcoefIrreg</a> ()</td></tr>
+<tr class="memdesc:a16a1e2ba2e60c4eee89fbed6668e7067"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the Helmholtz B-coefficient on the EB.  <a href="classEBHelmholtzOp.html#a16a1e2ba2e60c4eee89fbed6668e7067">More...</a><br /></td></tr>
+<tr class="separator:a16a1e2ba2e60c4eee89fbed6668e7067"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afabaf780d215951b42cdaa13e7bf2832"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#afabaf780d215951b42cdaa13e7bf2832">coarsen</a> (LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine)</td></tr>
 <tr class="memdesc:afabaf780d215951b42cdaa13e7bf2832"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen data from fine to coar level.  <a href="classEBHelmholtzOp.html#afabaf780d215951b42cdaa13e7bf2832">More...</a><br /></td></tr>
 <tr class="separator:afabaf780d215951b42cdaa13e7bf2832"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -300,10 +312,10 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a01995f0b9cac6833fd90bc6336845c04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a01995f0b9cac6833fd90bc6336845c04">relaxGSMultiColor</a> (LevelData&lt; EBCellFAB &gt; &amp;a_correction, const LevelData&lt; EBCellFAB &gt; &amp;a_residual, const int a_iterations)</td></tr>
 <tr class="memdesc:a01995f0b9cac6833fd90bc6336845c04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multi-colored gauss-seidel relaxation.  <a href="classEBHelmholtzOp.html#a01995f0b9cac6833fd90bc6336845c04">More...</a><br /></td></tr>
 <tr class="separator:a01995f0b9cac6833fd90bc6336845c04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86e909fdfd02a35b757d16b0ee40029a"><td class="memItemLeft" align="right" valign="top"><a id="a86e909fdfd02a35b757d16b0ee40029a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a86e909fdfd02a35b757d16b0ee40029a">computeAlphaWeight</a> ()</td></tr>
-<tr class="memdesc:a86e909fdfd02a35b757d16b0ee40029a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the weight of the diagonal term. <br /></td></tr>
-<tr class="separator:a86e909fdfd02a35b757d16b0ee40029a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b4e8202869126ba34ed41369a81b71c"><td class="memItemLeft" align="right" valign="top"><a id="a2b4e8202869126ba34ed41369a81b71c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a2b4e8202869126ba34ed41369a81b71c">computeDiagWeight</a> ()</td></tr>
+<tr class="memdesc:a2b4e8202869126ba34ed41369a81b71c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the weight of the diagonal term. <br /></td></tr>
+<tr class="separator:a2b4e8202869126ba34ed41369a81b71c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d1aa298b65f2361aac473eb4a485818"><td class="memItemLeft" align="right" valign="top"><a id="a6d1aa298b65f2361aac473eb4a485818"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a6d1aa298b65f2361aac473eb4a485818">computeRelaxationCoefficient</a> ()</td></tr>
 <tr class="memdesc:a6d1aa298b65f2361aac473eb4a485818"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate relaxation coefficient. <br /></td></tr>
@@ -2438,6 +2450,66 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
+<a id="ac57225143774c072002c4f8f7914d9d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac57225143774c072002c4f8f7914d9d8">&#9670;&nbsp;</a></span>getAcoef()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt; &gt; &amp; EBHelmholtzOp::getAcoef </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the Helmholtz A-coefficient on cell centers. </p>
+<dl class="section return"><dt>Returns</dt><dd>m_Acoef </dd></dl>
+
+</div>
+</div>
+<a id="ad0b4f43b2a98a900ef9ebca6888f3b0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0b4f43b2a98a900ef9ebca6888f3b0b">&#9670;&nbsp;</a></span>getBcoef()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt; &amp; EBHelmholtzOp::getBcoef </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the Helmholtz B-coefficient on faces. </p>
+<dl class="section return"><dt>Returns</dt><dd>m_Bcoef </dd></dl>
+
+</div>
+</div>
+<a id="a16a1e2ba2e60c4eee89fbed6668e7067"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16a1e2ba2e60c4eee89fbed6668e7067">&#9670;&nbsp;</a></span>getBcoefIrreg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt; &gt; &gt; &amp; EBHelmholtzOp::getBcoefIrreg </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the Helmholtz B-coefficient on the EB. </p>
+<dl class="section return"><dt>Returns</dt><dd>m_Bcoef </dd></dl>
+
+</div>
+</div>
 <a id="a63b4bfad4d0f236ad1ae4b71b1936ee0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a63b4bfad4d0f236ad1ae4b71b1936ee0">&#9670;&nbsp;</a></span>getFaceCenterFluxStencil()</h2>
 
@@ -3579,6 +3651,51 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Data to be scaled </td></tr>
     <tr><td class="paramdir"></td><td class="paramname">[i]</td><td>a_scale Scaling factor </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a0cdbaa4d871750098c48a369aa2c8355"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cdbaa4d871750098c48a369aa2c8355">&#9670;&nbsp;</a></span>setAcoAndBco()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBHelmholtzOp::setAcoAndBco </td>
+          <td>(</td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; EBCellFAB &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_Acoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RefCountedPtr&lt; LevelData&lt; BaseIVFAB&lt; Real &gt;&gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_BcoefIrreg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Update with new A and B coefficients. </p>
+<dl class="section note"><dt>Note</dt><dd>This will call defineStencils but will not recompute the stencils from the BC objects. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Acoef</td><td>Operator A-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>Operator B-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_BcoefIrreg</td><td>Operator B-coefficient (on EB faces) </td></tr>
   </table>
   </dd>
 </dl>

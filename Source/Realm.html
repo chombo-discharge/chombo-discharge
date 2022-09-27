@@ -17,6 +17,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -175,19 +176,19 @@ For particles, the computational load is better defined by the number of computa
 Every <code class="docutils literal notranslate"><span class="pre">Realm</span></code> is owned by <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>, and the user will only interact with realms through the public <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> interface, for example by fetching operators for performing AMR operations.
 In addition, data that is defined on one realm can be copied to another; <code class="docutils literal notranslate"><span class="pre">EBAMRData&lt;T&gt;</span></code> takes care of this.
 You will simply call a copier:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span> <span class="n">realmOneData</span><span class="p">;</span>
-<span class="n">EBAMRCellData</span> <span class="n">realmTwoData</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">realmOneData</span><span class="p">;</span><span class="w"></span>
+<span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">realmTwoData</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">realmOneData</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="n">realmTwoData</span><span class="p">);</span>
+<span class="n">realmOneData</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="n">realmTwoData</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The rest of the functionality uses the public interface of <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>.
 For example for coarsening of multifluid data:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">multifluidRealm</span><span class="p">;</span>
-<span class="n">MFAMRCellData</span> <span class="n">multifluidData</span><span class="p">;</span>
-<span class="n">AmrMesh</span> <span class="n">amrMesh</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">multifluidRealm</span><span class="p">;</span><span class="w"></span>
+<span class="n">MFAMRCellData</span><span class="w"> </span><span class="n">multifluidData</span><span class="p">;</span><span class="w"></span>
+<span class="n">AmrMesh</span><span class="w"> </span><span class="n">amrMesh</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">amrMesh</span><span class="p">.</span><span class="n">averageDown</span><span class="p">(</span><span class="n">multifluidData</span><span class="p">,</span> <span class="n">multifluidRealm</span><span class="p">);</span>
+<span class="n">amrMesh</span><span class="p">.</span><span class="n">averageDown</span><span class="p">(</span><span class="n">multifluidData</span><span class="p">,</span><span class="w"> </span><span class="n">multifluidRealm</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 </div>

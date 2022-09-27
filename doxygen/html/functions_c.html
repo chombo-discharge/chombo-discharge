@@ -214,6 +214,10 @@ $(function() {
 : <a class="el" href="classEBHelmholtzOpFactory.html#a60a1dc661a7c02f70f049fb14350fe06">EBHelmholtzOpFactory</a>
 , <a class="el" href="classMFHelmholtzOpFactory.html#a07c420e3274a45e5501188518e8ca272">MFHelmholtzOpFactory</a>
 </li>
+<li>coarsenCoefficientsMG()
+: <a class="el" href="classEBHelmholtzOpFactory.html#ab78e5835f07ea966d00c63e158e893a2">EBHelmholtzOpFactory</a>
+, <a class="el" href="classMFHelmholtzOpFactory.html#ad7e8385fb04a5522c4277d946c4e91c2">MFHelmholtzOpFactory</a>
+</li>
 <li>coarsenTags()
 : <a class="el" href="classGeoCoarsener.html#acfabba1da6ee3002c80ffa2601371e3f">GeoCoarsener</a>
 </li>
@@ -249,9 +253,6 @@ $(function() {
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysicsLEA.html#a5134f9f8437839773192913cc7e87652">Physics::ItoPlasma::ItoPlasmaPhysicsLEA</a>
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysicsLFA.html#af1a06ff0bc331ba410dbff125e84570c">Physics::ItoPlasma::ItoPlasmaPhysicsLFA</a>
 </li>
-<li>computeAlphaWeight()
-: <a class="el" href="classEBHelmholtzOp.html#a86e909fdfd02a35b757d16b0ee40029a">EBHelmholtzOp</a>
-</li>
 <li>computeAMRGradient()
 : <a class="el" href="classEBGradient.html#ad45a607bf4b5d675b544ce443a8fbcb1">EBGradient</a>
 </li>
@@ -280,7 +281,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html#afb4ffe4ff86c6bd656cfbe9447697c08">Physics::CdrPlasma::CdrPlasmaPhysics</a>
 </li>
 <li>computeCdrDiffusion()
-: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a950e034b9705e5448887730d0d42ed38">Physics::CdrPlasma::CdrPlasmaStepper</a>
+: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a998d77190201f121c74311bfd9012e9a">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
 <li>computeCdrDiffusionCell()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a6aeaab31b1a8b9f5b8b4615782afdab7">Physics::CdrPlasma::CdrPlasmaStepper</a>
@@ -355,6 +356,9 @@ $(function() {
 <li>computeDetachmentStationary()
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aaa04ad857d50c6c2fdddbc546b0edd9e">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
+<li>computeDiagWeight()
+: <a class="el" href="classEBHelmholtzOp.html#a2b4e8202869126ba34ed41369a81b71c">EBHelmholtzOp</a>
+</li>
 <li>computeDielectricCurrent()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aa27402ec756f5d5bc3dd988d2aac3522">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
@@ -424,8 +428,8 @@ $(function() {
 : <a class="el" href="classLeastSquares.html#a072d4ac64192845915f11e86fc8aa534">LeastSquares</a>
 </li>
 <li>computeElectricField()
-: <a class="el" href="classFieldSolver.html#a7c416556bf5360effce49ed0e399a4dc">FieldSolver</a>
-, <a class="el" href="classFieldSolverMultigrid.html#a0d2adeaf9d09c4704245900d7ae4f3fc">FieldSolverMultigrid</a>
+: <a class="el" href="classFieldSolver.html#ac318282a2f1e4f16fe6031314e9a2d77">FieldSolver</a>
+, <a class="el" href="classFieldSolverMultigrid.html#a6d1b52f36ccb73d28d18756f12085716">FieldSolverMultigrid</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#ac13980ecbd41a9fa0674eb4e53babf02">Physics::CdrPlasma::CdrPlasmaFieldTagger</a>
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a9026a476cdbe7dd7d1c7b278b50e432b">Physics::CdrPlasma::CdrPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaFieldTagger.html#a36cab0cdf588c7153fccc87c72037d0b">Physics::ItoPlasma::ItoPlasmaFieldTagger</a>
@@ -475,14 +479,14 @@ $(function() {
 , <a class="el" href="classRtSolver.html#a686bc53955acb79c2157d56193f5d00c">RtSolver</a>
 </li>
 <li>computeGradient()
-: <a class="el" href="classAmrMesh.html#adc77b754e28f3212863848aaba964db5">AmrMesh</a>
+: <a class="el" href="classAmrMesh.html#a03736c8164011068783b32d6c0342caf">AmrMesh</a>
 </li>
 <li>computeGradSten()
-: <a class="el" href="classLeastSquares.html#a336b80150f892d9e3d7b4fd82d617fdf">LeastSquares</a>
+: <a class="el" href="classLeastSquares.html#a8c61ddfee07d6ca75cf3e84c44f26aa9">LeastSquares</a>
 </li>
 <li>computeHopDt()
 : <a class="el" href="classItoLayout.html#a4d1ed43f584e39ac180a7d8e5b42d770">ItoLayout&lt; T &gt;</a>
-, <a class="el" href="classItoSolver.html#ab053c9b08666c62e4527258f7762793c">ItoSolver</a>
+, <a class="el" href="classItoSolver.html#a17ea187e51e51e3623459068cc281b14">ItoSolver</a>
 </li>
 <li>computeInceptionIntegralStationary()
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#aea76490785c5a51b260a73339b63c6a6">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
@@ -494,7 +498,7 @@ $(function() {
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a0e26e868b1c99b949df36dd6beceb664">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>computeInterpolationStencil()
-: <a class="el" href="classLeastSquares.html#a7a3449fc1633e1796ea87ad9bd09ad7d">LeastSquares</a>
+: <a class="el" href="classLeastSquares.html#a877218ddd82cab33f4b2f6e997862a86">LeastSquares</a>
 </li>
 <li>computeInterpStencil1D()
 : <a class="el" href="classLinearStencil.html#ac687313e5557352419e56d033501d6b7">LinearStencil</a>
@@ -599,7 +603,7 @@ $(function() {
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a4c7ea0342c35898f4173e9bf64e5ca8e">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
 <li>computeRHS()
-: <a class="el" href="classMeshODESolver.html#a87d8532a91975b39f861bc71b0bfa099">MeshODESolver&lt; N &gt;</a>
+: <a class="el" href="classMeshODESolver.html#aeea8a244495f50145d82db821dc54739">MeshODESolver&lt; N &gt;</a>
 , <a class="el" href="classSigmaSolver.html#a5eba3c9e95c14bdc9a69b4e7e0d2fbde">SigmaSolver</a>
 </li>
 <li>computeSigmaFlux()
@@ -645,8 +649,8 @@ $(function() {
 : <a class="el" href="classVofUtils.html#a4c1b8b107f99c67dd45645e40a1ba5e4">VofUtils</a>
 </li>
 <li>conservativeAverage()
-: <a class="el" href="classAmrMesh.html#a53b3f8d395e81592ba629ebc11b9141e">AmrMesh</a>
-, <a class="el" href="classEBCoarAve.html#a6a686fce230f08fbefdac325ade5609d">EBCoarAve</a>
+: <a class="el" href="classAmrMesh.html#aabe7ab07b30103513af9784864aba639">AmrMesh</a>
+, <a class="el" href="classEBCoarAve.html#a0c9a64d294a38bdf21a7f5b5a49fd376">EBCoarAve</a>
 </li>
 <li>conservativeDivergenceNoKappaDivision()
 : <a class="el" href="classCdrSolver.html#a7bb06d2d9cb8acb7cc9456820b18c3ce">CdrSolver</a>
@@ -661,9 +665,9 @@ $(function() {
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ac968eefd702993a53b186b5f4495a0b7">Physics::CdrPlasma::CdrPlasmaJSON</a>
 </li>
 <li>copy()
-: <a class="el" href="classDataOps.html#af9695c22d415df5658913bd9de3aade3">DataOps</a>
+: <a class="el" href="classDataOps.html#ad8098fcedc68a9105187d5e0696b321e">DataOps</a>
 , <a class="el" href="classDomainFluxIFFAB.html#af5b89308ad7b78effc5449611e734ee7">DomainFluxIFFAB</a>
-, <a class="el" href="classEBAMRData.html#aee9bfe083aedcaf965d3f5af08858c65">EBAMRData&lt; T &gt;</a>
+, <a class="el" href="classEBAMRData.html#aaaa7d0927e8ff954d52070cc3999f94b">EBAMRData&lt; T &gt;</a>
 , <a class="el" href="classMFBaseIVFAB.html#a8aa1046470e967b0c04e220c73420704">MFBaseIVFAB</a>
 , <a class="el" href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">ParticleOps</a>
 </li>
@@ -719,7 +723,7 @@ $(function() {
 : <a class="el" href="classDriver.html#a588b2bd21757e48440a9d1958af64ce1">Driver</a>
 </li>
 <li>CylinderSdf()
-: <a class="el" href="classCylinderSdf.html#a19a08c3a455abee2c778d0b552f16ac0">CylinderSdf</a>
+: <a class="el" href="classCylinderSdf.html#a8c45809c4a95be65fc2970718d195065">CylinderSdf</a>
 </li>
 </ul>
 </div><!-- contents -->

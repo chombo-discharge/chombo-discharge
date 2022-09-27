@@ -17,6 +17,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -187,17 +188,17 @@ Usage of <code class="docutils literal notranslate"><span class="pre">LookupTabl
 <div class="section" id="inserting-data">
 <h2>Inserting data<a class="headerlink" href="#inserting-data" title="Permalink to this heading"></a></h2>
 <p>To add data to the table, one will use the member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span>
-<span class="kr">inline</span>
-<span class="kt">void</span> <span class="n">addEntry</span><span class="p">(</span><span class="k">const</span> <span class="n">Ts</span><span class="o">&amp;</span><span class="p">...</span> <span class="n">x</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span><span class="w"> </span><span class="n">Ts</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kr">inline</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">addEntry</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Ts</span><span class="o">&amp;</span><span class="p">...</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where the parameter pack must have <code class="docutils literal notranslate"><span class="pre">N</span></code> entries.
 For example, to add two rows of data to a table:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span> <span class="n">myTable</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myTable</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">myTable</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">);</span>
-<span class="n">myTable</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">);</span>
+<span class="n">myTable</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mf">6.0</span><span class="p">);</span><span class="w"></span>
+<span class="n">myTable</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This will insert two new rows at the end up the table.</p>
@@ -210,7 +211,7 @@ Users will insert rows one by one; <code class="docutils literal notranslate"><s
 <div class="section" id="restricting-ranges">
 <h2>Restricting ranges<a class="headerlink" href="#restricting-ranges" title="Permalink to this heading"></a></h2>
 <p>To restrict the data range, call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="n">setRange</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_min</span><span class="p">,</span> <span class="k">const</span> <span class="n">Real</span> <span class="n">a_max</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">a_independentVariable</span><span class="p">)</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">setRange</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_min</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_max</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_independentVariable</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">a_min</span></code> and <code class="docutils literal notranslate"><span class="pre">a_max</span></code> are the permissible ranges for data in the input column (<code class="docutils literal notranslate"><span class="pre">a_independentVariable</span></code>).
@@ -220,8 +221,8 @@ Data outside these ranges are discarded from the table.</p>
 <h2>Independent variable<a class="headerlink" href="#independent-variable" title="Permalink to this heading"></a></h2>
 <p>To select an independent variable, the user will select one of the columns and sort the data along that column.
 The C++ code for this is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">N</span><span class="o">&gt;</span>
-<span class="kt">void</span> <span class="n">LookupTable</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">sort</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">a_independentVariable</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">sort</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_independentVariable</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where the input integer indicates the column (i.e., independent variable) used for sorting.
@@ -259,15 +260,15 @@ For example if the original data is</p>
 <div class="section" id="setting-grid-point-spacing">
 <h3>Setting grid point spacing<a class="headerlink" href="#setting-grid-point-spacing" title="Permalink to this heading"></a></h3>
 <p>The user can set the spacing by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">setTableSpacing</span><span class="p">(</span><span class="k">const</span> <span class="n">TableSpacing</span> <span class="n">a_spacing</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setTableSpacing</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">TableSpacing</span><span class="w"> </span><span class="n">a_spacing</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">TableSpacing::Uniform</span></code> and <code class="docutils literal notranslate"><span class="pre">TableSpacing::Exponential</span></code> are supported.
 For example, to use uniformly or exponentially spaced grid points:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span> <span class="n">myTable</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myTable</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">myTable</span><span class="p">.</span><span class="n">setTableSpacing</span><span class="p">(</span><span class="n">TableSpacing</span><span class="o">::</span><span class="n">Uniform</span><span class="p">);</span>     <span class="c1">// For uniformly spaced points</span>
-<span class="n">myTable</span><span class="p">.</span><span class="n">setTableSpacing</span><span class="p">(</span><span class="n">TableSpacing</span><span class="o">::</span><span class="n">Exponential</span><span class="p">);</span> <span class="c1">// For exponentially spaced points</span>
+<span class="n">myTable</span><span class="p">.</span><span class="n">setTableSpacing</span><span class="p">(</span><span class="n">TableSpacing</span><span class="o">::</span><span class="n">Uniform</span><span class="p">);</span><span class="w">     </span><span class="c1">// For uniformly spaced points</span>
+<span class="n">myTable</span><span class="p">.</span><span class="n">setTableSpacing</span><span class="p">(</span><span class="n">TableSpacing</span><span class="o">::</span><span class="n">Exponential</span><span class="p">);</span><span class="w"> </span><span class="c1">// For exponentially spaced points</span>
 </pre></div>
 </div>
 <p><strong>Uniform spacing</strong></p>
@@ -282,7 +283,7 @@ For example, to use uniformly or exponentially spaced grid points:</p>
 </div>
 <div class="section" id="regularizing-table">
 <h3>Regularizing table<a class="headerlink" href="#regularizing-table" title="Permalink to this heading"></a></h3>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="n">regularize</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">a_numRows</span><span class="p">)</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">regularize</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_numRows</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>which will make the table into a regularly spaced table with <code class="docutils literal notranslate"><span class="pre">a_numRows</span></code> rows.
@@ -298,11 +299,11 @@ Specifying a number of rows that is smaller/larger than the original number of r
 <h2>Retrieving data<a class="headerlink" href="#retrieving-data" title="Permalink to this heading"></a></h2>
 <p>To retrieve data from one of the columns, one can fetch either a specific value in a row, or the entire row.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// For fetching column K</span>
-<span class="k">template</span><span class="o">&lt;</span><span class="kt">int</span> <span class="n">K</span><span class="o">&gt;</span>
-<span class="n">Real</span> <span class="n">getEntry</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_x</span><span class="p">);</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">Real</span><span class="w"> </span><span class="n">getEntry</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_x</span><span class="p">);</span><span class="w"></span>
 
 <span class="c1">// For fetching the entire row</span>
-<span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span> <span class="n">N</span><span class="o">&gt;</span> <span class="n">getData</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_x</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="n">getData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_x</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>In the above, the template parameter <code class="docutils literal notranslate"><span class="pre">K</span></code> is the column to retrieve and <code class="docutils literal notranslate"><span class="pre">a_x</span></code> is the value of the independent variable.</p>
@@ -317,9 +318,9 @@ Specifying a number of rows that is smaller/larger than the original number of r
 </pre></div>
 </div>
 <p>To retrieve an interpolated value for <code class="docutils literal notranslate"><span class="pre">x=2.0</span></code> in the third column we call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span> <span class="n">myTable</span><span class="p">,</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myTable</span><span class="p">,</span><span class="w"></span>
 
-<span class="k">const</span> <span class="n">Real</span> <span class="n">val</span> <span class="o">=</span> <span class="n">myTable</span><span class="p">.</span><span class="n">getEntry</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">2.0</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myTable</span><span class="p">.</span><span class="n">getEntry</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">2.0</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>which will return a value of 4.5 (linearly interpolated).</p>
@@ -327,19 +328,19 @@ Specifying a number of rows that is smaller/larger than the original number of r
 <div class="section" id="viewing-tables">
 <h2>Viewing tables<a class="headerlink" href="#viewing-tables" title="Permalink to this heading"></a></h2>
 <p>For debugging purposes, <code class="docutils literal notranslate"><span class="pre">LookupTable</span></code> can write the internal data to an output stream or a file through the two member functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">dumpTable</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span> <span class="n">a_outputStream</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">dumpTable</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_outputStream</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 
-<span class="kt">void</span> <span class="nf">dumpTable</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">a_fileName</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">dumpTable</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_fileName</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>For example:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">10</span><span class="o">&gt;</span> <span class="n">myTable</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">10</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myTable</span><span class="p">;</span><span class="w"></span>
 
 <span class="c1">// Dump table to terminal window</span>
-<span class="n">myTable</span><span class="p">.</span><span class="n">dumpTable</span><span class="p">();</span>
+<span class="n">myTable</span><span class="p">.</span><span class="n">dumpTable</span><span class="p">();</span><span class="w"></span>
 
 <span class="c1">// Dump table to file.</span>
-<span class="n">myTable</span><span class="p">.</span><span class="n">dumpTable</span><span class="p">(</span><span class="s">&quot;myTable.dat&quot;</span><span class="p">);</span>
+<span class="n">myTable</span><span class="p">.</span><span class="n">dumpTable</span><span class="p">(</span><span class="s">&quot;myTable.dat&quot;</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 </div>

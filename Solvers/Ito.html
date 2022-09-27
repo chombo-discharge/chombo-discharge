@@ -17,6 +17,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -171,26 +172,26 @@ The source code is used by a physics module in <code class="file docutils litera
 <span id="chap-ito-particle"></span><h2>The Îto particle<a class="headerlink" href="#the-ito-particle" title="Permalink to this heading"></a></h2>
 <p>The Îto particle is a computational particle class in <cite>chombo-discharge</cite> which can be used together with the particle tools in <cite>Chombo</cite>.
 The following data fields are implemented in the particle:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span> <span class="n">m_position</span><span class="p">;</span>
-<span class="n">RealVect</span> <span class="n">m_velocity</span><span class="p">;</span>
-<span class="n">Real</span> <span class="n">m_mass</span><span class="p">;</span>
-<span class="n">Real</span> <span class="n">m_diffusion</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span><span class="w"> </span><span class="n">m_position</span><span class="p">;</span><span class="w"></span>
+<span class="n">RealVect</span><span class="w"> </span><span class="n">m_velocity</span><span class="p">;</span><span class="w"></span>
+<span class="n">Real</span><span class="w"> </span><span class="n">m_mass</span><span class="p">;</span><span class="w"></span>
+<span class="n">Real</span><span class="w"> </span><span class="n">m_diffusion</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>To obtain the fields, the user will call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">position</span><span class="p">();</span>
-<span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">velocity</span><span class="p">();</span>
-<span class="n">Real</span><span class="o">&amp;</span> <span class="n">mass</span><span class="p">();</span>
-<span class="n">Real</span><span class="o">&amp;</span> <span class="n">diffusion</span><span class="p">();</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">position</span><span class="p">();</span><span class="w"></span>
+<span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">velocity</span><span class="p">();</span><span class="w"></span>
+<span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">mass</span><span class="p">();</span><span class="w"></span>
+<span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">diffusion</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 </div>
 <p>All functions also have <code class="docutils literal notranslate"><span class="pre">const</span></code> versions.
 Note that the field <code class="docutils literal notranslate"><span class="pre">m_mass</span></code> is the same as the <em>weight</em> of the computational particle.
 The following functions are used to set the various properties:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">setPosition</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_pos</span><span class="p">);</span>
-<span class="n">setVelocity</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_vel</span><span class="p">);</span>
-<span class="n">setMass</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_mass</span><span class="p">);</span>
-<span class="n">setDiffusion</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_diffusion</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">setPosition</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">);</span><span class="w"></span>
+<span class="n">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_vel</span><span class="p">);</span><span class="w"></span>
+<span class="n">setMass</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_mass</span><span class="p">);</span><span class="w"></span>
+<span class="n">setDiffusion</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_diffusion</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
@@ -198,7 +199,7 @@ The following functions are used to set the various properties:</p>
 <span id="chap-ito-species"></span><h2>ito_species<a class="headerlink" href="#ito-species" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ito_species</span></code> is a class for parsing information into the solver class.
 The constructor for the <code class="docutils literal notranslate"><span class="pre">ito_species</span></code> class is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ito_species</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">a_name</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="n">a_charge</span><span class="p">,</span> <span class="k">const</span> <span class="kt">bool</span> <span class="n">a_mobile</span><span class="p">,</span> <span class="k">const</span> <span class="kt">bool</span> <span class="n">a_diffusive</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ito_species</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_name</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_charge</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_mobile</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_diffusive</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>and this will set the name of the class, the charge, and whether or not the transport kernels account for drift and diffusion.</p>
@@ -210,30 +211,30 @@ When <code class="docutils literal notranslate"><span class="pre">initial_data()
 If one has a list of initial particles, or wants to draw a specified number of particles from a distribution, the initial particles <em>must</em> be distributed over the available MPI ranks.
 For example, the code in <code class="file docutils literal notranslate"><span class="pre">/physics/brownian_walker/brownian_walker_species.cpp</span></code> draws a specified number of particles distributed over all MPI ranks as (the code is called in <code class="docutils literal notranslate"><span class="pre">brownian_walker_species::draw_initial_particles</span></code>)</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// To avoid that MPI ranks draw the same particle positions, increment the seed for each rank</span>
-<span class="n">m_seed</span> <span class="o">+=</span> <span class="n">procID</span><span class="p">();</span>
+<span class="n">m_seed</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">procID</span><span class="p">();</span><span class="w"></span>
 
 <span class="c1">// Set up the RNG</span>
-<span class="n">m_rng</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">mt19937_64</span><span class="p">(</span><span class="n">m_seed</span><span class="p">);</span>
-<span class="n">m_gauss</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">normal_distribution</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">m_blob_radius</span><span class="p">);</span>
-<span class="n">m_udist11</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">uniform_real_distribution</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">);</span>
+<span class="n">m_rng</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">mt19937_64</span><span class="p">(</span><span class="n">m_seed</span><span class="p">);</span><span class="w"></span>
+<span class="n">m_gauss</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">normal_distribution</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">m_blob_radius</span><span class="p">);</span><span class="w"></span>
+<span class="n">m_udist11</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">uniform_real_distribution</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">-1.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">);</span><span class="w"></span>
 
 <span class="c1">// Each MPI process draws the desired number of particles from a distribution</span>
-<span class="k">const</span> <span class="kt">int</span> <span class="n">quotient</span>  <span class="o">=</span> <span class="n">m_num_particles</span><span class="o">/</span><span class="n">numProc</span><span class="p">();</span>
-<span class="k">const</span> <span class="kt">int</span> <span class="n">remainder</span> <span class="o">=</span> <span class="n">m_num_particles</span> <span class="o">%</span> <span class="n">numProc</span><span class="p">();</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quotient</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">m_num_particles</span><span class="o">/</span><span class="n">numProc</span><span class="p">();</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">remainder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_num_particles</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">numProc</span><span class="p">();</span><span class="w"></span>
 
-<span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">particlesPerRank</span><span class="p">(</span><span class="n">numProc</span><span class="p">(),</span> <span class="n">quotient</span><span class="p">);</span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">particlesPerRank</span><span class="p">(</span><span class="n">numProc</span><span class="p">(),</span><span class="w"> </span><span class="n">quotient</span><span class="p">);</span><span class="w"></span>
 
-<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">remainder</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
-  <span class="n">particlesPerRank</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">remainder</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">){</span><span class="w"></span>
+<span class="w">  </span><span class="n">particlesPerRank</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
 <span class="c1">// Now make the particles</span>
-<span class="n">m_initial_particles</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
-<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">particlesPerRank</span><span class="p">[</span><span class="n">procID</span><span class="p">()];</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
-  <span class="k">const</span> <span class="n">Real</span> <span class="n">weight</span>  <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
-  <span class="k">const</span> <span class="n">RealVect</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">m_blob_center</span> <span class="o">+</span> <span class="n">random_gaussian</span><span class="p">();</span>
-  <span class="n">m_initial_particles</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">ito_particle</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="n">pos</span><span class="p">));</span>
-<span class="p">}</span>
+<span class="n">m_initial_particles</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">particlesPerRank</span><span class="p">[</span><span class="n">procID</span><span class="p">()];</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">){</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">weight</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_blob_center</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">random_gaussian</span><span class="p">();</span><span class="w"></span>
+<span class="w">  </span><span class="n">m_initial_particles</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">ito_particle</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span><span class="w"> </span><span class="n">pos</span><span class="p">));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
@@ -245,17 +246,17 @@ For example, the code in <code class="file docutils literal notranslate"><span c
 <h3>Drift<a class="headerlink" href="#drift" title="Permalink to this heading"></a></h3>
 <p>The drift time step routines are implemented such that one restricts the time step such that the fastest particle does not move more than a specified number of grid cells.</p>
 <p>For the drift, the signatures are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="nf">compute_min_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="nf">compute_min_drift_dt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_maxCellsToMove</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compute_drift_dt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_maxCellsToMove</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_drift_dt</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span> <span class="c1">// Compute dt on all AMR levels, return vector of time step</span>
-<span class="n">Real</span> <span class="nf">compute_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">a_lvl</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
-<span class="n">Real</span> <span class="nf">compute_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">a_lvl</span><span class="p">,</span> <span class="k">const</span> <span class="n">DataIndex</span><span class="o">&amp;</span> <span class="n">a_dit</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_dx</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compute_drift_dt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"> </span><span class="c1">// Compute dt on all AMR levels, return vector of time step</span>
+<span class="n">Real</span><span class="w"> </span><span class="nf">compute_drift_dt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="n">Real</span><span class="w"> </span><span class="nf">compute_drift_dt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">DataIndex</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_dit</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_dx</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>These last three functions all compute <span class="math notranslate nohighlight">\(\Delta t = \Delta x/Max(v_x, v_y, v_z)\)</span> on the the various AMR levels and patches.
 The routine</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_drift_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compute_drift_dt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_maxCellsToMove</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>simply scales <span class="math notranslate nohighlight">\(\Delta t\)</span> by <code class="docutils literal notranslate"><span class="pre">a_maxCellsToMove</span></code> on every level.
@@ -264,12 +265,12 @@ Finally, the function <code class="docutils literal notranslate"><span class="pr
 <div class="section" id="diffusion">
 <h3>Diffusion<a class="headerlink" href="#diffusion" title="Permalink to this heading"></a></h3>
 <p>The signatures for the diffusion time step are similar to the ones for drift:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span> <span class="nf">compute_min_diffusion_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_diffusion_dt</span><span class="p">(</span><span class="k">const</span> <span class="n">Real</span> <span class="n">a_maxCellsToMove</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="nf">compute_min_diffusion_dt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_maxCellsToMove</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compute_diffusion_dt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_maxCellsToMove</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">compute_diffusion_dt</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
-<span class="n">Real</span> <span class="nf">compute_diffusion_dt</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">a_lvl</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
-<span class="n">Real</span> <span class="nf">compute_diffusion_dt</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">a_lvl</span><span class="p">,</span> <span class="k">const</span> <span class="n">DataIndex</span><span class="o">&amp;</span> <span class="n">a_dit</span><span class="p">,</span> <span class="k">const</span> <span class="n">RealVect</span> <span class="n">a_dx</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">compute_diffusion_dt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="n">Real</span><span class="w"> </span><span class="nf">compute_diffusion_dt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="n">Real</span><span class="w"> </span><span class="nf">compute_diffusion_dt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">DataIndex</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_dit</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_dx</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>In these routines, the time step is computed as <span class="math notranslate nohighlight">\(\Delta t = \frac{\Delta x}{\sqrt{2D}}\)</span>.

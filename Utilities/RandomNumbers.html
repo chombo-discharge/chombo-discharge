@@ -17,6 +17,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -150,21 +151,21 @@
 <p><code class="docutils literal notranslate"><span class="pre">Random</span></code> is a static class for generating pseudo-random numbers, and exist so that all random number operations can be aggregated into a single class.
 Internally, <code class="docutils literal notranslate"><span class="pre">Random</span></code> use a Mersenne-Twister random number generation.</p>
 <p>To use the <code class="docutils literal notranslate"><span class="pre">Random</span></code> class, simply include <code class="docutils literal notranslate"><span class="pre">&lt;CD_Random.H&gt;</span></code>, e.g.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;CD_Random.H&gt;</span><span class="cp"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_Random.H&gt;</span><span class="cp"></span>
 </pre></div>
 </div>
 <p>See the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classRandom.html">Random API</a> for further details.</p>
 <div class="section" id="drawing-random-numbers">
 <h2>Drawing random numbers<a class="headerlink" href="#drawing-random-numbers" title="Permalink to this heading"></a></h2>
 <p>The general routine for drawing a random number is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
-<span class="n">Real</span> <span class="n">get</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span> <span class="n">a_distribution</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">Real</span><span class="w"> </span><span class="n">get</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_distribution</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>which is for example used as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">uniform_real_distribution</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">dist</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">uniform_real_distribution</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dist</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">100.0</span><span class="p">);</span><span class="w"></span>
 
-<span class="k">const</span> <span class="n">Real</span> <span class="n">randomNumber</span> <span class="o">=</span> <span class="n">Random</span><span class="o">::</span><span class="n">get</span><span class="p">(</span><span class="n">dist</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">randomNumber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Random</span><span class="o">::</span><span class="n">get</span><span class="p">(</span><span class="n">dist</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Pre-defined distributions exist for performing the following operations:</p>

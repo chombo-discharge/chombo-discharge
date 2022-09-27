@@ -17,6 +17,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -170,7 +171,7 @@
 \[\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}\]</div>
 <p>subject to the constraints and boundary conditions given in <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a>.
 The implementation is by a class</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FieldStepper</span> <span class="o">:</span> <span class="k">public</span> <span class="n">TimeStepper</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FieldStepper</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimeStepper</span><span class="w"></span>
 </pre></div>
 </div>
 <p>and is found in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/Electrostatics</span></code>.
@@ -209,7 +210,7 @@ FieldStepper.rho_radius   = 1.0
 <div class="section" id="custom-value">
 <h3>Custom value<a class="headerlink" href="#custom-value" title="Permalink to this heading"></a></h3>
 <p>For a more general way of specifying the space charge, <code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">setRho</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_rho</span><span class="p">,</span> <span class="k">const</span> <span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span> <span class="n">a_phase</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setRho</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rho</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>
@@ -224,7 +225,7 @@ This constant is given by</p>
 <div class="section" id="id1">
 <h3>Custom value<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>For a more general way of specifying the surface charge, <code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">setSigma</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_sigma</span><span class="p">)</span> <span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_sigma</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </div>

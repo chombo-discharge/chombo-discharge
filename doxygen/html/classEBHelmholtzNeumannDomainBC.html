@@ -128,12 +128,12 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a4edc896c53d44f952a13bb565ad31e54"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzNeumannDomainBC.html#a4edc896c53d44f952a13bb565ad31e54">setBxDphiDn</a> (const std::function&lt; Real(const RealVect &amp;a_pos)&gt; &amp;a_BxDphiDn)</td></tr>
 <tr class="memdesc:a4edc896c53d44f952a13bb565ad31e54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the spatially dependent value of B*dphi/dn on the EB.  <a href="classEBHelmholtzNeumannDomainBC.html#a4edc896c53d44f952a13bb565ad31e54">More...</a><br /></td></tr>
 <tr class="separator:a4edc896c53d44f952a13bb565ad31e54"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2555a65c15c903cef0e3b34e764093be"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzNeumannDomainBC.html#a2555a65c15c903cef0e3b34e764093be">getFaceFlux</a> (BaseFab&lt; Real &gt; &amp;a_faceFlux, const BaseFab&lt; Real &gt; &amp;a_phi, const int &amp;a_dir, const Side::LoHiSide &amp;a_side, const DataIndex &amp;a_dit, const bool a_useHomogeneous) const override</td></tr>
-<tr class="memdesc:a2555a65c15c903cef0e3b34e764093be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get face flux. This is for regular cells.  <a href="classEBHelmholtzNeumannDomainBC.html#a2555a65c15c903cef0e3b34e764093be">More...</a><br /></td></tr>
-<tr class="separator:a2555a65c15c903cef0e3b34e764093be"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a222e223a4718380d3e2d7f8dcf5873c3"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzNeumannDomainBC.html#a222e223a4718380d3e2d7f8dcf5873c3">getFaceFlux</a> (const VolIndex &amp;a_vof, const EBCellFAB &amp;a_phi, const int &amp;a_dir, const Side::LoHiSide &amp;a_side, const DataIndex &amp;a_dit, const bool a_useHomogeneous) const override</td></tr>
-<tr class="memdesc:a222e223a4718380d3e2d7f8dcf5873c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get face flux. This is for irregular cells.  <a href="classEBHelmholtzNeumannDomainBC.html#a222e223a4718380d3e2d7f8dcf5873c3">More...</a><br /></td></tr>
-<tr class="separator:a222e223a4718380d3e2d7f8dcf5873c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a956583b1dcd342d47b20cf3671342830"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzNeumannDomainBC.html#a956583b1dcd342d47b20cf3671342830">getFaceFlux</a> (BaseFab&lt; Real &gt; &amp;a_faceFlux, const BaseFab&lt; Real &gt; &amp;a_phi, const BaseFab&lt; Real &gt; &amp;a_Bcoef, const int &amp;a_dir, const Side::LoHiSide &amp;a_side, const DataIndex &amp;a_dit, const bool a_useHomogeneous) const override</td></tr>
+<tr class="memdesc:a956583b1dcd342d47b20cf3671342830"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get face flux. This is for regular cells.  <a href="classEBHelmholtzNeumannDomainBC.html#a956583b1dcd342d47b20cf3671342830">More...</a><br /></td></tr>
+<tr class="separator:a956583b1dcd342d47b20cf3671342830"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a882d13dc5401a6b1b8fc10f405e87292"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzNeumannDomainBC.html#a882d13dc5401a6b1b8fc10f405e87292">getFaceFlux</a> (const VolIndex &amp;a_vof, const EBCellFAB &amp;a_phi, const EBFaceFAB &amp;a_Bcoef, const int &amp;a_dir, const Side::LoHiSide &amp;a_side, const DataIndex &amp;a_dit, const bool a_useHomogeneous) const override</td></tr>
+<tr class="memdesc:a882d13dc5401a6b1b8fc10f405e87292"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get face flux. This is for irregular cells.  <a href="classEBHelmholtzNeumannDomainBC.html#a882d13dc5401a6b1b8fc10f405e87292">More...</a><br /></td></tr>
+<tr class="separator:a882d13dc5401a6b1b8fc10f405e87292"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEBHelmholtzDomainBC"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEBHelmholtzDomainBC')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a></td></tr>
 <tr class="memitem:a62a27c07e95d20640a776252334856a7 inherit pub_methods_classEBHelmholtzDomainBC"><td class="memItemLeft" align="right" valign="top"><a id="a62a27c07e95d20640a776252334856a7"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a62a27c07e95d20640a776252334856a7">EBHelmholtzDomainBC</a> ()</td></tr>
@@ -159,9 +159,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a75031e80f302ee20380d481f94f0ef43">operator=</a> (const <a class="el" href="classEBHelmholtzDomainBC.html">EBHelmholtzDomainBC</a> &amp;&amp;a_other)=delete</td></tr>
 <tr class="memdesc:a75031e80f302ee20380d481f94f0ef43 inherit pub_methods_classEBHelmholtzDomainBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed - don't see why you would need it. <br /></td></tr>
 <tr class="separator:a75031e80f302ee20380d481f94f0ef43 inherit pub_methods_classEBHelmholtzDomainBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af1677641644f6dc7d5df6b011b9d8034 inherit pub_methods_classEBHelmholtzDomainBC"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#af1677641644f6dc7d5df6b011b9d8034">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt;&gt; &amp;a_Bcoef, const RealVect &amp;a_probLo, const Real a_dx)</td></tr>
-<tr class="memdesc:af1677641644f6dc7d5df6b011b9d8034 inherit pub_methods_classEBHelmholtzDomainBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <a href="classEBHelmholtzDomainBC.html#af1677641644f6dc7d5df6b011b9d8034">More...</a><br /></td></tr>
-<tr class="separator:af1677641644f6dc7d5df6b011b9d8034 inherit pub_methods_classEBHelmholtzDomainBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af68ec9f9fce88bcd4a2cfd9deb642ceb inherit pub_methods_classEBHelmholtzDomainBC"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#af68ec9f9fce88bcd4a2cfd9deb642ceb">define</a> (const <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> a_dataLocation, const EBLevelGrid &amp;a_eblg, const RealVect &amp;a_probLo, const Real a_dx)</td></tr>
+<tr class="memdesc:af68ec9f9fce88bcd4a2cfd9deb642ceb inherit pub_methods_classEBHelmholtzDomainBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define function.  <a href="classEBHelmholtzDomainBC.html#af68ec9f9fce88bcd4a2cfd9deb642ceb">More...</a><br /></td></tr>
+<tr class="separator:af68ec9f9fce88bcd4a2cfd9deb642ceb inherit pub_methods_classEBHelmholtzDomainBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -202,10 +202,6 @@ RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a0aa59faa73cb06c4f19aae746bc801ef">m_eblg</a></td></tr>
 <tr class="memdesc:a0aa59faa73cb06c4f19aae746bc801ef inherit pro_attribs_classEBHelmholtzDomainBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level grid. <br /></td></tr>
 <tr class="separator:a0aa59faa73cb06c4f19aae746bc801ef inherit pro_attribs_classEBHelmholtzDomainBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d20401ae7e633d3d310f790663038a6 inherit pro_attribs_classEBHelmholtzDomainBC"><td class="memItemLeft" align="right" valign="top"><a id="a2d20401ae7e633d3d310f790663038a6"></a>
-RefCountedPtr&lt; LevelData&lt; EBFluxFAB &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzDomainBC.html#a2d20401ae7e633d3d310f790663038a6">m_Bcoef</a></td></tr>
-<tr class="memdesc:a2d20401ae7e633d3d310f790663038a6 inherit pro_attribs_classEBHelmholtzDomainBC"><td class="mdescLeft">&#160;</td><td class="mdescRight">B-coefficent. <br /></td></tr>
-<tr class="separator:a2d20401ae7e633d3d310f790663038a6 inherit pro_attribs_classEBHelmholtzDomainBC"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -285,8 +281,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a2555a65c15c903cef0e3b34e764093be"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2555a65c15c903cef0e3b34e764093be">&#9670;&nbsp;</a></span>getFaceFlux() <span class="overload">[1/2]</span></h2>
+<a id="a956583b1dcd342d47b20cf3671342830"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a956583b1dcd342d47b20cf3671342830">&#9670;&nbsp;</a></span>getFaceFlux() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -305,6 +301,12 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td>
           <td class="paramtype">const BaseFab&lt; Real &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseFab&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -348,6 +350,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_faceFlux</td><td>Face-centered flux. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>Face-centered B-coefficient </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>High or low side </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
@@ -357,12 +360,12 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </dl>
 <dl class="section note"><dt>Note</dt><dd>a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. </dd></dl>
 
-<p>Implements <a class="el" href="classEBHelmholtzDomainBC.html#a54631221c19c6b5d6ac7afcc17e703fe">EBHelmholtzDomainBC</a>.</p>
+<p>Implements <a class="el" href="classEBHelmholtzDomainBC.html#a8792e75adf6e14497d402b0f6382e0ca">EBHelmholtzDomainBC</a>.</p>
 
 </div>
 </div>
-<a id="a222e223a4718380d3e2d7f8dcf5873c3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a222e223a4718380d3e2d7f8dcf5873c3">&#9670;&nbsp;</a></span>getFaceFlux() <span class="overload">[2/2]</span></h2>
+<a id="a882d13dc5401a6b1b8fc10f405e87292"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a882d13dc5401a6b1b8fc10f405e87292">&#9670;&nbsp;</a></span>getFaceFlux() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -381,6 +384,12 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td>
           <td class="paramtype">const EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBFaceFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -424,6 +433,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_vof</td><td>Grid cell </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Cell-centered data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>Face-centered B-coefficient </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>High or low side </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
@@ -432,7 +442,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classEBHelmholtzDomainBC.html#a4045904df9f95392d8b53ffa643284cb">EBHelmholtzDomainBC</a>.</p>
+<p>Implements <a class="el" href="classEBHelmholtzDomainBC.html#a18dc7979d449e64d88f38fa8c0922537">EBHelmholtzDomainBC</a>.</p>
 
 </div>
 </div>

@@ -133,6 +133,10 @@ $(function() {
 , <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies.html#a57361159847f317eae058a5b93b35ff1">Physics::RadiativeTransfer::RadiativeTransferSpecies</a>
 , <a class="el" href="classRtSpecies.html#a3d62dfd621fac6336eaff75d9e3ab98a">RtSpecies</a>
 </li>
+<li>getAcoef()
+: <a class="el" href="classEBHelmholtzOp.html#ac57225143774c072002c4f8f7914d9d8">EBHelmholtzOp</a>
+, <a class="el" href="classMFHelmholtzOp.html#ae45f4ff38cb50064e4d69ca549112693">MFHelmholtzOp</a>
+</li>
 <li>getAllVofsInRadius()
 : <a class="el" href="classVofUtils.html#af7395cb846e45e298121683fa3f9d936">VofUtils</a>
 </li>
@@ -152,6 +156,14 @@ $(function() {
 </li>
 <li>getBcFunction()
 : <a class="el" href="classCdrDomainBC.html#a198f0ea15cc59e59bd66f1bba57165c5">CdrDomainBC</a>
+</li>
+<li>getBcoef()
+: <a class="el" href="classEBHelmholtzOp.html#ad0b4f43b2a98a900ef9ebca6888f3b0b">EBHelmholtzOp</a>
+, <a class="el" href="classMFHelmholtzOp.html#a1d474bab7b5bc6d3925cfaa7d0632087">MFHelmholtzOp</a>
+</li>
+<li>getBcoefIrreg()
+: <a class="el" href="classEBHelmholtzOp.html#a16a1e2ba2e60c4eee89fbed6668e7067">EBHelmholtzOp</a>
+, <a class="el" href="classMFHelmholtzOp.html#a50bf2a6d268baf59d8fbfefb63f79a6a">MFHelmholtzOp</a>
 </li>
 <li>getBcs()
 : <a class="el" href="classElectrostaticEbBc.html#a794ac74e82935b8a3d95adad01315ba9">ElectrostaticEbBc</a>
@@ -206,7 +218,7 @@ $(function() {
 : <a class="el" href="classCdrSolver.html#ada68d63038371ea21f526696459c51f6">CdrSolver</a>
 </li>
 <li>getCellParticles()
-: <a class="el" href="classParticleContainer.html#a099a6d9732476773cda825f8a90a8b3a">ParticleContainer&lt; P &gt;</a>
+: <a class="el" href="classParticleContainer.html#ada3bf20e82e42f284952ad2bcc39dfaa">ParticleContainer&lt; P &gt;</a>
 </li>
 <li>getCellParticlesDestructive()
 : <a class="el" href="classParticleContainer.html#a10e99ca2c4fa96ce8fa31da674d1749c">ParticleContainer&lt; P &gt;</a>
@@ -457,12 +469,12 @@ $(function() {
 : <a class="el" href="classEBHelmholtzOp.html#a00b0d77f18b42122614b17bcb832a8df">EBHelmholtzOp</a>
 </li>
 <li>getFaceFlux()
-: <a class="el" href="classEBHelmholtzDirichletDomainBC.html#a06ced838f55c2b3cc54de6bb73e4b02e">EBHelmholtzDirichletDomainBC</a>
-, <a class="el" href="classEBHelmholtzDomainBC.html#a54631221c19c6b5d6ac7afcc17e703fe">EBHelmholtzDomainBC</a>
-, <a class="el" href="classEBHelmholtzEddingtonSP1DomainBC.html#a80d84189110458ed7f0d423055c03ac3">EBHelmholtzEddingtonSP1DomainBC</a>
-, <a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#a010bfdc898fe75ea2e7a6e7f0de40e9a">EBHelmholtzElectrostaticDomainBC</a>
-, <a class="el" href="classEBHelmholtzNeumannDomainBC.html#a2555a65c15c903cef0e3b34e764093be">EBHelmholtzNeumannDomainBC</a>
-, <a class="el" href="classEBHelmholtzRobinDomainBC.html#adec0fb889551969a15111524bb0ef1e3">EBHelmholtzRobinDomainBC</a>
+: <a class="el" href="classEBHelmholtzDirichletDomainBC.html#a214d49fbe36cb6d2b98527e8e111ea8f">EBHelmholtzDirichletDomainBC</a>
+, <a class="el" href="classEBHelmholtzDomainBC.html#a8792e75adf6e14497d402b0f6382e0ca">EBHelmholtzDomainBC</a>
+, <a class="el" href="classEBHelmholtzEddingtonSP1DomainBC.html#a89051928bae0d83cc9f7298eb90e2e2e">EBHelmholtzEddingtonSP1DomainBC</a>
+, <a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#aa1b422f272eb1008c1c0ee6f8e2f580f">EBHelmholtzElectrostaticDomainBC</a>
+, <a class="el" href="classEBHelmholtzNeumannDomainBC.html#a956583b1dcd342d47b20cf3671342830">EBHelmholtzNeumannDomainBC</a>
+, <a class="el" href="classEBHelmholtzRobinDomainBC.html#ac2f46f12385bddc8a77c61634e4a2124">EBHelmholtzRobinDomainBC</a>
 </li>
 <li>getFiCoBuffer()
 : <a class="el" href="classEBCoarseFineParticleMesh.html#adb957799ac83947311d188ec9ea96150">EBCoarseFineParticleMesh</a>
@@ -541,6 +553,9 @@ $(function() {
 : <a class="el" href="classPhaseRealm.html#aad25c2fff1ac5f694ec82ef154701ad9">PhaseRealm</a>
 , <a class="el" href="classRealm.html#a796422371d5c85d74019c7d570bbd5b5">Realm</a>
 </li>
+<li>getGradPhiStencils()
+: <a class="el" href="classEBHelmholtzEBBC.html#a2df076344f7a145857f026f0bbd921de">EBHelmholtzEBBC</a>
+</li>
 <li>getGradSten()
 : <a class="el" href="classLeastSquares.html#a9765f825f84dc831de636e1b9e796c75">LeastSquares</a>
 </li>
@@ -592,9 +607,6 @@ $(function() {
 </li>
 <li>getKappa()
 : <a class="el" href="classRtSolver.html#a6b88752ec61d7f506bb6cff96a5b97d5">RtSolver</a>
-</li>
-<li>getKappaDivFStencils()
-: <a class="el" href="classEBHelmholtzEBBC.html#aa596c345d2d9135830970ea22d54c487">EBHelmholtzEBBC</a>
 </li>
 <li>getKappaEb()
 : <a class="el" href="classRtSolver.html#a684fb7325af1b1912e0c4cec9fb90770">RtSolver</a>
@@ -650,10 +662,10 @@ $(function() {
 : <a class="el" href="classAmrMesh.html#aaee371b14070e14d0a7624b943ff2441">AmrMesh</a>
 </li>
 <li>getMaxMin()
-: <a class="el" href="classDataOps.html#ac9670a14cbaddb9258b7b7740e152d11">DataOps</a>
+: <a class="el" href="classDataOps.html#a5de2e0bae557d084310a1991f183d339">DataOps</a>
 </li>
 <li>getMaxMinNorm()
-: <a class="el" href="classDataOps.html#a323f11e992c657224003ab61e6680c11">DataOps</a>
+: <a class="el" href="classDataOps.html#aca2a03862cae1159b56c451397eb17da">DataOps</a>
 </li>
 <li>getMaxSimulationDepth()
 : <a class="el" href="classAmrMesh.html#a3a22db83d03132b22c64dbe04918d6c0">AmrMesh</a>
@@ -807,7 +819,7 @@ $(function() {
 : <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a646332fff83fc1a63ada182bcd7202c3">Physics::ItoPlasma::ItoPlasmaPhysics</a>
 </li>
 <li>getParticleEnergy()
-: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a7cad8b0dde860c84982a19c92302ffae">Physics::ItoPlasma::ItoPlasmaPhysics</a>
+: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a54edc99a21929af49082a059a20406ed">Physics::ItoPlasma::ItoPlasmaPhysics</a>
 </li>
 <li>getParticleMeanEnergy()
 : <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a7ec7ce10a2f284cf6923da7ca2984ebc">Physics::ItoPlasma::ItoPlasmaPhysics</a>
@@ -822,7 +834,7 @@ $(function() {
 </li>
 <li>getParticles()
 : <a class="el" href="classItoLayout.html#a7f8bb364130ae7655bc1b794acfead38">ItoLayout&lt; T &gt;</a>
-, <a class="el" href="classItoSolver.html#a754df1d59ab75675768b1fdba4ce759a">ItoSolver</a>
+, <a class="el" href="classItoSolver.html#a83b5921e65afb1442dc9a71ef2c83d55">ItoSolver</a>
 , <a class="el" href="classParticleContainer.html#af2553ab1da9c88769e060b89dc2ecf01">ParticleContainer&lt; P &gt;</a>
 , <a class="el" href="classSuperParticles_1_1KDNode.html#a68c69d847a5d8766d2219a16295126a2">SuperParticles::KDNode&lt; P &gt;</a>
 , <a class="el" href="classTracerParticleSolver.html#ac29ff32bc3d5381bfe2fbaafa529950a">TracerParticleSolver&lt; P &gt;</a>
@@ -853,7 +865,7 @@ $(function() {
 <li>getPhi()
 : <a class="el" href="classCdrSolver.html#a56e1673fb1c0cd109286735d2a6035e1">CdrSolver</a>
 , <a class="el" href="classItoSolver.html#aa426b09943223c61f0a9a5c51ddb8822">ItoSolver</a>
-, <a class="el" href="classMeshODESolver.html#a04e05aade236a092f167b98e609b10d5">MeshODESolver&lt; N &gt;</a>
+, <a class="el" href="classMeshODESolver.html#acab27e07e8d5387441b877586c1fb146">MeshODESolver&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#afe63e91fc214250129e9482190662fad">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#a19b876edea4718bdee9cc4436e107c9d">RtSolver</a>
 , <a class="el" href="classSigmaSolver.html#ad4e1585bef654013a4759908adfed98a">SigmaSolver</a>
@@ -967,7 +979,7 @@ $(function() {
 : <a class="el" href="classFieldSolver.html#a9eccd7336ecfe55f427eb0a9dae8ab6b">FieldSolver</a>
 </li>
 <li>getRHS()
-: <a class="el" href="classMeshODESolver.html#a7fce291d49f320f16378a37fca92c6fb">MeshODESolver&lt; N &gt;</a>
+: <a class="el" href="classMeshODESolver.html#aed8c3a068c1de9b7432ede91a1569797">MeshODESolver&lt; N &gt;</a>
 </li>
 <li>getRight()
 : <a class="el" href="classSuperParticles_1_1KDNode.html#aa1262e8975bd8f25cfdfa651776aa39a">SuperParticles::KDNode&lt; P &gt;</a>
@@ -1089,7 +1101,7 @@ $(function() {
 , <a class="el" href="classRealm.html#a784a904143d940d32bb5be1cea8e2663">Realm</a>
 </li>
 <li>getVofsInMonotonePath()
-: <a class="el" href="classVofUtils.html#a4bd5fa987785d612cb41d2702a1684c8">VofUtils</a>
+: <a class="el" href="classVofUtils.html#aec5d78ce8c2fa2ad7854a47828b18af9">VofUtils</a>
 </li>
 <li>getVofsInQuadrant()
 : <a class="el" href="classVofUtils.html#a59e5e601931496a9e7b6f20a4c3b464e">VofUtils</a>

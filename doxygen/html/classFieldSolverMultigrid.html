@@ -169,6 +169,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a2e28a48d4ce140b46dc2ebec38da88af">setupSolver</a> () override</td></tr>
 <tr class="memdesc:a2e28a48d4ce140b46dc2ebec38da88af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up multigrid solver. <br /></td></tr>
 <tr class="separator:a2e28a48d4ce140b46dc2ebec38da88af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f236c23030a758bc4ee54520e346c19"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a5f236c23030a758bc4ee54520e346c19">setSolverPermittivities</a> (const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_permittivityCell, const <a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;a_permittivityFace, const <a class="el" href="classEBAMRData.html">MFAMRIVData</a> &amp;a_permittivityEB) override</td></tr>
+<tr class="memdesc:a5f236c23030a758bc4ee54520e346c19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set new permittivities for the multigrid solver.  <a href="classFieldSolverMultigrid.html#a5f236c23030a758bc4ee54520e346c19">More...</a><br /></td></tr>
+<tr class="separator:a5f236c23030a758bc4ee54520e346c19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ba9896c4c868488216cf9835961479e"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; long long &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a7ba9896c4c868488216cf9835961479e">computeLoads</a> (const DisjointBoxLayout &amp;a_dbl, const int a_level) override</td></tr>
 <tr class="memdesc:a7ba9896c4c868488216cf9835961479e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute grid loads.  <a href="classFieldSolverMultigrid.html#a7ba9896c4c868488216cf9835961479e">More...</a><br /></td></tr>
 <tr class="separator:a7ba9896c4c868488216cf9835961479e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1182,6 +1185,60 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <p>This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB and fills necessary ghost faces/cells. </p>
 
 <p>Reimplemented from <a class="el" href="classFieldSolver.html#aa8372b83812dada88c651e69c13d823e">FieldSolver</a>.</p>
+
+</div>
+</div>
+<a id="a5f236c23030a758bc4ee54520e346c19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f236c23030a758bc4ee54520e346c19">&#9670;&nbsp;</a></span>setSolverPermittivities()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FieldSolverMultigrid::setSolverPermittivities </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_permittivityCell</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_permittivityFace</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classEBAMRData.html">MFAMRIVData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_permittivityEB</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set new permittivities for the multigrid solver. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_permittivityCell</td><td>Permittivity on cell center </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_permittivityFace</td><td>Permittivity on faces </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_permittivityEB</td><td>Permittivity on EB </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classFieldSolver.html#a73190bc31e96ed450982d9747b2c0b1d">FieldSolver</a>.</p>
 
 </div>
 </div>
