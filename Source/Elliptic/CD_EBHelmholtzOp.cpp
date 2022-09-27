@@ -185,6 +185,24 @@ EBHelmholtzOp::setAcoAndBco(const RefCountedPtr<LevelData<EBCellFAB>>&       a_A
   this->defineStencils();
 }
 
+const RefCountedPtr<LevelData<EBCellFAB>>&
+EBHelmholtzOp::getAcoef()
+{
+  return m_Acoef;
+}
+
+const RefCountedPtr<LevelData<EBFluxFAB>>&
+EBHelmholtzOp::getBcoef()
+{
+  return m_Bcoef;
+}
+
+const RefCountedPtr<LevelData<BaseIVFAB<Real>>>&
+EBHelmholtzOp::getBcoefIrreg()
+{
+  return m_BcoefIrreg;
+}
+
 EBHelmholtzOp::~EBHelmholtzOp() { CH_TIME("EBHelmholtzOp::~EBHelmholtzOp()"); }
 
 void

@@ -168,6 +168,27 @@ public:
                const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoefIrreg);
 
   /*!
+    @brief Get the Helmholtz A-coefficient on cell centers
+    @return m_Acoef
+  */
+  const RefCountedPtr<LevelData<EBCellFAB>>&
+  getAcoef();
+
+  /*!
+    @brief Get the Helmholtz B-coefficient on faces
+    @return m_Bcoef
+  */
+  const RefCountedPtr<LevelData<EBFluxFAB>>&
+  getBcoef();
+
+  /*!
+    @brief Get the Helmholtz B-coefficient on the EB
+    @return m_Bcoef
+  */
+  const RefCountedPtr<LevelData<BaseIVFAB<Real>>>&
+  getBcoefIrreg();
+
+  /*!
     @brief Coarsen data from fine to coar level
     @param[in] a_phi     Data on this level
     @param[in] a_phiFine Data on finer level
