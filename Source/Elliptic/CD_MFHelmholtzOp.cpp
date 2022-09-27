@@ -197,7 +197,7 @@ MFHelmholtzOp::setAcoAndBco(const RefCountedPtr<LevelData<MFCellFAB>>&   a_Acoef
                             const RefCountedPtr<LevelData<MFFluxFAB>>&   a_Bcoef,
                             const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_BcoefIrreg)
 {
-  CH_TIME("MFHelmholtzOp::udpateStencils");
+  CH_TIME("MFHelmholtzOp::setAcoAndBco");
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++) {

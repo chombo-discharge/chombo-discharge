@@ -393,7 +393,8 @@ FieldSolverMultigrid::setupSolver()
 }
 
 void
-FieldSolverMultigrid::setSolverPermittivities(const MFAMRFluxData& a_permittivityFace,
+FieldSolverMultigrid::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                                              const MFAMRFluxData& a_permittivityFace,
                                               const MFAMRIVData&   a_permittivityEB)
 {
   CH_TIME("FieldSolverMultigrid::setSolverPermittivities()");
@@ -401,9 +402,28 @@ FieldSolverMultigrid::setSolverPermittivities(const MFAMRFluxData& a_permittivit
     pout() << "FieldSolverMultigrid::setSolverPermittivities()" << endl;
   }
 
+#if 1
+  return;
+#endif
+
   if (!m_isSolverSetup) {
     MayDay::Error("FieldSolverMultigrid::setSolverPermittivities -- must set up solver first!");
   }
+
+  // Get the AMR operators and update the coefficients.
+  Vector<AMRLevelOp<LevelData<MFCellFAB>>*>& operatorsAMR = m_multigridSolver.getAMROperators();
+
+  CH_assert(operatorsAMR.size() == 1 + m_amr->getFinestLevel());
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    CH_assert(!(operatorsAMR[lvl] == nullptr));
+
+    MFHelmholtzOp& op = static_cast<MFHelmholtzOp&>(*operatorsAMR[lvl]);
+
+    op.setAcoAndBco(a_permittivityCell[lvl], a_permittivityFace[lvl], a_permittivityEB[lvl]);
+  }
+
+  // Now do the MG operators and update their coefficients.
 
   MayDay::Abort("FieldSolverMultigrid::setSolverPermittivities -- not implemented");
 }

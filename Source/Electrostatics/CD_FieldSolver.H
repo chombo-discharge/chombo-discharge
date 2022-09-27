@@ -75,12 +75,15 @@ public:
 
   /*!
     @brief A special routine for when solver permittivities need to change but solver does not.
+    @param[in] a_permittivityCell Permittivity on cell center
     @param[in] a_permittivityFace Permittivity on faces
     @param[in] a_permittivityEB   Permittivity on EB
     @note Used by FieldSolverMultigrid to change permittivities/conductivities under the hood of the multigrid solver.
   */
   virtual void
-  setSolverPermittivities(const MFAMRFluxData& a_permittivityFace, const MFAMRIVData& a_permittivityEB);
+  setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                          const MFAMRFluxData& a_permittivityFace,
+                          const MFAMRIVData&   a_permittivityEB);
 
   /*!
     @brief Solve Poisson equation using m_potential, m_rho, and m_sigma. 

@@ -94,7 +94,9 @@ MFHelmholtzJumpBC::setBco(const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_Bcoef)
 
   m_Bcoef = a_Bcoef;
 
-  this->buildAverageStencils();
+  if (m_multiPhase) {
+    this->buildAverageStencils();
+  }
 }
 
 void
