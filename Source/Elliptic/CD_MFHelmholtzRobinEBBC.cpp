@@ -275,20 +275,27 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   // Get the vofs around the cut-cell. Note that if m_weight = 0 we enable the cut-cell itself in the interpolation.
   Vector<VolIndex> vofs;
   switch (a_neighborhood) {
-  case VofUtils::Neighborhood::Quadrant:
+  case VofUtils::Neighborhood::Quadrant: {
     vofs = VofUtils::getVofsInQuadrant(a_vof,
                                        ebisbox,
                                        ebisbox.normal(a_vof),
                                        radius,
                                        VofUtils::Connectivity::MonotonePath,
                                        useStartVof);
+
     break;
-  case VofUtils::Neighborhood::Radius:
+  }
+  case VofUtils::Neighborhood::Radius: {
     vofs = VofUtils::getVofsInRadius(a_vof, ebisbox, radius, VofUtils::Connectivity::MonotonePath, useStartVof);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error(
       "MFHelmholtzRobinEBBC::getInterpolationStencil(VolIndex, DataIndex, VofUtils::Neighborhood) -- logic bust");
+
+    break;
+  }
   }
 
   // Build displacements vector, i.e. distances from cell centers/centroids to the cut-cell EB centroid.

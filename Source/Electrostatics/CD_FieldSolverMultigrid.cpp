@@ -402,10 +402,6 @@ FieldSolverMultigrid::setSolverPermittivities(const MFAMRCellData& a_permittivit
     pout() << "FieldSolverMultigrid::setSolverPermittivities()" << endl;
   }
 
-#if 1
-  return;
-#endif
-
   if (!m_isSolverSetup) {
     MayDay::Error("FieldSolverMultigrid::setSolverPermittivities -- must set up solver first!");
   }
@@ -425,7 +421,7 @@ FieldSolverMultigrid::setSolverPermittivities(const MFAMRCellData& a_permittivit
 
   // Now do the MG operators and update their coefficients.
 
-  MayDay::Abort("FieldSolverMultigrid::setSolverPermittivities -- not implemented");
+  //  MayDay::Abort("FieldSolverMultigrid::setSolverPermittivities -- not implemented");
 }
 
 void
