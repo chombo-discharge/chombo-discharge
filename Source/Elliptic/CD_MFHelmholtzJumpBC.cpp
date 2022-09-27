@@ -87,7 +87,8 @@ MFHelmholtzJumpBC::getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) 
   return (*m_multiPhaseVofs.at(a_phase))[a_dit];
 }
 
-void MFHelmholtzJumpBC::setBco(const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_Bcoef)
+void
+MFHelmholtzJumpBC::setBco(const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_Bcoef)
 {
   CH_TIME("MFHelmholtzJumpBC::defineStencils()");
 
@@ -107,12 +108,12 @@ MFHelmholtzJumpBC::defineStencils()
   // TLDR: This routine computes the stencils for approximating dphi/dn on each side of the boundary. If we have multi-valued cells we use an average formulation. These
   //       stencils can later be used to compute the bounadry value on the interface.
 
-  // MFHelmholtzJumpBC internals should never be called unless it's a multiphase problem.  
+  // MFHelmholtzJumpBC internals should never be called unless it's a multiphase problem.
   if (m_multiPhase) {
     const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
     m_gradPhiStencils.define(dbl);
-    m_gradPhiWeights.define(dbl);    
+    m_gradPhiWeights.define(dbl);
     m_boundaryPhi.define(dbl);
     m_avgStencils.define(dbl);
     m_avgWeights.define(dbl);
@@ -122,7 +123,7 @@ MFHelmholtzJumpBC::defineStencils()
       const Box box = dbl[dit()];
 
       m_gradPhiStencils[dit()].define(m_mflg, dit());
-      m_gradPhiWeights[dit()].define(m_mflg, dit());      
+      m_gradPhiWeights[dit()].define(m_mflg, dit());
       m_boundaryPhi[dit()].define(m_mflg, dit());
       m_avgStencils[dit()].define(m_mflg, dit());
       m_avgWeights[dit()].define(m_mflg, dit());
@@ -141,8 +142,8 @@ MFHelmholtzJumpBC::defineStencils()
         const IntVectSet& ivs     = m_ivs[dit()];
 
         // Build stencils like we always do
-        BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[dit()].getIVFAB(iphase);//(ivs, ebgraph, m_nComp);
-        BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);//(ivs, ebgraph, m_nComp);
+        BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[dit()].getIVFAB(iphase); //(ivs, ebgraph, m_nComp);
+        BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);  //(ivs, ebgraph, m_nComp);
 
         // Iteration space for kernel
         VoFIterator vofit(ivs, ebgraph);
@@ -156,7 +157,8 @@ MFHelmholtzJumpBC::defineStencils()
           // Try quadrants first.
           order = m_order;
           while (!foundStencil && order > 0) {
-            foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Quadrant, order);
+            foundStencil =
+              this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Quadrant, order);
             order--;
 
             // Check if stencil reaches too far across CF
@@ -168,7 +170,8 @@ MFHelmholtzJumpBC::defineStencils()
           // If we couldn't find in a quadrant, try a larger neighborhood
           order = m_order;
           while (!foundStencil && order > 0) {
-            foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Radius, order);
+            foundStencil =
+              this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Radius, order);
             order--;
 
             // Check if stencil reaches too far across CF
@@ -188,11 +191,11 @@ MFHelmholtzJumpBC::defineStencils()
         };
 
         // Execute kernel and build stencils.
-        BoxLoops::loop(vofit, kernel);	
+        BoxLoops::loop(vofit, kernel);
       }
     }
 
-    // Build the average stencils. 
+    // Build the average stencils.
     this->buildAverageStencils();
     this->resetBC();
   }
@@ -205,18 +208,18 @@ MFHelmholtzJumpBC::buildAverageStencils()
 
   CH_assert(m_multiPhase);
 
-  const DisjointBoxLayout& dbl = m_mflg.getGrids();  
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
-  // Compute the average stencils and weights. 
+  // Compute the average stencils and weights.
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     const EBLevelGrid& eblg  = m_mflg.getEBLevelGrid(iphase);
     const EBISLayout&  ebisl = eblg.getEBISL();
-      
+
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       const Box         box     = dbl[dit()];
       const EBISBox&    ebisbox = ebisl[dit()];
-      const IntVectSet& ivs    = m_ivs[dit()];
-	
+      const IntVectSet& ivs     = m_ivs[dit()];
+
       const BaseIVFAB<VoFStencil>& gradStencils = m_gradPhiStencils[dit()].getIVFAB(iphase);
       const BaseIVFAB<Real>&       bndryWeights = m_gradPhiWeights[dit()].getIVFAB(iphase);
 
@@ -226,34 +229,34 @@ MFHelmholtzJumpBC::buildAverageStencils()
       const BaseIVFAB<Real>& Bcoef       = (*m_Bcoef)[dit()].getIVFAB(iphase);
 
       for (IVSIterator ivsIt(ivs); ivsIt.ok(); ++ivsIt) {
-	const IntVect iv = ivsIt();
+        const IntVect iv = ivsIt();
 
-	const VolIndex         curVof(iv, 0);
-	const Vector<VolIndex> allVofs = ebisbox.getVoFs(iv);
+        const VolIndex         curVof(iv, 0);
+        const Vector<VolIndex> allVofs = ebisbox.getVoFs(iv);
 
-	Real&       curWeight  = avgWeights(curVof, m_comp);
-	VoFStencil& curStencil = avgStencils(curVof, m_comp);
+        Real&       curWeight  = avgWeights(curVof, m_comp);
+        VoFStencil& curStencil = avgStencils(curVof, m_comp);
 
-	curWeight = 0.0;
-	curStencil.clear();
+        curWeight = 0.0;
+        curStencil.clear();
 
-	Real avgBco = 0.0;
-	for (int ivof = 0; ivof < allVofs.size(); ivof++) {
-	  const VolIndex& vof = allVofs[ivof];
+        Real avgBco = 0.0;
+        for (int ivof = 0; ivof < allVofs.size(); ivof++) {
+          const VolIndex& vof = allVofs[ivof];
 
-	  avgBco += Bcoef(vof, m_comp);
-	  curWeight += bndryWeights(vof, m_comp);
-	  curStencil += gradStencils(vof, m_comp);
-	}
+          avgBco += Bcoef(vof, m_comp);
+          curWeight += bndryWeights(vof, m_comp);
+          curStencil += gradStencils(vof, m_comp);
+        }
 
-	const Real invNum = 1. / allVofs.size();
+        const Real invNum = 1. / allVofs.size();
 
-	avgBco *= invNum;
-	curWeight *= invNum;
-	curStencil *= invNum;
+        avgBco *= invNum;
+        curWeight *= invNum;
+        curStencil *= invNum;
 
-	curStencil *= avgBco;
-	curWeight *= avgBco;
+        curStencil *= avgBco;
+        curWeight *= avgBco;
       }
     }
   }
@@ -285,7 +288,7 @@ MFHelmholtzJumpBC::buildAverageStencils()
       derivStenPhase0 *= denom;
       derivStenPhase1 *= denom;
     }
-  }  
+  }
 }
 
 void

@@ -88,7 +88,8 @@ public:
     @brief Set B-coefficient. This updates the stencils
     @param[in] a_Bcoef Helmholtz B-coefficient
   */
-  void setBco(const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_Bcoef);
+  void
+  setBco(const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_Bcoef);
 
   /*!
     @brief Return stencil order
@@ -246,7 +247,7 @@ protected:
   /*!
     @brief Raw weights for dphi/dn
   */
-  LayoutData<MFInterfaceFAB<Real>> m_gradPhiWeights;  
+  LayoutData<MFInterfaceFAB<Real>> m_gradPhiWeights;
 
   /*!
     @brief Average stencil

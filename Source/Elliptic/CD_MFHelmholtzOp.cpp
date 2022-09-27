@@ -676,19 +676,19 @@ MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellF
   // This function performs relaxation. The user can switch between various kernels.
 
   switch (m_smoother) {
-  case Smoother::PointJacobi:  {
+  case Smoother::PointJacobi: {
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
-    
+
     break;
   }
   case Smoother::GauSaiRedBlack: {
     this->relaxGSRedBlack(a_correction, a_residual, a_iterations);
-    
+
     break;
   }
   case Smoother::GauSaiMultiColor: {
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
-    
+
     break;
   }
   default: {
