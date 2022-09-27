@@ -65,6 +65,7 @@ public:
     @brief Get face flux. This is for regular cells, and it uses first order finite differences for filling the flux. 
     @param[inout] a_faceFlux       Face-centered flux. 
     @param[in]    a_phi            Cell-centered data
+    @param[in]    a_Bcoef          Face-centered B-coefficient
     @param[in]    a_dir            Coordinate direction
     @param[in]    a_side           High or low side
     @param[in]    a_dit            Data index
@@ -74,6 +75,7 @@ public:
   virtual void
   getFaceFlux(BaseFab<Real>&        a_faceFlux,
               const BaseFab<Real>&  a_phi,
+              const BaseFab<Real>&  a_Bcoef,
               const int&            a_dir,
               const Side::LoHiSide& a_side,
               const DataIndex&      a_dit,
@@ -83,6 +85,7 @@ public:
     @brief Get face flux. This is for irregular cells. 
     @param[in] a_vof            Grid cell
     @param[in] a_phi            Cell-centered data
+    @param[in]    a_Bcoef          Face-centered B-coefficient
     @param[in] a_dir            Coordinate direction
     @param[in] a_side           High or low side
     @param[in] a_dit            Data index
@@ -91,6 +94,7 @@ public:
   virtual Real
   getFaceFlux(const VolIndex&       a_vof,
               const EBCellFAB&      a_phi,
+              const EBFaceFAB&      a_Bcoef,
               const int&            a_dir,
               const Side::LoHiSide& a_side,
               const DataIndex&      a_dit,

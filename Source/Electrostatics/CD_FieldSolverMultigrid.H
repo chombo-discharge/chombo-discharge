@@ -164,6 +164,17 @@ public:
   setupSolver() override;
 
   /*!
+    @brief Set new permittivities for the multigrid solver. 
+    @param[in] a_permittivityCell Permittivity on cell center
+    @param[in] a_permittivityFace Permittivity on faces
+    @param[in] a_permittivityEB   Permittivity on EB
+  */
+  virtual void
+  setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                          const MFAMRFluxData& a_permittivityFace,
+                          const MFAMRIVData&   a_permittivityEB) override;
+
+  /*!
     @brief Compute grid loads
     @param[in] a_dbl   Grids on input level
     @param[in] a_level Grid level

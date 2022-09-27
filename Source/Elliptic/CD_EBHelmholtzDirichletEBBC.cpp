@@ -113,7 +113,7 @@ EBHelmholtzDirichletEBBC::define()
   }
 
   m_boundaryWeights.define(dbl);
-  m_kappaDivFStencils.define(dbl);
+  m_gradPhiStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box         box     = dbl[dit()];
@@ -122,9 +122,7 @@ EBHelmholtzDirichletEBBC::define()
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
-
-    const BaseIVFAB<Real>& Bcoef = (*m_Bcoef)[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     weights.define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
@@ -135,7 +133,6 @@ EBHelmholtzDirichletEBBC::define()
     // Kernel
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
-      const Real B        = Bcoef(vof, m_comp);
 
       int                         order;
       bool                        foundStencil = false;
@@ -170,8 +167,8 @@ EBHelmholtzDirichletEBBC::define()
         stencils(vof, m_comp) = pairSten.second;
 
         // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the area fraction.
-        weights(vof, m_comp) *= B * areaFrac / m_dx;
-        stencils(vof, m_comp) *= B * areaFrac / m_dx;
+        weights(vof, m_comp) *= areaFrac / m_dx;
+        stencils(vof, m_comp) *= areaFrac / m_dx;
       }
       else {
         // Dead cell. No flux.
@@ -185,12 +182,13 @@ EBHelmholtzDirichletEBBC::define()
 }
 
 void
-EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&     a_vofit,
-                                      EBCellFAB&       a_Lphi,
-                                      const EBCellFAB& a_phi,
-                                      const DataIndex& a_dit,
-                                      const Real&      a_beta,
-                                      const bool&      a_homogeneousPhysBC) const
+EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
+                                      EBCellFAB&             a_Lphi,
+                                      const EBCellFAB&       a_phi,
+                                      const BaseIVFAB<Real>& a_Bcoef,
+                                      const DataIndex&       a_dit,
+                                      const Real&            a_beta,
+                                      const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME("EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
@@ -199,7 +197,8 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&     a_vofit,
   if (!a_homogeneousPhysBC) {
 
     auto kernel = [&](const VolIndex& vof) -> void {
-      Real value;
+      Real       value = 0.0;
+      const Real B     = a_Bcoef(vof, m_comp);
 
       if (m_useConstant) {
         value = m_constantValue;
@@ -213,9 +212,9 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&     a_vofit,
         MayDay::Error("EBHelmholtzDirichletEBBC::applyEBFlux -- logic bust");
       }
 
-      // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
-      // beta is not.
-      a_Lphi(vof, m_comp) += a_beta * value * m_boundaryWeights[a_dit](vof, m_comp);
+      // Area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
+      // beta and Bcoef are not.
+      a_Lphi(vof, m_comp) += a_beta * B * value * m_boundaryWeights[a_dit](vof, m_comp);
     };
 
     BoxLoops::loop(a_vofit, kernel);

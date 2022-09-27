@@ -393,8 +393,8 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   //       semi-implicit scheme because we solve for the field using div((eps + dt*sigma^k/eps0)E^(k+1)) = -rho^(k+1)/eps0 but
   //       this means we need the conductivity and space charge at the previous time step for restoring the field on the new mesh.
 
-  if (m_fieldCoupling != FieldCoupling::SemiImplicit ||
-      m_timeStep == 0) { // Just use regular regrid when we start the simulation.
+  // Just use regular regrid when we start the simulation.
+  if (m_fieldCoupling != FieldCoupling::SemiImplicit || m_timeStep == 0) {
     CdrPlasmaStepper::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   }
   else {
@@ -429,13 +429,13 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
     m_amr->interpGhostMG(m_semiImplicitRho, m_realm, m_phase);
 
     // Set up the semi-implicit Poisson equation and solve it.
+    m_fieldSolver->setupSolver();
     this->computeFaceConductivity(m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);
     this->setupSemiImplicitPoisson(m_conductivityFactorFace, m_conductivityFactorEB, 1.0);
 
-    // Now solve for the field on the new grids.
     const bool converged = this->solveSemiImplicitPoisson();
 
-    // If we don't converge, try new Poisson solver settings
+    // Debug if we don't converge.
     if (!converged) {
       pout() << "CdrPlasmaGodunovStepper::regrid - Poisson solver failed to converge during semi-implicit regrid."
              << endl;

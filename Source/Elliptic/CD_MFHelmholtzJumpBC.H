@@ -30,6 +30,10 @@
   @brief  Class for computing "jump interface" boundary conditions for multifluid code. 
   @details This class creates stencils for approximating the normal derivative on each side. It uses those stencil to compute a value on the boundary which fulfills
   the discrete version of dphi/dn1 + dphi/dn2 = sigma. This value is used by MFHelmholtzEBBC to compute the fluxes into the cut-cells on each side. 
+
+  When multi-valued cells are involved we use an "average" formulation such that we obtain the surface potential which is equal on all multi-cut surfaces. For this
+  reason we store the bare stencils AND the averaged stencils (which are used in the matching). When stencil coefficients are updated then we use the raw stencils
+  for recomputing the average stencils. This is done by calling setBco.
 */
 class MFHelmholtzJumpBC
 {
@@ -45,7 +49,7 @@ public:
   MFHelmholtzJumpBC() = delete;
 
   /*!
-    @brief Defining constructo
+    @brief Defining constructor.
     @param[in] a_dataLocation Data centering
     @param[in] a_mflg         Grids
     @param[in] a_Bcoef        Helmholtz B-coefficient
@@ -79,6 +83,13 @@ public:
   */
   MFHelmholtzJumpBC&
   operator=(const MFHelmholtzJumpBC& a_other) = delete;
+
+  /*!
+    @brief Set B-coefficient. This updates the stencils
+    @param[in] a_Bcoef Helmholtz B-coefficient
+  */
+  void
+  setBco(const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_Bcoef);
 
   /*!
     @brief Return stencil order
@@ -224,9 +235,19 @@ protected:
   mutable std::map<int, std::shared_ptr<LayoutData<VoFIterator>>> m_multiPhaseVofs;
 
   /*!
-    @brief IntVectSet over which we run the "averaging"
+    @brief IntVectSet over which we run the "averaging".
   */
   LayoutData<IntVectSet> m_ivs;
+
+  /*!
+    @brief Raw stencils for dphi/dn
+  */
+  LayoutData<MFInterfaceFAB<VoFStencil>> m_gradPhiStencils;
+
+  /*!
+    @brief Raw weights for dphi/dn
+  */
+  LayoutData<MFInterfaceFAB<Real>> m_gradPhiWeights;
 
   /*!
     @brief Average stencil
@@ -234,7 +255,7 @@ protected:
   LayoutData<MFInterfaceFAB<VoFStencil>> m_avgStencils;
 
   /*!
-    @brief Denom factor
+    @brief Denominator 1/(bp*wp + bq*wq) for all interface cells. 
   */
   LayoutData<MFInterfaceFAB<Real>> m_denom;
 
@@ -254,6 +275,12 @@ protected:
   */
   void
   defineIterators();
+
+  /*!
+    @brief Brief the average stencils
+  */
+  void
+  buildAverageStencils();
 
   /*!
     @brief Get stencil with specified order. 

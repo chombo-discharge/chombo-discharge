@@ -124,14 +124,13 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     // Build interpolation stencils.
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
 
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
-      const Real helmBco  = (*m_Bcoef)[dit()](vof, m_comp);
 
       weights(vof, m_comp) = 0.0;
 
@@ -189,7 +188,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
         // The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
         // kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
         if (std::abs(B) > 0.0) {
-          fluxStencil *= A * areaFrac * helmBco / (B * m_dx);
+          fluxStencil *= A * areaFrac / (B * m_dx);
         }
         else {
           fluxStencil.clear();
@@ -205,12 +204,13 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
-                                             EBCellFAB&       a_Lphi,
-                                             const EBCellFAB& a_phi,
-                                             const DataIndex& a_dit,
-                                             const Real&      a_beta,
-                                             const bool&      a_homogeneousPhysBC) const
+MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                                             EBCellFAB&             a_Lphi,
+                                             const EBCellFAB&       a_phi,
+                                             const BaseIVFAB<Real>& a_Bcoef,
+                                             const DataIndex&       a_dit,
+                                             const Real&            a_beta,
+                                             const bool&            a_homogeneousPhysBC) const
 {
 
   // TLDR: For Robin, the flux is b*dphi/dn = beta*b*A*phi/B - beta*b*C/B and we have stored
@@ -238,7 +238,7 @@ MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
 
       const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
       const Real     areaFrac  = ebisbox.bndryArea(vof);
-      const Real     helmBco   = (*m_Bcoef)[a_dit](vof, m_comp);
+      const Real     helmBco   = a_Bcoef(vof, m_comp);
       const Real     kappaDivF = -a_beta * helmBco * areaFrac * C / (m_dx * B);
 
       if (std::abs(B) > 0.0) {
@@ -275,20 +275,27 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   // Get the vofs around the cut-cell. Note that if m_weight = 0 we enable the cut-cell itself in the interpolation.
   Vector<VolIndex> vofs;
   switch (a_neighborhood) {
-  case VofUtils::Neighborhood::Quadrant:
+  case VofUtils::Neighborhood::Quadrant: {
     vofs = VofUtils::getVofsInQuadrant(a_vof,
                                        ebisbox,
                                        ebisbox.normal(a_vof),
                                        radius,
                                        VofUtils::Connectivity::MonotonePath,
                                        useStartVof);
+
     break;
-  case VofUtils::Neighborhood::Radius:
+  }
+  case VofUtils::Neighborhood::Radius: {
     vofs = VofUtils::getVofsInRadius(a_vof, ebisbox, radius, VofUtils::Connectivity::MonotonePath, useStartVof);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error(
       "MFHelmholtzRobinEBBC::getInterpolationStencil(VolIndex, DataIndex, VofUtils::Neighborhood) -- logic bust");
+
+    break;
+  }
   }
 
   // Build displacements vector, i.e. distances from cell centers/centroids to the cut-cell EB centroid.
