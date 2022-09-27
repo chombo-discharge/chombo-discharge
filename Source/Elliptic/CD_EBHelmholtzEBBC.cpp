@@ -34,7 +34,6 @@ EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
   CH_TIME(
     "EBHelmholtzEBBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<BaseIVFAB<Real> > >, RealVect, Real, int)");
 
-  CH_assert(!a_Bcoef.isNull());
   CH_assert(a_dx > 0.0);
   CH_assert(a_ghostCF >= 0);
 
