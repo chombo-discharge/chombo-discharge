@@ -215,9 +215,8 @@ MFHelmholtzOp::setAcoAndBco(const RefCountedPtr<LevelData<MFCellFAB>>&   a_Acoef
     m_helmOps.at(iphase)->setAcoAndBco(Acoef, Bcoef, BcoefIrreg);
   }
 
-
   // Jump BC object also needs to update coefficients.
-  MayDay::Abort("MFHelmholtzOp -- jump bc has not updated coefficients");
+  m_jumpBC->setBco(a_BcoefIrreg);
 }
 
 void
@@ -677,17 +676,26 @@ MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellF
   // This function performs relaxation. The user can switch between various kernels.
 
   switch (m_smoother) {
-  case Smoother::PointJacobi:
+  case Smoother::PointJacobi:  {
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
+    
     break;
-  case Smoother::GauSaiRedBlack:
+  }
+  case Smoother::GauSaiRedBlack: {
     this->relaxGSRedBlack(a_correction, a_residual, a_iterations);
+    
     break;
-  case Smoother::GauSaiMultiColor:
+  }
+  case Smoother::GauSaiMultiColor: {
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
+    
     break;
-  default:
+  }
+  default: {
     MayDay::Error("MFHelmholtzOp::relax - bogus relaxation method requested");
+
+    break;
+  }
   };
 }
 
