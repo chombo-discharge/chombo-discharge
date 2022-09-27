@@ -373,6 +373,49 @@ MFHelmholtzOpFactory::defineMultigridLevels()
   }
 }
 
+void
+MFHelmholtzOpFactory::coarsenCoefficientsMG()
+{
+  CH_TIME("MFHelmholtzOpFactory::coarsenCoefficientsMG");
+
+  constexpr int mgRefRat = 2;
+
+  for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++) {
+
+    if (m_hasMgLevels[amrLevel]) {
+      // In these vectors, mgAco[0] is the AMR level, mgAco[1] is a refinement 2 coarsening of mgAco[0], mgAco[2] is the coarsening of mgAco[1] and so on.
+      const AmrLevelGrids mgGrids = m_mgLevelGrids[amrLevel];
+
+      AmrCellData& mgAco      = m_mgAcoef[amrLevel];
+      AmrFluxData& mgBco      = m_mgBcoef[amrLevel];
+      AmrIrreData& mgBcoIrreg = m_mgBcoefIrreg[amrLevel];
+
+      for (int mgLevel = 0; mgLevel < mgGrids.size() - 1; mgLevel++) {
+        const MFLevelGrid& mflgCoar = mgGrids[mgLevel + 1];
+        const MFLevelGrid& mflgFine = mgGrids[mgLevel];
+
+        LevelData<MFCellFAB>&   coarAcoef      = *mgAco[mgLevel + 1];
+        LevelData<MFFluxFAB>&   coarBcoef      = *mgBco[mgLevel + 1];
+        LevelData<MFBaseIVFAB>& coarBcoefIrreg = *mgBcoIrreg[mgLevel + 1];
+
+        const LevelData<MFCellFAB>&   fineAcoef      = *mgAco[mgLevel];
+        const LevelData<MFFluxFAB>&   fineBcoef      = *mgBco[mgLevel];
+        const LevelData<MFBaseIVFAB>& fineBcoefIrreg = *mgBcoIrreg[mgLevel];
+
+        this->coarsenCoefficients(coarAcoef,
+                                  coarBcoef,
+                                  coarBcoefIrreg,
+                                  fineAcoef,
+                                  fineBcoef,
+                                  fineBcoefIrreg,
+                                  mflgCoar,
+                                  mflgFine,
+                                  mgRefRat);
+      }
+    }
+  }
+}
+
 bool
 MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
                                        const MFLevelGrid& a_fineMflg,

@@ -68,6 +68,9 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   m_smoother     = a_relaxType;
   m_hasCoar      = a_hasCoar;
   m_hasFine      = a_hasFine;
+  m_Acoef        = a_Acoef;
+  m_Bcoef        = a_Bcoef;
+  m_BcoefIrreg   = a_BcoefIrreg;
 
   if (a_hasCoar) {
     m_mflgCoFi = a_mflgCoFi;
@@ -217,6 +220,24 @@ MFHelmholtzOp::setAcoAndBco(const RefCountedPtr<LevelData<MFCellFAB>>&   a_Acoef
 
   // Jump BC object also needs to update coefficients.
   m_jumpBC->setBco(a_BcoefIrreg);
+}
+
+const RefCountedPtr<LevelData<MFCellFAB>>&
+MFHelmholtzOp::getAcoef()
+{
+  return m_Acoef;
+}
+
+const RefCountedPtr<LevelData<MFFluxFAB>>&
+MFHelmholtzOp::getBcoef()
+{
+  return m_Bcoef;
+}
+
+const RefCountedPtr<LevelData<MFBaseIVFAB>>&
+MFHelmholtzOp::getBcoefIrreg()
+{
+  return m_BcoefIrreg;
 }
 
 void

@@ -339,8 +339,6 @@ CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFa
   m_amr->conservativeAverage(permEBGas, m_realm, phase::gas);
 
   // Set up the solver with the new "permittivities".
-  m_fieldSolver->setupSolver();
-
   m_fieldSolver->setSolverPermittivities(permCell, permFace, permEB);
 }
 

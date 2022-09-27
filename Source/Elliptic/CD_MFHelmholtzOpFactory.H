@@ -146,6 +146,12 @@ public:
   getSigma() const;
 
   /*!
+    @brief Go through all MG levels and coarsen the coefficients from the finer levels
+  */
+  void
+  coarsenCoefficientsMG();
+
+  /*!
     @brief Create multigrid operator
     @param[in] a_fineDomain      Domain
     @param[in] a_depth           Depth. This specifies that the operator will be created at depth coarsen(a_fineDomain, 2^a_depth);
