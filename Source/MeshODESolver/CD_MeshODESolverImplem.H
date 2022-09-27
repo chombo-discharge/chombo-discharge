@@ -433,6 +433,18 @@ MeshODESolver<N>::getName() const noexcept
 }
 
 template <size_t N>
+void
+MeshODESolver<N>::setName(const std::string& a_name) noexcept
+{
+  CH_TIME("MeshODESolver::setName()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setName()" << endl;
+  }
+
+  m_name = a_name;
+}
+
+template <size_t N>
 Vector<std::string>
 MeshODESolver<N>::getPlotVariableNames() const noexcept
 {
