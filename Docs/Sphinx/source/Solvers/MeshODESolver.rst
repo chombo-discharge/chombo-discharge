@@ -96,7 +96,7 @@ The source term can also be set on a component-by-component basis using
    void
    MeshODESolver<N>::setRHS(const Func& a_rhsFunction, const size_t a_comp) noexcept;
 
-The above function will evaluate a function :math:`S_{\text{a_comp}} = f(\mathbf{x})` in each cell.
+The above function will evaluate a function :math:`f(\mathbf{x})` in each cell.
 
 Analytically coupled
 ____________________

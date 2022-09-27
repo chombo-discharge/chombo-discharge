@@ -217,7 +217,6 @@ latex_elements = {
 # Release name
 #'releasename': ''
 
-'fncychap': r'\usepackage[Bjornstrup]{fncychap}',
 'figure_align': 'htb',
 }
 
