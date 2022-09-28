@@ -132,7 +132,7 @@ Solvers
    Solvers/Electrostatics
    Solvers/MeshODESolver
    Solvers/RTE
-   Solvers/Sigma
+   Solvers/SurfaceODESolver
    Solvers/TracerParticles
    Solvers/Ito
 

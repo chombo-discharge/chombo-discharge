@@ -4,7 +4,14 @@ Particles
 =========
 
 ``chombo-discharge`` supports computational particles using native ``Chombo`` particle data.
-The source code for the particle functionality resides in :file:`$DISCHARGE_HOME/Source/Particle`. 
+The source code for the particle functionality resides in :file:`$DISCHARGE_HOME/Source/Particle`.
+
+.. _Chap:GenericParticle:
+
+GenericParticle
+---------------
+
+.. _Chap:ParticleContainer:
 
 ParticleContainer
 ------------------
@@ -561,4 +568,83 @@ For example, in order to interpolate the particle acceleration, the particle cla
    amr->interpolateParticles<MyParticleClass, &MyParticleClass::acceleration>(...)
 
 Note that if the user interpolates onto a scalar variable, the mesh variable must have exactly one component.
-Likewise, if interpolating a vector variable, the mesh variable must have exact ``SpaceDim`` components. 
+Likewise, if interpolating a vector variable, the mesh variable must have exact ``SpaceDim`` components.
+
+.. _Chap:SuperParticles:
+
+Superparticles
+--------------
+
+Custom approach
+_______________
+
+For a custom approach of managing superparticles, users can simply manipulate the particle lists in the grid patches or grid cells.
+In each case one starts with a list ``List<P>`` that needs to be modified. 
+
+kD-trees
+________
+
+Overview
+^^^^^^^^
+
+``chombo-discharge`` has functionality for spatially partitioning particles using kD-trees, which can be used as a basis for particle merging and splitting.
+kD-trees operate by partitioning a set of input primitives into spatially coherent subsets.
+At each level in the tree recursion one chooses an axis for partitioning one subset into two new subsets, and the recursion continues until the partitioning is complete.
+:numref:`Fig:PartitionKD` shows an example where a set of initial particles are partitioned using such a tree. 
+
+.. _Fig:PartitionKD:
+.. figure:: /_static/figures/PartitionKD.png
+   :width: 75%
+   :align: center
+
+   Example of a kD-tree partitioning of particles in a single cell.
+
+.. note:: 
+
+   The source code for the kD-tree functionality is given in :file:`$DISCHARGE_HOME/Source/Particle/CD_SuperParticles.H`.       
+
+Particle partitioners
+^^^^^^^^^^^^^^^^^^^^^
+
+The kD-tree partitioner requires a user-supplied criterion for particle partitioning.
+Only the partitioner ``PartitionEqualWeight`` is currently supported, and this partitioner will divide the original subset into two new subsets such that the particle weights in the two halves differs by at most one physical particle.
+This partitioner is imlemented as
+
+.. code-block:: c++
+
+  template <class P, Real& (P::*weight)(), const RealVect& (P::*position)() const>
+  typename KDNode<P>::Partitioner PartitionEqualWeight;
+
+Here, ``P`` is the particle type, and this class *must* have function members ``Real& P::weight()`` and ``const RealVect& P::position()`` which return the particle weight and position.
+
+.. warning::
+   
+   ``PartitionEqualWeight`` will usually split particles to ensure that the weight in the two subsets are the same (thus creating new particles). 
+   In this case any other members in the particle type are copied over into the new particles.
+
+The particles in each leaf of the kD-tree can then be merged into new particles.
+Since the weight in the nodes of the tree differ by at most one, the resulting computational particles also have weights that differ by at most one.
+
+.. _Fig:SuperKD:
+.. figure:: /_static/figures/SuperKD.png
+   :width: 50%
+   :align: center
+
+   kD-tree partitioning of particles into new particles whose weight differ by at most one.
+   Left: Original particles with weights between 1 and 100.
+   Right: Merged particles.
+   
+
+.. _Chap:ParticleOps:
+
+ParticleOps
+-----------
+
+``ParticleOps`` is a static data class that provides methods for commonly used particle operations.
+These include
+
+* Intersection of particles with EBs.
+* Intersection of particles with domain edges/faces.
+* Drawing particles from a probability distribution.
+
+The ``ParticleOps`` API is found at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleOps.html>`_.

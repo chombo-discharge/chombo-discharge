@@ -28,8 +28,12 @@ To instantiate the solver, use the full constructor with reference to :ref:`Chap
 
 If running dual grid simulations, the corresponding :ref:`Chap:Realm` can be set through the public API, see `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMeshODESolver.html>`_.
 
-Setting initial data
---------------------
+.. note::
+   
+   Source code for the ``MeshODESolver`` resides in :file:`Source/MeshODESolver`.
+
+Setting :math:`\vec{\phi}`
+--------------------------
 
 Mesh-based
 __________
@@ -67,8 +71,8 @@ One can set :math:`\vec{\phi}` by using analytic functions :math:`\vec{\phi}(\ma
 These differ in the sense that ``Func1``, which is just an alias for a function :math:`f = f\left(\mathbf{x}\right)`, sets the value for a specified component.
 The other version that takes ``Func2`` as an argument sets the corresponding values for all components. 
 
-Setting source terms
---------------------
+Setting :math:`\vec{S}`
+-----------------------
 
 General approach
 ________________
@@ -157,7 +161,7 @@ These variables are named
    MeshODESolver.plt_vars = phi rhs
 
 Only ``phi`` and ``rhs`` are recognized as valid arguments.
-If choosing to omit output variables for the solver, one can put e.g. ``MeshOdeSolver.plt_vars = -1``. 
+If choosing to omit output variables for the solver, one can put e.g. ``MeshODESolver.plt_vars = -1``. 
 
 .. note::
 
