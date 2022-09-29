@@ -510,12 +510,12 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
   switch (a_phase) {
   case phase::gas: {
     implicitFunction = m_baseif.at(phase::gas);
-    
+
     break;
   }
   case phase::solid: {
     implicitFunction = m_baseif.at(phase::solid);
-    
+
     break;
   }
   default: {
@@ -721,17 +721,17 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
   switch (a_phase) {
   case phase::gas: {
     implicitFunction = m_baseif.at(phase::gas);
-    
+
     break;
   }
   case phase::solid: {
     implicitFunction = m_baseif.at(phase::solid);
-    
+
     break;
   }
   default: {
     MayDay::Error("AmrMesh::intersectParticlesRaycastIF - logic bust");
-    
+
     break;
   }
   }
@@ -863,12 +863,12 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
   switch (a_phase) {
   case phase::gas: {
     implicitFunction = m_baseif.at(phase::gas);
-    
+
     break;
   }
   case phase::solid: {
     implicitFunction = m_baseif.at(phase::solid);
-    
+
     break;
   }
   default: {
