@@ -113,6 +113,17 @@ FieldSolver::solve(MFAMRCellData& a_potential, const bool a_zeroPhi)
 }
 
 void
+FieldSolver::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                                     const MFAMRFluxData& a_permittivityFace,
+                                     const MFAMRIVData&   a_permittivityEB)
+{
+  CH_TIME("FieldSolver::setSolverPermittivities");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolver::setSolverPermittivities" << endl;
+  }
+}
+
+void
 FieldSolver::computeElectricField()
 {
   CH_TIME("FieldSolver::computeElectricField()");

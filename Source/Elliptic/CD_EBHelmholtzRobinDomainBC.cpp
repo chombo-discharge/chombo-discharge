@@ -62,6 +62,7 @@ EBHelmholtzRobinDomainBC::setCoefficients(const std::function<Real(const RealVec
 void
 EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                       const BaseFab<Real>&  a_phi,
+                                      const BaseFab<Real>&  a_Bcoef,
                                       const int&            a_dir,
                                       const Side::LoHiSide& a_side,
                                       const DataIndex&      a_dit,
@@ -125,13 +126,13 @@ EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   BoxLoops::loop(a_faceFlux.box(), kernel);
 
   // Multiplies by B-coefficient.
-  const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
-  this->multiplyByBcoef(a_faceFlux, Bco, a_dir, a_side);
+  this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
 }
 
 Real
 EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
                                       const EBCellFAB&      a_phi,
+                                      const EBFaceFAB&      a_Bcoef,
                                       const int&            a_dir,
                                       const Side::LoHiSide& a_side,
                                       const DataIndex&      a_dit,
@@ -215,7 +216,7 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
 
       // Multiply by the Helmholtz b-coefficient and aperture.
       const FaceIndex& bndryFace = faces[0];
-      const Real       Bco       = (*m_Bcoef)[a_dit][a_dir](bndryFace, m_comp);
+      const Real       Bco       = a_Bcoef(bndryFace, m_comp);
       const Real       area      = ebisbox.areaFrac(bndryFace);
 
       centroidFlux *= Bco * area;

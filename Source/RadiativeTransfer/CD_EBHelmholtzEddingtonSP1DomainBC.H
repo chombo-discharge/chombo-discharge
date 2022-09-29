@@ -78,23 +78,23 @@ public:
 
   /*!
     @brief Define function
-    @param[in] a_eblg   Level grids
-    @param[in] a_Bcoef  B-coefficient for Helmholtz equation
-    @param[in] a_probLo Lower-left corner of computational domain
-    @param[in] a_dx     Grid resolution
+    @param[in] a_dataLocation Data location
+    @param[in] a_eblg         Level grids
+    @param[in] a_probLo       Lower-left corner of computational domain
+    @param[in] a_dx           Grid resolution
     @note Overriding because this is a wrapper class for Dirichlet/Neumann, and those objects need defining. 
   */
   void
-  define(const Location::Cell                       a_dataLocation,
-         const EBLevelGrid&                         a_eblg,
-         const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
-         const RealVect&                            a_probLo,
-         const Real                                 a_dx) override final;
+  define(const Location::Cell a_dataLocation,
+         const EBLevelGrid&   a_eblg,
+         const RealVect&      a_probLo,
+         const Real           a_dx) override final;
 
   /*!
     @brief Get face flux. This is for regular cells. 
     @param[inout] a_faceFlux       Face-centered flux. 
     @param[in]    a_phi            Cell-centered data
+    @param[in]    a_Bcoef          Face-centered B-coefficient
     @param[in]    a_dir            Coordinate direction
     @param[in]    a_side           High or low side
     @param[in]    a_dit            Data index
@@ -104,6 +104,7 @@ public:
   void
   getFaceFlux(BaseFab<Real>&        a_faceFlux,
               const BaseFab<Real>&  a_phi,
+              const BaseFab<Real>&  a_Bcoef,
               const int&            a_dir,
               const Side::LoHiSide& a_side,
               const DataIndex&      a_dit,
@@ -113,6 +114,7 @@ public:
     @brief Get face flux. This is for irregular cells. 
     @param[in] a_vof            Grid cell
     @param[in] a_phi            Cell-centered data
+    @param[in] a_Bcoef          Face-centered B-coefficient
     @param[in] a_dir            Coordinate direction
     @param[in] a_side           High or low side
     @param[in] a_dit            Data index
@@ -121,6 +123,7 @@ public:
   Real
   getFaceFlux(const VolIndex&       a_vof,
               const EBCellFAB&      a_phi,
+              const EBFaceFAB&      a_Bcoef,
               const int&            a_dir,
               const Side::LoHiSide& a_side,
               const DataIndex&      a_dit,

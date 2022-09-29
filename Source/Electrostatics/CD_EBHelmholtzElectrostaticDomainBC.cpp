@@ -46,15 +46,22 @@ EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC(const Electro
 
       // Create either a Dirichlet or Neumann boundary condition object for the current domain edge (face in 3D).
       switch (bcType) {
-      case ElectrostaticDomainBc::BcType::Dirichlet:
+      case ElectrostaticDomainBc::BcType::Dirichlet: {
         m_bcObjects.emplace(domainSide, std::make_shared<EBHelmholtzDirichletDomainBC>(func));
+
         break;
-      case ElectrostaticDomainBc::BcType::Neumann:
+      }
+      case ElectrostaticDomainBc::BcType::Neumann: {
         m_bcObjects.emplace(domainSide, std::make_shared<EBHelmholtzNeumannDomainBC>(func));
+
         break;
-      default:
+      }
+      default: {
         MayDay::Error(
           "EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC - unsupported boundary condition passed into constructor!");
+
+        break;
+      }
       }
     }
   }
@@ -66,11 +73,10 @@ EBHelmholtzElectrostaticDomainBC::~EBHelmholtzElectrostaticDomainBC()
 }
 
 void
-EBHelmholtzElectrostaticDomainBC::define(const Location::Cell                       a_dataLocation,
-                                         const EBLevelGrid&                         a_eblg,
-                                         const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
-                                         const RealVect&                            a_probLo,
-                                         const Real                                 a_dx)
+EBHelmholtzElectrostaticDomainBC::define(const Location::Cell a_dataLocation,
+                                         const EBLevelGrid&   a_eblg,
+                                         const RealVect&      a_probLo,
+                                         const Real           a_dx)
 {
   CH_TIME(
     "EBHelmholtzElectrostaticDomainBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<EBFluxFAB> >, RealVect, Real)");
@@ -83,7 +89,7 @@ EBHelmholtzElectrostaticDomainBC::define(const Location::Cell                   
     for (SideIterator sit; sit.ok(); ++sit) {
       auto& bcPtr = m_bcObjects.at(std::make_pair(dir, sit()));
 
-      bcPtr->define(a_dataLocation, a_eblg, a_Bcoef, a_probLo, a_dx);
+      bcPtr->define(a_dataLocation, a_eblg, a_probLo, a_dx);
     }
   }
 }
@@ -91,6 +97,7 @@ EBHelmholtzElectrostaticDomainBC::define(const Location::Cell                   
 void
 EBHelmholtzElectrostaticDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                               const BaseFab<Real>&  a_phi,
+                                              const BaseFab<Real>&  a_Bcoef,
                                               const int&            a_dir,
                                               const Side::LoHiSide& a_side,
                                               const DataIndex&      a_dit,
@@ -104,12 +111,13 @@ EBHelmholtzElectrostaticDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
-  bcPtr->getFaceFlux(a_faceFlux, a_phi, a_dir, a_side, a_dit, a_useHomogeneous);
+  bcPtr->getFaceFlux(a_faceFlux, a_phi, a_Bcoef, a_dir, a_side, a_dit, a_useHomogeneous);
 }
 
 Real
 EBHelmholtzElectrostaticDomainBC::getFaceFlux(const VolIndex&       a_vof,
                                               const EBCellFAB&      a_phi,
+                                              const EBFaceFAB&      a_Bcoef,
                                               const int&            a_dir,
                                               const Side::LoHiSide& a_side,
                                               const DataIndex&      a_dit,
@@ -121,7 +129,7 @@ EBHelmholtzElectrostaticDomainBC::getFaceFlux(const VolIndex&       a_vof,
 
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
-  return bcPtr->getFaceFlux(a_vof, a_phi, a_dir, a_side, a_dit, a_useHomogeneous);
+  return bcPtr->getFaceFlux(a_vof, a_phi, a_Bcoef, a_dir, a_side, a_dit, a_useHomogeneous);
 }
 
 #include <CD_NamespaceFooter.H>

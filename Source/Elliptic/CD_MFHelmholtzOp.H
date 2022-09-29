@@ -148,6 +148,38 @@ public:
   operator=(const MFHelmholtzOp&& a_oper) = delete;
 
   /*!
+    @brief Update operators with new coefficients.
+    @param[in] a_Acoef         Operator A-coefficient
+    @param[in] a_Bcoef         Operator B-coefficient
+    @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
+  */
+  void
+  setAcoAndBco(const RefCountedPtr<LevelData<MFCellFAB>>&   a_Acoef,
+               const RefCountedPtr<LevelData<MFFluxFAB>>&   a_Bcoef,
+               const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_BcoefIrreg);
+
+  /*!
+    @brief Get the Helmholtz A-coefficient on cell centers
+    @return m_Acoef
+  */
+  const RefCountedPtr<LevelData<MFCellFAB>>&
+  getAcoef();
+
+  /*!
+    @brief Get the Helmholtz B-coefficient on faces
+    @return m_Bcoef
+  */
+  const RefCountedPtr<LevelData<MFFluxFAB>>&
+  getBcoef();
+
+  /*!
+    @brief Get the Helmholtz B-coefficient on the EB
+    @return m_Bcoef
+  */
+  const RefCountedPtr<LevelData<MFBaseIVFAB>>&
+  getBcoefIrreg();
+
+  /*!
     @brief Set the jump boundary condition
   */
   void
@@ -583,6 +615,21 @@ protected:
     @brief Coarsener
   */
   MFCoarAve m_coarAve;
+
+  /*!
+    @brief Helmholtz A-coefficeint
+  */
+  RefCountedPtr<LevelData<MFCellFAB>> m_Acoef;
+
+  /*!
+    @brief Helmholtz B-coefficeint
+  */
+  RefCountedPtr<LevelData<MFFluxFAB>> m_Bcoef;
+
+  /*!
+    @brief Helmholtz B-coefficeint on EB
+  */
+  RefCountedPtr<LevelData<MFBaseIVFAB>> m_BcoefIrreg;
 
   /*!
     @brief Multifluid operator or not. 

@@ -63,22 +63,18 @@ public:
   /*!
     @brief Define function
     @param[in] a_eblg   Level grids
-    @param[in] a_Bcoef  B-coefficient in the Helmholtz equation
     @param[in] a_probLo Lower-left corner of computational domain
     @param[in] a_dx     Grid resolution
     @note This sets the internals for the BC object. This is called by EBHelmholtzOp when it defines stencils. 
   */
   virtual void
-  define(const Location::Cell                       a_dataLocation,
-         const EBLevelGrid&                         a_eblg,
-         const RefCountedPtr<LevelData<EBFluxFAB>>& a_Bcoef,
-         const RealVect&                            a_probLo,
-         const Real                                 a_dx);
+  define(const Location::Cell a_dataLocation, const EBLevelGrid& a_eblg, const RealVect& a_probLo, const Real a_dx);
 
   /*!
     @brief Get face flux. This is for regular cells. 
     @param[inout] a_faceFlux       Face-centered flux. 
     @param[in]    a_phi            Cell-centered data
+    @param[in]    a_Bcoef          Face-centered B-coefficient
     @param[in]    a_dir            Coordinate direction
     @param[in]    a_side           High or low side
     @param[in]    a_dit            Data index
@@ -88,6 +84,7 @@ public:
   virtual void
   getFaceFlux(BaseFab<Real>&        a_faceFlux,
               const BaseFab<Real>&  a_phi,
+              const BaseFab<Real>&  a_Bcoef,
               const int&            a_dir,
               const Side::LoHiSide& a_side,
               const DataIndex&      a_dit,
@@ -97,6 +94,7 @@ public:
     @brief Get face flux. This is for irregular cells. 
     @param[in] a_vof            Grid cell
     @param[in] a_phi            Cell-centered data
+    @param[in] a_Bcoef          Face-centered B-coefficient
     @param[in] a_dir            Coordinate direction
     @param[in] a_side           High or low side
     @param[in] a_dit            Data index
@@ -105,6 +103,7 @@ public:
   virtual Real
   getFaceFlux(const VolIndex&       a_vof,
               const EBCellFAB&      a_phi,
+              const EBFaceFAB&      a_Bcoef,
               const int&            a_dir,
               const Side::LoHiSide& a_side,
               const DataIndex&      a_dit,
@@ -140,11 +139,6 @@ protected:
     @brief Level grid
   */
   EBLevelGrid m_eblg;
-
-  /*!
-    @brief B-coefficent. 
-  */
-  RefCountedPtr<LevelData<EBFluxFAB>> m_Bcoef;
 
   /*!
     @brief Returns the cell-centered position at the boundary. 

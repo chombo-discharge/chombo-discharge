@@ -393,6 +393,53 @@ FieldSolverMultigrid::setupSolver()
 }
 
 void
+FieldSolverMultigrid::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                                              const MFAMRFluxData& a_permittivityFace,
+                                              const MFAMRIVData&   a_permittivityEB)
+{
+  CH_TIME("FieldSolverMultigrid::setSolverPermittivities()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverMultigrid::setSolverPermittivities()" << endl;
+  }
+
+  if (!m_isSolverSetup) {
+    MayDay::Error("FieldSolverMultigrid::setSolverPermittivities -- must set up solver first!");
+  }
+
+  // Get the AMR operators and update the coefficients.
+  Vector<AMRLevelOp<LevelData<MFCellFAB>>*>& operatorsAMR = m_multigridSolver.getAMROperators();
+
+  CH_assert(operatorsAMR.size() == 1 + m_amr->getFinestLevel());
+
+  // Set coefficients for the AMR levels.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    CH_assert(!(operatorsAMR[lvl] == nullptr));
+
+    MFHelmholtzOp& op = static_cast<MFHelmholtzOp&>(*operatorsAMR[lvl]);
+
+    op.setAcoAndBco(a_permittivityCell[lvl], a_permittivityFace[lvl], a_permittivityEB[lvl]);
+  }
+
+  // Get the deeper multigrid levels and coarsen onto that data as well. Strictly speaking, we don't
+  // have to do this but it facilitates multigrid convergence and is therefore good practice. The operator
+  // factory has routines for the coefficients that belong to the multigrid levels. The factory does not
+  // have access to the operator, so we fetch those using AMRMultiGrid and call setAcoAndBco from there.
+  // access to the operator.
+  m_helmholtzOpFactory->coarsenCoefficientsMG();
+  Vector<Vector<MGLevelOp<LevelData<MFCellFAB>>*>> operatorsMG = m_multigridSolver.getOperatorsMG();
+
+  for (int amrLevel = 0; amrLevel < operatorsMG.size(); amrLevel++) {
+    for (int mgLevel = 0; mgLevel < operatorsMG[amrLevel].size(); mgLevel++) {
+      CH_assert(!(operatorsMG[amrLevel][mgLevel] == nullptr));
+
+      MFHelmholtzOp& op = static_cast<MFHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
+
+      op.setAcoAndBco(op.getAcoef(), op.getBcoef(), op.getBcoefIrreg());
+    }
+  }
+}
+
+void
 FieldSolverMultigrid::setPermittivities()
 {
   CH_TIME("FieldSolverMultigrid::setPermittivities()");
