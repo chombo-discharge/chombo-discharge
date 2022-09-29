@@ -19,8 +19,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt install doxygen
-#          sudo apt install graphviz
-#          sudo apt install texlive
+          sudo apt install graphviz
+          sudo apt install texlive
 #          sudo apt install texlive-latex-extra
 #          sudo apt install latexmk
 #          python3 -m pip install sphinx sphinx_rtd_theme sphinxcontrib-bibtex
