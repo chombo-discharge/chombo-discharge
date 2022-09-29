@@ -4,7 +4,7 @@ Driver
 ======
 
 The ``Driver`` class runs ``chombo-discharge`` simulations.
-The primary role of the ``Driver`` class is to coordinate the simulation advance (i.e. ``TimeStepper`` integration) with I/O and regrid functionality. 
+The primary purpose of the ``Driver`` class is to coordinate the simulation advance (i.e. ``TimeStepper`` integration) together with I/O and regrid functionality. 
 The constructor for this class is
 
 .. code-block:: c++

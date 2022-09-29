@@ -4,7 +4,7 @@
 To build the doxygen documentation locally, run
 
 ```
-doxygen Docs/Doxyfile
+doxygen Docs/doxygen.conf
 ```
 
 from $DISCHARGE_HOME.

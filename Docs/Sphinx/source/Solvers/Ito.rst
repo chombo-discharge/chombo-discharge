@@ -37,6 +37,13 @@ This class can advance a set of particles (see :ref:`Chap:ItoParticle`) with the
 * Representing ''source particles'' (``WhichContainer::Source``).
 * Particles that live *inside* the EB (``WhichContainer::Covered``).
 
+The particles are available from the solver through the function
+
+.. code-block::
+
+   ParticleContainer<ItoParticle>&
+   ItoSolver::getParticles(const WhichContainer a_whichParticles);
+
 For the ``ItoSolver`` the particle velocity is computed as
 
 .. math::
@@ -272,7 +279,22 @@ The above will compute :math:`v\left(\mathbf{X}\right)` and set the velocity as 
 Particle intersections
 ----------------------
 
-TODO.
+It will happen that particles occasionally hit the embedded boundary or leave through the domain sides.
+In this case one might want to keep the particles in separate data holders rather than discard them.
+``ItoSolver`` supplies the following routine for transferring the particles to the containers that hold the EB and domain particles:
+
+.. code-block:: c++
+
+   void
+   ItoSolver::intersectParticles(const EbIntersection a_ebIntersection, const bool a_deleteParticles);
+
+Here, ``EbIntersection`` is a just an enum for putting logic into how the intersection is computed.
+Valid options are ``EbIntersection::Bisection`` and ``EbIntersection::Raycast``.
+These algorithms are discussed in :ref:`Chap:ParticleEB`.
+The flag ``a_deleteParticles`` specifies if the original particles should be deleted when populating the other particle containers.
+
+After calling ``intersectParticles``, the particles that crossed the EB or domain walls are available through the ``getParticles`` routine, see :ref:`Chap:ItoSolver`. 
+   
 
 Computing time steps
 --------------------
@@ -324,18 +346,80 @@ The function for splitting and merging the particles is
 Calling this function will merge/split the particles such that their computational weights differ by at most one.   
 ``ItoSolver`` uses the kD-node implementation from :ref:`Chap:SuperParticles` and partitioners for splitting the particles into two subsets with equal weights.
 
-
 .. _Chap:ItoIO:
 
 I/O
 ---
 
-TODO.
+.. _Chap:ItoPlot:
+
+Plot files
+__________
+
+``ItoSolver`` can output the following variables to plot files:
+
+* :math:`\phi`, i.e. the deposited particle weights (``ItoSolver.plt_vars = phi``)
+* :math:`\mathbf{v}`, the advection field (``ItoSolver.plt_vars = vel``).
+* :math:`D`, the diffusion coefficient  (``ItoSolver.plt_vars = dco``).
+
+It can also plot the corresponding particle data holders:
+
+* Ito particles (``ItoSolver.plt_vars = part``).
+* EB particles  (``ItoSolver.plt_vars = eb_part``).
+* Domain particles  (``ItoSolver.plt_vars = domain_part``).
+* Source particles  (``ItoSolver.plt_vars = source_part``).
+
+.. _Chap:ItoCheck:  
+
+Checkpoint files
+________________
+
+When writing checkpoint files, ``ItoSolver`` can either
+
+* Add the particles to the HDF5 file,
+* Checkpoint the corresponding fluid data.
+
+The user specifies this through the input script variable ``ItoSolver.checkpointing``, see :ref:`Chap:ItoInput`.
+If checkpointing fluid data then a subsequent restart will generate a new set of particles.
+
+.. warning::
+
+   If writing particle checkpoint files, simulation restarts must also *read* as if the checkpoint file contains particles. 
 
 .. _Chap:ItoInput:
 
 Input options
 -------------
+
+I/O
+___
+
+Plot variables are specified using ``ItoSolver.plt_vars``, see :ref:`Chap:ItoPlot`).
+If adding the various particle container data holders to the plot file, the deposition method for those is specified using ``ItoSolver.plot_deposition``.
+
+If using fluid checkpointing for simulation restarts, the flag ``ItoSolver.ppc_restart`` determines the maximum number of particles that will initialized in each grid cell during a restart. 
+
+
+Particle-mesh
+_____________
+
+To specify the mobility interpolation, use ``ItoSolver.mobility_interp``.
+Valid options are ``direct`` and ``velocity``, see :ref:`Chap:ItoInterpolation`.
+
+Deposition and coarse-fine deposition (see :ref:`Chap:ParticleDeposition`) is controlled using the flags
+
+* ``ItoSolver.deposition`` for the base deposition scheme.
+  Valid options are ``ngp``, ``cic``, and ``tsc``.
+* ``ItoSolver.deposition_cf`` for the coarse-fine deposition strategy.
+  Valid options are ``interp``, ``halo``, or ``halo_ngp``.
+
+To modify the deposition scheme in cut-cells, one can enforce NGP interpolation and deposition through
+
+* ``ItoSolver.irr_ngp_deposition`` for enforcing NGP deposition. Valid options are ``true`` or ``false``.
+* ``ItoSolver.irr_ngp_interp`` for enforcing NGP interpolation. Valid options are ``true`` or ``false``.  
+
+Checkpoint-restart
+__________________
 
 Available input options for the ``ItoSolver`` are listed below:
 
