@@ -143,6 +143,12 @@ protected:
   LevelData<BaseIVFAB<Real>> m_coarsenedFineIrregData;
 
   /*!
+    @brief Iterator for valid cut-cells. 
+    @details This iterator runs over the coarse cells on the coarsened fine layout. 
+  */
+  LayoutData<VoFIterator> m_irregVoFs;
+
+  /*!
     @brief Piecewise constant interpolation of an EBCellFAB 
     @param[out] a_fineData  Piecewise constant interpolation of the coarse data.
     @param[in]  a_coarData  Coarse data
