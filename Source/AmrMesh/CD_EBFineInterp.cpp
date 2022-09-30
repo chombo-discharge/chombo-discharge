@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <BaseIVFactory.H>
 
 // Our includes
 #include <CD_EBFineInterp.H>
@@ -60,6 +61,22 @@ EBFineInterp::define(const EBLevelGrid&        a_eblgFine,
 
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
+
+  // Define the irreg data holder.
+  LayoutData<IntVectSet> irregCells;
+
+  for (DataIterator dit(m_coarsenedFineGrids); dit.ok(); ++dit) {
+    const Box&     cellBox = m_coarsenedFineGrids[dit()];
+    const EBISBox& ebisbox = m_coarsenedFineEBISL[dit()];
+
+    irregCells[dit()] = ebisbox.getIrregIVS(cellBox);
+  }
+
+  // Should not need ghost cells for this one (because the irreg regrids don't use slopes but keeps it local).
+  m_coarsenedFineIrregData.define(m_coarsenedFineGrids,
+                                  1,
+                                  IntVect::Zero,
+                                  BaseIVFactory<Real>(m_coarsenedFineEBISL, irregCells));
 }
 
 void
@@ -74,7 +91,6 @@ EBFineInterp::regridNoSlopes(LevelData<EBCellFAB>&       a_fineData,
   a_coarData.copyTo(a_variables, m_coarsenedFineData, a_variables);
 
   for (DataIterator dit(m_coarsenedFineGrids); dit.ok(); ++dit) {
-
     this->regridNoSlopes(a_fineData[dit()], m_coarsenedFineData[dit()], dit(), a_variables);
   }
 }
@@ -146,6 +162,26 @@ EBFineInterp::regridMinMod(LevelData<EBCellFAB>&       a_fineData,
   CH_TIME("EBFineInterp::regridMinMod");
 
   EBPWLFineInterp::interpolate(a_fineData, a_coarData, a_variables);
+}
+
+void
+EBFineInterp::regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
+                                 const LevelData<BaseIVFAB<Real>>& a_coarData,
+                                 const Interval&                   a_variables)
+{
+  CH_TIME("EBFineInterp::regridConservative");
+
+  MayDay::Abort("EBFineInterp::regridConservative -- not implemented");
+}
+
+void
+EBFineInterp::regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
+                               const LevelData<BaseIVFAB<Real>>& a_coarData,
+                               const Interval&                   a_variables)
+{
+  CH_TIME("EBFineInterp::regridArithmetic");
+
+  MayDay::Abort("EBFineInterp::regridArithmetic -- not implemented");
 }
 
 #include <CD_NamespaceFooter.H>

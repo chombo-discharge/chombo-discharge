@@ -364,7 +364,6 @@ public:
   getPlotVariableNames() const noexcept;
 
 protected:
-
   /*!
     @brief Realm where this solver is registered. 
   */

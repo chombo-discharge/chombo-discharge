@@ -104,6 +104,28 @@ public:
   void
   regridMinMod(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData, const Interval& a_variables);
 
+  /*!
+    @brief Regrid irregular data using conservative interpolation
+    @param[out] a_fineData  Piecewise interpolation of coarse data.
+    @param[in]  a_coarData  Coarse data
+    @param[in]  a_variables Variables to interpolate. 
+  */
+  void
+  regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
+                     const LevelData<BaseIVFAB<Real>>& a_coarData,
+                     const Interval&                   a_variables);
+
+  /*!
+    @brief Regrid irregular data using arithmetic interpolation
+    @param[out] a_fineData  Piecewise interpolation of coarse data.
+    @param[in]  a_coarData  Coarse data
+    @param[in]  a_variables Variables to interpolate. 
+  */
+  void
+  regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
+                   const LevelData<BaseIVFAB<Real>>& a_coarData,
+                   const Interval&                   a_variables);
+
 protected:
   /*!
     @brief Fine grid.
@@ -114,6 +136,11 @@ protected:
     @brief Coarse grid
   */
   EBLevelGrid m_eblgCoar;
+
+  /*!
+    @brief Data holder for holding data on the coarsened fine grids. 
+  */
+  LevelData<BaseIVFAB<Real>> m_coarsenedFineIrregData;
 
   /*!
     @brief Piecewise constant interpolation of an EBCellFAB 

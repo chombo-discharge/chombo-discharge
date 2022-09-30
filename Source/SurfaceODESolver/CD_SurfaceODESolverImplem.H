@@ -109,7 +109,7 @@ SurfaceODESolver<N>::parseRegrid() noexcept
   std::string str;
   pp.get("regrid", str);
 
-  if(str == "conservative") {
+  if (str == "conservative") {
     m_conservativeRegrid = true;
   }
   else if (str == "arithmetic") {
@@ -538,7 +538,11 @@ SurfaceODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const 
     pout() << m_name + "::registerOperators" << endl;
   }
 
-  MayDay::Abort("SurfaceODESolver::regrid -- not implemented");
+  this->allocate();
+
+  m_amr->interpToNewGrids(m_phi, m_cache, m_phase, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_conservativeRegrid);
+
+  m_amr->deallocate(m_cache);
 }
 
 template <size_t N>
