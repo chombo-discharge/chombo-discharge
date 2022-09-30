@@ -106,7 +106,19 @@ SurfaceODESolver<N>::parseRegrid() noexcept
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("conservative_regrid", m_conservativeRegrid);
+  std::string str;
+  pp.get("regrid", str);
+
+  if(str == "conservative") {
+    m_conservativeRegrid = true;
+  }
+  else if (str == "arithmetic") {
+    m_conservativeRegrid = false;
+  }
+  else {
+    const std::string err = "SurfaceODESolver<N>::parseRegrid() - argument '" + str + "' not recognized";
+    MayDay::Error(err.c_str());
+  }
 }
 
 template <size_t N>
@@ -673,42 +685,44 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
 
   const int numPlotVars = this->getNumberOfPlotVariables();
 
-  const Vector<std::string> plotVarNames = this->getPlotVariableNames();
+  if (numPlotVars > 0) {
+    const Vector<std::string> plotVarNames = this->getPlotVariableNames();
 
-  CH_assert(plotVarNames.size() == numPlotVars);
-  CH_assert(!(m_amr.isNull()));
+    CH_assert(plotVarNames.size() == numPlotVars);
+    CH_assert(!(m_amr.isNull()));
 
-  EBAMRCellData output;
-  m_amr->allocate(output, m_realm, m_phase, numPlotVars);
+    EBAMRCellData output;
+    m_amr->allocate(output, m_realm, m_phase, numPlotVars);
 
-  int icomp = 0;
-  this->writePlotData(output, icomp);
+    int icomp = 0;
+    this->writePlotData(output, icomp);
 
-  // Filename
-  char filename[100];
-  sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_step, SpaceDim);
-  std::string fname(filename);
+    // Filename
+    char filename[100];
+    sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_step, SpaceDim);
+    std::string fname(filename);
 
-  // Alias, becuase Chombo is a bit anal about smart pointers.
-  Vector<LevelData<EBCellFAB>*> outputPtr;
-  m_amr->alias(outputPtr, output);
+    // Alias, becuase Chombo is a bit anal about smart pointers.
+    Vector<LevelData<EBCellFAB>*> outputPtr;
+    m_amr->alias(outputPtr, output);
 
 #ifdef CH_USE_HDF5
-  constexpr int numPlotGhost = 0;
+    constexpr int numPlotGhost = 0;
 
-  DischargeIO::writeEBHDF5(fname,
-                           plotVarNames,
-                           m_amr->getGrids(m_realm),
-                           outputPtr,
-                           m_amr->getDomains(),
-                           m_amr->getDx(),
-                           m_amr->getRefinementRatios(),
-                           m_dt,
-                           m_time,
-                           m_amr->getProbLo(),
-                           m_amr->getFinestLevel() + 1,
-                           numPlotGhost);
+    DischargeIO::writeEBHDF5(fname,
+                             plotVarNames,
+                             m_amr->getGrids(m_realm),
+                             outputPtr,
+                             m_amr->getDomains(),
+                             m_amr->getDx(),
+                             m_amr->getRefinementRatios(),
+                             m_dt,
+                             m_time,
+                             m_amr->getProbLo(),
+                             m_amr->getFinestLevel() + 1,
+                             numPlotGhost);
 #endif
+  }
 }
 
 template <size_t N>
