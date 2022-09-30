@@ -13,7 +13,6 @@
 #define CD_SurfaceODESolver_H
 
 // Our includes
-#include <CD_ComputationalGeometry.H>
 #include <CD_AmrMesh.H>
 #include <CD_NamespaceHeader.H>
 
@@ -25,20 +24,18 @@ template <size_t N = 1>
 class SurfaceODESolver
 {
 public:
-
   /*!
-    @brief Default constructor. Must subsequently set AmrMesh and ComputationalGeometry
+    @brief Default constructor. Must subsequently set AmrMesh.
     @details Sets realm to primal and phase to phase::gas.
   */
   SurfaceODESolver();
 
   /*!
     @brief Full constructor. 
-    @details Sets AmrMesh and the computational geometry. Sets realm to primal and phase to phase::gas.
+    @details Sets AmrMesh to input and sets realm to primal and phase to phase::gas.
     @param[in] a_amr      AmrMesh reference
-    @param[in] a_compGeom Computational geometry
   */
-  SurfaceODESolver(const RefCountedPtr<AmrMesh>& a_amr, const RefCountedPtr<ComputationalGeometry>& a_compGeom);
+  SurfaceODESolver(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Disallowed copy constructor
@@ -48,7 +45,7 @@ public:
   /*!
     @brief Disallowed move constructor
   */
-  SurfaceODESolver(const SurfaceODESOlver&&) = delete;  
+  SurfaceODESolver(const SurfaceODESOlver&&) = delete;
 
   /*!
     @brief Destructor (does nothing).
@@ -77,7 +74,7 @@ public:
     @brief Parse runtime solver options
   */
   virtual void
-  parseRuntimeOptions() noexcept;    
+  parseRuntimeOptions() noexcept;
 
   /*!
     @brief Set the amr object
@@ -85,13 +82,6 @@ public:
   */
   virtual void
   setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh) noexcept;
-
-  /*!
-    @brief Set the computational geometry
-    @param[in] a_compGeom The computational geometry.
-  */
-  virtual void
-  setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_compGeom) noexcept;  
 
   /*!
     @brief Set the realm.
@@ -105,21 +95,28 @@ public:
     @param[in] a_name Solver name
   */
   virtual void
-  setName(const std::string a_name) noexcept;  
+  setName(const std::string a_name) noexcept;
 
   /*!
     @brief Get the realm where the solver is registered.
     @return Returns m_realm
   */
-  const std::string
-  getRealm() const noexcept;  
+  std::string
+  getRealm() const noexcept;
 
   /*!
     @brief Set phase.
     @param[in] a_phase Phase.
   */
   virtual void
-  setPhase(phase::which_phase a_phase) noexcept;
+  setPhase(const phase::which_phase a_phase) noexcept;
+
+  /*!
+    @brief Get phase
+    @return m_phase
+  */
+  virtual phase::which_phase
+  getPhase() const noexcept;
 
   /*!
     @brief Set verbosity.
@@ -133,7 +130,7 @@ public:
     @return m_verbosity
   */
   virtual void
-  getVerbosity() const noexcept;  
+  getVerbosity() const noexcept;
 
   /*!
     @brief Set the time. 
@@ -164,14 +161,7 @@ public:
     @return m_dt
   */
   virtual Real
-  getTimeStep() const noexcept;    
-
-  /*!
-    @brief Get phase
-    @return m_phase
-  */
-  virtual phase::which_phase
-  getPhase() const noexcept;
+  getDt() const noexcept;
 
   /*!
     @brief Convenience function for setting m_phi
@@ -191,7 +181,7 @@ public:
     @brief Convenience function for setting m_phi
     @param[in] a_phi Values
     @note a_phi must have N components. 
-  */  
+  */
   virtual void
   setPhi(const EBAMRIVData& a_phi);
 
@@ -214,7 +204,7 @@ public:
     @param[in] a_rhs Values for all components
   */
   virtual void
-  setRHS(const Real a_rhs);    
+  setRHS(const Real a_rhs);
 
   /*!
     @brief Convenience function for setting m_rhs
@@ -227,9 +217,9 @@ public:
     @brief Convenience function for setting m_rhs
     @param[in] a_rhs Values per cell and component. 
     @note a_rhs must have N components. 
-  */  
+  */
   virtual void
-  setRHS(const EBAMRIVData& a_rhs);  
+  setRHS(const EBAMRIVData& a_rhs);
 
   /*!
     @brief Get internal state
@@ -243,26 +233,26 @@ public:
     @return Returns m_rhs
   */
   virtual const EBAMRIVData&
-  getRHS() const noexcept;    
+  getRHS() const noexcept;
 
   /*!
     @brief Allocate internal storage for this class. 
     @details Allocates m_phi and m_rhs
   */
   virtual void
-  allocateInternals() noexcept;
+  allocate() noexcept;
 
   /*!
     @brief Deallocate internal storage.
   */
   virtual void
-  deallocateInternals() noexcept;
+  deallocate() noexcept;
 
   /*!
     @brief Register operators. 
   */
   virtual void
-  registerOperators() noexcept;  
+  registerOperators() noexcept;
 
   /*!
     @brief Pre-regrid function. 
@@ -271,7 +261,7 @@ public:
     @param[in] a_oldFinestLevel Finest level before the regrid operation. 
   */
   virtual void
-  preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept;  
+  preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept;
 
   /*!
     @brief Regrid function.
@@ -287,15 +277,17 @@ public:
     @brief Reset m_phi on electrode cells. 
     @details This will set a_data to the specified value (in electrode cells)
     @param[in] a_val  Value
+    @note Does not include ghost cells. 
   */
   virtual void
-  resetElectrodes(const Real a_value) noexcept;  
+  resetElectrodes(const Real a_value) noexcept;
 
   /*!
     @brief Reset the input data holder on electrode cells. 
     @details This will set a_data to the specified value (in electrode cells)
     @param[in] a_data Input data to be set.
     @param[in] a_val  Value
+    @note Does not include ghost cells. 
   */
   virtual void
   resetElectrodes(EBAMRIVData& a_phi, const Real a_value) const noexcept;
@@ -304,18 +296,20 @@ public:
     @brief Reset m_phi on dielectric cells. 
     @details This will set a_data to the specified value (in dielectric cells)
     @param[in] a_val  Value
+    @note Does not include ghost cells. 
   */
   virtual void
-  resetDielectrics(const Real a_value) noexcept;  
+  resetDielectrics(const Real a_value) noexcept;
 
   /*!
     @brief Reset the input data holder on dielectric cells. 
     @details This will set a_data to the specified value (in dielectric cells)
     @param[in] a_data Input data to be set.
     @param[in] a_val  Value
+    @note Does not include ghost cells. 
   */
   virtual void
-  resetDielectrics(EBAMRIVData& a_phi, const Real a_value) const noexcept;  
+  resetDielectrics(EBAMRIVData& a_phi, const Real a_value) const noexcept;
 
 #ifdef CH_USE_HDF5
   /*!
@@ -324,17 +318,26 @@ public:
     @param[in]   a_level Grid level
   */
   virtual void
-  writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
+  writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const noexcept;
 #endif
 
 #ifdef CH_USE_HDF5
   /*!
     @brief Read checkpoint data from HDF5 file. 
     @param[in] a_handle HDF5 handle.
-    @param[in] const int a_level Grid level
+    @param[in] a_level  Grid level
   */
   virtual void
-  readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
+  readCheckpointLevel(HDF5Handle& a_handle, const int a_level) noexcept;
+#endif
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Write a plot file
+    @details The name of the plot file is m_name.stepXXXXXXX.DIM.hdf5
+  */
+  virtual void
+  writePlotFile() const noexcept;
 #endif
 
   /*!
@@ -345,24 +348,22 @@ public:
     @note This routine writes m_phi and m_rhs into a_ouput. 
   */
   virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_comp);
+  writePlotData(EBAMRCellData& a_output, int& a_comp) const noexcept;
 
   /*!
-    @brief Number of variables to be plotted. 
-    @details Returns 2 - the surface charge and the incoming flux. 
+    @brief Get number of variables to be plotted. 
   */
   virtual int
-  getNumberOfPlotVariables();
+  getNumberOfPlotVariables() const noexcept;
 
   /*!
     @brief Get output plot names
     @return Return a list of plot variable names. 
   */
   virtual Vector<std::string>
-  getPlotVariableNames() const;
+  getPlotVariableNames() const noexcept;
 
 protected:
-
   /*!
     @brief Realm where this solver is registered. 
   */
@@ -396,7 +397,7 @@ protected:
   /*!
     @brief Plot rhs or not
   */
-  bool m_plotRHS;  
+  bool m_plotRHS;
 
   /*!
     @brief Index spaces
@@ -404,14 +405,20 @@ protected:
   RefCountedPtr<MultiFluidIndexSpace> m_mfis;
 
   /*!
-    @brief Computational geometry
-  */
-  RefCountedPtr<ComputationalGeometry> m_compGeom;
-
-  /*!
     @brief AMR; needed for grid stuff
   */
   RefCountedPtr<AmrMesh> m_amr;
+
+  /*!
+    @brief Cut-cells that are electrode cells. This does not include ghost cells. 
+
+  */
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_electrodeVoFs;
+
+  /*!
+    @brief Cut-cells that are also dielectric cells. This does not include ghost cells. 
+  */
+  Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_dielectricVoFs;
 
   /*!
     @brief State. Stored on cut-cells. 
@@ -436,7 +443,7 @@ protected:
   /*!
     @brief Time step
   */
-  int m_timeStep;
+  int m_step;
 
   /*!
     @brief Current time
@@ -451,17 +458,26 @@ protected:
   /*!
     @brief Parse verbosity
   */
-  void parseVerbosity();    
+  void
+  parseVerbosity();
 
   /*!
     @brief Parse regrid method
   */
-  void parseRegrid();  
+  void
+  parseRegrid();
 
   /*!
     @brief Parse plot variables
   */
-  void parsePlotVariables();
+  void
+  parsePlotVariables();
+
+  /*!
+    @brief Define iterators for iterating over cell subsets
+  */
+  void
+  defineVoFIterators() noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
