@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_SurfaceODESolver.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 template <size_t N>
@@ -54,7 +55,7 @@ SurfaceODESolver<N>::~SurfaceODESolver()
 
 template <size_t N>
 void
-SurfaceODESolver<N>::parseOptions()
+SurfaceODESolver<N>::parseOptions() noexcept
 {
   CH_TIME("SurfaceODESolver::parseOptions");
   if (m_verbosity > 5) {
@@ -122,7 +123,9 @@ SurfaceODESolver<N>::parsePlotVariables() noexcept
 
   ParmParse pp(m_className.c_str());
 
-  if (pp.countval("plt_vars") > 0) {
+  const int num = pp.countval("plt_vars");
+
+  if (num > 0) {
     Vector<std::string> str(num);
     pp.getarr("plt_vars", str, 0, num);
 
@@ -139,7 +142,7 @@ SurfaceODESolver<N>::parsePlotVariables() noexcept
 
 template <size_t N>
 void
-SurfaceODESolver<N>::setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh) noexcept
+SurfaceODESolver<N>::setAmr(const RefCountedPtr<AmrMesh>& a_amr) noexcept
 {
   CH_TIME("SurfaceODESolver::setAmr");
   if (m_verbosity > 5) {
@@ -172,9 +175,10 @@ SurfaceODESolver<N>::setName(const std::string a_name) noexcept
     pout() << "SurfaceODESolver::setName" << endl;
   }
 
-  m_realm = a_realm;
+  m_realm = a_name;
 }
 
+template <size_t N>
 std::string
 SurfaceODESolver<N>::getRealm() const noexcept
 {
@@ -223,7 +227,7 @@ SurfaceODESolver<N>::setVerbosity(const int a_verbosity) noexcept
 }
 
 template <size_t N>
-void
+int
 SurfaceODESolver<N>::getVerbosity() const noexcept
 {
   CH_TIME("SurfaceODESolver::getVerbosity");
@@ -306,7 +310,7 @@ SurfaceODESolver<N>::setPhi(const std::array<Real, N>& a_phi)
   }
 
   for (int i = 0; i < N; i++) {
-    DataOps::setValue(m_phi, std::get<i>(a_phi));
+    DataOps::setValue(m_phi, a_phi[i]);
   }
 }
 
@@ -368,7 +372,7 @@ SurfaceODESolver<N>::setRHS(const std::array<Real, N>& a_rhs)
   }
 
   for (int i = 0; i < N; i++) {
-    DataOps::setValue(m_rhs, std::get<i>(a_rhs));
+    DataOps::setValue(m_rhs, a_rhs[i]);
   }
 }
 
@@ -534,7 +538,7 @@ SurfaceODESolver<N>::resetElectrodes(const Real a_value) noexcept
     pout() << m_name + "::resetElectrodes" << endl;
   }
 
-  this->resetElectrode(m_phi, a_value);
+  this->resetElectrodes(m_phi, a_value);
 }
 
 template <size_t N>
@@ -607,7 +611,7 @@ SurfaceODESolver<N>::resetDielectrics(EBAMRIVData& a_phi, const Real a_value) co
 
 template <size_t N>
 void
-SurfaceODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const
+SurfaceODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const noexcept
 {
   CH_TIME("SurfaceODESolver::writeCheckpointLevel");
   if (m_verbosity > 5) {
@@ -626,7 +630,7 @@ SurfaceODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_leve
   DataOps::setValue(*scratch[a_level], 0.0);
   DataOps::incr(*scratch[a_level], *m_phi[a_level], 1.0);
 
-  write(a_handle, *scratch[lvl], id);
+  write(a_handle, *scratch[a_level], id);
 }
 #endif
 
@@ -634,7 +638,7 @@ SurfaceODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_leve
 
 template <size_t N>
 void
-SurfaceODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
+SurfaceODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) noexcept
 {
   CH_TIME("SurfaceODESolver::readCheckpointLevel");
   if (m_verbosity > 5) {
@@ -651,7 +655,7 @@ SurfaceODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level
 
   m_amr->allocate(scratch, m_realm, m_phase, N);
 
-  read(a_handle, *scratch[lvl], id);
+  read<EBCellFAB>(a_handle, *scratch[a_level], id, m_amr->getGrids(m_realm)[a_level], Interval(0, N - 1), false);
 
   DataOps::setValue(*m_phi[a_level], 0.0);
   DataOps::incr(*m_phi[a_level], *scratch[a_level], 1.0);
@@ -678,11 +682,11 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
   m_amr->allocate(output, m_realm, m_phase, numPlotVars);
 
   int icomp = 0;
-  this->writePlotData(output);
+  this->writePlotData(output, icomp);
 
   // Filename
   char filename[100];
-  sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
+  sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_step, SpaceDim);
   std::string fname(filename);
 
   // Alias, becuase Chombo is a bit anal about smart pointers.

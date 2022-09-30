@@ -40,12 +40,12 @@ public:
   /*!
     @brief Disallowed copy constructor
   */
-  SurfaceODESolver(const SurfaceODESOlver&) = delete;
+  SurfaceODESolver(const SurfaceODESolver&) = delete;
 
   /*!
     @brief Disallowed move constructor
   */
-  SurfaceODESolver(const SurfaceODESOlver&&) = delete;
+  SurfaceODESolver(const SurfaceODESolver&&) = delete;
 
   /*!
     @brief Destructor (does nothing).
@@ -129,7 +129,7 @@ public:
     @brief Get verbosity
     @return m_verbosity
   */
-  virtual void
+  virtual int
   getVerbosity() const noexcept;
 
   /*!
@@ -459,19 +459,19 @@ protected:
     @brief Parse verbosity
   */
   void
-  parseVerbosity();
+  parseVerbosity() noexcept;
 
   /*!
     @brief Parse regrid method
   */
   void
-  parseRegrid();
+  parseRegrid() noexcept;
 
   /*!
     @brief Parse plot variables
   */
   void
-  parsePlotVariables();
+  parsePlotVariables() noexcept;
 
   /*!
     @brief Define iterators for iterating over cell subsets
