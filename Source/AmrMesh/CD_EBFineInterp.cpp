@@ -63,13 +63,16 @@ EBFineInterp::define(const EBLevelGrid&        a_eblgFine,
   m_eblgCoar = a_eblgCoar;
 
   // Define the irreg data holder.
-  LayoutData<IntVectSet> irregCells;
+  LayoutData<IntVectSet> irregCells(m_coarsenedFineGrids);
 
+  m_irregVoFs.define(m_coarsenedFineGrids);
   for (DataIterator dit(m_coarsenedFineGrids); dit.ok(); ++dit) {
     const Box&     cellBox = m_coarsenedFineGrids[dit()];
     const EBISBox& ebisbox = m_coarsenedFineEBISL[dit()];
 
     irregCells[dit()] = ebisbox.getIrregIVS(cellBox);
+
+    m_irregVoFs[dit()].define(irregCells[dit()], ebisbox.getEBGraph());
   }
 
   // Should not need ghost cells for this one (because the irreg regrids don't use slopes but keeps it local).
@@ -77,8 +80,6 @@ EBFineInterp::define(const EBLevelGrid&        a_eblgFine,
                                   1,
                                   IntVect::Zero,
                                   BaseIVFactory<Real>(m_coarsenedFineEBISL, irregCells));
-
-  MayDay::Abort("EBFineInterp::define -- vofiterators have not been defined!");
 }
 
 void
@@ -212,21 +213,19 @@ EBFineInterp::regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
           fineArea += fineEBISBox.bndryArea(refinedVoFs[i]);
         }
 
-        Real coarFineArea = 0.0;
+        Real factor = 0.0;
         if (fineArea > 0.0) {
-          coarFineArea = areaFactor * coarArea / fineArea;
+          factor = areaFactor * coarArea / fineArea;
         }
 
         for (int i = 0; i < refinedVoFs.size(); i++) {
-          fineData(refinedVoFs[i], comp) = coarData(coarVoF, 0) * coarFineArea;
+          fineData(refinedVoFs[i], comp) = coarData(coarVoF, 0) * factor;
         }
       };
 
       BoxLoops::loop(vofit, kernel);
     }
   }
-
-  MayDay::Abort("EBFineInterp::regridConservative -- not implemented");
 }
 
 void
@@ -236,7 +235,44 @@ EBFineInterp::regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
 {
   CH_TIME("EBFineInterp::regridArithmetic");
 
-  MayDay::Abort("EBFineInterp::regridArithmetic -- not implemented");
+  CH_assert(a_fineData.nComp() >= a_variables.size());
+  CH_assert(a_coarData.nComp() >= a_variables.size());
+
+  CH_assert(a_fineData.nComp() > a_variables.end());
+  CH_assert(a_coarData.nComp() > a_variables.end());
+
+  for (int comp = a_variables.begin(); comp <= a_variables.end(); comp++) {
+    a_coarData.copyTo(Interval(comp, comp), m_coarsenedFineIrregData, Interval(0, 0));
+
+    const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+    const DisjointBoxLayout& dblCoar = m_coarsenedFineGrids;
+
+    const EBISLayout& ebislFine = m_eblgFine.getEBISL();
+    const EBISLayout& ebislCoar = m_coarsenedFineEBISL;
+
+    for (DataIterator dit(dblFine); dit.ok(); ++dit) {
+      const Box& fineBox = dblFine[dit()];
+      const Box& coarBox = dblCoar[dit()];
+
+      const EBISBox& fineEBISBox = ebislFine[dit()];
+      const EBISBox& coarEBISBox = ebislCoar[dit()];
+
+      BaseIVFAB<Real>&       fineData = a_fineData[dit()];
+      const BaseIVFAB<Real>& coarData = m_coarsenedFineIrregData[dit()];
+
+      VoFIterator& vofit = m_irregVoFs[dit()];
+
+      auto kernel = [&](const VolIndex& coarVoF) -> void {
+        const Vector<VolIndex>& refinedVoFs = ebislCoar.refine(coarVoF, m_refRat, dit());
+
+        for (int i = 0; i < refinedVoFs.size(); i++) {
+          fineData(refinedVoFs[i], comp) = coarData(coarVoF, 0);
+        }
+      };
+
+      BoxLoops::loop(vofit, kernel);
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>
