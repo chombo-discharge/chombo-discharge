@@ -138,15 +138,20 @@ protected:
   EBLevelGrid m_eblgCoar;
 
   /*!
+    @brief Coarsened fine grids
+  */
+  EBLevelGrid m_eblgCoFi;
+
+  /*!
     @brief Data holder for holding data on the coarsened fine grids. 
   */
-  LevelData<BaseIVFAB<Real>> m_coarsenedFineIrregData;
+  LevelData<BaseIVFAB<Real>> m_irregCoFi;
 
   /*!
     @brief Iterator for valid cut-cells. 
     @details This iterator runs over the coarse cells on the coarsened fine layout. 
   */
-  LayoutData<VoFIterator> m_irregVoFs;
+  LayoutData<VoFIterator> m_coarVoFs;
 
   /*!
     @brief Piecewise constant interpolation of an EBCellFAB 
