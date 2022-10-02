@@ -128,8 +128,6 @@ SigmaSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_ne
 
   this->allocateInternals();
 
-
-  
   DataOps::setValue(m_phi, 0.0);
 
   // These levels have never changed but the ownership might have, so we have to copy in order to ensure that data
@@ -215,18 +213,6 @@ SigmaSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_ne
   }
 
   this->resetCells(m_phi);
-
-#if 1 // Debug
-  EBAMRIVData test1;
-  EBAMRIVData test2;
-  
-  m_amr->allocate(test1, m_realm, phase::gas, 1);
-  m_amr->allocate(test2, m_realm, phase::gas, 1);
-  
-  m_amr->interpToNewGrids(test1, test2, phase::gas, a_lmin, a_oldFinestLevel, a_newFinestLevel, false);
-
-  MayDay::Warning("CD_SigmaSolver.cpp -- debug code in place. roll back to main branch");
-#endif
 }
 
 void
