@@ -62,23 +62,71 @@ EBFineInterp::define(const EBLevelGrid&        a_eblgFine,
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
 
-  coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
-
   // Define the irreg data holder.
-  LayoutData<IntVectSet> irregCells(m_coarsenedFineGrids);
+  LayoutData<IntVectSet> irregFine(m_eblgFine.getDBL());
+  LayoutData<IntVectSet> irregCoar(m_coarsenedFineGrids);
 
-  m_coarVoFs.define(m_eblgCoFi.getDBL());
-  for (DataIterator dit(m_coarsenedFineGrids); dit.ok(); ++dit) {
-    const Box&     cellBox = m_eblgCoFi.getDBL()[dit()];
-    const EBISBox& ebisbox = m_eblgCoFi.getEBISL()[dit()];
+  m_fineVoFs.define(m_eblgFine.getDBL());
 
-    irregCells[dit()] = ebisbox.getIrregIVS(cellBox);
+  for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
+    const Box& fineBox = m_eblgFine.getDBL()[dit()];
+    const Box& coarBox = m_coarsenedFineGrids[dit()];
 
-    m_coarVoFs[dit()].define(irregCells[dit()], ebisbox.getEBGraph());
+    const EBISBox& fineEBISBox = m_eblgFine.getEBISL()[dit()];
+    const EBISBox& coarEBISBox = m_coarsenedFineEBISL[dit()];
+
+    irregFine[dit()] = fineEBISBox.getIrregIVS(fineBox);
+    irregCoar[dit()] = coarEBISBox.getIrregIVS(coarBox);
+
+    m_fineVoFs[dit()].define(irregFine[dit()], fineEBISBox.getEBGraph());
   }
 
   // Should not need ghost cells for this one (because the irreg regrids don't use slopes but keeps it local).
-  m_irregCoFi.define(m_eblgCoFi.getDBL(), 1, IntVect::Zero, BaseIVFactory<Real>(m_eblgCoFi.getEBISL(), irregCells));
+  m_irregCoFi.define(m_coarsenedFineGrids, 1, IntVect::Zero, BaseIVFactory<Real>(m_coarsenedFineEBISL, irregCoar));
+
+  m_conservativeWeights.define(m_eblgFine.getDBL(),
+                               1,
+                               IntVect::Zero,
+                               BaseIVFactory<Real>(m_eblgFine.getEBISL(), irregFine));
+
+  this->defineWeights();
+}
+
+void
+EBFineInterp::defineWeights() noexcept
+{
+  CH_TIME("EBFineInterp::defineWeights");
+
+  const EBISLayout& ebislFine = m_eblgFine.getEBISL();
+  const EBISLayout& ebislCoar = m_coarsenedFineEBISL;
+
+  for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
+    const EBISBox& ebisBoxFine = ebislFine[dit()];
+    const EBISBox& ebisBoxCoar = ebislCoar[dit()];
+
+    BaseIVFAB<Real>& weights = m_conservativeWeights[dit()];
+
+    auto kernel = [&](const VolIndex& fineVoF) -> void {
+      // TLDR: We want refRat^(D-1) * coarArea/fineArea. We refine the coarse vof (which also gives regular cells)
+      // but that won't matter because they don't have a boundary area.
+
+      const VolIndex         coarVoF     = ebislFine.coarsen(fineVoF, m_refRat, dit());
+      const Vector<VolIndex> refCoarVoFs = ebislCoar.refine(coarVoF, m_refRat, dit());
+
+      Real fineArea = 0.0;
+      Real coarArea = ebisBoxCoar.bndryArea(coarVoF);
+
+      for (int i = 0; i < refCoarVoFs.size(); i++) {
+        fineArea += ebisBoxFine.bndryArea(refCoarVoFs[i]);
+      }
+
+      weights(fineVoF, 0) = 0.0;
+
+      if (fineArea > 0.0) {
+        weights(fineVoF, 0) = std::pow(m_refRat, SpaceDim - 1) * coarArea / fineArea;
+      }
+    };
+  }
 }
 
 void
@@ -186,10 +234,9 @@ EBFineInterp::regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
     a_coarData.copyTo(Interval(comp, comp), m_irregCoFi, Interval(0, 0));
 
     const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
-    const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
 
     const EBISLayout& ebislFine = m_eblgFine.getEBISL();
-    const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
+    const EBISLayout& ebislCoar = m_coarsenedFineEBISL;
 
     for (DataIterator dit(dblFine); dit.ok(); ++dit) {
       const EBISBox& fineEBISBox = ebislFine[dit()];
@@ -197,30 +244,18 @@ EBFineInterp::regridConservative(LevelData<BaseIVFAB<Real>>&       a_fineData,
 
       BaseIVFAB<Real>&       fineData = a_fineData[dit()];
       const BaseIVFAB<Real>& coarData = m_irregCoFi[dit()];
+      const BaseIVFAB<Real>& weights  = m_conservativeWeights[dit()];
 
-      auto kernel = [&](const VolIndex& coarVoF) -> void {
-        const Vector<VolIndex>& fineVoFs = ebislCoar.refine(coarVoF, m_refRat, dit());
+      auto kernel = [&](const VolIndex& fineVoF) -> void {
+        const VolIndex coarVoF = ebislFine.coarsen(fineVoF, m_refRat, dit());
 
-        const Real coarArea = coarEBISBox.bndryArea(coarVoF);
+        CH_assert(coarEBISBox.isIrregular(coarVoF.gridIndex()));
+        CH_assert(fineEBISBox.isIrregular(fineVoF.gridIndex()));
 
-        Real fineArea = 0.0;
-        for (int i = 0; i < fineVoFs.size(); i++) {
-          fineArea += fineEBISBox.bndryArea(fineVoFs[i]);
-        }
-
-        Real factor = 0.0;
-        if (fineArea > 0.0) {
-          factor = std::pow(m_refRat, SpaceDim - 1) * coarArea / fineArea;
-        }
-
-        for (int i = 0; i < fineVoFs.size(); i++) {
-          CH_assert(coarData.getIVS().contains(coarVoF.gridIndex()));
-          CH_assert(fineData.getIVS().contains(fineVoFs[i].gridIndex()));
-
-          fineData(fineVoFs[i], comp) = coarData(coarVoF, 0) * factor;
-        }
+        fineData(fineVoF, comp) = coarData(coarVoF, 0) * weights(fineVoF, 0);
       };
-      BoxLoops::loop(m_coarVoFs[dit()], kernel);
+
+      BoxLoops::loop(m_fineVoFs[dit()], kernel);
     }
   }
 }
@@ -244,28 +279,19 @@ EBFineInterp::regridArithmetic(LevelData<BaseIVFAB<Real>>&       a_fineData,
   for (int comp = a_variables.begin(); comp <= a_variables.end(); comp++) {
     a_coarData.copyTo(Interval(comp, comp), m_irregCoFi, Interval(0, 0));
 
-    const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
-    const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
-
     const EBISLayout& ebislFine = m_eblgFine.getEBISL();
-    const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
-    for (DataIterator dit(dblFine); dit.ok(); ++dit) {
+    for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
       BaseIVFAB<Real>&       fineData = a_fineData[dit()];
       const BaseIVFAB<Real>& coarData = m_irregCoFi[dit()];
 
-      auto kernel = [&](const VolIndex& coarVoF) -> void {
-        const Vector<VolIndex> fineVoFs = ebislCoar.refine(coarVoF, m_refRat, dit());
+      auto kernel = [&](const VolIndex& fineVoF) -> void {
+        const VolIndex coarVoF = ebislFine.coarsen(fineVoF, m_refRat, dit());
 
-        for (int i = 0; i < fineVoFs.size(); i++) {
-          CH_assert(coarData.getIVS().contains(coarVoF.gridIndex()));
-          CH_assert(fineData.getIVS().contains(fineVoFs[i].gridIndex()));
-
-          fineData(fineVoFs[i], comp) = coarData(coarVoF, 0);
-        }
+        fineData(fineVoF, comp) = coarData(coarVoF, 0);
       };
 
-      BoxLoops::loop(m_coarVoFs[dit()], kernel);
+      BoxLoops::loop(m_fineVoFs[dit()], kernel);
     }
   }
 }
