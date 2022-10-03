@@ -3195,7 +3195,7 @@ CdrPlasmaStepper::deallocateSolverInternals()
   m_cdr->deallocateInternals();
   m_rte->deallocateInternals();
   m_fieldSolver->deallocateInternals();
-  m_sigma->deallocateInternals();
+  m_sigma->deallocate();
 }
 
 void
@@ -3526,7 +3526,7 @@ CdrPlasmaStepper::initialSigma()
   m_amr->conservativeAverage(sigma, m_realm, phase::gas);
 
   // Set surface charge to zero on electrode interface cells.
-  m_sigma->resetCells(sigma);
+  m_sigma->resetElectrodes(sigma, 0.0);
 }
 
 void
@@ -3943,7 +3943,7 @@ CdrPlasmaStepper::allocate()
   m_cdr->allocateInternals();
   m_fieldSolver->allocateInternals();
   m_rte->allocateInternals();
-  m_sigma->allocateInternals();
+  m_sigma->allocate();
 }
 
 void
@@ -4017,11 +4017,10 @@ CdrPlasmaStepper::setupSigma()
     pout() << "CdrPlasmaStepper::setupSigma" << endl;
   }
 
-  m_sigma = RefCountedPtr<SigmaSolver>(new SigmaSolver());
-  m_sigma->setAmr(m_amr);
+  m_sigma = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
   m_sigma->setVerbosity(m_solverVerbosity);
-  m_sigma->setComputationalGeometry(m_computationalGeometry);
   m_sigma->setRealm(m_realm);
+  m_sigma->setPhase(phase::gas);
 }
 
 void
@@ -4190,7 +4189,7 @@ CdrPlasmaStepper::computeDielectricCurrent()
 
   // Reset the current density only electrode interface cells so we get the electrode cells. We also
   // coarsen the currentDensity so that we can perform the integration on the coarsest grid level.
-  m_sigma->resetCells(currentDensity);
+  m_sigma->resetElectrodes(currentDensity, 0.0);
   m_amr->conservativeAverage(currentDensity, m_realm, m_cdr->getPhase());
 
   // Next, we integrate the current over the EB surface on the coarsest level only.
