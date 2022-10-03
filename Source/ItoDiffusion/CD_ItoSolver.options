@@ -3,10 +3,8 @@
 # ====================================================================================================
 ItoSolver.plt_vars            = phi vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
-ItoSolver.seed                = 0             # Seed for RNG
-ItoSolver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
 ItoSolver.normal_max          = 5.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
-ItoSolver.redistribute        = true          # Turn on/off redistribution. 
+ItoSolver.redistribute        = false         # Turn on/off redistribution. 
 ItoSolver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing       = particles     # 'particles' or 'numbers'
 ItoSolver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
@@ -14,6 +12,5 @@ ItoSolver.irr_ngp_deposition  = false         # Force irregular deposition in cu
 ItoSolver.irr_ngp_interp      = true          # Force irregular interpolation in cut cells or not
 ItoSolver.mobility_interp     = direct        # How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
-ItoSolver.halo_deposition     = native        # Native or NGP (see documentation)
-ItoSolver.deposition          = cic           # Deposition type. 'ngp' or 'halo'
+ItoSolver.deposition          = cic           # Deposition type. 
 ItoSolver.deposition_cf       = halo          # Coarse-fine deposition. interp, halo, or halo_ngp

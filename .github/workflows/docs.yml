@@ -18,6 +18,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get update
           sudo apt install doxygen
           sudo apt install graphviz
           sudo apt install texlive
@@ -28,7 +29,7 @@ jobs:
 
       - name: Build doxygen
         run: |
-          doxygen Docs/Doxyfile
+          doxygen Docs/doxygen.conf
 
       - name: Build HTML documentation
         working-directory: ${{ github.workspace }}/Docs/Sphinx        
