@@ -218,9 +218,9 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:ae4bcccf6f53767a56ff382e8e85f267d"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; <a class="el" href="classFieldSolver.html">FieldSolver</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ae4bcccf6f53767a56ff382e8e85f267d">m_fieldSolver</a></td></tr>
 <tr class="memdesc:ae4bcccf6f53767a56ff382e8e85f267d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the <a class="el" href="classFieldSolver.html" title="Base class for electrostatic solvers.">FieldSolver</a>.  <a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#ae4bcccf6f53767a56ff382e8e85f267d">More...</a><br /></td></tr>
 <tr class="separator:ae4bcccf6f53767a56ff382e8e85f267d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d2547047901ae9dc608169a8444dcf1"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; <a class="el" href="classSigmaSolver.html">SigmaSolver</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6d2547047901ae9dc608169a8444dcf1">m_sigma</a></td></tr>
-<tr class="memdesc:a6d2547047901ae9dc608169a8444dcf1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the surface charge solver.  <a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a6d2547047901ae9dc608169a8444dcf1">More...</a><br /></td></tr>
-<tr class="separator:a6d2547047901ae9dc608169a8444dcf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcb62f7b314e6d00065c9f9de482ea5c"><td class="memItemLeft" align="right" valign="top">RefCountedPtr&lt; <a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt; 1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#adcb62f7b314e6d00065c9f9de482ea5c">m_sigma</a></td></tr>
+<tr class="memdesc:adcb62f7b314e6d00065c9f9de482ea5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the surface charge solver.  <a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#adcb62f7b314e6d00065c9f9de482ea5c">More...</a><br /></td></tr>
+<tr class="separator:adcb62f7b314e6d00065c9f9de482ea5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a054fe0839b92c24fa6ed15d52cd1953b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a054fe0839b92c24fa6ed15d52cd1953b">m_realm</a></td></tr>
 <tr class="memdesc:a054fe0839b92c24fa6ed15d52cd1953b"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where the solver lives.  <a href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a054fe0839b92c24fa6ed15d52cd1953b">More...</a><br /></td></tr>
 <tr class="separator:a054fe0839b92c24fa6ed15d52cd1953b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1280,8 +1280,8 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="a6d2547047901ae9dc608169a8444dcf1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d2547047901ae9dc608169a8444dcf1">&#9670;&nbsp;</a></span>m_sigma</h2>
+<a id="adcb62f7b314e6d00065c9f9de482ea5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adcb62f7b314e6d00065c9f9de482ea5c">&#9670;&nbsp;</a></span>m_sigma</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1292,7 +1292,7 @@ template&lt;class T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">RefCountedPtr&lt;<a class="el" href="classSigmaSolver.html">SigmaSolver</a>&gt; <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html">Physics::Electrostatics::FieldStepper</a>&lt; T &gt;::m_sigma</td>
+          <td class="memname">RefCountedPtr&lt;<a class="el" href="classSurfaceODESolver.html">SurfaceODESolver</a>&lt;1&gt; &gt; <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html">Physics::Electrostatics::FieldStepper</a>&lt; T &gt;::m_sigma</td>
         </tr>
       </table>
   </td>

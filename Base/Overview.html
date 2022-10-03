@@ -18,7 +18,6 @@
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -47,7 +46,6 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#history">History</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#key-functionalities">Key functionalities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#design-approach">Design approach</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
@@ -220,38 +218,7 @@ That is, all the AMR levels are advanced using the same time step.
 <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has also incorporated many changes to the EB functionality supplied by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
 This includes much faster grid generation, support for polygon surfaces, and many performance optimizations (in particular to the EB formulation).</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports both fluid and particle methods, and can use multiply parallel distributed grids (see <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>) for individually load balancing particle and fluid kernels.
-Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and still use the embedded boundary formalism, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also provides several physics modules for describing various types of problems.
-See e.g. <span class="xref std std-ref">Chap:ImplementedModels</span>.</p>
-</div>
-<div class="section" id="design-approach">
-<h2>Design approach<a class="headerlink" href="#design-approach" title="Permalink to this heading"></a></h2>
-<p>A fundamental design principle in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is the division between the AMR core, geometry, solvers, physics coupling, and user applications.
-As an example, the fundamental time integrator class <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is a just an abstraction, i.e. it only presents an API which application codes must use.
-Because of that, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> can be used for solving completely unrelated problems.
-We have, for example, implementations of <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> for solving radiative transfer equations, advection-diffusion problems, electrostatic problems, or for plasma problems.</p>
-<p>The division between computational concepts (e.g., AMR functionality and solvers) exists so that users will be able to solve problems across a range of geometries, add new solvers functionality, or write entirely new applications, without requiring deep changes to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-<a class="reference internal" href="#fig-design"><span class="std std-numref">Fig. 1</span></a> shows the basic design sketch of the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> code.
-To the right in this figure we have the AMR core functionality, which supplies the infrastructure for running the solvers.
-In general, solvers may share common features (such as elliptic discretizations) or be completely disjoint.
-For this reason numerical solvers are asked to <em>register</em> AMR requirements.
-For example, elliptic solvers need functionality for interpolating ghost cells over the refinement boundary, but pure particle solvers have no need for such functionality.
-A consequence of this is that the numerical solvers are literally asked (during their instantiation) to register what type of AMR infrastructure they require.
-In return, the AMR core will allocate this infrastructure and make it available to solver, as illustrated in <a class="reference internal" href="#fig-design"><span class="std std-numref">Fig. 1</span></a>.</p>
-<div class="figure align-center" id="id2">
-<span id="fig-design"></span><a class="reference internal image-reference" href="../_images/Design.png"><img alt="../_images/Design.png" src="../_images/Design.png" style="width: 70%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">Concept design sketch for <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also uses <em>loosely coupled</em> solvers as a foundation for the code design, where a <em>solver</em> indicates a piece of code for solving an equation.
-For example, solving the Laplace equation <span class="math notranslate nohighlight">\(\nabla^2\Phi = 0\)</span> is encapsulated by one of the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> solvers.
-Some solvers in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> have a null-implemented API, i.e. we have enforced a strict separation of the solver interface and the solver implementation.
-This constraint exists because while new features may be added to a discretization, we do not want such changes to affect upstream application code.
-An example of this is the <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code>, which conceptualizes a numerical solver for solving for electrostatic field problems.
-The <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is an API with no fundamental discretization – it only contains high-level routines for understanding the type of solver being dealt with.
-Yet, it is the <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> API which is used by application code (and not the implementation class).</p>
-<p>All numerical solvers interact with a common AMR core that encapsulates functionality for running the solvers.
-All solvers are also compatible with mesh refinement and complex geometries, but they can only run through <em>application codes</em>, i.e. <em>physics modules</em>.
-These modules encapsulate the time advancement of either individual or coupled solvers.
-Solvers only interact with one another through these modules, and these modules usually advance the equations of motion using the method-of-lines.</p>
+Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and still use the embedded boundary formalism, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also provides several physics modules for describing various types of problems.</p>
 </div>
 </div>
 

@@ -269,7 +269,7 @@ Note that the above equation is a mere rewrite of the Ito process for a collecti
 <p>This equation is sensible only when <span class="math notranslate nohighlight">\(\langle n_-\rangle\)</span> is interpreted as an ion density distribution (over many identical experiments).</p>
 <p>The above quantities are then used for computing the probability of streamer inception in time <span class="math notranslate nohighlight">\(t\)</span> by</p>
 <div class="math notranslate nohighlight" id="equation-streamerinceptionprobability">
-<span class="eqno">(8)<a class="headerlink" href="#equation-streamerinceptionprobability" title="Permalink to this equation"></a></span>\[P(t) = 1  - \exp\left[-\int_0^t\left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\text{d}t^\prime\right].\]</div>
+<span class="eqno">(9)<a class="headerlink" href="#equation-streamerinceptionprobability" title="Permalink to this equation"></a></span>\[P(t) = 1  - \exp\left[-\int_0^t\left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\text{d}t^\prime\right].\]</div>
 <p>Here, <span class="math notranslate nohighlight">\(\left\langle\frac{d n_{\text{e}}}{dt}\right\rangle\)</span> is the electron production rate from both background ionization and electron detachment, i.e.</p>
 <div class="math notranslate nohighlight">
 \[\left\langle\frac{d n_{\text{e}}}{dt}\right\rangle = S_{\text{bg}} + k_d \left\langle n_-\right\rangle,\]</div>
@@ -278,8 +278,8 @@ The second integral is due to electron emission from the cathode and into the cr
 Note that, internally, we always ensure that <span class="math notranslate nohighlight">\(j_{\text{e}} dA\)</span> evaluates to zero on anode surfaces.</p>
 <p>We also compute the probability of a first electron appearing in the time interval <span class="math notranslate nohighlight">\([t, t+\Delta t]\)</span>, given by</p>
 <div class="math notranslate nohighlight" id="equation-streamerinceptionprobability2">
-<span class="eqno">(9)<a class="headerlink" href="#equation-streamerinceptionprobability2" title="Permalink to this equation"></a></span>\[\Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\Delta t\]</div>
-<p>When running in transient mode the user must set the voltage curve (see <span class="xref std std-ref">StreamerInceptionVoltageCurve</span>) and pay particular caution to setting the initial ion density, mobility, and detachment rates.</p>
+<span class="eqno">(10)<a class="headerlink" href="#equation-streamerinceptionprobability2" title="Permalink to this equation"></a></span>\[\Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\Delta t\]</div>
+<p>When running in transient mode the user must set the voltage curve (see <a class="reference internal" href="#chap-streamerinceptionvoltagecurve"><span class="std std-ref">Voltage curve</span></a>) and pay particular caution to setting the initial ion density, mobility, and detachment rates.</p>
 </div>
 </div>
 <div class="section" id="input-data">
@@ -487,7 +487,7 @@ However, as <span class="math notranslate nohighlight">\(U \rightarrow U_{\text{
 </div>
 <div class="section" id="inception-probability">
 <h3>Inception probability<a class="headerlink" href="#inception-probability" title="Permalink to this heading"></a></h3>
-<p>The inception probability is given by <a class="reference internal" href="#equation-streamerinceptionprobability">Eq. 8</a> and is computed using straightforward numerical quadrature:</p>
+<p>The inception probability is given by <a class="reference internal" href="#equation-streamerinceptionprobability">Eq. 9</a> and is computed using straightforward numerical quadrature:</p>
 <div class="math notranslate nohighlight">
 \[\int_{V_c}\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V \approx \sum_{\mathbf{i}\in K_\mathbf{i} &gt; K_c} \left(\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle\right)_{\mathbf{i}}\left(1 - \frac{\eta_{\mathbf{i}}}{\alpha_{\mathbf{i}}}\right)\kappa_{\mathbf{i}}\Delta V_{\mathbf{i}},\]</div>
 <p>and similarly for the surface integral.</p>

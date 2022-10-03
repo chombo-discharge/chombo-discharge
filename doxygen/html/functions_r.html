@@ -199,7 +199,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a35856a387301c7b15798216f5789dc0c">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classRtLayout.html#a516972ee9bc7da034f33803ded2dbd5d">RtLayout&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#aa5ba606d2ab6c1e8238063ed12d53076">RtSolver</a>
-, <a class="el" href="classSigmaSolver.html#a78b60e9d7e73d2b3e493c68d1be786cb">SigmaSolver</a>
+, <a class="el" href="classSurfaceODESolver.html#ac8a873019cdc9b08ce46800e7be0d2bd">SurfaceODESolver&lt; N &gt;</a>
 , <a class="el" href="classTimeStepper.html#a6ebd252f7be57801cd47b0fe060d89ee">TimeStepper</a>
 , <a class="el" href="classTracerParticleSolver.html#a38d76320140db2288eb6a13f96724443">TracerParticleSolver&lt; P &gt;</a>
 </li>
@@ -251,7 +251,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a67d5369557edb249c0721f603577bbc1">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classRtLayout.html#a832351a76afd5fbbdc1bd43d84fe6d7f">RtLayout&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#ac789e6fd29391b49b3bc7e9df12f9603">RtSolver</a>
-, <a class="el" href="classSigmaSolver.html#acf92f173ca69e2a4950221e3142ccc47">SigmaSolver</a>
+, <a class="el" href="classSurfaceODESolver.html#ac888a390dae05e95f5d6b2800055b041">SurfaceODESolver&lt; N &gt;</a>
 , <a class="el" href="classTiledMeshRefine.html#a113e4a2023a3b483e54fe6a13d0127df">TiledMeshRefine</a>
 , <a class="el" href="classTimeStepper.html#a653b195c640ac95a01197b70b9e0e260">TimeStepper</a>
 , <a class="el" href="classTracerParticleSolver.html#add1cac43843a34b6e4a3113c2d22dfa1">TracerParticleSolver&lt; P &gt;</a>
@@ -259,9 +259,15 @@ $(function() {
 <li>regridAmr()
 : <a class="el" href="classAmrMesh.html#a9a8897dc00f6ac738080aba2ec29ad7a">AmrMesh</a>
 </li>
+<li>regridArithmetic()
+: <a class="el" href="classEBFineInterp.html#a1c733b786513adc42eebde122c8cdd6d">EBFineInterp</a>
+</li>
 <li>regridBase()
 : <a class="el" href="classPhaseRealm.html#a949afed30ee8c314894e4d4498a486ae">PhaseRealm</a>
 , <a class="el" href="classRealm.html#af7b956b920638c56071e9957e78090be">Realm</a>
+</li>
+<li>regridConservative()
+: <a class="el" href="classEBFineInterp.html#a6fe7e537978eca35f3c6845976c10071">EBFineInterp</a>
 </li>
 <li>regridInternals()
 : <a class="el" href="classDriver.html#a888e76dacb8fde6bd35f81ef7be8780b">Driver</a>
@@ -273,7 +279,7 @@ $(function() {
 : <a class="el" href="classEBFineInterp.html#aa5257ae15b4b4049065bc74406199329">EBFineInterp</a>
 </li>
 <li>regridNoSlopes()
-: <a class="el" href="classEBFineInterp.html#acf5583e80a92d2ed65ca6d1ad5e4398d">EBFineInterp</a>
+: <a class="el" href="classEBFineInterp.html#a0a9b4c5965fe1e5cbb554929de2e5dac">EBFineInterp</a>
 </li>
 <li>regridOperators()
 : <a class="el" href="classAmrMesh.html#aee8e3a7de269ef9be0121c22eed428d5">AmrMesh</a>
@@ -303,9 +309,9 @@ $(function() {
 , <a class="el" href="classMFHelmholtzOp.html#aa0cc90980d0ad2f9dec992ad3f00cc95">MFHelmholtzOp</a>
 </li>
 <li>remap()
-: <a class="el" href="classItoLayout.html#a9393f9e3ba2f8869bdc579ea37faf5c3">ItoLayout&lt; T &gt;</a>
-, <a class="el" href="classItoSolver.html#a2b2ffd6f216e2fe3fc1b7d69134cd941">ItoSolver</a>
-, <a class="el" href="classMcPhoto.html#a83b71abb5f05186cdf9e1ca7392c5378">McPhoto</a>
+: <a class="el" href="classItoLayout.html#a76a326dbb0416bb29e4d92394b4e42d8">ItoLayout&lt; T &gt;</a>
+, <a class="el" href="classItoSolver.html#a802e12734bd28664a925cf946f485350">ItoSolver</a>
+, <a class="el" href="classMcPhoto.html#af6b0622e5f17ddd23066af62eb9253a8">McPhoto</a>
 , <a class="el" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">ParticleContainer&lt; P &gt;</a>
 , <a class="el" href="classTracerParticleSolver.html#a2173dd281f00cc869d7ed513ddf46eb4">TracerParticleSolver&lt; P &gt;</a>
 </li>
@@ -316,7 +322,7 @@ $(function() {
 : <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a49f669ea47084a14714d4229eb1c2044">Physics::ItoPlasma::ItoPlasmaPhysics</a>
 </li>
 <li>removeCoveredParticles()
-: <a class="el" href="classItoSolver.html#a1478e53aa80da3b4ef0e4e6c779accf3">ItoSolver</a>
+: <a class="el" href="classItoSolver.html#a972f24cc11dc2d60cbfc83f86be683dc">ItoSolver</a>
 </li>
 <li>removeCoveredParticlesDiscrete()
 : <a class="el" href="classAmrMesh.html#a6fb1b3008526e53b38e09e96e0e88487">AmrMesh</a>
@@ -345,14 +351,17 @@ $(function() {
 <li>resetBC()
 : <a class="el" href="classMFHelmholtzJumpBC.html#a9d00ecfd9e54efe428a6ff87565e2201">MFHelmholtzJumpBC</a>
 </li>
-<li>resetCells()
-: <a class="el" href="classSigmaSolver.html#a028fcd50cbdf83ced892f3aae2b19f61">SigmaSolver</a>
-</li>
 <li>resetDielectricCells()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab0c5c239850803bda2008f9cd0a9b002">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
+<li>resetDielectrics()
+: <a class="el" href="classSurfaceODESolver.html#afc1aa9cbbab13f884b15e534e66e9e24">SurfaceODESolver&lt; N &gt;</a>
+</li>
 <li>resetDomainFlux()
 : <a class="el" href="classCdrSolver.html#a608cefd6b0a47c9ffc909d5d0297625d">CdrSolver</a>
+</li>
+<li>resetElectrodes()
+: <a class="el" href="classSurfaceODESolver.html#ab029196df127f4a96de680f720e67608">SurfaceODESolver&lt; N &gt;</a>
 </li>
 <li>resetFluxRegister()
 : <a class="el" href="classCdrSolver.html#a9c8f5bd76e99d2e55746176942d4a84e">CdrSolver</a>
@@ -378,13 +387,13 @@ $(function() {
 : <a class="el" href="classMeshODESolver.html#a2393941e9c299309ddaf8b67281ef0d2">MeshODESolver&lt; N &gt;</a>
 </li>
 <li>RodIF()
-: <a class="el" href="classRodIF.html#a8c1fd8fbd686fcae2709656c6d48956f">RodIF</a>
+: <a class="el" href="classRodIF.html#a2b773d4772aa56912c263af880503936">RodIF</a>
 </li>
 <li>roof()
-: <a class="el" href="classDataOps.html#a44be6edb8a25b5d7c028f2286a2a095d">DataOps</a>
+: <a class="el" href="classDataOps.html#afd25d01b1be678aea3023ec32631e51d">DataOps</a>
 </li>
 <li>RoundedBoxIF()
-: <a class="el" href="classRoundedBoxIF.html#ac61e74dec3192fd775bbcfd56aba5524">RoundedBoxIF</a>
+: <a class="el" href="classRoundedBoxIF.html#a4d6cf9e2c90603a423fc56d37dec60a0">RoundedBoxIF</a>
 </li>
 <li>RoundedCylinderIF()
 : <a class="el" href="classRoundedCylinderIF.html#a3f42875c0b9ee7ec285d79f93328f40a">RoundedCylinderIF</a>

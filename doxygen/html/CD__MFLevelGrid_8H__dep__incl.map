@@ -20,12 +20,12 @@
 <area shape="rect" id="node17" href="$CD__CdrPlasmaGodunovStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaGodunovStepper." alt="" coords="5,839,244,895"/>
 <area shape="rect" id="node18" href="$CD__CdrPlasmaImExSdcStepper_8H.html" title="Declaration of a semi&#45;implicit spectral deferred correction class for Physics/CdrPlasma." alt="" coords="385,735,624,791"/>
 <area shape="rect" id="node19" href="$CD__CdrPlasmaImExSdcStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaImExSdcStepper." alt="" coords="293,839,532,895"/>
-<area shape="rect" id="node24" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="612,474,848,501"/>
+<area shape="rect" id="node24" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="648,474,884,501"/>
 <area shape="rect" id="node25" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="1792,467,1951,508"/>
 <area shape="rect" id="node27" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2900,467,3045,508"/>
 <area shape="rect" id="node28" href="$CD__MeshODESolver_8H.html" title="Encapsulation of an ODE solver on the mesh." alt="" coords="2492,467,2667,508"/>
 <area shape="rect" id="node29" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="2691,467,2875,508"/>
-<area shape="rect" id="node30" href="$CD__SigmaSolver_8H.html" title="Declaration of a surface charge solver." alt="" coords="435,467,587,508"/>
+<area shape="rect" id="node30" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="436,467,624,508"/>
 <area shape="rect" id="node31" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="1975,467,2168,508"/>
 <area shape="rect" id="node6" href="$CD__CellTagger_8cpp.html" title="Implementation of CD_CellTagger.H." alt="" coords="2933,556,3095,597"/>
 <area shape="rect" id="node10" href="$CD__CdrPlasmaTagger_8H.html" title="Declearation of an abstract class for tagging cells in a Physics/CdrPlasma context." alt="" coords="1203,742,1371,783"/>

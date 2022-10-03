@@ -139,9 +139,19 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:aa5257ae15b4b4049065bc74406199329"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBFineInterp.html#aa5257ae15b4b4049065bc74406199329">regridMinMod</a> (LevelData&lt; EBCellFAB &gt; &amp;a_fineData, const LevelData&lt; EBCellFAB &gt; &amp;a_coarData, const Interval &amp;a_variables)</td></tr>
 <tr class="memdesc:aa5257ae15b4b4049065bc74406199329"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use min-mod slopes when interpolating to the new grids.  <a href="classEBFineInterp.html#aa5257ae15b4b4049065bc74406199329">More...</a><br /></td></tr>
 <tr class="separator:aa5257ae15b4b4049065bc74406199329"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fe7e537978eca35f3c6845976c10071"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBFineInterp.html#a6fe7e537978eca35f3c6845976c10071">regridConservative</a> (LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_fineData, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_coarData, const Interval &amp;a_variables)</td></tr>
+<tr class="memdesc:a6fe7e537978eca35f3c6845976c10071"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid irregular data using conservative interpolation.  <a href="classEBFineInterp.html#a6fe7e537978eca35f3c6845976c10071">More...</a><br /></td></tr>
+<tr class="separator:a6fe7e537978eca35f3c6845976c10071"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c733b786513adc42eebde122c8cdd6d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBFineInterp.html#a1c733b786513adc42eebde122c8cdd6d">regridArithmetic</a> (LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_fineData, const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;a_coarData, const Interval &amp;a_variables)</td></tr>
+<tr class="memdesc:a1c733b786513adc42eebde122c8cdd6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid irregular data using arithmetic interpolation.  <a href="classEBFineInterp.html#a1c733b786513adc42eebde122c8cdd6d">More...</a><br /></td></tr>
+<tr class="separator:a1c733b786513adc42eebde122c8cdd6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:ae664f89c46a2adbcf3fb26f9065c25e0"><td class="memItemLeft" align="right" valign="top"><a id="ae664f89c46a2adbcf3fb26f9065c25e0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBFineInterp.html#ae664f89c46a2adbcf3fb26f9065c25e0">defineWeights</a> () noexcept</td></tr>
+<tr class="memdesc:ae664f89c46a2adbcf3fb26f9065c25e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define weights for cut-cell conservative regridding. <br /></td></tr>
+<tr class="separator:ae664f89c46a2adbcf3fb26f9065c25e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf5583e80a92d2ed65ca6d1ad5e4398d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBFineInterp.html#acf5583e80a92d2ed65ca6d1ad5e4398d">regridNoSlopes</a> (EBCellFAB &amp;a_fineData, const EBCellFAB &amp;a_coarData, const DataIndex &amp;a_dit, const Interval &amp;a_variables)</td></tr>
 <tr class="memdesc:acf5583e80a92d2ed65ca6d1ad5e4398d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Piecewise constant interpolation of an EBCellFAB.  <a href="classEBFineInterp.html#acf5583e80a92d2ed65ca6d1ad5e4398d">More...</a><br /></td></tr>
 <tr class="separator:acf5583e80a92d2ed65ca6d1ad5e4398d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -156,6 +166,16 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBFineInterp.html#adef3a55737f4e8e78a76184d2ef685f6">m_eblgCoar</a></td></tr>
 <tr class="memdesc:adef3a55737f4e8e78a76184d2ef685f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarse grid. <br /></td></tr>
 <tr class="separator:adef3a55737f4e8e78a76184d2ef685f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d71b36112c79a8eb97c2e2be2d25d38"><td class="memItemLeft" align="right" valign="top"><a id="a7d71b36112c79a8eb97c2e2be2d25d38"></a>
+LevelData&lt; BaseIVFAB&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBFineInterp.html#a7d71b36112c79a8eb97c2e2be2d25d38">m_irregCoFi</a></td></tr>
+<tr class="memdesc:a7d71b36112c79a8eb97c2e2be2d25d38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data holder for holding data on the coarsened fine grids. <br /></td></tr>
+<tr class="separator:a7d71b36112c79a8eb97c2e2be2d25d38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adee97ba605ccfaa8515e7853526c7ccd"><td class="memItemLeft" align="right" valign="top">LayoutData&lt; VoFIterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBFineInterp.html#adee97ba605ccfaa8515e7853526c7ccd">m_fineVoFs</a></td></tr>
+<tr class="memdesc:adee97ba605ccfaa8515e7853526c7ccd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator for valid cut-cells.  <a href="classEBFineInterp.html#adee97ba605ccfaa8515e7853526c7ccd">More...</a><br /></td></tr>
+<tr class="separator:adee97ba605ccfaa8515e7853526c7ccd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42902adee0aa5b7393a1dc30b45410cd"><td class="memItemLeft" align="right" valign="top">LevelData&lt; BaseIVFAB&lt; Real &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBFineInterp.html#a42902adee0aa5b7393a1dc30b45410cd">m_conservativeWeights</a></td></tr>
+<tr class="memdesc:a42902adee0aa5b7393a1dc30b45410cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weights in cut-cells when regridding conservatively.  <a href="classEBFineInterp.html#a42902adee0aa5b7393a1dc30b45410cd">More...</a><br /></td></tr>
+<tr class="separator:a42902adee0aa5b7393a1dc30b45410cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for interpolating data to fine grids. Can use constant interpolation or include limiters. </p>
@@ -271,6 +291,94 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between fine and coarse. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_nComp</td><td>Number of components. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebisPtr</td><td>EB index space. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1c733b786513adc42eebde122c8cdd6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c733b786513adc42eebde122c8cdd6d">&#9670;&nbsp;</a></span>regridArithmetic()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBFineInterp::regridArithmetic </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_fineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_coarData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_variables</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Regrid irregular data using arithmetic interpolation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_fineData</td><td>Piecewise interpolation of coarse data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables to interpolate. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6fe7e537978eca35f3c6845976c10071"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fe7e537978eca35f3c6845976c10071">&#9670;&nbsp;</a></span>regridConservative()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBFineInterp::regridConservative </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_fineData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; BaseIVFAB&lt; Real &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_coarData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interval &amp;&#160;</td>
+          <td class="paramname"><em>a_variables</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Regrid irregular data using conservative interpolation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_fineData</td><td>Piecewise interpolation of coarse data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_coarData</td><td>Coarse data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables to interpolate. </td></tr>
   </table>
   </dd>
 </dl>
@@ -421,6 +529,57 @@ EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a42902adee0aa5b7393a1dc30b45410cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42902adee0aa5b7393a1dc30b45410cd">&#9670;&nbsp;</a></span>m_conservativeWeights</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LevelData&lt;BaseIVFAB&lt;Real&gt; &gt; EBFineInterp::m_conservativeWeights</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Weights in cut-cells when regridding conservatively. </p>
+<p>Defined over the fine layout. </p>
+
+</div>
+</div>
+<a id="adee97ba605ccfaa8515e7853526c7ccd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adee97ba605ccfaa8515e7853526c7ccd">&#9670;&nbsp;</a></span>m_fineVoFs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">LayoutData&lt;VoFIterator&gt; EBFineInterp::m_fineVoFs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Iterator for valid cut-cells. </p>
+<p>This iterator runs over the valid fine cells. </p>
 
 </div>
 </div>

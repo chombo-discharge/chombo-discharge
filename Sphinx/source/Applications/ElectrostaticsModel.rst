@@ -50,7 +50,7 @@ By default, the initial space charge for this problem is given by Gaussian
 where :math:`\rho_0` is an amplitude, :math:`\mathbf{x}_0` is the center and :math:`R` is the Gaussian radius.
 These are set by the input options
 
-.. code-block:: none
+.. code-block:: text
 
    FieldStepper.init_rho     = 1.0  
    FieldStepper.rho_center   = 0 0 0

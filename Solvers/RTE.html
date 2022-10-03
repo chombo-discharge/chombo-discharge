@@ -304,7 +304,7 @@ In the input script, the user can specify</p>
 <ol class="arabic">
 <li><p><strong>Dirichlet</strong>.
 For Dirichlet boundary conditions we specify the value of <span class="math notranslate nohighlight">\(\Psi\)</span> on the boundary.
-Note that this involves reconstructing the gradient <span class="math notranslate nohighlight">\(\partial_n\Psi\)</span> on domain faces and edges, see <span class="xref std std-ref">Chap:LinearSolversDirichletBC</span>.</p></li>
+Note that this involves reconstructing the gradient <span class="math notranslate nohighlight">\(\partial_n\Psi\)</span> on domain faces and edges, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolverdirichletbc"><span class="std std-ref">Dirichlet</span></a>.</p></li>
 <li><p><strong>Neumann</strong>.
 For Neumann boundary conditions we specify the value of <span class="math notranslate nohighlight">\(\partial_n\Psi\)</span> on the boundary.
 Note that the linear solver interface also supports setting <span class="math notranslate nohighlight">\(B\partial_n\Psi\)</span> on the boundary (where <span class="math notranslate nohighlight">\(B\)</span> is the Helmholtz equation <span class="math notranslate nohighlight">\(B\)</span> coefficient).
@@ -325,38 +325,38 @@ In the majority of cases, however, we will have <span class="math notranslate no
 <div class="section" id="solver-configuration">
 <h3>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implementation has a number of configurable options for running the solver, and these are given below:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
-<span class="c1"># EddingtonSP1 class options</span>
-<span class="c1"># ====================================================================================================</span>
-EddingtonSP1.stationary          <span class="o">=</span> <span class="nb">true</span>         <span class="c1"># Stationary solver</span>
-EddingtonSP1.reflectivity        <span class="o">=</span> <span class="m">0</span>.           <span class="c1"># Reflectivity</span>
-EddingtonSP1.use_tga             <span class="o">=</span> <span class="nb">false</span>        <span class="c1"># Use TGA for integration</span>
-EddingtonSP1.kappa_scale         <span class="o">=</span> <span class="nb">true</span>         <span class="c1"># Kappa scale source or not (depends on algorithm)</span>
-EddingtonSP1.plt_vars            <span class="o">=</span> phi src      <span class="c1"># Plot variables. Available are &#39;phi&#39; and &#39;src&#39;</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# EddingtonSP1 class options
+# ====================================================================================================
+EddingtonSP1.stationary          = true         # Stationary solver
+EddingtonSP1.reflectivity        = 0.           # Reflectivity
+EddingtonSP1.use_tga             = false        # Use TGA for integration
+EddingtonSP1.kappa_scale         = true         # Kappa scale source or not (depends on algorithm)
+EddingtonSP1.plt_vars            = phi src      # Plot variables. Available are &#39;phi&#39; and &#39;src&#39;
 
-EddingtonSP1.ebbc                <span class="o">=</span> larsen <span class="m">0</span>.0   <span class="c1"># Bc on embedded boundaries</span>
-EddingtonSP1.bc.x.lo             <span class="o">=</span> larsen <span class="m">0</span>.0   <span class="c1"># Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
-EddingtonSP1.bc.x.hi             <span class="o">=</span> larsen <span class="m">0</span>.0   <span class="c1"># Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
-EddingtonSP1.bc.y.lo             <span class="o">=</span> larsen <span class="m">0</span>.0   <span class="c1"># Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
-EddingtonSP1.bc.y.hi             <span class="o">=</span> larsen <span class="m">0</span>.0   <span class="c1"># Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
-EddingtonSP1.bc.z.lo             <span class="o">=</span> larsen <span class="m">0</span>.0   <span class="c1"># Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
-EddingtonSP1.bc.z.hi             <span class="o">=</span> larsen <span class="m">0</span>.0   <span class="c1"># Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
-EddingtonSP1.bc.z.hi             <span class="o">=</span> larsen <span class="m">0</span>.0   <span class="c1"># Boundary on domain. &#39;neumann&#39; or &#39;larsen&#39;</span>
+EddingtonSP1.ebbc                = larsen 0.0   # Bc on embedded boundaries
+EddingtonSP1.bc.x.lo             = larsen 0.0   # Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;
+EddingtonSP1.bc.x.hi             = larsen 0.0   # Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;
+EddingtonSP1.bc.y.lo             = larsen 0.0   # Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;
+EddingtonSP1.bc.y.hi             = larsen 0.0   # Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;
+EddingtonSP1.bc.z.lo             = larsen 0.0   # Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;
+EddingtonSP1.bc.z.hi             = larsen 0.0   # Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;
+EddingtonSP1.bc.z.hi             = larsen 0.0   # Boundary on domain. &#39;neumann&#39; or &#39;larsen&#39;
 
-EddingtonSP1.gmg_verbosity       <span class="o">=</span> -1           <span class="c1"># GMG verbosity</span>
-EddingtonSP1.gmg_pre_smooth      <span class="o">=</span> <span class="m">8</span>            <span class="c1"># Number of relaxations in downsweep</span>
-EddingtonSP1.gmg_post_smooth     <span class="o">=</span> <span class="m">8</span>            <span class="c1"># Number of relaxations in upsweep</span>
-EddingtonSP1.gmg_bott_smooth     <span class="o">=</span> <span class="m">8</span>            <span class="c1"># NUmber of relaxations before dropping to bottom solver</span>
-EddingtonSP1.gmg_min_iter        <span class="o">=</span> <span class="m">5</span>            <span class="c1"># Minimum number of iterations</span>
-EddingtonSP1.gmg_max_iter        <span class="o">=</span> <span class="m">32</span>           <span class="c1"># Maximum number of iterations</span>
-EddingtonSP1.gmg_exit_tol        <span class="o">=</span> <span class="m">1</span>.E-6        <span class="c1"># Residue tolerance</span>
-EddingtonSP1.gmg_exit_hang       <span class="o">=</span> <span class="m">0</span>.2          <span class="c1"># Solver hang</span>
-EddingtonSP1.gmg_min_cells       <span class="o">=</span> <span class="m">16</span>           <span class="c1"># Bottom drop</span>
-EddingtonSP1.gmg_bottom_solver   <span class="o">=</span> bicgstab     <span class="c1"># Bottom solver type. Valid options are &#39;simple &lt;number&gt;&#39; and &#39;bicgstab&#39;</span>
-EddingtonSP1.gmg_cycle           <span class="o">=</span> vcycle       <span class="c1"># Cycle type. Only &#39;vcycle&#39; supported for now</span>
-EddingtonSP1.gmg_ebbc_weight     <span class="o">=</span> <span class="m">2</span>            <span class="c1"># EBBC weight (only for Dirichlet)</span>
-EddingtonSP1.gmg_ebbc_order      <span class="o">=</span> <span class="m">2</span>            <span class="c1"># EBBC order (only for Dirichlet)</span>
-EddingtonSP1.gmg_smoother        <span class="o">=</span> red_black    <span class="c1"># Relaxation type. &#39;jacobi&#39;, &#39;red_black&#39;, or &#39;multi_color&#39;</span>
+EddingtonSP1.gmg_verbosity       = -1           # GMG verbosity
+EddingtonSP1.gmg_pre_smooth      = 8            # Number of relaxations in downsweep
+EddingtonSP1.gmg_post_smooth     = 8            # Number of relaxations in upsweep
+EddingtonSP1.gmg_bott_smooth     = 8            # NUmber of relaxations before dropping to bottom solver
+EddingtonSP1.gmg_min_iter        = 5            # Minimum number of iterations
+EddingtonSP1.gmg_max_iter        = 32           # Maximum number of iterations
+EddingtonSP1.gmg_exit_tol        = 1.E-6        # Residue tolerance
+EddingtonSP1.gmg_exit_hang       = 0.2          # Solver hang
+EddingtonSP1.gmg_min_cells       = 16           # Bottom drop
+EddingtonSP1.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are &#39;simple &lt;number&gt;&#39; and &#39;bicgstab&#39;
+EddingtonSP1.gmg_cycle           = vcycle       # Cycle type. Only &#39;vcycle&#39; supported for now
+EddingtonSP1.gmg_ebbc_weight     = 2            # EBBC weight (only for Dirichlet)
+EddingtonSP1.gmg_ebbc_order      = 2            # EBBC order (only for Dirichlet)
+EddingtonSP1.gmg_smoother        = red_black    # Relaxation type. &#39;jacobi&#39;, &#39;red_black&#39;, or &#39;multi_color&#39;
 </pre></div>
 </div>
 <div class="section" id="basic-options">

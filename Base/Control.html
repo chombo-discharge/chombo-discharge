@@ -180,7 +180,7 @@ To compile with these guards turned on, compile with <code class="docutils liter
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make -s -j32 <span class="nv">DIM</span><span class="o">=</span><span class="m">2</span> <span class="nv">OPT</span><span class="o">=</span>HIGH <span class="nv">DEBUG</span><span class="o">=</span>FALSE &lt;application_name&gt;
 </pre></div>
 </div>
-<p>Recall also that default settings for the dimension (<code class="docutils literal notranslate"><span class="pre">DIM</span></code>), optimization level (<code class="docutils literal notranslate"><span class="pre">OPT</span></code>), and debug mode (<code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>) can be set in <code class="file docutils literal notranslate"><span class="pre">Make.defs.local</span></code>, see <span class="xref std std-ref">Chap:GettingStarted</span>.</p>
+<p>Recall also that default settings for the dimension (<code class="docutils literal notranslate"><span class="pre">DIM</span></code>), optimization level (<code class="docutils literal notranslate"><span class="pre">OPT</span></code>), and debug mode (<code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>) can be set in <code class="file docutils literal notranslate"><span class="pre">Make.defs.local</span></code>, see <a class="reference internal" href="Installation.html#chap-installation"><span class="std std-ref">Installation</span></a>.</p>
 </div>
 </div>
 <div class="section" id="running-applications">
@@ -278,7 +278,7 @@ It will also create the following subdirectories given in <a class="reference in
 <p>The <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> class is responsible for writing output files at specified intervals, but the user is generally speaking responsible for specifying what goes into the plot files.
 Since not all variables are always of interest, solver classes have options like <code class="docutils literal notranslate"><span class="pre">plt_vars</span></code> that specify which output variables in the solver will be written to the output file.
 For example, one of our convection-diffusion-reaction solver classes have the following output options:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CdrGodunov.plt_vars <span class="o">=</span> phi vel dco src ebflux <span class="c1"># Plot variables. Options are &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;src&#39;, &#39;ebflux&#39;</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CdrGodunov.plt_vars = phi vel dco src ebflux # Plot variables. Options are &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;src&#39;, &#39;ebflux&#39;
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">phi</span></code> is the state density, <code class="docutils literal notranslate"><span class="pre">vel</span></code> is the drift velocity, <code class="docutils literal notranslate"><span class="pre">dco</span></code> is the diffusion coefficient, <code class="docutils literal notranslate"><span class="pre">src</span></code> is the source term, and <code class="docutils literal notranslate"><span class="pre">ebflux</span></code> is the flux at embedded boundaries.

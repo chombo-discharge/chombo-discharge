@@ -24,7 +24,7 @@
 <area shape="rect" id="node44" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="1479,423,1625,464"/>
 <area shape="rect" id="node45" href="$CD__MeshODESolver_8H.html" title="Encapsulation of an ODE solver on the mesh." alt="" coords="4055,423,4230,464"/>
 <area shape="rect" id="node46" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="2967,423,3151,464"/>
-<area shape="rect" id="node47" href="$CD__SigmaSolver_8H.html" title="Declaration of a surface charge solver." alt="" coords="4420,423,4572,464"/>
+<area shape="rect" id="node47" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="4402,423,4590,464"/>
 <area shape="rect" id="node48" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="2550,423,2743,464"/>
 <area shape="rect" id="node10" href="$CD__CellTagger_8cpp.html" title="Implementation of CD_CellTagger.H." alt="" coords="710,512,871,553"/>
 <area shape="rect" id="node15" href="$CD__CdrPlasmaTagger_8H.html" title="Declearation of an abstract class for tagging cells in a Physics/CdrPlasma context." alt="" coords="923,698,1091,739"/>

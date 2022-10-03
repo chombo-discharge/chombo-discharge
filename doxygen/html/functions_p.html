@@ -320,6 +320,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a88dfd2e80c183fe65715b683e8dc9882">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classRtLayout.html#a2db7ec4f4e516de4927d76089a7b550f">RtLayout&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#a7b1ee47e4eabfe2cca13ce6b96fd13fe">RtSolver</a>
+, <a class="el" href="classSurfaceODESolver.html#a3f9cf119188f8fe4883c1cfbdcafa0fb">SurfaceODESolver&lt; N &gt;</a>
 , <a class="el" href="classTracerParticleSolver.html#adf4af7c8c73a44acbae91e3e87f7c5d9">TracerParticleSolver&lt; P &gt;</a>
 </li>
 <li>parseOutput()
@@ -373,6 +374,7 @@ $(function() {
 , <a class="el" href="classMcPhoto.html#ad0e8145b5850c2739886793bb6ec36a2">McPhoto</a>
 , <a class="el" href="classMeshODESolver.html#ac3e7341aca6d11275f70d827101710ee">MeshODESolver&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#af43849097e02a9686b2dfc757f0fda95">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+, <a class="el" href="classSurfaceODESolver.html#a42bc20542b2efd2973093b118698d643">SurfaceODESolver&lt; N &gt;</a>
 , <a class="el" href="classTracerParticleSolver.html#a33683a0179f3c391262c3bf0af1af85d">TracerParticleSolver&lt; P &gt;</a>
 </li>
 <li>parseProblem()
@@ -404,6 +406,9 @@ $(function() {
 </li>
 <li>parseReflection()
 : <a class="el" href="classEddingtonSP1.html#a2ab6a608fb6dc324de1fd5b06ace6c02">EddingtonSP1</a>
+</li>
+<li>parseRegrid()
+: <a class="el" href="classSurfaceODESolver.html#a60a8a98fcf0df97f432ab3b8f96fd417">SurfaceODESolver&lt; N &gt;</a>
 </li>
 <li>parseRegridSlopes()
 : <a class="el" href="classCdrSolver.html#a88e4d5966ffc4ae9699619014eaacb24">CdrSolver</a>
@@ -453,6 +458,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a2f15d32e686db0ffa118b736793aab85">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classRtLayout.html#a8f3502f8c50d8e5d9de7beb1d1f429c5">RtLayout&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#adcdfbf37f18272cf983eaceb8eb52771">RtSolver</a>
+, <a class="el" href="classSurfaceODESolver.html#adf4e084d4c7a8e1940d0886bea0affb1">SurfaceODESolver&lt; N &gt;</a>
 , <a class="el" href="classTimeStepper.html#afa0d1dde7b10de830cd6d8592ae70d56">TimeStepper</a>
 , <a class="el" href="classTracerParticleSolver.html#abb272043985a3e7edb063d48adc63a86">TracerParticleSolver&lt; P &gt;</a>
 </li>
@@ -491,6 +497,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a4a651f5252dc8918abf4f44a1be34748">Physics::CdrPlasma::CdrPlasmaStepper</a>
 , <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a85ff7c19f055e933f51dbb3e60787200">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>
 , <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a13cb9f1e06e3170fa281c3aa5ad5d0d9">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
+, <a class="el" href="classSurfaceODESolver.html#a117044ed8dc5229e65bd4bcbdfd0898d">SurfaceODESolver&lt; N &gt;</a>
 , <a class="el" href="classTracerParticleSolver.html#a8e2f428b9bfa8057d08fed245d18c2d5">TracerParticleSolver&lt; P &gt;</a>
 </li>
 <li>parseVoltages()
@@ -518,7 +525,7 @@ $(function() {
 : <a class="el" href="classPerlinPlaneSdf.html#accfcc8325b5d284d2f7bd084a92c0c49">PerlinPlaneSdf</a>
 </li>
 <li>PerlinRodSdf()
-: <a class="el" href="classPerlinRodSdf.html#a81cc142f928a4ff8ab1bae683742e65c">PerlinRodSdf</a>
+: <a class="el" href="classPerlinRodSdf.html#a943cb7180a17e01f61eb4b3576d06b05">PerlinRodSdf</a>
 </li>
 <li>PerlinSdf()
 : <a class="el" href="classPerlinSdf.html#ab4cbf7a09a74362770466ba4d151e92a">PerlinSdf</a>
@@ -539,13 +546,13 @@ $(function() {
 : <a class="el" href="classMcPhoto.html#aae3fa6a4a0215c0da8e81c496e1deeb8">McPhoto</a>
 </li>
 <li>plus()
-: <a class="el" href="classDataOps.html#a1d9897e0082692437768f37b5213d59c">DataOps</a>
+: <a class="el" href="classDataOps.html#ae30f972ce853e2ffafba4cce6d27f40d">DataOps</a>
 </li>
 <li>pointJacobiKernel()
 : <a class="el" href="classEBHelmholtzOp.html#a55a11630804c46a822948f522c9fd0dc">EBHelmholtzOp</a>
 </li>
 <li>PointParticle()
-: <a class="el" href="classPointParticle.html#a5943d7d7e880db937b2d86cbde18eb0f">PointParticle</a>
+: <a class="el" href="classPointParticle.html#a7997b3b4d18368b4494da4261d8d7861">PointParticle</a>
 </li>
 <li>poissonReaction()
 : <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a0e3a17d1735b22ba2bbdb70cbb6d2e28">Physics::ItoPlasma::ItoPlasmaPhysics</a>
@@ -554,7 +561,7 @@ $(function() {
 : <a class="el" href="classPolygonRodIF.html#aae05bb86ae84afaf77540b3d1401456d">PolygonRodIF</a>
 </li>
 <li>position()
-: <a class="el" href="classGenericParticle.html#ac8632b1aebba8fdbb83243a21dbace3d">GenericParticle&lt; M, N &gt;</a>
+: <a class="el" href="classGenericParticle.html#a83df86ffcd9181ac7f0999b02f53cb1d">GenericParticle&lt; M, N &gt;</a>
 </li>
 <li>postCheckpoint()
 : <a class="el" href="classFieldSolver.html#a83d7523f112723ad7b036527589375b3">FieldSolver</a>
@@ -634,18 +641,18 @@ $(function() {
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a52e6f38da4e04ce773a8979dcad2b5fe">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classRtLayout.html#ae95ee94fb9aae76ebed78d6731956c18">RtLayout&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#a92b3ea39efa4bdde9807003e7335c1df">RtSolver</a>
-, <a class="el" href="classSigmaSolver.html#a1681fb0aba5bab238edae326490ff559">SigmaSolver</a>
+, <a class="el" href="classSurfaceODESolver.html#a78b0381be243c63767f45cc32cdcbbd1">SurfaceODESolver&lt; N &gt;</a>
 , <a class="el" href="classTimeStepper.html#a5332298b62730f2d120137a241fef332">TimeStepper</a>
 , <a class="el" href="classTracerParticleSolver.html#a87305505381a0c3d37ec1cbb7c9928a4">TracerParticleSolver&lt; P &gt;</a>
 </li>
 <li>preRegridInternals()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aecb6cadbd56a43c54080f410eb6e4e22">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
-<li>Primal
-: <a class="el" href="classRealm.html#ae7b66527325a72d0b3aa2db67d34078e">Realm</a>
-</li>
 <li>primal
 : <a class="el" href="classRealm.html#a1c30e25a30f74a8e27405dbd2261f4dd">Realm</a>
+</li>
+<li>Primal
+: <a class="el" href="classRealm.html#ae7b66527325a72d0b3aa2db67d34078e">Realm</a>
 </li>
 <li>printReportHeader()
 : <a class="el" href="classTimer.html#a7fdf1359a0b60f215e37cecd75962132">Timer</a>
@@ -670,13 +677,13 @@ $(function() {
 : <a class="el" href="classProfileCylinderIF.html#a2f49faca177c60540aa7891b73e31bc6">ProfileCylinderIF</a>
 </li>
 <li>ProfilePlaneIF()
-: <a class="el" href="classProfilePlaneIF.html#ad0e89c65d2375c3f9c4b8941143263a4">ProfilePlaneIF</a>
+: <a class="el" href="classProfilePlaneIF.html#ae9ab3deebfba13769e5f927e9fcdadc8">ProfilePlaneIF</a>
 </li>
 <li>projectDomain()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab3f5c6688c08805fab13e021c6619b34">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
 <li>projectFlux()
-: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a13dc192ada81f1213e779f791e13bd67">Physics::CdrPlasma::CdrPlasmaStepper</a>
+: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab6760ebb5a38dd449fcba310aa7a1a43">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
 <li>projectGradSten()
 : <a class="el" href="classLeastSquares.html#ac7bc04cd04924e14de570a416963fe8f">LeastSquares</a>
@@ -689,7 +696,7 @@ $(function() {
 : <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a51f775ffc664753f55974f8348a65c7b">Physics::ItoPlasma::ItoPlasmaPhysics</a>
 </li>
 <li>propensity()
-: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a0310c32456794623e9cbb03d5e5049aa">Physics::ItoPlasma::ItoPlasmaPhysics</a>
+: <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaPhysics.html#a57f44e21222915e93bb474fd853b50a4">Physics::ItoPlasma::ItoPlasmaPhysics</a>
 , <a class="el" href="classPhysics_1_1ItoPlasma_1_1ItoPlasmaReaction.html#a67203ff25547de08911c3f5c133f4619">Physics::ItoPlasma::ItoPlasmaReaction</a>
 </li>
 <li>push_back()

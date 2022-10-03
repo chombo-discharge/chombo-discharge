@@ -261,8 +261,8 @@ Note that on multifluid-boundaries the boundary condition is enforced by the con
 Domain boundary condition <em>types</em> are parsed through a member function <code class="docutils literal notranslate"><span class="pre">FieldSolver::parseDomainBc</span></code>.
 This function will read string identifiers from the input script, and these identifiers are either in the format <code class="docutils literal notranslate"><span class="pre">&lt;string&gt;</span> <span class="pre">&lt;float&gt;</span></code> (simplified format) or in the format <code class="docutils literal notranslate"><span class="pre">&lt;string&gt;</span></code> (general format).
 For setting general types of Neumann or Dirichlet BCs on the domain sides, one will specify</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.bc.x.low  <span class="o">=</span> dirichlet_custom
-FieldSolverMultigrid.bc.x.high <span class="o">=</span> dirichlet_neumann
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.bc.x.low  = dirichlet_custom
+FieldSolverMultigrid.bc.x.high = dirichlet_neumann
 </pre></div>
 </div>
 <p>Unfortunately, due to the many degrees of freedom in setting domain boundary conditions, the procedure is a bit convoluted.
@@ -290,8 +290,8 @@ These functions are then directly processed by the numerical discretizations.</p
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> also supports a simplified method of setting the domain boundary conditions, in which case the user will specify Neumann or Dirichlet values (rather than functions) for each domain side.
 These values are usually, but not necessarily, constant values.</p>
 <p>In this case one will use an identifier <code class="docutils literal notranslate"><span class="pre">&lt;string&gt;</span> <span class="pre">&lt;float&gt;</span></code> in the input script, like so:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.bc.x.low  <span class="o">=</span> neumann   <span class="m">0</span>.0
-FieldSolverMultigrid.bc.x.high <span class="o">=</span> dirichlet <span class="m">1</span>.0
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.bc.x.low  = neumann   0.0
+FieldSolverMultigrid.bc.x.high = dirichlet 1.0
 </pre></div>
 </div>
 <p>The floating point number has a slightly different interpretation for the two types of BCs.
@@ -315,8 +315,8 @@ That is, for Dirichlet boundary conditions the solver will always multiply the p
 That is, the function <code class="docutils literal notranslate"><span class="pre">func(a_pos,</span> <span class="pre">a_time)</span></code> is the space-time function set through <code class="docutils literal notranslate"><span class="pre">setDomainSideBcFunction</span></code>.
 Recall that, by default, this function is set to one so that the default voltage that is parsed into the numerical discretization is simply the specified voltage multiplied by the specified fraction in the input script.
 For example, using</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.bc.y.low  <span class="o">=</span> dirichlet <span class="m">0</span>.0
-FieldSolverMultigrid.bc.y.high <span class="o">=</span> dirichlet <span class="m">1</span>.0
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.bc.y.low  = dirichlet 0.0
+FieldSolverMultigrid.bc.y.high = dirichlet 1.0
 </pre></div>
 </div>
 <p>will the set voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
@@ -425,36 +425,36 @@ For further details on the spatial discretization, see <a class="reference inter
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> has a number of switches for determining how it operates.
 Some of these switches are intended for parsing boundary conditions, whereas others are settings for operating multigrid or for I/O.
 The current list of configuration options are indicated below</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
-<span class="c1"># FieldSolverMultigrid class options</span>
-<span class="c1"># ====================================================================================================</span>
-FieldSolverMultigrid.verbosity         <span class="o">=</span> -1                <span class="c1"># Class verbosity</span>
-FieldSolverMultigrid.jump_bc           <span class="o">=</span> natural           <span class="c1"># Jump BC type (&#39;natural&#39; or &#39;saturation_charge&#39;)</span>
-FieldSolverMultigrid.bc.x.lo           <span class="o">=</span> dirichlet <span class="m">0</span>.0     <span class="c1"># Bc type (see docs)</span>
-FieldSolverMultigrid.bc.x.hi           <span class="o">=</span> dirichlet <span class="m">0</span>.0     <span class="c1"># Bc type (see docs)</span>
-FieldSolverMultigrid.bc.y.lo           <span class="o">=</span> dirichlet <span class="m">0</span>.0     <span class="c1"># Bc type (see docs)</span>
-FieldSolverMultigrid.bc.y.hi           <span class="o">=</span> dirichlet <span class="m">0</span>.0     <span class="c1"># Bc type (see docs)</span>
-FieldSolverMultigrid.bc.z.lo           <span class="o">=</span> dirichlet <span class="m">0</span>.0     <span class="c1"># Bc type (see docs)</span>
-FieldSolverMultigrid.bc.z.hi           <span class="o">=</span> dirichlet <span class="m">0</span>.0     <span class="c1"># Bc type (see docs)</span>
-FieldSolverMultigrid.plt_vars          <span class="o">=</span> phi rho E         <span class="c1"># Plot variables. Possible vars are &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;, &#39;sigma&#39;</span>
-FieldSolverMultigrid.kappa_source      <span class="o">=</span> <span class="nb">true</span>              <span class="c1"># Volume weighted space charge density or not (depends on algorithm)</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# FieldSolverMultigrid class options
+# ====================================================================================================
+FieldSolverMultigrid.verbosity         = -1                # Class verbosity
+FieldSolverMultigrid.jump_bc           = natural           # Jump BC type (&#39;natural&#39; or &#39;saturation_charge&#39;)
+FieldSolverMultigrid.bc.x.lo           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.hi           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.y.hi           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.z.lo           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.z.hi           = dirichlet 0.0     # Bc type (see docs)
+FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables. Possible vars are &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;, &#39;sigma&#39;
+FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
 
-FieldSolverMultigrid.gmg_verbosity     <span class="o">=</span> -1                <span class="c1"># GMG verbosity</span>
-FieldSolverMultigrid.gmg_pre_smooth    <span class="o">=</span> <span class="m">12</span>                <span class="c1"># Number of relaxations in downsweep</span>
-FieldSolverMultigrid.gmg_post_smooth   <span class="o">=</span> <span class="m">12</span>                <span class="c1"># Number of relaxations in upsweep</span>
-FieldSolverMultigrid.gmg_bott_smooth   <span class="o">=</span> <span class="m">12</span>                <span class="c1"># Number of at bottom level (before dropping to bottom solver)</span>
-FieldSolverMultigrid.gmg_min_iter      <span class="o">=</span> <span class="m">5</span>                 <span class="c1"># Minimum number of iterations</span>
-FieldSolverMultigrid.gmg_max_iter      <span class="o">=</span> <span class="m">32</span>                <span class="c1"># Maximum number of iterations</span>
-FieldSolverMultigrid.gmg_exit_tol      <span class="o">=</span> <span class="m">1</span>.E-10            <span class="c1"># Residue tolerance</span>
-FieldSolverMultigrid.gmg_exit_hang     <span class="o">=</span> <span class="m">0</span>.2               <span class="c1"># Solver hang</span>
-FieldSolverMultigrid.gmg_min_cells     <span class="o">=</span> <span class="m">16</span>                <span class="c1"># Bottom drop</span>
-FieldSolverMultigrid.gmg_bc_order      <span class="o">=</span> <span class="m">2</span>                 <span class="c1"># Boundary condition order for multigrid</span>
-FieldSolverMultigrid.gmg_bc_weight     <span class="o">=</span> <span class="m">2</span>                 <span class="c1"># Boundary condition weights (for least squares)</span>
-FieldSolverMultigrid.gmg_jump_order    <span class="o">=</span> <span class="m">2</span>                 <span class="c1"># Boundary condition order for jump conditions</span>
-FieldSolverMultigrid.gmg_jump_weight   <span class="o">=</span> <span class="m">2</span>                 <span class="c1"># Boundary condition weight for jump conditions (for least squares)</span>
-FieldSolverMultigrid.gmg_bottom_solver <span class="o">=</span> bicgstab          <span class="c1"># Bottom solver type. &#39;simple&#39;, &#39;bicgstab&#39;, or &#39;gmres&#39;</span>
-FieldSolverMultigrid.gmg_cycle         <span class="o">=</span> vcycle            <span class="c1"># Cycle type. Only &#39;vcycle&#39; supported for now.</span>
-FieldSolverMultigrid.gmg_smoother      <span class="o">=</span> red_black         <span class="c1"># Relaxation type. &#39;jacobi&#39;, &#39;multi_color&#39;, or &#39;red_black&#39;</span>
+FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity
+FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
+FieldSolverMultigrid.gmg_post_smooth   = 12                # Number of relaxations in upsweep
+FieldSolverMultigrid.gmg_bott_smooth   = 12                # Number of at bottom level (before dropping to bottom solver)
+FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of iterations
+FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
+FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
+FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
+FieldSolverMultigrid.gmg_min_cells     = 16                # Bottom drop
+FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
+FieldSolverMultigrid.gmg_bc_weight     = 2                 # Boundary condition weights (for least squares)
+FieldSolverMultigrid.gmg_jump_order    = 2                 # Boundary condition order for jump conditions
+FieldSolverMultigrid.gmg_jump_weight   = 2                 # Boundary condition weight for jump conditions (for least squares)
+FieldSolverMultigrid.gmg_bottom_solver = bicgstab          # Bottom solver type. &#39;simple&#39;, &#39;bicgstab&#39;, or &#39;gmres&#39;
+FieldSolverMultigrid.gmg_cycle         = vcycle            # Cycle type. Only &#39;vcycle&#39; supported for now.
+FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. &#39;jacobi&#39;, &#39;multi_color&#39;, or &#39;red_black&#39;
 </pre></div>
 </div>
 <p>Note that <em>all</em> options pertaining to IO or multigrid are run-time configurable (see <a class="reference internal" href="../Base/Control.html#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>).</p>
@@ -537,7 +537,7 @@ Setting the bottom solver to <code class="docutils literal notranslate"><span cl
 <div class="section" id="adjusting-output">
 <h3>Adjusting output<a class="headerlink" href="#adjusting-output" title="Permalink to this heading"></a></h3>
 <p>The user may plot the potential, the space charge, the electric, and the GMG residue as follows:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.plt_vars  <span class="o">=</span> phi rho E res     <span class="c1"># Plot variables. Possible vars are &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;
 </pre></div>
 </div>
 </div>
@@ -545,11 +545,11 @@ Setting the bottom solver to <code class="docutils literal notranslate"><span cl
 <span id="chap-poissondielectricbc"></span><h3>Saturation charge BC<a class="headerlink" href="#saturation-charge-bc" title="Permalink to this heading"></a></h3>
 <p>As mentioned above, on dielectric interfaces the user can choose to specify which “form” of <a class="reference internal" href="#equation-gaussbc">Eq. 4</a> to solve.
 If the user wants the natural form in which the surface charge is the free parameter, he can specify</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.which_jump <span class="o">=</span> natural
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.which_jump = natural
 </pre></div>
 </div>
 <p>To use the other format (in which one of the fluxes is specified), use</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.which_jump <span class="o">=</span> saturation_charge
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.which_jump = saturation_charge
 </pre></div>
 </div>
 <div class="admonition note">

@@ -67,7 +67,7 @@ The routines are used by :ref:`Chap:Driver` in the simulation setup step.
 registerRealms
 --------------
 
-``TimeStepper`` permits solvers to run on different realms (see :ref:`Chap:Realms`) for individual load balancing of various components.
+``TimeStepper`` permits solvers to run on different realms (see :ref:`Chap:Realm`) for individual load balancing of various components.
 To register a ``Realm``, users will have ``TimeStepper`` register realms in the ``registerRealms()``, as follows:
 
 .. code-block:: c++

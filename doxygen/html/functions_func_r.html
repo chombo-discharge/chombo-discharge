@@ -190,7 +190,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a35856a387301c7b15798216f5789dc0c">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classRtLayout.html#a516972ee9bc7da034f33803ded2dbd5d">RtLayout&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#aa5ba606d2ab6c1e8238063ed12d53076">RtSolver</a>
-, <a class="el" href="classSigmaSolver.html#a78b60e9d7e73d2b3e493c68d1be786cb">SigmaSolver</a>
+, <a class="el" href="classSurfaceODESolver.html#ac8a873019cdc9b08ce46800e7be0d2bd">SurfaceODESolver&lt; N &gt;</a>
 , <a class="el" href="classTimeStepper.html#a6ebd252f7be57801cd47b0fe060d89ee">TimeStepper</a>
 , <a class="el" href="classTracerParticleSolver.html#a38d76320140db2288eb6a13f96724443">TracerParticleSolver&lt; P &gt;</a>
 </li>
@@ -242,7 +242,7 @@ $(function() {
 , <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a67d5369557edb249c0721f603577bbc1">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>
 , <a class="el" href="classRtLayout.html#a832351a76afd5fbbdc1bd43d84fe6d7f">RtLayout&lt; T &gt;</a>
 , <a class="el" href="classRtSolver.html#ac789e6fd29391b49b3bc7e9df12f9603">RtSolver</a>
-, <a class="el" href="classSigmaSolver.html#acf92f173ca69e2a4950221e3142ccc47">SigmaSolver</a>
+, <a class="el" href="classSurfaceODESolver.html#ac888a390dae05e95f5d6b2800055b041">SurfaceODESolver&lt; N &gt;</a>
 , <a class="el" href="classTiledMeshRefine.html#a113e4a2023a3b483e54fe6a13d0127df">TiledMeshRefine</a>
 , <a class="el" href="classTimeStepper.html#a653b195c640ac95a01197b70b9e0e260">TimeStepper</a>
 , <a class="el" href="classTracerParticleSolver.html#add1cac43843a34b6e4a3113c2d22dfa1">TracerParticleSolver&lt; P &gt;</a>
@@ -250,9 +250,15 @@ $(function() {
 <li>regridAmr()
 : <a class="el" href="classAmrMesh.html#a9a8897dc00f6ac738080aba2ec29ad7a">AmrMesh</a>
 </li>
+<li>regridArithmetic()
+: <a class="el" href="classEBFineInterp.html#a1c733b786513adc42eebde122c8cdd6d">EBFineInterp</a>
+</li>
 <li>regridBase()
 : <a class="el" href="classPhaseRealm.html#a949afed30ee8c314894e4d4498a486ae">PhaseRealm</a>
 , <a class="el" href="classRealm.html#af7b956b920638c56071e9957e78090be">Realm</a>
+</li>
+<li>regridConservative()
+: <a class="el" href="classEBFineInterp.html#a6fe7e537978eca35f3c6845976c10071">EBFineInterp</a>
 </li>
 <li>regridInternals()
 : <a class="el" href="classDriver.html#a888e76dacb8fde6bd35f81ef7be8780b">Driver</a>
@@ -336,14 +342,17 @@ $(function() {
 <li>resetBC()
 : <a class="el" href="classMFHelmholtzJumpBC.html#a9d00ecfd9e54efe428a6ff87565e2201">MFHelmholtzJumpBC</a>
 </li>
-<li>resetCells()
-: <a class="el" href="classSigmaSolver.html#a028fcd50cbdf83ced892f3aae2b19f61">SigmaSolver</a>
-</li>
 <li>resetDielectricCells()
 : <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab0c5c239850803bda2008f9cd0a9b002">Physics::CdrPlasma::CdrPlasmaStepper</a>
 </li>
+<li>resetDielectrics()
+: <a class="el" href="classSurfaceODESolver.html#aa483d55dd7acd1a3ff50d27c3f734d6b">SurfaceODESolver&lt; N &gt;</a>
+</li>
 <li>resetDomainFlux()
 : <a class="el" href="classCdrSolver.html#a608cefd6b0a47c9ffc909d5d0297625d">CdrSolver</a>
+</li>
+<li>resetElectrodes()
+: <a class="el" href="classSurfaceODESolver.html#a375c53d0c10d23ac57e73abe21c7c4a9">SurfaceODESolver&lt; N &gt;</a>
 </li>
 <li>resetFluxRegister()
 : <a class="el" href="classCdrSolver.html#a9c8f5bd76e99d2e55746176942d4a84e">CdrSolver</a>
@@ -366,13 +375,13 @@ $(function() {
 : <a class="el" href="classPhysics_1_1StreamerInception_1_1StreamerInceptionStepper.html#a4af5e3f69d3f0966ee8105578c7cc9a7">Physics::StreamerInception::StreamerInceptionStepper&lt; P, F, C &gt;</a>
 </li>
 <li>RodIF()
-: <a class="el" href="classRodIF.html#a8c1fd8fbd686fcae2709656c6d48956f">RodIF</a>
+: <a class="el" href="classRodIF.html#a2b773d4772aa56912c263af880503936">RodIF</a>
 </li>
 <li>roof()
-: <a class="el" href="classDataOps.html#ab9eecb9d5aa052cc3569b09e325909f6">DataOps</a>
+: <a class="el" href="classDataOps.html#a44be6edb8a25b5d7c028f2286a2a095d">DataOps</a>
 </li>
 <li>RoundedBoxIF()
-: <a class="el" href="classRoundedBoxIF.html#a2d2b871e953b32ccf3cc5612808b8b86">RoundedBoxIF</a>
+: <a class="el" href="classRoundedBoxIF.html#ac61e74dec3192fd775bbcfd56aba5524">RoundedBoxIF</a>
 </li>
 <li>RoundedCylinderIF()
 : <a class="el" href="classRoundedCylinderIF.html#ac15b73f982bff885b235b57b50186f89">RoundedCylinderIF</a>
@@ -381,7 +390,7 @@ $(function() {
 : <a class="el" href="classLoadBalancing.html#a32d0cf7d91b7006c51cc245a75362d6a">LoadBalancing</a>
 </li>
 <li>RteSpeciesJSON()
-: <a class="el" href="classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html#a5998f9d3721bda4257bab0d1838df593">Physics::CdrPlasma::RteSpeciesJSON</a>
+: <a class="el" href="classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html#a605f3360554fa35016c03e8e05a81482">Physics::CdrPlasma::RteSpeciesJSON</a>
 </li>
 <li>RtFactory()
 : <a class="el" href="classRtFactory.html#adc2a159d3d15576922a15e464e760ad7">RtFactory&lt; T, S &gt;</a>
@@ -399,7 +408,7 @@ $(function() {
 : <a class="el" href="classRtSpecies.html#ab7457bcfbaf1d3cdc61ef0e19f358ab9">RtSpecies</a>
 </li>
 <li>RtStorage()
-: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1RtStorage.html#ad0176d317afecfac52ba65e6c0a48cf5">Physics::CdrPlasma::CdrPlasmaGodunovStepper::RtStorage</a>
+: <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1RtStorage.html#a81994342a306bdb02e7175407c3b3e2b">Physics::CdrPlasma::CdrPlasmaGodunovStepper::RtStorage</a>
 </li>
 <li>run()
 : <a class="el" href="classDriver.html#aa52e9e3c4a04da44ecc3af54ac5d9245">Driver</a>

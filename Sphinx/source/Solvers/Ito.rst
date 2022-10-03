@@ -406,7 +406,7 @@ _____________
 To specify the mobility interpolation, use ``ItoSolver.mobility_interp``.
 Valid options are ``direct`` and ``velocity``, see :ref:`Chap:ItoInterpolation`.
 
-Deposition and coarse-fine deposition (see :ref:`Chap:ParticleDeposition`) is controlled using the flags
+Deposition and coarse-fine deposition (see :ref:`Chap:ParticleMesh`) is controlled using the flags
 
 * ``ItoSolver.deposition`` for the base deposition scheme.
   Valid options are ``ngp``, ``cic``, and ``tsc``.

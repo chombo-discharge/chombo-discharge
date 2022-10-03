@@ -213,7 +213,7 @@ This routine should parse options into the <code class="docutils literal notrans
 <h3>parseRuntimeOptions<a class="headerlink" href="#parseruntimeoptions" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">parseRuntimeOptions</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> after each grid step.
 This routine will re-read class options into the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> instance.
-See <span class="xref std std-ref">Chap:RuntimeConfig:</span> for further details.</p>
+See <a class="reference internal" href="../Base/Control.html#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a> for further details.</p>
 </div>
 <div class="section" id="getnumberofplotvariables">
 <h3>getNumberOfPlotVariables<a class="headerlink" href="#getnumberofplotvariables" title="Permalink to this heading"></a></h3>
@@ -229,9 +229,9 @@ The functionality is the same as for <a class="reference internal" href="TimeSte
 <h2>Restrict tagging<a class="headerlink" href="#restrict-tagging" title="Permalink to this heading"></a></h2>
 <p>It is possible to prevent <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> from adding refinement flags in specified regions.
 The default behavior is to add a number of boxes where refinement and coarsening is allowed:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>MyCellTagger.num_boxes   <span class="o">=</span> <span class="m">0</span>            <span class="c1"># Number of allowed tag boxes (0 = tags allowe everywhere)</span>
-MyCellTagger.box1_lo     <span class="o">=</span> <span class="m">0</span>.0 <span class="m">0</span>.0 <span class="m">0</span>.0  <span class="c1"># Only allow tags that fall between</span>
-MyCellTagger.box1_hi     <span class="o">=</span> <span class="m">1</span>.0 <span class="m">1</span>.0 <span class="m">1</span>.0  <span class="c1"># these two corners</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>MyCellTagger.num_boxes   = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+MyCellTagger.box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
+MyCellTagger.box1_hi     = 1.0 1.0 1.0  # these two corners
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">MyCellTagger</span></code> is a placeholder for the name of the class that is used.
@@ -245,7 +245,7 @@ This has been done for performance and communication reasons.
 Under the hood, the <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> is an array of boolean values on a patch which is very fast and simple to communicate with MPI.
 Adding a grid cell for refinement which lies outside the patch will lead to memory corruptions.
 It is nonetheless still possible to do this by growing the final generated tags like so:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>MyCellTagger.buffer <span class="o">=</span> <span class="m">4</span> <span class="c1"># Add a buffer region around the tagged cells</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>MyCellTagger.buffer = 4 # Add a buffer region around the tagged cells
 </pre></div>
 </div>
 <p>Just before passing the flags into <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> grid generation routines, the tagged cells are put in a different data holder (<code class="docutils literal notranslate"><span class="pre">IntVectSet</span></code>) and this data holder <em>can</em> contain cells that are outside the patch boundaries.</p>

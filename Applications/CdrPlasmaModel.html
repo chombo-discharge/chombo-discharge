@@ -229,8 +229,8 @@ This physics model also includes the following subfolders:</p>
 <li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/python</span></code> contains Python source files for quickly setting up new applications.</p></li>
 </ul>
 <p>In the CDR plasma model we are solving</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}&amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0},\\
+<div class="math notranslate nohighlight" id="equation-cdrplasmaequations">
+<span class="eqno">(7)<a class="headerlink" href="#equation-cdrplasmaequations" title="Permalink to this equation"></a></span>\[\begin{split}&amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0},\\
 &amp;\frac{\partial\sigma}{\partial t} = F_\sigma,\\
 &amp;\frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n\right) = S,\end{split}\]</div>
 <p>The above equations must be supported by additional boundary conditions on electrodes and insulating surfaces.</p>
@@ -247,7 +247,7 @@ They can easily be adapted to e.g. scattering media.
 They are, on the other hand, inherently stochastic which implies that some extra caution must be exercised when integrating the equations of motion.</p>
 <p>The coupling that is (currently) available in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is</p>
 <div class="math notranslate nohighlight" id="equation-cdrplasmacoupling">
-<span class="eqno">(7)<a class="headerlink" href="#equation-cdrplasmacoupling" title="Permalink to this equation"></a></span>\[\begin{split}\epsilon_r =&amp; \epsilon_r(\mathbf{x}), (\textrm{can additionally be discontinuous}), \\
+<span class="eqno">(8)<a class="headerlink" href="#equation-cdrplasmacoupling" title="Permalink to this equation"></a></span>\[\begin{split}\epsilon_r =&amp; \epsilon_r(\mathbf{x}), (\textrm{can additionally be discontinuous}), \\
 \mathbf{v} =&amp; \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
 D =&amp; \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
 S =&amp; S\left(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi\right),\\
@@ -262,12 +262,12 @@ F =&amp; F(t, \mathbf{x}, \mathbf{E}, n),\end{split}\]</div>
 <li><p>Advection-diffusion-reaction solver, <a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>.</p></li>
 <li><p>Electrostatics solvers, <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a>.</p></li>
 <li><p>Radiative transfer solver (either Monte-Carlo or continuum approximation), <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a>.</p></li>
-<li><p>Surface charge solver, <span class="xref std std-ref">Chap:SigmaSolver</span>.</p></li>
+<li><p>Surface charge solver, see <a class="reference internal" href="../Solvers/SurfaceODESolver.html#chap-surfaceodesolver"><span class="std std-ref">Surface ODE solver</span></a>.</p></li>
 </ol>
 </div>
 <div class="section" id="cdrplasmaphysics">
 <span id="chap-cdrplasmaphysics"></span><h2>CdrPlasmaPhysics<a class="headerlink" href="#cdrplasmaphysics" title="Permalink to this heading"></a></h2>
-<p><a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in <a class="reference internal" href="#equation-cdrplasmacoupling">Eq. 7</a>.
+<p><a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in <a class="reference internal" href="#equation-cdrplasmacoupling">Eq. 8</a>.
 The source code for the class resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CD_CdrPlasmaPhysics.H</span></code>.
 Note that the entire class is an interface, whose implementations are used by the time integrators that advance the equations.</p>
 <p>There are no default input parameters for <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>, as users must generally implement their own kinetics.
@@ -497,12 +497,12 @@ Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are
 </div>
 <div class="section" id="time-discretizations">
 <h2>Time discretizations<a class="headerlink" href="#time-discretizations" title="Permalink to this heading"></a></h2>
-<p>Here, we discuss two discretizations of <code class="xref eq docutils literal notranslate"><span class="pre">CdrPlasmaEquations</span></code>.
+<p>Here, we discuss two discretizations of <a class="reference internal" href="#equation-cdrplasmaequations">Eq. 7</a>.
 Firstly, note that there are two layers to the time integrators:</p>
 <ol class="arabic simple">
 <li><p>A pure class <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> which inherits from <code class="docutils literal notranslate"><span class="pre">TimeSteppers</span></code> but does not implement an <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.
 This class simply provides the base functionality for more easily developing time integrators.
-<code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> contains methods that are necessary for coupling the solvers, e.g. calling the <span class="xref std std-ref">CdrPlasmaPhysics</span> methods at the correct time.</p></li>
+<code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> contains methods that are necessary for coupling the solvers, e.g. calling the <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> methods at the correct time.</p></li>
 <li><p>Implementations of <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code>, which implement the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method and can thus be used for advancing models.</p></li>
 </ol>
 <p>The supported time integrators are located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/CdrPlasma/TimeSteppers</span></code>.
@@ -654,10 +654,10 @@ For an introduction to the particle radiative transfer solver, see <a class="ref
 <p>The user must use one of the following:</p>
 <ol class="arabic">
 <li><p>Set the following class options:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CdrPlasmaJSON.discrete_photons <span class="o">=</span> <span class="nb">true</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CdrPlasmaJSON.discrete_photons = true
 
-McPhoto.photon_generation <span class="o">=</span> deterministic
-McPhoto.source_type       <span class="o">=</span> number
+McPhoto.photon_generation = deterministic
+McPhoto.source_type       = number
 </pre></div>
 </div>
 <p>When specifying <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON.discrete_photons=true</span></code>, <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> will do a Poisson sampling of the number of photons that are generated in each cell and put this in the radiative transfer solvers’ source terms.
@@ -665,10 +665,10 @@ This means that the radiative transfer solver source terms <em>contain the physi
 To turn off sampling inside the radiative transfer solver, we specify <code class="docutils literal notranslate"><span class="pre">McPhoto.photon_generation</span> <span class="pre">=</span> <span class="pre">stochastic</span></code> and set <code class="docutils literal notranslate"><span class="pre">McPhoto.source_type</span> <span class="pre">=</span> <span class="pre">number</span></code> to let the solver know that the source contains the number of physical photons.</p>
 </li>
 <li><p>Set the following class options:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CdrPlasmaJSON.discrete_photons <span class="o">=</span> <span class="nb">false</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CdrPlasmaJSON.discrete_photons = false
 
-McPhoto.photon_generation <span class="o">=</span> stochastic
-McPhoto.source_type       <span class="o">=</span> volume_rate
+McPhoto.photon_generation = stochastic
+McPhoto.source_type       = volume_rate
 </pre></div>
 </div>
 <p>In this case the <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> class will fill the solver source terms with the volumetric rate, i.e. the number of photons produced per unit volume and time.
@@ -754,7 +754,7 @@ In this case one must specify the extra fields</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">res</span> <span class="pre">height</span></code> For setting the height resolution in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> internal table.</p></li>
 </ul>
 <p>For example, assume that our file <code class="docutils literal notranslate"><span class="pre">MyAtmosphere.dat</span></code> contains the following data:</p>
-<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># z [m]              rho [kg/m^3]    T [K]           p [Pa]
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># z [m]              rho [kg/m^3]    T [K]           p [Pa]
 0.0000000E+00        1.2900000E+00   2.7210000E+02   1.0074046E+05
 1.0000000E+03        1.1500000E+00   2.6890000E+02   8.8751220E+04
 2.0000000E+03        1.0320000E+00   2.6360000E+02   7.8074784E+04
@@ -1442,7 +1442,7 @@ For example:</p>
 The file parser will read the files below the header line until it reaches an empty line.
 The fields <code class="docutils literal notranslate"><span class="pre">E/N</span></code> and <code class="docutils literal notranslate"><span class="pre">rate/N</span></code> indicate the columns where the reduced electric field and reaction rates are stored.</p>
 <p>The final fields <code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">E/N</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">E/N</span></code>, and <code class="docutils literal notranslate"><span class="pre">points</span></code> are formatting fields that trim the range of the data input and organizes the data along a table with <code class="docutils literal notranslate"><span class="pre">points</span></code> entries.
-As with the mobilities (see <span class="xref std std-ref">Chap:CdrPlasmaJSONMobilities</span>), the <code class="docutils literal notranslate"><span class="pre">spacing</span></code> argument determines whether or not the internal interpolation table uses uniform or exponential grid point spacing.
+As with the mobilities (see <a class="reference internal" href="#chap-cdrplasmajsonmobility"><span class="std std-ref">Mobilities</span></a>), the <code class="docutils literal notranslate"><span class="pre">spacing</span></code> argument determines whether or not the internal interpolation table uses uniform or exponential grid point spacing.
 Finally, the <code class="docutils literal notranslate"><span class="pre">dump</span></code> argument will tell <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> to dump the table to file, which is useful for debugging or quality assurance of the tabulated data.</p>
 </div>
 <div class="section" id="collisional-quenching">
@@ -1575,7 +1575,7 @@ This is not a fundamental limitation, but a restriction imposed by the JSON inte
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>The rules for specifying reaction strings are the same as for the plasma reactions, see <span class="xref std std-ref">CdrPlasmaReactionsJSON</span>.
+<p>The rules for specifying reaction strings are the same as for the plasma reactions, see <a class="reference internal" href="#chap-cdrplasmareactionsjson"><span class="std std-ref">Plasma reactions</span></a>.
 Wildcards also apply, see <a class="reference internal" href="#cdrplasma-wildcards"><span class="std std-ref">Wildcards</span></a>.</p>
 </div>
 <div class="section" id="default-behavior">

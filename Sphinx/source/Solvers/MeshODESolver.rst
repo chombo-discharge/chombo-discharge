@@ -156,7 +156,7 @@ I/O
 The user can add :math:`\vec{\phi}` and :math:`\vec{S}` to output files by specifying these in the input script.
 These variables are named
 
-.. code-block:: txt
+.. code-block:: text
 
    MeshODESolver.plt_vars = phi rhs
 

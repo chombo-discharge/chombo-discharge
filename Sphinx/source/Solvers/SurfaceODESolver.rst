@@ -17,10 +17,10 @@ The surface charge solver is implemented as
 
 .. code-block:: c++
 
-   template <size_t N = 1>
+   template <int N = 1>
    class SurfaceODESolver;
 
-where :math:`N` indicates the number of variables stored in each cut cell. 
+where :math:`N` indicates the number of variables stored in each cut cell.
 
 Instantiation
 -------------
@@ -29,7 +29,7 @@ To instantiate the solver, use the default constructor
 
 .. code-block:: c++
 
-   template <size_t N>
+   template <int N>
    SurfaceODESolver<N>::SurfaceODESolver();
 
 The solver also requires a reference to :ref:`Chap:AmrMesh`, and the computational geometry such that a full instantiation example is
@@ -51,7 +51,7 @@ To set :math:`\vec{\phi}` on the mesh, one can fetch the underlying data by call
 
 .. code-block:: c++
 
-   template <size_t N>
+   template <int N>
    EBAMRIVData&
    SurfaceODESolver<N>::getPhi() noexcept;
 
@@ -65,7 +65,7 @@ To set the data directly, ``SurfaceODESolver`` defines a function
 
 .. code-block:: c++
 
-   template <size_t N>
+   template <int N>
    void
    SurfaceODESolver<N>::setPhi(std::function<std::array<Real, N>(const RealVect pos)>& a_func);
 
@@ -81,7 +81,7 @@ To set :math:`\vec{F}` on the mesh, one can fetch the underlying data by calling
 
 .. code-block:: c++
 
-   template <size_t N>
+   template <int N>
    EBAMRIVData&
    SurfaceODESolver<N>::getRHS() noexcept;
 
@@ -95,7 +95,7 @@ To set the right-hand side directly, ``SurfaceODESolver`` defines a function
 
 .. code-block:: c++
 
-   template <size_t N>
+   template <int N>
    void
    SurfaceODESolver<N>::setRHS(std::function<std::array<Real, N>(const RealVect pos)>& a_func);
 
@@ -109,11 +109,11 @@ The function signatures are
 
 .. code-block::
 
-   template <size_t N>
+   template <int N>
    void
    SurfaceODESolver<N>::resetElectrodeCells(const Real a_value);
 
-   template <size_t N>
+   template <int N>
    void
    SurfaceODESolver<N>::resetDielectricCells(const Real a_value);
 
@@ -127,7 +127,7 @@ When regridding the ``SurfaceODESolver``, one should call
 
 .. code-block:: c++
 
-   template <size_t N>
+   template <int N>
    void
    SurfaceODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept;
 
@@ -137,7 +137,7 @@ After :ref:`Chap:AmrMesh` has generated the new grids, :math:`\vec{\phi}` can be
 
 .. code-block:: c++
 
-   template <size_t N>
+   template <int N>
    SurfaceODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept;
 
 Note that when interpolating to the new grids one can choose to initialize data in the new cells using the value in the underlying coarse cells, i.e.
@@ -162,13 +162,13 @@ where :math:`\mathbf{i}_{\textrm{fine}}` is set of cut-cells that occur when ref
 In this case :math:`\vec{\phi}` is strictly conserved.
 Users can switch between these two methods by specifying the regridding type in the input script:
 
-.. code-block:: txt
+.. code-block:: text
 
    SurfaceODESolver.regridding = arithmetic
 
 or
 
-.. code-block:: txt
+.. code-block:: text
 
    SurfaceODESolver.regridding = conservative
 
@@ -178,7 +178,7 @@ I/O
 The user can add :math:`\vec{\phi}` and :math:`\vec{F}` to output files by specifying these in the input script.
 These variables are named
 
-.. code-block:: txt
+.. code-block:: text
 
    SurfaceODESolver.plt_vars = phi rhs
 
