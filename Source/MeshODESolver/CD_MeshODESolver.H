@@ -99,6 +99,7 @@ public:
   */
   virtual void
   setPhi(const std::function<Real(const RealVect& a_pos)>& a_phiFunc, const size_t a_comp) noexcept;
+
   /*!
     @brief Set phi everywhere. 
     @param[in] a_phiFunc Phi function. 
@@ -185,6 +186,13 @@ public:
   */
   virtual std::string
   getName() const noexcept;
+
+  /*!
+    @brief Set solver name
+    @param[in] a_name Solver name
+  */
+  virtual void
+  setName(const std::string& a_name) noexcept;
 
   /*!
     @brief Get output plot names

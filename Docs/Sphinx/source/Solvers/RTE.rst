@@ -7,6 +7,10 @@ Radiative transfer is supported in the diffusion (i.e. Eddington or Helmholtz) a
 The solvers share a common interface (a parent class), but note that the radiative transfer equation is inherently deterministic while Monte Carlo photon transport is inherently stochastic. 
 The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or ''stationary'' transport.
 
+.. note::
+
+   The source code for the radiative transfer solvers reside in :file:`Source/RadiativeTransfer`
+
 .. _Chap:RtSpecies:
 
 RtSpecies

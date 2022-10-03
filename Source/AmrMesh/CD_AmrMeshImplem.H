@@ -508,14 +508,21 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
   RefCountedPtr<BaseIF> implicitFunction;
 
   switch (a_phase) {
-  case phase::gas:
+  case phase::gas: {
     implicitFunction = m_baseif.at(phase::gas);
+
     break;
-  case phase::solid:
+  }
+  case phase::solid: {
     implicitFunction = m_baseif.at(phase::solid);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("AmrMesh::removeCoveredParticlesIF - logic bust");
+
+    break;
+  }
   }
 
   // Get the realm where the particles live.
@@ -712,14 +719,21 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
   RefCountedPtr<BaseIF> implicitFunction;
 
   switch (a_phase) {
-  case phase::gas:
+  case phase::gas: {
     implicitFunction = m_baseif.at(phase::gas);
+
     break;
-  case phase::solid:
+  }
+  case phase::solid: {
     implicitFunction = m_baseif.at(phase::solid);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("AmrMesh::intersectParticlesRaycastIF - logic bust");
+
+    break;
+  }
   }
 
   // Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain
@@ -794,10 +808,9 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
                 ebParticles.add(lit());
               }
             }
-            else { // Crashed with domain "first".
-              const Real sSafety = std::max(0.0,
-                                            sDomain -
-                                              safety); // To prevent particles falling off the high side of the domain
+            else {
+              // Crashed with domain "first". Safety factor is to prevent particles falling off the high side of the domain
+              const Real sSafety = std::max(0.0, sDomain - safety);
 
               particle.position() = oldPos + sSafety * path;
 
@@ -848,14 +861,21 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
   RefCountedPtr<BaseIF> implicitFunction;
 
   switch (a_phase) {
-  case phase::gas:
+  case phase::gas: {
     implicitFunction = m_baseif.at(phase::gas);
+
     break;
-  case phase::solid:
+  }
+  case phase::solid: {
     implicitFunction = m_baseif.at(phase::solid);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("AmrMesh::intersectParticlesBisectIF - logic bust");
+
+    break;
+  }
   }
 
   // Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain

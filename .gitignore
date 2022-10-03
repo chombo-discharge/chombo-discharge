@@ -46,7 +46,7 @@ docs
 Docs/*
 !Docs/.nojekyll
 !Docs/Sphinx/
-!Docs/Doxyfile
+!Docs/doxygen.conf
 !Docs/README.md
 Docs/Sphinx/build
 Docs/**/*.dat

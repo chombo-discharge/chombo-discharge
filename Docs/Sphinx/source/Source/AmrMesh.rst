@@ -64,7 +64,12 @@ The API of ``AmrMesh`` is quite extensive, and it has functionality both for pro
 * Updating ghost cells.
 * Interpolating data to e.g. EB centroids.
 
-The `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ is a good place to start for figuring out the ``AmrMesh`` functionality. 
+The `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ is a good place to start for figuring out the ``AmrMesh`` functionality.
+
+.. _Chap:AmrParticleIntersection:
+
+Particle intersection
+---------------------
 
 Class options
 -------------
