@@ -2,5 +2,5 @@
 # SurfaceODESolver solver settings. 
 # ====================================================================================================
 SurfaceODESolver.verbosity = -1                # Chattiness
-SurfaceODESolver.regrid    = conservative      # Regrid method. 'conservative' or 'arithemtic'
-SurfaceODESolver.plt_vars  = phi rhs           # Plot variables. Can be left empty.
+SurfaceODESolver.regrid    = conservative      # Regrid method. 'conservative' or 'arithmetic'
+SurfaceODESolver.plt_vars  = phi               # Plot variables. Valid arguments are 'phi' and 'rhs'
