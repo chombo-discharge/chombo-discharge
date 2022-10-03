@@ -54,7 +54,8 @@ We aim for (but cannot guarantee) backward compatibility such that existing ``ch
    div#design.section,
    div#discretization.section,   
    div#solvers.section,
-   div#physics-models.section,
+   div#physics-applications.section,
+   div#solver-models.section,   
    div#tutorial.section,
    div#utilities.section,
    div#contributing.section,
@@ -136,8 +137,8 @@ Solvers
    Solvers/TracerParticles
    Solvers/Ito
 
-Multi-physics applications
-**************************
+Physics applications
+********************
 
 .. toctree::
    :maxdepth: 3
@@ -148,8 +149,8 @@ Multi-physics applications
    Applications/StreamerInceptionModel
 ..   ItoPlasmaModel   
 
-Single-solver applications
-**************************
+Solver applications
+*******************
 
 .. toctree::
    :maxdepth: 3
