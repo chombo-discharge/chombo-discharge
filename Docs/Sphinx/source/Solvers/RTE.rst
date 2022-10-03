@@ -163,7 +163,7 @@ Boundary condition types
 
 #. **Dirichlet**.
    For Dirichlet boundary conditions we specify the value of :math:`\Psi` on the boundary.
-   Note that this involves reconstructing the gradient :math:`\partial_n\Psi` on domain faces and edges, see :ref:`Chap:LinearSolversDirichletBC`. 
+   Note that this involves reconstructing the gradient :math:`\partial_n\Psi` on domain faces and edges, see :ref:`Chap:LinearSolverDirichletBC`. 
 #. **Neumann**.
    For Neumann boundary conditions we specify the value of :math:`\partial_n\Psi` on the boundary.
    Note that the linear solver interface also supports setting :math:`B\partial_n\Psi` on the boundary (where :math:`B` is the Helmholtz equation :math:`B` coefficient).

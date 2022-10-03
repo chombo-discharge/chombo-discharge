@@ -13,7 +13,9 @@ This physics model also includes the following subfolders:
 
 In the CDR plasma model we are solving
 
+
 .. math::
+   :label: CdrPlasmaEquations
       
    &\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0},\\
    &\frac{\partial\sigma}{\partial t} = F_\sigma,\\
@@ -63,7 +65,7 @@ This module uses the following solvers:
 #. Advection-diffusion-reaction solver, :ref:`Chap:CdrSolver`.
 #. Electrostatics solvers, :ref:`Chap:FieldSolver`.
 #. Radiative transfer solver (either Monte-Carlo or continuum approximation), :ref:`Chap:RtSolver`.
-#. Surface charge solver, :ref:`Chap:SigmaSolver`. 
+#. Surface charge solver, see :ref:`Chap:SurfaceODESolver`. 
 
 .. _Chap:CdrPlasmaPhysics:
 
@@ -343,7 +345,7 @@ Firstly, note that there are two layers to the time integrators:
 
 #. A pure class ``CdrPlasmaStepper`` which inherits from ``TimeSteppers`` but does not implement an ``advance`` method.
    This class simply provides the base functionality for more easily developing time integrators.
-   ``CdrPlasmaStepper`` contains methods that are necessary for coupling the solvers, e.g. calling the :ref:`CdrPlasmaPhysics` methods at the correct time.
+   ``CdrPlasmaStepper`` contains methods that are necessary for coupling the solvers, e.g. calling the :ref:`Chap:CdrPlasmaPhysics` methods at the correct time.
 #. Implementations of ``CdrPlasmaPhysics``, which implement the ``advance`` method and can thus be used for advancing models.
    
 The supported time integrators are located in :file:`$DISCHARGE_HOME/CdrPlasma/TimeSteppers`.
@@ -813,7 +815,7 @@ To specify temperature, density, and pressure as function of altitude, set ``law
 
 For example, assume that our file ``MyAtmosphere.dat`` contains the following data:
 
-.. code-block:: txt
+.. code-block:: text
 
    # z [m]              rho [kg/m^3]    T [K]           p [Pa]
    0.0000000E+00	1.2900000E+00	2.7210000E+02	1.0074046E+05
@@ -1617,7 +1619,7 @@ The file parser will read the files below the header line until it reaches an em
 The fields ``E/N`` and ``rate/N`` indicate the columns where the reduced electric field and reaction rates are stored.
 
 The final fields ``min E/N``, ``max E/N``, and ``points`` are formatting fields that trim the range of the data input and organizes the data along a table with ``points`` entries.
-As with the mobilities (see :ref:`Chap:CdrPlasmaJSONMobilities`), the ``spacing`` argument determines whether or not the internal interpolation table uses uniform or exponential grid point spacing.
+As with the mobilities (see :ref:`Chap:CdrPlasmaJSONMobility`), the ``spacing`` argument determines whether or not the internal interpolation table uses uniform or exponential grid point spacing.
 Finally, the ``dump`` argument will tell ``chombo-discharge`` to dump the table to file, which is useful for debugging or quality assurance of the tabulated data.
 
 
@@ -1778,7 +1780,7 @@ For example:
      ]
    }
 
-The rules for specifying reaction strings are the same as for the plasma reactions, see :ref:`CdrPlasmaReactionsJSON`.
+The rules for specifying reaction strings are the same as for the plasma reactions, see :ref:`Chap:CdrPlasmaReactionsJSON`.
 Wildcards also apply, see :ref:`CdrPlasma:Wildcards`.
 
 Default behavior

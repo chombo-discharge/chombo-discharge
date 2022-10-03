@@ -162,13 +162,13 @@ where :math:`\mathbf{i}_{\textrm{fine}}` is set of cut-cells that occur when ref
 In this case :math:`\vec{\phi}` is strictly conserved.
 Users can switch between these two methods by specifying the regridding type in the input script:
 
-.. code-block:: txt
+.. code-block:: text
 
    SurfaceODESolver.regridding = arithmetic
 
 or
 
-.. code-block:: txt
+.. code-block:: text
 
    SurfaceODESolver.regridding = conservative
 
@@ -178,7 +178,7 @@ I/O
 The user can add :math:`\vec{\phi}` and :math:`\vec{F}` to output files by specifying these in the input script.
 These variables are named
 
-.. code-block:: txt
+.. code-block:: text
 
    SurfaceODESolver.plt_vars = phi rhs
 

@@ -74,7 +74,7 @@ ___________________
 
 ``parseRuntimeOptions`` is called by :ref:`Chap:Driver` after each grid step.
 This routine will re-read class options into the ``CellTagger`` instance.
-See :ref:`Chap:RuntimeConfig:` for further details.
+See :ref:`Chap:RuntimeConfig` for further details.
 
 getNumberOfPlotVariables
 ________________________

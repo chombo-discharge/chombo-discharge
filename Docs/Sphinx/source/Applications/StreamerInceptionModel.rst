@@ -119,7 +119,7 @@ We also compute the probability of a first electron appearing in the time interv
    
    \Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\Delta t
 
-When running in transient mode the user must set the voltage curve (see :ref:`StreamerInceptionVoltageCurve`) and pay particular caution to setting the initial ion density, mobility, and detachment rates.
+When running in transient mode the user must set the voltage curve (see :ref:`Chap:StreamerInceptionVoltageCurve`) and pay particular caution to setting the initial ion density, mobility, and detachment rates.
 
 .. _Chap:StreamerInceptionInputData:
 

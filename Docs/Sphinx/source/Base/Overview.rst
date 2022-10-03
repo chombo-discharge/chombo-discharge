@@ -60,6 +60,3 @@ This includes much faster grid generation, support for polygon surfaces, and man
 
 ``chombo-discharge`` supports both fluid and particle methods, and can use multiply parallel distributed grids (see :ref:`Chap:Realm`) for individually load balancing particle and fluid kernels. 
 Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into ``chombo-discharge`` and still use the embedded boundary formalism, ``chombo-discharge`` also provides several physics modules for describing various types of problems.
-See e.g. :ref:`Chap:ImplementedModels`.
-
-

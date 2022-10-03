@@ -31,7 +31,7 @@ To compile for production runs, ``chombo-discharge`` should generally speaking b
 
    make -s -j32 DIM=2 OPT=HIGH DEBUG=FALSE <application_name>
 
-Recall also that default settings for the dimension (``DIM``), optimization level (``OPT``), and debug mode (``DEBUG``) can be set in :file:`Make.defs.local`, see :ref:`Chap:GettingStarted`. 
+Recall also that default settings for the dimension (``DIM``), optimization level (``OPT``), and debug mode (``DEBUG``) can be set in :file:`Make.defs.local`, see :ref:`Chap:Installation`. 
 
 Running applications
 --------------------
