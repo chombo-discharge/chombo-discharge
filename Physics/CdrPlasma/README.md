@@ -13,7 +13,7 @@ The folders contains
 To set up a new problem, use the Python script. For example:
 
 ```shell
-./setup.py -base_dir=MyApplications -app_name=MyPlasmaModel -dim=2 -geometry=CoaxialCable
+./setup.py -base_dir=MyApplications -app_name=MyPlasmaModel -geometry=CoaxialCable
 ```
 
 The application will be installed to $DISCHARGE_HOME/MyApplications/MyPlasmaApplication

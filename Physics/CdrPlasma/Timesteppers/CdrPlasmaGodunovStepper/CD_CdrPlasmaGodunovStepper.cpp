@@ -107,6 +107,7 @@ CdrPlasmaGodunovStepper::parseRuntimeOptions()
   m_cdr->parseRuntimeOptions();
   m_rte->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
+  m_sigma->parseRuntimeOptions();
 
   // Physics also parses run-time options
   m_physics->parseRuntimeOptions();
@@ -1026,7 +1027,7 @@ CdrPlasmaGodunovStepper::computeSigmaFlux()
   }
 
   // Reset the data holder that holds the solver charge flux.
-  EBAMRIVData& flux = m_sigma->getFlux();
+  EBAMRIVData& flux = m_sigma->getRHS();
   DataOps::setValue(flux, 0.0);
 
   // Run through the CDR solvers and increment by their fluxes.
@@ -1044,7 +1045,7 @@ CdrPlasmaGodunovStepper::computeSigmaFlux()
   }
 
   // Reset the flux on electrode interface cells.
-  m_sigma->resetCells(flux);
+  m_sigma->resetElectrodes(flux, 0.0);
 }
 
 void
@@ -1215,7 +1216,7 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
   // Advance the sigma equation. This may seem weird but we've kept the flux through the EB constant during the transport step, so it
   // doesn't matter if we did an Euler or Heun advance in the advective step.
   EBAMRIVData&       sigma = m_sigma->getPhi();
-  const EBAMRIVData& rhs   = m_sigma->getFlux();
+  const EBAMRIVData& rhs   = m_sigma->getRHS();
 
   DataOps::incr(sigma, rhs, a_dt);
 }

@@ -980,7 +980,11 @@ CdrPlasmaImExSdcStepper::integrateAdvection(const Real a_dt, const int a_m, cons
   EBAMRIVData&       sigma_m1 = m_sigmaScratch->getSigmaSolver()[a_m + 1];
   EBAMRIVData&       Fsig_new = m_sigmaScratch->getFnew()[a_m];
   const EBAMRIVData& sigma_m  = m_sigmaScratch->getSigmaSolver()[a_m];
+#if 1 // New code after SigmaSolver -> SurfaceODESolver
+  DataOps::copy(Fsig_new, m_sigma->getRHS());
+#else
   m_sigma->computeRHS(Fsig_new); // Fills Fsig_new with BCs from CDR solvers
+#endif
   DataOps::copy(sigma_m1, sigma_m);
   DataOps::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
 }
@@ -1111,7 +1115,11 @@ CdrPlasmaImExSdcStepper::reconcileIntegrands()
 
   // Compute Fsig_p - that wasn't done either
   EBAMRIVData& Fnew_p = m_sigmaScratch->getFnew()[m_p];
+#if 1 // New code after SigmaSolver -> SurfaceODESolver
+  DataOps::copy(Fnew_p, m_sigma->getRHS());
+#else
   m_sigma->computeRHS(Fnew_p);
+#endif
   for (int m = 0; m <= m_p; m++) {
     EBAMRIVData& Fold_m = m_sigmaScratch->getFold()[m];
     EBAMRIVData& Fnew_m = m_sigmaScratch->getFnew()[m];
@@ -1843,7 +1851,7 @@ CdrPlasmaImExSdcStepper::computeSigmaFlux()
     pout() << "CdrPlasmaImExSdcStepper::computeSigmaFlux" << endl;
   }
 
-  EBAMRIVData& flux = m_sigma->getFlux();
+  EBAMRIVData& flux = m_sigma->getRHS();
   DataOps::setValue(flux, 0.0);
 
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it) {
@@ -1854,7 +1862,7 @@ CdrPlasmaImExSdcStepper::computeSigmaFlux()
     DataOps::incr(flux, solver_flux, spec->getChargeNumber() * Units::Qe);
   }
 
-  m_sigma->resetCells(flux);
+  m_sigma->resetElectrodes(flux, 0.0);
 }
 
 void

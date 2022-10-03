@@ -47,14 +47,12 @@ We aim for (but cannot guarantee) backward compatibility such that existing ``ch
 .. raw:: html
 
    <style>
-   /* front page: hide chapter titles
-    * needed for consistent HTML-PDF-EPUB chapters
-    */
    div#introduction.section,
    div#design.section,
    div#discretization.section,   
    div#solvers.section,
-   div#physics-models.section,
+   div#multi-physics-applications.section,
+   div#single-solver-applications.section,   
    div#tutorial.section,
    div#utilities.section,
    div#contributing.section,
@@ -69,6 +67,8 @@ We aim for (but cannot guarantee) backward compatibility such that existing ``ch
 
    .. toctree::
       :caption: Contents
+
+.. _Chap:blabla:
 
 Introduction
 ************
@@ -163,8 +163,6 @@ Single-solver applications
    Applications/MeshODEModel
    Applications/RadiativeTransferModel
    Applications/TracerParticleModel
-
-
 
 
 Tutorial

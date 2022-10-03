@@ -529,7 +529,9 @@ Future versions of ``chombo-discharge`` will likely include more sophisticated a
 
 .. tip::
 
-   ``AmrMesh`` also stores the implicit function on the mesh, which could also be used to resolved particle collisions with the EB/domain. 
+   ``AmrMesh`` also stores the implicit function on the mesh, which could also be used to resolved particle collisions with the EB/domain.
+
+.. _Chap:ParticleMesh:
 
 Particle-mesh
 -------------

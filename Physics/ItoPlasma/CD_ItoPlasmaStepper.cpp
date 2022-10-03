@@ -141,11 +141,11 @@ ItoPlasmaStepper::setupSigma()
     pout() << "ItoPlasmaStepper::setupSigma" << endl;
   }
 
-  m_sigma = RefCountedPtr<SigmaSolver>(new SigmaSolver());
-  m_sigma->setAmr(m_amr);
+  m_sigma = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
   m_sigma->setVerbosity(m_verbosity);
-  m_sigma->setComputationalGeometry(m_computationalGeometry);
   m_sigma->setRealm(m_fluid_Realm);
+  m_sigma->setPhase(m_phase);
+  m_sigma->setName("Surface charge");
 }
 
 void
@@ -178,7 +178,7 @@ ItoPlasmaStepper::allocate()
   m_ito->allocateInternals();
   m_rte->allocateInternals();
   m_fieldSolver->allocateInternals();
-  m_sigma->allocateInternals();
+  m_sigma->allocate();
 }
 
 void
@@ -247,7 +247,7 @@ ItoPlasmaStepper::initialSigma()
   }
 
   m_amr->conservativeAverage(sigma, m_fluid_Realm, phase::gas);
-  m_sigma->resetCells(sigma);
+  m_sigma->resetElectrodes(sigma, 0.0);
 }
 
 void

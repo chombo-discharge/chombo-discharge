@@ -31,7 +31,7 @@ To compile for production runs, ``chombo-discharge`` should generally speaking b
 
    make -s -j32 DIM=2 OPT=HIGH DEBUG=FALSE <application_name>
 
-Recall also that default settings for the dimension (``DIM``), optimization level (``OPT``), and debug mode (``DEBUG``) can be set in :file:`Make.defs.local`, see :ref:`Chap:GettingStarted`. 
+Recall also that default settings for the dimension (``DIM``), optimization level (``OPT``), and debug mode (``DEBUG``) can be set in :file:`Make.defs.local`, see :ref:`Chap:Installation`. 
 
 Running applications
 --------------------
@@ -135,7 +135,7 @@ The :ref:`Chap:Driver` class is responsible for writing output files at specifie
 Since not all variables are always of interest, solver classes have options like ``plt_vars`` that specify which output variables in the solver will be written to the output file.
 For example, one of our convection-diffusion-reaction solver classes have the following output options:
 
-.. code-block:: bash
+.. code-block:: text
 
    CdrGodunov.plt_vars = phi vel dco src ebflux # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
 
