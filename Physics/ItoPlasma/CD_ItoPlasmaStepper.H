@@ -23,7 +23,7 @@
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
 #include "CD_FieldSolver.H"
-#include "CD_SigmaSolver.H"
+#include "CD_SurfaceODESolver.H"
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -485,7 +485,7 @@ namespace Physics {
       RefCountedPtr<ItoLayout<ItoSolver>> m_ito;
       RefCountedPtr<RtLayout<McPhoto>>    m_rte;
       RefCountedPtr<FieldSolver>          m_fieldSolver;
-      RefCountedPtr<SigmaSolver>          m_sigma;
+      RefCountedPtr<SurfaceODESolver<1>>  m_sigma;
 
       TimeCode m_timeCode;
 

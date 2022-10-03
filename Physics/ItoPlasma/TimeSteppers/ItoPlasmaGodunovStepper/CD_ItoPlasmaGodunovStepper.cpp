@@ -104,7 +104,7 @@ ItoPlasmaGodunovStepper::allocate()
   m_ito->allocateInternals();
   m_rte->allocateInternals();
   m_fieldSolver->allocateInternals();
-  m_sigma->allocateInternals();
+  m_sigma->allocate();
 
   // Now allocate for the conductivity particles and rho^dagger particles
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
