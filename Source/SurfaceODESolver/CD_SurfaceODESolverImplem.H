@@ -162,7 +162,7 @@ SurfaceODESolver<N>::setAmr(const RefCountedPtr<AmrMesh>& a_amr) noexcept
     pout() << m_name + "::setAmr" << endl;
   }
 
-  CH_assert(!(a_amrMesh.isNull()));
+  CH_assert(!(a_amr.isNull()));
 
   m_amr = a_amr;
 }
@@ -347,6 +347,8 @@ SurfaceODESolver<N>::getPhi() noexcept
   if (m_verbosity > 5) {
     pout() << m_name + "::getPhi" << endl;
   }
+
+  this->writePlotFile();
 
   return m_phi;
 }

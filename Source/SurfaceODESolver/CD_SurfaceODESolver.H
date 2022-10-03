@@ -331,14 +331,12 @@ public:
   readCheckpointLevel(HDF5Handle& a_handle, const int a_level) noexcept;
 #endif
 
-#ifdef CH_USE_HDF5
   /*!
     @brief Write a plot file
     @details The name of the plot file is m_name.stepXXXXXXX.DIM.hdf5
   */
   virtual void
   writePlotFile() const noexcept;
-#endif
 
   /*!
     @brief Write output data to a_output
