@@ -20,10 +20,12 @@
   @brief Surface ODE solver
   @details This is a basic solver that acts as an ODE solver on cut-cells. 
 */
-template <size_t N = 1>
+template <int N = 1>
 class SurfaceODESolver
 {
 public:
+  static_assert(N > 0);
+
   /*!
     @brief Default constructor. Must subsequently set AmrMesh.
     @details Sets realm to primal and phase to phase::gas.

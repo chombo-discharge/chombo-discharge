@@ -21,7 +21,7 @@
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
-template <size_t N>
+template <int N>
 SurfaceODESolver<N>::SurfaceODESolver()
 {
   CH_TIME("SurfaceODESolver::SurfaceODESolver");
@@ -32,9 +32,10 @@ SurfaceODESolver<N>::SurfaceODESolver()
   this->setRealm(Realm::Primal);
   this->setPhase(phase::gas);
   this->setName(m_className);
+  this->setTime(0, 0.0, 0.0);
 }
 
-template <size_t N>
+template <int N>
 SurfaceODESolver<N>::SurfaceODESolver(const RefCountedPtr<AmrMesh>& a_amr) : SurfaceODESolver<N>()
 {
   CH_TIME("SurfaceODESolver::SurfaceODESolver");
@@ -45,7 +46,7 @@ SurfaceODESolver<N>::SurfaceODESolver(const RefCountedPtr<AmrMesh>& a_amr) : Sur
   m_amr = a_amr;
 }
 
-template <size_t N>
+template <int N>
 SurfaceODESolver<N>::~SurfaceODESolver()
 {
   CH_TIME("SurfaceODESolver::~SurfaceODESolver");
@@ -54,7 +55,7 @@ SurfaceODESolver<N>::~SurfaceODESolver()
   }
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::parseOptions() noexcept
 {
@@ -68,7 +69,7 @@ SurfaceODESolver<N>::parseOptions() noexcept
   this->parsePlotVariables();
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::parseRuntimeOptions() noexcept
 {
@@ -82,7 +83,7 @@ SurfaceODESolver<N>::parseRuntimeOptions() noexcept
   this->parsePlotVariables();
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::parseVerbosity() noexcept
 {
@@ -96,7 +97,7 @@ SurfaceODESolver<N>::parseVerbosity() noexcept
   pp.get("verbosity", m_verbosity);
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::parseRegrid() noexcept
 {
@@ -122,7 +123,7 @@ SurfaceODESolver<N>::parseRegrid() noexcept
   }
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::parsePlotVariables() noexcept
 {
@@ -153,7 +154,7 @@ SurfaceODESolver<N>::parsePlotVariables() noexcept
   }
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setAmr(const RefCountedPtr<AmrMesh>& a_amr) noexcept
 {
@@ -167,7 +168,7 @@ SurfaceODESolver<N>::setAmr(const RefCountedPtr<AmrMesh>& a_amr) noexcept
   m_amr = a_amr;
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setRealm(const std::string a_realm) noexcept
 {
@@ -179,7 +180,7 @@ SurfaceODESolver<N>::setRealm(const std::string a_realm) noexcept
   m_realm = a_realm;
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setName(const std::string a_name) noexcept
 {
@@ -191,7 +192,7 @@ SurfaceODESolver<N>::setName(const std::string a_name) noexcept
   m_name = a_name;
 }
 
-template <size_t N>
+template <int N>
 std::string
 SurfaceODESolver<N>::getRealm() const noexcept
 {
@@ -203,7 +204,7 @@ SurfaceODESolver<N>::getRealm() const noexcept
   return m_realm;
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setPhase(const phase::which_phase a_phase) noexcept
 {
@@ -215,7 +216,7 @@ SurfaceODESolver<N>::setPhase(const phase::which_phase a_phase) noexcept
   m_phase = a_phase;
 }
 
-template <size_t N>
+template <int N>
 phase::which_phase
 SurfaceODESolver<N>::getPhase() const noexcept
 {
@@ -227,7 +228,7 @@ SurfaceODESolver<N>::getPhase() const noexcept
   return m_phase;
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setVerbosity(const int a_verbosity) noexcept
 {
@@ -239,7 +240,7 @@ SurfaceODESolver<N>::setVerbosity(const int a_verbosity) noexcept
   m_verbosity = a_verbosity;
 }
 
-template <size_t N>
+template <int N>
 int
 SurfaceODESolver<N>::getVerbosity() const noexcept
 {
@@ -251,7 +252,7 @@ SurfaceODESolver<N>::getVerbosity() const noexcept
   return m_verbosity;
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setTime(const int a_step, const Real a_time, const Real a_dt) noexcept
 {
@@ -265,7 +266,7 @@ SurfaceODESolver<N>::setTime(const int a_step, const Real a_time, const Real a_d
   m_dt   = a_dt;
 }
 
-template <size_t N>
+template <int N>
 Real
 SurfaceODESolver<N>::getStep() const noexcept
 {
@@ -277,7 +278,7 @@ SurfaceODESolver<N>::getStep() const noexcept
   return m_step;
 }
 
-template <size_t N>
+template <int N>
 Real
 SurfaceODESolver<N>::getTime() const noexcept
 {
@@ -289,7 +290,7 @@ SurfaceODESolver<N>::getTime() const noexcept
   return m_time;
 }
 
-template <size_t N>
+template <int N>
 Real
 SurfaceODESolver<N>::getDt() const noexcept
 {
@@ -301,7 +302,7 @@ SurfaceODESolver<N>::getDt() const noexcept
   return m_dt;
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setPhi(const Real a_phi)
 {
@@ -313,7 +314,7 @@ SurfaceODESolver<N>::setPhi(const Real a_phi)
   DataOps::setValue(m_phi, a_phi);
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setPhi(const std::array<Real, N>& a_phi)
 {
@@ -327,7 +328,7 @@ SurfaceODESolver<N>::setPhi(const std::array<Real, N>& a_phi)
   }
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setPhi(const EBAMRIVData& a_phi)
 {
@@ -339,7 +340,7 @@ SurfaceODESolver<N>::setPhi(const EBAMRIVData& a_phi)
   DataOps::copy(m_phi, a_phi);
 }
 
-template <size_t N>
+template <int N>
 EBAMRIVData&
 SurfaceODESolver<N>::getPhi() noexcept
 {
@@ -348,12 +349,10 @@ SurfaceODESolver<N>::getPhi() noexcept
     pout() << m_name + "::getPhi" << endl;
   }
 
-  this->writePlotFile();
-
   return m_phi;
 }
 
-template <size_t N>
+template <int N>
 const EBAMRIVData&
 SurfaceODESolver<N>::getPhi() const noexcept
 {
@@ -365,7 +364,7 @@ SurfaceODESolver<N>::getPhi() const noexcept
   return m_phi;
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setRHS(const Real a_rhs)
 {
@@ -377,7 +376,7 @@ SurfaceODESolver<N>::setRHS(const Real a_rhs)
   DataOps::setValue(m_rhs, a_rhs);
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setRHS(const std::array<Real, N>& a_rhs)
 {
@@ -391,7 +390,7 @@ SurfaceODESolver<N>::setRHS(const std::array<Real, N>& a_rhs)
   }
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::setRHS(const EBAMRIVData& a_rhs)
 {
@@ -403,7 +402,7 @@ SurfaceODESolver<N>::setRHS(const EBAMRIVData& a_rhs)
   DataOps::copy(m_rhs, a_rhs);
 }
 
-template <size_t N>
+template <int N>
 EBAMRIVData&
 SurfaceODESolver<N>::getRHS()
 {
@@ -415,7 +414,7 @@ SurfaceODESolver<N>::getRHS()
   return m_rhs;
 }
 
-template <size_t N>
+template <int N>
 const EBAMRIVData&
 SurfaceODESolver<N>::getRHS() const noexcept
 {
@@ -427,7 +426,7 @@ SurfaceODESolver<N>::getRHS() const noexcept
   return m_rhs;
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::allocate() noexcept
 {
@@ -444,7 +443,7 @@ SurfaceODESolver<N>::allocate() noexcept
   this->defineVoFIterators();
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::deallocate() noexcept
 {
@@ -459,7 +458,7 @@ SurfaceODESolver<N>::deallocate() noexcept
   m_amr->deallocate(m_rhs);
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::defineVoFIterators() noexcept
 {
@@ -502,7 +501,7 @@ SurfaceODESolver<N>::defineVoFIterators() noexcept
   }
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::registerOperators() noexcept
 {
@@ -516,7 +515,7 @@ SurfaceODESolver<N>::registerOperators() noexcept
   m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept
 {
@@ -532,7 +531,7 @@ SurfaceODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) no
   DataOps::copy(m_cache, m_phi);
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept
 {
@@ -548,7 +547,7 @@ SurfaceODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const 
   m_amr->deallocate(m_cache);
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::resetElectrodes(const Real a_value) noexcept
 {
@@ -560,7 +559,7 @@ SurfaceODESolver<N>::resetElectrodes(const Real a_value) noexcept
   this->resetElectrodes(m_phi, a_value);
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::resetElectrodes(EBAMRIVData& a_phi, const Real a_value) const noexcept
 {
@@ -587,7 +586,7 @@ SurfaceODESolver<N>::resetElectrodes(EBAMRIVData& a_phi, const Real a_value) con
   }
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::resetDielectrics(const Real a_value) noexcept
 {
@@ -599,7 +598,7 @@ SurfaceODESolver<N>::resetDielectrics(const Real a_value) noexcept
   this->resetDielectrics(m_phi, a_value);
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::resetDielectrics(EBAMRIVData& a_phi, const Real a_value) const noexcept
 {
@@ -627,7 +626,7 @@ SurfaceODESolver<N>::resetDielectrics(EBAMRIVData& a_phi, const Real a_value) co
 }
 
 #ifdef CH_USE_HDF5
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const noexcept
 {
@@ -654,7 +653,7 @@ SurfaceODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_leve
 
 #ifdef CH_USE_HDF5
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) noexcept
 {
@@ -680,7 +679,7 @@ SurfaceODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level
 }
 #endif
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::writePlotFile() const noexcept
 {
@@ -731,7 +730,7 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
   }
 }
 
-template <size_t N>
+template <int N>
 void
 SurfaceODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_comp) const noexcept
 {
@@ -773,7 +772,7 @@ SurfaceODESolver<N>::writePlotData(EBAMRCellData& a_output, int& a_comp) const n
   }
 }
 
-template <size_t N>
+template <int N>
 int
 SurfaceODESolver<N>::getNumberOfPlotVariables() const noexcept
 {
@@ -795,7 +794,7 @@ SurfaceODESolver<N>::getNumberOfPlotVariables() const noexcept
   return num;
 }
 
-template <size_t N>
+template <int N>
 Vector<std::string>
 SurfaceODESolver<N>::getPlotVariableNames() const noexcept
 {

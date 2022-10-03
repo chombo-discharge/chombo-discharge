@@ -4023,6 +4023,7 @@ CdrPlasmaStepper::setupSigma()
   m_sigma->setPhase(phase::gas);
   m_sigma->parseOptions();
   m_sigma->setName("Surface charge");
+  m_sigma->setTime(0, 0.0, 0.0);
 }
 
 void

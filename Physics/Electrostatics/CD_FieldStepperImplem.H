@@ -119,6 +119,8 @@ namespace Physics {
       m_sigma->setPhase(phase::gas);
       m_sigma->setRealm(m_realm);
       m_sigma->setName("Surface charge");
+      m_sigma->parseOptions();
+      m_sigma->setTime(0, 0.0, 0.0);
     }
 
     template <class T>
