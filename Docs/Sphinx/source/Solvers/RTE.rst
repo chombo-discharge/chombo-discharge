@@ -188,7 +188,7 @@ ____________________
 
 The ``EddingtonSP1`` implementation has a number of configurable options for running the solver, and these are given below:
 
-.. code-block:: bash
+.. code-block:: text
 	     
    # ====================================================================================================
    # EddingtonSP1 class options

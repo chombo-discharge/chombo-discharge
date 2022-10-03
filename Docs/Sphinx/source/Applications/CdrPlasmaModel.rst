@@ -691,7 +691,7 @@ The user must use one of the following:
 
 #. Set the following class options:
 
-   .. code-block:: bash
+   .. code-block:: text
 		   
       CdrPlasmaJSON.discrete_photons = true
       
@@ -704,7 +704,7 @@ The user must use one of the following:
 
 #. Set the following class options:
    
-   .. code-block:: bash
+   .. code-block:: text
 		   
       CdrPlasmaJSON.discrete_photons = false
       

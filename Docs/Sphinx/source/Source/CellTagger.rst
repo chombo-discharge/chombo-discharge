@@ -93,7 +93,7 @@ Restrict tagging
 It is possible to prevent ``CellTagger`` from adding refinement flags in specified regions. 
 The default behavior is to add a number of boxes where refinement and coarsening is allowed:
 
-.. code-block:: bash
+.. code-block:: text
 
    MyCellTagger.num_boxes   = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
    MyCellTagger.box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
@@ -112,7 +112,7 @@ Under the hood, the ``DenseIntVectSet`` is an array of boolean values on a patch
 Adding a grid cell for refinement which lies outside the patch will lead to memory corruptions.
 It is nonetheless still possible to do this by growing the final generated tags like so:
 
-.. code-block:: bash
+.. code-block:: text
 		
    MyCellTagger.buffer = 4 # Add a buffer region around the tagged cells
 

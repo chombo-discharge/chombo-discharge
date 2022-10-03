@@ -141,7 +141,7 @@ If you need a separator for the variable, use an underscore ``_``.
 For variables that should be grouped under a common block, one may use a dot ``.`` for grouping them. 
 For a class ``MyClass`` and options file might look something like
 
-.. code-block:: bash
+.. code-block:: text
 
    MyClass.input_variable = 1.0
    MyClass.bc.x.lo        = dirichlet 1.0

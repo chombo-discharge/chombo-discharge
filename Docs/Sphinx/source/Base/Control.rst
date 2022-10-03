@@ -135,7 +135,7 @@ The :ref:`Chap:Driver` class is responsible for writing output files at specifie
 Since not all variables are always of interest, solver classes have options like ``plt_vars`` that specify which output variables in the solver will be written to the output file.
 For example, one of our convection-diffusion-reaction solver classes have the following output options:
 
-.. code-block:: bash
+.. code-block:: text
 
    CdrGodunov.plt_vars = phi vel dco src ebflux # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
 

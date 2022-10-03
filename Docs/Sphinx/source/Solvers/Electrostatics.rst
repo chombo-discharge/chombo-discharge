@@ -117,7 +117,7 @@ Domain boundary condition *types* are parsed through a member function ``FieldSo
 This function will read string identifiers from the input script, and these identifiers are either in the format ``<string> <float>`` (simplified format) or in the format ``<string>`` (general format). 
 For setting general types of Neumann or Dirichlet BCs on the domain sides, one will specify 
 
-.. code-block:: bash
+.. code-block:: text
 
    FieldSolverMultigrid.bc.x.low  = dirichlet_custom
    FieldSolverMultigrid.bc.x.high = dirichlet_neumann   
@@ -155,7 +155,7 @@ These values are usually, but not necessarily, constant values.
 
 In this case one will use an identifier ``<string> <float>`` in the input script, like so:
 
-.. code-block:: bash
+.. code-block:: text
 
    FieldSolverMultigrid.bc.x.low  = neumann   0.0
    FieldSolverMultigrid.bc.x.high = dirichlet 1.0
@@ -186,7 +186,7 @@ That is, the function ``func(a_pos, a_time)`` is the space-time function set thr
 Recall that, by default, this function is set to one so that the default voltage that is parsed into the numerical discretization is simply the specified voltage multiplied by the specified fraction in the input script.
 For example, using
 
-.. code-block:: bash
+.. code-block:: text
 
    FieldSolverMultigrid.bc.y.low  = dirichlet 0.0
    FieldSolverMultigrid.bc.y.high = dirichlet 1.0
@@ -330,7 +330,7 @@ ____________________
 Some of these switches are intended for parsing boundary conditions, whereas others are settings for operating multigrid or for I/O.
 The current list of configuration options are indicated below
 
-.. code-block:: bash
+.. code-block:: text
 
    # ====================================================================================================
    # FieldSolverMultigrid class options
@@ -449,7 +449,7 @@ ________________
 
 The user may plot the potential, the space charge, the electric, and the GMG residue as follows:
 
-.. code-block:: bash
+.. code-block:: text
 
    FieldSolverMultigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 
@@ -461,13 +461,13 @@ ____________________
 As mentioned above, on dielectric interfaces the user can choose to specify which "form" of :eq:`GaussBC` to solve.
 If the user wants the natural form in which the surface charge is the free parameter, he can specify
 
-.. code-block:: bash
+.. code-block:: text
 
    FieldSolverMultigrid.which_jump = natural
 
 To use the other format (in which one of the fluxes is specified), use
 
-.. code-block:: bash
+.. code-block:: text
 
    FieldSolverMultigrid.which_jump = saturation_charge
 
