@@ -1915,6 +1915,49 @@ AmrMesh::interpToNewGrids(EBAMRCellData&           a_newData,
 }
 
 void
+AmrMesh::interpToNewGrids(EBAMRIVData&             a_newData,
+                          const EBAMRIVData&       a_oldData,
+                          const phase::which_phase a_phase,
+                          const int                a_lmin,
+                          const int                a_oldFinestLevel,
+                          const int                a_newFinestLevel,
+                          const bool               a_conservative)
+{
+  CH_TIME("AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, bool)");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::interpToNewGrids(EBAMRCellData x2, phase, int x3, bool)" << endl;
+  }
+
+  CH_assert(a_newData.getRealm() == a_oldData.getRealm());
+  CH_assert(a_newData[0]->nComp() == a_oldData[0]->nComp());
+
+  // These levels ahve not changed but ownership might have changed so we still need to copy.
+  for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
+    a_oldData[lvl]->copyTo(*a_newData[lvl]);
+  }
+
+  for (int lvl = std::max(1, a_lmin); lvl <= a_newFinestLevel; lvl++) {
+    RefCountedPtr<EBFineInterp>& interpolator = this->getFineInterp(a_newData.getRealm(), a_phase)[lvl];
+
+    const int nComp = a_newData[lvl]->nComp();
+
+    // Interpolate the data
+    if (a_conservative) {
+      interpolator->regridConservative(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1));
+    }
+    else {
+      interpolator->regridArithmetic(*a_newData[lvl], *a_newData[lvl - 1], Interval(0, nComp - 1));
+    }
+
+    // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
+    // to pollute the solution with interpolation errors there since we already have valid data.
+    if (lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)) {
+      a_oldData[lvl]->copyTo(*a_newData[lvl]);
+    }
+  }
+}
+
+void
 AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
 {
   CH_TIME("AmrMesh::interpToCentroids(EBAMRCellData, string, phase::which_phase)");

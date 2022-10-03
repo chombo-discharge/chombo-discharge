@@ -11,7 +11,7 @@ GeoCoarsener
 The ``GeoCoarsener`` class permits manual removement of refinement flags along a geometric surface.
 To remove these so-called *geometric tags*, the user specifies boxes in space where geometric tags will be removed:
 
-.. code-block:: bash
+.. code-block:: text
 		
    GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
    GeoCoarsener.box1_lo     = -1 -1 -1     # Lower-left corner 
@@ -21,7 +21,7 @@ To remove these so-called *geometric tags*, the user specifies boxes in space wh
 
 If users want more boxes, they can specify it using the same syntax, e.g.
 
-.. code-block:: bash
+.. code-block:: text
 
    GeoCoarsener.num_boxes   = 2            # Number of coarsening boxes (0 = don't coarsen)
    

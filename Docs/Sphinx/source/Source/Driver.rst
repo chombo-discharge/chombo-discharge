@@ -90,7 +90,7 @@ In brief, the algorithm looks like this:
    }
 
 
-.. _Chap:Regridding:
+.. _Chap:DriverRegridding:
    
 Regridding
 ----------

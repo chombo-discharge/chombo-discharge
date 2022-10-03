@@ -23,7 +23,7 @@
 #include <CD_CdrLayout.H>
 #include <CD_RtLayout.H>
 #include <CD_FieldSolver.H>
-#include <CD_SigmaSolver.H>
+#include <CD_SurfaceODESolver.H>
 #include <CD_TimeStepper.H>
 #include <CD_NamespaceHeader.H>
 
@@ -1307,7 +1307,7 @@ namespace Physics {
       /*!
 	@brief Surface charge solver
       */
-      RefCountedPtr<SigmaSolver> m_sigma;
+      RefCountedPtr<SurfaceODESolver<1>> m_sigma;
 
       /*!
 	@brief Set the potential

@@ -14,7 +14,7 @@ Test suite
 ----------
 
 To make sure ``chombo-discharge`` compiles and runs as expected, we include a test suite that runs functional tests of many ``chombo-discharge`` components.
-The tests are defined in :file:`$DISCHARGE_HOME/Exec/Tests`, and are organized by application type (see :ref:`Chap:ImplementedModels`).
+The tests are defined in :file:`$DISCHARGE_HOME/Exec/Tests`, and are organized by application type.
 
 Running the test suite
 ______________________
@@ -110,6 +110,4 @@ Convergence testing
 To ensure that the various components in ``chombo-discharge`` converge at desired truncation order, many modules are equipped with their own convergence tests.
 These are located in :file:`$DISCHARGE_HOME/Exec/Convergence`.
 The tests are too extensive to include in continuous integration, and they must be run locally like a regular ``chombo-discharge`` application.
-
 Our approach for convergence testing is found in :ref:`Chap:VV`.
-See the individual modules (:ref:`Chap:ImplementedModels`) for various convergence tests. 

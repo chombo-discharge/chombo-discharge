@@ -1,7 +1,6 @@
 # ====================================================================================================
 # CdrCTU solver settings. 
 # ====================================================================================================
-CdrCTU.seed                 = -1                      # Seed. Random seed with seed < 0
 CdrCTU.bc.x.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.x.hi              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
 CdrCTU.bc.y.lo              = wall                    # 'data', 'function', 'wall', 'outflow', or 'solver'
