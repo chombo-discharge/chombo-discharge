@@ -4021,6 +4021,8 @@ CdrPlasmaStepper::setupSigma()
   m_sigma->setVerbosity(m_solverVerbosity);
   m_sigma->setRealm(m_realm);
   m_sigma->setPhase(phase::gas);
+  m_sigma->parseOptions();
+  m_sigma->setName("Surface charge");
 }
 
 void

@@ -31,6 +31,7 @@ SurfaceODESolver<N>::SurfaceODESolver()
   this->setVerbosity(-1);
   this->setRealm(Realm::Primal);
   this->setPhase(phase::gas);
+  this->setName(m_className);
 }
 
 template <size_t N>
@@ -187,7 +188,7 @@ SurfaceODESolver<N>::setName(const std::string a_name) noexcept
     pout() << "SurfaceODESolver::setName" << endl;
   }
 
-  m_realm = a_name;
+  m_name = a_name;
 }
 
 template <size_t N>
@@ -435,8 +436,8 @@ SurfaceODESolver<N>::allocate() noexcept
 
   CH_assert(!(m_amr.isNull()));
 
-  m_amr->allocate(m_phi, m_realm, m_phase, N);
-  m_amr->allocate(m_rhs, m_realm, m_phase, N);
+  m_amr->allocate(m_phi, m_realm, m_phase, N, 0);
+  m_amr->allocate(m_rhs, m_realm, m_phase, N, 0);
 
   this->defineVoFIterators();
 }
@@ -471,27 +472,27 @@ SurfaceODESolver<N>::defineVoFIterators() noexcept
 
   const int finestLevel = m_amr->getFinestLevel();
 
-  m_electrodeVoFs.resize(1 + finestLevel);
   m_dielectricVoFs.resize(1 + finestLevel);
+  m_electrodeVoFs.resize(1 + finestLevel);
 
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const MFLevelGrid&       mflg  = *m_amr->getMFLevelGrid(m_realm)[lvl];
 
-    m_electrodeVoFs[lvl]  = RefCountedPtr<LDVoFs>(new LDVoFs(dbl));
     m_dielectricVoFs[lvl] = RefCountedPtr<LDVoFs>(new LDVoFs(dbl));
+    m_electrodeVoFs[lvl]  = RefCountedPtr<LDVoFs>(new LDVoFs(dbl));
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       const Box&     cellBox = dbl[dit()];
       const EBISBox& ebisBox = ebisl[dit()];
       const EBGraph& ebGraph = ebisBox.getEBGraph();
 
-      IntVectSet dielectricIVS = mflg.interfaceRegion(cellBox, dit());
-      IntVectSet electrodeIVS  = ebisBox.getIrregIVS(cellBox) - dielectricIVS;
-
       VoFIterator& dielectricVoFIt = (*m_dielectricVoFs[lvl])[dit()];
       VoFIterator& electrodeVoFIt  = (*m_electrodeVoFs[lvl])[dit()];
+
+      IntVectSet dielectricIVS = mflg.interfaceRegion(cellBox, dit());
+      IntVectSet electrodeIVS  = ebisBox.getIrregIVS(cellBox) - dielectricIVS;
 
       dielectricVoFIt.define(dielectricIVS, ebGraph);
       electrodeVoFIt.define(electrodeIVS, ebGraph);
@@ -570,16 +571,16 @@ SurfaceODESolver<N>::resetElectrodes(EBAMRIVData& a_phi, const Real a_value) con
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      BaseIVFAB<Real>& phi   = (*m_phi[lvl])[dit()];
+      BaseIVFAB<Real>& phi   = (*a_phi[lvl])[dit()];
       VoFIterator&     vofit = (*m_electrodeVoFs[lvl])[dit()];
 
-      for (int comp = 0; comp < N; comp++) {
-        auto kernel = [&](const VolIndex& vof) -> void {
+      auto kernel = [&](const VolIndex& vof) -> void {
+        for (int comp = 0; comp < N; comp++) {
           phi(vof, comp) = a_value;
-        };
+        }
+      };
 
-        BoxLoops::loop(vofit, kernel);
-      }
+      BoxLoops::loop(vofit, kernel);
     }
   }
 }
@@ -609,22 +610,21 @@ SurfaceODESolver<N>::resetDielectrics(EBAMRIVData& a_phi, const Real a_value) co
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      BaseIVFAB<Real>& phi   = (*m_phi[lvl])[dit()];
+      BaseIVFAB<Real>& phi   = (*a_phi[lvl])[dit()];
       VoFIterator&     vofit = (*m_dielectricVoFs[lvl])[dit()];
 
-      for (int comp = 0; comp < N; comp++) {
-        auto kernel = [&](const VolIndex& vof) -> void {
+      auto kernel = [&](const VolIndex& vof) -> void {
+        for (int comp = 0; comp < N; comp++) {
           phi(vof, comp) = a_value;
-        };
+        }
+      };
 
-        BoxLoops::loop(vofit, kernel);
-      }
+      BoxLoops::loop(vofit, kernel);
     }
   }
 }
 
 #ifdef CH_USE_HDF5
-
 template <size_t N>
 void
 SurfaceODESolver<N>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const noexcept
@@ -806,13 +806,23 @@ SurfaceODESolver<N>::getPlotVariableNames() const noexcept
 
   if (m_plotPhi) {
     for (int i = 0; i < N; i++) {
-      plotVarNames.push_back(m_name + " phi-" + std::to_string(i));
+      if (N > 1) {
+        plotVarNames.push_back(m_name + " phi-" + std::to_string(i));
+      }
+      else {
+        plotVarNames.push_back(m_name + " phi");
+      }
     }
   }
 
   if (m_plotRHS) {
     for (int i = 0; i < N; i++) {
-      plotVarNames.push_back(m_name + " rhs-" + std::to_string(i));
+      if (N > 1) {
+        plotVarNames.push_back(m_name + " rhs-" + std::to_string(i));
+      }
+      else {
+        plotVarNames.push_back(m_name + " rhs");
+      }
     }
   }
 

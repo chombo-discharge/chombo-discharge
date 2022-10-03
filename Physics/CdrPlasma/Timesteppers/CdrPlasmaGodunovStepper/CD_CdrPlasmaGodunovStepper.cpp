@@ -107,6 +107,7 @@ CdrPlasmaGodunovStepper::parseRuntimeOptions()
   m_cdr->parseRuntimeOptions();
   m_rte->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
+  m_sigma->parseRuntimeOptions();
 
   // Physics also parses run-time options
   m_physics->parseRuntimeOptions();
