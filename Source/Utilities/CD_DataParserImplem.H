@@ -23,14 +23,14 @@
 #include <CD_DataParser.H>
 #include <CD_NamespaceHeader.H>
 
-LookupTable<2>
+LookupTable1D<2>
 DataParser::simpleFileReadASCII(const std::string       a_fileName,
                                 const int               a_xColumn,
                                 const int               a_yColumn,
                                 const std::vector<char> a_ignoreChars)
 {
   // This is the return table. It will be populated as we read the file.
-  LookupTable<2> returnTable = LookupTable<2>();
+  LookupTable1D<2> returnTable = LookupTable1D<2>();
 
   // Open an input file stream and start reading lines.
   std::ifstream inputFile(a_fileName);
@@ -65,7 +65,7 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
           values.emplace_back(curVal);
         }
 
-        // Read the data into the LookupTable IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
+        // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough data WILL be ignored.
         const int numColumnsOnThisLine = values.size();
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {
           returnTable.addEntry(values[a_xColumn], values[a_yColumn]);
@@ -77,7 +77,7 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
   return returnTable;
 }
 
-LookupTable<2>
+LookupTable1D<2>
 DataParser::fractionalFileReadASCII(const std::string       a_fileName,
                                     const std::string       a_startRead,
                                     const std::string       a_stopRead,
@@ -86,7 +86,7 @@ DataParser::fractionalFileReadASCII(const std::string       a_fileName,
                                     const std::vector<char> a_ignoreChars)
 {
   // This is the return table. It will be populated as we read the file.
-  LookupTable<2> returnTable = LookupTable<2>();
+  LookupTable1D<2> returnTable = LookupTable1D<2>();
 
   // Open an input file stream and start reading lines.
   bool          parseLine = false;
@@ -128,7 +128,7 @@ DataParser::fractionalFileReadASCII(const std::string       a_fileName,
           values.emplace_back(curVal);
         }
 
-        // Read the data into the LookupTable IF we have enough data in the input file. Rows that do not have enough
+        // Read the data into the LookupTable1D IF we have enough data in the input file. Rows that do not have enough
         // data WILL be ignored.
         const int numColumnsOnThisLine = values.size();
         if (a_xColumn < numColumnsOnThisLine && a_yColumn < numColumnsOnThisLine) {

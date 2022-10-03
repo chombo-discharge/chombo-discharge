@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_ItoPlasmaPhysicsLEA.H>
-#include <CD_LookupTable.H>
+#include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -89,7 +89,7 @@ namespace Physics {
     {
     public:
       Electron() = default;
-      Electron(const LookupTable& a_mobility, const LookupTable& a_diffusion);
+      Electron(const LookupTable1D& a_mobility, const LookupTable1D& a_diffusion);
       ~Electron();
 
       Real
@@ -98,8 +98,8 @@ namespace Physics {
       diffusion(const Real a_energy) const override;
 
     protected:
-      LookupTable m_mobility;
-      LookupTable m_diffusion;
+      LookupTable1D m_mobility;
+      LookupTable1D m_diffusion;
     };
 
     class ItoPlasmaAir3LEA::Positive : public ItoSpecies

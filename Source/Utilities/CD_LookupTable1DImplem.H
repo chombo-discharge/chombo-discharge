@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_LookupTableImplem.H
-  @brief  Implementation of CD_LookupTable.H
+  @file   CD_LookupTable1DImplem.H
+  @brief  Implementation of CD_LookupTable1D.H
   @author Robert Marskar
 */
 
-#ifndef CD_LookupTableImplem_H
-#define CD_LookupTableImplem_H
+#ifndef CD_LookupTable1DImplem_H
+#define CD_LookupTable1DImplem_H
 
 // Std includes
 #include <iostream>
@@ -19,11 +19,11 @@
 #include <math.h>
 
 // Our includes
-#include <CD_LookupTable.H>
+#include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>
 
 template <int N>
-inline LookupTable<N>::LookupTable()
+inline LookupTable1D<N>::LookupTable1D()
 {
 
   // Default settings
@@ -35,11 +35,11 @@ inline LookupTable<N>::LookupTable()
 }
 
 template <int N>
-inline LookupTable<N>::~LookupTable()
+inline LookupTable1D<N>::~LookupTable1D()
 {}
 
 template <int N>
-inline LookupTable<N>::LookupTable(const LookupTable& a_table)
+inline LookupTable1D<N>::LookupTable1D(const LookupTable1D& a_table)
 {
   m_data    = a_table.m_data;
   m_state   = a_table.m_state;
@@ -53,7 +53,7 @@ inline LookupTable<N>::LookupTable(const LookupTable& a_table)
 template <int N>
 template <typename... Ts>
 inline void
-LookupTable<N>::addEntry(const Ts&... x)
+LookupTable1D<N>::addEntry(const Ts&... x)
 {
   std::array<Real, sizeof...(Ts)> arr = {x...};
   m_data.emplace_back(arr);
@@ -64,7 +64,7 @@ LookupTable<N>::addEntry(const Ts&... x)
 
 template <int N>
 inline void
-LookupTable<N>::sort(const int a_sortedColumn)
+LookupTable1D<N>::sort(const int a_sortedColumn)
 {
 
   auto comparator = [idx = a_sortedColumn](const std::array<Real, N>& a, const std::array<Real, N>& b) -> bool {
@@ -80,7 +80,7 @@ LookupTable<N>::sort(const int a_sortedColumn)
 template <int N>
 template <int K>
 inline void
-LookupTable<N>::scale(const Real a_scale)
+LookupTable1D<N>::scale(const Real a_scale)
 {
   for (auto& r : m_data) {
     r[K] *= a_scale;
@@ -93,7 +93,7 @@ LookupTable<N>::scale(const Real a_scale)
 
 template <int N>
 inline void
-LookupTable<N>::swap(const int a_column1, const int a_column2)
+LookupTable1D<N>::swap(const int a_column1, const int a_column2)
 {
   for (auto& r : m_data) {
     const Real tmp = r[a_column1];
@@ -115,14 +115,14 @@ LookupTable<N>::swap(const int a_column1, const int a_column2)
 
 template <int N>
 inline void
-LookupTable<N>::clear()
+LookupTable1D<N>::clear()
 {
   m_data.resize(0);
 }
 
 template <int N>
 inline void
-LookupTable<N>::setRange(const Real a_min, const Real a_max, const int a_colRange)
+LookupTable1D<N>::setRange(const Real a_min, const Real a_max, const int a_colRange)
 {
 
   // Do a backup of the data and reset data holder.
@@ -141,21 +141,21 @@ LookupTable<N>::setRange(const Real a_min, const Real a_max, const int a_colRang
 
 template <int N>
 inline void
-LookupTable<N>::setOutOfRangeStrategyLow(const OutOfRangeStrategy a_strategy)
+LookupTable1D<N>::setOutOfRangeStrategyLow(const OutOfRangeStrategy a_strategy)
 {
   m_strategyLo = a_strategy;
 }
 
 template <int N>
 inline void
-LookupTable<N>::setOutOfRangeStrategyHigh(const OutOfRangeStrategy a_strategy)
+LookupTable1D<N>::setOutOfRangeStrategyHigh(const OutOfRangeStrategy a_strategy)
 {
   m_strategyHi = a_strategy;
 }
 
 template <int N>
 inline void
-LookupTable<N>::setTableSpacing(const TableSpacing a_spacing)
+LookupTable1D<N>::setTableSpacing(const TableSpacing a_spacing)
 {
 
   // If we change the table spacing, we are no longer in "uniform" mode.
@@ -168,7 +168,7 @@ LookupTable<N>::setTableSpacing(const TableSpacing a_spacing)
 
 template <int N>
 inline void
-LookupTable<N>::dumpTable(std::ostream& a_outputStream) const
+LookupTable1D<N>::dumpTable(std::ostream& a_outputStream) const
 {
   for (const auto& r : m_data) {
     for (const auto& c : r) {
@@ -180,7 +180,7 @@ LookupTable<N>::dumpTable(std::ostream& a_outputStream) const
 
 template <int N>
 inline void
-LookupTable<N>::dumpTable(const std::string a_fileName) const
+LookupTable1D<N>::dumpTable(const std::string a_fileName) const
 {
 #ifdef CH_MPI
   if (procID() == 0) {
@@ -205,7 +205,7 @@ LookupTable<N>::dumpTable(const std::string a_fileName) const
 
 template <int N>
 inline int
-LookupTable<N>::getIndexLo(const Real a_x) const
+LookupTable1D<N>::getIndexLo(const Real a_x) const
 {
   int index = 0;
 
@@ -227,7 +227,7 @@ LookupTable<N>::getIndexLo(const Real a_x) const
     break;
   }
   default: {
-    MayDay::Error("LookupTable<N>::getIndexLo - logic bust");
+    MayDay::Error("LookupTable1D<N>::getIndexLo - logic bust");
   }
   }
 
@@ -237,7 +237,7 @@ LookupTable<N>::getIndexLo(const Real a_x) const
 template <int N>
 template <int K>
 inline Real
-LookupTable<N>::getEntry(const Real a_x) const
+LookupTable1D<N>::getEntry(const Real a_x) const
 {
 
   // TLDR: This is the main routine for fetching a column of data. This will switch between constant/linear interpolation outside of
@@ -290,7 +290,7 @@ LookupTable<N>::getEntry(const Real a_x) const
         break;
       }
       default:
-        MayDay::Error("LookupTable<N>::getEntry -- logic bust when fetching out-of-range endpoint on the low side");
+        MayDay::Error("LookupTable1D<N>::getEntry -- logic bust when fetching out-of-range endpoint on the low side");
 
         break;
       }
@@ -328,7 +328,7 @@ LookupTable<N>::getEntry(const Real a_x) const
         break;
       }
       default:
-        MayDay::Error("LookupTable<N>::getEntry -- logic bust when fetching out-of-range endpoint on the high side");
+        MayDay::Error("LookupTable1D<N>::getEntry -- logic bust when fetching out-of-range endpoint on the high side");
 
         break;
       }
@@ -351,7 +351,7 @@ LookupTable<N>::getEntry(const Real a_x) const
 
 template <int N>
 inline std::array<Real, N>
-LookupTable<N>::getData(const Real a_x) const
+LookupTable1D<N>::getData(const Real a_x) const
 {
 
   std::array<Real, N> ret;
@@ -395,7 +395,7 @@ LookupTable<N>::getData(const Real a_x) const
         break;
       }
       default:
-        MayDay::Error("LookupTable<N>::getData -- logic bust when fetching out-of-range endpoint on the low side");
+        MayDay::Error("LookupTable1D<N>::getData -- logic bust when fetching out-of-range endpoint on the low side");
 
         break;
       }
@@ -429,13 +429,13 @@ LookupTable<N>::getData(const Real a_x) const
         break;
       }
       default:
-        MayDay::Error("LookupTable<N>::getEntry -- logic bust when fetching out-of-range endpoint on the high side");
+        MayDay::Error("LookupTable1D<N>::getEntry -- logic bust when fetching out-of-range endpoint on the high side");
 
         break;
       }
     }
     else {
-      MayDay::Error("LookupTable<N>::getEntry (array version -- spacing is wrong");
+      MayDay::Error("LookupTable1D<N>::getEntry (array version -- spacing is wrong");
       const Real t = (a_x - m_data[idx][sortedColumn]) / m_delta;
 
       // Interpolate all variables.
@@ -450,12 +450,12 @@ LookupTable<N>::getData(const Real a_x) const
 
 template <int N>
 inline std::array<Real, N>
-LookupTable<N>::directLookup(const Real a_x) const
+LookupTable1D<N>::directLookup(const Real a_x) const
 {
 
   std::array<Real, N> ret;
   if (!std::get<Sorted>(m_state)) {
-    std::cerr << "LookupTable<N>::directLookup -- logic bust. Data must be sorted along the input column!\n";
+    std::cerr << "LookupTable1D<N>::directLookup -- logic bust. Data must be sorted along the input column!\n";
   }
   else {
     const int column = std::get<Column>(m_state);
@@ -491,7 +491,7 @@ LookupTable<N>::directLookup(const Real a_x) const
 
 template <int N>
 inline void
-LookupTable<N>::makeUniform(const int a_numRows)
+LookupTable1D<N>::makeUniform(const int a_numRows)
 {
 
   if (std::get<Sorted>(m_state)) {
@@ -530,7 +530,7 @@ LookupTable<N>::makeUniform(const int a_numRows)
         break;
       }
       default: {
-        MayDay::Error("LookupTable<N>::makeUniform - logic bust");
+        MayDay::Error("LookupTable1D<N>::makeUniform - logic bust");
       }
       }
 
@@ -548,17 +548,17 @@ LookupTable<N>::makeUniform(const int a_numRows)
       std::get<Uniform>(m_state) = true;
     }
     else {
-      std::cerr << "LookupTable<N>::makeUniform -- must have at least two rows!\n";
+      std::cerr << "LookupTable1D<N>::makeUniform -- must have at least two rows!\n";
     }
   }
   else {
-    std::cerr << "LookupTable<N>::makeUniform -- must sort the column along one of the coordinates first!\n";
+    std::cerr << "LookupTable1D<N>::makeUniform -- must sort the column along one of the coordinates first!\n";
   }
 }
 
 template <int N>
 inline int
-LookupTable<N>::getNumEntries() const
+LookupTable1D<N>::getNumEntries() const
 {
   return m_data.size();
 }

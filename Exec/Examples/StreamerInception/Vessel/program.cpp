@@ -2,7 +2,7 @@
 #include <CD_Vessel.H>
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_StreamerInceptionTagger.H>
-#include <CD_LookupTable.H>
+#include <CD_LookupTable1D.H>
 #include <CD_DataParser.H>
 #include <ParmParse.H>
 
@@ -27,12 +27,12 @@ main(int argc, char* argv[])
   const Real N2 = 0.8;
   const Real T  = 300.0;
 
-  LookupTable<2> ionizationData = DataParser::fractionalFileReadASCII("transport_data.txt",
-                                                                      "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)",
-                                                                      "");
-  LookupTable<2> attachmentData = DataParser::fractionalFileReadASCII("transport_data.txt",
-                                                                      "E/N (Td)	Townsend attach. coef. eta/N (m2)",
-                                                                      "");
+  LookupTable1D<2> ionizationData = DataParser::fractionalFileReadASCII("transport_data.txt",
+                                                                        "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)",
+                                                                        "");
+  LookupTable1D<2> attachmentData = DataParser::fractionalFileReadASCII("transport_data.txt",
+                                                                        "E/N (Td)	Townsend attach. coef. eta/N (m2)",
+                                                                        "");
 
   ionizationData.setRange(10, 2000, 0);
   attachmentData.setRange(10, 2000, 0);
