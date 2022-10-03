@@ -18,6 +18,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get update
           sudo apt install doxygen
           sudo apt install graphviz
           sudo apt install texlive

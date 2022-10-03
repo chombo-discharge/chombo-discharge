@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_TimeStepper.H>
-#include <CD_SigmaSolver.H>
+#include <CD_SurfaceODESolver.H>
 #include <CD_FieldSolver.H>
 #include <CD_NamespaceHeader.H>
 
@@ -247,7 +247,7 @@ namespace Physics {
       /*!
 	@brief Reference to the surface charge solver.
       */
-      RefCountedPtr<SigmaSolver> m_sigma;
+      RefCountedPtr<SurfaceODESolver<1>> m_sigma;
 
       /*!
 	@brief Realm where the solver lives

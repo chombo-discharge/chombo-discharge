@@ -114,11 +114,11 @@ namespace Physics {
       m_fieldSolver->setTime(0, 0.0, 0.0);
 
       // Instantiate the surface charge solver and set it up.
-      m_sigma = RefCountedPtr<SigmaSolver>(new SigmaSolver());
+      m_sigma = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
       m_sigma->setVerbosity(m_verbosity);
-      m_sigma->setAmr(m_amr);
-      m_sigma->setComputationalGeometry(m_computationalGeometry);
+      m_sigma->setPhase(phase::gas);
       m_sigma->setRealm(m_realm);
+      m_sigma->setName("Surface charge");
     }
 
     template <class T>
@@ -156,7 +156,7 @@ namespace Physics {
       }
 
       m_fieldSolver->allocateInternals();
-      m_sigma->allocateInternals();
+      m_sigma->allocate();
     }
 
     template <class T>
@@ -187,7 +187,7 @@ namespace Physics {
 
       DataOps::setValue(state, 0.0);
       DataOps::setValue(sigma, m_surfaceChargeDensity, m_amr->getProbLo(), m_amr->getDx(), 0);
-      m_sigma->resetCells(sigma);
+      m_sigma->resetElectrodes(sigma, 0.0);
       m_fieldSolver->setRho(m_rhoGas);
 
       // Solve Poisson equation.
@@ -203,7 +203,7 @@ namespace Physics {
         pout() << "FieldStepper<T>::solvePoisson" << endl;
       }
 
-      // Solve using rho from fieldsolver and sigma from SigmaSolver.
+      // Solve using rho from fieldsolver and sigma from SurfaceODESolver.
       MFAMRCellData& phi   = m_fieldSolver->getPotential();
       MFAMRCellData& rho   = m_fieldSolver->getRho();
       EBAMRIVData&   sigma = m_sigma->getPhi();
