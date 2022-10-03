@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Surface charge solver" href="Sigma.html" />
+    <link rel="next" title="Surface ODE solver" href="SurfaceODESolver.html" />
     <link rel="prev" title="Mesh ODE solver" href="MeshODESolver.html" /> 
 </head>
 
@@ -52,16 +52,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/DesignOverview.html">Overview</a></li>
@@ -71,6 +61,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
 <ul class="current">
@@ -115,7 +116,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#example-application">Example application</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 </ul>
@@ -185,6 +186,10 @@
 <p>Radiative transfer is supported in the diffusion (i.e. Eddington or Helmholtz) approximation and with Monte Carlo sampling of discrete photons.
 The solvers share a common interface (a parent class), but note that the radiative transfer equation is inherently deterministic while Monte Carlo photon transport is inherently stochastic.
 The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or ‘’stationary’’ transport.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The source code for the radiative transfer solvers reside in <code class="file docutils literal notranslate"><span class="pre">Source/RadiativeTransfer</span></code></p>
+</div>
 <div class="section" id="rtspecies">
 <span id="chap-rtspecies"></span><h2>RtSpecies<a class="headerlink" href="#rtspecies" title="Permalink to this heading"></a></h2>
 <p>The class <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> is an abstract base class for parsing necessary information into radiative transfer solvers.
@@ -510,7 +515,7 @@ The following functions are used to set the various properties:</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="MeshODESolver.html" class="btn btn-neutral float-left" title="Mesh ODE solver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Sigma.html" class="btn btn-neutral float-right" title="Surface charge solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="SurfaceODESolver.html" class="btn btn-neutral float-right" title="Surface ODE solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

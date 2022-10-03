@@ -52,16 +52,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/DesignOverview.html">Overview</a></li>
@@ -72,13 +62,24 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
@@ -264,48 +265,48 @@ To see available setup options, run</p>
 <div class="section" id="c1-coaxial-cable">
 <h3>C1: Coaxial cable<a class="headerlink" href="#c1-coaxial-cable" title="Permalink to this heading"></a></h3>
 <p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C1</span></code> is a spatial convergence test in a coaxial cable geometry.
-Figure <a class="reference internal" href="#fig-electrostaticsc1-1"><span class="std std-numref">Fig. 24</span></a> shows the field distribution.
+Figure <a class="reference internal" href="#fig-electrostaticsc1-1"><span class="std std-numref">Fig. 26</span></a> shows the field distribution.
 Note that there is a dielectric embedded between the two cylindrical shells.</p>
 <div class="figure align-center" id="id2">
 <span id="fig-electrostaticsc1-1"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC1_1.png"><img alt="../_images/ElectrostaticsC1_1.png" src="../_images/ElectrostaticsC1_1.png" style="width: 40%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 24 </span><span class="caption-text">Field distribution for a coaxial cable geometry on a <span class="math notranslate nohighlight">\(512^2\)</span> grid.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 26 </span><span class="caption-text">Field distribution for a coaxial cable geometry on a <span class="math notranslate nohighlight">\(512^2\)</span> grid.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </div>
-<p>The computed convergence rates are given in <a class="reference internal" href="#fig-electrostaticsc1-2"><span class="std std-numref">Fig. 25</span></a>.
+<p>The computed convergence rates are given in <a class="reference internal" href="#fig-electrostaticsc1-2"><span class="std std-numref">Fig. 27</span></a>.
 We find second order convergence in all three norms.</p>
 <div class="figure align-center" id="id3">
 <span id="fig-electrostaticsc1-2"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC1_2.png"><img alt="../_images/ElectrostaticsC1_2.png" src="../_images/ElectrostaticsC1_2.png" style="width: 45%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 25 </span><span class="caption-text">Spatial convergence rates for two-dimensional coaxial cable geometry.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 27 </span><span class="caption-text">Spatial convergence rates for two-dimensional coaxial cable geometry.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
 </div>
 </div>
 <div class="section" id="c2-profiled-surface">
 <h3>C2: Profiled surface<a class="headerlink" href="#c2-profiled-surface" title="Permalink to this heading"></a></h3>
 <p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C2</span></code> is a 2D spatial convergence test for an electrode and a dielectric slab with surface profiles.
-Figure <a class="reference internal" href="#fig-electrostaticsc2-1"><span class="std std-numref">Fig. 26</span></a> shows the field distribution.</p>
+Figure <a class="reference internal" href="#fig-electrostaticsc2-1"><span class="std std-numref">Fig. 28</span></a> shows the field distribution.</p>
 <div class="figure align-center" id="id4">
 <span id="fig-electrostaticsc2-1"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC2_1.png"><img alt="../_images/ElectrostaticsC2_1.png" src="../_images/ElectrostaticsC2_1.png" style="width: 45%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 26 </span><span class="caption-text">Field distribution for a profiled surface geometry on a <span class="math notranslate nohighlight">\(2048^2\)</span> grid.</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 28 </span><span class="caption-text">Field distribution for a profiled surface geometry on a <span class="math notranslate nohighlight">\(2048^2\)</span> grid.</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
 </div>
-<p>The computed convergence rates are given in <a class="reference internal" href="#fig-electrostaticsc2-2"><span class="std std-numref">Fig. 27</span></a>.
+<p>The computed convergence rates are given in <a class="reference internal" href="#fig-electrostaticsc2-2"><span class="std std-numref">Fig. 29</span></a>.
 We find second order convergence in all three norms.</p>
 <div class="figure align-center" id="id5">
 <span id="fig-electrostaticsc2-2"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC2_2.png"><img alt="../_images/ElectrostaticsC2_2.png" src="../_images/ElectrostaticsC2_2.png" style="width: 45%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 27 </span><span class="caption-text">Spatial convergence rates for two-dimensional dielectric surface profile.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 29 </span><span class="caption-text">Spatial convergence rates for two-dimensional dielectric surface profile.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </div>
 </div>
 <div class="section" id="c3-dielectric-shaft">
 <h3>C3: Dielectric shaft<a class="headerlink" href="#c3-dielectric-shaft" title="Permalink to this heading"></a></h3>
 <p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C3</span></code> is a 3D spatial convergence test for a dielectric shaft perpendicular to the background field.
-Figure <a class="reference internal" href="#fig-electrostaticsc3-1"><span class="std std-numref">Fig. 28</span></a> shows the field distribution for a <span class="math notranslate nohighlight">\(256^3\)</span> grid.</p>
+Figure <a class="reference internal" href="#fig-electrostaticsc3-1"><span class="std std-numref">Fig. 30</span></a> shows the field distribution for a <span class="math notranslate nohighlight">\(256^3\)</span> grid.</p>
 <div class="figure align-center" id="id6">
 <span id="fig-electrostaticsc3-1"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC3_1.png"><img alt="../_images/ElectrostaticsC3_1.png" src="../_images/ElectrostaticsC3_1.png" style="width: 25%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 28 </span><span class="caption-text">Field distribution for a profiled surface geometry on a <span class="math notranslate nohighlight">\(256^3\)</span> grid.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 30 </span><span class="caption-text">Field distribution for a profiled surface geometry on a <span class="math notranslate nohighlight">\(256^3\)</span> grid.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </div>
-<p>The computed convergence rates are given in <a class="reference internal" href="#fig-electrostaticsc3-2"><span class="std std-numref">Fig. 29</span></a>.
+<p>The computed convergence rates are given in <a class="reference internal" href="#fig-electrostaticsc3-2"><span class="std std-numref">Fig. 31</span></a>.
 We find second order convergence in <span class="math notranslate nohighlight">\(L_1\)</span> and <span class="math notranslate nohighlight">\(L_2\)</span> on all grids, and find second order convergence in the max-norm on sufficiently fine grids.
 On coarser grids, the reduced convergence rate in the max-norm is probably due to under-resolution of the geometry.</p>
 <div class="figure align-center" id="id7">
 <span id="fig-electrostaticsc3-2"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC3_2.png"><img alt="../_images/ElectrostaticsC3_2.png" src="../_images/ElectrostaticsC3_2.png" style="width: 45%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 29 </span><span class="caption-text">Spatial convergence rates.</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 31 </span><span class="caption-text">Spatial convergence rates.</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
 </div>
 </div>
 </div>

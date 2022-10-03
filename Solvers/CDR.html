@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Electrostatic solver" href="Electrostatics.html" />
-    <link rel="prev" title="GeoCoarsener" href="../Source/GeoCoarsener.html" /> 
+    <link rel="prev" title="Verification and validation" href="../Source/VV.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,16 +52,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/DesignOverview.html">Overview</a></li>
@@ -71,6 +61,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
 <ul class="current">
@@ -106,7 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Electrostatics.html">Electrostatic solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 </ul>
@@ -232,7 +233,7 @@ In general, we seek a method-of-lines update <span class="math notranslate nohig
 <p>The sum runs over all cell edges (faces in 3D) of the cell where <span class="math notranslate nohighlight">\(G_f\)</span> is the flux on the edge centroid and <span class="math notranslate nohighlight">\(\alpha_f\)</span> is the edge (face) aperture.</p>
 <div class="figure align-center" id="id2">
 <a class="reference internal image-reference" href="../_images/CutCell.png"><img alt="../_images/CutCell.png" src="../_images/CutCell.png" style="width: 40%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 20 </span><span class="caption-text">Location of centroid fluxes for cut cells.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 22 </span><span class="caption-text">Location of centroid fluxes for cut cells.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </div>
 <p>However, taking <span class="math notranslate nohighlight">\([\nabla\cdot\mathbf{G}^k]\)</span> to be this sum leads to a time step constraint proportional to <span class="math notranslate nohighlight">\(\kappa\)</span>, which can be arbitrarily small.
 This leads to an unacceptable time step constraint for <a class="reference internal" href="#equation-conservativeupdate">Eq. 2</a>.
@@ -595,7 +596,7 @@ See <a class="reference internal" href="../Source/Particles.html#chap-particles"
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../Source/GeoCoarsener.html" class="btn btn-neutral float-left" title="GeoCoarsener" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Source/VV.html" class="btn btn-neutral float-left" title="Verification and validation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Electrostatics.html" class="btn btn-neutral float-right" title="Electrostatic solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

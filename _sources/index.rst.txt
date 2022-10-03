@@ -51,8 +51,8 @@ We aim for (but cannot guarantee) backward compatibility such that existing ``ch
     * needed for consistent HTML-PDF-EPUB chapters
     */
    div#introduction.section,
-   div#discretization.section,
    div#design.section,
+   div#discretization.section,   
    div#solvers.section,
    div#physics-models.section,
    div#tutorial.section,
@@ -87,23 +87,6 @@ Introduction
    Base/Testing
    Base/Acknowledgements
 
-Discretization
-**************
-
-.. toctree::
-   :maxdepth: 3
-   :caption: Discretization
-   :hidden:
-
-   Source/SpatialDiscretization      
-   Source/ChomboBasics      
-   Source/MeshData
-   Source/Particles
-   Source/Realm
-   Source/LinearSolvers
-   Source/VV
-
-
 Design
 ******
 
@@ -120,6 +103,23 @@ Design
    Source/CellTagger
    Source/GeoCoarsener
 
+Discretization
+**************
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Discretization
+   :hidden:
+
+   Source/SpatialDiscretization      
+   Source/ChomboBasics      
+   Source/MeshData
+   Source/Particles
+   Source/Realm
+   Source/Regridding   
+   Source/LinearSolvers
+   Source/VV   
+
 Solvers
 *******
 
@@ -132,7 +132,7 @@ Solvers
    Solvers/Electrostatics
    Solvers/MeshODESolver
    Solvers/RTE
-   Solvers/Sigma
+   Solvers/SurfaceODESolver
    Solvers/TracerParticles
    Solvers/Ito
 

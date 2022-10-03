@@ -52,16 +52,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Source/DesignOverview.html">Overview</a></li>
@@ -72,13 +62,24 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
@@ -237,7 +238,7 @@ This “range of voltages” can be a series of discrete values, or a voltage cu
 <p>The template complexity is due to flexibility in what solver implementations we use.
 The following solvers are used within the model:</p>
 <ul class="simple">
-<li><p>The tracer particle solver (<a class="reference internal" href="../Solvers/TracerParticles.html#chap-tracerparticlesolver"><span class="std std-ref">Tracer particles</span></a>) for reconstructing the inception integral.</p></li>
+<li><p>The tracer particle solver (<a class="reference internal" href="../Solvers/TracerParticles.html#chap-tracerparticlesolver"><span class="std std-ref">TracerParticleSolver</span></a>) for reconstructing the inception integral.</p></li>
 <li><p>The <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a> for computing the electric field.</p></li>
 <li><p>The convection diffusion reaction module (<a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>) for modeling negative ion transport.</p></li>
 </ul>
@@ -627,7 +628,7 @@ Ensure that <code class="docutils literal notranslate"><span class="pre">CdrCTU.
 <div class="section" id="caveats">
 <h3>Caveats<a class="headerlink" href="#caveats" title="Permalink to this heading"></a></h3>
 <p>The model is intended to be used with a nearest-grid-point deposition scheme (which is also volume-weighted).
-When running the model, ensure that the <a class="reference internal" href="../Solvers/TracerParticles.html#chap-tracerparticlesolver"><span class="std std-ref">Tracer particles</span></a> flag is set as follows:</p>
+When running the model, ensure that the <a class="reference internal" href="../Solvers/TracerParticles.html#chap-tracerparticlesolver"><span class="std std-ref">TracerParticleSolver</span></a> flag is set as follows:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TracerParticleSolver.deposition   = ngp
 </pre></div>
 </div>

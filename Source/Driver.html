@@ -52,16 +52,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="SpatialDiscretization.html">Spatial discretization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
@@ -83,13 +73,24 @@
 <li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
@@ -157,7 +158,7 @@
   <div class="section" id="driver">
 <span id="chap-driver"></span><h1>Driver<a class="headerlink" href="#driver" title="Permalink to this heading"></a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class runs <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations.
-The primary role of the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class is to coordinate the simulation advance (i.e. <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> integration) with I/O and regrid functionality.
+The primary purpose of the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class is to coordinate the simulation advance (i.e. <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> integration) together with I/O and regrid functionality.
 The constructor for this class is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Driver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_compgeom</span><span class="p">,</span><span class="w"></span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">TimeStepper</span><span class="o">&gt;&amp;</span><span class="w">           </span><span class="n">a_timestepper</span><span class="p">,</span><span class="w"></span>

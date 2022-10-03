@@ -68,8 +68,7 @@ The user *can* specify a number of ghost cells for his/hers application code dir
 
 If the user does not specify the number of ghost cells when calling ``AmrMesh::allocate``, ``AmrMesh`` will use the default number of ghost cells specified in the input file.
 
-
-
+.. _Chap:MeshIteration:
 
 Iterating over patches
 ----------------------

@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Verification and validation" href="VV.html" />
-    <link rel="prev" title="Realm" href="Realm.html" /> 
+    <link rel="prev" title="Regridding" href="Regridding.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,6 +52,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="SpatialDiscretization.html">Spatial discretization</a></li>
@@ -59,6 +69,7 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Linear solvers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#helmholtz-equation">Helmholtz equation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#discretization-and-fluxes">Discretization and fluxes</a></li>
@@ -85,23 +96,13 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Design</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
@@ -187,7 +188,7 @@ In the general case the cell center might lie inside the embedded boundary, and 
 Thus, <span class="math notranslate nohighlight">\(\Phi\)</span> does not satisfy a discrete maximum principle.</p>
 <div class="figure align-center" id="id1">
 <span id="fig-helmholtzfluxes"></span><a class="reference internal image-reference" href="../_images/CutCell.png"><img alt="../_images/CutCell.png" src="../_images/CutCell.png" style="width: 40%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 14 </span><span class="caption-text">Location of fluxes for finite volume discretization.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 16 </span><span class="caption-text">Location of fluxes for finite volume discretization.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </div>
 <p>The finite volume update require fluxes on the face centroids rather than the centers.
 These are constructed by first computing the fluxes to second order on the face centers, and then interpolating them to the face centroids.
@@ -215,11 +216,11 @@ On the domain boundaries the fluxes are face-centered and we therefore use finit
 <p>On the embedded boundaries the flux is more complicated to compute, and requires us to compute an approximation to the normal gradient <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span> at the boundary.
 Our approach is to approximate this flux by expanding the solution as a polynomial around a specified number of grid cells.
 By using more grid cells than there are unknown in the Taylor series, we formulate an over-determined system of equations up to some specified order.
-As a first approximation we include only those cells in the quadrant or half-space defined by the normal vector, see <a class="reference internal" href="#fig-gradientreconstruction"><span class="std std-numref">Fig. 15</span></a>.
+As a first approximation we include only those cells in the quadrant or half-space defined by the normal vector, see <a class="reference internal" href="#fig-gradientreconstruction"><span class="std std-numref">Fig. 17</span></a>.
 If we can not find enough equations, the strategy is to 1) drop order and 2) include all cells around the cut-cell.</p>
 <div class="figure align-center" id="id2">
 <span id="fig-gradientreconstruction"></span><a class="reference internal image-reference" href="../_images/GradientReconstruction.png"><img alt="../_images/GradientReconstruction.png" src="../_images/GradientReconstruction.png" style="width: 40%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 15 </span><span class="caption-text">Examples of neighborhoods (quadrant and half-space) used for gradient reconstruction on the EB.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 17 </span><span class="caption-text">Examples of neighborhoods (quadrant and half-space) used for gradient reconstruction on the EB.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </div>
 <p>Once the cells used for the gradient reconstruction have been obtained, we use weighted least squares to compute the approximation to the derivative to specified order (for details, see <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a>).
 The result of the least squares computation is represented as a stencil:</p>
@@ -227,12 +228,12 @@ The result of the least squares computation is represented as a stencil:</p>
 \[\frac{\partial\Phi}{\partial n} = w_{\textrm{B}}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\Phi_{\textrm{B}}\)</span> is the value on the boundary, the <span class="math notranslate nohighlight">\(w\)</span> are weights for grid points <span class="math notranslate nohighlight">\(\mathbf{i}\)</span>, and the sum runs over cells in the domain.</p>
 <p>Note that the gradient reconstruction can end up requiring more than one ghost cell layer near the embedded boundaries.
-For example, <a class="reference internal" href="#fig-stencilregion"><span class="std std-numref">Fig. 16</span></a> shows a typical stencil region which is built when using second order gradient reconstruction on the EB.
+For example, <a class="reference internal" href="#fig-stencilregion"><span class="std std-numref">Fig. 18</span></a> shows a typical stencil region which is built when using second order gradient reconstruction on the EB.
 In this case the gradient reconstruction requires a stencil with a radius of 2, but as the cut-cell lies on the refinement boundary the stencil reaches into two layers of ghost cells.
 For the same reason, gradient reconstruction near the cut-cells might require interpolation of corner ghost cells on refinement boundaries.</p>
 <div class="figure align-center" id="id3">
 <span id="fig-stencilregion"></span><a class="reference internal image-reference" href="../_images/StencilRegion.png"><img alt="../_images/StencilRegion.png" src="../_images/StencilRegion.png" style="width: 40%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 16 </span><span class="caption-text">Example of the region of a second order stencil for the Laplacian operator with second order gradient reconstruction on the embedded boundary.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 18 </span><span class="caption-text">Example of the region of a second order stencil for the Laplacian operator with second order gradient reconstruction on the embedded boundary.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
 </div>
 </div>
 <div class="section" id="robin">
@@ -257,27 +258,27 @@ The Robin boundary condition takes the form</p>
 <span id="chap-multigridinterpolation"></span><h3>Ghost cell interpolation<a class="headerlink" href="#ghost-cell-interpolation" title="Permalink to this heading"></a></h3>
 <p>With AMR, multigrid requires ghost cells on the refinement boundary.
 The interior stencils for the Helmholtz operator have a radius of one and thus only require a single layer of ghost cells (and no corner ghost cells).
-These ghost cells are filled using a finite-difference stencil, see <a class="reference internal" href="#fig-multigridinterpolation"><span class="std std-numref">Fig. 17</span></a>.</p>
+These ghost cells are filled using a finite-difference stencil, see <a class="reference internal" href="#fig-multigridinterpolation"><span class="std std-numref">Fig. 19</span></a>.</p>
 <div class="figure align-center" id="id4">
 <span id="fig-multigridinterpolation"></span><a class="reference internal image-reference" href="../_images/MultigridInterpolation.png"><img alt="../_images/MultigridInterpolation.png" src="../_images/MultigridInterpolation.png" style="width: 40%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 17 </span><span class="caption-text">Standard finite-difference stencil for ghost cell interpolation (open circle).
+<p class="caption"><span class="caption-number">Fig. 19 </span><span class="caption-text">Standard finite-difference stencil for ghost cell interpolation (open circle).
 We first interpolate the coarse-grid cells to the centerline (diamond).
 The coarse-grid interpolation is then used together with the fine-grid cells (filled circles) for interpolation to the ghost cell (open circle).</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
 </div>
 <p>Embedded boundaries introduce many pathologies for multigrid:</p>
 <ol class="arabic simple">
-<li><p>Cut-cell stencils may have a large radius (see <a class="reference internal" href="#fig-stencilregion"><span class="std std-numref">Fig. 16</span></a>) and thus require more ghost cell layers.</p></li>
+<li><p>Cut-cell stencils may have a large radius (see <a class="reference internal" href="#fig-stencilregion"><span class="std std-numref">Fig. 18</span></a>) and thus require more ghost cell layers.</p></li>
 <li><p>The EBs cut the grid in arbitrary ways, leading to multiple pathologies regarding cell availability.</p></li>
 </ol>
 <p>The pathologies mean that standard finite differencing fails near the EB, mandating a more general approach.
 Our way of handling ghost cell interpolation near EBs is to reconstruct the solution (to specified order) in the ghost cells, using the available cells around the ghost cell (see <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a> for details).
 As per conventional wisdom regarding multigrid interpolation, this reconstruction does <em>not</em> use coarse-level grid cells that are covered by the fine level.</p>
-<p>Figure <a class="reference internal" href="#fig-ebmultigridinterpolation"><span class="std std-numref">Fig. 18</span></a> shows a typical interpolation stencil for the stencil in <a class="reference internal" href="#fig-stencilregion"><span class="std std-numref">Fig. 16</span></a>.
+<p>Figure <a class="reference internal" href="#fig-ebmultigridinterpolation"><span class="std std-numref">Fig. 20</span></a> shows a typical interpolation stencil for the stencil in <a class="reference internal" href="#fig-stencilregion"><span class="std std-numref">Fig. 18</span></a>.
 Here, the open circle indicates the ghost cell to be interpolated, and we interpolate the solution in this cell using neighboring grid cells (closed circles).
 For this particular case there are 10 nearby grid cells available, which is sufficient for second order interpolation (which requirse at least 6 cells in 2D).</p>
 <div class="figure align-center" id="id5">
 <span id="fig-ebmultigridinterpolation"></span><a class="reference internal image-reference" href="../_images/EBMultigridInterpolation.png"><img alt="../_images/EBMultigridInterpolation.png" src="../_images/EBMultigridInterpolation.png" style="width: 40%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 18 </span><span class="caption-text">Multigrid interpolation for refinement boundaries away from and close to an embedded boundary.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 20 </span><span class="caption-text">Multigrid interpolation for refinement boundaries away from and close to an embedded boundary.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -317,13 +318,13 @@ The most common case is that involving discontinuous coefficients, e.g. for</p>
 <span class="math notranslate nohighlight">\(\sigma\)</span> is a jump factor.</p>
 <div class="figure align-center" id="id6">
 <span id="fig-jumpcondition"></span><a class="reference internal image-reference" href="../_images/JumpCondition.png"><img alt="../_images/JumpCondition.png" src="../_images/JumpCondition.png" style="width: 40%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 19 </span><span class="caption-text">Example of cells and stencils that are involved in discretizing the jump condition. Open and filled circles indicate cells in separate phases.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
+<p class="caption"><span class="caption-number">Fig. 21 </span><span class="caption-text">Example of cells and stencils that are involved in discretizing the jump condition. Open and filled circles indicate cells in separate phases.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </div>
 </div>
 <div class="section" id="discretization">
 <h3>Discretization<a class="headerlink" href="#discretization" title="Permalink to this heading"></a></h3>
 <p>To incorporate the jump condition in the Helmholtz discretization, we use a gradient reconstruction to obtain a solution to <span class="math notranslate nohighlight">\(\Phi\)</span> on the boundary, and use this value to impose a Dirichlet boundary condition during multigrid relaxation.
-Recalling the gradient reconstruction <span class="math notranslate nohighlight">\(\frac{\partial\Phi}{\partial n} = w_{\textrm{B}}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}\)</span>, the matching condition (see <a class="reference internal" href="#fig-jumpcondition"><span class="std std-numref">Fig. 19</span></a>) can be written as</p>
+Recalling the gradient reconstruction <span class="math notranslate nohighlight">\(\frac{\partial\Phi}{\partial n} = w_{\textrm{B}}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}\)</span>, the matching condition (see <a class="reference internal" href="#fig-jumpcondition"><span class="std std-numref">Fig. 21</span></a>) can be written as</p>
 <div class="math notranslate nohighlight">
 \[b_1\left[w_{\textrm{B},1}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i},1}\Phi_{\mathbf{i},1}\right] + b_2\left[w_{\textrm{B},2}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i},2}\Phi_{\mathbf{i},2}\right] = \sigma.\]</div>
 <p>This equation can be solved for the boundary value <span class="math notranslate nohighlight">\(\Phi_{\textrm{B}}\)</span>, which can then be used to compute the finite-volume fluxes into the cut-cells.</p>
@@ -360,7 +361,7 @@ It takes an “operator factory” as an argument, and the factory can generate 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Realm.html" class="btn btn-neutral float-left" title="Realm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Regridding.html" class="btn btn-neutral float-left" title="Regridding" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="VV.html" class="btn btn-neutral float-right" title="Verification and validation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -188,6 +188,9 @@ const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td
 <tr class="memitem:ae8628a6202953a82b83652786520c1f8"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#ae8628a6202953a82b83652786520c1f8">getName</a> () const noexcept</td></tr>
 <tr class="memdesc:ae8628a6202953a82b83652786520c1f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get solver name.  <a href="classMeshODESolver.html#ae8628a6202953a82b83652786520c1f8">More...</a><br /></td></tr>
 <tr class="separator:ae8628a6202953a82b83652786520c1f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2fc1cb7d415c53e783cbbfde14512f31"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a2fc1cb7d415c53e783cbbfde14512f31">setName</a> (const std::string &amp;a_name) noexcept</td></tr>
+<tr class="memdesc:a2fc1cb7d415c53e783cbbfde14512f31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set solver name.  <a href="classMeshODESolver.html#a2fc1cb7d415c53e783cbbfde14512f31">More...</a><br /></td></tr>
+<tr class="separator:a2fc1cb7d415c53e783cbbfde14512f31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14272084bb398f800af6c9ec19d03aab"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshODESolver.html#a14272084bb398f800af6c9ec19d03aab">getPlotVariableNames</a> () const noexcept</td></tr>
 <tr class="memdesc:a14272084bb398f800af6c9ec19d03aab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get output plot names.  <a href="classMeshODESolver.html#a14272084bb398f800af6c9ec19d03aab">More...</a><br /></td></tr>
 <tr class="separator:a14272084bb398f800af6c9ec19d03aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -682,6 +685,42 @@ template&lt;size_t N&gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_amrMesh</td><td><a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2fc1cb7d415c53e783cbbfde14512f31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fc1cb7d415c53e783cbbfde14512f31">&#9670;&nbsp;</a></span>setName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;size_t N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classMeshODESolver.html">MeshODESolver</a>&lt; N &gt;::setName </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>a_name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set solver name. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_name</td><td>Solver name </td></tr>
   </table>
   </dd>
 </dl>

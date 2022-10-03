@@ -1,0 +1,76 @@
+\documentclass[10pt]{article}
+\usepackage{amsmath,amsfonts,times}
+\usepackage{graphicx,color,tikz,pgfplots}
+\usepackage[paperwidth=16cm,paperheight=7.0cm,lmargin=0in,rmargin=0in,tmargin=0.in,bmargin=0.in]{geometry}
+\usepackage{bm}
+\usetikzlibrary{arrows,shadings,shapes.arrows,decorations.pathreplacing,calc, positioning}
+\usepgfplotslibrary{fillbetween}
+
+\pgfplotsset{compat=1.15,
+  myStyle/.style={
+    width=7cm,
+    height=7cm,
+    xmin=0,
+    xmax=1,
+    ymin=0,
+    ymax=1,
+    axis line style=ultra thick, 
+    colormap/bluered,
+    colorbar,
+    ticks=none,
+    colorbar style={
+      title=Weights,
+      at={(1.1,0)},anchor=south west }
+  },
+}
+
+
+\begin{document}
+\centering
+\begin{tikzpicture}[font=\small,
+    tree/.style={
+      black,
+      densely dashed,
+      *-
+    }
+  ]
+  \begin{axis}[myStyle, alias=input, title={a) Initial particles}]
+
+
+    % Particles
+    \addplot[scatter, only marks, point meta=explicit] table[x=x,y=y,meta=color] {input_particles.dat};
+
+    %% % Draw kd tree
+    %% \draw[tree, alias=b] (0.665, 0)     --++ (0,1);
+    
+    %% \draw[tree] (0,     0.290) --++ (0.665, 0);
+    %% \draw[tree] (0.665, 0.456) --++ (1, 0);
+
+    %% \draw[tree] (0.345, 0) -- (0.345, 0.29);
+    %% \draw[tree] (0.507, 0.433) -- (0.507, 1);
+    
+
+
+
+      % Draw the EB
+    \draw[fill=black!50!white, draw=black, thick] (axis cs:0,0.25) -- (axis cs:0.75,1) -- (axis cs:0,1) -- cycle;
+
+  \end{axis}
+  
+  \begin{axis}[myStyle,
+      alias=output,
+      at=(input.north east),
+      anchor=north west,
+      xshift=7em,
+      title={b) Final particles}]
+%      colorbar style={ytick={773, 774}}]
+    
+    % Draw the EB
+    \draw[fill=black!50!white, draw=black, thick] (axis cs:0,0.25) -- (axis cs:0.75,1) -- (axis cs:0,1) -- cycle;
+
+    % Particles
+    \addplot[scatter, only marks,point meta=explicit] table[x=x,y=y,meta=color] {output_particles.dat};
+  \end{axis}
+\end{tikzpicture}
+
+\end{document} 

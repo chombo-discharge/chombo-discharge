@@ -21,7 +21,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Linear solvers" href="LinearSolvers.html" />
+    <link rel="next" title="Regridding" href="Regridding.html" />
     <link rel="prev" title="Particles" href="Particles.html" /> 
 </head>
 
@@ -51,6 +51,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="SpatialDiscretization.html">Spatial discretization</a></li>
@@ -62,18 +72,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#interacting-with-realms">Interacting with realms</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Design</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
 <ul>
@@ -81,7 +82,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
@@ -160,10 +161,10 @@ Note that every <code class="docutils literal notranslate"><span class="pre">Rea
 The difference lies primarily in the assignment of MPI ranks to grids; i.e. the load-balancing and domain decomposition.</p>
 <div class="figure align-center" id="id1">
 <span id="fig-dualmesh"></span><a class="reference internal image-reference" href="../_images/DualMesh.png"><img alt="../_images/DualMesh.png" src="../_images/DualMesh.png" style="width: 35%;" /></a>
-<p class="caption"><span class="caption-number">Fig. 13 </span><span class="caption-text">Sketch of dual grid approach.
+<p class="caption"><span class="caption-number">Fig. 15 </span><span class="caption-text">Sketch of dual grid approach.
 Each rectangle represents a grid patch and the numbers show MPI ranks. a) Load balancing with the number of grid cells. b) Load balancing with the number of particles.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </div>
-<p><a class="reference internal" href="#fig-dualmesh"><span class="std std-numref">Fig. 13</span></a> shows an example of a dual-grid approach.
+<p><a class="reference internal" href="#fig-dualmesh"><span class="std std-numref">Fig. 15</span></a> shows an example of a dual-grid approach.
 In  this figure we have a set of grid patches on a particular grid level.
 In the top panel the grid patches are load-balanced using the grid patch volume as a proxy for the computational load.
 The numbers in each grid patch indicates the MPI rank ownership of the patches.
@@ -199,7 +200,7 @@ For example for coarsening of multifluid data:</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Particles.html" class="btn btn-neutral float-left" title="Particles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="LinearSolvers.html" class="btn btn-neutral float-right" title="Linear solvers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Regridding.html" class="btn btn-neutral float-right" title="Regridding" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

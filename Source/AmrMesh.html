@@ -52,16 +52,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="SpatialDiscretization.html">Spatial discretization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Design</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
@@ -70,6 +60,7 @@
 <li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">AmrMesh</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#main-functionality">Main functionality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#particle-intersection">Particle intersection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#class-options">Class options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#runtime-options">Runtime options</a></li>
 </ul>
@@ -77,13 +68,24 @@
 <li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Sigma.html">Surface charge solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
@@ -204,6 +206,9 @@ See <a class="reference internal" href="Realm.html#chap-realm"><span class="std 
 <li><p>Interpolating data to e.g. EB centroids.</p></li>
 </ul>
 <p>The <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh API</a> is a good place to start for figuring out the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> functionality.</p>
+</div>
+<div class="section" id="particle-intersection">
+<span id="chap-amrparticleintersection"></span><h2>Particle intersection<a class="headerlink" href="#particle-intersection" title="Permalink to this heading"></a></h2>
 </div>
 <div class="section" id="class-options">
 <h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this heading"></a></h2>
