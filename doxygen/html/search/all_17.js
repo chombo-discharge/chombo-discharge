@@ -111,7 +111,7 @@ var searchData=
   ['_7eitospecies_2941',['~ItoSpecies',['../classItoSpecies.html#ac6469bbc15c51b87cd283a2d0264378f',1,'ItoSpecies']]],
   ['_7ekdnode_2942',['~KDNode',['../classSuperParticles_1_1KDNode.html#ab42c4527cfb231eed85ccbf9b56694df',1,'SuperParticles::KDNode']]],
   ['_7eleastsquares_2943',['~LeastSquares',['../classLeastSquares.html#ac82b8db090ce699c21c4e3fa9722e4c1',1,'LeastSquares']]],
-  ['_7elookuptable_2944',['~LookupTable',['../classLookupTable.html#ab52588553d5c55f9ab97886c2de65b73',1,'LookupTable']]],
+  ['_7elookuptable1d_2944',['~LookupTable1D',['../classLookupTable1D.html#a97c81d0742cac72c11327ae2fc260171',1,'LookupTable1D']]],
   ['_7emcphoto_2945',['~McPhoto',['../classMcPhoto.html#a53a80d21c0b2a1822117c9a1101d54eb',1,'McPhoto']]],
   ['_7emeshodesolver_2946',['~MeshODESolver',['../classMeshODESolver.html#ab714fefe8a0e92d2fef58330654836d8',1,'MeshODESolver']]],
   ['_7emeshodestepper_2947',['~MeshODEStepper',['../classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a82feb9aa7620871f16f784eb3499e0a2',1,'Physics::MeshODE::MeshODEStepper']]],

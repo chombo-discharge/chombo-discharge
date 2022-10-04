@@ -1,7 +1,7 @@
 var searchData=
 [
   ['addebbc_3701',['addEbBc',['../classElectrostaticEbBc.html#a7fb6990a34322210a286a08804bf1655',1,'ElectrostaticEbBc']]],
-  ['addentry_3702',['addEntry',['../classLookupTable.html#a44d82e1f380400ec814395e291b16104',1,'LookupTable']]],
+  ['addentry_3702',['addEntry',['../classLookupTable1D.html#ae91a0ce9537b0b88c6755d7b27cad9cf',1,'LookupTable1D']]],
   ['addficodatatofine_3703',['addFiCoDataToFine',['../classEBCoarseFineParticleMesh.html#af93cfd62846ed73d8fc8c7cab48aa38f',1,'EBCoarseFineParticleMesh']]],
   ['addfineghoststocoarse_3704',['addFineGhostsToCoarse',['../classEBCoarseFineParticleMesh.html#a4136a727ffdaf513ee37d9eca4cd1dfc',1,'EBCoarseFineParticleMesh']]],
   ['addinvalidcoarsetofine_3705',['addInvalidCoarseToFine',['../classEBCoarseFineParticleMesh.html#a281dd813bb440fb9f825178c1cc37967',1,'EBCoarseFineParticleMesh']]],

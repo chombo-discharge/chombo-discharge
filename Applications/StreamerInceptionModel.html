@@ -308,8 +308,8 @@ For defining an analytic function:</p>
 <span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Tabulated data (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">Lookup tables</span></a>) can also be used.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tableData</span><span class="p">;</span><span class="w"></span>
+<p>Tabulated data (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable1d"><span class="std std-ref">Lookup tables</span></a>) can also be used.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tableData</span><span class="p">;</span><span class="w"></span>
 
 <span class="k">auto</span><span class="w"> </span><span class="n">alphaCoeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">tableData</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">tableData</span><span class="p">.</span><span class="n">getEntry</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">E</span><span class="p">);</span><span class="w"></span>

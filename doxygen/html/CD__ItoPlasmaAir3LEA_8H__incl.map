@@ -3,7 +3,7 @@
 <area shape="rect" id="node2" href="$CD__ItoPlasmaPhysicsLEA_8H.html" title="Interface file for LEA&#45;based ito plasma physics." alt="" coords="2200,109,2400,136"/>
 <area shape="rect" id="node21" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1083,572,1269,599"/>
 <area shape="rect" id="node22" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1903,572,2081,599"/>
-<area shape="rect" id="node34" href="$CD__LookupTable_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="3257,333,3399,360"/>
+<area shape="rect" id="node34" href="$CD__LookupTable1D_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="3239,333,3399,360"/>
 <area shape="rect" id="node3" href="$CD__ItoPlasmaPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="1788,184,1964,211"/>
 <area shape="rect" id="node4" title=" " alt="" coords="1989,259,2056,285"/>
 <area shape="rect" id="node5" title=" " alt="" coords="2080,259,2152,285"/>
@@ -36,8 +36,8 @@
 <area shape="rect" id="node33" href="$CD__ItoPlasmaPhotoReactionImplem_8H.html" title="Implementation of CD_ItoPlasmaPhotoReaction.H." alt="" coords="1747,483,1954,524"/>
 <area shape="rect" id="node35" title=" " alt="" coords="3483,490,3563,517"/>
 <area shape="rect" id="node36" title=" " alt="" coords="3499,408,3562,435"/>
-<area shape="rect" id="node37" title=" " alt="" coords="3139,408,3208,435"/>
-<area shape="rect" id="node38" href="$CD__LookupTableImplem_8H.html" title="Implementation of CD_LookupTable.H." alt="" coords="3232,408,3424,435"/>
+<area shape="rect" id="node37" title=" " alt="" coords="3120,408,3189,435"/>
+<area shape="rect" id="node38" href="$CD__LookupTable1DImplem_8H.html" title="Implementation of CD_LookupTable1D.H." alt="" coords="3213,408,3424,435"/>
 <area shape="rect" id="node39" title=" " alt="" coords="3080,490,3165,517"/>
 <area shape="rect" id="node40" title=" " alt="" coords="3339,490,3407,517"/>
 <area shape="rect" id="node42" title=" " alt="" coords="2712,490,2827,517"/>

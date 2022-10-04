@@ -18,8 +18,8 @@
 <area shape="rect" id="node25" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="1235,169,1341,196"/>
 <area shape="rect" id="node27" href="$CD__ItoPlasmaReaction_8H.html" title="Declaration of a class for holding reaction types in ito_plasma physics." alt="" coords="2441,244,2625,271"/>
 <area shape="rect" id="node30" href="$CD__ItoPlasmaPhotoReaction_8H.html" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="2129,244,2351,271"/>
-<area shape="rect" id="node32" href="$CD__LookupTable_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="3011,244,3154,271"/>
-<area shape="rect" id="node39" href="$CD__ItoPlasmaPhysicsImplem_8H.html" title="Implementation of CD_ItoPlasmaPhysics.H." alt="" coords="3349,244,3576,271"/>
+<area shape="rect" id="node32" href="$CD__LookupTable1D_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="2999,244,3159,271"/>
+<area shape="rect" id="node39" href="$CD__ItoPlasmaPhysicsImplem_8H.html" title="Implementation of CD_ItoPlasmaPhysics.H." alt="" coords="3359,244,3585,271"/>
 <area shape="rect" id="node14" title=" " alt="" coords="981,326,1040,353"/>
 <area shape="rect" id="node15" title=" " alt="" coords="1065,326,1141,353"/>
 <area shape="rect" id="node16" title=" " alt="" coords="896,326,957,353"/>
@@ -32,13 +32,13 @@
 <area shape="rect" id="node28" title=" " alt="" coords="2419,326,2495,353"/>
 <area shape="rect" id="node29" href="$CD__ItoPlasmaReactionImplem_8H.html" title="Implementation of CD_ItoPlasmaReaction.H." alt="" coords="2571,326,2805,353"/>
 <area shape="rect" id="node31" href="$CD__ItoPlasmaPhotoReactionImplem_8H.html" title="Implementation of CD_ItoPlasmaPhotoReaction.H." alt="" coords="2137,319,2343,360"/>
-<area shape="rect" id="node33" title=" " alt="" coords="3581,408,3661,435"/>
+<area shape="rect" id="node33" title=" " alt="" coords="3595,408,3675,435"/>
 <area shape="rect" id="node34" title=" " alt="" coords="3033,326,3095,353"/>
 <area shape="rect" id="node35" title=" " alt="" coords="3120,326,3189,353"/>
-<area shape="rect" id="node36" href="$CD__LookupTableImplem_8H.html" title="Implementation of CD_LookupTable.H." alt="" coords="3384,326,3576,353"/>
-<area shape="rect" id="node37" title=" " alt="" coords="3812,408,3897,435"/>
-<area shape="rect" id="node38" title=" " alt="" coords="3446,408,3514,435"/>
-<area shape="rect" id="node40" title=" " alt="" coords="3701,326,3816,353"/>
-<area shape="rect" id="node41" title=" " alt="" coords="3841,326,3943,353"/>
+<area shape="rect" id="node36" href="$CD__LookupTable1DImplem_8H.html" title="Implementation of CD_LookupTable1D.H." alt="" coords="3384,326,3595,353"/>
+<area shape="rect" id="node37" title=" " alt="" coords="3828,408,3913,435"/>
+<area shape="rect" id="node38" title=" " alt="" coords="3455,408,3523,435"/>
+<area shape="rect" id="node40" title=" " alt="" coords="3720,326,3835,353"/>
+<area shape="rect" id="node41" title=" " alt="" coords="3859,326,3962,353"/>
 <area shape="rect" id="node42" href="$CD__Units_8H.html" title="Declaration of various useful units." alt="" coords="3264,326,3360,353"/>
 </map>
