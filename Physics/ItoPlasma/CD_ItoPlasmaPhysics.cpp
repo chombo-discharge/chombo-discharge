@@ -92,7 +92,7 @@ void
 ItoPlasmaPhysics::addTable(const std::string a_table_name, const std::string a_file)
 {
 
-  LookupTable<2> table;
+  LookupTable1D<2> table;
 
   this->readFile(table, a_file); // Read file
   table.sort();
@@ -101,7 +101,7 @@ ItoPlasmaPhysics::addTable(const std::string a_table_name, const std::string a_f
 }
 
 void
-ItoPlasmaPhysics::readFile(LookupTable<2>& a_table, const std::string a_file)
+ItoPlasmaPhysics::readFile(LookupTable1D<2>& a_table, const std::string a_file)
 {
 
   Real x, y;

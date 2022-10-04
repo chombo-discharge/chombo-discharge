@@ -33,7 +33,7 @@
 #include <CD_ItoParticle.H>
 #include <CD_ItoPlasmaReaction.H>
 #include <CD_ItoPlasmaPhotoReaction.H>
-#include <CD_LookupTable.H>
+#include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -285,7 +285,7 @@ namespace Physics {
       mutable std::map<std::string, ItoPlasmaPhotoReaction> m_photoReactions;
 
       // Lookup tables if you need them.
-      std::map<std::string, LookupTable<2>> m_tables;
+      std::map<std::string, LookupTable1D<2>> m_tables;
 
       /*!
 	@brief Add a table
@@ -297,7 +297,7 @@ namespace Physics {
 	@brief Read a file and put it in a lookup table
       */
       void
-      readFile(LookupTable<2>& a_table, const std::string a_file);
+      readFile(LookupTable1D<2>& a_table, const std::string a_file);
 
       /*!
 	@brief Draw a valid random position somewhere in a cell

@@ -235,7 +235,7 @@ ItoPlasmaAir3LEA::photoionizationRate(const Real a_E) const
   return excitationRates(a_E) * sergeyFactor(m_O2frac) * m_photoi_factor;
 }
 
-ItoPlasmaAir3LEA::Electron::Electron(const LookupTable& a_mobility, const LookupTable& a_diffusion)
+ItoPlasmaAir3LEA::Electron::Electron(const LookupTable1D& a_mobility, const LookupTable1D& a_diffusion)
   : m_mobility(a_mobility), m_diffusion(a_diffusion)
 {
   m_isMobile     = true;

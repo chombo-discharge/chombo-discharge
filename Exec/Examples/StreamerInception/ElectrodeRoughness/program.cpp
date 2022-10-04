@@ -2,7 +2,7 @@
 #include <CD_NoisePlane.H>
 #include <CD_StreamerInceptionStepper.H>
 #include <CD_StreamerInceptionTagger.H>
-#include <CD_LookupTable.H>
+#include <CD_LookupTable1D.H>
 #include <CD_DataParser.H>
 #include <ParmParse.H>
 
@@ -28,12 +28,12 @@ main(int argc, char* argv[])
   // Read ionization and attachment coefficients and make them into functions.
   constexpr Real N = 2.45E25;
 
-  LookupTable<2> ionizationData = DataParser::fractionalFileReadASCII("sf6.dat",
-                                                                      "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)",
-                                                                      "");
-  LookupTable<2> attachmentData = DataParser::fractionalFileReadASCII("sf6.dat",
-                                                                      "E/N (Td)	Townsend attach. coef. eta/N (m2)",
-                                                                      "");
+  LookupTable1D<2> ionizationData = DataParser::fractionalFileReadASCII("sf6.dat",
+                                                                        "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)",
+                                                                        "");
+  LookupTable1D<2> attachmentData = DataParser::fractionalFileReadASCII("sf6.dat",
+                                                                        "E/N (Td)	Townsend attach. coef. eta/N (m2)",
+                                                                        "");
 
   ionizationData.setRange(10, 4000, 0);
   attachmentData.setRange(10, 4000, 0);
