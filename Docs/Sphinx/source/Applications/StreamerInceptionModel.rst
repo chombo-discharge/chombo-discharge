@@ -154,11 +154,11 @@ For defining an analytic function:
       return 1/E.
    };
 
-Tabulated data (see :ref:`Chap:LookupTable`) can also be used.
+Tabulated data (see :ref:`Chap:LookupTable1D`) can also be used.
 
 .. code-block:: c++
 		
-   LookupTable<2> tableData;
+   LookupTable1D<2> tableData;
    
    auto alphaCoeff = [tableData](const Real E) -> void {
       return tableData.getEntry<1>(E);
