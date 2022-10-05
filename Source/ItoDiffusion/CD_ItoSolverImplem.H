@@ -71,6 +71,19 @@ ItoSolver::addParticles(ListBox<ItoParticle>& a_inputParticles,
 template <class P, const Real& (P::*particleScalarField)() const>
 void
 ItoSolver::depositParticles(EBAMRCellData&             a_phi,
+                            ParticleContainer<P>&      a_particles) const
+ {
+  CH_TIME("ItoSolver::depositParticles");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::depositParticles" << endl;
+  }
+
+  this->depositParticles<P, particleScalarField>(a_phi, a_particles, m_deposition, m_coarseFineDeposition);
+}
+
+template <class P, const Real& (P::*particleScalarField)() const>
+void
+ItoSolver::depositParticles(EBAMRCellData&             a_phi,
                             ParticleContainer<P>&      a_particles,
                             const DepositionType       a_deposition,
                             const CoarseFineDeposition a_coarseFineDeposition) const

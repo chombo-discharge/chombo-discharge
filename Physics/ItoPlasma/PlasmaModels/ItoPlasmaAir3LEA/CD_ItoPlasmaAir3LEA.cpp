@@ -153,15 +153,15 @@ ItoPlasmaAir3LEA::readTables()
   this->addTable("collision", "collision_rate.dat");
 
   // Need to scale energy tables. First column is in eV
-  m_tables["mobility"].scaleY(1. / m_N);
-  m_tables["diffco"].scaleY(1. / m_N);
-  m_tables["alpha"].scaleY(m_N);
-  m_tables["eta"].scaleY(m_N);
-  m_tables["collision"].scaleY(m_N);
+  m_tables["mobility"].scale<1>(1. / m_N);
+  m_tables["diffco"].scale<1>(1. / m_N);
+  m_tables["alpha"].scale<1>(m_N);
+  m_tables["eta"].scale<1>(m_N);
+  m_tables["collision"].scale<1>(m_N);
 
   // LFA table for Townsed coefficient
-  m_tables["alpha_lfa"].scaleX(m_N * Units::Td);
-  m_tables["alpha_lfa"].scaleY(m_N);
+  m_tables["alpha_lfa"].scale<0>(m_N * Units::Td);
+  m_tables["alpha_lfa"].scale<1>(m_N);
 }
 
 Real
@@ -175,7 +175,7 @@ ItoPlasmaAir3LEA::computeAlpha(const RealVect a_E) const
 {
   const Real E = a_E.vectorLength();
 
-  return m_tables.at("alpha_lfa").getEntry(E);
+  return m_tables.at("alpha_lfa").getEntry<1>(E);
 }
 
 void
@@ -192,10 +192,10 @@ ItoPlasmaAir3LEA::updateReactionRatesLEA(const RealVect     a_E,
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim); //*a_kappa;
   const Real E       = a_E.vectorLength();
-  const Real alpha   = m_tables.at("alpha").getEntry(Electron_energy);
-  const Real eta     = m_tables.at("eta").getEntry(Electron_energy);
-  const Real mu      = m_tables.at("mobility").getEntry(Electron_energy);
-  const Real scat    = m_tables.at("collision").getEntry(Electron_energy);
+  const Real alpha   = m_tables.at("alpha").getEntry<1>(Electron_energy);
+  const Real eta     = m_tables.at("eta").getEntry<1>(Electron_energy);
+  const Real mu      = m_tables.at("mobility").getEntry<1>(Electron_energy);
+  const Real scat    = m_tables.at("collision").getEntry<1>(Electron_energy);
   const Real velo    = mu * a_E.vectorLength();
   const Real Te      = 2.0 * a_mean_energies[m_electronIdx] / (3.0 * Units::kb);
   const Real xfactor = (m_pq / (m_p + m_pq)) * excitationRates(E) * sergeyFactor(m_O2frac) * m_photoi_factor;
@@ -235,7 +235,7 @@ ItoPlasmaAir3LEA::photoionizationRate(const Real a_E) const
   return excitationRates(a_E) * sergeyFactor(m_O2frac) * m_photoi_factor;
 }
 
-ItoPlasmaAir3LEA::Electron::Electron(const LookupTable1D& a_mobility, const LookupTable1D& a_diffusion)
+ItoPlasmaAir3LEA::Electron::Electron(const LookupTable1D<2>& a_mobility, const LookupTable1D<2>& a_diffusion)
   : m_mobility(a_mobility), m_diffusion(a_diffusion)
 {
   m_isMobile     = true;
@@ -250,14 +250,14 @@ Real
 ItoPlasmaAir3LEA::Electron::mobility(const Real a_energy) const
 {
   const Real energy = Max(a_energy, 30.0);
-  return m_mobility.getEntry(energy);
+  return m_mobility.getEntry<1>(energy);
 }
 
 Real
 ItoPlasmaAir3LEA::Electron::diffusion(const Real a_energy) const
 {
   const Real energy = Max(a_energy, 30.0);
-  return m_diffusion.getEntry(energy);
+  return m_diffusion.getEntry<1>(energy);
 }
 
 ItoPlasmaAir3LEA::Positive::Positive()
@@ -310,7 +310,7 @@ ItoPlasmaAir3LEA::PhotonZ::PhotonZ()
 ItoPlasmaAir3LEA::PhotonZ::~PhotonZ() {}
 
 Real
-ItoPlasmaAir3LEA::PhotonZ::getKappa(const RealVect a_pos) const
+ItoPlasmaAir3LEA::PhotonZ::getAbsorptionCoefficient(const RealVect a_pos) const
 {
   const Real f = m_f1 + (*m_udist01)(*m_rng) * (m_f2 - m_f1);
   return m_K1 * pow(m_K2 / m_K1, (f - m_f1) / (m_f2 - m_f1));

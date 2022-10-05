@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_ItoPlasmaStepper.H>
-#include <CD_ItoPlasmaGodunovParticle.H>
+#include <CD_PointParticle.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -93,9 +93,9 @@ namespace Physics {
       which_algorithm m_algorithm;
       which_dt        m_whichDt;
 
-      Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>
+      Vector<ParticleContainer<PointParticle>*>
         m_conductivity_particles; // Used to store the particle that gave the sigma^k
-      Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>
+      Vector<ParticleContainer<PointParticle>*>
         m_rho_dagger_particles; // Used to store the particles that gave rho^dagger
 
       int m_merge_interval; // How often to merge superparticles
@@ -108,21 +108,21 @@ namespace Physics {
       void
       setOldPositions();
       void
-      remapGodunovParticles(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles,
+      remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
                             const WhichParticles                                  a_which);
       void
-      deposit_ItoPlasmaGodunovParticles(const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles,
+      deposit_PointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
                                         const WhichParticles                                        a_which);
       void
-      clearGodunovParticles(const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles,
+      clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
                             const WhichParticles                                        a_which);
 
       // Routines for semi-implicit Poisson solution
       void
-      computeAllConductivities(const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles);
+      computeAllConductivities(const Vector<ParticleContainer<PointParticle>*>& a_particles);
       void
       compute_cell_conductivity(EBAMRCellData&                                              a_conductivity,
-                                const Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_particles);
+                                const Vector<ParticleContainer<PointParticle>*>& a_particles);
       void
       compute_face_conductivity();
       void
@@ -134,9 +134,9 @@ namespace Physics {
 
       // Routines for semi-implicit regridding
       void
-      copyConductivityParticles(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_conductivity_particles);
+      copyConductivityParticles(Vector<ParticleContainer<PointParticle>*>& a_conductivity_particles);
       void
-      copyRhoDaggerParticles(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_rho_dagger_particles);
+      copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger_particles);
       void
       computeRegridConductivity();
       void
@@ -146,7 +146,7 @@ namespace Physics {
       void
       advanceParticlesEulerMaruyama(const Real a_dt);
       void
-      diffuseParticlesEulerMaruyama(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_rho_dagger,
+      diffuseParticlesEulerMaruyama(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger,
                                     const Real                                            a_dt);
       void
       stepEulerMaruyama(const Real a_dt);
@@ -155,9 +155,9 @@ namespace Physics {
       void
       advanceParticlesTrapezoidal(const Real a_dt);
       void
-      preTrapezoidalPredictor(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_rho_dagger, const Real a_dt);
+      preTrapezoidalPredictor(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger, const Real a_dt);
       void
-      preTrapezoidalCorrector(Vector<ParticleContainer<ItoPlasmaGodunovParticle>*>& a_rho_dagger, const Real a_dt);
+      preTrapezoidalCorrector(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger, const Real a_dt);
       void
       trapezoidalPredictor(const Real a_dt);
       void

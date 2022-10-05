@@ -89,7 +89,7 @@ namespace Physics {
     {
     public:
       Electron() = default;
-      Electron(const LookupTable1D& a_mobility, const LookupTable1D& a_diffusion);
+      Electron(const LookupTable1D<2>& a_mobility, const LookupTable1D<2>& a_diffusion);
       ~Electron();
 
       Real
@@ -98,8 +98,8 @@ namespace Physics {
       diffusion(const Real a_energy) const override;
 
     protected:
-      LookupTable1D m_mobility;
-      LookupTable1D m_diffusion;
+      LookupTable1D<2> m_mobility;
+      LookupTable1D<2> m_diffusion;
     };
 
     class ItoPlasmaAir3LEA::Positive : public ItoSpecies
@@ -123,7 +123,7 @@ namespace Physics {
       ~PhotonZ();
 
       Real
-      getKappa(const RealVect a_pos) const override;
+      getAbsorptionCoefficient(const RealVect a_pos) const override;
 
     protected:
       Real m_pO2;

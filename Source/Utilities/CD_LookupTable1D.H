@@ -60,6 +60,7 @@ template <int N>
 class LookupTable1D
 {
 public:
+  static_assert(N > 1);
   /*!
     @brief Default constructor. Creates a table without any entries. 
   */

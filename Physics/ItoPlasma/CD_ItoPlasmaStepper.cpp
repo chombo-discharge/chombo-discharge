@@ -764,7 +764,7 @@ ItoPlasmaStepper::parseFilters()
   }
 }
 
-void
+Real
 ItoPlasmaStepper::computeDt()
 {
   CH_TIME("ItoPlasmaStepper::computeDt");
@@ -1058,7 +1058,7 @@ ItoPlasmaStepper::computeElectricField(EBAMRIVData&             a_E_eb,
   CH_assert(a_E_cell[0]->nComp() == SpaceDim);
 
   const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencil =
-    m_amr->getEbCentroidInterpolationStencilStencils(m_fluid_Realm, a_phase);
+    m_amr->getEbCentroidInterpolationStencils(m_fluid_Realm, a_phase);
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 
@@ -1367,7 +1367,7 @@ ItoPlasmaStepper::intersectParticles(const WhichParticles            a_WhichPart
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
-
+#if 0
     switch (a_WhichParticles) {
     case WhichParticles::all:
       solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
@@ -1404,6 +1404,7 @@ ItoPlasmaStepper::intersectParticles(const WhichParticles            a_WhichPart
       MayDay::Abort(
         "ItoPlasmaStepper::intersectParticles_particles(WhichParticles, string, string, string, EbRepresentation, bool) - logic bust");
     }
+#endif
   }
 }
 
@@ -3373,7 +3374,7 @@ ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int>>&             a_pr
   for (int i = 0; i < lb_solvers.size(); i++) {
     ParticleContainer<ItoParticle>& particles = lb_solvers[i]->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
+    m_amr->remapToNewGrids(particles, a_lmin, a_finestLevel);
 
     // If we make superparticles during regrids, do it here so we can better estimate the computational loads for each patch. This way, if a grid is removed the realistic
     // load estimate of the underlying grid(s) is improved.

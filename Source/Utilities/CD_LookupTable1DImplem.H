@@ -185,7 +185,7 @@ LookupTable1D<N>::dumpTable(const std::string a_fileName) const
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
-    ofstream outputFile;
+    std::ofstream outputFile;
 
     outputFile.open(a_fileName);
 

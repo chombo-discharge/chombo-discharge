@@ -270,6 +270,18 @@ public:
     the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
     @param[out] a_phi                  Mesh data -- must have exactly one component. 
     @param[in]  a_particles            Particles to be deposited
+  */
+  template <class P, const Real& (P::*particleScalarField)() const>
+  void
+  depositParticles(EBAMRCellData&             a_phi,
+                   ParticleContainer<P>&      a_particles) const;
+
+  /*!
+    @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
+    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
+    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
+    @param[out] a_phi                  Mesh data -- must have exactly one component. 
+    @param[in]  a_particles            Particles to be deposited
     @param[in]  a_deposition           Deposition method
     @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
   */
