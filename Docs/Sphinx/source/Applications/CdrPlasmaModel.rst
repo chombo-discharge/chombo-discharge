@@ -941,7 +941,7 @@ Currently, the following fields are supported:
 * ``height profile`` For specifying a height profile along :math:`y` in 2D, and :math:`z` in 3D.
   To include it, prepare an ASCII files with at least two columns.
   The height (in meters) must be specified in one column and the density (in units of :math:`m^{-3}`) in another.
-  Internally, this data is stored in a lookup table (see :ref:`Chap:LookupTable`). 
+  Internally, this data is stored in a lookup table (see :ref:`Chap:LookupTable1D`). 
   Required fields are
   
   * ``file`` , for specifying the file.
@@ -1083,7 +1083,7 @@ Supported functions are:
 
 Specifying ``lookup`` to ``table E/N`` lets the user set the mobility from a tabulated value of the reduced electric field.
 BOLSIG-like files can be parsed by specifying the header which contains the tabulated data, and the columns that identify the reduced electric field and mobilities.
-This data is then stored in a lookup table, see :ref:`Chap:LookupTable`.
+This data is then stored in a lookup table, see :ref:`Chap:LookupTable1D`.
 
 For example:
 
@@ -1122,7 +1122,7 @@ In the above, the fields have the following meaning:
 * ``dump``, an optional argument (useful for debugging) which will write the table to file. 
 
 Note that the input file does *not* need regularly spaced or sorted data.
-For performance reasons, the tables are always resampled, see :ref:`Chap:LookupTable`.
+For performance reasons, the tables are always resampled, see :ref:`Chap:LookupTable1D`.
 
 Diffusion coefficients
 ______________________

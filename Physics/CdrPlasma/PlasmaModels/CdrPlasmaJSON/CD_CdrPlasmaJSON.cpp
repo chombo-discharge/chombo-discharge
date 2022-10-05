@@ -489,9 +489,9 @@ CdrPlasmaJSON::initializeNeutralSpecies()
       this->throwParserError(baseError + " and got tabulated gas law but file = '" + filename + "' was not found");
 
     // Let the data parser read the input.
-    LookupTable<2> temperatureTable = DataParser::simpleFileReadASCII(filename, height, T);
-    LookupTable<2> pressureTable    = DataParser::simpleFileReadASCII(filename, height, P);
-    LookupTable<2> densityTable     = DataParser::simpleFileReadASCII(filename, height, Rho);
+    LookupTable1D<2> temperatureTable = DataParser::simpleFileReadASCII(filename, height, T);
+    LookupTable1D<2> pressureTable    = DataParser::simpleFileReadASCII(filename, height, P);
+    LookupTable1D<2> densityTable     = DataParser::simpleFileReadASCII(filename, height, Rho);
 
     // Compute the number of points in the table
     const int numPoints = std::ceil((maxHeight - minHeight) / resHeight);
@@ -762,7 +762,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
     std::vector<FunctionX> gauss4Functions;
 
     // Pointer to height profile table
-    LookupTable<2> heightProfile;
+    LookupTable1D<2> heightProfile;
 
     // Set the uniform density
     if (initData.contains("uniform")) {
@@ -895,7 +895,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
       // Compute the number of points for the table
       const int numPoints = std::ceil((maxHeight - minHeight) / resHeight);
 
-      // Parse input file into our nifty little LookupTable.
+      // Parse input file into our nifty little LookupTable1D.
       heightProfile = DataParser::simpleFileReadASCII(filename, heightColumn, densityColumn);
 
       // Sort the table along the first column. This is the height above ground.
@@ -1478,7 +1478,7 @@ CdrPlasmaJSON::parseMobilities()
         // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
         // second column.
-        LookupTable<2> mobilityTable =
+        LookupTable1D<2> mobilityTable =
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
@@ -1566,7 +1566,7 @@ CdrPlasmaJSON::parseMobilities()
         // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
         // the user specified the correct eV column then that data will be put in the first column. The data for mu*N will be in the
         // second column.
-        LookupTable<2> mobilityTable =
+        LookupTable1D<2> mobilityTable =
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
@@ -1789,7 +1789,7 @@ CdrPlasmaJSON::parseDiffusion()
         // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
         // second column.
-        LookupTable<2> diffusionTable =
+        LookupTable1D<2> diffusionTable =
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
@@ -1879,7 +1879,7 @@ CdrPlasmaJSON::parseDiffusion()
         // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
         // second column.
-        LookupTable<2> diffusionTable =
+        LookupTable1D<2> diffusionTable =
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
@@ -2086,7 +2086,7 @@ CdrPlasmaJSON::parseTemperatures()
         // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
         // second column.
-        LookupTable<2> temperatureTable =
+        LookupTable1D<2> temperatureTable =
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
@@ -2577,7 +2577,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
     // second column.
-    LookupTable<2> reactionTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
+    LookupTable1D<2> reactionTable =
+      DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
     if (reactionTable.getNumEntries() == 0) {
@@ -2656,7 +2657,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
     // second column.
-    LookupTable<2> reactionTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
+    LookupTable1D<2> reactionTable =
+      DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
     if (reactionTable.getNumEntries() == 0) {
@@ -4209,7 +4211,7 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_positio
       }
       case LookupMethod::TableEN: {
         // Recall; the mobility tables are stored as (E/N, mu*N) so we need to extract mu from that.
-        const LookupTable<2>& mobilityTable = m_mobilityTablesEN.at(i);
+        const LookupTable1D<2>& mobilityTable = m_mobilityTablesEN.at(i);
 
         mu[i] = mobilityTable.getEntry<1>(Etd); // Get mu*N
         mu[i] /= N;                             // Get mu
@@ -4217,7 +4219,7 @@ CdrPlasmaJSON::computePlasmaSpeciesMobilities(const RealVect&          a_positio
         break;
       }
       case LookupMethod::TableEnergy: {
-        const LookupTable<2>& mobilityTable = m_mobilityTablesEnergy.at(i);
+        const LookupTable1D<2>& mobilityTable = m_mobilityTablesEnergy.at(i);
 
         mu[i] = mobilityTable.getEntry<1>(energies[i]);
         mu[i] /= N;
@@ -4284,7 +4286,7 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect          a_pos,
       }
       case LookupMethod::TableEN: {
         // Recall; the diffusion tables are stored as (E/N, D*N) so we need to extract D from that.
-        const LookupTable<2>& diffusionTable = m_diffusionTablesEN.at(i);
+        const LookupTable1D<2>& diffusionTable = m_diffusionTablesEN.at(i);
 
         Dco = diffusionTable.getEntry<1>(Etd); // Get D*N
         Dco /= N;                              // Get D
@@ -4293,7 +4295,7 @@ CdrPlasmaJSON::computePlasmaSpeciesDiffusion(const RealVect          a_pos,
       }
       case LookupMethod::TableEnergy: {
         // Recall: The diffusion tables are stored as (eV, D*N) so we just get D from that.
-        const LookupTable<2>& diffusionTable = m_diffusionTablesEnergy.at(i);
+        const LookupTable1D<2>& diffusionTable = m_diffusionTablesEnergy.at(i);
 
         Dco = diffusionTable.getEntry<1>(energies[i]);
         Dco /= N;
@@ -4396,7 +4398,7 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
         }
         case LookupMethod::TableEN: {
           // Recall; the temperature tables are stored as (E/N, K) so we can fetch the temperature immediately.
-          const LookupTable<2>& temperatureTable = m_temperatureTablesEN.at(i);
+          const LookupTable1D<2>& temperatureTable = m_temperatureTablesEN.at(i);
 
           T = temperatureTable.getEntry<1>(Etd);
 
@@ -4478,7 +4480,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
   }
   case LookupMethod::TableEN: {
     // Recall; the reaction tables are stored as (E/N, rate/N) so we need to extract mu from that.
-    const LookupTable<2>& reactionTable = m_plasmaReactionTablesEN.at(a_reactionIndex);
+    const LookupTable1D<2>& reactionTable = m_plasmaReactionTablesEN.at(a_reactionIndex);
 
     // Get the reaction rate.
     k = reactionTable.getEntry<1>(a_Etd);
@@ -4491,8 +4493,8 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
     break;
   }
   case LookupMethod::TableEnergy: {
-    const int&            speciesIndex  = m_plasmaReactionTablesEnergy.at(a_reactionIndex).first;
-    const LookupTable<2>& reactionTable = m_plasmaReactionTablesEnergy.at(a_reactionIndex).second;
+    const int&              speciesIndex  = m_plasmaReactionTablesEnergy.at(a_reactionIndex).first;
+    const LookupTable1D<2>& reactionTable = m_plasmaReactionTablesEnergy.at(a_reactionIndex).second;
 
     const Real energy = a_cdrEnergies[speciesIndex];
 

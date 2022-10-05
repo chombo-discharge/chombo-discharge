@@ -31,7 +31,7 @@
 #include <CD_CdrPlasmaReactionJSON.H>
 #include <CD_CdrPlasmaPhotoReactionJSON.H>
 #include <CD_CdrPlasmaSurfaceReactionJSON.H>
-#include <CD_LookupTable.H>
+#include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>
 
 using json = nlohmann::json;
@@ -524,12 +524,12 @@ namespace Physics {
       /*!
 	@brief For when we can put alpha = table(E,N)
       */
-      LookupTable<2> m_alphaTableEN;
+      LookupTable1D<2> m_alphaTableEN;
 
       /*!
 	@brief For when we can put eta = table(E,N)
       */
-      LookupTable<2> m_etaTableEN;
+      LookupTable1D<2> m_etaTableEN;
 
       // ================================
       // MOBILITY QUANTITIES BEGIN HERE
@@ -558,13 +558,13 @@ namespace Physics {
       /*!
 	@brief Map for table-based mobilities. Stored as tables (E/N, mu*N)
       */
-      std::map<int, LookupTable<2>> m_mobilityTablesEN;
+      std::map<int, LookupTable1D<2>> m_mobilityTablesEN;
 
       /*!
 	@brief Map for table-based mobilities as function of energy. 
 	@details Stored as tables (eV, mu*N)
       */
-      std::map<int, LookupTable<2>> m_mobilityTablesEnergy;
+      std::map<int, LookupTable1D<2>> m_mobilityTablesEnergy;
 
       // ================================
       // DIFFUSION  QUANTITIES BEGIN HERE
@@ -589,13 +589,13 @@ namespace Physics {
 	@brief Map for table-based diffusion coefficients D = D(E,N).
 	@details Tables stored as (E/N, D*N)
       */
-      std::map<int, LookupTable<2>> m_diffusionTablesEN;
+      std::map<int, LookupTable1D<2>> m_diffusionTablesEN;
 
       /*!
 	@brief Map for table-based diffusion coefficients as function of energy. 
 	@details Stored as tables (eV, D*N)
       */
-      std::map<int, LookupTable<2>> m_diffusionTablesEnergy;
+      std::map<int, LookupTable1D<2>> m_diffusionTablesEnergy;
 
       // ===========================================
       // PLASMA SPECIES TEMPERATURE DATA BEGINS HERE
@@ -614,7 +614,7 @@ namespace Physics {
       /*!
 	@brief Temperatures as functions of E/N. 
       */
-      std::map<int, LookupTable<2>> m_temperatureTablesEN;
+      std::map<int, LookupTable1D<2>> m_temperatureTablesEN;
 
       // ================================
       // REACTION DATA BEGINS HERE
@@ -664,13 +664,13 @@ namespace Physics {
       /*!
 	@brief Map for table-based reaction coefficients, where k = k(E,N).
       */
-      std::map<int, LookupTable<2>> m_plasmaReactionTablesEN;
+      std::map<int, LookupTable1D<2>> m_plasmaReactionTablesEN;
 
       /*!
 	@brief Map for table-based reaction coefficients where k = k(energy).
 	@details The first index is the reaction index, while the pair describes which species energy and the tabulated data. 
       */
-      std::map<int, std::pair<int, LookupTable<2>>> m_plasmaReactionTablesEnergy;
+      std::map<int, std::pair<int, LookupTable1D<2>>> m_plasmaReactionTablesEnergy;
 
       /*!
 	@brief Scaled plasma reactions. These account for e.g. reaction efficiencies, collisional quenching, etc. 

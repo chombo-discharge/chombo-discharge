@@ -1,14 +1,14 @@
-.. _Chap:LookupTable:
+.. _Chap:LookupTable1D:
 
 Lookup tables
 =============
 
-``LookupTable`` is a class for looking up and interpolation data stored in a row-column format.
+``LookupTable1D`` is a class for looking up and interpolation data stored in a row-column format.
 It is used in order to easily retrieve input data that can be stored in table formats.
 
 .. important::
 
-   LookupTable is used for data lookup *in one independent variable*.
+   LookupTable1D is used for data lookup *in one independent variable*.
    It does not support higher-dimensional data interpolation. 
 
 The class is templated as
@@ -16,15 +16,15 @@ The class is templated as
 .. code-block::
 
    template <int N>
-   class LookupTable
+   class LookupTable1D
 
 where the template parameter ``N`` indicates the number of columns in the data holders.
 Internally, the data is stored as an ``std::vector<std::array<Real, N> >`` where the vector entries are rows and the ``std::array<Real, N>`` are data in each row.
-Thus, a table ``LookupTable<2>`` always has two columns.
+Thus, a table ``LookupTable1D<2>`` always has two columns.
 
-The ``LookupTable`` is used on regularly spaced data (for performance reasons).
-Although the user can fill irregularly spaced data into ``LookupTable``, the class has routines for making that data regularly spaced and sorted along of its columns.
-Usage of ``LookupTable`` will therefore consist of the following:
+The ``LookupTable1D`` is used on regularly spaced data (for performance reasons).
+Although the user can fill irregularly spaced data into ``LookupTable1D``, the class has routines for making that data regularly spaced and sorted along of its columns.
+Usage of ``LookupTable1D`` will therefore consist of the following:
 
 #. Add data rows into the table.
 #. Swap columns if necessary.
@@ -51,7 +51,7 @@ For example, to add two rows of data to a table:
 
 .. code-block:: c++
 
-   LookupTable<3> myTable;
+   LookupTable1D<3> myTable;
 
    myTable.add(4.0, 5.0, 6.0);
    myTable.add(1.0, 2.0, 3.0);   
@@ -61,7 +61,7 @@ This will insert two new rows at the end up the table.
 .. important::
 
    Input data points do not need to be uniformly spaced, or even sorted.
-   Users will insert rows one by one; ``LookupTable`` has functions for sorting and regularizing the table. 
+   Users will insert rows one by one; ``LookupTable1D`` has functions for sorting and regularizing the table. 
 
 Restricting ranges
 ------------------
@@ -86,7 +86,7 @@ The C++ code for this is
 .. code-block:: c++
 
    template <int N>
-   void LookupTable<N>::sort(const int a_independentVariable);
+   void LookupTable1D<N>::sort(const int a_independentVariable);
 
 where the input integer indicates the column (i.e., independent variable) used for sorting.
 Note that the sorting *is always from smallest to largest value*.
@@ -97,7 +97,7 @@ Thus, if one has two rows
    1.0  5.0  6.0
    2.0  2.0  3.0
 
-and one calls ``LookupTable<N>::sort(1)`` the final table becomes
+and one calls ``LookupTable1D<N>::sort(1)`` the final table becomes
 
 .. code-block:: text
 
@@ -109,7 +109,7 @@ Note that the second column now becomes the independent variable.
 Swapping columns
 ----------------
 
-Columns can be swapped by calling ``LookupTable<N>::swap(int, int)``, which will swap two of the columns.
+Columns can be swapped by calling ``LookupTable1D<N>::swap(int, int)``, which will swap two of the columns.
 For example if the original data is
 
 .. code-block:: text
@@ -145,7 +145,7 @@ For example, to use uniformly or exponentially spaced grid points:
 
 .. code-block:: c++
 
-   LookupTable<2> myTable;
+   LookupTable1D<2> myTable;
 
    myTable.setTableSpacing(TableSpacing::Uniform);     // For uniformly spaced points
    myTable.setTableSpacing(TableSpacing::Exponential); // For exponentially spaced points   
@@ -176,7 +176,7 @@ __________________
    void regularize(const int a_numRows)
 
 which will make the table into a regularly spaced table with ``a_numRows`` rows.
-``LookupTable`` will always use piecewise linear interpolation when regularizing the table.
+``LookupTable1D`` will always use piecewise linear interpolation when regularizing the table.
 Specifying a number of rows that is smaller/larger than the original number of rows will downsample/upsample the table.
 
 .. important::
@@ -201,7 +201,7 @@ In the above, the template parameter ``K`` is the column to retrieve and ``a_x``
 
 .. important::
 
-   ``LookupTable`` will *always* use piecewise linear interpolation between two grid points.
+   ``LookupTable1D`` will *always* use piecewise linear interpolation between two grid points.
 
 For example, consider table regularized and sorted along the middle column:
 
@@ -215,7 +215,7 @@ To retrieve an interpolated value for ``x=2.0`` in the third column we call
 
 .. code-block:: c++
 
-   LookupTable<3> myTable,
+   LookupTable1D<3> myTable,
 
    const Real val = myTable.getEntry<2>(2.0);
 
@@ -224,7 +224,7 @@ which will return a value of 4.5 (linearly interpolated).
 Viewing tables
 --------------
 
-For debugging purposes, ``LookupTable`` can write the internal data to an output stream or a file through the two member functions:
+For debugging purposes, ``LookupTable1D`` can write the internal data to an output stream or a file through the two member functions:
 
 .. code-block:: c++
 		
@@ -236,7 +236,7 @@ For example:
 
 .. code-block:: c++
 
-   LookupTable<10> myTable;
+   LookupTable1D<10> myTable;
 
    // Dump table to terminal window
    myTable.dumpTable();
