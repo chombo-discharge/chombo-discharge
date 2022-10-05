@@ -13,7 +13,7 @@
 #define CD_DataParser_H
 
 // Our includes
-#include <CD_LookupTable.H>
+#include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -23,16 +23,16 @@ namespace DataParser {
 
   /*!
     @brief Simple file parser which reads a file and puts the data into two columns (a lookup table). 
-    @details This will read ASCII row/column data into a LookupTable (which is a simple x-y data structure). The user can specify which columns
-    to use as the x and y coordinates in the LookupTable. If the user ask for a column that does not exist in the input file, the data will not be read
-    into the LookupTable. 
+    @details This will read ASCII row/column data into a LookupTable1D (which is a simple x-y data structure). The user can specify which columns
+    to use as the x and y coordinates in the LookupTable1D. If the user ask for a column that does not exist in the input file, the data will not be read
+    into the LookupTable1D. 
     @param[in] a_fileName    Input file name. Must be an ASCII file organized into rows and columns. 
     @param[in] a_xColumn     Which column to use as the x-column. 
     @param[in] a_yColumn     Which column to use as the y-column. 
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
     @note xColumn = 0 is the FIRST column, xColumn=1 is the SECOND column and so on. 
   */
-  static LookupTable<2>
+  static LookupTable1D<2>
   simpleFileReadASCII(const std::string       a_fileName,
                       const int               a_xColumn     = 0,
                       const int               a_yColumn     = 1,
@@ -51,7 +51,7 @@ namespace DataParser {
     @param[in] a_yColumn     Which column to use as the y-column. 
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
   */
-  static LookupTable<2>
+  static LookupTable1D<2>
   fractionalFileReadASCII(const std::string       a_fileName,
                           const std::string       a_startRead,
                           const std::string       a_stopRead,

@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_LookupTable.H
+  @file   CD_LookupTable1D.H
   @brief  Declaration of a table for looking up coefficients etc. 
   @author Robert Marskar
 */
 
-#ifndef CD_LookupTable_H
-#define CD_LookupTable_H
+#ifndef CD_LookupTable1D_H
+#define CD_LookupTable1D_H
 
 // Std includes
 #include <iostream>
@@ -35,7 +35,7 @@ enum class OutOfRangeStrategy
 };
 
 /*!
-  @brief For identifying columns in the LookupTable.
+  @brief For identifying columns in the LookupTable1D.
 */
 enum StateStatus
 {
@@ -57,23 +57,23 @@ enum class TableSpacing
   @brief Class for looking up and interpolation (x,y) data. 
 */
 template <int N>
-class LookupTable
+class LookupTable1D
 {
 public:
   /*!
     @brief Default constructor. Creates a table without any entries. 
   */
-  LookupTable();
+  LookupTable1D();
 
   /*!
     @brief Copy constructor. 
   */
-  LookupTable(const LookupTable& a_table);
+  LookupTable1D(const LookupTable1D& a_table);
 
   /*!
     @brief Destructor (does nothing). 
   */
-  virtual ~LookupTable();
+  virtual ~LookupTable1D();
 
   /*!
     @brief Clear all data
@@ -242,6 +242,6 @@ protected:
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_LookupTableImplem.H>
+#include <CD_LookupTable1DImplem.H>
 
 #endif
