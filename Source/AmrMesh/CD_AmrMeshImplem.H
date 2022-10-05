@@ -212,6 +212,23 @@ AmrMesh::allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel) const
   return this->allocatePointer(a_data.getData(), a_finestLevel);
 }
 
+template <class P>
+void
+AmrMesh::remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept
+{
+  CH_TIME("AmrMesh::remapToNewGrids");
+
+  const std::string realm = a_particles.getRealm();
+
+  const Vector<DisjointBoxLayout>& grids      = this->getGrids(realm);
+  const Vector<ProblemDomain>&     domains    = this->getDomains();
+  const Vector<Real>&              dx         = this->getDx();
+  const Vector<int>&               refRat     = this->getRefinementRatios();
+  const AMRMask&                   validCells = this->getValidCells(realm);
+
+  a_particles.regrid(grids, domains, dx, refRat, validCells, a_lmin, a_newFinestLevel);
+}
+
 template <class P, const Real& (P::*particleScalarField)() const>
 void
 AmrMesh::depositParticles(EBAMRCellData&              a_meshData,

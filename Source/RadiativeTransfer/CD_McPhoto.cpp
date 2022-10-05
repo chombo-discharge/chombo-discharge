@@ -501,18 +501,11 @@ McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFin
   m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
   m_amr->reallocate(m_massDiff, m_phase, a_lmin);
 
-  // Particle data regrids
-  const Vector<DisjointBoxLayout>& grids   = m_amr->getGrids(m_realm);
-  const Vector<ProblemDomain>&     domains = m_amr->getDomains();
-  const Vector<Real>&              dx      = m_amr->getDx();
-  const Vector<int>&               ref_rat = m_amr->getRefinementRatios();
-  const AMRMask&                   mask    = m_amr->getValidCells(m_realm);
-
-  m_photons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
-  m_bulkPhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
-  m_ebPhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
-  m_domainPhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
-  m_sourcePhotons.regrid(grids, domains, dx, ref_rat, mask, a_lmin, a_newFinestLevel);
+  m_amr->remapToNewGrids(m_photons, a_lmin, a_newFinestLevel);
+  m_amr->remapToNewGrids(m_bulkPhotons, a_lmin, a_newFinestLevel);
+  m_amr->remapToNewGrids(m_ebPhotons, a_lmin, a_newFinestLevel);
+  m_amr->remapToNewGrids(m_domainPhotons, a_lmin, a_newFinestLevel);
+  m_amr->remapToNewGrids(m_sourcePhotons, a_lmin, a_newFinestLevel);
 
   // Deposit
   this->depositPhotons();
