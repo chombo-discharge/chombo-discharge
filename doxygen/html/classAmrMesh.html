@@ -425,6 +425,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:aeab6792375474b61a99bd36203fd3de3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#aeab6792375474b61a99bd36203fd3de3">interpToNewGrids</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_newData, const <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_oldData, const phase::which_phase a_phase, const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel, const bool a_conservative)</td></tr>
 <tr class="memdesc:aeab6792375474b61a99bd36203fd3de3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to new grids.  <a href="classAmrMesh.html#aeab6792375474b61a99bd36203fd3de3">More...</a><br /></td></tr>
 <tr class="separator:aeab6792375474b61a99bd36203fd3de3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33518b8e6bc4daf6ce94d33d5905c357"><td class="memTemplParams" colspan="2">template&lt;class P &gt; </td></tr>
+<tr class="memitem:a33518b8e6bc4daf6ce94d33d5905c357"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a33518b8e6bc4daf6ce94d33d5905c357">remapToNewGrids</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept</td></tr>
+<tr class="memdesc:a33518b8e6bc4daf6ce94d33d5905c357"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid particle to new grids.  <a href="classAmrMesh.html#a33518b8e6bc4daf6ce94d33d5905c357">More...</a><br /></td></tr>
+<tr class="separator:a33518b8e6bc4daf6ce94d33d5905c357"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58008f166bc2d7de06c4c24d879513fe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a58008f166bc2d7de06c4c24d879513fe">interpToCentroids</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a58008f166bc2d7de06c4c24d879513fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate data to centroids on realm and phase.  <a href="classAmrMesh.html#a58008f166bc2d7de06c4c24d879513fe">More...</a><br /></td></tr>
 <tr class="separator:a58008f166bc2d7de06c4c24d879513fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -6249,6 +6253,60 @@ Run-time errors will occur if the mask or realm do not exist. </dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_procs</td><td>Processor IDs </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Grid boxes </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that changes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a33518b8e6bc4daf6ce94d33d5905c357"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33518b8e6bc4daf6ce94d33d5905c357">&#9670;&nbsp;</a></span>remapToNewGrids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AmrMesh::remapToNewGrids </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_lmin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_newFinestLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Regrid particle to new grids. </p>
+<dl class="section note"><dt>Note</dt><dd>User needs to call <a class="el" href="classParticleContainer.html#a56f20f8dc3405f672d0bd218710630e2" title="Cache particles before calling regrid.">ParticleContainer&lt;P&gt;::preRegrid</a> prior to this. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that did not change (but distribution may have changed). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_newFinestLevel</td><td>New finest level. </td></tr>
   </table>
   </dd>
 </dl>
