@@ -26,31 +26,49 @@ using namespace Physics::ItoPlasma;
 ItoPlasmaStepper::ItoPlasmaStepper()
 {
   CH_TIME("ItoPlasmaStepper::ItoPlasmaStepper");
-  
-  m_verbosity = -1;
-  m_name      = "ItoPlasmaStepper";
-  m_phase     = phase::gas;
-  m_dt   = 0.0;
-  m_time = 0.0;
-  m_timeStep = 0;
 
-  m_load_ppc    = 1.0;
+  // Default settings.
+  m_verbosity               = -1;
+  m_name                    = "ItoPlasmaStepper";
+  m_phase                   = phase::gas;
+  m_dt                      = 0.0;
+  m_time                    = 0.0;
+  m_timeStep                = 0;
+  m_loadPerCell             = 1.0;
+  m_useNewReactionAlgorithm = true;
+  m_regridSuperparticles    = true;
+  m_fluidRealm              = Realm::Primal;
+  m_particleRealm           = Realm::Primal;
 
-  m_nwo_reactions         = true;
-  m_regridSuperparticles = true;
-
-  m_fluidRealm   = Realm::Primal;
-  m_particleRealm = Realm::Primal;
+  this->parseOptions();
 }
 
 ItoPlasmaStepper::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) : ItoPlasmaStepper()
 {
   CH_TIME("ItoPlasmaStepper::ItoPlasmaStepper(RefCountrPtr<ItoPlasmaPhysics>)");
-  
+
   m_physics = a_physics;
 }
 
-ItoPlasmaStepper::~ItoPlasmaStepper() {}
+ItoPlasmaStepper::~ItoPlasmaStepper() {
+  CH_TIME("ItoPlasmaStepper::~ItoPlasmaStepper");
+}
+
+void
+ItoPlasmaStepper::parsOptions() {
+  CH_TIME("ItoPlasmaStepper::parseOptions");
+  if (m_verbosity > 5) {
+    pout() << "ItoPlasmaStepper::parseOptions" << endl;
+  }
+}
+
+void
+ItoPlasmaStepper::parseRuntimeOptions() {
+  CH_TIME("ItoPlasmaStepper::parseRuntimeOptions");
+  if (m_verbosity > 5) {
+    pout() << "ItoPlasmaStepper::parseRuntimeOptions" << endl;
+  }
+}
 
 void
 ItoPlasmaStepper::setVerbosity(const int a_verbosity)
@@ -191,7 +209,7 @@ ItoPlasmaStepper::initialData()
   this->initialSigma();
 
   m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
-  m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
+  m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
   m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
 
   // Solve Poisson equation and compute the E-field
@@ -836,7 +854,7 @@ ItoPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int
 
   if (m_regridSuperparticles) {
     m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
-    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
     m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 
@@ -2769,7 +2787,7 @@ ItoPlasmaStepper::advanceReactionNetwork(const Real a_dt)
     pout() << "ItoPlasmaStepper::advanceReactionNetwork(a_dt)" << endl;
   }
 
-  if (m_nwo_reactions) {
+  if (m_useNewReactionAlgorithm) {
     this->advanceReactionNetworkNWO(a_dt);
   }
   else {
@@ -3278,7 +3296,7 @@ ItoPlasmaStepper::loadBalanceThisRealm(const std::string a_realm) const
 
   bool ret = false;
 
-  if (a_realm == m_particleRealm && m_LoadBalancing) {
+  if (a_realm == m_particleRealm && m_loadBalance) {
     ret = true;
   }
 
@@ -3298,7 +3316,7 @@ ItoPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
     pout() << "ItoPlasmaStepper_stepper::loadBalanceBoxes" << endl;
   }
 
-  if (m_LoadBalancing && a_realm == m_particleRealm) {
+  if (m_loadBalance && a_realm == m_particleRealm) {
     this->loadBalanceParticleRealm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
   }
   else {
@@ -3318,7 +3336,7 @@ ItoPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_leve
   const int                nbox = dbl.size();
 
   Vector<long int> loads(nbox, 0L);
-  if (m_LoadBalancing && a_realm == m_particleRealm) {
+  if (m_loadBalance && a_realm == m_particleRealm) {
     Vector<RefCountedPtr<ItoSolver>> lb_solvers = this->getLoadBalanceSolvers();
 
     for (int isolver = 0; isolver < lb_solvers.size(); isolver++) {
@@ -3335,7 +3353,7 @@ ItoPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_leve
       const Box box  = dbl[lit()];
       const int ibox = lit().intCode();
 
-      loads[ibox] += lround(m_load_ppc * box.numPts());
+      loads[ibox] += lround(m_loadPerCell * box.numPts());
     }
   }
   else {
@@ -3380,7 +3398,7 @@ ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int>>&             a_pr
     // load estimate of the underlying grid(s) is improved.
     if (m_regridSuperparticles) {
       particles.sortParticlesByCell();
-      lb_solvers[i]->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
+      lb_solvers[i]->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
       particles.sortParticlesByPatch();
     }
   }
@@ -3413,7 +3431,7 @@ ItoPlasmaStepper::getLoadBalanceSolvers() const
 
   Vector<RefCountedPtr<ItoSolver>> lb_solvers;
 
-  if (m_LoadBalancing_idx < 0) {
+  if (m_loadBalance_idx < 0) {
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
       RefCountedPtr<ItoSolver>& solver = solver_it();
 
@@ -3421,7 +3439,7 @@ ItoPlasmaStepper::getLoadBalanceSolvers() const
     }
   }
   else {
-    RefCountedPtr<ItoSolver>& solver = m_ito->getSolvers()[m_LoadBalancing_idx];
+    RefCountedPtr<ItoSolver>& solver = m_ito->getSolvers()[m_loadBalance_idx];
     lb_solvers.push_back(solver);
   }
 
@@ -3437,7 +3455,7 @@ ItoPlasmaStepper::computeEdotJSource(const Real a_dt)
   }
 
   // Swap between these two.
-  if (m_nwo_reactions) {
+  if (m_useNewReactionAlgorithm) {
     //    this->computeEdotJSourceNWO();
     this->computeEdotJSourceNWO2(a_dt);
   }
@@ -3536,9 +3554,9 @@ ItoPlasmaStepper::computeEdotJSourceNWO()
       m_fluid_scratch1.copy(m_particle_scratch1);                                        // Copy D*n to fluid Realm
       m_amr->interpGhostMG(m_fluid_scratch1, m_fluidRealm, m_phase);
       m_amr->computeGradient(m_fluid_scratchD, m_fluid_scratch1, m_fluidRealm, m_phase); // scratchD = grad(D*n)
-      DataOps::scale(m_fluid_scratchD, -1.0);                                             // scratchD = -grad(D*n)
-      DataOps::dotProduct(m_fluid_scratch1, m_fluid_scratchD, m_fluid_E);                 // scratch1 = -E.dot.grad(D*n)
-      DataOps::scale(m_fluid_scratch1, Abs(q) * Units::Qe);                               // scratch1 = -Z*e*E*grad(D*n)
+      DataOps::scale(m_fluid_scratchD, -1.0);                                            // scratchD = -grad(D*n)
+      DataOps::dotProduct(m_fluid_scratch1, m_fluid_scratchD, m_fluid_E);                // scratch1 = -E.dot.grad(D*n)
+      DataOps::scale(m_fluid_scratch1, Abs(q) * Units::Qe);                              // scratch1 = -Z*e*E*grad(D*n)
 
       m_amr->conservativeAverage(m_fluid_scratch1, m_fluidRealm, m_phase);
       m_amr->interpGhost(m_fluid_scratch1, m_fluidRealm, m_phase);

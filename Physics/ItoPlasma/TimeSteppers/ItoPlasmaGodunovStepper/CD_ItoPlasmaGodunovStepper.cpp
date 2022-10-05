@@ -31,8 +31,8 @@ ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>
   ParmParse pp("ItoPlasmaGodunovStepper");
   pp.get("particle_realm", m_particleRealm);
   pp.get("profile", m_profile);
-  pp.get("load_ppc", m_load_ppc);
-  pp.get("nwo_reactions", m_nwo_reactions);
+  pp.get("load_ppc", m_loadPerCell);
+  pp.get("nwo_reactions", m_useNewReactionAlgorithm);
 
   m_avg_cfl = 0.0;
 }
@@ -137,14 +137,14 @@ ItoPlasmaGodunovStepper::parseOptions()
   std::string str;
 
   pp.get("verbosity", m_verbosity);
-  pp.get("ppc", m_ppc);
+  pp.get("ppc", m_particlesPerCell);
   pp.get("max_cells_hop", m_max_cells_hop);
   pp.get("merge_interval", m_merge_interval);
   pp.get("relax_factor", m_relax_factor);
   pp.get("regrid_super", m_regridSuperparticles);
   pp.get("algorithm", str);
-  pp.get("load_balance", m_LoadBalancing);
-  pp.get("load_index", m_LoadBalancing_idx);
+  pp.get("load_balance", m_loadBalance);
+  pp.get("load_index", m_loadBalance_idx);
   pp.get("min_dt", m_min_dt);
   pp.get("max_dt", m_max_dt);
   pp.get("filter_rho", m_filter_rho);
@@ -215,14 +215,14 @@ ItoPlasmaGodunovStepper::parseRuntimeOptions()
   std::string str;
 
   pp.get("verbosity", m_verbosity);
-  pp.get("ppc", m_ppc);
+  pp.get("ppc", m_particlesPerCell);
   pp.get("max_cells_hop", m_max_cells_hop);
   pp.get("merge_interval", m_merge_interval);
   pp.get("relax_factor", m_relax_factor);
   pp.get("regrid_super", m_regridSuperparticles);
   pp.get("algorithm", str);
-  pp.get("load_balance", m_LoadBalancing);
-  pp.get("load_index", m_LoadBalancing_idx);
+  pp.get("load_balance", m_loadBalance);
+  pp.get("load_index", m_loadBalance_idx);
   pp.get("min_dt", m_min_dt);
   pp.get("max_dt", m_max_dt);
   pp.get("filter_rho", m_filter_rho);
@@ -412,7 +412,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   MPI_Barrier(Chombo_MPI::comm);
   super_time = -Timer::wallClock();
   if ((m_timeStep + 1) % m_merge_interval == 0 && m_merge_interval > 0) {
-    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
   }
   super_time += Timer::wallClock();
 
@@ -642,8 +642,8 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
     const int idx = solver_it.index();
-    //    m_amr->regrid(*m_rho_dagger_particles[idx], a_lmin, a_newFinestLevel);
-    //    m_amr->regrid(*m_conductivity_particles[idx], a_lmin, a_newFinestLevel);
+    m_amr->remapToNewGrids(*m_rho_dagger_particles[idx], a_lmin, a_newFinestLevel);
+    m_amr->remapToNewGrids(*m_conductivity_particles[idx], a_lmin, a_newFinestLevel);
   }
   gdnv_time += Timer::wallClock();
 
@@ -668,7 +668,7 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   super_time -= Timer::wallClock();
   if (m_regridSuperparticles) {
     m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
-    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
     m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
   super_time += Timer::wallClock();

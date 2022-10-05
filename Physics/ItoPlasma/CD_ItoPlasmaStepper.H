@@ -68,11 +68,18 @@ namespace Physics {
       virtual
       ~ItoPlasmaStepper();
 
-      // Setup routines
+      /*!
+	@brief Parse options
+      */
       virtual void
-      parseOptions() = 0;
+      parseOptions();
+
+      /*!
+	@brief Parse runtime configurable options
+      */      
       virtual void
-      parseRuntimeOptions() = 0;
+      parseRuntimeOptions();
+      
       virtual void
       allocateInternals() = 0;
       virtual void
@@ -510,14 +517,19 @@ namespace Physics {
       std::function<Real(const Real a_time)> m_potential;
 
       bool m_regridSuperparticles;
-      bool m_LoadBalancing;
-      bool m_nwo_reactions; // For switching between the old and new reaction algorithms.
+      bool m_loadBalance;
+      bool m_useNewReactionAlgorithm; // For switching between the old and new reaction algorithms.
       bool m_filter_rho;
 
-      int m_ppc;
-      int m_LoadBalancing_idx;
+      int m_particlesPerCell;
+      int m_loadBalance_idx;
 
-      Real m_load_ppc;
+      /*!
+	@brief The "background" load per cell when using particle load balancing.
+	@note This is used when computing the loads per patch on the particle realm such that the total load 
+	is m_loadPerCell * numGridPoints + numParticles. 
+      */
+      Real m_loadPerCell;
       Real m_max_cells_hop;
       Real m_dt_relax;
       Real m_min_dt;
