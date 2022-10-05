@@ -3605,14 +3605,14 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt)
             const RealVect& Xnew = p.position();
             const RealVect& Xold = p.oldPosition();
 
-            p.tmp()  = m;
+            p.tmp()    = m;
             p.weight() = m * PolyGeom::dot(v, Xnew - Xold);
           }
         }
       }
 
       // Deposit the result
-      solver->depositParticles(m_particle_scratch1, particles, deposition);
+      solver->depositParticles<ItoParticle, &ItoParticle::weight>(m_particle_scratch1, particles);
       m_fluid_scratch1.copy(m_particle_scratch1);
 
       // Scale by Qe/dt to make it Joule/dt. Then add to correct index
@@ -3627,7 +3627,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt)
 
           for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
             ItoParticle& p = lit();
-            p.weight()       = p.tmp();
+            p.weight()     = p.tmp();
           }
         }
       }

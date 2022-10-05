@@ -115,7 +115,7 @@ ItoPlasmaGodunovStepper::allocate()
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
     const RefCountedPtr<ItoSolver>& solver = solver_it();
 
-    const int idx         = solver_it.index();
+    const int idx = solver_it.index();
 
     m_conductivity_particles[idx] = new ParticleContainer<PointParticle>();
     m_rho_dagger_particles[idx]   = new ParticleContainer<PointParticle>();
@@ -524,7 +524,7 @@ ItoPlasmaGodunovStepper::computeDt()
     a_dt = m_ito->computeDt();
   }
 
-  a_dt       = a_dt * m_max_cells_hop;
+  a_dt                = a_dt * m_max_cells_hop;
   TimeCode a_timeCode = TimeCode::Advection;
 
   // Physics-based restriction
@@ -752,7 +752,8 @@ ItoPlasmaGodunovStepper::setupRuntimeStorage()
     MayDay::Abort("ItoPlasmaGodunovStepper::setupRuntimeStorage - logic bust");
   }
 #else
-  MayDay::Error("ItoPlasmaGodunovStepper::setupRuntimeStorage -- need to figure out how to add more fields to ItoParticle");
+  MayDay::Error(
+    "ItoPlasmaGodunovStepper::setupRuntimeStorage -- need to figure out how to add more fields to ItoParticle");
 #endif
 }
 
@@ -786,7 +787,7 @@ ItoPlasmaGodunovStepper::setOldPositions()
 
 void
 ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                               const WhichParticles                                  a_WhichParticles)
+                                               const WhichParticles                       a_WhichParticles)
 {
   CH_TIME("ItoPlasmaGodunovStepper::remapGodunovParticles");
   if (m_verbosity > 5) {
@@ -842,9 +843,8 @@ ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<PointPar
 }
 
 void
-ItoPlasmaGodunovStepper::deposit_PointParticles(
-  const Vector<ParticleContainer<PointParticle>*>& a_particles,
-  const WhichParticles                                        a_WhichParticles)
+ItoPlasmaGodunovStepper::deposit_PointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
+                                                const WhichParticles                             a_WhichParticles)
 {
   CH_TIME("ItoPlasmaGodunovStepper::deposit_PointParticles");
   if (m_verbosity > 5) {
@@ -901,7 +901,7 @@ ItoPlasmaGodunovStepper::deposit_PointParticles(
 
 void
 ItoPlasmaGodunovStepper::clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                               const WhichParticles a_WhichParticles)
+                                               const WhichParticles                             a_WhichParticles)
 {
   CH_TIME("ItoPlasmaGodunovStepper::clearGodunovParticles");
   if (m_verbosity > 5) {
@@ -957,8 +957,7 @@ ItoPlasmaGodunovStepper::clearGodunovParticles(const Vector<ParticleContainer<Po
 }
 
 void
-ItoPlasmaGodunovStepper::computeAllConductivities(
-  const Vector<ParticleContainer<PointParticle>*>& a_particles)
+ItoPlasmaGodunovStepper::computeAllConductivities(const Vector<ParticleContainer<PointParticle>*>& a_particles)
 {
   CH_TIME("ItoPlasmaGodunovStepper::computeAllConductivities");
   if (m_verbosity > 5) {
@@ -972,9 +971,8 @@ ItoPlasmaGodunovStepper::computeAllConductivities(
 }
 
 void
-ItoPlasmaGodunovStepper::compute_cell_conductivity(
-  EBAMRCellData&                                              a_conductivity,
-  const Vector<ParticleContainer<PointParticle>*>& a_particles)
+ItoPlasmaGodunovStepper::compute_cell_conductivity(EBAMRCellData&                                   a_conductivity,
+                                                   const Vector<ParticleContainer<PointParticle>*>& a_particles)
 {
   CH_TIME("ItoPlasmaGodunovStepper::compute_cell_conductivity(conductivity, PointParticle");
   if (m_verbosity > 5) {
@@ -992,8 +990,10 @@ ItoPlasmaGodunovStepper::compute_cell_conductivity(
 
     if (q != 0 && solver->isMobile()) {
       DataOps::setValue(m_particle_scratch1, 0.0);
-#if 1                                                                   // Original code
-      solver->depositParticles<PointParticle, &PointParticle::weight>(m_particle_scratch1, *a_particles[idx]); // The particles should have "masses" = m*mu
+#if 1 // Original code
+      solver->depositParticles<PointParticle,
+                               &PointParticle::weight>(m_particle_scratch1,
+                                                       *a_particles[idx]); // The particles should have "masses" = m*mu
 #else
       const EBAMRCellData& mu  = solver->getMobilityFunction();
       const EBAMRCellData& phi = solver->getPhi();
@@ -1018,9 +1018,9 @@ ItoPlasmaGodunovStepper::compute_cell_conductivity(
         DataOps::setValue(m_fluid_scratch1, 0.0);
         m_fluid_scratch1.copy(a_conductivity);
         DataOps::setCoveredValue(m_fluid_scratch1, 0.0, 0);
-	//        DataOps::filterSmooth(a_conductivity, m_fluid_scratch1, stride, alpha);
+        //        DataOps::filterSmooth(a_conductivity, m_fluid_scratch1, stride, alpha);
 
-	MayDay::Error("ItoPlasmaGodunovStepper::compute_cell_conductivity - don't use filterSmooth");
+        MayDay::Error("ItoPlasmaGodunovStepper::compute_cell_conductivity - don't use filterSmooth");
 
         m_amr->conservativeAverage(a_conductivity, m_fluid_Realm, m_phase);
         m_amr->interpGhost(a_conductivity, m_fluid_Realm, m_phase);
@@ -1117,8 +1117,7 @@ ItoPlasmaGodunovStepper::setupStandardPoisson()
 }
 
 void
-ItoPlasmaGodunovStepper::copyConductivityParticles(
-  Vector<ParticleContainer<PointParticle>*>& a_conductivity_particles)
+ItoPlasmaGodunovStepper::copyConductivityParticles(Vector<ParticleContainer<PointParticle>*>& a_conductivity_particles)
 {
   CH_TIME("ItoPlasmaGodunovStepper::copyConductivityParticles");
   if (m_verbosity > 5) {
@@ -1146,7 +1145,7 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
           for (ListIterator<ItoParticle> lit(ito_parts); lit.ok(); ++lit) {
             const ItoParticle& p        = lit();
             const RealVect&    pos      = p.position();
-            const Real&        weight     = p.weight();
+            const Real&        weight   = p.weight();
             const Real&        mobility = p.mobility();
 
             gdnv_parts.add(PointParticle(pos, weight * mobility));
@@ -1158,8 +1157,7 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
 }
 
 void
-ItoPlasmaGodunovStepper::copyRhoDaggerParticles(
-  Vector<ParticleContainer<PointParticle>*>& a_rho_dagger_particles)
+ItoPlasmaGodunovStepper::copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger_particles)
 {
   CH_TIME("ItoPlasmaGodunovStepper::copyRhoDaggerParticles");
   if (m_verbosity > 5) {
@@ -1185,8 +1183,8 @@ ItoPlasmaGodunovStepper::copyRhoDaggerParticles(
 
         if (q != 0) {
           for (ListIterator<ItoParticle> lit(ito_parts); lit.ok(); ++lit) {
-            const ItoParticle& p    = lit();
-            const RealVect&    pos  = p.position();
+            const ItoParticle& p      = lit();
+            const RealVect&    pos    = p.position();
             const Real&        weight = p.weight();
 
             gdnv_parts.add(PointParticle(pos, weight));
@@ -1284,9 +1282,9 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
   // Compute space charge density
   MPI_Barrier(Chombo_MPI::comm);
   depositGdnvTime -= Timer::wallClock();
-  this->deposit_PointParticles(
-    m_rho_dagger_particles,
-    WhichParticles::all_diffusive); // Diffusive should be enough because state is not changed for others.
+  this->deposit_PointParticles(m_rho_dagger_particles,
+                               WhichParticles::
+                                 all_diffusive); // Diffusive should be enough because state is not changed for others.
   depositGdnvTime += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
@@ -1391,9 +1389,8 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
 }
 
 void
-ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(
-  Vector<ParticleContainer<PointParticle>*>& a_rho_dagger,
-  const Real                                            a_dt)
+ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger,
+                                                       const Real                                 a_dt)
 {
   CH_TIME("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama");
   if (m_verbosity > 5) {
@@ -1420,14 +1417,14 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
 
-        List<ItoParticle>&              ItoParticles = particles[dit()].listItems();
+        List<ItoParticle>&   ItoParticles = particles[dit()].listItems();
         List<PointParticle>& gdnv_parts   = (*a_rho_dagger[idx])[lvl][dit()].listItems();
 
         if (diffusive) {
           for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit) {
             ItoParticle&    p      = lit();
             const Real      factor = g * sqrt(2.0 * p.diffusion() * a_dt);
-            const Real&     weight   = p.weight();
+            const Real&     weight = p.weight();
             const RealVect& pos    = p.position();
 #if 0
 	    RealVect&       hop    = p.runtimeVector(0);
@@ -1437,15 +1434,15 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(
             // Add simpler particle
             gdnv_parts.add(PointParticle(pos + hop, weight));
 #else
-	    MayDay::Error("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruayma -- runtime stuff");
+            MayDay::Error("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruayma -- runtime stuff");
 #endif
           }
         }
         else { // Splitting up diffusion and non-diffusion because I dont want to generate random numbers where they're not required...
           for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit) {
-            ItoParticle&    p    = lit();
+            ItoParticle&    p      = lit();
             const Real&     weight = p.weight();
-            const RealVect& pos  = p.position();
+            const RealVect& pos    = p.position();
 #if 0
 	    RealVect&       hop  = p.runtimeVector(0);
             hop                  = RealVect::Zero;
@@ -1453,7 +1450,7 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(
             // Add simpler particle
             gdnv_parts.add(PointParticle(pos, weight));
 #else
-	    MayDay::Error("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruayma -- runtime stuff");
+            MayDay::Error("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruayma -- runtime stuff");
 #endif
           }
         }
@@ -1497,7 +1494,7 @@ ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt)
 	    const RealVect& hop = p.runtimeVector(0);
             p.position()        = p.oldPosition() + f * p.velocity() * a_dt + g * hop;
 #else
-	    MayDay::Error("ItoPlasmaGodunovStepper::stopEulerMaruyama -- runtime stuff");
+            MayDay::Error("ItoPlasmaGodunovStepper::stopEulerMaruyama -- runtime stuff");
 #endif
           }
         }
@@ -1543,7 +1540,7 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
                               WhichParticles::
                                 all_mobile_or_diffusive); // Only need to remap particles that were mobile or diffusive
   this->deposit_PointParticles(m_rho_dagger_particles,
-                                          WhichParticles::all); // Everything needs to deposit...
+                               WhichParticles::all); // Everything needs to deposit...
 
   this->copyConductivityParticles(m_conductivity_particles);
   this->computeAllConductivities(m_conductivity_particles);
@@ -1568,7 +1565,7 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
 
 void
 ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger,
-                                                 const Real                                            a_dt)
+                                                 const Real                                 a_dt)
 {
   CH_TIME("ItoPlasmaGodunovStepper::preTrapezoidalPredictor");
   if (m_verbosity > 5) {
@@ -1593,7 +1590,7 @@ ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<PointP
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
 
-        List<ItoParticle>&              ItoParticles = particles[dit()].listItems();
+        List<ItoParticle>&   ItoParticles = particles[dit()].listItems();
         List<PointParticle>& gdnv_parts   = (*a_rho_dagger[idx])[lvl][dit()].listItems();
 
         gdnv_parts.clear();
@@ -1604,7 +1601,7 @@ ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<PointP
           const Real      factor = sqrt(2.0 * p.diffusion() * a_dt);
           const RealVect  hop    = factor * solver->randomGaussian();
           const RealVect& Xk     = p.oldPosition();
-          const Real&     weight   = p.weight();
+          const Real&     weight = p.weight();
 
           // Store the diffusion hop and the current velocity.
 #if 0
@@ -1614,9 +1611,8 @@ ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<PointP
           // Add simpler particle
           gdnv_parts.add(PointParticle(Xk + g * hop, weight));
 #else
-	  MayDay::Error("ItoPlasmaGodunovStepper::preTrapezoidalPredictor -- runtime stuff");
+          MayDay::Error("ItoPlasmaGodunovStepper::preTrapezoidalPredictor -- runtime stuff");
 #endif
-	  
         }
       }
     }
@@ -1660,7 +1656,7 @@ ItoPlasmaGodunovStepper::trapezoidalPredictor(const Real a_dt)
 
             p.position() = p.oldPosition() + f * p.velocity() * a_dt + g * hop;
 #else
-	  MayDay::Error("ItoPlasmaGodunovStepper::trapezoidalPredictor -- runtime stuff");
+            MayDay::Error("ItoPlasmaGodunovStepper::trapezoidalPredictor -- runtime stuff");
 #endif
           }
         }
@@ -1671,7 +1667,7 @@ ItoPlasmaGodunovStepper::trapezoidalPredictor(const Real a_dt)
 
 void
 ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger,
-                                                 const Real                                            a_dt)
+                                                 const Real                                 a_dt)
 {
   CH_TIME("ItoPlasmaGodunovStepper::preTrapezoidalCorrector");
   if (m_verbosity > 5) {
@@ -1696,7 +1692,7 @@ ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<PointP
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
 
-        List<ItoParticle>&              ItoParticles = particles[dit()].listItems();
+        List<ItoParticle>&   ItoParticles = particles[dit()].listItems();
         List<PointParticle>& gdnv_parts   = (*a_rho_dagger[idx])[lvl][dit()].listItems();
 
         gdnv_parts.clear();
@@ -1706,7 +1702,7 @@ ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<PointP
           ItoParticle& p = lit();
 
           const Real&     weight = p.weight();
-          const RealVect& Xk   = p.oldPosition();
+          const RealVect& Xk     = p.oldPosition();
 #if 0
 	  const RealVect& hop  = p.runtimeVector(0);
 	  const RealVect& Vk   = p.runtimeVector(1);
@@ -1715,7 +1711,7 @@ ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<PointP
           const RealVect pos = Xk + 0.5 * a_dt * f * Vk + g * hop;
           gdnv_parts.add(PointParticle(pos, weight));
 #else
-	  MayDay::Error("ItoPlasmaGodunovStepper::trapezoidalPredictor -- preTrapezoidalCorrector");
+          MayDay::Error("ItoPlasmaGodunovStepper::trapezoidalPredictor -- preTrapezoidalCorrector");
 #endif
         }
       }
@@ -1753,7 +1749,7 @@ ItoPlasmaGodunovStepper::trapezoidalCorrector(const Real a_dt)
           for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
             ItoParticle& p = lit();
 
-            const RealVect& Xk  = p.oldPosition();
+            const RealVect& Xk = p.oldPosition();
 #if 0
 	    const RealVect& hop = p.runtimeVector(0);
 	    const RealVect& Vk  = p.runtimeVector(1);
@@ -1761,7 +1757,7 @@ ItoPlasmaGodunovStepper::trapezoidalCorrector(const Real a_dt)
 
             p.position() = Xk + 0.5 * f * a_dt * (Vk + Vk1) + g * hop;
 #else
-	    MayDay::Error("ItoPlasmaGodunovStepper::trapezoidalCorrector -- runtime stuff");
+            MayDay::Error("ItoPlasmaGodunovStepper::trapezoidalCorrector -- runtime stuff");
 #endif
           }
         }

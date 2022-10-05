@@ -108,20 +108,18 @@ namespace Physics {
       void
       setOldPositions();
       void
-      remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
-                            const WhichParticles                                  a_which);
+      remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles, const WhichParticles a_which);
       void
       deposit_PointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                        const WhichParticles                                        a_which);
+                             const WhichParticles                             a_which);
       void
-      clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                            const WhichParticles                                        a_which);
+      clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const WhichParticles a_which);
 
       // Routines for semi-implicit Poisson solution
       void
       computeAllConductivities(const Vector<ParticleContainer<PointParticle>*>& a_particles);
       void
-      compute_cell_conductivity(EBAMRCellData&                                              a_conductivity,
+      compute_cell_conductivity(EBAMRCellData&                                   a_conductivity,
                                 const Vector<ParticleContainer<PointParticle>*>& a_particles);
       void
       compute_face_conductivity();
@@ -146,8 +144,7 @@ namespace Physics {
       void
       advanceParticlesEulerMaruyama(const Real a_dt);
       void
-      diffuseParticlesEulerMaruyama(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger,
-                                    const Real                                            a_dt);
+      diffuseParticlesEulerMaruyama(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger, const Real a_dt);
       void
       stepEulerMaruyama(const Real a_dt);
 

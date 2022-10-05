@@ -273,8 +273,7 @@ public:
   */
   template <class P, const Real& (P::*particleScalarField)() const>
   void
-  depositParticles(EBAMRCellData&             a_phi,
-                   ParticleContainer<P>&      a_particles) const;
+  depositParticles(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles) const;
 
   /*!
     @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
