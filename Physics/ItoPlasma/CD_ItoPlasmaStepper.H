@@ -29,28 +29,43 @@
 namespace Physics {
   namespace ItoPlasma {
 
-    // Differentiation between particles.
+    /*!
+      @brief Enum for differentiating between types of particles
+    */
     enum class WhichParticles
     {
-      all,
-      all_mobile,
-      all_diffusive,
-      charged_mobile,
-      charged_diffusive,
-      all_mobile_or_diffusive,
-      charged_and_mobile_or_diffusive,
-      stationary,
+      All,
+      AllMobile,
+      AllDiffusive,
+      ChargedMobile,
+      ChargedDiffusive,
+      AllMobileOrDiffusive,
+      ChargedAndMobileOrDiffusive,
+      Stationary,
     };
 
+    /*!
+      @brief Time stepper that advances the Ito-Poisson system of equations
+    */
     class ItoPlasmaStepper : public TimeStepper
     {
     public:
-      static Real
-      s_constant_one(const RealVect a_pos);
 
-      // Ctor and dtor
+      /*!
+	@brief Default constructor. Sets default options. 
+      */
       ItoPlasmaStepper();
+
+      /*!
+	@brief Full constructor. Calls the other constructor
+	@param[in] a_physics Implementation of the Ito plasma physics model.
+      */
       ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
+
+      /*!
+	@brief Destructor
+      */
+      virtual
       ~ItoPlasmaStepper();
 
       // Setup routines
@@ -474,7 +489,7 @@ namespace Physics {
         Physics
       };
 
-      std::string        m_fluid_Realm;   // Realm for Poisson and sigma solver. Defaults to Realm::Primal
+      std::string        m_fluidRealm;   // Realm for Poisson and sigma solver. Defaults to Realm::Primal
       std::string        m_particleRealm; // Realm for particles. Defaults to Realm::Primal
       std::string        m_name;
       phase::which_phase m_phase;
@@ -494,14 +509,12 @@ namespace Physics {
 
       std::function<Real(const Real a_time)> m_potential;
 
-      bool m_regrid_superparticles;
+      bool m_regridSuperparticles;
       bool m_LoadBalancing;
       bool m_nwo_reactions; // For switching between the old and new reaction algorithms.
       bool m_filter_rho;
 
       int m_ppc;
-      int m_halo_buffer;
-      int m_pvr_buffer;
       int m_LoadBalancing_idx;
 
       Real m_load_ppc;

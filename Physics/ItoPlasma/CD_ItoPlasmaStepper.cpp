@@ -25,26 +25,28 @@ using namespace Physics::ItoPlasma;
 
 ItoPlasmaStepper::ItoPlasmaStepper()
 {
+  CH_TIME("ItoPlasmaStepper::ItoPlasmaStepper");
+  
   m_verbosity = -1;
   m_name      = "ItoPlasmaStepper";
   m_phase     = phase::gas;
-
   m_dt   = 0.0;
   m_time = 0.0;
+  m_timeStep = 0;
 
-  m_halo_buffer = 1;
-  m_pvr_buffer  = 0;
   m_load_ppc    = 1.0;
 
   m_nwo_reactions         = true;
-  m_regrid_superparticles = true;
+  m_regridSuperparticles = true;
 
-  m_fluid_Realm   = Realm::Primal;
+  m_fluidRealm   = Realm::Primal;
   m_particleRealm = Realm::Primal;
 }
 
 ItoPlasmaStepper::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) : ItoPlasmaStepper()
 {
+  CH_TIME("ItoPlasmaStepper::ItoPlasmaStepper(RefCountrPtr<ItoPlasmaPhysics>)");
+  
   m_physics = a_physics;
 }
 
@@ -113,7 +115,7 @@ ItoPlasmaStepper::setupPoisson()
   m_fieldSolver->setAmr(m_amr);
   m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
   m_fieldSolver->setVoltage(m_potential);
-  m_fieldSolver->setRealm(m_fluid_Realm);
+  m_fieldSolver->setRealm(m_fluidRealm);
 }
 
 void
@@ -143,7 +145,7 @@ ItoPlasmaStepper::setupSigma()
 
   m_sigma = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
   m_sigma->setVerbosity(m_verbosity);
-  m_sigma->setRealm(m_fluid_Realm);
+  m_sigma->setRealm(m_fluidRealm);
   m_sigma->setPhase(m_phase);
   m_sigma->setName("Surface charge");
 }
@@ -214,8 +216,8 @@ ItoPlasmaStepper::initialSigma()
   EBAMRIVData& sigma = m_sigma->getPhi();
 
   for (int lvl = 0; lvl <= finest_level; lvl++) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluid_Realm)[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluid_Realm, phase::gas)[lvl];
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, phase::gas)[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
@@ -236,7 +238,7 @@ ItoPlasmaStepper::initialSigma()
     }
   }
 
-  m_amr->conservativeAverage(sigma, m_fluid_Realm, phase::gas);
+  m_amr->conservativeAverage(sigma, m_fluidRealm, phase::gas);
   m_sigma->resetElectrodes(sigma, 0.0);
 }
 
@@ -273,8 +275,8 @@ ItoPlasmaStepper::postCheckpointPoisson()
   // Do ghost cells and then compute E
   MFAMRCellData& state = m_fieldSolver->getPotential();
 
-  m_amr->conservativeAverage(state, m_fluid_Realm);
-  m_amr->interpGhost(state, m_fluid_Realm);
+  m_amr->conservativeAverage(state, m_fluidRealm);
+  m_amr->interpGhost(state, m_fluidRealm);
 
   m_fieldSolver->computeElectricField(); // Solver checkpoints the potential. Now compute the field.
 
@@ -285,9 +287,9 @@ ItoPlasmaStepper::postCheckpointPoisson()
 
   // Fluid Realm
   m_fluid_E.copy(E);
-  m_amr->conservativeAverage(m_fluid_E, m_fluid_Realm, m_phase);
-  m_amr->interpGhostPwl(m_fluid_E, m_fluid_Realm, m_phase);
-  m_amr->interpToCentroids(m_fluid_E, m_fluid_Realm, m_phase);
+  m_amr->conservativeAverage(m_fluid_E, m_fluidRealm, m_phase);
+  m_amr->interpGhostPwl(m_fluid_E, m_fluidRealm, m_phase);
+  m_amr->interpToCentroids(m_fluid_E, m_fluidRealm, m_phase);
 
   // Particle Realm
   m_particle_E.copy(E);
@@ -783,7 +785,7 @@ ItoPlasmaStepper::registerRealms()
     pout() << "ItoPlasmaStepper::registerRealms" << endl;
   }
 
-  m_amr->registerRealm(m_fluid_Realm);
+  m_amr->registerRealm(m_fluidRealm);
   m_amr->registerRealm(m_particleRealm);
 }
 
@@ -799,8 +801,6 @@ ItoPlasmaStepper::registerOperators()
   m_fieldSolver->registerOperators();
   m_rte->registerOperators();
   m_sigma->registerOperators();
-
-  m_amr->registerMask("particle_halo", m_halo_buffer, m_particleRealm);
 }
 
 void
@@ -834,7 +834,7 @@ ItoPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int
   m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_sigma->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
-  if (m_regrid_superparticles) {
+  if (m_regridSuperparticles) {
     m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
     m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
     m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
@@ -945,9 +945,9 @@ ItoPlasmaStepper::computeMaxElectricField(const phase::which_phase a_phase)
 
   // Interpolate to centroids
   EBAMRCellData E;
-  m_amr->allocate(E, m_fluid_Realm, m_phase, SpaceDim);
+  m_amr->allocate(E, m_fluidRealm, m_phase, SpaceDim);
   DataOps::copy(E, Ephase);
-  m_amr->interpToCentroids(E, m_fluid_Realm, m_phase);
+  m_amr->interpToCentroids(E, m_fluidRealm, m_phase);
 
   Real max, min;
   DataOps::getMaxMinNorm(max, min, E);
@@ -976,8 +976,8 @@ ItoPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& 
 
   m_fieldSolver->computeElectricField(a_E, a_potential);
 
-  m_amr->conservativeAverage(a_E, m_fluid_Realm);
-  m_amr->interpGhost(a_E, m_fluid_Realm);
+  m_amr->conservativeAverage(a_E, m_fluidRealm);
+  m_amr->interpGhost(a_E, m_fluidRealm);
 }
 
 void
@@ -1003,8 +1003,8 @@ ItoPlasmaStepper::computeElectricField(EBAMRCellData&           a_E,
 
   m_fieldSolver->computeElectricField(a_E, a_phase, a_potential);
 
-  m_amr->conservativeAverage(a_E, m_fluid_Realm, a_phase);
-  m_amr->interpGhost(a_E, m_fluid_Realm, a_phase);
+  m_amr->conservativeAverage(a_E, m_fluidRealm, a_phase);
+  m_amr->interpGhost(a_E, m_fluidRealm, a_phase);
 }
 
 void
@@ -1023,8 +1023,8 @@ ItoPlasmaStepper::computeElectricField(EBAMRFluxData&           a_E_face,
   const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++) {
 
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_fluid_Realm)[lvl];
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_fluid_Realm, a_phase)[lvl];
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_fluidRealm)[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_fluidRealm, a_phase)[lvl];
     const ProblemDomain&     domain = m_amr->getDomains()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
@@ -1058,7 +1058,7 @@ ItoPlasmaStepper::computeElectricField(EBAMRIVData&             a_E_eb,
   CH_assert(a_E_cell[0]->nComp() == SpaceDim);
 
   const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencil =
-    m_amr->getEbCentroidInterpolationStencils(m_fluid_Realm, a_phase);
+    m_amr->getEbCentroidInterpolationStencils(m_fluidRealm, a_phase);
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 
@@ -1107,11 +1107,11 @@ ItoPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
 
   DataOps::scale(a_rho, Units::Qe);
 
-  m_amr->conservativeAverage(a_rho, m_fluid_Realm);
-  m_amr->interpGhost(a_rho, m_fluid_Realm);
+  m_amr->conservativeAverage(a_rho, m_fluidRealm);
+  m_amr->interpGhost(a_rho, m_fluidRealm);
 
   // Interpolate to centroids
-  m_amr->interpToCentroids(rhoPhase, m_fluid_Realm, m_phase);
+  m_amr->interpToCentroids(rhoPhase, m_fluidRealm, m_phase);
 }
 
 void
@@ -1156,11 +1156,11 @@ ItoPlasmaStepper::computeConductivity(EBAMRCellData&                            
 
   DataOps::scale(a_conductivity, Units::Qe);
 
-  m_amr->conservativeAverage(a_conductivity, m_fluid_Realm, m_phase);
-  m_amr->interpGhostPwl(a_conductivity, m_fluid_Realm, m_phase);
+  m_amr->conservativeAverage(a_conductivity, m_fluidRealm, m_phase);
+  m_amr->interpGhostPwl(a_conductivity, m_fluidRealm, m_phase);
 
   // See if this helps....
-  m_amr->interpToCentroids(a_conductivity, m_fluid_Realm, m_phase);
+  m_amr->interpToCentroids(a_conductivity, m_fluidRealm, m_phase);
 }
 
 void
@@ -1209,7 +1209,7 @@ ItoPlasmaStepper::computeRelaxationTime(const int a_level)
 
   Real dt = 1.E99;
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluid_Realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
     const Real thisDt = this->computeRelaxationTime(a_level, dit());
@@ -1240,8 +1240,8 @@ ItoPlasmaStepper::computeRelaxationTime(const int a_level, const DataIndex a_dit
   const int  comp   = 0;
   const Real SAFETY = 1.E-10;
 
-  const Box      box     = m_amr->getGrids(m_fluid_Realm)[a_level].get(a_dit);
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluid_Realm, m_phase)[a_level][a_dit];
+  const Box      box     = m_amr->getGrids(m_fluidRealm)[a_level].get(a_dit);
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_phase)[a_level][a_dit];
 
   // Get a handle to the E-field
   EBAMRCellData amrE;
@@ -1294,9 +1294,9 @@ ItoPlasmaStepper::solvePoisson()
 
   // Fluid Realm
   m_fluid_E.copy(E);
-  m_amr->conservativeAverage(m_fluid_E, m_fluid_Realm, m_phase);
-  m_amr->interpGhostPwl(m_fluid_E, m_fluid_Realm, m_phase);
-  m_amr->interpToCentroids(m_fluid_E, m_fluid_Realm, m_phase);
+  m_amr->conservativeAverage(m_fluid_E, m_fluidRealm, m_phase);
+  m_amr->interpGhostPwl(m_fluid_E, m_fluidRealm, m_phase);
+  m_amr->interpToCentroids(m_fluid_E, m_fluidRealm, m_phase);
 
   // Particle Realm
   m_particle_E.copy(E);
@@ -1369,34 +1369,34 @@ ItoPlasmaStepper::intersectParticles(const WhichParticles            a_WhichPart
     const bool charged   = species->getChargeNumber() != 0;
 #if 0
     switch (a_WhichParticles) {
-    case WhichParticles::all:
+    case WhichParticles::All:
       solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case WhichParticles::all_mobile:
+    case WhichParticles::AllMobile:
       if (mobile)
         solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case WhichParticles::all_diffusive:
+    case WhichParticles::AllDiffusive:
       if (diffusive)
         solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case WhichParticles::charged_mobile:
+    case WhichParticles::ChargedMobile:
       if (charged && mobile)
         solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case WhichParticles::charged_diffusive:
+    case WhichParticles::ChargedDiffusive:
       if (charged && diffusive)
         solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case WhichParticles::all_mobile_or_diffusive:
+    case WhichParticles::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case WhichParticles::charged_and_mobile_or_diffusive:
+    case WhichParticles::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case WhichParticles::stationary:
+    case WhichParticles::Stationary:
       if (!mobile && !diffusive)
         solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
@@ -1444,34 +1444,34 @@ ItoPlasmaStepper::removeCoveredParticles(const WhichParticles            a_which
     const bool charged   = species->getChargeNumber() != 0;
 
     switch (a_which) {
-    case WhichParticles::all:
+    case WhichParticles::All:
       solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::all_mobile:
+    case WhichParticles::AllMobile:
       if (mobile)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::all_diffusive:
+    case WhichParticles::AllDiffusive:
       if (diffusive)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::charged_mobile:
+    case WhichParticles::ChargedMobile:
       if (charged && mobile)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::charged_diffusive:
+    case WhichParticles::ChargedDiffusive:
       if (charged && diffusive)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::all_mobile_or_diffusive:
+    case WhichParticles::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::charged_and_mobile_or_diffusive:
+    case WhichParticles::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::stationary:
+    case WhichParticles::Stationary:
       if (!mobile && !diffusive)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
@@ -1525,34 +1525,34 @@ ItoPlasmaStepper::transferCoveredParticles(const WhichParticles            a_whi
     const bool charged   = species->getChargeNumber() != 0;
 
     switch (a_which) {
-    case WhichParticles::all:
+    case WhichParticles::All:
       solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::all_mobile:
+    case WhichParticles::AllMobile:
       if (mobile)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::all_diffusive:
+    case WhichParticles::AllDiffusive:
       if (diffusive)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::charged_mobile:
+    case WhichParticles::ChargedMobile:
       if (charged && mobile)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::charged_diffusive:
+    case WhichParticles::ChargedDiffusive:
       if (charged && diffusive)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::all_mobile_or_diffusive:
+    case WhichParticles::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::charged_and_mobile_or_diffusive:
+    case WhichParticles::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::stationary:
+    case WhichParticles::Stationary:
       if (!mobile && !diffusive)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
@@ -1592,34 +1592,34 @@ ItoPlasmaStepper::remapParticles(const WhichParticles a_WhichParticles, const It
     const bool charged   = species->getChargeNumber() != 0;
 
     switch (a_WhichParticles) {
-    case WhichParticles::all:
+    case WhichParticles::All:
       solver->remap(a_container);
       break;
-    case WhichParticles::all_mobile:
+    case WhichParticles::AllMobile:
       if (mobile)
         solver->remap(a_container);
       break;
-    case WhichParticles::all_diffusive:
+    case WhichParticles::AllDiffusive:
       if (diffusive)
         solver->remap(a_container);
       break;
-    case WhichParticles::charged_mobile:
+    case WhichParticles::ChargedMobile:
       if (charged && mobile)
         solver->remap(a_container);
       break;
-    case WhichParticles::charged_diffusive:
+    case WhichParticles::ChargedDiffusive:
       if (charged && diffusive)
         solver->remap(a_container);
       break;
-    case WhichParticles::all_mobile_or_diffusive:
+    case WhichParticles::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->remap(a_container);
       break;
-    case WhichParticles::charged_and_mobile_or_diffusive:
+    case WhichParticles::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->remap(a_container);
       break;
-    case WhichParticles::stationary:
+    case WhichParticles::Stationary:
       if (!mobile && !diffusive)
         solver->remap(a_container);
       break;
@@ -1659,34 +1659,34 @@ ItoPlasmaStepper::depositParticles(const WhichParticles a_WhichParticles, const 
     const bool charged   = species->getChargeNumber() != 0;
 
     switch (a_WhichParticles) {
-    case WhichParticles::all:
+    case WhichParticles::All:
       solver->depositParticles(a_container);
       break;
-    case WhichParticles::all_mobile:
+    case WhichParticles::AllMobile:
       if (mobile)
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::all_diffusive:
+    case WhichParticles::AllDiffusive:
       if (diffusive)
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::charged_mobile:
+    case WhichParticles::ChargedMobile:
       if (charged && mobile)
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::charged_diffusive:
+    case WhichParticles::ChargedDiffusive:
       if (charged && diffusive)
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::all_mobile_or_diffusive:
+    case WhichParticles::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::charged_and_mobile_or_diffusive:
+    case WhichParticles::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::stationary:
+    case WhichParticles::Stationary:
       if (!mobile && !diffusive)
         solver->depositParticles(a_container);
       break;
@@ -1812,8 +1812,8 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
 
 #if 0 // In principle, we should be able to average down and interpolate on the fluid Realm and then copy directly to the particle Realm. \
       // But we need to make sure that EBAMRData::copy also gets ghost cells 
-      m_amr->conservativeAverage(m_fscratch1[idx], m_fluid_Realm, m_phase);
-      m_amr->interpGhost(m_fscratch1[idx], m_fluid_Realm, m_phase);
+      m_amr->conservativeAverage(m_fscratch1[idx], m_fluidRealm, m_phase);
+      m_amr->interpGhost(m_fscratch1[idx], m_fluidRealm, m_phase);
 
       a_meshMobilities[idx]->copy(m_fscratch1[idx]);
 #else
@@ -1840,7 +1840,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>*>& a_meshM
     pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, level, time)" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluid_Realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
     const EBCellFAB& E  = a_E[dit()];
@@ -1890,7 +1890,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
   }
 
   // Do irregular cells
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluid_Realm, m_phase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_phase)[a_level])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit) {
     const VolIndex& vof = vofit();
     const RealVect  e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
@@ -1986,8 +1986,8 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
     if (solver->isDiffusive()) {
 
 #if 0 // In principle, we should be able to average down and interpolate ghost cells on the fluid Realm, and copy the entire result over to the particle Realm.
-      m_amr->conservativeAverage(m_fscratch1[idx], m_fluid_Realm, m_phase);
-      m_amr->interpGhost(m_fscratch2[idx], m_fluid_Realm, m_phase);
+      m_amr->conservativeAverage(m_fscratch1[idx], m_fluidRealm, m_phase);
+      m_amr->interpGhost(m_fscratch2[idx], m_fluidRealm, m_phase);
       a_diffusionCoefficient_funcs[idx]->copy(m_fluid_scratch1[idx]);
 #else // Instead, we copy to the particle Realm and average down there, then interpolate.
       a_diffusionCoefficient_funcs[idx]->copy(m_fscratch1[idx]);
@@ -2015,7 +2015,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_
 
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluid_Realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
     const Box box = dbl.get(dit());
@@ -2083,7 +2083,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
   }
 
   // Do irregular cells
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluid_Realm, m_phase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_phase)[a_level])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit) {
     const VolIndex& vof = vofit();
     const RealVect  e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
@@ -2395,7 +2395,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_partic
     pout() << "ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, energies, E, sources, level, dt)" << endl;
   }
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluid_Realm)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
     this->advanceReactionNetworkNWO(a_particlesPerCell[dit()],
@@ -2433,8 +2433,8 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
 
   const RealVect prob_lo = m_amr->getProbLo();
 
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluid_Realm, m_phase)[a_level][a_dit];
-  const EBISBox& ebgraph = m_amr->getEBISLayout(m_fluid_Realm, m_phase)[a_level][a_dit];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_phase)[a_level][a_dit];
+  const EBISBox& ebgraph = m_amr->getEBISLayout(m_fluidRealm, m_phase)[a_level][a_dit];
 
   const BaseFab<Real>& Efab = a_E.getSingleValuedFAB();
 
@@ -2481,7 +2481,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
   }
 
   // Irregular cells
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluid_Realm, m_phase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_phase)[a_level])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit) {
     const VolIndex& vof   = vofit();
     const Real      kappa = ebisbox.volFrac(vof);
@@ -3378,7 +3378,7 @@ ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int>>&             a_pr
 
     // If we make superparticles during regrids, do it here so we can better estimate the computational loads for each patch. This way, if a grid is removed the realistic
     // load estimate of the underlying grid(s) is improved.
-    if (m_regrid_superparticles) {
+    if (m_regridSuperparticles) {
       particles.sortParticlesByCell();
       lb_solvers[i]->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
       particles.sortParticlesByPatch();
@@ -3524,8 +3524,8 @@ ItoPlasmaStepper::computeEdotJSourceNWO()
       DataOps::dotProduct(m_fluid_scratch1, m_fluid_E, m_fluid_scratchD); // m_particle_scratch1 = E.dot.(E*mu*n)
       DataOps::scale(m_fluid_scratch1, Abs(q) * Units::Qe);               // m_particle_scratch1 = Z*e*mu*n*E*E
 
-      m_amr->conservativeAverage(m_fluid_scratch1, m_fluid_Realm, m_phase);
-      m_amr->interpGhost(m_fluid_scratch1, m_fluid_Realm, m_phase);
+      m_amr->conservativeAverage(m_fluid_scratch1, m_fluidRealm, m_phase);
+      m_amr->interpGhost(m_fluid_scratch1, m_fluidRealm, m_phase);
       DataOps::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1); // a_source[idx] += Z*e*mu*n*E*E
     }
 
@@ -3534,14 +3534,14 @@ ItoPlasmaStepper::computeEdotJSourceNWO()
       solver->depositDiffusivity(m_particle_scratch1,
                                  solver->getParticles(ItoSolver::WhichContainer::Bulk)); // Deposit D*n
       m_fluid_scratch1.copy(m_particle_scratch1);                                        // Copy D*n to fluid Realm
-      m_amr->interpGhostMG(m_fluid_scratch1, m_fluid_Realm, m_phase);
-      m_amr->computeGradient(m_fluid_scratchD, m_fluid_scratch1, m_fluid_Realm, m_phase); // scratchD = grad(D*n)
+      m_amr->interpGhostMG(m_fluid_scratch1, m_fluidRealm, m_phase);
+      m_amr->computeGradient(m_fluid_scratchD, m_fluid_scratch1, m_fluidRealm, m_phase); // scratchD = grad(D*n)
       DataOps::scale(m_fluid_scratchD, -1.0);                                             // scratchD = -grad(D*n)
       DataOps::dotProduct(m_fluid_scratch1, m_fluid_scratchD, m_fluid_E);                 // scratch1 = -E.dot.grad(D*n)
       DataOps::scale(m_fluid_scratch1, Abs(q) * Units::Qe);                               // scratch1 = -Z*e*E*grad(D*n)
 
-      m_amr->conservativeAverage(m_fluid_scratch1, m_fluid_Realm, m_phase);
-      m_amr->interpGhost(m_fluid_scratch1, m_fluid_Realm, m_phase);
+      m_amr->conservativeAverage(m_fluid_scratch1, m_fluidRealm, m_phase);
+      m_amr->interpGhost(m_fluid_scratch1, m_fluidRealm, m_phase);
 
       DataOps::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1); // source  += -Z*e*E*grad(D*n)
     }

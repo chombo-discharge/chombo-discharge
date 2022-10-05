@@ -141,14 +141,12 @@ ItoPlasmaGodunovStepper::parseOptions()
   pp.get("max_cells_hop", m_max_cells_hop);
   pp.get("merge_interval", m_merge_interval);
   pp.get("relax_factor", m_relax_factor);
-  pp.get("regrid_super", m_regrid_superparticles);
+  pp.get("regrid_super", m_regridSuperparticles);
   pp.get("algorithm", str);
   pp.get("load_balance", m_LoadBalancing);
   pp.get("load_index", m_LoadBalancing_idx);
   pp.get("min_dt", m_min_dt);
   pp.get("max_dt", m_max_dt);
-  pp.get("halo_buffer", m_halo_buffer);
-  pp.get("pvr_buffer", m_pvr_buffer);
   pp.get("filter_rho", m_filter_rho);
   pp.get("filter_cond", m_filter_cond);
   pp.get("eb_tolerance", m_eb_tolerance);
@@ -221,7 +219,7 @@ ItoPlasmaGodunovStepper::parseRuntimeOptions()
   pp.get("max_cells_hop", m_max_cells_hop);
   pp.get("merge_interval", m_merge_interval);
   pp.get("relax_factor", m_relax_factor);
-  pp.get("regrid_super", m_regrid_superparticles);
+  pp.get("regrid_super", m_regridSuperparticles);
   pp.get("algorithm", str);
   pp.get("load_balance", m_LoadBalancing);
   pp.get("load_index", m_LoadBalancing_idx);
@@ -299,20 +297,20 @@ ItoPlasmaGodunovStepper::allocateInternals()
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
   const int num_rtSpecies  = m_physics->getNumRtSpecies();
 
-  m_amr->allocate(m_fluid_scratch1, m_fluid_Realm, m_phase, 1);
-  m_amr->allocate(m_fluid_scratchD, m_fluid_Realm, m_phase, SpaceDim);
+  m_amr->allocate(m_fluid_scratch1, m_fluidRealm, m_phase, 1);
+  m_amr->allocate(m_fluid_scratchD, m_fluidRealm, m_phase, SpaceDim);
 
   m_amr->allocate(m_particle_scratch1, m_particleRealm, m_phase, 1);
   m_amr->allocate(m_particle_scratchD, m_particleRealm, m_phase, SpaceDim);
   m_amr->allocate(m_particle_E, m_particleRealm, m_phase, SpaceDim);
 
-  m_amr->allocate(m_J, m_fluid_Realm, m_phase, SpaceDim);
-  m_amr->allocate(m_scratch1, m_fluid_Realm, m_phase, 1);
-  m_amr->allocate(m_scratch2, m_fluid_Realm, m_phase, 1);
-  m_amr->allocate(m_conduct_cell, m_fluid_Realm, m_phase, 1);
-  m_amr->allocate(m_conduct_face, m_fluid_Realm, m_phase, 1);
-  m_amr->allocate(m_conduct_eb, m_fluid_Realm, m_phase, 1);
-  m_amr->allocate(m_fluid_E, m_fluid_Realm, m_phase, SpaceDim);
+  m_amr->allocate(m_J, m_fluidRealm, m_phase, SpaceDim);
+  m_amr->allocate(m_scratch1, m_fluidRealm, m_phase, 1);
+  m_amr->allocate(m_scratch2, m_fluidRealm, m_phase, 1);
+  m_amr->allocate(m_conduct_cell, m_fluidRealm, m_phase, 1);
+  m_amr->allocate(m_conduct_face, m_fluidRealm, m_phase, 1);
+  m_amr->allocate(m_conduct_eb, m_fluidRealm, m_phase, 1);
+  m_amr->allocate(m_fluid_E, m_fluidRealm, m_phase, SpaceDim);
 
   // Allocate for energy sources
   m_energy_sources.resize(num_ItoSpecies);
@@ -324,8 +322,8 @@ ItoPlasmaGodunovStepper::allocateInternals()
   m_fscratch1.resize(num_ItoSpecies);
   m_fscratch2.resize(num_ItoSpecies);
   for (int i = 0; i < num_ItoSpecies; i++) {
-    m_amr->allocate(m_fscratch1[i], m_fluid_Realm, m_phase, 1);
-    m_amr->allocate(m_fscratch2[i], m_fluid_Realm, m_phase, 1);
+    m_amr->allocate(m_fscratch1[i], m_fluidRealm, m_phase, 1);
+    m_amr->allocate(m_fscratch2[i], m_fluidRealm, m_phase, 1);
   }
 
   // Allocate for PPC and YPC on both Realm. Also do EdotJ.
@@ -334,11 +332,11 @@ ItoPlasmaGodunovStepper::allocateInternals()
   m_amr->allocate(m_particle_eps, m_particleRealm, m_phase, num_ItoSpecies);
   m_amr->allocate(m_particle_ypc, m_particleRealm, m_phase, num_rtSpecies);
 
-  m_amr->allocate(m_fluid_ppc, m_fluid_Realm, m_phase, num_ItoSpecies);
-  m_amr->allocate(m_fluid_eps, m_fluid_Realm, m_phase, num_ItoSpecies);
-  m_amr->allocate(m_fluid_ypc, m_fluid_Realm, m_phase, num_rtSpecies);
+  m_amr->allocate(m_fluid_ppc, m_fluidRealm, m_phase, num_ItoSpecies);
+  m_amr->allocate(m_fluid_eps, m_fluidRealm, m_phase, num_ItoSpecies);
+  m_amr->allocate(m_fluid_ypc, m_fluidRealm, m_phase, num_rtSpecies);
 
-  m_amr->allocate(m_EdotJ, m_fluid_Realm, m_phase, num_ItoSpecies);
+  m_amr->allocate(m_EdotJ, m_fluidRealm, m_phase, num_ItoSpecies);
 }
 
 Real
@@ -573,7 +571,7 @@ ItoPlasmaGodunovStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   // Copy conductivity to scratch storage
   const int ncomp        = 1;
   const int finest_level = m_amr->getFinestLevel();
-  m_amr->allocate(m_cache, m_fluid_Realm, m_phase, ncomp);
+  m_amr->allocate(m_cache, m_fluidRealm, m_phase, ncomp);
   for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++) {
     m_conduct_cell[lvl]->localCopyTo(*m_cache[lvl]);
   }
@@ -668,7 +666,7 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   // Regrid superparticles.
   MPI_Barrier(Chombo_MPI::comm);
   super_time -= Timer::wallClock();
-  if (m_regrid_superparticles) {
+  if (m_regridSuperparticles) {
     m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
     m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
     m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
@@ -805,34 +803,34 @@ ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<PointPar
     const bool charged   = species->getChargeNumber() != 0;
 
     switch (a_WhichParticles) {
-    case WhichParticles::all:
+    case WhichParticles::All:
       a_particles[idx]->remap();
       break;
-    case WhichParticles::all_mobile:
+    case WhichParticles::AllMobile:
       if (mobile)
         a_particles[idx]->remap();
       break;
-    case WhichParticles::all_diffusive:
+    case WhichParticles::AllDiffusive:
       if (diffusive)
         a_particles[idx]->remap();
       break;
-    case WhichParticles::charged_mobile:
+    case WhichParticles::ChargedMobile:
       if (charged && mobile)
         a_particles[idx]->remap();
       break;
-    case WhichParticles::charged_diffusive:
+    case WhichParticles::ChargedDiffusive:
       if (charged && diffusive)
         a_particles[idx]->remap();
       break;
-    case WhichParticles::all_mobile_or_diffusive:
+    case WhichParticles::AllMobileOrDiffusive:
       if (mobile || diffusive)
         a_particles[idx]->remap();
       break;
-    case WhichParticles::charged_and_mobile_or_diffusive:
+    case WhichParticles::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         a_particles[idx]->remap();
       break;
-    case WhichParticles::stationary:
+    case WhichParticles::Stationary:
       if (!mobile && !diffusive)
         a_particles[idx]->remap();
       break;
@@ -862,34 +860,34 @@ ItoPlasmaGodunovStepper::deposit_PointParticles(const Vector<ParticleContainer<P
     const bool charged   = species->getChargeNumber() != 0;
 
     switch (a_WhichParticles) {
-    case WhichParticles::all:
+    case WhichParticles::All:
       solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::all_mobile:
+    case WhichParticles::AllMobile:
       if (mobile)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::all_diffusive:
+    case WhichParticles::AllDiffusive:
       if (diffusive)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::charged_mobile:
+    case WhichParticles::ChargedMobile:
       if (charged && mobile)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::charged_diffusive:
+    case WhichParticles::ChargedDiffusive:
       if (charged && diffusive)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::all_mobile_or_diffusive:
+    case WhichParticles::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::charged_and_mobile_or_diffusive:
+    case WhichParticles::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::stationary:
+    case WhichParticles::Stationary:
       if (!mobile && !diffusive)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
@@ -919,34 +917,34 @@ ItoPlasmaGodunovStepper::clearGodunovParticles(const Vector<ParticleContainer<Po
     const bool charged   = species->getChargeNumber() != 0;
 
     switch (a_WhichParticles) {
-    case WhichParticles::all:
+    case WhichParticles::All:
       a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::all_mobile:
+    case WhichParticles::AllMobile:
       if (mobile)
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::all_diffusive:
+    case WhichParticles::AllDiffusive:
       if (diffusive)
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::charged_mobile:
+    case WhichParticles::ChargedMobile:
       if (charged && mobile)
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::charged_diffusive:
+    case WhichParticles::ChargedDiffusive:
       if (charged && diffusive)
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::all_mobile_or_diffusive:
+    case WhichParticles::AllMobileOrDiffusive:
       if (mobile || diffusive)
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::charged_and_mobile_or_diffusive:
+    case WhichParticles::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::stationary:
+    case WhichParticles::Stationary:
       if (!mobile && !diffusive)
         a_particles[idx]->clearParticles();
       break;
@@ -1022,19 +1020,19 @@ ItoPlasmaGodunovStepper::compute_cell_conductivity(EBAMRCellData&               
 
         MayDay::Error("ItoPlasmaGodunovStepper::compute_cell_conductivity - don't use filterSmooth");
 
-        m_amr->conservativeAverage(a_conductivity, m_fluid_Realm, m_phase);
-        m_amr->interpGhost(a_conductivity, m_fluid_Realm, m_phase);
+        m_amr->conservativeAverage(a_conductivity, m_fluidRealm, m_phase);
+        m_amr->interpGhost(a_conductivity, m_fluidRealm, m_phase);
       }
     }
   }
 
   DataOps::scale(a_conductivity, Units::Qe);
 
-  m_amr->conservativeAverage(a_conductivity, m_fluid_Realm, m_phase);
-  m_amr->interpGhostPwl(a_conductivity, m_fluid_Realm, m_phase);
+  m_amr->conservativeAverage(a_conductivity, m_fluidRealm, m_phase);
+  m_amr->interpGhostPwl(a_conductivity, m_fluidRealm, m_phase);
 
   // See if this helps....
-  m_amr->interpToCentroids(a_conductivity, m_fluid_Realm, m_phase);
+  m_amr->interpToCentroids(a_conductivity, m_fluidRealm, m_phase);
 }
 
 void
@@ -1054,7 +1052,7 @@ ItoPlasmaGodunovStepper::compute_face_conductivity()
   // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
   // for EB extrapolation can be a bit nasty (e.g. Negative weights), we do the centroid instead and take that as an approximation.
 #if 0
-  const IrregAmrStencil<CentroidInterpolationStencil>& ebsten = m_amr->getCentroidInterpolationStencils(m_fluid_Realm, m_phase);
+  const IrregAmrStencil<CentroidInterpolationStencil>& ebsten = m_amr->getCentroidInterpolationStencils(m_fluidRealm, m_phase);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);
   }
@@ -1096,8 +1094,8 @@ ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt)
   DataOps::incr(bco_gas, m_conduct_face, 1.0);
   DataOps::incr(bco_irr_gas, m_conduct_eb, 1.0);
 
-  m_amr->conservativeAverage(bco_gas, m_fluid_Realm, phase::gas);
-  m_amr->conservativeAverage(bco_irr_gas, m_fluid_Realm, phase::gas);
+  m_amr->conservativeAverage(bco_gas, m_fluidRealm, phase::gas);
+  m_amr->conservativeAverage(bco_irr_gas, m_fluidRealm, phase::gas);
 
   // Set up the solver
   m_fieldSolver->setupSolver();
@@ -1124,7 +1122,7 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(Vector<ParticleContainer<Poin
     pout() << m_name + "::copyConductivityParticles" << endl;
   }
 
-  this->clearGodunovParticles(a_conductivity_particles, WhichParticles::all);
+  this->clearGodunovParticles(a_conductivity_particles, WhichParticles::All);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
     const RefCountedPtr<ItoSolver>&  solver  = solver_it();
@@ -1214,7 +1212,7 @@ ItoPlasmaGodunovStepper::computeRegridRho()
     pout() << m_name + "::computeRegridRho" << endl;
   }
 
-  this->deposit_PointParticles(m_rho_dagger_particles, WhichParticles::all);
+  this->deposit_PointParticles(m_rho_dagger_particles, WhichParticles::All);
 }
 
 void
@@ -1258,7 +1256,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
 
   MPI_Barrier(Chombo_MPI::comm);
   remapGdnvTime -= Timer::wallClock();
-  this->remapGodunovParticles(m_rho_dagger_particles, WhichParticles::all_diffusive);
+  this->remapGodunovParticles(m_rho_dagger_particles, WhichParticles::AllDiffusive);
   remapGdnvTime += Timer::wallClock();
 
   // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch.
@@ -1284,7 +1282,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
   depositGdnvTime -= Timer::wallClock();
   this->deposit_PointParticles(m_rho_dagger_particles,
                                WhichParticles::
-                                 all_diffusive); // Diffusive should be enough because state is not changed for others.
+                                 AllDiffusive); // Diffusive should be enough because state is not changed for others.
   depositGdnvTime += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
@@ -1310,17 +1308,17 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
 
   MPI_Barrier(Chombo_MPI::comm);
   remapTime -= Timer::wallClock();
-  this->remapParticles(WhichParticles::all_mobile_or_diffusive);
+  this->remapParticles(WhichParticles::AllMobileOrDiffusive);
   remapTime += Timer::wallClock();
 
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   MPI_Barrier(Chombo_MPI::comm);
   isectTime -= Timer::wallClock();
   const bool delete_eb_particles = true;
-  this->intersectParticles(WhichParticles::all_mobile_or_diffusive,
+  this->intersectParticles(WhichParticles::AllMobileOrDiffusive,
                            EbRepresentation::ImplicitFunction,
                            delete_eb_particles);
-  this->removeCoveredParticles(WhichParticles::all_mobile_or_diffusive,
+  this->removeCoveredParticles(WhichParticles::AllMobileOrDiffusive,
                                EbRepresentation::ImplicitFunction,
                                m_eb_tolerance);
   isectTime += Timer::wallClock();
@@ -1328,7 +1326,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
   MPI_Barrier(Chombo_MPI::comm);
   depositTime -= Timer::wallClock();
-  this->depositParticles(WhichParticles::all_mobile_or_diffusive);
+  this->depositParticles(WhichParticles::AllMobileOrDiffusive);
   depositTime += Timer::wallClock();
 
   totalTime += Timer::wallClock();
@@ -1397,7 +1395,7 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
     pout() << m_name + "::diffuseParticlesEulerMaruyama" << endl;
   }
 
-  this->clearGodunovParticles(a_rho_dagger, WhichParticles::all);
+  this->clearGodunovParticles(a_rho_dagger, WhichParticles::All);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
     RefCountedPtr<ItoSolver>&        solver  = solver_it();
@@ -1519,8 +1517,8 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
   this->preTrapezoidalPredictor(m_rho_dagger_particles, a_dt);
   this->remapGodunovParticles(m_rho_dagger_particles,
                               WhichParticles::
-                                all_diffusive); // Particles that were copied but not moved are in the right box.
-  this->deposit_PointParticles(m_rho_dagger_particles, WhichParticles::all); // All copies need to deposit.
+                                AllDiffusive); // Particles that were copied but not moved are in the right box.
+  this->deposit_PointParticles(m_rho_dagger_particles, WhichParticles::All); // All copies need to deposit.
 
   this->copyConductivityParticles(m_conductivity_particles);
   this->computeAllConductivities(m_conductivity_particles);
@@ -1530,7 +1528,7 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
   this->trapezoidalPredictor(a_dt);
-  this->remapParticles(WhichParticles::all_mobile_or_diffusive);
+  this->remapParticles(WhichParticles::AllMobileOrDiffusive);
   // ====== PREDICTOR END ======
 
   // ====== CORRECTOR BEGIN =====
@@ -1538,9 +1536,9 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
                                 a_dt); // Mobile or diffusive moves to X^dagger = X^k + 0.5*dt*V^k + hop
   this->remapGodunovParticles(m_rho_dagger_particles,
                               WhichParticles::
-                                all_mobile_or_diffusive); // Only need to remap particles that were mobile or diffusive
+                                AllMobileOrDiffusive); // Only need to remap particles that were mobile or diffusive
   this->deposit_PointParticles(m_rho_dagger_particles,
-                               WhichParticles::all); // Everything needs to deposit...
+                               WhichParticles::All); // Everything needs to deposit...
 
   this->copyConductivityParticles(m_conductivity_particles);
   this->computeAllConductivities(m_conductivity_particles);
@@ -1550,17 +1548,17 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
   this->trapezoidalCorrector(a_dt);
-  this->remapParticles(WhichParticles::all_mobile_or_diffusive);
+  this->remapParticles(WhichParticles::AllMobileOrDiffusive);
   // ====== CORRECTOR END =====
 
   // Do particle-boundary intersection.
-  this->intersectParticles(WhichParticles::all_mobile_or_diffusive, EbRepresentation::ImplicitFunction, true);
-  this->removeCoveredParticles(WhichParticles::all_mobile_or_diffusive,
+  this->intersectParticles(WhichParticles::AllMobileOrDiffusive, EbRepresentation::ImplicitFunction, true);
+  this->removeCoveredParticles(WhichParticles::AllMobileOrDiffusive,
                                EbRepresentation::ImplicitFunction,
                                m_eb_tolerance);
 
   // Finally, deposit particles.
-  this->depositParticles(WhichParticles::all_mobile_or_diffusive);
+  this->depositParticles(WhichParticles::AllMobileOrDiffusive);
 }
 
 void
