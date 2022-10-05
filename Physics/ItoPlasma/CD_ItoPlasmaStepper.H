@@ -50,7 +50,6 @@ namespace Physics {
     class ItoPlasmaStepper : public TimeStepper
     {
     public:
-
       /*!
 	@brief Default constructor. Sets default options. 
       */
@@ -65,8 +64,7 @@ namespace Physics {
       /*!
 	@brief Destructor
       */
-      virtual
-      ~ItoPlasmaStepper();
+      virtual ~ItoPlasmaStepper();
 
       /*!
 	@brief Parse options
@@ -76,34 +74,76 @@ namespace Physics {
 
       /*!
 	@brief Parse runtime configurable options
-      */      
+      */
       virtual void
-      parseRuntimeOptions();
-      
-      virtual void
-      allocateInternals() = 0;
-      virtual void
-      setupSolvers() override;
+      parseRuntimeOptions() override;
+
+      /*!
+	@brief Allocate storage for solvers.
+      */
       virtual void
       allocate() override;
+
+      /*!
+	@brief Allocate "internal" storage.
+      */
+      virtual void
+      allocateInternals();
+
+      /*!
+	@brief Set up solvers.
+      */
+      virtual void
+      setupSolvers() override;
+
+      /*!
+	@brief Fill solvers with initial data
+      */
       virtual void
       initialData() override;
-      virtual void
-      initialSigma();
+
+      /*!
+	@brief Perform post-checkpoint operations
+	@details This allocates the internal storage, recomputes the electric field and recomputes the velocity and diffusion coefficients. 
+      */
       virtual void
       postCheckpointSetup() override;
+
+      /*!
+	@brief Do some post-checkpoint operations for the electrostatic part. 
+	@details This computes the electric field from the checkpointed potential and populates m_electricFieldFluid and m_electricFieldParticle.
+      */
       virtual void
       postCheckpointPoisson();
+
+      /*!
+	@brief Post-initialization operations. Default does nothing
+      */
       virtual void
       postInitialize() override;
 
-      void
+      /*!
+	@brief Set up the Ito particle solvers
+      */
+      virtual void
       setupIto();
-      void
+
+      /*!
+	@brief Set up the electrostatic field solver
+      */
+      virtual void
       setupPoisson();
-      void
+
+      /*!
+	@brief Set up the radiative transfer solver
+      */
+      virtual void
       setupRadiativeTransfer();
-      void
+
+      /*!
+	@brief Set up the surface charge solver
+      */
+      virtual void
       setupSigma();
 
       // IO routines
@@ -129,28 +169,83 @@ namespace Physics {
       // Advance routines
       virtual Real
       advance(const Real a_dt) = 0;
+
+      /*!
+	@brief Compute a time step used for the advance method
+      */
       virtual Real
       computeDt() override;
+
+      /*!
+	@brief Synchronize solver times for all the solvers
+	@param[in] a_step Time step
+	@param[in] a_time Simulation time
+	@param[in] a_dt   Last time step used. 
+      */
       void
       synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+
+      /*!
+	@brief Print a step report. Used by Driver for user monitoring of simulation.
+      */
       void
       printStepReport() override;
 
-      // Registration routines
+      /*!
+	@brief Register realms used for the simulation
+      */
       void
       registerRealms() override;
+
+      /*!
+	@brief Register operators used for the simulation
+      */
       void
       registerOperators() override;
 
-      // Regrid routines.
+      /*!
+	@brief Perform pre-regrid operations.
+	@details This stores the particles and mesh data on the old grids. 
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+      */
       virtual void
       preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
+
+      /*!
+	@brief Regrid methods -- puts all data on the new mesh. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */
       virtual void
       regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
-      void
+
+      /*!
+	@brief Perform post-regrid operations -- default implementation does nothing. 
+      */
+      virtual void
       postRegrid() override;
+
+      /*!
+	@brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids for the input realm. 
+	@param[in] a_realm Realm name
+      */
       bool
       loadBalanceThisRealm(const std::string a_realm) const override;
+
+      /*!
+	@brief Load balance grid boxes for a specified realm. 
+	@param[out] a_procs       MPI ranks owning the various grid boxes. 
+	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
+	@param[in]  a_realm       Realm identifier
+	@param[in]  a_grids       Original grids
+	@param[in]  a_lmin        Coarsest grid level that changed
+	@param[in]  a_finestLevel New finest grid level
+	@details This is only called by Driver if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default implementation
+	uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and
+	he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance(Vector<int>, Vector<T>, Vector<Box>).
+      */
       void
       loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                        Vector<Vector<Box>>&             a_boxes,
@@ -191,10 +286,6 @@ namespace Physics {
                                const EbRepresentation          a_representation,
                                const Real                      a_tolerance);
 
-      // Internal routines
-      void
-      setVerbosity(const int a_verbosity);
-
       // Set routines
       void
       setIto(RefCountedPtr<ItoLayout<ItoSolver>>& a_cdr);
@@ -203,7 +294,7 @@ namespace Physics {
       void
       setRadiativeTransferSolvers(RefCountedPtr<RtLayout<McPhoto>>& a_rte);
       void
-      setVoltage(const std::function<Real(const Real a_time)>& a_potential);
+      setVoltage(const std::function<Real(const Real a_time)>& a_voltage);
 
       // Get routines
       Real
@@ -488,41 +579,112 @@ namespace Physics {
         Advection,
         Diffusion,
         AdvectionDiffusion,
-        Source,
         RelaxationTime,
-        Restricted,
         Hardcap,
-        Error,
         Physics
       };
 
-      std::string        m_fluidRealm;   // Realm for Poisson and sigma solver. Defaults to Realm::Primal
-      std::string        m_particleRealm; // Realm for particles. Defaults to Realm::Primal
-      std::string        m_name;
-      phase::which_phase m_phase;
-
+      /*!
+	@brief Box sorting method when using dual-grid with particle load balancing.
+      */
       BoxSorting m_boxSort;
 
-      RefCountedPtr<ItoPlasmaPhysics>     m_physics;
-      RefCountedPtr<ItoLayout<ItoSolver>> m_ito;
-      RefCountedPtr<RtLayout<McPhoto>>    m_rte;
-      RefCountedPtr<FieldSolver>          m_fieldSolver;
-      RefCountedPtr<SurfaceODESolver<1>>  m_sigma;
-
+      /*!
+	@brief Time code for understanding how the time step was restricted. 
+      */
       TimeCode m_timeCode;
 
-      // Filters that can be applied.
-      std::deque<std::tuple<Real, int, int>> m_filters;
+      /*!
+	@brief Realm used for the fluid part (i.e., electrostatic) part of the simulation
+	@note This is hardcoded to Realm::Primal
+      */
+      std::string m_fluidRealm;
 
-      std::function<Real(const Real a_time)> m_potential;
+      /*!
+	@brief Realm used for the particle part of the simulation. 
+      */
+      std::string m_particleRealm;
 
+      /*!
+	@brief Time stepper name
+      */
+      std::string m_name;
+
+      /*!
+	@brief Phase where we solve for the plasma. 
+	@note This is hardcoded to phase::gas
+      */
+      phase::which_phase m_phase;
+
+      /*!
+	@brief Implementation of ItoPlasmaPhysics. 
+	@details All solver coupling occurs through the implementation of this class
+      */
+      RefCountedPtr<ItoPlasmaPhysics> m_physics;
+
+      /*!
+	@brief Ito solvers
+      */
+      RefCountedPtr<ItoLayout<ItoSolver>> m_ito;
+
+      /*!
+	@brief Radiative transfer solvers. 
+      */
+      RefCountedPtr<RtLayout<McPhoto>> m_rte;
+
+      /*!
+	@brief Field solver. 
+      */
+      RefCountedPtr<FieldSolver> m_fieldSolver;
+
+      /*!
+	@brief Surface charge solver. 
+      */
+      RefCountedPtr<SurfaceODESolver<1>> m_sigma;
+
+      /*!
+	@brief Voltage curve on the electrodes used in the simulation.
+      */
+      std::function<Real(const Real a_time)> m_voltage;
+
+      /*!
+	@brief Profile kernels or not
+      */
+      bool m_profile;
+
+      /*!
+	@brief Do or do not superparticle merging/splitting on regrids.
+      */
       bool m_regridSuperparticles;
-      bool m_loadBalance;
-      bool m_useNewReactionAlgorithm; // For switching between the old and new reaction algorithms.
-      bool m_filter_rho;
 
+      /*!
+	@brief Load balance or don't load balance.
+      */
+      bool m_loadBalance;
+
+      /*!
+	@brief For switching between the old and new reaction algorithms
+      */
+      bool m_useNewReactionAlgorithm;
+
+      /*!
+	@brief Target number of particles per cell when squishing ItoParticle's into superparticles
+      */
       int m_particlesPerCell;
-      int m_loadBalance_idx;
+
+      /*!
+	@brief How often to merge superparticles
+	@details If <= 1 we merge every time step. 
+      */
+      int m_mergeInterval;
+
+      /*!
+	@brief Solver index used when load-balancing the particle solvers.
+	@details If m_loadBalanceIndex we use the total number of particles in the patch as a metric. If
+	m_loadBalanceIndex >= 0 we use the solver corresponding to m_loadBalanceIndex. This needs to be
+	consistent with the definitions of the species in the ItoPlasmaPhysics implementation that is used. 
+      */
+      int m_loadBalanceIndex;
 
       /*!
 	@brief The "background" load per cell when using particle load balancing.
@@ -530,67 +692,201 @@ namespace Physics {
 	is m_loadPerCell * numGridPoints + numParticles. 
       */
       Real m_loadPerCell;
-      Real m_max_cells_hop;
-      Real m_dt_relax;
-      Real m_min_dt;
-      Real m_max_dt;
 
-      // Storage for current density. This is defined over the particle Realm.
-      EBAMRCellData         m_J;
-      mutable EBAMRCellData m_fluid_scratch1; // Scratch storage on the fluid Realm with 1 component
-      mutable EBAMRCellData m_fluid_scratchD; // Scratch storage on the fluid Realm with SpaceDim components
+      /*!
+	@brief CFL-like time step for advection
+      */
+      Real m_advectionCFL;
 
-      mutable EBAMRCellData m_particle_scratch1; // Scratch storage on the particle Realm with 1 component
-      mutable EBAMRCellData m_particle_scratchD; // Scratch storage on the particle Realm with SpaceDim components
+      /*!
+	@brief CFL-like time step for diffusion
+      */
+      Real m_diffusionCFL;
+
+      /*!
+	@brief CFL-like time step for advection-diffusion
+      */
+      Real m_advectionDiffusionCFL;
+
+      /*!
+	@brief Factor proportional to the dielectric relaxation time dtRelax = eps0/sigma
+	@details Used for restricting dt < m_relaxTimeFactor * eps0/sigma
+      */
+      Real m_relaxTimeFactor;
+
+      /*!
+	@brief Minimum permitted time step
+      */
+      Real m_minDt;
+
+      /*!
+	@brief Maximum permitted time step
+      */
+      Real m_maxDt;
+
+      /*!
+	@brief The advective time step (not multiplied by m_advectionCFL)
+      */
+      Real m_advectionDt;
+
+      /*!
+	@brief The diffusive time step (not multiplied by m_diffusionCFL)
+      */
+      Real m_diffusionDt;
+
+      /*!
+	@brief The advection-diffusion time step (not multiplied by m_advectionDiffusionCFL)
+      */
+      Real m_advectionDiffusionDt;
+
+      /*!
+	@brief The relaxation time eps0/sigma
+      */
+      Real m_relaxationTime;
+
+      /*!
+	@brief The physics-based time step
+      */
+      Real m_physicsDt;
+
+      /*!
+	@brief Storage for current density.
+	@note Defined over the fluid realm with SpaceDim components. 
+      */
+      EBAMRCellData m_currentDensity;
+
+      /*!
+	@brief Cell-centered conductivity.
+	@note Defined on the fluid realm with 1 component
+      */
+      EBAMRCellData m_conductivityCell;
+
+      /*!
+	@brief Face-centered conductivity.
+	@note Defined on the fluid realm with 1 component
+      */
+      EBAMRFluxData m_conductivityFace;
+
+      /*!
+	@brief EB-centered conductivity.
+	@note Defined on the fluid realm with 1 component
+      */
+      EBAMRIVData m_conductivityEB;
+
+      /*!
+	@brief For holding the number of particles per cell for all species.
+	@note Defined on the particle realm with components = number of plasma species
+      */
+      EBAMRCellData m_particlePPC;
+
+      /*!
+	@brief For holding the number of generated photons per cell.
+	@note Defined on the particle realm with components = number of photon species
+      */
+      EBAMRCellData m_particleYPC;
+
+      /*!
+	@brief For holding the mean particle energy
+	@note Defined on the particle realm with components = number of plasma species
+      */
+      EBAMRCellData m_particleEPS;
+
+      /*!
+	@brief For holding the previous number of particles per cell for all species
+	@note Defined on the particle realm with components = number of plasma species
+      */
+      EBAMRCellData m_particleOldPPC;
+
+      /*!
+	@brief For holding the number of particles per cell for all species.
+	@note Defined on the fluid realm with components = number of plasma species
+      */
+      EBAMRCellData m_fluidPPC;
+
+      /*!
+	@brief For holding the number of generated photons per cell.
+	@note Defined on the fluid realm with components = number of photon species
+      */
+      EBAMRCellData m_fluidYPC;
+
+      /*!
+	@brief For holding the mean particle energy
+	@note Defined on the fluid realm with components = number of plasma species
+      */
+      EBAMRCellData m_fluidEPS;
+
+      /*!
+	@brief Storage for holding the plasma phase electric field on the fluid realm
+      */
+      EBAMRCellData m_electricFieldFluid;
+
+      /*!
+	@brief Storage for holding the plasma phase electric field on the particle realm
+      */
+      EBAMRCellData m_electricFieldParticle;
+
+      /*!
+	@brief Storage for holding the energy sources for each species.
+	@note Defined on the particle realm but about to get deprecated when we switch to the new reaction algorithm. 
+      */
+      Vector<EBAMRCellData> m_energySources;
+
+      /*!
+	@brief Storage for holdnig E*J on the fluid realm. 1 component
+      */
+      EBAMRCellData m_EdotJ;
+
+      /*!
+	@brief Scratch storage on the fluid realm having 1 component
+      */
+      mutable EBAMRCellData m_fluidScratch1;
+
+      /*!
+	@brief Scratch storage on the fluid realm with SpaceDim components
+      */
+      mutable EBAMRCellData m_fluidScratchD;
+
+      /*!
+	@brief Scratch storage on the particle realm with 1 component
+      */
+      mutable EBAMRCellData m_particleScratch1;
+
+      /*!
+	@brief Scratch storage on the particle realm with SpaceDim components
+      */
+      mutable EBAMRCellData m_particleScratchD;
 
       mutable Vector<EBAMRCellData>
         m_fscratch1; // Scratch storage with a single component for all species. On the fluid Realm.
       mutable Vector<EBAMRCellData>
         m_fscratch2; // Scratch storage with a single component for all species. On the fluid Realm.
 
-      EBAMRCellData
-                    m_particle_ppc; // For holding the number of particles per cell for all species. Contains compoents = number of species
-      EBAMRCellData m_particle_ypc; // For holding the number of generated Photons per cell on the particle Realm.
-      EBAMRCellData m_particle_eps; // For holding the mean energy on the particle Realm
-      EBAMRCellData m_particle_old; // For holding the mean energy on the particle Realm
-
-      EBAMRCellData
-                    m_fluid_ppc; // For holding the number of particles per cell for all species. Contains compoents = number of species
-      EBAMRCellData m_fluid_ypc; // For holding the number of generated Photons per cell on the fluid Realm.
-      EBAMRCellData m_fluid_eps; // For holding the mean energy on the particle Realm
-
-      // Storage for the electric field on
-      EBAMRCellData m_fluid_E;
-      EBAMRCellData m_particle_E;
-
-      // Storage for energy source terms
-      Vector<EBAMRCellData> m_energy_sources;
-      EBAMRCellData         m_EdotJ;
-
-      // For parsing filters
+      /*!
+	@brief Compute some particle statistics
+	@param[out] a_avgParticles Average numer of particles
+	@param[out] a_sigma        Particle standard deviation (across MPI ranks)
+	@param[out] a_minParticles Minimum number of particles
+	@param[out] a_maxParticles Maximum number of particles
+	@param[out] a_minRank      MPI rank with lowest number of particles
+	@param[out] a_maxRank      MPI rank with highest number of particles
+      */
       void
-      parseFilters();
+      getParticleStatistics(Real& a_avgParticles,
+                            Real& a_sigma,
+                            Real& a_minParticles,
+                            Real& a_maxParticles,
+                            int&  a_minRank,
+                            int&  a_maxRank);
 
-      // Set the particle buffers
-      void
-      setParticleBuffers();
-
-      // Diagnostics tool
-      void
-      getParticleStatistics(Real&   a_avg,
-                            Real&   a_sigma,
-                            size_t& a_minParticles,
-                            size_t& a_maxParticles,
-                            int&    a_minRank,
-                            int&    a_maxRank);
-      void
-      printTimerHead();
-      void
-      printTimerDiagnostics(Real& a_timer, const std::string a_prefix); // Timer should be in percentage
-      void
-      printTimerTail();
-
-      // Do load balancing of the particle Realm.
+      /*!
+	@brief Routine called by loadBalanceBoxes and used for particle-based load balancing.
+	@param[out] a_procs       MPI ranks owning the various grid boxes. 
+	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
+	@param[in]  a_realm       Realm identifier
+	@param[in]  a_grids       Original grids
+	@param[in]  a_lmin        Coarsest grid level to load balance. 
+	@param[in]  a_finestLevel Finest grid level
+      */
       void
       loadBalanceParticleRealm(Vector<Vector<int>>&             a_procs,
                                Vector<Vector<Box>>&             a_boxes,
@@ -599,8 +895,51 @@ namespace Physics {
                                const int                        a_lmin,
                                const int                        a_finestLevel);
 
+      /*!
+	@brief Get the solvers used for load balancing
+	@details This depends on m_loadBalanceIndex -- if it's < 0 we use ALL plasma species for load balancing.
+      */
       Vector<RefCountedPtr<ItoSolver>>
       getLoadBalanceSolvers() const;
+
+      /*!
+	@brief Fill surface charge solver with initial data
+      */
+      virtual void
+      initialSigma();
+
+      /*!
+	@brief Parse chattiness
+	@details Sets m_verbosity from input script. 
+      */
+      virtual void
+      parseVerbosity() noexcept;
+
+      /*!
+	@brief Parse the desired number of particles per cell. 
+	@details Sets m_particlesPerCell from input script. 
+      */
+      virtual void
+      parseSuperparticles() noexcept;
+
+      /*!
+	@brief Parse dual or single realm calculations
+	@details Sets m_particleRealm = "ParticleRealm" if 'dual_grid' is true.
+      */
+      virtual void
+      parseDualGrid() noexcept;
+
+      /*!
+	@brief Parse load balancing
+      */
+      virtual void
+      parseLoadBalance() noexcept;
+
+      /*!
+	@brief Parse time step restrictions
+      */
+      virtual void
+      parseTimeStepRestrictions() noexcept;
     };
   } // namespace ItoPlasma
 };  // namespace Physics

@@ -24,21 +24,21 @@ namespace ParallelOps {
     @brief MPI barrier
   */
   inline void
-  barrier();
+  barrier() noexcept;
 
   /*!
     @brief Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)
     @param[in] a_input Data input. Returns the smallest. 
   */
   inline Real
-  min(const Real& a_input);
+  min(const Real& a_input) noexcept;
 
   /*!
     @brief Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)
     @param[in] a_input Data input. Returns the smallest. 
   */
   inline int
-  min(const int& a_input);
+  min(const int& a_input) noexcept;
 
   /*!
     @brief Get the minimum value and the position corresponding to the minimum value of a_val
@@ -53,14 +53,14 @@ namespace ParallelOps {
     @param[in] a_input Data input. 
   */
   inline Real
-  max(const Real& a_input);
+  max(const Real& a_input) noexcept;
 
   /*!
     @brief Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)
     @param[in] a_input Data input. 
   */
   inline int
-  max(const int& a_input);
+  max(const int& a_input) noexcept;
 
   /*!
     @brief Get the maximum value and the position corresponding to the maximum value of a_val
@@ -71,10 +71,39 @@ namespace ParallelOps {
   max(const Real& a_val, const RealVect& a_pos) noexcept;
 
   /*!
-    @brief Compute the sum across all MPI ranks
+    @brief Get the maximum value and the rank having the maximum value. 
+    @param[in] a_val Value to be compared. 
+  */
+  inline std::pair<Real, int>
+  maxRank(const Real& a_val) noexcept;
+
+  /*!
+    @brief Get the minimum value and the rank having the minimum value. 
+    @param[in] a_val Value to be compared. 
+  */
+  inline std::pair<Real, int>
+  minRank(const Real& a_val) noexcept;
+
+  /*!
+    @brief Compute the average (across MPI ranks) of the input value
+    @param[in] a_val Value to take the average of
   */
   inline Real
-  sum(const Real& a_value);
+  average(const Real& a_val) noexcept;
+
+  /*!
+    @brief Compute the sum across all MPI ranks
+    @param[in] a_value Value to the take the sum of. 
+  */
+  inline Real
+  sum(const Real& a_value) noexcept;
+
+  /*!
+    @brief Compute the standard deviation of the input value.
+    @param[in] a_value Value to compute the standard deviation of.
+  */
+  inline Real
+  standardDeviation(const Real& a_value) noexcept;
 
   /*!
     @brief Perform a summation of all the MPI ranks's input data. 
@@ -83,7 +112,7 @@ namespace ParallelOps {
     @param[inout] a_data On 
   */
   inline void
-  vectorSum(Vector<Real>& a_data);
+  vectorSum(Vector<Real>& a_data) noexcept;
 
   /*!
     @brief Perform a summation of all the MPI ranks's input data. 
@@ -92,7 +121,7 @@ namespace ParallelOps {
     @param[inout] a_data On 
   */
   inline void
-  vectorSum(Vector<long int>& a_data);
+  vectorSum(Vector<long int>& a_data) noexcept;
 } // namespace ParallelOps
 
 #include <CD_NamespaceFooter.H>

@@ -77,10 +77,8 @@ namespace Physics {
       // These are things that are used to compute the conductivity.
       EBAMRCellData m_scratch1;
       EBAMRCellData m_scratch2;
-      EBAMRCellData m_conduct_cell;
+
       EBAMRCellData m_cache; // Used to store the cell-centered conductivity
-      EBAMRFluxData m_conduct_face;
-      EBAMRIVData   m_conduct_eb;
 
       bool m_profile;
       bool m_filter_cond;
@@ -97,8 +95,6 @@ namespace Physics {
         m_conductivity_particles; // Used to store the particle that gave the sigma^k
       Vector<ParticleContainer<PointParticle>*>
         m_rho_dagger_particles; // Used to store the particles that gave rho^dagger
-
-      int m_merge_interval; // How often to merge superparticles
 
       // Routine for setting up extra particle storage
       void

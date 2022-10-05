@@ -19,7 +19,7 @@
 #include <CD_NamespaceHeader.H>
 
 inline void
-ParallelOps::barrier()
+ParallelOps::barrier() noexcept
 {
 #ifdef CH_MPI
   MPI_Barrier(Chombo_MPI::comm);
@@ -27,7 +27,7 @@ ParallelOps::barrier()
 }
 
 inline Real
-ParallelOps::min(const Real& a_input)
+ParallelOps::min(const Real& a_input) noexcept
 {
 #ifdef CH_MPI
   Real      ret    = 1.0;
@@ -42,7 +42,7 @@ ParallelOps::min(const Real& a_input)
 }
 
 inline int
-ParallelOps::min(const int& a_input)
+ParallelOps::min(const int& a_input) noexcept
 {
 #ifdef CH_MPI
   int       ret    = 1;
@@ -115,9 +115,8 @@ ParallelOps::min(const Real& a_val, const RealVect& a_pos) noexcept
 }
 
 inline Real
-ParallelOps::max(const Real& a_input)
+ParallelOps::max(const Real& a_input) noexcept
 {
-
 #ifdef CH_MPI
   Real      ret    = 1.0;
   const int result = MPI_Allreduce(&a_input, &ret, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
@@ -131,7 +130,7 @@ ParallelOps::max(const Real& a_input)
 }
 
 inline int
-ParallelOps::max(const int& a_input)
+ParallelOps::max(const int& a_input) noexcept
 {
 
 #ifdef CH_MPI
@@ -204,8 +203,64 @@ ParallelOps::max(const Real& a_val, const RealVect& a_pos) noexcept
 #endif
 }
 
+inline std::pair<Real, int>
+ParallelOps::maxRank(const Real& a_val) noexcept
+{
+#ifdef CH_MPI
+  const int nProc = numProc();
+
+  Real* values = new Real[nProc];
+
+  MPI_Allgather(&a_val, 1, MPI_CH_REAL, values, 1, MPI_CH_REAL, Chombo_MPI::comm);
+
+  int  irank  = -1;
+  Real maxVal = -std::numeric_limits<Real>::max();
+
+  for (int i = 0; i < nProc; i++) {
+    if (values[i] > maxVal) {
+      irank  = i;
+      maxVal = values[i];
+    }
+  }
+
+  delete[] values;
+
+  return std::make_pair(maxVal, irank);
+#else
+  return std::make_pair(a_val, 0);
+#endif
+}
+
+inline std::pair<Real, int>
+ParallelOps::minRank(const Real& a_val) noexcept
+{
+#ifdef CH_MPI
+  const int nProc = numProc();
+
+  Real* values = new Real[nProc];
+
+  MPI_Allgather(&a_val, 1, MPI_CH_REAL, values, 1, MPI_CH_REAL, Chombo_MPI::comm);
+
+  int  irank  = -1;
+  Real maxVal = std::numeric_limits<Real>::max();
+
+  for (int i = 0; i < nProc; i++) {
+    if (values[i] < maxVal) {
+      irank  = i;
+      maxVal = values[i];
+    }
+  }
+
+  delete[] values;
+
+  return std::make_pair(maxVal, irank);
+#else
+  return std::make_pair(a_val, 0);
+#endif
+}
+
 inline Real
-ParallelOps::sum(const Real& a_value)
+ParallelOps::sum(const Real& a_value) noexcept
 {
 #ifdef CH_MPI
   Real ret = 0.0;
@@ -222,7 +277,7 @@ ParallelOps::sum(const Real& a_value)
 }
 
 inline void
-ParallelOps::vectorSum(Vector<Real>& a_data)
+ParallelOps::vectorSum(Vector<Real>& a_data) noexcept
 {
 #ifdef CH_MPI
   const Vector<Real> tmp = a_data;
@@ -234,7 +289,7 @@ ParallelOps::vectorSum(Vector<Real>& a_data)
 }
 
 inline void
-ParallelOps::vectorSum(Vector<long int>& a_data)
+ParallelOps::vectorSum(Vector<long int>& a_data) noexcept
 {
 #ifdef CH_MPI
   const Vector<long int> tmp = a_data;
@@ -242,6 +297,41 @@ ParallelOps::vectorSum(Vector<long int>& a_data)
   if (result != MPI_SUCCESS) {
     MayDay::Error("In file ParallelOps::vectorSum -- MPI communication error");
   }
+#endif
+}
+
+inline Real
+ParallelOps::average(const Real& a_val) noexcept
+{
+#ifdef CH_MPI
+  return ParallelOps::sum(a_val) / numProc();
+#else
+  return a_val;
+#endif
+}
+
+inline Real
+ParallelOps::standardDeviation(const Real& a_value) noexcept
+{
+#ifdef CH_MPI
+  const int nProc = numProc();
+
+  const Real average = ParallelOps::average(a_value);
+
+  Real* values = new Real[nProc];
+
+  MPI_Allgather(&a_value, 1, MPI_CH_REAL, values, 1, MPI_CH_REAL, Chombo_MPI::comm);
+
+  Real sigma = 0.0;
+  for (int i = 0; i < nProc; i++) {
+    sigma += std::pow(values[i] - average, 2);
+  }
+
+  delete[] values;
+
+  return sqrt(sigma / nProc);
+#else
+  return 0.0;
 #endif
 }
 
