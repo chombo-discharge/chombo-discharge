@@ -168,7 +168,7 @@ ItoPlasmaPhysics::computeCharge(const Vector<List<ItoParticle>*>& a_particles) c
     const long long q = (long long)m_ItoSpecies[i]->getChargeNumber();
 
     for (ListIterator<ItoParticle> lit(*a_particles[i]); lit.ok(); ++lit) {
-      const long long w = llround(lit().mass());
+      const long long w = llround(lit().weight());
 
       ret += w * q;
     }
@@ -377,7 +377,7 @@ ItoPlasmaPhysics::sanityCheck(const List<ItoParticle>& a_particles) const
   ListIterator<ItoParticle> lit(a_particles);
 
   for (lit.begin(); lit.ok(); ++lit) {
-    const Real w = lit().mass();
+    const Real w = lit().weight();
 
     if (w < 1.0)
       MayDay::Abort("ItoPlasmaPhysics::sanityCheck - can't have w < 1!!!!");
@@ -390,7 +390,7 @@ ItoPlasmaPhysics::getTotalWeight(const List<ItoParticle>& a_particles) const
 
   long long ret = 0;
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-    const long long w = (long long)llround(lit().mass());
+    const long long w = (long long)llround(lit().weight());
 
     ret += w;
   }
@@ -405,7 +405,7 @@ ItoPlasmaPhysics::computeWeights(ListIterator<ItoParticle>& a_lit,
 {
   int i = 0;
   for (a_lit.begin(); a_lit.ok(); ++a_lit, ++i) {
-    a_particleWeights[i] = (long long)llround(a_lit().mass());
+    a_particleWeights[i] = (long long)llround(a_lit().weight());
     a_minWeight          = std::min(a_particleWeights[i], a_minWeight);
   }
 }
@@ -478,7 +478,7 @@ ItoPlasmaPhysics::reconcileWeights(List<ItoParticle>& a_particles, const Vector<
     ItoParticle& p = lit();
 
     if (a_particleWeights[i] > zero) {
-      p.mass() = (Real)a_particleWeights[i];
+      p.weight() = (Real)a_particleWeights[i];
       a_particles.add(p);
     }
   }
@@ -578,7 +578,7 @@ ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_partic
     for (ListIterator<Photon> lit(*a_Photons[src]); lit.ok(); ++lit) {
       const Photon&  phot = lit();
       const RealVect pos  = phot.position();
-      const Real     mass = phot.mass(); // Basically the number of reactions, in real format.
+      const Real     mass = phot.weight(); // Basically the number of reactions, in real format.
 
       // Increment energies and update total particles.
       for (const auto& t : targets) {
@@ -742,7 +742,7 @@ ItoPlasmaPhysics::getParticleCount(const List<ItoParticle>& a_particles) const
   long long ret = 0;
 
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-    ret += (long long)llround(lit().mass());
+    ret += (long long)llround(lit().weight());
   }
 
   return ret;
@@ -766,7 +766,7 @@ ItoPlasmaPhysics::getParticleEnergy(const List<ItoParticle>& a_particles) const
   Real ret = 0;
 
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-    const Real& m = lit().mass();
+    const Real& m = lit().weight();
     const Real& e = lit().energy();
 
     ret += m * e;

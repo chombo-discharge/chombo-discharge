@@ -11,8 +11,8 @@ $(ebaseobject): dependencies
 # Build dependencies if they do not exis. 
 dependencies: 
 	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-lib
-	$(MAKE) --directory=$(DISCHARGE_HOME) advectiondiffusion
+	$(MAKE) --directory=$(DISCHARGE_HOME) itoplasma
 
 # Make advection-diffusion headers and library visible. 
-XTRACPPFLAGS += $(ITOPLASMA_INCLUDE)
+XTRACPPFLAGS += $(ITOPLASMA_INCLUDE) -I$(DISCHARGE_HOME)/Submodules/json/include
 XTRALIBFLAGS += $(addprefix -l, $(ITOPLASMA_LIB))$(config)

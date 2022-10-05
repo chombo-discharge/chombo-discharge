@@ -90,20 +90,6 @@ public:
   parseRuntimeOptions();
 
   /*!
-    @brief Set PVR buffer for all solvers
-    @param[in] a_buffer Width of the PVR buffer region (see ParticleContainer for documentatino)
-  */
-  virtual void
-  setPVRBuffer(const int a_pvrBuffer);
-
-  /*!
-    @brief Set the halo buffer
-    @param[in] a_buffer Width of the halo buffer region (see ParticleContainer for documentatino)
-  */
-  virtual void
-  setHaloBuffer(const int a_haloBuffer);
-
-  /*!
     @brief Allocate internals for all solvers
     @details This will call allocateInternals for each ItoSolver. 
   */
@@ -266,23 +252,6 @@ public:
   */
   virtual Real
   computeHopDt(const Real a_maxCellsToMove);
-
-  /*!
-    @brief Get largest possible time step for advection part.
-    @details This computes computeMinDriftDt for each solver and minimizes the result over the solvers.
-    @param[in] a_maxCellsToMove Maximum number of cells to move (due to advection only)
-  */
-  virtual Real
-  computeMinDriftDt(const Real a_maxCellsToMove);
-
-  /*!
-    @brief Get largest possible time step for diffusion part
-    @details This computes computeMinDiffusionDt for each solver and minimizes the result over the solvers. As with computeHopDt, the result of this function will
-    depend on the restriction of the normal distribution (which controls the diffusion hop).
-    @param[in] a_maxCellsToMove Maximum number of cells to move (due to diffusion only)
-  */
-  virtual Real
-  computeMinDiffusionDt(const Real a_maxCellsToMove);
 
   /*!
     @brief Compute the classical diffusive time step dt = dx*dx/(2*D) where D is the diffusion coefficient (not dimensional dependence here)

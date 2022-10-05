@@ -155,16 +155,6 @@ ItoPlasmaStepper::setParticleBuffers()
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::setParticleBuffers" << endl;
   }
-
-  m_ito->setHalobuffer(m_halo_buffer);
-  m_ito->setPVRBuffer(m_pvr_buffer);
-
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<McPhoto>& solver = solver_it();
-
-    solver->setHaloBuffer(m_halo_buffer);
-    solver->setPVRBuffer(m_pvr_buffer);
-  }
 }
 
 void
@@ -1119,25 +1109,6 @@ ItoPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
 
   m_amr->conservativeAverage(a_rho, m_fluid_Realm);
   m_amr->interpGhost(a_rho, m_fluid_Realm);
-
-  // Add potential filters.
-  if (false) { //m_filter_rho){
-    for (const auto& f : m_filters) {
-      const Real alpha   = std::get<0>(f);
-      const int  stride  = std::get<1>(f);
-      const int  num_app = std::get<2>(f);
-
-      for (int iapp = 0; iapp < num_app; iapp++) {
-        DataOps::setValue(m_fluid_scratch1, 0.0);
-        m_fluid_scratch1.copy(rhoPhase);
-        DataOps::setCoveredValue(m_fluid_scratch1, 0.0, 0);
-        DataOps::filterSmooth(rhoPhase, m_fluid_scratch1, stride, alpha);
-
-        m_amr->conservativeAverage(rhoPhase, m_fluid_Realm, m_phase);
-        m_amr->interpGhost(rhoPhase, m_fluid_Realm, m_phase);
-      }
-    }
-  }
 
   // Interpolate to centroids
   m_amr->interpToCentroids(rhoPhase, m_fluid_Realm, m_phase);
@@ -2225,7 +2196,7 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
 
         const List<ItoParticle>& listParticles = cellParticles(iv, 0);
         for (ListIterator<ItoParticle> lit(listParticles); lit.ok(); ++lit) {
-          num += lit().mass();
+          num += lit().weight();
         }
       }
 
@@ -2248,7 +2219,7 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
         const RealVect& pos = lit().position();
 
         if (PolyGeom::dot((pos - ebCentroid), normal) >= 0.0) {
-          num += lit().mass();
+          num += lit().weight();
         }
       }
 
@@ -2324,8 +2295,8 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_mean_ener
         const List<ItoParticle>& listParticles = cellParticles(iv, 0);
 
         for (ListIterator<ItoParticle> lit(listParticles); lit.ok(); ++lit) {
-          m += lit().mass();
-          E += lit().mass() * lit().energy();
+          m += lit().weight();
+          E += lit().weight() * lit().energy();
         }
 
         numFab(iv, idx) = E / m;
@@ -2349,8 +2320,8 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_mean_ener
         const RealVect& pos = lit().position();
 
         if (PolyGeom::dot((pos - ebCentroid), normal) >= 0.0) {
-          m += lit().mass();
-          E += lit().mass() * lit().energy();
+          m += lit().weight();
+          E += lit().weight() * lit().energy();
         }
       }
 
@@ -3628,13 +3599,13 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt)
           for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
             ItoParticle& p = lit();
 
-            const Real      m    = p.mass();
+            const Real      m    = p.weight();
             const RealVect& v    = p.velocity(); // Actually = E(X^new)
             const RealVect& Xnew = p.position();
             const RealVect& Xold = p.oldPosition();
 
             p.tmp()  = m;
-            p.mass() = m * PolyGeom::dot(v, Xnew - Xold);
+            p.weight() = m * PolyGeom::dot(v, Xnew - Xold);
           }
         }
       }
@@ -3647,7 +3618,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt)
       DataOps::scale(m_fluid_scratch1, q * Units::Qe / a_dt);
       DataOps::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);
 
-      // Set p.mass() back to the original value
+      // Set p.weight() back to the original value
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
         const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
         for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
@@ -3655,7 +3626,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt)
 
           for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
             ItoParticle& p = lit();
-            p.mass()       = p.tmp();
+            p.weight()       = p.tmp();
           }
         }
       }

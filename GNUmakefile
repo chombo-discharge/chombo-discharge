@@ -11,7 +11,7 @@ discharge-source: chombo
 discharge-geometries: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Geometries
 
-discharge-physics: discharge-source advectiondiffusion brownianwalker cdrplasma electrostatics geometry meshode radiativetransfer streamerinception tracerparticle
+discharge-physics: discharge-source advectiondiffusion brownianwalker cdrplasma electrostatics geometry itoplasma meshode radiativetransfer streamerinception tracerparticle
 
 advectiondiffusion: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/AdvectionDiffusion

@@ -83,24 +83,6 @@ ItoLayout<T>::parseRuntimeOptions()
 
 template <class T>
 void
-ItoLayout<T>::setPVRBuffer(const int a_pvrBuffer)
-{
-  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    iter()->setPVRBuffer(a_pvrBuffer);
-  }
-}
-
-template <class T>
-void
-ItoLayout<T>::setHaloBuffer(const int a_haloBuffer)
-{
-  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    iter()->setHaloBuffer(a_haloBuffer);
-  }
-}
-
-template <class T>
-void
 ItoLayout<T>::allocateInternals()
 {
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
@@ -312,34 +294,6 @@ ItoLayout<T>::computeHopDt(const Real a_maxCellsToMove)
 
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
     const Real thisDt = iter()->computeHopDt(a_maxCellsToMove);
-    minDt             = std::min(minDt, thisDt);
-  }
-
-  return minDt;
-}
-
-template <class T>
-Real
-ItoLayout<T>::computeMinDriftDt(const Real a_maxCellsToMove)
-{
-  Real minDt = std::numeric_limits<Real>::max();
-
-  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    const Real thisDt = iter()->computeMinDriftDt(a_maxCellsToMove);
-    minDt             = std::min(minDt, thisDt);
-  }
-
-  return minDt;
-}
-
-template <class T>
-Real
-ItoLayout<T>::computeMinDiffusionDt(const Real a_maxCellsToMove)
-{
-  Real minDt = std::numeric_limits<Real>::max();
-
-  for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter) {
-    const Real thisDt = iter()->computeMinDiffusionDt(a_maxCellsToMove);
     minDt             = std::min(minDt, thisDt);
   }
 
