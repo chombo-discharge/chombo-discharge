@@ -824,16 +824,10 @@ ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newF
   }
 
   // Regrid particle containers.
-  const Vector<DisjointBoxLayout>& grids   = m_amr->getGrids(m_realm);
-  const Vector<ProblemDomain>&     domains = m_amr->getDomains();
-  const Vector<Real>&              dx      = m_amr->getDx();
-  const Vector<int>&               refRat  = m_amr->getRefinementRatios();
-  const AMRMask&                   mask    = m_amr->getValidCells(m_realm);
-
   for (auto& container : m_particleContainers) {
     ParticleContainer<ItoParticle>& particles = container.second;
 
-    particles.regrid(grids, domains, dx, refRat, mask, a_lmin, a_newFinestLevel);
+    m_amr->remapToNewGrids(particles, a_lmin, a_newFinestLevel);
   }
 }
 

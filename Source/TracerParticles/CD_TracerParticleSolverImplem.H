@@ -330,14 +330,7 @@ TracerParticleSolver<P>::regrid(const int a_lmin, const int a_oldFinestLevel, co
   CH_assert(a_oldFinestLevel >= 0);
   CH_assert(a_newFinestLevel >= 0);
 
-  // Regrid the particles.
-  const Vector<DisjointBoxLayout>& grids   = m_amr->getGrids(m_realm);
-  const Vector<ProblemDomain>&     domains = m_amr->getDomains();
-  const Vector<Real>&              dx      = m_amr->getDx();
-  const Vector<int>&               refRat  = m_amr->getRefinementRatios();
-  const AMRMask&                   mask    = m_amr->getValidCells(m_realm);
-
-  m_particles.regrid(grids, domains, dx, refRat, mask, a_lmin, a_newFinestLevel);
+  m_amr->remapToNewGrids(m_particles, a_lmin, a_newFinestLevel);
 }
 
 template <typename P>

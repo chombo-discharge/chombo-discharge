@@ -1257,6 +1257,16 @@ public:
                    const bool               a_conservative);
 
   /*!
+    @brief Regrid particle to new grids. 
+    @note User needs to call ParticleContainer<P>::preRegrid prior to this.
+    @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
+    @param[in]  a_newFinestLevel New finest level. 
+  */
+  template <class P>
+  void
+  remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept;
+
+  /*!
     @brief Interpolate data to centroids on realm and phase
     @param[inout] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
