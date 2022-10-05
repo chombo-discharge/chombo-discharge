@@ -28,6 +28,9 @@ electrostatics: discharge-source
 geometry: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Geometry
 
+itoplasma: discharge-source
+	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/ItoPlasma
+
 meshode: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/MeshODE
 
@@ -50,6 +53,7 @@ allclean: libclean
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/CdrPlasma          pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Electrostatics     pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Geometry           pristine
+	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/ItoPlasma          pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/MeshODE            pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/RadiativeTransfer  pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/StreamerInception  pristine
@@ -62,4 +66,4 @@ pristine: allclean
 	find . -type f -name "*.d" -delete
 	find . -type f -name "*.o" -delete
 
-.PHONY: all chombo discharge-lib discharge-physics discharge-source discharge-geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry meshode radiativetransfer streamerinception tracerparticle libclean allclean pristine
+.PHONY: all chombo discharge-lib discharge-physics discharge-source discharge-geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry itoplasma meshode radiativetransfer streamerinception tracerparticle libclean allclean pristine

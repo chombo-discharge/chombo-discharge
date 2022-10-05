@@ -4,17 +4,17 @@ import sys
 def write_template(args):
     # Make sure that every class can be found where they should
     geofile = args.discharge_home + "/Geometries" + "/" + args.geometry + "/CD_" + args.geometry + ".H"
-    tsfile  = args.discharge_home + "/Physics/ItoPlasma/TimeSteppers" + "/" + args.TimeStepper + "/CD_" + args.TimeStepper + ".H"
+    tsfile  = args.discharge_home + "/Physics/ItoPlasma/TimeSteppers" + "/" + args.time_stepper + "/CD_" + args.time_stepper + ".H"
     kinfile = args.discharge_home + "/Physics/ItoPlasma/PlasmaModels" + "/" + args.physics + "/CD_" + args.physics + ".H"
-    tagfile = args.discharge_home + "/Physics/ItoPlasma/CellTaggers" +  "/" + args.CellTagger + "/CD_" + args.CellTagger + ".H"
+    tagfile = args.discharge_home + "/Physics/ItoPlasma/CellTaggers" +  "/" + args.cell_tagger + "/CD_" + args.cell_tagger + ".H"
     if not os.path.exists(geofile):
-        print 'Could not find ' + geofile
+        print('Could not find ' + geofile)
     if not os.path.exists(tsfile):
-        print 'Could not find ' + tsfile
+        print('Could not find ' + tsfile)
     if not os.path.exists(kinfile):
-        print 'Could not find ' + kinfile
-    if not os.path.exists(tagfile) and args.CellTagger != "none":
-        print 'Could not find ' + tagfile
+        print('Could not find ' + kinfile)
+    if not os.path.exists(tagfile) and args.cell_tagger != "none":
+        print('Could not find ' + tagfile)
                     
     # Create app directory if it does not exist
     app_dir = args.discharge_home + "/" + args.base_dir + "/" + args.app_name
@@ -23,21 +23,21 @@ def write_template(args):
         os.makedirs(app_dir)
                         
         # Write main file. This should be a separate routine. 
-    main_filename = app_dir + "/" + args.filename + ".cpp"
+    main_filename = app_dir + "/program.cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include <CD_Driver.H>\n')
     mainf.write('#include <CD_GeoCoarsener.H>\n')
     mainf.write('#include <CD_FieldSolverFactory.H>\n')
     mainf.write('#include <CD_' + args.field_solver + '.H>\n')
     mainf.write('#include <CD_ItoLayout.H>\n')
-    mainf.write('#include <CD_' + args.ItoSolver + '.H>\n')
+    mainf.write('#include <CD_' + args.ito_solver + '.H>\n')
     mainf.write('#include <CD_RtLayout.H>\n')
     mainf.write('#include <CD_McPhoto.H>\n')
     mainf.write('#include <CD_' + args.physics + '.H>\n')
     mainf.write('#include <CD_' + args.geometry + '.H>\n')
-    mainf.write('#include <CD_' + args.TimeStepper + '.H>\n')
-    if not args.CellTagger == "none":
-        mainf.write('#include <CD_' + args.CellTagger + '.H>\n')
+    mainf.write('#include <CD_' + args.time_stepper + '.H>\n')
+    if not args.cell_tagger == "none":
+        mainf.write('#include <CD_' + args.cell_tagger + '.H>\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
     
@@ -53,10 +53,9 @@ def write_template(args):
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
-    if args.use_mpi:
-        mainf.write("#ifdef CH_MPI\n")
-        mainf.write("  MPI_Init(&argc, &argv);\n")
-        mainf.write("#endif\n")
+    mainf.write("#ifdef CH_MPI\n")
+    mainf.write("  MPI_Init(&argc, &argv);\n")
+    mainf.write("#endif\n")
     
     mainf.write("\n")
     mainf.write("  // Build class options from input script and command line options\n")
@@ -83,9 +82,9 @@ def write_template(args):
     mainf.write("\n")
     mainf.write("  // Set up physics \n")
     mainf.write("  RefCountedPtr<ItoPlasmaPhysics> physics      = RefCountedPtr<ItoPlasmaPhysics> (new " + args.physics + "());\n")
-    mainf.write("  RefCountedPtr<ItoPlasmaStepper> timestepper  = RefCountedPtr<ItoPlasmaStepper> (new " + args.TimeStepper + "(physics));\n")
-    if args.CellTagger != "none":
-        mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new " + args.CellTagger + "(physics, timestepper, amr, compgeom));\n")
+    mainf.write("  RefCountedPtr<ItoPlasmaStepper> timestepper  = RefCountedPtr<ItoPlasmaStepper> (new " + args.time_stepper + "(physics));\n")
+    if args.cell_tagger != "none":
+        mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new " + args.cell_tagger + "(physics, timestepper, amr, compgeom));\n")
     else:
         mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);\n")
 
@@ -93,7 +92,7 @@ def write_template(args):
 
     mainf.write("  // Create solver factories\n")
     mainf.write("  auto poi_fact = new FieldSolverFactory<" + args.field_solver + ">();\n")
-    mainf.write("  auto ito_fact = new ItoFactory<ItoSolver, " + args.ItoSolver + ">();\n")
+    mainf.write("  auto ito_fact = new ItoFactory<ItoSolver, " + args.ito_solver + ">();\n")
     mainf.write("  auto rte_fact = new RtFactory<McPhoto, McPhoto>();\n")
     mainf.write("\n")
     
@@ -118,11 +117,10 @@ def write_template(args):
     mainf.write("  engine->setupAndRun(input_file);\n");
     mainf.write("\n")
 
-    if args.use_mpi:
-        mainf.write("#ifdef CH_MPI\n")
-        mainf.write("  CH_TIMER_REPORT();\n")
-        mainf.write("  MPI_Finalize();\n")
-        mainf.write("#endif\n")
-        mainf.write("}\n")
+    mainf.write("#ifdef CH_MPI\n")
+    mainf.write("  CH_TIMER_REPORT();\n")
+    mainf.write("  MPI_Finalize();\n")
+    mainf.write("#endif\n")
+    mainf.write("}\n")
         
     mainf.close()
