@@ -152,7 +152,7 @@ namespace Physics {
 	@param[inout] a_handle HDF5 fil
 	@param[in]    a_lvl    Grid level
       */
-      void
+      virtual void
       writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
 
@@ -162,7 +162,7 @@ namespace Physics {
 	@param[inout] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
       */
-      void
+      virtual void
       readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
 #endif
 
@@ -186,7 +186,7 @@ namespace Physics {
       /*!
 	@brief Get number of plot variables for the output file
       */
-      int
+      virtual int
       getNumberOfPlotVariables() const override;
 
       /*!
@@ -198,7 +198,7 @@ namespace Physics {
 	@param[in] a_level Grid level
 	@return Returns computational loads for each box on grid level a_level. 
       */
-      Vector<long int>
+      virtual Vector<long int>
       getCheckpointLoads(const std::string a_realm, const int a_level) const override;
 
       /*!
@@ -297,115 +297,191 @@ namespace Physics {
 	@brief Intersect a subset of the particles with the domain and embedded boundary. 
 	@details This calls the other version, intersecting the Ito bulk particles with the EB and placing the collided particles
 	in the appropriate particle containers (ItoSolver::WhichContainer::EB, for example). 
-	@param[in] a_particleSubset Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
-	@param[in] a_representation Representation of the EB -- basically an algorithmic selection. 
-	@param[in] a_delete         Delete original particles. If this is left to false, the particles are copied into the other containers. 
-      */
-      virtual void
-      intersectParticles(const SpeciesSubset    a_particleSubset,
-                         const EbRepresentation a_representation,
-                         const bool             a_delete) noexcept;
-
-      /*!
-	@brief Intersect a subset of the particles with the domain and embedded boundary. 
-	@param[in] a_particleSubset  Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
-	@param[in] a_representation  Representation of the EB -- basically an algorithmic selection. 
-	@param[in] a_containerBulk   ItoSolver container for "bulk" particles, i.e. particles that will be intersected. 
-	@param[in] a_containerEB     ItoSolver container for EB particles. 
-	@param[in] a_containerDomain ItoSolver container for domain particles. 
+	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
+	@param[in] a_intersectionAlg Representation of the EB -- basically an algorithmic selection. 
 	@param[in] a_delete          Delete original particles. If this is left to false, the particles are copied into the other containers. 
       */
       virtual void
-      intersectParticles(const SpeciesSubset             a_particleSubset,
+      intersectParticles(const SpeciesSubset  a_speciesSubset,
+                         const EBIntersection a_interactionAlg,
+                         const bool           a_delete) noexcept;
+
+      /*!
+	@brief Intersect a subset of the particles with the domain and embedded boundary. 
+	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
+	@param[in] a_containerBulk   ItoSolver container for "bulk" particles, i.e. particles that will be intersected. 
+	@param[in] a_containerEB     ItoSolver container for EB particles. 
+	@param[in] a_containerDomain ItoSolver container for domain particles. 
+	@param[in] a_intersectionAlg EB intersection algorithm
+	@param[in] a_delete          Delete original particles. If this is left to false, the particles are copied into the other containers. 
+      */
+      virtual void
+      intersectParticles(const SpeciesSubset             a_speciesSubset,
                          const ItoSolver::WhichContainer a_containerBulk,
                          const ItoSolver::WhichContainer a_containerEB,
                          const ItoSolver::WhichContainer a_containerDomain,
-                         const EbRepresentation          a_representation,
+                         const EBIntersection            a_intersectionAlg,
                          const bool                      a_delete) noexcept;
 
-      void
+      /*!
+	@brief Remove covered particles (i.e., particles inside the EB)
+	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
+	@param[in] a_representation  Representation of the EB.
+	@param[in] a_tolerance       Tolerance for removal. Removes up to distance a_tolerance from the EB.
+	@note a_representation is basically an algorithmic selection that propagates into ItoSolver
+      */
+      virtual void
       removeCoveredParticles(const SpeciesSubset    a_which,
-                             const EbRepresentation a_representation,
-                             const Real             a_tolerance);
-      void
+                             const EBRepresentation a_representation,
+                             const Real             a_tolerance) noexcept;
+
+      /*!
+	@brief Remove covered particles (i.e., particles inside the EB)
+	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
+	@param[in] a_container       Which of the containers in ItoSolver to remove from. 
+	@param[in] a_representation  Representation of the EB.
+	@param[in] a_tolerance       Tolerance for removal. Removes up to distance a_tolerance from the EB.
+	@note a_representation is basically an algorithmic selection that propagates into ItoSolver
+      */
+      virtual void
       removeCoveredParticles(const SpeciesSubset             a_which,
                              const ItoSolver::WhichContainer a_container,
-                             const EbRepresentation          a_representation,
-                             const Real                      a_tolerance);
+                             const EBRepresentation          a_representation,
+                             const Real                      a_tolerance) noexcept;
 
-      void
-      transferCoveredParticles(const SpeciesSubset    a_which,
-                               const EbRepresentation a_representation,
-                               const Real             a_tolerance);
-      void
-      transferCoveredParticles(const SpeciesSubset             a_which,
+      /*!
+	@brief Transfer covered particles (i.e., particles inside the EB) from the ItoSolver bulk container to EB container. 
+	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
+	@param[in] a_representation  Representation of the EB.
+	@param[in] a_tolerance       Tolerance for transfer. Transfers up to distance a_tolerance from the EB.
+	@note a_representation is basically an algorithmic selection that propagates into ItoSolver
+      */
+      virtual void
+      transferCoveredParticles(const SpeciesSubset    a_speciesSubset,
+                               const EBRepresentation a_representation,
+                               const Real             a_tolerance) noexcept;
+
+      /*!
+	@brief Transfer covered particles (i.e., particles inside the EB) from the ItoSolver bulk container to EB container. 
+	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
+	@param[in] a_containerFrom   Particle container (in ItoSolver) to transfer from
+	@param[in] a_containerTo     Particle container (in ItoSolver) to transfer to
+	@param[in] a_representation  Representation of the EB.
+	@param[in] a_tolerance       Tolerance for transfer. Transfers up to distance a_tolerance from the EB.
+	@note a_representation is basically an algorithmic selection that propagates into ItoSolver
+      */
+      virtual void
+      transferCoveredParticles(const SpeciesSubset             a_speciesSubset,
                                const ItoSolver::WhichContainer a_containerFrom,
                                const ItoSolver::WhichContainer a_containerTo,
-                               const EbRepresentation          a_representation,
-                               const Real                      a_tolerance);
+                               const EBRepresentation          a_representation,
+                               const Real                      a_tolerance) noexcept;
 
-      // Set routines
-      void
-      setIto(RefCountedPtr<ItoLayout<ItoSolver>>& a_cdr);
-      void
-      setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson);
-      void
-      setRadiativeTransferSolvers(RefCountedPtr<RtLayout<McPhoto>>& a_rte);
-      void
-      setVoltage(const std::function<Real(const Real a_time)>& a_voltage);
+      /*!
+	@brief Set the Ito layout 
+	@param[in] a_itoLayout Set of ItoSolver solvers. 
+      */
+      virtual void
+      setIto(RefCountedPtr<ItoLayout<ItoSolver>>& a_itoLayout) noexcept;
 
-      // Get routines
-      Real
-      getTime() const;
-      Real
-      computeMaxElectricField(const phase::which_phase a_phase);
+      /*!
+	@brief Set the field solver
+	@param[in] a_fieldSolver Field solver
+      */
+      virtual void
+      setFieldSolver(RefCountedPtr<FieldSolver>& a_fieldSolver) noexcept;
 
-      // E-field computations
-      void
-      computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
-      void
-      computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase);
-      void
-      computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential);
-      void
-      computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
-      void
-      computeElectricField(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
+      /*!
+	@brief Set the radiative transfer solvers
+	@param[in] a_rteLayout Radiative transfer solvers
+      */
+      virtual void
+      setRadiativeTransferSolvers(RefCountedPtr<RtLayout<McPhoto>>& a_rteLayout) noexcept;
 
-      // Compute rho routines
-      void
-      computeSpaceChargeDensity();
-      void
-      computeSpaceChargeDensity(EBAMRCellData& a_rho, const phase::which_phase a_phase);
-      void
-      computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>& a_densities);
+      /*!
+	@brief Set voltage used for the simulation
+	@param[in] a_voltage Voltage
+	@note This should be done BEFORE calling setupSolvers. 
+      */
+      virtual void
+      setVoltage(const std::function<Real(const Real a_time)>& a_voltage) noexcept;
 
-      // Compute conductivity routines
-      void
-      computeConductivity(EBAMRCellData& a_conductivity);
-      void
-      computeConductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ItoParticle>*>& a_particles);
+      /*!
+	@brief Get current simulation time
+	@return m_time
+      */
+      virtual Real
+      getTime() const noexcept;
 
-      // Compute J routines
-      void
-      computeJ(EBAMRCellData& a_J, const Real a_dt);
+      /*!
+	@brief Compute the maximum electric field (norm)
+	@param[in] a_phase Phase where we compute the field. 
+      */
+      virtual Real
+      computeMaxElectricField(const phase::which_phase a_phase) noexcept;
 
-      // Relaxation time
-      Real
-      computeRelaxationTime();
-      Real
-      computeRelaxationTime(const int a_level);
-      Real
-      computeRelaxationTime(const int a_level, const DataIndex a_dit);
+      /*!
+	@brief Recompute the electric field onto the specified data holder
+	@param[out] a_electricField Electric field on cell centroid (defined on the fluid realm). 
+	@param[in]  a_phase Phase where we compute the electric field. 
+      */
+      virtual void
+      computeElectricField(EBAMRCellData& a_electricField, const phase::which_phase a_phase) const noexcept;
 
-      // Poisson-solving routines
-      bool
-      solvePoisson();
-      bool
-      solvePoisson(MFAMRCellData&                a_potential,
-                   MFAMRCellData&                a_rhs,
-                   const Vector<EBAMRCellData*>& a_densities,
-                   const EBAMRIVData&            a_sigma);
+      /*!
+	@brief Compute the space charge. Calls the other version. 
+	@note This runs through the ItoSolver densities -- user should remember to deposit before calling this routine. 
+      */
+      virtual void
+      computeSpaceChargeDensity() noexcept;
+
+      /*!
+	@brief Compute the space charge density (both phases)
+	@param[out] a_rho   Space cahrge density
+	@param[in]  a_phase Phase where we compute the space charge density      
+      */
+      virtual void
+      computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>& a_densities) noexcept;
+
+      /*!
+	@brief Compute the cell-centered conductiivty
+	@param[out] a_conductivity Cell-centered conductivity
+	@note Calls the other version. 
+      */
+      virtual void
+      computeConductivityCell(EBAMRCellData& a_conductivity) noexcept;
+
+      /*!
+	@brief Compute the cell-centered conductiivty
+	@param[out] a_conductivity Cell-centered conductivity
+	@param[in]  a_particles    Ito particles.
+
+      */
+      virtual void
+      computeConductivityCell(EBAMRCellData&                                 a_conductivity,
+                              const Vector<ParticleContainer<ItoParticle>*>& a_particles) noexcept;
+
+      /*!
+	@brief Compute the current density. 
+	@note This calls computeConductivityCell and uses m_electricFieldFluid. Make sure they're updated.
+      */
+      virtual void
+      computeCurrentDensity(EBAMRCellData& a_J) noexcept;
+
+      /*!
+	@brief Compute the dielectric relaxation time
+      */
+      virtual Real
+      computeRelaxationTime() noexcept;
+
+      /*!
+	@brief Solve the electrostatic problem
+	@details This calls the other version with all lhs/rhs taken from the field solver. Space charge density is computed
+	in this routine. 
+	@return Returns true if the solver converged. 
+      */
+      virtual bool
+      solvePoisson() noexcept;
 
       // Remap and deposition routines for solver subsets.
       void
@@ -672,7 +748,7 @@ namespace Physics {
 	@brief Phase where we solve for the plasma. 
 	@note This is hardcoded to phase::gas
       */
-      phase::which_phase m_phase;
+      phase::which_phase m_plasmaPhase;
 
       /*!
 	@brief Implementation of ItoPlasmaPhysics. 
@@ -945,20 +1021,20 @@ namespace Physics {
 	@param[in]  a_lmin        Coarsest grid level to load balance. 
 	@param[in]  a_finestLevel Finest grid level
       */
-      void
+      virtual void
       loadBalanceParticleRealm(Vector<Vector<int>>&             a_procs,
                                Vector<Vector<Box>>&             a_boxes,
                                const std::string                a_realm,
                                const Vector<DisjointBoxLayout>& a_grids,
                                const int                        a_lmin,
-                               const int                        a_finestLevel);
+                               const int                        a_finestLevel) noexcept;
 
       /*!
 	@brief Get the solvers used for load balancing
 	@details This depends on m_loadBalanceIndex -- if it's < 0 we use ALL plasma species for load balancing.
       */
-      Vector<RefCountedPtr<ItoSolver>>
-      getLoadBalanceSolvers() const;
+      virtual Vector<RefCountedPtr<ItoSolver>>
+      getLoadBalanceSolvers() const noexcept;
 
       /*!
 	@brief Fill surface charge solver with initial data

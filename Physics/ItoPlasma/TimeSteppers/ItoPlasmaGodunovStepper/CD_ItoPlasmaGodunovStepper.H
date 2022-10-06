@@ -106,8 +106,7 @@ namespace Physics {
       void
       remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_which);
       void
-      deposit_PointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                             const SpeciesSubset                             a_which);
+      deposit_PointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_which);
       void
       clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_which);
 

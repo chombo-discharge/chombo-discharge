@@ -470,7 +470,7 @@ BrownianWalkerStepper::advance(const Real a_dt)
   m_solver->remap();
 
   // 3. Particles that strike the EB are absorbed on it, and removed from the simulation.
-  m_solver->removeCoveredParticles(EbRepresentation::ImplicitFunction, 0.0);
+  m_solver->removeCoveredParticles(EBRepresentation::ImplicitFunction, 0.0);
 
   // 4. Make new super-particles.
   this->makeSuperParticles();

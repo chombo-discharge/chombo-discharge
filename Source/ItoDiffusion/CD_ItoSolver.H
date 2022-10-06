@@ -20,8 +20,8 @@
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_SuperParticles.H>
-#include <CD_EbRepresentation.H>
-#include <CD_EbIntersection.H>
+#include <CD_EBRepresentation.H>
+#include <CD_EBIntersection.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -313,7 +313,7 @@ public:
     @details Calls the other version with m_particles.
   */
   virtual void
-  removeCoveredParticles(const EbRepresentation a_representation, const Real a_tol);
+  removeCoveredParticles(const EBRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB. 
@@ -323,7 +323,7 @@ public:
     @note Calls the other version with ParticleContainer = m_particles.at(a_container)
   */
   virtual void
-  removeCoveredParticles(const WhichContainer a_container, const EbRepresentation a_representation, const Real a_tol);
+  removeCoveredParticles(const WhichContainer a_container, const EBRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB
@@ -333,7 +333,7 @@ public:
   */
   virtual void
   removeCoveredParticles(ParticleContainer<ItoParticle>& a_particles,
-                         const EbRepresentation          a_representation,
+                         const EBRepresentation          a_representation,
                          const Real                      a_tol) const;
 
   /*!
@@ -343,7 +343,7 @@ public:
     @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
   */
   virtual void
-  transferCoveredParticles(const EbRepresentation a_representation, const Real a_tol);
+  transferCoveredParticles(const EBRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
@@ -355,7 +355,7 @@ public:
   virtual void
   transferCoveredParticles(const WhichContainer   a_containerFrom,
                            const WhichContainer   a_containerTo,
-                           const EbRepresentation a_representation,
+                           const EBRepresentation a_representation,
                            const Real             a_tol);
 
   /*!
@@ -368,7 +368,7 @@ public:
   virtual void
   transferCoveredParticles(ParticleContainer<ItoParticle>& a_particlesFrom,
                            ParticleContainer<ItoParticle>& a_particlesTo,
-                           const EbRepresentation          a_representation,
+                           const EBRepresentation          a_representation,
                            const Real                      a_tol) const;
 
   /*!
@@ -380,7 +380,7 @@ public:
     @note This will call the other version with WhichContainer::Bulk, WhichContainer::EB, and WhichContainer::Domain.
   */
   virtual void
-  intersectParticles(const EbIntersection a_ebIntersection, const bool a_deleteParticles);
+  intersectParticles(const EBIntersection a_ebIntersection, const bool a_deleteParticles);
 
   /*!
     @brief Do boundary intersection tests.
@@ -397,7 +397,7 @@ public:
   intersectParticles(const WhichContainer a_particles,
                      const WhichContainer a_ebParticles,
                      const WhichContainer a_domainParticles,
-                     const EbIntersection a_ebIntersection,
+                     const EBIntersection a_ebIntersection,
                      const bool           a_deleteParticles);
 
   /*!
@@ -414,7 +414,7 @@ public:
   intersectParticles(ParticleContainer<ItoParticle>& a_particles,
                      ParticleContainer<ItoParticle>& a_ebParticles,
                      ParticleContainer<ItoParticle>& a_domainParticles,
-                     const EbIntersection            a_ebIntersection,
+                     const EBIntersection            a_ebIntersection,
                      const bool                      a_deleteParticles);
 
   /*!

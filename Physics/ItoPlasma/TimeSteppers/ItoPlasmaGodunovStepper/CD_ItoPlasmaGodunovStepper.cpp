@@ -258,15 +258,15 @@ ItoPlasmaGodunovStepper::allocateInternals()
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
   const int num_rtSpecies  = m_physics->getNumRtSpecies();
 
-  m_amr->allocate(m_scratch1, m_fluidRealm, m_phase, 1);
-  m_amr->allocate(m_scratch2, m_fluidRealm, m_phase, 1);
+  m_amr->allocate(m_scratch1, m_fluidRealm, m_plasmaPhase, 1);
+  m_amr->allocate(m_scratch2, m_fluidRealm, m_plasmaPhase, 1);
 
   // Allocate fluid scratch storage
   m_fscratch1.resize(num_ItoSpecies);
   m_fscratch2.resize(num_ItoSpecies);
   for (int i = 0; i < num_ItoSpecies; i++) {
-    m_amr->allocate(m_fscratch1[i], m_fluidRealm, m_phase, 1);
-    m_amr->allocate(m_fscratch2[i], m_fluidRealm, m_phase, 1);
+    m_amr->allocate(m_fscratch1[i], m_fluidRealm, m_plasmaPhase, 1);
+    m_amr->allocate(m_fscratch2[i], m_fluidRealm, m_plasmaPhase, 1);
   }
 }
 
@@ -298,7 +298,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
 
   // Compute current and relaxation time.
-  this->computeJ(m_currentDensity, a_dt);
+  this->computeCurrentDensity(m_currentDensity);
   const Real relaxTime = this->computeRelaxationTime(); // This is for the restricting the next step.
 
   // Move Photons
@@ -408,7 +408,7 @@ ItoPlasmaGodunovStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   // Copy conductivity to scratch storage
   const int ncomp        = 1;
   const int finest_level = m_amr->getFinestLevel();
-  m_amr->allocate(m_cache, m_fluidRealm, m_phase, ncomp);
+  m_amr->allocate(m_cache, m_fluidRealm, m_plasmaPhase, ncomp);
   for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++) {
     m_conductivityCell[lvl]->localCopyTo(*m_cache[lvl]);
   }
@@ -525,7 +525,7 @@ ItoPlasmaGodunovStepper::setOldPositions()
 
 void
 ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                               const SpeciesSubset                       a_SpeciesSubset)
+                                               const SpeciesSubset                        a_SpeciesSubset)
 {
   CH_TIME("ItoPlasmaGodunovStepper::remapGodunovParticles");
   if (m_verbosity > 5) {
@@ -582,7 +582,7 @@ ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<PointPar
 
 void
 ItoPlasmaGodunovStepper::deposit_PointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                                const SpeciesSubset                             a_SpeciesSubset)
+                                                const SpeciesSubset                              a_SpeciesSubset)
 {
   CH_TIME("ItoPlasmaGodunovStepper::deposit_PointParticles");
   if (m_verbosity > 5) {
@@ -639,7 +639,7 @@ ItoPlasmaGodunovStepper::deposit_PointParticles(const Vector<ParticleContainer<P
 
 void
 ItoPlasmaGodunovStepper::clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                               const SpeciesSubset                             a_SpeciesSubset)
+                                               const SpeciesSubset                              a_SpeciesSubset)
 {
   CH_TIME("ItoPlasmaGodunovStepper::clearGodunovParticles");
   if (m_verbosity > 5) {
@@ -747,11 +747,11 @@ ItoPlasmaGodunovStepper::compute_cell_conductivity(EBAMRCellData&               
 
   DataOps::scale(a_conductivity, Units::Qe);
 
-  m_amr->conservativeAverage(a_conductivity, m_fluidRealm, m_phase);
-  m_amr->interpGhostPwl(a_conductivity, m_fluidRealm, m_phase);
+  m_amr->conservativeAverage(a_conductivity, m_fluidRealm, m_plasmaPhase);
+  m_amr->interpGhostPwl(a_conductivity, m_fluidRealm, m_plasmaPhase);
 
   // See if this helps....
-  m_amr->interpToCentroids(a_conductivity, m_fluidRealm, m_phase);
+  m_amr->interpToCentroids(a_conductivity, m_fluidRealm, m_plasmaPhase);
 }
 
 void
@@ -771,7 +771,7 @@ ItoPlasmaGodunovStepper::compute_face_conductivity()
   // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
   // for EB extrapolation can be a bit nasty (e.g. Negative weights), we do the centroid instead and take that as an approximation.
 #if 0
-  const IrregAmrStencil<CentroidInterpolationStencil>& ebsten = m_amr->getCentroidInterpolationStencils(m_fluidRealm, m_phase);
+  const IrregAmrStencil<CentroidInterpolationStencil>& ebsten = m_amr->getCentroidInterpolationStencils(m_fluidRealm, m_plasmaPhase);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     ebsten.apply(m_conductivityEB, m_conductivityCell, lvl);
   }
@@ -980,12 +980,8 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
 
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   const bool delete_eb_particles = true;
-  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive,
-                           EbRepresentation::ImplicitFunction,
-                           delete_eb_particles);
-  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive,
-                               EbRepresentation::ImplicitFunction,
-                               m_eb_tolerance);
+  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, delete_eb_particles);
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_eb_tolerance);
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
   this->depositParticles(SpeciesSubset::AllMobileOrDiffusive);
@@ -1157,10 +1153,8 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
   // ====== CORRECTOR END =====
 
   // Do particle-boundary intersection.
-  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EbRepresentation::ImplicitFunction, true);
-  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive,
-                               EbRepresentation::ImplicitFunction,
-                               m_eb_tolerance);
+  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, true);
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_eb_tolerance);
 
   // Finally, deposit particles.
   this->depositParticles(SpeciesSubset::AllMobileOrDiffusive);
