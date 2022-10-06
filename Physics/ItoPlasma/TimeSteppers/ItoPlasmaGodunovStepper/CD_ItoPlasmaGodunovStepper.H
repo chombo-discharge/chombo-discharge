@@ -104,12 +104,12 @@ namespace Physics {
       void
       setOldPositions();
       void
-      remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles, const WhichParticles a_which);
+      remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_which);
       void
       deposit_PointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                             const WhichParticles                             a_which);
+                             const SpeciesSubset                             a_which);
       void
-      clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const WhichParticles a_which);
+      clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_which);
 
       // Routines for semi-implicit Poisson solution
       void

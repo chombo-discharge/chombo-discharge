@@ -32,7 +32,7 @@ namespace Physics {
     /*!
       @brief Enum for differentiating between types of particles
     */
-    enum class WhichParticles
+    enum class SpeciesSubset
     {
       All,
       AllMobile,
@@ -45,7 +45,7 @@ namespace Physics {
     };
 
     /*!
-      @brief Time stepper that advances the Ito-Poisson system of equations
+      @brief Base time stepper class that advances the Ito-Poisson system of equations
     */
     class ItoPlasmaStepper : public TimeStepper
     {
@@ -146,27 +146,66 @@ namespace Physics {
       virtual void
       setupSigma();
 
-      // IO routines
 #ifdef CH_USE_HDF5
+      /*!  
+	@brief Write checkpoint data to file
+	@param[inout] a_handle HDF5 fil
+	@param[in]    a_lvl    Grid level
+      */
       void
       writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
+
 #ifdef CH_USE_HDF5
+      /*!
+	@brief Read checkpoint data from file
+	@param[inout] a_handle HDF5 file
+	@param[in]    a_lvl    Grid level
+      */
       void
       readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
 #endif
+
+      /*!
+	@brief Write plot data to output holder. 
+	@param[inout] a_output            Output data holder.
+	@param[in]    a_plotVariableNames Plot variable names.
+	@param[inout] a_icomp             Starting component in a_output to begin at. 
+      */
       virtual void
       writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
-      void
-      writeJ(EBAMRCellData& a_output, int& a_icomp) const;
-      void
+
+      /*!
+	@brief Write number of particles per patch to output holder. 
+	@param[inout] a_output Output data holder.
+	@param[inout] a_icomp  Starting component in a_output to begin at. 
+      */
+      virtual void
       writeNumParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const;
+
+      /*!
+	@brief Get number of plot variables for the output file
+      */
       int
       getNumberOfPlotVariables() const override;
+
+      /*!
+	@brief Get computational loads to be checkpointed. 
+	@details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads to a file. This routine is
+	disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means that we are not operating with temporarily load balanced
+	grids where the but the final ones. 
+	@param[in] a_realm Realm
+	@param[in] a_level Grid level
+	@return Returns computational loads for each box on grid level a_level. 
+      */
       Vector<long int>
       getCheckpointLoads(const std::string a_realm, const int a_level) const override;
 
-      // Advance routines
+      /*!
+	@brief Advancement method. Needs to be implemented by subclasses.
+	@param[in] a_dt Time step to be used for advancement
+	@return    Returns the time step that was used. 
+      */
       virtual Real
       advance(const Real a_dt) = 0;
 
@@ -182,25 +221,25 @@ namespace Physics {
 	@param[in] a_time Simulation time
 	@param[in] a_dt   Last time step used. 
       */
-      void
+      virtual void
       synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
 
       /*!
 	@brief Print a step report. Used by Driver for user monitoring of simulation.
       */
-      void
+      virtual void
       printStepReport() override;
 
       /*!
 	@brief Register realms used for the simulation
       */
-      void
+      virtual void
       registerRealms() override;
 
       /*!
 	@brief Register operators used for the simulation
       */
-      void
+      virtual void
       registerOperators() override;
 
       /*!
@@ -231,7 +270,7 @@ namespace Physics {
 	@brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids for the input realm. 
 	@param[in] a_realm Realm name
       */
-      bool
+      virtual bool
       loadBalanceThisRealm(const std::string a_realm) const override;
 
       /*!
@@ -246,7 +285,7 @@ namespace Physics {
 	uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and
 	he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance(Vector<int>, Vector<T>, Vector<Box>).
       */
-      void
+      virtual void
       loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                        Vector<Vector<Box>>&             a_boxes,
                        const std::string                a_realm,
@@ -254,33 +293,52 @@ namespace Physics {
                        const int                        a_lmin,
                        const int                        a_finestLevel) override;
 
-      // Particle handling routines.
-      void
-      intersectParticles(const WhichParticles a_which, const EbRepresentation a_representation, const bool a_delete);
-      void
-      intersectParticles(const WhichParticles            a_which,
-                         const ItoSolver::WhichContainer a_particles,
-                         const ItoSolver::WhichContainer a_eb_particles,
-                         const ItoSolver::WhichContainer a_domain_particles,
+      /*!
+	@brief Intersect a subset of the particles with the domain and embedded boundary. 
+	@details This calls the other version, intersecting the Ito bulk particles with the EB and placing the collided particles
+	in the appropriate particle containers (ItoSolver::WhichContainer::EB, for example). 
+	@param[in] a_particleSubset Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
+	@param[in] a_representation Representation of the EB -- basically an algorithmic selection. 
+	@param[in] a_delete         Delete original particles. If this is left to false, the particles are copied into the other containers. 
+      */
+      virtual void
+      intersectParticles(const SpeciesSubset    a_particleSubset,
+                         const EbRepresentation a_representation,
+                         const bool             a_delete) noexcept;
+
+      /*!
+	@brief Intersect a subset of the particles with the domain and embedded boundary. 
+	@param[in] a_particleSubset  Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
+	@param[in] a_representation  Representation of the EB -- basically an algorithmic selection. 
+	@param[in] a_containerBulk   ItoSolver container for "bulk" particles, i.e. particles that will be intersected. 
+	@param[in] a_containerEB     ItoSolver container for EB particles. 
+	@param[in] a_containerDomain ItoSolver container for domain particles. 
+	@param[in] a_delete          Delete original particles. If this is left to false, the particles are copied into the other containers. 
+      */
+      virtual void
+      intersectParticles(const SpeciesSubset             a_particleSubset,
+                         const ItoSolver::WhichContainer a_containerBulk,
+                         const ItoSolver::WhichContainer a_containerEB,
+                         const ItoSolver::WhichContainer a_containerDomain,
                          const EbRepresentation          a_representation,
-                         const bool                      a_delete);
+                         const bool                      a_delete) noexcept;
 
       void
-      removeCoveredParticles(const WhichParticles   a_which,
+      removeCoveredParticles(const SpeciesSubset    a_which,
                              const EbRepresentation a_representation,
                              const Real             a_tolerance);
       void
-      removeCoveredParticles(const WhichParticles            a_which,
+      removeCoveredParticles(const SpeciesSubset             a_which,
                              const ItoSolver::WhichContainer a_container,
                              const EbRepresentation          a_representation,
                              const Real                      a_tolerance);
 
       void
-      transferCoveredParticles(const WhichParticles   a_which,
+      transferCoveredParticles(const SpeciesSubset    a_which,
                                const EbRepresentation a_representation,
                                const Real             a_tolerance);
       void
-      transferCoveredParticles(const WhichParticles            a_which,
+      transferCoveredParticles(const SpeciesSubset             a_which,
                                const ItoSolver::WhichContainer a_containerFrom,
                                const ItoSolver::WhichContainer a_containerTo,
                                const EbRepresentation          a_representation,
@@ -351,13 +409,13 @@ namespace Physics {
 
       // Remap and deposition routines for solver subsets.
       void
-      depositParticles(const WhichParticles a_WhichParticles);
+      depositParticles(const SpeciesSubset a_SpeciesSubset);
       void
-      depositParticles(const WhichParticles a_WhichParticles, const ItoSolver::WhichContainer a_container);
+      depositParticles(const SpeciesSubset a_SpeciesSubset, const ItoSolver::WhichContainer a_container);
       void
-      remapParticles(const WhichParticles a_WhichParticles);
+      remapParticles(const SpeciesSubset a_SpeciesSubset);
       void
-      remapParticles(const WhichParticles a_WhichParticles, const ItoSolver::WhichContainer a_container);
+      remapParticles(const SpeciesSubset a_SpeciesSubset, const ItoSolver::WhichContainer a_container);
 
       // This sets the velocity function for each species. This is sgn(charge)*E
       void
@@ -870,7 +928,7 @@ namespace Physics {
 	@param[out] a_minRank      MPI rank with lowest number of particles
 	@param[out] a_maxRank      MPI rank with highest number of particles
       */
-      void
+      virtual void
       getParticleStatistics(Real& a_avgParticles,
                             Real& a_sigma,
                             Real& a_minParticles,

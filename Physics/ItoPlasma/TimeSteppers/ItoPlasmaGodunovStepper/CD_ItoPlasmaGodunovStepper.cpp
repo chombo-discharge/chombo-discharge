@@ -525,7 +525,7 @@ ItoPlasmaGodunovStepper::setOldPositions()
 
 void
 ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                               const WhichParticles                       a_WhichParticles)
+                                               const SpeciesSubset                       a_SpeciesSubset)
 {
   CH_TIME("ItoPlasmaGodunovStepper::remapGodunovParticles");
   if (m_verbosity > 5) {
@@ -542,35 +542,35 @@ ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<PointPar
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch (a_WhichParticles) {
-    case WhichParticles::All:
+    switch (a_SpeciesSubset) {
+    case SpeciesSubset::All:
       a_particles[idx]->remap();
       break;
-    case WhichParticles::AllMobile:
+    case SpeciesSubset::AllMobile:
       if (mobile)
         a_particles[idx]->remap();
       break;
-    case WhichParticles::AllDiffusive:
+    case SpeciesSubset::AllDiffusive:
       if (diffusive)
         a_particles[idx]->remap();
       break;
-    case WhichParticles::ChargedMobile:
+    case SpeciesSubset::ChargedMobile:
       if (charged && mobile)
         a_particles[idx]->remap();
       break;
-    case WhichParticles::ChargedDiffusive:
+    case SpeciesSubset::ChargedDiffusive:
       if (charged && diffusive)
         a_particles[idx]->remap();
       break;
-    case WhichParticles::AllMobileOrDiffusive:
+    case SpeciesSubset::AllMobileOrDiffusive:
       if (mobile || diffusive)
         a_particles[idx]->remap();
       break;
-    case WhichParticles::ChargedAndMobileOrDiffusive:
+    case SpeciesSubset::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         a_particles[idx]->remap();
       break;
-    case WhichParticles::Stationary:
+    case SpeciesSubset::Stationary:
       if (!mobile && !diffusive)
         a_particles[idx]->remap();
       break;
@@ -582,7 +582,7 @@ ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<PointPar
 
 void
 ItoPlasmaGodunovStepper::deposit_PointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                                const WhichParticles                             a_WhichParticles)
+                                                const SpeciesSubset                             a_SpeciesSubset)
 {
   CH_TIME("ItoPlasmaGodunovStepper::deposit_PointParticles");
   if (m_verbosity > 5) {
@@ -599,35 +599,35 @@ ItoPlasmaGodunovStepper::deposit_PointParticles(const Vector<ParticleContainer<P
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch (a_WhichParticles) {
-    case WhichParticles::All:
+    switch (a_SpeciesSubset) {
+    case SpeciesSubset::All:
       solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::AllMobile:
+    case SpeciesSubset::AllMobile:
       if (mobile)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::AllDiffusive:
+    case SpeciesSubset::AllDiffusive:
       if (diffusive)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::ChargedMobile:
+    case SpeciesSubset::ChargedMobile:
       if (charged && mobile)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::ChargedDiffusive:
+    case SpeciesSubset::ChargedDiffusive:
       if (charged && diffusive)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::AllMobileOrDiffusive:
+    case SpeciesSubset::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::ChargedAndMobileOrDiffusive:
+    case SpeciesSubset::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
-    case WhichParticles::Stationary:
+    case SpeciesSubset::Stationary:
       if (!mobile && !diffusive)
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
       break;
@@ -639,7 +639,7 @@ ItoPlasmaGodunovStepper::deposit_PointParticles(const Vector<ParticleContainer<P
 
 void
 ItoPlasmaGodunovStepper::clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                               const WhichParticles                             a_WhichParticles)
+                                               const SpeciesSubset                             a_SpeciesSubset)
 {
   CH_TIME("ItoPlasmaGodunovStepper::clearGodunovParticles");
   if (m_verbosity > 5) {
@@ -656,35 +656,35 @@ ItoPlasmaGodunovStepper::clearGodunovParticles(const Vector<ParticleContainer<Po
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch (a_WhichParticles) {
-    case WhichParticles::All:
+    switch (a_SpeciesSubset) {
+    case SpeciesSubset::All:
       a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::AllMobile:
+    case SpeciesSubset::AllMobile:
       if (mobile)
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::AllDiffusive:
+    case SpeciesSubset::AllDiffusive:
       if (diffusive)
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::ChargedMobile:
+    case SpeciesSubset::ChargedMobile:
       if (charged && mobile)
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::ChargedDiffusive:
+    case SpeciesSubset::ChargedDiffusive:
       if (charged && diffusive)
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::AllMobileOrDiffusive:
+    case SpeciesSubset::AllMobileOrDiffusive:
       if (mobile || diffusive)
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::ChargedAndMobileOrDiffusive:
+    case SpeciesSubset::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         a_particles[idx]->clearParticles();
       break;
-    case WhichParticles::Stationary:
+    case SpeciesSubset::Stationary:
       if (!mobile && !diffusive)
         a_particles[idx]->clearParticles();
       break;
@@ -841,7 +841,7 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(Vector<ParticleContainer<Poin
     pout() << m_name + "::copyConductivityParticles" << endl;
   }
 
-  this->clearGodunovParticles(a_conductivity_particles, WhichParticles::All);
+  this->clearGodunovParticles(a_conductivity_particles, SpeciesSubset::All);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
     const RefCountedPtr<ItoSolver>&  solver  = solver_it();
@@ -931,7 +931,7 @@ ItoPlasmaGodunovStepper::computeRegridRho()
     pout() << m_name + "::computeRegridRho" << endl;
   }
 
-  this->deposit_PointParticles(m_rho_dagger_particles, WhichParticles::All);
+  this->deposit_PointParticles(m_rho_dagger_particles, SpeciesSubset::All);
 }
 
 void
@@ -949,7 +949,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
 
   // 2. Diffuse the particles. This copies onto m_rho_dagger_particles and stores the hop on the full particles.
   this->diffuseParticlesEulerMaruyama(m_rho_dagger_particles, a_dt);
-  this->remapGodunovParticles(m_rho_dagger_particles, WhichParticles::AllDiffusive);
+  this->remapGodunovParticles(m_rho_dagger_particles, SpeciesSubset::AllDiffusive);
 
   // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch.
   this->copyConductivityParticles(m_conductivity_particles); // Sets particle "weights" = w*mu
@@ -962,7 +962,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
 
   // Compute space charge density
   // Diffusive should be enough because state is not changed for others.
-  this->deposit_PointParticles(m_rho_dagger_particles, WhichParticles::AllDiffusive);
+  this->deposit_PointParticles(m_rho_dagger_particles, SpeciesSubset::AllDiffusive);
 
   this->solvePoisson(); // Solve the stinking equation.
 
@@ -976,19 +976,19 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
 
   this->stepEulerMaruyama(a_dt);
 
-  this->remapParticles(WhichParticles::AllMobileOrDiffusive);
+  this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
 
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   const bool delete_eb_particles = true;
-  this->intersectParticles(WhichParticles::AllMobileOrDiffusive,
+  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive,
                            EbRepresentation::ImplicitFunction,
                            delete_eb_particles);
-  this->removeCoveredParticles(WhichParticles::AllMobileOrDiffusive,
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive,
                                EbRepresentation::ImplicitFunction,
                                m_eb_tolerance);
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
-  this->depositParticles(WhichParticles::AllMobileOrDiffusive);
+  this->depositParticles(SpeciesSubset::AllMobileOrDiffusive);
 }
 
 void
@@ -1000,7 +1000,7 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
     pout() << m_name + "::diffuseParticlesEulerMaruyama" << endl;
   }
 
-  this->clearGodunovParticles(a_rho_dagger, WhichParticles::All);
+  this->clearGodunovParticles(a_rho_dagger, SpeciesSubset::All);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
     RefCountedPtr<ItoSolver>&        solver  = solver_it();
@@ -1121,9 +1121,9 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
   // ====== PREDICTOR BEGIN ======
   this->preTrapezoidalPredictor(m_rho_dagger_particles, a_dt);
   this->remapGodunovParticles(m_rho_dagger_particles,
-                              WhichParticles::
+                              SpeciesSubset::
                                 AllDiffusive); // Particles that were copied but not moved are in the right box.
-  this->deposit_PointParticles(m_rho_dagger_particles, WhichParticles::All); // All copies need to deposit.
+  this->deposit_PointParticles(m_rho_dagger_particles, SpeciesSubset::All); // All copies need to deposit.
 
   this->copyConductivityParticles(m_conductivity_particles);
   this->computeAllConductivities(m_conductivity_particles);
@@ -1133,17 +1133,17 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
   this->trapezoidalPredictor(a_dt);
-  this->remapParticles(WhichParticles::AllMobileOrDiffusive);
+  this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
   // ====== PREDICTOR END ======
 
   // ====== CORRECTOR BEGIN =====
   this->preTrapezoidalCorrector(m_rho_dagger_particles,
                                 a_dt); // Mobile or diffusive moves to X^dagger = X^k + 0.5*dt*V^k + hop
   this->remapGodunovParticles(m_rho_dagger_particles,
-                              WhichParticles::
+                              SpeciesSubset::
                                 AllMobileOrDiffusive); // Only need to remap particles that were mobile or diffusive
   this->deposit_PointParticles(m_rho_dagger_particles,
-                               WhichParticles::All); // Everything needs to deposit...
+                               SpeciesSubset::All); // Everything needs to deposit...
 
   this->copyConductivityParticles(m_conductivity_particles);
   this->computeAllConductivities(m_conductivity_particles);
@@ -1153,17 +1153,17 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
   this->trapezoidalCorrector(a_dt);
-  this->remapParticles(WhichParticles::AllMobileOrDiffusive);
+  this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
   // ====== CORRECTOR END =====
 
   // Do particle-boundary intersection.
-  this->intersectParticles(WhichParticles::AllMobileOrDiffusive, EbRepresentation::ImplicitFunction, true);
-  this->removeCoveredParticles(WhichParticles::AllMobileOrDiffusive,
+  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EbRepresentation::ImplicitFunction, true);
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive,
                                EbRepresentation::ImplicitFunction,
                                m_eb_tolerance);
 
   // Finally, deposit particles.
-  this->depositParticles(WhichParticles::AllMobileOrDiffusive);
+  this->depositParticles(SpeciesSubset::AllMobileOrDiffusive);
 }
 
 void

@@ -532,12 +532,12 @@ ItoPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) con
     pout() << "ItoPlasmaStepper::writeCheckpointData" << endl;
   }
 
-  for (ItoIterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    solver_it()->writeCheckpointLevel(a_handle, a_lvl);
+  for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->writeCheckpointLevel(a_handle, a_lvl);
   }
 
-  for (RtIterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-    solver_it()->writeCheckpointLevel(a_handle, a_lvl);
+  for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->writeCheckpointLevel(a_handle, a_lvl);
   }
 
   m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
@@ -554,14 +554,12 @@ ItoPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
     pout() << "ItoPlasmaStepper::readCheckpointData" << endl;
   }
 
-  for (ItoIterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>& solver = solver_it();
-    solver->readCheckpointLevel(a_handle, a_lvl);
+  for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->readCheckpointLevel(a_handle, a_lvl);
   }
 
-  for (RtIterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<McPhoto>& solver = solver_it();
-    solver->readCheckpointLevel(a_handle, a_lvl);
+  for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->readCheckpointLevel(a_handle, a_lvl);
   }
 
   m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
@@ -586,21 +584,26 @@ ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_
   m_sigma->writePlotData(a_output, a_icomp);
 
   // Ito solvers copy their output data
-  for (ItoIterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>& solver = solver_it();
+  for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>& solver = solverIt();
+
     a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 
   // RTE solvers copy their output data
-  for (RtIterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<McPhoto>& solver = solver_it();
+  for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<McPhoto>& solver = solverIt();
+
     a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
 
   // Write the current to the output
-  this->writeJ(a_output, a_icomp);
+  const Interval srcInterv(0, SpaceDim - 1);
+  const Interval dstInterv(a_icomp, a_icomp + SpaceDim - 1);
+  a_output.copy(srcInterv, m_currentDensity, dstInterv);
+
   a_plotVariableNames.push_back("x-J");
   a_plotVariableNames.push_back("y-J");
   if (SpaceDim == 3) {
@@ -613,28 +616,6 @@ ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_
 }
 
 void
-ItoPlasmaStepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const
-{
-  CH_TIME("ItoPlasmaStepper::writeJ");
-  if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::writeJ" << endl;
-  }
-
-  const Interval src_interv(0, SpaceDim - 1);
-  const Interval dst_interv(a_icomp, a_icomp + SpaceDim - 1);
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    if (m_currentDensity.getRealm() == a_output.getRealm()) {
-      m_currentDensity[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-    }
-    else {
-      m_currentDensity[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-    }
-  }
-  a_icomp += SpaceDim;
-}
-
-void
 ItoPlasmaStepper::writeNumParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const
 {
   CH_TIME("ItoPlasmaStepper::writeNumParticlesPerPatch");
@@ -642,31 +623,19 @@ ItoPlasmaStepper::writeNumParticlesPerPatch(EBAMRCellData& a_output, int& a_icom
     pout() << "ItoPlasmaStepper::writeNumParticlesPerPatch" << endl;
   }
 
-  const Interval src_interv(0, 0);
-  const Interval dst_interv(a_icomp, a_icomp);
-
   DataOps::setValue(m_particleScratch1, 0.0);
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const ParticleContainer<ItoParticle>& particles = solver_it()->getParticles(ItoSolver::WhichContainer::Bulk);
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const ParticleContainer<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      for (DataIterator dit(m_amr->getGrids(m_particleRealm)[lvl]); dit.ok(); ++dit) {
         (*m_particleScratch1[lvl])[dit()] += particles[lvl][dit].numItems();
       }
     }
   }
 
-  // Copy to output holder
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    if (m_particleScratch1.getRealm() == a_output.getRealm()) {
-      m_particleScratch1[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-    }
-    else {
-      m_particleScratch1[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-    }
-  }
+  a_output.copy(Interval(0, 0), m_particleScratch1, Interval(a_icomp, a_icomp));
 
   a_icomp += 1;
 }
@@ -699,21 +668,18 @@ ItoPlasmaStepper::printStepReport()
 
   const Real Emax = this->computeMaxElectricField(m_phase);
 
-  const size_t l_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, true);
-  const size_t g_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, false);
-
-  const size_t l_eb_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, true);
-  const size_t g_eb_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, false);
-
-  const size_t l_domain_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::Domain, true);
-  const size_t g_domain_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::Domain, false);
-
-  const size_t l_source_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, true);
-  const size_t g_source_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, false);
+  const size_t localParticlesBulk    = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, true);
+  const size_t globalParticlesBulk   = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, false);
+  const size_t localParticlesEB      = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, true);
+  const size_t globalParticlesEB     = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, false);
+  const size_t localParticlesDomain  = m_ito->getNumParticles(ItoSolver::WhichContainer::Domain, true);
+  const size_t globalParticlesDomain = m_ito->getNumParticles(ItoSolver::WhichContainer::Domain, false);
+  const size_t localParticlesSource  = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, true);
+  const size_t globalParticlesSource = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, false);
 
   // Compute some global particle statistics
-  Real avg   = 0.0;
-  Real sigma = 0.0;
+  Real avgParticles = 0.0;
+  Real stdDev       = 0.0;
 
   Real minParticles = 0.0;
   Real maxParticles = 0.0;
@@ -721,7 +687,7 @@ ItoPlasmaStepper::printStepReport()
   int minRank = 0;
   int maxRank = 0;
 
-  this->getParticleStatistics(avg, sigma, minParticles, maxParticles, minRank, maxRank);
+  this->getParticleStatistics(avgParticles, stdDev, minParticles, maxParticles, minRank, maxRank);
 
   // How was the time step restricted
   std::string str;
@@ -756,18 +722,21 @@ ItoPlasmaStepper::printStepReport()
   // Print the step report.
   pout() << "                                   " + str << endl;
   pout() << "                                   Emax      = " << Emax << endl
-         << "                                   #part     = " << l_particles << " (" << g_particles << ")" << endl
-         << "                                   #eb part  = " << l_eb_particles << " (" << g_eb_particles << ")" << endl
-         << "                                   #dom part = " << l_domain_particles << " (" << g_domain_particles << ")"
+         << "                                   #part     = " << localParticlesBulk << " (" << globalParticlesBulk
+         << ")" << endl
+         << "                                   #eb part  = " << localParticlesEB << " (" << globalParticlesEB << ")"
          << endl
-         << "                                   #src part = " << l_source_particles << " (" << g_source_particles << ")"
-         << endl
+         << "                                   #dom part = " << localParticlesDomain << " (" << globalParticlesDomain
+         << ")" << endl
+         << "                                   #src part = " << localParticlesSource << " (" << globalParticlesSource
+         << ")" << endl
          << "                                   #part min = " << minParticles << " (on rank = " << minRank << ")"
          << endl
          << "                                   #part max = " << maxParticles << " (on rank = " << maxRank << ")"
          << endl
-         << "                                   #part avg = " << avg << endl
-         << "                                   #part dev = " << sigma << " (" << 100. * sigma / avg << "%)" << endl;
+         << "                                   #part avg = " << avgParticles << endl
+         << "                                   #part dev = " << stdDev << " (" << 100. * stdDev / avgParticles << "%)"
+         << endl;
 }
 
 void
@@ -859,6 +828,8 @@ ItoPlasmaStepper::registerRealms()
     pout() << "ItoPlasmaStepper::registerRealms" << endl;
   }
 
+  // TLDR: If using dual grid then m_particleRealm != m_fluidRealm and we'll have two realms.
+
   m_amr->registerRealm(m_fluidRealm);
   m_amr->registerRealm(m_particleRealm);
 }
@@ -944,20 +915,27 @@ ItoPlasmaStepper::getNumberOfPlotVariables() const
 
   int ncomp = 0;
 
-  for (ItoIterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>& solver = solver_it();
-    ncomp += solver->getNumberOfPlotVariables();
+  // Ito solver variables.
+  for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    ncomp += solverIt()->getNumberOfPlotVariables();
   }
 
-  for (RtIterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<McPhoto>& solver = solver_it();
-    ncomp += solver->getNumberOfPlotVariables();
+  // RTE solver variables.
+  for (RtIterator<McPhoto> solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    ncomp += solverIt()->getNumberOfPlotVariables();
   }
 
+  // Field solver variables.
   ncomp += m_fieldSolver->getNumberOfPlotVariables();
+
+  // Surface charge solver variables.
   ncomp += m_sigma->getNumberOfPlotVariables();
-  ncomp += SpaceDim; // For plotting the current density
-  ncomp += 1;        // For plotting the number of particles per cell
+
+  // Current density.
+  ncomp += SpaceDim;
+
+  // Number of particles per cell.
+  ncomp += 1;
 
   return ncomp;
 }
@@ -1169,10 +1147,10 @@ ItoPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
   m_amr->alias(rhoPhase, m_phase, a_rho);
 
   // Increment each solver
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const RefCountedPtr<ItoSolver>&  solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<ItoSolver>&  solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
-    const int                        idx     = solver_it.index();
+    const int                        idx     = solverIt.index();
     const int                        q       = species->getChargeNumber();
 
     if (species->getChargeNumber() != 0) {
@@ -1212,11 +1190,11 @@ ItoPlasmaStepper::computeConductivity(EBAMRCellData&                            
 
   DataOps::setValue(a_conductivity, 0.0);
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
     const int q   = species->getChargeNumber();
 
     if (Abs(q) > 0 && solver->isMobile()) {
@@ -1403,16 +1381,16 @@ ItoPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
 }
 
 void
-ItoPlasmaStepper::intersectParticles(const WhichParticles   a_WhichParticles,
+ItoPlasmaStepper::intersectParticles(const SpeciesSubset    a_particleSubset,
                                      const EbRepresentation a_representation,
-                                     const bool             a_delete)
+                                     const bool             a_delete) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::intersectParticles(WhichParticles, EbRepresentation)");
+  CH_TIME("ItoPlasmaStepper::intersectParticles(SpeciesSubset, EbRepresentation, bool)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::intersectParticles(WhichParticles, EbRepresentation)" << endl;
+    pout() << "ItoPlasmaStepper::intersectParticles(SpeciesSubset, EbRepresentation, bool)" << endl;
   }
 
-  this->intersectParticles(a_WhichParticles,
+  this->intersectParticles(a_particleSubset,
                            ItoSolver::WhichContainer::Bulk,
                            ItoSolver::WhichContainer::EB,
                            ItoSolver::WhichContainer::Domain,
@@ -1421,133 +1399,157 @@ ItoPlasmaStepper::intersectParticles(const WhichParticles   a_WhichParticles,
 }
 
 void
-ItoPlasmaStepper::intersectParticles(const WhichParticles            a_WhichParticles,
-                                     const ItoSolver::WhichContainer a_particles,
-                                     const ItoSolver::WhichContainer a_eb_particles,
-                                     const ItoSolver::WhichContainer a_domain_particles,
+ItoPlasmaStepper::intersectParticles(const SpeciesSubset             a_particleSubset,
+                                     const ItoSolver::WhichContainer a_containerBulk,
+                                     const ItoSolver::WhichContainer a_containerEB,
+                                     const ItoSolver::WhichContainer a_containerDomain,
                                      const EbRepresentation          a_representation,
-                                     const bool                      a_delete)
+                                     const bool                      a_delete) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::intersectParticles(WhichParticles, string, string, string, EbRepresentation, bool)");
+  CH_TIME("ItoPlasmaStepper::intersectParticles(SpeciesSubset, string, string, string, EbRepresentation, bool)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::intersectParticles(WhichParticles, string, string, string, EbRepresentation, bool)"
+    pout() << "ItoPlasmaStepper::intersectParticles(SpeciesSubset, string, string, string, EbRepresentation, bool)"
            << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
-
-    const int idx = solver_it.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->getChargeNumber() != 0;
-#if 0
-    switch (a_WhichParticles) {
-    case WhichParticles::All:
-      solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
+    const bool charged   = (species->getChargeNumber() != 0);
+
+    switch (a_particleSubset) {
+    case SpeciesSubset::All: {
+      solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_representation, a_delete);
+
       break;
-    case WhichParticles::AllMobile:
-      if (mobile)
-        solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
-      break;
-    case WhichParticles::AllDiffusive:
-      if (diffusive)
-        solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
-      break;
-    case WhichParticles::ChargedMobile:
-      if (charged && mobile)
-        solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
-      break;
-    case WhichParticles::ChargedDiffusive:
-      if (charged && diffusive)
-        solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
-      break;
-    case WhichParticles::AllMobileOrDiffusive:
-      if (mobile || diffusive)
-        solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
-      break;
-    case WhichParticles::ChargedAndMobileOrDiffusive:
-      if (charged && (mobile || diffusive))
-        solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
-      break;
-    case WhichParticles::Stationary:
-      if (!mobile && !diffusive)
-        solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
-      break;
-    default:
-      MayDay::Abort(
-        "ItoPlasmaStepper::intersectParticles_particles(WhichParticles, string, string, string, EbRepresentation, bool) - logic bust");
     }
+#if 0      
+    case SpeciesSubset::AllMobile: {
+      if (mobile) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_representation, a_delete);
+      }
+
+      break;
+    }
+    case SpeciesSubset::AllDiffusive: {
+      if (diffusive) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_representation, a_delete);
+      }
+
+      break;
+    }
+    case SpeciesSubset::ChargedMobile: {
+      if (charged && mobile) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_representation, a_delete);
+      }
+
+      break;
+    }
+    case SpeciesSubset::ChargedDiffusive: {
+      if (charged && diffusive) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_representation, a_delete);
+      }
+
+      break;
+    }
+    case SpeciesSubset::AllMobileOrDiffusive: {
+      if (mobile || diffusive) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_representation, a_delete);
+      }
+
+      break;
+    }
+    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
+      if (charged && (mobile || diffusive)) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_representation, a_delete);
+      }
+
+      break;
+    }
+    case SpeciesSubset::Stationary: {
+      if (!mobile && !diffusive) {
+        solver->intersectParticles(a_containerBulk, a_containerEB, a_containerDomain, a_representation, a_delete);
+      }
+
+      break;
+    }
+    default: {
+      MayDay::Abort("ItoPlasmaStepper::intersectParticles - logic bust");
+
+      break;
+    }
+
 #endif
+    }      
   }
 }
 
 void
-ItoPlasmaStepper::removeCoveredParticles(const WhichParticles   a_WhichParticles,
+ItoPlasmaStepper::removeCoveredParticles(const SpeciesSubset    a_SpeciesSubset,
                                          const EbRepresentation a_representation,
                                          const Real             a_tolerance)
 {
-  CH_TIME("ItoPlasmaStepper::removeCoveredParticles(WhichParticles, representation, tolerance)");
+  CH_TIME("ItoPlasmaStepper::removeCoveredParticles(SpeciesSubset, representation, tolerance)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::removeCoveredParticles(WhichParticles, representation, tolerance)" << endl;
+    pout() << "ItoPlasmaStepper::removeCoveredParticles(SpeciesSubset, representation, tolerance)" << endl;
   }
 
-  this->removeCoveredParticles(a_WhichParticles, ItoSolver::WhichContainer::Bulk, a_representation, a_tolerance);
+  this->removeCoveredParticles(a_SpeciesSubset, ItoSolver::WhichContainer::Bulk, a_representation, a_tolerance);
 }
 
 void
-ItoPlasmaStepper::removeCoveredParticles(const WhichParticles            a_which,
+ItoPlasmaStepper::removeCoveredParticles(const SpeciesSubset             a_which,
                                          const ItoSolver::WhichContainer a_container,
                                          const EbRepresentation          a_representation,
                                          const Real                      a_tolerance)
 {
-  CH_TIME("ItoPlasmaStepper::removeCoveredParticles(WhichParticles, container, EbRepresentation, tolerance)");
+  CH_TIME("ItoPlasmaStepper::removeCoveredParticles(SpeciesSubset, container, EbRepresentation, tolerance)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::removeCoveredParticles(WhichParticles, container, EbRepresentation, tolerance)"
-           << endl;
+    pout() << "ItoPlasmaStepper::removeCoveredParticles(SpeciesSubset, container, EbRepresentation, tolerance)" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
     switch (a_which) {
-    case WhichParticles::All:
+    case SpeciesSubset::All:
       solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::AllMobile:
+    case SpeciesSubset::AllMobile:
       if (mobile)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::AllDiffusive:
+    case SpeciesSubset::AllDiffusive:
       if (diffusive)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::ChargedMobile:
+    case SpeciesSubset::ChargedMobile:
       if (charged && mobile)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::ChargedDiffusive:
+    case SpeciesSubset::ChargedDiffusive:
       if (charged && diffusive)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::AllMobileOrDiffusive:
+    case SpeciesSubset::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::ChargedAndMobileOrDiffusive:
+    case SpeciesSubset::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case WhichParticles::Stationary:
+    case SpeciesSubset::Stationary:
       if (!mobile && !diffusive)
         solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
@@ -1558,13 +1560,13 @@ ItoPlasmaStepper::removeCoveredParticles(const WhichParticles            a_which
 }
 
 void
-ItoPlasmaStepper::transferCoveredParticles(const WhichParticles   a_which,
+ItoPlasmaStepper::transferCoveredParticles(const SpeciesSubset    a_which,
                                            const EbRepresentation a_representation,
                                            const Real             a_tolerance)
 {
-  CH_TIME("ItoPlasmaStepper::transferCoveredParticles_particles(WhichParticles, EbRepresentation, tolerance)");
+  CH_TIME("ItoPlasmaStepper::transferCoveredParticles_particles(SpeciesSubset, EbRepresentation, tolerance)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::transferCoveredParticles_particles(WhichParticles, EbRepresentation, tolerance)"
+    pout() << "ItoPlasmaStepper::transferCoveredParticles_particles(SpeciesSubset, EbRepresentation, tolerance)"
            << endl;
   }
 
@@ -1576,59 +1578,59 @@ ItoPlasmaStepper::transferCoveredParticles(const WhichParticles   a_which,
 }
 
 void
-ItoPlasmaStepper::transferCoveredParticles(const WhichParticles            a_which,
+ItoPlasmaStepper::transferCoveredParticles(const SpeciesSubset             a_which,
                                            const ItoSolver::WhichContainer a_containerFrom,
                                            const ItoSolver::WhichContainer a_containerTo,
                                            const EbRepresentation          a_representation,
                                            const Real                      a_tolerance)
 {
   CH_TIME(
-    "ItoPlasmaStepper::transferCoveredParticles_particles(WhichParticles, container, container, EbRepresentation, tolerance)");
+    "ItoPlasmaStepper::transferCoveredParticles_particles(SpeciesSubset, container, container, EbRepresentation, tolerance)");
   if (m_verbosity > 5) {
     pout()
-      << "ItoPlasmaStepper::transferCoveredParticles_particles(WhichParticles, container, container, EbRepresentation, tolerance)"
+      << "ItoPlasmaStepper::transferCoveredParticles_particles(SpeciesSubset, container, container, EbRepresentation, tolerance)"
       << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
     switch (a_which) {
-    case WhichParticles::All:
+    case SpeciesSubset::All:
       solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::AllMobile:
+    case SpeciesSubset::AllMobile:
       if (mobile)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::AllDiffusive:
+    case SpeciesSubset::AllDiffusive:
       if (diffusive)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::ChargedMobile:
+    case SpeciesSubset::ChargedMobile:
       if (charged && mobile)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::ChargedDiffusive:
+    case SpeciesSubset::ChargedDiffusive:
       if (charged && diffusive)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::AllMobileOrDiffusive:
+    case SpeciesSubset::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::ChargedAndMobileOrDiffusive:
+    case SpeciesSubset::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
-    case WhichParticles::Stationary:
+    case SpeciesSubset::Stationary:
       if (!mobile && !diffusive)
         solver->transferCoveredParticles(a_containerFrom, a_containerTo, a_representation, a_tolerance);
       break;
@@ -1639,63 +1641,63 @@ ItoPlasmaStepper::transferCoveredParticles(const WhichParticles            a_whi
 }
 
 void
-ItoPlasmaStepper::remapParticles(const WhichParticles a_WhichParticles)
+ItoPlasmaStepper::remapParticles(const SpeciesSubset a_SpeciesSubset)
 {
-  CH_TIME("ItoPlasmaStepper::remapParticles(WhichParticles)");
+  CH_TIME("ItoPlasmaStepper::remapParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::remapParticles(WhichParticles)" << endl;
+    pout() << "ItoPlasmaStepper::remapParticles(SpeciesSubset)" << endl;
   }
 
-  this->remapParticles(a_WhichParticles, ItoSolver::WhichContainer::Bulk);
+  this->remapParticles(a_SpeciesSubset, ItoSolver::WhichContainer::Bulk);
 }
 
 void
-ItoPlasmaStepper::remapParticles(const WhichParticles a_WhichParticles, const ItoSolver::WhichContainer a_container)
+ItoPlasmaStepper::remapParticles(const SpeciesSubset a_SpeciesSubset, const ItoSolver::WhichContainer a_container)
 {
-  CH_TIME("ItoPlasmaStepper::remapParticles(WhichParticles)");
+  CH_TIME("ItoPlasmaStepper::remapParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::remapParticles(WhichParticles)" << endl;
+    pout() << "ItoPlasmaStepper::remapParticles(SpeciesSubset)" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch (a_WhichParticles) {
-    case WhichParticles::All:
+    switch (a_SpeciesSubset) {
+    case SpeciesSubset::All:
       solver->remap(a_container);
       break;
-    case WhichParticles::AllMobile:
+    case SpeciesSubset::AllMobile:
       if (mobile)
         solver->remap(a_container);
       break;
-    case WhichParticles::AllDiffusive:
+    case SpeciesSubset::AllDiffusive:
       if (diffusive)
         solver->remap(a_container);
       break;
-    case WhichParticles::ChargedMobile:
+    case SpeciesSubset::ChargedMobile:
       if (charged && mobile)
         solver->remap(a_container);
       break;
-    case WhichParticles::ChargedDiffusive:
+    case SpeciesSubset::ChargedDiffusive:
       if (charged && diffusive)
         solver->remap(a_container);
       break;
-    case WhichParticles::AllMobileOrDiffusive:
+    case SpeciesSubset::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->remap(a_container);
       break;
-    case WhichParticles::ChargedAndMobileOrDiffusive:
+    case SpeciesSubset::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->remap(a_container);
       break;
-    case WhichParticles::Stationary:
+    case SpeciesSubset::Stationary:
       if (!mobile && !diffusive)
         solver->remap(a_container);
       break;
@@ -1706,68 +1708,68 @@ ItoPlasmaStepper::remapParticles(const WhichParticles a_WhichParticles, const It
 }
 
 void
-ItoPlasmaStepper::depositParticles(const WhichParticles a_WhichParticles)
+ItoPlasmaStepper::depositParticles(const SpeciesSubset a_SpeciesSubset)
 {
-  CH_TIME("ItoPlasmaStepper::depositParticles(WhichParticles)");
+  CH_TIME("ItoPlasmaStepper::depositParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::depositParticles(WhichParticles)" << endl;
+    pout() << "ItoPlasmaStepper::depositParticles(SpeciesSubset)" << endl;
   }
 
-  this->depositParticles(a_WhichParticles, ItoSolver::WhichContainer::Bulk);
+  this->depositParticles(a_SpeciesSubset, ItoSolver::WhichContainer::Bulk);
 }
 
 void
-ItoPlasmaStepper::depositParticles(const WhichParticles a_WhichParticles, const ItoSolver::WhichContainer a_container)
+ItoPlasmaStepper::depositParticles(const SpeciesSubset a_SpeciesSubset, const ItoSolver::WhichContainer a_container)
 {
-  CH_TIME("ItoPlasmaStepper::depositParticles(WhichParticles)");
+  CH_TIME("ItoPlasmaStepper::depositParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::depositParticles(WhichParticles)" << endl;
+    pout() << "ItoPlasmaStepper::depositParticles(SpeciesSubset)" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch (a_WhichParticles) {
-    case WhichParticles::All:
+    switch (a_SpeciesSubset) {
+    case SpeciesSubset::All:
       solver->depositParticles(a_container);
       break;
-    case WhichParticles::AllMobile:
+    case SpeciesSubset::AllMobile:
       if (mobile)
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::AllDiffusive:
+    case SpeciesSubset::AllDiffusive:
       if (diffusive)
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::ChargedMobile:
+    case SpeciesSubset::ChargedMobile:
       if (charged && mobile)
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::ChargedDiffusive:
+    case SpeciesSubset::ChargedDiffusive:
       if (charged && diffusive)
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::AllMobileOrDiffusive:
+    case SpeciesSubset::AllMobileOrDiffusive:
       if (mobile || diffusive)
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::ChargedAndMobileOrDiffusive:
+    case SpeciesSubset::ChargedAndMobileOrDiffusive:
       if (charged && (mobile || diffusive))
         solver->depositParticles(a_container);
       break;
-    case WhichParticles::Stationary:
+    case SpeciesSubset::Stationary:
       if (!mobile && !diffusive)
         solver->depositParticles(a_container);
       break;
     default:
-      MayDay::Abort("ItoPlasmaStepper::depositParticles(WhichParticles) - logic bust");
+      MayDay::Abort("ItoPlasmaStepper::depositParticles(SpeciesSubset) - logic bust");
     }
   }
 }
@@ -1780,8 +1782,8 @@ ItoPlasmaStepper::setItoVelocityFunctions()
     pout() << "ItoPlasmaStepper::setItoVelocityFunctions" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     if (solver->isMobile()) {
@@ -1820,8 +1822,8 @@ ItoPlasmaStepper::computeItoVelocities()
   }
 
   // Interpolate velocity function to particle position
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    solver_it()->interpolateVelocities(); // Interpolates v = +/- mu*E
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->interpolateVelocities(); // Interpolates v = +/- mu*E
   }
 }
 
@@ -1880,9 +1882,9 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
   }
 
   // Average down and interpolate ghost cells. Then interpolate mobilities to particle positions.
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const int                 idx    = solver_it.index();
-    RefCountedPtr<ItoSolver>& solver = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const int                 idx    = solverIt.index();
+    RefCountedPtr<ItoSolver>& solver = solverIt();
 
     if (solver->isMobile()) {
 
@@ -1959,8 +1961,8 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
     const Vector<Real> mobilities = m_physics->computeItoMobilitiesLFA(a_time, pos, e);
 
     // Put mobilities in data holder
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx                                           = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx                                           = solverIt.index();
       (*a_meshMobilities[idx]).getSingleValuedFAB()(iv, comp) = mobilities[idx];
     }
   }
@@ -1976,15 +1978,15 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
     const Vector<Real> mobilities = m_physics->computeItoMobilitiesLFA(a_time, pos, e);
 
     // Put diffusion in the appropriate place.
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx                       = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx                       = solverIt.index();
       (*a_meshMobilities[idx])(vof, comp) = mobilities[idx];
     }
   }
 
   // Covered is bogus.
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const int idx = solver_it.index();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
     a_meshMobilities[idx]->setCoveredCellVal(0.0, comp);
   }
 }
@@ -1998,8 +2000,8 @@ ItoPlasmaStepper::computeItoMobilitiesLEA()
   }
 
   // This is really simple because the solvers do this directly...
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    solver_it()->updateMobilities();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->updateMobilities();
   }
 }
 
@@ -2032,8 +2034,8 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
   //       This requires a couple of copies.
 
   // 1. Copy particle Realm densities to fluid Realm scratch data.
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const int idx = solver_it.index();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
 
     m_fscratch2[idx].copy(*a_densities[idx]);
   }
@@ -2055,9 +2057,9 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
   }
 
   // Average down, interpolate ghost cells, and then interpolate to particle positions
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const int                 idx    = solver_it.index();
-    RefCountedPtr<ItoSolver>& solver = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const int                 idx    = solverIt.index();
+    RefCountedPtr<ItoSolver>& solver = solverIt();
 
     if (solver->isDiffusive()) {
 
@@ -2100,10 +2102,10 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_
     Vector<EBCellFAB*> densities(numPlasmaSpecies);
     ;
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
 
-      if (solver_it()->isDiffusive()) {
+      if (solverIt()->isDiffusive()) {
         diffusion[idx] = &(*a_diffusionCoefficient[idx])[dit()];
       }
       densities[idx] = &(*a_densities[idx])[dit()];
@@ -2140,8 +2142,8 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
 
     // Make grid densities
     Vector<Real> densities;
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
       densities.push_back((*a_densities[idx]).getSingleValuedFAB()(iv, comp));
     }
 
@@ -2149,10 +2151,10 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
     const Vector<Real> diffusion = m_physics->computeItoDiffusionLFA(a_time, pos, e, densities);
 
     // Put diffusion where they belong
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      RefCountedPtr<ItoSolver>& solver = solver_it();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      RefCountedPtr<ItoSolver>& solver = solverIt();
       if (solver->isDiffusive()) {
-        const int idx                                                 = solver_it.index();
+        const int idx                                                 = solverIt.index();
         (*a_diffusionCoefficient[idx]).getSingleValuedFAB()(iv, comp) = diffusion[idx];
       }
     }
@@ -2167,8 +2169,8 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
 
     // Get densities
     Vector<Real> densities;
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
       densities.push_back((*a_densities[idx])(vof, comp));
     }
 
@@ -2176,18 +2178,18 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
     const Vector<Real> diffusion = m_physics->computeItoDiffusionLFA(a_time, pos, e, densities);
 
     // Put diffusion in the appropriate place.
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      if (solver_it()->isDiffusive()) {
-        const int idx                             = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      if (solverIt()->isDiffusive()) {
+        const int idx                             = solverIt.index();
         (*a_diffusionCoefficient[idx])(vof, comp) = diffusion[idx];
       }
     }
   }
 
   // Covered is bogus.
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    if (solver_it()->isDiffusive()) {
-      const int idx = solver_it.index();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    if (solverIt()->isDiffusive()) {
+      const int idx = solverIt.index();
       a_diffusionCoefficient[idx]->setCoveredCellVal(0.0, comp);
     }
   }
@@ -2202,8 +2204,8 @@ ItoPlasmaStepper::computeItoDiffusion_lea()
   }
 
   // This is really simple because the solvers do this directly... No monkeying with interpolations or anything.
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    solver_it()->updateDiffusion();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->updateDiffusion();
   }
 }
 
@@ -2256,9 +2258,9 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
 
   BaseFab<Real>& numFab = a_ppc.getSingleValuedFAB();
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>& solver = solver_it();
-    const int                 idx    = solver_it.index();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>& solver = solverIt();
+    const int                 idx    = solverIt.index();
 
     const ParticleContainer<ItoParticle>& particles     = solver->getParticles(ItoSolver::WhichContainer::Bulk);
     const BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_dit);
@@ -2354,9 +2356,9 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_mean_ener
 
   BaseFab<Real>& numFab = a_mean_energies.getSingleValuedFAB();
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>& solver = solver_it();
-    const int                 idx    = solver_it.index();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>& solver = solverIt();
+    const int                 idx    = solverIt.index();
 
     const ParticleContainer<ItoParticle>& particles     = solver->getParticles(ItoSolver::WhichContainer::Bulk);
     const BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_dit);
@@ -2664,18 +2666,18 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
   Vector<BinFab<Photon>*>      sourcePhotonsFAB(numPhotonSpecies);
   Vector<BinFab<Photon>*>      bulkPhotonsFAB(numPhotonSpecies);
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>& solver = solver_it();
-    const int                 idx    = solver_it.index();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>& solver = solverIt();
+    const int                 idx    = solverIt.index();
 
     ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     particlesFAB[idx] = &(solverParticles.getCellParticles(a_level, a_dit));
   }
 
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<McPhoto>& solver = solver_it();
-    const int               idx    = solver_it.index();
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<McPhoto>& solver = solverIt();
+    const int               idx    = solverIt.index();
 
     ParticleContainer<Photon>& solverBulkPhotons = solver->getBulkPhotons();
     ParticleContainer<Photon>& solverSourPhotons = solver->getSourcePhotons();
@@ -2706,8 +2708,8 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
       Vector<long long> numOldParticles(numPlasmaSpecies);
       Vector<long long> numNewPhotons(numPhotonSpecies);
 
-      for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-        const int idx = solver_it.index();
+      for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
         particles[idx]            = &((*particlesFAB[idx])(iv, 0));
         particleMeanEnergies[idx] = a_meanParticleEnergies.getSingleValuedFAB()(iv, idx);
@@ -2715,12 +2717,12 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
         numOldParticles[idx]      = llround(a_oldParticlesPerCell.getSingleValuedFAB()(iv, idx));
       }
 
-      for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-        const int idx = solver_it.index();
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
         bulkPhotons[idx]   = &((*bulkPhotonsFAB[idx])(iv, 0));
         sourcePhotons[idx] = &((*sourcePhotonsFAB[idx])(iv, 0));
-        photoSpecies[idx]  = solver_it()->getSpecies();
+        photoSpecies[idx]  = solverIt()->getSpecies();
         numNewPhotons[idx] = llround(a_newPhotonsPerCell.getSingleValuedFAB()(iv, idx));
 
         sourcePhotons[idx]->clear();
@@ -2785,8 +2787,8 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
     Vector<long long> numOldParticles(numPlasmaSpecies);
     Vector<long long> numNewPhotons(numPhotonSpecies);
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
 
       particles[idx]            = &((*particlesFAB[idx])(iv, 0));
       particleMeanEnergies[idx] = a_meanParticleEnergies(vof, idx);
@@ -2794,12 +2796,12 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
       numOldParticles[idx]      = llround(a_oldParticlesPerCell(vof, idx));
     }
 
-    for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx = solver_it.index();
+    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
 
       bulkPhotons[idx]   = &((*bulkPhotonsFAB[idx])(iv, 0));
       sourcePhotons[idx] = &((*sourcePhotonsFAB[idx])(iv, 0));
-      photoSpecies[idx]  = solver_it()->getSpecies();
+      photoSpecies[idx]  = solverIt()->getSpecies();
       numNewPhotons[idx] = llround(a_newPhotonsPerCell(vof, idx));
 
       sourcePhotons[idx]->clear();
@@ -2856,13 +2858,13 @@ ItoPlasmaStepper::advanceReactionNetwork(const Real a_dt)
     Vector<ParticleContainer<Photon>*>      bulk_Photons(numPhotonSpecies); // Photons absorbed on mesh
     Vector<ParticleContainer<Photon>*>      new_Photons(numPhotonSpecies);  // Produced Photons go here.
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      particles[solver_it.index()] = &(solver_it()->getParticles(ItoSolver::WhichContainer::Bulk));
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      particles[solverIt.index()] = &(solverIt()->getParticles(ItoSolver::WhichContainer::Bulk));
     }
 
-    for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-      bulk_Photons[solver_it.index()] = &(solver_it()->getBulkPhotons());
-      new_Photons[solver_it.index()]  = &(solver_it()->getSourcePhotons());
+    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      bulk_Photons[solverIt.index()] = &(solverIt()->getBulkPhotons());
+      new_Photons[solverIt.index()]  = &(solverIt()->getSourcePhotons());
     }
 
     this->advanceReactionNetwork(particles, bulk_Photons, new_Photons, m_energySources, m_electricFieldParticle, a_dt);
@@ -2892,13 +2894,13 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>*>
   Vector<AMRCellParticles<Photon>*>      Photons(numPlasmaSpecies);
   Vector<AMRCellParticles<Photon>*>      newPhotons(numPlasmaSpecies);
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const int idx  = solver_it.index();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx  = solverIt.index();
     particles[idx] = &(a_particles[idx]->getCellParticles());
   }
 
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-    const int idx   = solver_it.index();
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx   = solverIt.index();
     Photons[idx]    = &(a_Photons[idx]->getCellParticles());
     newPhotons[idx] = &(a_newPhotons[idx]->getCellParticles());
   }
@@ -2932,14 +2934,14 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>*>&
     Vector<LayoutData<BinFab<Photon>>*>      newPhotons(numPhotonSpecies);
     Vector<LevelData<EBCellFAB>*>            sources(numPlasmaSpecies);
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx  = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx  = solverIt.index();
       particles[idx] = &(*(*a_particles[idx])[lvl]);
       sources[idx]   = &(*(a_sources[idx])[lvl]);
     }
 
-    for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx   = solver_it.index();
+    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx   = solverIt.index();
       Photons[idx]    = &(*(*a_Photons[idx])[lvl]);
       newPhotons[idx] = &(*(*a_newPhotons[idx])[lvl]);
     }
@@ -2980,14 +2982,14 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle>>*
     Vector<BinFab<Photon>*> newPhotons(numPhotonSpecies);
     Vector<EBCellFAB*>      sources(numPlasmaSpecies);
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx  = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx  = solverIt.index();
       particles[idx] = &((*a_particles[idx])[dit()]);
       sources[idx]   = &((*a_sources[idx])[dit()]);
     }
 
-    for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx   = solver_it.index();
+    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx   = solverIt.index();
       Photons[idx]    = &((*a_Photons[idx])[dit()]);
       newPhotons[idx] = &((*a_newPhotons[idx])[dit()]);
     }
@@ -3043,8 +3045,8 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
       Vector<List<Photon>*>      newPhotons(numPhotonSpecies);
       Vector<Real>               sources(numPlasmaSpecies);
 
-      for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-        const int idx = solver_it.index();
+      for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
         List<ItoParticle>& bp = (*a_particles[idx])(iv, comp);
         particles[idx]        = &bp;
@@ -3053,8 +3055,8 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
         sources[idx]                    = sourcesFAB(iv, comp);
       }
 
-      for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-        const int idx = solver_it.index();
+      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
         List<Photon>& bp    = (*a_Photons[idx])(iv, comp);
         List<Photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
@@ -3099,8 +3101,8 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
     Vector<List<Photon>*>      newPhotons(numPhotonSpecies);
     Vector<Real>               sources(numPlasmaSpecies);
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
 
       List<ItoParticle>& bp = (*a_particles[idx])(iv, comp);
       particles[idx]        = &bp;
@@ -3109,8 +3111,8 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
       sources[idx]                    = sourcesFAB(iv, comp);
     }
 
-    for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx = solver_it.index();
+    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
 
       List<Photon>& bp    = (*a_Photons[idx])(iv, comp);
       List<Photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
@@ -3156,8 +3158,8 @@ ItoPlasmaStepper::computePhysicsDt(const EBAMRCellData& a_E, const Vector<EBAMRC
 
     Vector<LevelData<EBCellFAB>*> densities(numPlasmaSpecies);
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
 
       densities[idx] = &(*(*a_densities[idx])[lvl]);
     }
@@ -3190,8 +3192,8 @@ ItoPlasmaStepper::computePhysicsDt(const LevelData<EBCellFAB>&         a_E,
 
     Vector<EBCellFAB*> densities(numPlasmaSpecies);
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
 
       densities[idx] = &((*a_densities[idx])[dit()]);
     }
@@ -3244,8 +3246,8 @@ ItoPlasmaStepper::computePhysicsDt(const EBCellFAB&         a_E,
 
     if (ebisbox.isRegular(iv)) {
       Vector<Real> densities(numPlasmaSpecies);
-      for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-        const int idx = solver_it.index();
+      for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+        const int idx = solverIt.index();
 
         const BaseFab<Real>& basefab = a_densities[idx]->getSingleValuedFAB();
         densities[idx]               = basefab(iv, comp);
@@ -3266,8 +3268,8 @@ ItoPlasmaStepper::computePhysicsDt(const EBCellFAB&         a_E,
 
     Vector<Real> densities(numPlasmaSpecies);
 
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      const int idx  = solver_it.index();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx  = solverIt.index();
       densities[idx] = (*a_densities[idx])(vof, comp);
     }
 
@@ -3287,8 +3289,8 @@ ItoPlasmaStepper::advancePhotons(const Real a_dt)
     pout() << "ItoPlasmaStepper::advance_advancePhotons(a_dt)" << endl;
   }
 
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<McPhoto>& solver = solver_it();
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<McPhoto>& solver = solverIt();
 
     // Add source Photons and move the Photons
     ParticleContainer<Photon>& Photons       = solver->getPhotons();
@@ -3326,8 +3328,8 @@ ItoPlasmaStepper::sortPhotonsByCell(McPhoto::WhichContainer a_which)
     pout() << "ItoPlasmaStepper::sortPhotonsByCell(McPhoto::WhichContainer)" << endl;
   }
 
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-    solver_it()->sortPhotonsByCell(a_which);
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->sortPhotonsByCell(a_which);
   }
 }
 
@@ -3339,8 +3341,8 @@ ItoPlasmaStepper::sortPhotonsByPatch(McPhoto::WhichContainer a_which)
     pout() << "ItoPlasmaStepper::sortPhotonsByPatch(McPhoto::WhichContainer)" << endl;
   }
 
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it) {
-    solver_it()->sortPhotonsByPatch(a_which);
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->sortPhotonsByPatch(a_which);
   }
 }
 
@@ -3394,24 +3396,33 @@ ItoPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_leve
   const int                nbox = dbl.size();
 
   Vector<long int> loads(nbox, 0L);
+
   if (m_loadBalance && a_realm == m_particleRealm) {
+
+    // If we're load balancing with particles, get the number of particles per patch
+    // from the relevant particle solvers. Since these are Ito solvers, the loads
+    // are equal to the number of computational particles in the grid patches.
     Vector<RefCountedPtr<ItoSolver>> loadBalanceProxySolvers = this->getLoadBalanceSolvers();
 
     for (int isolver = 0; isolver < loadBalanceProxySolvers.size(); isolver++) {
-      Vector<long int> solver_loads(nbox, 0L);
-      loadBalanceProxySolvers[isolver]->computeLoads(solver_loads, dbl, a_level);
 
+      // This solver computes loads -- there's a parallel gather operation
+      // under the hood here.
+      Vector<long int> solverLoads(nbox, 0L);
+      loadBalanceProxySolvers[isolver]->computeLoads(solverLoads, dbl, a_level);
+
+      // Add to total loads.
       for (int ibox = 0; ibox < nbox; ibox++) {
-        loads[ibox] += solver_loads[ibox];
+        loads[ibox] += solverLoads[ibox];
       }
     }
 
-    // Now add the "constant" loads
+    // Add the "constant" loads -- these are computational loads due to the "mesh" part. We use
+    // a heuristic where we have m_loadPerCell "cost".
     for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
-      const Box box  = dbl[lit()];
-      const int ibox = lit().intCode();
+      const Box box = dbl[lit()];
 
-      loads[ibox] += lround(m_loadPerCell * box.numPts());
+      loads[lit().intCode()] += lround(m_loadPerCell * box.numPts());
     }
   }
   else {
@@ -3492,8 +3503,8 @@ ItoPlasmaStepper::getLoadBalanceSolvers() const
   Vector<RefCountedPtr<ItoSolver>> loadBalanceProxySolvers;
 
   if (m_loadBalanceIndex < 0) {
-    for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-      RefCountedPtr<ItoSolver>& solver = solver_it();
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      RefCountedPtr<ItoSolver>& solver = solverIt();
 
       loadBalanceProxySolvers.push_back(solver);
     }
@@ -3532,11 +3543,11 @@ ItoPlasmaStepper::computeEdotJSource()
     pout() << "ItoPlasmaStepper::computeEdotJSource()" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
     const int q   = species->getChargeNumber();
 
     DataOps::setValue(m_energySources[idx], 0.0);
@@ -3589,11 +3600,11 @@ ItoPlasmaStepper::computeEdotJSourceNWO()
 
   DataOps::setValue(m_EdotJ, 0.0);
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
     const int q   = species->getChargeNumber();
 
     // Do mobile contribution. Computes Z*e*E*mu*n*E*E
@@ -3642,11 +3653,11 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt)
 
   DataOps::setValue(m_EdotJ, 0.0);
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
     const int q   = species->getChargeNumber();
 
     const bool mobile    = solver->isMobile();
