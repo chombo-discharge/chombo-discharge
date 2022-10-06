@@ -1838,33 +1838,45 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
     pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, time)" << endl;
   }
 
-  CH_assert(a_electricField.getRealm() = m_fluidRealm);
+  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+  CH_assert(a_electricField.getRealm() == m_fluidRealm);
+  CH_assert(a_meshMobilities.size() == numPlasmaSpecies);
 
-    // Computation is done on the fluid realm but the mesh mobilities are defined on the particle realm.
-    Vector<LevelData<EBCellFAB>*> meshMobilities;
-    for (int i = 0; i < a_meshMobilities.size(); i++) {
-      meshMobilities.push_back(&(*(m_fscratch1[i])[lvl]));
+  // The mesh mobilities belong on the particle realm (they are the ItoSolver mobilities) but we need to run
+  // the computation on the fluid realm. So, create some transient storage for that.
+  Vector<EBAMRCellData> fluidScratchMobilities(numPlasmaSpecies);
+  for (int i = 0; i < numPlasmaSpecies; i++) {
+    m_amr->allocate(fluidScratchMobilities[i], m_fluidRealm, m_plasmaPhase, 1);
 
-      CH_assert(a_meshMobilities[i]->getRealm() == m_particleRealm);
-    }
-
-    // Run the level computation.
-    this->computeItoMobilitiesLFA(meshMobilities, *a_electricField[lvl], lvl, a_time);
+    CH_assert(a_meshMobilities[i]->getRealm() == m_particleRealm);
   }
 
-  // Average down and interpolate ghost cells. Then interpolate mobilities to particle positions.
+  // Now run the computation on the fluid realm, computing the mobilities into fluidScratchMobilities
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    Vector<LevelData<EBCellFAB>*> mobilities(numPlasmaSpecies);
+
+    for (int i = 0; i < numPlasmaSpecies; i++) {
+      mobilities[i] = &(*(fluidScratchMobilities[i])[lvl]);
+    }
+
+    // Run the level computation, which will fill mobilities aka fluidScratchMobilities.
+    this->computeItoMobilitiesLFA(mobilities, *a_electricField[lvl], lvl, a_time);
+  }
+
+  // Copy the fluid realm data into the particle realm data and update ghost cells
+  for (int i = 0; i < numPlasmaSpecies; i++) {
+    a_meshMobilities[i]->copy(fluidScratchMobilities[i]);
+
+    m_amr->conservativeAverage(*a_meshMobilities[i], m_particleRealm, m_plasmaPhase);
+    m_amr->interpGhost(*a_meshMobilities[i], m_particleRealm, m_plasmaPhase);
+  }
+
+  // Interpolate mobilities to the particle position.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    const int                 idx    = solverIt.index();
     RefCountedPtr<ItoSolver>& solver = solverIt();
 
     if (solver->isMobile()) {
-      a_meshMobilities[idx]->copy(m_fscratch1[idx]);
-
-      m_amr->conservativeAverage(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhost(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
-
       solver->interpolateMobilities();
     }
   }
@@ -1914,7 +1926,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
 
   const Real     dx      = m_amr->getDx()[a_level];
   const RealVect probLo  = m_amr->getProbLo();
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl][dit()];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
 
   // Handle to regular data.
   const FArrayBox&   electricFieldReg = a_electricField.getFArrayBox();
@@ -1969,9 +1981,9 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
 }
 
 void
-ItoPlasmaStepper::computeItoMobilitiesLEA()
+ItoPlasmaStepper::computeItoMobilitiesLEA() noexcept
 {
-  CH_TIME("ItoPlasmaStepper");
+  CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLEA()");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::computeItoMobilitiesLEA()" << endl;
   }
@@ -1983,74 +1995,77 @@ ItoPlasmaStepper::computeItoMobilitiesLEA()
 }
 
 void
-ItoPlasmaStepper::computeItoDiffusionLFA()
+ItoPlasmaStepper::computeItoDiffusionLFA() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA()");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::computeItoDiffusionLFA()" << endl;
   }
 
-  Vector<EBAMRCellData*> diffco_funcs = m_ito->getDiffusionFunctions();
-  Vector<EBAMRCellData*> densities    = m_ito->getDensities();
+  Vector<EBAMRCellData*> diffusionCoefficients = m_ito->getDiffusionFunctions();
+  Vector<EBAMRCellData*> densities             = m_ito->getDensities();
 
-  this->computeItoDiffusionLFA(diffco_funcs, densities, m_electricFieldParticle, m_time);
+  this->computeItoDiffusionLFA(diffusionCoefficients, densities, m_electricFieldFluid, m_time);
 }
 
 void
-ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusionCoefficient_funcs,
+ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusionCoefficients,
                                          const Vector<EBAMRCellData*>& a_densities,
-                                         const EBAMRCellData&          a_E,
-                                         const Real                    a_time)
+                                         const EBAMRCellData&          a_electricField,
+                                         const Real                    a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, time)");
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData>x2, EBAMRCellData, Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, time)" << endl;
+    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData>x2, EBAMRCellData, Real)" << endl;
   }
 
-  // TLDR: In this routine we make m_fscratch1 hold the diffusion coefficients on the fluid Realm and m_fscratch2 hold the particle densities on the fluid Realm.
-  //       This requires a couple of copies.
+  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
 
-  // 1. Copy particle Realm densities to fluid Realm scratch data.
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx = solverIt.index();
+  CH_assert(a_electricField.getRealm() == m_fluidRealm);
+  CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
+  CH_assert(a_densities.size() == numPlasmaSpecies);
 
-    m_fscratch2[idx].copy(*a_densities[idx]);
+  // The mesh diffusion coefficients belong on the particle realm (they are the ItoSolver diffusion coefficients) but we need to run
+  // the computation on the fluid realm. So, create some transient storage for that.
+  Vector<EBAMRCellData> fluidScratchDiffusion(numPlasmaSpecies);
+  Vector<EBAMRCellData> fluidScratchDensities(numPlasmaSpecies);
+  for (int i = 0; i < numPlasmaSpecies; i++) {
+    m_amr->allocate(fluidScratchDiffusion[i], m_fluidRealm, m_plasmaPhase, 1);
+    m_amr->allocate(fluidScratchDensities[i], m_fluidRealm, m_plasmaPhase, 1);
+
+    // Copy particle realm data over to fluid realm
+    fluidScratchDensities[i].copy(*(a_densities[i]));
+
+    CH_assert(a_diffusionCoefficients[i].getRealm() == m_particleRealm);
+    CH_assert(a_densities[i].getRealm() == m_particleRealm);
   }
 
-  // 2. Compute on each level. On the fluid Realm.
+  // Compute mesh-based diffusion coefficients on the fluid realm.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-
-    const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-
-    Vector<LevelData<EBCellFAB>*> diffco_funcs(numPlasmaSpecies);
+    Vector<LevelData<EBCellFAB>*> diffusionCoefficients(numPlasmaSpecies);
     Vector<LevelData<EBCellFAB>*> densities(numPlasmaSpecies);
 
-    for (int idx = 0; idx < a_diffusionCoefficient_funcs.size(); idx++) {
-      diffco_funcs[idx] = &(*(m_fscratch1[idx])[lvl]);
-      densities[idx]    = &(*(m_fscratch2[idx])[lvl]);
+    for (int i = 0; i < numPlasmaSpecies; i++) {
+      diffusionCoefficients[i] = &(*(fluidScratchDiffusion[i])[lvl]);
+      densities[i]             = &(*(fluidScratchDensities[i])[lvl]);
     }
 
-    this->computeItoDiffusionLFA(diffco_funcs, densities, *m_electricFieldFluid[lvl], lvl, a_time);
+    this->computeItoDiffusionLFA(diffusionCoefficients, densities, *a_electricField[lvl], lvl, a_time);
   }
 
-  // Average down, interpolate ghost cells, and then interpolate to particle positions
+  // Copy the fluid realm data over to the particle realm data and then coarsen and update ghost cells.
+  for (int i = 0; i < numPlasmaSpecies; i++) {
+    a_diffusionCoefficients[i]->copy(fluidScratchDiffusion[i]);
+
+    m_amr->conservativeAverage(*a_diffusionCoefficients[i], m_particleRealm, m_plasmaPhase);
+    m_amr->interpGhost(*a_diffusionCoefficients[i], m_particleRealm, m_plasmaPhase);
+  }
+
+  // Interpolate diffusion coefficients to particle positions.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    const int                 idx    = solverIt.index();
     RefCountedPtr<ItoSolver>& solver = solverIt();
 
     if (solver->isDiffusive()) {
-
-#if 0 // In principle, we should be able to average down and interpolate ghost cells on the fluid Realm, and copy the entire result over to the particle Realm.
-      m_amr->conservativeAverage(m_fscratch1[idx], m_fluidRealm, m_plasmaPhase);
-      m_amr->interpGhost(m_fscratch2[idx], m_fluidRealm, m_plasmaPhase);
-      a_diffusionCoefficient_funcs[idx]->copy(m_fluidScratch1[idx]);
-#else // Instead, we copy to the particle Realm and average down there, then interpolate.
-      a_diffusionCoefficient_funcs[idx]->copy(m_fscratch1[idx]);
-
-      m_amr->conservativeAverage(*a_diffusionCoefficient_funcs[idx], m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhost(*a_diffusionCoefficient_funcs[idx], m_particleRealm, m_plasmaPhase);
-#endif
-
       solver->interpolateDiffusion();
     }
   }

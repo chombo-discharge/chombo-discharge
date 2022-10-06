@@ -255,19 +255,14 @@ ItoPlasmaGodunovStepper::allocateInternals()
     pout() << m_name + "::allocateInternals" << endl;
   }
 
+  // Call parent method first
+  ItoPlasmaStepper::allocateInternals();
+
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
   const int num_rtSpecies  = m_physics->getNumRtSpecies();
 
   m_amr->allocate(m_scratch1, m_fluidRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_scratch2, m_fluidRealm, m_plasmaPhase, 1);
-
-  // Allocate fluid scratch storage
-  m_fscratch1.resize(num_ItoSpecies);
-  m_fscratch2.resize(num_ItoSpecies);
-  for (int i = 0; i < num_ItoSpecies; i++) {
-    m_amr->allocate(m_fscratch1[i], m_fluidRealm, m_plasmaPhase, 1);
-    m_amr->allocate(m_fscratch2[i], m_fluidRealm, m_plasmaPhase, 1);
-  }
 }
 
 Real

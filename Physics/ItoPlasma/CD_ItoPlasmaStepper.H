@@ -494,7 +494,7 @@ namespace Physics {
 	@brief Deposit a subset of the ItoSolver particles on the mesh
 	@param[in] a_speciesSubset Subset of species to deposit
 	@param[in] a_container     Which container in ItoSolver to deposit. 
-      */      
+      */
       virtual void
       depositParticles(const SpeciesSubset a_speciesSubset, const ItoSolver::WhichContainer a_container) noexcept;
 
@@ -505,7 +505,7 @@ namespace Physics {
       */
       virtual void
       remapParticles(const SpeciesSubset a_speciesSubset) noexcept;
-      
+
       /*!
 	@brief Remap a subset of ItoSolver particles
 	@param[in] a_speciesSubset Subset of species to remap
@@ -531,7 +531,7 @@ namespace Physics {
       /*!
 	@brief Compute ItoSolver velocities.
 	@details This will compute the diffusion coefficients (in the specified coupling regime)
-      */      
+      */
       virtual void
       computeItoDiffusion() noexcept;
 
@@ -549,7 +549,9 @@ namespace Physics {
 	@param[in]  a_time           Time
       */
       virtual void
-      computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_electricField, const Real a_time) noexcept;
+      computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities,
+                              const EBAMRCellData&    a_electricField,
+                              const Real              a_time) noexcept;
 
       /*!
 	@brief Level-routine when computing mesh-based mobilities for LFA coupling
@@ -557,7 +559,7 @@ namespace Physics {
 	@param[in]  a_electricField  Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_level          Grid level
 	@param[in]  a_time           Time
-      */      
+      */
       virtual void
       computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>*>& a_meshMobilities,
                               const LevelData<EBCellFAB>&    a_E,
@@ -581,25 +583,32 @@ namespace Physics {
                               const Box           a_cellBox,
                               const Real          a_time) noexcept;
 
-      // Routines for computing mobilities in the LEA. This runs through all the particles and calls a mobility computation function,
-      // which you must implement in ItoSpecies
-      void
-      computeItoMobilitiesLEA();
-      void
-      computeItoMobilitiesLEA(Vector<ParticleContainer<ItoParticle>*>& a_particles);
-      void
-      computeItoMobilitiesLEA(Vector<ParticleData<ItoParticle>*>& a_particles);
+      /*!
+	@brief Compute the IonSolver particle mobilities in the LEA coupling regime
+	@note This one is very simple because the solvers just update the mobilities from appropriate coupling functions. 
+      */
+      virtual void
+      computeItoMobilitiesLEA() noexcept;
 
-      // Routines for computing diffusion coefficients.
-      // These routines compute the diffusion coefficients by computing D(E)
-      // as a mesh variable, and then interpolating that to the particle position.
-      void
-      computeItoDiffusionLFA();
-      void
+      /*!
+	@brief Compute mesh-based diffusion coefficients for LFA coupling
+	@note Calls the other version with diffusion coefficients taken from ItoSolver solvers. 
+      */
+      virtual void
+      computeItoDiffusionLFA() noexcept;
+
+      /*!
+	@brief Compute mesh-based diffusion coefficients for LFA coupling
+	@param[out] a_diffusionCoefficients Mesh-based diffusion coefficients. Must be defined on the particle realm. 
+	@param[in]  a_electricField         Electric field. Must be defined on the fluid realm. 
+	@param[in]  a_time                  Time
+      */
+      virtual void
       computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusionCoefficient,
                              const Vector<EBAMRCellData*>& a_densities,
-                             const EBAMRCellData&          a_E,
-                             const Real                    a_time);
+                             const EBAMRCellData&          a_electricField,
+                             const Real                    a_time) noexcept;
+
       void
       computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_diffusionCoefficient,
                              const Vector<LevelData<EBCellFAB>*>& a_densities,
@@ -1049,11 +1058,6 @@ namespace Physics {
 	@brief Scratch storage on the particle realm with SpaceDim components
       */
       mutable EBAMRCellData m_particleScratchD;
-
-      mutable Vector<EBAMRCellData>
-        m_fscratch1; // Scratch storage with a single component for all species. On the fluid Realm.
-      mutable Vector<EBAMRCellData>
-        m_fscratch2; // Scratch storage with a single component for all species. On the fluid Realm.
 
       /*!
 	@brief Compute some particle statistics
