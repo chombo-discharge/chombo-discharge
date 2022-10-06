@@ -1528,7 +1528,7 @@ ItoPlasmaStepper::transferCoveredParticles(const SpeciesSubset             a_spe
 }
 
 void
-ItoPlasmaStepper::remapParticles(const SpeciesSubset a_speciesSubset)
+ItoPlasmaStepper::remapParticles(const SpeciesSubset a_speciesSubset) noexcept
 {
   CH_TIME("ItoPlasmaStepper::remapParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
@@ -1539,7 +1539,8 @@ ItoPlasmaStepper::remapParticles(const SpeciesSubset a_speciesSubset)
 }
 
 void
-ItoPlasmaStepper::remapParticles(const SpeciesSubset a_speciesSubset, const ItoSolver::WhichContainer a_container)
+ItoPlasmaStepper::remapParticles(const SpeciesSubset             a_speciesSubset,
+                                 const ItoSolver::WhichContainer a_container) noexcept
 {
   CH_TIME("ItoPlasmaStepper::remapParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
@@ -1554,48 +1555,74 @@ ItoPlasmaStepper::remapParticles(const SpeciesSubset a_speciesSubset, const ItoS
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->getChargeNumber() != 0;
+    const bool charged   = (species->getChargeNumber() != 0);
 
     switch (a_speciesSubset) {
-    case SpeciesSubset::All:
+    case SpeciesSubset::All: {
       solver->remap(a_container);
+
       break;
-    case SpeciesSubset::AllMobile:
-      if (mobile)
+    }
+    case SpeciesSubset::AllMobile: {
+      if (mobile) {
         solver->remap(a_container);
+      }
+
       break;
-    case SpeciesSubset::AllDiffusive:
-      if (diffusive)
+    }
+    case SpeciesSubset::AllDiffusive: {
+      if (diffusive) {
         solver->remap(a_container);
+      }
+
       break;
-    case SpeciesSubset::ChargedMobile:
-      if (charged && mobile)
+    }
+    case SpeciesSubset::ChargedMobile: {
+      if (charged && mobile) {
         solver->remap(a_container);
+      }
+
       break;
-    case SpeciesSubset::ChargedDiffusive:
-      if (charged && diffusive)
+    }
+    case SpeciesSubset::ChargedDiffusive: {
+      if (charged && diffusive) {
         solver->remap(a_container);
+      }
+
       break;
-    case SpeciesSubset::AllMobileOrDiffusive:
-      if (mobile || diffusive)
+    }
+    case SpeciesSubset::AllMobileOrDiffusive: {
+      if (mobile || diffusive) {
         solver->remap(a_container);
+      }
+
       break;
-    case SpeciesSubset::ChargedAndMobileOrDiffusive:
-      if (charged && (mobile || diffusive))
+    }
+    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
+      if (charged && (mobile || diffusive)) {
         solver->remap(a_container);
+      }
+
       break;
-    case SpeciesSubset::Stationary:
-      if (!mobile && !diffusive)
+    }
+    case SpeciesSubset::Stationary: {
+      if (!mobile && !diffusive) {
         solver->remap(a_container);
+      }
+
       break;
-    default:
-      MayDay::Abort("ItoPlasmaStepper::remapParticles(which particles) - logic bust");
+    }
+    default: {
+      MayDay::Abort("ItoPlasmaStepper::remapParticles - logic bust");
+
+      break;
+    }
     }
   }
 }
 
 void
-ItoPlasmaStepper::depositParticles(const SpeciesSubset a_speciesSubset)
+ItoPlasmaStepper::depositParticles(const SpeciesSubset a_speciesSubset) noexcept
 {
   CH_TIME("ItoPlasmaStepper::depositParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
@@ -1606,7 +1633,8 @@ ItoPlasmaStepper::depositParticles(const SpeciesSubset a_speciesSubset)
 }
 
 void
-ItoPlasmaStepper::depositParticles(const SpeciesSubset a_speciesSubset, const ItoSolver::WhichContainer a_container)
+ItoPlasmaStepper::depositParticles(const SpeciesSubset             a_speciesSubset,
+                                   const ItoSolver::WhichContainer a_container) noexcept
 {
   CH_TIME("ItoPlasmaStepper::depositParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
@@ -1621,48 +1649,74 @@ ItoPlasmaStepper::depositParticles(const SpeciesSubset a_speciesSubset, const It
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-    const bool charged   = species->getChargeNumber() != 0;
+    const bool charged   = (species->getChargeNumber() != 0);
 
     switch (a_speciesSubset) {
-    case SpeciesSubset::All:
+    case SpeciesSubset::All: {
       solver->depositParticles(a_container);
+
       break;
-    case SpeciesSubset::AllMobile:
-      if (mobile)
+    }
+    case SpeciesSubset::AllMobile: {
+      if (mobile) {
         solver->depositParticles(a_container);
+      }
+
       break;
-    case SpeciesSubset::AllDiffusive:
-      if (diffusive)
+    }
+    case SpeciesSubset::AllDiffusive: {
+      if (diffusive) {
         solver->depositParticles(a_container);
+      }
+
       break;
-    case SpeciesSubset::ChargedMobile:
-      if (charged && mobile)
+    }
+    case SpeciesSubset::ChargedMobile: {
+      if (charged && mobile) {
         solver->depositParticles(a_container);
+      }
+
       break;
-    case SpeciesSubset::ChargedDiffusive:
-      if (charged && diffusive)
+    }
+    case SpeciesSubset::ChargedDiffusive: {
+      if (charged && diffusive) {
         solver->depositParticles(a_container);
+      }
+
       break;
-    case SpeciesSubset::AllMobileOrDiffusive:
-      if (mobile || diffusive)
+    }
+    case SpeciesSubset::AllMobileOrDiffusive: {
+      if (mobile || diffusive) {
         solver->depositParticles(a_container);
+      }
+
       break;
-    case SpeciesSubset::ChargedAndMobileOrDiffusive:
-      if (charged && (mobile || diffusive))
+    }
+    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
+      if (charged && (mobile || diffusive)) {
         solver->depositParticles(a_container);
+      }
+
       break;
-    case SpeciesSubset::Stationary:
-      if (!mobile && !diffusive)
+    }
+    case SpeciesSubset::Stationary: {
+      if (!mobile && !diffusive) {
         solver->depositParticles(a_container);
+      }
+
       break;
-    default:
-      MayDay::Abort("ItoPlasmaStepper::depositParticles(SpeciesSubset) - logic bust");
+    }
+    default: {
+      MayDay::Abort("ItoPlasmaStepper::depositParticles - logic bust");
+
+      break;
+    }
     }
   }
 }
 
 void
-ItoPlasmaStepper::setItoVelocityFunctions()
+ItoPlasmaStepper::setItoVelocityFunctions() noexcept
 {
   CH_TIME("ItoPlasmaStepper::setItoVelocityFunctions");
   if (m_verbosity > 5) {
@@ -1674,69 +1728,95 @@ ItoPlasmaStepper::setItoVelocityFunctions()
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     if (solver->isMobile()) {
-      EBAMRCellData& velo_func = solver->getVelocityFunction();
-      velo_func.copy(m_electricFieldParticle);
+      EBAMRCellData& velocityFunction = solver->getVelocityFunction();
+      velocityFunction.copy(m_electricFieldParticle);
 
-      const int q = species->getChargeNumber();
-      const int s = (q > 0) - (q < 0);
+      const int Z = species->getChargeNumber();
 
-      DataOps::scale(velo_func, s);
+      if (Z < 0) {
+        DataOps::scale(velocityFunction, -1.0);
+      }
+      else if (Z == 0) {
+        MayDay::Warning("ItoPlasmaStepper::setItoVelocityFunctions -- what to do about sign for neutral species?");
+      }
+
+      // Coarsen and update ghost cells.
+      m_amr->conservativeAverage(velocityFunction, m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhost(velocityFunction, m_particleRealm, m_plasmaPhase);
     }
   }
 }
 
 void
-ItoPlasmaStepper::computeItoVelocities()
+ItoPlasmaStepper::computeItoVelocities() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoVelocities()");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::computeItoVelocities()" << endl;
   }
 
-  const ItoPlasmaPhysics::coupling which_coupling = m_physics->getCoupling();
+  const ItoPlasmaPhysics::coupling fieldCoupling = m_physics->getCoupling();
 
-  // Set velocity functions
+  // Set the ItoSolver velocity functions.
   this->setItoVelocityFunctions();
 
   // Compute mobilities based on appropriate coupling
-  switch (which_coupling) {
-  case ItoPlasmaPhysics::coupling::LFA:
+  switch (fieldCoupling) {
+  case ItoPlasmaPhysics::coupling::LFA: {
     this->computeItoMobilitiesLFA();
-    break;
-  case ItoPlasmaPhysics::coupling::LEA:
-    this->computeItoMobilitiesLEA();
+
     break;
   }
+  case ItoPlasmaPhysics::coupling::LEA: {
+    this->computeItoMobilitiesLEA();
 
-  // Interpolate velocity function to particle position
+    break;
+  }
+  default: {
+    MayDay::Error("ItoPlasmaStepper::computeItoVelocities - logic bust");
+
+    break;
+  }
+  }
+
+  // Interpolate velocity function to particle position so that particles get velocity v = +/- mu*E
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    solverIt()->interpolateVelocities(); // Interpolates v = +/- mu*E
+    solverIt()->interpolateVelocities();
   }
 }
 
 void
-ItoPlasmaStepper::computeItoDiffusion()
+ItoPlasmaStepper::computeItoDiffusion() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoDiffusion()");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::computeItoDiffusion()" << endl;
   }
 
-  const ItoPlasmaPhysics::coupling which_coupling = m_physics->getCoupling();
+  const ItoPlasmaPhysics::coupling fieldCoupling = m_physics->getCoupling();
 
   // Compute mobilities based on appropriate coupling
-  switch (which_coupling) {
-  case ItoPlasmaPhysics::coupling::LFA:
+  switch (fieldCoupling) {
+  case ItoPlasmaPhysics::coupling::LFA: {
     this->computeItoDiffusionLFA();
+
     break;
-  case ItoPlasmaPhysics::coupling::LEA:
-    this->computeItoDiffusion_lea();
+  }
+  case ItoPlasmaPhysics::coupling::LEA: {
+    this->computeItoDiffusionLEA();
+
     break;
+  }
+  default: {
+    MayDay::Error("ItoPlasmaStepper::computeItoDiffusion - logic bust");
+
+    break;
+  }
   }
 }
 
 void
-ItoPlasmaStepper::computeItoMobilitiesLFA()
+ItoPlasmaStepper::computeItoMobilitiesLFA() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA()");
   if (m_verbosity > 5) {
@@ -1744,28 +1824,34 @@ ItoPlasmaStepper::computeItoMobilitiesLFA()
   }
 
   Vector<EBAMRCellData*> meshMobilities = m_ito->getMobilityFunctions();
+
   this->computeItoMobilitiesLFA(meshMobilities, m_electricFieldFluid, m_time);
 }
 
 void
 ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities,
-                                          const EBAMRCellData&    a_E,
-                                          const Real              a_time)
+                                          const EBAMRCellData&    a_electricField,
+                                          const Real              a_time) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, time)");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, time)" << endl;
   }
 
+  CH_assert(a_electricField.getRealm() = m_fluidRealm);
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
 
-    // Computation is done on the fluid Realm.
+    // Computation is done on the fluid realm but the mesh mobilities are defined on the particle realm.
     Vector<LevelData<EBCellFAB>*> meshMobilities;
     for (int i = 0; i < a_meshMobilities.size(); i++) {
       meshMobilities.push_back(&(*(m_fscratch1[i])[lvl]));
+
+      CH_assert(a_meshMobilities[i]->getRealm() == m_particleRealm);
     }
 
-    this->computeItoMobilitiesLFA(meshMobilities, *a_E[lvl], lvl, a_time);
+    // Run the level computation.
+    this->computeItoMobilitiesLFA(meshMobilities, *a_electricField[lvl], lvl, a_time);
   }
 
   // Average down and interpolate ghost cells. Then interpolate mobilities to particle positions.
@@ -1774,20 +1860,10 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
     RefCountedPtr<ItoSolver>& solver = solverIt();
 
     if (solver->isMobile()) {
-
-#if 0 // In principle, we should be able to average down and interpolate on the fluid Realm and then copy directly to the particle Realm. \
-      // But we need to make sure that EBAMRData::copy also gets ghost cells 
-      m_amr->conservativeAverage(m_fscratch1[idx], m_fluidRealm, m_plasmaPhase);
-      m_amr->interpGhost(m_fscratch1[idx], m_fluidRealm, m_plasmaPhase);
-
-      a_meshMobilities[idx]->copy(m_fscratch1[idx]);
-#else
-      // Copy to particle Realm, build ghost cells and the interpolate the mobilities to particle positions.
       a_meshMobilities[idx]->copy(m_fscratch1[idx]);
 
       m_amr->conservativeAverage(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
       m_amr->interpGhost(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
-#endif
 
       solver->interpolateMobilities();
     }
@@ -1796,9 +1872,9 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
 
 void
 ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>*>& a_meshMobilities,
-                                          const LevelData<EBCellFAB>&    a_E,
+                                          const LevelData<EBCellFAB>&    a_electricField,
                                           const int                      a_level,
-                                          const Real                     a_time)
+                                          const Real                     a_time) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, level, time)");
   if (m_verbosity > 5) {
@@ -1807,74 +1883,88 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>*>& a_meshM
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const EBCellFAB& E  = a_E[dit()];
-    const Box        bx = dbl.get(dit());
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const EBCellFAB& E       = a_electricField[dit()];
+    const Box        cellBox = dbl[dit()];
 
     Vector<EBCellFAB*> meshMobilities;
     for (int i = 0; i < a_meshMobilities.size(); i++) {
       meshMobilities.push_back(&((*a_meshMobilities[i])[dit()]));
     }
 
-    this->computeItoMobilitiesLFA(meshMobilities, E, a_level, dit(), bx, a_time);
+    this->computeItoMobilitiesLFA(meshMobilities, E, a_level, dit(), cellBox, a_time);
   }
 }
 
 void
 ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
-                                          const EBCellFAB&    a_E,
+                                          const EBCellFAB&    a_electricField,
                                           const int           a_level,
                                           const DataIndex     a_dit,
                                           const Box           a_box,
-                                          const Real          a_time)
+                                          const Real          a_time) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)" << endl;
   }
 
-  const int            comp    = 0;
-  const Real           dx      = m_amr->getDx()[a_level];
-  const RealVect       prob_lo = m_amr->getProbLo();
-  const BaseFab<Real>& E       = a_E.getSingleValuedFAB();
+  // TLDR: We go through each and every cell and call the physics interface. This includes cells covered by a finer grid
+  //       but data is coarsened later anyways.
 
-  // Do regular cells
-  for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-    const IntVect  iv  = bit();
-    const RealVect pos = m_amr->getProbLo() + dx * (RealVect(iv) + 0.5 * RealVect::Unit);
-    const RealVect e   = RealVect(D_DECL(E(iv, 0), E(iv, 1), E(iv, 2)));
+  const Real     dx      = m_amr->getDx()[a_level];
+  const RealVect probLo  = m_amr->getProbLo();
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl][dit()];
 
-    // Call ito_physics and compute diffusion for each particle species
-    const Vector<Real> mobilities = m_physics->computeItoMobilitiesLFA(a_time, pos, e);
-
-    // Put mobilities in data holder
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx                                           = solverIt.index();
-      (*a_meshMobilities[idx]).getSingleValuedFAB()(iv, comp) = mobilities[idx];
-    }
+  // Handle to regular data.
+  const FArrayBox&   electricFieldReg = a_electricField.getFArrayBox();
+  Vector<FArrayBox*> meshMobilitiesReg;
+  for (int i = 0; i < a_meshMobilities.size(); i++) {
+    meshMobilitiesReg.push_back(&(a_meshMobilities[i]->getFArrayBox()));
   }
 
-  // Do irregular cells
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit) {
-    const VolIndex& vof = vofit();
-    const RealVect  e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
-    const RealVect  pos = EBArith::getVofLocation(vof, dx * RealVect::Unit, prob_lo);
+  // Regular kernel
+  auto regularKernel = [&](const IntVect& iv) -> void {
+    const RealVect pos = m_amr->getProbLo() + dx * (RealVect(iv) + 0.5 * RealVect::Unit);
+    const RealVect E   = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+
+    // Call ito_physics and compute mobilities for each particle species
+    const Vector<Real> mobilities = m_physics->computeItoMobilitiesLFA(a_time, pos, E);
+
+    // Put mobilities in appropriate data holder
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
+
+      (*meshMobilitiesReg[idx])(iv, 0) = mobilities[idx];
+    }
+  };
+
+  // Irregular kernel.
+  auto irregularKernel = [&](const VolIndex& vof) -> void {
+    const RealVect e   = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
+    const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 
     // Compute diffusion
     const Vector<Real> mobilities = m_physics->computeItoMobilitiesLFA(a_time, pos, e);
 
     // Put diffusion in the appropriate place.
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx                       = solverIt.index();
-      (*a_meshMobilities[idx])(vof, comp) = mobilities[idx];
+      const int idx = solverIt.index();
+
+      (*a_meshMobilities[idx])(vof, 0) = mobilities[idx];
     }
-  }
+  };
+
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
+
+  // Run the kernels.
+  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);
 
   // Covered is bogus.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
-    a_meshMobilities[idx]->setCoveredCellVal(0.0, comp);
+    a_meshMobilities[idx]->setCoveredCellVal(0.0, 0);
   }
 }
 
@@ -2016,10 +2106,10 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
     pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, dit, time)" << endl;
   }
 
-  const int            comp    = 0;
-  const Real           dx      = m_amr->getDx()[a_level];
-  const RealVect       prob_lo = m_amr->getProbLo();
-  const BaseFab<Real>& E       = a_E.getSingleValuedFAB();
+  const int            comp   = 0;
+  const Real           dx     = m_amr->getDx()[a_level];
+  const RealVect       probLo = m_amr->getProbLo();
+  const BaseFab<Real>& E      = a_E.getSingleValuedFAB();
 
   // Do regular cells
   for (BoxIterator bit(a_box); bit.ok(); ++bit) {
@@ -2052,7 +2142,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
   for (vofit.reset(); vofit.ok(); ++vofit) {
     const VolIndex& vof = vofit();
     const RealVect  e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
-    const RealVect  pos = EBArith::getVofLocation(vof, dx * RealVect::Unit, prob_lo);
+    const RealVect  pos = EBArith::getVofLocation(vof, dx * RealVect::Unit, probLo);
 
     // Get densities
     Vector<Real> densities;
@@ -2083,11 +2173,11 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
 }
 
 void
-ItoPlasmaStepper::computeItoDiffusion_lea()
+ItoPlasmaStepper::computeItoDiffusionLEA()
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusion_lea()");
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLEA()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoDiffusion_lea()" << endl;
+    pout() << "ItoPlasmaStepper::computeItoDiffusionLEA()" << endl;
   }
 
   // This is really simple because the solvers do this directly... No monkeying with interpolations or anything.
@@ -2396,7 +2486,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
   const int numPhotonSpecies = m_physics->getNumRtSpecies();
 
-  const RealVect prob_lo = m_amr->getProbLo();
+  const RealVect probLo = m_amr->getProbLo();
 
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
   const EBISBox& ebgraph = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
@@ -2416,7 +2506,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
       const Real kappa = 1.0;
       const Real dV    = kappa * pow(a_dx, SpaceDim);
 
-      const RealVect pos = prob_lo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
+      const RealVect pos = probLo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
       const RealVect E   = RealVect(D_DECL(Efab(iv, 0), Efab(iv, 1), Efab(iv, 2)));
 
       // Initialize for this cell.
@@ -2451,7 +2541,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
     const VolIndex& vof   = vofit();
     const Real      kappa = ebisbox.volFrac(vof);
     const Real      dV    = kappa * pow(a_dx, SpaceDim);
-    const RealVect  pos   = EBArith::getVofLocation(vof, a_dx * RealVect::Unit, prob_lo);
+    const RealVect  pos   = EBArith::getVofLocation(vof, a_dx * RealVect::Unit, probLo);
     const RealVect  E     = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
 
     // Initialize for this cell.
@@ -2544,7 +2634,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
   const int numPhotonSpecies = m_physics->getNumRtSpecies();
 
-  const RealVect prob_lo = m_amr->getProbLo();
+  const RealVect probLo = m_amr->getProbLo();
 
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
   const EBISBox& ebgraph = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
@@ -2577,7 +2667,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
   for (BoxIterator bit(a_box); bit.ok(); ++bit) {
     const IntVect iv = bit();
     if (ebisbox.isRegular(iv)) {
-      const RealVect cellPos       = prob_lo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
+      const RealVect cellPos       = probLo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
       const RealVect centroidPos   = cellPos;
       const RealVect lo            = -0.5 * RealVect::Unit;
       const RealVect hi            = 0.5 * RealVect::Unit;
@@ -2653,7 +2743,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
     const VolIndex& vof           = vofit();
     const IntVect   iv            = vof.gridIndex();
     const Real      kappa         = ebisbox.volFrac(vof);
-    const RealVect  cellPos       = EBArith::getVofLocation(vof, a_dx * RealVect::Unit, prob_lo);
+    const RealVect  cellPos       = EBArith::getVofLocation(vof, a_dx * RealVect::Unit, probLo);
     const RealVect  centroidPos   = ebisbox.centroid(vof);
     const RealVect  bndryCentroid = ebisbox.bndryCentroid(vof);
     const RealVect  bndryNormal   = ebisbox.normal(vof);
@@ -2910,8 +3000,8 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
   const int numPhotonSpecies = m_physics->getNumRtSpecies();
 
-  const RealVect prob_lo = m_amr->getProbLo();
-  const RealVect dx      = a_dx * RealVect::Unit;
+  const RealVect probLo = m_amr->getProbLo();
+  const RealVect dx     = a_dx * RealVect::Unit;
 
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_lvl][a_dit];
   const EBISBox& ebgraph = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_lvl][a_dit];
@@ -2924,7 +3014,7 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
 
     if (ebisbox.isRegular(iv)) {
       const Real     kappa = 1.0;
-      const RealVect pos   = prob_lo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
+      const RealVect pos   = probLo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
       const RealVect e     = RealVect(D_DECL(Efab(iv, 0), Efab(iv, 1), Efab(iv, 2)));
 
       Vector<List<ItoParticle>*> particles(numPlasmaSpecies);
@@ -2969,7 +3059,7 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
   for (vofit.reset(); vofit.ok(); ++vofit) {
     const VolIndex vof   = vofit();
     const IntVect  iv    = vof.gridIndex();
-    const RealVect pos   = prob_lo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
+    const RealVect pos   = probLo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
     const RealVect cen   = ebisbox.centroid(vof);
     const Real     kappa = ebisbox.volFrac(vof);
     const RealVect e     = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
@@ -3121,7 +3211,7 @@ ItoPlasmaStepper::computePhysicsDt(const EBCellFAB&         a_E,
 
   const int            comp    = 0;
   const Real           dx      = m_amr->getDx()[a_level];
-  const RealVect       prob_lo = m_amr->getProbLo();
+  const RealVect       probLo  = m_amr->getProbLo();
   const BaseFab<Real>& E       = a_E.getSingleValuedFAB();
   const EBISBox&       ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
 
@@ -3151,7 +3241,7 @@ ItoPlasmaStepper::computePhysicsDt(const EBCellFAB&         a_E,
   for (vofit.reset(); vofit.ok(); ++vofit) {
     const VolIndex& vof = vofit();
     const RealVect  e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
-    const RealVect  pos = EBArith::getVofLocation(vof, dx * RealVect::Unit, prob_lo);
+    const RealVect  pos = EBArith::getVofLocation(vof, dx * RealVect::Unit, probLo);
 
     Vector<Real> densities(numPlasmaSpecies);
 

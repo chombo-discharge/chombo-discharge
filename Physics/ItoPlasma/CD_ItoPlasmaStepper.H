@@ -483,43 +483,103 @@ namespace Physics {
       virtual bool
       solvePoisson() noexcept;
 
-      // Remap and deposition routines for solver subsets.
-      void
-      depositParticles(const SpeciesSubset a_SpeciesSubset);
-      void
-      depositParticles(const SpeciesSubset a_SpeciesSubset, const ItoSolver::WhichContainer a_container);
-      void
-      remapParticles(const SpeciesSubset a_SpeciesSubset);
-      void
-      remapParticles(const SpeciesSubset a_SpeciesSubset, const ItoSolver::WhichContainer a_container);
+      /*!
+	@brief Deposit a subset of the ItoSolver particles on the mesh
+	@note Calls the other version with ItoSolver::WhichContainer::Bulk
+      */
+      virtual void
+      depositParticles(const SpeciesSubset a_speciesSubset) noexcept;
 
-      // This sets the velocity function for each species. This is sgn(charge)*E
-      void
-      setItoVelocityFunctions();
+      /*!
+	@brief Deposit a subset of the ItoSolver particles on the mesh
+	@param[in] a_speciesSubset Subset of species to deposit
+	@param[in] a_container     Which container in ItoSolver to deposit. 
+      */      
+      virtual void
+      depositParticles(const SpeciesSubset a_speciesSubset, const ItoSolver::WhichContainer a_container) noexcept;
 
-      // Routines for computing velocities and diffusion coefficients
-      void
-      computeItoVelocities();
-      void
-      computeItoDiffusion();
+      /*!
+	@brief Remap a subset of ItoSolver particles
+	@param[in] a_speciesSubset Subset of species to remap
+	@note Calls the other version with ItoSolver::WhichContainer::Bulk
+      */
+      virtual void
+      remapParticles(const SpeciesSubset a_speciesSubset) noexcept;
+      
+      /*!
+	@brief Remap a subset of ItoSolver particles
+	@param[in] a_speciesSubset Subset of species to remap
+	@param[in] a_container     Which container in ItoSolver to remap.       
+      */
+      virtual void
+      remapParticles(const SpeciesSubset a_speciesSubset, const ItoSolver::WhichContainer a_container) noexcept;
 
-      // Routines for computing mobilities in the LFA. This computes mesh-defined mobilities and interpolates them to the particle positions
-      void
-      computeItoMobilitiesLFA();
-      void
-      computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time);
-      void
+      /*!
+	@brief Set the Ito velocity functions. This is sgn(charge) * E
+	@note This should be set before ItoSolver computes velocities. 
+      */
+      virtual void
+      setItoVelocityFunctions() noexcept;
+
+      /*!
+	@brief Compute ItoSolver velocities.
+	@details This will compute the mobilities and then interpolate mu*E to particle positions.  
+      */
+      virtual void
+      computeItoVelocities() noexcept;
+
+      /*!
+	@brief Compute ItoSolver velocities.
+	@details This will compute the diffusion coefficients (in the specified coupling regime)
+      */      
+      virtual void
+      computeItoDiffusion() noexcept;
+
+      /*!
+	@brief Compute mesh-based mobilities for LFA coupling
+	@note Calls the other version with mesh mobilities taken from ItoSolver solvers. 
+      */
+      virtual void
+      computeItoMobilitiesLFA() noexcept;
+
+      /*!
+	@brief Compute mesh-based mobilities for LFA coupling
+	@param[out] a_meshMobilities Mesh-based mobilities. Must be defined on the particle realm. 
+	@param[in]  a_electricField  Electric field. Must be defined on the fluid realm. 
+	@param[in]  a_time           Time
+      */
+      virtual void
+      computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_electricField, const Real a_time) noexcept;
+
+      /*!
+	@brief Level-routine when computing mesh-based mobilities for LFA coupling
+	@param[out] a_meshMobilities Mesh-based mobilities. Must be defined on the fluid realm. 
+	@param[in]  a_electricField  Electric field. Must be defined on the fluid realm. 
+	@param[in]  a_level          Grid level
+	@param[in]  a_time           Time
+      */      
+      virtual void
       computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>*>& a_meshMobilities,
                               const LevelData<EBCellFAB>&    a_E,
                               const int                      a_level,
-                              const Real                     a_time);
-      void
+                              const Real                     a_time) noexcept;
+
+      /*!
+	@brief Patch-routine when computing mesh-based mobilities for LFA coupling
+	@param[out] a_meshMobilities Mesh-based mobilities. Must be defined on the fluid realm. 
+	@param[in]  a_electricField  Electric field. Must be defined on the fluid realm. 
+	@param[in]  a_level          Grid level
+	@param[in]  a_dit            Grid index
+	@param[in]  a_cellBox        Computation box
+	@param[in]  a_time           Time      
+      */
+      virtual void
       computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
-                              const EBCellFAB&    a_E,
+                              const EBCellFAB&    a_electricField,
                               const int           a_level,
                               const DataIndex     a_dit,
-                              const Box           a_box,
-                              const Real          a_time);
+                              const Box           a_cellBox,
+                              const Real          a_time) noexcept;
 
       // Routines for computing mobilities in the LEA. This runs through all the particles and calls a mobility computation function,
       // which you must implement in ItoSpecies
@@ -557,7 +617,7 @@ namespace Physics {
 
       // Routines for computing diffusion coefficients in the LEA
       void
-      computeItoDiffusion_lea();
+      computeItoDiffusionLEA();
 
       // Routines for computing the number of particles per cell. This is done on the particle Realm.
       void
