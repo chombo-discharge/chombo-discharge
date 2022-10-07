@@ -618,7 +618,7 @@ ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_
 
   // Write the number of particles per patch
   this->writeNumParticlesPerPatch(a_output, a_icomp);
-  a_plotVariableNames.push_back("particles_per_patch");
+  a_plotVariableNames.push_back("Particles per patch");
   a_icomp++;
 }
 
