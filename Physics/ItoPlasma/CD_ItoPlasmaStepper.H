@@ -600,6 +600,7 @@ namespace Physics {
       /*!
 	@brief Compute mesh-based diffusion coefficients for LFA coupling
 	@param[out] a_diffusionCoefficients Mesh-based diffusion coefficients. Must be defined on the particle realm. 
+	@param[in]  a_densities             Ito solver densities. Must be defined on the particle realm. 
 	@param[in]  a_electricField         Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_time                  Time
       */
@@ -609,87 +610,224 @@ namespace Physics {
                              const EBAMRCellData&          a_electricField,
                              const Real                    a_time) noexcept;
 
-      void
+      /*!
+	@brief Level-routine when computing mesh-based mobilities for LFA coupling
+	@param[out] a_diffusionCoefficients Diffusion coefficients. Must be defined on the fluid realm. 
+	@param[in]  a_densities             Ito solver densities. Must be defined on the fluid realm. 
+	@param[in]  a_electricField         Electric field. Must be defined on the fluid realm. 
+	@param[in]  a_level                 Grid level
+	@param[in]  a_time                  Time
+      */
+      virtual void
       computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_diffusionCoefficient,
                              const Vector<LevelData<EBCellFAB>*>& a_densities,
-                             const LevelData<EBCellFAB>&          a_E,
+                             const LevelData<EBCellFAB>&          a_electricField,
                              const int                            a_level,
-                             const Real                           a_time);
-      void
+                             const Real                           a_time) noexcept;
+
+      /*!
+	@brief Patch-routine when computing mesh-based diffusion coefficients in the LFA coupling
+	@param[out] a_diffusionCoefficients Diffusion coefficients. Must be defined on the fluid realm. 
+	@param[in]  a_densities             Ito solver densities. Must be defined on the fluid realm. 
+	@param[in]  a_electricField         Electric field. Must be defined on the fluid realm. 
+	@param[in]  a_level                 Grid level
+	@param[in]  a_time                  Time
+	@param[in]  a_level                 Grid level
+	@param[in]  a_dit                   Grid index
+	@param[in]  a_cellBox               Computation box
+	@param[in]  a_time                  Time      
+      */
+      virtual void
       computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCoefficient,
                              const Vector<EBCellFAB*>& a_densities,
                              const EBCellFAB&          a_E,
                              const int                 a_level,
                              const DataIndex           a_dit,
                              const Box                 a_box,
-                             const Real                a_time);
+                             const Real                a_time) noexcept;
 
-      // Routines for computing diffusion coefficients in the LEA
-      void
-      computeItoDiffusionLEA();
+      /*!
+	@brief Compute the IonSolver particle diffusion coefficients in the LEA coupling regime
+	@note This one is very simple because the solvers just update the diffusion coefficients from appropriate coupling functions. 
+      */
+      virtual void
+      computeItoDiffusionLEA() noexcept;
 
-      // Routines for computing the number of particles per cell. This is done on the particle Realm.
-      void
-      computeReactiveParticlesPerCell(EBAMRCellData& a_ppc);
-      void
-      computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level);
-      void
+      /*!
+	@brief Compute the number of reactive particles per cell
+	@param[out] a_ppc Number of physical particles per grid cell for all species
+	@note a_ppc Must be defined over the particle realm and have the same number of components as the number of plasma species involved in the simulation. 
+      */
+      virtual void
+      computeReactiveParticlesPerCell(EBAMRCellData& a_ppc) noexcept;
+
+      /*!
+	@brief Compute the number of reactive particles per cell
+	@param[out] a_ppc  Number of physical particles per grid cell for all species
+	@param[in]  a_level Grid level
+	@note a_ppc Must be defined over the particle realm and have the same number of components as the number of plasma species involved in the simulation. 
+      */
+      virtual void
+      computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level) noexcept;
+
+      /*!
+	@brief Compute the number of reactive particles per cell
+	@param[out] a_ppc     Number of physical particles per grid cell for all species
+	@param[in]  a_level   Grid level
+	@param[in]  a_dit     Grid index
+	@param[in]  a_box     Grid box
+	@param[in]  a_ebisbox EB grid box
+	@note a_ppc Must be defined over the particle realm and have the same number of components as the number of plasma species involved in the simulation. 
+      */
+      virtual void
       computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
                                       const int       a_level,
                                       const DataIndex a_dit,
                                       const Box       a_box,
-                                      const EBISBox&  a_ebisbox);
+                                      const EBISBox&  a_ebisbox) noexcept;
 
-      // Routines for computing the mean energy of the particles in grid cells
-      void
-      computeReactiveMeanEnergiesPerCell(EBAMRCellData& a_mean_energies);
-      void
-      computeReactiveMeanEnergiesPerCell(LevelData<EBCellFAB>& a_mean_energies, const int a_level);
-      void
-      computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_mean_energies,
+      /*!
+	@brief Compute the mean particle energy in all grid cells.
+	@param[out] a_meanEnergies Mean particle energies = sum(w * E)/sum(w) for all species. 
+	@note a_meanEnergies must be defined over the particle realm and have the same number of components as the number of palsma species involved in the simulation. 
+      */
+      virtual void
+      computeReactiveMeanEnergiesPerCell(EBAMRCellData& a_meanEnergies) noexcept;
+
+      /*!
+	@brief Compute the mean particle energy in all grid cells. Level version. 
+	@param[out] a_meanEnergies Mean particle energies = sum(w * E)/sum(w) for all species. 
+	@param[in]  a_level        Grid level
+	@note a_meanEnergies must be defined over the particle realm and have the same number of components as the number of palsma species involved in the simulation. 
+      */
+      virtual void
+      computeReactiveMeanEnergiesPerCell(LevelData<EBCellFAB>& a_meanEnergies, const int a_level) noexcept;
+
+      /*!
+	@brief Compute the mean particle energy in all grid cells. Patch version. 
+	@param[out] a_meanEnergies Number of physical particles per grid cell for all species
+	@param[in]  a_level        Grid level
+	@param[in]  a_dit          Grid index
+	@param[in]  a_box          Grid box
+	@param[in]  a_ebisbox      EB grid box
+	@note a_meanEnergies must be defined over the particle realm and have the same number of components as the number of palsma species involved in the simulation. 
+      */
+      virtual void
+      computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_meanEnergies,
                                          const int       a_level,
                                          const DataIndex a_dit,
                                          const Box       a_box,
-                                         const EBISBox&  a_ebisbox);
+                                         const EBISBox&  a_ebisbox) noexcept;
 
-      // New routines for chemistry advances.
-      void
-      advanceReactionNetworkNWO(const Real a_dt);
-      void
-      advanceReactionNetworkNWO(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt);
-      void
-      advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_ppc,
-                                LevelData<EBCellFAB>&       a_ypc,
-                                LevelData<EBCellFAB>&       a_mean_energies,
-                                const LevelData<EBCellFAB>& a_E,
+      /*!
+	@brief Chemistry advance over time a_dt
+	@param[in] a_dt Time step
+	@note This will call the other version. The kernel will only run over valid grid cells (not covered by a finer grid. 
+      */
+      virtual void
+      advanceReactionNetworkNWO(const Real a_dt) noexcept;
+
+      /*!
+	@brief Chemistry advance over time a_dt. AMR version. 
+	@param[in] a_electricField Electric field. Must be defined on the fluid realm. 
+	@param[in] a_EdotJ         Source term EdotJ for each species. Must have same number of components as Ito layout and be defined on the fluid realm. 
+	@param[in] a_dt            Time step
+	@note This will call the level versions AND reconcileParticles. The kernel will only run over valid grid cells (not covered by a finer grid. 
+      */
+      virtual void
+      advanceReactionNetworkNWO(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt) noexcept;
+
+      /*!
+	@brief Chemistry advance over time a_dt. Level version. 
+	@param[inout] a_particlesPerCell      Number of particles per cell for each plasma species
+	@param[inout] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
+	@param[inout] a_meanParticleEnergies  Mean particle energies for each plasma species
+	@param[in]    a_electricField         Electric field. 
+	@param[in]    a_EdotJ                 EdotJ for each plasma species.
+	@param[in]    a_level                 Grid level
+	@param[in]    a_dt                    Time increment
+	@note This should be called through the AMR signature. All data should be defined on the fluid realm. The kernel will
+	only run over valid grid cells (not covered by a finer grid. 
+      */
+      virtual void
+      advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_particlesPerCell,
+                                LevelData<EBCellFAB>&       a_newPhotonsPerCell,
+                                LevelData<EBCellFAB>&       a_meanParticleEnergies,
+                                const LevelData<EBCellFAB>& a_electricField,
                                 const LevelData<EBCellFAB>& a_EdotJ,
                                 const int                   a_level,
-                                const Real                  a_dt);
-      void
+                                const Real                  a_dt) noexcept;
+
+      /*!
+	@brief Chemistry advance over time a_dt. Patch version. 
+	@param[inout] a_particlesPerCell      Number of particles per cell for each plasma species
+	@param[inout] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
+	@param[inout] a_meanParticleEnergies  Mean particle energies for each plasma species
+	@param[in]    a_electricField         Electric field. 
+	@param[in]    a_EdotJ                 EdotJ for each plasma species.
+	@param[in]    a_level                 Grid level
+	@param[in]    a_dit                   Grid index.
+	@param[in]    a_box                   Grid box
+	@param[in]    a_dx                    Grid resolution.
+	@param[in]    a_dt                    Time increment
+	@note This should be called through the AMR signature. All data should be defined on the fluid realm. The kernel will
+	only run over valid grid cells (not covered by a finer grid. 
+      */
+      virtual void
       advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
                                 EBCellFAB&       a_newPhotonsPerCell,
                                 EBCellFAB&       a_meanParticleEnergies,
-                                const EBCellFAB& a_E,
+                                const EBCellFAB& a_electricField,
                                 const EBCellFAB& a_EdotJ,
                                 const int        a_level,
                                 const DataIndex  a_dit,
                                 const Box        a_box,
                                 const Real       a_dx,
-                                const Real       a_dt);
+                                const Real       a_dt) noexcept;
 
-      // Routines for reconciling particles.
-      void
+      /*!
+	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
+	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
+	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
+	@param[in] a_meanParticleEnergies Mean particle energies after the chemistry advance. 
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance. 
+	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
+      */
+      virtual void
       reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                          const EBAMRCellData& a_oldParticlesPerCell,
                          const EBAMRCellData& a_meanParticleEnergies,
-                         const EBAMRCellData& a_newPhotonsPerCell);
-      void
+                         const EBAMRCellData& a_newPhotonsPerCell) noexcept;
+
+      /*!
+	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
+	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
+	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
+	@param[in] a_meanParticleEnergies Mean particle energies after the chemistry advance. 
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance. 
+	@param[in] a_level                Grid level
+	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
+      */
+      virtual void
       reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
                          const LevelData<EBCellFAB>& a_oldParticlesPerCell,
                          const LevelData<EBCellFAB>& a_meanParticleEnergies,
                          const LevelData<EBCellFAB>& a_newPhotonsPerCell,
-                         const int                   a_level);
-      void
+                         const int                   a_level) noexcept;
+
+      /*!
+	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
+	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
+	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
+	@param[in] a_meanParticleEnergies Mean particle energies after the chemistry advance. 
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance. 
+	@param[in] a_level                Grid level
+	@param[in] a_dit                  Grid index
+	@param[in] a_box                  Grid box
+	@param[in] a_dx                   Grid resolution. 
+	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
+      */
+      virtual void
       reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                          const EBCellFAB& a_oldParticlesPerCell,
                          const EBCellFAB& a_meanParticleEnergies,
@@ -697,7 +835,73 @@ namespace Physics {
                          const int        a_level,
                          const DataIndex  a_dit,
                          const Box        a_box,
-                         const Real       a_dx);
+                         const Real       a_dx) noexcept;
+
+      /*!
+	@brief Compute a maximum time step from the physics interface.
+	@note Calls the other version with m_electricFieldParticle and the ItoSolver densities. The kernels are only
+	called on the valid region.
+      */
+      virtual Real
+      computePhysicsDt() const noexcept;
+
+      /*!
+	@brief Compute a maximum time step from the physics interface.
+	@param[in] a_electricField Electric field. 
+	@param[in] a_densities     ItoSolver mesh densities. 
+	@note Input data must be defined on the particle realms. Kernels are only called on the valid region. 
+      */
+      virtual Real
+      computePhysicsDt(const EBAMRCellData& a_electricField, const Vector<EBAMRCellData*> a_densities) const noexcept;
+
+      /*!
+	@brief Compute a maximum time step from the physics interface.
+	@param[in] a_electricField Electric field. 
+	@param[in] a_densities     ItoSolver mesh densities. 
+	@param[in] a_level         Grid level
+	@note Input data must be defined on the particle realms. Kernels are only called on the valid region. 
+      */
+      virtual Real
+      computePhysicsDt(const LevelData<EBCellFAB>&         a_electricField,
+                       const Vector<LevelData<EBCellFAB>*> a_densities,
+                       const int                           a_level) const noexcept;
+
+      /*!
+	@brief Compute a maximum time step from the physics interface.
+	@param[in] a_electricField Electric field. 
+	@param[in] a_densities     ItoSolver mesh densities. 
+	@param[in] a_level         Grid level
+	@param[in] a_dit           Grid index
+	@param[in] a_box           Grid box
+	@note Input data must be defined on the particle realms. Kernels are only called on the valid region. 
+      */
+      virtual Real
+      computePhysicsDt(const EBCellFAB&         a_electricField,
+                       const Vector<EBCellFAB*> a_densities,
+                       const int                a_level,
+                       const DataIndex          a_dit,
+                       const Box                a_box) const noexcept;
+
+      // Routines for advancing Photons
+      void
+      advancePhotons(const Real a_dt);
+
+      // Routines for sorting particles. These routines are here because RtLayout is general for RtSolver, and I'm too
+      // lazy to write an McPhoto_layout. So here you go.
+      void
+      sortPhotonsByCell(McPhoto::WhichContainer a_which);
+      void
+      sortPhotonsByPatch(McPhoto::WhichContainer a_which);
+
+      // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.
+      void
+      computeEdotJSource(const Real a_dt);
+      void
+      computeEdotJSource();
+      void
+      computeEdotJSourceNWO();
+      void
+      computeEdotJSourceNWO2(const Real a_dt);
 
       // Old routines for chemistry advances. The physics module will switch between LFA and LEA.
       void
@@ -735,43 +939,6 @@ namespace Physics {
                              const Box                     a_box,
                              const Real                    a_dx,
                              const Real                    a_dt);
-
-      // Compute dt routines
-      Real
-      computePhysicsDt() const;
-      Real
-      computePhysicsDt(const EBAMRCellData& a_E, const Vector<EBAMRCellData*> a_densities) const;
-      Real
-      computePhysicsDt(const LevelData<EBCellFAB>&         a_E,
-                       const Vector<LevelData<EBCellFAB>*> a_densities,
-                       const int                           a_level) const;
-      Real
-      computePhysicsDt(const EBCellFAB&         a_E,
-                       const Vector<EBCellFAB*> a_densities,
-                       const int                a_level,
-                       const DataIndex          a_dit,
-                       const Box                a_box) const;
-
-      // Routines for advancing Photons
-      void
-      advancePhotons(const Real a_dt);
-
-      // Routines for sorting particles. These routines are here because RtLayout is general for RtSolver, and I'm too
-      // lazy to write an McPhoto_layout. So here you go.
-      void
-      sortPhotonsByCell(McPhoto::WhichContainer a_which);
-      void
-      sortPhotonsByPatch(McPhoto::WhichContainer a_which);
-
-      // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.
-      void
-      computeEdotJSource(const Real a_dt);
-      void
-      computeEdotJSource();
-      void
-      computeEdotJSourceNWO();
-      void
-      computeEdotJSourceNWO2(const Real a_dt);
 
     protected:
       /*!
@@ -977,7 +1144,7 @@ namespace Physics {
       EBAMRIVData m_conductivityEB;
 
       /*!
-	@brief For holding the number of particles per cell for all species.
+	@brief For holding the number of physical particles per cell for all species.
 	@note Defined on the particle realm with components = number of plasma species
       */
       EBAMRCellData m_particlePPC;

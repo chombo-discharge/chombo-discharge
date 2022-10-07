@@ -2072,123 +2072,160 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
 }
 
 void
-ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_diffusionCoefficient,
+ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_diffusionCoefficients,
                                          const Vector<LevelData<EBCellFAB>*>& a_densities,
-                                         const LevelData<EBCellFAB>&          a_E,
+                                         const LevelData<EBCellFAB>&          a_electricField,
                                          const int                            a_level,
-                                         const Real                           a_time)
+                                         const Real                           a_time) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, time)");
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>x2, LD<EBCellFAB>, int, Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, time)" << endl;
+    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>x2, LD<EBCellFAB>, int, Real)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
 
+  CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
+  CH_assert(a_densities.size() == numPlasmaSpecies);
+
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const Box box = dbl.get(dit());
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
-    Vector<EBCellFAB*> diffusion(numPlasmaSpecies);
+    // Populate the patch data.
+    Vector<EBCellFAB*> diffusionCoefficients(numPlasmaSpecies);
     Vector<EBCellFAB*> densities(numPlasmaSpecies);
-    ;
 
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
       if (solverIt()->isDiffusive()) {
-        diffusion[idx] = &(*a_diffusionCoefficient[idx])[dit()];
+        diffusionCoefficients[idx] = &(*a_diffusionCoefficients[idx])[dit()];
       }
+      else {
+        diffusionCoefficients[idx] = nullptr;
+      }
+
       densities[idx] = &(*a_densities[idx])[dit()];
     }
 
-    this->computeItoDiffusionLFA(diffusion, densities, a_E[dit()], a_level, dit(), box, a_time);
+    this->computeItoDiffusionLFA(diffusionCoefficients,
+                                 densities,
+                                 a_electricField[dit()],
+                                 a_level,
+                                 dit(),
+                                 dbl[dit()],
+                                 a_time);
   }
 }
 
 void
-ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCoefficient,
+ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCoefficients,
                                          const Vector<EBCellFAB*>& a_densities,
-                                         const EBCellFAB&          a_E,
+                                         const EBCellFAB&          a_electricField,
                                          const int                 a_level,
                                          const DataIndex           a_dit,
                                          const Box                 a_box,
-                                         const Real                a_time)
+                                         const Real                a_time) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, dit, time)");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, dit, time)" << endl;
   }
 
-  const int            comp   = 0;
-  const Real           dx     = m_amr->getDx()[a_level];
-  const RealVect       probLo = m_amr->getProbLo();
-  const BaseFab<Real>& E      = a_E.getSingleValuedFAB();
+  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
 
-  // Do regular cells
-  for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-    const IntVect  iv  = bit();
-    const RealVect pos = m_amr->getProbLo() + dx * (RealVect(iv) + 0.5 * RealVect::Unit);
-    const RealVect e   = RealVect(D_DECL(E(iv, 0), E(iv, 1), E(iv, 2)));
+  CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
+  CH_assert(a_densities.size() == numPlasmaSpecies);
+  CH_assert(a_electricField.nComp() == SpaceDim);
 
-    // Make grid densities
-    Vector<Real> densities;
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-      densities.push_back((*a_densities[idx]).getSingleValuedFAB()(iv, comp));
-    }
+  // Geometric information that we need.
+  const Real     dx      = m_amr->getDx()[a_level];
+  const RealVect probLo  = m_amr->getProbLo();
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
 
-    // Call ito_physics and compute diffusion for each particle species
-    const Vector<Real> diffusion = m_physics->computeItoDiffusionLFA(a_time, pos, e, densities);
+  // Definition of single-valued aka regular data.
+  const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
 
-    // Put diffusion where they belong
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      RefCountedPtr<ItoSolver>& solver = solverIt();
-      if (solver->isDiffusive()) {
-        const int idx                                                 = solverIt.index();
-        (*a_diffusionCoefficient[idx]).getSingleValuedFAB()(iv, comp) = diffusion[idx];
-      }
-    }
+  Vector<FArrayBox*> diffCoReg(numPlasmaSpecies);
+  Vector<FArrayBox*> densitiesReg(numPlasmaSpecies);
+
+  for (int i = 0; i < numPlasmaSpecies; i++) {
+    diffCoReg[i]    = &(a_diffusionCoefficients[i]->getFArrayBox());
+    densitiesReg[i] = &(a_densities[i]->getFArrayBox());
+
+    CH_assert(a_densities[i]->nComp() == 1);
   }
 
-  // Do irregular cells
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit) {
-    const VolIndex& vof = vofit();
-    const RealVect  e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
-    const RealVect  pos = EBArith::getVofLocation(vof, dx * RealVect::Unit, probLo);
+  // Storage needed for interfacing into the physics.
+  Vector<Real> cellDensities(numPlasmaSpecies);
 
-    // Get densities
-    Vector<Real> densities;
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-      densities.push_back((*a_densities[idx])(vof, comp));
+  // Regular kernel definition.
+  auto regularKernel = [&](const IntVect& iv) -> void {
+    const RealVect pos = probLo + dx * (RealVect(iv) + 0.5 * RealVect::Unit);
+    const RealVect E   = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+
+    // Make grid densities
+    for (int i = 0; i < numPlasmaSpecies; i++) {
+      cellDensities[i] = (*densitiesReg[i])(iv, 0);
     }
 
-    // Compute diffusion
-    const Vector<Real> diffusion = m_physics->computeItoDiffusionLFA(a_time, pos, e, densities);
+    // Compute diffusion coefficients.
+    const Vector<Real> diffusion = m_physics->computeItoDiffusionLFA(a_time, pos, E, cellDensities);
+
+    // Put diffusion coefficients into correct storage.
+    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+      RefCountedPtr<ItoSolver>& solver = solverIt();
+
+      if (solver->isDiffusive()) {
+        const int idx = solverIt.index();
+
+        (*diffCoReg[idx])(iv, 0) = diffusion[idx];
+      }
+    }
+  };
+
+  // Irregular kernel.
+  auto irregularKernel = [&](const VolIndex& vof) -> void {
+    const RealVect E   = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
+    const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+
+    // Make grid densities
+    for (int i = 0; i < numPlasmaSpecies; i++) {
+      cellDensities[i] = (*a_densities[i])(vof, 0);
+    }
+
+    // Compute diffusion coefficients.
+    const Vector<Real> diffusion = m_physics->computeItoDiffusionLFA(a_time, pos, E, cellDensities);
 
     // Put diffusion in the appropriate place.
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
       if (solverIt()->isDiffusive()) {
-        const int idx                             = solverIt.index();
-        (*a_diffusionCoefficient[idx])(vof, comp) = diffusion[idx];
+        const int idx = solverIt.index();
+
+        (*a_diffusionCoefficients[idx])(vof, 0) = diffusion[idx];
       }
     }
-  }
+  };
+
+  // Run kernels.
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
+
+  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);
 
   // Covered is bogus.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     if (solverIt()->isDiffusive()) {
       const int idx = solverIt.index();
-      a_diffusionCoefficient[idx]->setCoveredCellVal(0.0, comp);
+
+      a_diffusionCoefficients[idx]->setCoveredCellVal(0.0, 0);
     }
   }
 }
 
 void
-ItoPlasmaStepper::computeItoDiffusionLEA()
+ItoPlasmaStepper::computeItoDiffusionLEA() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoDiffusionLEA()");
   if (m_verbosity > 5) {
@@ -2202,12 +2239,14 @@ ItoPlasmaStepper::computeItoDiffusionLEA()
 }
 
 void
-ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData& a_ppc)
+ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData& a_ppc) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc)");
+  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData)" << endl;
   }
+
+  CH_assert(a_ppc.getRealm() == m_particleRealm);
 
   DataOps::setValue(a_ppc, 0.0);
 
@@ -2217,18 +2256,21 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData& a_ppc)
 }
 
 void
-ItoPlasmaStepper::computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level)
+ItoPlasmaStepper::computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc, lvl)");
+  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(LD<EBCellFAB>, int)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc, lvl)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(LD<EBCellFAB>, int)" << endl;
   }
+
+  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+
+  CH_assert(a_ppc.nComp() == numPlasmaSpecies);
 
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_particleRealm)[a_level];
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level];
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box      box     = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
 
@@ -2241,168 +2283,194 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
                                                   const int       a_level,
                                                   const DataIndex a_dit,
                                                   const Box       a_box,
-                                                  const EBISBox&  a_ebisbox)
+                                                  const EBISBox&  a_ebisbox) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc, lvl, dit, box)");
+  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc, lvl, dit, box)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)" << endl;
   }
 
-  BaseFab<Real>& numFab = a_ppc.getSingleValuedFAB();
+  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+
+  CH_assert(a_ppc.nComp() == numPlasmaSpecies);
+
+  // TLDR: We go through each solver and add the number of PHYSICAL particles per cell to a_ppc.
+
+  FArrayBox& ppcRegular = a_ppc.getFArrayBox();
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>& solver = solverIt();
     const int                 idx    = solverIt.index();
 
+    // Get the cell-sorted particles. This will issue an error if the user has not
+    // sorted the particles by cell before calling this routine.
     const ParticleContainer<ItoParticle>& particles     = solver->getParticles(ItoSolver::WhichContainer::Bulk);
     const BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_dit);
 
-    // Regular cells.
-    for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-      const IntVect iv = bit();
-
+    // Regular cells kernel.
+    auto regularKernel = [&](const IntVect& iv) -> void {
       Real num = 0.0;
 
       if (a_ebisbox.isRegular(iv)) {
-
-        const List<ItoParticle>& listParticles = cellParticles(iv, 0);
-        for (ListIterator<ItoParticle> lit(listParticles); lit.ok(); ++lit) {
+        for (ListIterator<ItoParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
           num += lit().weight();
         }
       }
 
-      numFab(iv, idx) = num;
-    }
+      ppcRegular(iv, idx) = num;
+    };
 
-    // Irregular cells.
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
-    for (vofit.reset(); vofit.ok(); ++vofit) {
-      const VolIndex& vof        = vofit();
-      const IntVect   iv         = vof.gridIndex();
-      const RealVect  normal     = a_ebisbox.normal(vof);
-      const RealVect  ebCentroid = a_ebisbox.bndryCentroid(vof);
+    // Irregular kernel -- note that only particles that lie inside the domain get to react.
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      const IntVect  iv         = vof.gridIndex();
+      const RealVect normal     = a_ebisbox.normal(vof);
+      const RealVect ebCentroid = a_ebisbox.bndryCentroid(vof);
 
       Real num = 0.0;
 
-      const List<ItoParticle>& listParticles = cellParticles(iv, 0);
-
-      for (ListIterator<ItoParticle> lit(listParticles); lit.ok(); ++lit) {
+      for (ListIterator<ItoParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
         const RealVect& pos = lit().position();
 
-        if (PolyGeom::dot((pos - ebCentroid), normal) >= 0.0) {
+        if ((pos - ebCentroid).dotProduct(normal) >= 0.0) {
           num += lit().weight();
         }
       }
 
-      numFab(iv, idx) = num;
-    }
+      ppcRegular(iv, idx) = num;
+    };
+
+    // Run the kernels.
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
+
+    BoxLoops::loop(a_box, regularKernel);
+    BoxLoops::loop(vofit, irregularKernel);
   }
 }
 
 void
-ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBAMRCellData& a_mean_energies)
+ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBAMRCellData& a_meanEnergies) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::compute_mean-energies_per_cell(EBAMRCellData)");
+  CH_TIME("ItoPlasmaStepper::computeReactiveMaeanEnergiesPerCell(EBAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveMaeanEnergiesPerCell(EBAMRCellData)" << endl;
   }
 
-  DataOps::setValue(a_mean_energies, 0.0);
+  CH_assert(meanEnergies.getRealm() == m_particleRealm);
+
+  DataOps::setValue(a_meanEnergies, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    this->computeReactiveMeanEnergiesPerCell(*a_mean_energies[lvl], lvl);
+    this->computeReactiveMeanEnergiesPerCell(*a_meanEnergies[lvl], lvl);
   }
 }
 
 void
-ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(LevelData<EBCellFAB>& a_mean_energies, const int a_level)
+ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(LevelData<EBCellFAB>& a_meanEnergies, const int a_level) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(ppc, lvl)");
+  CH_TIME("ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(LD<EBCellFAB>, int)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(ppc, lvl)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(LD<EBCellFAB>, int)" << endl;
   }
+
+  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+
+  CH_assert(a_meanEnergies.nComp() == numPlasmaSpecies);
 
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_particleRealm)[a_level];
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level];
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box      box     = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
 
-    this->computeReactiveMeanEnergiesPerCell(a_mean_energies[dit()], a_level, dit(), box, ebisbox);
+    this->computeReactiveMeanEnergiesPerCell(a_meanEnergies[dit()], a_level, dit(), box, ebisbox);
   }
 }
 
 void
-ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_mean_energies,
+ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_meanEnergies,
                                                      const int       a_level,
                                                      const DataIndex a_dit,
                                                      const Box       a_box,
-                                                     const EBISBox&  a_ebisbox)
+                                                     const EBISBox&  a_ebisbox) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(ppc, lvl, dit, box)");
+  CH_TIME("ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFABint, DataIndex, Box, EBISBox)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(ppc, lvl, dit, box)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFABint, DataIndex, Box, EBISBox))" << endl;
   }
 
-  BaseFab<Real>& numFab = a_mean_energies.getSingleValuedFAB();
+  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+
+  CH_assert(a_meanEnergies.nComp() == numPlasmaSpecies);
+
+  // Get single-valued data.
+  FArrayBox& meanEnergiesReg = a_meanEnergies.getFArrayBox();
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>& solver = solverIt();
     const int                 idx    = solverIt.index();
 
+    // Get the cell-sorted particles. This will issue an error if the user has not
+    // sorted the particles by cell before calling this routine.
     const ParticleContainer<ItoParticle>& particles     = solver->getParticles(ItoSolver::WhichContainer::Bulk);
     const BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_dit);
 
-    // Regular cells.
-    for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-      const IntVect iv = bit();
-
+    // Regular grid cells.
+    auto regularKernel = [&](const IntVect& iv) -> void {
       if (a_ebisbox.isRegular(iv)) {
-        Real m = 0.0;
-        Real E = 0.0;
+        Real totalWeight = 0.0;
+        Real totalEnergy = 0.0;
 
-        const List<ItoParticle>& listParticles = cellParticles(iv, 0);
-
-        for (ListIterator<ItoParticle> lit(listParticles); lit.ok(); ++lit) {
-          m += lit().weight();
-          E += lit().weight() * lit().energy();
+        for (ListIterator<ItoParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
+          totalWeight += lit().weight();
+          totalEnergy += lit().weight() * lit().energy();
         }
 
-        numFab(iv, idx) = E / m;
+        if (totalWeight > 0.0) {
+          meanEnergiesReg(iv, idx) = totalEnergy / totalWeight;
+        }
+        else {
+          meanEnergiesReg(iv, idx) = 0.0;
+        }
       }
-    }
+    };
 
-    // Irregular cells.
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
-    for (vofit.reset(); vofit.ok(); ++vofit) {
-      const VolIndex& vof        = vofit();
-      const IntVect   iv         = vof.gridIndex();
-      const RealVect  normal     = a_ebisbox.normal(vof);
-      const RealVect  ebCentroid = a_ebisbox.bndryCentroid(vof);
+    // Irregular cells -- note that only valid particles get to play with us.
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
+      const IntVect  iv         = vof.gridIndex();
+      const RealVect normal     = a_ebisbox.normal(vof);
+      const RealVect ebCentroid = a_ebisbox.bndryCentroid(vof);
 
-      Real m = 0.0;
-      Real E = 0.0;
+      Real totalWeight = 0.0;
+      Real totalEnergy = 0.0;
 
-      const List<ItoParticle>& listParticles = cellParticles(iv, 0);
-
-      for (ListIterator<ItoParticle> lit(listParticles); lit.ok(); ++lit) {
+      for (ListIterator<ItoParticle> lit(cellParticles(iv, 0)); lit.ok(); ++lit) {
         const RealVect& pos = lit().position();
 
-        if (PolyGeom::dot((pos - ebCentroid), normal) >= 0.0) {
-          m += lit().weight();
-          E += lit().weight() * lit().energy();
+        if ((pos - ebCentroid).dotProduct(normal) >= 0.0) {
+          totalWeight += lit().weight();
+          totalEnergy += lit().weight() * lit().energy();
         }
       }
 
-      numFab(iv, idx) = E / m;
-    }
+      if (totalWeight > 0.0) {
+        meanEnergiesReg(iv, idx) = totalEnergy / totalWeight;
+      }
+      else {
+        meanEnergiesReg(iv, idx) = 0.0;
+      }
+    };
+
+    // Run the kernels.
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
+
+    BoxLoops::loop(a_box, regularKernel);
+    BoxLoops::loop(vofit, irregularKernel);
   }
 }
 
 void
-ItoPlasmaStepper::advanceReactionNetworkNWO(const Real a_dt)
+ItoPlasmaStepper::advanceReactionNetworkNWO(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::advanceReactionNetworkNWO(dt)");
   if (m_verbosity > 5) {
@@ -2413,41 +2481,57 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(const Real a_dt)
 }
 
 void
-ItoPlasmaStepper::advanceReactionNetworkNWO(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt)
+ItoPlasmaStepper::advanceReactionNetworkNWO(const EBAMRCellData& a_electricField,
+                                            const EBAMRCellData& a_EdotJ,
+                                            const Real           a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, E, sources, dt)");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, E, sources, dt)" << endl;
   }
 
-  // 1. Compute the number of particles per cell. Set the number of Photons to be generated per cell to zero.
+  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+
+  CH_assert(a_electricField.getRealm() == m_fluidRealm);
+  CH_assert(a_EdotJ.getRealm() == m_fluidRealm);
+  CH_assert(a_dt > 0.0);
+  CH_assert(a_EdotJ[0]->nComp() == numPlasmaSpecies);
+
+  // Compute the number of particles per cell and the mean energy of the particles. Copy the
+  // result to the fluid realm because it is load balanced using number of grid cells and can
+  // run the algorithms a bit more efficiently.
   this->computeReactiveParticlesPerCell(m_particlePPC);
   this->computeReactiveMeanEnergiesPerCell(m_particleEPS);
 
   m_fluidPPC.copy(m_particlePPC);
   m_fluidEPS.copy(m_particleEPS);
 
+  // m_fluidYPC and m_particleYPC are the number of photons that will be generated -- need to initialize
+  // to zero here.
   DataOps::setValue(m_fluidYPC, 0.0);
   DataOps::setValue(m_particleYPC, 0.0);
+
+  // Back up the old number of particles per cell.
   DataOps::copy(m_particleOldPPC, m_particlePPC);
 
-  // 2. Solve for the new number of particles per cell. This also obtains the number of Photons to be generated in each cell.
+  // Advance the reaction network which gives us a new number of particles per cell, as well as the number of
+  // photons that need to be generated per cell.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     this->advanceReactionNetworkNWO(*m_fluidPPC[lvl],
                                     *m_fluidYPC[lvl],
                                     *m_fluidEPS[lvl],
-                                    *a_E[lvl],
+                                    *a_electricField[lvl],
                                     *a_EdotJ[lvl],
                                     lvl,
                                     a_dt);
   }
 
-  // 3. Copy the results to the particle Realm.
+  // Copy the results to the particle realm -- then reconcile the particles on the particle realm. Note that ''reconcile''
+  // means that we adjust the weights so we don't exceed the desired number of particles per cell.
   m_particlePPC.copy(m_fluidPPC);
   m_particleYPC.copy(m_fluidYPC);
   m_particleEPS.copy(m_fluidEPS);
 
-  // 4. Reconcile particles on the particle Realm. Not implemented (yet).
   this->reconcileParticles(m_particlePPC, m_particleOldPPC, m_particleEPS, m_particleYPC);
 }
 
@@ -2455,23 +2539,32 @@ void
 ItoPlasmaStepper::advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_particlesPerCell,
                                             LevelData<EBCellFAB>&       a_newPhotonsPerCell,
                                             LevelData<EBCellFAB>&       a_meanParticleEnergies,
-                                            const LevelData<EBCellFAB>& a_E,
+                                            const LevelData<EBCellFAB>& a_electricField,
                                             const LevelData<EBCellFAB>& a_EdotJ,
                                             const int                   a_level,
-                                            const Real                  a_dt)
+                                            const Real                  a_dt) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, energies, E, sources, level, dt)");
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(LD<EBCellFAB>x5, int, Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, energies, E, sources, level, dt)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetwork(LD<EBCellFAB>x5, int, Real)" << endl;
   }
+
+  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+
+  CH_assert(a_particlesPerCell.nComp() == numPlasmaSpecies);
+  CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
+  CH_assert(a_meanParticleEnergies.nComp() == numPlasmaSpecies);
+  CH_assert(a_electricField.nComp() == SpaceDim);
+  CH_assert(a_EdotJ.nComp() == numPlasmaSpecies);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
     this->advanceReactionNetworkNWO(a_particlesPerCell[dit()],
                                     a_newPhotonsPerCell[dit()],
                                     a_meanParticleEnergies[dit()],
-                                    a_E[dit()],
+                                    a_electricField[dit()],
                                     a_EdotJ[dit()],
                                     a_level,
                                     dit(),
@@ -2485,50 +2578,98 @@ void
 ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
                                             EBCellFAB&       a_newPhotonsPerCell,
                                             EBCellFAB&       a_meanParticleEnergies,
-                                            const EBCellFAB& a_E,
+                                            const EBCellFAB& a_electricField,
                                             const EBCellFAB& a_EdotJ,
                                             const int        a_level,
                                             const DataIndex  a_dit,
                                             const Box        a_box,
                                             const Real       a_dx,
-                                            const Real       a_dt)
+                                            const Real       a_dt) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::advanceReactionNetworkNWO(ppc, ypc, E, sources, level, dit, box, dx, dt)");
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFABx5, int, DataIndex, Box, Realx2)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::advanceReactionNetworkNWO(ppc, ypc, E, sources, level, dit, box, dx, dt)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFABx5, int, DataIndex, Box, Realx2)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
   const int numPhotonSpecies = m_physics->getNumRtSpecies();
 
-  const RealVect probLo = m_amr->getProbLo();
+  CH_assert(a_particlesPerCell.nComp() == numPlasmaSpecies);
+  CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
+  CH_assert(a_meanParticleEnergies.nComp() == numPlasmaSpecies);
+  CH_assert(a_electricField.nComp() == SpaceDim);
+  CH_assert(a_EdotJ.nComp() == numPlasmaSpecies);
 
+  // Geometric information that we require.
+  const RealVect probLo  = m_amr->getProbLo();
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
   const EBISBox& ebgraph = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
 
-  const BaseFab<Real>& Efab = a_E.getSingleValuedFAB();
+  const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
 
+  // Storage used by physics interface.
   Vector<long long> particles(numPlasmaSpecies);
   Vector<long long> newPhotons(numPhotonSpecies);
   Vector<Real>      meanEnergies(numPlasmaSpecies);
   Vector<Real>      energySources(numPlasmaSpecies);
 
+  const Real dV = std::pow(a_dx, SpaceDim);
+
+  // Populate single-valued data.
+  FArrayBox&       particlesPerCellReg     = a_particlesPerCell.getFArrayBox();
+  FArrayBox&       newPhotonsReg           = a_newPhotonsPerCell.getFArrayBox();
+  FArrayBox&       meanParticleEnergiesReg = a_meanParticleEnergies.getFArrayBox();
+  const FArrayBox& energySourcesReg        = a_EdotJ.getFArrayBox();
+
+  // Handle to valid grid cells.
+  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_level])[a_dit];
+
   // Regular cells
-  for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-    const IntVect iv = bit();
-
-    if (ebisbox.isRegular(iv)) {
-      const Real kappa = 1.0;
-      const Real dV    = kappa * pow(a_dx, SpaceDim);
-
+  auto regularKernel = [&](const IntVect& iv) -> void {
+    if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
       const RealVect pos = probLo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
-      const RealVect E   = RealVect(D_DECL(Efab(iv, 0), Efab(iv, 1), Efab(iv, 2)));
+      const RealVect E   = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+
+      // Populate the data holders that the physics interface requires.
+      for (int i = 0; i < numPlasmaSpecies; i++) {
+        particles[i]     = llround(particlesPerCellReg(iv, i));
+        meanEnergies[i]  = meanParticleEnergiesReg(iv, i);
+        energySources[i] = energySourcesReg(iv, i) * dV / Units::Qe;
+      }
+
+      for (int i = 0; i < numPhotonSpecies; i++) {
+        newPhotons[i] = 0LL;
+      }
+
+      // Do the physics advance.
+      m_physics->advanceParticles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, 1.0);
+
+      // Repopulate the input data holders with the new number of particles/photons per cell.
+      for (int i = 0; i < numPlasmaSpecies; i++) {
+        particlesPerCellReg(iv, i)     = 1.0 * particles[i];
+        meanParticleEnergiesReg(iv, i) = 1.0 * meanEnergies[i];
+      }
+
+      for (int i = 0; i < numPhotonSpecies; i++) {
+        newPhotonsReg(iv, i) = 1.0 * newPhotons[i];
+      }
+    }
+  };
+
+  // Irregular cells
+  auto irregularKernel = [&](const VolIndex& vof) -> void {
+    const IntVect iv = vof.gridIndex();
+
+    if (validCells(iv, 0)) {
+      const Real     kappa = ebisbox.volFrac(vof);
+      const RealVect pos   = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
+      const RealVect E = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
 
       // Initialize for this cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
-        particles[i]     = llround(a_particlesPerCell.getSingleValuedFAB()(iv, i));
-        meanEnergies[i]  = a_meanParticleEnergies.getSingleValuedFAB()(iv, i);
-        energySources[i] = a_EdotJ.getSingleValuedFAB()(iv, i) * dV / Units::Qe;
+        particles[i]     = llround(a_particlesPerCell(vof, i));
+        meanEnergies[i]  = a_meanParticleEnergies(vof, i);
+        energySources[i] = a_EdotJ(vof, i) * kappa * dV / Units::Qe;
       }
 
       for (int i = 0; i < numPhotonSpecies; i++) {
@@ -2538,65 +2679,42 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
       // Do the physics advance
       m_physics->advanceParticles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, kappa);
 
-      // Set result
+      // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
-        a_particlesPerCell.getSingleValuedFAB()(iv, i)     = 1.0 * particles[i];
-        a_meanParticleEnergies.getSingleValuedFAB()(iv, i) = 1.0 * meanEnergies[i];
+        a_particlesPerCell(vof, i)     = 1.0 * particles[i];
+        a_meanParticleEnergies(vof, i) = 1.0 * meanEnergies[i];
       }
 
       for (int i = 0; i < numPhotonSpecies; i++) {
-        a_newPhotonsPerCell.getSingleValuedFAB()(iv, i) = 1.0 * newPhotons[i];
+        a_newPhotonsPerCell(vof, i) = 1.0 * newPhotons[i];
       }
     }
-  }
+  };
 
-  // Irregular cells
+  // Run the kernels.
   VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit) {
-    const VolIndex& vof   = vofit();
-    const Real      kappa = ebisbox.volFrac(vof);
-    const Real      dV    = kappa * pow(a_dx, SpaceDim);
-    const RealVect  pos   = EBArith::getVofLocation(vof, a_dx * RealVect::Unit, probLo);
-    const RealVect  E     = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
 
-    // Initialize for this cell.
-    for (int i = 0; i < numPlasmaSpecies; i++) {
-      particles[i]     = a_particlesPerCell(vof, i);
-      meanEnergies[i]  = a_meanParticleEnergies(vof, i);
-      energySources[i] = a_EdotJ(vof, i) * dV / Units::Qe;
-    }
-
-    for (int i = 0; i < numPhotonSpecies; i++) {
-      newPhotons[i] = 0LL;
-    }
-
-    m_physics->advanceParticles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, kappa);
-
-    // Set result
-    for (int i = 0; i < numPlasmaSpecies; i++) {
-      a_particlesPerCell(vof, i)     = 1.0 * particles[i];
-      a_meanParticleEnergies(vof, i) = 1.0 * meanEnergies[i];
-    }
-
-    for (int i = 0; i < numPhotonSpecies; i++) {
-      a_newPhotonsPerCell(vof, i) = 1.0 * newPhotons[i];
-    }
-  }
+  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);
 }
 
 void
 ItoPlasmaStepper::reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                                      const EBAMRCellData& a_oldParticlesPerCell,
                                      const EBAMRCellData& a_meanParticleEnergies,
-                                     const EBAMRCellData& a_newPhotonsPerCell)
+                                     const EBAMRCellData& a_newPhotonsPerCell) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::reconcileParticles(EBAMRCellData, EBAMRCellData, EBAMRCellData)");
+  CH_TIME("ItoPlasmaStepper::reconcileParticles(EBAMRCellDatax4)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::reconcileParticles(EBAMRCellData, EBAMRCellData, EBAMRCellData)";
+    pout() << "ItoPlasmaStepper::reconcileParticles(EBAMRCellDatax4)";
   }
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+  CH_assert(a_newParticlesPerCell.getRealm() == m_particleRealm);
+  CH_assert(a_oldParticlesPerCell.getRealm() == m_particleRealm);
+  CH_assert(a_meanParticleEnergies.getRealm() == m_particleRealm);
+  CH_assert(a_newPhotonsPerCell.getRealm() == m_particleRealm);
 
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     this->reconcileParticles(*a_newParticlesPerCell[lvl],
                              *a_oldParticlesPerCell[lvl],
                              *a_meanParticleEnergies[lvl],
@@ -2610,16 +2728,24 @@ ItoPlasmaStepper::reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesP
                                      const LevelData<EBCellFAB>& a_oldParticlesPerCell,
                                      const LevelData<EBCellFAB>& a_meanParticleEnergies,
                                      const LevelData<EBCellFAB>& a_newPhotonsPerCell,
-                                     const int                   a_level)
+                                     const int                   a_level) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::reconcileParticles(LevelData<EBCellFAB>x3, int)");
+  CH_TIME("ItoPlasmaStepper::reconcileParticles(LevelData<EBCellFAB>x4, int)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::reconcileParticles(LevelData<EBCellFAB>x3, int)" << endl;
+    pout() << "ItoPlasmaStepper::reconcileParticles(LevelData<EBCellFAB>x4, int)" << endl;
   }
+
+  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+
+  CH_assert(a_newParticlesPerCell.nComp() == numPlasmaSpecies);
+  CH_assert(a_oldParticlesPerCell.nComp() == numPlasmaSpecies);
+  CH_assert(a_meanParticleEnergies.nComp() == numPlasmaSpecies);
+  CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
     this->reconcileParticles(a_newParticlesPerCell[dit()],
                              a_oldParticlesPerCell[dit()],
                              a_meanParticleEnergies[dit()],
@@ -2639,37 +2765,56 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                                      const int        a_level,
                                      const DataIndex  a_dit,
                                      const Box        a_box,
-                                     const Real       a_dx)
+                                     const Real       a_dx) noexcept
 {
   CH_TIME("ItoPlasmaStepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)" << endl;
   }
 
+  // TLDR: This is the main routine for generating new particles/photons after the chemistry advance have finished. We have
+  //       already computed the number of particles in each grid cell, and we now need to generate them. To do that we use
+  //       the reconciliation routines from the physics interface, which takes the per-cell responsibility for that. The main
+  //       work done in this routine is to expose the per-patch data to per-cell data that the physics interface can then use.
+
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
   const int numPhotonSpecies = m_physics->getNumRtSpecies();
 
-  const RealVect probLo = m_amr->getProbLo();
+  CH_assert(a_newParticlesPerCell.nComp() == numPlasmaSpecies);
+  CH_assert(a_oldParticlesPerCell.nComp() == numPlasmaSpecies);
+  CH_assert(a_meanParticleEnergies.nComp() == numPlasmaSpecies);
+  CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
 
+  // Geometric information that we need.
+  const RealVect probLo  = m_amr->getProbLo();
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
   const EBISBox& ebgraph = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
 
+  // List of valid grid cells
+  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[a_level])[a_dit];
+
+  // Pointers to cell-centered particle storages. Note that the BinFabs hold a list of particles/photons
+  // on each grid cell. We will manipulate these lists.
   Vector<BinFab<ItoParticle>*> particlesFAB(numPlasmaSpecies);
   Vector<BinFab<Photon>*>      sourcePhotonsFAB(numPhotonSpecies);
   Vector<BinFab<Photon>*>      bulkPhotonsFAB(numPhotonSpecies);
 
+  // Get a handle to the cell-sorted particles from the Ito solvers.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>& solver = solverIt();
-    const int                 idx    = solverIt.index();
+
+    const int idx = solverIt.index();
 
     ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     particlesFAB[idx] = &(solverParticles.getCellParticles(a_level, a_dit));
   }
 
+  // Get a handle to the cell-sorted photons from the Monte Carlo photon solvers.
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<McPhoto>& solver = solverIt();
-    const int               idx    = solverIt.index();
+
+    const int idx = solverIt.index();
 
     ParticleContainer<Photon>& solverBulkPhotons = solver->getBulkPhotons();
     ParticleContainer<Photon>& solverSourPhotons = solver->getSourcePhotons();
@@ -2678,10 +2823,23 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
     sourcePhotonsFAB[idx] = &(solverSourPhotons.getCellParticles(a_level, a_dit));
   }
 
+  // The physics interface takes the physical number of particles/photons as arguments
+  // to the reconciliation routines. These need to be set from the input arguments; this is the
+  // storage we use in the grid cells.
+  Vector<Real>      particleMeanEnergies(numPlasmaSpecies);
+  Vector<long long> numNewParticles(numPlasmaSpecies);
+  Vector<long long> numOldParticles(numPlasmaSpecies);
+  Vector<long long> numNewPhotons(numPhotonSpecies);
+
+  // The physics interface also takes the actual particles/photons as argument to its reconciliation routines. This
+  // is the storage we use for these; note that it is repopulated in every grid cell.
+  Vector<List<ItoParticle>*> particles(numPlasmaSpecies);
+  Vector<List<Photon>*>      bulkPhotons(numPhotonSpecies);
+  Vector<List<Photon>*>      sourcePhotons(numPhotonSpecies);
+
   // Regular cells
-  for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-    const IntVect iv = bit();
-    if (ebisbox.isRegular(iv)) {
+  auto regularKernel = [&](const IntVect& iv) -> void {
+    if (ebisbox.isRegular(iv) && validCells(iv)) {
       const RealVect cellPos       = probLo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
       const RealVect centroidPos   = cellPos;
       const RealVect lo            = -0.5 * RealVect::Unit;
@@ -2690,37 +2848,28 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
       const RealVect bndryNormal   = RealVect::Zero;
       const Real     kappa         = 1.0;
 
-      Vector<List<ItoParticle>*>       particles(numPlasmaSpecies);
-      Vector<List<Photon>*>            bulkPhotons(numPhotonSpecies);
-      Vector<List<Photon>*>            sourcePhotons(numPhotonSpecies);
-      Vector<RefCountedPtr<RtSpecies>> photoSpecies(numPhotonSpecies);
-
-      Vector<Real>      particleMeanEnergies(numPlasmaSpecies);
-      Vector<long long> numNewParticles(numPlasmaSpecies);
-      Vector<long long> numOldParticles(numPlasmaSpecies);
-      Vector<long long> numNewPhotons(numPhotonSpecies);
-
-      for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-        const int idx = solverIt.index();
-
-        particles[idx]            = &((*particlesFAB[idx])(iv, 0));
-        particleMeanEnergies[idx] = a_meanParticleEnergies.getSingleValuedFAB()(iv, idx);
-        numNewParticles[idx]      = llround(a_newParticlesPerCell.getSingleValuedFAB()(iv, idx));
-        numOldParticles[idx]      = llround(a_oldParticlesPerCell.getSingleValuedFAB()(iv, idx));
+      // Populate the per-cell particle data.
+      for (int i = 0; i < numPlasmaSpecies; i++) {
+        particles[i]            = &((*particlesFAB[i])(iv, 0));
+        particleMeanEnergies[i] = a_meanParticleEnergies.getSingleValuedFAB()(iv, i);
+        numNewParticles[i]      = llround(a_newParticlesPerCell.getSingleValuedFAB()(iv, i));
+        numOldParticles[i]      = llround(a_oldParticlesPerCell.getSingleValuedFAB()(iv, i));
       }
 
-      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-        const int idx = solverIt.index();
+      // Populate the per-cell photon data.
+      for (int i = 0; i < numPlasmaSpecies; i++) {
+        bulkPhotons[i]   = &((*bulkPhotonsFAB[i])(iv, 0));
+        sourcePhotons[i] = &((*sourcePhotonsFAB[i])(iv, 0));
 
-        bulkPhotons[idx]   = &((*bulkPhotonsFAB[idx])(iv, 0));
-        sourcePhotons[idx] = &((*sourcePhotonsFAB[idx])(iv, 0));
-        photoSpecies[idx]  = solverIt()->getSpecies();
-        numNewPhotons[idx] = llround(a_newPhotonsPerCell.getSingleValuedFAB()(iv, idx));
+        numNewPhotons[i] = llround(a_newPhotonsPerCell.getSingleValuedFAB()(iv, i));
 
-        sourcePhotons[idx]->clear();
+        // sourcePhotons will hold the NEW number of photons to be generated -- it should already
+        // have been cleared in upstream code but I'm leaving this in for safety.
+        sourcePhotons[i]->clear();
       }
 
-      // Reconcile particles, Photons, and photoionization
+      // Reconcile the ItoSolver particles -- this either removes weight from the original particles (if we lost physical particles)
+      // or adds new particles (if we gained physical particles)
       m_physics->reconcileParticles(particles,
                                     numNewParticles,
                                     numOldParticles,
@@ -2732,6 +2881,9 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                                     bndryNormal,
                                     a_dx,
                                     kappa);
+
+      // Reconcile the photon solver. This will generate new computational photons that are later added to the Monte Carlo photon
+      // solvers.
       m_physics->reconcilePhotons(sourcePhotons,
                                   numNewPhotons,
                                   cellPos,
@@ -2742,67 +2894,70 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                                   bndryNormal,
                                   a_dx,
                                   kappa);
-      m_physics->reconcilePhotoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
-      m_physics->setMeanParticleEnergy(particles, particleMeanEnergies);
 
-      // Clear the bulk Photons - they have now been absorbed on the mesh.
-      for (int i = 0; i < numPhotonSpecies; i++) {
-        //	bulkPhotons[i]->clear();
-      }
+      // Add the photoionization term. This will adds new particles from the photoionization reactions.
+      m_physics->reconcilePhotoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
+
+      // Set the new particle mean energies (the photoionization reconciliation term will have updated what they need to be).
+      m_physics->setMeanParticleEnergy(particles, particleMeanEnergies);
     }
-  }
+  };
 
   // Irregular cells
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit) {
-    const VolIndex& vof           = vofit();
-    const IntVect   iv            = vof.gridIndex();
-    const Real      kappa         = ebisbox.volFrac(vof);
-    const RealVect  cellPos       = EBArith::getVofLocation(vof, a_dx * RealVect::Unit, probLo);
-    const RealVect  centroidPos   = ebisbox.centroid(vof);
-    const RealVect  bndryCentroid = ebisbox.bndryCentroid(vof);
-    const RealVect  bndryNormal   = ebisbox.normal(vof);
+  auto irregularKernel = [&](const VolIndex& vof) -> void {
+    const IntVect iv = vof.gridIndex();
+    if (ebisbox.isIrregular(iv) && validCells(iv, 0)) {
+      const Real     kappa         = ebisbox.volFrac(vof);
+      const RealVect cellPos       = EBArith::getVofLocation(vof, a_dx * RealVect::Unit, probLo);
+      const RealVect centroidPos   = ebisbox.centroid(vof);
+      const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
+      const RealVect bndryNormal   = ebisbox.normal(vof);
 
-    RealVect lo = -0.5 * RealVect::Unit;
-    RealVect hi = 0.5 * RealVect::Unit;
-    if (kappa < 1.0) {
-      DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
-    }
+      // Compute the minimum bounding box that encloses this cut-cell.
+      RealVect lo = -0.5 * RealVect::Unit;
+      RealVect hi = 0.5 * RealVect::Unit;
+      if (kappa < 1.0) {
+        DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
+      }
 
-    Vector<List<ItoParticle>*>       particles(numPlasmaSpecies);
-    Vector<List<Photon>*>            bulkPhotons(numPhotonSpecies);
-    Vector<List<Photon>*>            sourcePhotons(numPhotonSpecies);
-    Vector<RefCountedPtr<RtSpecies>> photoSpecies(numPhotonSpecies);
+      // Populate the per-cell particle data.
+      for (int i = 0; i < numPlasmaSpecies; i++) {
+        particles[i]            = &((*particlesFAB[i])(iv, 0));
+        particleMeanEnergies[i] = a_meanParticleEnergies(vof, i);
+        numNewParticles[i]      = llround(a_newParticlesPerCell(vof, i));
+        numOldParticles[i]      = llround(a_oldParticlesPerCell(vof, i));
+      }
 
-    Vector<Real>      particleMeanEnergies(numPlasmaSpecies);
-    Vector<long long> numNewParticles(numPlasmaSpecies);
-    Vector<long long> numOldParticles(numPlasmaSpecies);
-    Vector<long long> numNewPhotons(numPhotonSpecies);
+      // Populate the per-cell photon data.
+      for (int i = 0; i < numPhotonSpecies; i++) {
+        bulkPhotons[i]   = &((*bulkPhotonsFAB[i])(iv, 0));
+        sourcePhotons[i] = &((*sourcePhotonsFAB[i])(iv, 0));
 
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+        numNewPhotons[i] = llround(a_newPhotonsPerCell(vof, i));
 
-      particles[idx]            = &((*particlesFAB[idx])(iv, 0));
-      particleMeanEnergies[idx] = a_meanParticleEnergies(vof, idx);
-      numNewParticles[idx]      = llround(a_newParticlesPerCell(vof, idx));
-      numOldParticles[idx]      = llround(a_oldParticlesPerCell(vof, idx));
-    }
+        // sourcePhotons will hold the NEW number of photons to be generated -- it should already
+        // have been cleared in upstream code but I'm leaving this in for safety.
+        sourcePhotons[i]->clear();
+      }
 
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
+      // Reconcile the ItoSolver particles -- this either removes weight from the original particles (if we lost physical particles)
+      // or adds new particles (if we gained physical particles)
+      m_physics->reconcileParticles(particles,
+                                    numNewParticles,
+                                    numOldParticles,
+                                    cellPos,
+                                    centroidPos,
+                                    lo,
+                                    hi,
+                                    bndryCentroid,
+                                    bndryNormal,
+                                    a_dx,
+                                    kappa);
 
-      bulkPhotons[idx]   = &((*bulkPhotonsFAB[idx])(iv, 0));
-      sourcePhotons[idx] = &((*sourcePhotonsFAB[idx])(iv, 0));
-      photoSpecies[idx]  = solverIt()->getSpecies();
-      numNewPhotons[idx] = llround(a_newPhotonsPerCell(vof, idx));
-
-      sourcePhotons[idx]->clear();
-    }
-
-    // Reconcile particles, Photons, and photoionization
-    m_physics->reconcileParticles(particles,
-                                  numNewParticles,
-                                  numOldParticles,
+      // Reconcile the photon solver. This will generate new computational photons that are later added to the Monte Carlo photon
+      // solvers.
+      m_physics->reconcilePhotons(sourcePhotons,
+                                  numNewPhotons,
                                   cellPos,
                                   centroidPos,
                                   lo,
@@ -2811,24 +2966,20 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                                   bndryNormal,
                                   a_dx,
                                   kappa);
-    m_physics->reconcilePhotons(sourcePhotons,
-                                numNewPhotons,
-                                cellPos,
-                                centroidPos,
-                                lo,
-                                hi,
-                                bndryCentroid,
-                                bndryNormal,
-                                a_dx,
-                                kappa);
-    m_physics->reconcilePhotoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
-    m_physics->setMeanParticleEnergy(particles, particleMeanEnergies);
 
-    // Clear the bulk Photons - they have now been absorbed on the mesh.
-    for (int i = 0; i < numPhotonSpecies; i++) {
-      //      bulkPhotons[i]->clear();
+      // Add the photoionization term. This will adds new particles from the photoionization reactions.
+      m_physics->reconcilePhotoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
+
+      // Set the new particle mean energies (the photoionization reconciliation term will have updated what they need to be).
+      m_physics->setMeanParticleEnergy(particles, particleMeanEnergies);
     }
-  }
+  };
+
+  // Run the kernels.
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
+
+  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);
 }
 
 void
@@ -3120,22 +3271,22 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
 }
 
 Real
-ItoPlasmaStepper::computePhysicsDt() const
+ItoPlasmaStepper::computePhysicsDt() const noexcept
 {
   CH_TIME("ItoPlasmaStepper::computePhysicsDt()");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::computePhysicsDt()" << endl;
   }
 
-  // TLDR: This is done on the particle Realm because of the densities (which are defined on the particle Realm).
-
+  // TLDR: This is done on the particle realm because that is where the densities are defined.
   const Real dt = this->computePhysicsDt(m_electricFieldParticle, m_ito->getDensities());
 
   return dt;
 }
 
 Real
-ItoPlasmaStepper::computePhysicsDt(const EBAMRCellData& a_E, const Vector<EBAMRCellData*> a_densities) const
+ItoPlasmaStepper::computePhysicsDt(const EBAMRCellData&         a_electricField,
+                                   const Vector<EBAMRCellData*> a_densities) const noexcept
 {
   CH_TIME("ItoPlasmaStepper::computePhysicsDt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)");
   if (m_verbosity > 5) {
@@ -3144,131 +3295,143 @@ ItoPlasmaStepper::computePhysicsDt(const EBAMRCellData& a_E, const Vector<EBAMRC
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
 
-  Real minDt = 1.E99;
+  CH_assert(a_electricField.getRealm() == m_particleRealm);
+  CH_assert(a_densities.size() == numPlasmaSpecies);
+
+  Real minDt = std::numeric_limits<Real>::max();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    Vector<LevelData<EBCellFAB>*> densities(numPlasmaSpecies, nullptr);
 
-    Vector<LevelData<EBCellFAB>*> densities(numPlasmaSpecies);
+    for (int i = 0; i < numPlasmaSpecies; i++) {
+      densities[i] = &(*(*a_densities[i])[lvl]);
 
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      densities[idx] = &(*(*a_densities[idx])[lvl]);
+      CH_assert(a_densities[i]->getRealm() == m_particleRealm);
     }
 
-    const Real levelDt = this->computePhysicsDt(*a_E[lvl], densities, lvl);
+    const Real levelDt = this->computePhysicsDt(*a_electricField[lvl], densities, lvl);
 
-    minDt = Min(minDt, levelDt);
+    minDt = std::min(minDt, levelDt);
   }
 
   return minDt;
 }
 
 Real
-ItoPlasmaStepper::computePhysicsDt(const LevelData<EBCellFAB>&         a_E,
+ItoPlasmaStepper::computePhysicsDt(const LevelData<EBCellFAB>&         a_electricField,
                                    const Vector<LevelData<EBCellFAB>*> a_densities,
-                                   const int                           a_level) const
+                                   const int                           a_level) const noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computePhysicsDt(LevelData<EBCellFAB>, Vector<LevelData<EBCellFAB> *>, int)");
+  CH_TIME("ItoPlasmaStepper::computePhysicsDt(LD<EBCellFAB>, Vector<LD<EBCellFAB> *>, int)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computePhysicsDt(LevelData<EBCellFAB>, Vector<LevelData<EBCellFAB> *>, int)" << endl;
+    pout() << "ItoPlasmaStepper::computePhysicsDt(LD<EBCellFAB>, Vector<LD<EBCellFAB> *>, int)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+
+  CH_assert(a_densities.size() == numPlasmaSpecies);
+  CH_assert(a_electricField.nComp() == SpaceDim);
+
+  Real minDt = std::numeric_limits<Real>::max();
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
 
-  Real minDt = 1.E99;
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-
-    Vector<EBCellFAB*> densities(numPlasmaSpecies);
-
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      densities[idx] = &((*a_densities[idx])[dit()]);
+    // Populate the patch data.
+    Vector<EBCellFAB*> densities(numPlasmaSpecies, nullptr);
+    for (int i = 0; i < numPlasmaSpecies; i++) {
+      densities[i] = &((*a_densities[i])[dit()]);
     }
 
-    const Real boxDt = this->computePhysicsDt(a_E[dit()], densities, a_level, dit(), dbl.get(dit()));
+    const Real patchDt = this->computePhysicsDt(a_electricField[dit()], densities, a_level, dit(), dbl[dit()]);
 
-    minDt = Min(minDt, boxDt);
+    minDt = std::min(minDt, patchDt);
   }
 
-  // MPI reduction....
-#ifdef CH_MPI
-  Real tmp    = 1.;
-  int  result = MPI_Allreduce(&minDt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-  if (result != MPI_SUCCESS) {
-    MayDay::Error("ItoPlasmaStepper::computePhysicsDt(lvl) - communication error on norm");
-  }
-  minDt = tmp;
-#endif
-
-  return minDt;
+  return ParallelOps::min(minDt);
 }
 
 Real
-ItoPlasmaStepper::computePhysicsDt(const EBCellFAB&         a_E,
+ItoPlasmaStepper::computePhysicsDt(const EBCellFAB&         a_electricField,
                                    const Vector<EBCellFAB*> a_densities,
                                    const int                a_level,
                                    const DataIndex          a_dit,
-                                   const Box                a_box) const
+                                   const Box                a_box) const noexcept
 {
-  CH_TIME("ItoPlasmaStepper::computePhysicsDt(EBCellFAB, Vector<EBCellFAB*>, lvl, dit, box)");
+  CH_TIME("ItoPlasmaStepper::computePhysicsDt(EBCellFAB, Vector<EBCellFAB*>, int, DataIndex, Box)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computePhysicsDt(EBCellFAB, Vector<EBCellFAB*>, lvl, dit, box)" << endl;
+    pout() << "ItoPlasmaStepper::computePhysicsDt(EBCellFAB, Vector<EBCellFAB*>, int, DataIndex, Box)" << endl;
   }
 
-  Real minDt = 1.E99;
+  Real minDt = std::numeric_limits<Real>::max();
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
 
-  const int            comp    = 0;
-  const Real           dx      = m_amr->getDx()[a_level];
-  const RealVect       probLo  = m_amr->getProbLo();
-  const BaseFab<Real>& E       = a_E.getSingleValuedFAB();
-  const EBISBox&       ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
+  CH_assert(a_electricField.nComp() == SpaceDim);
+  CH_assert(a_densities.size() == numPlasmaSpecies);
 
-  // Do regular cells
-  for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-    const IntVect  iv  = bit();
-    const RealVect pos = m_amr->getProbLo() + dx * (RealVect(iv) + 0.5 * RealVect::Unit);
-    const RealVect e   = RealVect(D_DECL(E(iv, 0), E(iv, 1), E(iv, 2)));
+  // Geometric information that we need.
+  const Real     dx      = m_amr->getDx()[a_level];
+  const RealVect probLo  = m_amr->getProbLo();
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
 
-    if (ebisbox.isRegular(iv)) {
-      Vector<Real> densities(numPlasmaSpecies);
-      for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-        const int idx = solverIt.index();
+  // Valid grid cells.
+  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[a_level])[a_dit];
 
-        const BaseFab<Real>& basefab = a_densities[idx]->getSingleValuedFAB();
-        densities[idx]               = basefab(iv, comp);
+  // Handles to regular grid data.
+  Vector<FArrayBox*> densitiesReg(numPlasmaSpecies);
+  for (int i = 0; i < numPlasmaSpecies; i++) {
+    densitiesReg[i] = &(a_densities[i]->getFArrayBox());
+  }
+
+  const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
+
+  // The kernel require storage for the per-cell densities. This is
+  // the storage we use for that
+  Vector<Real> densities(numPlasmaSpecies);
+
+  // Regular grid kernel.
+  auto regularKernel = [&](const IntVect& iv) -> void {
+    // Only regular cells not covered by a finer grid.
+    if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
+      const RealVect E   = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
+      const RealVect pos = m_amr->getProbLo() + dx * (RealVect(iv) + 0.5 * RealVect::Unit);
+
+      for (int i = 0; i < numPlasmaSpecies; i++) {
+        densities[i] = (*densitiesReg[i])(iv, 0);
       }
 
-      const Real cellDt = m_physics->computeDt(e, pos, densities);
+      const Real cellDt = m_physics->computeDt(E, pos, densities);
 
-      minDt = Min(minDt, cellDt);
+      minDt = std::min(minDt, cellDt);
     }
-  }
+  };
 
-  // Do irregular cells
+  // Irregular grid kernel.
+  auto irregularKernel = [&](const VolIndex& vof) -> void {
+    const IntVect& iv = vof.gridIndex();
+
+    // Only irregular cells not covered by a finer grid.
+    if (ebisbox.isIrregular(iv) && validCells(iv, 0)) {
+      const RealVect E   = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
+      const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+
+      for (int i = 0; i < numPlasmaSpecies; i++) {
+        densities[i] = (*a_densities[i])(vof, 0);
+      }
+
+      const Real cellDt = m_physics->computeDt(E, pos, densities);
+
+      minDt = std::min(minDt, cellDt);
+    }
+  };
+
+  // Run the kernels.
   VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit) {
-    const VolIndex& vof = vofit();
-    const RealVect  e   = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
-    const RealVect  pos = EBArith::getVofLocation(vof, dx * RealVect::Unit, probLo);
 
-    Vector<Real> densities(numPlasmaSpecies);
-
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx  = solverIt.index();
-      densities[idx] = (*a_densities[idx])(vof, comp);
-    }
-
-    const Real cellDt = m_physics->computeDt(e, pos, densities);
-
-    minDt = Min(minDt, cellDt);
-  }
+  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);
 
   return minDt;
 }
