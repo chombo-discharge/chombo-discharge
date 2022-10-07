@@ -599,6 +599,11 @@ ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_
     solver->writePlotData(a_output, a_icomp);
   }
 
+  // Write the conductivity to the output
+  a_output.copy(Interval(0, 0), m_conductivityCell, Interval(a_icomp, a_icomp));
+  a_plotVariableNames.push_back("Conductivity");
+  a_icomp++;
+
   // Write the current to the output
   const Interval srcInterv(0, SpaceDim - 1);
   const Interval dstInterv(a_icomp, a_icomp + SpaceDim - 1);
@@ -609,10 +614,12 @@ ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_
   if (SpaceDim == 3) {
     a_plotVariableNames.push_back("z-J");
   }
+  a_icomp += SpaceDim;
 
   // Write the number of particles per patch
   this->writeNumParticlesPerPatch(a_output, a_icomp);
   a_plotVariableNames.push_back("particles_per_patch");
+  a_icomp++;
 }
 
 void
@@ -930,6 +937,9 @@ ItoPlasmaStepper::getNumberOfPlotVariables() const
 
   // Surface charge solver variables.
   ncomp += m_sigma->getNumberOfPlotVariables();
+
+  // Conductivity
+  ncomp += 1;
 
   // Current density.
   ncomp += SpaceDim;
@@ -3966,9 +3976,12 @@ ItoPlasmaStepper::computeEdotJSourceNWO3(const Real a_dt) noexcept
 
             CompParticle p;
 
-            // vect<0> holds the starting position.
+            // vect<0> holds the starting position. real<0> holds the weight and
+            // real<1> is used for V(A) and real<2> is used for V(B)
             p.position()         = itoParticle.position();
             p.template real<0>() = itoParticle.weight();
+            p.template real<1>() = 0.0;
+            p.template real<2>() = 0.0;
             p.template vect<0>() = itoParticle.oldPosition();
 
             patchCompParticles.add(p);

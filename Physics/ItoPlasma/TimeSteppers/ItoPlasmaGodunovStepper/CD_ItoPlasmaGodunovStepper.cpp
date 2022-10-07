@@ -24,70 +24,18 @@ using namespace Physics::ItoPlasma;
 ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics)
   : ItoPlasmaStepper(a_physics)
 {
+  CH_TIME("ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper");
+  
   m_name    = "ItoPlasmaGodunovStepper";
-  m_physics = a_physics;
-
-  ParmParse pp("ItoPlasmaGodunovStepper");
-  pp.get("load_ppc", m_loadPerCell);
-  pp.get("nwo_reactions", m_useNewReactionAlgorithm);
-
-  m_avg_cfl = 0.0;
+  m_averageCFL = 0.0;
 }
 
-ItoPlasmaGodunovStepper::~ItoPlasmaGodunovStepper() {}
-
-int
-ItoPlasmaGodunovStepper::getNumberOfPlotVariables() const
+ItoPlasmaGodunovStepper::~ItoPlasmaGodunovStepper()
 {
-  CH_TIME("ItoPlasmaGodunovStepper::getNumberOfPlotVariables");
+  CH_TIME("ItoPlasmaGodunovStepper::~ItoPlasmaGodunovStepper");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaGodunovStepper::getNumberOfPlotVariables" << endl;
+    pout() << "ItoPlasmaGodunovStepper::~ItoPlasmaGodunovStepper" << endl;
   }
-
-  int ncomp = ItoPlasmaStepper::getNumberOfPlotVariables();
-
-  ncomp++; // Add conductivity
-
-  return ncomp;
-}
-
-void
-ItoPlasmaGodunovStepper::writePlotData(EBAMRCellData&       a_output,
-                                       Vector<std::string>& a_plotVariableNames,
-                                       int&                 a_icomp) const
-{
-  CH_TIME("ItoPlasmaGodunovStepper::writeConductivity");
-  if (m_verbosity > 5) {
-    pout() << "ItoPlasmaGodunovStepper::writeConductivity" << endl;
-  }
-
-  ItoPlasmaStepper::writePlotData(a_output, a_plotVariableNames, a_icomp);
-
-  // Do conductivity
-  this->writeConductivity(a_output, a_icomp);
-  a_plotVariableNames.push_back("conductivity");
-}
-
-void
-ItoPlasmaGodunovStepper::writeConductivity(EBAMRCellData& a_output, int& a_icomp) const
-{
-  CH_TIME("ItoPlasmaStepper::writeConductivity");
-  if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::writeConductivity" << endl;
-  }
-
-  const Interval src_interv(0, 0);
-  const Interval dst_interv(a_icomp, a_icomp);
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    if (m_conductivityCell.getRealm() == a_output.getRealm()) {
-      m_conductivityCell[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-    }
-    else {
-      m_conductivityCell[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-    }
-  }
-  a_icomp += 1;
 }
 
 void
@@ -378,12 +326,12 @@ ItoPlasmaGodunovStepper::computeDt()
 
 #if 0 // Debug code
   const Real dtCFL = m_ito->computeDt();
-  m_avg_cfl += a_dt/dtCFL;
+  m_averageCFL += a_dt/dtCFL;
   if(procID() == 0) std::cout << "dt = " << a_dt
 			      << "\t relax dt = " << relaxTime
 			      << "\t factor = " << a_dt/relaxTime
 			      << "\t CFL = " << a_dt/dtCFL
-			      << "\t avgCFL = " << m_avg_cfl/(1+m_timeStep)
+			      << "\t avgCFL = " << m_averageCFL/(1+m_timeStep)
 			      << std::endl;
 #endif
 

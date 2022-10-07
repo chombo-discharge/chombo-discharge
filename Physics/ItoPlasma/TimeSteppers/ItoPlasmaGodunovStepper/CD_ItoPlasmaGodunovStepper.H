@@ -20,21 +20,29 @@
 namespace Physics {
   namespace ItoPlasma {
 
+    /*!
+      @brief Implementation of ItoPlasmaStepper that uses a semi-implicit split-step formalism for advancing the Ito-Poisson equations
+    */
     class ItoPlasmaGodunovStepper : public ItoPlasmaStepper
     {
     public:
-      // Ctor and dtor
-      ItoPlasmaGodunovStepper() = delete;
-      ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
-      ~ItoPlasmaGodunovStepper();
 
-      // IO routines
-      int
-      getNumberOfPlotVariables() const override;
-      void
-      writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
-      void
-      writeConductivity(EBAMRCellData& a_output, int& a_icomp) const;
+      /*!
+	@brief Default constructor - disallowed
+      */
+      ItoPlasmaGodunovStepper() = delete;
+
+      /*!
+	@brief Full constructor. 
+	@param[in] a_phyics Physics implementation. 
+      */
+      ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
+
+      /*!
+	@brief Destructor. Does nothing
+      */
+      virtual ~ItoPlasmaGodunovStepper();
+
 
       // Advance routines
       Real
@@ -84,7 +92,7 @@ namespace Physics {
       bool m_filter_cond;
 
       Real m_relax_factor; // Factor for relaxation time
-      Real m_avg_cfl;      // Average CFL number
+      Real m_averageCFL;      // Average CFL number
       Real m_prevDt;
       Real m_eb_tolerance; // Tolerance for EB particle removal.
 
