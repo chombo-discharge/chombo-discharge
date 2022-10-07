@@ -3685,10 +3685,13 @@ ItoPlasmaStepper::computeEdotJSource(const Real a_dt) noexcept
     pout() << "ItoPlasmaStepper::computeEdotJSource(a_dt)" << endl;
   }
 
+  CH_assert(a_dt > 0.0);
+
   // Swap between these two.
   if (m_useNewReactionAlgorithm) {
     //    this->computeEdotJSourceNWO();
-    this->computeEdotJSourceNWO2(a_dt);
+    //    this->computeEdotJSourceNWO2(a_dt);
+    this->computeEdotJSourceNWO3(a_dt);
   }
   else {
     this->computeEdotJSource();

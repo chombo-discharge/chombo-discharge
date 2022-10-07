@@ -911,6 +911,13 @@ namespace Physics {
       computeEdotJSource(const Real a_dt) noexcept;
 
       /*!
+	@brief Compute the energy source term for the various plasma species
+      */
+      virtual void
+      computeEdotJSourceNWO3(const Real a_dt) noexcept;
+
+      // THESE ARE OLD ROUTINES THAT WILL BE REMOVED VERY SOON
+      /*!
 	@brief Compute the energy source term for the various species
       */
       virtual void
@@ -927,12 +934,6 @@ namespace Physics {
       */
       virtual void
       computeEdotJSourceNWO2(const Real a_dt) noexcept;
-
-      /*!
-	@brief Compute the energy source term for the various plasma species
-      */
-      virtual void
-      computeEdotJSourceNWO3(const Real a_dt) noexcept;
 
       // Old routines for chemistry advances. The physics module will switch between LFA and LEA.
       void
@@ -970,6 +971,7 @@ namespace Physics {
                              const Box                     a_box,
                              const Real                    a_dx,
                              const Real                    a_dt);
+      // END OF OLD ROUTINES TO BE REMOVED VERY SOON
 
     protected:
       /*!
