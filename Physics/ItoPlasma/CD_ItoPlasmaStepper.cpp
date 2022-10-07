@@ -3437,46 +3437,53 @@ ItoPlasmaStepper::computePhysicsDt(const EBCellFAB&         a_electricField,
 }
 
 void
-ItoPlasmaStepper::advancePhotons(const Real a_dt)
+ItoPlasmaStepper::advancePhotons(const Real a_dt) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::advancePhotons(a_dt)");
+  CH_TIME("ItoPlasmaStepper::advancePhotons(Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::advance_advancePhotons(a_dt)" << endl;
+    pout() << "ItoPlasmaStepper::advancePhotons(Real)" << endl;
   }
+
+  // TLDR: This will add the source photons to the "bulk" photons and then advance them. If the
+  //       solver is a true transient solver then the photons are moved and some of them are eventually
+  //       absorbed on the mesh. If the solver is an "instanteneous" solver then all source photons
+  //       are absorbed on the mesh.
 
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<McPhoto>& solver = solverIt();
 
-    // Add source Photons and move the Photons
-    ParticleContainer<Photon>& Photons       = solver->getPhotons();
+    // To reiterate: photons are the photons that live in the solver and are moved around. bulkPhotons
+    // are the solvers that were absorbed on the mesh, bbPhotons are the photons that collided with the EB
+    // and domainPhotons are photons that moved out of the domain.
+    ParticleContainer<Photon>& photons       = solver->getPhotons();
     ParticleContainer<Photon>& bulkPhotons   = solver->getBulkPhotons();
     ParticleContainer<Photon>& ebPhotons     = solver->getEbPhotons();
     ParticleContainer<Photon>& domainPhotons = solver->getDomainPhotons();
     ParticleContainer<Photon>& sourcePhotons = solver->getSourcePhotons();
 
     if (solver->isInstantaneous()) {
-      solver->clear(Photons);
+      solver->clear(photons);
 
       // Add source Photons
-      Photons.addParticles(sourcePhotons);
+      photons.addParticles(sourcePhotons);
       solver->clear(sourcePhotons);
 
-      // Instantaneous advance
-      solver->advancePhotonsInstantaneous(bulkPhotons, ebPhotons, domainPhotons, Photons);
+      // Instantaneous advance.
+      solver->advancePhotonsInstantaneous(bulkPhotons, ebPhotons, domainPhotons, photons);
     }
     else {
       // Add source Photons
-      Photons.addParticles(sourcePhotons);
+      photons.addParticles(sourcePhotons);
       solver->clear(sourcePhotons);
 
       // Stationary advance
-      solver->advancePhotonsTransient(bulkPhotons, ebPhotons, domainPhotons, Photons, a_dt);
+      solver->advancePhotonsTransient(bulkPhotons, ebPhotons, domainPhotons, photons, a_dt);
     }
   }
 }
 
 void
-ItoPlasmaStepper::sortPhotonsByCell(McPhoto::WhichContainer a_which)
+ItoPlasmaStepper::sortPhotonsByCell(const McPhoto::WhichContainer a_which) noexcept
 {
   CH_TIME("ItoPlasmaStepper::sortPhotonsByCell(McPhoto::WhichContainer)");
   if (m_verbosity > 5) {
@@ -3489,7 +3496,7 @@ ItoPlasmaStepper::sortPhotonsByCell(McPhoto::WhichContainer a_which)
 }
 
 void
-ItoPlasmaStepper::sortPhotonsByPatch(McPhoto::WhichContainer a_which)
+ItoPlasmaStepper::sortPhotonsByPatch(const McPhoto::WhichContainer a_which) noexcept
 {
   CH_TIME("ItoPlasmaStepper::sortPhotonsByPatch(McPhoto::WhichContainer)");
   if (m_verbosity > 5) {
@@ -3528,7 +3535,7 @@ ItoPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
 {
   CH_TIME("ItoPlasmaStepper::loadBalanceBoxes");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper_stepper::loadBalanceBoxes" << endl;
+    pout() << "ItoPlasmaStepper::loadBalanceBoxes" << endl;
   }
 
   if (m_loadBalance && a_realm == m_particleRealm) {
@@ -3544,7 +3551,7 @@ ItoPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_leve
 {
   CH_TIME("ItoPlasmaStepper::getCheckpointLoads(...)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper_stepper::getCheckpointLoads(...)" << endl;
+    pout() << "ItoPlasmaStepper::getCheckpointLoads(...)" << endl;
   }
 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(a_realm)[a_level];
@@ -3671,7 +3678,7 @@ ItoPlasmaStepper::getLoadBalanceSolvers() const noexcept
 }
 
 void
-ItoPlasmaStepper::computeEdotJSource(const Real a_dt)
+ItoPlasmaStepper::computeEdotJSource(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeEdotJSource(a_dt)");
   if (m_verbosity > 5) {
@@ -3689,7 +3696,7 @@ ItoPlasmaStepper::computeEdotJSource(const Real a_dt)
 }
 
 void
-ItoPlasmaStepper::computeEdotJSource()
+ItoPlasmaStepper::computeEdotJSource() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeEdotJSource()");
   if (m_verbosity > 5) {
@@ -3744,7 +3751,7 @@ ItoPlasmaStepper::computeEdotJSource()
 }
 
 void
-ItoPlasmaStepper::computeEdotJSourceNWO()
+ItoPlasmaStepper::computeEdotJSourceNWO() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO()");
   if (m_verbosity > 5) {
@@ -3797,7 +3804,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO()
 }
 
 void
-ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt)
+ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO2(a_dt)");
   if (m_verbosity > 5) {
@@ -3805,6 +3812,9 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt)
   }
 
   DataOps::setValue(m_EdotJ, 0.0);
+
+  // TLDR: EdotJ is an energy term for the various species, i.e. it is the rate of energy increase as the particle moves from
+  //       position A to position B, excluding friction from collision with other molecules.
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
@@ -3880,6 +3890,158 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt)
         }
       }
     }
+  }
+}
+
+void
+ItoPlasmaStepper::computeEdotJSourceNWO3(const Real a_dt) noexcept
+{
+  CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO3(a_dt)");
+  if (m_verbosity > 5) {
+    pout() << "ItoPlasmaStepper::computeEdotJSourceNWO3(a_dt)" << endl;
+  }
+
+  CH_assert(a_dt > 0.0);
+
+  DataOps::setValue(m_EdotJ, 0.0);
+
+  CH_assert(m_EdotJ.getRealm() == m_fluidRealm);
+
+  // TLDR: EdotJ is an energy term for the various species, i.e. it is the rate of energy increase as the particle moves from
+  //       position A to position B, excluding friction from collision with other molecules. We compute this energy increase as
+  //
+  //          q * V(B) - V(A)
+  //
+  //       which means that the energy rate is q*(V(B) - V(A))/a_dt.
+  //
+  //       We simply assign this factor to the particles and then deposit them on the mesh. However, this is more complex than
+  //       it sounds because the particles m_EdotJ live on different realms. The way we do this is that we copy the potential
+  //       over into the particle realm and we interpolate V(B) and V(A) onto some storage in the particle container. We then
+  //       assign an effective weight w * [V(B) - V(A)] to the particles which we deposit onto the mesh using the appropriate
+  //       deposition scheme that the user has assgned.
+  //
+
+  // Allocate a particle data holder with three scalar storage spaces; these are the weight, V(A), and V(B). We also
+  // need the positions A and B so they're in here as well.
+  using CompParticle = GenericParticle<3, 1>;
+
+  ParticleContainer<CompParticle> computationParticles;
+  m_amr->allocate(computationParticles, m_particleRealm);
+
+  // Electrostatic potential on appropriate phase. This is defined on the fluid realm
+  // but we need it on the particle realm.
+  const EBAMRCellData potentialPhase = m_amr->alias(m_plasmaPhase, m_fieldSolver->getPotential());
+  m_particleScratch1.copy(potentialPhase);
+
+  m_amr->conservativeAverage(m_particleScratch1, m_particleRealm, m_plasmaPhase);
+  m_amr->interpGhost(m_particleScratch1, m_particleRealm, m_plasmaPhase);
+
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+
+    const int  idx       = solverIt.index();
+    const int  Z         = species->getChargeNumber();
+    const bool mobile    = solver->isMobile();
+    const bool diffusive = solver->isDiffusive();
+
+    if (Z != 0 && (mobile || diffusive)) {
+
+      const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
+
+      // Copy the ItoParticles to the transient particles we use for computing these things.
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+
+          List<CompParticle>&      patchCompParticles = computationParticles[lvl][dit()].listItems();
+          const List<ItoParticle>& patchItoParticles  = particles[lvl][dit()].listItems();
+
+          for (ListIterator<ItoParticle> lit(patchItoParticles); lit.ok(); ++lit) {
+            const ItoParticle& itoParticle = lit();
+
+            CompParticle p;
+
+            // vect<0> holds the starting position.
+            p.position()         = itoParticle.position();
+            p.template real<0>() = itoParticle.weight();
+            p.template vect<0>() = itoParticle.oldPosition();
+
+            patchCompParticles.add(p);
+          }
+        }
+      }
+
+      // Interpolate the potential to the current particle position which gives us V(B) for the particles.
+      m_amr->interpolateParticles<CompParticle, &CompParticle::template real<1>>(computationParticles,
+                                                                                 m_particleRealm,
+                                                                                 m_plasmaPhase,
+                                                                                 m_particleScratch1,
+                                                                                 solver->getDeposition(),
+                                                                                 false);
+
+      // Move the particles back to their old positions and interpolate the potential there.
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          List<CompParticle>& particles = computationParticles[lvl][dit()].listItems();
+
+          for (ListIterator<CompParticle> lit(particles); lit.ok(); ++lit) {
+
+            // Swap positions.
+            const RealVect tmp = lit().position();
+
+            // vect<0> holds the end position.
+            lit().position()         = lit().template vect<0>();
+            lit().template vect<0>() = tmp;
+          }
+        }
+      }
+
+      computationParticles.remap();
+
+      // Interpolate the potential to the previous particle position which gives us V(A) for the particles.
+      m_amr->interpolateParticles<CompParticle, &CompParticle::template real<2>>(computationParticles,
+                                                                                 m_particleRealm,
+                                                                                 m_plasmaPhase,
+                                                                                 m_particleScratch1,
+                                                                                 solver->getDeposition());
+
+      // Move the particles back again and multiply the weight by Z * (V(A) - V(B))/a_dt
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          List<CompParticle>& particles = computationParticles[lvl][dit()].listItems();
+
+          for (ListIterator<CompParticle> lit(particles); lit.ok(); ++lit) {
+            lit().position() = lit().template vect<0>();
+
+            // Compute weight * V(B) - V(A) where V(B) is stored in real<1> and V(A) is stored in real<2>
+            lit().template real<0>() *= (lit().template real<1>() - lit().template real<2>());
+          }
+        }
+      }
+
+      computationParticles.remap();
+
+      // Deposit the particles
+      m_amr->depositParticles<CompParticle, &CompParticle::template real<0>>(m_particleScratch1,
+                                                                             m_particleRealm,
+                                                                             m_plasmaPhase,
+                                                                             computationParticles,
+                                                                             solver->getDeposition(),
+                                                                             solver->getCoarseFineDeposition());
+
+      // Copy data back onto the fluid realm.
+      m_fluidScratch1.copy(m_particleScratch1);
+      DataOps::scale(m_fluidScratch1, Z * Units::Qe / a_dt);
+      DataOps::plus(m_EdotJ, m_fluidScratch1, 0, idx, 1);
+    }
+
+    computationParticles.clearParticles();
   }
 }
 

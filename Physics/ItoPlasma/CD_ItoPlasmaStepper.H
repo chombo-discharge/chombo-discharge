@@ -882,26 +882,57 @@ namespace Physics {
                        const DataIndex          a_dit,
                        const Box                a_box) const noexcept;
 
-      // Routines for advancing Photons
-      void
-      advancePhotons(const Real a_dt);
+      /*!
+	@brief Photon advancement routine
+	@param[in] a_dt Time step
+      */
+      virtual void
+      advancePhotons(const Real a_dt) noexcept;
 
-      // Routines for sorting particles. These routines are here because RtLayout is general for RtSolver, and I'm too
-      // lazy to write an McPhoto_layout. So here you go.
-      void
-      sortPhotonsByCell(McPhoto::WhichContainer a_which);
-      void
-      sortPhotonsByPatch(McPhoto::WhichContainer a_which);
+      /*!
+	@brief Sort photons by cells
+	@param[in] a_which Which container to sort by cell
+      */
+      virtual void
+      sortPhotonsByCell(const McPhoto::WhichContainer a_which) noexcept;
 
-      // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.
-      void
-      computeEdotJSource(const Real a_dt);
-      void
-      computeEdotJSource();
-      void
-      computeEdotJSourceNWO();
-      void
-      computeEdotJSourceNWO2(const Real a_dt);
+      /*!
+	@brief Sort photons by patch
+	@param[in] a_which Which container to sort by patch
+      */
+      virtual void
+      sortPhotonsByPatch(const McPhoto::WhichContainer a_which) noexcept;
+
+      /*!
+	@brief Compute the energy source E*J for the various species
+	@param[in] a_dt Time step
+      */
+      virtual void
+      computeEdotJSource(const Real a_dt) noexcept;
+
+      /*!
+	@brief Compute the energy source term for the various species
+      */
+      virtual void
+      computeEdotJSource() noexcept;
+
+      /*!
+	@brief Compute the energy source term for the various species
+      */
+      virtual void
+      computeEdotJSourceNWO() noexcept;
+
+      /*!
+	@brief Compute the energy source term for the various species
+      */
+      virtual void
+      computeEdotJSourceNWO2(const Real a_dt) noexcept;
+
+      /*!
+	@brief Compute the energy source term for the various plasma species
+      */
+      virtual void
+      computeEdotJSourceNWO3(const Real a_dt) noexcept;
 
       // Old routines for chemistry advances. The physics module will switch between LFA and LEA.
       void

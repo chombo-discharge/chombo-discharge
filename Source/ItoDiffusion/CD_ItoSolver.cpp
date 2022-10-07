@@ -2899,6 +2899,12 @@ ItoSolver::getDeposition() const
   return m_deposition;
 }
 
+CoarseFineDeposition
+ItoSolver::getCoarseFineDeposition() const
+{
+  return m_coarseFineDeposition;
+}
+
 phase::which_phase
 ItoSolver::getPhase() const
 {

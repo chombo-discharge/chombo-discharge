@@ -963,6 +963,12 @@ public:
   getDeposition() const;
 
   /*!
+    @brief Get the coarse-fine deposition strategy
+  */
+  CoarseFineDeposition
+  getCoarseFineDeposition() const;
+
+  /*!
     @brief Return phase
     @return Returns m_phase
   */
