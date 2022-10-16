@@ -13,8 +13,6 @@
 #include <limits>
 
 // Chombo includes
-#include <EBArith.H>
-#include <PolyGeom.H>
 #include <ParmParse.H>
 
 // Our includes
@@ -2918,7 +2916,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
     const IntVect iv = vof.gridIndex();
     if (ebisbox.isIrregular(iv) && validCells(iv, 0)) {
       const Real     kappa         = ebisbox.volFrac(vof);
-      const RealVect cellPos       = EBArith::getVofLocation(vof, a_dx * RealVect::Unit, probLo);
+      const RealVect cellPos       = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, a_dx);
       const RealVect centroidPos   = ebisbox.centroid(vof);
       const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
       const RealVect bndryNormal   = ebisbox.normal(vof);
@@ -3877,7 +3875,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt) noexcept
             const RealVect& Xold = p.oldPosition();
 
             p.tmp()    = m;
-            p.weight() = m * PolyGeom::dot(v, Xnew - Xold);
+            p.weight() = m * v.dotProduct(Xnew - Xold);
           }
         }
       }

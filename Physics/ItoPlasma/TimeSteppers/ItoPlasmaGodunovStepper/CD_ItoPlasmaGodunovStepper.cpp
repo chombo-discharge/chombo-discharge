@@ -25,8 +25,8 @@ ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>
   : ItoPlasmaStepper(a_physics)
 {
   CH_TIME("ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper");
-  
-  m_name    = "ItoPlasmaGodunovStepper";
+
+  m_name       = "ItoPlasmaGodunovStepper";
   m_averageCFL = 0.0;
 }
 

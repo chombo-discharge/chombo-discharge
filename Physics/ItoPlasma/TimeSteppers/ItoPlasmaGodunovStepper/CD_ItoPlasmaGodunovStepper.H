@@ -26,7 +26,6 @@ namespace Physics {
     class ItoPlasmaGodunovStepper : public ItoPlasmaStepper
     {
     public:
-
       /*!
 	@brief Default constructor - disallowed
       */
@@ -42,7 +41,6 @@ namespace Physics {
 	@brief Destructor. Does nothing
       */
       virtual ~ItoPlasmaGodunovStepper();
-
 
       // Advance routines
       Real
@@ -92,7 +90,7 @@ namespace Physics {
       bool m_filter_cond;
 
       Real m_relax_factor; // Factor for relaxation time
-      Real m_averageCFL;      // Average CFL number
+      Real m_averageCFL;   // Average CFL number
       Real m_prevDt;
       Real m_eb_tolerance; // Tolerance for EB particle removal.
 
