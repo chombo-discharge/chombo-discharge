@@ -132,28 +132,9 @@ KineticMonteCarlo<R, State, T>::partitionCriticalReactions(const State&        a
   const size_t numReactions = a_reactions.size();
 
   for (size_t i = 0; i < numReactions; i++) {
+    const T Lj = a_reactions[i]->computeCriticalNumberOfReactions(a_state);
 
-    // Should be a std::map<size_t, integer_type>.
-    const auto& stateChange = a_reactions[i]->getStateChange();
-
-    T    Lj        = std::numeric_limits<T>::max();
-    bool consuming = false;
-
-    for (const auto& s : stateChange) {
-      const auto& reactant = stateChange.first;
-      const auto& nuIJ     = stateChange.second;
-
-      if (nuIJ < 0) {
-        consuming = true;
-
-        const T s = (T)std::abs(nuIJ);
-        const T b = ((T)a_state[reactant] + s - 1) / s;
-
-        Lj = std::min(Lj, b);
-      }
-    }
-
-    if (Lj < m_Ncrit && consuming) {
+    if (Lj < m_Ncrit) {
       criticalReactions.emplace_back(a_reactions[i]);
     }
     else {
@@ -344,7 +325,7 @@ KineticMonteCarlo<R, State, T>::advanceTau(State&              a_state,
         this->stepTau(state, a_reactions, curDt);
 
         // If this was a valid step, accept it. Else reduce dt.
-        if (R::isStateValid(state)) {
+        if (state.isValidState()) {
           a_state = state;
 
           curTime += curDt;
@@ -555,7 +536,7 @@ KineticMonteCarlo<R, State, T>::advanceHybrid(State&              a_state,
           this->stepTau(state, nonCriticalReactions, propensitiesNonCrit, curDt);
 
           // Check if we need to reject the state and rather try again with a smaller non-critical time step.
-          validStep = R::isStateValid(state);
+          validStep = state.isValidState();
 
           if (validStep) {
             a_state = state;
@@ -574,7 +555,7 @@ KineticMonteCarlo<R, State, T>::advanceHybrid(State&              a_state,
         this->stepTau(state, nonCriticalReactions, propensitiesNonCrit, curDt);
 
         // Check if we need to reject the state and rather try again with a smaller non-critical time step.
-        validStep = R::isStateValid(state);
+        validStep = state.isValidState();
 
         if (validStep) {
           a_state = state;
