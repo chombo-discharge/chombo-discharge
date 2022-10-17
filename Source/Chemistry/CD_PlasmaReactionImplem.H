@@ -111,14 +111,14 @@ PlasmaReaction<T, State>::advanceState(State&   a_particleState,
 }
 
 template <typename T, typename State>
-inline const std::map<size_t, int>&
+inline const std::map<size_t, T>&
 PlasmaReaction<T, State>::getParticleStateChange() const noexcept
 {
   return m_particleStateChange;
 }
 
 template <typename T, typename State>
-inline const std::map<size_t, int>&
+inline const std::map<size_t, T>&
 PlasmaReaction<T, State>::getPhotonStateChange() const noexcept
 {
   return m_photonStateChange;
@@ -129,7 +129,7 @@ inline const std::list<size_t>&
 PlasmaReaction<T, State>::getParticleReactants() const noexcept
 {
   return m_particleReactants;
-}
+}
 
 template <typename T, typename State>
 inline const std::list<size_t>&

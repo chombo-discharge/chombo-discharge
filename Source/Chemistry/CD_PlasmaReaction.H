@@ -101,14 +101,14 @@ public:
     @brief Get the particle state change.
     @return m_particleStateChange;
   */
-  inline const std::map<size_t, int>&
+  inline const std::map<size_t, T>&
   getParticleStateChange() const noexcept;
 
   /*!
     @brief Get the photon state change.
     @return m_photonStateChange;
   */
-  inline const std::map<size_t, int>&
+  inline const std::map<size_t, T>&
   getPhotonStateChange() const noexcept;
 
   /*!
@@ -157,12 +157,12 @@ protected:
   /*!
     @brief State change for particles. 
   */
-  std::map<size_t, int> m_particleStateChange;
+  std::map<size_t, T> m_particleStateChange;
 
   /*!
     @brief State change for photons. 
   */
-  std::map<size_t, int> m_photonStateChange;
+  std::map<size_t, T> m_photonStateChange;
 
   /*!
     @brief Compute state change
