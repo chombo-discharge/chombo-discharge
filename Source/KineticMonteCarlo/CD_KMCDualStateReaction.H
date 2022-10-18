@@ -44,6 +44,9 @@ public:
 
   /*!
     @brief Full constructor
+    @param[in] a_lhsReactives    Reactive species on the left-hand side of the reaction (i.e., the reactants)
+    @param[in] a_rhsReactives    Reactive species on the right-hand side of the reaction (i.e., the products)
+    @param[in] a_rhsNonReactives Non-reactive species on the right-hand side of the reaction (i.e., piggybacked products)
   */
   inline KMCDualStateReaction(const std::list<size_t>& a_lhsReactives,
                               const std::list<size_t>& a_rhsReactives,
@@ -63,12 +66,15 @@ public:
 
   /*!
     @brief Get the population of the reactant in the input state.
+    @param[in] a_reactant Reactive species
+    @param[in] a_state    State vector
   */
   inline T
   population(const size_t& a_reactant, const State& a_state) const noexcept;
 
   /*!
     @brief Compute the propensity function for this reaction type. 
+    @param[in] a_state    State vector
     @note User should set the rate before calling this routine. 
   */
   inline Real
@@ -76,6 +82,7 @@ public:
 
   /*!
     @brief Compute the number of times the reaction can fire before exhausting one of the reactants.
+    @param[in] a_state    State vector
   */
   inline T
   computeCriticalNumberOfReactions(const State& a_state) const noexcept;
@@ -88,13 +95,16 @@ public:
   getReactants() const noexcept;
 
   /*!
-    @brief Get the state change due to a change in the input particle reactant
+    @brief Get the state change due to a change in the input reactant
+    @param[in] a_reactant Reactive species
   */
   inline T
-  getStateChange(const size_t a_particleReactant) const noexcept;
+  getStateChange(const size_t a_reactant) const noexcept;
 
   /*!
     @brief Advance the incoming state with the number of reactions. 
+    @param[inout] a_state        State vector
+    @param[in]    a_numReactions Number of reactions.
   */
   inline void
   advanceState(State& a_state, const T& a_numReactions) const noexcept;
@@ -106,27 +116,27 @@ protected:
   mutable Real m_rate;
 
   /*!
-    @brief Particle reactants. 
+    @brief Reactive species.
   */
   std::list<size_t> m_lhsReactives;
 
   /*!
-    @brief Particle products. 
+    @brief Product species.
   */
   std::list<size_t> m_rhsReactives;
 
   /*!
-    @brief Photon products.
+    @brief Non-reactive product species. 
   */
   std::list<size_t> m_rhsNonReactives;
 
   /*!
-    @brief State change for particles. 
+    @brief State change for reactants/products.
   */
   std::map<size_t, T> m_reactiveStateChange;
 
   /*!
-    @brief State change for photons. 
+    @brief State change for non-reactive products. 
   */
   std::map<size_t, T> m_nonReactiveStateChange;
 

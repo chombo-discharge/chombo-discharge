@@ -45,17 +45,19 @@ KMCSingleState<T>::isValidState() const noexcept
 
 template <typename T>
 inline T&
-KMCSingleState<T>::operator[](const size_t a_idx) noexcept{
+KMCSingleState<T>::operator[](const size_t a_idx) noexcept
+{
   CH_assert(a_idx < m_state.size());
-  
+
   return m_state[a_idx];
 }
 
 template <typename T>
 inline const T&
-KMCSingleState<T>::operator[](const size_t a_idx) const noexcept{
+KMCSingleState<T>::operator[](const size_t a_idx) const noexcept
+{
   CH_assert(a_idx < m_state.size());
-  
+
   return m_state[a_idx];
 }
 

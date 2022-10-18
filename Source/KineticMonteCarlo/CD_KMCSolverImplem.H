@@ -177,7 +177,9 @@ KMCSolver<R, State, T>::getCriticalTimeStep(const std::vector<Real>& a_propensit
 {
   CH_TIME("KineticMonteCarlo::getCriticalTimeStep(std::vector<Real>)");
 
+  // To avoid division by zero later on.
   Real A = std::numeric_limits<Real>::min();
+
   for (const auto& p : a_propensities) {
     A += p;
   }

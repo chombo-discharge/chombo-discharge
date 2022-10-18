@@ -48,8 +48,7 @@ public:
     @param[in] a_reactants Species on the left-hand side of the reaction. 
     @param[in] a_products  Species on the right-hand side of the reaction. 
   */
-  inline KMCSingleStateReaction(const std::list<size_t>& a_reactants,
-				const std::list<size_t>& a_products) noexcept;
+  inline KMCSingleStateReaction(const std::list<size_t>& a_reactants, const std::list<size_t>& a_products) noexcept;
 
   /*!
     @brief Destructor

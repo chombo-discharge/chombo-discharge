@@ -21,6 +21,8 @@ KMCDualState<T>::KMCDualState(const size_t a_numReactiveSpecies, const size_t a_
 {
   m_reactiveState.resize(a_numReactiveSpecies);
   m_nonReactiveState.resize(a_numNonReactiveSpecies);
+
+  CH_assert(m_reactiveState.size() > 0);
 }
 
 template <typename T>

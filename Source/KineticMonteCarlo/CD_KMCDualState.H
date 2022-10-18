@@ -70,7 +70,7 @@ public:
   operator=(const KMCDualState&&) = delete;
 
   /*!
-    @brief Check if state is a valid state. An invalid state will have a negative number of particles/photons. 
+    @brief Check if state is a valid state. An invalid state will have a negative number of reactants/non-reactants. 
   */
   inline bool
   isValidState() const noexcept;

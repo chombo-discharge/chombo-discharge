@@ -79,7 +79,7 @@ public:
     @param[in] a_idx Index in state vector
   */
   inline const T&
-  operator[](const size_t a_idx) const noexcept;  
+  operator[](const size_t a_idx) const noexcept;
 
   /*!
     @brief Check if state is a valid state. 

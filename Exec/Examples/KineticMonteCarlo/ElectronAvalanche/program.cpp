@@ -24,12 +24,10 @@ main(int argc, char* argv[])
   std::vector<std::shared_ptr<const KMCSingleStateReaction<>>> reactionList;
 
   // Define reaction e + null -> e + e + null
-  auto ionization = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0},
-							       std::list<size_t>{0, 0});
+  auto ionization = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0}, std::list<size_t>{0, 0});
 
   // Define e -> null
-  auto attachment = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0},
-							       std::list<size_t>{});
+  auto attachment = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0}, std::list<size_t>{});
 
   reactionList.emplace_back(attachment);
   reactionList.emplace_back(ionization);
@@ -47,7 +45,7 @@ main(int argc, char* argv[])
   pp.get("attachment_rate", attachmentRate);
   pp.get("initial_particles", initVal);
 
-  state[0] = (long long) initVal;
+  state[0] = (long long)initVal;
 
   // Define the Kinetic Monte Carlo solver and run it until time = 10.
   KMCSolver<KMCSingleStateReaction<>, KMCSingleState<>, long long> kmcSolver(reactionList);

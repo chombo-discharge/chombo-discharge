@@ -58,6 +58,7 @@ public:
 
   /*!
     @brief Full constructor. 
+    @param[in] a_reaction List of reactions. 
   */
   inline KMCSolver(const ReactionList& a_reaction) noexcept;
 
@@ -90,24 +91,32 @@ public:
 
   /*!
     @brief Compute propensities for ALL reactions
+    @param[in] a_state State vector
+    @note Calls the other version with m_reactions.
   */
   inline std::vector<Real>
   propensities(const State& a_state) const noexcept;
 
   /*!
     @brief Compute propensities for a subset of reactions
+    @param[in] a_state     State vector
+    @param[in] a_reactions Reaction list
   */
   inline std::vector<Real>
   propensities(const State& a_state, const ReactionList& a_reactions) const noexcept;
 
   /*!
     @brief Compute the total propensity for ALL reactions
+    @param[in] a_state     State vector
+    @note Calls the other version with m_reactions.
   */
   inline Real
   totalPropensity(const State& a_state) const noexcept;
 
   /*!
     @brief Compute the total propensity for a subset of reactions
+    @param[in] a_state     State vector
+    @param[in] a_reactions Reaction list
   */
   inline Real
   totalPropensity(const State& a_state, const ReactionList& a_reactions) const noexcept;
@@ -115,6 +124,7 @@ public:
   /*!
     @brief Partition reactions into critical and non-critical reactions. 
     @details First member in the pair is the critical reactions, then the non-critical reactions.
+    @param[in] a_state     State vector
     @note Calls the other version with m_reactions
   */
   inline std::pair<ReactionList, ReactionList>
@@ -123,40 +133,48 @@ public:
   /*!
     @brief Partition reactions into critical and non-critical reactions. 
     @details First member in the pair is the critical reactions, then the non-critical reactions
+    @param[in] a_state     State vector
+    @param[in] a_reactions Reaction list to be partitioned
   */
   inline std::pair<ReactionList, ReactionList>
   partitionReactions(const State& a_state, const ReactionList& a_reactions) const noexcept;
 
   /*!
     @brief Get the time to the next critical reaction
-    @note Calls the other vresion with m_reactions
+    @param[in] a_state State vector
+    @note Calls the other version with m_reactions
   */
   inline Real
   getCriticalTimeStep(const State& a_state) const noexcept;
 
   /*!
     @brief Get the time to the next critical reaction
+    @param[in] a_state             State vector
+    @param[in] a_criticalReactions Reaction list to be partitioned
     @note Computes the total propensity and calls the other version. 
   */
   inline Real
   getCriticalTimeStep(const State& a_state, const ReactionList& a_criticalReactions) const noexcept;
 
   /*!
-    @brief Get the time to the next critical reaction
-    @note Computes the total propensity and calls the other version. 
+    @brief Get the time to the next critical reaction.
+    @param[in] a_propensities Reaction propensities
   */
   inline Real
   getCriticalTimeStep(const std::vector<Real>& a_propensities) const noexcept;
 
   /*!
     @brief Get the time to the next critical reaction
-    @note Computes the total propensity and calls the other version. 
+    @param[in] a_totalPropensity Total propensity
   */
   inline Real
   getCriticalTimeStep(const Real& a_totalPropensity) const noexcept;
 
   /*!
     @brief Get the time to the next critical reaction
+    @param[in] a_state                   State vector
+    @param[in] a_nonCriticalReactions    Non-critical reactions
+    @param[in] a_nonCriticalPropensities Non-critical propensities
   */
   inline Real
   getNonCriticalTimeStep(const State&             a_state,
@@ -165,6 +183,8 @@ public:
 
   /*!
     @brief Perform one tau-leaping step using ALL reactions. 
+    @param[inout] a_state State vector to be advanced
+    @param[in]    a_dt    Time increment
     @note Calls the other version with m_reactions
   */
   inline void
@@ -172,6 +192,9 @@ public:
 
   /*!
     @brief Perform one tau-leaping step over the input reactions using a time step a_dt
+    @param[inout] a_state     State vector to be advanced
+    @param[in]    a_reactions List of reactions to advance with
+    @param[in]    a_dt        Time increment
     @note Computes propensities and calls the other version. 
   */
   inline void
@@ -179,6 +202,10 @@ public:
 
   /*!
     @brief Perform one tau-leaping step over the input reactions using a time step a_dt
+    @param[inout] a_state        State vector to be advanced
+    @param[in]    a_reactions    List of reactions to advance with
+    @param[in]    a_propensities Pre-computed propensities for the input reactions
+    @param[in]    a_dt           Time increment
   */
   inline void
   stepTau(State&                   a_state,
@@ -188,6 +215,8 @@ public:
 
   /*!
     @brief Advance with tau-leaping step over the input time. This can end up using substepping.
+    @param[inout] a_state     State vector to be advanced
+    @param[in]    a_dt        Time increment
     @note Calls the other version with m_reactions.
   */
   inline void
@@ -195,12 +224,16 @@ public:
 
   /*!
     @brief Advance with tau-leaping step over the input time. This can end up using substepping
+    @param[inout] a_state     State vector to be advanced
+    @param[in]    a_reactions List of reactions to advance with
+    @param[in]    a_dt        Time increment
   */
   inline void
   advanceTau(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform a single SSA step.
+    @param[inout] a_state State vector to advance
     @note Calls the other version with m_reactions
   */
   inline void
@@ -208,18 +241,26 @@ public:
 
   /*!
     @brief Perform a single SSA step.
+    @param[inout] a_state     State vector to advance
+    @param[in]    a_reactions Reactions to advance with
+    @note Computes propensities and calls the other version
   */
   inline void
   stepSSA(State& a_state, const ReactionList& a_reactions) const noexcept;
 
   /*!
     @brief Perform a single SSA step. This version has pre-computed propensities (for optimization reasons)
+    @param[inout] a_state        State vector to advance
+    @param[in]    a_reactions    Reactions to advance with
+    @param[in]    a_propensities Propensities for the reactions
   */
   inline void
   stepSSA(State& a_state, const ReactionList& a_reactions, const std::vector<Real>& a_propensities) const noexcept;
 
   /*!
     @brief Advance with the SSA over the input time. This can end up using substepping
+    @param[inout] a_state State vector to advance
+    @param[in]    a_dt    Time increment
     @note Calls the other version with m_reactions
   */
   inline void
@@ -227,19 +268,27 @@ public:
 
   /*!
     @brief Advance with the SSA over the input time. This can end up using substepping
+    @param[inout] a_state     State vector to advance
+    @param[in]    a_reactions Reactions to advance with
+    @param[in]    a_dt        Time increment
   */
   inline void
   advanceSSA(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
-    @brief Advance using hybrid method over the input time. This can end up using substepping.
+    @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
+    @param[inout] a_state State vector to advance
+    @param[in]    a_dt    Time increment
     @note Calls the other version with m_reactions
   */
   inline void
   advanceHybrid(State& a_state, const Real a_dt) const noexcept;
 
   /*!
-    @brief Advance using hybrid method over the input time. This can end up using substepping.
+    @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
+    @param[inout] a_state     State vector to advance
+    @param[in]    a_reactions Reactions to advance with
+    @param[in]    a_dt        Time increment
   */
   inline void
   advanceHybrid(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
@@ -262,13 +311,13 @@ protected:
   T m_numSSA;
 
   /*!
-    @brief
+    @brief Maximum permitted change in propensities for non-critical reactions. 
   */
   Real m_eps;
 
   /*!
-    @brief
-  */
+    @brief Threshold for switching to SSA-based algorithm within the Cao algorithm. 
+<  */
   Real m_SSAlim;
 };
 
