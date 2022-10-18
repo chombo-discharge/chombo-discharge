@@ -129,6 +129,13 @@ public:
 
   /*!
     @brief Get the time to the next critical reaction
+    @note Calls the other vresion with m_reactions
+  */
+  inline Real
+  getCriticalTimeStep(const State& a_state) const noexcept;  
+
+  /*!
+    @brief Get the time to the next critical reaction
     @note Computes the total propensity and calls the other version. 
   */
   inline Real

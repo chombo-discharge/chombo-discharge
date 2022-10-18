@@ -39,7 +39,20 @@ main(int argc, char* argv[])
   // Define the Kinetic Monte Carlo solver and run it until time = 10.
   KMCSolver<KMCDualStateReaction<>, KMCDualState<>, long long> kmcSolver(reactionList);
 
-  kmcSolver.advanceHybrid(state, 10.0);
+  //  kmcSolver.advanceHybrid(state, 10.0);
+
+  // Run the SSA algorithm
+  Real maxDt = 5.0;
+  Real curDt = 0.0;
+  while (curDt < maxDt) {
+    const Real nextDt = kmcSolver.getCriticalTimeStep(state);
+
+    kmcSolver.stepSSA(state);
+
+    curDt += nextDt;
+
+    pout() << curDt << "\t" << nextDt << "\t" << state.getReactiveState()[0] << endl;
+  }
 
 #ifdef CH_MPI
   MPI_Finalize();

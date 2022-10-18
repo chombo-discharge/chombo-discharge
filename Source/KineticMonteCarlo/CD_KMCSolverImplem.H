@@ -144,6 +144,14 @@ KMCSolver<R, State, T>::partitionReactions(const State& a_state, const ReactionL
 
 template <typename R, typename State, typename T>
 inline Real
+KMCSolver<R, State, T>::getCriticalTimeStep(const State& a_state) const noexcept
+
+{
+  return this->getCriticalTimeStep(a_state, m_reactions);
+}
+
+template <typename R, typename State, typename T>
+inline Real
 KMCSolver<R, State, T>::getCriticalTimeStep(const State&        a_state,
                                             const ReactionList& a_criticalReactions) const noexcept
 {
