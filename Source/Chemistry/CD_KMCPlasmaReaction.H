@@ -28,7 +28,7 @@
   @brief Reaction type for advancing a KMCPlasmaState for Kinetic Monte Carlo
   @note T is the integer type used for the state. 
 */
-template <typename T = long long, typename State = KMCPlasmaState<T>>
+template <typename T = long long, typename State = KMCPlasmaReactionState<T>>
 class KMCPlasmaReaction
 {
 public:
@@ -40,12 +40,12 @@ public:
   /*!
     @brief Copy constructor (uses default). 
   */
-  KMCPlasmaReaction(const PlasmaReaction&) = default;
+  KMCPlasmaReaction(const KMCPlasmaReaction&) = default;
 
   /*!
     @brief Disallowed move constructor
   */
-  KMCPlasmaReaction(const PlasmaReaction&&) = delete;
+  KMCPlasmaReaction(const KMCPlasmaReaction&&) = delete;
 
   /*!
     @brief Full constructor
@@ -124,6 +124,15 @@ protected:
   */
   inline void
   computeStateChanges() noexcept;
+
+  /*!
+    @brief Debugging function which ensures that the class data holders do not reach out of the incoming state. 
+    @details This is necessary because PlasmaReaction does not have compile-time size restrictions on the incoming state. The
+    internals of this method uses Chombo assertions so the compiler should be able to take this function out of the executable
+    if compiling with the correct flags.
+  */
+  inline void
+  sanityCheck(const State& a_state) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
