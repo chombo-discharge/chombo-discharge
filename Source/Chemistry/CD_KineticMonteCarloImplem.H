@@ -179,21 +179,20 @@ KineticMonteCarlo<R, State, T>::getCriticalTimeStep(const Real& a_totalPropensit
 
 template <typename R, typename State, typename T>
 inline Real
-KineticMonteCarlo<R, State, T>::getNonCriticalTimeStep(const State&        a_state,
-                                                       const ReactionList& a_nonCriticalReactions) const noexcept
+KineticMonteCarlo<R, State, T>::getNonCriticalTimeStep(
+  const State&             a_state,
+  const ReactionList&      a_nonCriticalReactions,
+  const std::vector<Real>& a_nonCriticalPropensities) const noexcept
 {
   CH_TIME("KineticMonteCarlo::getCriticalTimeStep");
 
-  // TLDR: This computes the time until the firing of the next critical reaction.
+  CH_assert(a_nonCriticalReactions.size() == a_nonCriticalPropensities.size());
 
   Real dt = std::numeric_limits<Real>::max();
 
   const size_t numReactions = a_nonCriticalReactions.size();
 
   if (numReactions > 0) {
-
-    // 1. Compute propensities.
-    const std::vector<Real> propensities = this->propensities(a_state, a_nonCriticalReactions);
 
     // 2. Get the list of all reactants involved in the non-critical reactions.
     std::unordered_set<size_t> allReactants;
@@ -215,7 +214,7 @@ KineticMonteCarlo<R, State, T>::getNonCriticalTimeStep(const State&        a_sta
         constexpr int gi = 1;
 
         for (size_t i = 0; i < numReactions; i++) {
-          const Real& p    = propensities[i];
+          const Real& p    = a_nonCriticalPropensities[i];
           const auto& muIJ = a_nonCriticalReactions[i]->getStateChange().at(i);
 
           mu += muIJ * p;
@@ -475,7 +474,7 @@ KineticMonteCarlo<R, State, T>::advanceHybrid(State&              a_state,
     const std::vector<Real> propensitiesNonCrit = this->propensities(a_state, nonCriticalReactions);
 
     Real dtCrit    = this->getCriticalTimeStep(a_state, propensitiesCrit);
-    Real dtNonCrit = this->getNonCriticalTimeStep(a_state, nonCriticalReactions);
+    Real dtNonCrit = this->getNonCriticalTimeStep(a_state, nonCriticalReactions, propensitiesNonCrit);
 
     // Try the various advancement algorithms; the loop is for step rejection in case we end up with an invalid state, e.g.
     // a state with a negative number of particles.

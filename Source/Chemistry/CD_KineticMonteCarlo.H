@@ -146,7 +146,9 @@ public:
     @brief Get the time to the next critical reaction
   */
   inline Real
-  getNonCriticalTimeStep(const State& a_state, const ReactionList& a_nonCriticalReactions) const noexcept;
+  getNonCriticalTimeStep(const State&             a_state,
+                         const ReactionList&      a_nonCriticalReactions,
+                         const std::vector<Real>& a_nonCriticalPropensities) const noexcept;
 
   /*!
     @brief Perform one tau-leaping step using ALL reactions. 

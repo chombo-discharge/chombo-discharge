@@ -25,6 +25,8 @@ inline KMCPlasmaReaction<T, State>::KMCPlasmaReaction(const std::list<size_t>& a
   m_particleProducts  = a_particleProducts;
   m_photonProducts    = a_photonProducts;
 
+  CH_assert(a_particleReactants > 0);
+
   this->computeStateChanges();
 }
 
@@ -65,6 +67,9 @@ KMCPlasmaReaction<T, State>::computeStateChanges() noexcept
       m_photonStateChange[p]++;
     }
   }
+
+  // Compute the reaction order.
+  m_reactionOrder = (T)a_particleReactants.size();
 }
 
 template <typename T, typename State>
@@ -116,6 +121,15 @@ KMCPlasmaReaction<T, State>::computeCriticalNumberOfReactions(const State& a_sta
   }
 
   return Lj;
+}
+
+template <typename T, typename State>
+inline T
+KMCPlasmaReaction<T, State>::getGi(const State& a_state) const noexcept
+{
+  // The KineticMonteCarlo model uses the Cao algorithm for tau-step selection where, in principle, the Gi-factor
+  // should be state-dependent. This matters when the number of reactants is very low, e.g. gi = (2 + 1/(xi-1))
+  return m_reactionOrder;
 }
 
 template <typename T, typename State>

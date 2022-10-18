@@ -83,6 +83,12 @@ public:
   computeCriticalNumberOfReactions(const State& a_state) const noexcept;
 
   /*!
+    @brief Get Gi factor
+  */
+  inline T
+  getGi(const State& a_state) const noexcept;
+
+  /*!
     @brief Advance the incoming state with the number of reactions. 
   */
   inline void
@@ -118,6 +124,11 @@ protected:
     @brief State change for photons. 
   */
   std::map<size_t, T> m_photonStateChange;
+
+  /*!
+    @brief Reaction order
+  */
+  T m_reactionOrder;
 
   /*!
     @brief Compute state change
