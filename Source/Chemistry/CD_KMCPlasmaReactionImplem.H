@@ -80,6 +80,17 @@ KMCPlasmaReaction<T, State>::rate() const noexcept
 }
 
 template <typename T, typename State>
+inline T
+KMCPlasmaReaction<T, State>::population(const size_t& a_reactant, const State& a_state) const noexcept
+{
+  const auto& particleState = a_state.getParticleState();
+
+  CH_assert(particleState.size() > a_reactant);
+
+  return particleState[a_reactant];
+}
+
+template <typename T, typename State>
 inline Real
 KMCPlasmaReaction<T, State>::propensity(const State& a_state) const noexcept
 {
@@ -124,12 +135,23 @@ KMCPlasmaReaction<T, State>::computeCriticalNumberOfReactions(const State& a_sta
 }
 
 template <typename T, typename State>
-inline T
-KMCPlasmaReaction<T, State>::getGi(const State& a_state) const noexcept
+inline std::list<size_t>
+KMCPlasmaReaction<T, State>::getReactants() const noexcept
 {
-  // The KineticMonteCarlo model uses the Cao algorithm for tau-step selection where, in principle, the Gi-factor
-  // should be state-dependent. This matters when the number of reactants is very low, e.g. gi = (2 + 1/(xi-1))
-  return m_reactionOrder;
+  return m_particleReactants;
+}
+
+template <typename T, typename State>
+inline T
+KMCPlasmaReaction<T>::getStateChange(const size_t a_particleReactant) const noexcept
+{
+  T nuIJ = 0;
+
+  if (m_particleStateChange.find(a_particleReactant) != m_particleStateChange.end()) {
+    nuIJ = m_particleStateChange.at(a_particleReactant);
+  }
+
+  return nuIJ;
 }
 
 template <typename T, typename State>

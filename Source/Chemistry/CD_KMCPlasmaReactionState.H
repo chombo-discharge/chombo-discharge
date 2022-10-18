@@ -27,6 +27,7 @@ template <typename T = long long>
 class KMCPlasmaReactionState
 {
 public:
+  
   using State = std::vector<T>;
 
   /*!
@@ -65,6 +66,12 @@ public:
   */
   inline KMCPlasmaReactionState&
   operator=(const KMCPlasmaReactionState&&) = delete;
+
+  /*!
+    @brief Add a state vector to this state
+  */
+  inline KMCPlasmaReactionState&
+  operator +=(const KMCPlasmaReactionState& a_other) noexcept;
 
   /*!
     @brief Check if state is a valid state. An invalid state will have a negative number of particles/photons. 

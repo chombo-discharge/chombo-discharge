@@ -70,6 +70,12 @@ public:
   rate() const noexcept;
 
   /*!
+    @brief Get the population of the reactant in the input state.
+  */
+  inline T
+  population(const size_t& a_reactant, const State& a_state) const noexcept;
+
+  /*!
     @brief Compute the propensity function for this reaction type. 
     @note User should set the rate before calling this routine. 
   */
@@ -83,10 +89,17 @@ public:
   computeCriticalNumberOfReactions(const State& a_state) const noexcept;
 
   /*!
-    @brief Get Gi factor
+    @brief Return the a vector that triggers the propensity function. 
+    @details The returned state should be populated with non-zero values for all reactant species. 
+  */
+  inline std::list<size_t>
+  getReactants() const noexcept;
+
+  /*!
+    @brief Get the state change due to a change in the input particle reactant
   */
   inline T
-  getGi(const State& a_state) const noexcept;
+  getStateChange(const size_t a_particleReactant) const noexcept;
 
   /*!
     @brief Advance the incoming state with the number of reactions. 

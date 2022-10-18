@@ -194,28 +194,40 @@ KineticMonteCarlo<R, State, T>::getNonCriticalTimeStep(
 
   if (numReactions > 0) {
 
-    // 2. Get the list of all reactants involved in the non-critical reactions.
-    std::unordered_set<size_t> allReactants;
-    for (const auto& curReaction : a_nonCriticalReactions) {
-      const auto& curReactants = curReactants->getReactants();
+    // 1. Gather a list of all reactants involved in the non-critical reactions.
+    auto allReactants = a_nonCriticalReactions[0]->getReactants();
+    for (size_t i = 1; i < numReactions; i++) {
+      const auto& curReactants = a_nonCriticalReactions[i]->getReactants();
 
-      for (const auto& l : curReactants) {
-        allReactants.insert(l);
-      }
+      allReactants.insert(allReactants.end(), curReactants.begin(), curReactants.end());
     }
+
+    // Only do unique reactants.
+    const auto ip = std::unique(allReactants.begin(), allReactants.end());
+    allReactants.resize(std::distance(allReactants.begin(), ip));
 
     // 2. Iterate through all reactants and compute deviations.
     for (const auto& reactant : allReactants) {
-      if (a_state[reactant] > 0) {
+
+      // Xi is the population of the current reactant. It might seem weird that we are indexing this
+      // through the reactions rather then through the state. Which it is, but the reason for that is
+      // that it is the REACTION that determines how we index the state population. This is simply a
+      // design choice that permits the user to apply different type of reactions without changing
+      // the underlying state.
+      const T& Xi = a_nonCriticalReactions[0]->population(a_state, reactant);
+
+      if (Xi > 0) {
         Real mu     = 0.0;
         Real sigma2 = 0.0;
 
-        // Set gi to 1 for now -- should revisit this later.
-        constexpr int gi = 1;
+        // Set gi to 3 for now -- this is equivalent to a third-order reaction Si*Si*Si with Xi = 3, I doubt
+        // that the Cao computation of gi is necessary because it becomes an "approximation within an approximation". So
+        // I'm just setting gi to the "worst-case" scenario and live with that.
+        constexpr Real gi = 4.0;
 
         for (size_t i = 0; i < numReactions; i++) {
           const Real& p    = a_nonCriticalPropensities[i];
-          const auto& muIJ = a_nonCriticalReactions[i]->getStateChange().at(i);
+          const auto& muIJ = a_nonCriticalReactions[i]->getStateChange(reactant);
 
           mu += muIJ * p;
           sigma2 += muIJ * muIJ * p;
@@ -224,7 +236,7 @@ KineticMonteCarlo<R, State, T>::getNonCriticalTimeStep(
         Real dt1 = std::numeric_limits<Real>::max();
         Real dt2 = std::numeric_limits<Real>::max();
 
-        const Real f = std::max(m_eps * a_state[reactant] / gi, 1.0);
+        const Real f = std::max(m_eps * Xi / gi, 1.0);
 
         mu     = std::abs(mu);
         sigma2 = std::abs(sigma2);

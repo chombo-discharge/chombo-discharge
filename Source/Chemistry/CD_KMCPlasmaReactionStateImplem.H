@@ -54,6 +54,30 @@ KMCPlasmaReactionState<T>::isValidState() const noexcept
 }
 
 template <typename T>
+inline KMCPlasmaReactionState<T>&
+KMCPlasmaReactionState<T>::operator+=(const KMCPlasmaReactionState<T>& a_other) noexcept
+{
+  const auto& otherParticleState = a_other.getParticleState();
+  const auto& otherPhotonState   = a_other.getPhotonState();
+
+  const size_t numParticleSpecies = m_particleState.size();
+  const size_t numPhotonSpecies   = m_photonState.size();
+
+  CH_assert(otherParticleState.size() == m_particleState.size());
+  CH_assert(otherPhotonState.size() == m_photonState.size());
+
+  for (size_t i = 0; i < numParticleSpecies; i++) {
+    m_particleState[i] += otherParticleState[i];
+  }
+
+  for (size_t i = 0; i < numPhotonSpecies; i++) {
+    m_photonState[i] += otherPhotonState[i];
+  }
+
+  return *this;
+}
+
+template <typename T>
 inline typename KMCPlasmaReactionState<T>::State&
 KMCPlasmaReactionState<T>::getParticleState() noexcept
 {
