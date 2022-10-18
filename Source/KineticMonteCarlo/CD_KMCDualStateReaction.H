@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_KMCPlasmaReaction.H
+  @file   CD_KMCDualStateReaction.H
   @brief  Declaration of a simple plasma reaction type for Kinetic Monte Carlo
   @author Robert Marskar
 */
 
-#ifndef CD_KMCPlasmaReaction_H
-#define CD_KMCPlasmaReaction_H
+#ifndef CD_KMCDualStateReaction_H
+#define CD_KMCDualStateReaction_H
 
 // Std includes
 #include <map>
@@ -21,31 +21,31 @@
 #include <REAL.H>
 
 // Our includes
-#include <CD_KMCPlasmaReactionState.H>
+#include <CD_KMCDualState.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Reaction type for advancing a KMCPlasmaState for Kinetic Monte Carlo
+  @brief Reaction type for advancing a KMCDualState for Kinetic Monte Carlo. 
   @note T is the integer type used for the state. 
 */
-template <typename T = long long, typename State = KMCPlasmaReactionState<T>>
-class KMCPlasmaReaction
+template <typename T = long long, typename State = KMCDualState<T>>
+class KMCDualStateReaction
 {
 public:
   /*!
     @brief Disallowed constructor. Use the full constructor. 
   */
-  KMCPlasmaReaction() = delete;
+  KMCDualStateReaction() = delete;
 
   /*!
     @brief Copy constructor (uses default). 
   */
-  KMCPlasmaReaction(const KMCPlasmaReaction&) = default;
+  KMCDualStateReaction(const KMCDualStateReaction&) = default;
 
   /*!
     @brief Disallowed move constructor
   */
-  KMCPlasmaReaction(const KMCPlasmaReaction&&) = delete;
+  KMCDualStateReaction(const KMCDualStateReaction&&) = delete;
 
   /*!
     @brief Full constructor
@@ -53,14 +53,14 @@ public:
     @param[in] a_particleProducts  Particle products (particles right-hand side of reactions)
     @param[in] a_photonProducts    Photon products (photons right-hand side of reactions)
   */
-  inline KMCPlasmaReaction(const std::list<size_t>& a_particleReactants,
-                           const std::list<size_t>& a_particleProducts,
-                           const std::list<size_t>& a_photonProducts) noexcept;
+  inline KMCDualStateReaction(const std::list<size_t>& a_particleReactants,
+                              const std::list<size_t>& a_particleProducts,
+                              const std::list<size_t>& a_photonProducts) noexcept;
 
   /*!
     @brief Destructor
   */
-  inline virtual ~KMCPlasmaReaction();
+  inline virtual ~KMCDualStateReaction();
 
   /*!
     @brief Get modifiable reaction rate.
@@ -137,11 +137,6 @@ protected:
     @brief State change for photons. 
   */
   std::map<size_t, T> m_photonStateChange;
-
-  /*!
-    @brief Reaction order
-  */
-  T m_reactionOrder;
 
   /*!
     @brief Compute state change

@@ -1,4 +1,4 @@
->/* chombo-discharge
+/* chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */

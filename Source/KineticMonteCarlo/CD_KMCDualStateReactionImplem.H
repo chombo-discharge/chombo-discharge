@@ -4,22 +4,22 @@
  */
 
 /*!
-  @file   CD_KMCPlasmaReactionImplem.H
-  @brief  Implementation of CD_KMCPlasmaReaction.H
+  @file   CD_KMCDualStateReactionImplem.H
+  @brief  Implementation of CD_KMCDualStateReaction.H
   @author Robert Marskar
 */
 
-#ifndef CD_KMCPlasmaReactionImplem_H
-#define CD_KMCPlasmaReactionImplem_H
+#ifndef CD_KMCDualStateReactionImplem_H
+#define CD_KMCDualStateReactionImplem_H
 
 // Our includes
-#include <CD_KMCPlasmaReactionState.H>
+#include <CD_KMCDualStateReactionState.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename T, typename State>
-inline KMCPlasmaReaction<T, State>::KMCPlasmaReaction(const std::list<size_t>& a_particleReactants,
-                                                      const std::list<size_t>& a_particleProducts,
-                                                      const std::list<size_t>& a_photonProducts) noexcept
+inline KMCDualStateReaction<T, State>::KMCDualStateReaction(const std::list<size_t>& a_particleReactants,
+                                                            const std::list<size_t>& a_particleProducts,
+                                                            const std::list<size_t>& a_photonProducts) noexcept
 {
   m_particleReactants = a_particleReactants;
   m_particleProducts  = a_particleProducts;
@@ -31,12 +31,12 @@ inline KMCPlasmaReaction<T, State>::KMCPlasmaReaction(const std::list<size_t>& a
 }
 
 template <typename T, typename State>
-inline KMCPlasmaReaction<T, State>::~KMCPlasmaReaction()
+inline KMCDualStateReaction<T, State>::~KMCDualStateReaction()
 {}
 
 template <typename T, typename State>
 inline void
-KMCPlasmaReaction<T, State>::computeStateChanges() noexcept
+KMCDualStateReaction<T, State>::computeStateChanges() noexcept
 {
   // Consumed particles.
   for (const auto& r : m_particleReactants) {
@@ -74,16 +74,16 @@ KMCPlasmaReaction<T, State>::computeStateChanges() noexcept
 
 template <typename T, typename State>
 inline Real&
-KMCPlasmaReaction<T, State>::rate() const noexcept
+KMCDualStateReaction<T, State>::rate() const noexcept
 {
   return m_rate;
 }
 
 template <typename T, typename State>
 inline T
-KMCPlasmaReaction<T, State>::population(const size_t& a_reactant, const State& a_state) const noexcept
+KMCDualStateReaction<T, State>::population(const size_t& a_reactant, const State& a_state) const noexcept
 {
-  const auto& particleState = a_state.getParticleState();
+  const auto& particleState = a_state.getReactiveState();
 
   CH_assert(particleState.size() > a_reactant);
 
@@ -92,7 +92,7 @@ KMCPlasmaReaction<T, State>::population(const size_t& a_reactant, const State& a
 
 template <typename T, typename State>
 inline Real
-KMCPlasmaReaction<T, State>::propensity(const State& a_state) const noexcept
+KMCDualStateReaction<T, State>::propensity(const State& a_state) const noexcept
 {
 #ifndef NDEBUG
   this->sanityCheck(a_state);
@@ -100,7 +100,7 @@ KMCPlasmaReaction<T, State>::propensity(const State& a_state) const noexcept
 
   Real A = m_rate;
 
-  const auto& particleState = a_state.getParticleState();
+  const auto& particleState = a_state.getReactiveState();
 
   for (const auto& r : m_particleReactants) {
     A *= particleState[r];
@@ -111,7 +111,7 @@ KMCPlasmaReaction<T, State>::propensity(const State& a_state) const noexcept
 
 template <typename T, typename State>
 inline T
-KMCPlasmaReaction<T, State>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
+KMCDualStateReaction<T, State>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
 {
 #ifndef NDEBUG
   this->sanityCheck(a_state);
@@ -119,7 +119,7 @@ KMCPlasmaReaction<T, State>::computeCriticalNumberOfReactions(const State& a_sta
 
   T Lj = std::numeric_limits<long long>::max();
 
-  const auto& particleState = a_state.getParticleState();
+  const auto& particleState = a_state.getReactiveState();
 
   for (const auto& s : m_particleStateChange) {
 
@@ -136,14 +136,14 @@ KMCPlasmaReaction<T, State>::computeCriticalNumberOfReactions(const State& a_sta
 
 template <typename T, typename State>
 inline std::list<size_t>
-KMCPlasmaReaction<T, State>::getReactants() const noexcept
+KMCDualStateReaction<T, State>::getReactants() const noexcept
 {
   return m_particleReactants;
 }
 
 template <typename T, typename State>
 inline T
-KMCPlasmaReaction<T>::getStateChange(const size_t a_particleReactant) const noexcept
+KMCDualStateReaction<T>::getStateChange(const size_t a_particleReactant) const noexcept
 {
   T nuIJ = 0;
 
@@ -156,14 +156,14 @@ KMCPlasmaReaction<T>::getStateChange(const size_t a_particleReactant) const noex
 
 template <typename T, typename State>
 inline void
-KMCPlasmaReaction<T, State>::advanceState(State& a_state, const T& a_numReactions) const noexcept
+KMCDualStateReaction<T, State>::advanceState(State& a_state, const T& a_numReactions) const noexcept
 {
 #ifndef NDEBUG
   this->sanityCheck(a_state);
 #endif
 
-  auto& particleState = a_state.getParticleState();
-  auto& photonState   = a_state.getPhotonState();
+  auto& particleState = a_state.getReactiveState();
+  auto& photonState   = a_state.getNonReactiveState();
 
   for (const auto& s : m_particleStateChange) {
     particleState[s.first] += a_numReactions * s.second;
@@ -176,10 +176,10 @@ KMCPlasmaReaction<T, State>::advanceState(State& a_state, const T& a_numReaction
 
 template <typename T, typename State>
 inline void
-KMCPlasmaReaction<T, State>::sanityCheck(const State& a_state) const noexcept
+KMCDualStateReaction<T, State>::sanityCheck(const State& a_state) const noexcept
 {
-  const auto& particleState = a_state.getParticleState();
-  const auto& photonState   = a_state.getPhotonState();
+  const auto& particleState = a_state.getReactiveState();
+  const auto& photonState   = a_state.getNonReactiveState();
 
   for (const auto& idx : m_particleReactants) {
     CH_assert(particleState.size() > idx);
