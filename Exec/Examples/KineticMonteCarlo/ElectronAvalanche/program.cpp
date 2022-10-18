@@ -11,16 +11,19 @@ main(int argc, char* argv[])
   MPI_Init(&argc, &argv);
 #endif
 
+  // Read input file.
+  ParmParse pp(argc - 2, argv + 2, NULL, argv[1]);
+
   // Seed the RNG
   Random::setRandomSeed();
 
-  // Initial state.
+  // State that we advance.
   KMCDualState<> state(1, 0);
 
-  // One initial electron.
-  state.getReactiveState()[0] = 5;
+  // Define list of reactions.
+  std::vector<std::shared_ptr<const KMCDualStateReaction<>>> reactionList;
 
-  // Define e + null -> e + e + null
+  // Define reaction e + null -> e + e + null
   auto ionization = std::make_shared<KMCDualStateReaction<>>(std::list<size_t>{0},
                                                              std::list<size_t>{0, 0},
                                                              std::list<size_t>{});
@@ -30,26 +33,33 @@ main(int argc, char* argv[])
                                                              std::list<size_t>{},
                                                              std::list<size_t>{});
 
-  // Set ionization and attachment rates.
-  ionization->rate() = 1.0;
-  attachment->rate() = 2.0;
-
-  // Define list of reactions.
-  std::vector<std::shared_ptr<const KMCDualStateReaction<>>> reactionList;
   reactionList.emplace_back(attachment);
-  reactionList.emplace_back(ionization);  
+  reactionList.emplace_back(ionization);
+
+  // Read initial values.
+  Real& ionizationRate = ionization->rate();
+  Real& attachmentRate = attachment->rate();
+
+  Real stopDt = 0.0;
+  int  initVal;
+
+  // Read program input variables
+  pp.get("stop_time", stopDt);
+  pp.get("ionization_rate", ionizationRate);
+  pp.get("attachment_rate", attachmentRate);
+  pp.get("initial_particles", initVal);
+
+  // Set initial number of particles
+  state.getReactiveState()[0] = (long long)initVal;
 
   // Define the Kinetic Monte Carlo solver and run it until time = 10.
   KMCSolver<KMCDualStateReaction<>, KMCDualState<>, long long> kmcSolver(reactionList);
 
-  //  kmcSolver.advanceHybrid(state, 10.0);
-
   // Run the SSA algorithm
-  Real maxDt = 5.0;
   Real curDt = 0.0;
-  while (curDt < maxDt) {
+  while (curDt < stopDt) {
     pout() << curDt << "\t" << state.getReactiveState()[0] << endl;
-    
+
     const Real nextDt = kmcSolver.getCriticalTimeStep(state);
 
     kmcSolver.stepSSA(state);

@@ -122,7 +122,7 @@ public:
     @brief Set a random RNG seed
   */
   inline static void
-  setRandomSeed();  
+  setRandomSeed();
 
   /*!
     @brief Return a random position in the cube (a_lo, a_hi);
@@ -192,7 +192,6 @@ private:
     @brief Normal distribution centered at zero with standard deviation of one
   */
   static std::normal_distribution<Real> s_normal01;
-
 };
 
 #include <CD_NamespaceFooter.H>

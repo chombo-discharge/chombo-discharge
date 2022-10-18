@@ -1,0 +1,4 @@
+stop_time = 5.0
+ionization_rate = 1.0
+attachment_rate = 1.0
+initial_particles = 10

@@ -132,7 +132,7 @@ public:
     @note Calls the other vresion with m_reactions
   */
   inline Real
-  getCriticalTimeStep(const State& a_state) const noexcept;  
+  getCriticalTimeStep(const State& a_state) const noexcept;
 
   /*!
     @brief Get the time to the next critical reaction
