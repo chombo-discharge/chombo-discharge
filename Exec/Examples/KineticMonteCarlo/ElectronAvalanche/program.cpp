@@ -15,7 +15,7 @@ main(int argc, char* argv[])
   KMCDualState<> state(1, 0);
 
   // One initial electron.
-  state.getReactiveState()[0] = 1;
+  state.getReactiveState()[0] = 10;
 
   // Define e + null -> e + e + null
   auto ionization = std::make_shared<KMCDualStateReaction<>>(std::list<size_t>{0},
