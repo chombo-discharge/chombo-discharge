@@ -97,10 +97,12 @@ KMCDualStateReaction<T, State>::propensity(const State& a_state) const noexcept
 
   Real A = m_rate;
 
-  const auto& reactiveState = a_state.getReactiveState();
+  auto reactiveState = a_state.getReactiveState();
 
   for (const auto& r : m_lhsReactives) {
     A *= reactiveState[r];
+
+    reactiveState[r]--;
   }
 
   return A;

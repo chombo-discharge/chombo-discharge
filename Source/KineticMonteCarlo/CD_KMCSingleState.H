@@ -36,8 +36,9 @@ public:
 
   /*!
     @brief Copy constructor.
+    @param[in] a_other Other state
   */
-  inline KMCSingleState(KMCSingleState&) = default;
+  inline KMCSingleState(const KMCSingleState& a_state) = default;
 
   /*!
     @brief Disallowed move constructor

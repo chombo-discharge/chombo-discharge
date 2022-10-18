@@ -23,8 +23,6 @@ inline KMCSingleStateReaction<T, State>::KMCSingleStateReaction(const std::list<
   m_reactants = a_reactants;
   m_products  = a_products;
 
-  CH_assert(m_reactants.size() > 0);
-
   this->computeStateChanges();
 }
 
@@ -77,8 +75,12 @@ KMCSingleStateReaction<T, State>::propensity(const State& a_state) const noexcep
 {
   Real A = m_rate;
 
+  State tmp = a_state;
+
   for (const auto& r : m_reactants) {
-    A *= a_state[r];
+    A *= tmp[r];
+
+    tmp[r]--;
   }
 
   return A;
