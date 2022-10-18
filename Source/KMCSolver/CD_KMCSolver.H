@@ -4,15 +4,16 @@
  */
 
 /*!
-  @file   CD_KineticMonteCarlo.H
+  @file   CD_KMCSolver.H
   @brief  Class for running Kinetic Monte Carlo functionality. 
   @author Robert Marskar
 */
 
-#ifndef CD_KineticMonteCarlo_H
-#define CD_KineticMonteCarlo_H
+#ifndef CD_KMCSolver_H
+#define CD_KMCSolver_H
 
 // Std includes
+#include <vector>
 #include <memory>
 
 // Chombo includes
@@ -23,14 +24,19 @@
 
 /*!
   @brief Class for running Kinetic Monte-Carlo simulations. 
-  @details The template parameter R is the underlying reaction type. It MUST have the following functions:
+  @details The template parameter State is the underlying state type that KMC operators on. There are no required member functions on the State parameter,
+  but the reaction type (template parameter R) MUST be able to operate on the state through the following functions:
 
+  1. Real R::propensity(State) const -> Computes the reaction propensity for the input state.
+  2. T R::computeCriticalNumberOfReactions(State) const -> Computes the minimum number of reactions that exhausts one of the reactants. 
+  3. void R::advanceState(State&, const T numReactions) const -> Advance state by numReactions
+  4. std::<some_container> getReactants() const -> Get reactants involved in the reactions.
+  5. T R::population(const <some_type> reactant, const State& a_state) -> Get the population of the input reactant in the input state. 
 
-  @note The template parameter T is the underlying INTEGER type used in KineticMonteCarlo. It does not have to be the underlying integer type
-  in the reaction methods. 
+  The template parameter T should agree across both both R, State, and KMCSolver. 
 */
 template <typename R, typename State, typename T = long long>
-class KineticMonteCarlo
+class KMCSolver
 {
 public:
   using ReactionList = std::vector<std::shared_ptr<const R>>;
@@ -38,39 +44,39 @@ public:
   /*!
     @brief Disallowed constructor.
   */
-  KineticMonteCarlo() = delete;
+  KMCSolver() = delete;
 
   /*!
     @brief Disallowed copy constructor
   */
-  KineticMonteCarlo(const KineticMonteCarlo&) = default;
+  KMCSolver(const KMCSolver&) = default;
 
   /*!
     @brief Disallowed move constructor
   */
-  KineticMonteCarlo(const KineticMonteCarlo&&) = delete;
+  KMCSolver(const KMCSolver&&) = delete;
 
   /*!
     @brief Full constructor. 
   */
-  inline KineticMonteCarlo(const ReactionList& a_reaction) noexcept;
+  inline KMCSolver(const ReactionList& a_reaction) noexcept;
 
   /*!
     @brief Destructor
   */
-  virtual ~KineticMonteCarlo() noexcept;
+  virtual ~KMCSolver() noexcept;
 
   /*!
     @brief Copy assignment operator. 
   */
-  KineticMonteCarlo&
-  operator=(const KineticMonteCarlo&) = default;
+  KMCSolver&
+  operator=(const KMCSolver&) = default;
 
   /*!
     @brief Disallowed move assignment operator. 
   */
-  KineticMonteCarlo&
-  operator=(const KineticMonteCarlo&&) = delete;
+  KMCSolver&
+  operator=(const KMCSolver&&) = delete;
 
   /*!
     @brief Set solver parameters
@@ -261,6 +267,6 @@ protected:
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_KineticMonteCarloImplem.H>
+#include <CD_KMCSolverImplem.H>
 
 #endif

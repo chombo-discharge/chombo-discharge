@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_KineticMonteCarloImplem.H
-  @brief  Class for running Kinetic Monte Carlo functionality. 
+  @file   CD_KMCSolverImplem.H
+  @brief  Implementation of CD_KMCSolver.H
   @author Robert Marskar
 */
 
-#ifndef CD_KineticMonteCarloImplem_H
-#define CD_KineticMonteCarloImplem_H
+#ifndef CD_KMCSolverImplem_H
+#define CD_KMCSolverImplem_H
 
 // Std includes
 #include <limits>
@@ -21,13 +21,13 @@
 
 // Our includes
 #include <CD_Random.H>
-#include <CD_KineticMonteCarlo.H>
+#include <CD_KMCSolver.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename R, typename State, typename T>
-inline KineticMonteCarlo<R, State, T>::KineticMonteCarlo(const ReactionList& a_reactions) noexcept
+inline KMCSolver<R, State, T>::KMCSolver(const ReactionList& a_reactions) noexcept
 {
-  CH_TIME("KineticMonteCarlo::KineticMonteCarlo");
+  CH_TIME("KMCSolver::KMCSolver");
 
   m_reactions = a_reactions;
 
@@ -36,19 +36,19 @@ inline KineticMonteCarlo<R, State, T>::KineticMonteCarlo(const ReactionList& a_r
 }
 
 template <typename R, typename State, typename T>
-inline KineticMonteCarlo<R, State, T>::~KineticMonteCarlo() noexcept
+inline KMCSolver<R, State, T>::~KMCSolver() noexcept
 {
-  CH_TIME("KineticMonteCarlo::~KineticMonteCarlo");
+  CH_TIME("KMCSolver::~KMCSolver");
 }
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::setSolverParameters(const T    a_Ncrit,
-                                                    const T    a_numSSA,
-                                                    const Real a_eps,
-                                                    const Real a_SSAlim) noexcept
+KMCSolver<R, State, T>::setSolverParameters(const T    a_Ncrit,
+                                            const T    a_numSSA,
+                                            const Real a_eps,
+                                            const Real a_SSAlim) noexcept
 {
-  CH_TIME("KineticMonteCarlo::propensities(State)");
+  CH_TIME("KMCSolver::propensities(State)");
 
   m_Ncrit  = a_Ncrit;
   m_numSSA = a_numSSA;
@@ -58,18 +58,18 @@ KineticMonteCarlo<R, State, T>::setSolverParameters(const T    a_Ncrit,
 
 template <typename R, typename State, typename T>
 inline std::vector<Real>
-KineticMonteCarlo<R, State, T>::propensities(const State& a_state) const noexcept
+KMCSolver<R, State, T>::propensities(const State& a_state) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::propensities(State)");
+  CH_TIME("KMCSolver::propensities(State)");
 
   return this->propensities(a_state, m_reactions);
 }
 
 template <typename R, typename State, typename T>
 inline std::vector<Real>
-KineticMonteCarlo<R, State, T>::propensities(const State& a_state, const ReactionList& a_reactions) const noexcept
+KMCSolver<R, State, T>::propensities(const State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::propensities(State, ReactionList)");
+  CH_TIME("KMCSolver::propensities(State, ReactionList)");
 
   std::vector<Real> A(a_reactions.size());
 
@@ -84,18 +84,18 @@ KineticMonteCarlo<R, State, T>::propensities(const State& a_state, const Reactio
 
 template <typename R, typename State, typename T>
 inline Real
-KineticMonteCarlo<R, State, T>::totalPropensity(const State& a_state) const noexcept
+KMCSolver<R, State, T>::totalPropensity(const State& a_state) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::totalPropensity(State)");
+  CH_TIME("KMCSolver::totalPropensity(State)");
 
   return this->totalPropensity(a_state, m_reactions);
 }
 
 template <typename R, typename State, typename T>
 inline Real
-KineticMonteCarlo<R, State, T>::totalPropensity(const State& a_state, const ReactionList& a_reactions) const noexcept
+KMCSolver<R, State, T>::totalPropensity(const State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::totalPropensity(State, ReactionList)");
+  CH_TIME("KMCSolver::totalPropensity(State, ReactionList)");
 
   Real A = 0.0;
 
@@ -109,22 +109,19 @@ KineticMonteCarlo<R, State, T>::totalPropensity(const State& a_state, const Reac
 }
 
 template <typename R, typename State, typename T>
-inline std::pair<typename KineticMonteCarlo<R, State, T>::ReactionList,
-                 typename KineticMonteCarlo<R, State, T>::ReactionList>
-KineticMonteCarlo<R, State, T>::partitionCriticalReactions(const State& a_state) const noexcept
+inline std::pair<typename KMCSolver<R, State, T>::ReactionList, typename KMCSolver<R, State, T>::ReactionList>
+KMCSolver<R, State, T>::partitionCriticalReactions(const State& a_state) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::partitionCriticalReactions(State)");
+  CH_TIME("KMCSolver::partitionCriticalReactions(State)");
 
   return this->partitionCriticalReactions(a_state, m_reactions);
 }
 
 template <typename R, typename State, typename T>
-inline std::pair<typename KineticMonteCarlo<R, State, T>::ReactionList,
-                 typename KineticMonteCarlo<R, State, T>::ReactionList>
-KineticMonteCarlo<R, State, T>::partitionCriticalReactions(const State&        a_state,
-                                                           const ReactionList& a_reactions) const noexcept
+inline std::pair<typename KMCSolver<R, State, T>::ReactionList, typename KMCSolver<R, State, T>::ReactionList>
+KMCSolver<R, State, T>::partitionCriticalReactions(const State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::partitionCriticalReactions(State, ReactionList)");
+  CH_TIME("KMCSolver::partitionCriticalReactions(State, ReactionList)");
 
   ReactionList criticalReactions;
   ReactionList nonCriticalReactions;
@@ -147,10 +144,10 @@ KineticMonteCarlo<R, State, T>::partitionCriticalReactions(const State&        a
 
 template <typename R, typename State, typename T>
 inline Real
-KineticMonteCarlo<R, State, T>::getCriticalTimeStep(const State&        a_state,
-                                                    const ReactionList& a_criticalReactions) const noexcept
+KMCSolver<R, State, T>::getCriticalTimeStep(const State&        a_state,
+                                            const ReactionList& a_criticalReactions) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::getCriticalTimeStep");
+  CH_TIME("KMCSolver::getCriticalTimeStep");
 
   // TLDR: This computes the time until the firing of the next critical reaction.
 
@@ -168,7 +165,7 @@ KineticMonteCarlo<R, State, T>::getCriticalTimeStep(const State&        a_state,
 
 template <typename R, typename State, typename T>
 inline Real
-KineticMonteCarlo<R, State, T>::getCriticalTimeStep(const Real& a_totalPropensity) const noexcept
+KMCSolver<R, State, T>::getCriticalTimeStep(const Real& a_totalPropensity) const noexcept
 {
   CH_TIME("KineticMotneCarlo::getCriticalTimeStep(Real)");
 
@@ -179,12 +176,11 @@ KineticMonteCarlo<R, State, T>::getCriticalTimeStep(const Real& a_totalPropensit
 
 template <typename R, typename State, typename T>
 inline Real
-KineticMonteCarlo<R, State, T>::getNonCriticalTimeStep(
-  const State&             a_state,
-  const ReactionList&      a_nonCriticalReactions,
-  const std::vector<Real>& a_nonCriticalPropensities) const noexcept
+KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
+                                               const ReactionList&      a_nonCriticalReactions,
+                                               const std::vector<Real>& a_nonCriticalPropensities) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::getCriticalTimeStep");
+  CH_TIME("KMCSolver::getCriticalTimeStep");
 
   CH_assert(a_nonCriticalReactions.size() == a_nonCriticalPropensities.size());
 
@@ -258,18 +254,18 @@ KineticMonteCarlo<R, State, T>::getNonCriticalTimeStep(
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::stepTau(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::stepTau(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::stepTau(State, Real)");
+  CH_TIME("KMCSolver::stepTau(State, Real)");
 
   this->stepTau(a_state, m_reactions, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::stepTau(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::stepTau(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::stepTau(State, ReactionList, Real)");
+  CH_TIME("KMCSolver::stepTau(State, ReactionList, Real)");
 
   const size_t numReactions = a_reactions.size();
 
@@ -281,12 +277,12 @@ KineticMonteCarlo<R, State, T>::stepTau(State& a_state, const ReactionList& a_re
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::stepTau(State&                   a_state,
-                                        const ReactionList&      a_reactions,
-                                        const std::vector<Real>& a_propensities,
-                                        const Real               a_dt) const noexcept
+KMCSolver<R, State, T>::stepTau(State&                   a_state,
+                                const ReactionList&      a_reactions,
+                                const std::vector<Real>& a_propensities,
+                                const Real               a_dt) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::stepTau(State, ReactionList, std::vector<Real>, Real)");
+  CH_TIME("KMCSolver::stepTau(State, ReactionList, std::vector<Real>, Real)");
 
   CH_assert(a_reactions.size() == a_propensities.size());
 
@@ -301,20 +297,18 @@ KineticMonteCarlo<R, State, T>::stepTau(State&                   a_state,
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::advanceTau(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advanceTau(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::advanceTau(State, ReactionList)");
+  CH_TIME("KMCSolver::advanceTau(State, ReactionList)");
 
   this->advanceTau(a_state, m_reactions, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::advanceTau(State&              a_state,
-                                           const ReactionList& a_reactions,
-                                           const Real          a_dt) const noexcept
+KMCSolver<R, State, T>::advanceTau(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::advanceTau(State, ReactionList, Real)");
+  CH_TIME("KMCSolver::advanceTau(State, ReactionList, Real)");
 
   if (a_reactions.size() > 0) {
     Real curTime = 0.0;
@@ -351,18 +345,18 @@ KineticMonteCarlo<R, State, T>::advanceTau(State&              a_state,
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::stepSSA(State& a_state) const noexcept
+KMCSolver<R, State, T>::stepSSA(State& a_state) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::stepSSA(State, Real)");
+  CH_TIME("KMCSolver::stepSSA(State, Real)");
 
   this->stepSSA(a_state, m_reactions);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::stepSSA(State& a_state, const ReactionList& a_reactions) const noexcept
+KMCSolver<R, State, T>::stepSSA(State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::stepSSA(State, ReactionList, Real)");
+  CH_TIME("KMCSolver::stepSSA(State, ReactionList, Real)");
 
   if (a_reactions.size() > 0) {
 
@@ -375,11 +369,11 @@ KineticMonteCarlo<R, State, T>::stepSSA(State& a_state, const ReactionList& a_re
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::stepSSA(State&                   a_state,
-                                        const ReactionList&      a_reactions,
-                                        const std::vector<Real>& a_propensities) const noexcept
+KMCSolver<R, State, T>::stepSSA(State&                   a_state,
+                                const ReactionList&      a_reactions,
+                                const std::vector<Real>& a_propensities) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::stepSSA(State, ReactionList, std::vector<Real>)");
+  CH_TIME("KMCSolver::stepSSA(State, ReactionList, std::vector<Real>)");
 
   CH_assert(a_reactions.size() == a_propensities.size());
 
@@ -414,20 +408,18 @@ KineticMonteCarlo<R, State, T>::stepSSA(State&                   a_state,
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::advanceSSA(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advanceSSA(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::advanceSSA(State, Real)");
+  CH_TIME("KMCSolver::advanceSSA(State, Real)");
 
   this->advanceSSA(a_state, m_reactions, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::advanceSSA(State&              a_state,
-                                           const ReactionList& a_reactions,
-                                           const Real          a_dt) const noexcept
+KMCSolver<R, State, T>::advanceSSA(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::advanceSSA(State, ReactionList, Real)");
+  CH_TIME("KMCSolver::advanceSSA(State, ReactionList, Real)");
 
   const size_t numReactions = a_reactions.size();
 
@@ -455,20 +447,18 @@ KineticMonteCarlo<R, State, T>::advanceSSA(State&              a_state,
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::advanceHybrid(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advanceHybrid(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::advanceHybrid(State, Real)");
+  CH_TIME("KMCSolver::advanceHybrid(State, Real)");
 
   this->advanceHybrid(a_state, m_reactions, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KineticMonteCarlo<R, State, T>::advanceHybrid(State&              a_state,
-                                              const ReactionList& a_reactions,
-                                              const Real          a_dt) const noexcept
+KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIME("KineticMonteCarlo::advanceHybrid(State, ReactionList, Real)");
+  CH_TIME("KMCSolver::advanceHybrid(State, ReactionList, Real)");
 
   // Simulated time within the advancement algorithm.
   Real curTime = 0.0;
