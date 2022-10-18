@@ -46,7 +46,7 @@ public:
   inline KMCDualState(KMCDualState&&) = delete;
 
   /*!
-    @brief Full constructor. Initializes the state with zero reactive and non-reactive particles. 
+    @brief Full constructor. 
     @param[in] a_numReactiveSpecies    Number of reactive species in the state vector.
     @param[in] a_numNonReactiveSpecies Number of non-reactive species in the state vector.
   */

@@ -1,6 +1,6 @@
 #include <CD_Driver.H>
 #include <CD_KMCSolver.H>
-#include <CD_KMCDualStateReaction.H>
+#include <CD_KMCSingleStateReaction.H>
 
 using namespace ChomboDischarge;
 
@@ -18,20 +18,18 @@ main(int argc, char* argv[])
   Random::setRandomSeed();
 
   // State that we advance.
-  KMCDualState<> state(1, 0);
+  KMCSingleState<> state(1);
 
   // Define list of reactions.
-  std::vector<std::shared_ptr<const KMCDualStateReaction<>>> reactionList;
+  std::vector<std::shared_ptr<const KMCSingleStateReaction<>>> reactionList;
 
   // Define reaction e + null -> e + e + null
-  auto ionization = std::make_shared<KMCDualStateReaction<>>(std::list<size_t>{0},
-                                                             std::list<size_t>{0, 0},
-                                                             std::list<size_t>{});
+  auto ionization = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0},
+							       std::list<size_t>{0, 0});
 
   // Define e -> null
-  auto attachment = std::make_shared<KMCDualStateReaction<>>(std::list<size_t>{0},
-                                                             std::list<size_t>{},
-                                                             std::list<size_t>{});
+  auto attachment = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0},
+							       std::list<size_t>{});
 
   reactionList.emplace_back(attachment);
   reactionList.emplace_back(ionization);
@@ -49,16 +47,15 @@ main(int argc, char* argv[])
   pp.get("attachment_rate", attachmentRate);
   pp.get("initial_particles", initVal);
 
-  // Set initial number of particles
-  state.getReactiveState()[0] = (long long)initVal;
+  state[0] = (long long) initVal;
 
   // Define the Kinetic Monte Carlo solver and run it until time = 10.
-  KMCSolver<KMCDualStateReaction<>, KMCDualState<>, long long> kmcSolver(reactionList);
+  KMCSolver<KMCSingleStateReaction<>, KMCSingleState<>, long long> kmcSolver(reactionList);
 
   // Run the SSA algorithm
   Real curDt = 0.0;
   while (curDt < stopDt) {
-    pout() << curDt << "\t" << state.getReactiveState()[0] << endl;
+    pout() << curDt << "\t" << state[0] << endl;
 
     const Real nextDt = kmcSolver.getCriticalTimeStep(state);
 
