@@ -11,11 +11,14 @@ main(int argc, char* argv[])
   MPI_Init(&argc, &argv);
 #endif
 
+  // Seed the RNG
+  Random::setRandomSeed();
+
   // Initial state.
   KMCDualState<> state(1, 0);
 
   // One initial electron.
-  state.getReactiveState()[0] = 10;
+  state.getReactiveState()[0] = 5;
 
   // Define e + null -> e + e + null
   auto ionization = std::make_shared<KMCDualStateReaction<>>(std::list<size_t>{0},
@@ -29,12 +32,12 @@ main(int argc, char* argv[])
 
   // Set ionization and attachment rates.
   ionization->rate() = 1.0;
-  attachment->rate() = 1.0;
+  attachment->rate() = 2.0;
 
   // Define list of reactions.
   std::vector<std::shared_ptr<const KMCDualStateReaction<>>> reactionList;
-  reactionList.emplace_back(ionization);
   reactionList.emplace_back(attachment);
+  reactionList.emplace_back(ionization);  
 
   // Define the Kinetic Monte Carlo solver and run it until time = 10.
   KMCSolver<KMCDualStateReaction<>, KMCDualState<>, long long> kmcSolver(reactionList);
@@ -45,13 +48,13 @@ main(int argc, char* argv[])
   Real maxDt = 5.0;
   Real curDt = 0.0;
   while (curDt < maxDt) {
+    pout() << curDt << "\t" << state.getReactiveState()[0] << endl;
+    
     const Real nextDt = kmcSolver.getCriticalTimeStep(state);
 
     kmcSolver.stepSSA(state);
 
     curDt += nextDt;
-
-    pout() << curDt << "\t" << nextDt << "\t" << state.getReactiveState()[0] << endl;
   }
 
 #ifdef CH_MPI

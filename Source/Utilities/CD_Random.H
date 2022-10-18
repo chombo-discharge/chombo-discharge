@@ -111,6 +111,20 @@ public:
   seed();
 
   /*!
+    @brief Set the RNG seed.
+    @details If using MPI, the seed is set to a_seed + procID().
+    @param[in] a_seed Seed to use for RNG.
+  */
+  inline static void
+  setSeed(const int a_seed);
+
+  /*!
+    @brief Set a random RNG seed
+  */
+  inline static void
+  setRandomSeed();  
+
+  /*!
     @brief Return a random position in the cube (a_lo, a_hi);
     @param[in] a_lo Lower-left corner 
     @param[in] a_hi Upper-right corner 
@@ -179,19 +193,6 @@ private:
   */
   static std::normal_distribution<Real> s_normal01;
 
-  /*!
-    @brief Set the RNG seed.
-    @details If using MPI, the seed is set to a_seed + procID().
-    @param[in] a_seed Seed to use for RNG.
-  */
-  inline static void
-  setSeed(const int a_seed);
-
-  /*!
-    @brief Set a random RNG seed
-  */
-  inline static void
-  setRandomSeed();
 };
 
 #include <CD_NamespaceFooter.H>

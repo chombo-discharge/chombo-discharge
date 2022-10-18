@@ -43,7 +43,6 @@ Random::seed()
   else {
     Random::setSeed(0);
   }
-
   s_seeded = true;
 }
 

@@ -402,28 +402,30 @@ KMCSolver<R, State, T>::stepSSA(State&                   a_state,
   const size_t numReactions = a_reactions.size();
 
   if (numReactions > 0) {
-
     constexpr T one = (T)1;
 
-    // Compute total propensity.
+    // Determine the reaction type as per Gillespie algorithm.
     Real A = 0.0;
-
     for (size_t i = 0; i < numReactions; i++) {
       A += a_propensities[i];
     }
 
-    // Determine the reaction type.
     const Real u = Random::getUniformReal01();
 
-    size_t r = 0;
-    for (size_t i = 1; i < a_reactions.size(); i++) {
-      if (a_propensities[i - 1] <= u * A && a_propensities[i] > u * A) {
+    size_t r = std::numeric_limits<size_t>::max();
+
+    Real sumProp = 0.0;
+    for (size_t i = 0; i < a_reactions.size(); i++) {
+      sumProp += a_propensities[i];
+
+      if (sumProp >= u * A) {
         r = i;
 
         break;
       }
     }
 
+    // Advance by one reaction.
     a_reactions[r]->advanceState(a_state, one);
   }
 }
