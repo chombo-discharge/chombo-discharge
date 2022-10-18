@@ -49,13 +49,10 @@ public:
 
   /*!
     @brief Full constructor
-    @param[in] a_particleReactants Particle reactants (particles on left-hand side of reaction)
-    @param[in] a_particleProducts  Particle products (particles right-hand side of reactions)
-    @param[in] a_photonProducts    Photon products (photons right-hand side of reactions)
   */
-  inline KMCDualStateReaction(const std::list<size_t>& a_particleReactants,
-                              const std::list<size_t>& a_particleProducts,
-                              const std::list<size_t>& a_photonProducts) noexcept;
+  inline KMCDualStateReaction(const std::list<size_t>& a_lhsReactives,
+                              const std::list<size_t>& a_rhsReactives,
+                              const std::list<size_t>& a_rhsNonReactives) noexcept;
 
   /*!
     @brief Destructor
@@ -89,8 +86,8 @@ public:
   computeCriticalNumberOfReactions(const State& a_state) const noexcept;
 
   /*!
-    @brief Return the a vector that triggers the propensity function. 
-    @details The returned state should be populated with non-zero values for all reactant species. 
+    @brief Get the reactants in the reaction.
+    @return m_lhsReactives
   */
   inline std::list<size_t>
   getReactants() const noexcept;
@@ -116,27 +113,27 @@ protected:
   /*!
     @brief Particle reactants. 
   */
-  std::list<size_t> m_particleReactants;
+  std::list<size_t> m_lhsReactives;
 
   /*!
     @brief Particle products. 
   */
-  std::list<size_t> m_particleProducts;
+  std::list<size_t> m_rhsReactives;
 
   /*!
     @brief Photon products.
   */
-  std::list<size_t> m_photonProducts;
+  std::list<size_t> m_rhsNonReactives;
 
   /*!
     @brief State change for particles. 
   */
-  std::map<size_t, T> m_particleStateChange;
+  std::map<size_t, T> m_reactiveStateChange;
 
   /*!
     @brief State change for photons. 
   */
-  std::map<size_t, T> m_photonStateChange;
+  std::map<size_t, T> m_nonReactiveStateChange;
 
   /*!
     @brief Compute state change

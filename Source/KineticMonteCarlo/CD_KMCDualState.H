@@ -28,7 +28,6 @@ template <typename T = long long>
 class KMCDualState
 {
 public:
-  
   using State = std::vector<T>;
 
   /*!

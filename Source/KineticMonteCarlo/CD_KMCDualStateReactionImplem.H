@@ -17,15 +17,15 @@
 #include <CD_NamespaceHeader.H>
 
 template <typename T, typename State>
-inline KMCDualStateReaction<T, State>::KMCDualStateReaction(const std::list<size_t>& a_particleReactants,
-                                                            const std::list<size_t>& a_particleProducts,
-                                                            const std::list<size_t>& a_photonProducts) noexcept
+inline KMCDualStateReaction<T, State>::KMCDualStateReaction(const std::list<size_t>& a_lhsReactives,
+                                                            const std::list<size_t>& a_rhsReactives,
+                                                            const std::list<size_t>& a_rhsNonReactives) noexcept
 {
-  m_particleReactants = a_particleReactants;
-  m_particleProducts  = a_particleProducts;
-  m_photonProducts    = a_photonProducts;
+  m_lhsReactives    = a_lhsReactives;
+  m_rhsReactives    = a_rhsReactives;
+  m_rhsNonReactives = a_rhsNonReactives;
 
-  CH_assert(a_particleReactants > 0);
+  CH_assert(a_lhsReactives > 0);
 
   this->computeStateChanges();
 }
@@ -39,37 +39,37 @@ inline void
 KMCDualStateReaction<T, State>::computeStateChanges() noexcept
 {
   // Consumed particles.
-  for (const auto& r : m_particleReactants) {
-    if (m_particleStateChange.find(r) == m_particleStateChange.end()) {
-      m_particleStateChange.emplace(r, -1);
+  for (const auto& r : m_lhsReactives) {
+    if (m_reactiveStateChange.find(r) == m_reactiveStateChange.end()) {
+      m_reactiveStateChange.emplace(r, -1);
     }
     else {
-      m_particleStateChange[r]--;
+      m_reactiveStateChange[r]--;
     }
   }
 
   // Produced particles.
-  for (const auto& p : m_particleProducts) {
-    if (m_particleStateChange.find(p) == m_particleStateChange.end()) {
-      m_particleStateChange.emplace(p, +1);
+  for (const auto& p : m_rhsReactives) {
+    if (m_reactiveStateChange.find(p) == m_reactiveStateChange.end()) {
+      m_reactiveStateChange.emplace(p, +1);
     }
     else {
-      m_particleStateChange[p]++;
+      m_reactiveStateChange[p]++;
     }
   }
 
   // Produced photons.
-  for (const auto& p : m_photonProducts) {
-    if (m_photonStateChange.find(p) == m_photonStateChange.end()) {
-      m_photonStateChange.emplace(p, +1);
+  for (const auto& p : m_rhsNonReactives) {
+    if (m_nonReactiveStateChange.find(p) == m_nonReactiveStateChange.end()) {
+      m_nonReactiveStateChange.emplace(p, +1);
     }
     else {
-      m_photonStateChange[p]++;
+      m_nonReactiveStateChange[p]++;
     }
   }
 
   // Compute the reaction order.
-  m_reactionOrder = (T)a_particleReactants.size();
+  m_reactionOrder = (T)a_lhsReactives.size();
 }
 
 template <typename T, typename State>
@@ -102,7 +102,7 @@ KMCDualStateReaction<T, State>::propensity(const State& a_state) const noexcept
 
   const auto& particleState = a_state.getReactiveState();
 
-  for (const auto& r : m_particleReactants) {
+  for (const auto& r : m_lhsReactives) {
     A *= particleState[r];
   }
 
@@ -121,7 +121,7 @@ KMCDualStateReaction<T, State>::computeCriticalNumberOfReactions(const State& a_
 
   const auto& particleState = a_state.getReactiveState();
 
-  for (const auto& s : m_particleStateChange) {
+  for (const auto& s : m_reactiveStateChange) {
 
     const size_t rI   = s.first;
     const T      nuIJ = s.second;
@@ -138,7 +138,7 @@ template <typename T, typename State>
 inline std::list<size_t>
 KMCDualStateReaction<T, State>::getReactants() const noexcept
 {
-  return m_particleReactants;
+  return m_lhsReactives;
 }
 
 template <typename T, typename State>
@@ -147,8 +147,8 @@ KMCDualStateReaction<T>::getStateChange(const size_t a_particleReactant) const n
 {
   T nuIJ = 0;
 
-  if (m_particleStateChange.find(a_particleReactant) != m_particleStateChange.end()) {
-    nuIJ = m_particleStateChange.at(a_particleReactant);
+  if (m_reactiveStateChange.find(a_particleReactant) != m_reactiveStateChange.end()) {
+    nuIJ = m_reactiveStateChange.at(a_particleReactant);
   }
 
   return nuIJ;
@@ -165,11 +165,11 @@ KMCDualStateReaction<T, State>::advanceState(State& a_state, const T& a_numReact
   auto& particleState = a_state.getReactiveState();
   auto& photonState   = a_state.getNonReactiveState();
 
-  for (const auto& s : m_particleStateChange) {
+  for (const auto& s : m_reactiveStateChange) {
     particleState[s.first] += a_numReactions * s.second;
   }
 
-  for (const auto& s : m_photonStateChange) {
+  for (const auto& s : m_nonReactiveStateChange) {
     photonState[s.first] += a_numReactions * s.second;
   }
 }
@@ -181,15 +181,15 @@ KMCDualStateReaction<T, State>::sanityCheck(const State& a_state) const noexcept
   const auto& particleState = a_state.getReactiveState();
   const auto& photonState   = a_state.getNonReactiveState();
 
-  for (const auto& idx : m_particleReactants) {
+  for (const auto& idx : m_lhsReactives) {
     CH_assert(particleState.size() > idx);
   }
 
-  for (const auto& idx : m_particleProducts) {
+  for (const auto& idx : m_rhsReactives) {
     CH_assert(particleState.size() > idx);
   }
 
-  for (const auto& idx : m_photonProducts) {
+  for (const auto& idx : m_rhsNonReactives) {
     CH_assert(photonState.size() > idx);
   }
 }
