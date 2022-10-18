@@ -110,18 +110,18 @@ KMCSolver<R, State, T>::totalPropensity(const State& a_state, const ReactionList
 
 template <typename R, typename State, typename T>
 inline std::pair<typename KMCSolver<R, State, T>::ReactionList, typename KMCSolver<R, State, T>::ReactionList>
-KMCSolver<R, State, T>::partitionCriticalReactions(const State& a_state) const noexcept
+KMCSolver<R, State, T>::partitionReactions(const State& a_state) const noexcept
 {
-  CH_TIME("KMCSolver::partitionCriticalReactions(State)");
+  CH_TIME("KMCSolver::partitionReactions(State)");
 
-  return this->partitionCriticalReactions(a_state, m_reactions);
+  return this->partitionReactions(a_state, m_reactions);
 }
 
 template <typename R, typename State, typename T>
 inline std::pair<typename KMCSolver<R, State, T>::ReactionList, typename KMCSolver<R, State, T>::ReactionList>
-KMCSolver<R, State, T>::partitionCriticalReactions(const State& a_state, const ReactionList& a_reactions) const noexcept
+KMCSolver<R, State, T>::partitionReactions(const State& a_state, const ReactionList& a_reactions) const noexcept
 {
-  CH_TIME("KMCSolver::partitionCriticalReactions(State, ReactionList)");
+  CH_TIME("KMCSolver::partitionReactions(State, ReactionList)");
 
   ReactionList criticalReactions;
   ReactionList nonCriticalReactions;
@@ -165,9 +165,23 @@ KMCSolver<R, State, T>::getCriticalTimeStep(const State&        a_state,
 
 template <typename R, typename State, typename T>
 inline Real
+KMCSolver<R, State, T>::getCriticalTimeStep(const std::vector<Real>& a_propensities) const noexcept
+{
+  CH_TIME("KineticMonteCarlo::getCriticalTimeStep(std::vector<Real>)");
+
+  Real A = std::numeric_limits<Real>::min();
+  for (const auto& p : a_propensities) {
+    A += p;
+  }
+
+  return this->getCriticalTimeStep(A);
+}
+
+template <typename R, typename State, typename T>
+inline Real
 KMCSolver<R, State, T>::getCriticalTimeStep(const Real& a_totalPropensity) const noexcept
 {
-  CH_TIME("KineticMotneCarlo::getCriticalTimeStep(Real)");
+  CH_TIME("KineticMonteCarlo::getCriticalTimeStep(Real)");
 
   const Real u = std::numeric_limits<Real>::min() + Random::getUniformReal01();
 
@@ -210,7 +224,7 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
       // that it is the REACTION that determines how we index the state population. This is simply a
       // design choice that permits the user to apply different type of reactions without changing
       // the underlying state.
-      const T& Xi = a_nonCriticalReactions[0]->population(a_state, reactant);
+      const T Xi = a_nonCriticalReactions[0]->population(reactant, a_state);
 
       if (Xi > 0) {
         Real mu     = 0.0;
@@ -395,7 +409,7 @@ KMCSolver<R, State, T>::stepSSA(State&                   a_state,
 
     size_t r = 0;
     for (size_t i = 1; i < a_reactions.size(); i++) {
-      if (propensities[i - 1] <= u * A && propensities[i] > u * A) {
+      if (a_propensities[i - 1] <= u * A && a_propensities[i] > u * A) {
         r = i;
 
         break;
@@ -475,7 +489,7 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
     const std::vector<Real> propensitiesCrit    = this->propensities(a_state, criticalReactions);
     const std::vector<Real> propensitiesNonCrit = this->propensities(a_state, nonCriticalReactions);
 
-    Real dtCrit    = this->getCriticalTimeStep(a_state, propensitiesCrit);
+    Real dtCrit    = this->getCriticalTimeStep(propensitiesCrit);
     Real dtNonCrit = this->getNonCriticalTimeStep(a_state, nonCriticalReactions, propensitiesNonCrit);
 
     // Try the various advancement algorithms; the loop is for step rejection in case we end up with an invalid state, e.g.
@@ -499,7 +513,7 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
       if (nonCriticalOnly) {
 
         // Compute the total propensity because it might actually be better to run SSA steps.
-        Real A = this->propensity(state, a_reactions);
+        Real A = this->totalPropensity(state, a_reactions);
 
         if (A * curDt < m_SSAlim) {
           // TLDR: Tau-leaping is inefficient here so we switch to an SSA-based algorithm for the WHOLE reaction set.

@@ -35,17 +35,12 @@ public:
   /*!
     @brief Disallowed constructor. Use the full constructor. 
   */
-  KMCDualStateReaction() = delete;
+  KMCDualStateReaction() = default;
 
   /*!
     @brief Copy constructor (uses default). 
   */
   KMCDualStateReaction(const KMCDualStateReaction&) = default;
-
-  /*!
-    @brief Disallowed move constructor
-  */
-  KMCDualStateReaction(const KMCDualStateReaction&&) = delete;
 
   /*!
     @brief Full constructor
@@ -152,5 +147,7 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_KMCDualStateReactionImplem.H>
 
 #endif

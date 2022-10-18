@@ -13,7 +13,7 @@
 #define CD_KMCDualStateReactionImplem_H
 
 // Our includes
-#include <CD_KMCDualStateReactionState.H>
+#include <CD_KMCDualStateReaction.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename T, typename State>
@@ -67,9 +67,6 @@ KMCDualStateReaction<T, State>::computeStateChanges() noexcept
       m_nonReactiveStateChange[p]++;
     }
   }
-
-  // Compute the reaction order.
-  m_reactionOrder = (T)a_lhsReactives.size();
 }
 
 template <typename T, typename State>
@@ -143,7 +140,7 @@ KMCDualStateReaction<T, State>::getReactants() const noexcept
 
 template <typename T, typename State>
 inline T
-KMCDualStateReaction<T>::getStateChange(const size_t a_particleReactant) const noexcept
+KMCDualStateReaction<T, State>::getStateChange(const size_t a_particleReactant) const noexcept
 {
   T nuIJ = 0;
 

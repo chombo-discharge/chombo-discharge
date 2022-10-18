@@ -118,14 +118,14 @@ public:
     @note Calls the other version with m_reactions
   */
   inline std::pair<ReactionList, ReactionList>
-  partitionCriticalReactions(const State& a_state) const noexcept;
+  partitionReactions(const State& a_state) const noexcept;
 
   /*!
     @brief Partition reactions into critical and non-critical reactions. 
     @details First member in the pair is the critical reactions, then the non-critical reactions
   */
   inline std::pair<ReactionList, ReactionList>
-  partitionCriticalReactions(const State& a_state, const ReactionList& a_reactions) const noexcept;
+  partitionReactions(const State& a_state, const ReactionList& a_reactions) const noexcept;
 
   /*!
     @brief Get the time to the next critical reaction
@@ -139,7 +139,7 @@ public:
     @note Computes the total propensity and calls the other version. 
   */
   inline Real
-  getCriticalTimeStep(const State& a_state, const std::vector<Real>& a_propensities) const noexcept;
+  getCriticalTimeStep(const std::vector<Real>& a_propensities) const noexcept;
 
   /*!
     @brief Get the time to the next critical reaction
