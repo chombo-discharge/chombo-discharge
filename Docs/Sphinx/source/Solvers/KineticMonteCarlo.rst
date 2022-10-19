@@ -289,22 +289,135 @@ Using ``MyState`` above as an example, a minimal reaction that can advance :math
       size_t m_B;	 
    };
 
+Advancement routines
+____________________
+
+The advancement routines for the ``KMCSolver`` are
+
+.. code-block:: c++
+
+   template <typename R, typename State, typename T = long long>
+   class KMCSolver
+   {
+   public:
+
+      // Advance one step with the SSA algorithm.
+      inline void
+      advanceSSA(State& a_state, const Real a_dt) const;
+
+      // Advance using tau leaping
+      inline void
+      advanceTau(State& a_state, const Real a_dt) const;
+
+      // Advance using hybrid algorithm. 
+      inline void
+      advanceHybrid(State& a_state, const Real a_dt) const;
+
+      // Set hybrid solver parameters.
+      inline void
+      setSolverParameters(const T a_numCrit, const T a_numSSA, const Real a_eps, const Real a_SSAlim) noexcept;      
+   };
+
+When using the hybrid algorithm, the user should set the hybrid solver parameters through ``setSolverParameters``.
+See :ref:`Chap:KMCHybridAdvance` for further details. 
+
 State and reaction examples
 ---------------------------
 
-``chombo-discharge`` 
+``chombo-discharge`` maintains some states and reaction methods that can be useful when solving problems with ``KMCSolver``.
 
 .. _Chap:KMCSingleState:
 
 Single-state
 ____________
 
+The ``KMCSingleState`` class defines a single state vector :math:`\vec{X}` that can appear on either side of reactions.
+The user defines the number of species through the constructor
+
+.. code-block:: c++
+
+   template <typename T = long long>
+   class KMCSingleState {
+   public:
+      // Define a state vector with specified number of species. 
+      inline KMCSingleState(const size_t a_numSpecies) noexcept;
+   };
+
+Internally the state just uses a ``std::vector<T>`` for representing the populations.
+
+``KMCSingleStateReaction`` can be used to define reactions between species in ``KMCSingleState``.
+The reaction is specified as a generic type of reaction
+
+.. math::
+
+   X_A + X_B + \ldots \xrightarrow{k} X_C + X_D + \ldots.
+
+The relevant function signatures that specify the reactants, products, and the rate :math:`k`, are
+
+.. code-block:: c++
+
+   template <typename T = long long, typename State = KMCSingleState<T>>
+   class KMCSingleStateReaction {
+   public:
+
+      // Define list of reactants/products through constructor
+      inline
+      KMCSingleStateReaction(const std::list<size_t>& a_reactants,
+                             const std::list<size_t>& a_products) noexcept;
+
+      // For setting the reaction rate used in the propensity calculation.
+      inline Real&
+      rate() const noexcept;
+   };
+
 .. _Chap:KMCDualState:
 
 Dual-state
 __________
 
+``KMCDualState`` defines two state vectors :math:`\vec{X}` and :math:`\vec{Y}` where :math:`\vec{X}` are *reactant species* and :math:`\vec{Y}` are *non-reactant* species.
+The intention behind this class is that reactant species are allowed on either side of the reaction, while the non-reactant species only occur on the right-hand side of the reaction.
+For example:
 
+.. math::
+
+   X_A \ldots \xrightarrow{k} 2X_A + Y_A + \emptyset
+
+The class is implemented as
+
+.. code-block:: c++
+		
+   template <typename T = long long>
+   class KMCDualState {
+   public:
+      // Define a state vector with specified number of species. 
+      inline KMCDualState(const size_t a_numReactiveSpecies, const size_t a_numNonReactiveSpecies) noexcept;
+
+      // Get the reactant state (i.e, X)
+      std::vector<T>& getReactiveState() noexcept;
+
+      // Get the non-reactant state (i.e, Y)
+      std::vector<T>& getNonReactiveState() noexcept;      
+   };
+
+``KMCDualStateReaction`` can define reactions between states in the state vector :math:`\vec{X}` which give products in both :math:`\vec{X}` and :math:`\vec{Y}` as follows.
+
+.. code-block:: c++
+		
+   template <typename T = long long, typename State = KMCDualState<T>>
+   class KMCDualStateReaction {
+   public:
+
+      // Define list of reactants/products through constructor
+      inline
+      KMCDualStateReaction(const std::list<size_t>& a_lhsReactives,
+                           const std::list<size_t>& a_rhsReactives,
+                           const std::list<size_t>& a_rhsNonReactives);
+
+      // For setting the reaction rate used in the propensity calculation.
+      inline Real&
+      rate() const noexcept;
+   };
 
 
 Verification
