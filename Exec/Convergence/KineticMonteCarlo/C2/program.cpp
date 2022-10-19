@@ -29,6 +29,9 @@ main(int argc, char* argv[])
   MPI_Init(&argc, &argv);
 #endif
 
+  // Read input file
+  ParmParse pp(argc - 2, argv + 2, NULL, argv[1]);
+
   // Seed the RNG
   Random::setRandomSeed();
 
@@ -54,18 +57,54 @@ main(int argc, char* argv[])
   reactionList.emplace_back(c3R);
   reactionList.emplace_back(c4R);
 
-  // Define the Kinetic Monte Carlo solver and run it until time = 10.
+  // Read input variables
+  Real SSAlim   = 0.1;
+  Real eps      = 0.3;
+  int  numSteps = 100;
+  int  numCrit  = 5;
+  int  numSSA   = 5;
+
+  std::string alg;
+
+  pp.get("nsteps", numSteps);
+  pp.get("algorithm", alg);
+  pp.get("num_crit", numCrit);
+  pp.get("num_ssa", numSSA);
+  pp.get("eps", eps);
+  pp.get("ssa_lim", SSAlim);
+
+  // Define the Kinetic Monte Carlo solver and run it until the stop time.
   KMCSolver<KMCSingleStateReaction<>, KMCSingleState<>, long long> kmcSolver(reactionList);
 
+  kmcSolver.setSolverParameters(numCrit, numSSA, eps, SSAlim);
+
   // Run the SSA algorithm
-  Real curDt  = 0.0;
-  Real stopDt = 20.0;
-  while (curDt < stopDt) {
-    const Real nextDt = kmcSolver.getCriticalTimeStep(state);
+  Real curDt    = 0.0;
+  Real stopTime = 20.0;
+  while (curDt < stopTime) {
+    pout() << curDt << "\t" << state[0] << endl;
 
-    pout() << curDt << "\t" << nextDt << "\t" << state[0] << endl;
+    Real nextDt = std::numeric_limits<Real>::max();
+    if (alg == "ssa") {
+      nextDt = kmcSolver.getCriticalTimeStep(state);
 
-    kmcSolver.stepSSA(state);
+      kmcSolver.stepSSA(state);
+    }
+    else if (alg == "tau") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.stepTau(state, nextDt);
+    }
+    else if (alg == "hybrid") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt);
+    }
+    else {
+      const std::string err = "Expected algorithm to be 'ssa', 'tau', or 'hybrid' but got '" + alg + "'";
+
+      MayDay::Error(err.c_str());
+    }
 
     curDt += nextDt;
   }

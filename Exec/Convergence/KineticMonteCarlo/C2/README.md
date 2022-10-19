@@ -1,7 +1,8 @@
-## Convergence/KineticMonteCarlo/ElectronAvalanche
+## Convergence/KineticMonteCarlo/C2
 
-This example compares Kinetic Monte Carlo solutions with an exact solution for an electron avalanche process.
-The reactions involved in the KMC model are 'e + null -> e + e + null' and 'e -> null'.
+This example runs a Kinetic Monte Carlo solver for the Schlogl model.
+The rate constants are the same as in [Cao. et. al in J. Chem. Phys. Vol. 124 044109 (2006)](https://doi.org/10.1063/1.2159468)
+For each run of the model the population will converge to one of the bi-stable states. 
 
 # Compilation
 
@@ -22,4 +23,4 @@ The user can select between different algorithms and initial conditions in the i
 Output is given in the pout.* files.
 The files contain data in the format
 
-"Time" "KMC solution" "Exact solution"
+"Time" "KMC solution"
