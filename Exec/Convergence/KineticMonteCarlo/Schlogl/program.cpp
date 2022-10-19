@@ -44,10 +44,10 @@ main(int argc, char* argv[])
   auto c3R = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{}, std::list<size_t>{0});
   auto c4R = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0}, std::list<size_t>{});
 
-  c1R->rate() = c1 * N1 / 2.0; // Propensity becomes 1/2 * c1 * B1 * X * (X-1)
-  c2R->rate() = c2 / 6.0;      // Propensity becomes 1/6 * c2 * X * (X-1) * (X-2)
-  c3R->rate() = c3 * N2;       // Propensity becomes c3 * B2
-  c4R->rate() = c4;            // Propensity becomes c4 * X
+  c1R->rate() = c1 * N1; // Propensity becomes 1/2 * c1 * B1 * X * (X-1)
+  c2R->rate() = c2;      // Propensity becomes 1/6 * c2 * X * (X-1) * (X-2)
+  c3R->rate() = c3 * N2; // Propensity becomes c3 * B2
+  c4R->rate() = c4;      // Propensity becomes c4 * X
 
   reactionList.emplace_back(c1R);
   reactionList.emplace_back(c2R);

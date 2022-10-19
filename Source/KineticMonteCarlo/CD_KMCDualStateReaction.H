@@ -116,6 +116,12 @@ protected:
   mutable Real m_rate;
 
   /*!
+    @brief Factor for the case where two or more particles of the same species react. 
+    @details For reactions X + X -> null the propensity is k * X * (X-1)/2 because there are X * (X-1)/2 unique pairs of particles in the cell. 
+  */
+  Real m_propensityFactor;
+
+  /*!
     @brief Reactive species.
   */
   std::list<size_t> m_lhsReactives;

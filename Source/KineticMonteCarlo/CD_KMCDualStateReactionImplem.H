@@ -67,6 +67,35 @@ KMCDualStateReaction<T, State>::computeStateChanges() noexcept
       m_nonReactiveStateChange[p]++;
     }
   }
+
+  // Compute the propensity factor that we need when there are bi- or tri-particle reactions involving the same species. We need to do this
+  // because for biparticle reactions of N particles of the same type, there are 0.5 * N * (N-1) unique pairs of particles. Or in general when
+  // we have a k-order reaction we have 'N choose k' = N!/(k! * (N-k)!) combinations. In the propensity function we compute the propensity as
+  //
+  //    a = rate * factor * N * (N-1) * (N-2) ...
+  //
+  // For this to make sense we have
+  //
+  //    a = rate * N * (N-1) * (N-2) ... (N-k+1) * (N-k)!/(k! * (N-k)!)
+  //      = rate * N * (N-1) * (N-2) ... * 1/k!
+  //
+  // so the factor is just 1/k! (for each species).
+
+  m_propensityFactor = 1.0;
+
+  std::map<size_t, size_t> reactantNumbers;
+  for (const auto& r : m_reactants) {
+    if (reactantNumbers.find(r) == reactantNumbers.end()) {
+      reactantNumbers.emplace(r, 1);
+    }
+    else {
+      reactantNumbers[r]++;
+    }
+  }
+
+  for (const auto& rn : reactantNumbers) {
+    m_propensityFactor *= 1.0 / factorial(rn.second);
+  }
 }
 
 template <typename T, typename State>
@@ -95,7 +124,7 @@ KMCDualStateReaction<T, State>::propensity(const State& a_state) const noexcept
   this->sanityCheck(a_state);
 #endif
 
-  Real A = m_rate;
+  Real A = m_rate * m_propensityFactor;
 
   auto reactiveState = a_state.getReactiveState();
 
