@@ -538,7 +538,7 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
           while (dtSSA < curDt && numSSA < m_numSSA) {
 
             // Recompute propensities for the full reaction set and advance everything using the SSA.
-            std::vector<Real> propensities = this->propensities(state, a_reactions);
+            std::vector<Real> propensities = this->propensities(a_state, a_reactions);
 
             A = 0.0;
             for (size_t i = 0; i < propensities.size(); i++) {
@@ -550,10 +550,15 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
 
             if (dtSSA + dtReact < curDt) {
               this->stepSSA(a_state, a_reactions, propensities);
-            }
 
-            dtSSA += dtReact;
-            numSSA += 1;
+              dtSSA += dtReact;
+              numSSA += 1;
+            }
+            else {
+
+              // Next reaction occured outside the substep -- break out of the loop.
+              dtSSA = curDt;
+            }
           }
 
           validStep = true;

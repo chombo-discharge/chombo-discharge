@@ -36,28 +36,63 @@ main(int argc, char* argv[])
   Real& ionizationRate = ionization->rate();
   Real& attachmentRate = attachment->rate();
 
-  Real stopDt = 0.0;
-  int  initVal;
+  Real stopTime = 0.0;
+  Real SSAlim   = 0.1;
+  Real eps      = 0.3;
+  int  initVal  = 0;
+  int  numSteps = 100;
+  int  numCrit  = 5;
+  int  numSSA   = 5;
+
+  std::string alg;
 
   // Read program input variables
-  pp.get("stop_time", stopDt);
+  pp.get("nsteps", numSteps);
+  pp.get("stop_time", stopTime);
   pp.get("ionization_rate", ionizationRate);
   pp.get("attachment_rate", attachmentRate);
   pp.get("initial_particles", initVal);
+  pp.get("algorithm", alg);
+  pp.get("num_crit", numCrit);
+  pp.get("num_ssa", numSSA);
+  pp.get("eps", eps);
+  pp.get("ssa_lim", SSAlim);
 
   state[0] = (long long)initVal;
 
   // Define the Kinetic Monte Carlo solver and run it until time = 10.
   KMCSolver<KMCSingleStateReaction<>, KMCSingleState<>, long long> kmcSolver(reactionList);
 
+  kmcSolver.setSolverParameters(numCrit, numSSA, eps, SSAlim);
+
   // Run the SSA algorithm
-  Real curDt = 0.0;
-  while (curDt < stopDt) {
-    pout() << curDt << "\t" << state[0] << endl;
 
-    const Real nextDt = kmcSolver.getCriticalTimeStep(state);
+  Real       curDt   = 0.0;
+  const Real effRate = ionizationRate - attachmentRate;
+  while (curDt < stopTime) {
+    pout() << curDt << "\t" << state[0] << "\t" << 1.0 * initVal * exp(effRate * curDt) << endl;
 
-    kmcSolver.stepSSA(state);
+    Real nextDt = std::numeric_limits<Real>::max();
+    if (alg == "ssa") {
+      nextDt = kmcSolver.getCriticalTimeStep(state);
+
+      kmcSolver.stepSSA(state);
+    }
+    else if (alg == "tau") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.stepTau(state, nextDt);
+    }
+    else if (alg == "hybrid") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt);
+    }
+    else {
+      const std::string err = "Expected algorithm to be 'ssa', 'tau', or 'hybrid' but got '" + alg + "'";
+
+      MayDay::Error(err.c_str());
+    }
 
     curDt += nextDt;
   }
