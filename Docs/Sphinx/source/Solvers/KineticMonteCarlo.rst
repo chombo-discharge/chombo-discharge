@@ -46,10 +46,11 @@ For bimolecular of the type
 
 .. math::
 
-   X_A + X_A \xrightarrow{k} \emptyset
+   2X_A \xrightarrow{k} \emptyset
 
 the propensity is :math:`k \frac{1}{2} X_A(X_A-1)` because there are :math:`\frac{1}{2}X_A(X_A-1)` unique pairs of molecules of type A.
 Propensities for higher-order reactions can then be expanded using the binomial theorem.
+For example, for a third-order reaction :math:`3X_A\xrightarrow{k} \emptyset` the propensity function is :math:`k\frac{1}{6}X_A(X_A-1)(X_A-2)`. 
 
 Various algorithms can be used for advancing the state :math:`\vec{X}` for an arbitrary reaction network :math:`\vec{R}`.
 
