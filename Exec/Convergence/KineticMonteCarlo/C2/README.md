@@ -27,4 +27,4 @@ The files contain data in the format
 
 The figure below shows an example when run over 8 ranks
 
-<img src="Schlogl.png" alt="KMC Schlogl model solutions" width="400"/>
+<img src="Schlogl.png" alt="KMC Schlogl model solutions" width="800"/>
