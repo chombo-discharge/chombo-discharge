@@ -65,8 +65,7 @@ main(int argc, char* argv[])
 
   kmcSolver.setSolverParameters(numCrit, numSSA, eps, SSAlim);
 
-  // Run the SSA algorithm
-
+  // Advance problem.
   Real       curDt   = 0.0;
   const Real effRate = ionizationRate - attachmentRate;
   while (curDt < stopTime) {
