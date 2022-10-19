@@ -24,7 +24,3 @@ Output is given in the pout.* files.
 The files contain data in the format
 
 "Time" "KMC solution"
-
-The figure below shows an example when run over 8 ranks
-
-<img src="Schlogl.png" alt="KMC Schlogl model solutions" width="800"/>

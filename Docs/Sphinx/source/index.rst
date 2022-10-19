@@ -130,6 +130,7 @@ Solvers
 
    Solvers/CDR
    Solvers/Electrostatics
+   Solvers/KineticMonteCarlo
    Solvers/MeshODESolver
    Solvers/RTE
    Solvers/SurfaceODESolver
