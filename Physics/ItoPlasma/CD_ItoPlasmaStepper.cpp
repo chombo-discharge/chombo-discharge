@@ -71,10 +71,16 @@ ItoPlasmaStepper::parseOptions()
   }
 
   this->parseVerbosity();
-  this->parseSuperparticles();
+  this->parseSuperParticles();
   this->parseDualGrid();
   this->parseLoadBalance();
   this->parseTimeStepRestrictions();
+  this->parseParametersEB();
+
+  m_ito->parseOptions();
+  m_fieldSolver->parseOptions();
+  m_rte->parseOptions();
+  m_sigmaSolver->parseOptions();  
 }
 
 void
@@ -86,9 +92,15 @@ ItoPlasmaStepper::parseRuntimeOptions()
   }
 
   this->parseVerbosity();
-  this->parseSuperparticles();
+  this->parseSuperParticles();
   this->parseLoadBalance();
   this->parseTimeStepRestrictions();
+  this->parseParametersEB();
+
+  m_ito->parseRuntimeOptions();
+  m_fieldSolver->parseRuntimeOptions();
+  m_rte->parseRuntimeOptions();
+  m_sigmaSolver->parseRuntimeOptions();
 }
 
 void
@@ -106,11 +118,11 @@ ItoPlasmaStepper::parseVerbosity() noexcept
 }
 
 void
-ItoPlasmaStepper::parseSuperparticles() noexcept
+ItoPlasmaStepper::parseSuperParticles() noexcept
 {
-  CH_TIME("ItoPlasmaStepper::parseSuperparticles");
+  CH_TIME("ItoPlasmaStepper::parseSuperParticles");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::parseSuperparticles" << endl;
+    pout() << "ItoPlasmaStepper::parseSuperParticles" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -120,7 +132,7 @@ ItoPlasmaStepper::parseSuperparticles() noexcept
   pp.get("regrid_superparticles", m_regridSuperparticles);
 
   if (m_particlesPerCell <= 0) {
-    MayDay::Error("ItoPlasmaStepper::parseSuperparticles -- must have 'particles_per_cell' > 0");
+    MayDay::Error("ItoPlasmaStepper::parseSuperParticles -- must have 'particles_per_cell' > 0");
   }
 
   if (m_mergeInterval <= 1) {
@@ -231,9 +243,22 @@ ItoPlasmaStepper::parseTimeStepRestrictions() noexcept
 }
 
 void
+ItoPlasmaStepper::parseParametersEB() noexcept
+{
+  CH_TIME("ItoPlasmaStepper::parseTimeStepRestrictions");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseTimeStepRestrictions" << endl;
+  }
+
+  ParmParse pp(m_name.c_str());
+
+  pp.get("eb_tolerance", m_toleranceEB);
+}
+
+void
 ItoPlasmaStepper::setupSolvers()
 {
-  CH_TIME("ItoPlasmaStepper::setup_solver");
+  CH_TIME("ItoPlasmaStepper::setupSolver");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::setupSolvers" << endl;
   }
@@ -307,12 +332,12 @@ ItoPlasmaStepper::setupSigma()
     pout() << "ItoPlasmaStepper::setupSigma" << endl;
   }
 
-  m_sigma = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
-  m_sigma->setVerbosity(m_verbosity);
-  m_sigma->setRealm(m_fluidRealm);
-  m_sigma->setPhase(m_plasmaPhase);
-  m_sigma->setName("Surface charge");
-  m_sigma->setTime(0, 0.0, 0.0);
+  m_sigmaSolver = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
+  m_sigmaSolver->setVerbosity(m_verbosity);
+  m_sigmaSolver->setRealm(m_fluidRealm);
+  m_sigmaSolver->setPhase(m_plasmaPhase);
+  m_sigmaSolver->setName("Surface charge");
+  m_sigmaSolver->setTime(0, 0.0, 0.0);
 }
 
 void
@@ -327,7 +352,7 @@ ItoPlasmaStepper::allocate()
   m_ito->allocateInternals();
   m_rte->allocateInternals();
   m_fieldSolver->allocateInternals();
-  m_sigma->allocate();
+  m_sigmaSolver->allocate();
 
   this->allocateInternals();
 }
@@ -432,11 +457,11 @@ ItoPlasmaStepper::initialSigma()
 
   const RealVect probLo = m_amr->getProbLo();
 
-  EBAMRIVData& sigma = m_sigma->getPhi();
+  EBAMRIVData& sigma = m_sigmaSolver->getPhi();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_sigma->getRealm())[lvl];
-    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_sigma->getRealm(), m_sigma->getPhase())[lvl];
+    const DisjointBoxLayout& dbl   = m_amr->getGrids(m_sigmaSolver->getRealm())[lvl];
+    const EBISLayout&        ebisl = m_amr->getEBISLayout(m_sigmaSolver->getRealm(), m_sigmaSolver->getPhase())[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
@@ -451,17 +476,17 @@ ItoPlasmaStepper::initialSigma()
         phi(vof, 0) = m_physics->initialSigma(m_time, pos);
       };
 
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_sigma->getRealm(), m_sigma->getPhase())[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_sigmaSolver->getRealm(), m_sigmaSolver->getPhase())[lvl])[dit()];
 
       BoxLoops::loop(vofit, kernel);
     }
   }
 
   // Coarsen throughout the AMR hierarchy.
-  m_amr->conservativeAverage(sigma, m_fluidRealm, m_sigma->getPhase());
+  m_amr->conservativeAverage(sigma, m_fluidRealm, m_sigmaSolver->getPhase());
 
   // Set surface charge to zero on electrode cut-cells.
-  m_sigma->resetElectrodes(sigma, 0.0);
+  m_sigmaSolver->resetElectrodes(sigma, 0.0);
 }
 
 void
@@ -539,7 +564,7 @@ ItoPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) con
   }
 
   m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
-  m_sigma->writeCheckpointLevel(a_handle, a_lvl);
+  m_sigmaSolver->writeCheckpointLevel(a_handle, a_lvl);
 }
 #endif
 
@@ -561,7 +586,7 @@ ItoPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
   }
 
   m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
-  m_sigma->readCheckpointLevel(a_handle, a_lvl);
+  m_sigmaSolver->readCheckpointLevel(a_handle, a_lvl);
 }
 #endif
 
@@ -578,8 +603,8 @@ ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_
   m_fieldSolver->writePlotData(a_output, a_icomp);
 
   // Surface charge solver writes
-  a_plotVariableNames.append(m_sigma->getPlotVariableNames());
-  m_sigma->writePlotData(a_output, a_icomp);
+  a_plotVariableNames.append(m_sigmaSolver->getPlotVariableNames());
+  m_sigmaSolver->writePlotData(a_output, a_icomp);
 
   // Ito solvers copy their output data
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -660,7 +685,7 @@ ItoPlasmaStepper::synchronizeSolverTimes(const int a_step, const Real a_time, co
   m_ito->setTime(a_step, a_time, a_dt);
   m_fieldSolver->setTime(a_step, a_time, a_dt);
   m_rte->setTime(a_step, a_time, a_dt);
-  m_sigma->setTime(a_step, a_time, a_dt);
+  m_sigmaSolver->setTime(a_step, a_time, a_dt);
 }
 
 void
@@ -850,7 +875,7 @@ ItoPlasmaStepper::registerOperators()
   m_ito->registerOperators();
   m_fieldSolver->registerOperators();
   m_rte->registerOperators();
-  m_sigma->registerOperators();
+  m_sigmaSolver->registerOperators();
 }
 
 void
@@ -864,7 +889,7 @@ ItoPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   m_ito->preRegrid(a_lmin, a_oldFinestLevel);
   m_fieldSolver->preRegrid(a_lmin, a_oldFinestLevel);
   m_rte->preRegrid(a_lmin, a_oldFinestLevel);
-  m_sigma->preRegrid(a_lmin, a_oldFinestLevel);
+  m_sigmaSolver->preRegrid(a_lmin, a_oldFinestLevel);
 }
 
 void
@@ -882,7 +907,7 @@ ItoPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int
   m_ito->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-  m_sigma->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   if (m_regridSuperparticles) {
     m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
@@ -934,7 +959,7 @@ ItoPlasmaStepper::getNumberOfPlotVariables() const
   ncomp += m_fieldSolver->getNumberOfPlotVariables();
 
   // Surface charge solver variables.
-  ncomp += m_sigma->getNumberOfPlotVariables();
+  ncomp += m_sigmaSolver->getNumberOfPlotVariables();
 
   // Conductivity
   ncomp += 1;
@@ -1208,7 +1233,7 @@ ItoPlasmaStepper::solvePoisson() noexcept
   // Solve the Poisson equation and compute the cell-centered electric field.
   MFAMRCellData& phi   = m_fieldSolver->getPotential();
   MFAMRCellData& rho   = m_fieldSolver->getRho();
-  EBAMRIVData&   sigma = m_sigma->getPhi();
+  EBAMRIVData&   sigma = m_sigmaSolver->getPhi();
 
   const bool converged = m_fieldSolver->solve(phi, rho, sigma, false);
 

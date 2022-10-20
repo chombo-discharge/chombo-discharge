@@ -46,103 +46,186 @@ namespace Physics {
 	@brief Advance the Ito-Poisson-KMC system over a_dt
 	@param[in] a_dt Time step
       */
-      Real
+      virtual Real
       advance(const Real a_dt) override;
 
       /*!
-	@brief Compute time step to use for the simulation advance
+	@brief Allocate storage required for advancing the equations
       */
-      Real
-      computeDt() override;
-
-      // Setup routines
-      void
+      virtual void
       allocate() override;
-      void
+
+      /*!
+	@brief Parse options
+      */
+      virtual void
       parseOptions() override;
-      void
+
+      /*!
+	@brief Parse run-time options
+      */
+      virtual void
       parseRuntimeOptions() override;
-      void
+
+      /*!
+	@brief Allocate internal storage
+      */
+      virtual void
       allocateInternals() override;
 
-      // Regrid routines
-      void
+      /*!
+	@brief Perform pre-regrid operations.
+	@details This stores the particles and mesh data on the old grids. 
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@note This will store the "conductivity" and "rho dagger" particles. 
+      */
+      virtual void
       preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
-      void
+
+      /*!
+	@brief Regrid methods -- puts all data on the new mesh. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */
+      virtual void
       regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
     protected:
-      // Switching between algorithms.
-      enum class which_algorithm
+      /*!
+	@brief Simple enum for distinguishing between algorithms
+	@note Trapezoidal is a work-in-progress.
+      */
+      enum class WhichAlgorithm
       {
-        euler_maruyama,
-        trapezoidal,
+        EulerMaruyama,
+        Trapezoidal
       };
 
-      // How to restrict dt.
-      enum class which_dt
-      {
-        advection,
-        diffusion,
-        AdvectionDiffusion
-      };
+      /*!
+	@brief Average CFL number
+      */
+      Real m_averageCFL;
 
-      // These are things that are used to compute the conductivity.
-      EBAMRCellData m_scratch1;
-      EBAMRCellData m_scratch2;
-
-      EBAMRCellData m_cache; // Used to store the cell-centered conductivity
-
-      bool m_profile;
-      bool m_filter_cond;
-
-      Real m_relax_factor; // Factor for relaxation time
-      Real m_averageCFL;   // Average CFL number
+      /*!
+	@brief Previous time step.
+      */
       Real m_prevDt;
-      Real m_eb_tolerance; // Tolerance for EB particle removal.
 
-      which_algorithm m_algorithm;
-      which_dt        m_whichDt;
+      /*!
+	@brief Last 20 CFL numbers. Used for computing the average CFL.
+      */
+      std::deque<Real> m_cflNumbers;
 
-      Vector<ParticleContainer<PointParticle>*>
-        m_conductivity_particles; // Used to store the particle that gave the sigma^k
-      Vector<ParticleContainer<PointParticle>*>
-        m_rho_dagger_particles; // Used to store the particles that gave rho^dagger
+      /*!
+	@brief Which advancement algorithm to use.
+      */
+      WhichAlgorithm m_algorithm;
 
-      // Routine for setting up extra particle storage
-      void
-      setupRuntimeStorage();
+      /*!
+	@brief Storage for simplified particles that gave us sigma^k
+      */
+      Vector<ParticleContainer<PointParticle>*> m_conductivityParticles;
 
-      // Global routines
-      void
-      setOldPositions();
-      void
-      remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_which);
-      void
-      deposit_PointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_which);
-      void
-      clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_which);
+      /*!
+	@brief Storage for particles that gave rho^dagger
+      */
+      Vector<ParticleContainer<PointParticle>*> m_rhoDaggerParticles;
 
-      // Routines for semi-implicit Poisson solution
-      void
-      computeAllConductivities(const Vector<ParticleContainer<PointParticle>*>& a_particles);
-      void
-      compute_cell_conductivity(EBAMRCellData&                                   a_conductivity,
-                                const Vector<ParticleContainer<PointParticle>*>& a_particles);
-      void
-      compute_face_conductivity();
-      void
-      setupSemiImplicitPoisson(const Real a_dt);
+      /*!
+	@brief Parse advancement algorithm
+      */
+      virtual void
+      parseAlgorithm() noexcept;
 
-      // Routines for standard Poisson
-      void
-      setupStandardPoisson();
+      /*!
+	@brief Set up extra particle storage for all Ito particles. 
+      */
+      virtual void
+      setRuntimeParticleStorage() noexcept;
 
-      // Routines for semi-implicit regridding
-      void
-      copyConductivityParticles(Vector<ParticleContainer<PointParticle>*>& a_conductivity_particles);
-      void
-      copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger_particles);
+      /*!
+	@brief Discard extra patricle storge for all Ito particles
+      */
+      virtual void
+      resetRuntimeParticleStorage() noexcept;
+
+      /*!
+	@brief Set the starting positions for the ItoSolver particles
+      */
+      virtual void
+      setOldPositions() noexcept;
+
+      /*!
+	@brief Remap the input point particles
+	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
+	@param[in]    a_subset    Particle subset to remap.
+      */
+      virtual void
+      remapPointParticles(Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_subset) noexcept;
+
+      /*!
+	@brief Deposit the input point particles on the mesh
+	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
+	@param[in]    a_subset    Particle subset to remap. 
+	@note This deposits into the ItoSolver m_phi data. 
+      */     
+      virtual void
+      depositPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_subset) noexcept;
+
+      /*!
+	@brief Clear the input particle data holders
+	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
+	@param[in]    a_subset    Particle subset to remap. 
+      */
+      virtual void
+      clearPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_subset) noexcept;
+
+      /*!
+	@brief Compute all conductivities (cell, face, and EB) from the input point particles
+	@param[in] a_particles Particles to deposit. Particle weights must hold the mobility*weight
+	@note This deposits the input particle weights onto m_conductivityCell, m_conductivityFace etc. 
+      */
+      virtual void
+      computeConductivities(const Vector<ParticleContainer<PointParticle>*>& a_particles) noexcept;
+
+      /*!
+	@brief Compute the cell-centered conductivity
+	@param[out] a_conductivityCell Cell-centered conductivity
+	@param[in]  a_particles        Particles to deposit. Particle weights must hold the mobility*weight
+      */
+      virtual void
+      computeCellConductivity(EBAMRCellData&                                   a_conductivityCell,
+			      const Vector<ParticleContainer<PointParticle>*>& a_particles) noexcept;
+
+      /*!
+	@brief Compute the cell-centered conductivity
+	@note Interpolates m_conductivityCell to m_conductivityFace
+      */
+      virtual void
+      computeFaceConductivity() noexcept;
+
+      /*!
+	@brief Set up the semi-implicit Poisson solver
+      */
+      virtual void
+      setupSemiImplicitPoisson(const Real a_dt) noexcept;
+
+      /*!
+	@brief Copy particles from the ItoSolver into PointParticles whose weight are ItoParticle::m_weight * ItoParticle::m_mobility
+	@param[out] a_conductivityParticles Point-particles holding the mobility * weight
+      */
+      virtual void
+      copyConductivityParticles(Vector<ParticleContainer<PointParticle>*>& a_conductivityParticles) noexcept;
+
+      /*!
+	@brief Copy particles from the ItoSolver (if they are charged) into PointParticles whose weight are ItoParticle::m_weight.
+	@param[out] a_conductivityParticles Point-particles holding the mobility * weight     
+      */
+      virtual void
+      copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles) noexcept;
+      
       void
       computeRegridConductivity();
       void

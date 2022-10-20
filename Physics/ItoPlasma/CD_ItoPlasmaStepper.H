@@ -1043,7 +1043,7 @@ namespace Physics {
       /*!
 	@brief Surface charge solver. 
       */
-      RefCountedPtr<SurfaceODESolver<1>> m_sigma;
+      RefCountedPtr<SurfaceODESolver<1>> m_sigmaSolver;
 
       /*!
 	@brief Voltage curve on the electrodes used in the simulation.
@@ -1095,6 +1095,11 @@ namespace Physics {
 	is m_loadPerCell * numGridPoints + numParticles. 
       */
       Real m_loadPerCell;
+
+      /*!
+	@brief Accepted tolerance (relative to dx) for EB intersection
+      */
+      Real m_toleranceEB;
 
       /*!
 	@brief CFL-like time step for advection
@@ -1318,7 +1323,7 @@ namespace Physics {
 	@details Sets m_particlesPerCell from input script. 
       */
       virtual void
-      parseSuperparticles() noexcept;
+      parseSuperParticles() noexcept;
 
       /*!
 	@brief Parse dual or single realm calculations
@@ -1338,6 +1343,12 @@ namespace Physics {
       */
       virtual void
       parseTimeStepRestrictions() noexcept;
+
+      /*!
+	@brief Parse things related to the EB
+      */
+      virtual void
+      parseParametersEB() noexcept;
     };
   } // namespace ItoPlasma
 };  // namespace Physics

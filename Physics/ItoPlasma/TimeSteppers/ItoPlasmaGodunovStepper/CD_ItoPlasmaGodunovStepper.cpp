@@ -26,8 +26,7 @@ ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>
 {
   CH_TIME("ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper");
 
-  m_name       = "ItoPlasmaGodunovStepper";
-  m_averageCFL = 0.0;
+  m_name = "ItoPlasmaGodunovStepper";
 }
 
 ItoPlasmaGodunovStepper::~ItoPlasmaGodunovStepper()
@@ -48,23 +47,7 @@ ItoPlasmaGodunovStepper::allocate()
 
   ItoPlasmaStepper::allocate();
 
-  // Now allocate for the conductivity particles and rho^dagger particles
-  const int num_ItoSpecies = m_physics->getNumItoSpecies();
-
-  m_conductivity_particles.resize(num_ItoSpecies);
-  m_rho_dagger_particles.resize(num_ItoSpecies);
-
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const RefCountedPtr<ItoSolver>& solver = solver_it();
-
-    const int idx = solver_it.index();
-
-    m_conductivity_particles[idx] = new ParticleContainer<PointParticle>();
-    m_rho_dagger_particles[idx]   = new ParticleContainer<PointParticle>();
-
-    m_amr->allocate(*m_conductivity_particles[idx], m_particleRealm);
-    m_amr->allocate(*m_rho_dagger_particles[idx], m_particleRealm);
-  }
+  this->allocateInternals();
 }
 
 void
@@ -75,47 +58,9 @@ ItoPlasmaGodunovStepper::parseOptions()
     pout() << m_name + "::parseOptions" << endl;
   }
 
-  ParmParse   pp(m_name.c_str());
-  std::string str;
+  ItoPlasmaStepper::parseOptions();
 
-  pp.get("verbosity", m_verbosity);
-  pp.get("ppc", m_particlesPerCell);
-  pp.get("regrid_super", m_regridSuperparticles);
-  pp.get("algorithm", str);
-  pp.get("load_balance", m_loadBalance);
-  pp.get("load_index", m_loadBalanceIndex);
-  pp.get("min_dt", m_minDt);
-  pp.get("max_dt", m_maxDt);
-  pp.get("eb_tolerance", m_eb_tolerance);
-
-  // Get algorithm
-  if (str == "euler_maruyama") {
-    m_algorithm = which_algorithm::euler_maruyama;
-  }
-  else if (str == "trapezoidal") {
-    m_algorithm = which_algorithm::trapezoidal;
-  }
-  else {
-    MayDay::Abort("ItoPlasmaGodunovStepper::parseOptions - unknown algorithm requested");
-  }
-
-  // Dt limitation
-  pp.get("which_dt", str);
-  if (str == "advection") {
-    m_whichDt = which_dt::advection;
-  }
-  else if (str == "diffusion") {
-    m_whichDt = which_dt::diffusion;
-  }
-  else if (str == "AdvectionDiffusion") {
-    m_whichDt = which_dt::AdvectionDiffusion;
-  }
-  else {
-    MayDay::Abort("ItoPlasmaGodunovStepper::parseOptions - unknown 'which_dt' requested");
-  }
-
-  // Setup runtime storage (requirements change with algorithm)
-  this->setupRuntimeStorage();
+  this->parseAlgorithm();
 }
 
 void
@@ -126,73 +71,39 @@ ItoPlasmaGodunovStepper::parseRuntimeOptions()
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
-  ParmParse   pp(m_name.c_str());
-  std::string str;
+  ItoPlasmaStepper::parseRuntimeOptions();
 
-  pp.get("verbosity", m_verbosity);
-  pp.get("ppc", m_particlesPerCell);
-  pp.get("merge_interval", m_mergeInterval);
-  pp.get("relax_factor", m_relaxTimeFactor);
-  pp.get("regrid_super", m_regridSuperparticles);
-  pp.get("algorithm", str);
-  pp.get("load_balance", m_loadBalance);
-  pp.get("load_index", m_loadBalanceIndex);
-  pp.get("min_dt", m_minDt);
-  pp.get("max_dt", m_maxDt);
-  pp.get("eb_tolerance", m_eb_tolerance);
+  this->parseAlgorithm();
 
-  // Get algorithm
-  if (str == "euler_maruyama") {
-    m_algorithm = which_algorithm::euler_maruyama;
-  }
-  else if (str == "trapezoidal") {
-    m_algorithm = which_algorithm::trapezoidal;
-  }
-  else {
-    MayDay::Abort("ItoPlasmaGodunovStepper::parseOptions - unknown algorithm requested");
-  }
-
-  // Dt limitation
-  pp.get("which_dt", str);
-  if (str == "advection") {
-    m_whichDt = which_dt::advection;
-  }
-  else if (str == "diffusion") {
-    m_whichDt = which_dt::diffusion;
-  }
-  else if (str == "AdvectionDiffusion") {
-    m_whichDt = which_dt::AdvectionDiffusion;
-  }
-  else {
-    MayDay::Abort("ItoPlasmaGodunovStepper::parseOptions - unknown 'which_dt' requested");
-  }
-
-  // Box sorting for load balancing
-  pp.get("box_sorting", str);
-  if (str == "none") {
-    m_boxSort = BoxSorting::None;
-  }
-  else if (str == "std") {
-    m_boxSort = BoxSorting::Std;
-  }
-  else if (str == "shuffle") {
-    m_boxSort = BoxSorting::Shuffle;
-  }
-  else if (str == "morton") {
-    m_boxSort = BoxSorting::Morton;
-  }
-  else {
-    MayDay::Abort(
-      "ItoPlasmaGodunovStepper::parseOptions - unknown box sorting method requested for argument 'BoxSorting'");
-  }
-
-  // Setup runtime storage (requirements change with algorithm)
-  this->setupRuntimeStorage();
-
-  //
   m_ito->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
   m_rte->parseRuntimeOptions();
+  m_sigmaSolver->parseRuntimeOptions();
+}
+
+void
+ItoPlasmaGodunovStepper::parseAlgorithm() noexcept
+{
+  CH_TIME("ItoPlasmaGodunovStepper::parseAlgorithm");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseAlgorithm" << endl;
+  }
+
+  ParmParse   pp(m_name.c_str());
+  std::string str;
+
+  pp.get("algorithm", str);
+
+  // Get algorithm
+  if (str == "euler_maruyama") {
+    m_algorithm = WhichAlgorithm::EulerMaruyama;
+  }
+  else if (str == "trapezoidal") {
+    m_algorithm = WhichAlgorithm::Trapezoidal;
+  }
+  else {
+    MayDay::Abort("ItoPlasmaGodunovStepper::parseAlgorithm - unknown algorithm requested");
+  }
 }
 
 void
@@ -206,11 +117,23 @@ ItoPlasmaGodunovStepper::allocateInternals()
   // Call parent method first
   ItoPlasmaStepper::allocateInternals();
 
-  const int num_ItoSpecies = m_physics->getNumItoSpecies();
-  const int num_rtSpecies  = m_physics->getNumRtSpecies();
+  // Now allocate for the conductivity particles and rho^dagger particles
+  const int numItoSpecies = m_physics->getNumItoSpecies();
 
-  m_amr->allocate(m_scratch1, m_fluidRealm, m_plasmaPhase, 1);
-  m_amr->allocate(m_scratch2, m_fluidRealm, m_plasmaPhase, 1);
+  m_conductivityParticles.resize(numItoSpecies);
+  m_rhoDaggerParticles.resize(numItoSpecies);
+
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<ItoSolver>& solver = solverIt();
+
+    const int idx = solverIt.index();
+
+    m_conductivityParticles[idx] = new ParticleContainer<PointParticle>();
+    m_rhoDaggerParticles[idx]    = new ParticleContainer<PointParticle>();
+
+    m_amr->allocate(*m_conductivityParticles[idx], m_particleRealm);
+    m_amr->allocate(*m_rhoDaggerParticles[idx], m_particleRealm);
+  }
 }
 
 Real
@@ -221,14 +144,17 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
     pout() << m_name + "::advance" << endl;
   }
 
-  // Advance the particles.
+  // Setup runtime storage (requirements change with algorithm)
+  this->setRuntimeParticleStorage();
+
+  // Semi-implicitly advance the particles and the field.
   switch (m_algorithm) {
-  case which_algorithm::euler_maruyama: {
+  case WhichAlgorithm::EulerMaruyama: {
     this->advanceParticlesEulerMaruyama(a_dt);
 
     break;
   }
-  case which_algorithm::trapezoidal: {
+  case WhichAlgorithm::Trapezoidal: {
     this->advanceParticlesTrapezoidal(a_dt);
 
     break;
@@ -240,11 +166,14 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
   }
 
+  // Remove the run-time configurable particle storage.
+  this->resetRuntimeParticleStorage();
+
   // Compute current and relaxation time.
   this->computeCurrentDensity(m_currentDensity);
   const Real relaxTime = this->computeRelaxationTime(); // This is for the restricting the next step.
 
-  // Move Photons
+  // Do the radiative transfer advance.
   this->advancePhotons(a_dt);
 
   // If we are using the LEA, we must compute the Ohmic heating term. This must be done
@@ -253,15 +182,15 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
     this->computeEdotJSource(a_dt);
   }
 
-  // Sort the particles and Photons per cell so we can call reaction algorithms
+  // Sort the particles and photons per cell so we can call reaction algorithms
   m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
 
-  // Chemistry kernel.
+  // Run the Kinetic Monte Carlo reaction kernels.
   this->advanceReactionNetwork(a_dt);
 
-  // Make superparticles.
+  // Build superparticles.
   if ((m_timeStep + 1) % m_mergeInterval == 0 && m_mergeInterval > 0) {
     m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
   }
@@ -272,68 +201,17 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
 
   // Clear other data holders for now. BC comes later...
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    solver_it()->clear(ItoSolver::WhichContainer::EB);
-    solver_it()->clear(ItoSolver::WhichContainer::Domain);
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->clear(ItoSolver::WhichContainer::EB);
+    solverIt()->clear(ItoSolver::WhichContainer::Domain);
   }
 
-  // Deposit particles
+  // Deposit particles on the mesh.
   m_ito->depositParticles();
 
-  // Prepare next step
+  // Prepare for the next time step
   this->computeItoVelocities();
   this->computeItoDiffusion();
-
-  return a_dt;
-}
-
-Real
-ItoPlasmaGodunovStepper::computeDt()
-{
-  CH_TIME("ItoPlasmaGodunovStepper::computeDt");
-  if (m_verbosity > 5) {
-    pout() << "ItoPlasmaGodunovStepper::computeDt" << endl;
-  }
-
-  Real a_dt = std::numeric_limits<Real>::max();
-
-  if (m_whichDt == which_dt::advection) {
-    a_dt = m_advectionCFL * m_ito->computeAdvectiveDt();
-  }
-  else if (m_whichDt == which_dt::diffusion) {
-    a_dt = m_diffusionCFL * m_ito->computeDiffusiveDt();
-  }
-  else if (m_whichDt == which_dt::AdvectionDiffusion) {
-    a_dt = m_advectionDiffusionCFL * m_ito->computeDt();
-  }
-
-  // Physics-based restriction
-  const Real physicsDt = this->computePhysicsDt();
-  if (physicsDt < a_dt) {
-    a_dt       = physicsDt;
-    m_timeCode = TimeCode::Physics;
-  }
-
-  if (a_dt < m_minDt) {
-    a_dt       = m_minDt;
-    m_timeCode = TimeCode::Hardcap;
-  }
-
-  if (a_dt > m_maxDt) {
-    a_dt       = m_maxDt;
-    m_timeCode = TimeCode::Hardcap;
-  }
-
-#if 0 // Debug code
-  const Real dtCFL = m_ito->computeDt();
-  m_averageCFL += a_dt/dtCFL;
-  if(procID() == 0) std::cout << "dt = " << a_dt
-			      << "\t relax dt = " << relaxTime
-			      << "\t factor = " << a_dt/relaxTime
-			      << "\t CFL = " << a_dt/dtCFL
-			      << "\t avgCFL = " << m_averageCFL/(1+m_timeStep)
-			      << std::endl;
-#endif
 
   return a_dt;
 }
@@ -348,19 +226,11 @@ ItoPlasmaGodunovStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 
   ItoPlasmaStepper::preRegrid(a_lmin, a_oldFinestLevel);
 
-  // Copy conductivity to scratch storage
-  const int ncomp        = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  m_amr->allocate(m_cache, m_fluidRealm, m_plasmaPhase, ncomp);
-  for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++) {
-    m_conductivityCell[lvl]->localCopyTo(*m_cache[lvl]);
-  }
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const int idx = solver_it.index();
-
-    m_conductivity_particles[idx]->preRegrid(a_lmin);
-    m_rho_dagger_particles[idx]->preRegrid(a_lmin);
+    m_conductivityParticles[idx]->preRegrid(a_lmin);
+    m_rhoDaggerParticles[idx]->preRegrid(a_lmin);
   }
 }
 
@@ -376,16 +246,16 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   m_ito->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_rte->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-  m_sigma->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  m_sigmaSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   // Allocate internal memory for ItoPlasmaGodunovStepper now....
   this->allocateInternals();
 
   // We need to remap/regrid the stored particles as well.
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const int idx = solver_it.index();
-    m_amr->remapToNewGrids(*m_rho_dagger_particles[idx], a_lmin, a_newFinestLevel);
-    m_amr->remapToNewGrids(*m_conductivity_particles[idx], a_lmin, a_newFinestLevel);
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
+    m_amr->remapToNewGrids(*m_rhoDaggerParticles[idx], a_lmin, a_newFinestLevel);
+    m_amr->remapToNewGrids(*m_conductivityParticles[idx], a_lmin, a_newFinestLevel);
   }
 
   // Recompute the conductivity and space charge densities.
@@ -406,7 +276,7 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
     m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 
-  // Now let Ihe ito solver deposit its actual particles... In the above it deposit m_rho_dagger_particles.
+  // Now let Ihe ito solver deposit its actual particles... In the above it deposit m_rhoDaggerParticles.
   m_ito->depositParticles();
 
   // Recompute new velocities and diffusion coefficients
@@ -415,50 +285,60 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
 }
 
 void
-ItoPlasmaGodunovStepper::setupRuntimeStorage()
+ItoPlasmaGodunovStepper::setRuntimeParticleStorage() noexcept
 {
-  CH_TIME("ItoPlasmaGodunovStepper::setupRuntimeStorage");
+  CH_TIME("ItoPlasmaGodunovStepper::setRuntimeParticleStorage");
   if (m_verbosity > 5) {
-    pout() << m_name + "::setupRuntimeStorage" << endl;
+    pout() << m_name + "::setupRuntimeParticleStorage" << endl;
   }
 #if 0
   switch (m_algorithm) {
-  case which_algorithm::euler_maruyama:
+  case WhichAlgorithm::EulerMaruyama:
     ItoParticle::setNumRuntimeVectors(1);
     break;
-  case which_algorithm::trapezoidal:
+  case WhichAlgorithm::Trapezoidal:
     ItoParticle::setNumRuntimeVectors(2); // For V^k and the diffusion hop.
     break;
   default:
-    MayDay::Abort("ItoPlasmaGodunovStepper::setupRuntimeStorage - logic bust");
+    MayDay::Abort("ItoPlasmaGodunovStepper::setRuntimeParticleStorage - logic bust");
   }
 #else
   MayDay::Error(
-    "ItoPlasmaGodunovStepper::setupRuntimeStorage -- need to figure out how to add more fields to ItoParticle");
+    "ItoPlasmaGodunovStepper::setRuntimeParticleStorage -- need to figure out how to add more fields to ItoParticle");
 #endif
 }
 
 void
-ItoPlasmaGodunovStepper::setOldPositions()
+ItoPlasmaGodunovStepper::resetRuntimeParticleStorage() noexcept
 {
-  CH_TIME("ItoPlasmaGodunovStepper::setOldPositions()");
+  CH_TIME("ItoPlasmaGodunovStepper::resetRuntimeParticleStorage");
   if (m_verbosity > 5) {
-    pout() << m_name + "::setOldPositions()" << endl;
+    pout() << m_name + "::resetRuntimeParticleStorage" << endl;
+  }
+}
+
+void
+ItoPlasmaGodunovStepper::setOldPositions() noexcept
+{
+  CH_TIME("ItoPlasmaGodunovStepper::setOldPositions");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setOldPositions" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>& solver = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>& solver = solverIt();
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_particleRealm)[lvl];
       ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
         List<ItoParticle>& particleList = particles[dit()].listItems();
 
         for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-          ItoParticle& p  = particleList[lit];
+          ItoParticle& p = lit();
+
           p.oldPosition() = p.position();
         }
       }
@@ -467,264 +347,336 @@ ItoPlasmaGodunovStepper::setOldPositions()
 }
 
 void
-ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                               const SpeciesSubset                        a_SpeciesSubset)
+ItoPlasmaGodunovStepper::remapPointParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
+                                             const SpeciesSubset                        a_subset) noexcept
 {
-  CH_TIME("ItoPlasmaGodunovStepper::remapGodunovParticles");
+  CH_TIME("ItoPlasmaGodunovStepper::remapPointParticles");
   if (m_verbosity > 5) {
-    pout() << m_name + "::remapGodunovParticles" << endl;
+    pout() << m_name + "::remapPointParticles" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch (a_SpeciesSubset) {
-    case SpeciesSubset::All:
+    switch (a_subset) {
+    case SpeciesSubset::All: {
       a_particles[idx]->remap();
+
       break;
-    case SpeciesSubset::AllMobile:
-      if (mobile)
+    }
+    case SpeciesSubset::AllMobile: {
+      if (mobile) {
         a_particles[idx]->remap();
+      }
+
       break;
-    case SpeciesSubset::AllDiffusive:
-      if (diffusive)
+    }
+    case SpeciesSubset::AllDiffusive: {
+      if (diffusive) {
         a_particles[idx]->remap();
+      }
+
       break;
-    case SpeciesSubset::ChargedMobile:
-      if (charged && mobile)
+    }
+    case SpeciesSubset::ChargedMobile: {
+      if (charged && mobile) {
         a_particles[idx]->remap();
+      }
+
       break;
-    case SpeciesSubset::ChargedDiffusive:
-      if (charged && diffusive)
+    }
+    case SpeciesSubset::ChargedDiffusive: {
+      if (charged && diffusive) {
         a_particles[idx]->remap();
+      }
+
       break;
-    case SpeciesSubset::AllMobileOrDiffusive:
-      if (mobile || diffusive)
+    }
+    case SpeciesSubset::AllMobileOrDiffusive: {
+      if (mobile || diffusive) {
         a_particles[idx]->remap();
+      }
+
       break;
-    case SpeciesSubset::ChargedAndMobileOrDiffusive:
-      if (charged && (mobile || diffusive))
+    }
+    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
+      if (charged && (mobile || diffusive)) {
         a_particles[idx]->remap();
+      }
+
       break;
-    case SpeciesSubset::Stationary:
-      if (!mobile && !diffusive)
+    }
+    case SpeciesSubset::Stationary: {
+      if (!mobile && !diffusive) {
         a_particles[idx]->remap();
+      }
+
       break;
-    default:
-      MayDay::Abort("ItoPlasmaGodunovStepper::remapGodunovParticles - logic bust");
+    }
+    default: {
+      MayDay::Abort("ItoPlasmaGodunovStepper::remapPointParticles - logic bust");
+
+      break;
+    }
     }
   }
 }
 
 void
-ItoPlasmaGodunovStepper::deposit_PointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                                const SpeciesSubset                              a_SpeciesSubset)
+ItoPlasmaGodunovStepper::depositPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
+                                               const SpeciesSubset                              a_subset) noexcept
 {
-  CH_TIME("ItoPlasmaGodunovStepper::deposit_PointParticles");
+  CH_TIME("ItoPlasmaGodunovStepper::depositPointParticles");
   if (m_verbosity > 5) {
-    pout() << m_name + "::deposit_PointParticles" << endl;
+    pout() << m_name + "::depositPointParticles" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch (a_SpeciesSubset) {
-    case SpeciesSubset::All:
+    switch (a_subset) {
+    case SpeciesSubset::All: {
       solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+
       break;
-    case SpeciesSubset::AllMobile:
-      if (mobile)
+    }
+    case SpeciesSubset::AllMobile: {
+      if (mobile) {
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+      }
+
       break;
-    case SpeciesSubset::AllDiffusive:
-      if (diffusive)
+    }
+    case SpeciesSubset::AllDiffusive: {
+      if (diffusive) {
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+      }
+
       break;
-    case SpeciesSubset::ChargedMobile:
-      if (charged && mobile)
+    }
+    case SpeciesSubset::ChargedMobile: {
+      if (charged && mobile) {
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+      }
       break;
-    case SpeciesSubset::ChargedDiffusive:
-      if (charged && diffusive)
+    }
+    case SpeciesSubset::ChargedDiffusive: {
+      if (charged && diffusive) {
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+      }
+
       break;
-    case SpeciesSubset::AllMobileOrDiffusive:
-      if (mobile || diffusive)
+    }
+    case SpeciesSubset::AllMobileOrDiffusive: {
+      if (mobile || diffusive) {
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+      }
       break;
-    case SpeciesSubset::ChargedAndMobileOrDiffusive:
-      if (charged && (mobile || diffusive))
+    }
+    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
+      if (charged && (mobile || diffusive)) {
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+      }
+
       break;
-    case SpeciesSubset::Stationary:
-      if (!mobile && !diffusive)
+    }
+    case SpeciesSubset::Stationary: {
+      if (!mobile && !diffusive) {
         solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+      }
+
       break;
-    default:
-      MayDay::Abort("ItoPlasmaGodunovStepper::deposit_PointParticles - logic bust");
+    }
+    default: {
+      MayDay::Abort("ItoPlasmaGodunovStepper::depositPointParticles - logic bust");
+
+      break;
+    }
     }
   }
 }
 
 void
-ItoPlasmaGodunovStepper::clearGodunovParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
-                                               const SpeciesSubset                              a_SpeciesSubset)
+ItoPlasmaGodunovStepper::clearPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
+                                             const SpeciesSubset                              a_subset) noexcept
 {
-  CH_TIME("ItoPlasmaGodunovStepper::clearGodunovParticles");
+  CH_TIME("ItoPlasmaGodunovStepper::clearPointParticles");
   if (m_verbosity > 5) {
-    pout() << m_name + "::deposit_clearParticles" << endl;
+    pout() << m_name + "::clearPointParticles" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch (a_SpeciesSubset) {
-    case SpeciesSubset::All:
+    switch (a_subset) {
+    case SpeciesSubset::All: {
       a_particles[idx]->clearParticles();
+
       break;
-    case SpeciesSubset::AllMobile:
-      if (mobile)
+    }
+    case SpeciesSubset::AllMobile: {
+      if (mobile) {
         a_particles[idx]->clearParticles();
+      }
+
       break;
-    case SpeciesSubset::AllDiffusive:
-      if (diffusive)
+    }
+    case SpeciesSubset::AllDiffusive: {
+      if (diffusive) {
         a_particles[idx]->clearParticles();
+      }
+
       break;
-    case SpeciesSubset::ChargedMobile:
-      if (charged && mobile)
+    }
+    case SpeciesSubset::ChargedMobile: {
+      if (charged && mobile) {
         a_particles[idx]->clearParticles();
+      }
+
       break;
-    case SpeciesSubset::ChargedDiffusive:
-      if (charged && diffusive)
+    }
+    case SpeciesSubset::ChargedDiffusive: {
+      if (charged && diffusive) {
         a_particles[idx]->clearParticles();
+      }
+
       break;
-    case SpeciesSubset::AllMobileOrDiffusive:
-      if (mobile || diffusive)
+    }
+    case SpeciesSubset::AllMobileOrDiffusive: {
+      if (mobile || diffusive) {
         a_particles[idx]->clearParticles();
+      }
+
       break;
-    case SpeciesSubset::ChargedAndMobileOrDiffusive:
-      if (charged && (mobile || diffusive))
+    }
+    case SpeciesSubset::ChargedAndMobileOrDiffusive: {
+      if (charged && (mobile || diffusive)) {
         a_particles[idx]->clearParticles();
+      }
+
       break;
-    case SpeciesSubset::Stationary:
-      if (!mobile && !diffusive)
+    }
+    case SpeciesSubset::Stationary: {
+      if (!mobile && !diffusive) {
         a_particles[idx]->clearParticles();
+      }
+
       break;
-    default:
-      MayDay::Abort("ItoPlasmaGodunovStepper::clearGodunovParticles - logic bust");
+    }
+    default: {
+      MayDay::Abort("ItoPlasmaGodunovStepper::clearPointParticles - logic bust");
+
+      break;
+    }
     }
   }
 }
 
 void
-ItoPlasmaGodunovStepper::computeAllConductivities(const Vector<ParticleContainer<PointParticle>*>& a_particles)
+ItoPlasmaGodunovStepper::computeConductivities(const Vector<ParticleContainer<PointParticle>*>& a_particles) noexcept
 {
-  CH_TIME("ItoPlasmaGodunovStepper::computeAllConductivities");
+  CH_TIME("ItoPlasmaGodunovStepper::computeConductivities");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeAllConductivities" << endl;
+    pout() << m_name + "::computeConductivities" << endl;
   }
 
-  this->compute_cell_conductivity(m_conductivityCell, a_particles);
+  this->computeCellConductivity(m_conductivityCell, a_particles);
 
   // Now do the faces
-  this->compute_face_conductivity();
+  this->computeFaceConductivity();
 }
 
 void
-ItoPlasmaGodunovStepper::compute_cell_conductivity(EBAMRCellData&                                   a_conductivity,
-                                                   const Vector<ParticleContainer<PointParticle>*>& a_particles)
+ItoPlasmaGodunovStepper::computeCellConductivity(EBAMRCellData&                                   a_conductivityCell,
+                                                 const Vector<ParticleContainer<PointParticle>*>& a_particles) noexcept
 {
-  CH_TIME("ItoPlasmaGodunovStepper::compute_cell_conductivity(conductivity, PointParticle");
+  CH_TIME("ItoPlasmaGodunovStepper::computeCellConductivity(EBAMRCellData, PointParticle");
   if (m_verbosity > 5) {
-    pout() << m_name + "::compute_cell_conductivity(conductivity, PointParticle)" << endl;
+    pout() << m_name + "::computeCellConductivity(EBAMRCellData, PointParticle)" << endl;
   }
 
-  DataOps::setValue(a_conductivity, 0.0);
+  DataOps::setValue(a_conductivityCell, 0.0);
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
-    const int q   = species->getChargeNumber();
+    const int idx = solverIt.index();
+    const int Z   = species->getChargeNumber();
 
-    if (q != 0 && solver->isMobile()) {
+    if (Z != 0 && solver->isMobile()) {
+      // Deposit on the particle realm.
       DataOps::setValue(m_particleScratch1, 0.0);
-#if 1 // Original code
-      solver->depositParticles<PointParticle,
-                               &PointParticle::weight>(m_particleScratch1,
-                                                       *a_particles[idx]); // The particles should have "masses" = m*mu
-#else
-      const EBAMRCellData& mu  = solver->getMobilityFunction();
-      const EBAMRCellData& phi = solver->getPhi();
-      DataOps::copy(m_particleScratch1, mu);
-      DataOps::multiply(m_particleScratch1, phi);
-#endif
+      solver->depositParticles<PointParticle, &PointParticle::weight>(m_particleScratch1, *a_particles[idx]);
 
-      // Copy to fluid Realm and add to fluid stuff
+      // Copy to fluid realm and add to total conductivity.
       m_fluidScratch1.copy(m_particleScratch1);
-      DataOps::incr(a_conductivity, m_fluidScratch1, Abs(q));
+      DataOps::incr(a_conductivityCell, m_fluidScratch1, 1.0 * std::abs(Z));
     }
   }
 
-  DataOps::scale(a_conductivity, Units::Qe);
+  // Conductivity is mobility * weight * Q
+  DataOps::scale(a_conductivityCell, Units::Qe);
 
-  m_amr->conservativeAverage(a_conductivity, m_fluidRealm, m_plasmaPhase);
-  m_amr->interpGhostPwl(a_conductivity, m_fluidRealm, m_plasmaPhase);
+  // Coarsen, update ghost cells and interpolate to centroids
+  m_amr->conservativeAverage(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
+  m_amr->interpGhostMG(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
 
-  // See if this helps....
-  m_amr->interpToCentroids(a_conductivity, m_fluidRealm, m_plasmaPhase);
+  m_amr->interpToCentroids(a_conductivityCell, m_fluidRealm, m_plasmaPhase);
 }
 
 void
-ItoPlasmaGodunovStepper::compute_face_conductivity()
+ItoPlasmaGodunovStepper::computeFaceConductivity() noexcept
 {
-  CH_TIME("ItoPlasmaGodunovStepper::compute_face_conductivity");
+  CH_TIME("ItoPlasmaGodunovStepper::computeFaceConductivity");
   if (m_verbosity > 5) {
-    pout() << m_name + "::compute_face_conductivity" << endl;
+    pout() << m_name + "::computeFaceConductivity" << endl;
   }
 
   DataOps::setValue(m_conductivityFace, 0.0);
   DataOps::setValue(m_conductivityEB, 0.0);
 
-  // This code does averaging from cell to face.
-  DataOps::averageCellToFace(m_conductivityFace, m_conductivityCell, m_amr->getDomains());
+  // Average the cell-centered conductivity to faces. Note that this includes one "ghost face", which we need
+  // because the multigrid solver will interpolate face-centered conductivities to face centroids.
+  const Average  average  = Average::Arithmetic;
+  const int      tanGhost = 1;
+  const Interval interv(0, 0);
 
-  // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
-  // for EB extrapolation can be a bit nasty (e.g. Negative weights), we do the centroid instead and take that as an approximation.
-#if 0
-  const IrregAmrStencil<CentroidInterpolationStencil>& ebsten = m_amr->getCentroidInterpolationStencils(m_fluidRealm, m_plasmaPhase);
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    ebsten.apply(m_conductivityEB, m_conductivityCell, lvl);
-  }
-#else
+  DataOps::averageCellToFace(m_conductivityFace,
+                             m_conductivityCell,
+                             m_amr->getDomains(),
+                             tanGhost,
+                             interv,
+                             interv,
+                             average);
+
+  // Set the EB conductivity.
   DataOps::incr(m_conductivityEB, m_conductivityCell, 1.0);
-#endif
 }
 
 void
-ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt)
+ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::setupSemiImplicitPoisson");
   if (m_verbosity > 5) {
@@ -734,81 +686,65 @@ ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt)
   // Set coefficients as usual
   m_fieldSolver->setPermittivities();
 
-  // Get bco and increment with mobilities
-  MFAMRFluxData& bco     = m_fieldSolver->getPermittivityFace();
-  MFAMRIVData&   bco_irr = m_fieldSolver->getPermittivityEB();
+  // Get the permittivities
+  // Get the permittivities on the faces.
+  MFAMRCellData& permCell = m_fieldSolver->getPermittivityCell();
+  MFAMRFluxData& permFace = m_fieldSolver->getPermittivityFace();
+  MFAMRIVData&   permEB   = m_fieldSolver->getPermittivityEB();
 
-  EBAMRFluxData bco_gas;
-  EBAMRIVData   bco_irr_gas;
+  // Get handles to the gas-phase permittivities.
+  EBAMRFluxData permFaceGas = m_amr->alias(m_plasmaPhase, permFace);
+  EBAMRIVData   permEBGas   = m_amr->alias(m_plasmaPhase, permEB);
 
-  m_amr->allocatePointer(bco_gas);
-  m_amr->allocatePointer(bco_irr_gas);
+  // Increment the field solver permittivities by a_factor*sigma. After this, the "permittivities" are
+  // given by epsr + a_factor*sigma
+  DataOps::incr(permFaceGas, m_conductivityFace, a_dt / Units::eps0);
+  DataOps::incr(permEBGas, m_conductivityEB, a_dt / Units::eps0);
 
-  m_amr->alias(bco_gas, phase::gas, bco);
-  m_amr->alias(bco_irr_gas, phase::gas, bco_irr);
+  // Coarsen coefficients
+  m_amr->arithmeticAverage(permFaceGas, m_fluidRealm, phase::gas);
+  m_amr->conservativeAverage(permEBGas, m_fluidRealm, phase::gas);
 
-  DataOps::scale(m_conductivityFace, a_dt / Units::eps0);
-  DataOps::scale(m_conductivityEB, a_dt / Units::eps0);
-
-  DataOps::multiply(m_conductivityFace, bco_gas);
-  DataOps::multiply(m_conductivityEB, bco_irr_gas);
-
-  DataOps::incr(bco_gas, m_conductivityFace, 1.0);
-  DataOps::incr(bco_irr_gas, m_conductivityEB, 1.0);
-
-  m_amr->conservativeAverage(bco_gas, m_fluidRealm, phase::gas);
-  m_amr->conservativeAverage(bco_irr_gas, m_fluidRealm, phase::gas);
-
-  // Set up the solver
-  m_fieldSolver->setupSolver();
+  // Set up the solver with the "permittivities"
+  m_fieldSolver->setSolverPermittivities(permCell, permFace, permEB);
 }
 
 void
-ItoPlasmaGodunovStepper::setupStandardPoisson()
-{
-  CH_TIME("ItoPlasmaGodunovStepper::setupStandardPoisson");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setupStandardPoisson" << endl;
-  }
-
-  // Set coefficients as usual
-  m_fieldSolver->setPermittivities();
-  m_fieldSolver->setupSolver();
-}
-
-void
-ItoPlasmaGodunovStepper::copyConductivityParticles(Vector<ParticleContainer<PointParticle>*>& a_conductivity_particles)
+ItoPlasmaGodunovStepper::copyConductivityParticles(
+  Vector<ParticleContainer<PointParticle>*>& a_conductivityParticles) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::copyConductivityParticles");
   if (m_verbosity > 5) {
     pout() << m_name + "::copyConductivityParticles" << endl;
   }
 
-  this->clearGodunovParticles(a_conductivity_particles, SpeciesSubset::All);
+  this->clearPointParticles(a_conductivityParticles, SpeciesSubset::All);
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const RefCountedPtr<ItoSolver>&  solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<ItoSolver>&  solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
-    const int q   = species->getChargeNumber();
+    const int idx = solverIt.index();
+    const int Z   = species->getChargeNumber();
 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+    if(Z > 0 && solver->isMobile()) {
+      const ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const List<ItoParticle>& ito_parts =
-          solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
-        List<PointParticle>& gdnv_parts = (*a_conductivity_particles[idx])[lvl][dit()].listItems();
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+	const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
 
-        if (q != 0 && solver->isMobile()) {
-          for (ListIterator<ItoParticle> lit(ito_parts); lit.ok(); ++lit) {
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+	  const List<ItoParticle>& patchParticles = solverParticles[lvl][dit()].listItems();
+
+	  List<PointParticle>& pointParticles = (*a_conductivityParticles[idx])[lvl][dit()].listItems();
+
+          for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
             const ItoParticle& p        = lit();
             const RealVect&    pos      = p.position();
             const Real&        weight   = p.weight();
             const Real&        mobility = p.mobility();
 
-            gdnv_parts.add(PointParticle(pos, weight * mobility));
+            pointParticles.add(PointParticle(pos, weight * mobility));
           }
         }
       }
@@ -817,39 +753,41 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(Vector<ParticleContainer<Poin
 }
 
 void
-ItoPlasmaGodunovStepper::copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger_particles)
+ItoPlasmaGodunovStepper::copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles)
 {
   CH_TIME("ItoPlasmaGodunovStepper::copyRhoDaggerParticles");
   if (m_verbosity > 5) {
     pout() << m_name + "::copyRhoDaggerParticles" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    const RefCountedPtr<ItoSolver>&  solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<ItoSolver>&  solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
-    const int q   = species->getChargeNumber();
+    const int idx = solverIt.index();
+    const int Z   = species->getChargeNumber();
 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+    if (Z != 0) {
+      const ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);    
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        const List<ItoParticle>& ito_parts =
-          solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
-        List<PointParticle>& gdnv_parts = (*a_rho_dagger_particles[idx])[lvl][dit()].listItems();
+      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+	const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
 
-        gdnv_parts.clear();
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+	  const List<ItoParticle>& patchParticles = solverParticles[lvl][dit()].listItems();	
 
-        if (q != 0) {
-          for (ListIterator<ItoParticle> lit(ito_parts); lit.ok(); ++lit) {
-            const ItoParticle& p      = lit();
-            const RealVect&    pos    = p.position();
-            const Real&        weight = p.weight();
+	  List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][dit()].listItems();
 
-            gdnv_parts.add(PointParticle(pos, weight));
-          }
-        }
+	  pointParticles.clear();
+
+	  for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
+	    const ItoParticle& p      = lit();
+	    const RealVect&    pos    = p.position();
+	    const Real&        weight = p.weight();
+
+	    pointParticles.add(PointParticle(pos, weight));
+	  }
+	}
       }
     }
   }
@@ -863,7 +801,7 @@ ItoPlasmaGodunovStepper::computeRegridConductivity()
     pout() << m_name + "::computeRegridConductivity" << endl;
   }
 
-  this->computeAllConductivities(m_conductivity_particles);
+  this->computeConductivities(m_conductivityParticles);
 }
 
 void
@@ -874,7 +812,7 @@ ItoPlasmaGodunovStepper::computeRegridRho()
     pout() << m_name + "::computeRegridRho" << endl;
   }
 
-  this->deposit_PointParticles(m_rho_dagger_particles, SpeciesSubset::All);
+  this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::All);
 }
 
 void
@@ -890,22 +828,22 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
   // 1. Store X^k positions.
   this->setOldPositions();
 
-  // 2. Diffuse the particles. This copies onto m_rho_dagger_particles and stores the hop on the full particles.
-  this->diffuseParticlesEulerMaruyama(m_rho_dagger_particles, a_dt);
-  this->remapGodunovParticles(m_rho_dagger_particles, SpeciesSubset::AllDiffusive);
+  // 2. Diffuse the particles. This copies onto m_rhoDaggerParticles and stores the hop on the full particles.
+  this->diffuseParticlesEulerMaruyama(m_rhoDaggerParticles, a_dt);
+  this->remapPointParticles(m_rhoDaggerParticles, SpeciesSubset::AllDiffusive);
 
   // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch.
-  this->copyConductivityParticles(m_conductivity_particles); // Sets particle "weights" = w*mu
+  this->copyConductivityParticles(m_conductivityParticles); // Sets particle "weights" = w*mu
 
   // Compute conductivity on mesh
-  this->computeAllConductivities(m_conductivity_particles); // Deposits q_e*Z*w*mu on the mesh
+  this->computeConductivities(m_conductivityParticles); // Deposits q_e*Z*w*mu on the mesh
 
   // Setup Poisson solver
   this->setupSemiImplicitPoisson(a_dt); // Multigrid setup
 
   // Compute space charge density
   // Diffusive should be enough because state is not changed for others.
-  this->deposit_PointParticles(m_rho_dagger_particles, SpeciesSubset::AllDiffusive);
+  this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::AllDiffusive);
 
   this->solvePoisson(); // Solve the stinking equation.
 
@@ -924,7 +862,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   const bool delete_eb_particles = true;
   this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, delete_eb_particles);
-  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_eb_tolerance);
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
   this->depositParticles(SpeciesSubset::AllMobileOrDiffusive);
@@ -939,13 +877,13 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
     pout() << m_name + "::diffuseParticlesEulerMaruyama" << endl;
   }
 
-  this->clearGodunovParticles(a_rho_dagger, SpeciesSubset::All);
+  this->clearPointParticles(a_rho_dagger, SpeciesSubset::All);
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
@@ -959,8 +897,8 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
 
-        List<ItoParticle>&   ItoParticles = particles[dit()].listItems();
-        List<PointParticle>& gdnv_parts   = (*a_rho_dagger[idx])[lvl][dit()].listItems();
+        List<ItoParticle>&   ItoParticles   = particles[dit()].listItems();
+        List<PointParticle>& pointParticles = (*a_rho_dagger[idx])[lvl][dit()].listItems();
 
         if (diffusive) {
           for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit) {
@@ -974,7 +912,7 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
 
 
             // Add simpler particle
-            gdnv_parts.add(PointParticle(pos + hop, weight));
+            pointParticles.add(PointParticle(pos + hop, weight));
 #else
             MayDay::Error("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruayma -- runtime stuff");
 #endif
@@ -990,7 +928,7 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
             hop                  = RealVect::Zero;
 
             // Add simpler particle
-            gdnv_parts.add(PointParticle(pos, weight));
+            pointParticles.add(PointParticle(pos, weight));
 #else
             MayDay::Error("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruayma -- runtime stuff");
 #endif
@@ -1009,8 +947,8 @@ ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt)
     pout() << m_name + "::stepEulerMaruyama" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>& solver = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>& solver = solverIt();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
@@ -1058,14 +996,14 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
   this->setOldPositions();
 
   // ====== PREDICTOR BEGIN ======
-  this->preTrapezoidalPredictor(m_rho_dagger_particles, a_dt);
-  this->remapGodunovParticles(m_rho_dagger_particles,
-                              SpeciesSubset::
-                                AllDiffusive); // Particles that were copied but not moved are in the right box.
-  this->deposit_PointParticles(m_rho_dagger_particles, SpeciesSubset::All); // All copies need to deposit.
+  this->preTrapezoidalPredictor(m_rhoDaggerParticles, a_dt);
+  this->remapPointParticles(m_rhoDaggerParticles,
+                            SpeciesSubset::
+                              AllDiffusive); // Particles that were copied but not moved are in the right box.
+  this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::All); // All copies need to deposit.
 
-  this->copyConductivityParticles(m_conductivity_particles);
-  this->computeAllConductivities(m_conductivity_particles);
+  this->copyConductivityParticles(m_conductivityParticles);
+  this->computeConductivities(m_conductivityParticles);
   this->setupSemiImplicitPoisson(a_dt);
   this->solvePoisson();
 
@@ -1076,16 +1014,16 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
   // ====== PREDICTOR END ======
 
   // ====== CORRECTOR BEGIN =====
-  this->preTrapezoidalCorrector(m_rho_dagger_particles,
+  this->preTrapezoidalCorrector(m_rhoDaggerParticles,
                                 a_dt); // Mobile or diffusive moves to X^dagger = X^k + 0.5*dt*V^k + hop
-  this->remapGodunovParticles(m_rho_dagger_particles,
-                              SpeciesSubset::
-                                AllMobileOrDiffusive); // Only need to remap particles that were mobile or diffusive
-  this->deposit_PointParticles(m_rho_dagger_particles,
-                               SpeciesSubset::All); // Everything needs to deposit...
+  this->remapPointParticles(m_rhoDaggerParticles,
+                            SpeciesSubset::
+                              AllMobileOrDiffusive); // Only need to remap particles that were mobile or diffusive
+  this->depositPointParticles(m_rhoDaggerParticles,
+                              SpeciesSubset::All); // Everything needs to deposit...
 
-  this->copyConductivityParticles(m_conductivity_particles);
-  this->computeAllConductivities(m_conductivity_particles);
+  this->copyConductivityParticles(m_conductivityParticles);
+  this->computeConductivities(m_conductivityParticles);
   this->setupSemiImplicitPoisson(0.5 * a_dt);
   this->solvePoisson();
 
@@ -1097,7 +1035,7 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
 
   // Do particle-boundary intersection.
   this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, true);
-  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_eb_tolerance);
+  this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
 
   // Finally, deposit particles.
   this->depositParticles(SpeciesSubset::AllMobileOrDiffusive);
@@ -1112,11 +1050,11 @@ ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<PointP
     pout() << m_name + "::preTrapezoidalPredictor" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
@@ -1130,10 +1068,10 @@ ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<PointP
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
 
-        List<ItoParticle>&   ItoParticles = particles[dit()].listItems();
-        List<PointParticle>& gdnv_parts   = (*a_rho_dagger[idx])[lvl][dit()].listItems();
+        List<ItoParticle>&   ItoParticles   = particles[dit()].listItems();
+        List<PointParticle>& pointParticles = (*a_rho_dagger[idx])[lvl][dit()].listItems();
 
-        gdnv_parts.clear();
+        pointParticles.clear();
 
         // Store the diffusion hop, and add the godunov particles
         for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit) {
@@ -1149,7 +1087,7 @@ ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<PointP
 	  p.runtimeVector(1) = f * p.velocity();
 
           // Add simpler particle
-          gdnv_parts.add(PointParticle(Xk + g * hop, weight));
+          pointParticles.add(PointParticle(Xk + g * hop, weight));
 #else
           MayDay::Error("ItoPlasmaGodunovStepper::preTrapezoidalPredictor -- runtime stuff");
 #endif
@@ -1167,8 +1105,8 @@ ItoPlasmaGodunovStepper::trapezoidalPredictor(const Real a_dt)
     pout() << m_name + "::trapezoidalPredictor" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>& solver = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>& solver = solverIt();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
@@ -1214,11 +1152,11 @@ ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<PointP
     pout() << m_name + "::preTrapezoidalCorrector" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>&        solver  = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>&        solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
-    const int idx = solver_it.index();
+    const int idx = solverIt.index();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
@@ -1232,10 +1170,10 @@ ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<PointP
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
 
-        List<ItoParticle>&   ItoParticles = particles[dit()].listItems();
-        List<PointParticle>& gdnv_parts   = (*a_rho_dagger[idx])[lvl][dit()].listItems();
+        List<ItoParticle>&   ItoParticles   = particles[dit()].listItems();
+        List<PointParticle>& pointParticles = (*a_rho_dagger[idx])[lvl][dit()].listItems();
 
-        gdnv_parts.clear();
+        pointParticles.clear();
 
         // Store the diffusion hop, and add the godunov particles
         for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit) {
@@ -1249,7 +1187,7 @@ ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<PointP
 
           // Move particle.
           const RealVect pos = Xk + 0.5 * a_dt * f * Vk + g * hop;
-          gdnv_parts.add(PointParticle(pos, weight));
+          pointParticles.add(PointParticle(pos, weight));
 #else
           MayDay::Error("ItoPlasmaGodunovStepper::trapezoidalPredictor -- preTrapezoidalCorrector");
 #endif
@@ -1267,8 +1205,8 @@ ItoPlasmaGodunovStepper::trapezoidalCorrector(const Real a_dt)
     pout() << m_name + "::trapezoidalCorrector" << endl;
   }
 
-  for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<ItoSolver>& solver = solver_it();
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    RefCountedPtr<ItoSolver>& solver = solverIt();
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
