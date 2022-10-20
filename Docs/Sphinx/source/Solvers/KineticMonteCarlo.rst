@@ -74,14 +74,14 @@ For the SSA we compute the time until the next reaction by
 
    T = \frac{1}{\sum_{r\in\vec{R}} a_r}\ln\left(\frac{1}{u_1}\right)
 
-where :math:`u_1` is a uniformly distributed random variable between :math:`0` and :math:`1`.
+where :math:`A = \sum_{r\in\vec{R}} a_r` and :math:`u_1` is a uniformly distributed random variable between :math:`0` and :math:`1`.
 The type of reaction that fires is deterimined from
 
 .. math::
 
-   r_c = \textrm{smallest integer satisfying } \sum_{r^\prime = 1}^{r_c} a_{r^\prime} > u_2A
+   r_c = \textrm{smallest integer satisfying } \sum_{r^\prime = 1}^{r_c} a_{r^\prime} > u_2A,
 
-where :math:`A = \sum_{r\in\vec{R}} a_r` and u_2 is another uniformly distributed random variable between :math:`0` and :math:`1`.
+where and :math:`u_2` is another uniformly distributed random variable between :math:`0` and :math:`1`.
 The state is then advanced as
 
 .. math::

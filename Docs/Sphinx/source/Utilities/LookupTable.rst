@@ -1,7 +1,10 @@
 .. _Chap:LookupTable1D:
 
 Lookup tables
-=============
+*************
+
+LookupTable1D
+-------------
 
 ``LookupTable1D`` is a class for looking up and interpolation data stored in a row-column format.
 It is used in order to easily retrieve input data that can be stored in table formats.
