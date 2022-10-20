@@ -48,6 +48,15 @@ public:
   inline virtual ~GenericParticle();
 
   /*!
+    @brief Set up particle run-time storage
+    @param[in] a_numReal     Number of extra Reals to allocate
+    @param[in] a_numRealVect Number of extra RealVects to allocate
+    @note Default is zero, but if set to anything other than that, the user MUST ensure that all particles have the same number of run-time components. 
+  */
+  inline void
+  setRuntimeStorage(const unsigned int a_numReal, const unsigned int a_numRealVect) noexcept;  
+
+  /*!
     @brief Get the particle position. 
     @return m_position
   */
@@ -63,9 +72,9 @@ public:
 
   /*!
     @brief Get one of the scalars. 
-    @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
+    @details Template parameter is the position in the m_compileTimeScalars array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
-    @return m_scalars[K]
+    @return m_compileTimeScalars[K]
   */
   template <size_t K>
   inline Real&
@@ -73,9 +82,9 @@ public:
 
   /*!
     @brief Get one of the scalars. 
-    @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
+    @details Template parameter is the position in the m_compileTimeScalars array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
-    @return m_scalars[K]
+    @return m_compileTimeScalars[K]
   */
   template <size_t K>
   inline const Real&
@@ -83,9 +92,9 @@ public:
 
   /*!
     @brief Get one of the RealVects.
-    @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
+    @details Template parameter is the position in the m_compileTimeVectors array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
-    @return m_vectors[K]
+    @return m_compileTimeVectors[K]
   */
   template <size_t K>
   inline RealVect&
@@ -93,9 +102,9 @@ public:
 
   /*!
     @brief Get one of the RealVects.
-    @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
+    @details Template parameter is the position in the m_compileTimeVectors array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 
-    @return m_vectors[K]
+    @return m_compileTimeVectors[K]
   */
   template <size_t K>
   inline const RealVect&
@@ -147,12 +156,22 @@ protected:
   /*!
     @brief Scalar storage array
   */
-  std::array<Real, M> m_scalars;
+  std::array<Real, M> m_compileTimeScalars;
 
   /*!
     @brief vector storage array
   */
-  std::array<RealVect, N> m_vectors;
+  std::array<RealVect, N> m_compileTimeVectors;
+
+  /*!
+    @brief Run-time configurable Real storage
+  */
+  std::vector<Real> m_runTimeScalars;
+
+  /*!
+    @brief Run-time configurable RealVect storage
+  */
+  std::vector<RealVect> m_runTimeVectors;  
 };
 
 /*!
