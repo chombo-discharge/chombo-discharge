@@ -753,7 +753,7 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
 }
 
 void
-ItoPlasmaGodunovStepper::copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles)
+ItoPlasmaGodunovStepper::copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::copyRhoDaggerParticles");
   if (m_verbosity > 5) {
@@ -794,7 +794,7 @@ ItoPlasmaGodunovStepper::copyRhoDaggerParticles(Vector<ParticleContainer<PointPa
 }
 
 void
-ItoPlasmaGodunovStepper::computeRegridConductivity()
+ItoPlasmaGodunovStepper::computeRegridConductivity() noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::computeRegridConductivity");
   if (m_verbosity > 5) {
@@ -805,7 +805,7 @@ ItoPlasmaGodunovStepper::computeRegridConductivity()
 }
 
 void
-ItoPlasmaGodunovStepper::computeRegridRho()
+ItoPlasmaGodunovStepper::computeRegridRho() noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::computeRegridRho");
   if (m_verbosity > 5) {

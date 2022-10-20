@@ -225,11 +225,19 @@ namespace Physics {
       */
       virtual void
       copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles) noexcept;
-      
-      void
-      computeRegridConductivity();
-      void
-      computeRegridRho();
+
+      /*!
+	@brief Compute the conductivity anew during the regrid step.
+	@note Deposits m_conductivityParticles into m_conductivityCell, etc. 
+      */
+      virtual void
+      computeRegridConductivity() noexcept;
+
+      /*!
+	@brief Compute the "rho dagger" space charge anew during the regrid step. 
+      */      
+      virtual void
+      computeRegridRho() noexcept;
 
       // Specific routines for Euler-Maruyama
       void
