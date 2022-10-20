@@ -85,8 +85,8 @@ template <size_t M, size_t N>
 inline void
 TracerParticle<M, N>::linearOut(void* buf) const
 {
-  // clang-format off  
-  Real* buffer = (Real*)buf;
+  // clang-format off
+  Real* buffer = (Real*) buf;
 
   // Linearize m_position onto buffer.
   D_TERM(*buffer++ = this->m_position[0];,
@@ -102,9 +102,7 @@ TracerParticle<M, N>::linearOut(void* buf) const
   for (size_t i = 0; i < N; i++) {
     const RealVect& v = this->m_compileTimeVectors[i];
 
-    D_TERM(*buffer++ = v[0];,
-	   *buffer++ = v[1];,
-	   *buffer++ = v[2];);
+    D_TERM(*buffer++ = v[0];, *buffer++ = v[1];, *buffer++ = v[2];);
   }
 
   // Linearize m_velocity onto buffer
@@ -115,7 +113,7 @@ TracerParticle<M, N>::linearOut(void* buf) const
   // // Linearize weight onto buffer
   *buffer = m_weight;
 
-  // clang-format on  
+  // clang-format on
 }
 
 template <size_t M, size_t N>

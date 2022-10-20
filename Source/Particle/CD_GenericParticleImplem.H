@@ -35,9 +35,9 @@ inline GenericParticle<M, N>::GenericParticle()
 template <size_t M, size_t N>
 inline GenericParticle<M, N>::GenericParticle(const GenericParticle<M, N>& a_other)
 {
-  this->m_position = a_other.m_position;
-  this->m_compileTimeScalars  = a_other.m_compileTimeScalars;
-  this->m_compileTimeVectors  = a_other.m_compileTimeVectors;
+  this->m_position           = a_other.m_position;
+  this->m_compileTimeScalars = a_other.m_compileTimeScalars;
+  this->m_compileTimeVectors = a_other.m_compileTimeVectors;
 
   this->m_runTimeScalars = a_other.m_runTimeScalars;
   this->m_runTimeVectors = a_other.m_runTimeVectors;
@@ -102,10 +102,53 @@ GenericParticle<M, N>::vect() const
 }
 
 template <size_t M, size_t N>
+inline Real&
+GenericParticle<M, N>::runtimeReal(const size_t index) noexcept
+{
+  CH_assert(m_runTimeScalars.size() > index);
+
+  return m_runTimeScalars[index];
+}
+
+template <size_t M, size_t N>
+inline const Real&
+GenericParticle<M, N>::runtimeReal(const size_t index) const noexcept
+{
+  CH_assert(m_runTimeScalars.size() > index);
+
+  return m_runTimeScalars[index];
+}
+
+template <size_t M, size_t N>
+inline RealVect&
+GenericParticle<M, N>::runtimeVect(const size_t index) noexcept
+{
+  CH_assert(m_runTimeVectors.size() > index);
+
+  return m_runTimeVectors[index];
+}
+
+template <size_t M, size_t N>
+inline const RealVect&
+GenericParticle<M, N>::runtimeVect(const size_t index) const noexcept
+{
+  CH_assert(m_runTimeVectors.size() > index);
+
+  return m_runTimeVectors[index];
+}
+
+template <size_t M, size_t N>
 inline bool
 GenericParticle<M, N>::operator==(const GenericParticle<M, N>& a_p) const
 {
-  return (this->m_position == a_p.m_position && this->m_compileTimeScalars == a_p.m_compileTimeScalars && this->m_compileTimeVectors == a_p.m_compileTimeVectors);
+  // clang-format off
+  return (this->m_position           == a_p.m_position           &&
+	  this->m_compileTimeScalars == a_p.m_compileTimeScalars &&
+	  this->m_compileTimeVectors == a_p.m_compileTimeVectors &&
+	  this->m_runTimeScalars     == a_p.m_runTimeScalars     &&
+	  this->m_runTimeVectors     == a_p.m_runTimeVectors);
+
+  // clang-format on
 }
 
 template <size_t M, size_t N>
@@ -120,7 +163,7 @@ inline int
 GenericParticle<M, N>::size() const
 {
   // Compile size is the position plus M Reals and N RealVects
-  const int compileSize =  SpaceDim * sizeof(Real) + M * sizeof(Real) + N * SpaceDim * sizeof(Real);
+  const int compileSize = SpaceDim * sizeof(Real) + M * sizeof(Real) + N * SpaceDim * sizeof(Real);
 
   // Runtime size if number of runtime reals and realvects:
   const int runtimeSize = m_runTimeScalars.size() * sizeof(Real) + m_runTimeVectors.size() * SpaceDim * sizeof(Real);
@@ -132,9 +175,9 @@ template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::linearOut(void* buf) const
 {
-  Real* buffer = (Real*)buf;
-
   // clang-format off
+  
+  Real* buffer = (Real*) buf;
 
   // Linearize m_position onto buffer.
   D_TERM(*buffer++ = m_position[0];,
@@ -168,6 +211,7 @@ GenericParticle<M, N>::linearOut(void* buf) const
 	   *buffer++ = v[1];,
 	   *buffer++ = v[2];);
   }
+
   // clang-format on
 }
 
@@ -175,9 +219,10 @@ template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::linearIn(void* buf)
 {
-  Real* buffer = (Real*)buf;
+  // clang-format off
+  
+  Real* buffer = (Real*) buf;
 
-  // clang-format off  
   D_TERM(m_position[0] = *buffer++;,
 	 m_position[1] = *buffer++;,
 	 m_position[2] = *buffer++);
@@ -209,6 +254,7 @@ GenericParticle<M, N>::linearIn(void* buf)
 	   v[1] = *buffer++;,
 	   v[2] = *buffer++;);    
   }
+
   // clang-format on
 }
 

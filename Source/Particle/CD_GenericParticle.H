@@ -54,7 +54,7 @@ public:
     @note Default is zero, but if set to anything other than that, the user MUST ensure that all particles have the same number of run-time components. 
   */
   inline void
-  setRuntimeStorage(const unsigned int a_numReal, const unsigned int a_numRealVect) noexcept;  
+  setRuntimeStorage(const unsigned int a_numReal, const unsigned int a_numRealVect) noexcept;
 
   /*!
     @brief Get the particle position. 
@@ -109,6 +109,34 @@ public:
   template <size_t K>
   inline const RealVect&
   vect() const;
+
+  /*!
+    @brief Get one of the run-time configurable reals
+    @param[in] index Variable to fetch
+  */
+  inline Real&
+  runtimeReal(const size_t index) noexcept;
+
+  /*!
+    @brief Get one of the run-time configurable reals
+    @param[in] index Variable to fetch
+  */
+  inline const Real&
+  runtimeReal(const size_t index) const noexcept;
+
+  /*!
+    @brief Get one of the run-time configurable RealVects
+    @param[in] index Variable to fetch
+  */
+  inline RealVect&
+  runtimeVect(const size_t index) noexcept;
+
+  /*!
+    @brief Get one of the run-time configurable RealVects
+    @param[in] index Variable to fetch
+  */
+  inline const RealVect&
+  runtimeVect(const size_t index) const noexcept;
 
   /*!
     @brief Comparison operator with other particle. 
@@ -171,7 +199,7 @@ protected:
   /*!
     @brief Run-time configurable RealVect storage
   */
-  std::vector<RealVect> m_runTimeVectors;  
+  std::vector<RealVect> m_runTimeVectors;
 };
 
 /*!
