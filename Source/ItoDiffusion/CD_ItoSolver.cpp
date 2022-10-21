@@ -97,6 +97,7 @@ ItoSolver::parseOptions()
     pout() << m_name + "::parseOptions" << endl;
   }
 
+  this->parseVerbosity();
   this->parseRNG();
   this->parseTruncation();
   this->parsePlotVariables();
@@ -115,6 +116,7 @@ ItoSolver::parseRuntimeOptions()
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
+  this->parseVerbosity();
   this->parsePlotVariables();
   this->parseTruncation();
   this->parseDeposition();
@@ -122,6 +124,19 @@ ItoSolver::parseRuntimeOptions()
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
+}
+
+void
+ItoSolver::parseVerbosity()
+{
+  CH_TIME("ItoSolver::parseVerbosity");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::parseVerbosity" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("verbosity", m_verbosity);
 }
 
 void
@@ -162,15 +177,16 @@ ItoSolver::parsePlotVariables()
     pout() << m_name + "::parsePlotVariables" << endl;
   }
 
-  m_plotPhi             = false;
-  m_plotVelocity        = false;
-  m_plotDiffCo          = false;
-  m_plotParticles       = false;
-  m_plotParticlesEB     = false;
-  m_plotParticlesDomain = false;
-  m_plotParticlesSource = false;
-  m_plotEnergyDensity   = false;
-  m_plotAverageEnergy   = false;
+  m_plotPhi              = false;
+  m_plotVelocity         = false;
+  m_plotDiffCo           = false;
+  m_plotParticles        = false;
+  m_plotParticlesEB      = false;
+  m_plotParticlesDomain  = false;
+  m_plotParticlesSource  = false;
+  m_plotParticlesCovered = false;
+  m_plotEnergyDensity    = false;
+  m_plotAverageEnergy    = false;
 
   ParmParse pp(m_className.c_str());
 
@@ -198,6 +214,9 @@ ItoSolver::parsePlotVariables()
       m_plotParticlesDomain = true;
     }
     else if (str[i] == "src_part") {
+      m_plotParticlesSource = true;
+    }
+    else if (str[i] == "covered_part") {
       m_plotParticlesSource = true;
     }
     else if (str[i] == "energy_density") {

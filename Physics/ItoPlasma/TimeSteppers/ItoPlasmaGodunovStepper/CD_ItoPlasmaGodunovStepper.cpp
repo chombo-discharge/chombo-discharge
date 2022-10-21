@@ -153,7 +153,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
 
   // ====== BEGIN TRANSPORT STEP ======
   timer.startEvent("Particle/field advancement");
-  
+
   // Setup runtime storage (requirements change with algorithm)
   this->setRuntimeParticleStorage();
 

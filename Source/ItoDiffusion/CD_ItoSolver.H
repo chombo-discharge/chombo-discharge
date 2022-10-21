@@ -802,20 +802,20 @@ public:
   /*!
     @brief Remap the bulk particle container.
   */
-  void
+  virtual void
   remap();
 
   /*!
     @brief Remap all particles in the input container
     @param[in] a_container Particle container
   */
-  void
+  virtual void
   remap(const WhichContainer a_container);
 
   /*!
     @brief Remap all particle containers
   */
-  void
+  virtual void
   remapAll();
 
   /*!
@@ -840,7 +840,7 @@ public:
     If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
   */
-  Real
+  virtual Real
   computeDt() const;
 
   /*!
@@ -852,7 +852,7 @@ public:
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
     @param[in] a_lvl Grid level
   */
-  Real
+  virtual Real
   computeDt(const int a_lvl) const;
 
   /*!
@@ -865,7 +865,7 @@ public:
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
   */
-  Real
+  virtual Real
   computeDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
@@ -879,7 +879,7 @@ public:
     requires a solution to a quadratic equation. Fortunately, this is easy to solve for. 
     @param[in] a_maxCellsToMove
   */
-  Real
+  virtual Real
   computeHopDt(const Real a_maxCellsToMove) const;
 
   /*!
@@ -894,7 +894,7 @@ public:
     @param[in] a_maxCellsToMove Maximum number of cells to move with a standard Ito kernel dX = v*dt + sqrt(2*D*dt)*N
     @param[in] a_lvl            Grid level
   */
-  Real
+  virtual Real
   computeHopDt(const Real a_maxCellsToMove, const int a_lvl) const;
 
   /*!
@@ -910,20 +910,20 @@ public:
     @param[in] a_lvl            Grid level
     @param[in] a_dit            Grid index
   */
-  Real
+  virtual Real
   computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
     @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle. 
   */
-  Real
+  virtual Real
   computeAdvectiveDt() const;
 
   /*!
     @brief Compute the drift dt. This computes the minimum dt = dx/vMax on the input level. 
     @param[in] a_lvl Grid level
   */
-  Real
+  virtual Real
   computeAdvectiveDt(const int a_lvl) const;
 
   /*!
@@ -931,20 +931,20 @@ public:
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
   */
-  Real
+  virtual Real
   computeAdvectiveDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
     @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles
   */
-  Real
+  virtual Real
   computeDiffusiveDt() const;
 
   /*!
     @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input level
     @param[in] a_lvl Grid level
   */
-  Real
+  virtual Real
   computeDiffusiveDt(const int a_lvl) const;
 
   /*!
@@ -952,7 +952,7 @@ public:
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
   */
-  Real
+  virtual Real
   computeDiffusiveDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
@@ -1262,6 +1262,12 @@ protected:
   */
   void
   parseBisectStep();
+
+  /*!
+    @brief Parse class verbosity
+  */
+  void
+  parseVerbosity();
 
   /*!
     @brief Parse plot variables

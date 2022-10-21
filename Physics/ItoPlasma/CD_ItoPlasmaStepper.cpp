@@ -294,7 +294,7 @@ ItoPlasmaStepper::setupSolvers()
   }
 
   // Parse class options
-  this->parseOptions();    
+  this->parseOptions();
 
   // Set up solvers
   this->setupIto();
@@ -329,7 +329,6 @@ ItoPlasmaStepper::setupPoisson()
     pout() << m_name + "::setupPoisson" << endl;
   }
 
-  m_fieldSolver->setVerbosity(m_verbosity);
   m_fieldSolver->parseOptions();
   m_fieldSolver->setAmr(m_amr);
   m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
@@ -345,7 +344,6 @@ ItoPlasmaStepper::setupRadiativeTransfer()
     pout() << m_name + "::setupRadiativeTransfer" << endl;
   }
 
-  m_rte->setVerbosity(m_verbosity);
   m_rte->parseOptions();
   m_rte->setPhase(m_plasmaPhase);
   m_rte->setAmr(m_amr);
@@ -364,7 +362,6 @@ ItoPlasmaStepper::setupSigma()
 
   m_sigmaSolver = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
   m_sigmaSolver->parseOptions();
-  m_sigmaSolver->setVerbosity(m_verbosity);
   m_sigmaSolver->setRealm(m_fluidRealm);
   m_sigmaSolver->setPhase(m_plasmaPhase);
   m_sigmaSolver->setName("Surface charge");
@@ -1950,8 +1947,8 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
       a_meshMobilities[idx]->copy(fluidScratchMobilities[idx]);
 
       m_amr->conservativeAverage(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhost(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);      
-      
+      m_amr->interpGhost(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
+
       solver->interpolateMobilities();
     }
   }
@@ -2137,10 +2134,10 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
       const int idx = solverIt.index();
 
       a_diffusionCoefficients[idx]->copy(fluidScratchDiffusion[idx]);
-      
+
       m_amr->conservativeAverage(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
-      m_amr->interpGhost(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);      
-      
+      m_amr->interpGhost(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
+
       solver->interpolateDiffusion();
     }
   }
