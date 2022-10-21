@@ -144,10 +144,13 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
     pout() << m_name + "::advance" << endl;
   }
 
+  Timer timer("ItoPlasmaGodunovStepper::advance");
+
   // Previous time step is needed when regridding.
   m_prevDt = a_dt;
 
   // ====== BEGIN TRANSPORT STEP ======
+  timer.startEvent("Particle/field advancement");
   // Setup runtime storage (requirements change with algorithm)
   this->setRuntimeParticleStorage();
 
@@ -174,34 +177,47 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
 
   // Remove the run-time configurable particle storage. It is no longer needed.
   this->resetRuntimeParticleStorage();
+  timer.stopEvent("Particle/field advancement");
   // ====== END TRANSPORT STEP ======
 
   // Photon transport
+  timer.startEvent("Photon transport");
   this->advancePhotons(a_dt);
+  timer.stopEvent("Photon transport");
 
   // If we are using the LEA, we must compute the Ohmic heating term. This must be done
   // BEFORE sorting the particles per cell.
   if (m_physics->getCoupling() == ItoPlasmaPhysics::coupling::LEA) {
+    timer.startEvent("Compute EdotJ");
     this->computeEdotJSource(a_dt);
+    timer.stopEvent("Compute EdotJ");
   }
 
   // Sort the particles and photons per cell so we can call reaction algorithms
+  timer.startEvent("Sort by cell");
   m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
+  timer.stopEvent("Sort by cell");
 
   // Run the Kinetic Monte Carlo reaction kernels.
+  timer.startEvent("Reaction network");
   this->advanceReactionNetwork(a_dt);
+  timer.stopEvent("Reaction network");
 
   // Build superparticles.
   if ((m_timeStep + 1) % m_mergeInterval == 0 && m_mergeInterval > 0) {
+    timer.startEvent("Super-particle management");
     m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
+    timer.stopEvent("Super-particle management");
   }
 
   // Sort particles per patch.
+  timer.startEvent("Sort by patch");
   m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
+  timer.stopEvent("Sort by patch");
 
   // Clear other data holders for now. BC comes later...
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -210,14 +226,24 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
 
   // Deposit particles on the mesh.
+  timer.startEvent("Mesh deposit");
   m_ito->depositParticles();
+  timer.stopEvent("Mesh deposit");
 
   // Prepare for the next time step
+  timer.startEvent("Compute v and D");
   this->computeItoVelocities();
   this->computeItoDiffusion();
+  timer.stopEvent("Compute v and D");
 
   // Compute the current density (mostly for I/O purposes).
+  timer.startEvent("Compute J");
   this->computeCurrentDensity(m_currentDensity);
+  timer.stopEvent("Compute J");
+
+  if (m_profile) {
+    timer.eventReport(pout(), false);
+  }
 
   return a_dt;
 }

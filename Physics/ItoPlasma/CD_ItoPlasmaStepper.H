@@ -1071,6 +1071,21 @@ namespace Physics {
       bool m_useNewReactionAlgorithm;
 
       /*!
+	@brief Plot conductivity or not
+      */
+      bool m_plotConductivity;
+
+      /*!
+	@brief Plot conductivity or not
+      */
+      bool m_plotCurrentDensity;
+
+      /*!
+	@brief Plot number of particles per patch or not
+      */
+      bool m_plotParticlesPerPatch;
+
+      /*!
 	@brief Target number of particles per cell when squishing ItoParticle's into superparticles
       */
       int m_particlesPerCell;

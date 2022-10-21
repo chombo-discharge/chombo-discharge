@@ -127,7 +127,31 @@ ItoPlasmaStepper::parsePlotVariables() noexcept
     pout() << "ItoPlasmaStepper::parsePlotVariables" << endl;
   }
 
+  m_plotConductivity      = false;
+  m_plotCurrentDensity    = false;
+  m_plotParticlesPerPatch = false;
+
+  // Read in plot variables.
   ParmParse pp(m_name.c_str());
+  const int num = pp.countval("plt_vars");
+
+  if (num > 0) {
+    Vector<std::string> str(num);
+    pp.getarr("plt_vars", str, 0, num);
+
+    // Set plot variables
+    for (int i = 0; i < num; i++) {
+      if (str[i] == "conductivity") {
+        m_plotConductivity = true;
+      }
+      else if (str[i] == "current_density") {
+        m_plotCurrentDensity = true;
+      }
+      else if (str[i] == "particles_per_patch") {
+        m_plotParticlesPerPatch = true;
+      }
+    }
+  }
 }
 
 void
@@ -226,7 +250,7 @@ ItoPlasmaStepper::parseTimeStepRestrictions() noexcept
   pp.get("advection_cfl", m_advectionCFL);
   pp.get("diffusion_cfl", m_diffusionCFL);
   pp.get("advection_diffusion_cfl", m_advectionDiffusionCFL);
-  pp.get("relax_dt", m_relaxTimeFactor);
+  pp.get("relax_dt_factor", m_relaxTimeFactor);
   pp.get("min_dt", m_minDt);
   pp.get("max_dt", m_maxDt);
 
