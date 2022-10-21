@@ -20,33 +20,3 @@ ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permi
 ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
 ItoPlasmaGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
-
-
-# ==================================================================================================== 
-# ITO_PLASMA_GODUNOV CLASS OPTIONS
-# ==================================================================================================== 
-ItoPlasmaGodunovStepper.verbosity      = -1             # Verbosity
-ItoPlasmaGodunovStepper.min_dt         = 0.0            # Minimum dt
-ItoPlasmaGodunovStepper.max_dt         = 1.0            # Maximum dt
-ItoPlasmaGodunovStepper.particle_Realm = primal         # Particle Realm. Default is primal
-ItoPlasmaGodunovStepper.load_balance   = true           # Load balance or not
-ItoPlasmaGodunovStepper.box_sorting    = morton         # Box sorting for load balancing. 'none', 'shuffle', 'std', 'morton'
-ItoPlasmaGodunovStepper.load_index     = 0              # Species used for load balancing (-1 => all particles)
-ItoPlasmaGodunovStepper.load_ppc       = 0.0            # Load estimate per cell (in addition to particle load)
-ItoPlasmaGodunovStepper.nwo_reactions  = true           # Use or don't use the new reaction algorithm (presumably load balances better)
-ItoPlasmaGodunovStepper.max_cells_hop  = 1.0            # Maximum cells to move in one time step
-ItoPlasmaGodunovStepper.which_dt       = advection      # 'advection', 'diffusion', or 'AdvectionDiffusion'
-ItoPlasmaGodunovStepper.ppc            = 64             # Superparticle number of cells
-ItoPlasmaGodunovStepper.eb_tolerance   = 1.0            # How many dx into the cell particles can live
-ItoPlasmaGodunovStepper.merge_interval = 1              # How often to make superparticles
-ItoPlasmaGodunovStepper.relax_factor   = 0.5            # Factor in front of relaxation time
-ItoPlasmaGodunovStepper.regrid_super   = false          # Make superparticles after regrid or not
-ItoPlasmaGodunovStepper.algorithm      = euler_maruyama # 'euler_maruyama', or 'midpoint'
-ItoPlasmaGodunovStepper.diffusion      = super          # Which diffusion update? 'physical', 'super'
-ItoPlasmaGodunovStepper.diffu_samples  = 64             # Maximum number of diffusion samples when using 'physical' diffusion
-ItoPlasmaGodunovStepper.profile        = true           # Profile advance or not
-ItoPlasmaGodunovStepper.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and McPhoto)
-ItoPlasmaGodunovStepper.halo_buffer    = 1              # Halo buffer for particles (overrides ito and McPhoto)
-ItoPlasmaGodunovStepper.filter_rho     = false          # Filter space charge or not. (Don't use). 
-ItoPlasmaGodunovStepper.filter_cond    = false          # Filter conductivity or not. (Try to use). 
-ItoPlasmaGodunovStepper.filter_1       = 0.5 1 4 true   # alpha = 0.5, stride = 1, N = 4, compensation = true. 
