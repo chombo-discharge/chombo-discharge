@@ -975,7 +975,7 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
           const RealVect& pos    = p.position();
 
           // Compute a particle hop and store it on the run-time storage.
-          RealVect& hop = p.runtimeVect(0);
+	  RealVect& hop = p.runtimeVect(0);
           if (diffusive) {
             hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
           }
