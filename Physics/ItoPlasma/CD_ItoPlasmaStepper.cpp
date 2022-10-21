@@ -1615,9 +1615,9 @@ void
 ItoPlasmaStepper::remapParticles(const SpeciesSubset             a_speciesSubset,
                                  const ItoSolver::WhichContainer a_container) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::remapParticles(SpeciesSubset)");
+  CH_TIME("ItoPlasmaStepper::remapParticles(SpeciesSubset, WhichContainer)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::remapParticles(SpeciesSubset)" << endl;
+    pout() << m_name + "::remapParticles(SpeciesSubset, WhichContainer)" << endl;
   }
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
