@@ -49,8 +49,6 @@ ItoPlasmaStepper::ItoPlasmaStepper()
   m_relaxTimeFactor         = std::numeric_limits<Real>::max();
   m_minDt                   = std::numeric_limits<Real>::min();
   m_maxDt                   = std::numeric_limits<Real>::max();
-
-  this->parseOptions();
 }
 
 ItoPlasmaStepper::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) : ItoPlasmaStepper()
@@ -67,7 +65,7 @@ ItoPlasmaStepper::parseOptions()
 {
   CH_TIME("ItoPlasmaStepper::parseOptions");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::parseOptions" << endl;
+    pout() << m_name + "::parseOptions" << endl;
   }
 
   this->parseVerbosity();
@@ -77,11 +75,6 @@ ItoPlasmaStepper::parseOptions()
   this->parseLoadBalance();
   this->parseTimeStepRestrictions();
   this->parseParametersEB();
-
-  m_ito->parseOptions();
-  m_fieldSolver->parseOptions();
-  m_rte->parseOptions();
-  m_sigmaSolver->parseOptions();
 }
 
 void
@@ -89,7 +82,7 @@ ItoPlasmaStepper::parseRuntimeOptions()
 {
   CH_TIME("ItoPlasmaStepper::parseRuntimeOptions");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::parseRuntimeOptions" << endl;
+    pout() << m_name + "::parseRuntimeOptions" << endl;
   }
 
   this->parseVerbosity();
@@ -110,7 +103,7 @@ ItoPlasmaStepper::parseVerbosity() noexcept
 {
   CH_TIME("ItoPlasmaStepper::parseVerbosity");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::parseVerbosity" << endl;
+    pout() << m_name + "::parseVerbosity" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -124,7 +117,7 @@ ItoPlasmaStepper::parsePlotVariables() noexcept
 {
   CH_TIME("ItoPlasmaStepper::parsePlotVariables");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::parsePlotVariables" << endl;
+    pout() << m_name + "::parsePlotVariables" << endl;
   }
 
   m_plotConductivity      = false;
@@ -159,7 +152,7 @@ ItoPlasmaStepper::parseSuperParticles() noexcept
 {
   CH_TIME("ItoPlasmaStepper::parseSuperParticles");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::parseSuperParticles" << endl;
+    pout() << m_name + "::parseSuperParticles" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -182,7 +175,7 @@ ItoPlasmaStepper::parseDualGrid() noexcept
 {
   CH_TIME("ItoPlasmaStepper::parseDualGrid");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::parseDualGrid" << endl;
+    pout() << m_name + "::parseDualGrid" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -205,7 +198,7 @@ ItoPlasmaStepper::parseLoadBalance() noexcept
 {
   CH_TIME("ItoPlasmaStepper::parseLoadBalance");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::parseLoadBalance" << endl;
+    pout() << m_name + "::parseLoadBalance" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -242,7 +235,7 @@ ItoPlasmaStepper::parseTimeStepRestrictions() noexcept
 {
   CH_TIME("ItoPlasmaStepper::parseTimeStepRestrictions");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::parseTimeStepRestrictions" << endl;
+    pout() << m_name + "::parseTimeStepRestrictions" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -297,11 +290,11 @@ ItoPlasmaStepper::setupSolvers()
 {
   CH_TIME("ItoPlasmaStepper::setupSolver");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::setupSolvers" << endl;
+    pout() << m_name + "::setupSolvers" << endl;
   }
 
   // Parse class options
-  this->parseOptions();
+  this->parseOptions();    
 
   // Set up solvers
   this->setupIto();
@@ -318,7 +311,7 @@ ItoPlasmaStepper::setupIto()
 {
   CH_TIME("ItoPlasmaStepper::setupIto");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::setupIto" << endl;
+    pout() << m_name + "::setupIto" << endl;
   }
 
   m_ito->parseOptions();
@@ -333,7 +326,7 @@ ItoPlasmaStepper::setupPoisson()
 {
   CH_TIME("ItoPlasmaStepper::setupPoisson");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::setupPoisson" << endl;
+    pout() << m_name + "::setupPoisson" << endl;
   }
 
   m_fieldSolver->setVerbosity(m_verbosity);
@@ -349,7 +342,7 @@ ItoPlasmaStepper::setupRadiativeTransfer()
 {
   CH_TIME("ItoPlasmaStepper::setupRadiativeTransfer");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::setupRadiativeTransfer" << endl;
+    pout() << m_name + "::setupRadiativeTransfer" << endl;
   }
 
   m_rte->setVerbosity(m_verbosity);
@@ -366,10 +359,11 @@ ItoPlasmaStepper::setupSigma()
 {
   CH_TIME("ItoPlasmaStepper::setupSigma");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::setupSigma" << endl;
+    pout() << m_name + "::setupSigma" << endl;
   }
 
   m_sigmaSolver = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
+  m_sigmaSolver->parseOptions();
   m_sigmaSolver->setVerbosity(m_verbosity);
   m_sigmaSolver->setRealm(m_fluidRealm);
   m_sigmaSolver->setPhase(m_plasmaPhase);
@@ -382,7 +376,7 @@ ItoPlasmaStepper::allocate()
 {
   CH_TIME("ItoPlasmaStepper::allocate");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::allocate" << endl;
+    pout() << m_name + "::allocate" << endl;
   }
 
   // Solver allocation.
@@ -399,7 +393,7 @@ ItoPlasmaStepper::allocateInternals()
 {
   CH_TIME("ItoPlasmaStepper::allocateInternals");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::allocateInternals" << endl;
+    pout() << m_name + "::allocateInternals" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -454,7 +448,7 @@ ItoPlasmaStepper::postInitialize()
 {
   CH_TIME("ItoPlasmaStepper::postInitialize");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::postInitialize" << endl;
+    pout() << m_name + "::postInitialize" << endl;
   }
 }
 
@@ -463,7 +457,7 @@ ItoPlasmaStepper::initialData()
 {
   CH_TIME("ItoPlasmaStepper::initialData");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::initialData" << endl;
+    pout() << m_name + "::initialData" << endl;
   }
 
   m_fieldSolver->setPermittivities();
@@ -489,7 +483,7 @@ ItoPlasmaStepper::initialSigma()
 {
   CH_TIME("ItoPlasmaStepper::initialSigma");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::initialSigma" << endl;
+    pout() << m_name + "::initialSigma" << endl;
   }
 
   const RealVect probLo = m_amr->getProbLo();
@@ -531,7 +525,7 @@ ItoPlasmaStepper::postCheckpointSetup()
 {
   CH_TIME("ItoPlasmaStepper::postCheckpointSetup");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::postCheckpointSetup" << endl;
+    pout() << m_name + "::postCheckpointSetup" << endl;
   }
 
   // Allocate internal storage.
@@ -553,7 +547,7 @@ ItoPlasmaStepper::postCheckpointPoisson()
 {
   CH_TIME("ItoPlasmaStepper::postCheckpointPoisson");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::postCheckpointPoisson" << endl;
+    pout() << m_name + "::postCheckpointPoisson" << endl;
   }
 
   // Do some post checkpointing stuff.
@@ -589,7 +583,7 @@ ItoPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) con
 {
   CH_TIME("ItoPlasmaStepper::writeCheckpointData");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::writeCheckpointData" << endl;
+    pout() << m_name + "::writeCheckpointData" << endl;
   }
 
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -611,7 +605,7 @@ ItoPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
 {
   CH_TIME("ItoPlasmaStepper::readCheckpointData");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::readCheckpointData" << endl;
+    pout() << m_name + "::readCheckpointData" << endl;
   }
 
   for (ItoIterator<ItoSolver> solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -632,7 +626,7 @@ ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_
 {
   CH_TIME("ItoPlasmaStepper::writePlotData");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::writePlotData" << endl;
+    pout() << m_name + "::writePlotData" << endl;
   }
 
   // Poisson solver copies over its output data
@@ -694,7 +688,7 @@ ItoPlasmaStepper::writeNumParticlesPerPatch(EBAMRCellData& a_output, int& a_icom
 {
   CH_TIME("ItoPlasmaStepper::writeNumParticlesPerPatch");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::writeNumParticlesPerPatch" << endl;
+    pout() << m_name + "::writeNumParticlesPerPatch" << endl;
   }
 
   DataOps::setValue(m_particleScratch1, 0.0);
@@ -719,7 +713,7 @@ ItoPlasmaStepper::synchronizeSolverTimes(const int a_step, const Real a_time, co
 {
   CH_TIME("ItoPlasmaStepper::synchronizeSolverTimes");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::synchronizeSolverTimes" << endl;
+    pout() << m_name + "::synchronizeSolverTimes" << endl;
   }
 
   m_timeStep = a_step;
@@ -737,7 +731,7 @@ ItoPlasmaStepper::printStepReport()
 {
   CH_TIME("ItoPlasmaStepper::printStepReport");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::printStepReport" << endl;
+    pout() << m_name + "::printStepReport" << endl;
   }
 
   const Real Emax = this->computeMaxElectricField(m_plasmaPhase);
@@ -823,7 +817,7 @@ ItoPlasmaStepper::getParticleStatistics(Real& a_avgParticles,
 {
   CH_TIME("ItoPlasmaStepper::getParticleStatistics");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::getParticleStatistics" << endl;
+    pout() << m_name + "::getParticleStatistics" << endl;
   }
 
   // TLDR: We compute the number of particles, the standard deviation of the number of particles, as well
@@ -849,7 +843,7 @@ ItoPlasmaStepper::computeDt()
 {
   CH_TIME("ItoPlasmaStepper::computeDt");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeDt" << endl;
+    pout() << m_name + "::computeDt" << endl;
   }
 
   Real dt = std::numeric_limits<Real>::max();
@@ -899,11 +893,10 @@ ItoPlasmaStepper::registerRealms()
 {
   CH_TIME("ItoPlasmaStepper::registerRealms");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::registerRealms" << endl;
+    pout() << m_name + "::registerRealms" << endl;
   }
 
   // TLDR: If using dual grid then m_particleRealm != m_fluidRealm and we'll have two realms.
-
   m_amr->registerRealm(m_fluidRealm);
   m_amr->registerRealm(m_particleRealm);
 }
@@ -913,7 +906,7 @@ ItoPlasmaStepper::registerOperators()
 {
   CH_TIME("ItoPlasmaStepper::registerOperators");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::registerOperators" << endl;
+    pout() << m_name + "::registerOperators" << endl;
   }
 
   m_ito->registerOperators();
@@ -927,7 +920,7 @@ ItoPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 {
   CH_TIME("ItoPlasmaStepper::preRegrid");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::preRegrid" << endl;
+    pout() << m_name + "::preRegrid" << endl;
   }
 
   m_ito->preRegrid(a_lmin, a_oldFinestLevel);
@@ -941,7 +934,7 @@ ItoPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int
 {
   CH_TIME("ItoPlasmaStepper::regrid");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::regrid" << endl;
+    pout() << m_name + "::regrid" << endl;
   }
 
   // Allocate new memory
@@ -984,7 +977,7 @@ ItoPlasmaStepper::getNumberOfPlotVariables() const
 {
   CH_TIME("ItoPlasmaStepper::getNumberOfPlotVariables");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::getNumberOfPlotVariables" << endl;
+    pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
 
   int ncomp = 0;
@@ -1028,7 +1021,7 @@ ItoPlasmaStepper::setIto(RefCountedPtr<ItoLayout<ItoSolver>>& a_ito) noexcept
 {
   CH_TIME("ItoPlasmaStepper::setIto");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::setIto" << endl;
+    pout() << m_name + "::setIto" << endl;
   }
 
   m_ito = a_ito;
@@ -1039,7 +1032,7 @@ ItoPlasmaStepper::setFieldSolver(RefCountedPtr<FieldSolver>& a_fieldSolver) noex
 {
   CH_TIME("ItoPlasmaStepper::setFieldSolver");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::setFieldSolver" << endl;
+    pout() << m_name + "::setFieldSolver" << endl;
   }
 
   m_fieldSolver = a_fieldSolver;
@@ -1050,7 +1043,7 @@ ItoPlasmaStepper::setRadiativeTransferSolvers(RefCountedPtr<RtLayout<McPhoto>>& 
 {
   CH_TIME("ItoPlasmaStepper::setRadiativeTransferSolvers");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::setRadiativeTransferSolvers" << endl;
+    pout() << m_name + "::setRadiativeTransferSolvers" << endl;
   }
 
   m_rte = a_rteLayout;
@@ -1061,7 +1054,7 @@ ItoPlasmaStepper::setVoltage(const std::function<Real(const Real a_time)>& a_vol
 {
   CH_TIME("ItoPlasmaStepper::setVoltage");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::setVoltage" << endl;
+    pout() << m_name + "::setVoltage" << endl;
   }
 
   m_voltage = a_voltage;
@@ -1072,7 +1065,7 @@ ItoPlasmaStepper::computeMaxElectricField(const phase::which_phase a_phase) noex
 {
   CH_TIME("ItoPlasmaStepper::computeMaxElectricField");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeMaxElectricField" << endl;
+    pout() << m_name + "::computeMaxElectricField" << endl;
   }
 
   // Get a handle to the E-field. Note that this is the cell-centered field!
@@ -1099,7 +1092,7 @@ ItoPlasmaStepper::computeElectricField(EBAMRCellData& a_electricField, const pha
 {
   CH_TIME("ItoPlasmaStepper::computeElectricField(EBAMRCellData, phase)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeElectricField(EBAMRCellData, phase)" << endl;
+    pout() << m_name + "::computeElectricField(EBAMRCellData, phase)" << endl;
   }
 
   CH_assert(a_electricField.getRealm() == m_fluidRealm);
@@ -1112,7 +1105,7 @@ ItoPlasmaStepper::getTime() const noexcept
 {
   CH_TIME("ItoPlasmaStepper::getTime");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::getTime" << endl;
+    pout() << m_name + "::getTime" << endl;
   }
 
   return m_time;
@@ -1123,7 +1116,7 @@ ItoPlasmaStepper::computeSpaceChargeDensity() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeSpaceChargeDensity()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeSpaceChargeDensity()" << endl;
+    pout() << m_name + "::computeSpaceChargeDensity()" << endl;
   }
 
   this->computeSpaceChargeDensity(m_fieldSolver->getRho(), m_ito->getDensities());
@@ -1134,7 +1127,7 @@ ItoPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
 {
   CH_TIME("ItoPlasmaStepper::computeSpaceChargeDensity(rho, densities)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeSpaceChargeDensity(rho, densities)" << endl;
+    pout() << m_name + "::computeSpaceChargeDensity(rho, densities)" << endl;
   }
 
   // TLDR: a_densities is from the Ito solvers so it is defined over the particle realm. This CAN be equal to
@@ -1174,7 +1167,7 @@ ItoPlasmaStepper::computeConductivityCell(EBAMRCellData& a_conductivity) noexcep
 {
   CH_TIME("ItoPlasmaStepper::computeConductivityCell(EBAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeConductivityCell(EBAMRCellData)" << endl;
+    pout() << m_name + "::computeConductivityCell(EBAMRCellData)" << endl;
   }
 
   this->computeConductivityCell(a_conductivity, m_ito->getParticles(ItoSolver::WhichContainer::Bulk));
@@ -1186,7 +1179,7 @@ ItoPlasmaStepper::computeConductivityCell(EBAMRCellData&                        
 {
   CH_TIME("ItoPlasmaStepper::computeConductivityCell(EBAMRCellData, Particles)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeConductivityCell(EBAMRCellData, Particles)" << endl;
+    pout() << m_name + "::computeConductivityCell(EBAMRCellData, Particles)" << endl;
   }
 
   // TLDR: This will deposit the particle conductivity on the mesh (onto m_particleScratch1) which is
@@ -1224,7 +1217,7 @@ ItoPlasmaStepper::computeCurrentDensity(EBAMRCellData& a_J) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeCurrentDensity(EBAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeCurrentDensity(EBAMRCellData)" << endl;
+    pout() << m_name + "::computeCurrentDensity(EBAMRCellData)" << endl;
   }
 
   CH_assert(a_J[0]->nComp() == SpaceDim);
@@ -1243,7 +1236,7 @@ ItoPlasmaStepper::computeRelaxationTime() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeRelaxationTime()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeRelaxationTime()" << endl;
+    pout() << m_name + "::computeRelaxationTime()" << endl;
   }
 
   // TLDR: We compute eps0/conductivity directly.
@@ -1274,7 +1267,7 @@ ItoPlasmaStepper::solvePoisson() noexcept
 {
   CH_TIME("ItoPlasmaStepper::solvePoisson()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::solvePoisson()" << endl;
+    pout() << m_name + "::solvePoisson()" << endl;
   }
 
   // Compute the space charge density.
@@ -1317,7 +1310,7 @@ ItoPlasmaStepper::intersectParticles(const SpeciesSubset  a_speciesSubset,
 {
   CH_TIME("ItoPlasmaStepper::intersectParticles(SpeciesSubset, EBRepresentation, bool)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::intersectParticles(SpeciesSubset, EBRepresentation, bool)" << endl;
+    pout() << m_name + "::intersectParticles(SpeciesSubset, EBRepresentation, bool)" << endl;
   }
 
   this->intersectParticles(a_speciesSubset,
@@ -1338,7 +1331,7 @@ ItoPlasmaStepper::intersectParticles(const SpeciesSubset             a_speciesSu
 {
   CH_TIME("ItoPlasmaStepper::intersectParticles(SpeciesSubset, Containerx3, EBRepresentation, bool)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::intersectParticles(SpeciesSubset, Containerx3, EBRepresentation, bool)" << endl;
+    pout() << m_name + "::intersectParticles(SpeciesSubset, Containerx3, EBRepresentation, bool)" << endl;
   }
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -1420,7 +1413,7 @@ ItoPlasmaStepper::removeCoveredParticles(const SpeciesSubset    a_speciesSubset,
 {
   CH_TIME("ItoPlasmaStepper::removeCoveredParticles(SpeciesSubset, EBRepresentation, Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::removeCoveredParticles(SpeciesSubset, EBRepresentation, Real)" << endl;
+    pout() << m_name + "::removeCoveredParticles(SpeciesSubset, EBRepresentation, Real)" << endl;
   }
 
   this->removeCoveredParticles(a_speciesSubset, ItoSolver::WhichContainer::Bulk, a_representation, a_tolerance);
@@ -1434,7 +1427,7 @@ ItoPlasmaStepper::removeCoveredParticles(const SpeciesSubset             a_which
 {
   CH_TIME("ItoPlasmaStepper::removeCoveredParticles(SpeciesSubset, container, EBRepresentation, tolerance)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::removeCoveredParticles(SpeciesSubset, container, EBRepresentation, tolerance)" << endl;
+    pout() << m_name + "::removeCoveredParticles(SpeciesSubset, container, EBRepresentation, tolerance)" << endl;
   }
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -1516,7 +1509,7 @@ ItoPlasmaStepper::transferCoveredParticles(const SpeciesSubset    a_speciesSubse
 {
   CH_TIME("ItoPlasmaStepper::transferCoveredParticles(SpeciesSubset, EBRepresentation, Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::transferCoveredParticles(SpeciesSubset, EBRepresentation, Real)" << endl;
+    pout() << m_name + "::transferCoveredParticles(SpeciesSubset, EBRepresentation, Real)" << endl;
   }
 
   this->transferCoveredParticles(a_speciesSubset,
@@ -1535,7 +1528,7 @@ ItoPlasmaStepper::transferCoveredParticles(const SpeciesSubset             a_spe
 {
   CH_TIME("ItoPlasmaStepper::transferCoveredParticles(SpeciesSubset, Containerx2, EBRepresentation, Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::transferCoveredParticles(SpeciesSubset, Containerx2, EBRepresentation, Real)" << endl;
+    pout() << m_name + "::transferCoveredParticles(SpeciesSubset, Containerx2, EBRepresentation, Real)" << endl;
   }
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -1615,7 +1608,7 @@ ItoPlasmaStepper::remapParticles(const SpeciesSubset a_speciesSubset) noexcept
 {
   CH_TIME("ItoPlasmaStepper::remapParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::remapParticles(SpeciesSubset)" << endl;
+    pout() << m_name + "::remapParticles(SpeciesSubset)" << endl;
   }
 
   this->remapParticles(a_speciesSubset, ItoSolver::WhichContainer::Bulk);
@@ -1627,7 +1620,7 @@ ItoPlasmaStepper::remapParticles(const SpeciesSubset             a_speciesSubset
 {
   CH_TIME("ItoPlasmaStepper::remapParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::remapParticles(SpeciesSubset)" << endl;
+    pout() << m_name + "::remapParticles(SpeciesSubset)" << endl;
   }
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -1709,7 +1702,7 @@ ItoPlasmaStepper::depositParticles(const SpeciesSubset a_speciesSubset) noexcept
 {
   CH_TIME("ItoPlasmaStepper::depositParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::depositParticles(SpeciesSubset)" << endl;
+    pout() << m_name + "::depositParticles(SpeciesSubset)" << endl;
   }
 
   this->depositParticles(a_speciesSubset, ItoSolver::WhichContainer::Bulk);
@@ -1721,7 +1714,7 @@ ItoPlasmaStepper::depositParticles(const SpeciesSubset             a_speciesSubs
 {
   CH_TIME("ItoPlasmaStepper::depositParticles(SpeciesSubset)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::depositParticles(SpeciesSubset)" << endl;
+    pout() << m_name + "::depositParticles(SpeciesSubset)" << endl;
   }
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -1803,7 +1796,7 @@ ItoPlasmaStepper::setItoVelocityFunctions() noexcept
 {
   CH_TIME("ItoPlasmaStepper::setItoVelocityFunctions");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::setItoVelocityFunctions" << endl;
+    pout() << m_name + "::setItoVelocityFunctions" << endl;
   }
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -1835,7 +1828,7 @@ ItoPlasmaStepper::computeItoVelocities() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoVelocities()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoVelocities()" << endl;
+    pout() << m_name + "::computeItoVelocities()" << endl;
   }
 
   const ItoPlasmaPhysics::coupling fieldCoupling = m_physics->getCoupling();
@@ -1873,7 +1866,7 @@ ItoPlasmaStepper::computeItoDiffusion() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoDiffusion()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoDiffusion()" << endl;
+    pout() << m_name + "::computeItoDiffusion()" << endl;
   }
 
   const ItoPlasmaPhysics::coupling fieldCoupling = m_physics->getCoupling();
@@ -1903,7 +1896,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA()" << endl;
+    pout() << m_name + "::computeItoMobilitiesLFA()" << endl;
   }
 
   Vector<EBAMRCellData*> meshMobilities = m_ito->getMobilityFunctions();
@@ -1918,7 +1911,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
 {
   CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, time)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, time)" << endl;
+    pout() << m_name + "::computeItoMobilitiesLFA(mobilities, E, time)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -1947,19 +1940,18 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
     this->computeItoMobilitiesLFA(mobilities, *a_electricField[lvl], lvl, a_time);
   }
 
-  // Copy the fluid realm data into the particle realm data and update ghost cells
-  for (int i = 0; i < numPlasmaSpecies; i++) {
-    a_meshMobilities[i]->copy(fluidScratchMobilities[i]);
-
-    m_amr->conservativeAverage(*a_meshMobilities[i], m_particleRealm, m_plasmaPhase);
-    m_amr->interpGhost(*a_meshMobilities[i], m_particleRealm, m_plasmaPhase);
-  }
-
-  // Interpolate mobilities to the particle position.
+  // Copy fluid realm data into particle realm and interpolate mobilities to the particle position.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>& solver = solverIt();
 
     if (solver->isMobile()) {
+      const int idx = solverIt.index();
+
+      a_meshMobilities[idx]->copy(fluidScratchMobilities[idx]);
+
+      m_amr->conservativeAverage(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhost(*a_meshMobilities[idx], m_particleRealm, m_plasmaPhase);      
+      
       solver->interpolateMobilities();
     }
   }
@@ -1973,7 +1965,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>*>& a_meshM
 {
   CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, level, time)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, level, time)" << endl;
+    pout() << m_name + "::computeItoMobilitiesLFA(mobilities, E, level, time)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
@@ -2001,7 +1993,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
 {
   CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)" << endl;
+    pout() << m_name + "::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)" << endl;
   }
 
   // TLDR: We go through each and every cell and call the physics interface. This includes cells covered by a finer grid
@@ -2068,7 +2060,7 @@ ItoPlasmaStepper::computeItoMobilitiesLEA() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLEA()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoMobilitiesLEA()" << endl;
+    pout() << m_name + "::computeItoMobilitiesLEA()" << endl;
   }
 
   // This is really simple because the solvers do this directly...
@@ -2082,7 +2074,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA()" << endl;
+    pout() << m_name + "::computeItoDiffusionLFA()" << endl;
   }
 
   Vector<EBAMRCellData*> diffusionCoefficients = m_ito->getDiffusionFunctions();
@@ -2099,7 +2091,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
 {
   CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData>x2, EBAMRCellData, Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData>x2, EBAMRCellData, Real)" << endl;
+    pout() << m_name + "::computeItoDiffusionLFA(Vector<EBAMRCellData>x2, EBAMRCellData, Real)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2136,19 +2128,19 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
     this->computeItoDiffusionLFA(diffusionCoefficients, densities, *a_electricField[lvl], lvl, a_time);
   }
 
-  // Copy the fluid realm data over to the particle realm data and then coarsen and update ghost cells.
-  for (int i = 0; i < numPlasmaSpecies; i++) {
-    a_diffusionCoefficients[i]->copy(fluidScratchDiffusion[i]);
-
-    m_amr->conservativeAverage(*a_diffusionCoefficients[i], m_particleRealm, m_plasmaPhase);
-    m_amr->interpGhost(*a_diffusionCoefficients[i], m_particleRealm, m_plasmaPhase);
-  }
-
-  // Interpolate diffusion coefficients to particle positions.
+  // Copy the fluid realm data over to the particle realm data and then coarsen and interpolate diffusion coefficients
+  // to particle positions.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>& solver = solverIt();
 
     if (solver->isDiffusive()) {
+      const int idx = solverIt.index();
+
+      a_diffusionCoefficients[idx]->copy(fluidScratchDiffusion[idx]);
+      
+      m_amr->conservativeAverage(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);
+      m_amr->interpGhost(*a_diffusionCoefficients[idx], m_particleRealm, m_plasmaPhase);      
+      
       solver->interpolateDiffusion();
     }
   }
@@ -2163,7 +2155,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_
 {
   CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>x2, LD<EBCellFAB>, int, Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>x2, LD<EBCellFAB>, int, Real)" << endl;
+    pout() << m_name + "::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>x2, LD<EBCellFAB>, int, Real)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2213,7 +2205,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
 {
   CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, dit, time)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, dit, time)" << endl;
+    pout() << m_name + "::computeItoDiffusionLFA(velo, E, level, dit, time)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2312,7 +2304,7 @@ ItoPlasmaStepper::computeItoDiffusionLEA() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeItoDiffusionLEA()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeItoDiffusionLEA()" << endl;
+    pout() << m_name + "::computeItoDiffusionLEA()" << endl;
   }
 
   // This is really simple because the solvers do this directly... No monkeying with interpolations or anything.
@@ -2326,7 +2318,7 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData& a_ppc) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData)" << endl;
+    pout() << m_name + "::computeReactiveParticlesPerCell(EBAMRCellData)" << endl;
   }
 
   CH_assert(a_ppc.getRealm() == m_particleRealm);
@@ -2343,7 +2335,7 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, c
 {
   CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(LD<EBCellFAB>, int)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(LD<EBCellFAB>, int)" << endl;
+    pout() << m_name + "::computeReactiveParticlesPerCell(LD<EBCellFAB>, int)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2370,7 +2362,7 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
 {
   CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)" << endl;
+    pout() << m_name + "::computeReactiveParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2435,7 +2427,7 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBAMRCellData& a_meanEnergi
 {
   CH_TIME("ItoPlasmaStepper::computeReactiveMaeanEnergiesPerCell(EBAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveMaeanEnergiesPerCell(EBAMRCellData)" << endl;
+    pout() << m_name + "::computeReactiveMaeanEnergiesPerCell(EBAMRCellData)" << endl;
   }
 
   CH_assert(meanEnergies.getRealm() == m_particleRealm);
@@ -2452,7 +2444,7 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(LevelData<EBCellFAB>& a_mea
 {
   CH_TIME("ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(LD<EBCellFAB>, int)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(LD<EBCellFAB>, int)" << endl;
+    pout() << m_name + "::computeReactiveMeanEnergiesPerCell(LD<EBCellFAB>, int)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2479,7 +2471,7 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_meanEnerg
 {
   CH_TIME("ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFABint, DataIndex, Box, EBISBox)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFABint, DataIndex, Box, EBISBox))" << endl;
+    pout() << m_name + "::computeReactiveMeanEnergiesPerCell(EBCellFABint, DataIndex, Box, EBISBox))" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2557,7 +2549,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::advanceReactionNetworkNWO(dt)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::advanceReactionNetworkNWO(dt)" << endl;
+    pout() << m_name + "::advanceReactionNetworkNWO(dt)" << endl;
   }
 
   this->advanceReactionNetworkNWO(m_electricFieldFluid, m_EdotJ, a_dt);
@@ -2570,7 +2562,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(const EBAMRCellData& a_electricField
 {
   CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, E, sources, dt)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, E, sources, dt)" << endl;
+    pout() << m_name + "::advanceReactionNetwork(ppc, ypc, E, sources, dt)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2629,7 +2621,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_partic
 {
   CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(LD<EBCellFAB>x5, int, Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::advanceReactionNetwork(LD<EBCellFAB>x5, int, Real)" << endl;
+    pout() << m_name + "::advanceReactionNetwork(LD<EBCellFAB>x5, int, Real)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2671,7 +2663,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
 {
   CH_TIME("ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFABx5, int, DataIndex, Box, Realx2)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFABx5, int, DataIndex, Box, Realx2)" << endl;
+    pout() << m_name + "::advanceReactionNetworkNWO(EBCellFABx5, int, DataIndex, Box, Realx2)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2789,7 +2781,7 @@ ItoPlasmaStepper::reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
 {
   CH_TIME("ItoPlasmaStepper::reconcileParticles(EBAMRCellDatax4)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::reconcileParticles(EBAMRCellDatax4)";
+    pout() << m_name + "::reconcileParticles(EBAMRCellDatax4)";
   }
 
   CH_assert(a_newParticlesPerCell.getRealm() == m_particleRealm);
@@ -2815,7 +2807,7 @@ ItoPlasmaStepper::reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesP
 {
   CH_TIME("ItoPlasmaStepper::reconcileParticles(LevelData<EBCellFAB>x4, int)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::reconcileParticles(LevelData<EBCellFAB>x4, int)" << endl;
+    pout() << m_name + "::reconcileParticles(LevelData<EBCellFAB>x4, int)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -2852,7 +2844,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
 {
   CH_TIME("ItoPlasmaStepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)" << endl;
+    pout() << m_name + "::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)" << endl;
   }
 
   // TLDR: This is the main routine for generating new particles/photons after the chemistry advance have finished. We have
@@ -3070,7 +3062,7 @@ ItoPlasmaStepper::advanceReactionNetwork(const Real a_dt)
 {
   CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(a_dt)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::advanceReactionNetwork(a_dt)" << endl;
+    pout() << m_name + "::advanceReactionNetwork(a_dt)" << endl;
   }
 
   if (m_useNewReactionAlgorithm) {
@@ -3358,7 +3350,7 @@ ItoPlasmaStepper::computePhysicsDt() const noexcept
 {
   CH_TIME("ItoPlasmaStepper::computePhysicsDt()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computePhysicsDt()" << endl;
+    pout() << m_name + "::computePhysicsDt()" << endl;
   }
 
   // TLDR: This is done on the particle realm because that is where the densities are defined.
@@ -3373,7 +3365,7 @@ ItoPlasmaStepper::computePhysicsDt(const EBAMRCellData&         a_electricField,
 {
   CH_TIME("ItoPlasmaStepper::computePhysicsDt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computePhysicsDt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)" << endl;
+    pout() << m_name + "::computePhysicsDt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -3407,7 +3399,7 @@ ItoPlasmaStepper::computePhysicsDt(const LevelData<EBCellFAB>&         a_electri
 {
   CH_TIME("ItoPlasmaStepper::computePhysicsDt(LD<EBCellFAB>, Vector<LD<EBCellFAB> *>, int)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computePhysicsDt(LD<EBCellFAB>, Vector<LD<EBCellFAB> *>, int)" << endl;
+    pout() << m_name + "::computePhysicsDt(LD<EBCellFAB>, Vector<LD<EBCellFAB> *>, int)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumItoSpecies();
@@ -3444,7 +3436,7 @@ ItoPlasmaStepper::computePhysicsDt(const EBCellFAB&         a_electricField,
 {
   CH_TIME("ItoPlasmaStepper::computePhysicsDt(EBCellFAB, Vector<EBCellFAB*>, int, DataIndex, Box)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computePhysicsDt(EBCellFAB, Vector<EBCellFAB*>, int, DataIndex, Box)" << endl;
+    pout() << m_name + "::computePhysicsDt(EBCellFAB, Vector<EBCellFAB*>, int, DataIndex, Box)" << endl;
   }
 
   Real minDt = std::numeric_limits<Real>::max();
@@ -3524,7 +3516,7 @@ ItoPlasmaStepper::advancePhotons(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::advancePhotons(Real)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::advancePhotons(Real)" << endl;
+    pout() << m_name + "::advancePhotons(Real)" << endl;
   }
 
   // TLDR: This will add the source photons to the "bulk" photons and then advance them. If the
@@ -3570,7 +3562,7 @@ ItoPlasmaStepper::sortPhotonsByCell(const McPhoto::WhichContainer a_which) noexc
 {
   CH_TIME("ItoPlasmaStepper::sortPhotonsByCell(McPhoto::WhichContainer)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::sortPhotonsByCell(McPhoto::WhichContainer)" << endl;
+    pout() << m_name + "::sortPhotonsByCell(McPhoto::WhichContainer)" << endl;
   }
 
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
@@ -3583,7 +3575,7 @@ ItoPlasmaStepper::sortPhotonsByPatch(const McPhoto::WhichContainer a_which) noex
 {
   CH_TIME("ItoPlasmaStepper::sortPhotonsByPatch(McPhoto::WhichContainer)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::sortPhotonsByPatch(McPhoto::WhichContainer)" << endl;
+    pout() << m_name + "::sortPhotonsByPatch(McPhoto::WhichContainer)" << endl;
   }
 
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
@@ -3618,7 +3610,7 @@ ItoPlasmaStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
 {
   CH_TIME("ItoPlasmaStepper::loadBalanceBoxes");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::loadBalanceBoxes" << endl;
+    pout() << m_name + "::loadBalanceBoxes" << endl;
   }
 
   if (m_loadBalance && a_realm == m_particleRealm) {
@@ -3634,7 +3626,7 @@ ItoPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_leve
 {
   CH_TIME("ItoPlasmaStepper::getCheckpointLoads(...)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::getCheckpointLoads(...)" << endl;
+    pout() << m_name + "::getCheckpointLoads(...)" << endl;
   }
 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(a_realm)[a_level];
@@ -3687,7 +3679,7 @@ ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int>>&             a_pr
 {
   CH_TIME("ItoPlasmaStepper::loadBalanceParticleRealm(...)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::loadBalanceParticleRealm(...)" << endl;
+    pout() << m_name + "::loadBalanceParticleRealm(...)" << endl;
   }
 
   // Decompose the DisjointBoxLayout
@@ -3742,7 +3734,7 @@ ItoPlasmaStepper::getLoadBalanceSolvers() const noexcept
 {
   CH_TIME("ItoPlasmaStepper::getLoadBalanceSolvers()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::getLoadBalanceSolvers()" << endl;
+    pout() << m_name + "::getLoadBalanceSolvers()" << endl;
   }
 
   Vector<RefCountedPtr<ItoSolver>> loadBalanceProxySolvers;
@@ -3765,7 +3757,7 @@ ItoPlasmaStepper::computeEdotJSource(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeEdotJSource(a_dt)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeEdotJSource(a_dt)" << endl;
+    pout() << m_name + "::computeEdotJSource(a_dt)" << endl;
   }
 
   CH_assert(a_dt > 0.0);
@@ -3786,7 +3778,7 @@ ItoPlasmaStepper::computeEdotJSource() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeEdotJSource()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeEdotJSource()" << endl;
+    pout() << m_name + "::computeEdotJSource()" << endl;
   }
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -3841,7 +3833,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO() noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO()");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeEdotJSourceNWO()" << endl;
+    pout() << m_name + "::computeEdotJSourceNWO()" << endl;
   }
 
   DataOps::setValue(m_EdotJ, 0.0);
@@ -3894,7 +3886,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO2(a_dt)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeEdotJSourceNWO2(a_dt)" << endl;
+    pout() << m_name + "::computeEdotJSourceNWO2(a_dt)" << endl;
   }
 
   DataOps::setValue(m_EdotJ, 0.0);
@@ -3984,7 +3976,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO3(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO3(a_dt)");
   if (m_verbosity > 5) {
-    pout() << "ItoPlasmaStepper::computeEdotJSourceNWO3(a_dt)" << endl;
+    pout() << m_name + "::computeEdotJSourceNWO3(a_dt)" << endl;
   }
 
   CH_assert(a_dt > 0.0);

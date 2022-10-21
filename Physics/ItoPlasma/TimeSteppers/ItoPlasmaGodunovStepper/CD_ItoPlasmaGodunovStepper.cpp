@@ -27,6 +27,8 @@ ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>
   CH_TIME("ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper");
 
   m_name = "ItoPlasmaGodunovStepper";
+
+  this->parseOptions();
 }
 
 ItoPlasmaGodunovStepper::~ItoPlasmaGodunovStepper()
@@ -151,6 +153,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
 
   // ====== BEGIN TRANSPORT STEP ======
   timer.startEvent("Particle/field advancement");
+  
   // Setup runtime storage (requirements change with algorithm)
   this->setRuntimeParticleStorage();
 
