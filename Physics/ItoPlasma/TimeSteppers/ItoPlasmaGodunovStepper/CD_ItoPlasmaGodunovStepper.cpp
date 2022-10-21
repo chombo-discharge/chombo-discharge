@@ -144,6 +144,10 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
     pout() << m_name + "::advance" << endl;
   }
 
+  // Previous time step is needed when regridding.
+  m_prevDt = a_dt;
+
+  // ====== BEGIN TRANSPORT STEP ======
   // Setup runtime storage (requirements change with algorithm)
   this->setRuntimeParticleStorage();
 
@@ -155,6 +159,8 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
     break;
   }
   case WhichAlgorithm::Trapezoidal: {
+    MayDay::Warning("ItoPlasmaGodunovStepper::advance -- algorithm is 'trapezoidal' but this is a WIP");
+
     this->advanceParticlesTrapezoidal(a_dt);
 
     break;
@@ -166,14 +172,11 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
   }
 
-  // Remove the run-time configurable particle storage.
+  // Remove the run-time configurable particle storage. It is no longer needed.
   this->resetRuntimeParticleStorage();
+  // ====== END TRANSPORT STEP ======
 
-  // Compute current and relaxation time.
-  this->computeCurrentDensity(m_currentDensity);
-  const Real relaxTime = this->computeRelaxationTime(); // This is for the restricting the next step.
-
-  // Do the radiative transfer advance.
+  // Photon transport
   this->advancePhotons(a_dt);
 
   // If we are using the LEA, we must compute the Ohmic heating term. This must be done
@@ -212,6 +215,9 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   // Prepare for the next time step
   this->computeItoVelocities();
   this->computeItoDiffusion();
+
+  // Compute the current density (mostly for I/O purposes).
+  this->computeCurrentDensity(m_currentDensity);
 
   return a_dt;
 }
@@ -291,21 +297,42 @@ ItoPlasmaGodunovStepper::setRuntimeParticleStorage() noexcept
   if (m_verbosity > 5) {
     pout() << m_name + "::setupRuntimeParticleStorage" << endl;
   }
-#if 0
+
+  unsigned int numExtraVect = 0;
+
   switch (m_algorithm) {
-  case WhichAlgorithm::EulerMaruyama:
-    ItoParticle::setNumRuntimeVectors(1);
+  case WhichAlgorithm::EulerMaruyama: {
+    numExtraVect = 1;
+
     break;
-  case WhichAlgorithm::Trapezoidal:
-    ItoParticle::setNumRuntimeVectors(2); // For V^k and the diffusion hop.
-    break;
-  default:
-    MayDay::Abort("ItoPlasmaGodunovStepper::setRuntimeParticleStorage - logic bust");
   }
-#else
-  MayDay::Error(
-    "ItoPlasmaGodunovStepper::setRuntimeParticleStorage -- need to figure out how to add more fields to ItoParticle");
-#endif
+  case WhichAlgorithm::Trapezoidal: {
+    numExtraVect = 2;
+
+    break;
+  }
+  default: {
+    MayDay::Abort("ItoPlasmaGodunovStepper::setRuntimeParticleStorage - logic bust");
+
+    break;
+  }
+  }
+
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      ParticleData<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
+
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        List<ItoParticle>& patchParticles = particles[dit()].listItems();
+
+        for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
+          lit().setRuntimeStorage(0, numExtraVect);
+        }
+      }
+    }
+  }
 }
 
 void
@@ -314,6 +341,22 @@ ItoPlasmaGodunovStepper::resetRuntimeParticleStorage() noexcept
   CH_TIME("ItoPlasmaGodunovStepper::resetRuntimeParticleStorage");
   if (m_verbosity > 5) {
     pout() << m_name + "::resetRuntimeParticleStorage" << endl;
+  }
+
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      ParticleData<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
+
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        List<ItoParticle>& patchParticles = particles[dit()].listItems();
+
+        for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
+          lit().setRuntimeStorage(0, 0);
+        }
+      }
+    }
   }
 }
 
@@ -727,16 +770,16 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
     const int idx = solverIt.index();
     const int Z   = species->getChargeNumber();
 
-    if(Z > 0 && solver->isMobile()) {
+    if (Z > 0 && solver->isMobile()) {
       const ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-	const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
 
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-	  const List<ItoParticle>& patchParticles = solverParticles[lvl][dit()].listItems();
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          const List<ItoParticle>& patchParticles = solverParticles[lvl][dit()].listItems();
 
-	  List<PointParticle>& pointParticles = (*a_conductivityParticles[idx])[lvl][dit()].listItems();
+          List<PointParticle>& pointParticles = (*a_conductivityParticles[idx])[lvl][dit()].listItems();
 
           for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
             const ItoParticle& p        = lit();
@@ -753,7 +796,8 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
 }
 
 void
-ItoPlasmaGodunovStepper::copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles) noexcept
+ItoPlasmaGodunovStepper::copyRhoDaggerParticles(
+  Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::copyRhoDaggerParticles");
   if (m_verbosity > 5) {
@@ -768,26 +812,26 @@ ItoPlasmaGodunovStepper::copyRhoDaggerParticles(Vector<ParticleContainer<PointPa
     const int Z   = species->getChargeNumber();
 
     if (Z != 0) {
-      const ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);    
+      const ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-	const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
 
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-	  const List<ItoParticle>& patchParticles = solverParticles[lvl][dit()].listItems();	
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+          const List<ItoParticle>& patchParticles = solverParticles[lvl][dit()].listItems();
 
-	  List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][dit()].listItems();
+          List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][dit()].listItems();
 
-	  pointParticles.clear();
+          pointParticles.clear();
 
-	  for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
-	    const ItoParticle& p      = lit();
-	    const RealVect&    pos    = p.position();
-	    const Real&        weight = p.weight();
+          for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
+            const ItoParticle& p      = lit();
+            const RealVect&    pos    = p.position();
+            const Real&        weight = p.weight();
 
-	    pointParticles.add(PointParticle(pos, weight));
-	  }
-	}
+            pointParticles.add(PointParticle(pos, weight));
+          }
+        }
       }
     }
   }
@@ -816,38 +860,36 @@ ItoPlasmaGodunovStepper::computeRegridRho() noexcept
 }
 
 void
-ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
+ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama");
   if (m_verbosity > 5) {
     pout() << m_name + "::advanceParticlesEulerMaruyama" << endl;
   }
 
-  m_prevDt = a_dt; // Needed for regrids.
-
-  // 1. Store X^k positions.
+  // Store X^k positions.
   this->setOldPositions();
 
-  // 2. Diffuse the particles. This copies onto m_rhoDaggerParticles and stores the hop on the full particles.
+  // Diffuse the particles. This copies onto m_rhoDaggerParticles and stores the hop on the full particles.
   this->diffuseParticlesEulerMaruyama(m_rhoDaggerParticles, a_dt);
   this->remapPointParticles(m_rhoDaggerParticles, SpeciesSubset::AllDiffusive);
 
-  // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch.
-  this->copyConductivityParticles(m_conductivityParticles); // Sets particle "weights" = w*mu
-
-  // Compute conductivity on mesh
+  // Compute the conductivity on the mesh. This deposits q_e * Z * w * mu on the mesh.
+  this->copyConductivityParticles(m_conductivityParticles);
   this->computeConductivities(m_conductivityParticles); // Deposits q_e*Z*w*mu on the mesh
 
-  // Setup Poisson solver
-  this->setupSemiImplicitPoisson(a_dt); // Multigrid setup
+  // Set up the semi-implicit Poisson solver with the computed conductivities.
+  this->setupSemiImplicitPoisson(a_dt);
 
-  // Compute space charge density
-  // Diffusive should be enough because state is not changed for others.
+  // Compute space charge density arising from the new particle positions X^k + sqrt(2*D*dt)*W. Only need to
+  // do the diffusive and charged species.
   this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::AllDiffusive);
 
-  this->solvePoisson(); // Solve the stinking equation.
+  // Solve the stinking equation.
+  this->solvePoisson();
 
-  // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update.
+  // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
+  // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
 #if 1 // This is what the algorithm says.
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
@@ -855,29 +897,30 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt)
   this->computeItoVelocities();
 #endif
 
+  // Finalize the Euler-Maruyama update.
   this->stepEulerMaruyama(a_dt);
-
   this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
 
-  // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
-  const bool delete_eb_particles = true;
-  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, delete_eb_particles);
+  // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
+  const bool deleteParticles = true;
+  this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
   this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
 
-  // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
+  // Deposit particles on the mesh.
+  // NOTE: Not necessary unless we use LFA...?
   this->depositParticles(SpeciesSubset::AllMobileOrDiffusive);
 }
 
 void
-ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger,
-                                                       const Real                                 a_dt)
+ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles,
+                                                       const Real                                 a_dt) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama");
   if (m_verbosity > 5) {
     pout() << m_name + "::diffuseParticlesEulerMaruyama" << endl;
   }
 
-  this->clearPointParticles(a_rho_dagger, SpeciesSubset::All);
+  this->clearPointParticles(a_rhoDaggerParticles, SpeciesSubset::All);
 
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<ItoSolver>&        solver  = solverIt();
@@ -887,51 +930,32 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
 
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
-
-    const Real f = mobile ? 1.0 : 0.0;    // Multiplication factor for mobility
-    const Real g = diffusive ? 1.0 : 0.0; // Multiplication factor for diffusion
+    const int  Z         = species->getChargeNumber();
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_particleRealm)[lvl];
       ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        List<ItoParticle>&   itoParticles   = particles[dit()].listItems();
+        List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][dit()].listItems();
 
-        List<ItoParticle>&   ItoParticles   = particles[dit()].listItems();
-        List<PointParticle>& pointParticles = (*a_rho_dagger[idx])[lvl][dit()].listItems();
+        for (ListIterator<ItoParticle> lit(itoParticles); lit.ok(); ++lit) {
+          ItoParticle&    p      = lit();
+          const Real&     weight = p.weight();
+          const RealVect& pos    = p.position();
 
-        if (diffusive) {
-          for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit) {
-            ItoParticle&    p      = lit();
-            const Real      factor = g * sqrt(2.0 * p.diffusion() * a_dt);
-            const Real&     weight = p.weight();
-            const RealVect& pos    = p.position();
-#if 0
-	    RealVect&       hop    = p.runtimeVector(0);
-            hop                    = factor * solver->randomGaussian();
-
-
-            // Add simpler particle
-            pointParticles.add(PointParticle(pos + hop, weight));
-#else
-            MayDay::Error("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruayma -- runtime stuff");
-#endif
+          // Compute a particle hop and store it on the run-time storage.
+          RealVect& hop = p.runtimeVect(0);
+          if (diffusive) {
+            hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
           }
-        }
-        else { // Splitting up diffusion and non-diffusion because I dont want to generate random numbers where they're not required...
-          for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit) {
-            ItoParticle&    p      = lit();
-            const Real&     weight = p.weight();
-            const RealVect& pos    = p.position();
-#if 0
-	    RealVect&       hop  = p.runtimeVector(0);
-            hop                  = RealVect::Zero;
+          else {
+            hop = RealVect::Zero;
+          }
 
-            // Add simpler particle
-            pointParticles.add(PointParticle(pos, weight));
-#else
-            MayDay::Error("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruayma -- runtime stuff");
-#endif
+          if (Z != 0) {
+            pointParticles.add(PointParticle(pos + hop, weight));
           }
         }
       }
@@ -940,7 +964,7 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
 }
 
 void
-ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt)
+ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::stepEulerMaruyama");
   if (m_verbosity > 5) {
@@ -953,29 +977,23 @@ ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt)
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
 
-    const Real f = mobile ? 1.0 : 0.0;
+    const Real f = mobile ? a_dt : 0.0;
     const Real g = diffusive ? 1.0 : 0.0;
 
     if (mobile || diffusive) {
-
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
         const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_particleRealm)[lvl];
         ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-        for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
           List<ItoParticle>& particleList = particles[dit()].listItems();
 
           for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
             ItoParticle& p = lit();
 
-            // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
-#if 0
-	    const RealVect& hop = p.runtimeVector(0);
-            p.position()        = p.oldPosition() + f * p.velocity() * a_dt + g * hop;
-#else
-            MayDay::Error("ItoPlasmaGodunovStepper::stopEulerMaruyama -- runtime stuff");
-#endif
+            // Add in the diffusion hop and advective contribution.
+            const RealVect& hop = p.runtimeVect(0);
+            p.position()        = p.oldPosition() + f * p.velocity() + g * hop;
           }
         }
       }
@@ -1042,7 +1060,7 @@ ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt)
 }
 
 void
-ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger,
+ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles,
                                                  const Real                                 a_dt)
 {
   CH_TIME("ItoPlasmaGodunovStepper::preTrapezoidalPredictor");
@@ -1066,15 +1084,15 @@ ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<PointP
       const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_particleRealm)[lvl];
       ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
-        List<ItoParticle>&   ItoParticles   = particles[dit()].listItems();
-        List<PointParticle>& pointParticles = (*a_rho_dagger[idx])[lvl][dit()].listItems();
+        List<ItoParticle>&   itoParticles   = particles[dit()].listItems();
+        List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][dit()].listItems();
 
         pointParticles.clear();
 
         // Store the diffusion hop, and add the godunov particles
-        for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit) {
+        for (ListIterator<ItoParticle> lit(itoParticles); lit.ok(); ++lit) {
           ItoParticle&    p      = lit();
           const Real      factor = sqrt(2.0 * p.diffusion() * a_dt);
           const RealVect  hop    = factor * solver->randomGaussian();
@@ -1120,7 +1138,7 @@ ItoPlasmaGodunovStepper::trapezoidalPredictor(const Real a_dt)
         const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_particleRealm)[lvl];
         ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-        for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
           List<ItoParticle>& particleList = particles[dit()].listItems();
 
@@ -1144,7 +1162,7 @@ ItoPlasmaGodunovStepper::trapezoidalPredictor(const Real a_dt)
 }
 
 void
-ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger,
+ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles,
                                                  const Real                                 a_dt)
 {
   CH_TIME("ItoPlasmaGodunovStepper::preTrapezoidalCorrector");
@@ -1168,15 +1186,15 @@ ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<PointP
       const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_particleRealm)[lvl];
       ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
-        List<ItoParticle>&   ItoParticles   = particles[dit()].listItems();
-        List<PointParticle>& pointParticles = (*a_rho_dagger[idx])[lvl][dit()].listItems();
+        List<ItoParticle>&   itoParticles   = particles[dit()].listItems();
+        List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][dit()].listItems();
 
         pointParticles.clear();
 
         // Store the diffusion hop, and add the godunov particles
-        for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit) {
+        for (ListIterator<ItoParticle> lit(itoParticles); lit.ok(); ++lit) {
           ItoParticle& p = lit();
 
           const Real&     weight = p.weight();
@@ -1220,7 +1238,7 @@ ItoPlasmaGodunovStepper::trapezoidalCorrector(const Real a_dt)
         const DisjointBoxLayout&   dbl       = m_amr->getGrids(m_particleRealm)[lvl];
         ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
-        for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+        for (DataIterator dit(dbl); dit.ok(); ++dit) {
 
           List<ItoParticle>& particleList = particles[dit()].listItems();
 

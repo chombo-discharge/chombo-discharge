@@ -163,16 +163,18 @@ namespace Physics {
 	@param[in]    a_subset    Particle subset to remap.
       */
       virtual void
-      remapPointParticles(Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_subset) noexcept;
+      remapPointParticles(Vector<ParticleContainer<PointParticle>*>& a_particles,
+                          const SpeciesSubset                        a_subset) noexcept;
 
       /*!
 	@brief Deposit the input point particles on the mesh
 	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
 	@param[in]    a_subset    Particle subset to remap. 
 	@note This deposits into the ItoSolver m_phi data. 
-      */     
+      */
       virtual void
-      depositPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_subset) noexcept;
+      depositPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
+                            const SpeciesSubset                              a_subset) noexcept;
 
       /*!
 	@brief Clear the input particle data holders
@@ -180,7 +182,8 @@ namespace Physics {
 	@param[in]    a_subset    Particle subset to remap. 
       */
       virtual void
-      clearPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles, const SpeciesSubset a_subset) noexcept;
+      clearPointParticles(const Vector<ParticleContainer<PointParticle>*>& a_particles,
+                          const SpeciesSubset                              a_subset) noexcept;
 
       /*!
 	@brief Compute all conductivities (cell, face, and EB) from the input point particles
@@ -197,7 +200,7 @@ namespace Physics {
       */
       virtual void
       computeCellConductivity(EBAMRCellData&                                   a_conductivityCell,
-			      const Vector<ParticleContainer<PointParticle>*>& a_particles) noexcept;
+                              const Vector<ParticleContainer<PointParticle>*>& a_particles) noexcept;
 
       /*!
 	@brief Compute the cell-centered conductivity
@@ -235,25 +238,42 @@ namespace Physics {
 
       /*!
 	@brief Compute the "rho dagger" space charge anew during the regrid step. 
-      */      
+      */
       virtual void
       computeRegridRho() noexcept;
 
-      // Specific routines for Euler-Maruyama
-      void
-      advanceParticlesEulerMaruyama(const Real a_dt);
-      void
-      diffuseParticlesEulerMaruyama(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger, const Real a_dt);
-      void
-      stepEulerMaruyama(const Real a_dt);
+      /*!
+	@brief Advance the particles using the Euler-Maruyama scheme
+	@param[in] a_dt Time step
+      */
+      virtual void
+      advanceParticlesEulerMaruyama(const Real a_dt) noexcept;
+
+      /*!
+	@brief Perform the diffusive advance in the Euler-Maruyama step.
+	@details This computes the diffusion hop onto run-time enabled storage on the ItoParticles. We also store the
+	"rho dagger" particles which correspond to the position of the charged particles after the diffusionhop. 
+      */
+      virtual void
+      diffuseParticlesEulerMaruyama(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles,
+                                    const Real                                 a_dt) noexcept;
+
+      /*!
+	@brief Step the particles according to the regular Euler-Maruyama scheme.
+	@param[in] a_dt Time step. 
+	@details This sets X^(k+1) = X^k + a_dt * V + sqrt(2*D*a_dt) * W
+	@note The hop MUST have been stored on the particle run-time storage 
+      */
+      virtual void
+      stepEulerMaruyama(const Real a_dt) noexcept;
 
       // Specific routines for trapezoidal integration
       void
       advanceParticlesTrapezoidal(const Real a_dt);
       void
-      preTrapezoidalPredictor(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger, const Real a_dt);
+      preTrapezoidalPredictor(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles, const Real a_dt);
       void
-      preTrapezoidalCorrector(Vector<ParticleContainer<PointParticle>*>& a_rho_dagger, const Real a_dt);
+      preTrapezoidalCorrector(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles, const Real a_dt);
       void
       trapezoidalPredictor(const Real a_dt);
       void

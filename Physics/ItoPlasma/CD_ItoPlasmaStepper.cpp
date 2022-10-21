@@ -71,6 +71,7 @@ ItoPlasmaStepper::parseOptions()
   }
 
   this->parseVerbosity();
+  this->parsePlotVariables();
   this->parseSuperParticles();
   this->parseDualGrid();
   this->parseLoadBalance();
@@ -80,7 +81,7 @@ ItoPlasmaStepper::parseOptions()
   m_ito->parseOptions();
   m_fieldSolver->parseOptions();
   m_rte->parseOptions();
-  m_sigmaSolver->parseOptions();  
+  m_sigmaSolver->parseOptions();
 }
 
 void
@@ -92,6 +93,7 @@ ItoPlasmaStepper::parseRuntimeOptions()
   }
 
   this->parseVerbosity();
+  this->parsePlotVariables();
   this->parseSuperParticles();
   this->parseLoadBalance();
   this->parseTimeStepRestrictions();
@@ -115,6 +117,17 @@ ItoPlasmaStepper::parseVerbosity() noexcept
 
   pp.get("verbosity", m_verbosity);
   pp.get("profile", m_profile);
+}
+
+void
+ItoPlasmaStepper::parsePlotVariables() noexcept
+{
+  CH_TIME("ItoPlasmaStepper::parsePlotVariables");
+  if (m_verbosity > 5) {
+    pout() << "ItoPlasmaStepper::parsePlotVariables" << endl;
+  }
+
+  ParmParse pp(m_name.c_str());
 }
 
 void

@@ -1349,6 +1349,12 @@ namespace Physics {
       */
       virtual void
       parseParametersEB() noexcept;
+
+      /*!
+	@brief Parse plot variables
+      */
+      virtual void
+      parsePlotVariables() noexcept;
     };
   } // namespace ItoPlasma
 };  // namespace Physics
