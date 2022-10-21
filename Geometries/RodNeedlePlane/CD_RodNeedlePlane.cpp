@@ -170,8 +170,8 @@ RodNeedlePlane::definePlane()
   pp.getarr("point", v, 0, SpaceDim);
   point = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  RefCountedPtr<BaseIF> bif =
-    RefCountedPtr<BaseIF>(new RoundedCylinderIF(point, point - thickness * normal, radius, curve, false));
+  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF>(
+    new RoundedCylinderIF(point, point - thickness * normal, radius, curve, false));
 
   m_electrodes.push_back(Electrode(bif, live));
 }
