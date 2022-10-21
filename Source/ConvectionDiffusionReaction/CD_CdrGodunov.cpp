@@ -101,7 +101,7 @@ CdrGodunov::computeAdvectionDt()
         // Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far.
         auto regularKernel = [&](const IntVect& iv) -> void {
           Real velMax = 0.0;
-          if (!ebisBox.isCovered(iv)) {
+          if (ebisBox.isRegular(iv)) {
             for (int dir = 0; dir < SpaceDim; dir++) {
               velMax = std::max(velMax, std::abs(veloReg(iv, dir)));
             }
@@ -238,7 +238,7 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
     DataOps::incr(m_scratch, m_source, 1.0);
   }
 
-  m_amr->averageDown(m_scratch, m_realm, m_phase);
+  m_amr->conservativeAverage(m_scratch, m_realm, m_phase);
   m_amr->interpGhost(m_scratch, m_realm, m_phase);
 
   // This code extrapolates the cell-centered state to face centers on every grid level, in both space and time.

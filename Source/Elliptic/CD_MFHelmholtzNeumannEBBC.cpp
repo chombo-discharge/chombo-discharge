@@ -86,12 +86,13 @@ MFHelmholtzNeumannEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
-                                               EBCellFAB&       a_Lphi,
-                                               const EBCellFAB& a_phi,
-                                               const DataIndex& a_dit,
-                                               const Real&      a_beta,
-                                               const bool&      a_homogeneousPhysBC) const
+MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                                               EBCellFAB&             a_Lphi,
+                                               const EBCellFAB&       a_phi,
+                                               const BaseIVFAB<Real>& a_Bcoef,
+                                               const DataIndex&       a_dit,
+                                               const Real&            a_beta,
+                                               const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME("MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
@@ -113,7 +114,7 @@ MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVof
       // beta is not.
       const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
       const Real     areaFrac  = ebisbox.bndryArea(vof);
-      const Real     B         = m_multByBco ? (*m_Bcoef)[a_dit](vof, m_comp) : 1;
+      const Real     B         = m_multByBco ? a_Bcoef(vof, m_comp) : 1;
       const Real     kappaDivF = a_beta * B * value * areaFrac / m_dx;
 
       a_Lphi(vof, m_comp) += kappaDivF;

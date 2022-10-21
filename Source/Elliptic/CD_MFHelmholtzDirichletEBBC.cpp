@@ -79,6 +79,14 @@ MFHelmholtzDirichletEBBC::setWeight(const int a_weight)
 }
 
 void
+MFHelmholtzDirichletEBBC::setDomainDropOrder(const int a_domainSize)
+{
+  CH_TIME("MFHelmholtzDirichletEBBC::setDomainDropOrder()");
+
+  m_domainDropOrder = a_domainSize;
+}
+
+void
 MFHelmholtzDirichletEBBC::defineSinglePhase()
 {
   CH_TIME("MFHelmholtzDirichletEBBC::defineSinglePhase()");
@@ -96,8 +104,15 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
   }
 
   // TLDR: We compute the stencil for reconstructing dphi/dn on the boundary. This is done with least squares reconstruction.
+  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const ProblemDomain&     domain = m_eblg.getDomain();
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  // Drop order if we must
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (domain.size()[dir] <= m_domainDropOrder) {
+      m_order = 1;
+    }
+  }
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box         box     = dbl[dit()];
@@ -105,15 +120,12 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
-
-    const BaseIVFAB<Real>& Bcoef = (*m_Bcoef)[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
 
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
-      const Real B        = Bcoef(vof, m_comp);
 
       int                         order;
       bool                        foundStencil = false;
@@ -158,8 +170,8 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
         stencils(vof, m_comp) = pairSten.second;
 
         // Stencil and weight must also be scaled by the B-coefficient, dx (because it's used in kappa*Div(F)) and the area fraction.
-        weights(vof, m_comp) *= B * areaFrac / m_dx;
-        stencils(vof, m_comp) *= B * areaFrac / m_dx;
+        weights(vof, m_comp) *= areaFrac / m_dx;
+        stencils(vof, m_comp) *= areaFrac / m_dx;
       }
       else {
         // Dead cell. No flux.
@@ -173,12 +185,13 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
-                                                 EBCellFAB&       a_Lphi,
-                                                 const EBCellFAB& a_phi,
-                                                 const DataIndex& a_dit,
-                                                 const Real&      a_beta,
-                                                 const bool&      a_homogeneousPhysBC) const
+MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                                                 EBCellFAB&             a_Lphi,
+                                                 const EBCellFAB&       a_phi,
+                                                 const BaseIVFAB<Real>& a_Bcoef,
+                                                 const DataIndex&       a_dit,
+                                                 const Real&            a_beta,
+                                                 const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME("MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
@@ -189,7 +202,9 @@ MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseV
   if (!a_homogeneousPhysBC) {
 
     auto kernel = [&](const VolIndex& vof) -> void {
-      Real value;
+      Real value = 0.0;
+
+      const Real B = a_Bcoef(vof, m_comp);
 
       if (m_useConstant) {
         value = m_constantValue;
@@ -203,7 +218,7 @@ MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseV
         MayDay::Error("MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase - logic bust");
       }
 
-      a_Lphi(vof, m_comp) += a_beta * value * m_boundaryWeights[a_dit](vof, m_comp);
+      a_Lphi(vof, m_comp) += a_beta * B * value * m_boundaryWeights[a_dit](vof, m_comp);
     };
 
     BoxLoops::loop(a_singlePhaseVofs, kernel);

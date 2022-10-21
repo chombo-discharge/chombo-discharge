@@ -13,6 +13,7 @@
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
 #include <LoadBalance.H>
+#include <BaseIVFactory.H>
 #include <CH_Timer.H>
 
 // Our includes
@@ -216,22 +217,6 @@ EBHelmholtzOpFactory::defineMultigridLevels()
           RefCountedPtr<LevelData<BaseIVFAB<Real>>> coarBcoefIrreg(
             new LevelData<BaseIVFAB<Real>>(gridsCoar, m_nComp, nghost * IntVect::Unit, irreFactory));
 
-          // These are the fine coefficients which will be coarsened. Again, the coarsest level is at the back of the vector.
-          const LevelData<EBCellFAB>&       fineAcoef      = *m_mgAcoef[amrLevel].back();
-          const LevelData<EBFluxFAB>&       fineBcoef      = *m_mgBcoef[amrLevel].back();
-          const LevelData<BaseIVFAB<Real>>& fineBcoefIrreg = *m_mgBcoefIrreg[amrLevel].back();
-
-          // Coarsen the coefficients
-          this->coarsenCoefficients(*coarAcoef,
-                                    *coarBcoef,
-                                    *coarBcoefIrreg,
-                                    fineAcoef,
-                                    fineBcoef,
-                                    fineBcoefIrreg,
-                                    eblgCoar,
-                                    eblgFine,
-                                    mgRefRatio);
-
           m_mgLevelGrids[amrLevel].push_back(mgEblgCoar);
           m_mgAcoef[amrLevel].push_back(coarAcoef);
           m_mgBcoef[amrLevel].push_back(coarBcoef);
@@ -243,6 +228,92 @@ EBHelmholtzOpFactory::defineMultigridLevels()
     if (m_mgLevelGrids[amrLevel].size() <= 1) {
       m_hasMgLevels[amrLevel] = false;
     }
+  }
+
+  this->coarsenCoefficientsMG();
+}
+
+void
+EBHelmholtzOpFactory::coarsenCoefficientsMG()
+{
+  CH_TIME("EBHelmholtzOpFactory::coarsenCoefficientsMG");
+
+  constexpr int mgRefRat = 2;
+
+  for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++) {
+
+    if (m_hasMgLevels[amrLevel]) {
+      // In these vectors, mgAco[0] is the AMR level, mgAco[1] is a refinement 2 coarsening of mgAco[0], mgAco[2] is the coarsening of mgAco[1] and so on.
+      const AmrLevelGrids mgGrids = m_mgLevelGrids[amrLevel];
+
+      AmrCellData& mgAco      = m_mgAcoef[amrLevel];
+      AmrFluxData& mgBco      = m_mgBcoef[amrLevel];
+      AmrIrreData& mgBcoIrreg = m_mgBcoefIrreg[amrLevel];
+
+      for (int mgLevel = 0; mgLevel < mgGrids.size() - 1; mgLevel++) {
+        const EBLevelGrid& mflgCoar = *mgGrids[mgLevel + 1];
+        const EBLevelGrid& mflgFine = *mgGrids[mgLevel];
+
+        LevelData<EBCellFAB>&       coarAcoef      = *mgAco[mgLevel + 1];
+        LevelData<EBFluxFAB>&       coarBcoef      = *mgBco[mgLevel + 1];
+        LevelData<BaseIVFAB<Real>>& coarBcoefIrreg = *mgBcoIrreg[mgLevel + 1];
+
+        const LevelData<EBCellFAB>&       fineAcoef      = *mgAco[mgLevel];
+        const LevelData<EBFluxFAB>&       fineBcoef      = *mgBco[mgLevel];
+        const LevelData<BaseIVFAB<Real>>& fineBcoefIrreg = *mgBcoIrreg[mgLevel];
+
+        this->coarsenCoefficients(coarAcoef,
+                                  coarBcoef,
+                                  coarBcoefIrreg,
+                                  fineAcoef,
+                                  fineBcoef,
+                                  fineBcoefIrreg,
+                                  mflgCoar,
+                                  mflgFine,
+                                  mgRefRat);
+      }
+    }
+  }
+}
+
+void
+EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&             a_coarAcoef,
+                                          LevelData<EBFluxFAB>&             a_coarBcoef,
+                                          LevelData<BaseIVFAB<Real>>&       a_coarBcoefIrreg,
+                                          const LevelData<EBCellFAB>&       a_fineAcoef,
+                                          const LevelData<EBFluxFAB>&       a_fineBcoef,
+                                          const LevelData<BaseIVFAB<Real>>& a_fineBcoefIrreg,
+                                          const EBLevelGrid&                a_eblgCoar,
+                                          const EBLevelGrid&                a_eblgFine,
+                                          const int                         a_refRat)
+{
+  CH_TIME("EBHelmholtzOpFactory::coarsenCoefficients(...)");
+
+  const Interval interv(m_comp, m_comp);
+
+  if (a_refRat == 1) {
+    a_fineAcoef.copyTo(a_coarAcoef);
+    a_fineBcoef.copyTo(a_coarBcoef);
+    a_fineBcoefIrreg.copyTo(a_coarBcoefIrreg);
+  }
+  else {
+    EBCoarAve averageOp(a_eblgFine.getDBL(),
+                        a_eblgCoar.getDBL(),
+                        a_eblgFine.getEBISL(),
+                        a_eblgCoar.getEBISL(),
+                        a_eblgCoar.getDomain(),
+                        a_refRat,
+                        a_eblgCoar.getEBIS());
+
+    const Average average = Average::Arithmetic;
+
+    averageOp.averageData(a_coarAcoef, a_fineAcoef, interv, average);
+    averageOp.averageData(a_coarBcoef, a_fineBcoef, interv, average);
+    averageOp.averageData(a_coarBcoefIrreg, a_fineBcoefIrreg, interv, average);
+
+    a_coarAcoef.exchange();
+    a_coarBcoef.exchange();
+    a_coarBcoefIrreg.exchange();
   }
 }
 
@@ -333,46 +404,6 @@ EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid&       a_coarEblg,
   return hasCoarser;
 }
 
-void
-EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&             a_coarAcoef,
-                                          LevelData<EBFluxFAB>&             a_coarBcoef,
-                                          LevelData<BaseIVFAB<Real>>&       a_coarBcoefIrreg,
-                                          const LevelData<EBCellFAB>&       a_fineAcoef,
-                                          const LevelData<EBFluxFAB>&       a_fineBcoef,
-                                          const LevelData<BaseIVFAB<Real>>& a_fineBcoefIrreg,
-                                          const EBLevelGrid&                a_eblgCoar,
-                                          const EBLevelGrid&                a_eblgFine,
-                                          const int                         a_refRat)
-{
-  CH_TIME("EBHelmholtzOpFactory::coarsenCoefficients(...)");
-
-  const Interval interv(m_comp, m_comp);
-
-  if (a_refRat == 1) {
-    a_fineAcoef.copyTo(a_coarAcoef);
-    a_fineBcoef.copyTo(a_coarBcoef);
-    a_fineBcoefIrreg.copyTo(a_coarBcoefIrreg);
-  }
-  else {
-    EbCoarAve averageOp(a_eblgFine.getDBL(),
-                        a_eblgCoar.getDBL(),
-                        a_eblgFine.getEBISL(),
-                        a_eblgCoar.getEBISL(),
-                        a_eblgCoar.getDomain(),
-                        a_refRat,
-                        1,
-                        a_eblgCoar.getEBIS());
-
-    averageOp.average(a_coarAcoef, a_fineAcoef, interv);
-    averageOp.averageFaceData(a_coarBcoef, a_fineBcoef, interv);
-    averageOp.average(a_coarBcoefIrreg, a_fineBcoefIrreg, interv);
-
-    a_coarAcoef.exchange();
-    a_coarBcoef.exchange();
-    a_coarBcoefIrreg.exchange();
-  }
-}
-
 EBHelmholtzOp*
 EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly)
 {
@@ -406,7 +437,7 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
 
   RefCountedPtr<EBMultigridInterpolator> interpolator; // Only if defined on an AMR level
   RefCountedPtr<EBFluxRegister>          fluxReg;      // Only if defined on an AMR level
-  RefCountedPtr<EbCoarAve>               coarsener;    // Only if defined on an AMR level
+  RefCountedPtr<EBCoarAve>               coarsener;    // Only if defined on an AMR level
 
   RefCountedPtr<LevelData<EBCellFAB>>       Acoef;      // Always defined.
   RefCountedPtr<LevelData<EBFluxFAB>>       Bcoef;      // Always defined.

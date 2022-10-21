@@ -89,6 +89,7 @@ FieldSolverMultigrid.gmg_max_iter      = 32        # Maximum number of iteration
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10    # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2       # Solver hang
 FieldSolverMultigrid.gmg_min_cells     = 4         # Bottom drop
+FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2         # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 2         # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2         # Boundary condition order for jump conditions
@@ -133,8 +134,6 @@ CdrGodunov.gmg_smoother          = red_black               # Relaxation type. 'j
 McPhoto.instantaneous      = true          # Instantaneous transport or not
 McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical Photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
-McPhoto.pvr_buffer         = 0             # Buffer for PVR. 
-McPhoto.halo_buffer        = 1             # Halo region for particles. 
 McPhoto.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
 McPhoto.plt_vars           = phi src phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
 McPhoto.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 
@@ -153,6 +152,7 @@ McPhoto.source_type        = number        # 'number'       = Source term contai
                                             # 'volume_rate'  = Source terms contains the volumetric rate
                                             # 'rate'         = Source terms contains the rate
 McPhoto.deposition         = cic           # 'ngp'  = nearest grid point
+McPhoto.deposition_cf      = halo          # Coarse-fine deposition. Must be interp or halo
                                             # 'num'  = # of Photons per cell
                                             # 'cic'  = cloud-in-cell
                                             # 'tsc'  = triangle-shaped-cloud

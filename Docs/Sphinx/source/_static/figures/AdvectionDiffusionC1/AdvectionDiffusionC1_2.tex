@@ -1,0 +1,166 @@
+\documentclass[10pt]{article}
+\usepackage{pgfplots, siunitx}
+\usepackage{amsmath, amsfonts, amssymb, bm, color, graphicx, times}
+\usepackage{algorithm2e, nicefrac}
+\usepackage{filecontents}
+\usepackage[paperwidth=19.5cm,paperheight=15cm,lmargin=0in,rmargin=0in,tmargin=0.1in,bmargin=0.in]{geometry}
+\usepgfplotslibrary{fillbetween}
+
+\pgfplotsset{
+  compat=newest,
+  error_style/.style={
+    width=9.0cm,
+    height=7.0cm,
+    axis on top,
+    font=\footnotesize,
+    minor tick num=1,
+    xlabel=$N$ (grid cells),
+    ylabel=Solution error,
+    legend cell align=left,
+    legend style={at={(0.05,0.05)},yshift=1ex, anchor=south west, font=\scriptsize, legend columns=1, cells={align=center}}},
+  linf/.style={draw=red!90!black, thick, solid, mark repeat=1, mark=o, mark options={thin, mark size=2pt, solid, fill=white, fill opacity=1.0}},
+  l1/.style={draw=green!90!black, thick, solid, mark repeat=1, mark=square, mark options={thin, mark size=2pt, solid, fill=white, fill opacity=1.0}},
+  l2/.style={draw=blue!90!black, thick, solid, mark repeat=1, mark=triangle, mark options={thin, mark size=3pt, solid, fill=white, fill opacity=1.0}},
+  o1/.style={draw=black, thick, densely dotted},
+  o2/.style={draw=black, thick, thick}
+}
+
+\begin{filecontents*}{none.dat}
+16	0.0692571	0.00452276	0.0122055
+32	0.0480105	0.00316675	0.00851419
+64	0.0301436	0.00191685	0.00526295
+128	0.017296	0.00105408	0.00296974
+256	0.00934837	0.00055645	0.00158986
+\end{filecontents*}
+
+\begin{filecontents*}{minmod.dat}
+16	0.0589291	0.00343632	0.00980101
+32	0.0243803	0.00127514	0.00358003
+64	0.00896093	0.000422582	0.00119412
+128	0.00313776	0.0001281	0.000369775
+256	0.000906968	3.53716e-05	0.000104123
+\end{filecontents*}
+
+\begin{filecontents*}{mc.dat}
+# cells	Linf error	L1 error	L2 error
+16	0.0513051	0.00234528	0.00735967
+32	0.0154261	0.000683199	0.00213038
+64	0.00710947	0.000192875	0.00059265
+128	0.00237269	5.1277e-05	0.000153976
+256	0.000641118	1.59583e-05	4.67443e-05
+\end{filecontents*}
+
+\begin{filecontents*}{superbee.dat}
+# cells	Linf error	L1 error	L2 error  
+16	0.0502863	0.0022882	0.00705499
+32	0.0336034	0.000928206	0.0031594
+64	0.0154308	0.000574282	0.00179747
+128	0.00327815	0.000163348	0.000459379
+256	0.00108075	4.12908e-05	0.000116279
+\end{filecontents*}
+
+\begin{document}
+\begin{tikzpicture}
+
+  % Without limiter
+  \begin{axis}[
+      error_style,
+      xmode=log,
+      ymode=log,
+      xmin= 16,
+      xmax=256,
+      log basis x={2},    
+      alias=none,
+      title=No slope limiter]
+
+    \addplot[linf] table[x expr=\thisrowno{0}, y expr=\thisrowno{1}] {none.dat};
+    \addplot[l1] table[x expr=\thisrowno{0}, y expr=\thisrowno{2}] {none.dat};
+    \addplot[l2] table[x expr=\thisrowno{0}, y expr=\thisrowno{3}] {none.dat};
+    \addplot[o1][domain=16:256] {15/(16*x)};
+    \addplot[o2][domain=16:256] {15/(x*x)};    
+
+    \addlegendentry{$L_\infty$};
+    \addlegendentry{$L_1$};
+    \addlegendentry{$L_2$};
+    \addlegendentry{$\sim 1/\Delta x$};
+    \addlegendentry{$\sim 1/\Delta x^2$};
+  \end{axis}
+  \begin{axis}[
+      error_style,
+      at=(none.north east),
+      anchor=north west,
+      xshift=5em,
+      xmode=log,
+      ymode=log,
+      xmin= 16,
+      xmax=256,
+      log basis x={2},    
+      alias=minmod,
+      title=minmod limiter]
+
+    \addplot[linf] table[x expr=\thisrowno{0}, y expr=\thisrowno{1}] {minmod.dat};
+    \addplot[l1] table[x expr=\thisrowno{0}, y expr=\thisrowno{2}] {minmod.dat};
+    \addplot[l2] table[x expr=\thisrowno{0}, y expr=\thisrowno{3}] {minmod.dat};
+    \addplot[o1][domain=16:256] {15/(16*x)};
+    \addplot[o2][domain=16:256] {15/(x*x)};    
+
+    \addlegendentry{$L_\infty$};
+    \addlegendentry{$L_1$};
+    \addlegendentry{$L_2$};
+    \addlegendentry{$\sim 1/\Delta x$};
+    \addlegendentry{$\sim 1/\Delta x^2$};
+  \end{axis}
+  \begin{axis}[
+      error_style,
+      at=(none.south west),
+      anchor=north west,
+      yshift=-5em,
+      xmode=log,
+      ymode=log,
+      xmin= 16,
+      xmax=256,
+      log basis x={2},    
+      alias=mc,
+      title=Monotonized central difference limiter]
+
+    \addplot[linf] table[x expr=\thisrowno{0}, y expr=\thisrowno{1}] {mc.dat};
+    \addplot[l1] table[x expr=\thisrowno{0}, y expr=\thisrowno{2}] {mc.dat};
+    \addplot[l2] table[x expr=\thisrowno{0}, y expr=\thisrowno{3}] {mc.dat};
+    \addplot[o1][domain=16:256] {15/(16*x)};
+    \addplot[o2][domain=16:256] {15/(x*x)};    
+
+    \addlegendentry{$L_\infty$};
+    \addlegendentry{$L_1$};
+    \addlegendentry{$L_2$};
+    \addlegendentry{$\sim 1/\Delta x$};
+    \addlegendentry{$\sim 1/\Delta x^2$};
+  \end{axis}
+  \begin{axis}[
+      error_style,
+      at=(minmod.south west),
+      anchor=north west,
+      yshift=-5em,
+      xmode=log,
+      ymode=log,
+      xmin= 16,
+      xmax=256,
+      log basis x={2},    
+      alias=superbee,
+      title=Superbee limiter]
+
+    \addplot[linf] table[x expr=\thisrowno{0}, y expr=\thisrowno{1}] {superbee.dat};
+    \addplot[l1] table[x expr=\thisrowno{0}, y expr=\thisrowno{2}] {superbee.dat};
+    \addplot[l2] table[x expr=\thisrowno{0}, y expr=\thisrowno{3}] {superbee.dat};
+    \addplot[o1][domain=16:256] {15/(16*x)};
+    \addplot[o2][domain=16:256] {15/(x*x)};    
+
+    \addlegendentry{$L_\infty$};
+    \addlegendentry{$L_1$};
+    \addlegendentry{$L_2$};
+    \addlegendentry{$\sim 1/\Delta x$};
+    \addlegendentry{$\sim 1/\Delta x^2$};
+  \end{axis}      
+
+\end{tikzpicture}
+
+\end{document}

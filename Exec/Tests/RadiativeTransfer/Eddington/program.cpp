@@ -26,8 +26,8 @@ main(int argc, char* argv[])
   RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
 
   // Set up basic Poisson, potential = 1
-  auto timestepper =
-    RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(new RadiativeTransferStepper<EddingtonSP1>());
+  auto timestepper = RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(
+    new RadiativeTransferStepper<EddingtonSP1>());
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));

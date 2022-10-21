@@ -47,7 +47,7 @@ Tesselation::Tesselation()
   pp.get("z_coord", zCoord);
 
   // Read the PLY file and put it in a DCEL mesh.
-  auto m = EBGeometry::Parser::PLY<precision>::readIntoDCEL(filename);
+  auto m = EBGeometry::Parser::readIntoDCEL<precision>(filename);
 
   // Build the regular BVH tree. Use a quad-tree.
   constexpr int K    = 4;

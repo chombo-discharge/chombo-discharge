@@ -64,6 +64,9 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   m_time     = 0.0;
   m_dt       = 0.0;
 
+  // Default is always to do the coarsening
+  m_doCoarsening = true;
+
   // Parse some class options and create the output directories for the simulation.
   this->parseOptions();
 
@@ -128,8 +131,8 @@ Driver::getPlotVariableNames() const
     }
   }
   if (m_plotLevelset) {
-    plotVarNames.push_back("levelset_1");
-    plotVarNames.push_back("levelset_2");
+    plotVarNames.push_back("levelset_gas");
+    plotVarNames.push_back("levelset_solid");
   }
 
   return plotVarNames;
@@ -777,7 +780,7 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
       m_timeStep = 0;
     }
 
-    m_timeStepper->computeDt(m_dt, m_timeCode);
+    m_dt = m_timeStepper->computeDt();
     m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);
 
     bool isLastStep  = false;
@@ -809,8 +812,8 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
           // on levels (l-1);
           const int lmin =
             0; // Coarsest grid level that can change. Base level can also change (due to run-time parameters or load balancing).
-          const int lmax =
-            m_amr->getFinestLevel() + 1; // This means that if we refine, we can only add one level at a time.
+          const int lmax = m_amr->getFinestLevel() +
+                           1; // This means that if we refine, we can only add one level at a time.
 
           if (m_writeRegridFiles) {
             this->writePreRegridFile();
@@ -831,7 +834,7 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
 
       // Compute a time step for the TimeStepper::advance(...) method.
       if (!isFirstStep) {
-        m_timeStepper->computeDt(m_dt, m_timeCode);
+        m_dt = m_timeStepper->computeDt();
       }
       else { // In this case we already had one.
         isFirstStep = false;
@@ -1065,6 +1068,9 @@ Driver::parseOptions()
   this->parseGeometryGeneration();
   this->parseGeometryRefinement();
   this->parseIrregTagGrowth();
+
+  // Not a required thing.
+  pp.query("coarsening", m_doCoarsening);
 }
 
 void
@@ -1385,11 +1391,15 @@ Driver::setupGeometryOnly()
       EBIndexSpace::s_useMemoryLoadBalance = false;
     }
   }
+
+  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
-                                           m_amr->getNumberOfEbGhostCells());
+                                           m_amr->getNumberOfEbGhostCells(),
+                                           numCoarsenings);
   const Real t1 = Timer::wallClock();
   if (procID() == 0)
     std::cout << "geotime = " << t1 - t0 << std::endl;
@@ -1464,11 +1474,14 @@ Driver::setupFresh(const int a_initialRegrids)
     }
     m_computationalGeometry->useChomboShop();
   }
+
+  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
-                                           m_amr->getNumberOfEbGhostCells());
+                                           m_amr->getNumberOfEbGhostCells(),
+                                           numCoarsenings);
 
   // Register Realms
   m_timeStepper->setAmr(m_amr);
@@ -1537,9 +1550,6 @@ Driver::setupFresh(const int a_initialRegrids)
     m_timeStepper->initialData();            // Need to fill with initial data again.
   }
 
-  // Do post initialize stuff
-  m_timeStepper->postInitialize();
-
   // CellTagger
   if (!m_cellTagger.isNull()) {
     m_cellTagger->regrid();
@@ -1564,6 +1574,9 @@ Driver::setupFresh(const int a_initialRegrids)
       this->gridReport();
     }
   }
+
+  // Do post initialize stuff
+  m_timeStepper->postInitialize();
 }
 
 #ifdef CH_USE_HDF5
@@ -1594,11 +1607,15 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartF
       EBIndexSpace::s_useMemoryLoadBalance = false;
     }
   }
+
+  const int numCoarsenings = m_doCoarsening ? -1 : m_amr->getMaxAmrDepth();
+
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
                                            m_amr->getProbLo(),
                                            m_amr->getFinestDx(),
                                            m_amr->getMaxEbisBoxSize(),
-                                           m_amr->getNumberOfEbGhostCells());
+                                           m_amr->getNumberOfEbGhostCells(),
+                                           numCoarsenings);
 
   this->getGeometryTags(); // Get geometric tags.
 
@@ -1611,8 +1628,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartF
   m_amr->setBaseImplicitFunction(phase::solid, m_computationalGeometry->getSolidImplicitFunction());
 
   // Read checkpoint file
-  this->readCheckpointFile(
-    a_restartFile); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
+  this->readCheckpointFile(a_restartFile);
 
   // Time stepper does post checkpoint setup
   m_timeStepper->postCheckpointSetup();

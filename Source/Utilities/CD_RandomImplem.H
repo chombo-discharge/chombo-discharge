@@ -176,6 +176,63 @@ Random::get(T& a_distribution)
   return a_distribution(s_rng);
 }
 
+inline RealVect
+Random::randomPosition(const RealVect a_cellPos,
+                       const RealVect a_lo,
+                       const RealVect a_hi,
+                       const RealVect a_bndryCentroid,
+                       const RealVect a_bndryNormal,
+                       const Real     a_dx,
+                       const Real     a_kappa) noexcept
+{
+
+  RealVect pos;
+
+  if (a_kappa < 1.0) { // Rejection sampling.
+    pos = Random::randomPosition(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
+  }
+  else { // Regular cell. Get a position.
+    pos = Random::randomPosition(a_lo, a_hi);
+  }
+
+  // Convert from unit cell coordinates to physical coordinates.
+  pos = a_cellPos + pos * a_dx;
+
+  return pos;
+}
+
+inline RealVect
+Random::randomPosition(const RealVect a_lo,
+                       const RealVect a_hi,
+                       const RealVect a_bndryCentroid,
+                       const RealVect a_bndryNormal) noexcept
+{
+
+  // Draw a position.
+  RealVect pos   = Random::randomPosition(a_lo, a_hi);
+  bool     valid = (pos - a_bndryCentroid).dotProduct(a_bndryNormal) >= 0.0;
+
+  // Rejectino sampling.
+  while (!valid) {
+    pos   = Random::randomPosition(a_lo, a_hi);
+    valid = (pos - a_bndryCentroid).dotProduct(a_bndryNormal) >= 0.0;
+  }
+
+  return pos;
+}
+
+inline RealVect
+Random::randomPosition(const RealVect a_lo, const RealVect a_hi) noexcept
+{
+  RealVect pos = RealVect::Zero;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    pos[dir] = a_lo[dir] + 0.5 * (1.0 + Random::getUniformReal11()) * (a_hi[dir] - a_lo[dir]);
+  }
+
+  return pos;
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

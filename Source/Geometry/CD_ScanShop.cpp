@@ -29,6 +29,7 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
                    const RealVect      a_probLo,
                    const ProblemDomain a_finestDomain,
                    const ProblemDomain a_scanLevel,
+                   const int           a_ebGhost,
                    const Real          a_thrshdVoF)
   : GeometryShop(a_localGeom, a_verbosity, a_dx * RealVect::Unit, a_thrshdVoF)
 {
@@ -38,7 +39,7 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   m_baseIF       = &a_localGeom;
   m_hasScanLevel = false;
   m_profile      = false;
-  m_ebGhost      = 4;
+  m_ebGhost      = a_ebGhost;
   m_fileName     = "ScanShopReport.dat";
   m_boxSorting   = BoxSorting::Morton;
 
@@ -377,8 +378,8 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   m_grids[a_level] = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
   m_timer.stopEvent("Define grids");
   m_timer.startEvent("Define map");
-  m_boxMap[a_level] =
-    RefCountedPtr<LayoutData<GeometryService::InOut>>(new LayoutData<GeometryService::InOut>(m_grids[a_level]));
+  m_boxMap[a_level] = RefCountedPtr<LayoutData<GeometryService::InOut>>(
+    new LayoutData<GeometryService::InOut>(m_grids[a_level]));
   m_timer.stopEvent("Define map");
 
   m_timer.startEvent("Set box types");

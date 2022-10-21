@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -1 -1 -1    # Low corner of problem domain
 AmrMesh.hi_corner        =  1  1  1    # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 64 64 64   # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 1           # Maximum amr depth
+AmrMesh.max_amr_depth    = 3           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -42,7 +42,7 @@ Driver.initial_regrids                 = 0                # Number of initial re
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 10.0             # Stop time
-Driver.max_steps                       = 100              # Maximum number of steps
+Driver.max_steps                       = 1000              # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -64,7 +64,9 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # ====================================================================================================
 TracerParticleSolver.verbosity     = -1     # Solver verbosity level. 
 TracerParticleSolver.deposition    = cic    # Deposition method. Must be 'ngp' or 'cic'
-TracerParticleSolver.plot_mass     = true   # Turn on/off plotting of the particle mass.
+TracerParticleSolver.interpolation = cic    # Interpolation method. Must be 'ngp' or 'cic'
+TracerParticleSolver.deposition_cf = halo   # Coarse-fine deposition. Must be interp or halo
+TracerParticleSolver.plot_weight   = true   # Turn on/off plotting of the particle weight.
 TracerParticleSolver.plot_velocity = true   # Turn on/off plotting of the particle velocities.
 TracerParticleSolver.volume_scale  = false  # If true, depositions yield density * volume instead of just volume
 
@@ -94,7 +96,7 @@ CoaxialCable.dielectric.eps      = 4
 # ====================================================================================================
 TracerParticleStepper.initial_particles = 10000  # Number of uniformly distributed initial particles
 TracerParticleStepper.integration       = rk4    # 'euler', 'rk2', or 'rk4'
-TracerParticleStepper.verbosity         = -1     # Verbosity level
+TracerParticleStepper.verbosity         = 10     # Verbosity level
 TracerParticleStepper.cfl               = 1.0    # "CFL" number. 
 TracerParticleStepper.velocity_field    = 1      # Velocity field to use.
                                                  # 0 => Diagonal translation

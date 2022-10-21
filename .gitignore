@@ -3,6 +3,9 @@
 *.MPI
 *.session*
 **/Make.defs.local
+*.log
+*.aux
+
 
 **/doc/html/**
 **/doc/sphinx/build/html/**
@@ -26,15 +29,25 @@
 **/*.a
 **/*.o
 
+Exec/Examples/StreamerInception/Vessel/report.txt
+Exec/Examples/StreamerInception/ElectrodeRoughness/report.txt
+Exec/Tests/StreamerInception/Vessel/report.txt
+
+
 pout.*
 time.table.*
 
-myApplications/**
-MyApplications/**
+myApplications/*
+MyApplications/*
 scripts/**
 Research/**
 
-docs/*
-!docs/.nojekyll
-!docs/Sphinx/
-!docs/chombo-discharge.pdf
+docs
+Docs/*
+!Docs/.nojekyll
+!Docs/Sphinx/
+!Docs/doxygen.conf
+!Docs/README.md
+Docs/Sphinx/build
+Docs/**/*.dat
+

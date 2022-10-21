@@ -111,13 +111,16 @@ MFHelmholtzSaturationChargeJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
     Vector<VolIndex> vofsPhase0 = ebisBoxPhase0.getVoFs(iv);
     Vector<VolIndex> vofsPhase1 = ebisBoxPhase1.getVoFs(iv);
 
-    for (const auto& v : vofsPhase0.stdVector())
+    for (const auto& v : vofsPhase0.stdVector()) {
       bndryPhiPhase0(v, m_comp) = phiBndry;
-    for (const auto& v : vofsPhase1.stdVector())
+    }
+    for (const auto& v : vofsPhase1.stdVector()) {
       bndryPhiPhase1(v, m_comp) = phiBndry;
+    }
 
-    for (const auto& v : vofsPhase0.stdVector())
+    for (const auto& v : vofsPhase0.stdVector()) {
       a_jump(v, m_comp) = jump;
+    }
   }
 }
 

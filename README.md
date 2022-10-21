@@ -6,13 +6,60 @@ This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for disc
 A modified version of ``Chombo`` is distributed together with this code.
 ``chombo-discharge`` only uses ``Chombo``; it is not affiliated nor endorsed by LBNL.
 
-Documentation is available as [HTML](https://chombo-discharge.github.io/chombo-discharge/) or as a [PDF](https://github.com/chombo-discharge/chombo-discharge/raw/gh-pages/chombo-discharge.pdf).
-Click [here](https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html) for installation instructions. 
+Click [here](https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html) for installation instructions.
+
+Documentation
+-------------
+
+User documentation is available as [HTML](https://chombo-discharge.github.io/chombo-discharge/) or as a [PDF](https://github.com/chombo-discharge/chombo-discharge/raw/gh-pages/chombo-discharge.pdf).
+A doxygen-generated API is [also available](https://chombo-discharge.github.io/chombo-discharge/doxygen/html/index.html).
 
 License
 -------
 
-See LICENSE and Copyright.txt for redistribution rights. 
+See LICENSE and Copyright.txt for redistribution rights.
+
+Serial build quickstart
+-----------------------
+
+For doing a quick test-build of ``chombo-discharge`` without HDF5 capabilities, execute the following steps:
+
+1. Install the LAPACK, BLAS, and GCC dependencies:
+
+   ```
+   sudo apt install csh gfortran g++ libblas-dev liblapack-dev
+   ```
+   
+2. Choose an installation directory and clone ``chombo-discharge`` there:
+
+   ```
+   export DISCHARGE_HOME=/home/foo/chombo-discharge		
+   export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
+		
+   git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}   
+   ```
+
+3. Copy the GNU compiler makefile to it's appropriate location
+
+   ```
+   cp $DISCHARGE_HOME/Lib/Local/Make.defs.GNU $CHOMBO_HOME/mk/Make.defs.local
+   ```
+
+4. Build ``chombo-discharge``
+
+   ```
+   cd $DISCHARGE_HOME
+   make -s -j4
+   ```
+
+5. Run an example program
+
+   ```
+   cd $DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/DiagonalFlowNoEB
+   make -s -j4
+   ./*.ex example.inputs
+   ```		
+
 
 Contributing
 ------------

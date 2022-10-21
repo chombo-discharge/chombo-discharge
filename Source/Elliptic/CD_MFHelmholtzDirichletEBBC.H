@@ -62,6 +62,12 @@ public:
   void
   setWeight(const int a_weight);
 
+  /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  virtual void
+  setDomainDropOrder(const int a_domainSize);
+
 protected:
   /*!
     @brief Use constant for BC
@@ -89,6 +95,11 @@ protected:
   int m_weight;
 
   /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;
+
+  /*!
     @brief Value on the EB. Does not apply to matching cells. 
   */
   std::function<Real(const RealVect& a_pos)> m_functionValue;
@@ -104,17 +115,19 @@ protected:
     @param[inout] a_singlePhaseVofs   Iterator for single-phase cut-cells
     @param[inout] a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered. 
+    @param[in]    a_Bcoef             EB-centered B-coefficient
     @param[in]    a_dit               Data index    
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
   virtual void
-  applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
-                         EBCellFAB&       a_Lphi,
-                         const EBCellFAB& a_phi,
-                         const DataIndex& a_dit,
-                         const Real&      a_beta,
-                         const bool&      a_homogeneousPhysBC) const override;
+  applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                         EBCellFAB&             a_Lphi,
+                         const EBCellFAB&       a_phi,
+                         const BaseIVFAB<Real>& a_Bcoef,
+                         const DataIndex&       a_dit,
+                         const Real&            a_beta,
+                         const bool&            a_homogeneousPhysBC) const override;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -16,7 +16,6 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_AmrMesh.H>
-#include <CD_TimeCode.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -70,7 +69,7 @@ public:
   initialData() = 0;
 
   /*!
-    @brief Post-initialize operations to be performed after filling solvers with initialData.
+    @brief Post-initialize operations to be performed at end of setup stage. 
   */
   virtual void
   postInitialize() = 0;
@@ -159,11 +158,9 @@ public:
 
   /*!
     @brief Compute a time step to be used by Driver. 
-    @param[out] a_dt       Time step to be used.
-    @param[out] a_timeCode Identifier for how the time step was computed. 
   */
-  virtual void
-  computeDt(Real& a_dt, TimeCode& a_timeCode) = 0;
+  virtual Real
+  computeDt() = 0;
 
   /*!
     @brief Advancement method. The implementation of this method should advance all equations of motion
@@ -271,11 +268,6 @@ protected:
     @brief Previous time step size
   */
   Real m_dt;
-
-  /*!
-    @brief Time code for
-  */
-  TimeCode m_timeCode;
 
   /*!
     @brief AmrMesh. 

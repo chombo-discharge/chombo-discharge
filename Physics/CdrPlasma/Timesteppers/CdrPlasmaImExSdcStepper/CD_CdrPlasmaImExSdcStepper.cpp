@@ -699,7 +699,7 @@ CdrPlasmaImExSdcStepper::computeFD0()
         solver->computeDivD(FD_0, phi_0, false, false, false); // Domain fluxes always come in through advection terms.
 
         // Shouldn't be necesary
-        m_amr->averageDown(FD_0, m_realm, m_cdr->getPhase());
+        m_amr->conservativeAverage(FD_0, m_realm, m_cdr->getPhase());
         m_amr->interpGhost(FD_0, m_realm, m_cdr->getPhase());
       }
       else {
@@ -733,7 +733,9 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
     // Update source terms every time we go through this
     CdrPlasmaImExSdcStepper::computeElectricFieldIntoScratch();
     CdrPlasmaImExSdcStepper::
-      computeReactionNetwork(m, a_time, m_dtm[m]); // Ppdate the CDR and RTE source terms using the correct step size
+      computeReactionNetwork(m,
+                             a_time,
+                             m_dtm[m]); // Ppdate the CDR and RTE source terms using the correct step size
 
     // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
     // which is what we need to do at the start of the time step. In principle, these things do not change
@@ -871,7 +873,7 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
       DataOps::incr(phi_m1, src, m_dtm[a_m]); // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
 
       // This shouldn't be necessary
-      m_amr->averageDown(phi_m1, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
 
       if (a_lagged_terms) { // Back up the old slope first, we will need it for the lagged term
@@ -884,7 +886,7 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
       DataOps::scale(FAR_m, 1. / m_dtm[a_m]); // :
 
       // Shouldn't be necessary
-      m_amr->averageDown(FAR_m, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(FAR_m, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(FAR_m, m_realm, m_cdr->getPhase());
     }
 
@@ -966,7 +968,7 @@ CdrPlasmaImExSdcStepper::integrateAdvection(const Real a_dt, const int a_m, cons
       DataOps::copy(phi_m1, phi_m);
       DataOps::incr(phi_m1, scratch, -m_dtm[a_m]);
       DataOps::floor(phi_m1, 0.0);
-      m_amr->averageDown(phi_m1, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
     }
     else {
@@ -978,7 +980,11 @@ CdrPlasmaImExSdcStepper::integrateAdvection(const Real a_dt, const int a_m, cons
   EBAMRIVData&       sigma_m1 = m_sigmaScratch->getSigmaSolver()[a_m + 1];
   EBAMRIVData&       Fsig_new = m_sigmaScratch->getFnew()[a_m];
   const EBAMRIVData& sigma_m  = m_sigmaScratch->getSigmaSolver()[a_m];
+#if 1 // New code after SigmaSolver -> SurfaceODESolver
+  DataOps::copy(Fsig_new, m_sigma->getRHS());
+#else
   m_sigma->computeRHS(Fsig_new); // Fills Fsig_new with BCs from CDR solvers
+#endif
   DataOps::copy(sigma_m1, sigma_m);
   DataOps::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
 }
@@ -1014,7 +1020,7 @@ CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, cons
         const EBAMRCellData& FD_m1k = storage->getFD()[a_m + 1]; // FD_(m+1)^k. Lagged term.
         DataOps::incr(init_soln, FD_m1k, -m_dtm[a_m]);
       }
-      m_amr->averageDown(init_soln, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(init_soln, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(init_soln, m_realm, m_cdr->getPhase());
       DataOps::copy(phi_m1, phi_m);
 
@@ -1025,7 +1031,7 @@ CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, cons
       else {
         solver->advanceEuler(phi_m1, init_soln, source, m_dtm[a_m]); // No source.
       }
-      m_amr->averageDown(phi_m1, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
       DataOps::floor(phi_m1, 0.0);
 
@@ -1036,7 +1042,7 @@ CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, cons
       DataOps::incr(FD_m1k, init_soln, -1.0);
       DataOps::scale(FD_m1k, 1. / m_dtm[a_m]);
 
-      m_amr->averageDown(FD_m1k, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(FD_m1k, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(FD_m1k, m_realm, m_cdr->getPhase());
     }
     else {
@@ -1080,8 +1086,8 @@ CdrPlasmaImExSdcStepper::reconcileIntegrands()
     const EBAMRCellData& src   = solver->getSource();
 
     if (solver->isMobile()) {
-      const Real extrap_dt =
-        m_extrapAdvect ? 2.0 * m_extrapDt * m_dtm[m_p - 1] : 0.0;      // Factor of 2 because of EBPatchAdvect
+      const Real extrap_dt = m_extrapAdvect ? 2.0 * m_extrapDt * m_dtm[m_p - 1]
+                                            : 0.0;                     // Factor of 2 because of EBPatchAdvect
       solver->computeDivF(FAR_p, phi_p, extrap_dt, false, true, true); // FAR_p =  Div(v_p*phi_p)
       DataOps::scale(FAR_p, -1.0);                                     // FAR_p = -Div(v_p*phi_p)
     }
@@ -1102,14 +1108,18 @@ CdrPlasmaImExSdcStepper::reconcileIntegrands()
       }
 
       // Shouldn't be necessary
-      m_amr->averageDown(F_m, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(F_m, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(F_m, m_realm, m_cdr->getPhase());
     }
   }
 
   // Compute Fsig_p - that wasn't done either
   EBAMRIVData& Fnew_p = m_sigmaScratch->getFnew()[m_p];
+#if 1 // New code after SigmaSolver -> SurfaceODESolver
+  DataOps::copy(Fnew_p, m_sigma->getRHS());
+#else
   m_sigma->computeRHS(Fnew_p);
+#endif
   for (int m = 0; m <= m_p; m++) {
     EBAMRIVData& Fold_m = m_sigmaScratch->getFold()[m];
     EBAMRIVData& Fnew_m = m_sigmaScratch->getFnew()[m];
@@ -1171,8 +1181,8 @@ CdrPlasmaImExSdcStepper::finalizeErrors()
       // Compute norms. Only coarsest level
       Real      Lerr, Lphi;
       const int lvl = 0;
-      DataOps::norm(Lerr, *error[lvl], m_amr->getDomains()[lvl], m_errorNorm);
-      DataOps::norm(Lphi, *phi_p[lvl], m_amr->getDomains()[lvl], m_errorNorm);
+      Lerr          = DataOps::norm(*error[lvl], m_errorNorm);
+      Lphi          = DataOps::norm(*phi_p[lvl], m_errorNorm);
 
       if (Lphi > 0.0) {
         m_cdrError[idx] = Lerr / Lphi;
@@ -1285,15 +1295,16 @@ CdrPlasmaImExSdcStepper::adaptiveReport(const Real a_first_dt,
   pout() << "\n";
 }
 
-void
-CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+Real
+CdrPlasmaImExSdcStepper::computeDt()
 {
   CH_TIME("CdrPlasmaImExSdcStepper::computeDt");
   if (m_verbosity > 5) {
     pout() << "CdrPlasmaImExSdcStepper::computeDt" << endl;
   }
 
-  Real dt = 1.E99;
+  Real dt   = std::numeric_limits<Real>::max();
+  Real a_dt = std::numeric_limits<Real>::max();
 
   int Nref = 1;
   for (int lvl = 0; lvl < m_amr->getFinestLevel(); lvl++) {
@@ -1308,7 +1319,7 @@ CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
   if (!m_adaptiveDt) {
     if (dt_cfl < dt) {
       dt         = m_cfl * dt_cfl;
-      a_timeCode = TimeCode::Advection;
+      m_timeCode = TimeCode::Advection;
     }
   }
   else {
@@ -1327,7 +1338,7 @@ CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
 
     if (new_dt < dt) {
       dt         = new_dt;
-      a_timeCode = TimeCode::Error;
+      m_timeCode = TimeCode::Error;
     }
   }
 
@@ -1336,29 +1347,31 @@ CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
   const Real dt_relax = m_relaxTime * this->computeRelaxationTime();
   if (dt_relax < dt) {
     dt         = dt_relax;
-    a_timeCode = TimeCode::RelaxationTime;
+    m_timeCode = TimeCode::RelaxationTime;
   }
 
   if (dt < m_minDt) {
     dt         = m_minDt;
-    a_timeCode = TimeCode::Hardcap;
+    m_timeCode = TimeCode::Hardcap;
   }
 
   if (dt > m_maxDt) {
     dt         = m_maxDt;
-    a_timeCode = TimeCode::Hardcap;
+    m_timeCode = TimeCode::Hardcap;
   }
 
   a_dt = dt;
 
   // Copy the time code, it is needed for diagnostics
-  m_timeCode = a_timeCode;
+  m_timeCode = m_timeCode;
 
 #if 0 // Debug
   if(procID() == 0){
     std::cout << "computeDt = " << a_dt << "\t m_newDt = " << m_newDt << std::endl; 
   }
 #endif
+
+  return a_dt;
 }
 
 void
@@ -1510,7 +1523,7 @@ CdrPlasmaImExSdcStepper::computeCdrGradients(const Vector<EBAMRCellData*>& a_phi
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
     EBAMRCellData&             grad    = storage->getGradient();
     m_amr->computeGradient(grad, *a_phis[idx], m_realm, m_cdr->getPhase());
-    //    m_amr->averageDown(grad, m_realm, m_cdr->getPhase());
+    //    m_amr->conservativeAverage(grad, m_realm, m_cdr->getPhase());
     m_amr->interpGhost(grad, m_realm, m_cdr->getPhase());
   }
 }
@@ -1838,7 +1851,7 @@ CdrPlasmaImExSdcStepper::computeSigmaFlux()
     pout() << "CdrPlasmaImExSdcStepper::computeSigmaFlux" << endl;
   }
 
-  EBAMRIVData& flux = m_sigma->getFlux();
+  EBAMRIVData& flux = m_sigma->getRHS();
   DataOps::setValue(flux, 0.0);
 
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it) {
@@ -1849,7 +1862,7 @@ CdrPlasmaImExSdcStepper::computeSigmaFlux()
     DataOps::incr(flux, solver_flux, spec->getChargeNumber() * Units::Qe);
   }
 
-  m_sigma->resetCells(flux);
+  m_sigma->resetElectrodes(flux, 0.0);
 }
 
 void

@@ -104,7 +104,7 @@ ItoPlasmaGodunovStepper::allocate()
   m_ito->allocateInternals();
   m_rte->allocateInternals();
   m_fieldSolver->allocateInternals();
-  m_sigma->allocateInternals();
+  m_sigma->allocate();
 
   // Now allocate for the conductivity particles and rho^dagger particles
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
@@ -507,14 +507,14 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
 }
 
 void
-ItoPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+ItoPlasmaGodunovStepper::computeDt()
 {
   CH_TIME("ItoPlasmaGodunovStepper::computeDt");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaGodunovStepper::computeDt" << endl;
   }
 
-  a_dt = 1.E99;
+  Real a_dt = std::numeric_limits<Real>::max();
 
   if (m_whichDt == which_dt::advection) {
     a_dt = m_ito->computeAdvectiveDt();
@@ -558,6 +558,8 @@ ItoPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
 			      << "\t avgCFL = " << m_avg_cfl/(1+m_timeStep)
 			      << std::endl;
 #endif
+
+  return a_dt;
 }
 
 void
@@ -1017,7 +1019,7 @@ ItoPlasmaGodunovStepper::compute_cell_conductivity(
         DataOps::setCoveredValue(m_fluid_scratch1, 0.0, 0);
         DataOps::filterSmooth(a_conductivity, m_fluid_scratch1, stride, alpha);
 
-        m_amr->averageDown(a_conductivity, m_fluid_Realm, m_phase);
+        m_amr->conservativeAverage(a_conductivity, m_fluid_Realm, m_phase);
         m_amr->interpGhost(a_conductivity, m_fluid_Realm, m_phase);
       }
     }
@@ -1025,7 +1027,7 @@ ItoPlasmaGodunovStepper::compute_cell_conductivity(
 
   DataOps::scale(a_conductivity, Units::Qe);
 
-  m_amr->averageDown(a_conductivity, m_fluid_Realm, m_phase);
+  m_amr->conservativeAverage(a_conductivity, m_fluid_Realm, m_phase);
   m_amr->interpGhostPwl(a_conductivity, m_fluid_Realm, m_phase);
 
   // See if this helps....
@@ -1091,8 +1093,8 @@ ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt)
   DataOps::incr(bco_gas, m_conduct_face, 1.0);
   DataOps::incr(bco_irr_gas, m_conduct_eb, 1.0);
 
-  m_amr->averageDown(bco_gas, m_fluid_Realm, phase::gas);
-  m_amr->averageDown(bco_irr_gas, m_fluid_Realm, phase::gas);
+  m_amr->conservativeAverage(bco_gas, m_fluid_Realm, phase::gas);
+  m_amr->conservativeAverage(bco_irr_gas, m_fluid_Realm, phase::gas);
 
   // Set up the solver
   m_fieldSolver->setupSolver();

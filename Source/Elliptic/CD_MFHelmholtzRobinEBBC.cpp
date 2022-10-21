@@ -54,6 +54,14 @@ MFHelmholtzRobinEBBC::setWeight(const int a_weight)
 }
 
 void
+MFHelmholtzRobinEBBC::setDomainDropOrder(const int a_domainSize)
+{
+  CH_TIME("MFHelmholtzRobinEBBC::setDomainDropOrder()");
+
+  m_domainDropOrder = a_domainSize;
+}
+
+void
 MFHelmholtzRobinEBBC::setCoefficients(const Real a_A, const Real a_B, const Real a_C)
 {
   CH_TIME("MFHelmholtzRobinEBBC::setCoefficients(Real, Real, Real)");
@@ -101,21 +109,28 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
     MayDay::Error("MFHelmholtzRobinEBBC - must have weight >= 0");
   }
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const ProblemDomain&     domain = m_eblg.getDomain();
+
+  // Drop order if we must
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (domain.size()[dir] <= m_domainDropOrder) {
+      m_order = 1;
+    }
+  }
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box      box     = dbl[dit()];
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     // Build interpolation stencils.
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
 
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
-      const Real helmBco  = (*m_Bcoef)[dit()](vof, m_comp);
 
       weights(vof, m_comp) = 0.0;
 
@@ -173,7 +188,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
         // The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
         // kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
         if (std::abs(B) > 0.0) {
-          fluxStencil *= A * areaFrac * helmBco / (B * m_dx);
+          fluxStencil *= A * areaFrac / (B * m_dx);
         }
         else {
           fluxStencil.clear();
@@ -189,12 +204,13 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
-                                             EBCellFAB&       a_Lphi,
-                                             const EBCellFAB& a_phi,
-                                             const DataIndex& a_dit,
-                                             const Real&      a_beta,
-                                             const bool&      a_homogeneousPhysBC) const
+MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
+                                             EBCellFAB&             a_Lphi,
+                                             const EBCellFAB&       a_phi,
+                                             const BaseIVFAB<Real>& a_Bcoef,
+                                             const DataIndex&       a_dit,
+                                             const Real&            a_beta,
+                                             const bool&            a_homogeneousPhysBC) const
 {
 
   // TLDR: For Robin, the flux is b*dphi/dn = beta*b*A*phi/B - beta*b*C/B and we have stored
@@ -222,7 +238,7 @@ MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
 
       const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
       const Real     areaFrac  = ebisbox.bndryArea(vof);
-      const Real     helmBco   = (*m_Bcoef)[a_dit](vof, m_comp);
+      const Real     helmBco   = a_Bcoef(vof, m_comp);
       const Real     kappaDivF = -a_beta * helmBco * areaFrac * C / (m_dx * B);
 
       if (std::abs(B) > 0.0) {
@@ -250,29 +266,36 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   //       of the solution. The user will input the desired neighborhood and order of that interpolation. By default, the radius of the stencil is
   //       the same as the order.
 
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const bool     useStartVof =
-    !(m_weight >
-      0); // If we use unweighted least squares we can, in fact, include the cut-cell itself in the interpolation.
+  const EBISBox& ebisbox     = m_eblg.getEBISL()[a_dit];
+  const bool     useStartVof = !(
+    m_weight >
+    0); // If we use unweighted least squares we can, in fact, include the cut-cell itself in the interpolation.
   const int radius = a_order;
 
   // Get the vofs around the cut-cell. Note that if m_weight = 0 we enable the cut-cell itself in the interpolation.
   Vector<VolIndex> vofs;
   switch (a_neighborhood) {
-  case VofUtils::Neighborhood::Quadrant:
+  case VofUtils::Neighborhood::Quadrant: {
     vofs = VofUtils::getVofsInQuadrant(a_vof,
                                        ebisbox,
                                        ebisbox.normal(a_vof),
                                        radius,
                                        VofUtils::Connectivity::MonotonePath,
                                        useStartVof);
+
     break;
-  case VofUtils::Neighborhood::Radius:
+  }
+  case VofUtils::Neighborhood::Radius: {
     vofs = VofUtils::getVofsInRadius(a_vof, ebisbox, radius, VofUtils::Connectivity::MonotonePath, useStartVof);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error(
       "MFHelmholtzRobinEBBC::getInterpolationStencil(VolIndex, DataIndex, VofUtils::Neighborhood) -- logic bust");
+
+    break;
+  }
   }
 
   // Build displacements vector, i.e. distances from cell centers/centroids to the cut-cell EB centroid.

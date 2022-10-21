@@ -34,8 +34,7 @@ FieldSolverMultigrid::FieldSolverMultigrid() : FieldSolver()
 
   // Default settings
   m_isSolverSetup = false;
-  m_className =
-    "FieldSolverMultigrid"; // Do not change this since it is used in all ParmParse code in FieldSolverMultigrid
+  m_className     = "FieldSolverMultigrid";
 }
 
 FieldSolverMultigrid::~FieldSolverMultigrid() { CH_TIME("FieldSolverMultigrid::~FieldSolverMultigrid()"); }
@@ -106,6 +105,7 @@ FieldSolverMultigrid::parseMultigridSettings()
   pp.get("gmg_exit_tol", m_multigridExitTolerance);
   pp.get("gmg_exit_hang", m_multigridExitHang);
   pp.get("gmg_min_cells", m_minCellsBottom);
+  pp.get("gmg_drop_order", m_domainDropOrder);
   pp.get("gmg_bc_order", m_multigridBcOrder);
   pp.get("gmg_bc_weight", m_multigridBcWeight);
   pp.get("gmg_jump_order", m_multigridJumpOrder);
@@ -269,9 +269,9 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     DataOps::kappaScale(m_kappaRhoByEps0);
   }
 
-  m_amr->averageDown(a_phi, m_realm);
+  m_amr->conservativeAverage(a_phi, m_realm);
   m_amr->interpGhost(a_phi, m_realm);
-  m_amr->averageDown(m_kappaRhoByEps0, m_realm);
+  m_amr->conservativeAverage(m_kappaRhoByEps0, m_realm);
   m_amr->interpGhost(m_kappaRhoByEps0, m_realm);
 
   // Do the scaled surface charge
@@ -297,11 +297,14 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   const int coarsestLevel = 0;
   const int finestLevel   = m_amr->getFinestLevel();
 
-  const Real phiResid =
-    m_multigridSolver.computeAMRResidual(phi, rhs, finestLevel, 0); // This is the residue rho - L(phi)
-  const Real zeroResid =
-    m_multigridSolver.computeAMRResidual(zero, rhs, finestLevel, 0); // This is the residue rho - L(phi=0)
-  const Real convergedResid = zeroResid * m_multigridExitTolerance;  // Convergence criterion.
+  // This is the residue rho - L(phi)
+  const Real phiResid = m_multigridSolver.computeAMRResidual(phi, rhs, finestLevel, 0);
+
+  // This is the residue rho - L(phi=0)
+  const Real zeroResid = m_multigridSolver.computeAMRResidual(zero, rhs, finestLevel, 0);
+
+  // Convergence criterion.
+  const Real convergedResid = zeroResid * m_multigridExitTolerance;
 
   // If the residue rho - L(phi) is too large then we must get a new solution.
   if (phiResid > convergedResid) {
@@ -319,7 +322,7 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   m_multigridSolver.revert(phi, rhs, finestLevel, 0);
 
-  m_amr->averageDown(a_phi, m_realm);
+  m_amr->conservativeAverage(a_phi, m_realm);
   m_amr->interpGhostMG(a_phi, m_realm);
 
   this->computeElectricField(m_electricField, a_phi);
@@ -390,6 +393,122 @@ FieldSolverMultigrid::setupSolver()
 }
 
 void
+FieldSolverMultigrid::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                                              const MFAMRFluxData& a_permittivityFace,
+                                              const MFAMRIVData&   a_permittivityEB)
+{
+  CH_TIME("FieldSolverMultigrid::setSolverPermittivities()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverMultigrid::setSolverPermittivities()" << endl;
+  }
+
+  if (!m_isSolverSetup) {
+    MayDay::Error("FieldSolverMultigrid::setSolverPermittivities -- must set up solver first!");
+  }
+
+  // Get the AMR operators and update the coefficients.
+  Vector<AMRLevelOp<LevelData<MFCellFAB>>*>& operatorsAMR = m_multigridSolver.getAMROperators();
+
+  CH_assert(operatorsAMR.size() == 1 + m_amr->getFinestLevel());
+
+  // Set coefficients for the AMR levels.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    CH_assert(!(operatorsAMR[lvl] == nullptr));
+
+    MFHelmholtzOp& op = static_cast<MFHelmholtzOp&>(*operatorsAMR[lvl]);
+
+    op.setAcoAndBco(a_permittivityCell[lvl], a_permittivityFace[lvl], a_permittivityEB[lvl]);
+  }
+
+  // Get the deeper multigrid levels and coarsen onto that data as well. Strictly speaking, we don't
+  // have to do this but it facilitates multigrid convergence and is therefore good practice. The operator
+  // factory has routines for the coefficients that belong to the multigrid levels. The factory does not
+  // have access to the operator, so we fetch those using AMRMultiGrid and call setAcoAndBco from there.
+  // access to the operator.
+  m_helmholtzOpFactory->coarsenCoefficientsMG();
+  Vector<Vector<MGLevelOp<LevelData<MFCellFAB>>*>> operatorsMG = m_multigridSolver.getOperatorsMG();
+
+  for (int amrLevel = 0; amrLevel < operatorsMG.size(); amrLevel++) {
+    for (int mgLevel = 0; mgLevel < operatorsMG[amrLevel].size(); mgLevel++) {
+      CH_assert(!(operatorsMG[amrLevel][mgLevel] == nullptr));
+
+      MFHelmholtzOp& op = static_cast<MFHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
+
+      op.setAcoAndBco(op.getAcoef(), op.getBcoef(), op.getBcoefIrreg());
+    }
+  }
+}
+
+void
+FieldSolverMultigrid::setPermittivities()
+{
+  CH_TIME("FieldSolverMultigrid::setPermittivities()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolverMultigrid::setPermittivities()" << endl;
+  }
+
+  // Parent method fills permittivities over the "valid" region.
+  FieldSolver::setPermittivities();
+
+  // With EBHelmholtzOp/MFHelmholtzOp, the stencils can reach out of grid
+  // patches and into ghost faces when computing the centroid flux on a cut-cell
+  // face. To be on the safe side, we fill ghost cells for the cell-centered
+  // permittivity and average that onto the grid faces. Importantly, we ensure
+  // that we also fill one layer of "ghost faces".
+
+  const Average  average  = Average::Arithmetic;
+  const int      tanGhost = 1;
+  const Interval interv   = Interval(0, 0);
+
+  EBAMRCellData permCellGas;
+  EBAMRCellData permCellSol;
+  EBAMRFluxData permFluxGas;
+  EBAMRFluxData permFluxSol;
+  EBAMRIVData   permEBGas;
+  EBAMRIVData   permEBSol;
+
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+
+  // Do the gas-phase.
+  if (!(ebisGas.isNull())) {
+    permCellGas = m_amr->alias(phase::gas, m_permittivityCell);
+    permFluxGas = m_amr->alias(phase::gas, m_permittivityFace);
+    permEBGas   = m_amr->alias(phase::gas, m_permittivityEB);
+
+    // Coarsen cell and EB data.
+    m_amr->average(permCellGas, m_realm, phase::gas, average);
+    m_amr->average(permEBGas, m_realm, phase::gas, average);
+
+    // Interpolate cell-centered permittivities to ghost cells; then average
+    // cell-centered data to faces, including one ghost face.
+    m_amr->interpGhost(permCellGas, m_realm, phase::gas);
+
+    DataOps::averageCellToFace(permFluxGas, permCellGas, m_amr->getDomains(), tanGhost, interv, interv, average);
+
+    m_amr->average(permFluxGas, m_realm, phase::gas, average);
+  }
+
+  if (!(ebisSol.isNull())) {
+    permCellSol = m_amr->alias(phase::solid, m_permittivityCell);
+    permFluxSol = m_amr->alias(phase::solid, m_permittivityFace);
+    permEBSol   = m_amr->alias(phase::solid, m_permittivityEB);
+
+    // Coarsen cell and EB data.
+    m_amr->average(permCellSol, m_realm, phase::solid, average);
+    m_amr->average(permEBSol, m_realm, phase::solid, average);
+
+    // Interpolate cell-centered permittivities to ghost cells; then average
+    // cell-centered data to faces, including one ghost face.
+    m_amr->interpGhost(permCellSol, m_realm, phase::solid);
+
+    DataOps::averageCellToFace(permFluxSol, permCellSol, m_amr->getDomains(), tanGhost, interv, interv, average);
+
+    m_amr->average(permFluxSol, m_realm, phase::solid, average);
+  }
+}
+
+void
 FieldSolverMultigrid::setupHelmholtzFactory()
 {
   CH_TIME("FieldSolverMultigrid::setupHelmholtzFactory()");
@@ -417,27 +536,35 @@ FieldSolverMultigrid::setupHelmholtzFactory()
     Vector<EBLevelGrid>                            eblgPhases(numPhases);
     Vector<RefCountedPtr<EBMultigridInterpolator>> interpPhases(numPhases);
     Vector<RefCountedPtr<EBFluxRegister>>          fluxRegPhases(numPhases);
-    Vector<RefCountedPtr<EbCoarAve>>               avePhases(numPhases);
+    Vector<RefCountedPtr<EBCoarAve>>               avePhases(numPhases);
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       eblgPhases[phase::gas] = *(m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       eblgPhases[phase::solid] = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
+    }
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       interpPhases[phase::gas] = (m_amr->getMultigridInterpolator(m_realm, phase::gas)[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       interpPhases[phase::solid] = (m_amr->getMultigridInterpolator(m_realm, phase::solid)[lvl]);
+    }
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       fluxRegPhases[phase::gas] = (m_amr->getFluxRegister(m_realm, phase::gas)[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       fluxRegPhases[phase::solid] = (m_amr->getFluxRegister(m_realm, phase::solid)[lvl]);
+    }
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       avePhases[phase::gas] = (m_amr->getCoarseAverage(m_realm, phase::gas)[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       avePhases[phase::solid] = (m_amr->getCoarseAverage(m_realm, phase::solid)[lvl]);
+    }
 
     mflg[lvl].define(m_multifluidIndexSpace, eblgPhases);
     mfInterp[lvl].define(interpPhases);
@@ -460,21 +587,31 @@ FieldSolverMultigrid::setupHelmholtzFactory()
 
   // BC factories. Fortunately, MFHelmholtzOp/EBHelmholtzOp have sane interfaces which allowed us to code up
   // boundary condition objects and factories.
-  auto ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory>(
+  auto ebbcFactory = RefCountedPtr<MFHelmholtzElectrostaticEBBCFactory>(
     new MFHelmholtzElectrostaticEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebBc));
-  auto domainBcFactory =
-    RefCountedPtr<MFHelmholtzDomainBCFactory>(new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
+
+  auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>(
+    new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
 
   // Set the BC jump factory. This is either the "natural" factory or the saturation charge BC.
   RefCountedPtr<MFHelmholtzJumpBCFactory> jumpBcFactory;
   switch (m_jumpBcType) {
-  case JumpBCType::Natural:
+  case JumpBCType::Natural: {
     jumpBcFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>(new MFHelmholtzJumpBCFactory());
-    break;
-  case JumpBCType::SaturationCharge:
-    jumpBcFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>(new MFHelmholtzSaturationChargeJumpBCFactory(phase::gas));
+
     break;
   }
+  case JumpBCType::SaturationCharge: {
+    jumpBcFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>(new MFHelmholtzSaturationChargeJumpBCFactory(phase::gas));
+
+    break;
+  }
+  }
+
+  // Drop order stuff for EB stencils -- can facilitate safer GMG relaxations
+  // on deeper multigrid levels.
+  ebbcFactory->setDomainDropOrder(m_domainDropOrder);
+  jumpBcFactory->setDomainDropOrder(m_domainDropOrder);
 
   // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to zero
   // so there is no diagonal term in the operator after all.
@@ -519,31 +656,46 @@ FieldSolverMultigrid::setupMultigrid()
   // Select the bottom solver -- the user will have specified this when parseMultigridSettings() was called.
   LinearSolver<LevelData<MFCellFAB>>* bottomSolver = nullptr;
   switch (m_bottomSolverType) {
-  case BottomSolverType::Simple:
+  case BottomSolverType::Simple: {
     bottomSolver = &m_mfsolver;
+
     break;
-  case BottomSolverType::BiCGStab:
+  }
+  case BottomSolverType::BiCGStab: {
     bottomSolver = &m_bicgstab;
+
     break;
-  case BottomSolverType::GMRES:
+  }
+  case BottomSolverType::GMRES: {
     bottomSolver = &m_gmres;
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("FieldSolverMultigrid::setupMultigrid - logic bust in bottom solver");
+
     break;
+  }
   }
 
   // Select the multigrid type. Again, the user will have specified this when parseMultigridSettings was called.
   int gmgType;
   switch (m_multigridType) {
-  case MultigridType::VCycle:
+  case MultigridType::VCycle: {
     gmgType = 1;
+
     break;
-  case MultigridType::WCycle:
+  }
+  case MultigridType::WCycle: {
     gmgType = 2;
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("FieldSolverMultigrid::setupMultigrid - logic bust in multigrid type selection");
+
+    break;
+  }
   }
 
   // AMRMultiGrid requires the finest level and the coarsest domain.
@@ -552,19 +704,20 @@ FieldSolverMultigrid::setupMultigrid()
 
   // Define the Chombo multigrid solver
   m_multigridSolver.define(coarsestDomain, *m_helmholtzOpFactory, bottomSolver, 1 + finestLevel);
-  m_multigridSolver.setSolverParameters(
-    m_multigridPreSmooth,
-    m_multigridPostSmooth,
-    m_multigridBottomSmooth,
-    gmgType,
-    m_multigridMaxIterations,
-    m_multigridExitTolerance,
-    m_multigridExitHang,
-    1.E-99); // This is the termination criterion for the absolute. We disregard since we use a relative tolerance.
+  m_multigridSolver.setSolverParameters(m_multigridPreSmooth,
+                                        m_multigridPostSmooth,
+                                        m_multigridBottomSmooth,
+                                        gmgType,
+                                        m_multigridMaxIterations,
+                                        m_multigridExitTolerance,
+                                        m_multigridExitHang,
+                                        1.E-99);
 
-  m_multigridSolver.m_imin = m_multigridMinIterations; // Minimum number of iterations.
-  m_multigridSolver.m_verbosity =
-    m_multigridVerbosity; // Multigrid verbosity, in case user wants to see convergence rates etc.
+  // Minimum number of iterations.
+  m_multigridSolver.m_imin = m_multigridMinIterations;
+
+  // Multigrid verbosity, in case user wants to see convergence rates etc.
+  m_multigridSolver.m_verbosity = m_multigridVerbosity;
 
   // Create some dummy storage for multigrid initialization. This is needed because
   // AMRMultiGrid must allocate the operators.
@@ -666,7 +819,7 @@ FieldSolverMultigrid::computeElectricField(MFAMRCellData& a_electricField, const
   DataOps::scale(a_electricField, -1.0);
 
   // Coarsen solution and update ghost cells.
-  m_amr->averageDown(a_electricField, m_realm);
+  m_amr->conservativeAverage(a_electricField, m_realm);
   m_amr->interpGhost(a_electricField, m_realm);
 }
 
@@ -725,7 +878,7 @@ FieldSolverMultigrid::computeElectricField(EBAMRCellData&           a_electricFi
   DataOps::scale(a_electricField, -1.0);
 
   // Coarsen solution and update ghost cells.
-  m_amr->averageDown(a_electricField, m_realm, a_phase);
+  m_amr->conservativeAverage(a_electricField, m_realm, a_phase);
   m_amr->interpGhost(a_electricField, m_realm, a_phase);
 }
 

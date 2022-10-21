@@ -59,6 +59,15 @@ EBAMRData<T>::size() const
 }
 
 template <typename T>
+void
+EBAMRData<T>::exchange() noexcept
+{
+  for (int lvl = 0; lvl < m_data.size(); lvl++) {
+    m_data[lvl]->exchange();
+  }
+}
+
+template <typename T>
 Vector<RefCountedPtr<LevelData<T>>>&
 EBAMRData<T>::getData()
 {

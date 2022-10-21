@@ -27,18 +27,19 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
   CH_TIME("TracerParticleSolver::TracerParticleSolver()");
 
   // Default settings
-  m_verbosity     = -1;
-  m_name          = "TracerParticleSolver";
-  m_className     = "TracerParticleSolver";
-  m_realm         = Realm::primal;
-  m_phase         = phase::gas;
-  m_pvrBuffer     = 0;
-  m_haloBuffer    = 1;
-  m_plotVelocity  = true;
-  m_plotMass      = true;
-  m_volumeScale   = false;
-  m_deposition    = DepositionType::CIC;
-  m_velocityField = nullptr;
+  m_verbosity            = -1;
+  m_name                 = "TracerParticleSolver";
+  m_className            = "TracerParticleSolver";
+  m_realm                = Realm::primal;
+  m_phase                = phase::gas;
+  m_haloBuffer           = 1;
+  m_plotVelocity         = true;
+  m_plotWeight           = true;
+  m_volumeScale          = false;
+  m_deposition           = DepositionType::CIC;
+  m_interpolation        = DepositionType::CIC;
+  m_coarseFineDeposition = CoarseFineDeposition::Halo;
+  m_velocityField        = nullptr;
 }
 
 template <typename P>
@@ -102,19 +103,39 @@ TracerParticleSolver<P>::parseDeposition()
   // Deposition for particle-mesh operations
   pp.get("deposition", str);
   if (str == "ngp") {
-    m_haloBuffer = 0;
-
-    m_deposition           = DepositionType::NGP;
-    m_coarseFineDeposition = CoarseFineDeposition::PVR;
+    m_deposition = DepositionType::NGP;
   }
   else if (str == "cic") {
-    m_haloBuffer = 1;
-
-    m_deposition           = DepositionType::CIC;
-    m_coarseFineDeposition = CoarseFineDeposition::Halo;
+    m_deposition = DepositionType::CIC;
   }
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown deposition method requested.");
+  }
+
+  pp.get("deposition_cf", str);
+  if (str == "interp") {
+    m_coarseFineDeposition = CoarseFineDeposition::Interp;
+  }
+  else if (str == "halo") {
+    m_coarseFineDeposition = CoarseFineDeposition::Halo;
+  }
+  else if (str == "halo_ngp") {
+    m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
+  }
+  else {
+    MayDay::Error("TracerParticleSolver::parseDeposition - unknown coarse-fine deposition method requested.");
+  }
+
+  // Interpolation type particle-mesh operations
+  pp.get("interpolation", str);
+  if (str == "ngp") {
+    m_interpolation = DepositionType::NGP;
+  }
+  else if (str == "cic") {
+    m_interpolation = DepositionType::CIC;
+  }
+  else {
+    MayDay::Error("TracerParticleSolver::parseDeposition - unknown interpolation method requested.");
   }
 
   pp.get("volume_scale", m_volumeScale);
@@ -131,7 +152,7 @@ TracerParticleSolver<P>::parsePlotVariables()
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("plot_mass", m_plotMass);
+  pp.get("plot_weight", m_plotWeight);
   pp.get("plot_velocity", m_plotVelocity);
 }
 
@@ -165,7 +186,8 @@ TracerParticleSolver<P>::registerOperators() const
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
 
-    m_amr->registerMask(s_particle_halo, 1, m_realm); // For CIC halo deposition.
+    // For CIC halo deposition.
+    m_amr->registerMask(s_particle_halo, 1, m_realm);
   }
 }
 
@@ -179,7 +201,31 @@ TracerParticleSolver<P>::allocate()
   }
 
   // Allocate data for storing the velocity field on the mesh, and storage for the particles.
-  m_amr->allocate(m_particles, m_pvrBuffer, m_realm);
+  m_amr->allocate(m_particles, m_realm);
+}
+
+template <typename P>
+inline void
+TracerParticleSolver<P>::setName(const std::string& a_name) noexcept
+{
+  CH_TIME("TracerParticleSolver::setName(std::string)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setName(std::string)" << endl;
+  }
+
+  m_name = a_name;
+}
+
+template <typename P>
+inline void
+TracerParticleSolver<P>::setVolumeScale(const bool a_scale) noexcept
+{
+  CH_TIME("TracerParticleSolver::setVolumeScale(bool)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::setVolumeScale(bool)" << endl;
+  }
+
+  m_volumeScale = a_scale;
 }
 
 template <typename P>
@@ -284,13 +330,7 @@ TracerParticleSolver<P>::regrid(const int a_lmin, const int a_oldFinestLevel, co
   CH_assert(a_oldFinestLevel >= 0);
   CH_assert(a_newFinestLevel >= 0);
 
-  // Regrid the particles.
-  const Vector<DisjointBoxLayout>& grids   = m_amr->getGrids(m_realm);
-  const Vector<ProblemDomain>&     domains = m_amr->getDomains();
-  const Vector<Real>&              dx      = m_amr->getDx();
-  const Vector<int>&               refRat  = m_amr->getRefinementRatios();
-
-  m_particles.regrid(grids, domains, dx, refRat, a_lmin, a_newFinestLevel);
+  m_amr->remapToNewGrids(m_particles, a_lmin, a_newFinestLevel);
 }
 
 template <typename P>
@@ -307,7 +347,7 @@ TracerParticleSolver<P>::remap()
 
 template <typename P>
 inline void
-TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const
+TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi)
 {
   CH_TIME("TracerParticleSolver::deposit(EBAMRCellData)");
   if (m_verbosity > 5) {
@@ -315,11 +355,23 @@ TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const
   }
 
   DataOps::setValue(a_phi, 0.0);
-  this->depositParticles<P, &P::mass>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
+  this->depositParticles<P, &P::weight>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
 
   if (m_volumeScale) {
     DataOps::volumeScale(a_phi, m_amr->getDx());
   }
+}
+
+template <typename P>
+void
+TracerParticleSolver<P>::interpolateWeight(const EBAMRCellData& a_scalar) noexcept
+{
+  CH_TIME("TracerParticleSolver::interpolateWeight(EBAMRCellData)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::interpolateWeight(EBAMRCellData)" << endl;
+  }
+
+  m_amr->interpolateParticles<P, &P::weight>(m_particles, m_realm, m_phase, a_scalar, m_interpolation, false);
 }
 
 template <typename P>
@@ -333,7 +385,7 @@ TracerParticleSolver<P>::interpolateVelocities()
 
   CH_assert(!(m_velocityField == nullptr));
 
-  m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, *m_velocityField, m_deposition, false);
+  m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, *m_velocityField, m_interpolation, false);
 }
 
 template <typename P>
@@ -347,10 +399,12 @@ TracerParticleSolver<P>::getNumberOfPlotVariables() const
 
   int numPlotVars = 0;
 
-  if (m_plotMass)
+  if (m_plotWeight) {
     numPlotVars += 1;
-  if (m_plotVelocity)
+  }
+  if (m_plotVelocity) {
     numPlotVars += SpaceDim;
+  }
 
   return numPlotVars;
 }
@@ -364,22 +418,21 @@ TracerParticleSolver<P>::getPlotVariableNames() const
     pout() << m_name + "::getPlotVariableNames()" << endl;
   }
 
-  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux. This
-  //       function returns the associated plot variable names, and will be used in the plot files.
-
   Vector<std::string> plotVarNames(0);
 
-  if (m_plotMass) {
+  if (m_plotWeight) {
     plotVarNames.push_back(m_name + " density");
   }
-
-  if (m_plotVelocity)
-    plotVarNames.push_back("x-Velocity " + m_name);
-  if (m_plotVelocity)
-    plotVarNames.push_back("y-Velocity " + m_name);
+  if (m_plotVelocity) {
+    plotVarNames.push_back("x-velocity " + m_name);
+  }
+  if (m_plotVelocity) {
+    plotVarNames.push_back("y-velocity " + m_name);
+  }
 #if CH_SPACEDIM == 3
-  if (m_plotVelocity)
-    plotVarNames.push_back("z-Velocity " + m_name);
+  if (m_plotVelocity) {
+    plotVarNames.push_back("z-velocity " + m_name);
+  }
 #endif
 
   return plotVarNames;
@@ -444,17 +497,17 @@ TracerParticleSolver<P>::writePlotData(EBAMRCellData& a_output, int& a_icomp)
   }
 
   // Write the particle scalars.
-  if (m_plotMass) {
-    EBAMRCellData mass;
-    m_amr->allocate(mass, m_realm, m_phase, 1);
+  if (m_plotWeight) {
+    EBAMRCellData weight;
+    m_amr->allocate(weight, m_realm, m_phase, 1);
 
-    this->deposit(mass);
+    this->deposit(weight);
 
     const Interval srcInterval(0, 0);
     const Interval dstInterval(a_icomp, a_icomp);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      mass[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
+      weight[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
     }
 
     a_icomp++;
@@ -579,31 +632,32 @@ template <typename P>
 template <typename T, const Real& (T::*particleScalarFunction)() const>
 void
 TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
-                                          const ParticleContainer<T> a_particles,
+                                          ParticleContainer<T>&      a_particles,
                                           const DepositionType       a_baseDeposition,
-                                          const CoarseFineDeposition a_coarseFineDeposition) const
+                                          const CoarseFineDeposition a_coarseFineDeposition)
 {
   CH_TIME("TracerParticleSolver::depositParticles()");
   if (m_verbosity > 5) {
     pout() << m_name + "::depositParticles()" << endl;
   }
 
-  CH_assert(m_haloBuffer == 0 || m_pvrBuffer == 0);
   CH_assert(a_phi[0]->nComp() == 1);
 
   switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::PVR: {
+  case CoarseFineDeposition::Interp: {
     m_amr->depositParticles<T, particleScalarFunction>(a_phi,
                                                        m_realm,
                                                        m_phase,
                                                        a_particles,
                                                        a_baseDeposition,
-                                                       CoarseFineDeposition::PVR,
+                                                       CoarseFineDeposition::Interp,
                                                        false);
 
     break;
   }
   case CoarseFineDeposition::Halo: {
+
+    // Copy particles living on the mask.
     const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
     a_particles.copyMaskParticles(mask);
 
@@ -615,7 +669,27 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&             a_phi,
                                                        CoarseFineDeposition::Halo,
                                                        false);
 
+    // Clear out the mask particles.
     a_particles.clearMaskParticles();
+
+    break;
+  }
+  case CoarseFineDeposition::HaloNGP: {
+    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+
+    // Transfer particles living on the mask.
+    a_particles.transferMaskParticles(mask);
+
+    m_amr->depositParticles<T, particleScalarFunction>(a_phi,
+                                                       m_realm,
+                                                       m_phase,
+                                                       a_particles,
+                                                       a_baseDeposition,
+                                                       CoarseFineDeposition::HaloNGP,
+                                                       false);
+
+    // Transfer them back.
+    a_particles.transferParticles(a_particles.getMaskParticles());
 
     break;
   }

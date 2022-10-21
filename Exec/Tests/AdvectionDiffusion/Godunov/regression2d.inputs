@@ -139,30 +139,28 @@ RodDielectric.sphere.center             = 0 0           # Low corner
 RodDielectric.sphere.radius             = 0.15          # Radius
 
 # ====================================================================================================
-# ADVECTION_DIFFUSION CLASS OPTIONS
-#
-# This class does an expcliti AMR advection-diffusion simulation of a super-Gaussian blob with
-# wall flow BCs.
+# AdvectionDiffusionStepper class options
 # ====================================================================================================
 AdvectionDiffusion.verbosity      = -1      # Verbosity
-AdvectionDiffusion.realm          = primal  # Realm
+AdvectionDiffusion.diffusion      = true    # Turn on/off diffusion
+AdvectionDiffusion.advection      = true    # Turn on/off advection
+AdvectionDiffusion.integrator     = imex    # 'heun' or 'imex'
+
+# Default velocity, diffusion, and initial data
+# ---------------------------------------------
 AdvectionDiffusion.blob_amplitude = 1.0     # Blob amplitude
 AdvectionDiffusion.blob_radius    = 0.05    # Blob radius
 AdvectionDiffusion.blob_center    = 0 0.25  # Blob center
-AdvectionDiffusion.diffusion      = true    # Turn on/off diffusion
-AdvectionDiffusion.advection      = true    # Turn on/off advection
-AdvectionDiffusion.fhd            = false   # Use FHD or not
-AdvectionDiffusion.integrator     = imex    # 'heun' or 'imex'
-
-# Velocity, diffusion, and CFL
-# ----------------------------
 AdvectionDiffusion.diffco         = 1E-3    # Diffusion coefficient
 AdvectionDiffusion.omega          = 1.0     # Rotation velocity
+
+# Time step settings
+# ------------------
 AdvectionDiffusion.cfl            = 0.8     # CFL number
 AdvectionDiffusion.min_dt         = 0.0     # Smallest acceptable time step
 AdvectionDiffusion.max_dt         = 1.E99   # Largest acceptable time step
 
-# Cell tagging stuff
+# Cell tagging controls
 # ------------------
 AdvectionDiffusion.refine_curv = 0.25         # Refine if curvature exceeds this
 AdvectionDiffusion.refine_magn = 1E-2         # Only tag if magnitude eceeds this

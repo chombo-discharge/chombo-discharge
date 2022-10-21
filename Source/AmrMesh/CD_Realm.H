@@ -278,7 +278,7 @@ public:
     @brief Get data coarsening utility
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EbCoarAve>>&
+  Vector<RefCountedPtr<EBCoarAve>>&
   getCoarseAverage(const phase::which_phase a_phase);
 
   /*!

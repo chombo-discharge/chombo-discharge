@@ -35,8 +35,14 @@ PerlinRodSdf::PerlinRodSdf(const Real&     a_rad,
 
   // Cylinder and graded noise sphere
   BaseIF*       cyl = static_cast<BaseIF*>(new CylinderSdf(a_center1, center2, a_rad, a_inside));
-  const BaseIF* sph = static_cast<BaseIF*>(
-    new GradedPerlinSphereSdf(a_rad, center2, a_inside, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed));
+  const BaseIF* sph = static_cast<BaseIF*>(new GradedPerlinSphereSdf(a_rad + a_noiseAmp,
+                                                                     center2,
+                                                                     a_inside,
+                                                                     a_noiseAmp,
+                                                                     a_noiseFreq,
+                                                                     a_persistence,
+                                                                     a_octaves,
+                                                                     a_reseed));
 
   // Rotate sph so that it aligns with center2 - a_center1
 #if CH_SPACEDIM == 2

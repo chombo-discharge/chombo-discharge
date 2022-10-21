@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CD_ItoParticle.cpp
+  @file   CD_ItoParticleImplem.H
   @brief  Implementation of CD_ItoParticle.H
   @author Robert Marskar
 */
@@ -12,200 +12,160 @@
 #ifndef CD_ItoParticleImplem_H
 #define CD_ItoParticleImplem_H
 
+// Std includes
+#include <string>
+#include <typeinfo>
+#include <cstdio>
+#include <cmath>
+
 // Our includes
 #include <CD_ItoParticle.H>
 #include <CD_NamespaceHeader.H>
 
-void
-ItoParticle::define(const Real      a_mass,
+inline ItoParticle::ItoParticle() {}
+
+inline ItoParticle::ItoParticle(const Real      a_weight,
+                                const RealVect& a_position,
+                                const RealVect& a_velocity,
+                                const Real      a_diffusion,
+                                const Real      a_mobility,
+                                const Real      a_energy)
+{
+  this->define(a_weight, a_position, a_velocity, a_diffusion, a_mobility, a_energy);
+}
+
+inline ItoParticle::ItoParticle(const ItoParticle& a_other)
+{
+  this->weight()    = a_other.weight();
+  this->position()  = a_other.position();
+  this->velocity()  = a_other.velocity();
+  this->diffusion() = a_other.diffusion();
+  this->mobility()  = a_other.mobility();
+  this->energy()    = a_other.energy();
+}
+
+inline ItoParticle::~ItoParticle() {}
+
+inline void
+ItoParticle::define(const Real      a_weight,
                     const RealVect& a_position,
                     const RealVect& a_velocity,
                     const Real      a_diffusion,
                     const Real      a_mobility,
-                    const Real      a_averageEnergy)
+                    const Real      a_energy)
 {
-  this->setMass(a_mass);
-  this->setPosition(a_position);
-  this->setVelocity(a_velocity);
-  this->setDiffusion(a_diffusion);
-  this->setMobility(a_mobility);
-  this->setEnergy(a_averageEnergy);
+  this->weight()    = a_weight;
+  this->position()  = a_position;
+  this->velocity()  = a_velocity;
+  this->diffusion() = a_diffusion;
+  this->mobility()  = a_mobility;
+  this->energy()    = a_energy;
 }
 
-Real&
-ItoParticle::mass()
+inline Real&
+ItoParticle::weight()
 {
-  return m_mass;
+  return this->real<0>();
 }
 
-const Real&
-ItoParticle::mass() const
+inline const Real&
+ItoParticle::weight() const
 {
-  return m_mass;
+  return this->real<0>();
 }
 
-void
-ItoParticle::setMass(const Real& a_mass)
-{
-  m_mass = a_mass;
-}
-
-void
-ItoParticle::setOldPosition(const RealVect a_oldPosition)
-{
-  m_oldPosition = a_oldPosition;
-}
-
-RealVect&
-ItoParticle::oldPosition()
-{
-  return m_oldPosition;
-}
-
-const RealVect&
-ItoParticle::oldPosition() const
-{
-  return m_oldPosition;
-}
-
-void
-ItoParticle::setDiffusion(const Real a_diffusion)
-{
-  m_diffusion = a_diffusion;
-}
-
-Real&
-ItoParticle::diffusion()
-{
-  return m_diffusion;
-}
-
-const Real&
-ItoParticle::diffusion() const
-{
-  return m_diffusion;
-}
-
-void
-ItoParticle::setMobility(const Real a_mobility)
-{
-  m_mobility = a_mobility;
-}
-
-Real&
+inline Real&
 ItoParticle::mobility()
 {
-  return m_mobility;
+  return this->real<1>();
 }
 
-const Real&
+inline const Real&
 ItoParticle::mobility() const
 {
-  return m_mobility;
+  return this->real<1>();
 }
 
-Real
-ItoParticle::conductivity() const
+inline Real&
+ItoParticle::diffusion()
 {
-  return m_mass * m_mobility;
+  return this->real<2>();
 }
 
-Real
-ItoParticle::diffusivity() const
+inline const Real&
+ItoParticle::diffusion() const
 {
-  return m_mass * m_diffusion;
+  return this->real<2>();
 }
 
-void
-ItoParticle::setVelocity(const RealVect& a_velocity)
+inline Real&
+ItoParticle::energy()
 {
-  m_velocity = a_velocity;
+  return this->real<3>();
 }
 
-void
-ItoParticle::setVelocity(const Real& a_velocity, const int a_dir)
+inline const Real&
+ItoParticle::energy() const
 {
-  m_velocity[a_dir] = a_velocity;
+  return this->real<3>();
 }
 
-RealVect&
+inline RealVect&
+ItoParticle::oldPosition()
+{
+  return this->vect<0>();
+}
+
+inline const RealVect&
+ItoParticle::oldPosition() const
+{
+  return this->vect<0>();
+}
+
+inline RealVect&
 ItoParticle::velocity()
 {
-  return m_velocity;
+  return this->vect<1>();
 }
 
-const RealVect&
+inline const RealVect&
 ItoParticle::velocity() const
 {
-  return m_velocity;
+  return this->vect<1>();
 }
 
-Real
-ItoParticle::velocity(const int a_dir) const
+inline Real
+ItoParticle::conductivity() const
 {
-  return m_velocity[a_dir];
+  return this->weight() * this->mobility();
 }
 
-Real&
+inline Real
+ItoParticle::diffusivity() const
+{
+  return this->weight() * this->diffusion();
+}
+
+inline Real
+ItoParticle::totalEnergy() const
+{
+  return this->weight() * this->energy();
+}
+
+inline Real&
 ItoParticle::tmp()
 {
   return m_tmp;
 }
 
-const Real&
+inline const Real&
 ItoParticle::tmp() const
 {
   return m_tmp;
 }
 
-void
-ItoParticle::setEnergy(const Real a_averageEnergy)
-{
-  m_averageEnergy = a_averageEnergy;
-}
-
-Real&
-ItoParticle::energy()
-{
-  return m_averageEnergy;
-}
-
-const Real&
-ItoParticle::energy() const
-{
-  return m_averageEnergy;
-}
-
-Real
-ItoParticle::totalEnergy() const
-{
-  return m_mass * m_averageEnergy;
-}
-
-Real&
-ItoParticle::runtimeScalar(const int a_num)
-{
-  return m_runtimeScalars[a_num];
-}
-
-const Real&
-ItoParticle::runtimeScalar(const int a_num) const
-{
-  return m_runtimeScalars[a_num];
-}
-
-RealVect&
-ItoParticle::runtimeVector(const int a_num)
-{
-  return m_runtimeVectors[a_num];
-}
-
-const RealVect&
-ItoParticle::runtimeVector(const int a_num) const
-{
-  return m_runtimeVectors[a_num];
-}
-
 #include <CD_NamespaceFooter.H>
+
+#include <CD_ItoParticleImplem.H>
 
 #endif

@@ -1,7 +1,5 @@
 ## Summary
 
-## Background
-
 ## Intent
 
 - [ ] Fix a bug or incorrect behavior.

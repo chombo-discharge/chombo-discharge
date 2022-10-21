@@ -83,7 +83,6 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # ====================================================================================================
 McPhoto.instantaneous     = false         # Instantaneous transport or not
 McPhoto.max_photons       = 1             # Maximum no. generated in a cell (<= 0 yields physical Photons)
-McPhoto.pvr_buffer        = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
 McPhoto.random_kappa      = true          # Randomize absorption length (taken from Photon implementation)
 McPhoto.plt_vars          = phi src       # Available are 'phi' and 'src'
 McPhoto.plot_deposition   = cic           # Cloud-in-cell for plotting particles. 
@@ -102,6 +101,7 @@ McPhoto.source_type       = number        # 'number'      = Source term contains
                                            # 'volume_rate' = Source terms contains the volumetric rate
                                            # 'rate'        = Source terms contains the rate
 McPhoto.deposition        = cic           # 'ngp' = nearest grid point
+McPhoto.deposition_cf      = halo          # Coarse-fine deposition. Must be interp or halo
                                            # 'num' = # of Photons per cell
                                            # 'cic' = cloud-in-cell
                                            # 'tsc' = triangle-shaped-cloud

@@ -64,12 +64,9 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # ====================================================================================================
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
-ItoSolver.pvr_buffer          = 0             # Buffer for PVR.
-ItoSolver.halo_buffer         = 1             # Size of define halo region for particles
 ItoSolver.plt_vars            = phi vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ItoSolver.seed                = 0             # Seed for RNG
-ItoSolver.kd_direction        = -1            # Kd-tree direction, -1 => random, 0,1,2 => first plane split in this dir
 ItoSolver.max_diffusion_hop   = 2.0           # Maximum diffusion hop length (in units of dx)
 ItoSolver.normal_max          = 5.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ItoSolver.redistribute        = true          # Turn on/off redistribution. 
@@ -82,6 +79,7 @@ ItoSolver.mobility_interp     = direct        # How to interpolate mobility, 'di
 ItoSolver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ItoSolver.halo_deposition     = native        # Native or NGP (see documentation)
 ItoSolver.deposition          = cic           # 'ngp' = nearest grid point
+ItoSolver.deposition_cf       = halo          # Coarse-fine deposition. interp, halo, or halo_ngp
                                                # 'cic' = cloud-in-cell
                                                # 'tsc' = triangle-shaped-cloud
                                                # 'w4'  = 3rd order interpolation
@@ -120,7 +118,7 @@ RodDielectric.sphere.radius             = 0.15          # Radius
 # ====================================================================================================
 BrownianWalker.verbosity      = -1       # Verbosity
 BrownianWalker.realm          = primal # Realm
-BrownianWalker.diffusion      = true     # Turn on/off diffusion
+BrownianWalker.diffusion      = false    # Turn on/off diffusion
 BrownianWalker.advection      = true     # Turn on/off advection
 BrownianWalker.blob_amplitude = 1.0      # Blob amplitude
 BrownianWalker.blob_radius    = 0.5      # Blob radius

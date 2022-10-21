@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_SimpleItoParticleParticle.H
-  @brief  Declaration of a particle which only holds position, mass, and energy. 
+  @brief  Declaration of a particle which only holds position, weight, and energy. 
   @author Robert Marskar
 */
 
@@ -18,157 +18,76 @@
 #include <cstdio>
 #include <cmath>
 
-// Chombo includes
-#include <BinItem.H>
-
 // Our includes
+#include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief A particle class for reducing HDF5 I/O file sizes when using ItoSolver. 
-  @details This is a computational particle class which only stores the mass, position and energy of a particle. It is used
+  @details This is a computational particle class which only stores the weight, position and energy of a particle. It is used
   with ItoSolver in order to reduce the file size of HDF5 files. 
 */
-class SimpleItoParticle : public BinItem
+class SimpleItoParticle : public GenericParticle<2, 0>
 {
 public:
   /*!
-    @brief Default constructor. Should subsequently set mass/position/energy.
+    @brief Default constructor. Should subsequently set weight/position/energy.
   */
-  SimpleItoParticle();
+  inline SimpleItoParticle();
 
   /*!
-    @brief Constructor. Sets mass, position, and energy.
-    @param[in] a_mass     Computational mass/weight
+    @brief Constructor. Sets weight, position, and energy.
+    @param[in] a_weight   Computational weight
     @param[in] a_position Position in physical space. 
     @param[in] a_energy   Average particle energy
   */
-  SimpleItoParticle(const Real a_mass, const RealVect a_position, const Real a_energy);
+  inline SimpleItoParticle(const Real a_weight, const RealVect a_position, const Real a_energy);
 
   /*!
     @brief Destructor (does nothing)
   */
-  ~SimpleItoParticle();
+  inline virtual ~SimpleItoParticle();
 
   /*!
-    @brief Define function. Sets mass, position, and energy.
-    @param[in] a_mass     Computational mass/weight
+    @brief Define function. Sets weight, position, and energy.
+    @param[in] a_weight   Computational weigth
     @param[in] a_position Position in physical space. 
     @param[in] a_energy   Average particle energy
   */
-  void
-  define(const Real a_mass, const RealVect a_position, const Real a_energy);
+  inline void
+  define(const Real a_weight, const RealVect a_position, const Real a_energy);
 
   /*!
-    @brief Set particle mass
-    @param[in] a_mass Computational weight
-    @details Sets m_mass
+    @brief Get weight
+    @return Returns m_weight
   */
-  void
-  setMass(const Real a_mass);
-
-  /*!
-    @brief Get mass
-    @return Returns m_mass
-  */
-  Real&
-  mass();
+  inline Real&
+  weight();
 
   /*! 
-    @brief Const retrieve mass
-    @return Returns m_mass
+    @brief Const retrieve weight
+    @return Returns m_weight
   */
-  const Real&
-  mass() const;
-
-  /*!
-    @brief Set particle energy
-    @param[in] a_energy Average particle energy
-    @details Sets m_energy
-  */
-  void
-  setEnergy(const Real a_energy);
+  inline const Real&
+  weight() const;
 
   /*!
     @brief Get energy
     @return Returns m_energy
   */
-  Real&
+  inline Real&
   energy();
 
   /*! 
     @brief Const retrieve energy
     @return Returns m_energy
   */
-  const Real&
+  inline const Real&
   energy() const;
-
-  /*!
-    @brief Comparison operator. Returns true if mass, energy, and position are the same. 
-    @param[in] a_p Other particle
-  */
-  bool
-  operator==(const SimpleItoParticle& a_p) const;
-
-  /*!
-    @brief Comparison operator. Returns true if mass, energy, and position are the same. 
-    @param[in] a_p Other particle
-  */
-  bool
-  operator==(const SimpleItoParticle* a_p) const;
-
-  /*!
-    @brief Comparison operator. Returns false if mass, energy, or position are not the same.
-    @param[in] a_p Other particle
-  */
-  bool
-  operator!=(const SimpleItoParticle& a_p) const;
-
-  /*!
-    @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
-  */
-  virtual int
-  size() const;
-
-  /*!
-    @brief Write a linear binary representation of the internal data. Assumes that
-    sufficient memory for the buffer has already been allocated by
-    the caller.
-  */
-  virtual void
-  linearOut(void* buf) const;
-
-  /*!
-    @brief Read a linear binary representation of the internal data.
-    Assumes that the buffer has the correct data.
-  */
-  virtual void
-  linearIn(void* buf);
-
-  /*!
-    @brief For outputting particle.
-  */
-  friend std::ostream&
-  operator<<(std::ostream& ostr, const SimpleItoParticle& p);
-
-protected:
-  /*!
-    @brief Particle mass (i.e., computational weight)
-  */
-  Real m_mass;
-
-  /*!
-    @brief Particle average energy
-  */
-  Real m_energy;
 };
 
-/*!
-  @brief For printing particle to screen
-*/
-std::ostream&
-operator<<(std::ostream& ostr, const SimpleItoParticle& p);
-
 #include <CD_NamespaceFooter.H>
+
+#include <CD_SimpleItoParticleImplem.H>
 
 #endif

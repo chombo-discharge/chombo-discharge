@@ -113,6 +113,17 @@ FieldSolver::solve(MFAMRCellData& a_potential, const bool a_zeroPhi)
 }
 
 void
+FieldSolver::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                                     const MFAMRFluxData& a_permittivityFace,
+                                     const MFAMRIVData&   a_permittivityEB)
+{
+  CH_TIME("FieldSolver::setSolverPermittivities");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolver::setSolverPermittivities" << endl;
+  }
+}
+
+void
 FieldSolver::computeElectricField()
 {
   CH_TIME("FieldSolver::computeElectricField()");
@@ -287,15 +298,13 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
   // Compute D = eps*E and then the dot product E*D.
   this->computeDisplacementField(D, a_electricField);
   DataOps::dotProduct(EdotD, D, a_electricField);
-  m_amr->averageDown(EdotD, m_realm);
+  m_amr->conservativeAverage(EdotD, m_realm);
 
   // This defines a lambda which computes the energy in a specified phase
   auto phaseEnergy = [&EdotD, &amr = this->m_amr](const phase::which_phase a_phase) -> Real {
     const EBAMRCellData phaseEdotD = amr->alias(a_phase, EdotD);
 
-    Real energy;
-
-    DataOps::norm(energy, *phaseEdotD[0], amr->getDomains()[0], 1);
+    const Real energy = DataOps::norm(*phaseEdotD[0], 1);
 
     return energy;
   };
@@ -339,7 +348,9 @@ FieldSolver::computeCapacitance()
 
   // Do a backup of the voltage.
   auto voltageBackup = m_voltage;
-  auto voltageOne    = [](const Real a_time) -> Real { return 100.0; };
+  auto voltageOne    = [](const Real a_time) -> Real {
+    return 100.0;
+  };
 
   // Set the voltage to one and use that to compute the potential/E-field
   this->setVoltage(voltageOne);
@@ -389,7 +400,7 @@ FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_ne
   m_amr->interpToNewGrids(m_potential, m_cache, a_lmin, a_oldFinestLevel, a_newFinestLevel, m_regridSlopes);
 
   // Synchronize over levels.
-  m_amr->averageDown(m_potential, m_realm);
+  m_amr->conservativeAverage(m_potential, m_realm);
   m_amr->interpGhost(m_potential, m_realm);
 
   // Recompute E from the new potential.
@@ -422,6 +433,17 @@ FieldSolver::setRho(const std::function<Real(const RealVect)>& a_rho)
   }
 
   DataOps::setValue(m_rho, a_rho, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+}
+
+void
+FieldSolver::setSigma(const Real a_sigma)
+{
+  CH_TIME("FieldSolver::setSigma(Real");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolver::setSigma(Real)" << endl;
+  }
+
+  DataOps::setValue(m_sigma, a_sigma);
 }
 
 void
@@ -655,7 +677,9 @@ FieldSolver::setDefaultDomainBcFunctions()
   }
 
   // Default space/time dependency of domain BCs.
-  auto defaultDomainBcFunction = [](const RealVect a_position, const Real a_time) -> Real { return 1.0; };
+  auto defaultDomainBcFunction = [](const RealVect a_position, const Real a_time) -> Real {
+    return 1.0;
+  };
 
   m_domainBcFunctions.clear();
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -1028,16 +1052,20 @@ FieldSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const
   LevelData<EBCellFAB> potentialGas;
   LevelData<EBCellFAB> potentialSol;
 
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     MultifluidAlias::aliasMF(potentialGas, phase::gas, *m_potential[a_level]);
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     MultifluidAlias::aliasMF(potentialSol, phase::solid, *m_potential[a_level]);
+  }
 
   // Write data
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     write(a_handle, potentialGas, "FieldSolver::m_potential(gas)");
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     write(a_handle, potentialSol, "FieldSolver::m_potential(solid)");
+  }
 }
 #endif
 
@@ -1057,26 +1085,30 @@ FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   LevelData<EBCellFAB> potentialGas;
   LevelData<EBCellFAB> potentialSol;
 
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     MultifluidAlias::aliasMF(potentialGas, phase::gas, *m_potential[a_level]);
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     MultifluidAlias::aliasMF(potentialSol, phase::solid, *m_potential[a_level]);
+  }
 
   // Read data
-  if (!ebisGas.isNull())
+  if (!ebisGas.isNull()) {
     read<EBCellFAB>(a_handle,
                     potentialGas,
                     "FieldSolver::m_potential(gas)",
                     m_amr->getGrids(m_realm)[a_level],
                     Interval(0, 0),
                     false);
-  if (!ebisSol.isNull())
+  }
+  if (!ebisSol.isNull()) {
     read<EBCellFAB>(a_handle,
                     potentialSol,
                     "FieldSolver::m_potential(solid)",
                     m_amr->getGrids(m_realm)[a_level],
                     Interval(0, 0),
                     false);
+  }
 }
 #endif
 
@@ -1101,20 +1133,27 @@ FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp, const bool a_fo
   const bool doInterp = (m_dataLocation == Location::Cell::Center) && !a_forceNoInterp;
 
   // Add phi to output
-  if (m_plotPotential)
+  if (m_plotPotential) {
     this->writeMultifluidData(a_output, a_comp, m_potential, phase::gas, doInterp);
-  if (m_plotRho)
+  }
+  if (m_plotRho) {
     this->writeMultifluidData(a_output, a_comp, m_rho, phase::gas, false);
-  if (m_plotSigma)
+  }
+  if (m_plotSigma) {
     this->writeSurfaceData(a_output, a_comp, m_sigma);
-  if (m_plotResidue)
+  }
+  if (m_plotResidue) {
     this->writeMultifluidData(a_output, a_comp, m_residue, phase::gas, false);
-  if (m_plotPermittivity)
+  }
+  if (m_plotPermittivity) {
     this->writeMultifluidData(a_output, a_comp, m_permittivityCell, phase::gas, false);
-  if (m_plotElectricField)
+  }
+  if (m_plotElectricField) {
     this->writeMultifluidData(a_output, a_comp, m_electricField, phase::gas, doInterp);
-  if (m_plotElectricFieldSolid)
+  }
+  if (m_plotElectricFieldSolid) {
     this->writeMultifluidData(a_output, a_comp, m_electricField, phase::solid, doInterp);
+  }
 }
 
 void
@@ -1122,7 +1161,7 @@ FieldSolver::writeMultifluidData(EBAMRCellData&           a_output,
                                  int&                     a_comp,
                                  const MFAMRCellData&     a_data,
                                  const phase::which_phase a_phase,
-                                 const bool               a_interp)
+                                 const bool               a_interp) const
 {
   CH_TIME("FieldSolver::writeMultifluidData(EBAMRCellData, int, MFAMRCellData, bool)");
   if (m_verbosity > 5) {
@@ -1174,11 +1213,11 @@ FieldSolver::writeMultifluidData(EBAMRCellData&           a_output,
 
   // Coarsen data.
   if (reallyMultiPhase) {
-    m_amr->averageDown(scratchGas, m_realm, phase::gas);
-    m_amr->averageDown(scratchSolid, m_realm, phase::solid);
+    m_amr->conservativeAverage(scratchGas, m_realm, phase::gas);
+    m_amr->conservativeAverage(scratchSolid, m_realm, phase::solid);
   }
   else {
-    m_amr->averageDown(scratchGas, m_realm, phase::gas);
+    m_amr->conservativeAverage(scratchGas, m_realm, phase::gas);
   }
 
   // Interpolate ghost cells.
@@ -1321,20 +1360,27 @@ FieldSolver::getNumberOfPlotVariables() const
 
   int numPltVars = 0;
 
-  if (m_plotPotential)
+  if (m_plotPotential) {
     numPltVars = numPltVars + 1;
-  if (m_plotRho)
+  }
+  if (m_plotRho) {
     numPltVars = numPltVars + 1;
-  if (m_plotSigma)
+  }
+  if (m_plotSigma) {
     numPltVars = numPltVars + 1;
-  if (m_plotResidue)
+  }
+  if (m_plotResidue) {
     numPltVars = numPltVars + 1;
-  if (m_plotPermittivity)
+  }
+  if (m_plotPermittivity) {
     numPltVars = numPltVars + 1;
-  if (m_plotElectricField)
+  }
+  if (m_plotElectricField) {
     numPltVars = numPltVars + SpaceDim;
-  if (m_plotElectricFieldSolid)
+  }
+  if (m_plotElectricFieldSolid) {
     numPltVars = numPltVars + SpaceDim;
+  }
 
   return numPltVars;
 }
@@ -1349,16 +1395,21 @@ FieldSolver::getPlotVariableNames() const
 
   Vector<std::string> pltVarNames(0);
 
-  if (m_plotPotential)
+  if (m_plotPotential) {
     pltVarNames.push_back("Electrostatic potential");
-  if (m_plotRho)
+  }
+  if (m_plotRho) {
     pltVarNames.push_back("Space charge density");
-  if (m_plotSigma)
+  }
+  if (m_plotSigma) {
     pltVarNames.push_back("Electrostatic sigma");
-  if (m_plotResidue)
+  }
+  if (m_plotResidue) {
     pltVarNames.push_back("Electrostatic potential_residue");
-  if (m_plotPermittivity)
+  }
+  if (m_plotPermittivity) {
     pltVarNames.push_back("Electrostatic permittivity");
+  }
 
   if (m_plotElectricField) {
     pltVarNames.push_back("x-Electric field");
@@ -1472,6 +1523,17 @@ FieldSolver::getRho()
   }
 
   return m_rho;
+}
+
+EBAMRIVData&
+FieldSolver::getSigma()
+{
+  CH_TIME("FieldSolver::getSigma()");
+  if (m_verbosity > 5) {
+    pout() << "FieldSolver::getSigma()" << endl;
+  }
+
+  return m_sigma;
 }
 
 MFAMRCellData&

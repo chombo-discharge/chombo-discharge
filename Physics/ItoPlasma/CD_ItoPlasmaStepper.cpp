@@ -141,11 +141,11 @@ ItoPlasmaStepper::setupSigma()
     pout() << "ItoPlasmaStepper::setupSigma" << endl;
   }
 
-  m_sigma = RefCountedPtr<SigmaSolver>(new SigmaSolver());
-  m_sigma->setAmr(m_amr);
+  m_sigma = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
   m_sigma->setVerbosity(m_verbosity);
-  m_sigma->setComputationalGeometry(m_computationalGeometry);
   m_sigma->setRealm(m_fluid_Realm);
+  m_sigma->setPhase(m_phase);
+  m_sigma->setName("Surface charge");
 }
 
 void
@@ -178,7 +178,7 @@ ItoPlasmaStepper::allocate()
   m_ito->allocateInternals();
   m_rte->allocateInternals();
   m_fieldSolver->allocateInternals();
-  m_sigma->allocateInternals();
+  m_sigma->allocate();
 }
 
 void
@@ -246,8 +246,8 @@ ItoPlasmaStepper::initialSigma()
     }
   }
 
-  m_amr->averageDown(sigma, m_fluid_Realm, phase::gas);
-  m_sigma->resetCells(sigma);
+  m_amr->conservativeAverage(sigma, m_fluid_Realm, phase::gas);
+  m_sigma->resetElectrodes(sigma, 0.0);
 }
 
 void
@@ -283,7 +283,7 @@ ItoPlasmaStepper::postCheckpointPoisson()
   // Do ghost cells and then compute E
   MFAMRCellData& state = m_fieldSolver->getPotential();
 
-  m_amr->averageDown(state, m_fluid_Realm);
+  m_amr->conservativeAverage(state, m_fluid_Realm);
   m_amr->interpGhost(state, m_fluid_Realm);
 
   m_fieldSolver->computeElectricField(); // Solver checkpoints the potential. Now compute the field.
@@ -295,13 +295,13 @@ ItoPlasmaStepper::postCheckpointPoisson()
 
   // Fluid Realm
   m_fluid_E.copy(E);
-  m_amr->averageDown(m_fluid_E, m_fluid_Realm, m_phase);
+  m_amr->conservativeAverage(m_fluid_E, m_fluid_Realm, m_phase);
   m_amr->interpGhostPwl(m_fluid_E, m_fluid_Realm, m_phase);
   m_amr->interpToCentroids(m_fluid_E, m_fluid_Realm, m_phase);
 
   // Particle Realm
   m_particle_E.copy(E);
-  m_amr->averageDown(m_particle_E, m_particleRealm, m_phase);
+  m_amr->conservativeAverage(m_particle_E, m_particleRealm, m_phase);
   m_amr->interpGhostPwl(m_particle_E, m_particleRealm, m_phase);
   m_amr->interpToCentroids(m_particle_E, m_particleRealm, m_phase);
 
@@ -775,16 +775,14 @@ ItoPlasmaStepper::parseFilters()
 }
 
 void
-ItoPlasmaStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+ItoPlasmaStepper::computeDt()
 {
   CH_TIME("ItoPlasmaStepper::computeDt");
   if (m_verbosity > 5) {
     pout() << "ItoPlasmaStepper::computeDt" << endl;
   }
 
-  a_dt       = m_ito->computeDt();
-  a_dt       = a_dt * m_max_cells_hop;
-  a_timeCode = TimeCode::Advection;
+  return m_max_cells_hop * m_ito->computeDt();
 }
 
 void
@@ -988,7 +986,7 @@ ItoPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& 
 
   m_fieldSolver->computeElectricField(a_E, a_potential);
 
-  m_amr->averageDown(a_E, m_fluid_Realm);
+  m_amr->conservativeAverage(a_E, m_fluid_Realm);
   m_amr->interpGhost(a_E, m_fluid_Realm);
 }
 
@@ -1015,7 +1013,7 @@ ItoPlasmaStepper::computeElectricField(EBAMRCellData&           a_E,
 
   m_fieldSolver->computeElectricField(a_E, a_phase, a_potential);
 
-  m_amr->averageDown(a_E, m_fluid_Realm, a_phase);
+  m_amr->conservativeAverage(a_E, m_fluid_Realm, a_phase);
   m_amr->interpGhost(a_E, m_fluid_Realm, a_phase);
 }
 
@@ -1119,7 +1117,7 @@ ItoPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
 
   DataOps::scale(a_rho, Units::Qe);
 
-  m_amr->averageDown(a_rho, m_fluid_Realm);
+  m_amr->conservativeAverage(a_rho, m_fluid_Realm);
   m_amr->interpGhost(a_rho, m_fluid_Realm);
 
   // Add potential filters.
@@ -1135,7 +1133,7 @@ ItoPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
         DataOps::setCoveredValue(m_fluid_scratch1, 0.0, 0);
         DataOps::filterSmooth(rhoPhase, m_fluid_scratch1, stride, alpha);
 
-        m_amr->averageDown(rhoPhase, m_fluid_Realm, m_phase);
+        m_amr->conservativeAverage(rhoPhase, m_fluid_Realm, m_phase);
         m_amr->interpGhost(rhoPhase, m_fluid_Realm, m_phase);
       }
     }
@@ -1187,7 +1185,7 @@ ItoPlasmaStepper::computeConductivity(EBAMRCellData&                            
 
   DataOps::scale(a_conductivity, Units::Qe);
 
-  m_amr->averageDown(a_conductivity, m_fluid_Realm, m_phase);
+  m_amr->conservativeAverage(a_conductivity, m_fluid_Realm, m_phase);
   m_amr->interpGhostPwl(a_conductivity, m_fluid_Realm, m_phase);
 
   // See if this helps....
@@ -1325,13 +1323,13 @@ ItoPlasmaStepper::solvePoisson()
 
   // Fluid Realm
   m_fluid_E.copy(E);
-  m_amr->averageDown(m_fluid_E, m_fluid_Realm, m_phase);
+  m_amr->conservativeAverage(m_fluid_E, m_fluid_Realm, m_phase);
   m_amr->interpGhostPwl(m_fluid_E, m_fluid_Realm, m_phase);
   m_amr->interpToCentroids(m_fluid_E, m_fluid_Realm, m_phase);
 
   // Particle Realm
   m_particle_E.copy(E);
-  m_amr->averageDown(m_particle_E, m_particleRealm, m_phase);
+  m_amr->conservativeAverage(m_particle_E, m_particleRealm, m_phase);
   m_amr->interpGhostPwl(m_particle_E, m_particleRealm, m_phase);
   m_amr->interpToCentroids(m_particle_E, m_particleRealm, m_phase);
 
@@ -1842,7 +1840,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
 
 #if 0 // In principle, we should be able to average down and interpolate on the fluid Realm and then copy directly to the particle Realm. \
       // But we need to make sure that EBAMRData::copy also gets ghost cells 
-      m_amr->averageDown(m_fscratch1[idx], m_fluid_Realm, m_phase);
+      m_amr->conservativeAverage(m_fscratch1[idx], m_fluid_Realm, m_phase);
       m_amr->interpGhost(m_fscratch1[idx], m_fluid_Realm, m_phase);
 
       a_meshMobilities[idx]->copy(m_fscratch1[idx]);
@@ -1850,7 +1848,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
       // Copy to particle Realm, build ghost cells and the interpolate the mobilities to particle positions.
       a_meshMobilities[idx]->copy(m_fscratch1[idx]);
 
-      m_amr->averageDown(*a_meshMobilities[idx], m_particleRealm, m_phase);
+      m_amr->conservativeAverage(*a_meshMobilities[idx], m_particleRealm, m_phase);
       m_amr->interpGhost(*a_meshMobilities[idx], m_particleRealm, m_phase);
 #endif
 
@@ -2016,13 +2014,13 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
     if (solver->isDiffusive()) {
 
 #if 0 // In principle, we should be able to average down and interpolate ghost cells on the fluid Realm, and copy the entire result over to the particle Realm.
-      m_amr->averageDown(m_fscratch1[idx], m_fluid_Realm, m_phase);
+      m_amr->conservativeAverage(m_fscratch1[idx], m_fluid_Realm, m_phase);
       m_amr->interpGhost(m_fscratch2[idx], m_fluid_Realm, m_phase);
       a_diffusionCoefficient_funcs[idx]->copy(m_fluid_scratch1[idx]);
 #else // Instead, we copy to the particle Realm and average down there, then interpolate.
       a_diffusionCoefficient_funcs[idx]->copy(m_fscratch1[idx]);
 
-      m_amr->averageDown(*a_diffusionCoefficient_funcs[idx], m_particleRealm, m_phase);
+      m_amr->conservativeAverage(*a_diffusionCoefficient_funcs[idx], m_particleRealm, m_phase);
       m_amr->interpGhost(*a_diffusionCoefficient_funcs[idx], m_particleRealm, m_phase);
 #endif
 
@@ -3554,7 +3552,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO()
       DataOps::dotProduct(m_fluid_scratch1, m_fluid_E, m_fluid_scratchD); // m_particle_scratch1 = E.dot.(E*mu*n)
       DataOps::scale(m_fluid_scratch1, Abs(q) * Units::Qe);               // m_particle_scratch1 = Z*e*mu*n*E*E
 
-      m_amr->averageDown(m_fluid_scratch1, m_fluid_Realm, m_phase);
+      m_amr->conservativeAverage(m_fluid_scratch1, m_fluid_Realm, m_phase);
       m_amr->interpGhost(m_fluid_scratch1, m_fluid_Realm, m_phase);
       DataOps::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1); // a_source[idx] += Z*e*mu*n*E*E
     }
@@ -3570,7 +3568,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO()
       DataOps::dotProduct(m_fluid_scratch1, m_fluid_scratchD, m_fluid_E);                 // scratch1 = -E.dot.grad(D*n)
       DataOps::scale(m_fluid_scratch1, Abs(q) * Units::Qe);                               // scratch1 = -Z*e*E*grad(D*n)
 
-      m_amr->averageDown(m_fluid_scratch1, m_fluid_Realm, m_phase);
+      m_amr->conservativeAverage(m_fluid_scratch1, m_fluid_Realm, m_phase);
       m_amr->interpGhost(m_fluid_scratch1, m_fluid_Realm, m_phase);
 
       DataOps::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1); // source  += -Z*e*E*grad(D*n)

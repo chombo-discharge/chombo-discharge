@@ -2,7 +2,7 @@
 # FIELD_STEPPER CLASS OPTIONS
 # ====================================================================================================
 FieldStepper.verbosity    = -1              # Verbosity
-FieldStepper.realm        = primal          # Primal Realm
+FieldStepper.realm        = primal          # Realm where solver lives. 
 FieldStepper.load_balance = false           # Load balance or not.
 FieldStepper.box_sorting  = morton          # If you load balance you can redo the box sorting. 
 FieldStepper.init_sigma   = 0.0             # Surface charge density

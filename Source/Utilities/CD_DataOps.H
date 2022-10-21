@@ -13,6 +13,7 @@
 #define CD_DataOps_H
 
 // Our includes
+#include <CD_Average.H>
 #include <CD_EBAMRData.H>
 #include <CD_Decorations.H>
 #include <CD_MFInterfaceFAB.H>
@@ -48,70 +49,81 @@ public:
     @param[out] a_faceData Face data. Must have one component. 
     @param[in]  a_cellData Cell data. Must have SpaceDim components. 
     @param[in]  a_domains  AMR domains.
-    @note This routine also fills one tangential ghost face.
+    @param[in]  a_tanGhost Number of ghost faces to fill.
   */
   static void
-  averageCellVectorToFaceScalar(EBAMRFluxData&               a_faceData,
-                                const EBAMRCellData&         a_cellData,
-                                const Vector<ProblemDomain>& a_domains);
+  averageCellVelocityToFaceVelocity(EBAMRFluxData&               a_faceData,
+                                    const EBAMRCellData&         a_cellData,
+                                    const Vector<ProblemDomain>& a_domains,
+                                    const int                    a_tanGhosts);
 
   /*!
     @brief Routine which computes the average of a cell-centered quantity on faces for the normal component only.
     @param[out] a_faceData Face data. Must have one component. 
     @param[in]  a_cellData Cell data. Must have SpaceDim components. 
     @param[in]  a_domain   Problem domain
-    @note This routine also fills one tangential ghost face.
+    @param[in]  a_tanGhost Number of ghost faces to fill
   */
   static void
-  averageCellVectorToFaceScalar(LevelData<EBFluxFAB>&       a_faceData,
-                                const LevelData<EBCellFAB>& a_cellData,
-                                const ProblemDomain&        a_domain);
-
-  /*!
-    @brief Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face.
-    @param[out] a_faceData Face data. Must have one component. 
-    @param[in]  a_cellData Cell data. Must have one component. 
-    @param[in]  a_domains  AMR domains.
-    @note This routine also fills one tangential ghost face.
-  */
-  static void
-  averageCellScalarToFaceScalar(EBAMRFluxData&               a_faceData,
-                                const EBAMRCellData&         a_cellData,
-                                const Vector<ProblemDomain>& a_domains);
-
-  /*!
-    @brief Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face.
-    @param[out] a_faceData Face data. Must have one component. 
-    @param[in]  a_cellData Cell data. Must have one component.
-    @param[in]  a_domain   Problem domain
-    @note This routine also fills one tangential ghost face.
-  */
-  static void
-  averageCellScalarToFaceScalar(LevelData<EBFluxFAB>&       a_faceData,
-                                const LevelData<EBCellFAB>& a_cellData,
-                                const ProblemDomain&        a_domain);
+  averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceData,
+                                    const LevelData<EBCellFAB>& a_cellData,
+                                    const ProblemDomain&        a_domain,
+                                    const int                   a_tanGhosts);
 
   /*!
     @brief Average all components of the cell-centered data to faces.
+    @details Calls the other version; uses arihtmetic averaging and does not fill ghost faces. 
     @param[out] a_faceData Face data. 
     @param[in]  a_cellData Cell data. 
     @param[in]  a_domains  AMR domains.
-    @note This does not fill "tangential" ghost faces (unlike averageCellVectorToFaceScalar). 
+    @note This does not fill "tangential" ghost faces.
   */
   static void
   averageCellToFace(EBAMRFluxData& a_faceData, const EBAMRCellData& a_cellData, const Vector<ProblemDomain>& a_domains);
 
   /*!
-    @brief Average all components of the cell-centered data to faces.
+    @brief Routine which averages a cell-centered component to faces. 
+    @details User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These
+    faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z-
+    directions.
     @param[out] a_faceData Face data. 
     @param[in]  a_cellData Cell data. 
-    @param[in]  a_domain   Domain
-    @note This does not fill "tangential" ghost faces (unlike averageCellVectorToFaceScalar)
+    @param[in]  a_domain   Problem domain
+    @param[in]  a_tanGhost Number of ghost faces to fill
+    @param[in]  a_faceVars Face variables
+    @param[in]  a_cellVars Cell variables
+    @param[in]  a_average  Averaging method
+  */
+  static void
+  averageCellToFace(EBAMRFluxData&               a_faceData,
+                    const EBAMRCellData&         a_cellData,
+                    const Vector<ProblemDomain>& a_domains,
+                    const int                    a_tanGhosts,
+                    const Interval&              a_faceVars,
+                    const Interval&              a_cellVars,
+                    const Average&               a_average);
+
+  /*!
+    @brief Routine which averages a cell-centered component to faces. 
+    @details User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These
+    faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z-
+    directions.
+    @param[out] a_faceData Face data. 
+    @param[in]  a_cellData Cell data. 
+    @param[in]  a_domain   Problem domain
+    @param[in]  a_tanGhost Number of ghost faces to fill
+    @param[in]  a_faceVars Face variables
+    @param[in]  a_cellVars Cell variables
+    @param[in]  a_average  Averaging method
   */
   static void
   averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
                     const LevelData<EBCellFAB>& a_cellData,
-                    const ProblemDomain&        a_domain);
+                    const ProblemDomain&        a_domain,
+                    const int                   a_tanGhosts,
+                    const Interval&             a_faceVars,
+                    const Interval&             a_cellVars,
+                    const Average&              a_average);
 
   /*!
     @brief Average all components of face centered data to cell centers.
@@ -350,6 +362,17 @@ public:
   copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src);
 
   /*!
+    @brief Copy data from one data holder to another. Allows specification of components. 
+    @param[out] a_dst       Destination data holder
+    @param[in ] a_src       Source data holder
+    @param[out] a_dstInterv Destination data component
+    @param[in ] a_srcInterv Source data components
+  */
+  template <typename T>
+  static void
+  copy(EBAMRData<T>& a_dst, const EBAMRData<T>& a_src, const Interval a_dstInterv, const Interval a_srcInterv);
+
+  /*!
     @brief Divide one data holder by another. Does specified components.
     @param[inout] a_lhs Data to be divided
     @param[in]    a_rhs Divisor.
@@ -462,6 +485,60 @@ public:
   floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
 
   /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(EBAMRCellData& a_lhs, const Real a_value);
+
+  /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+
+  /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(EBAMRIVData& a_lhs, const Real a_value);
+
+  /*!
+    @brief Roof values in data holder. This sets all values above a_value to a_value
+    @param[inout] a_lhs Data to be roofed.
+    @param[in]    a_value Roof value
+    @note Also roofs ghost cells. 
+  */
+  static void
+  roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
+
+  /*!
+    @brief Make a_data = max(a_data1, a_data2)
+    @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
+    @param[in]  a_data1 Input data holder
+    @param[in]  a_data2 Input data holder
+  */
+  static void
+  max(EBAMRCellData& a_data, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
+
+  /*!
+    @brief Make a_data = max(a_data1, a_data2)
+    @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
+    @param[in]  a_data1 Input data holder
+    @param[in]  a_data2 Input data holder
+  */
+  static void
+  max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
+
+  /*!
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
     @param[out] a_min  Minium value
@@ -558,9 +635,10 @@ public:
     @brief Compute the kappa-weighted sum of the input data. Assumes one component
     @param[out] a_mass Total mass, computed as kappa * lhs
     @param[in]  a_lhs  Cell data
+    @param[in]  a_comp Component
   */
   static void
-  kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs);
+  kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_comp = 0);
 
   /*!
     @brief Scale data by volume fraction
@@ -688,24 +766,14 @@ public:
   multiplyScalar(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs);
 
   /*!
-    @brief Compute specified norm of data. Calls EBLevelDataOps
-    @param[out] a_norm   Norm
-    @param[in]  a_data   Data to compute the norm of
-    @param[in]  a_domain Domain
-    @param[in]  a_data   Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm
-  */
-  static void
-  norm(Real& a_norm, const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p);
-
-  /*!
     @brief Compute specified norm of data. 
-    @param[in]  a_data    Data to compute the norm of
-    @param[in]  a_domain  Domain
-    @param[in]  a_data    Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm
-    @param[in]  a_regOnly If true, only include regular cells in norm computation. 
+    @param[in]  a_data   Data to compute the norm of
+    @param[in]  a_p      Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm
+    @param[in]  a_comp   Component
+    @note Does not do kappa-weighting; if user needs
   */
   static Real
-  norm(const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p, const bool a_regOnly);
+  norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_comp = 0);
 
   /*!
     @brief General addition operator for adding together data. The user can choose which components to add. 
@@ -798,6 +866,14 @@ public:
   */
   static void
   scale(EBAMRFluxData& a_lhs, const Real a_scale);
+
+  /*!
+    @brief Scale data by factor
+    @param[inout] a_lhs   Data to be scaled
+    @param[in]    a_scale Scaling factor
+  */
+  static void
+  scale(LevelData<EBFluxFAB>& a_lhs, const Real a_scale);
 
   /*!
     @brief Scale data by factor

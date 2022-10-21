@@ -70,6 +70,7 @@ EBHelmholtzDirichletDomainBC::setValue(const std::function<Real(const RealVect& 
 void
 EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                           const BaseFab<Real>&  a_phi,
+                                          const BaseFab<Real>&  a_Bcoef,
                                           const int&            a_dir,
                                           const Side::LoHiSide& a_side,
                                           const DataIndex&      a_dit,
@@ -84,9 +85,8 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 
   // TLDR: This fill the regular flux on the domain edge/face.
 
-  const Real ihdx =
-    2.0 /
-    m_dx; // Spatial step is dx/2 because the finite difference goes between cell center and domain edge (so half a cell).
+  // Spatial step is dx/2 because the finite difference goes between cell center and domain edge (so half a cell).
+  const Real ihdx = 2.0 / m_dx;
   const Real sign = (a_side == Side::Lo) ? -1 : 1; // For getting the direction of the derivative correctly.
 
   std::function<void(const IntVect&)> kernel;
@@ -95,7 +95,9 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   // we have the dphi/dn = (phi-bc_value)/(dx/2) on the low side and (bc_value - phi)/(dx/2) on the high side. So make a switch between homogeneous/inhomogeneous
   // and constant/non-constant values.
   if (a_useHomogeneous) {
-    kernel = [&](const IntVect& iv) -> void { a_faceFlux(iv, m_comp) = -sign * ihdx * a_phi(iv, m_comp); };
+    kernel = [&](const IntVect& iv) -> void {
+      a_faceFlux(iv, m_comp) = -sign * ihdx * a_phi(iv, m_comp);
+    };
   }
   else {                 // Physical BCs, select whether or not we use a constant value of spatially varying value.
     if (m_useConstant) { // Constant value.
@@ -120,13 +122,13 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   BoxLoops::loop(a_faceFlux.box(), kernel);
 
   // Multiplies by B-coefficient so that a_faceFlux = B*dphi/dn.
-  const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
-  this->multiplyByBcoef(a_faceFlux, Bco, a_dir, a_side);
+  this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
 }
 
 Real
 EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
                                           const EBCellFAB&      a_phi,
+                                          const EBFaceFAB&      a_Bcoef,
                                           const int&            a_dir,
                                           const Side::LoHiSide& a_side,
                                           const DataIndex&      a_dit,
@@ -181,7 +183,7 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
 
       // Multiply by b-coefficient and aperture.
       const FaceIndex& bndryFace = faces[0];
-      const Real       Bco       = (*m_Bcoef)[a_dit][a_dir](bndryFace, m_comp);
+      const Real       Bco       = a_Bcoef(bndryFace, m_comp);
       const Real       area      = ebisbox.areaFrac(bndryFace);
 
       centroidFlux *= Bco * area;

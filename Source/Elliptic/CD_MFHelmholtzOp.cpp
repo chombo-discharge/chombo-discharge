@@ -65,10 +65,12 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   m_multifluid   = m_numPhases > 1;
   m_hasMGObjects = a_hasMGObjects;
   m_refToCoar    = a_refToCoar;
-  m_refToCoar    = a_refToFine;
   m_smoother     = a_relaxType;
   m_hasCoar      = a_hasCoar;
   m_hasFine      = a_hasFine;
+  m_Acoef        = a_Acoef;
+  m_Bcoef        = a_Bcoef;
+  m_BcoefIrreg   = a_BcoefIrreg;
 
   if (a_hasCoar) {
     m_mflgCoFi = a_mflgCoFi;
@@ -103,7 +105,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
     RefCountedPtr<EBMultigridInterpolator> interpolator = RefCountedPtr<EBMultigridInterpolator>(nullptr);
     RefCountedPtr<EBFluxRegister>          fluxRegister = RefCountedPtr<EBFluxRegister>(nullptr);
-    RefCountedPtr<EbCoarAve>               coarsener    = RefCountedPtr<EbCoarAve>(nullptr);
+    RefCountedPtr<EBCoarAve>               coarsener    = RefCountedPtr<EBCoarAve>(nullptr);
 
     if (!a_isMGOperator) {
       if (a_hasFine) {
@@ -123,8 +125,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     // Alias the multifluid-coefficients onto a single phase.
     RefCountedPtr<LevelData<EBCellFAB>>       Acoef = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
     RefCountedPtr<LevelData<EBFluxFAB>>       Bcoef = RefCountedPtr<LevelData<EBFluxFAB>>(new LevelData<EBFluxFAB>());
-    RefCountedPtr<LevelData<BaseIVFAB<Real>>> BcoefIrreg =
-      RefCountedPtr<LevelData<BaseIVFAB<Real>>>(new LevelData<BaseIVFAB<Real>>());
+    RefCountedPtr<LevelData<BaseIVFAB<Real>>> BcoefIrreg = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
+      new LevelData<BaseIVFAB<Real>>());
 
     MultifluidAlias::aliasMF(*Acoef, iphase, *a_Acoef);
     MultifluidAlias::aliasMF(*Bcoef, iphase, *a_Bcoef);
@@ -133,18 +135,26 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     EBHelmholtzOp::Smoother ebHelmRelax;
 
     switch (a_relaxType) {
-    case MFHelmholtzOp::Smoother::PointJacobi:
+    case MFHelmholtzOp::Smoother::PointJacobi: {
       ebHelmRelax = EBHelmholtzOp::Smoother::PointJacobi;
+
       break;
-    case MFHelmholtzOp::Smoother::GauSaiRedBlack:
+    }
+    case MFHelmholtzOp::Smoother::GauSaiRedBlack: {
       ebHelmRelax = EBHelmholtzOp::Smoother::GauSaiRedBlack;
+
       break;
-    case MFHelmholtzOp::Smoother::GauSaiMultiColor:
+    }
+    case MFHelmholtzOp::Smoother::GauSaiMultiColor: {
       ebHelmRelax = EBHelmholtzOp::Smoother::GauSaiMultiColor;
+
       break;
-    default:
+    }
+    default: {
       MayDay::Error("MFHelmholtzOp::MFHelmholtzOp - unsupported relaxation method requested");
+
       break;
+    }
     }
 
     RefCountedPtr<EBHelmholtzOp> oper = RefCountedPtr<EBHelmholtzOp>(new EBHelmholtzOp(m_dataLocation,
@@ -183,6 +193,51 @@ MFHelmholtzOp::~MFHelmholtzOp()
   CH_TIME("MFHelmholtzOp()::~MFHelmholtzOp()");
 
   m_helmOps.clear();
+}
+
+void
+MFHelmholtzOp::setAcoAndBco(const RefCountedPtr<LevelData<MFCellFAB>>&   a_Acoef,
+                            const RefCountedPtr<LevelData<MFFluxFAB>>&   a_Bcoef,
+                            const RefCountedPtr<LevelData<MFBaseIVFAB>>& a_BcoefIrreg)
+{
+  CH_TIME("MFHelmholtzOp::setAcoAndBco");
+
+  // Make the operators on eachphase.
+  for (int iphase = 0; iphase < m_numPhases; iphase++) {
+
+    // Alias the multifluid-coefficients onto a single phase.
+    RefCountedPtr<LevelData<EBCellFAB>>       Acoef = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
+    RefCountedPtr<LevelData<EBFluxFAB>>       Bcoef = RefCountedPtr<LevelData<EBFluxFAB>>(new LevelData<EBFluxFAB>());
+    RefCountedPtr<LevelData<BaseIVFAB<Real>>> BcoefIrreg = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
+      new LevelData<BaseIVFAB<Real>>());
+
+    MultifluidAlias::aliasMF(*Acoef, iphase, *a_Acoef);
+    MultifluidAlias::aliasMF(*Bcoef, iphase, *a_Bcoef);
+    MultifluidAlias::aliasMF(*BcoefIrreg, iphase, *a_BcoefIrreg);
+
+    m_helmOps.at(iphase)->setAcoAndBco(Acoef, Bcoef, BcoefIrreg);
+  }
+
+  // Jump BC object also needs to update coefficients.
+  m_jumpBC->setBco(a_BcoefIrreg);
+}
+
+const RefCountedPtr<LevelData<MFCellFAB>>&
+MFHelmholtzOp::getAcoef()
+{
+  return m_Acoef;
+}
+
+const RefCountedPtr<LevelData<MFFluxFAB>>&
+MFHelmholtzOp::getBcoef()
+{
+  return m_Bcoef;
+}
+
+const RefCountedPtr<LevelData<MFBaseIVFAB>>&
+MFHelmholtzOp::getBcoefIrreg()
+{
+  return m_BcoefIrreg;
 }
 
 void
@@ -642,17 +697,26 @@ MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellF
   // This function performs relaxation. The user can switch between various kernels.
 
   switch (m_smoother) {
-  case Smoother::PointJacobi:
+  case Smoother::PointJacobi: {
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
+
     break;
-  case Smoother::GauSaiRedBlack:
+  }
+  case Smoother::GauSaiRedBlack: {
     this->relaxGSRedBlack(a_correction, a_residual, a_iterations);
+
     break;
-  case Smoother::GauSaiMultiColor:
+  }
+  case Smoother::GauSaiMultiColor: {
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("MFHelmholtzOp::relax - bogus relaxation method requested");
+
+    break;
+  }
   };
 }
 

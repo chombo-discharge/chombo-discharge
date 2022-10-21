@@ -74,6 +74,18 @@ public:
   setupSolver() = 0;
 
   /*!
+    @brief A special routine for when solver permittivities need to change but solver does not.
+    @param[in] a_permittivityCell Permittivity on cell center
+    @param[in] a_permittivityFace Permittivity on faces
+    @param[in] a_permittivityEB   Permittivity on EB
+    @note Used by FieldSolverMultigrid to change permittivities/conductivities under the hood of the multigrid solver.
+  */
+  virtual void
+  setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                          const MFAMRFluxData& a_permittivityFace,
+                          const MFAMRIVData&   a_permittivityEB);
+
+  /*!
     @brief Solve Poisson equation using m_potential, m_rho, and m_sigma. 
     @param[in] a_zeroPhi Set m_potential to zero before calling other function. 
     @return    True if we found a solution and false otherwise. 
@@ -221,6 +233,12 @@ public:
   setRho(const std::function<Real(const RealVect)>& a_rho);
 
   /*!
+    @brief Set surface charge to specified value
+  */
+  void
+  setSigma(const Real a_sigma);
+
+  /*!
     @brief Set the computational geometry
     @param[in] a_computationalGeometry Computational geometry. 
   */
@@ -238,7 +256,7 @@ public:
     @brief Set the permittivities
     @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB.
   */
-  void
+  virtual void
   setPermittivities();
 
   /*!
@@ -458,10 +476,32 @@ public:
   getPermittivityEB();
 
   /*!
+    @brief Get m_sigma
+  */
+  EBAMRIVData&
+  getSigma();
+
+  /*!
     @brief Get data location
   */
   Location::Cell
   getDataLocation() const;
+
+  /*!
+    @brief Write multifluid data to single-fluid data holders. 
+    @details This takes the valid data from each phase and writes it to a_output. On cut-cells, the a_phase flag determines which phase will be plotted.
+    @param[inout] a_output Output data holder
+    @param[inout] a_comp   Current component in a_output. 
+    @param[in]    a_data   Multifluid data holder
+    @param[in]    a_phase  Main phase in cut-cells. 
+    @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
+  */
+  virtual void
+  writeMultifluidData(EBAMRCellData&           a_output,
+                      int&                     a_comp,
+                      const MFAMRCellData&     a_data,
+                      const phase::which_phase a_phase,
+                      const bool               a_interp) const;
 
 protected:
   /*!
@@ -733,22 +773,6 @@ protected:
                       const EBISBox&   a_ebisbox,
                       const RealVect&  a_origin,
                       const Real&      a_dx);
-
-  /*!
-    @brief Write multifluid data to single-fluid data holders. 
-    @details This takes the valid data from each phase and writes it to a_output. On cut-cells, the a_phase flag determines which phase will be plotted.
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp   Current component in a_output. 
-    @param[in]    a_data   Multifluid data holder
-    @param[in]    a_phase  Main phase in cut-cells. 
-    @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
-  */
-  virtual void
-  writeMultifluidData(EBAMRCellData&           a_output,
-                      int&                     a_comp,
-                      const MFAMRCellData&     a_data,
-                      const phase::which_phase a_phase,
-                      const bool               a_interp);
 
   /*!
     @brief Write surface data to volume data holder. 

@@ -28,7 +28,7 @@
 // Our includes
 #include <CD_Location.H>
 #include <CD_EBMultigridInterpolator.H>
-#include <CD_EbCoarAve.H>
+#include <CD_EBCoarAve.H>
 #include <CD_EBHelmholtzEBBC.H>
 #include <CD_EBHelmholtzDomainBC.H>
 #include <CD_NamespaceHeader.H>
@@ -105,7 +105,7 @@ public:
                 const EBLevelGrid&                               a_eblgCoarMG,
                 const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
                 const RefCountedPtr<EBFluxRegister>&             a_fluxReg,
-                const RefCountedPtr<EbCoarAve>&                  a_coarAve,
+                const RefCountedPtr<EBCoarAve>&                  a_coarAve,
                 const RefCountedPtr<EBHelmholtzDomainBC>&        a_domainBC,
                 const RefCountedPtr<EBHelmholtzEBBC>&            a_ebBC,
                 const RealVect&                                  a_probLo,
@@ -154,6 +154,39 @@ public:
   */
   void
   turnOnBCs();
+
+  /*!
+    @brief Update with new A and B coefficients.
+    @note This will call defineStencils but will not recompute the stencils from the BC objects. 
+    @param[in] a_Acoef         Operator A-coefficient
+    @param[in] a_Bcoef         Operator B-coefficient
+    @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
+  */
+  void
+  setAcoAndBco(const RefCountedPtr<LevelData<EBCellFAB>>&       a_Acoef,
+               const RefCountedPtr<LevelData<EBFluxFAB>>&       a_Bcoef,
+               const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoefIrreg);
+
+  /*!
+    @brief Get the Helmholtz A-coefficient on cell centers
+    @return m_Acoef
+  */
+  const RefCountedPtr<LevelData<EBCellFAB>>&
+  getAcoef();
+
+  /*!
+    @brief Get the Helmholtz B-coefficient on faces
+    @return m_Bcoef
+  */
+  const RefCountedPtr<LevelData<EBFluxFAB>>&
+  getBcoef();
+
+  /*!
+    @brief Get the Helmholtz B-coefficient on the EB
+    @return m_Bcoef
+  */
+  const RefCountedPtr<LevelData<BaseIVFAB<Real>>>&
+  getBcoefIrreg();
 
   /*!
     @brief Coarsen data from fine to coar level
@@ -817,7 +850,7 @@ protected:
   /*!
     @brief Conservative coarsener
   */
-  RefCountedPtr<EbCoarAve> m_coarAve;
+  RefCountedPtr<EBCoarAve> m_coarAve;
 
   /*!
     @brief A-coefficient in Helmholtz equation
@@ -948,7 +981,7 @@ protected:
     @brief Calculate the weight of the diagonal term
   */
   void
-  computeAlphaWeight();
+  computeDiagWeight();
 
   /*!
     @brief Calculate relaxation coefficient

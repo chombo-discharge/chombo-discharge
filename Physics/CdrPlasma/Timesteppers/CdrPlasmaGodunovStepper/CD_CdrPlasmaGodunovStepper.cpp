@@ -107,6 +107,7 @@ CdrPlasmaGodunovStepper::parseRuntimeOptions()
   m_cdr->parseRuntimeOptions();
   m_rte->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
+  m_sigma->parseRuntimeOptions();
 
   // Physics also parses run-time options
   m_physics->parseRuntimeOptions();
@@ -393,8 +394,8 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   //       semi-implicit scheme because we solve for the field using div((eps + dt*sigma^k/eps0)E^(k+1)) = -rho^(k+1)/eps0 but
   //       this means we need the conductivity and space charge at the previous time step for restoring the field on the new mesh.
 
-  if (m_fieldCoupling != FieldCoupling::SemiImplicit ||
-      m_timeStep == 0) { // Just use regular regrid when we start the simulation.
+  // Just use regular regrid when we start the simulation.
+  if (m_fieldCoupling != FieldCoupling::SemiImplicit || m_timeStep == 0) {
     CdrPlasmaStepper::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   }
   else {
@@ -422,20 +423,20 @@ CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
                             m_regridSlopes);
 
     // Coarsen the conductivity and space charge from the last step and update ghost cells.
-    m_amr->averageDown(m_conductivityFactorCell, m_realm, m_phase);
+    m_amr->conservativeAverage(m_conductivityFactorCell, m_realm, m_phase);
     m_amr->interpGhostMG(m_conductivityFactorCell, m_realm, m_phase);
 
-    m_amr->averageDown(m_semiImplicitRho, m_realm, m_phase);
+    m_amr->conservativeAverage(m_semiImplicitRho, m_realm, m_phase);
     m_amr->interpGhostMG(m_semiImplicitRho, m_realm, m_phase);
 
     // Set up the semi-implicit Poisson equation and solve it.
+    m_fieldSolver->setupSolver();
     this->computeFaceConductivity(m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);
     this->setupSemiImplicitPoisson(m_conductivityFactorFace, m_conductivityFactorEB, 1.0);
 
-    // Now solve for the field on the new grids.
     const bool converged = this->solveSemiImplicitPoisson();
 
-    // If we don't converge, try new Poisson solver settings
+    // Debug if we don't converge.
     if (!converged) {
       pout() << "CdrPlasmaGodunovStepper::regrid - Poisson solver failed to converge during semi-implicit regrid."
              << endl;
@@ -503,10 +504,10 @@ CdrPlasmaGodunovStepper::postCheckpointSetup()
 
     // When we enter this routine we will already have called read the checkpoint data into the conductivityFactor and semiimplicit space charge. We need
     // to set up the field solver with those quantities rather than the regular space charge.
-    m_amr->averageDown(m_conductivityFactorCell, m_realm, m_phase);
+    m_amr->conservativeAverage(m_conductivityFactorCell, m_realm, m_phase);
     m_amr->interpGhostMG(m_conductivityFactorCell, m_realm, m_phase);
 
-    m_amr->averageDown(m_semiImplicitRho, m_realm, m_phase);
+    m_amr->conservativeAverage(m_semiImplicitRho, m_realm, m_phase);
     m_amr->interpGhostMG(m_semiImplicitRho, m_realm, m_phase);
 
     this->computeFaceConductivity(m_conductivityFactorFace, m_conductivityFactorEB, m_conductivityFactorCell);
@@ -562,7 +563,7 @@ CdrPlasmaGodunovStepper::solveSemiImplicitPoisson()
   DataOps::setValue(rho, 0.0);
   DataOps::copy(rhoPhase, m_semiImplicitRho);
 
-  m_amr->averageDown(rho, m_realm);
+  m_amr->conservativeAverage(rho, m_realm);
   m_amr->interpGhostMG(rho, m_realm);
 
   m_amr->interpToCentroids(rhoPhase, m_realm, m_phase);
@@ -714,13 +715,13 @@ CdrPlasmaGodunovStepper::computeCdrGradients()
     // Update the ghost cells so we can compute the gradient.
     scratch.copy(solver->getPhi());
 
-    m_amr->averageDown(scratch, m_realm, m_phase);
+    m_amr->conservativeAverage(scratch, m_realm, m_phase);
     m_amr->interpGhostMG(scratch, m_realm, m_phase);
 
     // Compute the gradient, coarsen it, and update the ghost cells.
     m_amr->computeGradient(grad, scratch, m_realm, phase::gas);
 
-    m_amr->averageDown(grad, m_realm, m_cdr->getPhase());
+    m_amr->conservativeAverage(grad, m_realm, m_cdr->getPhase());
     m_amr->interpGhost(grad, m_realm, m_cdr->getPhase());
   }
 }
@@ -1026,7 +1027,7 @@ CdrPlasmaGodunovStepper::computeSigmaFlux()
   }
 
   // Reset the data holder that holds the solver charge flux.
-  EBAMRIVData& flux = m_sigma->getFlux();
+  EBAMRIVData& flux = m_sigma->getRHS();
   DataOps::setValue(flux, 0.0);
 
   // Run through the CDR solvers and increment by their fluxes.
@@ -1044,7 +1045,7 @@ CdrPlasmaGodunovStepper::computeSigmaFlux()
   }
 
   // Reset the flux on electrode interface cells.
-  m_sigma->resetCells(flux);
+  m_sigma->resetElectrodes(flux, 0.0);
 }
 
 void
@@ -1165,7 +1166,7 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
       }
 
       // Coarsen the solution and update ghost cells.
-      m_amr->averageDown(phi, m_realm, m_cdr->getPhase());
+      m_amr->conservativeAverage(phi, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi, m_realm, m_cdr->getPhase());
     }
 
@@ -1207,7 +1208,7 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
     }
 
     // Coarsen the solution and update ghost cells.
-    m_amr->averageDown(phi, m_realm, m_cdr->getPhase());
+    m_amr->conservativeAverage(phi, m_realm, m_cdr->getPhase());
     m_amr->interpGhost(phi, m_realm, m_cdr->getPhase());
   }
   m_timer->stopEvent("Transport advance");
@@ -1215,7 +1216,7 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
   // Advance the sigma equation. This may seem weird but we've kept the flux through the EB constant during the transport step, so it
   // doesn't matter if we did an Euler or Heun advance in the advective step.
   EBAMRIVData&       sigma = m_sigma->getPhi();
-  const EBAMRIVData& rhs   = m_sigma->getFlux();
+  const EBAMRIVData& rhs   = m_sigma->getRHS();
 
   DataOps::incr(sigma, rhs, a_dt);
 }
@@ -1233,7 +1234,7 @@ CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt)
   this->computeCellConductivity(m_conductivityFactorCell);
   DataOps::scale(m_conductivityFactorCell, a_dt / Units::eps0);
 
-  m_amr->averageDown(m_conductivityFactorCell, m_realm, m_phase);
+  m_amr->conservativeAverage(m_conductivityFactorCell, m_realm, m_phase);
   m_amr->interpGhostMG(m_conductivityFactorCell, m_realm, m_phase);
 
   // Average conductivity to faces and set up the semi-implicit poisson equation.
@@ -1417,12 +1418,12 @@ CdrPlasmaGodunovStepper::computeSourceTerms(const Real a_dt)
                                            a_dt);
 }
 
-void
-CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+Real
+CdrPlasmaGodunovStepper::computeDt()
 {
-  CH_TIME("CdrPlasmaGodunovStepper::computeDt(Real, TimeCode)");
+  CH_TIME("CdrPlasmaGodunovStepper::computeDt()");
   if (m_verbosity > 5) {
-    pout() << "CdrPlasmaGodunovStepper::computeDt(Real, TimeCode)" << endl;
+    pout() << "CdrPlasmaGodunovStepper::computeDt()" << endl;
   }
 
   // TLDR: This routine really depends on what algorithms we use:
@@ -1433,19 +1434,21 @@ CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
   // Note that the semi-implicit scheme does not require restriction by the relaxation time, but users will take
   // care of that through the input script.
 
+  Real dt = std::numeric_limits<Real>::max();
+
   // First, figure out what the transport time step must be for explicit and explicit-implicit methods.
   if (m_diffusionAlgorithm == DiffusionAlgorithm::Explicit) {
     const Real advectionDt = m_cdr->computeAdvectionDt();
     const Real diffusionDt = m_cdr->computeDiffusionDt();
 
     m_dtCFL = std::min(advectionDt, diffusionDt);
-    a_dt    = m_cfl * m_dtCFL;
+    dt      = m_cfl * m_dtCFL;
 
     if (advectionDt < diffusionDt) {
-      a_timeCode = TimeCode::Advection;
+      m_timeCode = TimeCode::Advection;
     }
     else {
-      a_timeCode = TimeCode::Diffusion;
+      m_timeCode = TimeCode::Diffusion;
     }
 
     // Turn off implicit diffusion for all species.
@@ -1455,9 +1458,9 @@ CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
   }
   else if (m_diffusionAlgorithm == DiffusionAlgorithm::Implicit) {
     m_dtCFL    = m_cdr->computeAdvectionDt();
-    a_timeCode = TimeCode::Advection;
+    m_timeCode = TimeCode::Advection;
 
-    a_dt = m_cfl * m_dtCFL;
+    dt = m_cfl * m_dtCFL;
 
     // Turn on implicit diffusion for all species.
     for (int i = 0; i < m_useImplicitDiffusion.size(); i++) {
@@ -1527,39 +1530,38 @@ CdrPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
     }
 
     // Finally, we will have found the smallest time step and also figured out which species that implicit/explicit diffusion.
-    a_dt       = minDt;
-    a_timeCode = TimeCode::AdvectionDiffusion;
+    dt         = minDt;
+    m_timeCode = TimeCode::AdvectionDiffusion;
 
     for (const auto& implicit : m_useImplicitDiffusion) {
       if (implicit) {
-        a_timeCode = TimeCode::Advection;
+        m_timeCode = TimeCode::Advection;
       }
     }
 
-    m_dtCFL = a_dt / m_cfl;
+    m_dtCFL = dt / m_cfl;
   }
 
   // Next, limit by the relaxation time.
   const Real dtRelax = m_relaxTime * this->computeRelaxationTime();
-  if (dtRelax < a_dt) {
-    a_dt       = dtRelax;
-    a_timeCode = TimeCode::RelaxationTime;
+  if (dtRelax < dt) {
+    dt         = dtRelax;
+    m_timeCode = TimeCode::RelaxationTime;
   }
 
   // Limit by lower hardcap.
-  if (a_dt < m_minDt) {
-    a_dt       = m_minDt;
-    a_timeCode = TimeCode::Hardcap;
+  if (dt < m_minDt) {
+    dt         = m_minDt;
+    m_timeCode = TimeCode::Hardcap;
   }
 
   // Limit by upper hardcap.
-  if (a_dt > m_maxDt) {
-    a_dt       = m_maxDt;
-    a_timeCode = TimeCode::Hardcap;
+  if (dt > m_maxDt) {
+    dt         = m_maxDt;
+    m_timeCode = TimeCode::Hardcap;
   }
 
-  // Set time code also for the TimeStepper.
-  m_timeCode = a_timeCode;
+  return dt;
 }
 
 void

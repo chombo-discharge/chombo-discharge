@@ -207,16 +207,22 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
 
   // Build the EBIS geometry. Use either ScanShop or Chombo here.
   if (m_useScanShop) {
-    ScanShop* scanShop =
-      new ScanShop(*m_implicitFunctionGas, 0, a_finestDx, a_probLo, a_finestDomain, m_scanDomain, s_thresh);
+    ScanShop* scanShop = new ScanShop(*m_implicitFunctionGas,
+                                      0,
+                                      a_finestDx,
+                                      a_probLo,
+                                      a_finestDomain,
+                                      m_scanDomain,
+                                      m_maxGhostEB,
+                                      s_thresh);
 
     scanShop->setProfileFileName("ScanShopReportGasPhase.dat");
 
     a_geoserver = static_cast<GeometryService*>(scanShop);
   }
   else { // Chombo geometry generation
-    a_geoserver =
-      static_cast<GeometryService*>(new GeometryShop(*m_implicitFunctionGas, 0, a_finestDx * RealVect::Unit, s_thresh));
+    a_geoserver = static_cast<GeometryService*>(
+      new GeometryShop(*m_implicitFunctionGas, 0, a_finestDx * RealVect::Unit, s_thresh));
   }
 }
 
@@ -250,12 +256,12 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
   else {
     Vector<BaseIF*> parts;
 
-    RefCountedPtr<BaseIF> dielBaseIF =
-      RefCountedPtr<BaseIF>(new NewIntersectionIF(dielectricParts)); // This gives the region outside the dielectrics.
-    RefCountedPtr<BaseIF> elecBaseIF =
-      RefCountedPtr<BaseIF>(new NewIntersectionIF(electrodeParts)); // This is the region outside the the electrodes.
-    RefCountedPtr<BaseIF> dielCompIF =
-      RefCountedPtr<BaseIF>(new ComplementIF(*dielBaseIF)); // This is the region inside the dielectrics.
+    RefCountedPtr<BaseIF> dielBaseIF = RefCountedPtr<BaseIF>(
+      new NewIntersectionIF(dielectricParts)); // This gives the region outside the dielectrics.
+    RefCountedPtr<BaseIF> elecBaseIF = RefCountedPtr<BaseIF>(
+      new NewIntersectionIF(electrodeParts)); // This is the region outside the the electrodes.
+    RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF>(
+      new ComplementIF(*dielBaseIF)); // This is the region inside the dielectrics.
 
     // We want the function which is the region inside the dielectrics and outside the electrodes, i.e. the intersection of the region "inside"
     // dielectrics and outside the electrods.
@@ -266,8 +272,14 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
 
     // Build the EBIS geometry. Use either ScanShop or Chombo here.
     if (m_useScanShop) {
-      ScanShop* scanShop =
-        new ScanShop(*m_implicitFunctionSolid, 0, a_finestDx, a_probLo, a_finestDomain, m_scanDomain, s_thresh);
+      ScanShop* scanShop = new ScanShop(*m_implicitFunctionSolid,
+                                        0,
+                                        a_finestDx,
+                                        a_probLo,
+                                        a_finestDomain,
+                                        m_scanDomain,
+                                        m_maxGhostEB,
+                                        s_thresh);
 
       scanShop->setProfileFileName("ScanShopReportSolidPhase.dat");
 

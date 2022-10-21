@@ -63,8 +63,8 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
 
   timer.startEvent("Define QuadCFInterp");
   //  QuadCFInterp::define(gridsFine, &gridsCoar, 1.0, a_refRat, 1, a_eblgFine.getDomain());
-  m_scalarInterpolator =
-    RefCountedPtr<QuadCFInterp>(new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, 1, a_eblgFine.getDomain()));
+  m_scalarInterpolator = RefCountedPtr<QuadCFInterp>(
+    new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, 1, a_eblgFine.getDomain()));
   m_vectorInterpolator = RefCountedPtr<QuadCFInterp>(
     new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, SpaceDim, a_eblgFine.getDomain()));
   timer.stopEvent("Define QuadCFInterp");
@@ -161,10 +161,18 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&     
 
       // Apply the coarse stencil
       constexpr int numComp = 1;
-      m_aggCoarStencils[dit()]
-        ->apply(dstFine, srcCoar, m_comp, icomp, numComp, false); // true/false => increment/not increment
-      m_aggFineStencils[dit()]
-        ->apply(dstFine, srcFine, icomp, icomp, numComp, true); // true/false => increment/not increment
+      m_aggCoarStencils[dit()]->apply(dstFine,
+                                      srcCoar,
+                                      m_comp,
+                                      icomp,
+                                      numComp,
+                                      false); // true/false => increment/not increment
+      m_aggFineStencils[dit()]->apply(dstFine,
+                                      srcFine,
+                                      icomp,
+                                      icomp,
+                                      numComp,
+                                      true); // true/false => increment/not increment
     }
   }
 }
@@ -548,12 +556,18 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     // in the comparators).
     const RealVect x0 = Location::position(a_dataLocation, a_ghostVofFine, a_ebisboxFine, a_dxFine);
 
+    // Things we need to capture
+    const auto& loc         = a_dataLocation;
+    const auto& p           = x0;
+    const auto& ebisBoxFine = a_ebisboxFine;
+    const auto& ebisBoxCoar = a_ebisboxCoar;
+    const auto& dxFine      = a_dxFine;
+    const auto& dxCoar      = a_dxCoar;
+
     // For sorting fine vofs, based on distance to the ghost vof. Shortest distance goes first.
-    auto comparatorFine =
-      [&loc = a_dataLocation, &p = x0, &ebisbox = a_ebisboxFine, &dx = a_dxFine](const VolIndex& v1,
-                                                                                 const VolIndex& v2) -> bool {
-      const RealVect d1 = Location::position(loc, v1, ebisbox, dx) - p;
-      const RealVect d2 = Location::position(loc, v2, ebisbox, dx) - p;
+    auto comparatorFine = [&loc, &p, &ebisBoxFine, &dxFine](const VolIndex& v1, const VolIndex& v2) -> bool {
+      const RealVect d1 = Location::position(loc, v1, ebisBoxFine, dxFine) - p;
+      const RealVect d2 = Location::position(loc, v2, ebisBoxFine, dxFine) - p;
 
       const Real l1 = d1.vectorLength();
       const Real l2 = d2.vectorLength();
@@ -562,11 +576,9 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     };
 
     // For sorting coar vofs, based on distance to the ghost vof. Shortest distance goes first.
-    auto comparatorCoar =
-      [&loc = a_dataLocation, &p = x0, &ebisbox = a_ebisboxCoar, &dx = a_dxCoar](const VolIndex& v1,
-                                                                                 const VolIndex& v2) -> bool {
-      const RealVect d1 = Location::position(loc, v1, ebisbox, dx) - p;
-      const RealVect d2 = Location::position(loc, v2, ebisbox, dx) - p;
+    auto comparatorCoar = [&loc, &p, &ebisBoxCoar, &dxCoar](const VolIndex& v1, const VolIndex& v2) -> bool {
+      const RealVect d1 = Location::position(loc, v1, ebisBoxCoar, dxCoar) - p;
+      const RealVect d2 = Location::position(loc, v2, ebisBoxCoar, dxCoar) - p;
 
       const Real l1 = d1.vectorLength();
       const Real l2 = d2.vectorLength();
@@ -615,15 +627,8 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     IntVectSet knownTerms      = IntVectSet();
 
     //timer.startEvent("stencil");
-    std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils =
-      LeastSquares::computeDualLevelStencils<float>(derivs,
-                                                    knownTerms,
-                                                    fineVofs,
-                                                    coarVofs,
-                                                    fineDisplacements,
-                                                    coarDisplacements,
-                                                    a_weight,
-                                                    a_order);
+    std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils = LeastSquares::computeDualLevelStencils<
+      float>(derivs, knownTerms, fineVofs, coarVofs, fineDisplacements, coarDisplacements, a_weight, a_order);
 
     a_stencilFine = stencils.at(interpStenIndex).first;
     a_stencilCoar = stencils.at(interpStenIndex).second;

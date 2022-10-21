@@ -12,11 +12,6 @@
 #ifndef CD_ItoSolver_H
 #define CD_ItoSolver_H
 
-// Chombo includes
-#include <Particle.H>
-#include <ParticleData.H>
-#include <BinItem.H>
-
 // Our includes
 #include <CD_AmrMesh.H>
 #include <CD_ComputationalGeometry.H>
@@ -24,8 +19,7 @@
 #include <CD_ItoParticle.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
-#include <CD_ItoMerge.H>
-#include <CD_PointMass.H>
+#include <CD_SuperParticles.H>
 #include <CD_EbRepresentation.H>
 #include <CD_EbIntersection.H>
 #include <CD_NamespaceHeader.H>
@@ -160,22 +154,23 @@ public:
     @details This deposits mass*mobility (not multiplied by charge)
     @param[out] a_phi       Mesh data
     @param[in]  a_particles Particle data
-    @note Calls the other versions with a_deposition = m_deposition
   */
   virtual void
-  depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
+  depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Deposit conductivities (i.e. mass*mobility / volume)
     @details This deposits mass*mobility (not multiplied by charge)
-    @param[out] a_phi        Mesh data
-    @param[in]  a_particles  Particle data
-    @param[in]  a_deposition Deposition method
+    @param[out] a_phi                  Mesh data
+    @param[in]  a_particles            Particle data
+    @param[in]  a_deposition           Deposition method
+    @param[in]  a_coarseFineDeposition Coarse-fine deposition method. 
   */
   virtual void
-  depositConductivity(EBAMRCellData&                        a_phi,
-                      const ParticleContainer<ItoParticle>& a_particles,
-                      const DepositionType                  a_deposition) const;
+  depositConductivity(EBAMRCellData&                  a_phi,
+                      ParticleContainer<ItoParticle>& a_particles,
+                      const DepositionType            a_deposition,
+                      const CoarseFineDeposition      a_coarseFineDeposition) const;
 
   /*!
     @brief Deposit diffusivity (i.e. mass*D/volume)
@@ -185,19 +180,21 @@ public:
     @note Calls the other versions with a_deposition = m_deposition
   */
   virtual void
-  depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
+  depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Deposit diffusivity (i.e. mass*D/volume)
     @details This deposits mass*mobility (not multiplied by charge)
-    @param[out] a_phi        Mesh data
-    @param[in]  a_particles  Particle data
-    @param[in]  a_deposition Deposition method
+    @param[out] a_phi                  Mesh data
+    @param[in]  a_particles            Particle data
+    @param[in]  a_deposition           Deposition method
+    @param[in]  a_coarseFineDeposition Coarse-fine deposition method. 
   */
   virtual void
-  depositDiffusivity(EBAMRCellData&                        a_phi,
-                     const ParticleContainer<ItoParticle>& a_particles,
-                     const DepositionType                  a_deposition) const;
+  depositDiffusivity(EBAMRCellData&                  a_phi,
+                     ParticleContainer<ItoParticle>& a_particles,
+                     const DepositionType            a_deposition,
+                     const CoarseFineDeposition      a_coarseFineDeposition) const;
 
   /*!
     @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
@@ -207,19 +204,21 @@ public:
     @note Calls the other versions with a_deposition = m_deposition
   */
   virtual void
-  depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
+  depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
     @details This deposits mass*energy
-    @param[out] a_phi        Mesh data
-    @param[in]  a_particles  Particle data
-    @param[in]  a_deposition Deposition method
+    @param[out] a_phi                  Mesh data
+    @param[in]  a_particles            Particle data
+    @param[in]  a_deposition           Deposition method
+    @param[in]  a_coarseFineDeposition Coarse-fine deposition method. 
   */
   virtual void
-  depositEnergyDensity(EBAMRCellData&                        a_phi,
-                       const ParticleContainer<ItoParticle>& a_particles,
-                       const DepositionType                  a_deposition) const;
+  depositEnergyDensity(EBAMRCellData&                  a_phi,
+                       ParticleContainer<ItoParticle>& a_particles,
+                       const DepositionType            a_deposition,
+                       const CoarseFineDeposition      a_coarseFineDeposition) const;
 
   /*!
     @brief Compute average mobility. 
@@ -228,7 +227,7 @@ public:
     @param[in]  a_particles Particle data
   */
   virtual void
-  computeAverageMobility(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
+  computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Compute average diffusion coefficient. 
@@ -237,7 +236,7 @@ public:
     @param[in]  a_particles Particle data
   */
   virtual void
-  computeAverageDiffusion(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
+  computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Compute average particle energy.. 
@@ -246,7 +245,7 @@ public:
     @param[in]  a_particles Particle data
   */
   virtual void
-  computeAverageEnergy(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
+  computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Deposit particles onto mesh. 
@@ -269,30 +268,32 @@ public:
     @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
     @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
     the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
-    @param[out] a_phi        Mesh data -- must have exactly one component. 
-    @param[in]  a_particles  Particles to be deposited
-    @param[in]  a_deposition Deposition method
-    @note The coarse-fine deposition handling is defined by the input parameters in m_pvrBuffer, m_haloBuffer, and m_forceIrregHaloNGP (see the class documentation).
+    @param[out] a_phi                  Mesh data -- must have exactly one component. 
+    @param[in]  a_particles            Particles to be deposited
+    @param[in]  a_deposition           Deposition method
+    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
   */
   template <class P, const Real& (P::*particleScalarField)() const>
   void
-  depositParticles(EBAMRCellData&              a_phi,
-                   const ParticleContainer<P>& a_particles,
-                   const DepositionType        a_deposition) const;
+  depositParticles(EBAMRCellData&             a_phi,
+                   ParticleContainer<P>&      a_particles,
+                   const DepositionType       a_deposition,
+                   const CoarseFineDeposition a_coarseFineDeposition) const;
 
   /*!
     @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
     @details Just like the version above, but with a different function signature.
-    @param[out] a_phi        Mesh data -- must have exactly one component. 
-    @param[in]  a_particles  Particles to be deposited
-    @param[in]  a_deposition Deposition method
-    @note The coarse-fine deposition handling is defined by the input parameters in m_pvrBuffer, m_haloBuffer, and m_forceIrregHaloNGP (see the class documentation).
+    @param[out] a_phi                  Mesh data -- must have exactly one component. 
+    @param[in]  a_particles            Particles to be deposited
+    @param[in]  a_deposition           Deposition method
+    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
   */
   template <class P, Real (P::*particleScalarField)() const>
   void
-  depositParticles(EBAMRCellData&              a_phi,
-                   const ParticleContainer<P>& a_particles,
-                   const DepositionType        a_deposition) const;
+  depositParticles(EBAMRCellData&             a_phi,
+                   ParticleContainer<P>&      a_particles,
+                   const DepositionType       a_deposition,
+                   const CoarseFineDeposition a_coarseFineDeposition) const;
 
   /*!
     @brief Remove particles that are inside the EB. 
@@ -422,34 +423,6 @@ public:
   getNumberOfPlotVariables() const;
 
   /*!
-    @brief Get PVR buffer
-    @return Returns m_pvrBuffer
-  */
-  virtual int
-  getPVRBuffer() const;
-
-  /*!
-    @brief Get the halo buffer
-    @return Returns m_haloBuffer
-  */
-  virtual int
-  getHaloBuffer() const;
-
-  /*!
-    @brief Set the PVR buffer
-    @param[in] a_pvrBuffer PVR buffer size
-  */
-  virtual void
-  setPVRBuffer(const int a_pvrBuffer);
-
-  /*!
-    @brief Set the halo buffer
-    @param[in] a_haloBuffer Halo buffer size
-  */
-  virtual void
-  setHaloBuffer(const int a_haloBuffer);
-
-  /*!
     @brief Get number of particles in a specified particle container
     @param[in] a_whichContainer Which container to count particles in. 
     @param[in] a_localOnly      Only report local particles (i.e. not reduced over MPI ranks)
@@ -509,7 +482,7 @@ public:
     @note This will write the plot data in this solver to a_output, starting on a_comp
   */
   virtual void
-  writePlotData(EBAMRCellData& a_output, int& a_comp) const;
+  writePlotData(EBAMRCellData& a_output, int& a_comp);
 
 #ifdef CH_USE_HDF5
   /*!
@@ -1033,19 +1006,9 @@ protected:
   int m_restartPPC;
 
   /*!
-    @brief Splitting direction. This is used in mergeBVH to select the first direction of the BVH when merging/splitting particles. 
-  */
-  int m_directionKD;
-
-  /*!
     @brief Realm where this solve lives. 
   */
   std::string m_realm;
-
-  /*!
-    @brief Boundary volume hierarchy merging tree -- used in mergeBVH. 
-  */
-  ItoMerge::Tree<PointMass> m_mergeTree;
 
   /*!
     @brief Computational geometry. 
@@ -1103,11 +1066,6 @@ protected:
     @brief Time step
   */
   int m_timeStep;
-
-  /*!
-    @brief Buffer for PVR
-  */
-  int m_pvrBuffer;
 
   /*!
     @brief Size of refinement boundary halo
@@ -1215,6 +1173,11 @@ protected:
   DepositionType m_deposition;
 
   /*!
+    @brief Coarse-fine deposition strategy
+  */
+  CoarseFineDeposition m_coarseFineDeposition;
+
+  /*!
     @brief Deposition method when depositing particles to mesh during plotting. 
   */
   DepositionType m_plotDeposition;
@@ -1260,12 +1223,6 @@ protected:
   std::map<WhichContainer, ParticleContainer<ItoParticle>> m_particleContainers;
 
   /*!
-    @brief Parse superparticle settings -- this just sets the default direction in which we build the BVH
-  */
-  void
-  parseSuperParticles();
-
-  /*!
     @brief Parse RNG options -- this parses the RNG seed and instantiates the distributions. 
   */
   void
@@ -1288,12 +1245,6 @@ protected:
   */
   void
   parseBisectStep();
-
-  /*!
-    @brief Parse PVR buffer
-  */
-  void
-  parsePvrBuffer();
 
   /*!
     @brief Parse plot variables
@@ -1386,30 +1337,32 @@ protected:
     @brief Compute the cell-centered deposition -- this is the main deposition function.
     @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
     the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
-    @param[out] a_phi        Cell-centered mesh data. Must have exactly one component. 
-    @param[in]  a_particles  Particles to be deposited. 
-    @param[in]  a_deposition Deposition type
-    @note The coarse-fine deposition is handled internally in this routine (through parameters m_pvrBuffer and m_haloBuffer)
+    @param[out] a_phi                  Cell-centered mesh data. Must have exactly one component. 
+    @param[in]  a_particles            Particles to be deposited. 
+    @param[in]  a_deposition           Deposition type
+    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
   */
   template <class P, const Real& (P::*particleScalarField)() const>
   void
-  depositKappaConservative(EBAMRCellData&              a_phi,
-                           const ParticleContainer<P>& a_particles,
-                           const DepositionType        a_deposition) const;
+  depositKappaConservative(EBAMRCellData&             a_phi,
+                           ParticleContainer<P>&      a_particles,
+                           const DepositionType       a_deposition,
+                           const CoarseFineDeposition a_coarseFineDeposition) const;
 
   /*!
     @brief Compute the cell-centered deposition -- this is the main deposition function.
     @details Just like the version above except that the function signature is Real P::particleScalarField() const.
-    @param[out] a_phi        Cell-centered mesh data. Must have exactly one component. 
-    @param[in]  a_particles  Particles to be deposited. 
-    @param[in]  a_deposition Deposition type
-    @note The coarse-fine deposition is handled internally in this routine (through parameters m_pvrBuffer and m_haloBuffer)
+    @param[out] a_phi                  Cell-centered mesh data. Must have exactly one component. 
+    @param[in]  a_particles            Particles to be deposited. 
+    @param[in]  a_deposition           Deposition type
+    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
   */
   template <class P, Real (P::*particleScalarField)() const>
   void
-  depositKappaConservative(EBAMRCellData&              a_phi,
-                           const ParticleContainer<P>& a_particles,
-                           const DepositionType        a_deposition) const;
+  depositKappaConservative(EBAMRCellData&             a_phi,
+                           ParticleContainer<P>&      a_particles,
+                           const DepositionType       a_deposition,
+                           const CoarseFineDeposition a_coarseFineDeposition) const;
 
   /*!
     @brief Redistribute mass in an AMR context. 
@@ -1474,7 +1427,7 @@ protected:
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
   void
-  mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell);
+  makeSuperparticles(List<ItoParticle>& a_particles, const int a_particlesPerCell);
 
   /*!
     @brief Write data to output. Convenience function which just copies data from one data holder to the output data holder. 
@@ -1501,56 +1454,6 @@ protected:
   */
   virtual void
   interpolateMobilitiesVelocity(const int a_level, const DataIndex& a_dit);
-
-  /*!
-    @brief Sign function
-    @return Returns 1.0 if a > 0 and -1 if a < 0.
-  */
-  inline Real
-  sign(const Real& a) const;
-
-  /*!
-    @brief Draw a random position physical somewhere in a grid cell.
-    @details This is the version that respects cut-cells -- it will draw a position (through rejection sampling) such that the particle ends up 
-    on the correct side of the EB. 
-    @param[in] a_cellPos       Cell-center position.
-    @param[in] a_lo            Lower-left corner of volume that encloses the cut-cell. This is relative to the unit cell. 
-    @param[in] a_hi            Upper-right corner of volume that encloses the cut-cell. This is relative to the unit cell. 
-    @param[in] a_bndryCentroid EB centroid position
-    @param[in] a_normal        EB normal (points into the fluid region)
-    @param[in] a_dx            Grid resolution
-    @param[in] a_kappa         Cell volume
-  */
-  inline RealVect
-  randomPosition(const RealVect a_cellPos,
-                 const RealVect a_lo,
-                 const RealVect a_hi,
-                 const RealVect a_bndryCentroid,
-                 const RealVect a_normal,
-                 const Real     a_dx,
-                 const Real     a_kappa) const;
-
-  /*!
-    @brief Draw a random position somewhere in a cut-cell
-    @param[in] a_lo            Lower-left corner of volume that encloses the cut-cell. This is relative to the unit cell. 
-    @param[in] a_hi            Upper-right corner of volume that encloses the cut-cell. This is relative to the unit cell. 
-    @param[in] a_bndryCentroid EB centroid position
-    @param[in] a_normal        EB normal (points into the fluid region)
-    @return Returns a position inside the cut-cell and on the correct side of the EB. 
-  */
-  inline RealVect
-  randomPosition(const RealVect a_lo,
-                 const RealVect a_hi,
-                 const RealVect a_bndryCentroid,
-                 const RealVect a_normal) const;
-
-  /*!
-    @brief Return a random position in the cube (a_lo, a_hi);
-    @param[in] a_lo Lower-left corner 
-    @param[in] a_hi Upper-right corner 
-  */
-  inline RealVect
-  randomPosition(const RealVect a_lo, const RealVect a_hi) const;
 };
 
 #include <CD_NamespaceFooter.H>

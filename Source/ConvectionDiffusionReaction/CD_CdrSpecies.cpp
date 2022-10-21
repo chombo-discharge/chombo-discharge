@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_CdrSpecies.H>
 #include <CD_NamespaceHeader.H>
@@ -83,7 +86,7 @@ CdrSpecies::isMobile() const
   return m_isMobile;
 }
 
-const List<Particle>&
+const List<PointParticle>&
 CdrSpecies::getInitialParticles() const
 {
   CH_TIME("CdrSpecies::getInitialParticles()");
@@ -91,7 +94,7 @@ CdrSpecies::getInitialParticles() const
   return m_initialParticles;
 }
 
-List<Particle>&
+List<PointParticle>&
 CdrSpecies::getInitialParticles()
 {
   CH_TIME("CdrSpecies::getInitialParticles()");

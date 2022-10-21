@@ -943,12 +943,18 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     // in the comparators).
     const RealVect x0 = Location::position(a_dataLocation, a_vofCoar, ebisBoxCoar, a_dxCoar);
 
+    // Things we need to capture
+    const auto& loc         = a_dataLocation;
+    const auto& p           = x0;
+    const auto& ebisboxFine = ebisBoxFine;
+    const auto& ebisboxCoar = ebisBoxCoar;
+    const auto& dxFine      = a_dxFine;
+    const auto& dxCoar      = a_dxCoar;
+
     // For sorting fine vofs, based on distance to the ghost vof. Shortest distance goes first.
-    auto comparatorFine =
-      [&loc = a_dataLocation, &p = x0, &ebisbox = ebisBoxFine, &dx = a_dxFine](const VolIndex& v1,
-                                                                               const VolIndex& v2) -> bool {
-      const RealVect d1 = Location::position(loc, v1, ebisbox, dx) - p;
-      const RealVect d2 = Location::position(loc, v2, ebisbox, dx) - p;
+    auto comparatorFine = [&loc, &p, &ebisboxFine, &dxFine](const VolIndex& v1, const VolIndex& v2) -> bool {
+      const RealVect d1 = Location::position(loc, v1, ebisboxFine, dxFine) - p;
+      const RealVect d2 = Location::position(loc, v2, ebisboxFine, dxFine) - p;
 
       const Real l1 = d1.vectorLength();
       const Real l2 = d2.vectorLength();
@@ -957,11 +963,9 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     };
 
     // For sorting coar vofs, based on distance to the ghost vof. Shortest distance goes first.
-    auto comparatorCoar =
-      [&loc = a_dataLocation, &p = x0, &ebisbox = ebisBoxCoar, &dx = a_dxCoar](const VolIndex& v1,
-                                                                               const VolIndex& v2) -> bool {
-      const RealVect d1 = Location::position(loc, v1, ebisbox, dx) - p;
-      const RealVect d2 = Location::position(loc, v2, ebisbox, dx) - p;
+    auto comparatorCoar = [&loc, &p, &ebisboxCoar, &dxCoar](const VolIndex& v1, const VolIndex& v2) -> bool {
+      const RealVect d1 = Location::position(loc, v1, ebisboxCoar, dxCoar) - p;
+      const RealVect d2 = Location::position(loc, v2, ebisboxCoar, dxCoar) - p;
 
       const Real l1 = d1.vectorLength();
       const Real l2 = d2.vectorLength();
@@ -1011,15 +1015,8 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     }
     knownTerms |= IntVect::Zero;
 
-    const std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils =
-      LeastSquares::computeDualLevelStencils<float>(derivTerms,
-                                                    knownTerms,
-                                                    fineVoFs,
-                                                    coarVoFs,
-                                                    fineDisplacements,
-                                                    coarDisplacements,
-                                                    a_weight,
-                                                    a_order);
+    const std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils = LeastSquares::computeDualLevelStencils<
+      float>(derivTerms, knownTerms, fineVoFs, coarVoFs, fineDisplacements, coarDisplacements, a_weight, a_order);
     // LeastSquares returns a map over all derivatives (unknowns) in the Taylor series. These are stored
     // as IntVects so that IntVect(1,1) = d^2/(dxdy) and so on. We are after IntVect(1,0) = d/dx, IntVect(0,1) = d/dy. We fetch
     // those and place them in a_stencilFine and a_stencilCoar. We encode the direction in the stencil variable (in a_stencilFine) and

@@ -56,7 +56,9 @@ EBHelmholtzLarsenEBBCFactory::setRobinCoefficients()
 
   // This is the right-hand side of the Robin BC, i.e. the source function. Time is a dummy parameter, and the user should
   // have captured some external time (e.g., RtSolver::m_time) by reference in the function that was passed into the full constructor.
-  m_functionC = [source = this->m_source](const RealVect& a_position) { return source; };
+  m_functionC = [source = this->m_source](const RealVect& a_position) {
+    return source;
+  };
 
   m_useConstant = false;
   m_useFunction = true;

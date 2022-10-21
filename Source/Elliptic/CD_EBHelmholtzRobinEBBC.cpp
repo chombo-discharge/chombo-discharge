@@ -23,8 +23,9 @@ EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC()
 {
   CH_TIME("EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC()");
 
-  m_order  = -1;
-  m_weight = -1;
+  m_order           = -1;
+  m_weight          = -1;
+  m_domainDropOrder = -1;
 
   m_useConstant = false;
   m_useFunction = false;
@@ -87,6 +88,14 @@ EBHelmholtzRobinEBBC::setWeight(const int a_weight)
 }
 
 void
+EBHelmholtzRobinEBBC::setDomainDropOrder(const int a_domainSize)
+{
+  CH_TIME("EBHelmholtzRobinEBBC::setDomainDropOrder()");
+
+  m_domainDropOrder = a_domainSize;
+}
+
+void
 EBHelmholtzRobinEBBC::setCoefficients(const Real a_A, const Real a_B, const Real a_C)
 {
   CH_TIME("EBHelmholtzRobinEBBC::setCoefficients(Real, Real, Real)");
@@ -128,9 +137,17 @@ EBHelmholtzRobinEBBC::define()
     MayDay::Error("EBHelmholtzRobinEBBC::define() - not using constant or function!");
   }
 
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const ProblemDomain&     domain = m_eblg.getDomain();
 
-  m_kappaDivFStencils.define(dbl);
+  // Drop order if we must
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (domain.size()[dir] <= m_domainDropOrder) {
+      m_order = 1;
+    }
+  }
+
+  m_gradPhiStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
     const Box         box     = dbl[dit()];
@@ -138,7 +155,7 @@ EBHelmholtzRobinEBBC::define()
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
-    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
 
     stencils.define(ivs, ebgraph, m_nComp);
 
@@ -147,7 +164,6 @@ EBHelmholtzRobinEBBC::define()
 
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
-      const Real helmBco  = (*m_Bcoef)[dit()](vof, m_comp);
 
       VoFStencil& fluxStencil = stencils(vof, m_comp);
 
@@ -202,7 +218,7 @@ EBHelmholtzRobinEBBC::define()
         // The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
         // kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
         if (std::abs(B) > 0.0) {
-          fluxStencil *= A * areaFrac * helmBco / (B * m_dx);
+          fluxStencil *= A * areaFrac / (B * m_dx);
         }
         else {
           fluxStencil.clear();
@@ -219,19 +235,20 @@ EBHelmholtzRobinEBBC::define()
 }
 
 void
-EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&     a_vofit,
-                                  EBCellFAB&       a_Lphi,
-                                  const EBCellFAB& a_phi,
-                                  const DataIndex& a_dit,
-                                  const Real&      a_beta,
-                                  const bool&      a_homogeneousPhysBC) const
+EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&           a_vofit,
+                                  EBCellFAB&             a_Lphi,
+                                  const EBCellFAB&       a_phi,
+                                  const BaseIVFAB<Real>& a_Bcoef,
+                                  const DataIndex&       a_dit,
+                                  const Real&            a_beta,
+                                  const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME("EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
   CH_assert(m_useFunction || m_useConstant);
 
-  // Recall that the "flux" is kappaDivF = area*dphi/dn/DeltaX where dphi/dn = (A*phi - C)/B. We already have the phi
-  // term in the stencil so only need to add -C/B.
+  // Recall that the "flux" is kappaDivF = area*B*dphi/dn/DeltaX where dphi/dn = (A*phi - C)/B. We already have the phi
+  // term in the stencil so only need to add -C/B. The Helmholtz B-coefficient is also missing so multiply that in here.
   if (!a_homogeneousPhysBC) {
 
     // Kernel
@@ -255,7 +272,7 @@ EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&     a_vofit,
 
       const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
       const Real     areaFrac  = ebisbox.bndryArea(vof);
-      const Real     helmBco   = (*m_Bcoef)[a_dit](vof, m_comp);
+      const Real     helmBco   = a_Bcoef(vof, m_comp);
       const Real     kappaDivF = -a_beta * helmBco * areaFrac * C / (m_dx * B);
 
       if (std::abs(B) > 0.0) {
@@ -281,10 +298,10 @@ EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   //       of the solution. The user will input the desired neighborhood and order of that interpolation. By default, the radius of the stencil is
   //       the same as the order.
 
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const bool     useStartVof =
-    !(m_weight >
-      0); // If we use unweighted least squares we can, in fact, include the cut-cell itself in the interpolation.
+  const EBISBox& ebisbox     = m_eblg.getEBISL()[a_dit];
+  const bool     useStartVof = !(
+    m_weight >
+    0); // If we use unweighted least squares we can, in fact, include the cut-cell itself in the interpolation.
   const int radius = a_order;
 
   // Get the vofs around the cut-cell. Note that if m_weight = 0 we enable the cut-cell itself in the interpolation.

@@ -116,11 +116,6 @@ protected:
   RefCountedPtr<GeoCoarsener> m_geoCoarsen;
 
   /*!
-    @brief Time code
-  */
-  TimeCode m_timeCode;
-
-  /*!
     @brief Input file
   */
   std::string m_inputFile;
@@ -290,6 +285,11 @@ protected:
     @brief Angle refinement threshold
   */
   Real m_refineAngle;
+
+  /*!
+    @brief Turn on/off geometry coarsening below the base level
+  */
+  bool m_doCoarsening;
 
   /*!
     @brief Special option for when geometric tags are changed during a simulation. 

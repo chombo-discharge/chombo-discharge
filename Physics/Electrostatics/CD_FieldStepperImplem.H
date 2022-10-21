@@ -36,12 +36,35 @@ namespace Physics {
 
       ParmParse pp("FieldStepper");
 
-      std::string str;
+      Real     rho0       = 0.0;
+      Real     sigma0     = 0.0;
+      Real     blobRadius = 1.0;
+      RealVect blobCenter = RealVect::Zero;
 
+      std::string  str;
+      Vector<Real> vec(SpaceDim);
+
+      // Read in parameters
+      pp.get("init_rho", rho0);
+      pp.get("init_sigma", sigma0);
+      pp.get("rho_radius", blobRadius);
       pp.get("load_balance", m_loadBalance);
       pp.get("box_sorting", str);
       pp.get("realm", m_realm);
       pp.get("verbosity", m_verbosity);
+      pp.getarr("rho_center", vec, 0, SpaceDim);
+
+      blobCenter = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+
+      m_rhoGas = [a = rho0, c = blobCenter, r = blobRadius](const RealVect x) -> Real {
+        const Real d = (x - c).dotProduct(x - c);
+        return a * exp(-d / (2 * r * r));
+      };
+
+      m_rhoDielectric        = m_rhoGas;
+      m_surfaceChargeDensity = [s = sigma0](const RealVect& x) -> Real {
+        return s;
+      };
 
       if (str == "none") {
         m_boxSort = BoxSorting::None;
@@ -76,7 +99,9 @@ namespace Physics {
       }
 
       // Define a voltage function to be used in the simulation.
-      auto voltage = [](const Real a_time) -> Real { return 1.0; };
+      auto voltage = [](const Real a_time) -> Real {
+        return 1.0;
+      };
 
       // Instantiate the FieldSolver and set it up.
       m_fieldSolver = RefCountedPtr<FieldSolver>(new T());
@@ -89,11 +114,13 @@ namespace Physics {
       m_fieldSolver->setTime(0, 0.0, 0.0);
 
       // Instantiate the surface charge solver and set it up.
-      m_sigma = RefCountedPtr<SigmaSolver>(new SigmaSolver());
+      m_sigma = RefCountedPtr<SurfaceODESolver<1>>(new SurfaceODESolver<1>(m_amr));
       m_sigma->setVerbosity(m_verbosity);
-      m_sigma->setAmr(m_amr);
-      m_sigma->setComputationalGeometry(m_computationalGeometry);
+      m_sigma->setPhase(phase::gas);
       m_sigma->setRealm(m_realm);
+      m_sigma->setName("Surface charge");
+      m_sigma->parseOptions();
+      m_sigma->setTime(0, 0.0, 0.0);
     }
 
     template <class T>
@@ -131,7 +158,7 @@ namespace Physics {
       }
 
       m_fieldSolver->allocateInternals();
-      m_sigma->allocateInternals();
+      m_sigma->allocate();
     }
 
     template <class T>
@@ -155,47 +182,18 @@ namespace Physics {
         pout() << "FieldStepper<T>::initialData" << endl;
       }
 
-      // TLDR: We create a Gaussian blob for the space charge, rho = rho0*exp(-(x-x0)^2/(2*R^2)), and set the surface charge to sigma = sigma0. The parameters
-      //       are parsed in through the input script.
-
-      ParmParse pp("FieldStepper");
-
-      Real rho0;
-      Real sigma0;
-
-      Vector<Real> vec(SpaceDim);
-
-      Real     blobRadius;
-      RealVect blobCenter;
-
-      // Read in parameters
-      pp.get("init_rho", rho0);
-      pp.get("init_sigma", sigma0);
-      pp.get("rho_radius", blobRadius);
-      pp.getarr("rho_center", vec, 0, SpaceDim);
-      blobCenter = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-
-      // Fetch the potential and surface/space charges and initialize them.
+      // Fetch the potential and surface/space charges and initialize them. The potential is set to zero
+      // and the space/surface charge set from m_rhoGas, m_rhoDielectric, and m_surfaceChargeDensity
       MFAMRCellData& state = m_fieldSolver->getPotential();
       EBAMRIVData&   sigma = m_sigma->getPhi();
 
-      // Nifty lambda for making a Gaussian blob.
-      auto rhoFunc = [rho0, blobCenter, blobRadius](const RealVect a_position) -> Real {
-        const RealVect dist  = a_position - blobCenter;
-        const Real     dist2 = dist.dotProduct(dist);
-
-        return rho0 * exp(-dist2 / (2 * blobRadius * blobRadius));
-      };
-
-      // Initial potential to zero.
       DataOps::setValue(state, 0.0);
+      DataOps::setValue(sigma, m_surfaceChargeDensity, m_amr->getProbLo(), m_amr->getDx(), 0);
+      m_sigma->resetElectrodes(sigma, 0.0);
+      m_fieldSolver->setRho(m_rhoGas);
 
-      // Set surface charge.
-      DataOps::setValue(sigma, sigma0);
-      m_sigma->resetCells(sigma);
-
-      // Set space charge.
-      m_fieldSolver->setRho(rhoFunc);
+      // Solve Poisson equation.
+      this->solvePoisson();
     }
 
     template <class T>
@@ -207,7 +205,7 @@ namespace Physics {
         pout() << "FieldStepper<T>::solvePoisson" << endl;
       }
 
-      // Solve using rho from fieldsolver and sigma from SigmaSolver.
+      // Solve using rho from fieldsolver and sigma from SurfaceODESolver.
       MFAMRCellData& phi   = m_fieldSolver->getPotential();
       MFAMRCellData& rho   = m_fieldSolver->getRho();
       EBAMRIVData&   sigma = m_sigma->getPhi();
@@ -231,8 +229,6 @@ namespace Physics {
       if (m_verbosity > 5) {
         pout() << "FieldStepper<T>::postInitialize" << endl;
       }
-
-      this->solvePoisson();
     }
 
     template <class T>
@@ -418,6 +414,36 @@ namespace Physics {
         LoadBalancing::sort(a_boxes[lvl], loads, m_boxSort);
         LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
       }
+    }
+
+    template <class T>
+    void
+    FieldStepper<T>::setRho(const std::function<Real(const RealVect& a_pos)>& a_rho,
+                            const phase::which_phase                          a_phase) noexcept
+    {
+      CH_TIME("FieldStepper::setRho");
+      if (m_verbosity > 5) {
+        pout() << "FieldStepper<T>::setRho" << endl;
+      }
+
+      if (a_phase == phase::gas) {
+        m_rhoGas = a_rho;
+      }
+      else if (a_phase == phase::solid) {
+        m_rhoDielectric = a_rho;
+      }
+    }
+
+    template <class T>
+    void
+    FieldStepper<T>::setSigma(const std::function<Real(const RealVect& a_pos)>& a_sigma) noexcept
+    {
+      CH_TIME("FieldStepper::setSigma");
+      if (m_verbosity > 5) {
+        pout() << "FieldStepper<T>::setSigma" << endl;
+      }
+
+      m_surfaceChargeDensity = a_sigma;
     }
   } // namespace Electrostatics
 } // namespace Physics

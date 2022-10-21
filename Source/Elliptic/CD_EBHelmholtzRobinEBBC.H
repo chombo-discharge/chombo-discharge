@@ -78,6 +78,12 @@ public:
   setWeight(const int a_weight);
 
   /*!
+    @brief Drop BC order if domain size is equal or below this.
+  */
+  virtual void
+  setDomainDropOrder(const int a_domainSize);
+
+  /*!
     @brief Set constant coefficients
     @param[in] a_A Constant A-coefficient
     @param[in] a_B Constant B-coefficient
@@ -102,17 +108,19 @@ public:
     @param[inout] a_vofit             Iterator for cut-cells
     @param[in]    a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered. 
+    @param[in]    a_Bcoef             EB-centered B-coefficient
     @param[in]    a_dit               Data index    
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
   virtual void
-  applyEBFlux(VoFIterator&     a_vofit,
-              EBCellFAB&       a_Lphi,
-              const EBCellFAB& a_phi,
-              const DataIndex& a_dit,
-              const Real&      a_beta,
-              const bool&      a_homogeneousPhysBC) const override;
+  applyEBFlux(VoFIterator&           a_vofit,
+              EBCellFAB&             a_Lphi,
+              const EBCellFAB&       a_phi,
+              const BaseIVFAB<Real>& a_Bcoef,
+              const DataIndex&       a_dit,
+              const Real&            a_beta,
+              const bool&            a_homogeneousPhysBC) const override;
 
 protected:
   /*!
@@ -134,6 +142,11 @@ protected:
     @brief Stencil weight (for weighting equations in least squares reconstruction)
   */
   int m_weight;
+
+  /*!
+    @brief Special flag for dropping stencil order when domains become coarser than this.
+  */
+  int m_domainDropOrder;
 
   /*!
     @brief Constant A-coefficient

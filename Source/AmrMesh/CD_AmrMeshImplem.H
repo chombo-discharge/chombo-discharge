@@ -121,14 +121,14 @@ AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std
 
     const Real dx = m_dx[lvl];
 
-    a_particles[lvl] =
-      RefCountedPtr<ParticleData<T>>(new ParticleData<T>(dbl, domain, m_blockingFactor, dx * RealVect::Unit, m_probLo));
+    a_particles[lvl] = RefCountedPtr<ParticleData<T>>(
+      new ParticleData<T>(dbl, domain, m_blockingFactor, dx * RealVect::Unit, m_probLo));
   }
 }
 
 template <typename T>
 void
-AmrMesh::allocate(ParticleContainer<T>& a_container, const int a_buffer, const std::string a_realm) const
+AmrMesh::allocate(ParticleContainer<T>& a_container, const std::string a_realm) const
 {
   CH_TIME("AmrMesh::allocate(ParticleContainer<T>, int, string)");
   if (m_verbosity > 5) {
@@ -136,8 +136,8 @@ AmrMesh::allocate(ParticleContainer<T>& a_container, const int a_buffer, const s
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::allocate(ParticleContainer<T>, int, string) - could not find Realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::allocate(ParticleContainer<T>, int, string) - could not find Realm '" + a_realm +
+                            "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -150,10 +150,10 @@ AmrMesh::allocate(ParticleContainer<T>& a_container, const int a_buffer, const s
                      m_realms[a_realm]->getDomains(),
                      m_realms[a_realm]->getDx(),
                      m_realms[a_realm]->getRefinementRatios(),
+                     m_realms[a_realm]->getValidCells(),
                      m_probLo,
                      m_blockingFactor,
                      m_finestLevel,
-                     a_buffer,
                      a_realm);
 }
 
@@ -210,6 +210,23 @@ AmrMesh::allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel) const
   }
 
   return this->allocatePointer(a_data.getData(), a_finestLevel);
+}
+
+template <class P>
+void
+AmrMesh::remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept
+{
+  CH_TIME("AmrMesh::remapToNewGrids");
+
+  const std::string realm = a_particles.getRealm();
+
+  const Vector<DisjointBoxLayout>& grids      = this->getGrids(realm);
+  const Vector<ProblemDomain>&     domains    = this->getDomains();
+  const Vector<Real>&              dx         = this->getDx();
+  const Vector<int>&               refRat     = this->getRefinementRatios();
+  const AMRMask&                   validCells = this->getValidCells(realm);
+
+  a_particles.regrid(grids, domains, dx, refRat, validCells, a_lmin, a_newFinestLevel);
 }
 
 template <class P, const Real& (P::*particleScalarField)() const>
@@ -508,14 +525,21 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
   RefCountedPtr<BaseIF> implicitFunction;
 
   switch (a_phase) {
-  case phase::gas:
+  case phase::gas: {
     implicitFunction = m_baseif.at(phase::gas);
+
     break;
-  case phase::solid:
+  }
+  case phase::solid: {
     implicitFunction = m_baseif.at(phase::solid);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("AmrMesh::removeCoveredParticlesIF - logic bust");
+
+    break;
+  }
   }
 
   // Get the realm where the particles live.
@@ -712,14 +736,21 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
   RefCountedPtr<BaseIF> implicitFunction;
 
   switch (a_phase) {
-  case phase::gas:
+  case phase::gas: {
     implicitFunction = m_baseif.at(phase::gas);
+
     break;
-  case phase::solid:
+  }
+  case phase::solid: {
     implicitFunction = m_baseif.at(phase::solid);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("AmrMesh::intersectParticlesRaycastIF - logic bust");
+
+    break;
+  }
   }
 
   // Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain
@@ -794,9 +825,9 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
                 ebParticles.add(lit());
               }
             }
-            else { // Crashed with domain "first".
-              const Real sSafety =
-                std::max(0.0, sDomain - safety); // To prevent particles falling off the high side of the domain
+            else {
+              // Crashed with domain "first". Safety factor is to prevent particles falling off the high side of the domain
+              const Real sSafety = std::max(0.0, sDomain - safety);
 
               particle.position() = oldPos + sSafety * path;
 
@@ -847,14 +878,21 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
   RefCountedPtr<BaseIF> implicitFunction;
 
   switch (a_phase) {
-  case phase::gas:
+  case phase::gas: {
     implicitFunction = m_baseif.at(phase::gas);
+
     break;
-  case phase::solid:
+  }
+  case phase::solid: {
     implicitFunction = m_baseif.at(phase::solid);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("AmrMesh::intersectParticlesBisectIF - logic bust");
+
+    break;
+  }
   }
 
   // Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain
@@ -930,8 +968,9 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
               }
             }
             else { // Crashed with domain "first".
-              const Real sSafety =
-                std::max(0.0, sDomain - safety); // To prevent particles falling off the high side of the domain
+              const Real sSafety = std::max(0.0,
+                                            sDomain -
+                                              safety); // To prevent particles falling off the high side of the domain
 
               particle.position() = oldPos + sSafety * path;
 

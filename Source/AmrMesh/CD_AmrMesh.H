@@ -27,7 +27,7 @@
 
 // Our includes
 #include <CD_EBAMRData.H>
-#include <CD_EbCoarAve.H>
+#include <CD_EBCoarAve.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_IrregAmrStencil.H>
@@ -140,13 +140,11 @@ public:
   /*!
     @brief Template class for generic allocation of particle containers. 
     @param[out] a_container Particle container to be allocated
-    @param[in]  a_pvrBuffer The particle valid region buffer. 
     @param[out] a_realm     Realm on which the particles will be allocated. 
-    @note Particles that live within a_pvrBuffer on the fine side of the refinement boundary will be mapped to the coarse level. 
   */
   template <typename T>
   void
-  allocate(ParticleContainer<T>& a_container, const int a_pvrBuffer, const std::string a_realm) const;
+  allocate(ParticleContainer<T>& a_container, const std::string a_realm) const;
 
   /*!
     @brief Allocate pointer but not any memory blocks. 
@@ -441,7 +439,7 @@ public:
            const std::string        a_realm,
            const phase::which_phase a_phase,
            const int                a_nComp,
-           const int                a_nGhost = 0) const;
+           const int                a_nGhost = -1) const;
 
   /*!
     @brief Allocate a data holder over a specific realm
@@ -456,7 +454,7 @@ public:
            const std::string        a_realm,
            const phase::which_phase a_phase,
            const int                a_nComp,
-           const int                a_nGhost = 0) const;
+           const int                a_nGhost = -1) const;
 
   /*!
     @brief Allocate Boolean data over a specific realm
@@ -577,21 +575,48 @@ public:
   */
   void
   reallocate(MFAMRIVData& a_data, const int a_lmin) const;
-  /*!
-    @brief Average down multifluid data over a realm. 
-    @param[inout] a_data  Data to be coarsened.
-    @param[in]    a_realm Realm name
-  */
-  void
-  averageDown(MFAMRCellData& a_data, const std::string a_realm) const;
 
   /*!
-    @brief Average down multifluid data over a realm. 
+    @brief Average multifluid data over a specified realm
+    @param[inout] a_data    Data to be coarsened.
+    @param[in]    a_realm   Realm name
+    @param[in]    a_average Averaging method
+  */
+  void
+  average(MFAMRCellData& a_data, const std::string a_realm, const Average& a_average) const;
+
+  /*!
+    @brief Arithmetic coarsening of multifluid data.
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
   void
-  averageDown(MFAMRFluxData& a_data, const std::string a_realm) const;
+  arithmeticAverage(MFAMRCellData& a_data, const std::string a_realm) const;
+
+  /*!
+    @brief Harmonic coarsening of multifluid data.
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+  */
+  void
+  harmonicAverage(MFAMRCellData& a_data, const std::string a_realm) const;
+
+  /*!
+    @brief Conservative coarsening of multifluid data.
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+  */
+  void
+  conservativeAverage(MFAMRCellData& a_data, const std::string a_realm) const;
+
+  /*!
+    @brief Average multifluid data over a specified realm
+    @param[inout] a_data    Data to be coarsened.
+    @param[in]    a_realm   Realm name
+    @param[in]    a_average Averaging method
+  */
+  void
+  average(MFAMRFluxData& a_data, const std::string a_realm, const Average& a_average) const;
 
   /*!
     @brief Average multifluid data over a realm. 
@@ -600,54 +625,131 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  averageFaces(MFAMRFluxData& a_data, const std::string a_realm) const;
+  arithmeticAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
+
+  /*!
+    @brief Average multifluid data over a realm. 
+    @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+  */
+  void
+  harmonicAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
+
+  /*!
+    @brief Average down multifluid data over a realm. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+  */
+  void
+  conservativeAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
 
   /*!
     @brief Average down on specific realm and phase. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
+    @param[in]    a_average Averaging method
   */
   void
-  averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  average(EBAMRCellData&           a_data,
+          const std::string        a_realm,
+          const phase::which_phase a_phase,
+          const Average&           a_average) const;
+
+  /*!
+    @brief Average down on specific realm and phase. 
+    @param[inout] a_data      Data to be coarsened.
+    @param[in]    a_realm     Realm
+    @param[in]    a_phase     Phase (gas or solid)
+    @param[in]    a_variables Variables to average
+    @param[in]    a_average   Averaging method
+  */
+  void
+  average(EBAMRCellData&           a_data,
+          const std::string        a_realm,
+          const phase::which_phase a_phase,
+          const Average&           a_average,
+          const Interval&          a_variables) const;
+
+  /*!
+    @brief Arithmetic average of data. Does all components. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void
+  arithmeticAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Arithmetic average of data. 
+    @param[inout] a_data      Data to be coarsened.
+    @param[in]    a_realm     Realm name
+    @param[in]    a_phase     Phase (gas or solid)
+    @param[in]    a_variables Variables
+  */
+  void
+  arithmeticAverage(EBAMRCellData&           a_data,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase,
+                    const Interval&          a_variables) const;
+
+  /*!
+    @brief Harmonic average of data. Does all components. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void
+  harmonicAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Harmonic average of data. Does all components. 
+    @param[inout] a_data      Data to be coarsened.
+    @param[in]    a_realm     Realm name
+    @param[in]    a_phase     Phase (gas or solid)
+    @param[in]    a_variables Variables
+  */
+  void
+  harmonicAverage(EBAMRCellData&           a_data,
+                  const std::string        a_realm,
+                  const phase::which_phase a_phase,
+                  const Interval&          a_variables) const;
+
+  /*!
+    @brief Conseratively average data. Does all components. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void
+  conservativeAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Conseratively average data. Does all components. 
+    @param[inout] a_data      Data to be coarsened.
+    @param[in]    a_realm     Realm name
+    @param[in]    a_phase     Phase (gas or solid)
+    @param[in]    a_variables Variables
+  */
+  void
+  conservativeAverage(EBAMRCellData&           a_data,
+                      const std::string        a_realm,
+                      const phase::which_phase a_phase,
+                      const Interval&          a_variables) const;
 
   /*!
     @brief Average down on specific realm and phase. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
-    @param[in]    a_level The coarse level.
-    @details This coarsens data from level a_lvl+1 to level a_lvl
+    @param[in]    a_average Averaging method
   */
   void
-  averageDown(EBAMRCellData&           a_data,
-              const std::string        a_realm,
-              const phase::which_phase a_phase,
-              const int                a_lvl) const;
-
-  /*!
-    @brief Coarsen cells over a realm. This does a specific level. 
-    @param[inout] a_coarData Coarse grid data
-    @param[inout] a_fineData Fine grid data
-    @param[in]    a_level    The grid level corresponding to a_fineData
-    @param[in]    a_realm    Realm name
-    @param[in]    a_phase    Phase (gas or solid)
-  */
-  void
-  averageDown(LevelData<EBCellFAB>&       a_coarData,
-              const LevelData<EBCellFAB>& a_fineData,
-              const int                   a_level,
-              const std::string           a_realm,
-              const phase::which_phase    a_phase) const;
-
-  /*!
-    @brief Average down on specific realm and phase. 
-    @param[inout] a_data  Data to be coarsened.
-    @param[in]    a_realm Realm name
-    @param[in]    a_phase Phase (gas or solid)
-  */
-  void
-  averageDown(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  average(EBAMRFluxData&           a_data,
+          const std::string        a_realm,
+          const phase::which_phase a_phase,
+          const Average&           a_average) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -657,7 +759,17 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  averageFaces(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  arithmeticAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Average down on specific realm and phase. 
+    @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
+    @param[inout] a_data  Data to be average.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void
+  harmonicAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Average down on specific realm and phase. 
@@ -666,16 +778,47 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  averageDown(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  conservativeAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Do conservative coarsening for data defined on cut-cells. 
+    @brief Average down on specific realm and phase. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+    @param[in]    a_average Averaging method
+  */
+  void
+  average(EBAMRIVData&             a_data,
+          const std::string        a_realm,
+          const phase::which_phase a_phase,
+          const Average&           a_average) const;
+
+  /*!
+    @brief Arithmetic average on specific realm and phase. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase);
+  arithmeticAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Harmonic average on specific realm and phase. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void
+  harmonicAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Conservative averaging on specific realm and phase.
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void
+  conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Deposit scalar particle quantities on the mesh. 
@@ -1093,6 +1236,37 @@ public:
                    const bool               a_useSlopes);
 
   /*!
+    @brief Interpolate data to new grids
+    @details This is called when requiring data to be interpolated to new grids. Takes old data as argument
+    and fills the new grid data with an interpolation of the old grid data. 
+    @param[out] a_newData        New grid data.
+    @param[in]  a_oldData        Old grid data.
+    @param[in]  a_phase          Phase on which we regrid. 
+    @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
+    @param[in]  a_oldFinestLevel Previous finest level.
+    @param[in]  a_newFinestLevel New finest level. 
+    @param[in]  a_conservative   If true, do conservative regridding. 
+  */
+  void
+  interpToNewGrids(EBAMRIVData&             a_newData,
+                   const EBAMRIVData&       a_oldData,
+                   const phase::which_phase a_phase,
+                   const int                a_lmin,
+                   const int                a_oldFinestLevel,
+                   const int                a_newFinestLevel,
+                   const bool               a_conservative);
+
+  /*!
+    @brief Regrid particle to new grids. 
+    @note User needs to call ParticleContainer<P>::preRegrid prior to this.
+    @param[in]  a_lmin           Coarsest level that did not change (but distribution may have changed). 
+    @param[in]  a_newFinestLevel New finest level. 
+  */
+  template <class P>
+  void
+  remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept;
+
+  /*!
     @brief Interpolate data to centroids on realm and phase
     @param[inout] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
@@ -1365,7 +1539,7 @@ public:
   /*!
     @brief Get the coarsening utility
   */
-  Vector<RefCountedPtr<EbCoarAve>>&
+  Vector<RefCountedPtr<EBCoarAve>>&
   getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!

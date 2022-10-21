@@ -25,10 +25,9 @@ def write_template(args):
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
-    if args.use_mpi:
-        mainf.write("#ifdef CH_MPI\n")
-        mainf.write("  MPI_Init(&argc, &argv);\n")
-        mainf.write("#endif\n")
+    mainf.write("#ifdef CH_MPI\n")
+    mainf.write("  MPI_Init(&argc, &argv);\n")
+    mainf.write("#endif\n")
     
     mainf.write("\n")
     mainf.write("  // Build class options from input script and command line options\n")
@@ -54,11 +53,8 @@ def write_template(args):
     mainf.write("  engine->setupAndRun(input_file);\n");
     mainf.write("\n")
 
-    if args.use_mpi:
-        mainf.write("#ifdef CH_MPI\n")
-        mainf.write("  CH_TIMER_REPORT();\n")
-        mainf.write("  MPI_Finalize();\n")
-        mainf.write("#endif\n")
-        mainf.write("}\n")
-        
-    mainf.close()
+    mainf.write("#ifdef CH_MPI\n")
+    mainf.write("  CH_TIMER_REPORT();\n")
+    mainf.write("  MPI_Finalize();\n")
+    mainf.write("#endif\n")
+    mainf.write("}\n")

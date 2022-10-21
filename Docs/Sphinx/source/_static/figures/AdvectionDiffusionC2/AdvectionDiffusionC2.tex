@@ -1,0 +1,97 @@
+\documentclass[10pt]{article}
+\usepackage{pgfplots, siunitx}
+\usepackage{amsmath, amsfonts, amssymb, bm, color, graphicx, times}
+\usepackage{algorithm2e, nicefrac}
+\usepackage{filecontents}
+\usepackage[paperwidth=19.5cm,paperheight=7.3cm,lmargin=0in,rmargin=0in,tmargin=0.in,bmargin=0.in]{geometry}
+\usepgfplotslibrary{fillbetween}
+
+\pgfplotsset{
+  compat=newest,
+  error_style/.style={
+    width=9.0cm,
+    height=7.0cm,    
+    axis on top,
+    font=\footnotesize,
+    minor tick num=1,
+    xlabel=Time refinement,
+    ylabel=Solution error,
+    legend cell align=left,
+    legend style={at={(0.05,0.05)},yshift=1ex, anchor=south west, font=\scriptsize, legend columns=1, cells={align=center}}},
+  linf/.style={draw=red!90!black, thick, solid, mark repeat=1, mark=o, mark options={thin, mark size=2pt, solid, fill=white, fill opacity=1.0}},
+  l1/.style={draw=green!90!black, thick, solid, mark repeat=1, mark=square, mark options={thin, mark size=2pt, solid, fill=white, fill opacity=1.0}},
+  l2/.style={draw=blue!90!black, thick, solid, mark repeat=1, mark=triangle, mark options={thin, mark size=3pt, solid, fill=white, fill opacity=1.0}},
+  o1/.style={draw=black, thick, densely dotted},
+  o2/.style={draw=black, thick, thick}
+}
+
+\begin{filecontents*}{heun.dat}
+2	2.36757e-05	1.10609e-06	3.41728e-06
+4	5.9431e-06	2.77622e-07	8.56773e-07
+8	1.48341e-06	6.93697e-08	2.14023e-07
+16	3.7594e-07	1.73538e-08	5.35491e-08
+\end{filecontents*}
+
+\begin{filecontents*}{imex.dat}
+2	0.000408169	1.1241e-05	3.54864e-05
+4	0.000226786	6.77638e-06	2.11891e-05
+8	0.000118253	3.69924e-06	1.15144e-05
+16	6.09069e-05	1.92647e-06	5.98427e-06
+\end{filecontents*}
+
+\begin{document}
+\begin{tikzpicture}
+
+  \begin{axis}[
+      error_style,
+      xmode=log,
+      ymode=log,
+      xmin= 2,
+      xmax=16,
+      log basis x={2},
+      log basis y={10},          
+      alias=heun,
+      title=Heun's method]
+
+    \addplot[linf] table[x expr=\thisrowno{0}, y expr=\thisrowno{1}] {heun.dat};
+    \addplot[l1] table[x expr=\thisrowno{0}, y expr=\thisrowno{2}] {heun.dat};
+    \addplot[l2] table[x expr=\thisrowno{0}, y expr=\thisrowno{3}] {heun.dat};
+    \addplot[o1][domain=2:16] {5E-5/(2*x)};
+    \addplot[o2][domain=2:16] {5E-5/(x*x)};    
+
+    \addlegendentry{$L_\infty$};
+    \addlegendentry{$L_1$};
+    \addlegendentry{$L_2$};
+    \addlegendentry{$\sim 1/\Delta t$};
+    \addlegendentry{$\sim 1/\Delta t^2$};
+  \end{axis}
+
+  \begin{axis}[
+      at=(heun.north east),
+      anchor=north west,
+      xshift=5em,
+      error_style,
+      xmode=log,
+      ymode=log,
+      xmin= 2,
+      xmax=16,
+      log basis x={2},
+      log basis y={10},          
+      alias=imex,
+      title=IMEX discretization]
+
+    \addplot[linf] table[x expr=\thisrowno{0}, y expr=\thisrowno{1}] {imex.dat};
+    \addplot[l1] table[x expr=\thisrowno{0}, y expr=\thisrowno{2}] {imex.dat};
+    \addplot[l2] table[x expr=\thisrowno{0}, y expr=\thisrowno{3}] {imex.dat};
+    \addplot[o1][domain=2:16] {5E-4/(2*x)};
+    \addplot[o2][domain=2:16] {5E-4/(x*x)};    
+
+    \addlegendentry{$L_\infty$};
+    \addlegendentry{$L_1$};
+    \addlegendentry{$L_2$};
+    \addlegendentry{$\sim 1/\Delta t$};
+    \addlegendentry{$\sim 1/\Delta t^2$};
+  \end{axis}  
+\end{tikzpicture}
+
+\end{document}

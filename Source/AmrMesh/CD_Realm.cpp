@@ -227,8 +227,8 @@ Realm::defineHaloMasks(const int a_lmin)
 
         const int ncomp = 1;
 
-        mask[lvl] =
-          RefCountedPtr<LevelData<BaseFab<bool>>>(new LevelData<BaseFab<bool>>(gridsCoar, ncomp, IntVect::Zero));
+        mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
+          new LevelData<BaseFab<bool>>(gridsCoar, ncomp, IntVect::Zero));
 
         this->defineHaloMask(*mask[lvl], domainCoar, domainFine, gridsCoar, gridsFine, buffer, m_refinementRatios[lvl]);
       }
@@ -554,7 +554,7 @@ Realm::getNonConservativeDivergenceStencils(const phase::which_phase a_phase) co
   return m_realms[a_phase]->getNonConservativeDivergenceStencils();
 }
 
-Vector<RefCountedPtr<EbCoarAve>>&
+Vector<RefCountedPtr<EBCoarAve>>&
 Realm::getCoarseAverage(const phase::which_phase a_phase)
 {
   return m_realms[a_phase]->getCoarseAverage();

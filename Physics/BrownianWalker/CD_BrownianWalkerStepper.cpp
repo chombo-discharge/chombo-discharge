@@ -93,15 +93,6 @@ BrownianWalkerStepper::initialData()
   // Fill initial particles and then make the desired number of superparticles.
   m_solver->initialData();
   this->makeSuperParticles();
-}
-
-void
-BrownianWalkerStepper::postInitialize()
-{
-  CH_TIME("BrownianWalkerStepper::postInitialize");
-  if (m_verbosity > 5) {
-    pout() << "BrownianWalkerStepper::postInitialize" << endl;
-  }
 
   // Set advection and diffusion fields.
   this->setAdvectionDiffusion();
@@ -111,6 +102,15 @@ BrownianWalkerStepper::postInitialize()
   m_solver->setParticleMobility(m_mobility);
 
   m_solver->interpolateVelocities();
+}
+
+void
+BrownianWalkerStepper::postInitialize()
+{
+  CH_TIME("BrownianWalkerStepper::postInitialize");
+  if (m_verbosity > 5) {
+    pout() << "BrownianWalkerStepper::postInitialize" << endl;
+  }
 }
 
 void
@@ -171,7 +171,7 @@ BrownianWalkerStepper::setVelocity()
   DataOps::setValue(vel, veloFunc, m_amr->getProbLo(), m_amr->getDx());
 
   // Coarsen and update ghost cells.
-  m_amr->averageDown(vel, m_realm, m_phase);
+  m_amr->conservativeAverage(vel, m_realm, m_phase);
   m_amr->interpGhostMG(vel, m_realm, m_phase);
 
   DataOps::setCoveredValue(vel, 0, 0.0);
@@ -204,15 +204,21 @@ BrownianWalkerStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs
   CH_assert(m_loadBalance && a_realm == m_realm);
 
   switch (m_whichLoadBalance) {
-  case LoadBalancingMethod::Mesh:
+  case LoadBalancingMethod::Mesh: {
     this->loadBalanceBoxesMesh(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
+
     break;
-  case LoadBalancingMethod::Particle:
+  }
+  case LoadBalancingMethod::Particle: {
     this->loadBalanceBoxesParticles(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
+
     break;
-  default:
+  }
+  default: {
     MayDay::Error("BrownianWalkerStepper::loadBalanceBoxes - logic bust");
+
     break;
+  }
   }
 }
 
@@ -293,15 +299,15 @@ BrownianWalkerStepper::writePlotData(EBAMRCellData&       a_output,
   m_solver->writePlotData(a_output, a_icomp);
 }
 
-void
-BrownianWalkerStepper::computeDt(Real& a_dt, TimeCode& a_timeCode)
+Real
+BrownianWalkerStepper::computeDt()
 {
   CH_TIME("BrownianWalkerStepper::computeDt");
   if (m_verbosity > 5) {
     pout() << "BrownianWalkerStepper::computeDt" << endl;
   }
 
-  a_dt = m_cfl * m_solver->computeDt();
+  return m_cfl * m_solver->computeDt();
 }
 
 void
@@ -693,7 +699,13 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
   ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
   // Regrid the particles onto the new mesh.
-  particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
+  particles.regrid(a_grids,
+                   m_amr->getDomains(),
+                   m_amr->getDx(),
+                   m_amr->getRefinementRatios(),
+                   m_amr->getValidCells(particles.getRealm()),
+                   a_lmin,
+                   a_finestLevel);
 
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);

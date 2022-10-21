@@ -78,6 +78,7 @@ MeshODEStepper<N>::initialData()
   }
 
   m_solver->setPhi(m_initialData);
+  m_solver->computeRHS(m_rhsFunction);
 }
 
 template <size_t N>
@@ -88,8 +89,6 @@ MeshODEStepper<N>::postInitialize()
   if (m_verbosity > 5) {
     pout() << "MeshODEStepper::postInitialize()" << endl;
   }
-
-  m_solver->computeRHS(m_rhsFunction);
 }
 
 template <size_t N>
@@ -250,15 +249,15 @@ MeshODEStepper<N>::getNumberOfPlotVariables() const
 }
 
 template <size_t N>
-void
-MeshODEStepper<N>::computeDt(Real& a_dt, TimeCode& a_timeCode)
+Real
+MeshODEStepper<N>::computeDt()
 {
   CH_TIME("MeshODEStepper::computeDt()");
   if (m_verbosity > 5) {
     pout() << "MeshODEStepper::computeDt()" << endl;
   }
 
-  a_dt = m_dt;
+  return m_dt;
 }
 
 template <size_t N>

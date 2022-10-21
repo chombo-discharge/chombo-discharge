@@ -110,7 +110,6 @@ public:
     scaled based on what a_source actually contains (number of photons, number/volume, number/second, number/(volume*second)). 
     @param[in] a_dt Time step
     @details This will generate photons and put them in a_particles
-    @todo This routine could be implemented using the PVR valid mask rather than remapping, which will be more efficient. 
     @todo Implementation could use a lambda to avoid the double definition. 
   */
   virtual void
@@ -170,14 +169,12 @@ public:
 
   /*!
     @brief Deposit photons
-    @param[out] a_phi        Deposited mesh density
-    @param[in]  a_photons    Computational photons to be deposited
-    @param[in]  a_deposition Deposition method
+    @param[out]   a_phi        Deposited mesh density
+    @param[inout] a_photons    Computational photons to be deposited
+    @param[in]    a_deposition Deposition method
   */
   virtual void
-  depositPhotons(EBAMRCellData&                   a_phi,
-                 const ParticleContainer<Photon>& a_particles,
-                 const DepositionType&            a_deposition);
+  depositPhotons(EBAMRCellData& a_phi, ParticleContainer<Photon>& a_particles, const DepositionType& a_deposition);
 
   /*!
     @brief Sort container by cell
@@ -348,34 +345,6 @@ public:
   getPlotVariableNames() const override;
 
   /*!
-    @brief Get PVR buffer
-    @details Returns m_pvrBuffer. 
-  */
-  virtual int
-  getPVRBuffer() const;
-
-  /*!
-    @brief Get the halo buffer
-    @details Returns m_haloBuffer
-  */
-  virtual int
-  getHaloBuffer() const;
-
-  /*!
-    @brief Set the PVR buffer
-    @param[in] a_buffer Width of the PVR buffer region
-  */
-  virtual void
-  setPVRBuffer(const int a_buffer);
-
-  /*!
-    @brief Set the halo buffer
-    @param[in] a_buffer Width of the halo buffer region
-  */
-  virtual void
-  setHaloBuffer(const int a_buffer);
-
-  /*!
     @brief Get number of output variables
     @return Returns number of plot variables that will be written to file in writePlotData
   */
@@ -519,11 +488,6 @@ protected:
   int m_seed;
 
   /*!
-    @brief PVR buffer
-  */
-  int m_pvrBuffer;
-
-  /*!
     @brief Halo size for particles
   */
   int m_haloBuffer;
@@ -552,6 +516,11 @@ protected:
     @brief Deposition type
   */
   DepositionType m_deposition;
+
+  /*!
+    @brief Coarse-fine deposition strategy
+  */
+  CoarseFineDeposition m_coarseFineDeposition;
 
   /*!
     @brief Plot deposition type
@@ -628,11 +597,13 @@ protected:
     @param[out] a_phi       Mesh density. 
     @param[in] a_particles  Particles to be deposited
     @param[in] a_deposition Deposition method
+    @param[in] a_coarseFineDeposition Coarse-fine deposition strategy.
   */
   void
-  depositKappaConservative(EBAMRCellData&                   a_phi,
-                           const ParticleContainer<Photon>& a_particles,
-                           const DepositionType             a_deposition);
+  depositKappaConservative(EBAMRCellData&             a_phi,
+                           ParticleContainer<Photon>& a_particles,
+                           const DepositionType       a_deposition,
+                           const CoarseFineDeposition a_coarseFineDeposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition
@@ -726,12 +697,6 @@ protected:
   */
   void
   parseDeposition();
-
-  /*!
-    @brief Parse PVR buffer
-  */
-  void
-  parseBuffer();
 
   /*!
     @brief Parse plot variables

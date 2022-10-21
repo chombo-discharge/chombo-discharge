@@ -164,6 +164,17 @@ public:
   setupSolver() override;
 
   /*!
+    @brief Set new permittivities for the multigrid solver. 
+    @param[in] a_permittivityCell Permittivity on cell center
+    @param[in] a_permittivityFace Permittivity on faces
+    @param[in] a_permittivityEB   Permittivity on EB
+  */
+  virtual void
+  setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                          const MFAMRFluxData& a_permittivityFace,
+                          const MFAMRIVData&   a_permittivityEB) override;
+
+  /*!
     @brief Compute grid loads
     @param[in] a_dbl   Grids on input level
     @param[in] a_level Grid level
@@ -287,6 +298,11 @@ protected:
   int m_minCellsBottom;
 
   /*!
+    @brief Domain drop order
+  */
+  int m_domainDropOrder;
+
+  /*!
     @brief Set bc order 
   */
   int m_multigridBcOrder;
@@ -375,6 +391,14 @@ protected:
   */
   virtual void
   parseJumpBC();
+
+  /*!
+    @brief Set the permittivities
+    @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB and fills
+    necessary ghost faces/cells. 
+  */
+  virtual void
+  setPermittivities() override;
 
   /*!
     @brief Set up the multigrid operator factory

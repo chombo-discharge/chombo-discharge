@@ -23,7 +23,7 @@
 #include <CD_CdrLayout.H>
 #include <CD_RtLayout.H>
 #include <CD_FieldSolver.H>
-#include <CD_SigmaSolver.H>
+#include <CD_SurfaceODESolver.H>
 #include <CD_TimeStepper.H>
 #include <CD_NamespaceHeader.H>
 
@@ -140,11 +140,11 @@ namespace Physics {
       getNumberOfPlotVariables() const override;
 
       /*!
-	@brief Compute the time step and how it was restricted.
+	@brief Compute the time step.
 	@details Subclasses must implement this one. 
       */
-      virtual void
-      computeDt(Real& a_dt, TimeCode& a_timeCode) = 0;
+      virtual Real
+      computeDt() = 0;
 
       /*!
 	@brief Advance method, advances equations.
@@ -1243,6 +1243,22 @@ namespace Physics {
       };
 
       /*!
+	@brief An enum for encapsulating how time steps were restricted. 
+      */
+      enum class TimeCode
+      {
+        Advection,
+        Diffusion,
+        AdvectionDiffusion,
+        Source,
+        RelaxationTime,
+        Restricted,
+        Hardcap,
+        Error,
+        Physics
+      };
+
+      /*!
 	@brief Realm where the time stepper is registered. 
 	@details This will always be the primal realm because CdrPlasma has no dual-grid functionality.
       */
@@ -1291,7 +1307,7 @@ namespace Physics {
       /*!
 	@brief Surface charge solver
       */
-      RefCountedPtr<SigmaSolver> m_sigma;
+      RefCountedPtr<SurfaceODESolver<1>> m_sigma;
 
       /*!
 	@brief Set the potential
@@ -1332,6 +1348,11 @@ namespace Physics {
 	@brief Computed CFL time step
       */
       Real m_dtCFL;
+
+      /*!
+	@brief Time code for step restriction
+      */
+      TimeCode m_timeCode;
 
       /*!
 	@brief Verbosity for solvers

@@ -15,4 +15,5 @@ The folder is organized as follows:
 * Particle Contains source code for using particles with EBs and AMR.
 * RadiativeTransfer Contains source code for various radiative transfer solvers.
 * SigmaSolver Contains source code for a surface charge solver.
+* TracerParticles Contains source code for the tracer particle solver. 
 * Utilities Contains various source code for useful utilities used in chombo-discharge source and application codes. 

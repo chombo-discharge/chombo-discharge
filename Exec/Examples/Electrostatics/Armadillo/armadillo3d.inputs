@@ -84,6 +84,7 @@ FieldSolverMultigrid.gmg_max_iter      = 32        # Maximum number of iteration
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10    # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2       # Solver hang
 FieldSolverMultigrid.gmg_min_cells     = 16        # Bottom drop
+FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 1         # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 2         # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 1         # Boundary condition order for jump conditions
@@ -91,6 +92,13 @@ FieldSolverMultigrid.gmg_jump_weight   = 2         # Boundary condition weight f
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now. 
 FieldSolverMultigrid.gmg_smoother      = red_black # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+
+# ====================================================================================================
+# SurfaceODESolver solver settings. 
+# ====================================================================================================
+SurfaceODESolver.verbosity = -1                # Chattiness
+SurfaceODESolver.regrid    = conservative      # Regrid method. 'conservative' or 'arithmetic'
+SurfaceODESolver.plt_vars  = phi               # Plot variables. Valid arguments are 'phi' and 'rhs'
 
 
 # ====================================================================================================

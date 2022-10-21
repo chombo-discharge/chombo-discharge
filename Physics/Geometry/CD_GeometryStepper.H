@@ -120,12 +120,10 @@ namespace Physics {
 
       /*!
 	@brief Compute a time step to be used by Driver. 
-	@param[out] a_dt       Time step to be used.
-	@param[out] a_timeCode Identifier for how the time step was computed. 
 	@return Returns 0
       */
-      virtual void
-      computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+      virtual Real
+      computeDt() override;
 
       /*!
 	@brief Advancement routine. Does nothing. 
