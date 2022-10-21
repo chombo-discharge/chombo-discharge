@@ -660,26 +660,33 @@ ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_
   }
 
   // Write the conductivity to the output
-  a_output.copy(Interval(0, 0), m_conductivityCell, Interval(a_icomp, a_icomp));
-  a_plotVariableNames.push_back("Conductivity");
-  a_icomp++;
+  if (m_plotConductivity) {
+    a_output.copy(Interval(0, 0), m_conductivityCell, Interval(a_icomp, a_icomp));
+    a_plotVariableNames.push_back("Conductivity");
+    a_icomp++;
+  }
 
   // Write the current to the output
-  const Interval srcInterv(0, SpaceDim - 1);
-  const Interval dstInterv(a_icomp, a_icomp + SpaceDim - 1);
-  a_output.copy(srcInterv, m_currentDensity, dstInterv);
+  if (m_plotCurrentDensity) {
+    const Interval srcInterv(0, SpaceDim - 1);
+    const Interval dstInterv(a_icomp, a_icomp + SpaceDim - 1);
+    a_output.copy(srcInterv, m_currentDensity, dstInterv);
 
-  a_plotVariableNames.push_back("x-J");
-  a_plotVariableNames.push_back("y-J");
-  if (SpaceDim == 3) {
-    a_plotVariableNames.push_back("z-J");
+    a_plotVariableNames.push_back("x-J");
+    a_plotVariableNames.push_back("y-J");
+    if (SpaceDim == 3) {
+      a_plotVariableNames.push_back("z-J");
+    }
+
+    a_icomp += SpaceDim;
   }
-  a_icomp += SpaceDim;
 
   // Write the number of particles per patch
-  this->writeNumParticlesPerPatch(a_output, a_icomp);
-  a_plotVariableNames.push_back("Particles per patch");
-  a_icomp++;
+  if (m_plotParticlesPerPatch) {
+    this->writeNumParticlesPerPatch(a_output, a_icomp);
+    a_plotVariableNames.push_back("Particles per patch");
+    a_icomp++;
+  }
 }
 
 void
@@ -999,13 +1006,19 @@ ItoPlasmaStepper::getNumberOfPlotVariables() const
   ncomp += m_sigmaSolver->getNumberOfPlotVariables();
 
   // Conductivity
-  ncomp += 1;
+  if (m_plotConductivity) {
+    ncomp += 1;
+  }
 
   // Current density.
-  ncomp += SpaceDim;
+  if (m_plotCurrentDensity) {
+    ncomp += SpaceDim;
+  }
 
-  // Number of particles per cell.
-  ncomp += 1;
+  // Number of particles per patch
+  if (m_plotParticlesPerPatch) {
+    ncomp += 1;
+  }
 
   return ncomp;
 }
