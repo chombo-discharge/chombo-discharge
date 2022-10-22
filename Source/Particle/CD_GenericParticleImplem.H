@@ -21,39 +21,26 @@ inline GenericParticle<M, N>::GenericParticle()
 {
   m_position = RealVect::Zero;
 
-  for (auto& s : m_compileTimeScalars) {
+  for (auto& s : m_scalars) {
     s = 0.0;
   }
 
-  for (auto& v : m_compileTimeVectors) {
+  for (auto& v : m_vectors) {
     v = RealVect::Zero;
   }
-
-  this->setRuntimeStorage(0, 0);
 }
 
 template <size_t M, size_t N>
 inline GenericParticle<M, N>::GenericParticle(const GenericParticle<M, N>& a_other)
 {
-  this->m_position           = a_other.m_position;
-  this->m_compileTimeScalars = a_other.m_compileTimeScalars;
-  this->m_compileTimeVectors = a_other.m_compileTimeVectors;
-
-  this->m_runTimeScalars = a_other.m_runTimeScalars;
-  this->m_runTimeVectors = a_other.m_runTimeVectors;
+  this->m_position = a_other.m_position;
+  this->m_scalars  = a_other.m_scalars;
+  this->m_vectors  = a_other.m_vectors;
 }
 
 template <size_t M, size_t N>
 inline GenericParticle<M, N>::~GenericParticle()
 {}
-
-template <size_t M, size_t N>
-inline void
-GenericParticle<M, N>::setRuntimeStorage(const unsigned int a_numReal, const unsigned int a_numRealVect) noexcept
-{
-  m_runTimeScalars.resize(a_numReal);
-  m_runTimeVectors.resize(a_numRealVect);
-}
 
 template <size_t M, size_t N>
 inline RealVect&
@@ -74,7 +61,7 @@ template <size_t K>
 inline Real&
 GenericParticle<M, N>::real()
 {
-  return std::get<K>(m_compileTimeScalars);
+  return std::get<K>(m_scalars);
 }
 
 template <size_t M, size_t N>
@@ -82,7 +69,7 @@ template <size_t K>
 inline const Real&
 GenericParticle<M, N>::real() const
 {
-  return std::get<K>(m_compileTimeScalars);
+  return std::get<K>(m_scalars);
 }
 
 template <size_t M, size_t N>
@@ -90,7 +77,7 @@ template <size_t K>
 inline RealVect&
 GenericParticle<M, N>::vect()
 {
-  return std::get<K>(m_compileTimeVectors);
+  return std::get<K>(m_vectors);
 }
 
 template <size_t M, size_t N>
@@ -98,57 +85,14 @@ template <size_t K>
 inline const RealVect&
 GenericParticle<M, N>::vect() const
 {
-  return std::get<K>(m_compileTimeVectors);
-}
-
-template <size_t M, size_t N>
-inline Real&
-GenericParticle<M, N>::runtimeReal(const size_t index) noexcept
-{
-  CH_assert(m_runTimeScalars.size() > index);
-
-  return m_runTimeScalars[index];
-}
-
-template <size_t M, size_t N>
-inline const Real&
-GenericParticle<M, N>::runtimeReal(const size_t index) const noexcept
-{
-  CH_assert(m_runTimeScalars.size() > index);
-
-  return m_runTimeScalars[index];
-}
-
-template <size_t M, size_t N>
-inline RealVect&
-GenericParticle<M, N>::runtimeVect(const size_t index) noexcept
-{
-  CH_assert(m_runTimeVectors.size() > index);
-
-  return m_runTimeVectors[index];
-}
-
-template <size_t M, size_t N>
-inline const RealVect&
-GenericParticle<M, N>::runtimeVect(const size_t index) const noexcept
-{
-  CH_assert(m_runTimeVectors.size() > index);
-
-  return m_runTimeVectors[index];
+  return std::get<K>(m_vectors);
 }
 
 template <size_t M, size_t N>
 inline bool
 GenericParticle<M, N>::operator==(const GenericParticle<M, N>& a_p) const
 {
-  // clang-format off
-  return (this->m_position           == a_p.m_position           &&
-	  this->m_compileTimeScalars == a_p.m_compileTimeScalars &&
-	  this->m_compileTimeVectors == a_p.m_compileTimeVectors &&
-	  this->m_runTimeScalars     == a_p.m_runTimeScalars     &&
-	  this->m_runTimeVectors     == a_p.m_runTimeVectors);
-
-  // clang-format on
+  return (this->m_position == a_p.m_position && this->m_scalars == a_p.m_scalars && this->m_vectors == a_p.m_vectors);
 }
 
 template <size_t M, size_t N>
@@ -162,100 +106,67 @@ template <size_t M, size_t N>
 inline int
 GenericParticle<M, N>::size() const
 {
-  // Compile size is the position plus M Reals and N RealVects
-  const int compileSize = SpaceDim * sizeof(Real) + M * sizeof(Real) + N * SpaceDim * sizeof(Real);
-
-  // Runtime size if number of runtime reals and realvects:
-  const int runtimeSize = m_runTimeScalars.size() * sizeof(Real) + m_runTimeVectors.size() * SpaceDim * sizeof(Real);
-
-  return compileSize + runtimeSize;
+  // Size is the position plus M Reals and N RealVects
+  return SpaceDim * sizeof(Real) + M * sizeof(Real) + N * SpaceDim * sizeof(Real);
 }
 
 template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::linearOut(void* buf) const
 {
-  // clang-format off
-  
-  Real* buffer = (Real*) buf;
+  Real* buffer = (Real*)buf;
 
   // Linearize m_position onto buffer.
-  D_TERM(*buffer++ = m_position[0];,
-	 *buffer++ = m_position[1];,
-	 *buffer++ = m_position[2];);
+  *buffer++ = m_position[0];
+  *buffer++ = m_position[1];
+#if CH_SPACEDIM == 3
+  *buffer++ = m_position[2];
+#endif
 
-  // Linearize m_compileTimeScalars onto the buffer
+  // Linearize m_scalars onto the buffer
   for (size_t i = 0; i < M; i++) {
-    *buffer++ = m_compileTimeScalars[i];
+    *buffer++ = m_scalars[i];
   }
 
   // Linearize vectors onto the buffer
   for (size_t i = 0; i < N; i++) {
-    const RealVect& v = m_compileTimeVectors[i];
+    const RealVect& v = m_vectors[i];
 
-    D_TERM(*buffer++ = v[0];,
-	   *buffer++ = v[1];,
-	   *buffer++ = v[2];);
+    *buffer++ = v[0];
+    *buffer++ = v[1];
+#if CH_SPACEDIM == 3
+    *buffer++ = v[2];
+#endif
   }
-
-  // Linearize the run-time scalars onto the buffer.
-  for (size_t i = 0; i < m_runTimeScalars.size(); i++) {
-    *buffer++ = m_runTimeScalars[i];
-  }
-
-  // Linearize the run-time vectors onto the buffer.
-  for (size_t i = 0; i < m_runTimeVectors.size(); i++) {
-    const RealVect& v = m_runTimeVectors[i];
-    
-    D_TERM(*buffer++ = v[0];,
-	   *buffer++ = v[1];,
-	   *buffer++ = v[2];);
-  }
-
-  // clang-format on
 }
 
 template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::linearIn(void* buf)
 {
-  // clang-format off
-  
-  Real* buffer = (Real*) buf;
+  Real* buffer = (Real*)buf;
 
-  D_TERM(m_position[0] = *buffer++;,
-	 m_position[1] = *buffer++;,
-	 m_position[2] = *buffer++);
+  m_position[0] = *buffer++;
+  m_position[1] = *buffer++;
+#if CH_SPACEDIM == 3
+  m_position[2] = *buffer++;
+#endif
 
   // Linearize buffer onto scalars
   for (size_t i = 0; i < M; i++) {
-    m_compileTimeScalars[i] = *buffer++;
+    m_scalars[i] = *buffer++;
   }
 
   // Linearize buffer onto vectors
   for (size_t i = 0; i < N; i++) {
-    RealVect& v = m_compileTimeVectors[i];
+    RealVect& v = m_vectors[i];
 
-    D_TERM(v[0] = *buffer++;,
-	   v[1] = *buffer++;,
-	   v[2] = *buffer++;);
+    v[0] = *buffer++;
+    v[1] = *buffer++;
+#if CH_SPACEDIM == 3
+    v[2] = *buffer++;
+#endif
   }
-
-  // Linearize the run-time scalars onto the buffer.
-  for (size_t i = 0; i < m_runTimeScalars.size(); i++) {
-    m_runTimeScalars[i] = *buffer++;
-  }
-
-  // Linearize the run-time vectors onto the buffer.
-  for (size_t i = 0; i < m_runTimeVectors.size(); i++) {
-    RealVect& v = m_runTimeVectors[i];
-
-    D_TERM(v[0] = *buffer++;,
-	   v[1] = *buffer++;,
-	   v[2] = *buffer++;);    
-  }
-
-  // clang-format on
 }
 
 template <size_t M, size_t N>
