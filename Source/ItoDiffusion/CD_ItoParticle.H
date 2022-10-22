@@ -34,7 +34,7 @@
   m_vectors[0] => oldPosition 
   m_vectors[1] => velocity
 */
-class ItoParticle : public GenericParticle<4, 2>
+class ItoParticle : public GenericParticle<5, 3>
 {
 public:
   /*!
@@ -194,24 +194,28 @@ public:
   diffusivity() const;
 
   /*!
-    @brief Get temporary storage
-    @return m_tmp
+    @brief Return scratch scalar storage
   */
   inline Real&
-  tmp();
+  tmpReal();
 
   /*! 
-    @brief Get temporary storage
-    @return m_tmp
+    @brief Return scratch scalar storage
   */
   inline const Real&
-  tmp() const;
+  tmpReal() const;
 
-protected:
   /*!
-    @brief Temporary memory -- this is not communicated
+    @brief Return scratch RealVect storage
   */
-  Real m_tmp;
+  inline RealVect&
+  tmpVect();
+
+  /*! 
+    @brief Return scratch RealVect storage
+  */
+  inline const RealVect&
+  tmpVect() const;
 };
 
 #include <CD_NamespaceFooter.H>

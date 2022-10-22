@@ -154,9 +154,6 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   // ====== BEGIN TRANSPORT STEP ======
   timer.startEvent("Particle/field advancement");
 
-  // Setup runtime storage (requirements change with algorithm)
-  this->setRuntimeParticleStorage();
-
   // Semi-implicitly advance the particles and the field.
   switch (m_algorithm) {
   case WhichAlgorithm::EulerMaruyama: {
@@ -179,7 +176,6 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
 
   // Remove the run-time configurable particle storage. It is no longer needed.
-  this->resetRuntimeParticleStorage();
   timer.stopEvent("Particle/field advancement");
   // ====== END TRANSPORT STEP ======
 
@@ -317,76 +313,6 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   // Recompute new velocities and diffusion coefficients
   this->computeItoVelocities();
   this->computeItoDiffusion();
-}
-
-void
-ItoPlasmaGodunovStepper::setRuntimeParticleStorage() noexcept
-{
-  CH_TIME("ItoPlasmaGodunovStepper::setRuntimeParticleStorage");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::setupRuntimeParticleStorage" << endl;
-  }
-
-  unsigned int numExtraVect = 0;
-
-  switch (m_algorithm) {
-  case WhichAlgorithm::EulerMaruyama: {
-    numExtraVect = 1;
-
-    break;
-  }
-  case WhichAlgorithm::Trapezoidal: {
-    numExtraVect = 2;
-
-    break;
-  }
-  default: {
-    MayDay::Abort("ItoPlasmaGodunovStepper::setRuntimeParticleStorage - logic bust");
-
-    break;
-  }
-  }
-
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      ParticleData<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
-
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        List<ItoParticle>& patchParticles = particles[dit()].listItems();
-
-        for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
-          lit().setRuntimeStorage(0, numExtraVect);
-        }
-      }
-    }
-  }
-}
-
-void
-ItoPlasmaGodunovStepper::resetRuntimeParticleStorage() noexcept
-{
-  CH_TIME("ItoPlasmaGodunovStepper::resetRuntimeParticleStorage");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::resetRuntimeParticleStorage" << endl;
-  }
-
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      ParticleData<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
-
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        List<ItoParticle>& patchParticles = particles[dit()].listItems();
-
-        for (ListIterator<ItoParticle> lit(patchParticles); lit.ok(); ++lit) {
-          lit().setRuntimeStorage(0, 0);
-        }
-      }
-    }
-  }
 }
 
 void
@@ -975,7 +901,7 @@ ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<
           const RealVect& pos    = p.position();
 
           // Compute a particle hop and store it on the run-time storage.
-	  RealVect& hop = p.runtimeVect(0);
+          RealVect& hop = p.tmpVect();
           if (diffusive) {
             hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
           }
@@ -1021,7 +947,7 @@ ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt) noexcept
             ItoParticle& p = lit();
 
             // Add in the diffusion hop and advective contribution.
-            const RealVect& hop = p.runtimeVect(0);
+            const RealVect& hop = p.tmpVect();
             p.position()        = p.oldPosition() + f * p.velocity() + g * hop;
           }
         }

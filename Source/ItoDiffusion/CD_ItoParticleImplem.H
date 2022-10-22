@@ -36,12 +36,13 @@ inline ItoParticle::ItoParticle(const Real      a_weight,
 
 inline ItoParticle::ItoParticle(const ItoParticle& a_other)
 {
-  this->weight()    = a_other.weight();
-  this->position()  = a_other.position();
-  this->velocity()  = a_other.velocity();
-  this->diffusion() = a_other.diffusion();
-  this->mobility()  = a_other.mobility();
-  this->energy()    = a_other.energy();
+  this->weight()      = a_other.weight();
+  this->position()    = a_other.position();
+  this->oldPosition() = a_other.oldPosition();
+  this->velocity()    = a_other.velocity();
+  this->diffusion()   = a_other.diffusion();
+  this->mobility()    = a_other.mobility();
+  this->energy()      = a_other.energy();
 }
 
 inline ItoParticle::~ItoParticle() {}
@@ -153,15 +154,27 @@ ItoParticle::totalEnergy() const
 }
 
 inline Real&
-ItoParticle::tmp()
+ItoParticle::tmpReal()
 {
-  return m_tmp;
+  return this->real<4>();
 }
 
 inline const Real&
-ItoParticle::tmp() const
+ItoParticle::tmpReal() const
 {
-  return m_tmp;
+  return this->real<4>();
+}
+
+inline RealVect&
+ItoParticle::tmpVect()
+{
+  return this->vect<2>();
+}
+
+inline const RealVect&
+ItoParticle::tmpVect() const
+{
+  return this->vect<2>();
 }
 
 #include <CD_NamespaceFooter.H>

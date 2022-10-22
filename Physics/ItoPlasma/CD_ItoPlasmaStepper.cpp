@@ -3938,8 +3938,8 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt) noexcept
             const RealVect& Xnew = p.position();
             const RealVect& Xold = p.oldPosition();
 
-            p.tmp()    = m;
-            p.weight() = m * v.dotProduct(Xnew - Xold);
+            p.tmpReal() = m;
+            p.weight()  = m * v.dotProduct(Xnew - Xold);
           }
         }
       }
@@ -3960,7 +3960,7 @@ ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt) noexcept
 
           for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
             ItoParticle& p = lit();
-            p.weight()     = p.tmp();
+            p.weight()     = p.tmpReal();
           }
         }
       }

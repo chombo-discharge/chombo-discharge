@@ -140,18 +140,6 @@ namespace Physics {
       parseAlgorithm() noexcept;
 
       /*!
-	@brief Set up extra particle storage for all Ito particles. 
-      */
-      virtual void
-      setRuntimeParticleStorage() noexcept;
-
-      /*!
-	@brief Discard extra patricle storge for all Ito particles
-      */
-      virtual void
-      resetRuntimeParticleStorage() noexcept;
-
-      /*!
 	@brief Set the starting positions for the ItoSolver particles
       */
       virtual void

@@ -2292,10 +2292,10 @@ ItoSolver::interpolateMobilitiesVelocity(const int a_lvl, const DataIndex& a_dit
   const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
 
   // First, interpolate |V| to the particle position, it will be stored on m_tmp.
-  meshInterp.interpolate<ItoParticle, &ItoParticle::tmp>(particleList,
-                                                         scratch,
-                                                         m_deposition,
-                                                         m_forceIrregInterpolationNGP);
+  meshInterp.interpolate<ItoParticle, &ItoParticle::tmpReal>(particleList,
+                                                             scratch,
+                                                             m_deposition,
+                                                             m_forceIrregInterpolationNGP);
 
   // Secondly, let m_scratch hold mu*|V| and interpolate that to the particle mobility field.
   scratch *= mobilityFunction;
@@ -2308,7 +2308,7 @@ ItoSolver::interpolateMobilitiesVelocity(const int a_lvl, const DataIndex& a_dit
   for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
     ItoParticle& p = lit();
 
-    p.mobility() *= 1. / p.tmp();
+    p.mobility() *= 1. / p.tmpReal();
   }
 }
 
