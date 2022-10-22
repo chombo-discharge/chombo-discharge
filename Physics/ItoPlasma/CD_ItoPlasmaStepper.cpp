@@ -2888,11 +2888,11 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
 
     const int idx = solverIt.index();
 
-    ParticleContainer<Photon>& solverBulkPhotons = solver->getBulkPhotons();
-    ParticleContainer<Photon>& solverSourPhotons = solver->getSourcePhotons();
+    ParticleContainer<Photon>& solverBulkPhotons   = solver->getBulkPhotons();
+    ParticleContainer<Photon>& solverSourcePhotons = solver->getSourcePhotons();
 
     bulkPhotonsFAB[idx]   = &(solverBulkPhotons.getCellParticles(a_level, a_dit));
-    sourcePhotonsFAB[idx] = &(solverSourPhotons.getCellParticles(a_level, a_dit));
+    sourcePhotonsFAB[idx] = &(solverSourcePhotons.getCellParticles(a_level, a_dit));
   }
 
   // The physics interface takes the physical number of particles/photons as arguments
@@ -2929,7 +2929,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
       }
 
       // Populate the per-cell photon data.
-      for (int i = 0; i < numPlasmaSpecies; i++) {
+      for (int i = 0; i < numPhotonSpecies; i++) {
         bulkPhotons[i]   = &((*bulkPhotonsFAB[i])(iv, 0));
         sourcePhotons[i] = &((*sourcePhotonsFAB[i])(iv, 0));
 
@@ -3051,7 +3051,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
   VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
 
   BoxLoops::loop(a_box, regularKernel);
-  BoxLoops::loop(vofit, irregularKernel);
+  //  BoxLoops::loop(vofit, irregularKernel);
 }
 
 void
