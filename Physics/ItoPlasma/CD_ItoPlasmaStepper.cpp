@@ -758,27 +758,27 @@ ItoPlasmaStepper::printStepReport()
   std::string str;
   switch (m_timeCode) {
   case TimeCode::Physics: {
-    str = "dt restricted by 'physics'";
+    str = "dt restricted by 'Physics'";
 
     break;
   }
   case TimeCode::Advection: {
-    str = "dt restricted by 'advection'";
+    str = "dt restricted by 'Advection'";
 
     break;
   }
   case TimeCode::RelaxationTime: {
-    str = "dt restricted by 'relaxation time'";
+    str = "dt restricted by 'Relaxation time'";
 
     break;
   }
   case TimeCode::Hardcap: {
-    str = "dt restricted by 'hardcap'";
+    str = "dt restricted by 'Hardcap'";
 
     break;
   }
   default: {
-    str = "dt restricted by 'unspecified'";
+    str = "dt restricted by 'Unspecified'";
 
     break;
   }
@@ -786,22 +786,24 @@ ItoPlasmaStepper::printStepReport()
 
   // Print the step report.
   pout() << "                                   " + str << endl;
-  pout() << "                                   Emax      = " << Emax << endl
-         << "                                   #part     = " << localParticlesBulk << " (" << globalParticlesBulk
+  pout() << "                                   Emax        = " << Emax << endl
+         << "                                   CFL         = " << m_dt / m_advectionDiffusionDt << endl
+         << "                                   Relax time  = " << m_dt / m_relaxationTime << endl
+         << "                                   #Particles  = " << localParticlesBulk << " (" << globalParticlesBulk
          << ")" << endl
-         << "                                   #eb part  = " << localParticlesEB << " (" << globalParticlesEB << ")"
+         << "                                   #EB part.   = " << localParticlesEB << " (" << globalParticlesEB << ")"
          << endl
-         << "                                   #dom part = " << localParticlesDomain << " (" << globalParticlesDomain
+         << "                                   #Dom. part. = " << localParticlesDomain << " (" << globalParticlesDomain
          << ")" << endl
-         << "                                   #src part = " << localParticlesSource << " (" << globalParticlesSource
+         << "                                   #Src. part. = " << localParticlesSource << " (" << globalParticlesSource
          << ")" << endl
-         << "                                   #part min = " << minParticles << " (on rank = " << minRank << ")"
+         << "                                   #Min part.  = " << minParticles << " (on rank = " << minRank << ")"
          << endl
-         << "                                   #part max = " << maxParticles << " (on rank = " << maxRank << ")"
+         << "                                   #Max part.  = " << maxParticles << " (on rank = " << maxRank << ")"
          << endl
-         << "                                   #part avg = " << avgParticles << endl
-         << "                                   #part dev = " << stdDev << " (" << 100. * stdDev / avgParticles << "%)"
-         << endl;
+         << "                                   #Avg. part. = " << avgParticles << endl
+         << "                                   #Dev. part. = " << stdDev << " (" << 100. * stdDev / avgParticles
+         << "%)" << endl;
 }
 
 void

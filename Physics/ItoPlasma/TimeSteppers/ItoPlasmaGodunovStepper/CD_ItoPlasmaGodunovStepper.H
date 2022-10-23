@@ -95,28 +95,16 @@ namespace Physics {
     protected:
       /*!
 	@brief Simple enum for distinguishing between algorithms
-	@note Trapezoidal is a work-in-progress.
       */
       enum class WhichAlgorithm
       {
         EulerMaruyama,
-        Trapezoidal
       };
-
-      /*!
-	@brief Average CFL number
-      */
-      Real m_averageCFL;
 
       /*!
 	@brief Previous time step.
       */
       Real m_prevDt;
-
-      /*!
-	@brief Last 20 CFL numbers. Used for computing the average CFL.
-      */
-      std::deque<Real> m_cflNumbers;
 
       /*!
 	@brief Which advancement algorithm to use.
@@ -254,18 +242,6 @@ namespace Physics {
       */
       virtual void
       stepEulerMaruyama(const Real a_dt) noexcept;
-
-      // Specific routines for trapezoidal integration
-      void
-      advanceParticlesTrapezoidal(const Real a_dt);
-      void
-      preTrapezoidalPredictor(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles, const Real a_dt);
-      void
-      preTrapezoidalCorrector(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles, const Real a_dt);
-      void
-      trapezoidalPredictor(const Real a_dt);
-      void
-      trapezoidalCorrector(const Real a_dt);
     };
   } // namespace ItoPlasma
 } // namespace Physics
