@@ -84,7 +84,7 @@ KMCDualStateReaction<T, State>::computeStateChanges() noexcept
   m_propensityFactor = 1.0;
 
   std::map<size_t, size_t> reactantNumbers;
-  for (const auto& r : m_reactants) {
+  for (const auto& r : m_lhsReactives) {
     if (reactantNumbers.find(r) == reactantNumbers.end()) {
       reactantNumbers.emplace(r, 1);
     }
@@ -92,6 +92,16 @@ KMCDualStateReaction<T, State>::computeStateChanges() noexcept
       reactantNumbers[r]++;
     }
   }
+
+  // Factorial function.
+  T factorial = [](const T& N) -> T {
+    T fac = 1;
+    for (T i = 2; i <= N; i++) {
+      fac *= i;
+    }
+
+    return fac;
+  };
 
   for (const auto& rn : reactantNumbers) {
     m_propensityFactor *= 1.0 / factorial(rn.second);
@@ -113,7 +123,7 @@ KMCDualStateReaction<T, State>::population(const size_t& a_reactant, const State
 
   CH_assert(reactiveState.size() > a_reactant);
 
-  return reactive[a_reactant];
+  return reactiveState[a_reactant];
 }
 
 template <typename T, typename State>

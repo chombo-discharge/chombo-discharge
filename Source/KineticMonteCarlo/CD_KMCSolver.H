@@ -42,9 +42,9 @@ public:
   using ReactionList = std::vector<std::shared_ptr<const R>>;
 
   /*!
-    @brief Disallowed constructor.
+    @brief Default constructor -- must subsequently define the object. 
   */
-  KMCSolver() = delete;
+  KMCSolver() noexcept;
 
   /*!
     @brief Disallowed copy constructor
@@ -58,9 +58,9 @@ public:
 
   /*!
     @brief Full constructor. 
-    @param[in] a_reaction List of reactions. 
+    @param[in] a_reactions List of reactions. 
   */
-  inline KMCSolver(const ReactionList& a_reaction) noexcept;
+  inline KMCSolver(const ReactionList& a_reactions) noexcept;
 
   /*!
     @brief Destructor
@@ -78,6 +78,13 @@ public:
   */
   KMCSolver&
   operator=(const KMCSolver&&) = delete;
+
+  /*!
+    @brief Define function. Sets the reactions. 
+    @param[in] a_reactions List of reactions. 
+  */
+  inline void
+  define(const ReactionList& a_reactions) noexcept;
 
   /*!
     @brief Set solver parameters

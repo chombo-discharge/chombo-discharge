@@ -21,105 +21,13 @@
 
 // Our includes
 #include <CD_ItoPlasmaPhysics.H>
+#include <CD_Random.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
 #define ITO_PLASMA_PHYSICS_DEBUG 0
 
 using namespace Physics::ItoPlasma;
-
-inline RealVect
-ItoPlasmaPhysics::randomPosition(const RealVect a_cellPos,
-                                 const RealVect a_centroidPos,
-                                 const RealVect a_lo,
-                                 const RealVect a_hi,
-                                 const RealVect a_bndryCentroid,
-                                 const RealVect a_bndryNormal,
-                                 const Real     a_dx,
-                                 const Real     a_kappa) const
-{
-
-  RealVect pos;
-
-  constexpr Real thresh = 1.E-3;
-  if (a_kappa < thresh) {
-    pos = a_centroidPos;
-  }
-  else if (a_kappa < 1.0) { // Rejection sampling.
-    pos = this->randomPosition(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
-  }
-  else { // Regular cell. Get a position.
-    pos = this->randomPosition(a_lo, a_hi);
-  }
-
-  pos = a_cellPos + pos * a_dx;
-
-  return pos;
-}
-
-inline RealVect
-ItoPlasmaPhysics::randomPosition(const RealVect a_lo,
-                                 const RealVect a_hi,
-                                 const RealVect a_bndryCentroid,
-                                 const RealVect a_bndryNormal) const
-{
-
-  RealVect pos   = this->randomPosition(a_lo, a_hi);
-  bool     valid = PolyGeom::dot(pos - a_bndryCentroid, a_bndryNormal) >= 0.0;
-
-  while (!valid) {
-    pos   = this->randomPosition(a_lo, a_hi);
-    valid = PolyGeom::dot(pos - a_bndryCentroid, a_bndryNormal) >= 0.0;
-  }
-
-  return pos;
-}
-
-inline RealVect
-ItoPlasmaPhysics::randomPosition(const RealVect a_lo, const RealVect a_hi) const
-{
-
-  RealVect pos = RealVect::Unit;
-
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    pos[dir] = a_lo[dir] + m_udist01(m_rng) * (a_hi[dir] - a_lo[dir]);
-  }
-
-  return pos;
-}
-
-inline RealVect
-ItoPlasmaPhysics::randomDirection() const
-{
-  const Real EPS = 1.E-8;
-#if CH_SPACEDIM == 2
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1 * x1 + x2 * x2;
-  while (r >= 1.0 || r < EPS) {
-    x1 = m_udist11(m_rng);
-    x2 = m_udist11(m_rng);
-    r  = x1 * x1 + x2 * x2;
-  }
-
-  return RealVect(x1, x2) / sqrt(r);
-#elif CH_SPACEDIM == 3
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1 * x1 + x2 * x2;
-  while (r >= 1.0 || r < EPS) {
-    x1 = m_udist11(m_rng);
-    x2 = m_udist11(m_rng);
-    r  = x1 * x1 + x2 * x2;
-  }
-
-  const Real x = 2 * x1 * sqrt(1 - r);
-  const Real y = 2 * x2 * sqrt(1 - r);
-  const Real z = 1 - 2 * r;
-
-  return RealVect(x, y, z);
-#endif
-}
 
 inline bool
 ItoPlasmaPhysics::isStateValid(const Vector<long long>& a_particles) const
@@ -286,16 +194,18 @@ ItoPlasmaPhysics::addParticles(List<ItoParticle>& a_particles,
   this->computeParticleWeights(weight, num, remainder, a_numNewParticles);
 
   for (int i = 0; i < num; i++) {
-    const RealVect p =
-      this->randomPosition(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect p = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
     const Real w = (Real)weight;
+
     a_particles.add(ItoParticle(w, p));
   }
 
   if (remainder > zero) { // Rest of weight in case we got superparticles
-    const RealVect p =
-      this->randomPosition(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect p = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
     const Real w = (Real)(weight + remainder);
+
     a_particles.add(ItoParticle(w, p));
   }
 }
@@ -533,18 +443,19 @@ ItoPlasmaPhysics::reconcilePhotons(List<Photon>&    a_Photons,
   this->computeParticleWeights(weight, num, remainder, a_num_Photons);
 
   for (int i = 0; i < num; i++) {
-    const RealVect p =
-      this->randomPosition(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    const RealVect v = Units::c * randomDirection();
+    const RealVect p = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+    const RealVect v = Units::c * Random::getDirection();
 
     a_Photons.add(Photon(p, v, a_species.getAbsorptionCoefficient(p), weight));
   }
 
   // If we used superPhotons the last Photon gets some extra oomph.
   if (remainder > 0) {
-    const RealVect p =
-      this->randomPosition(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    const RealVect v = Units::c * randomDirection();
+    const RealVect p = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+    const RealVect v = Units::c * Random::getDirection();
+
     a_Photons.add(Photon(p, v, a_species.getAbsorptionCoefficient(p), weight + remainder));
   }
 }
@@ -607,26 +518,6 @@ ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_partic
   }
 }
 
-inline long long
-ItoPlasmaPhysics::poissonReaction(const Real a_propensity, const Real a_dt) const
-{
-
-  constexpr long long zero  = 0;
-  long long           value = 0;
-  const Real          mean  = a_propensity * a_dt;
-
-  if (mean < m_fieldSolver_switch) {
-    std::poisson_distribution<long long> dist(mean);
-    value = dist(m_rng);
-  }
-  else {
-    std::normal_distribution<double> dist(mean, sqrt(mean));
-    value = (long long)llround(dist(m_rng));
-  }
-
-  return Max(zero, value);
-}
-
 inline int
 ItoPlasmaPhysics::computeParticlesPerRank(const int a_numParticles) const
 {
@@ -660,7 +551,7 @@ ItoPlasmaPhysics::drawGaussianParticles(List<ItoParticle>& a_particles1,
 
   // Now make the particles
   for (int i = 0; i < myNumParticles; i++) {
-    const RealVect pos = a_blobCenter + gauss(m_rng) * randomDirection();
+    const RealVect pos = a_blobCenter + gauss(m_rng) * Random::getDirection();
 
     a_particles1.add(ItoParticle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));
     a_particles2.add(ItoParticle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy2));
@@ -725,24 +616,14 @@ ItoPlasmaPhysics::drawBoxParticles(List<ItoParticle>& a_particles1,
 }
 
 inline Vector<long long>
-ItoPlasmaPhysics::getParticleCount(const Vector<List<ItoParticle>*>& a_particles) const
+ItoPlasmaPhysics::getNumPhysicalParticles(const Vector<List<ItoParticle>*>& a_particles) const
 {
   Vector<long long> ret(a_particles.size(), 0);
 
   for (int i = 0; i < a_particles.size(); i++) {
-    ret[i] = this->getParticleCount(*a_particles[i]);
-  }
-
-  return ret;
-}
-
-inline long long
-ItoPlasmaPhysics::getParticleCount(const List<ItoParticle>& a_particles) const
-{
-  long long ret = 0;
-
-  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-    ret += (long long)llround(lit().weight());
+    for (ListIterator<ItoParticle> lit(*a_particles[i]); lit.ok(); ++lit) {
+      ret[i] = llround(lit().weight());
+    }
   }
 
   return ret;
@@ -816,7 +697,7 @@ ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles
 
   // Get particle counts.
   Vector<long long> newPhotonCount   = Vector<long long>(m_numRtSpecies, 0);
-  Vector<long long> oldParticleCount = this->getParticleCount(a_particles);
+  Vector<long long> oldParticleCount = this->getNumPhysicalParticles(a_particles);
   Vector<long long> newParticleCount = oldParticleCount;
 
   // Energies, mean_energies, and sources. Make sure LFA gives dummy arguments.
@@ -1158,7 +1039,7 @@ ItoPlasmaPhysics::stepTau(Vector<long long>&      a_particles,
 
   // Go through list of reactions.
   for (int i = 0; i < a_reactions.size(); i++) {
-    const long long num_reactions = this->poissonReaction(a_propensities[i], a_dt);
+    const long long num_reactions = Random::getPoisson<long long>(a_propensities[i] * a_dt);
 
     // Jump state and energy
     a_reactions[i]->jumpState(a_particles, a_newPhotons, num_reactions); //

@@ -33,7 +33,7 @@ public:
   /*!
     @brief Default constructor. 
   */
-  inline KMCDualState() = delete;
+  inline KMCDualState() = default;
 
   /*!
     @brief Copy constructor
@@ -68,6 +68,14 @@ public:
   */
   inline KMCDualState&
   operator=(const KMCDualState&&) = delete;
+
+  /*!
+    @brief Define function constructor. 
+    @param[in] a_numReactiveSpecies    Number of reactive species in the state vector.
+    @param[in] a_numNonReactiveSpecies Number of non-reactive species in the state vector.
+  */
+  inline void
+  define(const size_t a_numReactiveSpecies, const size_t a_numNonReactiveSpecies) noexcept;
 
   /*!
     @brief Check if state is a valid state. An invalid state will have a negative number of reactants/non-reactants. 

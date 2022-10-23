@@ -23,16 +23,16 @@
 #include <CD_Random.H>
 #include <CD_KMCSolver.H>
 #include <CD_NamespaceHeader.H>
+template <typename R, typename State, typename T>
+inline KMCSolver<R, State, T>::KMCSolver() noexcept
+{}
 
 template <typename R, typename State, typename T>
 inline KMCSolver<R, State, T>::KMCSolver(const ReactionList& a_reactions) noexcept
 {
   CH_TIME("KMCSolver::KMCSolver");
 
-  m_reactions = a_reactions;
-
-  // Default settings. These are equivalent to ALWAYS using tau-leaping.
-  this->setSolverParameters(0, 0, std::numeric_limits<Real>::max(), 0.0);
+  this->define(a_reactions);
 }
 
 template <typename R, typename State, typename T>
@@ -43,12 +43,24 @@ inline KMCSolver<R, State, T>::~KMCSolver() noexcept
 
 template <typename R, typename State, typename T>
 inline void
+KMCSolver<R, State, T>::define(const ReactionList& a_reactions) noexcept
+{
+  CH_TIME("KMCSolver::define");
+
+  m_reactions = a_reactions;
+
+  // Default settings. These are equivalent to ALWAYS using tau-leaping.
+  this->setSolverParameters(0, 0, std::numeric_limits<Real>::max(), 0.0);
+}
+
+template <typename R, typename State, typename T>
+inline void
 KMCSolver<R, State, T>::setSolverParameters(const T    a_Ncrit,
                                             const T    a_numSSA,
                                             const Real a_eps,
                                             const Real a_SSAlim) noexcept
 {
-  CH_TIME("KMCSolver::propensities(State)");
+  CH_TIME("KMCSolver::setSolverParameters");
 
   m_Ncrit  = a_Ncrit;
   m_numSSA = a_numSSA;

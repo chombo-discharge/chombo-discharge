@@ -33,6 +33,9 @@
 #include <CD_ItoParticle.H>
 #include <CD_ItoPlasmaReaction.H>
 #include <CD_ItoPlasmaPhotoReaction.H>
+#include <CD_KMCDualState.H>
+#include <CD_KMCDualStateReaction.H>
+#include <CD_KMCSolver.H>
 #include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>
 
@@ -256,6 +259,20 @@ namespace Physics {
         hybrid
       };
 
+      using KMCState = KMCDualState<>;
+
+      using KMCReaction = KMCDualStateReaction<>;
+
+      /*!
+	@brief Kinetic Monte Carlo state
+      */
+      KMCState m_kmcState;
+
+      /*!
+	@brief Kinetic Monte Carlo solver. 
+      */
+      KMCSolver<KMCReaction, KMCState> m_kmcSolver;
+
       int m_seed;
       int m_table_entries;
 
@@ -298,41 +315,6 @@ namespace Physics {
       */
       void
       readFile(LookupTable1D<2>& a_table, const std::string a_file);
-
-      /*!
-	@brief Draw a valid random position somewhere in a cell
-      */
-      inline RealVect
-      randomPosition(const RealVect a_cellPos,
-                     const RealVect a_centroidPos,
-                     const RealVect a_lo,
-                     const RealVect a_hi,
-                     const RealVect a_bndryCentroid,
-                     const RealVect a_normal,
-                     const Real     a_dx,
-                     const Real     a_kappa) const;
-
-      /*!
-	@brief Draw a random position somewhere in the cube (a_lo, a_hi) such that the position is
-	(pos-bndryCentroid).dotProduct.a_normal > 0, i.e. inside the valid region. 
-      */
-      inline RealVect
-      randomPosition(const RealVect a_lo,
-                     const RealVect a_hi,
-                     const RealVect a_bndryCentroid,
-                     const RealVect a_normal) const;
-
-      /*!
-	@brief Return a random position in the cube (a_lo, a_hi);
-      */
-      inline RealVect
-      randomPosition(const RealVect a_lo, const RealVect a_hi) const;
-
-      /*!
-	@brief Draw a random direction in space
-      */
-      inline RealVect
-      randomDirection() const;
 
       /*!
 	@brief Returns true if all particle numbers are >= 0
@@ -447,12 +429,6 @@ namespace Physics {
                              const long long a_numNewParticles) const;
 
       /*!
-	@brief Poisson reaction
-      */
-      inline long long
-      poissonReaction(const Real a_propensity, const Real a_dt) const;
-
-      /*!
 	@brief Compute particles to draw per rank
       */
       inline int
@@ -498,16 +474,11 @@ namespace Physics {
                        const Real         a_energy2);
 
       /*!
-	@brief Get the particle count
+	@brief Get the number of physical particles. 
+	@param[in] a_particles List of plasma species particles. 
       */
       inline Vector<long long>
-      getParticleCount(const Vector<List<ItoParticle>*>& a_particles) const;
-
-      /*!
-	@brief Get the particle count
-      */
-      inline long long
-      getParticleCount(const List<ItoParticle>& a_particles) const;
+      getNumPhysicalParticles(const Vector<List<ItoParticle>*>& a_particles) const;
 
       /*!
 	@brief Get the particle energies
