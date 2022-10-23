@@ -44,7 +44,7 @@ namespace Physics {
     using ReactionTypes = std::pair<ReactionPtrs, ReactionPtrs>;
 
     /*!
-      @brief Abstract clas for specifying plasma kinetics
+      @brief Abstract clas for specifying plasma kinetics using Kinetic Monte Carlo. 
     */
     class ItoPlasmaPhysics
     {
@@ -56,14 +56,14 @@ namespace Physics {
       };
 
       /*!
-	@brief Ctor. Does nothing.
+	@brief Constructor. Does nothing.
       */
       ItoPlasmaPhysics();
 
       /*!
-	@brief Dtor. Does nothing. 
+	@brief Destructor. Does nothing. 
       */
-      ~ItoPlasmaPhysics();
+      virtual ~ItoPlasmaPhysics();
 
       /*!
 	@brief Compute a time step
@@ -93,13 +93,13 @@ namespace Physics {
 	@brief Return number of ion equations
       */
       int
-      getNumItoSpecies() const;
+      getNumPlasmaSpecies() const;
 
       /*!
 	@brief Return number of RTE equations
       */
       int
-      getNumRtSpecies() const;
+      getNumPhotonSpecies() const;
 
       /*!
 	@brief Get the coupling, LFA/LEA

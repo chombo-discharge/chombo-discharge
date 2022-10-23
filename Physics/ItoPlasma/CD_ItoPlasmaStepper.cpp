@@ -393,8 +393,8 @@ ItoPlasmaStepper::allocateInternals()
     pout() << m_name + "::allocateInternals" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   if (numPhotonSpecies <= 0) {
     MayDay::Warning("ItoPlasmaStepper::allocate -- how to handle case with no photon species?");
@@ -1913,7 +1913,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobiliti
     pout() << m_name + "::computeItoMobilitiesLFA(mobilities, E, time)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_electricField.getRealm() == m_fluidRealm);
   CH_assert(a_meshMobilities.size() == numPlasmaSpecies);
@@ -2093,7 +2093,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusi
     pout() << m_name + "::computeItoDiffusionLFA(Vector<EBAMRCellData>x2, EBAMRCellData, Real)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_electricField.getRealm() == m_fluidRealm);
   CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
@@ -2157,7 +2157,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>*>&       a_
     pout() << m_name + "::computeItoDiffusionLFA(Vector<LD<EBCellFAB>*>x2, LD<EBCellFAB>, int, Real)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
   CH_assert(a_densities.size() == numPlasmaSpecies);
@@ -2207,7 +2207,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
     pout() << m_name + "::computeItoDiffusionLFA(velo, E, level, dit, time)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_diffusionCoefficients.size() == numPlasmaSpecies);
   CH_assert(a_densities.size() == numPlasmaSpecies);
@@ -2337,7 +2337,7 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, c
     pout() << m_name + "::computeReactiveParticlesPerCell(LD<EBCellFAB>, int)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_ppc.nComp() == numPlasmaSpecies);
 
@@ -2364,7 +2364,7 @@ ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB&      a_ppc,
     pout() << m_name + "::computeReactiveParticlesPerCell(EBCellFAB, int, DataIndex, Box, EBISBox)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_ppc.nComp() == numPlasmaSpecies);
 
@@ -2446,7 +2446,7 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(LevelData<EBCellFAB>& a_mea
     pout() << m_name + "::computeReactiveMeanEnergiesPerCell(LD<EBCellFAB>, int)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_meanEnergies.nComp() == numPlasmaSpecies);
 
@@ -2473,7 +2473,7 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_meanEnerg
     pout() << m_name + "::computeReactiveMeanEnergiesPerCell(EBCellFABint, DataIndex, Box, EBISBox))" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_meanEnergies.nComp() == numPlasmaSpecies);
 
@@ -2564,7 +2564,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(const EBAMRCellData& a_electricField
     pout() << m_name + "::advanceReactionNetwork(ppc, ypc, E, sources, dt)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_electricField.getRealm() == m_fluidRealm);
   CH_assert(a_EdotJ.getRealm() == m_fluidRealm);
@@ -2623,8 +2623,8 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_partic
     pout() << m_name + "::advanceReactionNetwork(LD<EBCellFAB>x5, int, Real)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   CH_assert(a_particlesPerCell.nComp() == numPlasmaSpecies);
   CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
@@ -2665,8 +2665,8 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
     pout() << m_name + "::advanceReactionNetworkNWO(EBCellFABx5, int, DataIndex, Box, Realx2)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   CH_assert(a_particlesPerCell.nComp() == numPlasmaSpecies);
   CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
@@ -2809,8 +2809,8 @@ ItoPlasmaStepper::reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesP
     pout() << m_name + "::reconcileParticles(LevelData<EBCellFAB>x4, int)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   CH_assert(a_newParticlesPerCell.nComp() == numPlasmaSpecies);
   CH_assert(a_oldParticlesPerCell.nComp() == numPlasmaSpecies);
@@ -2851,8 +2851,8 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
   //       the reconciliation routines from the physics interface, which takes the per-cell responsibility for that. The main
   //       work done in this routine is to expose the per-patch data to per-cell data that the physics interface can then use.
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   CH_assert(a_newParticlesPerCell.nComp() == numPlasmaSpecies);
   CH_assert(a_oldParticlesPerCell.nComp() == numPlasmaSpecies);
@@ -3068,8 +3068,8 @@ ItoPlasmaStepper::advanceReactionNetwork(const Real a_dt)
     this->advanceReactionNetworkNWO(a_dt);
   }
   else {
-    const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-    const int numPhotonSpecies = m_physics->getNumRtSpecies();
+    const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+    const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
     Vector<ParticleContainer<ItoParticle>*> particles(numPlasmaSpecies);    // Current particles.
     Vector<ParticleContainer<Photon>*>      bulk_Photons(numPhotonSpecies); // Photons absorbed on mesh
@@ -3104,8 +3104,8 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>*>
       << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   Vector<AMRCellParticles<ItoParticle>*> particles(numPlasmaSpecies);
   Vector<AMRCellParticles<Photon>*>      Photons(numPlasmaSpecies);
@@ -3142,8 +3142,8 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>*>&
       << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     Vector<LayoutData<BinFab<ItoParticle>>*> particles(numPlasmaSpecies);
@@ -3184,8 +3184,8 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle>>*
       << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_lvl];
   const Real               dx  = m_amr->getDx()[a_lvl];
@@ -3237,8 +3237,8 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
 
   const int comp = 0;
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
-  const int numPhotonSpecies = m_physics->getNumRtSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
   const RealVect probLo = m_amr->getProbLo();
   const RealVect dx     = a_dx * RealVect::Unit;
@@ -3367,7 +3367,7 @@ ItoPlasmaStepper::computePhysicsDt(const EBAMRCellData&         a_electricField,
     pout() << m_name + "::computePhysicsDt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_electricField.getRealm() == m_particleRealm);
   CH_assert(a_densities.size() == numPlasmaSpecies);
@@ -3401,7 +3401,7 @@ ItoPlasmaStepper::computePhysicsDt(const LevelData<EBCellFAB>&         a_electri
     pout() << m_name + "::computePhysicsDt(LD<EBCellFAB>, Vector<LD<EBCellFAB> *>, int)" << endl;
   }
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_densities.size() == numPlasmaSpecies);
   CH_assert(a_electricField.nComp() == SpaceDim);
@@ -3440,7 +3440,7 @@ ItoPlasmaStepper::computePhysicsDt(const EBCellFAB&         a_electricField,
 
   Real minDt = std::numeric_limits<Real>::max();
 
-  const int numPlasmaSpecies = m_physics->getNumItoSpecies();
+  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
 
   CH_assert(a_electricField.nComp() == SpaceDim);
   CH_assert(a_densities.size() == numPlasmaSpecies);

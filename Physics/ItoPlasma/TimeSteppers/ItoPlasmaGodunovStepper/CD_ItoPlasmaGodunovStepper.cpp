@@ -117,7 +117,7 @@ ItoPlasmaGodunovStepper::allocateInternals()
   ItoPlasmaStepper::allocateInternals();
 
   // Now allocate for the conductivity particles and rho^dagger particles
-  const int numItoSpecies = m_physics->getNumItoSpecies();
+  const int numItoSpecies = m_physics->getNumPlasmaSpecies();
 
   m_conductivityParticles.resize(numItoSpecies);
   m_rhoDaggerParticles.resize(numItoSpecies);

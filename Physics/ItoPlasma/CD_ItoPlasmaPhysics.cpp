@@ -65,13 +65,13 @@ ItoPlasmaPhysics::getRtSpecies() const
 }
 
 int
-ItoPlasmaPhysics::getNumItoSpecies() const
+ItoPlasmaPhysics::getNumPlasmaSpecies() const
 {
   return m_ItoSpecies.size();
 }
 
 int
-ItoPlasmaPhysics::getNumRtSpecies() const
+ItoPlasmaPhysics::getNumPhotonSpecies() const
 {
   return m_rtSpecies.size();
 }
