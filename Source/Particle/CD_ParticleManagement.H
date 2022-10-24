@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_SuperParticles.H
-  @brief  Namespace containing various particle merging utilities.
+  @file   CD_ParticleManagement.H
+  @brief  Namespace containing various particle management utilities.
   @author Robert Marskar
 */
 
-#ifndef CD_SuperParticles_H
-#define CD_SuperParticles_H
+#ifndef CD_ParticleManagement_H
+#define CD_ParticleManagement_H
 
 // Std includes
 #include <memory>
@@ -24,9 +24,9 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Namespace for various particle merging tools. 
+  @brief Namespace for various particle management tools. 
 */
-namespace SuperParticles {
+namespace ParticleManagement {
 
   /*!
     @brief Node in a particle-merging KD-tree. 
@@ -211,10 +211,10 @@ namespace SuperParticles {
   static inline void
   deleteParticles(List<P>& a_particles, const Real a_weightThresh) noexcept;
   
-} // namespace SuperParticles
+} // namespace ParticleManagement
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_SuperParticlesImplem.H>
+#include <CD_ParticleManagementImplem.H>
 
 #endif

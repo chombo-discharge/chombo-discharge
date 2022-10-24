@@ -104,6 +104,16 @@ public:
                          const int                a_ppc);
 
   /*!
+    @brief Partition particle weights among a number of computational particles
+    @param[in] a_numPhysicalParticles Number of physical particles. 
+    @param[in] a_maxCompParticles     Maximum number of computational particles
+  */
+  template <typename T>
+  static inline std::vector<T> 
+  partitionParticleWeights(const T a_numPhysicalParticles,
+			   const T a_maxCompParticles) noexcept;   
+
+  /*!
     @brief Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles
     @param[in] a_numParticles Total number of particles to be drawn. 
     @return Returns the number of particles drawn by each rank. 

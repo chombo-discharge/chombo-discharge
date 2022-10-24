@@ -193,21 +193,6 @@ namespace Physics {
 	@brief Reconcile the number of particles
       */
       inline void
-      reconcilePhotons(Vector<List<Photon>*>&   a_newPhotons,
-                       const Vector<long long>& a_numNewPhotons,
-                       const RealVect           a_cellPos,
-                       const RealVect           a_centroidPos,
-                       const RealVect           a_lo,
-                       const RealVect           a_hi,
-                       const RealVect           a_bndryCentroid,
-                       const RealVect           a_bndryNormal,
-                       const Real               a_dx,
-                       const Real               a_kappa) const;
-
-      /*!
-	@brief Reconcile the number of particles
-      */
-      inline void
       reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
                          const Vector<long long>&    a_newNumParticles,
                          const Vector<long long>&    a_oldNumParticles,
@@ -218,23 +203,22 @@ namespace Physics {
                          const RealVect              a_bndryCentroid,
                          const RealVect              a_bndryNormal,
                          const Real                  a_dx,
-                         const Real                  a_kappa) const;
+                         const Real                  a_kappa) const;      
 
       /*!
-	@brief Reconcile number of Photons
+	@brief Reconcile the number of particles
       */
       inline void
-      reconcilePhotons(List<Photon>&    a_newPhotons,
-                       const RtSpecies& a_species,
-                       const long long  a_numNewPhotons,
-                       const RealVect   a_cellPos,
-                       const RealVect   a_centroidPos,
-                       const RealVect   a_lo,
-                       const RealVect   a_hi,
-                       const RealVect   a_bndryCentroid,
-                       const RealVect   a_normal,
-                       const Real       a_dx,
-                       const Real       a_kappa) const;
+      reconcilePhotons(Vector<List<Photon>*>&   a_newPhotons,
+                       const Vector<long long>& a_numNewPhotons,
+                       const RealVect           a_cellPos,
+                       const RealVect           a_centroidPos,
+                       const RealVect           a_lo,
+                       const RealVect           a_hi,
+                       const RealVect           a_bndryCentroid,
+                       const RealVect           a_bndryNormal,
+                       const Real               a_dx,
+                       const Real               a_kappa) const;
 
       /*!
 	@brief Reconcile photoionization mechanism
@@ -291,7 +275,7 @@ namespace Physics {
       Vector<RefCountedPtr<ItoSpecies>> m_ItoSpecies;
       Vector<RefCountedPtr<RtSpecies>>  m_rtSpecies;
 
-      int m_num_ItoSpecies;
+      int m_numPlasmaSpecies;
       int m_numRtSpecies;
       int m_ppc;
       int m_fieldSolver_switch;
@@ -341,37 +325,6 @@ namespace Physics {
       computeCharge(const Vector<List<ItoParticle>*>& a_particles) const;
 
       /*!
-	@brief Reconcile number of particles
-      */
-      inline void
-      reconcileParticles(List<ItoParticle>& a_particles,
-                         const long long    a_numNewParticles,
-                         const long long    a_oldNewParticles,
-                         const RealVect     a_cellPos,
-                         const RealVect     a_centroidPos,
-                         const RealVect     a_lo,
-                         const RealVect     a_hi,
-                         const RealVect     a_bndryCentroid,
-                         const RealVect     a_normal,
-                         const Real         a_dx,
-                         const Real         a_kappa) const;
-
-      /*!
-	@brief Add particles
-      */
-      inline void
-      addParticles(List<ItoParticle>& a_particles,
-                   const long long    a_numParticlesToAdd,
-                   const RealVect     a_cellPos,
-                   const RealVect     a_centroidPos,
-                   const RealVect     a_lo,
-                   const RealVect     a_hi,
-                   const RealVect     a_bndryCentroid,
-                   const RealVect     a_bndryNormal,
-                   const Real         a_dx,
-                   const Real         a_kappa) const;
-
-      /*!
 	@brief Remove particles from the input list.
 	@details This will remove weight from the input particles if we can. Otherwise we remove full particles. 
 	@param[inout] a_particles   List of (super-)particles to remove from. 
@@ -385,66 +338,6 @@ namespace Physics {
       */
       inline void
       setMeanParticleEnergy(List<ItoParticle>& a_particles, const Real a_mean_energy) const;
-
-      /*!
-	@brief Check that all weights are > 0
-      */
-      inline void
-      sanityCheck(const List<ItoParticle>& a_lit) const;
-
-      /*!
-	@brief Get the total weight of the input particles. 
-	@param[in] a_particles Input particles.
-      */
-      inline long long
-      getTotalWeight(const List<ItoParticle>& a_particles) const noexcept;
-
-      /*!
-	@brief Compute particle weights.
-	@param[in]  a_particles Input particles.
-	@param[out] a_weights   Particle weights
-	@param[out] a_minWeight Minimum particle weight. 
-      */
-      inline void
-      computeWeights(Vector<long long>&       a_particleWeights,
-                     long long&               a_minWeight,
-                     const List<ItoParticle>& a_particles) const noexcept;
-
-      /*!
-	@brief Trim particle weights down to a_minWeight
-	@details This attempts to trim the particle weights down a_minWeight, in such a way that we do not remove more than
-	a_numParticlesToRemove. The weight removed by this routine is added to a_numRemoved.
-	@param[inout] a_numRemoved           Number of physical particles removed
-	@param[inout] a_particleWeights      Particle weights. 
-	@param[in]    a_numParticlesToRemove Desired number of particles to remove. 
-	@param[in]    a_minWeight            Target weight to trim down to
-      */
-      inline void
-      trimWeights(long long&         a_numRemoved,
-                  Vector<long long>& a_particleWeights,
-                  const long long    a_numParticlesToRemove,
-                  const long long    a_minWeight) const;
-
-      /*!
-	@brief Remove particle weight down to a_numParticlesToRemove
-      */
-      inline void
-      subtractWeights(Vector<long long>& a_particleWeights, const long long a_numParticlesToRemove) const;
-
-      /*!
-	@brief Remove particle weight down to a_numParticlesToRemove
-      */
-      inline void
-      reconcileWeights(List<ItoParticle>& a_particles, const Vector<long long>& a_particleWeights) const;
-
-      /*!
-	@brief Compute particle weights for superparticles
-      */
-      inline void
-      computeParticleWeights(long long&      a_weight,
-                             long long&      a_num,
-                             long long&      a_remainder,
-                             const long long a_numNewParticles) const;
 
       /*!
 	@brief Get the number of physical particles. 

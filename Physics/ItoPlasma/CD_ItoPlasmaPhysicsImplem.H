@@ -20,6 +20,8 @@
 #include <PolyGeom.H>
 
 // Our includes
+#include <CD_ParticleOps.H>
+#include <CD_ParticleManagement.H>
 #include <CD_ItoPlasmaPhysics.H>
 #include <CD_Random.H>
 #include <CD_Units.H>
@@ -98,115 +100,25 @@ ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
                                      const Real                  a_dx,
                                      const Real                  a_kappa) const
 {
-
-#if ITO_PLASMA_PHYSICS_DEBUG
-  const bool isStateValid = this->isStateValid(a_newNumParticles);
-  if (!isStateValid) {
-    MayDay::Abort("ito_plmasma_physics::reconcileParticles - not a valid state!!!");
-  }
-#endif
+  CH_TIME("ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>, ...)");
 
   for (int i = 0; i < a_particles.size(); i++) {
-    this->reconcileParticles(*a_particles[i],
-                             a_newNumParticles[i],
-                             a_oldNumParticles[i],
-                             a_cellPos,
-                             a_centroidPos,
-                             a_lo,
-                             a_hi,
-                             a_bndryCentroid,
-                             a_bndryNormal,
-                             a_dx,
-                             a_kappa);
-  }
-}
+    const long long diff = a_newNumParticles[i] - a_oldNumParticles[i];
 
-inline void
-ItoPlasmaPhysics::reconcileParticles(List<ItoParticle>& a_particles,
-                                     const long long    a_newNumParticles,
-                                     const long long    a_oldNumParticles,
-                                     const RealVect     a_cellPos,
-                                     const RealVect     a_centroidPos,
-                                     const RealVect     a_lo,
-                                     const RealVect     a_hi,
-                                     const RealVect     a_bndryCentroid,
-                                     const RealVect     a_bndryNormal,
-                                     const Real         a_dx,
-                                     const Real         a_kappa) const
-{
+    if (diff > 0LL) {
+      // Adding particles, which is fairly simple. Just choose weights for the particles and go.
+      std::vector<long long> particleWeights = ParticleOps::partitionParticleWeights(diff, (long long)m_ppc);
 
-  const long long     diff = a_newNumParticles - a_oldNumParticles;
-  constexpr long long zero = 0;
+      for (const auto& w : particleWeights) {
+        const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
-  if (diff > zero) { // Need to add 'diff' mass.
-    const long long Diff = (long long)(diff);
-    this->addParticles(a_particles,
-                       diff,
-                       a_cellPos,
-                       a_centroidPos,
-                       a_lo,
-                       a_hi,
-                       a_bndryCentroid,
-                       a_bndryNormal,
-                       a_dx,
-                       a_kappa);
-  }
-  else if (diff < zero) { // Need to remove 'diff' mass.
-    this->removeParticles(a_particles, -diff);
-  }
-}
-
-inline void
-ItoPlasmaPhysics::computeParticleWeights(long long&      a_weight,
-                                         long long&      a_num,
-                                         long long&      a_remainder,
-                                         const long long a_numNewParticles) const
-{
-
-  if (a_numNewParticles <= m_ppc) {
-    a_weight    = 1;
-    a_remainder = 0;
-    a_num       = a_numNewParticles;
-  }
-  else { // Add superparticles
-    a_weight    = a_numNewParticles / m_ppc;
-    a_remainder = a_numNewParticles % m_ppc;
-    a_num       = (a_remainder == 0) ? m_ppc : m_ppc - 1;
-  }
-}
-
-inline void
-ItoPlasmaPhysics::addParticles(List<ItoParticle>& a_particles,
-                               const long long    a_numNewParticles,
-                               const RealVect     a_cellPos,
-                               const RealVect     a_centroidPos,
-                               const RealVect     a_lo,
-                               const RealVect     a_hi,
-                               const RealVect     a_bndryCentroid,
-                               const RealVect     a_bndryNormal,
-                               const Real         a_dx,
-                               const Real         a_kappa) const
-{
-  long long weight, num, remainder;
-
-  constexpr long long zero = 0;
-
-  this->computeParticleWeights(weight, num, remainder, a_numNewParticles);
-
-  for (int i = 0; i < num; i++) {
-    const RealVect p = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-
-    const Real w = (Real)weight;
-
-    a_particles.add(ItoParticle(w, p));
-  }
-
-  if (remainder > zero) { // Rest of weight in case we got superparticles
-    const RealVect p = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-
-    const Real w = (Real)(weight + remainder);
-
-    a_particles.add(ItoParticle(w, p));
+        a_particles[i]->add(ItoParticle(w, x));
+      }
+    }
+    else if (diff < 0LL) {
+      // Removing particles is a bit more difficult because we need to manipulate weights.
+      this->removeParticles(*a_particles[i], -diff);
+    }
   }
 }
 
@@ -215,53 +127,55 @@ ItoPlasmaPhysics::removeParticles(List<ItoParticle>& a_particles, const long lon
 {
   CH_TIME("ItoPlasmaPhysics::removeParticles");
 
-  constexpr long long zero = 0;
+  constexpr long long zero = 0LL;
+
+  CH_assert(a_numParticlesToRemove >= zero);
+
+  // Quick lambda for getting total particle weight. Used for debugging.
+  auto getTotalWeight = [&]() -> long long {
+    long long W = zero;
+
+    for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
+      W += llround(lit().weight());
+
+      if (lit().weight() < 1.0) {
+        MayDay::Error("ItoPlasmaPhysics::removeParticles -- bad particle mass!");
+      }
+    }
+
+    return W;
+  };
 
   if (a_numParticlesToRemove > zero) {
 
-    // This is for debugging purposes.
+    // For debugging only.
     long long totalWeightBefore = 0;
     long long totalWeightAfter  = 0;
 
     // Debug hook, compute the total particle weight before we start removing weights.
     if (m_debug) {
-      this->sanityCheck(a_particles);
+      totalWeightBefore = getTotalWeight();
 
-      totalWeightBefore = this->getTotalWeight(a_particles);
+      if (totalWeightBefore < a_numParticlesToRemove) {
+        MayDay::Error("ItoPlasmaPhysics::removeParticles: logic bust (trying to remove too many particles)");
+      }
     }
 
-    // Not for debugging, these are filled in computeWeights below.
-    long long         minWeight;
-    Vector<long long> particleWeights;
+    // Remove physical particles.
+    ParticleManagement::removePhysicalParticles(a_particles, a_numParticlesToRemove);
 
-    // Number of physical particles removed so far.
-    long long numRemoved = zero;
-
-    // Compute the particle weights and the minium particle weight.
-    this->computeWeights(particleWeights, minWeight, a_particles);
-
-    // Trim particle weights down to minWeight -- the number of particles removed by this is
-    // added to numRemoved. 
-    this->trimWeights(numRemoved, particleWeights, a_numParticlesToRemove, minWeight);
-
-    // Uniformly remove rest of the mass.
-    this->subtractWeights(particleWeights, a_numParticlesToRemove - numRemoved);
-
-    // Reconcile particle weights -- this sets the weights for the input particles.
-    this->reconcileWeights(a_particles, particleWeights);
+    // Remove particles with too low weight.
+    ParticleManagement::deleteParticles(a_particles, std::numeric_limits<Real>::min());
 
     // Debug hook, make sure that particle weights are > 0 AND we've removed the desired
     // particle weight.
     if (m_debug) {
-      this->sanityCheck(a_particles);
-
-      totalWeightAfter = this->getTotalWeight(a_particles);
+      totalWeightAfter = getTotalWeight();
 
       if (totalWeightBefore - totalWeightAfter != a_numParticlesToRemove) {
         pout() << "ItoPlasmaPhysics::removeParticles: Total weight before = " << totalWeightBefore << endl;
         pout() << "ItoPlasmaPhysics::removeParticles: Total weight after  = " << totalWeightAfter << endl;
         pout() << "ItoPlasmaPhysics::removeParticles: Should have removed = " << a_numParticlesToRemove << endl;
-        pout() << "ItoPlasmaPhysics::removeParticles: Actually removed    = " << numRemoved << endl;
 
         MayDay::Abort("ItoPlasmaPhysics::removeParticles - incorrect mass removed");
       }
@@ -294,136 +208,6 @@ ItoPlasmaPhysics::setMeanParticleEnergy(List<ItoParticle>& a_particles, const Re
   }
 }
 
-inline void
-ItoPlasmaPhysics::sanityCheck(const List<ItoParticle>& a_particles) const
-{
-
-  ListIterator<ItoParticle> lit(a_particles);
-
-  for (lit.begin(); lit.ok(); ++lit) {
-    const Real w = lit().weight();
-
-    if (w < 1.0)
-      MayDay::Abort("ItoPlasmaPhysics::sanityCheck - can't have w < 1!!!!");
-  }
-}
-
-inline long long
-ItoPlasmaPhysics::getTotalWeight(const List<ItoParticle>& a_particles) const noexcept
-{
-  CH_TIME("ItoPlasmaPhysics::getTotalWeight");
-
-  long long totalWeight = 0;
-  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-    totalWeight += llround(lit().weight());
-  }
-
-  return totalWeight;
-}
-
-inline void
-ItoPlasmaPhysics::computeWeights(Vector<long long>&       a_particleWeights,
-                                 long long&               a_minWeight,
-                                 const List<ItoParticle>& a_particles) const noexcept
-
-{
-  CH_TIME("ItoPlasmaPhysics::computeWeights");
-
-  CH_assert(a_particles.length() > 0);
-
-  // Init.
-  a_minWeight = std::numeric_limits<long long>::max();
-  a_particleWeights.resize(0);
-
-  // Append weights and compute minimum weight. 
-  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-    const long long curWeight = llround(lit().weight());
-
-    a_particleWeights.push_back(curWeight);
-
-    a_minWeight = std::min(a_minWeight, curWeight);
-  }
-}
-
-inline void
-ItoPlasmaPhysics::trimWeights(long long&         a_numRemoved,
-                              Vector<long long>& a_particleWeights,
-                              const long long    a_numParticlesToRemove,
-                              const long long    a_minWeight) const
-{
-  CH_TIME("ItoPlasmaPhysics::trimWeights");
-  
-  constexpr long long zero = 0;
-
-  for (int i = 0; i < a_particleWeights.size(); i++) {
-    const long long diff1 = a_particleWeights[i] - a_minWeight;    
-    const long long diff2 = a_numParticlesToRemove - a_numRemoved; 
-
-    CH_assert(diff1 >= 0);
-    CH_assert(diff2 >= 0);    
-
-    const long long r = std::max(zero, std::min(diff1, diff2));
-
-    a_particleWeights[i] -= r;
-    a_numRemoved += r;
-  }
-}
-
-inline void
-ItoPlasmaPhysics::subtractWeights(Vector<long long>& a_particleWeights, const long long a_numParticlesToRemove) const
-{
-
-  constexpr long long zero = 0;
-
-  if (a_numParticlesToRemove > zero) {
-    const long long numCompParticles = (long long)a_particleWeights.size();
-    const long long weight           = a_numParticlesToRemove / numCompParticles;
-    const long long remainder        = a_numParticlesToRemove % numCompParticles;
-
-    // Remove weight from each particle.
-    if (weight > zero) {
-      for (int i = 0; i < a_particleWeights.size(); i++) {
-        a_particleWeights[i] -= weight;
-      }
-    }
-
-    // Remove the remainder by cycling through the particles.
-    if (remainder > zero) {
-      long long W = zero;
-      for (int i = 0; i < a_particleWeights.size(); i++) {
-        const long long w = std::min(a_particleWeights[i], remainder - W);
-
-        a_particleWeights[i] -= w;
-        W += w;
-
-        if (W == remainder) { // OK, we have removed the remainder. Break out.
-          break;
-        }
-      }
-    }
-  }
-}
-
-inline void
-ItoPlasmaPhysics::reconcileWeights(List<ItoParticle>& a_particles, const Vector<long long>& a_particleWeights) const
-{
-
-  constexpr long long zero = 0;
-
-  List<ItoParticle> copyParticles(a_particles);
-  a_particles.clear();
-
-  int i = 0;
-  for (ListIterator<ItoParticle> lit(copyParticles); lit.ok(); ++lit, ++i) {
-    ItoParticle& p = lit();
-
-    if (a_particleWeights[i] > zero) {
-      p.weight() = (Real)a_particleWeights[i];
-      a_particles.add(p);
-    }
-  }
-}
-
 void
 ItoPlasmaPhysics::reconcilePhotons(Vector<List<Photon>*>&   a_newPhotons,
                                    const Vector<long long>& a_numNewPhotons,
@@ -438,55 +222,18 @@ ItoPlasmaPhysics::reconcilePhotons(Vector<List<Photon>*>&   a_newPhotons,
 {
 
   for (int i = 0; i < a_newPhotons.size(); i++) {
-    if (a_numNewPhotons[i] > 0) {
-      this->reconcilePhotons(*a_newPhotons[i],
-                             *m_rtSpecies[i],
-                             a_numNewPhotons[i],
-                             a_cellPos,
-                             a_centroidPos,
-                             a_lo,
-                             a_hi,
-                             a_bndryCentroid,
-                             a_bndryNormal,
-                             a_dx,
-                             a_kappa);
+    if (a_numNewPhotons[i] > 0LL) {
+
+      const std::vector<long long> photonWeights = ParticleOps::partitionParticleWeights(a_numNewPhotons[i],
+                                                                                         (long long)m_ppc);
+
+      for (const auto& w : photonWeights) {
+        const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+        const RealVect v = Units::c * Random::getDirection();
+
+        a_newPhotons[i]->add(Photon(x, v, m_rtSpecies[i]->getAbsorptionCoefficient(x), 1.0 * w));
+      }
     }
-  }
-}
-
-inline void
-ItoPlasmaPhysics::reconcilePhotons(List<Photon>&    a_Photons,
-                                   const RtSpecies& a_species,
-                                   const long long  a_num_Photons,
-                                   const RealVect   a_cellPos,
-                                   const RealVect   a_centroidPos,
-                                   const RealVect   a_lo,
-                                   const RealVect   a_hi,
-                                   const RealVect   a_bndryCentroid,
-                                   const RealVect   a_bndryNormal,
-                                   const Real       a_dx,
-                                   const Real       a_kappa) const
-{
-  a_Photons.clear();
-
-  long long weight, num, remainder;
-  this->computeParticleWeights(weight, num, remainder, a_num_Photons);
-
-  for (int i = 0; i < num; i++) {
-    const RealVect p = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-
-    const RealVect v = Units::c * Random::getDirection();
-
-    a_Photons.add(Photon(p, v, a_species.getAbsorptionCoefficient(p), weight));
-  }
-
-  // If we used superPhotons the last Photon gets some extra oomph.
-  if (remainder > 0) {
-    const RealVect p = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-
-    const RealVect v = Units::c * Random::getDirection();
-
-    a_Photons.add(Photon(p, v, a_species.getAbsorptionCoefficient(p), weight + remainder));
   }
 }
 
@@ -494,7 +241,7 @@ inline void
 ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_particles,
                                            Vector<Real>&                a_mean_energies,
                                            const Vector<long long>&     a_numParticles,
-                                           const Vector<List<Photon>*>& a_Photons) const
+                                           const Vector<List<Photon>*>& a_absorbedPhotons) const
 {
 
   // TLDR: This routine runs through all the photoreactions. For each reaction we look up the target species (e.g. electrons, ions)
@@ -516,7 +263,7 @@ ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_partic
 
     const std::deque<std::pair<int, Real>>& target_energies = r.second.getTargetEnergies();
 
-    for (ListIterator<Photon> lit(*a_Photons[src]); lit.ok(); ++lit) {
+    for (ListIterator<Photon> lit(*a_absorbedPhotons[src]); lit.ok(); ++lit) {
       const Photon&  phot = lit();
       const RealVect pos  = phot.position();
       const Real     mass = phot.weight(); // Basically the number of reactions, in real format.
@@ -610,7 +357,7 @@ ItoPlasmaPhysics::getParticleMeanEnergy(const Real& a_energy, const long long& a
 
 inline void
 ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles,
-                                         Vector<List<Photon>*>&      a_Photons,
+                                         Vector<List<Photon>*>&      a_absorbedPhotons,
                                          Vector<List<Photon>*>&      a_newPhotons,
                                          const Vector<Real>&         a_sources,
                                          const RealVect              a_E,
@@ -636,9 +383,9 @@ ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles
   // Energies, mean_energies, and sources. Make sure LFA gives dummy arguments.
   Vector<Real> sources, energies, mean_energies;
   if (m_coupling == coupling::LFA) {
-    energies.resize(m_num_ItoSpecies, 0.0);
-    mean_energies.resize(m_num_ItoSpecies, 0.0);
-    sources.resize(m_num_ItoSpecies, 0.0);
+    energies.resize(m_numPlasmaSpecies, 0.0);
+    mean_energies.resize(m_numPlasmaSpecies, 0.0);
+    sources.resize(m_numPlasmaSpecies, 0.0);
   }
   else {
     energies      = this->getParticleEnergy(a_particles);
@@ -669,10 +416,24 @@ ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles
   }
 #endif
 
-  // Do particle advancement
+  // Populate the KMC solver state.
+  m_kmcState.define(m_numPlasmaSpecies, m_numRtSpecies);
+
+  std::vector<long long>& reactives    = m_kmcState.getReactiveState();
+  std::vector<long long>& nonReactives = m_kmcState.getNonReactiveState();
+
+  for (size_t i = 0; i < a_particles.size(); i++) {
+    reactives[i] = 0LL;
+    for (ListIterator<ItoParticle> lit(*a_particles[i]); lit.ok(); ++lit) {
+      reactives[i] += llround(lit().weight());
+    }
+  }
+
+  // Run the Kinetic Monte Carlo solver.
   this->advanceParticles(newParticleCount, newPhotonCount, mean_energies, sources, a_dt, a_E, a_dx, a_kappa);
 
-  // Reconcile particles
+  // Reconcile particles -- this turns the new particle count into computational particles. This requires modifications
+  // to the particle weights, removal of particles, and addition of particles.
   this->reconcileParticles(a_particles,
                            newParticleCount,
                            oldParticleCount,
@@ -685,7 +446,7 @@ ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles
                            a_dx,
                            a_kappa);
 
-  // Generate new Photons
+  // Reconcile photons -- this creates new photons that the solver will use.
   this->reconcilePhotons(a_newPhotons,
                          newPhotonCount,
                          a_cellPos,
@@ -697,8 +458,8 @@ ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles
                          a_dx,
                          a_kappa);
 
-  // Run photo-reactions and increment the number of particles as needed
-  this->reconcilePhotoionization(a_particles, mean_energies, newParticleCount, a_Photons);
+  // Run through photo-reactions and increment the number of particles as needed.
+  this->reconcilePhotoionization(a_particles, mean_energies, newParticleCount, a_absorbedPhotons);
 
   // Set new mean energies for all the particles.
   this->setMeanParticleEnergy(a_particles, mean_energies);
@@ -965,7 +726,7 @@ ItoPlasmaPhysics::stepTau(Vector<long long>&      a_particles,
                           const Real              a_dt) const
 {
   // mean_energies -> total energies
-  Vector<Real> energies(m_num_ItoSpecies);
+  Vector<Real> energies(m_numPlasmaSpecies);
   for (int i = 0; i < a_particles.size(); i++) {
     energies[i] = Max(0.0, a_mean_energies[i] * a_particles[i]);
   }

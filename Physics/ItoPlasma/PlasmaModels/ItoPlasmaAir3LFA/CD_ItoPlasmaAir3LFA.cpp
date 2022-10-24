@@ -22,7 +22,7 @@ using namespace Physics::ItoPlasma;
 
 ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
 {
-  m_num_ItoSpecies = 3;
+  m_numPlasmaSpecies = 3;
   m_numRtSpecies   = 1;
 
   m_coupling == ItoPlasmaPhysics::coupling::LFA;
@@ -90,7 +90,7 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   m_N  = m_p * Units::Na / (m_T * Units::R);
 
   // Set up species
-  m_ItoSpecies.resize(m_num_ItoSpecies);
+  m_ItoSpecies.resize(m_numPlasmaSpecies);
   m_rtSpecies.resize(m_numRtSpecies);
 
   m_ElectronIdx = 0;
@@ -195,7 +195,7 @@ ItoPlasmaAir3LFA::computeAlpha(const RealVect a_E) const
 Vector<Real>
 ItoPlasmaAir3LFA::computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const
 {
-  Vector<Real> mobilities(m_num_ItoSpecies, m_ion_mu);
+  Vector<Real> mobilities(m_numPlasmaSpecies, m_ion_mu);
   mobilities[m_ElectronIdx] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
 
   return mobilities;
@@ -213,7 +213,7 @@ ItoPlasmaAir3LFA::computeItoDiffusionLFA(const Real         a_time,
                                          const RealVect     a_E,
                                          const Vector<Real> a_cdr_densities) const
 {
-  Vector<Real> D(m_num_ItoSpecies, m_ion_D);
+  Vector<Real> D(m_numPlasmaSpecies, m_ion_D);
   D[m_ElectronIdx] = m_tables.at("diffco").getEntry<1>(a_E.vectorLength());
 
   return D;

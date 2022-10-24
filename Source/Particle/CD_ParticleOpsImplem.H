@@ -182,6 +182,30 @@ ParticleOps::computeParticleWeights(unsigned long long&      a_weight,
 }
 
 template <typename T>
+inline std::vector<T> 
+ParticleOps::partitionParticleWeights(const T a_numPhysicalParticles,
+				      const T  a_maxCompParticles) noexcept {
+
+  std::vector<T> ret(0);
+
+  if(a_maxCompParticles > (T) 0) {
+    if(a_numPhysicalParticles <= a_maxCompParticles) {
+      ret.resize(a_numPhysicalParticles, (T) 1);
+    }
+    else {
+      const T W = a_numPhysicalParticles / a_maxCompParticles;
+      const T r = a_numPhysicalParticles / a_maxCompParticles;
+
+      ret.resize(a_maxCompParticles, W);
+
+      ret.back() += r;
+    }
+  }
+
+  return ret;
+}
+
+template <typename T>
 inline T
 ParticleOps::partitionParticles(const T a_numParticles)
 {

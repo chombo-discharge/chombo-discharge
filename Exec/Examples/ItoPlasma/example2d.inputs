@@ -213,7 +213,7 @@ ItoPlasmaGodunovStepper.load_balance            = true           # Turn on/off l
 ItoPlasmaGodunovStepper.load_index              = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
 ItoPlasmaGodunovStepper.box_sorting             = morton         # Box sorting when load balancing
-ItoPlasmaGodunovStepper.particles_per_cell      = 64             # Max computational particles per cell
+ItoPlasmaGodunovStepper.particles_per_cell      = 16             # Max computational particles per cell
 ItoPlasmaGodunovStepper.merge_interval          = 1              # Time steps between superparticle merging
 ItoPlasmaGodunovStepper.regrid_superparticles   = true           # Make superparticles during regrids
 ItoPlasmaGodunovStepper.advection_cfl           = 1.0            # Advective time step CFL restriction

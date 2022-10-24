@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_SuperParticlesImplem.H
-  @brief  Implementation of CD_SuperParticles.H
+  @file   CD_ParticleManagementImplem.H
+  @brief  Implementation of CD_ParticleManagement.H
   @author Robert Marskar
 */
 
-#ifndef CD_SuperParticlesImplem_H
-#define CD_SuperParticlesImplem_H
+#ifndef CD_ParticleManagementImplem_H
+#define CD_ParticleManagementImplem_H
 
 // Std includes
 #include <utility>
@@ -19,10 +19,10 @@
 #include <CH_Timer.H>
 
 // Our includes
-#include <CD_SuperParticles.H>
+#include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
-namespace SuperParticles {
+namespace ParticleManagement {
 
   template <class P>
   inline KDNode<P>::KDNode() : m_left(nullptr), m_right(nullptr), m_weight(0.0)
@@ -320,7 +320,7 @@ namespace SuperParticles {
   inline void
   removePhysicalParticles(List<P>& a_particles, const long long a_numPhysPartToRemove) noexcept
   {
-    CH_TIME("SuperParticles::removePhysicalParticles");
+    CH_TIME("ParticleManagement::removePhysicalParticles");
 
     constexpr long long zero = 0LL;
     
@@ -400,7 +400,7 @@ namespace SuperParticles {
   inline void
   deleteParticles(List<P>& a_particles, const Real a_weightThresh) noexcept
   {
-    CH_TIME("SuperParticles::deleteParticles");
+    CH_TIME("ParticleManagement::deleteParticles");
 
     for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
       if (lit().weight() < a_weightThresh) {
@@ -408,7 +408,7 @@ namespace SuperParticles {
       }
     }
   }
-} // namespace SuperParticles
+} // namespace ParticleManagement
 
 #include <CD_NamespaceFooter.H>
 
