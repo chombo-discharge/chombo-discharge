@@ -1198,14 +1198,14 @@ ItoPlasmaStepper::computeConductivityCell(EBAMRCellData&                        
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solverIt.index();
-    const int q   = species->getChargeNumber();
+    const int Z   = species->getChargeNumber();
 
-    if (q != 0 && solver->isMobile()) {
+    if (Z != 0 && solver->isMobile()) {
       solver->depositConductivity(m_particleScratch1, *a_particles[idx]);
 
       // Add to the fluid realm.
       m_fluidScratch1.copy(m_particleScratch1);
-      DataOps::incr(a_conductivity, m_fluidScratch1, std::abs(q));
+      DataOps::incr(a_conductivity, m_fluidScratch1, 1.0 * std::abs(Z));
     }
   }
 

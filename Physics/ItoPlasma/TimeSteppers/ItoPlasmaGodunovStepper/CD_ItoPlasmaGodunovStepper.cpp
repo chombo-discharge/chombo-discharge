@@ -689,9 +689,9 @@ ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt) noexcept
   DataOps::incr(permFaceGas, m_conductivityFace, a_dt / Units::eps0);
   DataOps::incr(permEBGas, m_conductivityEB, a_dt / Units::eps0);
 
-  // Coarsen coefficients
+  // Coarsen coefficients.
   m_amr->arithmeticAverage(permFaceGas, m_fluidRealm, phase::gas);
-  m_amr->conservativeAverage(permEBGas, m_fluidRealm, phase::gas);
+  m_amr->arithmeticAverage(permEBGas, m_fluidRealm, phase::gas);
 
   // Set up the solver with the "permittivities"
   m_fieldSolver->setSolverPermittivities(permCell, permFace, permEB);
@@ -715,7 +715,7 @@ ItoPlasmaGodunovStepper::copyConductivityParticles(
     const int idx = solverIt.index();
     const int Z   = species->getChargeNumber();
 
-    if (Z > 0 && solver->isMobile()) {
+    if (Z != 0 && solver->isMobile()) {
       const ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -821,7 +821,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
 
   // Compute the conductivity on the mesh. This deposits q_e * Z * w * mu on the mesh.
   this->copyConductivityParticles(m_conductivityParticles);
-  this->computeConductivities(m_conductivityParticles); // Deposits q_e*Z*w*mu on the mesh
+  this->computeConductivities(m_conductivityParticles);
 
   // Set up the semi-implicit Poisson solver with the computed conductivities.
   this->setupSemiImplicitPoisson(a_dt);
