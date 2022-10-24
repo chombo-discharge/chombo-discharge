@@ -36,22 +36,20 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics()
 {
   CH_TIME("ItoPlasmaPhysics::ItoPlasmaPhysics");
 
-  // Default coupling
+  m_coupling  = coupling::LFA;  
+
   m_className = "ItoPlasmaPhysics";
-  m_debug     = true;
-  m_coupling  = coupling::LFA;
 
   m_reactions.clear();
   m_photoReactions.clear();
 
-  // Default
-  m_ppc = 32;
-
-  // Default parameters for hybrid algorithm.
-  m_Ncrit     = 10;
-  m_eps       = 1.0;
-  m_NSSA      = 100;
-  m_SSAlim    = 0.1;
+  // Some default settings in case user forgets to call the parsing algorithms.
+  m_debug     = true;  
+  m_ppc       = 32;
+  m_Ncrit     = 5;
+  m_eps       = 0.1;
+  m_NSSA      = 10;
+  m_SSAlim    = 5.0;
   m_algorithm = Algorithm::Hybrid;
 }
 
