@@ -19,6 +19,7 @@
 // Our includes
 #include <CD_ParticleOps.H>
 #include <CD_PolyUtils.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 inline bool
@@ -218,6 +219,74 @@ ParticleOps::drawRandomParticles(List<P>&                         a_particles,
 
     a_particles.add(p);
   }
+}
+
+template <typename P, typename T>
+inline void
+ParticleOps::drawSphereParticles(List<P>&       a_particles,
+                                 const T        a_numParticles,
+                                 const RealVect a_center,
+                                 const Real     a_radius) noexcept
+{
+  CH_TIME("ParticleOps::drawSphereParticles");
+
+  a_particles.clear();
+
+  const T numParticles = ParticleOps::partitionParticles(a_numParticles);
+
+  for (T t = 0; t < numParticles; t++) {
+    P p;
+
+    RealVect& x = p.position();
+
+    x = std::numeric_limits<Real>::max() * RealVect::Unit;
+
+    while (x.vectorLength() > a_radius) {
+      for (int d = 0; d < SpaceDim; d++) {
+        x[d] = a_radius * Random::getUniformReal11();
+      }
+    }
+
+    a_particles.add(p);
+  }
+}
+
+template <typename P, typename T>
+inline void
+ParticleOps::drawBoxParticles(List<P>&       a_particles,
+                              const T        a_numParticles,
+                              const RealVect a_loCorner,
+                              const RealVect a_hiCorner) noexcept
+{
+  CH_TIME("ParticleOps::drawBoxParticles");
+
+  CH_assert(a_hiCorner >= a_loCorner);
+
+  auto ranBox = [&]() -> RealVect {
+    return RealVect(D_DECL(a_loCorner[0] + (a_hiCorner[0] - a_loCorner[0]) * Random::getUniformReal01(),
+                           a_loCorner[1] + (a_hiCorner[1] - a_loCorner[1]) * Random::getUniformReal01(),
+                           a_loCorner[2] + (a_hiCorner[2] - a_loCorner[2]) * Random::getUniformReal01()));
+  };
+
+  ParticleOps::drawRandomParticles(a_particles, a_numParticles, ranBox);
+}
+
+template <typename P, typename T>
+inline void
+ParticleOps::drawGaussianParticles(List<P>&       a_particles,
+                                   const T        a_numParticles,
+                                   const RealVect a_center,
+                                   const Real     a_radius) noexcept
+{
+  CH_TIME("ParticleOps::drawGaussianParticles");
+
+  std::normal_distribution<Real> gauss(0.0, a_radius);
+
+  auto ranGauss = [&]() -> RealVect {
+    return a_center + Random::get(gauss) * Random::getDirection();
+  };
+
+  ParticleOps::drawRandomParticles(a_particles, a_numParticles, ranGauss);
 }
 
 template <typename P>
