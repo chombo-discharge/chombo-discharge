@@ -324,7 +324,7 @@ protected:
 
   /*!
     @brief Threshold for switching to SSA-based algorithm within the Cao algorithm. 
-<  */
+  */
   Real m_SSAlim;
 };
 

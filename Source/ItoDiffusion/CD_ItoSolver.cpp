@@ -25,6 +25,7 @@
 #include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_ParticleOps.H>
+#include <CD_ParticleManagement.H>
 #include <CD_BoxLoops.H>
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
@@ -1198,21 +1199,12 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
       // Do regular cells -- in these cells we only need to draw a random position somewhere inside the cubic cell. Easy.
       if (ebisbox.isRegular(iv)) {
 
-        // Compute weights and remainder. This bit of code will take the number of physical particles and divide them into a_newPPC particles with
+        // This bit of code will take the number of physical particles and divide them into a_newPPC particles with
         // approximately equal weights. It is possible that one of the particles will have a larger particle weight than the others.
-        const unsigned long long numPhysicalParticles = (unsigned long long)llround(ppc(iv));
+        const std::vector<long long> weights = ParticleManagement::partitionParticleWeights(llround(ppc(iv)),
+                                                                                            (long long)a_newPPC);
 
-        unsigned long long computationalParticleWeight    = 0L;
-        unsigned long long computationalParticleNum       = 0L;
-        unsigned long long computationalParticleRemainder = 0L;
-
-        ParticleOps::computeParticleWeights(computationalParticleWeight,
-                                            computationalParticleNum,
-                                            computationalParticleRemainder,
-                                            numPhysicalParticles,
-                                            a_newPPC);
-
-        // Settings for drawing new particles.
+        // Settings for drawing new particles in the current cell.
         const RealVect minLo = -0.5 * RealVect::Unit;
         const RealVect minHi = 0.5 * RealVect::Unit;
         const RealVect norma = RealVect::Zero;
@@ -1220,20 +1212,10 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
         const RealVect pos   = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
         const Real     kappa = 1.0;
 
-        // Now add the partices. If the remainder was > 0 we add another one with weight w + r
-        for (unsigned long long i = 0; i < computationalParticleNum; i++) {
-          const RealVect particlePosition = Random::randomPosition(pos, minLo, minHi, centr, norma, dx, kappa);
-          const Real     particleWeight   = (Real)computationalParticleWeight;
+        for (const auto& w : weights) {
+          const RealVect x = Random::randomPosition(pos, minLo, minHi, centr, norma, dx, kappa);
 
-          myParticles.add(ItoParticle(particleWeight, particlePosition));
-        }
-
-        // Add the "remainder" particle.
-        if (computationalParticleRemainder > 0ULL) {
-          const RealVect particlePosition = Random::randomPosition(pos, minLo, minHi, centr, norma, dx, kappa);
-          const Real     particleWeight   = (Real)(computationalParticleWeight + computationalParticleRemainder);
-
-          myParticles.add(ItoParticle(particleWeight, particlePosition));
+          myParticles.add(ItoParticle(1.0 * w, x));
         }
       }
     };
@@ -1261,29 +1243,15 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
           DataOps::computeMinValidBox(minLo, minHi, norm, cent);
         }
 
-        // Compute weights and remainder
-        unsigned long long computationalParticleWeight;
-        unsigned long long computationalParticleNum;
-        unsigned long long computationalParticleRemainder;
-        ParticleOps::computeParticleWeights(computationalParticleWeight,
-                                            computationalParticleNum,
-                                            computationalParticleRemainder,
-                                            numPhysicalParticles,
-                                            a_newPPC);
+        // This bit of code will take the number of physical particles and divide them into a_newPPC particles with
+        // approximately equal weights. It is possible that one of the particles will have a larger particle weight than the others.
+        const std::vector<long long> weights = ParticleManagement::partitionParticleWeights(llround(ppc(iv)),
+                                                                                            (long long)a_newPPC);
 
-        // Now add the partices. If r > 0 we add another one with weight w + r
-        for (unsigned long long i = 0; i < computationalParticleNum; i++) {
-          const RealVect particlePosition = Random::randomPosition(pos, minLo, minHi, cent, norm, dx, kappa);
-          const Real     particleWeight   = (Real)computationalParticleWeight;
+        for (const auto& w : weights) {
+          const RealVect x = Random::randomPosition(pos, minLo, minHi, cent, norm, dx, kappa);
 
-          myParticles.add(ItoParticle(particleWeight, particlePosition));
-        }
-
-        if (computationalParticleRemainder > 0ULL) {
-          const RealVect particlePosition = Random::randomPosition(pos, minLo, minHi, cent, norm, dx, kappa);
-          const Real     particleWeight   = (Real)(computationalParticleWeight + computationalParticleRemainder);
-
-          myParticles.add(ItoParticle(particleWeight, particlePosition));
+          myParticles.add(ItoParticle(1.0 * w, x));
         }
       }
     };
@@ -3024,8 +2992,8 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
   }
 
   using PType        = NonCommParticle<2, 1>;
-  using Node         = SuperParticles::KDNode<PType>;
-  using ParticleList = SuperParticles::KDNode<PType>::ParticleList;
+  using Node         = ParticleManagement::KDNode<PType>;
+  using ParticleList = ParticleManagement::KDNode<PType>::ParticleList;
 
   // 1. Make the input list into a vector of particles with a smaller memory footprint.
   Real         W = 0.0;
@@ -3059,7 +3027,7 @@ ItoSolver::makeSuperparticles(List<ItoParticle>& a_particles, const int a_ppc)
 
     for (const auto& l : leaves1) {
       if (l->weight() > 2.0 - std::numeric_limits<Real>::min()) {
-        SuperParticles::PartitionEqualWeight<PType, &PType::template real<0>, &PType::template vect<0>>(*l);
+        ParticleManagement::PartitionEqualWeight<PType, &PType::template real<0>, &PType::template vect<0>>(*l);
 
         leaves2.emplace_back(l->getLeft());
         leaves2.emplace_back(l->getRight());

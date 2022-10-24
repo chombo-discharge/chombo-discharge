@@ -19,6 +19,7 @@
 #include <CH_Timer.H>
 
 // Our includes
+#include <CD_Random.H>
 #include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
@@ -323,7 +324,7 @@ namespace ParticleManagement {
     CH_TIME("ParticleManagement::removePhysicalParticles");
 
     constexpr long long zero = 0LL;
-    
+
     ListIterator<P> lit(a_particles);
 
     CH_assert(a_numPhysPartToRemove >= 0LL);
@@ -407,6 +408,138 @@ namespace ParticleManagement {
         a_particles.remove(lit);
       }
     }
+  }
+
+  template <typename T>
+  inline std::vector<T>
+  ParticleManagement::partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept
+  {
+
+    std::vector<T> ret(0);
+
+    if (a_maxCompParticles > (T)0) {
+      if (a_numPhysicalParticles <= a_maxCompParticles) {
+        ret.resize(a_numPhysicalParticles, (T)1);
+      }
+      else {
+        const T W = a_numPhysicalParticles / a_maxCompParticles;
+        const T r = a_numPhysicalParticles / a_maxCompParticles;
+
+        ret.resize(a_maxCompParticles, W);
+
+        ret.back() += r;
+      }
+    }
+
+    return ret;
+  }
+
+  template <typename T>
+  inline T
+  ParticleManagement::partitionParticles(const T a_numParticles)
+  {
+#ifdef CH_MPI
+    const T numProcs  = T(numProc());
+    const T quotient  = a_numParticles / numProc();
+    const T remainder = a_numParticles % numProc();
+
+    Vector<T> particlesPerRank(numProc(), quotient);
+
+    for (int i = 0; i < remainder; i++) {
+      particlesPerRank[i]++;
+    }
+
+    return particlesPerRank[procID()];
+#else
+    return a_numParticles;
+#endif
+  }
+
+  template <typename P, typename T>
+  inline void
+  ParticleManagement::drawRandomParticles(List<P>&                         a_particles,
+                                          const T                          a_numParticles,
+                                          const std::function<RealVect()>& a_distribution)
+  {
+
+    a_particles.clear();
+
+    const T numParticles = ParticleManagement::partitionParticles(a_numParticles);
+
+    for (T t = 0; t < numParticles; t++) {
+      P p;
+      p.position() = a_distribution();
+
+      a_particles.add(p);
+    }
+  }
+
+  template <typename P, typename T>
+  inline void
+  ParticleManagement::drawSphereParticles(List<P>&       a_particles,
+                                          const T        a_numParticles,
+                                          const RealVect a_center,
+                                          const Real     a_radius) noexcept
+  {
+    CH_TIME("ParticleManagement::drawSphereParticles");
+
+    a_particles.clear();
+
+    const T numParticles = ParticleManagement::partitionParticles(a_numParticles);
+
+    for (T t = 0; t < numParticles; t++) {
+      P p;
+
+      RealVect& x = p.position();
+
+      x = std::numeric_limits<Real>::max() * RealVect::Unit;
+
+      while (x.vectorLength() > a_radius) {
+        for (int d = 0; d < SpaceDim; d++) {
+          x[d] = a_radius * Random::getUniformReal11();
+        }
+      }
+
+      a_particles.add(p);
+    }
+  }
+
+  template <typename P, typename T>
+  inline void
+  ParticleManagement::drawBoxParticles(List<P>&       a_particles,
+                                       const T        a_numParticles,
+                                       const RealVect a_loCorner,
+                                       const RealVect a_hiCorner) noexcept
+  {
+    CH_TIME("ParticleManagement::drawBoxParticles");
+
+    CH_assert(a_hiCorner >= a_loCorner);
+
+    auto ranBox = [&]() -> RealVect {
+      return RealVect(D_DECL(a_loCorner[0] + (a_hiCorner[0] - a_loCorner[0]) * Random::getUniformReal01(),
+                             a_loCorner[1] + (a_hiCorner[1] - a_loCorner[1]) * Random::getUniformReal01(),
+                             a_loCorner[2] + (a_hiCorner[2] - a_loCorner[2]) * Random::getUniformReal01()));
+    };
+
+    ParticleManagement::drawRandomParticles(a_particles, a_numParticles, ranBox);
+  }
+
+  template <typename P, typename T>
+  inline void
+  ParticleManagement::drawGaussianParticles(List<P>&       a_particles,
+                                            const T        a_numParticles,
+                                            const RealVect a_center,
+                                            const Real     a_radius) noexcept
+  {
+    CH_TIME("ParticleManagement::drawGaussianParticles");
+
+    std::normal_distribution<Real> gauss(0.0, a_radius);
+
+    auto ranGauss = [&]() -> RealVect {
+      return a_center + Random::get(gauss) * Random::getDirection();
+    };
+
+    ParticleManagement::drawRandomParticles(a_particles, a_numParticles, ranGauss);
   }
 } // namespace ParticleManagement
 

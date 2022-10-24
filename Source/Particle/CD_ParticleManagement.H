@@ -210,7 +210,85 @@ namespace ParticleManagement {
   template <typename P>
   static inline void
   deleteParticles(List<P>& a_particles, const Real a_weightThresh) noexcept;
-  
+
+  /*!
+    @brief Partition particle weights among a number of computational particles
+    @param[in] a_numPhysicalParticles Number of physical particles. 
+    @param[in] a_maxCompParticles     Maximum number of computational particles
+  */
+  template <typename T>
+  static inline std::vector<T>
+  partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept;
+
+  /*!
+    @brief Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles
+    @param[in] a_numParticles Total number of particles to be drawn. 
+    @return Returns the number of particles drawn by each rank. 
+  */
+  template <typename T>
+  static inline T
+  partitionParticles(const T a_numParticles);
+
+  /*!
+    @brief Draw a specified number of random particles distributed according to a predefined distribution. 
+    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
+    P is the particle type (must derived from BinItem) and T is an integer type. 
+    @param[out] a_particles    Output particles (different for each rank)
+    @param[in]  a_numParticles Number of particles
+    @param[in]  a_distribution Particle distribution. Must return a random position when calling the function. 
+  */
+  template <typename P, typename T>
+  static inline void
+  drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution);
+
+  /*!
+    @brief Draw particles in a sphere
+    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
+    P is the particle type (must have a RealVect& position() function) and T is an integer type. 
+    @param[out] a_particles    Output particles (different for each rank)
+    @param[in]  a_numParticles Number of particles
+    @param[in]  a_center       Sphere center
+    @param[in]  a_radius       Sphere radius
+  */
+  template <typename P, typename T>
+  static inline void
+  drawSphereParticles(List<P>&       a_particles,
+                      const T        a_numParticles,
+                      const RealVect a_center,
+                      const Real     a_radius) noexcept;
+
+  /*!
+    @brief Draw particles in a box
+    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
+    P is the particle type (must have a RealVect& position() function) and T is an integer type. 
+    @param[out] a_particles    Output particles (different for each rank)
+    @param[in]  a_numParticles Number of particles
+    @param[in]  a_loCorner     Low corner of box
+    @param[in]  a_hiCorner     High corner of box
+  */
+  template <typename P, typename T>
+  static inline void
+  drawBoxParticles(List<P>&       a_particles,
+                   const T        a_numParticles,
+                   const RealVect a_loCorner,
+                   const RealVect a_hiCorner) noexcept;
+
+  /*!
+    @brief Draw particles from a Gaussian distribution
+    @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
+    P is the particle type (must have a RealVect& position() function) and T is an integer type. 
+    @param[out] a_particles    Output particles (different for each rank)
+    @param[in]  a_numParticles Number of particles
+    @param[in]  a_center       Gaussian blob Center
+    @param[in]  a_radius       Gaussian blob radius
+  */
+  template <typename P, typename T>
+  static inline void
+  drawGaussianParticles(List<P>&       a_particles,
+                        const T        a_numParticles,
+                        const RealVect a_center,
+                        const Real     a_radius) noexcept;
+
 } // namespace ParticleManagement
 
 #include <CD_NamespaceFooter.H>

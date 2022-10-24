@@ -14,8 +14,7 @@
 #include <ParmParse.H>
 
 // Our includes
-#include <CD_Random.H>
-#include <CD_ParticleOps.H>
+#include <CD_ParticleManagement.H>
 #include <CD_BrownianWalkerSpecies.H>
 #include <CD_NamespaceHeader.H>
 
@@ -54,22 +53,10 @@ BrownianWalkerSpecies::drawInitParticles()
 {
   CH_TIME("BrownianWalkerSpecies::drawInitParticles");
 
-  // TLDR: We draw a bunch of particles from a Gaussian distribution center on m_blobCenter. If we use MPI then
-  //       we should ensure that the ranks collectively draw the specified number of starting particles.
+  // Draw Gaussian particles and set weight to one.
 
-  // Nifty little lambda for drawing particle positions from a Gaussian distribution
-  std::normal_distribution<Real> gaussianDistribution(0.0, m_blobRadius);
-  auto                           randomGaussian = [center = this->m_blobCenter, &gaussianDistribution]() -> RealVect {
-    const Real     len = Random::get(gaussianDistribution);
-    const RealVect dir = Random::getDirection();
+  ParticleManagement::drawGaussianParticles(m_initialParticles, m_numParticles, m_blobCenter, m_blobRadius);
 
-    return center + len * dir;
-  };
-
-  m_initialParticles.clear();
-  ParticleOps::drawRandomParticles(m_initialParticles, m_numParticles, randomGaussian);
-
-  // Set the particle mass to one.
   for (ListIterator<ItoParticle> lit(m_initialParticles); lit.ok(); ++lit) {
     lit().weight() = 1.0;
   }

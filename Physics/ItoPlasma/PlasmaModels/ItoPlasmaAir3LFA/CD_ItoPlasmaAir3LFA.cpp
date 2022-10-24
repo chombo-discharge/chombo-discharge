@@ -15,15 +15,19 @@
 // Our includes
 #include <CD_ItoPlasmaAir3LFA.H>
 #include <CD_Units.H>
-#include <CD_ParticleOps.H>
+#include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoPlasma;
 
 ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
 {
+  m_className        = "ItoPlasmaAir3LFA";
   m_numPlasmaSpecies = 3;
-  m_numRtSpecies   = 1;
+  m_numRtSpecies     = 1;
+
+  // Default parameter for lookup tables
+  m_table_entries = 1000;
 
   m_coupling == ItoPlasmaPhysics::coupling::LFA;
 
@@ -34,7 +38,6 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   pp.get("dX", m_deltaX);
 
   // Stuff for initial particles
-  pp.get("seed", m_seed);
   pp.get("blob_radius", m_blob_radius);
   pp.get("num_particles", m_num_particles);
   pp.get("particle_weight", m_particle_weight);
@@ -52,7 +55,6 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   // Algorithm stuff
   std::string str;
   pp.get("react_ppc", m_ppc);
-  pp.get("poisson_switch", m_fieldSolver_switch);
   pp.get("Ncrit", m_Ncrit);
   pp.get("prop_eps", m_eps);
   pp.get("NSSA", m_NSSA);
@@ -61,22 +63,20 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   // Get algorithm
   pp.get("algorithm", str);
   if (str == "hybrid") {
-    m_algorithm = algorithm::hybrid;
+    m_algorithm = Algorithm::Hybrid;
   }
   else if (str == "tau") {
-    m_algorithm = algorithm::tau;
+    m_algorithm = Algorithm::Tau;
   }
   else if (str == "ssa") {
-    m_algorithm = algorithm::ssa;
+    m_algorithm = Algorithm::SSA;
   }
   else {
     MayDay::Abort("ItoPlasmaAir3LFA::ItoPlasmaAir3LFA - unknown algorithm requested");
   }
 
-  // Random seed
-  if (m_seed < 0) {
-    m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-  }
+  this->parsePPC();
+  this->parseAlgorithm();
 
   // Standard air.
   m_p      = 1.0;
@@ -90,7 +90,7 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   m_N  = m_p * Units::Na / (m_T * Units::R);
 
   // Set up species
-  m_ItoSpecies.resize(m_numPlasmaSpecies);
+  m_plasmaSpecies.resize(m_numPlasmaSpecies);
   m_rtSpecies.resize(m_numRtSpecies);
 
   m_ElectronIdx = 0;
@@ -98,32 +98,28 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   m_NegativeIdx = 2;
   m_PhotonZ_idx = 0;
 
-  m_ItoSpecies[m_ElectronIdx] = RefCountedPtr<ItoSpecies>(new Electron());
-  m_ItoSpecies[m_PositiveIdx] = RefCountedPtr<ItoSpecies>(new Positive());
-  m_ItoSpecies[m_NegativeIdx] = RefCountedPtr<ItoSpecies>(new Negative());
-  m_rtSpecies[m_PhotonZ_idx]  = RefCountedPtr<RtSpecies>(new PhotonZ());
+  m_plasmaSpecies[m_ElectronIdx] = RefCountedPtr<ItoSpecies>(new Electron());
+  m_plasmaSpecies[m_PositiveIdx] = RefCountedPtr<ItoSpecies>(new Positive());
+  m_plasmaSpecies[m_NegativeIdx] = RefCountedPtr<ItoSpecies>(new Negative());
+  m_rtSpecies[m_PhotonZ_idx]     = RefCountedPtr<RtSpecies>(new PhotonZ());
 
-  // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
-  m_seed += procID();
-  m_rng = std::mt19937_64(m_seed);
-
-  List<ItoParticle>& Electrons = m_ItoSpecies[m_ElectronIdx]->getInitialParticles();
-  List<ItoParticle>& Positives = m_ItoSpecies[m_PositiveIdx]->getInitialParticles();
-  List<ItoParticle>& Negatives = m_ItoSpecies[m_NegativeIdx]->getInitialParticles();
+  List<ItoParticle>& Electrons = m_plasmaSpecies[m_ElectronIdx]->getInitialParticles();
+  List<ItoParticle>& Positives = m_plasmaSpecies[m_PositiveIdx]->getInitialParticles();
+  List<ItoParticle>& Negatives = m_plasmaSpecies[m_NegativeIdx]->getInitialParticles();
 
   Electrons.clear();
   Positives.clear();
   Negatives.clear();
 
-  // Draw some initial electrons and add corresponding positive ions. 
-  ParticleOps::drawSphereParticles(Electrons, m_num_particles, m_blob_center, m_blob_radius);
+  // Draw some initial electrons and add corresponding positive ions.
+  ParticleManagement::drawSphereParticles(Electrons, m_num_particles, m_blob_center, m_blob_radius);
 
   for (ListIterator<ItoParticle> lit(Electrons); lit.ok(); ++lit) {
     const RealVect& x = lit().position();
 
     lit().weight() = m_particle_weight;
-    
-    Positives.add(ItoParticle(m_particle_weight, x));    
+
+    Positives.add(ItoParticle(m_particle_weight, x));
   }
 
   // Particle-particle reactions
@@ -205,6 +201,17 @@ RealVect
 ItoPlasmaAir3LFA::computeElectronDriftVelocity(const RealVect a_E) const
 {
   return -m_tables.at("mobility").getEntry<1>(a_E.vectorLength()) * a_E;
+}
+
+inline void
+ItoPlasmaAir3LFA::addTable(const std::string a_table_name, const std::string a_file)
+{
+
+  LookupTable1D<2> table = DataParser::simpleFileReadASCII(a_file);
+
+  table.sort();
+  table.makeUniform(m_table_entries);    // Make table into a unifom table
+  m_tables.emplace(a_table_name, table); // Add table
 }
 
 Vector<Real>
@@ -317,18 +324,11 @@ ItoPlasmaAir3LFA::PhotonZ::PhotonZ()
   pp.get("photoi_f2", m_f2);
   pp.get("photoi_K1", m_K1);
   pp.get("photoi_K2", m_K2);
-  pp.get("photoi_seed", m_seed);
 
   // Convert units
   m_pO2 = pressure * O2_frac * Units::atm2pascal;
   m_K1  = m_K1 * m_pO2;
   m_K2  = m_K2 * m_pO2;
-
-  // Seed the RNG
-  if (m_seed < 0)
-    m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-  m_rng     = new std::mt19937_64(m_seed);
-  m_udist01 = new std::uniform_real_distribution<Real>(0.0, 1.0);
 }
 
 ItoPlasmaAir3LFA::PhotonZ::~PhotonZ() {}
@@ -336,7 +336,7 @@ ItoPlasmaAir3LFA::PhotonZ::~PhotonZ() {}
 Real
 ItoPlasmaAir3LFA::PhotonZ::getAbsorptionCoefficient(const RealVect a_pos) const
 {
-  const Real f = m_f1 + (*m_udist01)(*m_rng) * (m_f2 - m_f1);
+  const Real f = m_f1 + Random::getUniformReal01() * (m_f2 - m_f1);
   return m_K1 * pow(m_K2 / m_K1, (f - m_f1) / (m_f2 - m_f1));
 }
 

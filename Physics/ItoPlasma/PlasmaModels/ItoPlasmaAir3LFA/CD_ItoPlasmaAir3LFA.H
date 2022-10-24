@@ -71,6 +71,9 @@ namespace Physics {
       int m_NegativeIdx;
       int m_PhotonZ_idx;
 
+      int m_table_entries;
+      int m_init_weights;
+
       // Mobile ions or not
       bool m_isMobile_ions;
 
@@ -88,6 +91,9 @@ namespace Physics {
       Real m_pO2;
       Real m_photoi_factor;
 
+      // Lookup tables if you need them.
+      std::map<std::string, LookupTable1D<2>> m_tables;
+
       // Functions for drawing initial particles
       void
       drawInitialParticles();
@@ -103,6 +109,12 @@ namespace Physics {
       // Electron velocity
       RealVect
       computeElectronDriftVelocity(const RealVect a_E) const;
+
+      /*!
+	@brief Add a table
+      */
+      void
+      addTable(const std::string a_table_name, const std::string a_file);
 
       // Read file into table
       void
@@ -145,10 +157,6 @@ namespace Physics {
       Real m_f2;
       Real m_K1;
       Real m_K2;
-
-      Real                                  m_seed;
-      std::mt19937_64*                      m_rng;
-      std::uniform_real_distribution<Real>* m_udist01;
     };
   } // namespace ItoPlasma
 } // namespace Physics

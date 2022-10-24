@@ -2970,10 +2970,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                                   kappa);
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
-      m_physics->reconcilePhotoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
-
-      // Set the new particle mean energies (the photoionization reconciliation term will have updated what they need to be).
-      m_physics->setMeanParticleEnergy(particles, particleMeanEnergies);
+      m_physics->reconcilePhotoionization(particles, bulkPhotons);
     }
   };
 
@@ -3042,10 +3039,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                                   kappa);
 
       // Add the photoionization term. This will adds new particles from the photoionization reactions.
-      m_physics->reconcilePhotoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
-
-      // Set the new particle mean energies (the photoionization reconciliation term will have updated what they need to be).
-      m_physics->setMeanParticleEnergy(particles, particleMeanEnergies);
+      m_physics->reconcilePhotoionization(particles, bulkPhotons);
     }
   };
 
@@ -3053,7 +3047,7 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
   VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
 
   BoxLoops::loop(a_box, regularKernel);
-  //  BoxLoops::loop(vofit, irregularKernel);
+  BoxLoops::loop(vofit, irregularKernel);
 }
 
 void

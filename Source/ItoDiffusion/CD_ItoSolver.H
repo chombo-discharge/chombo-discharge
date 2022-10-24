@@ -19,7 +19,6 @@
 #include <CD_ItoParticle.H>
 #include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
-#include <CD_SuperParticles.H>
 #include <CD_EBRepresentation.H>
 #include <CD_EBIntersection.H>
 #include <CD_NamespaceHeader.H>
