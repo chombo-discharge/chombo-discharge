@@ -434,44 +434,6 @@ namespace Physics {
       inline int
       computeParticlesPerRank(const int a_numParticles) const;
 
-      /*!
-	@brief Draw Gaussian distributed particles
-      */
-      inline void
-      drawGaussianParticles(List<ItoParticle>& a_particles1,
-                            List<ItoParticle>& a_particles2,
-                            const int          a_numParticles,
-                            const RealVect     a_blobCenter,
-                            const Real         a_blobRadius,
-                            const Real         a_weight,
-                            const Real         a_energy1,
-                            const Real         a_energy2);
-
-      /*!
-	@brief Draw sphere particles
-      */
-      inline void
-      drawSphereParticles(List<ItoParticle>& a_particles1,
-                          List<ItoParticle>& a_particles2,
-                          const int          a_numParticles,
-                          const RealVect     a_blobCenter,
-                          const Real         a_blobRadius,
-                          const Real         a_weight,
-                          const Real         a_energy1,
-                          const Real         a_energy2);
-
-      /*!
-	@brief Draw particles in a box
-      */
-      inline void
-      drawBoxParticles(List<ItoParticle>& a_particles1,
-                       List<ItoParticle>& a_particles2,
-                       const int          a_numParticles,
-                       const RealVect     a_boxLo,
-                       const RealVect     a_boxHi,
-                       const Real         a_weight,
-                       const Real         a_energy1,
-                       const Real         a_energy2);
 
       /*!
 	@brief Get the number of physical particles. 

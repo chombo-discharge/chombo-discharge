@@ -15,6 +15,7 @@
 // Our includes
 #include <CD_ItoPlasmaAir3LFA.H>
 #include <CD_Units.H>
+#include <CD_ParticleOps.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoPlasma;
@@ -114,14 +115,16 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   Positives.clear();
   Negatives.clear();
 
-  this->drawSphereParticles(Electrons,
-                            Positives,
-                            m_num_particles,
-                            m_blob_center,
-                            m_blob_radius,
-                            m_particle_weight,
-                            0.0,
-                            0.0);
+  // Draw some initial electrons and add corresponding positive ions. 
+  ParticleOps::drawSphereParticles(Electrons, m_num_particles, m_blob_center, m_blob_radius);
+
+  for (ListIterator<ItoParticle> lit(Electrons); lit.ok(); ++lit) {
+    const RealVect& x = lit().position();
+
+    lit().weight() = m_particle_weight;
+    
+    Positives.add(ItoParticle(m_particle_weight, x));    
+  }
 
   // Particle-particle reactions
   m_reactions.emplace("impact_ionization",
