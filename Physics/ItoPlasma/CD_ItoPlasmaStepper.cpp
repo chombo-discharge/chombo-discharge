@@ -2015,7 +2015,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
     const RealVect E   = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
 
     // Call ito_physics and compute mobilities for each particle species
-    const Vector<Real> mobilities = m_physics->computeItoMobilitiesLFA(a_time, pos, E);
+    const Vector<Real> mobilities = m_physics->computeItoMobilities(a_time, pos, E);
 
     // Put mobilities in appropriate data holder
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -2031,7 +2031,7 @@ ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
     const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 
     // Compute diffusion
-    const Vector<Real> mobilities = m_physics->computeItoMobilitiesLFA(a_time, pos, e);
+    const Vector<Real> mobilities = m_physics->computeItoMobilities(a_time, pos, e);
 
     // Put diffusion in the appropriate place.
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -2245,7 +2245,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
     }
 
     // Compute diffusion coefficients.
-    const Vector<Real> diffusion = m_physics->computeItoDiffusionLFA(a_time, pos, E, cellDensities);
+    const Vector<Real> diffusion = m_physics->computeItoDiffusion(a_time, pos, E, cellDensities);
 
     // Put diffusion coefficients into correct storage.
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -2270,7 +2270,7 @@ ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCo
     }
 
     // Compute diffusion coefficients.
-    const Vector<Real> diffusion = m_physics->computeItoDiffusionLFA(a_time, pos, E, cellDensities);
+    const Vector<Real> diffusion = m_physics->computeItoDiffusion(a_time, pos, E, cellDensities);
 
     // Put diffusion in the appropriate place.
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {

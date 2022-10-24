@@ -94,8 +94,8 @@ KMCDualStateReaction<T, State>::computeStateChanges() noexcept
   }
 
   // Factorial function.
-  T factorial = [](const T& N) -> T {
-    T fac = 1;
+  auto factorial = [](const T& N) -> T {
+    T fac = (T)1;
     for (T i = 2; i <= N; i++) {
       fac *= i;
     }

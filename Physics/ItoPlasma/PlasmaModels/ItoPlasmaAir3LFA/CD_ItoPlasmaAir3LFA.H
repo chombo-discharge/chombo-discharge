@@ -13,7 +13,7 @@
 #define CD_ItoPlasmaAir3LFA_H
 
 // Our includes
-#include <CD_ItoPlasmaPhysicsLFA.H>
+#include <CD_ItoPlasmaPhysics.H>
 #include <CD_LookupTable1D.H>
 #include <CD_NamespaceHeader.H>
 
@@ -23,7 +23,7 @@ namespace Physics {
     /*!
       @brief Abstract clas for specifying plasma kinetics
     */
-    class ItoPlasmaAir3LFA : public ItoPlasmaPhysicsLFA
+    class ItoPlasmaAir3LFA : public ItoPlasmaPhysics
     {
     public:
       class Electron;
@@ -44,16 +44,16 @@ namespace Physics {
       computeEta(const RealVect a_E) const;
 
       void
-      updateReactionRatesLFA(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
+      updateReactionRates(const RealVect a_E, const Real a_dx, const Real a_kappa) const noexcept override;
 
       Vector<Real>
-      computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const override;
+      computeItoMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
 
       Vector<Real>
-      computeItoDiffusionLFA(const Real         a_time,
+      computeItoDiffusion(const Real         a_time,
                              const RealVect     a_pos,
                              const RealVect     a_E,
-                             const Vector<Real> a_cdr_densities) const override;
+                             const Vector<Real> a_cdr_densities) const noexcept override;
 
     protected:
       // for dt

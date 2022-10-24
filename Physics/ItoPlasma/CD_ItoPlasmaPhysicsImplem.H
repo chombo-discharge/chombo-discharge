@@ -28,8 +28,6 @@
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
-#define ITO_PLASMA_PHYSICS_DEBUG 0
-
 using namespace Physics::ItoPlasma;
 
 inline ItoPlasmaPhysics::ItoPlasmaPhysics()
@@ -54,6 +52,17 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics()
 }
 
 inline ItoPlasmaPhysics::~ItoPlasmaPhysics() { CH_TIME("ItoPlasmaPhysics::~ItoPlasmaPhysics"); }
+
+inline void
+ItoPlasmaPhysics::defineKMC() noexcept
+{
+  CH_TIME("ItoPlasmaPhysics::defineKMC");
+
+  m_kmcState.define(m_plasmaSpecies.size(), m_rtSpecies.size());
+
+  m_kmcSolver.define(m_kmcReactions);
+
+}
 
 inline void
 ItoPlasmaPhysics::parsePPC() noexcept
@@ -336,6 +345,8 @@ ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles
 {
   CH_TIME("ItoPlasmaPhysics::advanceReactionNetwork");
 
+  MayDay::Abort("ItoPlasmaPhysics::advanceReactionNetwork -- logic bust. Deprecated routine");
+
   // Get particle counts.
   Vector<long long> newPhotonCount   = Vector<long long>(m_numRtSpecies, 0);
   Vector<long long> oldParticleCount = this->getNumPhysicalParticles(a_particles);
@@ -345,8 +356,6 @@ ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles
   Vector<Real> sources, energies, mean_energies;
 
   // Populate the KMC solver state.
-  m_kmcState.define(m_plasmaSpecies.size(), m_rtSpecies.size());
-
   std::vector<long long>& reactives    = m_kmcState.getReactiveState();
   std::vector<long long>& nonReactives = m_kmcState.getNonReactiveState();
 
@@ -593,22 +602,6 @@ ItoPlasmaPhysics::propensities(const Vector<long long>& a_particles, const React
 }
 
 inline void
-ItoPlasmaPhysics::updateReactionRates(const RealVect     a_E,
-                                      const Vector<Real> a_mean_energies,
-                                      const Real         a_dx,
-                                      const Real         a_kappa) const
-{
-
-  // Update the rate based on the mean energies or the electric field, depending on how we use the LFA/LEA.
-  if (m_coupling == coupling::LFA) {
-    this->updateReactionRatesLFA(a_E, a_dx, a_kappa);
-  }
-  else if (m_coupling == coupling::LEA) {
-    this->updateReactionRatesLEA(a_E, a_mean_energies, a_dx, a_kappa);
-  }
-}
-
-inline void
 ItoPlasmaPhysics::stepTau(Vector<long long>&  a_particles,
                           Vector<long long>&  a_newPhotons,
                           Vector<Real>&       a_mean_energies,
@@ -694,7 +687,7 @@ ItoPlasmaPhysics::advanceTau(Vector<long long>&  a_particles,
                              const Real          a_kappa) const
 {
   // Update reaction rates in case we use LEA.
-  this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
+  this->updateReactionRates(a_E, a_dx, a_kappa);
 
   // Do a tau step. Use rejection sampling so we only get valid states. But don't update reaction rates.
   Real curTime = 0.0;
@@ -725,7 +718,7 @@ ItoPlasmaPhysics::advanceTau(Vector<long long>&  a_particles,
         curTime += nextDt;
 
         // Update reaction rates in case we use LEA.
-        this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
+        this->updateReactionRates(a_E, a_dx, a_kappa);
       }
       else {
         nextDt = nextDt * 0.5;
@@ -874,7 +867,7 @@ ItoPlasmaPhysics::advanceSSA(Vector<long long>&  a_particles,
     while (curDt <= a_dt) {
 
       // Update reaction rates.
-      this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
+      this->updateReactionRates(a_E, a_dx, a_kappa);
 
       // Get all propensities and compute the total propensity.
       const std::deque<Real> propensities = this->propensities(a_particles);
@@ -928,11 +921,6 @@ ItoPlasmaPhysics::stepEnergy(Vector<Real>&            a_mean_energies,
       a_mean_energies[i] = 0.0;
     }
 
-#if ITO_PLASMA_PHYSICS_DEBUG
-    if (a_mean_energies[i] != a_mean_energies[i]) {
-      MayDay::Abort("ItoPlasmaPhysics::stepEnergy - got NaN energy...");
-    }
-#endif
   }
 }
 
@@ -946,16 +934,56 @@ ItoPlasmaPhysics::advanceParticles(Vector<long long>&  a_particles,
                                    const Real          a_dx,
                                    const Real          a_kappa) const
 {
+  CH_TIME("ItoPlasmaPhysics::advanceParticles");
+
+  // Define solver parameters in case they've been changed since last time. 
+  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);  
+
+  // Populate the KMC solver state.
+  std::vector<long long>& kmcParticles = m_kmcState.getReactiveState();
+  std::vector<long long>& kmcPhotons   = m_kmcState.getNonReactiveState();
+
+  for (size_t i = 0; i < a_particles.size(); i++) {
+    kmcParticles[i] = a_particles[i];
+  }
+
+  for (auto& p : kmcPhotons) {
+    p = 0LL;
+  }
+
+  // Update the reaction rates and run the KMC solver.
+  this->updateReactionRates(a_E, a_dx, a_kappa);
+  
   // // Which algorithm?
   if (m_algorithm == Algorithm::SSA) {
+#if 0
     this->advanceSSA(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa);
+#else
+    m_kmcSolver.advanceSSA(m_kmcState, a_dt);
+#endif
   }
   else if (m_algorithm == Algorithm::Tau) {
+#if 0
     this->advanceTau(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa);
+#else
+    m_kmcSolver.advanceTau(m_kmcState, a_dt);
+#endif
   }
   else if (m_algorithm == Algorithm::Hybrid) {
+#if 0
     this->advanceHybrid(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa);
+#else
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt);
+#endif
   }
+
+  // Put KMC back into ItoPlasma
+  for (size_t i = 0; i < a_particles.size(); i++) {
+    a_particles[i] = kmcParticles[i];
+  }
+  for (size_t i = 0; i < a_newPhotons.size(); i++) {
+    a_newPhotons[i] = kmcPhotons[i];
+  }  
 }
 
 inline void
@@ -973,7 +1001,7 @@ ItoPlasmaPhysics::advanceHybrid(Vector<long long>&  a_particles,
   while (curTime < a_dt) {
 
     // Update reaction rates
-    this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
+    this->updateReactionRates(a_E, a_dx, a_kappa);
 
     // Get critical and non-critical reactions.
     ReactionTypes rTypes = this->getCriticalReactions(a_particles);
@@ -1028,7 +1056,7 @@ ItoPlasmaPhysics::advanceHybrid(Vector<long long>&  a_particles,
             }
 
             // Update reaction rates and propensity for the next SSA step.
-            this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
+            this->updateReactionRates(a_E, a_dx, a_kappa);
 
             dtSSA += dtNext;
             nSSA += 1;
@@ -1111,7 +1139,7 @@ ItoPlasmaPhysics::advanceHybrid(Vector<long long>&  a_particles,
     }
 
     // Update reaction rates for next step
-    this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
+    this->updateReactionRates(a_E, a_dx, a_kappa);
   }
 }
 

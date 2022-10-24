@@ -126,45 +126,29 @@ namespace Physics {
       initialSigma(const Real a_time, const RealVect a_pos) const;
 
       /*!
-	@brief Compute the ito mobilities in the lfa approximation
+	@brief Compute the Ito solver mobilities.
+	@param[in] a_time Time
+	@param[in] a_pos  Position
+	@param[in] a_E    Electric field
+	@return Must return a vector of non-negative mobility coefficients for the plasma species
       */
       virtual Vector<Real>
-      computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const = 0;
+      computeItoMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
 
       /*!
-	@brief Compute diffusion coefficients
+	@brief Compute the Ito solver diffusion coefficients
+	@param[in] a_time Time
+	@param[in] a_pos  Position
+	@param[in] a_E    Electric field
+	@param[in] a_densities Mesh-based densities for the plasma species
+	@return Must return a vector of non-negative diffusion coefficients for the plasma species
       */
       virtual Vector<Real>
-      computeItoDiffusionLFA(const Real         a_time,
-                             const RealVect     a_pos,
-                             const RealVect     a_E,
-                             const Vector<Real> a_cdr_densities) const = 0;
+      computeItoDiffusion(const Real         a_time,
+			  const RealVect     a_pos,
+			  const RealVect     a_E,
+			  const Vector<Real> a_densities) const noexcept = 0;
 
-      /*!
-	@brief Update reaction rates for LFA updates. Since the rates don't change during the advance, they can
-	be set to a constant. 
-      */
-      virtual void
-      updateReactionRatesLFA(const RealVect a_E, const Real a_dx, const Real a_kappa) const = 0;
-
-      /*!
-	@brief Update reaction rates for LFA updates. Since the rates don't change during the advance, they can
-	be set to a constant. 
-      */
-      virtual void
-      updateReactionRatesLEA(const RealVect     a_E,
-                             const Vector<Real> a_mean_energies,
-                             const Real         a_dx,
-                             const Real         a_kappa) const = 0;
-
-      /*!
-	@brief Update reaction rates
-      */
-      inline void
-      updateReactionRates(const RealVect     a_E,
-                          const Vector<Real> a_mean_energies,
-                          const Real         a_dx,
-                          const Real         a_kappa) const;
 
       /*!
 	@brief Advance particles. If usign the LFA then a_mean_energies and a_sources are dummy arugments. 
@@ -177,14 +161,18 @@ namespace Physics {
                        const Real          a_dt,
                        const RealVect      a_E,
                        const Real          a_dx,
-                       const Real          a_kappa) const;
+                       const Real          a_kappa) const;            
+
 
       /*!
-	@brief Reaction network advance in the LEA.
+	@brief Reaction network advance
+	@param[inout] a_particles       Plasma-species particles
+	@param[inout] a_absorbedPhotons Photons that were absorbed on the mesh
+	@param[out]   a_newPhotons      New photons generated during the chemistry advance
       */
       inline void
       advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles,
-                             Vector<List<Photon>*>&      a_Photons,
+                             Vector<List<Photon>*>&      a_absorbedPhotons,
                              Vector<List<Photon>*>&      a_newPhotons,
                              const Vector<Real>&         a_sources,
                              const RealVect              a_E,
@@ -212,6 +200,7 @@ namespace Physics {
 	@param[in]    a_bndryNormal     Cut-cell normal (pointing into the domain)
 	@param[in]    a_dx              Grid resolution
 	@param[in]    a_kappa           Cut-cell volume fraction. 
+	@note Public because this is called by ItoPlasmaStepper
       */
       inline void
       reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
@@ -239,6 +228,7 @@ namespace Physics {
 	@param[in] a_bndryNormal     Cut-cell normal (pointing into the domain)
 	@param[in] a_dx              Grid resolution
 	@param[in] a_kappa           Cut-cell volume fraction. 
+	@note Public because this is called by ItoPlasmaStepper
       */
       inline void
       reconcilePhotons(Vector<List<Photon>*>&   a_newPhotons,
@@ -292,12 +282,17 @@ namespace Physics {
       /*!
 	@brief Kinetic Monte Carlo state
       */
-      KMCState m_kmcState;
+      mutable KMCState m_kmcState;
 
       /*!
 	@brief Kinetic Monte Carlo solver. 
       */
-      KMCSolver<KMCReaction, KMCState> m_kmcSolver;
+      mutable KMCSolver<KMCReaction, KMCState> m_kmcSolver;
+
+      /*!
+	@brief List of reactions for the KMC solver
+      */
+      std::vector<std::shared_ptr<const KMCReaction> > m_kmcReactions;
 
       /*!
 	@brief List of solver-tracked particle species. 
@@ -354,6 +349,12 @@ namespace Physics {
       mutable std::map<std::string, ItoPlasmaPhotoReaction> m_photoReactions;
 
       /*!
+	@brief Define the KMC solver and state
+      */
+      inline void
+      defineKMC() noexcept;
+
+      /*!
 	@brief Parse the maximum number of particles generated per cell
       */
       inline void
@@ -376,6 +377,20 @@ namespace Physics {
       */
       inline bool
       isStateValid(const Vector<long long>& a_particles) const;
+
+      /*!
+	@brief Update reaction rates
+	@param[in] a_E     Electric field
+	@param[in] a_dx    Grid resolution
+	@param[in] a_kappa Cut-cell volume fraction
+      */
+      virtual void
+      updateReactionRates(const RealVect     a_E,
+                          const Real         a_dx,
+                          const Real         a_kappa) const noexcept = 0;
+
+
+
 
       /*!
 	@brief Remove particles from the input list.

@@ -130,11 +130,26 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   m_reactions.emplace("ion_recombination", ItoPlasmaReaction({m_PositiveIdx, m_NegativeIdx}, {}));
   m_reactions.emplace("photo_excitation", ItoPlasmaReaction({m_ElectronIdx}, {m_ElectronIdx}, {m_PhotonZ_idx}));
 
+
+  auto r1 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0,0,1}, std::list<size_t>{});
+  auto r2 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0,2}, std::list<size_t>{});
+  auto r3 = std::make_shared<KMCReaction>(std::list<size_t>{0,1}, std::list<size_t>{}, std::list<size_t>{});
+  auto r4 = std::make_shared<KMCReaction>(std::list<size_t>{1,2}, std::list<size_t>{}, std::list<size_t>{});
+  auto r5 = std::make_shared<KMCReaction>(std::list<size_t>{1}, std::list<size_t>{1}, std::list<size_t>{0});
+
+  m_kmcReactions.emplace_back(r1);
+  m_kmcReactions.emplace_back(r2);
+  m_kmcReactions.emplace_back(r3);
+  m_kmcReactions.emplace_back(r4);
+  m_kmcReactions.emplace_back(r5);        
+  
   // Photo-reactions
   m_photoReactions.emplace("zheleznyak", ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_ElectronIdx, m_PositiveIdx}));
 
   // Set the ions diffusion coefficient
   m_ion_D = m_ion_mu * Units::kb * m_T / Units::Qe;
+
+  this->defineKMC();
 
   this->readTables();
 }
@@ -189,7 +204,7 @@ ItoPlasmaAir3LFA::computeAlpha(const RealVect a_E) const
 }
 
 Vector<Real>
-ItoPlasmaAir3LFA::computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const
+ItoPlasmaAir3LFA::computeItoMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
 {
   Vector<Real> mobilities(m_numPlasmaSpecies, m_ion_mu);
   mobilities[m_ElectronIdx] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
@@ -215,10 +230,10 @@ ItoPlasmaAir3LFA::addTable(const std::string a_table_name, const std::string a_f
 }
 
 Vector<Real>
-ItoPlasmaAir3LFA::computeItoDiffusionLFA(const Real         a_time,
+ItoPlasmaAir3LFA::computeItoDiffusion(const Real         a_time,
                                          const RealVect     a_pos,
                                          const RealVect     a_E,
-                                         const Vector<Real> a_cdr_densities) const
+                                         const Vector<Real> a_cdr_densities) const noexcept
 {
   Vector<Real> D(m_numPlasmaSpecies, m_ion_D);
   D[m_ElectronIdx] = m_tables.at("diffco").getEntry<1>(a_E.vectorLength());
@@ -227,7 +242,7 @@ ItoPlasmaAir3LFA::computeItoDiffusionLFA(const Real         a_time,
 }
 
 void
-ItoPlasmaAir3LFA::updateReactionRatesLFA(const RealVect a_E, const Real a_dx, const Real a_kappa) const
+ItoPlasmaAir3LFA::updateReactionRates(const RealVect a_E, const Real a_dx, const Real a_kappa) const noexcept
 {
 
   // Compute the reaction rates.
@@ -246,6 +261,12 @@ ItoPlasmaAir3LFA::updateReactionRatesLFA(const RealVect a_E, const Real a_dx, co
   m_reactions.at("Electron_recombination").rate() = bpe;
   m_reactions.at("ion_recombination").rate()      = bpn;
   m_reactions.at("photo_excitation").rate()       = alpha * velo * xfactor;
+
+  m_kmcReactions[0]->rate() = alpha*velo;
+  m_kmcReactions[1]->rate() = eta*velo;
+  m_kmcReactions[2]->rate() = bpe;
+  m_kmcReactions[3]->rate() = bpn;
+  m_kmcReactions[4]->rate() = alpha * velo * xfactor;        
 }
 
 Real
