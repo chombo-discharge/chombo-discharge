@@ -152,7 +152,7 @@ ItoPlasmaPhysics::reconcileParticles(List<ItoParticle>& a_particles,
                        a_kappa);
   }
   else if (diff < zero) { // Need to remove 'diff' mass.
-    this->remove_particles(a_particles, -diff);
+    this->removeParticles(a_particles, -diff);
   }
 }
 
@@ -211,47 +211,61 @@ ItoPlasmaPhysics::addParticles(List<ItoParticle>& a_particles,
 }
 
 inline void
-ItoPlasmaPhysics::remove_particles(List<ItoParticle>& a_particles, const long long a_numParticlesToRemove) const
+ItoPlasmaPhysics::removeParticles(List<ItoParticle>& a_particles, const long long a_numParticlesToRemove) const
 {
+  CH_TIME("ItoPlasmaPhysics::removeParticles");
 
   constexpr long long zero = 0;
 
   if (a_numParticlesToRemove > zero) {
-#if ITO_PLASMA_PHYSICS_DEBUG // Debug
-    this->sanityCheck(a_particles);
 
-    const long long weightBefore = this->getTotalWeight(a_particles);
-#endif
+    // This is for debugging purposes.
+    long long totalWeightBefore = 0;
+    long long totalWeightAfter  = 0;
 
-    ListIterator<ItoParticle> lit(a_particles);
-    Vector<long long>         particleWeights(a_particles.length());
+    // Debug hook, compute the total particle weight before we start removing weights.
+    if (m_debug) {
+      this->sanityCheck(a_particles);
 
-    long long minWeight  = std::numeric_limits<long long>::max();
+      totalWeightBefore = this->getTotalWeight(a_particles);
+    }
+
+    // Not for debugging, these are filled in computeWeights below.
+    long long         minWeight;
+    Vector<long long> particleWeights;
+
+    // Number of physical particles removed so far.
     long long numRemoved = zero;
 
-    // Compute weights and trim all particle weights down to the minimum weight. We shouldn't have weight = 0 when we
-    // get here...
-    this->computeWeights(lit, particleWeights, minWeight); // Computes weights
-    this->trimWeights(numRemoved,
-                      particleWeights,
-                      a_numParticlesToRemove,
-                      minWeight);                                              // Remove weight down to minWeight
-    this->removeWeights(particleWeights, a_numParticlesToRemove - numRemoved); // Uniformly removes rest of mass
-    this->reconcileWeights(a_particles, particleWeights);                      // Reconcile particle weights
+    // Compute the particle weights and the minium particle weight.
+    this->computeWeights(particleWeights, minWeight, a_particles);
 
-#if ITO_PLASMA_PHYSICS_DEBUG // Debug
-    this->sanityCheck(a_particles);
-    const long long weightAfter = this->getTotalWeight(a_particles);
+    // Trim particle weights down to minWeight -- the number of particles removed by this is
+    // added to numRemoved. 
+    this->trimWeights(numRemoved, particleWeights, a_numParticlesToRemove, minWeight);
 
-    if (weightBefore - weightAfter != a_numParticlesToRemove) {
-      std::cout << "weight before = " << weightBefore << std::endl;
-      std::cout << "weight after  = " << weightAfter << std::endl;
-      std::cout << "Should remove = " << a_numParticlesToRemove << std::endl;
-      std::cout << "numRemoved    = " << numRemoved << std::endl;
+    // Uniformly remove rest of the mass.
+    this->subtractWeights(particleWeights, a_numParticlesToRemove - numRemoved);
 
-      MayDay::Abort("ItoPlasmaPhysics::remove_particles - incorrect mass removed");
+    // Reconcile particle weights -- this sets the weights for the input particles.
+    this->reconcileWeights(a_particles, particleWeights);
+
+    // Debug hook, make sure that particle weights are > 0 AND we've removed the desired
+    // particle weight.
+    if (m_debug) {
+      this->sanityCheck(a_particles);
+
+      totalWeightAfter = this->getTotalWeight(a_particles);
+
+      if (totalWeightBefore - totalWeightAfter != a_numParticlesToRemove) {
+        pout() << "ItoPlasmaPhysics::removeParticles: Total weight before = " << totalWeightBefore << endl;
+        pout() << "ItoPlasmaPhysics::removeParticles: Total weight after  = " << totalWeightAfter << endl;
+        pout() << "ItoPlasmaPhysics::removeParticles: Should have removed = " << a_numParticlesToRemove << endl;
+        pout() << "ItoPlasmaPhysics::removeParticles: Actually removed    = " << numRemoved << endl;
+
+        MayDay::Abort("ItoPlasmaPhysics::removeParticles - incorrect mass removed");
+      }
     }
-#endif
   }
 }
 
@@ -295,28 +309,39 @@ ItoPlasmaPhysics::sanityCheck(const List<ItoParticle>& a_particles) const
 }
 
 inline long long
-ItoPlasmaPhysics::getTotalWeight(const List<ItoParticle>& a_particles) const
+ItoPlasmaPhysics::getTotalWeight(const List<ItoParticle>& a_particles) const noexcept
 {
+  CH_TIME("ItoPlasmaPhysics::getTotalWeight");
 
-  long long ret = 0;
+  long long totalWeight = 0;
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-    const long long w = (long long)llround(lit().weight());
-
-    ret += w;
+    totalWeight += llround(lit().weight());
   }
 
-  return ret;
+  return totalWeight;
 }
 
 inline void
-ItoPlasmaPhysics::computeWeights(ListIterator<ItoParticle>& a_lit,
-                                 Vector<long long>&         a_particleWeights,
-                                 long long&                 a_minWeight) const
+ItoPlasmaPhysics::computeWeights(Vector<long long>&       a_particleWeights,
+                                 long long&               a_minWeight,
+                                 const List<ItoParticle>& a_particles) const noexcept
+
 {
-  int i = 0;
-  for (a_lit.begin(); a_lit.ok(); ++a_lit, ++i) {
-    a_particleWeights[i] = (long long)llround(a_lit().weight());
-    a_minWeight          = std::min(a_particleWeights[i], a_minWeight);
+  CH_TIME("ItoPlasmaPhysics::computeWeights");
+
+  CH_assert(a_particles.length() > 0);
+
+  // Init.
+  a_minWeight = std::numeric_limits<long long>::max();
+  a_particleWeights.resize(0);
+
+  // Append weights and compute minimum weight. 
+  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
+    const long long curWeight = llround(lit().weight());
+
+    a_particleWeights.push_back(curWeight);
+
+    a_minWeight = std::min(a_minWeight, curWeight);
   }
 }
 
@@ -326,11 +351,16 @@ ItoPlasmaPhysics::trimWeights(long long&         a_numRemoved,
                               const long long    a_numParticlesToRemove,
                               const long long    a_minWeight) const
 {
+  CH_TIME("ItoPlasmaPhysics::trimWeights");
+  
   constexpr long long zero = 0;
 
   for (int i = 0; i < a_particleWeights.size(); i++) {
-    const long long diff1 = a_particleWeights[i] - a_minWeight;    // Should always be > 0
-    const long long diff2 = a_numParticlesToRemove - a_numRemoved; // Should always be > 0
+    const long long diff1 = a_particleWeights[i] - a_minWeight;    
+    const long long diff2 = a_numParticlesToRemove - a_numRemoved; 
+
+    CH_assert(diff1 >= 0);
+    CH_assert(diff2 >= 0);    
 
     const long long r = std::max(zero, std::min(diff1, diff2));
 
@@ -340,7 +370,7 @@ ItoPlasmaPhysics::trimWeights(long long&         a_numRemoved,
 }
 
 inline void
-ItoPlasmaPhysics::removeWeights(Vector<long long>& a_particleWeights, const long long a_numParticlesToRemove) const
+ItoPlasmaPhysics::subtractWeights(Vector<long long>& a_particleWeights, const long long a_numParticlesToRemove) const
 {
 
   constexpr long long zero = 0;
@@ -516,21 +546,6 @@ ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_partic
       a_mean_energies[i] = 0.0;
     }
   }
-}
-
-inline int
-ItoPlasmaPhysics::computeParticlesPerRank(const int a_numParticles) const
-{
-  const int quotient  = a_numParticles / numProc();
-  const int remainder = a_numParticles % numProc();
-
-  Vector<int> particlesPerRank(numProc(), quotient);
-
-  for (int i = 0; i < remainder; i++) {
-    particlesPerRank[i] += 1;
-  }
-
-  return particlesPerRank[procID()];
 }
 
 inline Vector<long long>

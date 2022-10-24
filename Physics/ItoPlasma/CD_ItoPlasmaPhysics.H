@@ -273,6 +273,11 @@ namespace Physics {
       */
       KMCSolver<KMCReaction, KMCState> m_kmcSolver;
 
+      /*!
+	@brief Turn on/off debugging
+      */
+      bool m_debug;
+
       int m_seed;
       int m_table_entries;
 
@@ -367,10 +372,13 @@ namespace Physics {
                    const Real         a_kappa) const;
 
       /*!
-	@brief Remove particles
+	@brief Remove particles from the input list.
+	@details This will remove weight from the input particles if we can. Otherwise we remove full particles. 
+	@param[inout] a_particles   List of (super-)particles to remove from. 
+	@param[in]    a_numToRemove Number of physical particles to remove from the input list
       */
       inline void
-      remove_particles(List<ItoParticle>& a_particles, const long long a_numParticlesToRemove) const;
+      removeParticles(List<ItoParticle>& a_particles, const long long a_numToRemove) const;
 
       /*!
 	@brief Set mean particle energy
@@ -385,21 +393,31 @@ namespace Physics {
       sanityCheck(const List<ItoParticle>& a_lit) const;
 
       /*!
-	@brief Check that all weights are > 0
+	@brief Get the total weight of the input particles. 
+	@param[in] a_particles Input particles.
       */
       inline long long
-      getTotalWeight(const List<ItoParticle>& a_lit) const;
+      getTotalWeight(const List<ItoParticle>& a_particles) const noexcept;
 
       /*!
-	@brief Compute particle weights
+	@brief Compute particle weights.
+	@param[in]  a_particles Input particles.
+	@param[out] a_weights   Particle weights
+	@param[out] a_minWeight Minimum particle weight. 
       */
       inline void
-      computeWeights(ListIterator<ItoParticle>& a_lit,
-                     Vector<long long>&         a_particleWeights,
-                     long long&                 a_minWeight) const;
+      computeWeights(Vector<long long>&       a_particleWeights,
+                     long long&               a_minWeight,
+                     const List<ItoParticle>& a_particles) const noexcept;
 
       /*!
 	@brief Trim particle weights down to a_minWeight
+	@details This attempts to trim the particle weights down a_minWeight, in such a way that we do not remove more than
+	a_numParticlesToRemove. The weight removed by this routine is added to a_numRemoved.
+	@param[inout] a_numRemoved           Number of physical particles removed
+	@param[inout] a_particleWeights      Particle weights. 
+	@param[in]    a_numParticlesToRemove Desired number of particles to remove. 
+	@param[in]    a_minWeight            Target weight to trim down to
       */
       inline void
       trimWeights(long long&         a_numRemoved,
@@ -411,7 +429,7 @@ namespace Physics {
 	@brief Remove particle weight down to a_numParticlesToRemove
       */
       inline void
-      removeWeights(Vector<long long>& a_particleWeights, const long long a_numParticlesToRemove) const;
+      subtractWeights(Vector<long long>& a_particleWeights, const long long a_numParticlesToRemove) const;
 
       /*!
 	@brief Remove particle weight down to a_numParticlesToRemove
@@ -427,13 +445,6 @@ namespace Physics {
                              long long&      a_num,
                              long long&      a_remainder,
                              const long long a_numNewParticles) const;
-
-      /*!
-	@brief Compute particles to draw per rank
-      */
-      inline int
-      computeParticlesPerRank(const int a_numParticles) const;
-
 
       /*!
 	@brief Get the number of physical particles. 
