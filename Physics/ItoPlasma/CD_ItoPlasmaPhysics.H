@@ -13,17 +13,12 @@
 #define CD_ItoPlasmaPhysics_H
 
 // Std includes
-#include <chrono>
-#include <random>
 #include <memory>
-#include <deque>
-#include <fstream>
-#include <sstream>
+#include <vector>
 
 // Chombo includes
 #include <RealVect.H>
 #include <RefCountedPtr.H>
-#include <LoHiSide.H>
 #include <List.H>
 
 // Our includes
@@ -31,7 +26,6 @@
 #include <CD_RtSpecies.H>
 #include <CD_Photon.H>
 #include <CD_ItoParticle.H>
-#include <CD_ItoPlasmaReaction.H>
 #include <CD_ItoPlasmaPhotoReaction.H>
 #include <CD_KMCDualState.H>
 #include <CD_KMCDualStateReaction.H>
@@ -41,26 +35,15 @@
 namespace Physics {
   namespace ItoPlasma {
 
-    using KMCState      = KMCDualState<>;
-    using KMCReaction   = KMCDualStateReaction<>;
-    using ReactionPtrs  = std::deque<std::shared_ptr<ItoPlasmaReaction>>;
-    using ReactionTypes = std::pair<ReactionPtrs, ReactionPtrs>;
+    using KMCState    = KMCDualState<>;
+    using KMCReaction = KMCDualStateReaction<>;
 
     /*!
-      @brief Base-class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. 
+      @brief Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. 
     */
     class ItoPlasmaPhysics
     {
     public:
-      /*!
-	@brief Enum for switching between LFA and LEA-based models. Soon deprecated
-      */
-      enum class coupling
-      {
-        LFA,
-        LEA
-      };
-
       /*!
 	@brief Constructor. Does nothing.
       */
@@ -76,6 +59,7 @@ namespace Physics {
 	@param[in] a_E         Electric field. 
 	@param[in] a_pos       Position
 	@param[in] a_densities Mesh-based plasma densities. 
+	@return Should return user-restricted physics based time step. 
       */
       virtual Real
       computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const = 0;
@@ -83,6 +67,7 @@ namespace Physics {
       /*!
 	@brief Compute Townsend effective ionization coefficient
 	@param[in] a_E Electric field. 
+	@return Should return the Townsend ionization coefficient. 
       */
       virtual Real
       computeAlpha(const RealVect a_E) const = 0;
@@ -114,13 +99,15 @@ namespace Physics {
       getNumPhotonSpecies() const;
 
       /*!
-	@brief Get the coupling, LFA/LEA
+	@brief Parse run-time options
       */
-      inline coupling
-      getCoupling() const;
+      inline virtual void
+      parseRuntimeOptions() noexcept;
 
       /*!
 	@brief Set initial surface charge. Default is 0, override if you want.
+	@param[in] a_time Simulation time
+	@param[in] a_pos  Physical coordinate
       */
       inline virtual Real
       initialSigma(const Real a_time, const RealVect a_pos) const;
@@ -145,30 +132,29 @@ namespace Physics {
       */
       virtual Vector<Real>
       computeItoDiffusion(const Real         a_time,
-			  const RealVect     a_pos,
-			  const RealVect     a_E,
-			  const Vector<Real> a_densities) const noexcept = 0;
-
+                          const RealVect     a_pos,
+                          const RealVect     a_E,
+                          const Vector<Real> a_densities) const noexcept = 0;
 
       /*!
-	@brief Advance particles. If usign the LFA then a_mean_energies and a_sources are dummy arugments. 
+	@brief Advance particles. 
+	@param[inout] a_numParticles  Number of physical particles
+	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)
+	@param[in]    a_dt            Time step
+	@param[in]    a_E             Electric field
+	@param[in]    a_dx            Grid resolution
+	@param[in]    a_kappa         Cut-cell volume fraction. 
       */
       inline void
-      advanceParticles(Vector<long long>&  a_particles,
-                       Vector<long long>&  a_newPhotons,
-                       Vector<Real>&       a_mean_energies,
-                       const Vector<Real>& a_sources,
-                       const Real          a_dt,
-                       const RealVect      a_E,
-                       const Real          a_dx,
-                       const Real          a_kappa) const;            
-
+      advanceKMC(Vector<long long>& a_numParticles,
+                 Vector<long long>& a_numNewPhotons,
+                 const Real         a_dt,
+                 const RealVect     a_E,
+                 const Real         a_dx,
+                 const Real         a_kappa) const;
 
       /*!
-	@brief Reaction network advance
-	@param[inout] a_particles       Plasma-species particles
-	@param[inout] a_absorbedPhotons Photons that were absorbed on the mesh
-	@param[out]   a_newPhotons      New photons generated during the chemistry advance
+	@brief Reaction network advance -- this is a deprecated routine
       */
       inline void
       advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles,
@@ -292,7 +278,12 @@ namespace Physics {
       /*!
 	@brief List of reactions for the KMC solver
       */
-      std::vector<std::shared_ptr<const KMCReaction> > m_kmcReactions;
+      std::vector<std::shared_ptr<const KMCReaction>> m_kmcReactions;
+
+      /*!
+	@brief List of photoionization reactions
+      */
+      std::map<std::string, ItoPlasmaPhotoReaction> m_photoReactions;
 
       /*!
 	@brief List of solver-tracked particle species. 
@@ -304,15 +295,10 @@ namespace Physics {
       */
       Vector<RefCountedPtr<RtSpecies>> m_rtSpecies;
 
-      // Soon to be deprecated.
-      coupling m_coupling;
-      int      m_numPlasmaSpecies;
-      int      m_numRtSpecies;
-
       /*!
 	@brief Maximum new number of particles 
       */
-      int m_ppc;
+      long long m_ppc;
 
       /*!
 	@brief Solver setting for the Cao et. al algorithm. 
@@ -339,16 +325,6 @@ namespace Physics {
       Real m_eps;
 
       /*!
-	@brief List of particle reactions
-      */
-      std::map<std::string, ItoPlasmaReaction> m_reactions;
-
-      /*!
-	@brief List of photoionization reactions
-      */
-      mutable std::map<std::string, ItoPlasmaPhotoReaction> m_photoReactions;
-
-      /*!
 	@brief Define the KMC solver and state
       */
       inline void
@@ -373,24 +349,14 @@ namespace Physics {
       parseAlgorithm() noexcept;
 
       /*!
-	@brief Returns true if all particle numbers are >= 0
-      */
-      inline bool
-      isStateValid(const Vector<long long>& a_particles) const;
-
-      /*!
 	@brief Update reaction rates
 	@param[in] a_E     Electric field
 	@param[in] a_dx    Grid resolution
 	@param[in] a_kappa Cut-cell volume fraction
+	@note Must be implemented by the user.
       */
       virtual void
-      updateReactionRates(const RealVect     a_E,
-                          const Real         a_dx,
-                          const Real         a_kappa) const noexcept = 0;
-
-
-
+      updateReactionRates(const RealVect a_E, const Real a_dx, const Real a_kappa) const noexcept = 0;
 
       /*!
 	@brief Remove particles from the input list.
@@ -400,187 +366,6 @@ namespace Physics {
       */
       inline void
       removeParticles(List<ItoParticle>& a_particles, const long long a_numToRemove) const;
-
-      /*!
-	@brief Get the number of physical particles. 
-	@param[in] a_particles List of plasma species particles. 
-      */
-      inline Vector<long long>
-      getNumPhysicalParticles(const Vector<List<ItoParticle>*>& a_particles) const;
-
-      /*!
-	@brief Get critical and non-critical reactions
-      */
-      inline ReactionTypes
-      getCriticalReactions(const Vector<long long>& a_particles) const;
-
-      /*!
-	@brief Get the time to the next critical reaction. 
-      */
-      inline Real
-      getCriticalTimeStep(const Vector<long long>& a_particles, const ReactionPtrs& a_critical_reactions) const;
-
-      /*!
-	@brief Get the time to the next critical reaction. 
-      */
-      inline Real
-      getNonCriticalTimeStep(const Vector<long long>& a_particles, const ReactionPtrs& a_non_critical_reactions) const;
-
-      /*!
-	@brief Compute the total propensity for all reactions. 
-      */
-      inline Real
-      propensity(const Vector<long long>& a_particles) const;
-
-      /*!
-	@brief Compute total propensity for a subset of reactions. 
-      */
-      inline Real
-      propensity(const Vector<long long>& a_particles, const ReactionPtrs& a_critical_reactions) const;
-
-      /*!
-	@brief Computes all propensities
-      */
-      inline std::deque<Real>
-      propensities(const Vector<long long>& a_particles) const;
-
-      /*!
-	@brief Compute critical propensities
-      */
-      inline std::deque<Real>
-      propensities(const Vector<long long>& a_particles, const ReactionPtrs& a_critical_reactions) const;
-
-      /*!
-	@brief Do a tau-step with all reactions. You must update the reaction rates before entering this routine! This calls the other version. 
-      */
-      inline void
-      stepTau(Vector<long long>&  a_particles,
-              Vector<long long>&  a_newPhotons,
-              Vector<Real>&       a_mean_energies,
-              const Vector<Real>& a_sources,
-              const Real          a_dx,
-              const Real          a_kappa,
-              const Real          a_dt) const;
-
-      /*!
-	@brief Do a tau-step with a subset of reactions. You must update the reaction rates before entering this routine!
-      */
-      inline void
-      stepTau(Vector<long long>&  a_particles,
-              Vector<long long>&  a_newPhotons,
-              Vector<Real>&       a_mean_energies,
-              const Vector<Real>& a_sources,
-              const ReactionPtrs& a_reactions,
-              const Real          a_dx,
-              const Real          a_kappa,
-              const Real          a_dt) const;
-
-      /*!
-	@brief Do a tau-step with a subset of reactions. You must update the reaction rates before entering this routine! Propensities are not
-	recomputed with this version. 
-      */
-      inline void
-      stepTau(Vector<long long>&      a_particles,
-              Vector<long long>&      a_newPhotons,
-              Vector<Real>&           a_mean_energies,
-              const Vector<Real>&     a_sources,
-              const ReactionPtrs&     a_reactions,
-              const std::deque<Real>& a_propensities,
-              const Real              a_dx,
-              const Real              a_kappa,
-              const Real              a_dt) const;
-
-      /*!
-	@brief New tau leaping advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
-      */
-      inline void
-      advanceTau(Vector<long long>&  a_particles,
-                 Vector<long long>&  a_newPhotons,
-                 Vector<Real>&       a_mean_energies,
-                 const Vector<Real>& a_sources,
-                 const Real          a_dt,
-                 const RealVect      a_E,
-                 const Real          a_dx,
-                 const Real          a_kappa) const;
-
-      /*!
-	@brief Do an SSA-step with a subset of reactions. You must update the reaction rates before entering this routine!
-      */
-      inline void
-      stepSSA(Vector<long long>&      a_particles,
-              Vector<long long>&      a_newPhotons,
-              Vector<Real>&           a_mean_energies,
-              const Vector<Real>&     a_sources,
-              const std::deque<Real>& a_propensities,
-              const ReactionPtrs&     a_reactions,
-              const Real              a_A,
-              const Real              a_dx,
-              const Real              a_kappa,
-              const Real              a_dt) const;
-
-      /*!
-	@brief This is a version that steps with all reactions, but where the propensities have been computed in advance. 
-      */
-      inline void
-      stepSSA(Vector<long long>&      a_particles,
-              Vector<long long>&      a_newPhotons,
-              Vector<Real>&           a_mean_energies,
-              const Vector<Real>&     a_sources,
-              const std::deque<Real>& a_propensities,
-              const Real              a_A,
-              const Real              a_dx,
-              const Real              a_kappa,
-              const Real              a_dt) const;
-
-      /*!
-	@brief Do an SSA-step with all reactions. You must update the reaction rates before entering this routine! This computes all propensities and
-	then calls the other version. 
-      */
-      inline void
-      stepSSA(Vector<long long>&  a_particles,
-              Vector<long long>&  a_newPhotons,
-              Vector<Real>&       a_mean_energies,
-              const Vector<Real>& a_sources,
-              const Real          a_dx,
-              const Real          a_kappa,
-              const Real          a_dt) const;
-
-      /*!
-	@brief Increase/decrease the mean energies with a volumetric source term
-      */
-      inline void
-      stepEnergy(Vector<Real>&            a_mean_energies,
-                 const Vector<long long>& a_particles,
-                 const Vector<Real>&      a_sources,
-                 const Real               a_dx,
-                 const Real               a_kappa,
-                 const Real               a_dt) const;
-
-      /*!
-	@brief New SSA advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
-      */
-      inline void
-      advanceSSA(Vector<long long>&  a_particles,
-                 Vector<long long>&  a_newPhotons,
-                 Vector<Real>&       a_mean_energies,
-                 const Vector<Real>& a_sources,
-                 const Real          a_dt,
-                 const RealVect      a_E,
-                 const Real          a_dx,
-                 const Real          a_kappa) const;
-
-      /*!
-	@brief New hybrid advance. If using the LFA then a_mean_energies and a_sources are dummy arguments. 
-      */
-      inline void
-      advanceHybrid(Vector<long long>&  a_particles,
-                    Vector<long long>&  a_newPhotons,
-                    Vector<Real>&       a_mean_energies,
-                    const Vector<Real>& a_sources,
-                    const Real          a_dt,
-                    const RealVect      a_E,
-                    const Real          a_dx,
-                    const Real          a_kappa) const;
     };
   } // namespace ItoPlasma
 } // namespace Physics

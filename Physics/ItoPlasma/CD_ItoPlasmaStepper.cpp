@@ -96,6 +96,8 @@ ItoPlasmaStepper::parseRuntimeOptions()
   m_fieldSolver->parseRuntimeOptions();
   m_rte->parseRuntimeOptions();
   m_sigmaSolver->parseRuntimeOptions();
+
+  m_physics->parseRuntimeOptions();
 }
 
 void
@@ -857,6 +859,11 @@ ItoPlasmaStepper::computeDt()
   if (m_advectionCFL * m_advectionDt < dt) {
     dt         = m_advectionCFL * m_advectionDt;
     m_timeCode = TimeCode::Advection;
+  }
+
+  if (m_relaxTimeFactor * m_relaxationTime < dt) {
+    dt         = m_relaxTimeFactor * m_relaxationTime;
+    m_timeCode = TimeCode::RelaxationTime;
   }
 
   if (m_diffusionCFL * m_diffusionDt < dt) {
@@ -1830,29 +1837,11 @@ ItoPlasmaStepper::computeItoVelocities() noexcept
     pout() << m_name + "::computeItoVelocities()" << endl;
   }
 
-  const ItoPlasmaPhysics::coupling fieldCoupling = m_physics->getCoupling();
-
   // Set the ItoSolver velocity functions.
   this->setItoVelocityFunctions();
 
-  // Compute mobilities based on appropriate coupling
-  switch (fieldCoupling) {
-  case ItoPlasmaPhysics::coupling::LFA: {
-    this->computeItoMobilitiesLFA();
-
-    break;
-  }
-  case ItoPlasmaPhysics::coupling::LEA: {
-    this->computeItoMobilitiesLEA();
-
-    break;
-  }
-  default: {
-    MayDay::Error("ItoPlasmaStepper::computeItoVelocities - logic bust");
-
-    break;
-  }
-  }
+  // Compute mobilities.
+  this->computeItoMobilitiesLFA();
 
   // Interpolate velocity function to particle position so that particles get velocity v = +/- mu*E
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -1868,26 +1857,7 @@ ItoPlasmaStepper::computeItoDiffusion() noexcept
     pout() << m_name + "::computeItoDiffusion()" << endl;
   }
 
-  const ItoPlasmaPhysics::coupling fieldCoupling = m_physics->getCoupling();
-
-  // Compute mobilities based on appropriate coupling
-  switch (fieldCoupling) {
-  case ItoPlasmaPhysics::coupling::LFA: {
-    this->computeItoDiffusionLFA();
-
-    break;
-  }
-  case ItoPlasmaPhysics::coupling::LEA: {
-    this->computeItoDiffusionLEA();
-
-    break;
-  }
-  default: {
-    MayDay::Error("ItoPlasmaStepper::computeItoDiffusion - logic bust");
-
-    break;
-  }
-  }
+  this->computeItoDiffusionLFA();
 }
 
 void
@@ -2716,7 +2686,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
       }
 
       // Do the physics advance.
-      m_physics->advanceParticles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, 1.0);
+      m_physics->advanceKMC(particles, newPhotons, a_dt, E, a_dx, 1.0);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
@@ -2751,7 +2721,7 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
       }
 
       // Do the physics advance
-      m_physics->advanceParticles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, kappa);
+      m_physics->advanceKMC(particles, newPhotons, a_dt, E, a_dx, kappa);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {

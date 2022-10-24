@@ -12,6 +12,10 @@
 #ifndef CD_ItoPlasmaPhotoReaction_H
 #define CD_ItoPlasmaPhotoReaction_H
 
+// Std includes
+#include <list>
+#include <deque>
+
 // Chombo includes
 #include <Vector.H>
 #include <RealVect.H>

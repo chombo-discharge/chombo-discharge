@@ -176,7 +176,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
 
   // If we are using the LEA, we must compute the Ohmic heating term. This must be done
   // BEFORE sorting the particles per cell.
-  if (m_physics->getCoupling() == ItoPlasmaPhysics::coupling::LEA) {
+  if (false) {
     timer.startEvent("Compute EdotJ");
     this->computeEdotJSource(a_dt);
     timer.stopEvent("Compute EdotJ");

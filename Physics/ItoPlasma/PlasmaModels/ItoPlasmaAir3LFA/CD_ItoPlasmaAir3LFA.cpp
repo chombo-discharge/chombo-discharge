@@ -15,6 +15,7 @@
 // Our includes
 #include <CD_ItoPlasmaAir3LFA.H>
 #include <CD_Units.H>
+#include <CD_DataParser.H>
 #include <CD_ParticleManagement.H>
 #include <CD_NamespaceHeader.H>
 
@@ -28,8 +29,6 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
 
   // Default parameter for lookup tables
   m_table_entries = 1000;
-
-  m_coupling == ItoPlasmaPhysics::coupling::LFA;
 
   ParmParse    pp("ItoPlasmaAir3LFA");
   Vector<Real> v;
@@ -52,31 +51,9 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   pp.get("quenching_pressure", m_pq);
   pp.get("photoi_factor", m_photoi_factor);
 
-  // Algorithm stuff
-  std::string str;
-  pp.get("react_ppc", m_ppc);
-  pp.get("Ncrit", m_Ncrit);
-  pp.get("prop_eps", m_eps);
-  pp.get("NSSA", m_NSSA);
-  pp.get("SSAlim", m_SSAlim);
-
-  // Get algorithm
-  pp.get("algorithm", str);
-  if (str == "hybrid") {
-    m_algorithm = Algorithm::Hybrid;
-  }
-  else if (str == "tau") {
-    m_algorithm = Algorithm::Tau;
-  }
-  else if (str == "ssa") {
-    m_algorithm = Algorithm::SSA;
-  }
-  else {
-    MayDay::Abort("ItoPlasmaAir3LFA::ItoPlasmaAir3LFA - unknown algorithm requested");
-  }
-
   this->parsePPC();
   this->parseAlgorithm();
+  this->parseDebug();
 
   // Standard air.
   m_p      = 1.0;
@@ -122,27 +99,18 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
     Positives.add(ItoParticle(m_particle_weight, x));
   }
 
-  // Particle-particle reactions
-  m_reactions.emplace("impact_ionization",
-                      ItoPlasmaReaction({m_ElectronIdx}, {m_ElectronIdx, m_ElectronIdx, m_PositiveIdx}));
-  m_reactions.emplace("Electron_attachment", ItoPlasmaReaction({m_ElectronIdx}, {m_NegativeIdx}));
-  m_reactions.emplace("Electron_recombination", ItoPlasmaReaction({m_ElectronIdx, m_PositiveIdx}, {}));
-  m_reactions.emplace("ion_recombination", ItoPlasmaReaction({m_PositiveIdx, m_NegativeIdx}, {}));
-  m_reactions.emplace("photo_excitation", ItoPlasmaReaction({m_ElectronIdx}, {m_ElectronIdx}, {m_PhotonZ_idx}));
-
-
-  auto r1 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0,0,1}, std::list<size_t>{});
-  auto r2 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0,2}, std::list<size_t>{});
-  auto r3 = std::make_shared<KMCReaction>(std::list<size_t>{0,1}, std::list<size_t>{}, std::list<size_t>{});
-  auto r4 = std::make_shared<KMCReaction>(std::list<size_t>{1,2}, std::list<size_t>{}, std::list<size_t>{});
+  auto r1 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0, 0, 1}, std::list<size_t>{});
+  auto r2 = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0, 2}, std::list<size_t>{});
+  auto r3 = std::make_shared<KMCReaction>(std::list<size_t>{0, 1}, std::list<size_t>{}, std::list<size_t>{});
+  auto r4 = std::make_shared<KMCReaction>(std::list<size_t>{1, 2}, std::list<size_t>{}, std::list<size_t>{});
   auto r5 = std::make_shared<KMCReaction>(std::list<size_t>{1}, std::list<size_t>{1}, std::list<size_t>{0});
 
   m_kmcReactions.emplace_back(r1);
   m_kmcReactions.emplace_back(r2);
   m_kmcReactions.emplace_back(r3);
   m_kmcReactions.emplace_back(r4);
-  m_kmcReactions.emplace_back(r5);        
-  
+  m_kmcReactions.emplace_back(r5);
+
   // Photo-reactions
   m_photoReactions.emplace("zheleznyak", ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_ElectronIdx, m_PositiveIdx}));
 
@@ -231,9 +199,9 @@ ItoPlasmaAir3LFA::addTable(const std::string a_table_name, const std::string a_f
 
 Vector<Real>
 ItoPlasmaAir3LFA::computeItoDiffusion(const Real         a_time,
-                                         const RealVect     a_pos,
-                                         const RealVect     a_E,
-                                         const Vector<Real> a_cdr_densities) const noexcept
+                                      const RealVect     a_pos,
+                                      const RealVect     a_E,
+                                      const Vector<Real> a_cdr_densities) const noexcept
 {
   Vector<Real> D(m_numPlasmaSpecies, m_ion_D);
   D[m_ElectronIdx] = m_tables.at("diffco").getEntry<1>(a_E.vectorLength());
@@ -256,17 +224,11 @@ ItoPlasmaAir3LFA::updateReactionRates(const RealVect a_E, const Real a_dx, const
   const Real bpn     = 2E-13 * sqrt(300 / m_T) / dV;
   const Real bpe     = 1.138E-11 * pow(Te, -0.7) / dV;
 
-  m_reactions.at("impact_ionization").rate()      = alpha * velo;
-  m_reactions.at("Electron_attachment").rate()    = eta * velo;
-  m_reactions.at("Electron_recombination").rate() = bpe;
-  m_reactions.at("ion_recombination").rate()      = bpn;
-  m_reactions.at("photo_excitation").rate()       = alpha * velo * xfactor;
-
-  m_kmcReactions[0]->rate() = alpha*velo;
-  m_kmcReactions[1]->rate() = eta*velo;
+  m_kmcReactions[0]->rate() = alpha * velo;
+  m_kmcReactions[1]->rate() = eta * velo;
   m_kmcReactions[2]->rate() = bpe;
   m_kmcReactions[3]->rate() = bpn;
-  m_kmcReactions[4]->rate() = alpha * velo * xfactor;        
+  m_kmcReactions[4]->rate() = alpha * velo * xfactor;
 }
 
 Real

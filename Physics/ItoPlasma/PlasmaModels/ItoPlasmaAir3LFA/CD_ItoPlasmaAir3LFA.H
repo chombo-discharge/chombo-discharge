@@ -51,9 +51,9 @@ namespace Physics {
 
       Vector<Real>
       computeItoDiffusion(const Real         a_time,
-                             const RealVect     a_pos,
-                             const RealVect     a_E,
-                             const Vector<Real> a_cdr_densities) const noexcept override;
+                          const RealVect     a_pos,
+                          const RealVect     a_E,
+                          const Vector<Real> a_cdr_densities) const noexcept override;
 
     protected:
       // for dt
@@ -64,6 +64,9 @@ namespace Physics {
       Real     m_particle_weight;
       int      m_num_particles;
       RealVect m_blob_center;
+
+      int m_numPlasmaSpecies;
+      int m_numRtSpecies;
 
       // Indices for species
       int m_ElectronIdx;
