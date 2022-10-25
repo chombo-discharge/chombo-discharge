@@ -203,7 +203,7 @@ ItoPlasmaAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const Vect
   const Real alpha = this->computeAlpha(a_E);
   const Real mu    = m_tables.at("mobility").getEntry<1>(E);
 
-  return log(m_deltaX) / (mu * E);
+  return log(m_deltaX) / (mu * E * alpha);
 }
 
 Real
