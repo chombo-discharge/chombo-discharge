@@ -4,8 +4,8 @@
 AmrMesh.lo_corner        = -1 -1 -1    # Low corner of problem domain
 AmrMesh.hi_corner        =  1  1  1    # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 128 128 128 # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 0           # Maximum amr depth
+AmrMesh.coarsest_domain  = 32 32 32    # Number of cells on coarsest domain
+AmrMesh.max_amr_depth    = 1           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -93,7 +93,3 @@ RodNeedlePlane.plane.radius		= 0.125			# Plane radius
 RodNeedlePlane.plane.thickness		= 0.01			# Plane thickness
 RodNeedlePlane.plane.curve		= 0.005			# Plane curve (edge)
 RodNeedlePlane.plane.live		= true			# Live or not
-
-
-
-

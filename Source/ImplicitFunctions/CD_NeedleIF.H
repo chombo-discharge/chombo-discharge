@@ -28,19 +28,19 @@ class NeedleIF : public BaseIF
 public:
   /*!
     @brief Constructor
-    @param[in] a_length Needle length
+    @param[in] a_length        Needle length
     @param[in] a_radius        Needle radius
-    @param[in] a_fluidInside   
+    @param[in] a_fluidInside   Fluid inside cylinder-part of needle, true/false
     @param[in] a_tipRadius     Radius of needle tip curvature           
     @param[in] a_angle         Needle tip (cone) opening angle
-    @param[in] a_cornerCurve        Corner curve between rod and needle
+    @param[in] a_cornerCurve   Corner curve between rod and needle
   */
-  NeedleIF(const Real&   a_length,
-           const Real&   a_radius,
-           const bool&   a_fluidInside,
-           const Real&   a_tipRadius,
-           const double& a_angle,
-           const Real&   a_cornerCurve);
+  NeedleIF(const Real& a_length,
+           const Real& a_radius,
+           const bool& a_fluidInside,
+           const Real& a_tipRadius,
+           const Real& a_angle,
+           const Real& a_cornerCurve);
 
   /*!
     @brief Copy constructor
@@ -63,8 +63,10 @@ public:
 
 protected:
   RefCountedPtr<BaseIF> m_baseif;
-
-  Real m_tipRadius; //curvature-radius of needle tip
+  /*!
+    @brief curvature-radius of needle tip
+  */
+  Real m_tipRadius;
 };
 
 #include <CD_NamespaceFooter.H>

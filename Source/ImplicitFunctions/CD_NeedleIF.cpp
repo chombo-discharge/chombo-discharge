@@ -22,18 +22,18 @@
 
 using Vec3 = EBGeometry::Vec3T<Real>;
 
-NeedleIF::NeedleIF(const Real&   a_length,
-                   const Real&   a_radius,
-                   const bool&   a_fluidInside,
-                   const Real&   a_tipRadius,
-                   const double& a_angle,
-                   const Real&   a_cornerCurve)
+NeedleIF::NeedleIF(const Real& a_length,
+                   const Real& a_radius,
+                   const bool& a_fluidInside,
+                   const Real& a_tipRadius,
+                   const Real& a_angle,
+                   const Real& a_cornerCurve)
 {
   m_tipRadius = a_tipRadius;
 
   constexpr Real pi = 3.14159265358979323846;
   // a_angle is entire opening angle, dividing by two to get half of the opening angle
-  const double tipLength = (a_radius - m_tipRadius) / std::tan((a_angle / 2) * pi / 180);
+  const Real tipLength = (a_radius - m_tipRadius) / std::tan((a_angle / 2) * pi / 180); //double
 
   RealVect centerFront(CH_SPACEDIM), centerBack(CH_SPACEDIM);
   centerFront[1] = tipLength;
@@ -47,7 +47,7 @@ NeedleIF::NeedleIF(const Real&   a_length,
   isects.push_back(
     static_cast<BaseIF*>(new CylinderSdf(centerFront, centerBack, (a_radius - m_tipRadius), a_fluidInside)));
 
-  //flipinside=true for cone since EBGeometry and Chombo has opposing sign conventions/logic regarding the flipinside..
+  // flipinside=true for cone since EBGeometry and Chombo has opposing sign conventions/logic regarding the flipinside..
   // the center of the needle tip is set to origo in order for the rotation to work more easily
   auto cone = std::make_shared<EBGeometry::ConeSDF<Real>>(centerT, tipLength, a_angle, true);
 

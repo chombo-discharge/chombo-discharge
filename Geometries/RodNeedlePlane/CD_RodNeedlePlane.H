@@ -23,7 +23,13 @@
 class RodNeedlePlane : public ComputationalGeometry
 {
 public:
+  /*!
+    @brief Constructor. Puts object in usable state based on the input given in the .options-file
+  */
   RodNeedlePlane();
+  /*!
+    @brief Destructor. Destroys the object and cleans up when the object goes out of scope.
+  */
   ~RodNeedlePlane();
 
 protected:

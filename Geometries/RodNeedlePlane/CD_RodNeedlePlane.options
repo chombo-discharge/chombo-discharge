@@ -22,5 +22,3 @@ RodNeedlePlane.plane.radius		= 0.125			# Plane radius
 RodNeedlePlane.plane.thickness		= 0.01			# Plane thickness
 RodNeedlePlane.plane.curve		= 0.005			# Plane curve (edge)
 RodNeedlePlane.plane.live		= true			# Live or not
-
-
