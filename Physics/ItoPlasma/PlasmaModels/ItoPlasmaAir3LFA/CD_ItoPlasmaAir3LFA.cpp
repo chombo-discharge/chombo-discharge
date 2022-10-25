@@ -64,7 +64,7 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   ParmParse pp("ItoPlasmaAir3LFA");
 
   int          initParticles;
-  int          initParticleWeight;
+  Real         initParticleWeight;
   Real         blobRadius;
   RealVect     blobCenter;
   Vector<Real> v;

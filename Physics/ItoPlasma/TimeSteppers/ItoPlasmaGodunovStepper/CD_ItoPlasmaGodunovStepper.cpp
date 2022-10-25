@@ -270,7 +270,7 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   // Solve the Poisson equation.
   const bool converged = this->solvePoisson();
   if (!converged) {
-    MayDay::Abort("ItoPlasmaGodunovStepper::regrid - Poisson solve did not converge after regrid!!!");
+    MayDay::Warning("ItoPlasmaGodunovStepper::regrid - Poisson solve did not converge after regrid!!!");
   }
 
   // Regrid superparticles.
