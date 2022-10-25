@@ -418,8 +418,6 @@ KMCSolver<R, State, T>::stepSSA(State&                   a_state,
   if (numReactions > 0) {
     constexpr T one = (T)1;
 
-    const bool goodBefore = a_state.isValidState();
-
     // Determine the reaction type as per Gillespie algorithm.
     Real A = 0.0;
     for (size_t i = 0; i < numReactions; i++) {
@@ -440,18 +438,9 @@ KMCSolver<R, State, T>::stepSSA(State&                   a_state,
         break;
       }
     }
-    pout() << "props = " << endl;
-    for (size_t i = 0; i < a_propensities.size(); i++) {
-      pout() << "\t" << a_propensities[i] << endl;
-    }
-    pout() << a_reactions.size() << "\t" << r << endl;
 
     // Advance by one reaction.
     a_reactions[r]->advanceState(a_state, one);
-
-    const bool goodAfter = a_state.isValidState();
-
-    pout() << goodBefore << "\t" << goodAfter << endl;
   }
 }
 
@@ -512,19 +501,10 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
   // Simulated time within the advancement algorithm.
   Real curTime = 0.0;
 
-  if (!a_state.isValidState()) {
-    MayDay::Error("Input state is crap");
-  }
-
   // Outer loop is for reactive substepping over a_dt.
   while (curTime < a_dt) {
 
-    if (!a_state.isValidState()) {
-      MayDay::Error("broke state during advance");
-    }
-
     // Partition reactions into critical and non-critical reactions and compute the critical and non-critical time steps.
-    pout() << "partition reactions" << endl;
     const std::pair<ReactionList, ReactionList> partitionedReactions = this->partitionReactions(a_state, a_reactions);
 
     const ReactionList& criticalReactions    = partitionedReactions.first;
@@ -533,7 +513,6 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
     const std::vector<Real> propensitiesCrit    = this->propensities(a_state, criticalReactions);
     const std::vector<Real> propensitiesNonCrit = this->propensities(a_state, nonCriticalReactions);
 
-    pout() << "get dt" << endl;
     Real dtCrit    = this->getCriticalTimeStep(propensitiesCrit);
     Real dtNonCrit = this->getNonCriticalTimeStep(a_state, nonCriticalReactions, propensitiesNonCrit);
 
@@ -542,7 +521,6 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
     bool validStep = false;
 
     while (!validStep) {
-      pout() << "try substep" << endl;
 
       // Do a backup of the advancement state to operate on. This is necessary because the tau-leaping
       // algorithms advance the state but we may need to reject those steps if we end up with a thermodynamically
@@ -557,23 +535,17 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
                                    (dtCrit > (a_dt - curTime));
 
       if (nonCriticalOnly) {
-        pout() << "noncrit only" << endl;
 
         // Compute the total propensity because it might actually be better to run SSA steps.
         Real A = this->totalPropensity(state, a_reactions);
 
         if (A * curDt < m_SSAlim) {
-          pout() << "ssa backdoor" << endl;
           // TLDR: Tau-leaping is inefficient here so we switch to an SSA-based algorithm for the WHOLE reaction set.
 
           // Number of SSA steps taken and simulated time within the SSA. We will compute until either dtSSA < curDt or
           // we've exceeded the maximum number of SSA steps that the user has permitted (m_numSSA).
           Real dtSSA  = 0.0;
           T    numSSA = 0;
-
-          if (!a_state.isValidState()) {
-            MayDay::Error("input to ssa backdoor is f'ed up");
-          }
 
           while (dtSSA < curDt && numSSA < m_numSSA) {
 
@@ -601,15 +573,10 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
             }
           }
 
-          if (!a_state.isValidState()) {
-            MayDay::Error("broke in ssa backdoor");
-          }
-
           validStep = true;
           curTime += dtSSA;
         }
         else {
-          pout() << "tau step" << endl;
           this->stepTau(state, nonCriticalReactions, propensitiesNonCrit, curDt);
 
           // Check if we need to reject the state and rather try again with a smaller non-critical time step.
@@ -628,12 +595,9 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
       else {
         // TLDR: Here, one critical reaction fired. We advance the critical reaction using the SSA and the rest of the reactions
         //       using tau-leaping.
-        pout() << "tau + ssa step (1)" << endl;
-        pout() << "# of crit reactions = " << criticalReactions.size() << endl;
         this->stepSSA(state, criticalReactions, propensitiesCrit);
-        pout() << "tau + ssa step (2)" << endl;
         this->stepTau(state, nonCriticalReactions, propensitiesNonCrit, curDt);
-        pout() << "tau + ssa step (3)" << endl;
+
         // Check if we need to reject the state and rather try again with a smaller non-critical time step.
         validStep = state.isValidState();
 
