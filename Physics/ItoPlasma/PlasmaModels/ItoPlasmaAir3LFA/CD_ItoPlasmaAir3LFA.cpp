@@ -203,7 +203,8 @@ ItoPlasmaAir3LFA::computeItoDiffusion(const Real         a_time,
                                       const RealVect     a_E,
                                       const Vector<Real> a_cdr_densities) const noexcept
 {
-  Vector<Real> D(m_numPlasmaSpecies, m_ion_D);
+  Vector<Real> D(m_numPlasmaSpecies, 0.0 * m_ion_D);
+  return D;
   D[m_ElectronIdx] = m_tables.at("diffco").getEntry<1>(a_E.vectorLength());
 
   return D;

@@ -107,8 +107,8 @@ ItoSolver.verbosity           = -1            # Class verbosity
 ItoSolver.plt_vars            = phi vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ItoSolver.normal_max          = 5.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
-ItoSolver.redistribute        = false         # Turn on/off redistribution. 
-ItoSolver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
+ItoSolver.redistribute        = true         # Turn on/off redistribution. 
+ItoSolver.blend_conservation  = true         # Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing       = particles     # 'particles' or 'numbers'
 ItoSolver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
 ItoSolver.irr_ngp_deposition  = false         # Force irregular deposition in cut cells or not
@@ -207,7 +207,7 @@ RodDielectric.sphere.radius             = 0.5           # Radius
 # ====================================================================================================
 ItoPlasmaGodunovStepper.verbosity               = -1             # Verbosity
 ItoPlasmaGodunovStepper.profile                 = true           # Turn on/off run-time profiling
-ItoPlasmaGodunovStepper.plt_vars                = particles_per_patch           # 'conductivity', 'current_density', 'particles_per_patch'
+ItoPlasmaGodunovStepper.plt_vars                = conductivity   # 'conductivity', 'current_density', 'particles_per_patch'
 ItoPlasmaGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
 ItoPlasmaGodunovStepper.load_balance            = true           # Turn on/off load balancing
 ItoPlasmaGodunovStepper.load_index              = -1             # Which particle containers to use for load balancing (-1 => all)
@@ -219,7 +219,7 @@ ItoPlasmaGodunovStepper.regrid_superparticles   = true           # Make superpar
 ItoPlasmaGodunovStepper.advection_cfl           = 1.0            # Advective time step CFL restriction
 ItoPlasmaGodunovStepper.diffusion_cfl           = 1.0            # Diffusive time step CFL restriction
 ItoPlasmaGodunovStepper.advection_diffusion_cfl = 1.0            # Advection-diffusion time step CFL restriction
-ItoPlasmaGodunovStepper.relax_dt_factor         = 10.0          # Relaxation time step restriction. 
+ItoPlasmaGodunovStepper.relax_dt_factor         = 1.E99          # Relaxation time step restriction. 
 ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
 ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
@@ -238,7 +238,7 @@ ItoPlasmaAir3LFA.particle_weight = 1             # Initial particle weights
 
 # For controlling the time step
 ItoPlasmaAir3LFA.debug = true
-ItoPlasmaAir3LFA.dX              = 5.0            # Maximum relative change Xnew/Xold during one time step.
+ItoPlasmaAir3LFA.dX              = 100.0            # Maximum relative change Xnew/Xold during one time step.
 
 # For turning on/off moving ions
 ItoPlasmaAir3LFA.mobile_ions    = false          # By default, stationary ions. 

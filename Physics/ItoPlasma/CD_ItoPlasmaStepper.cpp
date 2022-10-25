@@ -378,6 +378,9 @@ ItoPlasmaStepper::allocate()
     pout() << m_name + "::allocate" << endl;
   }
 
+  // TLDR: The difference between 'allocate' and 'allocateInternals' is that 'allocate' is used by Driver when setting up the simulation, while
+  //       'allocateInternals' is used by this class also during regrids.
+
   // Solver allocation.
   m_ito->allocateInternals();
   m_rte->allocateInternals();
@@ -1163,11 +1166,11 @@ ItoPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
     const RefCountedPtr<ItoSolver>&  solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
     const int                        idx     = solverIt.index();
-    const int                        q       = species->getChargeNumber();
+    const int                        Z       = species->getChargeNumber();
 
-    if (species->getChargeNumber() != 0) {
+    if (Z != 0) {
       m_fluidScratch1.copy(*a_densities[idx]);
-      DataOps::incr(rhoPhase, m_fluidScratch1, q);
+      DataOps::incr(rhoPhase, m_fluidScratch1, 1.0 * Z);
     }
   }
 
@@ -1224,7 +1227,7 @@ ItoPlasmaStepper::computeConductivityCell(EBAMRCellData&                        
   DataOps::scale(a_conductivity, Units::Qe);
 
   m_amr->conservativeAverage(a_conductivity, m_fluidRealm, m_plasmaPhase);
-  m_amr->interpGhostPwl(a_conductivity, m_fluidRealm, m_plasmaPhase);
+  m_amr->interpGhostMG(a_conductivity, m_fluidRealm, m_plasmaPhase);
 
   // Interpolate to centroids.
   m_amr->interpToCentroids(a_conductivity, m_fluidRealm, m_plasmaPhase);

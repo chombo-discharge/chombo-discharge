@@ -49,7 +49,25 @@ ItoPlasmaGodunovStepper::allocate()
 
   ItoPlasmaStepper::allocate();
 
-  this->allocateInternals();
+  // Now allocate for the conductivity particles and rho^dagger particles. This is only done in the 'allocate' routine
+  // and not in 'allocateInternals' because that would discard the particles during regrids. That has definitely never
+  // happen, and there's no way I've spent countless hours tracking down such a bug.
+  const int numItoSpecies = m_physics->getNumPlasmaSpecies();
+
+  m_conductivityParticles.resize(numItoSpecies);
+  m_rhoDaggerParticles.resize(numItoSpecies);
+
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<ItoSolver>& solver = solverIt();
+
+    const int idx = solverIt.index();
+
+    m_conductivityParticles[idx] = new ParticleContainer<PointParticle>();
+    m_rhoDaggerParticles[idx]    = new ParticleContainer<PointParticle>();
+
+    m_amr->allocate(*m_conductivityParticles[idx], m_particleRealm);
+    m_amr->allocate(*m_rhoDaggerParticles[idx], m_particleRealm);
+  }
 }
 
 void
@@ -102,36 +120,6 @@ ItoPlasmaGodunovStepper::parseAlgorithm() noexcept
   }
   else {
     MayDay::Abort("ItoPlasmaGodunovStepper::parseAlgorithm - unknown algorithm requested");
-  }
-}
-
-void
-ItoPlasmaGodunovStepper::allocateInternals()
-{
-  CH_TIME("ItoPlasmaGodunovStepper::allocateInternals");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::allocateInternals" << endl;
-  }
-
-  // Call parent method first
-  ItoPlasmaStepper::allocateInternals();
-
-  // Now allocate for the conductivity particles and rho^dagger particles
-  const int numItoSpecies = m_physics->getNumPlasmaSpecies();
-
-  m_conductivityParticles.resize(numItoSpecies);
-  m_rhoDaggerParticles.resize(numItoSpecies);
-
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<ItoSolver>& solver = solverIt();
-
-    const int idx = solverIt.index();
-
-    m_conductivityParticles[idx] = new ParticleContainer<PointParticle>();
-    m_rhoDaggerParticles[idx]    = new ParticleContainer<PointParticle>();
-
-    m_amr->allocate(*m_conductivityParticles[idx], m_particleRealm);
-    m_amr->allocate(*m_rhoDaggerParticles[idx], m_particleRealm);
   }
 }
 
@@ -275,8 +263,8 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   m_fieldSolver->setupSolver();
 
   // Recompute the conductivity and space charge densities.
-  this->computeRegridConductivity();
-  this->computeRegridRho();
+  this->computeConductivities(m_conductivityParticles);
+  this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::All);
   this->setupSemiImplicitPoisson(m_prevDt);
 
   // Solve the Poisson equation.
@@ -778,28 +766,6 @@ ItoPlasmaGodunovStepper::copyRhoDaggerParticles(
 }
 
 void
-ItoPlasmaGodunovStepper::computeRegridConductivity() noexcept
-{
-  CH_TIME("ItoPlasmaGodunovStepper::computeRegridConductivity");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeRegridConductivity" << endl;
-  }
-
-  this->computeConductivities(m_conductivityParticles);
-}
-
-void
-ItoPlasmaGodunovStepper::computeRegridRho() noexcept
-{
-  CH_TIME("ItoPlasmaGodunovStepper::computeRegridRho");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeRegridRho" << endl;
-  }
-
-  this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::All);
-}
-
-void
 ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
 {
   CH_TIME("ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama");
@@ -809,6 +775,52 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
 
   // Store X^k positions.
   this->setOldPositions();
+
+#if 0 // Debug. Use pre-removal of particles leaving the domain. 
+  this->computeItoVelocities();
+
+  // Advect particles first, then rewind them
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+	List<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
+
+	for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit) {
+	  ItoParticle& p = lit();
+
+	  p.position() += a_dt * p.velocity();
+	}
+      }
+    }
+  }
+
+  m_ito->remap();
+
+  // Remove particles from domain
+  this->intersectParticles(SpeciesSubset::All, EBIntersection::Bisection, true);
+  this->removeCoveredParticles(SpeciesSubset::All, EBRepresentation::ImplicitFunction, m_toleranceEB);  
+
+  // Rewind particles
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+	List<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
+
+	for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit) {
+	  ItoParticle& p = lit();
+
+	  p.position() = p.oldPosition();
+	}
+      }
+    }
+  }
+
+  m_ito->remap();
+#endif
 
   // Diffuse the particles. This copies onto m_rhoDaggerParticles and stores the hop on the full particles.
   this->diffuseParticlesEulerMaruyama(m_rhoDaggerParticles, a_dt);
@@ -830,7 +842,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
 
   // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
   // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
-#if 1 // This is what the algorithm says.
+#if 0 // This is what the algorithm says.
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
 #else // Have to use this for LEA - need to debug.

@@ -68,12 +68,6 @@ namespace Physics {
       parseRuntimeOptions() override;
 
       /*!
-	@brief Allocate internal storage
-      */
-      virtual void
-      allocateInternals() override;
-
-      /*!
 	@brief Perform pre-regrid operations.
 	@details This stores the particles and mesh data on the old grids. 
 	@param[in] a_lmin           The coarsest level that changes
@@ -204,19 +198,6 @@ namespace Physics {
       */
       virtual void
       copyRhoDaggerParticles(Vector<ParticleContainer<PointParticle>*>& a_rhoDaggerParticles) noexcept;
-
-      /*!
-	@brief Compute the conductivity anew during the regrid step.
-	@note Deposits m_conductivityParticles into m_conductivityCell, etc. 
-      */
-      virtual void
-      computeRegridConductivity() noexcept;
-
-      /*!
-	@brief Compute the "rho dagger" space charge anew during the regrid step. 
-      */
-      virtual void
-      computeRegridRho() noexcept;
 
       /*!
 	@brief Advance the particles using the Euler-Maruyama scheme
