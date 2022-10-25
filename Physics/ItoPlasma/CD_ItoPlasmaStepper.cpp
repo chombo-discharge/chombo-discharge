@@ -769,6 +769,16 @@ ItoPlasmaStepper::printStepReport()
 
     break;
   }
+  case TimeCode::Diffusion: {
+    str = "dt restricted by 'Diffusion'";
+
+    break;
+  }
+  case TimeCode::AdvectionDiffusion: {
+    str = "dt restricted by 'AdvectionDiffusion'";
+
+    break;
+  }    
   case TimeCode::RelaxationTime: {
     str = "dt restricted by 'Relaxation time'";
 
@@ -3035,26 +3045,26 @@ ItoPlasmaStepper::advanceReactionNetwork(const Real a_dt)
     const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
     const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
 
-    Vector<ParticleContainer<ItoParticle>*> particles(numPlasmaSpecies);    // Current particles.
-    Vector<ParticleContainer<Photon>*>      bulk_Photons(numPhotonSpecies); // Photons absorbed on mesh
-    Vector<ParticleContainer<Photon>*>      new_Photons(numPhotonSpecies);  // Produced Photons go here.
+    Vector<ParticleContainer<ItoParticle>*> particles(numPlasmaSpecies);   // Current particles.
+    Vector<ParticleContainer<Photon>*>      bulkPhotons(numPhotonSpecies); // Photons absorbed on mesh
+    Vector<ParticleContainer<Photon>*>      newPhotons(numPhotonSpecies);  // Freshly produced photons
 
     for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
       particles[solverIt.index()] = &(solverIt()->getParticles(ItoSolver::WhichContainer::Bulk));
     }
 
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      bulk_Photons[solverIt.index()] = &(solverIt()->getBulkPhotons());
-      new_Photons[solverIt.index()]  = &(solverIt()->getSourcePhotons());
+      bulkPhotons[solverIt.index()] = &(solverIt()->getBulkPhotons());
+      newPhotons[solverIt.index()]  = &(solverIt()->getSourcePhotons());
     }
 
-    this->advanceReactionNetwork(particles, bulk_Photons, new_Photons, m_energySources, m_electricFieldParticle, a_dt);
+    this->advanceReactionNetwork(particles, bulkPhotons, newPhotons, m_energySources, m_electricFieldParticle, a_dt);
   }
 }
 
 void
 ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>*>& a_particles,
-                                         Vector<ParticleContainer<Photon>*>&      a_Photons,
+                                         Vector<ParticleContainer<Photon>*>&      a_photons,
                                          Vector<ParticleContainer<Photon>*>&      a_newPhotons,
                                          const Vector<EBAMRCellData>&             a_sources,
                                          const EBAMRCellData&                     a_E,
@@ -3082,7 +3092,7 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>*>
 
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     const int idx   = solverIt.index();
-    Photons[idx]    = &(a_Photons[idx]->getCellParticles());
+    Photons[idx]    = &(a_photons[idx]->getCellParticles());
     newPhotons[idx] = &(a_newPhotons[idx]->getCellParticles());
   }
 
@@ -3092,7 +3102,7 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>*>
 
 void
 ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>*>& a_particles,
-                                         Vector<AMRCellParticles<Photon>*>&      a_Photons,
+                                         Vector<AMRCellParticles<Photon>*>&      a_photons,
                                          Vector<AMRCellParticles<Photon>*>&      a_newPhotons,
                                          const Vector<EBAMRCellData>&            a_sources,
                                          const EBAMRCellData&                    a_E,
@@ -3123,7 +3133,7 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>*>&
 
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const int idx   = solverIt.index();
-      Photons[idx]    = &(*(*a_Photons[idx])[lvl]);
+      Photons[idx]    = &(*(*a_photons[idx])[lvl]);
       newPhotons[idx] = &(*(*a_newPhotons[idx])[lvl]);
     }
 
@@ -3133,7 +3143,7 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>*>&
 
 void
 ItoPlasmaStepper::advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle>>*>& a_particles,
-                                         Vector<LayoutData<BinFab<Photon>>*>&      a_Photons,
+                                         Vector<LayoutData<BinFab<Photon>>*>&      a_photons,
                                          Vector<LayoutData<BinFab<Photon>>*>&      a_newPhotons,
                                          const Vector<LevelData<EBCellFAB>*>&      a_sources,
                                          const LevelData<EBCellFAB>&               a_E,
@@ -3171,7 +3181,7 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle>>*
 
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const int idx   = solverIt.index();
-      Photons[idx]    = &((*a_Photons[idx])[dit()]);
+      Photons[idx]    = &((*a_photons[idx])[dit()]);
       newPhotons[idx] = &((*a_newPhotons[idx])[dit()]);
     }
 
@@ -3181,7 +3191,7 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle>>*
 
 void
 ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particles,
-                                         Vector<BinFab<Photon>*>&      a_Photons,
+                                         Vector<BinFab<Photon>*>&      a_photons,
                                          Vector<BinFab<Photon>*>&      a_newPhotons,
                                          const Vector<EBCellFAB*>&     a_sources,
                                          const EBCellFAB&              a_E,
@@ -3239,7 +3249,7 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
       for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
         const int idx = solverIt.index();
 
-        List<Photon>& bp    = (*a_Photons[idx])(iv, comp);
+        List<Photon>& bp    = (*a_photons[idx])(iv, comp);
         List<Photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
 
         Photons[idx]    = &bp;
@@ -3295,7 +3305,7 @@ ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particl
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      List<Photon>& bp    = (*a_Photons[idx])(iv, comp);
+      List<Photon>& bp    = (*a_photons[idx])(iv, comp);
       List<Photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
 
       Photons[idx]    = &bp;

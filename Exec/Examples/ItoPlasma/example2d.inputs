@@ -208,12 +208,12 @@ RodDielectric.sphere.radius             = 0.5           # Radius
 ItoPlasmaGodunovStepper.verbosity               = -1             # Verbosity
 ItoPlasmaGodunovStepper.profile                 = true           # Turn on/off run-time profiling
 ItoPlasmaGodunovStepper.plt_vars                = none           # 'conductivity', 'current_density', 'particles_per_patch'
-ItoPlasmaGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
+ItoPlasmaGodunovStepper.dual_grid               = false           # Turn on/off dual-grid functionality
 ItoPlasmaGodunovStepper.load_balance            = true           # Turn on/off load balancing
 ItoPlasmaGodunovStepper.load_index              = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoPlasmaGodunovStepper.load_per_cell           = 1.0            # Default load per grid cell.
 ItoPlasmaGodunovStepper.box_sorting             = morton         # Box sorting when load balancing
-ItoPlasmaGodunovStepper.particles_per_cell      = 16            # Max computational particles per cell
+ItoPlasmaGodunovStepper.particles_per_cell      = 32            # Max computational particles per cell
 ItoPlasmaGodunovStepper.merge_interval          = 1              # Time steps between superparticle merging
 ItoPlasmaGodunovStepper.regrid_superparticles   = true           # Make superparticles during regrids
 ItoPlasmaGodunovStepper.advection_cfl           = 1.0            # Advective time step CFL restriction
@@ -245,11 +245,9 @@ ItoPlasmaAir3LFA.mobile_ions    = false          # By default, stationary ions.
 ItoPlasmaAir3LFA.ion_mobility   = 2E-4           # Turn on/off ion mobility
 
 # Reaction stuff
-ItoPlasmaAir3LFA.react_ppc      = 16             # Maximum number of particles to produce in reaction step	
-ItoPlasmaAir3LFA.tau_switch     = -1             # Switch from SSA to tau when reaching this many particles
-ItoPlasmaAir3LFA.poisson_switch = 100            # When to approximate Poisson by normal distribution
+ItoPlasmaAir3LFA.react_ppc      = 32             # Maximum number of particles to produce in reaction step	
 ItoPlasmaAir3LFA.Ncrit          = 5              # How many firings away from a Negative particle number?
-ItoPlasmaAir3LFA.prop_eps       = 1.0            # Maximum relative change in propensity function
+ItoPlasmaAir3LFA.prop_eps       = 0.1            # Maximum relative change in propensity function
 ItoPlasmaAir3LFA.NSSA           = 5              # How many SSA steps to run when tau-leaping is inefficient
 ItoPlasmaAir3LFA.SSAlim         = 1.0            # When to enter SSA instead of tau-leaping
 ItoPlasmaAir3LFA.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'

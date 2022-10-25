@@ -166,7 +166,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
 
   // Remove the run-time configurable particle storage. It is no longer needed.
-  timer.stopEvent("Particle/field advancement");
+  timer.stopEvent("Particle/field advance");
   // ====== END TRANSPORT STEP ======
 
   // Photon transport
