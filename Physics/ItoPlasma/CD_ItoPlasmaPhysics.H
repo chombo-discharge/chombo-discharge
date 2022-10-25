@@ -156,25 +156,6 @@ namespace Physics {
                  const Real         a_kappa) const;
 
       /*!
-	@brief Reaction network advance -- this is a deprecated routine
-      */
-      inline void
-      advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles,
-                             Vector<List<Photon>*>&      a_absorbedPhotons,
-                             Vector<List<Photon>*>&      a_newPhotons,
-                             const Vector<Real>&         a_sources,
-                             const RealVect              a_E,
-                             const RealVect              a_cellPos,
-                             const RealVect              a_centroidPos,
-                             const RealVect              a_bndryCentroid,
-                             const RealVect              a_bndryNormal,
-                             const RealVect              a_lo,
-                             const RealVect              a_hi,
-                             const Real                  a_dx,
-                             const Real                  a_kappa,
-                             const Real                  a_dt);
-
-      /*!
 	@brief Reconcile the number of particles.
 	@details This will add/remove particles and potentially also adjust the particle weights.
 	@param[inout] a_particles Computational particles

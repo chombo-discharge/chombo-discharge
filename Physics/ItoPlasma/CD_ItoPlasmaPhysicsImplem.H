@@ -350,27 +350,6 @@ ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_partic
   }
 }
 
-inline void
-ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>*>& a_particles,
-                                         Vector<List<Photon>*>&      a_absorbedPhotons,
-                                         Vector<List<Photon>*>&      a_newPhotons,
-                                         const Vector<Real>&         a_sources,
-                                         const RealVect              a_E,
-                                         const RealVect              a_cellPos,
-                                         const RealVect              a_centroidPos,
-                                         const RealVect              a_bndryCentroid,
-                                         const RealVect              a_bndryNormal,
-                                         const RealVect              a_lo,
-                                         const RealVect              a_hi,
-                                         const Real                  a_dx,
-                                         const Real                  a_kappa,
-                                         const Real                  a_dt)
-{
-  CH_TIME("ItoPlasmaPhysics::advanceReactionNetwork");
-
-  MayDay::Abort("ItoPlasmaPhysics::advanceReactionNetwork -- logic bust. Deprecated routine");
-}
-
 #include <CD_NamespaceFooter.H>
 
 #endif

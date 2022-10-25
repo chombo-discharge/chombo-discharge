@@ -225,7 +225,6 @@ ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permi
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
 ItoPlasmaGodunovStepper.algorithm               = euler_maruyama # Integration algorithm. 'euler_maruyama' or 'trapezoidal'
 
-
 # ====================================================================================================
 # ItoPlasmaAir3LFA class options
 # ====================================================================================================
@@ -238,7 +237,7 @@ ItoPlasmaAir3LFA.init_center     = 0 0 0         # Blob center
 ItoPlasmaAir3LFA.init_radius     = 200E-6        # Blob radius
 
 # For controlling the time step
-ItoPlasmaAir3LFA.dX              = 5.0           # Maximum relative change Xnew/Xold during one time step.
+ItoPlasmaAir3LFA.dX              = 2.0           # Maximum relative change Xnew/Xold during one time step.
 
 # Ion transport settings. 
 ItoPlasmaAir3LFA.ion_transport   = false         # By default, stationary ions. 
