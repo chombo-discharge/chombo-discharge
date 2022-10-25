@@ -67,7 +67,7 @@ namespace Physics {
       computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept;
 
       /*!
-	@brief Compute Townsend effective ionization coefficient
+	@brief Compute Townsend ionization coefficient
 	@param[in] a_E Electric field. 
 	@return Should return the Townsend ionization coefficient. 
       */
@@ -285,7 +285,7 @@ namespace Physics {
       /*!
 	@brief List of photoionization reactions
       */
-      std::map<std::string, ItoPlasmaPhotoReaction> m_photoReactions;
+      std::vector<std::shared_ptr<const ItoPlasmaPhotoReaction>> m_photoReactions;
 
       /*!
 	@brief List of solver-tracked particle species. 

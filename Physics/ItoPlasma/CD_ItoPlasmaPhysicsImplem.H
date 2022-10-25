@@ -336,8 +336,8 @@ ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_partic
   for (const auto& r : m_photoReactions) {
 
     // Source and targets
-    const size_t&            src     = r.second.getSourcePhoton();
-    const std::list<size_t>& targets = r.second.getTargetSpecies();
+    const size_t&            src     = r->getSourcePhoton();
+    const std::list<size_t>& targets = r->getTargetSpecies();
 
     for (ListIterator<Photon> lit(*a_absorbedPhotons[src]); lit.ok(); ++lit) {
       const RealVect x = lit().position();

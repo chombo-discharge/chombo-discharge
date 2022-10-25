@@ -21,7 +21,8 @@ namespace Physics {
   namespace ItoPlasma {
 
     /*!
-      @brief Abstract clas for specifying plasma kinetics
+      @brief Hard-coded implementation of ItoPlasmaPhysics for simplified discharges in STP air. 
+      @detail Transport data for the electrons are taken from BOLSIG+.
     */
     class ItoPlasmaAir3LFA : public ItoPlasmaPhysics
     {
@@ -31,134 +32,262 @@ namespace Physics {
       class Negative;
       class PhotonZ;
 
+      /*!
+	@brief Full constructor. Initializes species and sets up reactions. 
+      */
       ItoPlasmaAir3LFA();
-      ~ItoPlasmaAir3LFA();
 
-      Real
-      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const noexcept override;
+      /*!
+	@brief Destructor. Does nothing of importance
+      */
+      virtual ~ItoPlasmaAir3LFA();
 
-      Real
+      /*!
+	@brief Parse run-time options
+      */
+      virtual void
+      parseRuntimeOptions() noexcept override;
+
+      /*!
+	@brief Compute a physics-baseded time step. 
+	@param[in] a_E         Electric field. 
+	@param[in] a_pos       Position
+	@param[in] a_densities Mesh-based plasma densities. 
+	@return Returns m_deltaX/k where k is Townsend ionization coefficient and m_deltaX is user-specified. 
+      */
+      virtual Real
+      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept override;
+
+      /*!
+	@brief Compute Townsend ionization coefficient
+	@param[in] a_E Electric field. 
+      */
+      virtual Real
       computeAlpha(const RealVect a_E) const override;
 
-      Real
-      computeEta(const RealVect a_E) const;
-
-      void
+      /*!
+	@brief Update reaction rates
+	@param[in] a_E     Electric field
+	@param[in] a_dx    Grid resolution
+	@param[in] a_kappa Cut-cell volume fraction
+      */
+      virtual void
       updateReactionRates(const RealVect a_E, const Real a_dx, const Real a_kappa) const noexcept override;
 
+      /*!
+	@brief Compute the Ito solver mobilities.
+	@param[in] a_time Time
+	@param[in] a_pos  Position
+	@param[in] a_E    Electric field
+      */
       Vector<Real>
       computeItoMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
 
+      /*!
+	@brief Compute the Ito solver diffusion coefficients
+	@param[in] a_time      Time
+	@param[in] a_pos       Position
+	@param[in] a_E         Electric field
+	@param[in] a_densities Mesh-based densities for the plasma species
+      */
       Vector<Real>
       computeItoDiffusion(const Real         a_time,
                           const RealVect     a_pos,
                           const RealVect     a_E,
-                          const Vector<Real> a_cdr_densities) const noexcept override;
+                          const Vector<Real> a_densities) const noexcept override;
 
     protected:
-      // for dt
+      /*!
+	@brief User-defined parameter for time step restriction
+      */
       Real m_deltaX;
 
-      // Stuff for initial conditions
-      Real     m_blob_radius;
-      Real     m_particle_weight;
-      int      m_num_particles;
-      RealVect m_blob_center;
-
+      /*!
+	@brief Number of plasma species
+      */
       int m_numPlasmaSpecies;
-      int m_numRtSpecies;
-
-      // Indices for species
-      int m_ElectronIdx;
-      int m_PositiveIdx;
-      int m_NegativeIdx;
-      int m_PhotonZ_idx;
-
-      int m_table_entries;
-      int m_init_weights;
-
-      // Mobile ions or not
-      bool m_isMobile_ions;
-
-      // Ion mobility
-      Real m_ion_mu;
-      Real m_ion_D;
-
-      // Pressure, neutral number density etc
-      Real m_N;
-      Real m_p;
-      Real m_pq;
-      Real m_T;
-      Real m_O2frac;
-      Real m_N2frac;
-      Real m_pO2;
-      Real m_photoi_factor;
-
-      // Lookup tables if you need them.
-      std::map<std::string, LookupTable1D<2>> m_tables;
-
-      // Functions for drawing initial particles
-      void
-      drawInitialParticles();
-
-      // Zheleznyak photoionization rates
-      Real
-      excitationRates(const Real a_E) const;
-      Real
-      sergeyFactor(const Real a_O2frac) const;
-      Real
-      photoionizationRate(const Real a_E) const;
-
-      // Electron velocity
-      RealVect
-      computeElectronDriftVelocity(const RealVect a_E) const;
 
       /*!
-	@brief Add a table
+	@brief Number of radiative transfer species
       */
-      void
-      addTable(const std::string a_table_name, const std::string a_file);
+      int m_numRtSpecies;
 
-      // Read file into table
-      void
-      readTables();
+      /*!
+	@brief Ion mobility
+      */
+      Real m_ionMobility;
+
+      /*!
+	@brief Ion diffusion coefficient
+      */
+      Real m_ionDiffCo;
+
+      /*!
+	@brief Neutral number density
+      */
+      Real m_N;
+
+      /*!
+	@brief Gas pressure (SI)
+      */
+      Real m_p;
+
+      /*!
+	@brief Quenching pressure (SI)
+      */
+      Real m_pq;
+
+      /*!
+	@brief Gas temperature
+      */
+      Real m_T;
+
+      /*!
+	@brief O2 content
+      */
+      Real m_O2frac;
+
+      /*!
+	@brief N2 content
+      */
+      Real m_N2frac;
+
+      /*!
+	@brief Photo-ionization factor
+      */
+      Real m_photoIonizationFactor;
+
+      /*!
+	@brief Lookup tables holding mobilities, rate coefficients etc.
+      */
+      std::map<std::string, LookupTable1D<2>> m_tables;
+
+      /*!
+	@brief Excitation rate for photoionization term
+      */
+      virtual Real
+      excitationRates(const Real a_E) const;
+
+      /*!
+	@brief Sergey factor for photoionization term
+      */
+      virtual Real
+      sergeyFactor(const Real a_O2frac) const;
+
+      /*!
+	@brief Add a table to m_tables
+	@param[in] a_tableName Table identifier for m_table
+	@param[in] a_file      File. Must be in column x/y format
+      */
+      virtual void
+      addTable(const std::string a_tableName, const std::string a_file) noexcept;
+
+      /*!
+	@brief Read various tabulated data into the lookup tables in this class
+      */
+      virtual void
+      readTables() noexcept;
+
+      /*!
+	@brief Parse the m_dX variable used for time step restriction
+      */
+      virtual void
+      parseDx() noexcept;
+
+      /*!
+	@brief Parse some auxiliary transport settings. 
+      */
+      virtual void
+      parseTransport() noexcept;
     };
 
+    /*!
+      @brief Electron species
+    */
     class ItoPlasmaAir3LFA::Electron : public ItoSpecies
     {
     public:
+      /*!
+	@brief Constructor. Sets to mobile and diffusive
+      */
       Electron();
-      ~Electron();
+
+      /*!
+	@brief Destructor. Does nothing
+      */
+      virtual ~Electron();
     };
 
+    /*!
+      @brief Positive ion species
+    */
     class ItoPlasmaAir3LFA::Positive : public ItoSpecies
     {
     public:
+      /*!
+	@brief Constructor. Reads in parameters. 
+      */
       Positive();
-      ~Positive();
+
+      /*!
+	@brief Destructor. Does nothing
+      */
+      virtual ~Positive();
     };
 
     class ItoPlasmaAir3LFA::Negative : public ItoSpecies
     {
     public:
+      /*!
+	@brief Constructor. Reads in parameters. 
+      */
       Negative();
-      ~Negative();
+
+      /*!
+	@brief Destructor. Does nothing
+      */
+      virtual ~Negative();
     };
 
     class ItoPlasmaAir3LFA::PhotonZ : public RtSpecies
     {
     public:
+      /*!
+	@brief Constructor. Reads in parameters. 
+      */
       PhotonZ();
-      ~PhotonZ();
 
+      /*!
+	@brief Destructor. Does nothing
+      */
+      virtual ~PhotonZ();
+
+      /*!
+	@brief Get a random absorption coefficient. 
+	note This uses random sampling of the frequency between m_f1 and m_f2. See CdrPlasmaPhysicsJSON docs
+      */
       Real
       getAbsorptionCoefficient(const RealVect a_pos) const override;
 
     protected:
-      Real m_pO2;
+      /*!
+	@brief Lower frequency
+      */
       Real m_f1;
+
+      /*!
+	@brief Upper frequency
+      */
       Real m_f2;
+
+      /*!
+	@brief K1 factor
+      */
       Real m_K1;
+
+      /*!
+	@brief K2 factor
+      */
       Real m_K2;
     };
   } // namespace ItoPlasma

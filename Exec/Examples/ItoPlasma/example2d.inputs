@@ -81,7 +81,7 @@ FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables: 'ph
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
 
-FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity
+FieldSolverMultigrid.gmg_verbosity     = 10                # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 12                # Number of relaxations in downsweep
 FieldSolverMultigrid.gmg_post_smooth   = 12                # Number of relaxations in upsweep
 FieldSolverMultigrid.gmg_bott_smooth   = 12                # Number of at bottom level (before dropping to bottom solver)
@@ -89,7 +89,7 @@ FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of i
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 16                # Bottom drop
+FieldSolverMultigrid.gmg_min_cells     = 16                 # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 2                 # Boundary condition weights (for least squares)
@@ -227,24 +227,24 @@ ItoPlasmaGodunovStepper.algorithm               = euler_maruyama # Integration a
 
 
 # ====================================================================================================
-# ITO_PLASMA_AIR3 CLASS OPTIONS
+# ItoPlasmaAir3LFA class options
 # ====================================================================================================
+ItoPlasmaAir3LFA.debug = true                    # Turn on/off debugging
+
 # Initial data
-ItoPlasmaAir3LFA.blob_radius     = 200E-6        # Blob radius
-ItoPlasmaAir3LFA.blob_center     = 0 0 0         # Blob center
-ItoPlasmaAir3LFA.seed            = -1            # RNG seed, < 0 gives a random seed (for each rank)
-ItoPlasmaAir3LFA.num_particles   = 10000         # Number of initial particles
-ItoPlasmaAir3LFA.particle_weight = 1             # Initial particle weights
+ItoPlasmaAir3LFA.init_particles  = 10            # Number of initial particles
+ItoPlasmaAir3LFA.init_weights    = 1             # Initial particle weights
+ItoPlasmaAir3LFA.init_center     = 0 0 0         # Blob center
+ItoPlasmaAir3LFA.init_radius     = 200E-6        # Blob radius
 
 # For controlling the time step
-ItoPlasmaAir3LFA.debug = true
-ItoPlasmaAir3LFA.dX              = 100.0            # Maximum relative change Xnew/Xold during one time step.
+ItoPlasmaAir3LFA.dX              = 5.0           # Maximum relative change Xnew/Xold during one time step.
 
-# For turning on/off moving ions
-ItoPlasmaAir3LFA.mobile_ions    = false          # By default, stationary ions. 
-ItoPlasmaAir3LFA.ion_mobility   = 2E-4           # Turn on/off ion mobility
+# Ion transport settings. 
+ItoPlasmaAir3LFA.ion_transport   = false         # By default, stationary ions. 
+ItoPlasmaAir3LFA.ion_mobility    = 2E-4          # Turn on/off ion mobility
 
-# Reaction stuff
+# Kinetic Monte Carlo solver settings. 
 ItoPlasmaAir3LFA.react_ppc      = 32             # Maximum number of particles to produce in reaction step	
 ItoPlasmaAir3LFA.Ncrit          = 5              # How many firings away from a Negative particle number?
 ItoPlasmaAir3LFA.prop_eps       = 0.1            # Maximum relative change in propensity function
@@ -252,10 +252,9 @@ ItoPlasmaAir3LFA.NSSA           = 10             # How many SSA steps to run whe
 ItoPlasmaAir3LFA.SSAlim         = 1.0            # When to enter SSA instead of tau-leaping
 ItoPlasmaAir3LFA.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
 
-# Zheleznyak stuff.
+# Photoionization parameters
 ItoPlasmaAir3LFA.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)
 ItoPlasmaAir3LFA.photoi_factor      = 1.0        # Photoionization factor
-ItoPlasmaAir3LFA.photoi_seed        = 0          # RNG seed
 ItoPlasmaAir3LFA.photoi_f1          = 2.925E15   # Lower frequency
 ItoPlasmaAir3LFA.photoi_f2          = 3.059E15   # High frequency
 ItoPlasmaAir3LFA.photoi_K1          = 2.65E-2    # Converted to (mPa)^-1
