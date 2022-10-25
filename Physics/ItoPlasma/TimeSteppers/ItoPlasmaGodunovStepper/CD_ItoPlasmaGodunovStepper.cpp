@@ -673,8 +673,8 @@ ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt) noexcept
   DataOps::incr(permEBGas, m_conductivityEB, a_dt / Units::eps0);
 
   // Coarsen coefficients.
-  m_amr->arithmeticAverage(permFaceGas, m_fluidRealm, phase::gas);
-  m_amr->arithmeticAverage(permEBGas, m_fluidRealm, phase::gas);
+  m_amr->arithmeticAverage(permFaceGas, m_fluidRealm, m_plasmaPhase);
+  m_amr->arithmeticAverage(permEBGas, m_fluidRealm, m_plasmaPhase);
 
   // Set up the solver with the "permittivities"
   m_fieldSolver->setSolverPermittivities(permCell, permFace, permEB);
@@ -842,7 +842,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
 
   // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
   // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
-#if 0 // This is what the algorithm says.
+#if 1 // This is what the algorithm says.
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
 #else // Have to use this for LEA - need to debug.

@@ -58,6 +58,9 @@ ItoPlasmaPhysics::defineKMC() noexcept
   m_kmcState.define(m_plasmaSpecies.size(), m_rtSpecies.size());
 
   m_kmcSolver.define(m_kmcReactions);
+
+  // Define solver parameters in case they've been changed since last time.
+  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
 }
 
 inline void
@@ -68,6 +71,9 @@ ItoPlasmaPhysics::parseRuntimeOptions() noexcept
   this->parsePPC();
   this->parseDebug();
   this->parseAlgorithm();
+
+  // Define solver parameters in case they've been changed since last time.
+  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
 }
 
 inline void
@@ -162,9 +168,6 @@ ItoPlasmaPhysics::advanceKMC(Vector<long long>& a_numParticles,
                              const Real         a_kappa) const
 {
   CH_TIME("ItoPlasmaPhysics::advanceKMC");
-
-  // Define solver parameters in case they've been changed since last time.
-  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
 
   // Populate the KMC solver state.
   std::vector<long long>& kmcParticles = m_kmcState.getReactiveState();

@@ -10,8 +10,8 @@ ItoPlasma.basename  = pout
 AmrMesh.lo_corner        = -5E-2 -5E-2 # Low corner of problem domain
 AmrMesh.hi_corner        =  5E-2  5E-2 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 128 128     # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 3           # Maximum amr depth
+AmrMesh.coarsest_domain  = 256 256     # Number of cells on coarsest domain
+AmrMesh.max_amr_depth    = 2           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -90,11 +90,11 @@ FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of i
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
 FieldSolverMultigrid.gmg_min_cells     = 8                 # Bottom drop
-FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMultigrid.gmg_drop_order    = 32                # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
-FieldSolverMultigrid.gmg_bc_weight     = 0                 # Boundary condition weights (for least squares)
+FieldSolverMultigrid.gmg_bc_weight     = 2                 # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2                 # Boundary condition order for jump conditions
-FieldSolverMultigrid.gmg_jump_weight   = 0                 # Boundary condition weight for jump conditions (for least squares)
+FieldSolverMultigrid.gmg_jump_weight   = 2                 # Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_bottom_solver = simple 128        # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle         = vcycle            # Cycle type. Only 'vcycle' supported for now. 
 FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
@@ -111,7 +111,7 @@ ItoSolver.redistribute        = true         # Turn on/off redistribution.
 ItoSolver.blend_conservation  = true         # Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing       = particles     # 'particles' or 'numbers'
 ItoSolver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
-ItoSolver.irr_ngp_deposition  = false         # Force irregular deposition in cut cells or not
+ItoSolver.irr_ngp_deposition  = true         # Force irregular deposition in cut cells or not
 ItoSolver.irr_ngp_interp      = true          # Force irregular interpolation in cut cells or not
 ItoSolver.mobility_interp     = direct        # How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
@@ -219,7 +219,7 @@ ItoPlasmaGodunovStepper.regrid_superparticles   = true           # Make superpar
 ItoPlasmaGodunovStepper.advection_cfl           = 1.0            # Advective time step CFL restriction
 ItoPlasmaGodunovStepper.diffusion_cfl           = 1.0            # Diffusive time step CFL restriction
 ItoPlasmaGodunovStepper.advection_diffusion_cfl = 1.0            # Advection-diffusion time step CFL restriction
-ItoPlasmaGodunovStepper.relax_dt_factor         = 5000.0         # Relaxation time step restriction. 
+ItoPlasmaGodunovStepper.relax_dt_factor         = 1000          # Relaxation time step restriction. 
 ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
 ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
@@ -237,7 +237,7 @@ ItoPlasmaAir3LFA.init_center     = 0 0 0         # Blob center
 ItoPlasmaAir3LFA.init_radius     = 500E-6        # Blob radius
 
 # For controlling the time step
-ItoPlasmaAir3LFA.dX              = 5.0           # Maximum relative change Xnew/Xold during one time step.
+ItoPlasmaAir3LFA.dX              = 2.0           # Maximum relative change Xnew/Xold during one time step.
 
 # Ion transport settings. 
 ItoPlasmaAir3LFA.ion_transport   = false         # By default, stationary ions. 
@@ -248,7 +248,7 @@ ItoPlasmaAir3LFA.react_ppc      = 32             # Maximum number of particles t
 ItoPlasmaAir3LFA.Ncrit          = 5              # How many firings away from a Negative particle number?
 ItoPlasmaAir3LFA.prop_eps       = 1.0            # Maximum relative change in propensity function
 ItoPlasmaAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
-ItoPlasmaAir3LFA.SSAlim         = 0.1            # When to enter SSA instead of tau-leaping
+ItoPlasmaAir3LFA.SSAlim         = 1.0            # When to enter SSA instead of tau-leaping
 ItoPlasmaAir3LFA.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
 
 # Photoionization parameters
