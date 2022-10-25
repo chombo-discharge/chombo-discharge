@@ -174,14 +174,6 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   this->advancePhotons(a_dt);
   timer.stopEvent("Photon transport");
 
-  // If we are using the LEA, we must compute the Ohmic heating term. This must be done
-  // BEFORE sorting the particles per cell.
-  if (false) {
-    timer.startEvent("Compute EdotJ");
-    this->computeEdotJSource(a_dt);
-    timer.stopEvent("Compute EdotJ");
-  }
-
   // Sort the particles and photons per cell so we can call reaction algorithms
   timer.startEvent("Sort by cell");
   m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);

@@ -778,7 +778,7 @@ ItoPlasmaStepper::printStepReport()
     str = "dt restricted by 'AdvectionDiffusion'";
 
     break;
-  }    
+  }
   case TimeCode::RelaxationTime: {
     str = "dt restricted by 'Relaxation time'";
 
@@ -2524,20 +2524,20 @@ ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_meanEnerg
 }
 
 void
-ItoPlasmaStepper::advanceReactionNetworkNWO(const Real a_dt) noexcept
+ItoPlasmaStepper::advanceReactionNetwork(const Real a_dt) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::advanceReactionNetworkNWO(dt)");
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(dt)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::advanceReactionNetworkNWO(dt)" << endl;
+    pout() << m_name + "::advanceReactionNetwork(dt)" << endl;
   }
 
-  this->advanceReactionNetworkNWO(m_electricFieldFluid, m_EdotJ, a_dt);
+  this->advanceReactionNetwork(m_electricFieldFluid, m_EdotJ, a_dt);
 }
 
 void
-ItoPlasmaStepper::advanceReactionNetworkNWO(const EBAMRCellData& a_electricField,
-                                            const EBAMRCellData& a_EdotJ,
-                                            const Real           a_dt) noexcept
+ItoPlasmaStepper::advanceReactionNetwork(const EBAMRCellData& a_electricField,
+                                         const EBAMRCellData& a_EdotJ,
+                                         const Real           a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, E, sources, dt)");
   if (m_verbosity > 5) {
@@ -2571,13 +2571,13 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(const EBAMRCellData& a_electricField
   // Advance the reaction network which gives us a new number of particles per cell, as well as the number of
   // photons that need to be generated per cell.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    this->advanceReactionNetworkNWO(*m_fluidPPC[lvl],
-                                    *m_fluidYPC[lvl],
-                                    *m_fluidEPS[lvl],
-                                    *a_electricField[lvl],
-                                    *a_EdotJ[lvl],
-                                    lvl,
-                                    a_dt);
+    this->advanceReactionNetwork(*m_fluidPPC[lvl],
+                                 *m_fluidYPC[lvl],
+                                 *m_fluidEPS[lvl],
+                                 *a_electricField[lvl],
+                                 *a_EdotJ[lvl],
+                                 lvl,
+                                 a_dt);
   }
 
   // Copy the results to the particle realm -- then reconcile the particles on the particle realm. Note that ''reconcile''
@@ -2590,13 +2590,13 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(const EBAMRCellData& a_electricField
 }
 
 void
-ItoPlasmaStepper::advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_particlesPerCell,
-                                            LevelData<EBCellFAB>&       a_newPhotonsPerCell,
-                                            LevelData<EBCellFAB>&       a_meanParticleEnergies,
-                                            const LevelData<EBCellFAB>& a_electricField,
-                                            const LevelData<EBCellFAB>& a_EdotJ,
-                                            const int                   a_level,
-                                            const Real                  a_dt) noexcept
+ItoPlasmaStepper::advanceReactionNetwork(LevelData<EBCellFAB>&       a_particlesPerCell,
+                                         LevelData<EBCellFAB>&       a_newPhotonsPerCell,
+                                         LevelData<EBCellFAB>&       a_meanParticleEnergies,
+                                         const LevelData<EBCellFAB>& a_electricField,
+                                         const LevelData<EBCellFAB>& a_EdotJ,
+                                         const int                   a_level,
+                                         const Real                  a_dt) noexcept
 {
   CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(LD<EBCellFAB>x5, int, Real)");
   if (m_verbosity > 5) {
@@ -2615,34 +2615,34 @@ ItoPlasmaStepper::advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_partic
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    this->advanceReactionNetworkNWO(a_particlesPerCell[dit()],
-                                    a_newPhotonsPerCell[dit()],
-                                    a_meanParticleEnergies[dit()],
-                                    a_electricField[dit()],
-                                    a_EdotJ[dit()],
-                                    a_level,
-                                    dit(),
-                                    dbl[dit()],
-                                    m_amr->getDx()[a_level],
-                                    a_dt);
+    this->advanceReactionNetwork(a_particlesPerCell[dit()],
+                                 a_newPhotonsPerCell[dit()],
+                                 a_meanParticleEnergies[dit()],
+                                 a_electricField[dit()],
+                                 a_EdotJ[dit()],
+                                 a_level,
+                                 dit(),
+                                 dbl[dit()],
+                                 m_amr->getDx()[a_level],
+                                 a_dt);
   }
 }
 
 void
-ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
-                                            EBCellFAB&       a_newPhotonsPerCell,
-                                            EBCellFAB&       a_meanParticleEnergies,
-                                            const EBCellFAB& a_electricField,
-                                            const EBCellFAB& a_EdotJ,
-                                            const int        a_level,
-                                            const DataIndex  a_dit,
-                                            const Box        a_box,
-                                            const Real       a_dx,
-                                            const Real       a_dt) noexcept
+ItoPlasmaStepper::advanceReactionNetwork(EBCellFAB&       a_particlesPerCell,
+                                         EBCellFAB&       a_newPhotonsPerCell,
+                                         EBCellFAB&       a_meanParticleEnergies,
+                                         const EBCellFAB& a_electricField,
+                                         const EBCellFAB& a_EdotJ,
+                                         const int        a_level,
+                                         const DataIndex  a_dit,
+                                         const Box        a_box,
+                                         const Real       a_dx,
+                                         const Real       a_dt) noexcept
 {
-  CH_TIME("ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFABx5, int, DataIndex, Box, Realx2)");
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(EBCellFABx5, int, DataIndex, Box, Realx2)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::advanceReactionNetworkNWO(EBCellFABx5, int, DataIndex, Box, Realx2)" << endl;
+    pout() << m_name + "::advanceReactionNetwork(EBCellFABx5, int, DataIndex, Box, Realx2)" << endl;
   }
 
   const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
@@ -3028,294 +3028,6 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
 
   BoxLoops::loop(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
-}
-
-void
-ItoPlasmaStepper::advanceReactionNetwork(const Real a_dt)
-{
-  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(a_dt)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::advanceReactionNetwork(a_dt)" << endl;
-  }
-
-  if (m_useNewReactionAlgorithm) {
-    this->advanceReactionNetworkNWO(a_dt);
-  }
-  else {
-    const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
-    const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
-
-    Vector<ParticleContainer<ItoParticle>*> particles(numPlasmaSpecies);   // Current particles.
-    Vector<ParticleContainer<Photon>*>      bulkPhotons(numPhotonSpecies); // Photons absorbed on mesh
-    Vector<ParticleContainer<Photon>*>      newPhotons(numPhotonSpecies);  // Freshly produced photons
-
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      particles[solverIt.index()] = &(solverIt()->getParticles(ItoSolver::WhichContainer::Bulk));
-    }
-
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      bulkPhotons[solverIt.index()] = &(solverIt()->getBulkPhotons());
-      newPhotons[solverIt.index()]  = &(solverIt()->getSourcePhotons());
-    }
-
-    this->advanceReactionNetwork(particles, bulkPhotons, newPhotons, m_energySources, m_electricFieldParticle, a_dt);
-  }
-}
-
-void
-ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>*>& a_particles,
-                                         Vector<ParticleContainer<Photon>*>&      a_photons,
-                                         Vector<ParticleContainer<Photon>*>&      a_newPhotons,
-                                         const Vector<EBAMRCellData>&             a_sources,
-                                         const EBAMRCellData&                     a_E,
-                                         const Real                               a_dt)
-{
-  CH_TIME(
-    "ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer*> x3, Vector<EBAMRCellData*>, EBAMRCellData, Real)");
-  if (m_verbosity > 5) {
-    pout()
-      << "ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer*> x3, Vector<EBAMRCellData*>, EBAMRCellData, Real)"
-      << endl;
-  }
-
-  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
-  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
-
-  Vector<AMRCellParticles<ItoParticle>*> particles(numPlasmaSpecies);
-  Vector<AMRCellParticles<Photon>*>      Photons(numPlasmaSpecies);
-  Vector<AMRCellParticles<Photon>*>      newPhotons(numPlasmaSpecies);
-
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx  = solverIt.index();
-    particles[idx] = &(a_particles[idx]->getCellParticles());
-  }
-
-  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-    const int idx   = solverIt.index();
-    Photons[idx]    = &(a_photons[idx]->getCellParticles());
-    newPhotons[idx] = &(a_newPhotons[idx]->getCellParticles());
-  }
-
-  //Advance reaction network
-  this->advanceReactionNetwork(particles, Photons, newPhotons, a_sources, m_electricFieldParticle, a_dt);
-}
-
-void
-ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>*>& a_particles,
-                                         Vector<AMRCellParticles<Photon>*>&      a_photons,
-                                         Vector<AMRCellParticles<Photon>*>&      a_newPhotons,
-                                         const Vector<EBAMRCellData>&            a_sources,
-                                         const EBAMRCellData&                    a_E,
-                                         const Real                              a_dt)
-{
-  CH_TIME(
-    "ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles*> x 3, Vector<EBAMRCellData*>, EBAMRCellData, Real)");
-  if (m_verbosity > 5) {
-    pout()
-      << "ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles*> x 3, Vector<EBAMRCellData*>, EBAMRCellData, Real)"
-      << endl;
-  }
-
-  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
-  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    Vector<LayoutData<BinFab<ItoParticle>>*> particles(numPlasmaSpecies);
-    Vector<LayoutData<BinFab<Photon>>*>      Photons(numPhotonSpecies);
-    Vector<LayoutData<BinFab<Photon>>*>      newPhotons(numPhotonSpecies);
-    Vector<LevelData<EBCellFAB>*>            sources(numPlasmaSpecies);
-
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx  = solverIt.index();
-      particles[idx] = &(*(*a_particles[idx])[lvl]);
-      sources[idx]   = &(*(a_sources[idx])[lvl]);
-    }
-
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx   = solverIt.index();
-      Photons[idx]    = &(*(*a_photons[idx])[lvl]);
-      newPhotons[idx] = &(*(*a_newPhotons[idx])[lvl]);
-    }
-
-    this->advanceReactionNetwork(particles, Photons, newPhotons, sources, *a_E[lvl], lvl, a_dt);
-  }
-}
-
-void
-ItoPlasmaStepper::advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle>>*>& a_particles,
-                                         Vector<LayoutData<BinFab<Photon>>*>&      a_photons,
-                                         Vector<LayoutData<BinFab<Photon>>*>&      a_newPhotons,
-                                         const Vector<LevelData<EBCellFAB>*>&      a_sources,
-                                         const LevelData<EBCellFAB>&               a_E,
-                                         const int                                 a_lvl,
-                                         const Real                                a_dt)
-{
-  CH_TIME(
-    "ItoPlasmaStepper::advanceReactionNetwork(Vector<LD<BinFab>* > x 3, Vector<LD<EBCellFAB>*>, EBAMRCellData, level, dt)");
-  if (m_verbosity > 5) {
-    pout()
-      << "ItoPlasmaStepper::advanceReactionNetwork(Vector<LD<BinFab>* > x 3, Vector<LD<EBCellFAB>*>, EBAMRCellData, level, dt)"
-      << endl;
-  }
-
-  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
-  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
-
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_lvl];
-  const Real               dx  = m_amr->getDx()[a_lvl];
-
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const Box box = dbl.get(dit());
-
-    Vector<BinFab<ItoParticle>*> particles(numPlasmaSpecies);
-    Vector<BinFab<Photon>*>      Photons(numPhotonSpecies);
-    ;
-    Vector<BinFab<Photon>*> newPhotons(numPhotonSpecies);
-    Vector<EBCellFAB*>      sources(numPlasmaSpecies);
-
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx  = solverIt.index();
-      particles[idx] = &((*a_particles[idx])[dit()]);
-      sources[idx]   = &((*a_sources[idx])[dit()]);
-    }
-
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx   = solverIt.index();
-      Photons[idx]    = &((*a_photons[idx])[dit()]);
-      newPhotons[idx] = &((*a_newPhotons[idx])[dit()]);
-    }
-
-    this->advanceReactionNetwork(particles, Photons, newPhotons, sources, a_E[dit()], a_lvl, dit(), box, dx, a_dt);
-  }
-}
-
-void
-ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particles,
-                                         Vector<BinFab<Photon>*>&      a_photons,
-                                         Vector<BinFab<Photon>*>&      a_newPhotons,
-                                         const Vector<EBCellFAB*>&     a_sources,
-                                         const EBCellFAB&              a_E,
-                                         const int                     a_lvl,
-                                         const DataIndex               a_dit,
-                                         const Box                     a_box,
-                                         const Real                    a_dx,
-                                         const Real                    a_dt)
-{
-  CH_TIME(
-    "ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab*> x 3, Vector<EBCellFAB*>, EBCellFAB, level, dit, box, dx, dt)");
-  if (m_verbosity > 5) {
-    pout()
-      << "ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab*> x 3, Vector<EBCellFAB*>, EBCellFAB, level, dit, box, dx, dt)"
-      << endl;
-  }
-
-  const int comp = 0;
-
-  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
-  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
-
-  const RealVect probLo = m_amr->getProbLo();
-  const RealVect dx     = a_dx * RealVect::Unit;
-
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_lvl][a_dit];
-  const EBISBox& ebgraph = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_lvl][a_dit];
-
-  const BaseFab<Real>& Efab = a_E.getSingleValuedFAB();
-
-  // Regular cells
-  for (BoxIterator bit(a_box); bit.ok(); ++bit) {
-    const IntVect iv = bit();
-
-    if (ebisbox.isRegular(iv)) {
-      const Real     kappa = 1.0;
-      const RealVect pos   = probLo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
-      const RealVect e     = RealVect(D_DECL(Efab(iv, 0), Efab(iv, 1), Efab(iv, 2)));
-
-      Vector<List<ItoParticle>*> particles(numPlasmaSpecies);
-      Vector<List<Photon>*>      Photons(numPhotonSpecies);
-      Vector<List<Photon>*>      newPhotons(numPhotonSpecies);
-      Vector<Real>               sources(numPlasmaSpecies);
-
-      for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-        const int idx = solverIt.index();
-
-        List<ItoParticle>& bp = (*a_particles[idx])(iv, comp);
-        particles[idx]        = &bp;
-
-        const BaseFab<Real>& sourcesFAB = a_sources[idx]->getSingleValuedFAB();
-        sources[idx]                    = sourcesFAB(iv, comp);
-      }
-
-      for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-        const int idx = solverIt.index();
-
-        List<Photon>& bp    = (*a_photons[idx])(iv, comp);
-        List<Photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
-
-        Photons[idx]    = &bp;
-        newPhotons[idx] = &bpNew;
-      }
-
-      // Dummy stuff for regular cells
-      const RealVect lo = -0.5 * RealVect::Unit;
-      const RealVect hi = 0.5 * RealVect::Unit;
-      const RealVect n  = RealVect::Zero;
-      const RealVect c  = RealVect::Zero;
-
-      // Advance reactions
-      m_physics
-        ->advanceReactionNetwork(particles, Photons, newPhotons, sources, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
-    }
-  }
-
-  // Now do the irregular cells
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_lvl])[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit) {
-    const VolIndex vof   = vofit();
-    const IntVect  iv    = vof.gridIndex();
-    const RealVect pos   = probLo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
-    const RealVect cen   = ebisbox.centroid(vof);
-    const Real     kappa = ebisbox.volFrac(vof);
-    const RealVect e     = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
-    const RealVect n     = ebisbox.normal(vof);
-    const RealVect ebc   = ebisbox.bndryCentroid(vof);
-
-    // Compute a small box that encloses the cut-cell volume
-    RealVect lo = -0.5 * RealVect::Unit;
-    RealVect hi = 0.5 * RealVect::Unit;
-    if (kappa < 1.0) {
-      DataOps::computeMinValidBox(lo, hi, n, ebc);
-    }
-
-    Vector<List<ItoParticle>*> particles(numPlasmaSpecies);
-    Vector<List<Photon>*>      Photons(numPhotonSpecies);
-    Vector<List<Photon>*>      newPhotons(numPhotonSpecies);
-    Vector<Real>               sources(numPlasmaSpecies);
-
-    for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      List<ItoParticle>& bp = (*a_particles[idx])(iv, comp);
-      particles[idx]        = &bp;
-
-      const BaseFab<Real>& sourcesFAB = a_sources[idx]->getSingleValuedFAB();
-      sources[idx]                    = sourcesFAB(iv, comp);
-    }
-
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      List<Photon>& bp    = (*a_photons[idx])(iv, comp);
-      List<Photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
-
-      Photons[idx]    = &bp;
-      newPhotons[idx] = &bpNew;
-    }
-
-    // Advance reactions
-    m_physics
-      ->advanceReactionNetwork(particles, Photons, newPhotons, sources, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);
-  }
 }
 
 Real
@@ -3731,225 +3443,6 @@ ItoPlasmaStepper::computeEdotJSource(const Real a_dt) noexcept
   CH_TIME("ItoPlasmaStepper::computeEdotJSource(a_dt)");
   if (m_verbosity > 5) {
     pout() << m_name + "::computeEdotJSource(a_dt)" << endl;
-  }
-
-  CH_assert(a_dt > 0.0);
-
-  // Swap between these two.
-  if (m_useNewReactionAlgorithm) {
-    //    this->computeEdotJSourceNWO();
-    //    this->computeEdotJSourceNWO2(a_dt);
-    this->computeEdotJSourceNWO3(a_dt);
-  }
-  else {
-    this->computeEdotJSource();
-  }
-}
-
-void
-ItoPlasmaStepper::computeEdotJSource() noexcept
-{
-  CH_TIME("ItoPlasmaStepper::computeEdotJSource()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeEdotJSource()" << endl;
-  }
-
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<ItoSolver>&        solver  = solverIt();
-    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
-
-    const int idx = solverIt.index();
-    const int q   = species->getChargeNumber();
-
-    DataOps::setValue(m_energySources[idx], 0.0);
-
-    // Do mobile contribution.
-    if (q != 0 && solver->isMobile()) {
-
-      // Drift contribution
-      solver->depositConductivity(m_particleScratch1,
-                                  solver->getParticles(ItoSolver::WhichContainer::Bulk)); // Deposit mu*n
-      DataOps::copy(
-        m_particleScratchD,
-        m_electricFieldParticle); // Could use m_electricFieldParticle or solver's m_velo_func here, but m_velo_func = +/- E (depends on q)
-
-      DataOps::multiplyScalar(m_particleScratchD, m_particleScratch1); // m_particleScratchD = mu*n*E
-      DataOps::dotProduct(m_particleScratch1,
-                          m_electricFieldParticle,
-                          m_particleScratchD);                      // m_particleScratch1 = mu*n*E*E
-      DataOps::incr(m_energySources[idx], m_particleScratch1, 1.0); // a_source[idx] += mu*n*E*E
-    }
-
-    // Diffusive contribution
-    if (q != 0 && solver->isDiffusive()) {
-
-      // Compute the negative gradient of the diffusion term
-      solver->depositDiffusivity(m_particleScratch1, solver->getParticles(ItoSolver::WhichContainer::Bulk));
-      m_amr->interpGhostMG(m_particleScratch1, m_particleRealm, m_plasmaPhase);
-      m_amr->computeGradient(m_particleScratchD, m_particleScratch1, m_particleRealm, m_plasmaPhase);
-      DataOps::scale(m_particleScratchD, -1.0); // scratchD = -grad(D*n)
-
-      DataOps::dotProduct(m_particleScratch1,
-                          m_particleScratchD,
-                          m_electricFieldParticle);                 // m_particleScratch1 = -E*grad(D*n)
-      DataOps::incr(m_energySources[idx], m_particleScratch1, 1.0); // a_source[idx]
-    }
-
-    if (q != 0 && (solver->isMobile() || solver->isDiffusive())) {
-      DataOps::scale(m_energySources[idx], Abs(q) * Units::Qe);
-    }
-  }
-}
-
-void
-ItoPlasmaStepper::computeEdotJSourceNWO() noexcept
-{
-  CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO()");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeEdotJSourceNWO()" << endl;
-  }
-
-  DataOps::setValue(m_EdotJ, 0.0);
-
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<ItoSolver>&        solver  = solverIt();
-    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
-
-    const int idx = solverIt.index();
-    const int q   = species->getChargeNumber();
-
-    // Do mobile contribution. Computes Z*e*E*mu*n*E*E
-    if (q != 0 && solver->isMobile()) {
-      solver->depositConductivity(m_particleScratch1,
-                                  solver->getParticles(ItoSolver::WhichContainer::Bulk)); // Deposit mu*n
-      m_fluidScratch1.copy(m_particleScratch1);                                           // Copy mu*n to fluid Realm
-      DataOps::copy(m_fluidScratchD, m_electricFieldFluid);                               // m_fluidScratchD = E
-      DataOps::multiplyScalar(m_fluidScratchD, m_fluidScratch1);                          // m_fluidScratchD = E*mu*n
-      DataOps::dotProduct(m_fluidScratch1,
-                          m_electricFieldFluid,
-                          m_fluidScratchD);                // m_particleScratch1 = E.dot.(E*mu*n)
-      DataOps::scale(m_fluidScratch1, Abs(q) * Units::Qe); // m_particleScratch1 = Z*e*mu*n*E*E
-
-      m_amr->conservativeAverage(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
-      m_amr->interpGhost(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
-      DataOps::plus(m_EdotJ, m_fluidScratch1, 0, idx, 1); // a_source[idx] += Z*e*mu*n*E*E
-    }
-
-    // Diffusive contribution. Computes -Z*e*E*grad(D*n)
-    if (q != 0 && solver->isDiffusive()) {
-      solver->depositDiffusivity(m_particleScratch1,
-                                 solver->getParticles(ItoSolver::WhichContainer::Bulk)); // Deposit D*n
-      m_fluidScratch1.copy(m_particleScratch1);                                          // Copy D*n to fluid Realm
-      m_amr->interpGhostMG(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
-      m_amr->computeGradient(m_fluidScratchD, m_fluidScratch1, m_fluidRealm, m_plasmaPhase); // scratchD = grad(D*n)
-      DataOps::scale(m_fluidScratchD, -1.0);                                                 // scratchD = -grad(D*n)
-      DataOps::dotProduct(m_fluidScratch1, m_fluidScratchD, m_electricFieldFluid); // scratch1 = -E.dot.grad(D*n)
-      DataOps::scale(m_fluidScratch1, Abs(q) * Units::Qe);                         // scratch1 = -Z*e*E*grad(D*n)
-
-      m_amr->conservativeAverage(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
-      m_amr->interpGhost(m_fluidScratch1, m_fluidRealm, m_plasmaPhase);
-
-      DataOps::plus(m_EdotJ, m_fluidScratch1, 0, idx, 1); // source  += -Z*e*E*grad(D*n)
-    }
-  }
-}
-
-void
-ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt) noexcept
-{
-  CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO2(a_dt)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeEdotJSourceNWO2(a_dt)" << endl;
-  }
-
-  DataOps::setValue(m_EdotJ, 0.0);
-
-  // TLDR: EdotJ is an energy term for the various species, i.e. it is the rate of energy increase as the particle moves from
-  //       position A to position B, excluding friction from collision with other molecules.
-
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    RefCountedPtr<ItoSolver>&        solver  = solverIt();
-    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
-
-    const int idx = solverIt.index();
-    const int q   = species->getChargeNumber();
-
-    const bool mobile    = solver->isMobile();
-    const bool diffusive = solver->isDiffusive();
-
-    ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
-
-    const DepositionType deposition = solver->getDeposition();
-
-    if ((mobile || diffusive) && q != 0) {
-
-      // We will interpolate m_electricFieldParticle onto particle velocity vectors.
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-
-        for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-          const EBCellFAB& E       = (*m_electricFieldParticle[lvl])[dit()];
-          const EBISBox&   ebisbox = E.getEBISBox();
-          const FArrayBox& Efab    = E.getFArrayBox();
-          const RealVect   dx      = m_amr->getDx()[lvl] * RealVect::Unit;
-          const RealVect   probLo  = m_amr->getProbLo();
-          const Box        box     = dbl[dit()];
-
-          List<ItoParticle>& particleList = particles[lvl][dit()].listItems();
-
-          // This interpolates the velocity function on to the particle velocities
-#if 1
-          MayDay::Warning("EBParticleMesh should be replaced with call to AmrMesh as in ItoSolver");
-#endif
-          EBParticleMesh meshInterp(box, ebisbox, dx, probLo);
-          //	  meshInterp.interpolateVelocity(particleList, Efab, deposition);
-          meshInterp.interpolate<ItoParticle, &ItoParticle::velocity>(particleList, E, deposition, true);
-
-          // Go through the particles and set their mass to E.dot(X^new - X^old)
-          for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-            ItoParticle& p = lit();
-
-            const Real      m    = p.weight();
-            const RealVect& v    = p.velocity(); // Actually = E(X^new)
-            const RealVect& Xnew = p.position();
-            const RealVect& Xold = p.oldPosition();
-
-            p.tmpReal() = m;
-            p.weight()  = m * v.dotProduct(Xnew - Xold);
-          }
-        }
-      }
-
-      // Deposit the result
-      solver->depositParticles<ItoParticle, &ItoParticle::weight>(m_particleScratch1, particles);
-      m_fluidScratch1.copy(m_particleScratch1);
-
-      // Scale by Qe/dt to make it Joule/dt. Then add to correct index
-      DataOps::scale(m_fluidScratch1, q * Units::Qe / a_dt);
-      DataOps::plus(m_EdotJ, m_fluidScratch1, 0, idx, 1);
-
-      // Set p.weight() back to the original value
-      for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-        const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-        for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-          List<ItoParticle>& particleList = particles[lvl][dit()].listItems();
-
-          for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-            ItoParticle& p = lit();
-            p.weight()     = p.tmpReal();
-          }
-        }
-      }
-    }
-  }
-}
-
-void
-ItoPlasmaStepper::computeEdotJSourceNWO3(const Real a_dt) noexcept
-{
-  CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO3(a_dt)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computeEdotJSourceNWO3(a_dt)" << endl;
   }
 
   CH_assert(a_dt > 0.0);

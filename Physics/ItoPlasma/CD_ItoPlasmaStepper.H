@@ -725,7 +725,7 @@ namespace Physics {
 	@note This will call the other version. The kernel will only run over valid grid cells (not covered by a finer grid. 
       */
       virtual void
-      advanceReactionNetworkNWO(const Real a_dt) noexcept;
+      advanceReactionNetwork(const Real a_dt) noexcept;
 
       /*!
 	@brief Chemistry advance over time a_dt. AMR version. 
@@ -735,7 +735,7 @@ namespace Physics {
 	@note This will call the level versions AND reconcileParticles. The kernel will only run over valid grid cells (not covered by a finer grid. 
       */
       virtual void
-      advanceReactionNetworkNWO(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt) noexcept;
+      advanceReactionNetwork(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt) noexcept;
 
       /*!
 	@brief Chemistry advance over time a_dt. Level version. 
@@ -750,13 +750,13 @@ namespace Physics {
 	only run over valid grid cells (not covered by a finer grid. 
       */
       virtual void
-      advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_particlesPerCell,
-                                LevelData<EBCellFAB>&       a_newPhotonsPerCell,
-                                LevelData<EBCellFAB>&       a_meanParticleEnergies,
-                                const LevelData<EBCellFAB>& a_electricField,
-                                const LevelData<EBCellFAB>& a_EdotJ,
-                                const int                   a_level,
-                                const Real                  a_dt) noexcept;
+      advanceReactionNetwork(LevelData<EBCellFAB>&       a_particlesPerCell,
+                             LevelData<EBCellFAB>&       a_newPhotonsPerCell,
+                             LevelData<EBCellFAB>&       a_meanParticleEnergies,
+                             const LevelData<EBCellFAB>& a_electricField,
+                             const LevelData<EBCellFAB>& a_EdotJ,
+                             const int                   a_level,
+                             const Real                  a_dt) noexcept;
 
       /*!
 	@brief Chemistry advance over time a_dt. Patch version. 
@@ -774,16 +774,16 @@ namespace Physics {
 	only run over valid grid cells (not covered by a finer grid. 
       */
       virtual void
-      advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
-                                EBCellFAB&       a_newPhotonsPerCell,
-                                EBCellFAB&       a_meanParticleEnergies,
-                                const EBCellFAB& a_electricField,
-                                const EBCellFAB& a_EdotJ,
-                                const int        a_level,
-                                const DataIndex  a_dit,
-                                const Box        a_box,
-                                const Real       a_dx,
-                                const Real       a_dt) noexcept;
+      advanceReactionNetwork(EBCellFAB&       a_particlesPerCell,
+                             EBCellFAB&       a_newPhotonsPerCell,
+                             EBCellFAB&       a_meanParticleEnergies,
+                             const EBCellFAB& a_electricField,
+                             const EBCellFAB& a_EdotJ,
+                             const int        a_level,
+                             const DataIndex  a_dit,
+                             const Box        a_box,
+                             const Real       a_dx,
+                             const Real       a_dt) noexcept;
 
       /*!
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
@@ -904,74 +904,12 @@ namespace Physics {
       sortPhotonsByPatch(const McPhoto::WhichContainer a_which) noexcept;
 
       /*!
-	@brief Compute the energy source E*J for the various species
-	@param[in] a_dt Time step
+	@brief Compute the energy source term for the various plasma species
+	@param[in] a_dt Time step during which the particles move. 
+	@note This fills m_EdotJ
       */
       virtual void
       computeEdotJSource(const Real a_dt) noexcept;
-
-      /*!
-	@brief Compute the energy source term for the various plasma species
-      */
-      virtual void
-      computeEdotJSourceNWO3(const Real a_dt) noexcept;
-
-      // THESE ARE OLD ROUTINES THAT WILL BE REMOVED VERY SOON
-      /*!
-	@brief Compute the energy source term for the various species
-      */
-      virtual void
-      computeEdotJSource() noexcept;
-
-      /*!
-	@brief Compute the energy source term for the various species
-      */
-      virtual void
-      computeEdotJSourceNWO() noexcept;
-
-      /*!
-	@brief Compute the energy source term for the various species
-      */
-      virtual void
-      computeEdotJSourceNWO2(const Real a_dt) noexcept;
-
-      // Old routines for chemistry advances. The physics module will switch between LFA and LEA.
-      void
-      advanceReactionNetwork(const Real a_dt);
-      void
-      advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>*>& a_particles,
-                             Vector<ParticleContainer<Photon>*>&      a_Photons,
-                             Vector<ParticleContainer<Photon>*>&      a_newPhotons,
-                             const Vector<EBAMRCellData>&             a_sources,
-                             const EBAMRCellData&                     a_E,
-                             const Real                               a_dt);
-      void
-      advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>*>& a_particles,
-                             Vector<AMRCellParticles<Photon>*>&      a_Photons,
-                             Vector<AMRCellParticles<Photon>*>&      a_newPhotons,
-                             const Vector<EBAMRCellData>&            a_sources,
-                             const EBAMRCellData&                    a_E,
-                             const Real                              a_dt);
-      void
-      advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle>>*>& a_particles,
-                             Vector<LayoutData<BinFab<Photon>>*>&      a_Photons,
-                             Vector<LayoutData<BinFab<Photon>>*>&      a_newPhotons,
-                             const Vector<LevelData<EBCellFAB>*>&      a_sources,
-                             const LevelData<EBCellFAB>&               a_E,
-                             const int                                 a_lvl,
-                             const Real                                a_dt);
-      void
-      advanceReactionNetwork(Vector<BinFab<ItoParticle>*>& a_particles,
-                             Vector<BinFab<Photon>*>&      a_Photons,
-                             Vector<BinFab<Photon>*>&      a_newPhotons,
-                             const Vector<EBCellFAB*>&     a_sources,
-                             const EBCellFAB&              a_E,
-                             const int                     a_lvl,
-                             const DataIndex               a_dit,
-                             const Box                     a_box,
-                             const Real                    a_dx,
-                             const Real                    a_dt);
-      // END OF OLD ROUTINES TO BE REMOVED VERY SOON
 
     protected:
       /*!
