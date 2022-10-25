@@ -207,7 +207,7 @@ RodDielectric.sphere.radius             = 0.5           # Radius
 # ====================================================================================================
 ItoPlasmaGodunovStepper.verbosity               = -1             # Verbosity
 ItoPlasmaGodunovStepper.profile                 = true           # Turn on/off run-time profiling
-ItoPlasmaGodunovStepper.plt_vars                = none           # 'conductivity', 'current_density', 'particles_per_patch'
+ItoPlasmaGodunovStepper.plt_vars                = particles_per_patch           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoPlasmaGodunovStepper.dual_grid               = true           # Turn on/off dual-grid functionality
 ItoPlasmaGodunovStepper.load_balance            = true           # Turn on/off load balancing
 ItoPlasmaGodunovStepper.load_index              = -1             # Which particle containers to use for load balancing (-1 => all)
@@ -219,7 +219,7 @@ ItoPlasmaGodunovStepper.regrid_superparticles   = true           # Make superpar
 ItoPlasmaGodunovStepper.advection_cfl           = 1.0            # Advective time step CFL restriction
 ItoPlasmaGodunovStepper.diffusion_cfl           = 1.0            # Diffusive time step CFL restriction
 ItoPlasmaGodunovStepper.advection_diffusion_cfl = 1.0            # Advection-diffusion time step CFL restriction
-ItoPlasmaGodunovStepper.relax_dt_factor         = 100.0          # Relaxation time step restriction. 
+ItoPlasmaGodunovStepper.relax_dt_factor         = 10.0          # Relaxation time step restriction. 
 ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
 ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
@@ -248,7 +248,7 @@ ItoPlasmaAir3LFA.ion_mobility   = 2E-4           # Turn on/off ion mobility
 ItoPlasmaAir3LFA.react_ppc      = 32             # Maximum number of particles to produce in reaction step	
 ItoPlasmaAir3LFA.Ncrit          = 5              # How many firings away from a Negative particle number?
 ItoPlasmaAir3LFA.prop_eps       = 0.1            # Maximum relative change in propensity function
-ItoPlasmaAir3LFA.NSSA           = 5              # How many SSA steps to run when tau-leaping is inefficient
+ItoPlasmaAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
 ItoPlasmaAir3LFA.SSAlim         = 1.0            # When to enter SSA instead of tau-leaping
 ItoPlasmaAir3LFA.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
 
@@ -270,9 +270,9 @@ ItoPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that 
 ItoPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
 ItoPlasmaStreamerTagger.buffer            = 0            # Grow tagged cells
 
-ItoPlasmaStreamerTagger.refine_curvature  = 10.0         # Curvature refinement
-ItoPlasmaStreamerTagger.coarsen_curvature = 10.0         # Curvature coarsening	
-ItoPlasmaStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-ItoPlasmaStreamerTagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
+ItoPlasmaStreamerTagger.refine_curvature  = 100000.0     # Curvature refinement
+ItoPlasmaStreamerTagger.coarsen_curvature = 100000.0     # Curvature coarsening	
+ItoPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+ItoPlasmaStreamerTagger.coarsen_alpha     = 99.0          # Set alpha coarsening. Higher => Less mesh
 ItoPlasmaStreamerTagger.max_coarsen_lvl   = 0            # Set max coarsening depth
 

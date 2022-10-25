@@ -271,6 +271,9 @@ ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
     m_amr->remapToNewGrids(*m_conductivityParticles[idx], a_lmin, a_newFinestLevel);
   }
 
+  // Set up the field solver
+  m_fieldSolver->setupSolver();
+
   // Recompute the conductivity and space charge densities.
   this->computeRegridConductivity();
   this->computeRegridRho();

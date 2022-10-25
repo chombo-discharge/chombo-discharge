@@ -530,7 +530,6 @@ ItoPlasmaStepper::postCheckpointSetup()
   // Allocate internal storage.
   this->allocateInternals();
 
-  MayDay::Warning("ItoPlasmaStepper::postCheckpointSetup -- check if remap is necessary");
   m_ito->remap();
 
   // Recompute the electric field.
@@ -574,6 +573,9 @@ ItoPlasmaStepper::postCheckpointPoisson()
   m_amr->conservativeAverage(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
   m_amr->interpGhostPwl(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
   m_amr->interpToCentroids(m_electricFieldParticle, m_particleRealm, m_plasmaPhase);
+
+  // Set up the Poisson solver
+  m_fieldSolver->setupSolver();
 }
 
 #ifdef CH_USE_HDF5
