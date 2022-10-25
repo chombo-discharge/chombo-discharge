@@ -219,6 +219,10 @@ ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
   for (int i = 0; i < a_particles.size(); i++) {
     const long long diff = a_newNumParticles[i] - a_oldNumParticles[i];
 
+    if (m_debug && a_newNumParticles[i] < 0LL) {
+      MayDay::Abort("ItoPlasmaPhysics::reconcileParticles - crap");
+    }
+
     if (diff > 0LL) {
       // Adding particles, which is fairly simple. Just choose weights for the particles and go.
       std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(diff, m_ppc);
