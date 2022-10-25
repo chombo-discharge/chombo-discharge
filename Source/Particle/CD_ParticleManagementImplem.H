@@ -403,9 +403,12 @@ namespace ParticleManagement {
   {
     CH_TIME("ParticleManagement::deleteParticles");
 
-    for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
+    for (ListIterator<P> lit(a_particles); lit.ok();) {
       if (lit().weight() < a_weightThresh) {
         a_particles.remove(lit);
+      }
+      else {
+        ++lit;
       }
     }
   }
