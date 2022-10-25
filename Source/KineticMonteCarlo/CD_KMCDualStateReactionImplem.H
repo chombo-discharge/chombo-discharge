@@ -199,6 +199,7 @@ KMCDualStateReaction<T, State>::advanceState(State& a_state, const T& a_numReact
 #ifndef NDEBUG
   this->sanityCheck(a_state);
 #endif
+  CH_assert(a_state.isValidState());
 
   auto& reactiveState = a_state.getReactiveState();
   auto& photonState   = a_state.getNonReactiveState();
@@ -210,6 +211,8 @@ KMCDualStateReaction<T, State>::advanceState(State& a_state, const T& a_numReact
   for (const auto& s : m_nonReactiveStateChange) {
     photonState[s.first] += a_numReactions * s.second;
   }
+
+  CH_assert(a_state.isValidState());
 }
 
 template <typename T, typename State>
