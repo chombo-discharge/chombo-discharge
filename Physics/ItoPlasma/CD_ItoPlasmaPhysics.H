@@ -40,6 +40,8 @@ namespace Physics {
 
     /*!
       @brief Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. 
+      @details When using this class, the user should populate m_kmcReactions with the appropriate reactions AND implement routines
+      for computing the mobility/diffusion coefficeints. 
     */
     class ItoPlasmaPhysics
     {
@@ -59,10 +61,10 @@ namespace Physics {
 	@param[in] a_E         Electric field. 
 	@param[in] a_pos       Position
 	@param[in] a_densities Mesh-based plasma densities. 
-	@return Should return user-restricted physics based time step. 
+	@return Default returns infinity but user can implement a physics based time step. 
       */
-      virtual Real
-      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const = 0;
+      inline virtual Real
+      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept;
 
       /*!
 	@brief Compute Townsend effective ionization coefficient

@@ -112,7 +112,7 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA()
   m_kmcReactions.emplace_back(r5);
 
   // Photo-reactions
-  m_photoReactions.emplace("zheleznyak", ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_ElectronIdx, m_PositiveIdx}));
+  m_photoReactions.emplace("zheleznyak", ItoPlasmaPhotoReaction(0, std::list<size_t>{0, 1}));
 
   // Set the ions diffusion coefficient
   m_ion_D = m_ion_mu * Units::kb * m_T / Units::Qe;
@@ -153,7 +153,7 @@ ItoPlasmaAir3LFA::readTables()
 }
 
 Real
-ItoPlasmaAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const
+ItoPlasmaAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const noexcept
 {
   const Real alpha = this->computeAlpha(a_E);
   const Real velo  = this->computeElectronDriftVelocity(a_E).vectorLength();

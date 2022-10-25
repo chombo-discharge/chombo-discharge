@@ -42,6 +42,14 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics()
 
 inline ItoPlasmaPhysics::~ItoPlasmaPhysics() { CH_TIME("ItoPlasmaPhysics::~ItoPlasmaPhysics"); }
 
+inline Real
+ItoPlasmaPhysics::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept
+{
+  CH_TIME("ItoPlasmaPhysics::computeDt");
+
+  return std::numeric_limits<Real>::max();
+}
+
 inline void
 ItoPlasmaPhysics::defineKMC() noexcept
 {
@@ -328,8 +336,8 @@ ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&  a_partic
   for (const auto& r : m_photoReactions) {
 
     // Source and targets
-    const int&             src     = r.second.source();
-    const std::deque<int>& targets = r.second.targets();
+    const size_t&            src     = r.second.getSourcePhoton();
+    const std::list<size_t>& targets = r.second.getTargetSpecies();
 
     for (ListIterator<Photon> lit(*a_absorbedPhotons[src]); lit.ok(); ++lit) {
       const RealVect x = lit().position();

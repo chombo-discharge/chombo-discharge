@@ -149,7 +149,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   m_prevDt = a_dt;
 
   // ====== BEGIN TRANSPORT STEP ======
-  timer.startEvent("Particle/field advancement");
+  timer.startEvent("Particle/field advance");
 
   // Semi-implicitly advance the particles and the field.
   switch (m_algorithm) {

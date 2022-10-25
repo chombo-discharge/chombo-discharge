@@ -35,7 +35,7 @@ namespace Physics {
       ~ItoPlasmaAir3LFA();
 
       Real
-      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const override;
+      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const noexcept override;
 
       Real
       computeAlpha(const RealVect a_E) const override;
