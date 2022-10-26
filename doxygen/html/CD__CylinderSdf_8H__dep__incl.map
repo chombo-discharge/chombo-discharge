@@ -1,17 +1,18 @@
 <map id="Source/ImplicitFunctions/CD_CylinderSdf.H" name="Source/ImplicitFunctions/CD_CylinderSdf.H">
-<area shape="rect" id="node1" title="Declaration of a cylindrical signed distance function." alt="" coords="1248,5,1429,47"/>
+<area shape="rect" id="node1" title="Declaration of a cylindrical signed distance function." alt="" coords="1349,5,1531,47"/>
 <area shape="rect" id="node2" href="$CD__CylinderSdf_8cpp.html" title="CD_Implementation of CylinderSdf.H." alt="" coords="5,95,187,136"/>
 <area shape="rect" id="node3" href="$CD__HollowCylinderIF_8cpp.html" title="Implementation of CD_HollowCylinderIF.H." alt="" coords="211,95,399,136"/>
 <area shape="rect" id="node4" href="$CD__MushroomIF_8cpp.html" title="Implementation of CD_MushroomIF.H." alt="" coords="424,95,605,136"/>
-<area shape="rect" id="node5" href="$CD__PerlinRodSdf_8H.html" title="Declaration of a rod with a rounded, noisy tip." alt="" coords="629,95,811,136"/>
-<area shape="rect" id="node7" href="$CD__PolygonRodIF_8cpp.html" title="Implementation of CD_PolygonRodIF.H." alt="" coords="835,95,1016,136"/>
-<area shape="rect" id="node8" href="$CD__ProfileCylinderIF_8cpp.html" title="Implementation of CD_ProfileCylinderIF.H." alt="" coords="1040,95,1224,136"/>
-<area shape="rect" id="node9" href="$CD__RodIF_8cpp.html" title="Implementation of CD_RodIF.H." alt="" coords="1248,95,1429,136"/>
-<area shape="rect" id="node10" href="$CD__RoundedCylinderIF_8cpp.html" title="Implementation of CD_RoundedCylinderIF.H." alt="" coords="1453,95,1653,136"/>
-<area shape="rect" id="node11" href="$CD__WedgeIF_8cpp.html" title="Implementation of CD_WedgeIF.H." alt="" coords="1677,95,1859,136"/>
-<area shape="rect" id="node12" href="$CD__CoaxialCable_8cpp.html" title="Implementation of CD_CoaxialCable.H." alt="" coords="1883,95,2071,136"/>
-<area shape="rect" id="node13" href="$CD__MechanicalShaft_8cpp.html" title="Implementation of CD_MechanicalShaft.H." alt="" coords="2095,95,2305,136"/>
-<area shape="rect" id="node14" href="$CD__Vessel_8cpp.html" title="High&#45;voltage Vessel geometry." alt="" coords="2329,95,2495,136"/>
-<area shape="rect" id="node15" href="$CD__WireWire_8cpp.html" title="Implementation of CD_WireWire.H." alt="" coords="2520,95,2683,136"/>
-<area shape="rect" id="node6" href="$CD__RoughRod_8cpp.html" title="Implementation of CD_RoughRod.H." alt="" coords="636,184,804,225"/>
+<area shape="rect" id="node5" href="$CD__NeedleIF_8cpp.html" title="Implementation of CD_NeedleIF.H." alt="" coords="629,95,811,136"/>
+<area shape="rect" id="node6" href="$CD__PerlinRodSdf_8H.html" title="Declaration of a rod with a rounded, noisy tip." alt="" coords="835,95,1016,136"/>
+<area shape="rect" id="node8" href="$CD__PolygonRodIF_8cpp.html" title="Implementation of CD_PolygonRodIF.H." alt="" coords="1040,95,1221,136"/>
+<area shape="rect" id="node9" href="$CD__ProfileCylinderIF_8cpp.html" title="Implementation of CD_ProfileCylinderIF.H." alt="" coords="1245,95,1429,136"/>
+<area shape="rect" id="node10" href="$CD__RodIF_8cpp.html" title="Implementation of CD_RodIF.H." alt="" coords="1453,95,1635,136"/>
+<area shape="rect" id="node11" href="$CD__RoundedCylinderIF_8cpp.html" title="Implementation of CD_RoundedCylinderIF.H." alt="" coords="1659,95,1859,136"/>
+<area shape="rect" id="node12" href="$CD__WedgeIF_8cpp.html" title="Implementation of CD_WedgeIF.H." alt="" coords="1883,95,2064,136"/>
+<area shape="rect" id="node13" href="$CD__CoaxialCable_8cpp.html" title="Implementation of CD_CoaxialCable.H." alt="" coords="2089,95,2277,136"/>
+<area shape="rect" id="node14" href="$CD__MechanicalShaft_8cpp.html" title="Implementation of CD_MechanicalShaft.H." alt="" coords="2301,95,2510,136"/>
+<area shape="rect" id="node15" href="$CD__Vessel_8cpp.html" title="High&#45;voltage Vessel geometry." alt="" coords="2534,95,2701,136"/>
+<area shape="rect" id="node16" href="$CD__WireWire_8cpp.html" title="Implementation of CD_WireWire.H." alt="" coords="2725,95,2888,136"/>
+<area shape="rect" id="node7" href="$CD__RoughRod_8cpp.html" title="Implementation of CD_RoughRod.H." alt="" coords="841,184,1009,225"/>
 </map>

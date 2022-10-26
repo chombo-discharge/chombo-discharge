@@ -1,5 +1,5 @@
 <map id="ComputationalGeometry" name="ComputationalGeometry">
-<area shape="rect" id="node1" title="Abstract base class for geometries." alt="" coords="5,360,188,387"/>
+<area shape="rect" id="node1" title="Abstract base class for geometries." alt="" coords="5,385,188,412"/>
 <area shape="rect" id="node2" href="$classAerosol.html" title="Simple class for making a bunch of (manually constructored) dielectric sphere." alt="" coords="269,5,340,32"/>
 <area shape="rect" id="node3" href="$classCoaxialCable.html" title="This is a class that defines a coaxial cable geometry." alt="" coords="251,56,359,83"/>
 <area shape="rect" id="node4" href="$classCylinder.html" title="This is a class that defines a cylinder geometry." alt="" coords="267,107,343,133"/>
@@ -9,10 +9,11 @@
 <area shape="rect" id="node8" href="$classNoisePlane.html" title="This is a class that a rough sphere (either electrode or dielectric)" alt="" coords="257,309,352,336"/>
 <area shape="rect" id="node9" href="$classRegularGeometry.html" title="This class implements an empty geometry." alt="" coords="236,360,373,387"/>
 <area shape="rect" id="node10" href="$classRodDielectric.html" title="Class that defines an electrode rod and a dielectric (some shapes supported)" alt="" coords="250,411,359,437"/>
-<area shape="rect" id="node11" href="$classRodPlaneProfile.html" title="Geometry class which defines an electrode blade and a dielectric slab with various surface profiles." alt="" coords="243,461,367,488"/>
-<area shape="rect" id="node12" href="$classRoughRod.html" title="Class that describes a rod electrode with surface roughness." alt="" coords="261,512,349,539"/>
-<area shape="rect" id="node13" href="$classRoughSphere.html" title="This is a class that a rough sphere (either electrode or dielectric)" alt="" coords="251,563,359,589"/>
-<area shape="rect" id="node14" href="$classTesselation.html" title="A geometry consisting of a single polygon grid." alt="" coords="257,613,352,640"/>
-<area shape="rect" id="node15" href="$classVessel.html" title="High&#45;voltage vessel geometry." alt="" coords="273,664,337,691"/>
-<area shape="rect" id="node16" href="$classWireWire.html" title="This is a class that defines a wire&#45;wire geometry." alt="" coords="263,715,346,741"/>
+<area shape="rect" id="node11" href="$classRodNeedlePlane.html" title="A class that defines a rod electrode with a needle out of the tip, and a plane (electrode) a set dist..." alt="" coords="240,461,369,488"/>
+<area shape="rect" id="node12" href="$classRodPlaneProfile.html" title="Geometry class which defines an electrode blade and a dielectric slab with various surface profiles." alt="" coords="243,512,367,539"/>
+<area shape="rect" id="node13" href="$classRoughRod.html" title="Class that describes a rod electrode with surface roughness." alt="" coords="261,563,349,589"/>
+<area shape="rect" id="node14" href="$classRoughSphere.html" title="This is a class that a rough sphere (either electrode or dielectric)" alt="" coords="251,613,359,640"/>
+<area shape="rect" id="node15" href="$classTesselation.html" title="A geometry consisting of a single polygon grid." alt="" coords="257,664,352,691"/>
+<area shape="rect" id="node16" href="$classVessel.html" title="High&#45;voltage vessel geometry." alt="" coords="273,715,337,741"/>
+<area shape="rect" id="node17" href="$classWireWire.html" title="This is a class that defines a wire&#45;wire geometry." alt="" coords="263,765,346,792"/>
 </map>

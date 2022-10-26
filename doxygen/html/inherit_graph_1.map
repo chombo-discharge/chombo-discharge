@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" title=" " alt="" coords="5,639,72,665"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,664,72,691"/>
 <area shape="rect" id="node2" href="$classBoundedNoisePlane.html" title="Infinite plane with spatially bounded surface noise (Perlin noise)." alt="" coords="141,5,293,32"/>
 <area shape="rect" id="node3" href="$classBoxSdf.html" title="Class for defining a two&#45; or three&#45;dimensional box with arbitrary centroid and orientation." alt="" coords="183,56,251,83"/>
 <area shape="rect" id="node4" href="$classCylinderSdf.html" title="Declaration of a cylinder IF class." alt="" coords="169,107,266,133"/>
@@ -9,23 +9,24 @@
 <area shape="rect" id="node8" href="$classHyperboloidOneIF.html" title="Declaration of a one&#45;sheet hyperboloid." alt="" coords="148,309,287,336"/>
 <area shape="rect" id="node9" href="$classHyperboloidTwoIF.html" title="Declaration of a two&#45;sheet hyperboloid." alt="" coords="148,360,287,387"/>
 <area shape="rect" id="node10" href="$classMushroomIF.html" title="&quot;Mushroom&quot; implicit function. Consists of a cylinder with a circular plate on top." alt="" coords="166,411,269,437"/>
-<area shape="rect" id="node11" href="$classNewIntersectionIF.html" title="New intersection IF which does not mess up the return value function when there are no implicit funct..." alt="" coords="147,461,287,488"/>
-<area shape="rect" id="node12" href="$classPerlinPlaneSdf.html" title="Infinite plane with surface noise (Perlin noise)." alt="" coords="159,512,275,539"/>
-<area shape="rect" id="node13" href="$classPerlinSdf.html" title="Class that implements the improved Perlin noise function." alt="" coords="177,563,257,589"/>
-<area shape="rect" id="node14" href="$classPerlinSlabSdf.html" title="Implicit function class describing a slab (box) with surface noise on the top." alt="" coords="163,613,271,640"/>
-<area shape="rect" id="node15" href="$classPerlinSphereSdf.html" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="155,664,280,691"/>
-<area shape="rect" id="node18" href="$classPolygonRodIF.html" title="Implicit function class describing a rod with a polygonal cross scetion." alt="" coords="162,715,273,741"/>
-<area shape="rect" id="node19" href="$classProfileCylinderIF.html" title="Implicit function which takes the form of a cylinder with a surface profiles (grooves)." alt="" coords="153,765,282,792"/>
-<area shape="rect" id="node20" href="$classProfilePlaneIF.html" title="Implicit function which represents an infinite half&#45;plane with &quot;holes&quot;." alt="" coords="162,816,273,843"/>
-<area shape="rect" id="node21" href="$classRodIF.html" title="Cylinder with rounded caps at its ends." alt="" coords="188,867,247,893"/>
-<area shape="rect" id="node22" href="$classRoundedBoxIF.html" title="A box with rounded corners and edges." alt="" coords="159,917,275,944"/>
-<area shape="rect" id="node23" href="$classRoundedCylinderIF.html" title="Cylinder object with rounded edges (no endcaps)" alt="" coords="145,968,290,995"/>
-<area shape="rect" id="node24" href="$classSignedDistanceBVH.html" title="Signed distance function for a DCEL mesh." alt="" coords="136,1019,299,1061"/>
-<area shape="rect" id="node25" href="$classSignedDistanceDCEL.html" title="Signed distance function from a DCEL mesh." alt="" coords="120,1085,315,1112"/>
-<area shape="rect" id="node26" href="$classSphereArray.html" title="A Cartesian array of spheres." alt="" coords="166,1136,269,1163"/>
-<area shape="rect" id="node27" href="$classSphereSdf.html" title="Signed distance function for sphere." alt="" coords="173,1187,261,1213"/>
-<area shape="rect" id="node28" href="$classTorusSdf.html" title="Signed distance function for a torus (oriented along z)." alt="" coords="179,1237,256,1264"/>
-<area shape="rect" id="node29" href="$classWedgeIF.html" title="Implicit function for a wedge." alt="" coords="178,1288,257,1315"/>
-<area shape="rect" id="node16" href="$classGradedPerlinSphereSdf.html" title="GradedPerlinSphereSdf function." alt="" coords="363,639,535,665"/>
-<area shape="rect" id="node17" href="$classPerlinRodSdf.html" title="A rod geometry, but with noise on one of the end caps." alt="" coords="396,689,501,716"/>
+<area shape="rect" id="node11" href="$classNeedleIF.html" title="Cylinder with one pointed end and one flat end." alt="" coords="177,461,257,488"/>
+<area shape="rect" id="node12" href="$classNewIntersectionIF.html" title="New intersection IF which does not mess up the return value function when there are no implicit funct..." alt="" coords="147,512,287,539"/>
+<area shape="rect" id="node13" href="$classPerlinPlaneSdf.html" title="Infinite plane with surface noise (Perlin noise)." alt="" coords="159,563,275,589"/>
+<area shape="rect" id="node14" href="$classPerlinSdf.html" title="Class that implements the improved Perlin noise function." alt="" coords="177,613,257,640"/>
+<area shape="rect" id="node15" href="$classPerlinSlabSdf.html" title="Implicit function class describing a slab (box) with surface noise on the top." alt="" coords="163,664,271,691"/>
+<area shape="rect" id="node16" href="$classPerlinSphereSdf.html" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="155,715,280,741"/>
+<area shape="rect" id="node19" href="$classPolygonRodIF.html" title="Implicit function class describing a rod with a polygonal cross scetion." alt="" coords="162,765,273,792"/>
+<area shape="rect" id="node20" href="$classProfileCylinderIF.html" title="Implicit function which takes the form of a cylinder with a surface profiles (grooves)." alt="" coords="153,816,282,843"/>
+<area shape="rect" id="node21" href="$classProfilePlaneIF.html" title="Implicit function which represents an infinite half&#45;plane with &quot;holes&quot;." alt="" coords="162,867,273,893"/>
+<area shape="rect" id="node22" href="$classRodIF.html" title="Cylinder with rounded caps at its ends." alt="" coords="188,917,247,944"/>
+<area shape="rect" id="node23" href="$classRoundedBoxIF.html" title="A box with rounded corners and edges." alt="" coords="159,968,275,995"/>
+<area shape="rect" id="node24" href="$classRoundedCylinderIF.html" title="Cylinder object with rounded edges (no endcaps)" alt="" coords="145,1019,290,1045"/>
+<area shape="rect" id="node25" href="$classSignedDistanceBVH.html" title="Signed distance function for a DCEL mesh." alt="" coords="136,1070,299,1111"/>
+<area shape="rect" id="node26" href="$classSignedDistanceDCEL.html" title="Signed distance function from a DCEL mesh." alt="" coords="120,1136,315,1163"/>
+<area shape="rect" id="node27" href="$classSphereArray.html" title="A Cartesian array of spheres." alt="" coords="166,1187,269,1213"/>
+<area shape="rect" id="node28" href="$classSphereSdf.html" title="Signed distance function for sphere." alt="" coords="173,1237,261,1264"/>
+<area shape="rect" id="node29" href="$classTorusSdf.html" title="Signed distance function for a torus (oriented along z)." alt="" coords="179,1288,256,1315"/>
+<area shape="rect" id="node30" href="$classWedgeIF.html" title="Implicit function for a wedge." alt="" coords="178,1339,257,1365"/>
+<area shape="rect" id="node17" href="$classGradedPerlinSphereSdf.html" title="GradedPerlinSphereSdf function." alt="" coords="363,689,535,716"/>
+<area shape="rect" id="node18" href="$classPerlinRodSdf.html" title="A rod geometry, but with noise on one of the end caps." alt="" coords="396,740,501,767"/>
 </map>

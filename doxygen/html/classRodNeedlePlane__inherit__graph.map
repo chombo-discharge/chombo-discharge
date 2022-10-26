@@ -1,0 +1,4 @@
+<map id="RodNeedlePlane" name="RodNeedlePlane">
+<area shape="rect" id="node1" title="A class that defines a rod electrode with a needle out of the tip, and a plane (electrode) a set dist..." alt="" coords="32,80,161,107"/>
+<area shape="rect" id="node2" href="$classComputationalGeometry.html" title="Abstract base class for geometries." alt="" coords="5,5,188,32"/>
+</map>
