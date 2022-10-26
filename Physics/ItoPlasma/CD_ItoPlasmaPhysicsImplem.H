@@ -289,10 +289,13 @@ ItoPlasmaPhysics::removeParticles(List<ItoParticle>& a_particles, const long lon
     if (m_debug) {
       totalWeightAfter = getTotalWeight();
 
-      if (totalWeightBefore - totalWeightAfter != a_numParticlesToRemove) {
+      const long long errDiff = std::abs(totalWeightBefore - totalWeightAfter) - a_numParticlesToRemove;
+      if (std::abs(errDiff) != zero) {
+
         pout() << "ItoPlasmaPhysics::removeParticles: Total weight before = " << totalWeightBefore << endl;
         pout() << "ItoPlasmaPhysics::removeParticles: Total weight after  = " << totalWeightAfter << endl;
         pout() << "ItoPlasmaPhysics::removeParticles: Should have removed = " << a_numParticlesToRemove << endl;
+        pout() << "ItoPlasmaPhysics::removeParticles: Error               = " << errDiff << endl;
 
         MayDay::Abort("ItoPlasmaPhysics::removeParticles - incorrect mass removed");
       }
