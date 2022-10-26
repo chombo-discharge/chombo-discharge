@@ -98,7 +98,7 @@ Random::getPoisson(const Real a_mean)
   else {
     std::normal_distribution<Real> normal(a_mean, sqrt(a_mean));
 
-    ret = T(normal(s_rng));
+    ret = (T)llround(normal(s_rng));
 
     ret = std::max(zero, ret);
   }
