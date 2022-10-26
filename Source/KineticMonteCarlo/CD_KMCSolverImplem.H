@@ -321,9 +321,11 @@ KMCSolver<R, State, T>::stepTau(State&                   a_state,
 
   if (a_reactions.size() > 0) {
     for (size_t i = 0; i < a_reactions.size(); i++) {
-      const T numReactions = Random::getPoisson<T>(a_propensities[i] * a_dt);
 
-      // To prevent freak reactions.
+      // Number of reactions is always an integer -- draw from a Poisson distribution in long long. I'm just
+      // using a large integer type to avoid potential overflows.
+      const T numReactions = (T)Random::getPoisson<long long>(a_propensities[i] * a_dt);
+
       a_reactions[i]->advanceState(a_state, numReactions);
     }
   }

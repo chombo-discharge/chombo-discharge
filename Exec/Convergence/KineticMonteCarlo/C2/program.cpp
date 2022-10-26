@@ -22,6 +22,13 @@ constexpr Real c4 = 3.5;
 constexpr Real N1 = 1.E5;
 constexpr Real N2 = 2.E5;
 
+// FPR is the state representation. Integer and floating point
+// types should both work.
+using FPR           = Real;
+using KMCState      = KMCSingleState<FPR>;
+using KMCReaction   = KMCSingleStateReaction<FPR, KMCState>;
+using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
+
 int
 main(int argc, char* argv[])
 {
@@ -36,16 +43,16 @@ main(int argc, char* argv[])
   Random::setRandomSeed();
 
   // State that we advance -- there's only one species.
-  KMCSingleState<> state(1);
+  KMCState state(1);
   state[0] = 250;
 
   // Define list of reactions.
-  std::vector<std::shared_ptr<const KMCSingleStateReaction<>>> reactionList;
+  std::vector<std::shared_ptr<const KMCReaction>> reactionList;
 
-  auto c1R = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0, 0}, std::list<size_t>{0, 0, 0});
-  auto c2R = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0, 0, 0}, std::list<size_t>{0, 0});
-  auto c3R = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{}, std::list<size_t>{0});
-  auto c4R = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0}, std::list<size_t>{});
+  auto c1R = std::make_shared<KMCReaction>(std::list<size_t>{0, 0}, std::list<size_t>{0, 0, 0});
+  auto c2R = std::make_shared<KMCReaction>(std::list<size_t>{0, 0, 0}, std::list<size_t>{0, 0});
+  auto c3R = std::make_shared<KMCReaction>(std::list<size_t>{}, std::list<size_t>{0});
+  auto c4R = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{});
 
   c1R->rate() = c1 * N1; // Propensity becomes 1/2 * c1 * B1 * X * (X-1)
   c2R->rate() = c2;      // Propensity becomes 1/6 * c2 * X * (X-1) * (X-2)
@@ -74,7 +81,7 @@ main(int argc, char* argv[])
   pp.get("ssa_lim", SSAlim);
 
   // Define the Kinetic Monte Carlo solver and run it until the stop time.
-  KMCSolver<KMCSingleStateReaction<>, KMCSingleState<>, long long> kmcSolver(reactionList);
+  KMCSolverType kmcSolver(reactionList);
 
   kmcSolver.setSolverParameters(numCrit, numSSA, eps, SSAlim);
 

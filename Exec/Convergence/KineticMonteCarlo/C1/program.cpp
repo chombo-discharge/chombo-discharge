@@ -4,6 +4,13 @@
 
 using namespace ChomboDischarge;
 
+// FPR is the state representation. Integer and floating point
+// types should both work.
+using FPR           = long long;
+using KMCState      = KMCSingleState<FPR>;
+using KMCReaction   = KMCSingleStateReaction<FPR, KMCState>;
+using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
+
 int
 main(int argc, char* argv[])
 {
@@ -18,16 +25,16 @@ main(int argc, char* argv[])
   Random::setRandomSeed();
 
   // State that we advance.
-  KMCSingleState<> state(1);
+  KMCState state(1);
 
   // Define list of reactions.
-  std::vector<std::shared_ptr<const KMCSingleStateReaction<>>> reactionList;
+  std::vector<std::shared_ptr<const KMCReaction>> reactionList;
 
   // Define reaction e + null -> e + e + null
-  auto ionization = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0}, std::list<size_t>{0, 0});
+  auto ionization = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{0, 0});
 
   // Define e -> null
-  auto attachment = std::make_shared<KMCSingleStateReaction<>>(std::list<size_t>{0}, std::list<size_t>{});
+  auto attachment = std::make_shared<KMCReaction>(std::list<size_t>{0}, std::list<size_t>{});
 
   reactionList.emplace_back(attachment);
   reactionList.emplace_back(ionization);
@@ -61,7 +68,7 @@ main(int argc, char* argv[])
   state[0] = (long long)initVal;
 
   // Define the Kinetic Monte Carlo solver and run it until time = 10.
-  KMCSolver<KMCSingleStateReaction<>, KMCSingleState<>, long long> kmcSolver(reactionList);
+  KMCSolverType kmcSolver(reactionList);
 
   kmcSolver.setSolverParameters(numCrit, numSSA, eps, SSAlim);
 
