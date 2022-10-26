@@ -248,11 +248,11 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
       // the underlying state.
       const T Xi = a_nonCriticalReactions[0]->population(reactant, a_state);
 
-      if (Xi > 0) {
+      if (Xi > (T)0) {
         Real mu     = 0.0;
         Real sigma2 = 0.0;
 
-        // Set gi to 3 for now -- this is equivalent to a third-order reaction Si*Si*Si with Xi = 3, I doubt
+        // Set gi to 4 for now -- this is equivalent to a third-order reaction Si*Si*Si with Xi = 3, I doubt
         // that the Cao computation of gi is necessary because it becomes an "approximation within an approximation". So
         // I'm just setting gi to the "worst-case" scenario and live with that.
         constexpr Real gi = 4.0;
@@ -261,17 +261,14 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
           const Real& p    = a_nonCriticalPropensities[i];
           const auto& muIJ = a_nonCriticalReactions[i]->getStateChange(reactant);
 
-          mu += muIJ * p;
-          sigma2 += muIJ * muIJ * p;
+          mu += std::abs(muIJ * p);
+          sigma2 += std::abs(muIJ * muIJ * p);
         }
 
         Real dt1 = std::numeric_limits<Real>::max();
         Real dt2 = std::numeric_limits<Real>::max();
 
         const Real f = std::max(m_eps * Xi / gi, 1.0);
-
-        mu     = std::abs(mu);
-        sigma2 = std::abs(sigma2);
 
         if (mu > std::numeric_limits<Real>::min()) {
           dt1 = f / mu;
@@ -326,6 +323,7 @@ KMCSolver<R, State, T>::stepTau(State&                   a_state,
     for (size_t i = 0; i < a_reactions.size(); i++) {
       const T numReactions = Random::getPoisson<T>(a_propensities[i] * a_dt);
 
+      // To prevent freak reactions.
       a_reactions[i]->advanceState(a_state, numReactions);
     }
   }
@@ -352,7 +350,7 @@ KMCSolver<R, State, T>::advanceTau(State& a_state, const ReactionList& a_reactio
 
     while (curTime < a_dt) {
 
-      // Try big step.
+      // Try big time step first.
       curDt = a_dt - curTime;
 
       bool valid = false;
@@ -366,7 +364,9 @@ KMCSolver<R, State, T>::advanceTau(State& a_state, const ReactionList& a_reactio
         this->stepTau(state, a_reactions, curDt);
 
         // If this was a valid step, accept it. Else reduce dt.
-        if (state.isValidState()) {
+        valid = state.isValidState();
+
+        if (valid) {
           a_state = state;
 
           curTime += curDt;
@@ -498,6 +498,8 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
 {
   CH_TIME("KMCSolver::advanceHybrid(State, ReactionList, Real)");
 
+  constexpr T one = (T)1;
+
   // Simulated time within the advancement algorithm.
   Real curTime = 0.0;
 
@@ -564,7 +566,7 @@ KMCSolver<R, State, T>::advanceHybrid(State& a_state, const ReactionList& a_reac
               this->stepSSA(a_state, a_reactions, propensities);
 
               dtSSA += dtReact;
-              numSSA += 1;
+              numSSA += one;
             }
             else {
 
