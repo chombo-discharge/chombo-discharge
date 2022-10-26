@@ -325,76 +325,78 @@ namespace ParticleManagement {
 
     constexpr long long zero = 0LL;
 
-    ListIterator<P> lit(a_particles);
+    if (a_particles.length() > 0) {
+      ListIterator<P> lit(a_particles);
 
-    CH_assert(a_numPhysPartToRemove >= 0LL);
+      CH_assert(a_numPhysPartToRemove >= 0LL);
 
-    long long numRemoved = zero;
+      long long numRemoved = zero;
 
-    // 1. Compute the minimum particle weight.
-    long long minWeight = std::numeric_limits<long long>::max();
-    for (lit.begin(); lit.ok(); ++lit) {
-      minWeight = std::min(minWeight, llround(lit().weight()));
-    }
-
-    // 2. Trim particle weights down to minWeight.
-    for (lit.begin(); lit.ok(); ++lit) {
-      const long long diff1 = llround(lit().weight()) - minWeight;
-      const long long diff2 = a_numPhysPartToRemove - numRemoved;
-
-      CH_assert(diff1 >= zero);
-      CH_assert(diff2 >= zero);
-
-      const long long r = std::max(0LL, std::min(diff1, diff2));
-
-      lit().weight() -= 1.0 * r;
-      numRemoved += r;
-    }
-
-    // 3. "Uniformly" subtract the particle weights.
-    if (a_numPhysPartToRemove - numRemoved > 0) {
-      const long long numCompParticles = (long long)a_particles.length();
-      const long long uniformWeight    = (a_numPhysPartToRemove - numRemoved) / numCompParticles;
-      const long long uniformRemainder = (a_numPhysPartToRemove - numRemoved) % numCompParticles;
-
-      // Uniformly remove weight from each particle.
-      if (uniformWeight > zero) {
-        for (lit.begin(); lit.ok(); ++lit) {
-          lit().weight() -= 1.0 * uniformWeight;
-
-          numRemoved += uniformWeight;
-        }
+      // 1. Compute the minimum particle weight.
+      long long minWeight = std::numeric_limits<long long>::max();
+      for (lit.begin(); lit.ok(); ++lit) {
+        minWeight = std::min(minWeight, llround(lit().weight()));
       }
 
-      // May have to remove remainder from multiple particles because their weights might be less
-      // then the actual remainder.
-      if (uniformRemainder > zero) {
-        long long W = 0;
+      // 2. Trim particle weights down to minWeight.
+      for (lit.begin(); lit.ok(); ++lit) {
+        const long long diff1 = llround(lit().weight()) - minWeight;
+        const long long diff2 = a_numPhysPartToRemove - numRemoved;
 
-        for (lit.begin(); lit.ok(); ++lit) {
+        CH_assert(diff1 >= zero);
+        CH_assert(diff2 >= zero);
 
-          // Never remove so that weight is negative.
-          const long long w = std::min(llround(lit().weight()), uniformRemainder - W);
+        const long long r = std::max(0LL, std::min(diff1, diff2));
 
-          lit().weight() -= 1.0 * w;
-          W += w;
+        lit().weight() -= 1.0 * r;
+        numRemoved += r;
+      }
 
-          numRemoved += W;
+      // 3. "Uniformly" subtract the particle weights.
+      if (a_numPhysPartToRemove - numRemoved > zero) {
+        const long long numCompParticles = (long long)a_particles.length();
+        const long long uniformWeight    = (a_numPhysPartToRemove - numRemoved) / numCompParticles;
+        const long long uniformRemainder = (a_numPhysPartToRemove - numRemoved) % numCompParticles;
 
-          if (W == uniformRemainder) {
-            break;
+        // Uniformly remove weight from each particle.
+        if (uniformWeight > zero) {
+          for (lit.begin(); lit.ok(); ++lit) {
+            lit().weight() -= 1.0 * uniformWeight;
+
+            numRemoved += uniformWeight;
+          }
+        }
+
+        // May have to remove remainder from multiple particles because their weights might be less
+        // then the actual remainder.
+        if (uniformRemainder > zero) {
+          long long W = 0;
+
+          for (lit.begin(); lit.ok(); ++lit) {
+
+            // Never remove so that weight is negative.
+            const long long w = std::min(llround(lit().weight()), uniformRemainder - W);
+
+            lit().weight() -= 1.0 * w;
+            W += w;
+
+            numRemoved += W;
+
+            if (W == uniformRemainder) {
+              break;
+            }
           }
         }
       }
-    }
 
-    // Debug code.
-    CH_assert(numRemoved == a_numPhysPartToRemove);
+      // Debug code.
+      CH_assert(numRemoved == a_numPhysPartToRemove);
 #ifdef NDEBUG
-    for (lit.begin(); lit.ok(); ++lit) {
-      CH_assert(lit().weight() >= 0.0);
-    }
+      for (lit.begin(); lit.ok(); ++lit) {
+        CH_assert(lit().weight() >= 0.0);
+      }
 #endif
+    }
   }
 
   template <typename P>
