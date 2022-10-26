@@ -123,6 +123,15 @@ protected:
   State m_nonReactiveState;
 };
 
+/*!
+  @brief State printing function
+  @param[in] ostr    Output stream
+  @param[in] a_state State vector
+*/
+template <typename T>
+inline std::ostream&
+operator<<(std::ostream& ostr, const KMCDualState<T>& a_state);
+
 #include <CD_NamespaceFooter.H>
 
 #include <CD_KMCDualStateImplem.H>

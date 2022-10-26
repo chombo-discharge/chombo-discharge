@@ -89,6 +89,37 @@ KMCDualState<T>::getNonReactiveState() const noexcept
   return m_nonReactiveState;
 }
 
+template <typename T>
+inline std::ostream&
+operator<<(std::ostream& ostr, const KMCDualState<T>& a_state)
+{
+  ostr << "KMCDualState : \n";
+
+  // Print position.
+  const auto& reactiveState    = a_state.getReactiveState();
+  const auto& nonReactiveState = a_state.getNonReactiveState();
+
+  ostr << "\t Reactive     = (";
+  for (size_t i = 0; i < reactiveState.size(); i++) {
+    ostr << reactiveState[i];
+    if (i < reactiveState.size() - 1) {
+      ostr << ",";
+    }
+  }
+  ostr << ")\n";
+
+  ostr << "\t Non-reactive = (";
+  for (size_t i = 0; i < nonReactiveState.size(); i++) {
+    ostr << nonReactiveState[i];
+    if (i < nonReactiveState.size() - 1) {
+      ostr << ",";
+    }
+  }
+  ostr << ")\n";
+
+  return ostr;
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif
