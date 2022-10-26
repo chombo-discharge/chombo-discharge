@@ -93,7 +93,7 @@ main(int argc, char* argv[])
     else if (alg == "tau") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.stepTau(state, nextDt);
+      kmcSolver.advanceTau(state, nextDt);
     }
     else if (alg == "hybrid") {
       nextDt = stopTime / numSteps;
