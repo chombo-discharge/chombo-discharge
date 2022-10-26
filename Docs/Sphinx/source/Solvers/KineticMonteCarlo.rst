@@ -174,7 +174,7 @@ The template parameters are:
 
 * ``R`` is the type of reaction to advance with.
 * ``State`` is the state vector that the KMC and reactions will advance.
-* ``T`` is the integer representation.
+* ``T`` is the internal floating point or integer representation.
 
 .. tip::
 
