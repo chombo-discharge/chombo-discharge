@@ -380,7 +380,7 @@ namespace ParticleManagement {
             lit().weight() -= 1.0 * w;
             W += w;
 
-            numRemoved += W;
+            numRemoved += w;
 
             if (W == uniformRemainder) {
               break;
