@@ -212,11 +212,31 @@ KMCSolver<R, State, T>::getCriticalTimeStep(const Real& a_totalPropensity) const
 
 template <typename R, typename State, typename T>
 inline Real
+KMCSolver<R, State, T>::getNonCriticalTimeStep(const State& a_state) const noexcept
+{
+  CH_TIME("KMCSolver::getNonCriticalTimeStep(State");
+
+  return this->getNonCriticalTimeStep(a_state, m_reactions);
+}
+
+template <typename R, typename State, typename T>
+inline Real
+KMCSolver<R, State, T>::getNonCriticalTimeStep(const State& a_state, const ReactionList& a_reactions) const noexcept
+{
+  CH_TIME("KMCSolver::getNonCriticalTimeStep(State, ReactionList");
+
+  const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
+
+  return this->getNonCriticalTimeStep(a_state, a_reactions, propensities);
+}
+
+template <typename R, typename State, typename T>
+inline Real
 KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
                                                const ReactionList&      a_nonCriticalReactions,
                                                const std::vector<Real>& a_nonCriticalPropensities) const noexcept
 {
-  CH_TIME("KMCSolver::getCriticalTimeStep");
+  CH_TIME("KMCSolver::getNonCriticalTimeStep(State, ReactionList, std::vector<Real>");
 
   CH_assert(a_nonCriticalReactions.size() == a_nonCriticalPropensities.size());
 

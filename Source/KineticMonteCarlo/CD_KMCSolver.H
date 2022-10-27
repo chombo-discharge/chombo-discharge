@@ -157,7 +157,7 @@ public:
   /*!
     @brief Get the time to the next critical reaction
     @param[in] a_state             State vector
-    @param[in] a_criticalReactions Reaction list to be partitioned
+    @param[in] a_criticalReactions Reaction list.
     @note Computes the total propensity and calls the other version. 
   */
   inline Real
@@ -178,7 +178,24 @@ public:
   getCriticalTimeStep(const Real& a_totalPropensity) const noexcept;
 
   /*!
-    @brief Get the time to the next critical reaction
+    @brief Get the non-critical time step.
+    @param[in] a_state State vector
+    @note Calls the other version with m_reactions
+  */
+  inline Real
+  getNonCriticalTimeStep(const State& a_state) const noexcept;
+
+  /*!
+    @brief Get the non-critical time step.
+    @param[in] a_state     State vector
+    @param[in] a_reactions Reaction list
+    @note Computes propensities and calls the other version. 
+  */
+  inline Real
+  getNonCriticalTimeStep(const State& a_state, const ReactionList& a_reactions) const noexcept;
+
+  /*!
+    @brief Get the non-critical time step. 
     @param[in] a_state                   State vector
     @param[in] a_nonCriticalReactions    Non-critical reactions
     @param[in] a_nonCriticalPropensities Non-critical propensities

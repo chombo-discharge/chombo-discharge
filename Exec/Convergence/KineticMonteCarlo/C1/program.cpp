@@ -85,7 +85,7 @@ main(int argc, char* argv[])
       kmcSolver.stepSSA(state);
     }
     else if (alg == "tau") {
-      nextDt = stopTime / numSteps;
+      nextDt = kmcSolver.getNonCriticalTimeStep(state);
 
       kmcSolver.advanceTau(state, nextDt);
     }
