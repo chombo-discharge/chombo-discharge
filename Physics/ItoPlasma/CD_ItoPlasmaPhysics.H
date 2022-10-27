@@ -35,9 +35,24 @@
 namespace Physics {
   namespace ItoPlasma {
 
-    using FPR           = long long;
-    using KMCState      = KMCDualState<FPR>;
-    using KMCReaction   = KMCDualStateReaction<KMCState, FPR>;
+    /*!
+      @brief Numerical representation of the KMC state. Can be floating-point or integer type
+    */
+    using FPR = Real;
+
+    /*!
+      @brief KMC state used in the Kinetic Monte Carlo advancement
+    */
+    using KMCState = KMCDualState<FPR>;
+
+    /*!
+      @brief KMC reaction used in the Kinetic Monte Carlo advancement
+    */
+    using KMCReaction = KMCDualStateReaction<KMCState, FPR>;
+
+    /*!
+      @brief KMC solverl type used in the Kinetic Monte carlo advancement
+    */
     using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
 
     /*!
@@ -150,12 +165,12 @@ namespace Physics {
 	@param[in]    a_kappa         Cut-cell volume fraction. 
       */
       inline void
-      advanceKMC(Vector<long long>& a_numParticles,
-                 Vector<long long>& a_numNewPhotons,
-                 const Real         a_dt,
-                 const RealVect     a_E,
-                 const Real         a_dx,
-                 const Real         a_kappa) const;
+      advanceKMC(Vector<FPR>&   a_numParticles,
+                 Vector<FPR>&   a_numNewPhotons,
+                 const Real     a_dt,
+                 const RealVect a_E,
+                 const Real     a_dx,
+                 const Real     a_kappa) const;
 
       /*!
 	@brief Reconcile the number of particles.
@@ -175,8 +190,8 @@ namespace Physics {
       */
       inline void
       reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
-                         const Vector<long long>&    a_newNumParticles,
-                         const Vector<long long>&    a_oldNumParticles,
+                         const Vector<FPR>&          a_newNumParticles,
+                         const Vector<FPR>&          a_oldNumParticles,
                          const RealVect              a_cellPos,
                          const RealVect              a_centroidPos,
                          const RealVect              a_lo,
@@ -202,16 +217,16 @@ namespace Physics {
 	@note Public because this is called by ItoPlasmaStepper
       */
       inline void
-      reconcilePhotons(Vector<List<Photon>*>&   a_newPhotons,
-                       const Vector<long long>& a_numNewPhotons,
-                       const RealVect           a_cellPos,
-                       const RealVect           a_centroidPos,
-                       const RealVect           a_lo,
-                       const RealVect           a_hi,
-                       const RealVect           a_bndryCentroid,
-                       const RealVect           a_bndryNormal,
-                       const Real               a_dx,
-                       const Real               a_kappa) const noexcept;
+      reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
+                       const Vector<FPR>&     a_numNewPhotons,
+                       const RealVect         a_cellPos,
+                       const RealVect         a_centroidPos,
+                       const RealVect         a_lo,
+                       const RealVect         a_hi,
+                       const RealVect         a_bndryCentroid,
+                       const RealVect         a_bndryNormal,
+                       const Real             a_dx,
+                       const Real             a_kappa) const noexcept;
 
       /*!
 	@brief Reconcile photoionization reactions.
@@ -283,7 +298,7 @@ namespace Physics {
       /*!
 	@brief Maximum new number of particles 
       */
-      long long m_ppc;
+      int m_ppc;
 
       /*!
 	@brief Solver setting for the Cao et. al algorithm. 

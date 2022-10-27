@@ -14,6 +14,7 @@
 
 // Std includes
 #include <utility>
+#include <type_traits>
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -221,7 +222,7 @@ namespace ParticleManagement {
       Real dwr = 0.0;
       Real ddw = pw - dw;
 
-      const long long N = llround(ddw);
+      const long long N = (long long)ddw;
 
       if (N > 0LL) {
 
@@ -317,36 +318,39 @@ namespace ParticleManagement {
       return (W < splitThresh) ? true : false;
     };
 
-  template <typename P>
+  template <typename P, typename T, typename>
   inline void
-  removePhysicalParticles(List<P>& a_particles, const long long a_numPhysPartToRemove) noexcept
+  removePhysicalParticles(List<P>& a_particles, const T a_numPhysPartToRemove) noexcept
   {
     CH_TIME("ParticleManagement::removePhysicalParticles");
 
-    constexpr long long zero = 0LL;
+    constexpr T zero = (T)0;
+
+    // Obviously an error that the user should catch.
+    if (a_numPhysPartToRemove < zero) {
+      MayDay::Error("ParticleManagement::removePhysicalParticles - 'a_numPhysPartoToRemove < 0'");
+    }
 
     if (a_particles.length() > 0) {
       ListIterator<P> lit(a_particles);
 
-      CH_assert(a_numPhysPartToRemove >= 0LL);
-
-      long long numRemoved = zero;
+      T numRemoved = zero;
 
       // 1. Compute the minimum particle weight.
-      long long minWeight = std::numeric_limits<long long>::max();
+      T minWeight = std::numeric_limits<T>::max();
       for (lit.begin(); lit.ok(); ++lit) {
-        minWeight = std::min(minWeight, llround(lit().weight()));
+        minWeight = std::min(minWeight, (T)lit().weight());
       }
 
       // 2. Trim particle weights down to minWeight.
       for (lit.begin(); lit.ok(); ++lit) {
-        const long long diff1 = llround(lit().weight()) - minWeight;
-        const long long diff2 = a_numPhysPartToRemove - numRemoved;
+        const T diff1 = (T)lit().weight() - minWeight;
+        const T diff2 = a_numPhysPartToRemove - numRemoved;
 
         CH_assert(diff1 >= zero);
         CH_assert(diff2 >= zero);
 
-        const long long r = std::max(0LL, std::min(diff1, diff2));
+        const T r = std::max(0LL, std::min(diff1, diff2));
 
         lit().weight() -= 1.0 * r;
         numRemoved += r;
@@ -354,9 +358,9 @@ namespace ParticleManagement {
 
       // 3. "Uniformly" subtract the particle weights.
       if (a_numPhysPartToRemove - numRemoved > zero) {
-        const long long numCompParticles = (long long)a_particles.length();
-        const long long uniformWeight    = (a_numPhysPartToRemove - numRemoved) / numCompParticles;
-        const long long uniformRemainder = (a_numPhysPartToRemove - numRemoved) % numCompParticles;
+        const T numCompParticles = (T)a_particles.length();
+        const T uniformWeight    = (a_numPhysPartToRemove - numRemoved) / numCompParticles;
+        const T uniformRemainder = (a_numPhysPartToRemove - numRemoved) % numCompParticles;
 
         // Uniformly remove weight from each particle.
         if (uniformWeight > zero) {
@@ -370,16 +374,16 @@ namespace ParticleManagement {
         // May have to remove remainder from multiple particles because their weights might be less
         // then the actual remainder.
         if (uniformRemainder > zero) {
-          long long W = 0;
+          T W = 0;
 
           for (lit.begin(); lit.ok(); ++lit) {
 
             // Never remove so that weight is negative.
-            const long long w = std::min(llround(lit().weight()), uniformRemainder - W);
+            const T w = std::min((T)lit().weight(), uniformRemainder - W);
 
             lit().weight() -= 1.0 * w;
-            W += w;
 
+            W += w;
             numRemoved += w;
 
             if (W == uniformRemainder) {
@@ -415,31 +419,38 @@ namespace ParticleManagement {
     }
   }
 
-  template <typename T>
+  template <typename T, typename>
   inline std::vector<T>
   ParticleManagement::partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept
   {
-
     std::vector<T> ret(0);
 
-    if (a_maxCompParticles > (T)0) {
+    constexpr T zero = (T)0;
+    constexpr T one  = (T)1;
+
+    if (a_maxCompParticles > zero) {
       if (a_numPhysicalParticles <= a_maxCompParticles) {
-        ret.resize(a_numPhysicalParticles, (T)1);
+        ret.resize(a_numPhysicalParticles, one);
       }
       else {
         const T W = a_numPhysicalParticles / a_maxCompParticles;
-        const T r = a_numPhysicalParticles / a_maxCompParticles;
+        const T r = a_numPhysicalParticles % a_maxCompParticles;
 
-        ret.resize(a_maxCompParticles, W);
+        if (W > zero) {
+          ret.resize(a_maxCompParticles, W);
 
-        ret.back() += r;
+          ret.back() += r;
+        }
+        else {
+          ret.resize(1, r);
+        }
       }
     }
 
     return ret;
   }
 
-  template <typename T>
+  template <typename T, typename>
   inline T
   ParticleManagement::partitionParticles(const T a_numParticles)
   {
@@ -460,7 +471,7 @@ namespace ParticleManagement {
 #endif
   }
 
-  template <typename P, typename T>
+  template <typename P, typename T, typename>
   inline void
   ParticleManagement::drawRandomParticles(List<P>&                         a_particles,
                                           const T                          a_numParticles,
@@ -479,7 +490,7 @@ namespace ParticleManagement {
     }
   }
 
-  template <typename P, typename T>
+  template <typename P, typename T, typename>
   inline void
   ParticleManagement::drawSphereParticles(List<P>&       a_particles,
                                           const T        a_numParticles,
@@ -509,7 +520,7 @@ namespace ParticleManagement {
     }
   }
 
-  template <typename P, typename T>
+  template <typename P, typename T, typename>
   inline void
   ParticleManagement::drawBoxParticles(List<P>&       a_particles,
                                        const T        a_numParticles,
@@ -529,7 +540,7 @@ namespace ParticleManagement {
     ParticleManagement::drawRandomParticles(a_particles, a_numParticles, ranBox);
   }
 
-  template <typename P, typename T>
+  template <typename P, typename T, typename>
   inline void
   ParticleManagement::drawGaussianParticles(List<P>&       a_particles,
                                             const T        a_numParticles,

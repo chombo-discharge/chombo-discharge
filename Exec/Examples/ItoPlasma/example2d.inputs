@@ -39,7 +39,7 @@ Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
-Driver.plot_interval                   = 1               # Plot interval
+Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 10               # Checkpoint interval
 Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
@@ -219,7 +219,7 @@ ItoPlasmaGodunovStepper.regrid_superparticles   = true           # Make superpar
 ItoPlasmaGodunovStepper.advection_cfl           = 1.0            # Advective time step CFL restriction
 ItoPlasmaGodunovStepper.diffusion_cfl           = 1.0            # Diffusive time step CFL restriction
 ItoPlasmaGodunovStepper.advection_diffusion_cfl = 1.0            # Advection-diffusion time step CFL restriction
-ItoPlasmaGodunovStepper.relax_dt_factor         = 200.          # Relaxation time step restriction. 
+ItoPlasmaGodunovStepper.relax_dt_factor         = 500.          # Relaxation time step restriction. 
 ItoPlasmaGodunovStepper.min_dt                  = 0.0            # Minimum permitted time step
 ItoPlasmaGodunovStepper.max_dt                  = 1.E99          # Maximum permitted time step
 ItoPlasmaGodunovStepper.eb_tolerance            = 0.0            # EB intersection test tolerance
@@ -249,7 +249,7 @@ ItoPlasmaAir3LFA.Ncrit          = 10             # How many firings away from a 
 ItoPlasmaAir3LFA.prop_eps       = 0.1            # Maximum relative change in propensity function
 ItoPlasmaAir3LFA.NSSA           = 10             # How many SSA steps to run when tau-leaping is inefficient
 ItoPlasmaAir3LFA.SSAlim         = 10.0           # When to enter SSA instead of tau-leaping
-ItoPlasmaAir3LFA.algorithm      = tau         # 'tau', 'ssa', or 'hybrid'
+ItoPlasmaAir3LFA.algorithm      = hybrid         # 'tau', 'ssa', or 'hybrid'
 
 # Photoionization parameters
 ItoPlasmaAir3LFA.quenching_pressure = 0.03947    # Quenching pressure for photo-emission (atm)
@@ -268,9 +268,9 @@ ItoPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that 
 ItoPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
 ItoPlasmaStreamerTagger.buffer            = 0            # Grow tagged cells
 
-ItoPlasmaStreamerTagger.refine_curvature  = 100000.0     # Curvature refinement
-ItoPlasmaStreamerTagger.coarsen_curvature = 100000.0     # Curvature coarsening	
+ItoPlasmaStreamerTagger.refine_curvature  = 10.0     # Curvature refinement
+ItoPlasmaStreamerTagger.coarsen_curvature = 1000.0     # Curvature coarsening	
 ItoPlasmaStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
 ItoPlasmaStreamerTagger.coarsen_alpha     = 99.0          # Set alpha coarsening. Higher => Less mesh
-ItoPlasmaStreamerTagger.max_coarsen_lvl   = 0            # Set max coarsening depth
+ItoPlasmaStreamerTagger.max_coarsen_lvl   = 2            # Set max coarsening depth
 

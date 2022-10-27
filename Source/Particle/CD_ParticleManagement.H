@@ -198,9 +198,9 @@ namespace ParticleManagement {
     @param[in]    a_numPhysPartToRemove Number of physical particles to remove
     @note May fail if particle weights are not (close to) integers. 
   */
-  template <typename P>
+  template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
-  removePhysicalParticles(List<P>& a_particles, const long long a_numPhysPartToRemove) noexcept;
+  removePhysicalParticles(List<P>& a_particles, const T a_numPhysPartToRemove) noexcept;
 
   /*!
     @brief Remove particles if their weight is below the input weight
@@ -216,7 +216,7 @@ namespace ParticleManagement {
     @param[in] a_numPhysicalParticles Number of physical particles. 
     @param[in] a_maxCompParticles     Maximum number of computational particles
   */
-  template <typename T>
+  template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline std::vector<T>
   partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept;
 
@@ -225,7 +225,7 @@ namespace ParticleManagement {
     @param[in] a_numParticles Total number of particles to be drawn. 
     @return Returns the number of particles drawn by each rank. 
   */
-  template <typename T>
+  template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline T
   partitionParticles(const T a_numParticles);
 
@@ -237,7 +237,7 @@ namespace ParticleManagement {
     @param[in]  a_numParticles Number of particles
     @param[in]  a_distribution Particle distribution. Must return a random position when calling the function. 
   */
-  template <typename P, typename T>
+  template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
   drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution);
 
@@ -250,7 +250,7 @@ namespace ParticleManagement {
     @param[in]  a_center       Sphere center
     @param[in]  a_radius       Sphere radius
   */
-  template <typename P, typename T>
+  template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
   drawSphereParticles(List<P>&       a_particles,
                       const T        a_numParticles,
@@ -266,7 +266,7 @@ namespace ParticleManagement {
     @param[in]  a_loCorner     Low corner of box
     @param[in]  a_hiCorner     High corner of box
   */
-  template <typename P, typename T>
+  template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
   drawBoxParticles(List<P>&       a_particles,
                    const T        a_numParticles,
@@ -282,7 +282,7 @@ namespace ParticleManagement {
     @param[in]  a_center       Gaussian blob Center
     @param[in]  a_radius       Gaussian blob radius
   */
-  template <typename P, typename T>
+  template <typename P, typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline void
   drawGaussianParticles(List<P>&       a_particles,
                         const T        a_numParticles,

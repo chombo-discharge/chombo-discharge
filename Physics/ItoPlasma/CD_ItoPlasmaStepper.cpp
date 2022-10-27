@@ -2667,10 +2667,10 @@ ItoPlasmaStepper::advanceReactionNetwork(EBCellFAB&       a_particlesPerCell,
   const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
 
   // Storage used by physics interface.
-  Vector<long long> particles(numPlasmaSpecies);
-  Vector<long long> newPhotons(numPhotonSpecies);
-  Vector<Real>      meanEnergies(numPlasmaSpecies);
-  Vector<Real>      energySources(numPlasmaSpecies);
+  Vector<Physics::ItoPlasma::FPR> particles(numPlasmaSpecies);
+  Vector<Physics::ItoPlasma::FPR> newPhotons(numPhotonSpecies);
+  Vector<Real>                    meanEnergies(numPlasmaSpecies);
+  Vector<Real>                    energySources(numPlasmaSpecies);
 
   const Real dV = std::pow(a_dx, SpaceDim);
 
@@ -2885,10 +2885,10 @@ ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
   // The physics interface takes the physical number of particles/photons as arguments
   // to the reconciliation routines. These need to be set from the input arguments; this is the
   // storage we use in the grid cells.
-  Vector<Real>      particleMeanEnergies(numPlasmaSpecies);
-  Vector<long long> numNewParticles(numPlasmaSpecies);
-  Vector<long long> numOldParticles(numPlasmaSpecies);
-  Vector<long long> numNewPhotons(numPhotonSpecies);
+  Vector<Real>                    particleMeanEnergies(numPlasmaSpecies);
+  Vector<Physics::ItoPlasma::FPR> numNewParticles(numPlasmaSpecies);
+  Vector<Physics::ItoPlasma::FPR> numOldParticles(numPlasmaSpecies);
+  Vector<Physics::ItoPlasma::FPR> numNewPhotons(numPhotonSpecies);
 
   // The physics interface also takes the actual particles/photons as argument to its reconciliation routines. This
   // is the storage we use for these; note that it is repopulated in every grid cell.

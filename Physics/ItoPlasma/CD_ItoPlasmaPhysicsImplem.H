@@ -32,7 +32,7 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics()
 
   // Some default settings in case user forgets to call the parsing algorithms.
   m_debug     = true;
-  m_ppc       = 32LL;
+  m_ppc       = 32;
   m_Ncrit     = 5;
   m_eps       = 0.1;
   m_NSSA      = 10;
@@ -83,11 +83,7 @@ ItoPlasmaPhysics::parsePPC() noexcept
 
   ParmParse pp(m_className.c_str());
 
-  int ppc;
-
-  pp.get("react_ppc", ppc);
-
-  m_ppc = (long long)ppc;
+  pp.get("react_ppc", m_ppc);
 }
 
 inline void
@@ -160,18 +156,18 @@ ItoPlasmaPhysics::initialSigma(const Real a_time, const RealVect a_pos) const
 }
 
 inline void
-ItoPlasmaPhysics::advanceKMC(Vector<long long>& a_numParticles,
-                             Vector<long long>& a_numNewPhotons,
-                             const Real         a_dt,
-                             const RealVect     a_E,
-                             const Real         a_dx,
-                             const Real         a_kappa) const
+ItoPlasmaPhysics::advanceKMC(Vector<FPR>&   a_numParticles,
+                             Vector<FPR>&   a_numNewPhotons,
+                             const Real     a_dt,
+                             const RealVect a_E,
+                             const Real     a_dx,
+                             const Real     a_kappa) const
 {
   CH_TIME("ItoPlasmaPhysics::advanceKMC");
 
   // Populate the KMC solver state.
-  std::vector<long long>& kmcParticles = m_kmcState.getReactiveState();
-  std::vector<long long>& kmcPhotons   = m_kmcState.getNonReactiveState();
+  std::vector<FPR>& kmcParticles = m_kmcState.getReactiveState();
+  std::vector<FPR>& kmcPhotons   = m_kmcState.getNonReactiveState();
 
   for (size_t i = 0; i < a_numParticles.size(); i++) {
     kmcParticles[i] = a_numParticles[i];
@@ -206,8 +202,8 @@ ItoPlasmaPhysics::advanceKMC(Vector<long long>& a_numParticles,
 
 inline void
 ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
-                                     const Vector<long long>&    a_newNumParticles,
-                                     const Vector<long long>&    a_oldNumParticles,
+                                     const Vector<FPR>&          a_newNumParticles,
+                                     const Vector<FPR>&          a_oldNumParticles,
                                      const RealVect              a_cellPos,
                                      const RealVect              a_centroidPos,
                                      const RealVect              a_lo,
@@ -219,17 +215,41 @@ ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 {
   CH_TIME("ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>, ...)");
 
+  CH_assert(a_particles.size() == a_newNumParticles.size());
+  CH_assert(a_oldNumParticles.size() == a_newNumParticles.size());
+
+  if (m_debug) {
+    for (int i = 0; i < a_particles.size(); i++) {
+      const FPR& numNew = a_newNumParticles[i];
+      const FPR& numOld = a_oldNumParticles[i];
+
+      if (numNew < 0) {
+        MayDay::Warning("ItoPlasmaPhysics::reconcileParticles - new number of particles is < 0");
+      }
+      else if ((long long)numNew < 0LL) {
+        MayDay::Warning("ItoPlasmaPhysics::reconcileParticles - integer overflow!");
+      }
+
+      if (numOld < 0) {
+        MayDay::Warning("ItoPlasmaPhysics::reconcileParticles - old number of particles is < 0");
+      }
+      else if ((long long)numOld < 0LL) {
+        MayDay::Warning("ItoPlasmaPhysics::reconcileParticles - integer overflow for old particles!");
+      }
+    }
+  }
+
   for (int i = 0; i < a_particles.size(); i++) {
-    const long long diff = a_newNumParticles[i] - a_oldNumParticles[i];
+    const long long diff = (long long)(a_newNumParticles[i] - a_oldNumParticles[i]);
 
     if (diff > 0LL) {
       // Adding particles, which is fairly simple. Just choose weights for the particles and go.
-      std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(diff, m_ppc);
+      std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(diff, (long long)m_ppc);
 
       for (const auto& w : particleWeights) {
         const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
-        a_particles[i]->add(ItoParticle(w, x));
+        a_particles[i]->add(ItoParticle(1.0 * w, x));
       }
     }
     else if (diff < 0LL) {
@@ -253,7 +273,7 @@ ItoPlasmaPhysics::removeParticles(List<ItoParticle>& a_particles, const long lon
     long long W = zero;
 
     for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-      W += llround(lit().weight());
+      W += (long long)lit().weight();
 
       if (lit().weight() < 1.0) {
         MayDay::Error("ItoPlasmaPhysics::removeParticles -- bad particle mass!");
@@ -304,24 +324,24 @@ ItoPlasmaPhysics::removeParticles(List<ItoParticle>& a_particles, const long lon
 }
 
 inline void
-ItoPlasmaPhysics::reconcilePhotons(Vector<List<Photon>*>&   a_newPhotons,
-                                   const Vector<long long>& a_numNewPhotons,
-                                   const RealVect           a_cellPos,
-                                   const RealVect           a_centroidPos,
-                                   const RealVect           a_lo,
-                                   const RealVect           a_hi,
-                                   const RealVect           a_bndryCentroid,
-                                   const RealVect           a_bndryNormal,
-                                   const Real               a_dx,
-                                   const Real               a_kappa) const noexcept
+ItoPlasmaPhysics::reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
+                                   const Vector<FPR>&     a_numNewPhotons,
+                                   const RealVect         a_cellPos,
+                                   const RealVect         a_centroidPos,
+                                   const RealVect         a_lo,
+                                   const RealVect         a_hi,
+                                   const RealVect         a_bndryCentroid,
+                                   const RealVect         a_bndryNormal,
+                                   const Real             a_dx,
+                                   const Real             a_kappa) const noexcept
 {
   CH_TIME("ItoPlasmaPhysics::reconcilePhotons");
 
   for (int i = 0; i < a_newPhotons.size(); i++) {
     if (a_numNewPhotons[i] > 0LL) {
 
-      const std::vector<long long> photonWeights = ParticleManagement::partitionParticleWeights(a_numNewPhotons[i],
-                                                                                                m_ppc);
+      const std::vector<long long> photonWeights =
+        ParticleManagement::partitionParticleWeights((long long)a_numNewPhotons[i], (long long)m_ppc);
 
       for (const auto& w : photonWeights) {
         const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
