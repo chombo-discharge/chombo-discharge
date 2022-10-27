@@ -16,6 +16,7 @@
 #include <random>
 #include <memory>
 #include <mutex>
+#include <type_traits>
 
 // Chombo includes
 #include <REAL.H>
@@ -51,7 +52,7 @@ public:
   Random(const Random&& a_other) = delete;
 
   /*!
-    @brief Disallowed copy assignemtn. 
+    @brief Disallowed copy assignment. 
     @param[in] a_other Other RNG engine. 
   */
   Random&
@@ -67,7 +68,7 @@ public:
   /*!
     @brief Get Poisson distributed number
   */
-  template <typename T>
+  template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   inline static T
   getPoisson(const Real a_mean);
 
