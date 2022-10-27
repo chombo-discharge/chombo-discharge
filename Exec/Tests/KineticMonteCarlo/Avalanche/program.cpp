@@ -8,7 +8,7 @@ using namespace ChomboDischarge;
 // types should both work.
 using FPR           = long long;
 using KMCState      = KMCSingleState<FPR>;
-using KMCReaction   = KMCSingleStateReaction<FPR, KMCState>;
+using KMCReaction   = KMCSingleStateReaction<KMCState, FPR>;
 using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
 
 int

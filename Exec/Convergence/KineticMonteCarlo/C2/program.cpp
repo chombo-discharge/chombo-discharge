@@ -26,7 +26,7 @@ constexpr Real N2 = 2.E5;
 // types should both work.
 using FPR           = Real;
 using KMCState      = KMCSingleState<FPR>;
-using KMCReaction   = KMCSingleStateReaction<FPR, KMCState>;
+using KMCReaction   = KMCSingleStateReaction<KMCState, FPR>;
 using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
 
 int

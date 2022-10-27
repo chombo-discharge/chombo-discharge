@@ -28,7 +28,7 @@
   @brief Reaction type for advancing a KMCDualState for Kinetic Monte Carlo. 
   @note T is the integer type used for the state. 
 */
-template <typename T = long long, typename State = KMCDualState<T>>
+template <typename State = KMCDualState<long long>, typename T = long long>
 class KMCDualStateReaction
 {
 public:

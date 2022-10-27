@@ -16,8 +16,8 @@
 #include <CD_KMCDualStateReaction.H>
 #include <CD_NamespaceHeader.H>
 
-template <typename T, typename State>
-inline KMCDualStateReaction<T, State>::KMCDualStateReaction(const std::list<size_t>& a_lhsReactives,
+template <typename State, typename T>
+inline KMCDualStateReaction<State, T>::KMCDualStateReaction(const std::list<size_t>& a_lhsReactives,
                                                             const std::list<size_t>& a_rhsReactives,
                                                             const std::list<size_t>& a_rhsNonReactives) noexcept
 {
@@ -30,13 +30,13 @@ inline KMCDualStateReaction<T, State>::KMCDualStateReaction(const std::list<size
   this->computeStateChanges();
 }
 
-template <typename T, typename State>
-inline KMCDualStateReaction<T, State>::~KMCDualStateReaction()
+template <typename State, typename T>
+inline KMCDualStateReaction<State, T>::~KMCDualStateReaction()
 {}
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline void
-KMCDualStateReaction<T, State>::computeStateChanges() noexcept
+KMCDualStateReaction<State, T>::computeStateChanges() noexcept
 {
   // Consumed species.
   for (const auto& r : m_lhsReactives) {
@@ -108,16 +108,16 @@ KMCDualStateReaction<T, State>::computeStateChanges() noexcept
   }
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline Real&
-KMCDualStateReaction<T, State>::rate() const noexcept
+KMCDualStateReaction<State, T>::rate() const noexcept
 {
   return m_rate;
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline T
-KMCDualStateReaction<T, State>::population(const size_t& a_reactant, const State& a_state) const noexcept
+KMCDualStateReaction<State, T>::population(const size_t& a_reactant, const State& a_state) const noexcept
 {
   const auto& reactiveState = a_state.getReactiveState();
 
@@ -126,9 +126,9 @@ KMCDualStateReaction<T, State>::population(const size_t& a_reactant, const State
   return reactiveState[a_reactant];
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline Real
-KMCDualStateReaction<T, State>::propensity(const State& a_state) const noexcept
+KMCDualStateReaction<State, T>::propensity(const State& a_state) const noexcept
 {
 #ifndef NDEBUG
   this->sanityCheck(a_state);
@@ -147,9 +147,9 @@ KMCDualStateReaction<T, State>::propensity(const State& a_state) const noexcept
   return A;
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline T
-KMCDualStateReaction<T, State>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
+KMCDualStateReaction<State, T>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
 {
 #ifndef NDEBUG
   this->sanityCheck(a_state);
@@ -172,16 +172,16 @@ KMCDualStateReaction<T, State>::computeCriticalNumberOfReactions(const State& a_
   return Lj;
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline std::list<size_t>
-KMCDualStateReaction<T, State>::getReactants() const noexcept
+KMCDualStateReaction<State, T>::getReactants() const noexcept
 {
   return m_lhsReactives;
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline T
-KMCDualStateReaction<T, State>::getStateChange(const size_t a_particleReactant) const noexcept
+KMCDualStateReaction<State, T>::getStateChange(const size_t a_particleReactant) const noexcept
 {
   T nuIJ = 0;
 
@@ -192,9 +192,9 @@ KMCDualStateReaction<T, State>::getStateChange(const size_t a_particleReactant) 
   return nuIJ;
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline void
-KMCDualStateReaction<T, State>::advanceState(State& a_state, const T& a_numReactions) const noexcept
+KMCDualStateReaction<State, T>::advanceState(State& a_state, const T& a_numReactions) const noexcept
 {
 #ifndef NDEBUG
   this->sanityCheck(a_state);
@@ -215,9 +215,9 @@ KMCDualStateReaction<T, State>::advanceState(State& a_state, const T& a_numReact
   CH_assert(a_state.isValidState());
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline void
-KMCDualStateReaction<T, State>::sanityCheck(const State& a_state) const noexcept
+KMCDualStateReaction<State, T>::sanityCheck(const State& a_state) const noexcept
 {
   const auto& reactiveState = a_state.getReactiveState();
   const auto& photonState   = a_state.getNonReactiveState();

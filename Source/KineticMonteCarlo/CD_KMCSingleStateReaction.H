@@ -28,7 +28,7 @@
   @brief Reaction type for advancing a KMCSingleState for Kinetic Monte Carlo. 
   @note T is the integer type used for the state. 
 */
-template <typename T = long long, typename State = KMCSingleState<T>>
+template <typename State = KMCSingleState<long long>, typename T = long long>
 class KMCSingleStateReaction
 {
 public:

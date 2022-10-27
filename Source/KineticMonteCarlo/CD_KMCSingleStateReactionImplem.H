@@ -16,8 +16,8 @@
 #include <CD_KMCSingleStateReaction.H>
 #include <CD_NamespaceHeader.H>
 
-template <typename T, typename State>
-inline KMCSingleStateReaction<T, State>::KMCSingleStateReaction(const std::list<size_t>& a_reactants,
+template <typename State, typename T>
+inline KMCSingleStateReaction<State, T>::KMCSingleStateReaction(const std::list<size_t>& a_reactants,
                                                                 const std::list<size_t>& a_products) noexcept
 {
   m_reactants = a_reactants;
@@ -26,13 +26,13 @@ inline KMCSingleStateReaction<T, State>::KMCSingleStateReaction(const std::list<
   this->computeStateChanges();
 }
 
-template <typename T, typename State>
-inline KMCSingleStateReaction<T, State>::~KMCSingleStateReaction()
+template <typename State, typename T>
+inline KMCSingleStateReaction<State, T>::~KMCSingleStateReaction()
 {}
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline void
-KMCSingleStateReaction<T, State>::computeStateChanges() noexcept
+KMCSingleStateReaction<State, T>::computeStateChanges() noexcept
 {
   // Consumed particles.
   for (const auto& r : m_reactants) {
@@ -84,23 +84,23 @@ KMCSingleStateReaction<T, State>::computeStateChanges() noexcept
   }
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline Real&
-KMCSingleStateReaction<T, State>::rate() const noexcept
+KMCSingleStateReaction<State, T>::rate() const noexcept
 {
   return m_rate;
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline T
-KMCSingleStateReaction<T, State>::population(const size_t& a_reactant, const State& a_state) const noexcept
+KMCSingleStateReaction<State, T>::population(const size_t& a_reactant, const State& a_state) const noexcept
 {
   return a_state[a_reactant];
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline Real
-KMCSingleStateReaction<T, State>::propensity(const State& a_state) const noexcept
+KMCSingleStateReaction<State, T>::propensity(const State& a_state) const noexcept
 {
   Real A = m_rate * m_propensityFactor;
 
@@ -115,9 +115,9 @@ KMCSingleStateReaction<T, State>::propensity(const State& a_state) const noexcep
   return A;
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline T
-KMCSingleStateReaction<T, State>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
+KMCSingleStateReaction<State, T>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
 {
   T Lj = std::numeric_limits<long long>::max();
 
@@ -134,16 +134,16 @@ KMCSingleStateReaction<T, State>::computeCriticalNumberOfReactions(const State& 
   return Lj;
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline std::list<size_t>
-KMCSingleStateReaction<T, State>::getReactants() const noexcept
+KMCSingleStateReaction<State, T>::getReactants() const noexcept
 {
   return m_reactants;
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline T
-KMCSingleStateReaction<T, State>::getStateChange(const size_t a_particleReactant) const noexcept
+KMCSingleStateReaction<State, T>::getStateChange(const size_t a_particleReactant) const noexcept
 {
   T nuIJ = 0;
 
@@ -154,9 +154,9 @@ KMCSingleStateReaction<T, State>::getStateChange(const size_t a_particleReactant
   return nuIJ;
 }
 
-template <typename T, typename State>
+template <typename State, typename T>
 inline void
-KMCSingleStateReaction<T, State>::advanceState(State& a_state, const T& a_numReactions) const noexcept
+KMCSingleStateReaction<State, T>::advanceState(State& a_state, const T& a_numReactions) const noexcept
 {
   for (const auto& s : m_stateChange) {
     a_state[s.first] += a_numReactions * s.second;

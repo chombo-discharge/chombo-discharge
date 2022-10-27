@@ -35,8 +35,10 @@
 namespace Physics {
   namespace ItoPlasma {
 
-    using KMCState    = KMCDualState<>;
-    using KMCReaction = KMCDualStateReaction<>;
+    using FPR           = long long;
+    using KMCState      = KMCDualState<FPR>;
+    using KMCReaction   = KMCDualStateReaction<KMCState, FPR>;
+    using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
 
     /*!
       @brief Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. 
@@ -256,7 +258,7 @@ namespace Physics {
       /*!
 	@brief Kinetic Monte Carlo solver. 
       */
-      mutable KMCSolver<KMCReaction, KMCState> m_kmcSolver;
+      mutable KMCSolverType m_kmcSolver;
 
       /*!
 	@brief List of reactions for the KMC solver
