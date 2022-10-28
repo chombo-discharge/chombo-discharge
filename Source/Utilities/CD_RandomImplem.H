@@ -86,9 +86,20 @@ Random::getPoisson(const Real a_mean)
 {
   CH_assert(s_seeded);
 
-  std::poisson_distribution<T> poisson(a_mean);
+  T ret = (T) 0;
+  
+  if(a_mean < 500.0) {
+    std::poisson_distribution<T> poisson(a_mean);
 
-  return poisson(s_rng);
+    ret = poisson(s_rng);
+  }
+  else {
+    std::normal_distribution<Real> normal(a_mean, sqrt(a_mean));
+
+    ret = (T) std::max(normal(s_rng), 0.0);
+  }
+      
+  return ret;
 }
 
 inline Real
