@@ -1218,6 +1218,19 @@ namespace Physics {
       mutable EBAMRCellData m_particleScratchD;
 
       /*!
+	@brief Get maximum density of the Ito species
+	@param[out] a_maxDensity Maximum mesh density
+	@param[out] a_minDensity Minium mesh density
+	@param[out] a_maxSolver  Solver with highest density
+	@param[out] a_minSolver  Solver with lowest density
+      */
+      virtual void
+      getMaxMinItoDensity(Real&        a_maxDensity,
+                          Real&        a_minDensity,
+                          std::string& a_maxSolver,
+                          std::string& a_minSolver) const noexcept;
+
+        /*!
 	@brief Compute some particle statistics
 	@param[out] a_avgParticles Average numer of particles
 	@param[out] a_sigma        Particle standard deviation (across MPI ranks)
@@ -1226,13 +1239,12 @@ namespace Physics {
 	@param[out] a_minRank      MPI rank with lowest number of particles
 	@param[out] a_maxRank      MPI rank with highest number of particles
       */
-      virtual void
-      getParticleStatistics(Real& a_avgParticles,
-                            Real& a_sigma,
-                            Real& a_minParticles,
-                            Real& a_maxParticles,
-                            int&  a_minRank,
-                            int&  a_maxRank);
+        virtual void getParticleStatistics(Real& a_avgParticles,
+                                           Real& a_sigma,
+                                           Real& a_minParticles,
+                                           Real& a_maxParticles,
+                                           int&  a_minRank,
+                                           int&  a_maxRank);
 
       /*!
 	@brief Routine called by loadBalanceBoxes and used for particle-based load balancing.

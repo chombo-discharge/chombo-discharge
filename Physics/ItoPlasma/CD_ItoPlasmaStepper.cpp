@@ -21,6 +21,7 @@
 #include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_Units.H>
+#include <CD_Timer.H>
 #include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
@@ -761,6 +762,14 @@ ItoPlasmaStepper::printStepReport()
 
   this->getParticleStatistics(avgParticles, stdDev, minParticles, maxParticles, minRank, maxRank);
 
+  Real maxDensity = 0.0;
+  Real minDensity = 0.0;
+
+  std::string maxSolver = "invalid solver";
+  std::string minSolver = "invalid solver";
+
+  this->getMaxMinItoDensity(maxDensity, minDensity, maxSolver, minSolver);
+
   // How was the time step restricted
   std::string str;
   switch (m_timeCode) {
@@ -804,6 +813,7 @@ ItoPlasmaStepper::printStepReport()
   // Print the step report.
   pout() << "                                   " + str << endl;
   pout() << "                                   Emax        = " << Emax << endl
+         << "                                   Max density = " << maxDensity << " (" << maxSolver << ")" << endl
          << "                                   CFL         = " << m_dt / m_advectionDiffusionDt << endl
          << "                                   Relax time  = " << m_dt / m_relaxationTime << endl
          << "                                   #Particles  = " << localParticlesBulk << " (" << globalParticlesBulk
@@ -821,6 +831,45 @@ ItoPlasmaStepper::printStepReport()
          << "                                   #Avg. part. = " << avgParticles << endl
          << "                                   #Dev. part. = " << stdDev << " (" << 100. * stdDev / avgParticles
          << "%)" << endl;
+}
+
+void
+ItoPlasmaStepper::getMaxMinItoDensity(Real&        a_maxDensity,
+                                      Real&        a_minDensity,
+                                      std::string& a_maxSolver,
+                                      std::string& a_minSolver) const noexcept
+{
+  CH_TIME("ItoPlasmaStepper::getMaxMinDensity(Realx2, std::string2x)");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getMaxMinDensity(Realx2, std::string2x)" << endl;
+  }
+
+  // Need to initialize.
+  a_minDensity = std::numeric_limits<Real>::max();
+  a_maxDensity = -std::numeric_limits<Real>::max();
+
+  std::string maxSolver = "invalid solver";
+  std::string minSolver = "invalid solver";
+
+  // Go through each solver and find the max/min values.
+  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<ItoSolver>& solver = solverIt();
+
+    Real curMin = std::numeric_limits<Real>::max();
+    Real curMax = -std::numeric_limits<Real>::max();
+
+    DataOps::getMaxMin(curMax, curMin, solverIt()->getPhi(), 0);
+
+    if (curMax > a_maxDensity) {
+      a_maxDensity = curMax;
+      a_maxSolver  = solver->getName();
+    }
+
+    if (curMin < a_minDensity) {
+      a_minDensity = curMin;
+      a_minSolver  = solver->getName();
+    }
+  }
 }
 
 void
@@ -862,14 +911,30 @@ ItoPlasmaStepper::computeDt()
     pout() << m_name + "::computeDt" << endl;
   }
 
+  Timer timer(m_name +"::computeDt");
+
   Real dt = std::numeric_limits<Real>::max();
 
   // Compute various time steps.
+  timer.startEvent("Advection");
   m_advectionDt          = m_ito->computeAdvectiveDt();
+  timer.stopEvent("Advection");
+
+  timer.startEvent("Diffusion");  
   m_diffusionDt          = m_ito->computeDiffusiveDt();
+  timer.stopEvent("Diffusion");
+
+  timer.startEvent("AdvectionDiffusion");  
   m_advectionDiffusionDt = m_ito->computeDt();
+  timer.stopEvent("AdvectionDiffusion");
+
+  timer.startEvent("Physics");    
   m_physicsDt            = this->computePhysicsDt();
+  timer.stopEvent("Physics");
+
+  timer.startEvent("Relaxation");      
   m_relaxationTime       = this->computeRelaxationTime();
+  timer.stopEvent("Relaxation");        
 
   if (m_advectionCFL * m_advectionDt < dt) {
     dt         = m_advectionCFL * m_advectionDt;
@@ -904,6 +969,10 @@ ItoPlasmaStepper::computeDt()
   if (m_maxDt < dt) {
     dt         = m_maxDt;
     m_timeCode = TimeCode::Hardcap;
+  }
+
+  if(m_profile) {
+    timer.eventReport(pout(), false);
   }
 
   return dt;

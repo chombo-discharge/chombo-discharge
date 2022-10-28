@@ -23,6 +23,7 @@
 #include <CD_Random.H>
 #include <CD_KMCSolver.H>
 #include <CD_NamespaceHeader.H>
+
 template <typename R, typename State, typename T>
 inline KMCSolver<R, State, T>::KMCSolver() noexcept
 {}
@@ -216,7 +217,9 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State& a_state) const noexc
 {
   CH_TIME("KMCSolver::getNonCriticalTimeStep(State");
 
-  return this->getNonCriticalTimeStep(a_state, m_reactions);
+  const auto& partitionedReactions = this->partitionReactions(a_state, m_reactions);  
+
+  return this->getNonCriticalTimeStep(a_state, partitionedReactions.second);
 }
 
 template <typename R, typename State, typename T>
