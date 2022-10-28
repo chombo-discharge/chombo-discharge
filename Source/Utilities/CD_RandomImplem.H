@@ -88,7 +88,7 @@ Random::getPoisson(const Real a_mean)
 
   T ret = (T) 0;
   
-  if(a_mean < 500.0) {
+  if(a_mean < 250.0) {
     std::poisson_distribution<T> poisson(a_mean);
 
     ret = poisson(s_rng);
