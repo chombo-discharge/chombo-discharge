@@ -131,21 +131,19 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
     pout() << m_name + "::advance" << endl;
   }
 
-  Timer timer("ItoPlasmaGodunovStepper::advance");
+  m_timer = Timer("ItoPlasmaGodunovStepper::advance");
 
   // Previous time step is needed when regridding.
   m_prevDt = a_dt;
 
   // Done only so we can plot the absorbed photons (advanceReactionNetwork absorbs them)
-  timer.startEvent("Deposit photons");
+  m_timer.startEvent("Deposit photons");
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->depositPhotons(solverIt()->getPhi(), solverIt()->getBulkPhotons(), DepositionType::NGP);
   }
-  timer.stopEvent("Deposit photons");
+  m_timer.stopEvent("Deposit photons");
 
   // ====== BEGIN TRANSPORT STEP ======
-  timer.startEvent("Particle/field advance");
-
   // Semi-implicitly advance the particles and the field.
   switch (m_algorithm) {
   case WhichAlgorithm::EulerMaruyama: {
@@ -161,39 +159,38 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
 
   // Remove the run-time configurable particle storage. It is no longer needed.
-  timer.stopEvent("Particle/field advance");
   // ====== END TRANSPORT STEP ======
 
   // Photon transport
-  timer.startEvent("Photon transport");
+  m_timer.startEvent("Photon transport");
   this->advancePhotons(a_dt);
-  timer.stopEvent("Photon transport");
+  m_timer.stopEvent("Photon transport");
 
   // Sort the particles and photons per cell so we can call reaction algorithms
-  timer.startEvent("Sort by cell");
+  m_timer.startEvent("Sort by cell");
   m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
-  timer.stopEvent("Sort by cell");
+  m_timer.stopEvent("Sort by cell");
 
   // Run the Kinetic Monte Carlo reaction kernels.
-  timer.startEvent("Reaction network");
+  m_timer.startEvent("Reaction network");
   this->advanceReactionNetwork(a_dt);
-  timer.stopEvent("Reaction network");
+  m_timer.stopEvent("Reaction network");
 
   // Build superparticles.
   if ((m_timeStep + 1) % m_mergeInterval == 0 && m_mergeInterval > 0) {
-    timer.startEvent("Super-particle management");
+    m_timer.startEvent("Super-particle management");
     m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_particlesPerCell);
-    timer.stopEvent("Super-particle management");
+    m_timer.stopEvent("Super-particle management");
   }
 
   // Sort particles per patch.
-  timer.startEvent("Sort by patch");
+  m_timer.startEvent("Sort by patch");
   m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
-  timer.stopEvent("Sort by patch");
+  m_timer.stopEvent("Sort by patch");
 
   // Clear other data holders for now. BC comes later...
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
@@ -202,24 +199,26 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   }
 
   // Deposit particles on the mesh.
-  timer.startEvent("Mesh deposit");
+  m_timer.startEvent("Mesh deposit");
   m_ito->depositParticles();
-  timer.stopEvent("Mesh deposit");
+  m_timer.stopEvent("Mesh deposit");
 
   // Prepare for the next time step
-  timer.startEvent("Compute v and D");
+  m_timer.startEvent("Compute v and D");
   this->computeItoVelocities();
   this->computeItoDiffusion();
-  timer.stopEvent("Compute v and D");
+  m_timer.stopEvent("Compute v and D");
 
   // Compute the current density (mostly for I/O purposes).
-  timer.startEvent("Compute J");
+  m_timer.startEvent("Compute J");
   this->computeCurrentDensity(m_currentDensity);
-  timer.stopEvent("Compute J");
+  m_timer.stopEvent("Compute J");
 
   if (m_profile) {
-    timer.eventReport(pout(), false);
+    m_timer.eventReport(pout(), false);
   }
+
+  m_timer.clear();
 
   return a_dt;
 }
@@ -783,84 +782,53 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   // Store X^k positions.
   this->setOldPositions();
 
-#if 0 // Debug. Use pre-removal of particles leaving the domain. 
-  this->computeItoVelocities();
-
-  // Advect particles first, then rewind them
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-	List<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
-
-	for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit) {
-	  ItoParticle& p = lit();
-
-	  p.position() += a_dt * p.velocity();
-	}
-      }
-    }
-  }
-
-  m_ito->remap();
-
-  // Remove particles from domain
-  this->intersectParticles(SpeciesSubset::All, EBIntersection::Bisection, true);
-  this->removeCoveredParticles(SpeciesSubset::All, EBRepresentation::ImplicitFunction, m_toleranceEB);  
-
-  // Rewind particles
-  for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
-
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-	List<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
-
-	for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit) {
-	  ItoParticle& p = lit();
-
-	  p.position() = p.oldPosition();
-	}
-      }
-    }
-  }
-
-  m_ito->remap();
-#endif
-
   // Diffuse the particles. This copies onto m_rhoDaggerParticles and stores the hop on the full particles.
+  m_timer.startEvent("Diffuse particles");
   this->diffuseParticlesEulerMaruyama(m_rhoDaggerParticles, a_dt);
   this->remapPointParticles(m_rhoDaggerParticles, SpeciesSubset::AllDiffusive);
+  m_timer.stopEvent("Diffuse particles");
 
   // Compute the conductivity on the mesh. This deposits q_e * Z * w * mu on the mesh.
+  m_timer.startEvent("Compute conductivities");
   this->copyConductivityParticles(m_conductivityParticles);
   this->computeConductivities(m_conductivityParticles);
+  m_timer.stopEvent("Compute conductivities");
 
   // Set up the semi-implicit Poisson solver with the computed conductivities.
+  m_timer.startEvent("Setup Poisson");
   this->setupSemiImplicitPoisson(a_dt);
+  m_timer.stopEvent("Setup Poisson");
 
   // Compute space charge density arising from the new particle positions X^k + sqrt(2*D*dt)*W. Only need to
   // do the diffusive and charged species.
+  m_timer.startEvent("Deposit point particles");
   this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::AllDiffusive);
+  m_timer.stopEvent("Deposit point particles");
 
   // Solve the stinking equation.
+  m_timer.startEvent("Solve Poisson");
   this->solvePoisson();
+  m_timer.stopEvent("Solve Poisson");
 
   // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
   // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
+  m_timer.startEvent("Compute velocities");
 #if 1 // This is what the algorithm says.
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
 #else // Have to use this for LEA - need to debug.
   this->computeItoVelocities();
 #endif
+  m_timer.stopEvent("Compute velocities");
 
   // Finalize the Euler-Maruyama update.
+  m_timer.startEvent("Euler-Maruyama step");
   this->stepEulerMaruyama(a_dt);
   this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
+  m_timer.stopEvent("Euler-Maruyama step");
 
   // Do intersection test and remove EB particles. These particles are NOT allowed to react later.
+  m_timer.startEvent("EB/Particle intersection");
   const bool deleteParticles = true;
   this->intersectParticles(SpeciesSubset::AllMobileOrDiffusive, EBIntersection::Bisection, deleteParticles);
   this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::ImplicitFunction, m_toleranceEB);
@@ -868,6 +836,7 @@ ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt) noexcept
   // Deposit particles on the mesh.
   // NOTE: Not necessary unless we use LFA...?
   this->depositParticles(SpeciesSubset::AllMobileOrDiffusive);
+  m_timer.stopEvent("EB/Particle intersection");
 }
 
 void

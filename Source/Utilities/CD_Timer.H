@@ -112,6 +112,12 @@ public:
   inline void
   writeReportToFile(const std::string a_fileName) const noexcept;
 
+  /*!
+    @brief Clear all events
+  */
+  inline void
+  clear() noexcept;
+
 protected:
   /*!
     @brief Enum for indexing tuple. A rare case of where unscoped enums are useful. 

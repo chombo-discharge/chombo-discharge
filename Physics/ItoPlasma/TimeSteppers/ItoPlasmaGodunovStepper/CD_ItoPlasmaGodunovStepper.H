@@ -14,6 +14,7 @@
 
 // Our includes
 #include <CD_ItoPlasmaStepper.H>
+#include <CD_Timer.H>
 #include <CD_PointParticle.H>
 #include <CD_NamespaceHeader.H>
 
@@ -104,6 +105,11 @@ namespace Physics {
 	@brief Which advancement algorithm to use.
       */
       WhichAlgorithm m_algorithm;
+
+      /*!
+	@brief Timer used for run-time logging of routines
+      */
+      Timer m_timer;
 
       /*!
 	@brief Storage for simplified particles that gave us sigma^k
