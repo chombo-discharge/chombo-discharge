@@ -136,6 +136,13 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
   // Previous time step is needed when regridding.
   m_prevDt = a_dt;
 
+  // Done only so we can plot the absorbed photons (advanceReactionNetwork absorbs them)
+  timer.startEvent("Deposit photons");
+  for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
+    solverIt()->depositPhotons(solverIt()->getPhi(), solverIt()->getBulkPhotons(), DepositionType::NGP);
+  }
+  timer.stopEvent("Deposit photons");
+    
   // ====== BEGIN TRANSPORT STEP ======
   timer.startEvent("Particle/field advance");
 
