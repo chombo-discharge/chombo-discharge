@@ -217,7 +217,7 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State& a_state) const noexc
 {
   CH_TIME("KMCSolver::getNonCriticalTimeStep(State");
 
-  const auto& partitionedReactions = this->partitionReactions(a_state, m_reactions);  
+  const auto& partitionedReactions = this->partitionReactions(a_state, m_reactions);
 
   return this->getNonCriticalTimeStep(a_state, partitionedReactions.second);
 }

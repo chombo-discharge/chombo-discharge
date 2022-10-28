@@ -75,13 +75,13 @@ namespace Physics {
 
       /*!
 	@brief Compute a time step to use. 
-	@param[in] a_E         Electric field. 
-	@param[in] a_pos       Position
-	@param[in] a_densities Mesh-based plasma densities. 
+	@param[in] a_E            Electric field. 
+	@param[in] a_pos          Position
+	@param[in] a_numParticles Number of reactive particles of each species
 	@return Default returns infinity but user can implement a physics based time step. 
       */
       inline virtual Real
-      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept;
+      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<FPR> a_numParticles) const noexcept;
 
       /*!
 	@brief Compute Townsend ionization coefficient

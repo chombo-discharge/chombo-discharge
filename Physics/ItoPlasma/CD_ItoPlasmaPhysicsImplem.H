@@ -43,7 +43,7 @@ inline ItoPlasmaPhysics::ItoPlasmaPhysics()
 inline ItoPlasmaPhysics::~ItoPlasmaPhysics() { CH_TIME("ItoPlasmaPhysics::~ItoPlasmaPhysics"); }
 
 inline Real
-ItoPlasmaPhysics::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept
+ItoPlasmaPhysics::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<FPR> a_numParticles) const noexcept
 {
   CH_TIME("ItoPlasmaPhysics::computeDt");
 
@@ -193,10 +193,10 @@ ItoPlasmaPhysics::advanceKMC(Vector<FPR>&   a_numParticles,
 
   // Put KMC back into ItoPlasma
   for (size_t i = 0; i < a_numParticles.size(); i++) {
-    a_numParticles[i] = kmcParticles[i];
+    a_numParticles[i] = (FPR)kmcParticles[i];
   }
   for (size_t i = 0; i < a_numNewPhotons.size(); i++) {
-    a_numNewPhotons[i] = kmcPhotons[i];
+    a_numNewPhotons[i] = (FPR)kmcPhotons[i];
   }
 }
 
@@ -223,8 +223,8 @@ ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
       const FPR& numNew = a_newNumParticles[i];
       const FPR& numOld = a_oldNumParticles[i];
 
-      if (numNew < 0) {
-        MayDay::Warning("ItoPlasmaPhysics::reconcileParticles - new number of particles is < 0");
+      if (numNew < (FPR)0) {
+        MayDay::Warning("ItoPlasmaPhysics::reconcileParticles - new number of particles is < 0 (overflow issue?)");
       }
       else if ((long long)numNew < 0LL) {
         MayDay::Warning("ItoPlasmaPhysics::reconcileParticles - integer overflow!");

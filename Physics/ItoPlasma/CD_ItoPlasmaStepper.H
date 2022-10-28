@@ -843,44 +843,44 @@ namespace Physics {
 	called on the valid region.
       */
       virtual Real
-      computePhysicsDt() const noexcept;
+      computePhysicsDt() noexcept;
 
       /*!
 	@brief Compute a maximum time step from the physics interface.
 	@param[in] a_electricField Electric field. 
 	@param[in] a_densities     ItoSolver mesh densities. 
-	@note Input data must be defined on the particle realms. Kernels are only called on the valid region. 
+	@note Input data must be defined on the fluid realms. Kernels are only called on the valid region. 
       */
       virtual Real
-      computePhysicsDt(const EBAMRCellData& a_electricField, const Vector<EBAMRCellData*> a_densities) const noexcept;
+      computePhysicsDt(const EBAMRCellData& a_electricField) noexcept;
 
       /*!
 	@brief Compute a maximum time step from the physics interface.
-	@param[in] a_electricField Electric field. 
-	@param[in] a_densities     ItoSolver mesh densities. 
-	@param[in] a_level         Grid level
-	@note Input data must be defined on the particle realms. Kernels are only called on the valid region. 
+	@param[in] a_electricField    Electric field. 
+	@param[in] a_particlesPerCell Number of particles per grid cell
+	@param[in] a_level            Grid level
+	@note Input data must be defined on the fluid realms. Kernels are only called on the valid region. 
       */
       virtual Real
-      computePhysicsDt(const LevelData<EBCellFAB>&         a_electricField,
-                       const Vector<LevelData<EBCellFAB>*> a_densities,
-                       const int                           a_level) const noexcept;
+      computePhysicsDt(const LevelData<EBCellFAB>& a_electricField,
+                       const LevelData<EBCellFAB>& a_particlesPerCell,
+                       const int                   a_level) noexcept;
 
       /*!
 	@brief Compute a maximum time step from the physics interface.
-	@param[in] a_electricField Electric field. 
-	@param[in] a_densities     ItoSolver mesh densities. 
-	@param[in] a_level         Grid level
-	@param[in] a_dit           Grid index
-	@param[in] a_box           Grid box
-	@note Input data must be defined on the particle realms. Kernels are only called on the valid region. 
+	@param[in] a_electricField    Electric field. 
+	@param[in] a_particlesPerCell Number of particles per grid cell
+	@param[in] a_level            Grid level
+	@param[in] a_dit              Grid index
+	@param[in] a_box              Grid box
+	@note Input data must be defined on the fluid realms. Kernels are only called on the valid region. 
       */
       virtual Real
-      computePhysicsDt(const EBCellFAB&         a_electricField,
-                       const Vector<EBCellFAB*> a_densities,
-                       const int                a_level,
-                       const DataIndex          a_dit,
-                       const Box                a_box) const noexcept;
+      computePhysicsDt(const EBCellFAB& a_electricField,
+                       const EBCellFAB& a_particlesPercCell,
+                       const int        a_level,
+                       const DataIndex  a_dit,
+                       const Box        a_box) noexcept;
 
       /*!
 	@brief Photon advancement routine
@@ -987,6 +987,11 @@ namespace Physics {
 	@brief Voltage curve on the electrodes used in the simulation.
       */
       std::function<Real(const Real a_time)> m_voltage;
+
+      /*!
+	@brief Using dual grid or not
+      */
+      bool m_dualGrid;
 
       /*!
 	@brief Profile kernels or not
@@ -1230,7 +1235,7 @@ namespace Physics {
                           std::string& a_maxSolver,
                           std::string& a_minSolver) const noexcept;
 
-        /*!
+      /*!
 	@brief Compute some particle statistics
 	@param[out] a_avgParticles Average numer of particles
 	@param[out] a_sigma        Particle standard deviation (across MPI ranks)
@@ -1239,12 +1244,13 @@ namespace Physics {
 	@param[out] a_minRank      MPI rank with lowest number of particles
 	@param[out] a_maxRank      MPI rank with highest number of particles
       */
-        virtual void getParticleStatistics(Real& a_avgParticles,
-                                           Real& a_sigma,
-                                           Real& a_minParticles,
-                                           Real& a_maxParticles,
-                                           int&  a_minRank,
-                                           int&  a_maxRank);
+      virtual void
+      getParticleStatistics(Real& a_avgParticles,
+                            Real& a_sigma,
+                            Real& a_minParticles,
+                            Real& a_maxParticles,
+                            int&  a_minRank,
+                            int&  a_maxRank);
 
       /*!
 	@brief Routine called by loadBalanceBoxes and used for particle-based load balancing.

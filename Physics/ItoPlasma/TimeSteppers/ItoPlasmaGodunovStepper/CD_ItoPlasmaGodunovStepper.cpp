@@ -142,7 +142,7 @@ ItoPlasmaGodunovStepper::advance(const Real a_dt)
     solverIt()->depositPhotons(solverIt()->getPhi(), solverIt()->getBulkPhotons(), DepositionType::NGP);
   }
   timer.stopEvent("Deposit photons");
-    
+
   // ====== BEGIN TRANSPORT STEP ======
   timer.startEvent("Particle/field advance");
 
