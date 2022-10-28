@@ -50,9 +50,9 @@ namespace Physics {
 
       /*!
 	@brief Compute a physics-baseded time step. 
-	@param[in] a_E         Electric field. 
-	@param[in] a_pos       Position
-	@param[in] a_densities Mesh-based plasma densities. 
+	@param[in] a_E            Electric field. 
+	@param[in] a_pos          Position
+	@param[in] a_numParticles Number of particles per cell
 	@return Returns m_deltaX/k where k is Townsend ionization coefficient and m_deltaX is user-specified. 
       */
       virtual Real

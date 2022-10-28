@@ -195,10 +195,9 @@ ItoPlasmaAir3LFA::addTable(const std::string a_table_name, const std::string a_f
 }
 
 Real
-ItoPlasmaAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept
+ItoPlasmaAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_numParticles) const noexcept
 {
   CH_TIME("ItoPlasmaAir3LFA::computeDt");
-
   const Real E     = a_E.vectorLength();
   const Real alpha = this->computeAlpha(a_E);
   const Real mu    = m_tables.at("mobility").getEntry<1>(E);
